@@ -1,0 +1,111 @@
+<!--
+  [LICENSE]
+  Taskboard
+  - - -
+  Copyright (C) 2015 - 2016 Objective Solutions
+  - - -
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  [/LICENSE]
+  -->
+<dom-module id="config-lane-team">
+
+    <style>
+        .title {
+            font-size: 15px;
+            font-weight: bold;
+        }
+
+        .title:hover {
+            -webkit-transition: all .5s;
+            -moz-transition: all .5s;
+            transition: all .5s;
+            opacity: 0.9;
+        }
+
+        paper-toolbar {
+            height: 35px;
+            background-color: var(--dark-primary-color);
+        }
+
+        paper-toolbar ::shadow #topBar {
+            height: 35px;
+        }
+
+        iron-collapse {
+            padding: 20px 20px 20px 20px;
+        }
+
+        paper-checkbox {
+            padding-bottom: 10px;
+        }
+    </style>
+
+    <template>
+
+        <paper-toolbar class="title" on-tap="collapseLevelConfig">
+            <span>Lane Team</span>
+        </paper-toolbar>
+        <iron-collapse id="collapseLevelConfig">
+            <paper-material class="level-configuration" elevation="0">
+                <template is="dom-repeat" items="{{levels}}" as="level">
+                    <paper-material class="flex layout horizontal" elevation="0">
+                        <paper-checkbox checked="{{level.showLaneTeam}}" on-tap="changeConfig">[[level.level]]
+                        </paper-checkbox>
+                    </paper-material>
+                </template>
+                <hr/>
+                <template is="dom-repeat" items="{{laneConfiguration()}}" as="configurationX">
+                    <paper-material class="flex layout horizontal" elevation="0">
+
+                        <paper-checkbox checked="{{configurationX.showCount}}" on-tap="changeConfig">Show Count
+                        </paper-checkbox>
+                    </paper-material>
+                </template>
+            </paper-material>
+        </iron-collapse>
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'config-lane-team',
+
+                properties: {
+                    levels: {
+                        type: Object,
+                        notify: true
+                    }
+                },
+
+                collapseLevelConfig: function (e) {
+                    this.$.collapseLevelConfig.toggle();
+                },
+                laneConfiguration: function () {
+                    return userPreferences.getLanes();
+                },
+                changeConfig: function () {
+                    this.fire('iron-signal', {
+                        name: 'level-config-changed',
+                        data: {}
+                    });
+                    this.fire('iron-signal', {
+                        name: 'update-lane-team',
+                        data: {}
+                    });
+                }
+            });
+        })();
+    </script>
+
+</dom-module>

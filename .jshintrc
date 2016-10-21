@@ -1,0 +1,31 @@
+{
+  "node": true,
+  "browser": true,
+  "esnext": true,
+  "bitwise": false,
+  "camelcase": false,
+  "curly": true,
+  "eqeqeq": true,
+  "immed": true,
+  "indent": 2,
+  "noarg": true,
+  "quotmark": false,
+  "undef": true,
+  "unused": false,
+  "globals": {
+    "wrap": true,
+    "unwrap": true,
+    "Polymer": true,
+    "Platform": true,
+    "page": true,
+    "app": true,
+    "$": false,
+    "email": false,
+    "url": false,
+    "md5": false,
+    "define": false,
+    "unescape": false,
+    "MY_LIB": false,
+    "sucess": false
+  }
+}

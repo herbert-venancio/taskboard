@@ -1,0 +1,13 @@
+node_modules
+dist
+bower_components
+.tmp
+.settings
+.project
+.classpath
+.idea
+.factorypath
+target
+src/main/resources/static/bower_components
+/bin/
+taskboard.iml

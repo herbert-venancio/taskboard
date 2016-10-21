@@ -1,0 +1,459 @@
+<!--
+  [LICENSE]
+  Taskboard
+  - - -
+  Copyright (C) 2015 - 2016 Objective Solutions
+  - - -
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  [/LICENSE]
+  -->
+<dom-module id="issue-item">
+
+    <style is="custom-style">
+        :host {
+            box-sizing: border-box;
+            padding: 2px;
+            max-width: 300px;
+            margin: 1px 0px;
+        }
+
+        .issue {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .issue:hover {
+            -webkit-filter: brightness(90%);
+            -moz-filter: brightness(90%);
+        }
+
+        .issue {
+            border: 2px solid transparent;
+        }
+
+        .issue.dependency {
+            border: 2px solid red;
+        }
+
+        .top {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+
+        .issue:hover div {
+            opacity: 1;
+        }
+
+        .filterButton {
+            opacity: 0;
+            position: absolute;
+            background: rgba(241, 238, 238, 0.6);
+            top: 2px;
+            right: 2px;
+            border-radius: 5px;
+        }
+
+        .filterButton:hover {
+            background: rgba(0, 0, 0, 0.18);
+        }
+
+        .filterIcon {
+            width: 25px;
+            height: 25px;
+            padding: 3px;
+        }
+
+        .bottom {
+            margin-left: 6px;
+            flex-direction: row;
+            display: flex;
+            justify-content: flex-start;
+            width: 100%;
+        }
+
+        .info-issue {
+            flex-direction: row;
+            display: table;
+            justify-content: flex-end;
+            width: 50%;
+        }
+
+        .size-classe-de-servico {
+            flex-direction: row;
+            margin-bottom: 12px;
+        }
+
+        .key {
+            bottom: 0px;
+            font-size: 70%;
+            font-weight: bold;
+            margin-left: 5px;
+            position: absolute;
+            margin: 0px;
+            padding: 0px;
+            text-align: left;
+        }
+
+        .key:hover {
+            background: rgba(0, 0, 0, 0.18);
+            border-radius: 2px;
+            padding: 2px;
+            margin: -2px;
+        }
+
+        .icons {
+            display: flex;
+            flex-direction: row;
+            margin-left: auto;
+            margin-top: 4px;
+            margin-right: 15px;
+            width: 50%;
+            justify-content: flex-end;
+        }
+
+        :host.tiny .icons {
+            width: 75px;
+            justify-content: flex-end;
+        }
+
+        .icon-small {
+            width: 25px;
+            height: 25px;
+        }
+
+        .module {
+            height: 50px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .module p {
+            margin-top: 5px;
+            box-sizing: border-box;
+            flex: 1;
+            min-width: 75px;
+            line-height: 16px;
+            padding: 0 5px;
+            font-size: 12px;
+        }
+
+        .line-clamp {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+
+        .issue-size {
+            text-align: left;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .impedida {
+            text-align: center;
+            color: #F78181;
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            background: rgba(0, 0, 0, .3);
+            top: 0;
+            left: 0;
+            -webkit-filter: drop-shadow(1px 1px 1px #616161);
+            filter: drop-shadow(1px 1px 1px #616161);
+        }
+
+        .cancelada {
+            text-align: center;
+            color: #FFCD00;
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            background: rgba(0, 0, 0, .3);
+            top: 0;
+            left: 0;
+            -webkit-filter: drop-shadow(1px 1px 1px #616161);
+            filter: drop-shadow(1px 1px 1px #616161);
+        }
+
+        .iconImpedidaCancelada {
+            width: 25px;
+            height: 25px;
+            padding: 25px;
+        }
+
+        paper-spinner {
+            position: absolute;
+            width: 0px;
+            height: 0px;
+            z-index: 1;
+            top: 20%;
+            left: 40%;
+        }
+
+        .spinner-active {
+            width: 28px;
+            height: 28px;
+        }
+
+        .freeze {
+            opacity: 1;
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            background: rgba(255, 255, 255, .8);
+            top: 0;
+            left: 0;
+            -webkit-transition: all .5s;
+            -moz-transition: all .5s;
+            transition: all .5s;
+        }
+
+        .classe-de-servico {
+            opacity: 0.8;
+            font-size: 55%;
+        }
+    </style>
+
+    <template>
+        <iron-ajax id="ajax"
+                   method="POST"
+                   url="/ws/issues/assign"
+                   content-type='application/json'
+                   body="{{item}}"
+                   headers='{"Content-Type": "application/json"}'>
+        </iron-ajax>
+        <iron-signals
+                on-iron-signal-issue-filter-parent="issueFilterParent"
+                on-iron-signal-issue-filter-dependents="issueFilterDependency"
+                on-iron-signal-issue-filter-children="issueFilterChildren"
+                on-iron-signal-issue-filter-reset="issueFilterReset">
+        </iron-signals>
+        <paper-material class$="issue {{getClasses(item.hierarchyMatch)}}" elevation="0" style$="{{getIssueColor(item)}}" on-tap="opendialog"
+                        title="Issue details">
+            <template is="dom-if" if="{{issueImpedida(item)}}">
+                <div class="impedida">
+                    <iron-icon id="issueImpedidaIcon" class="iconImpedidaCancelada" icon="av:not-interested"
+                               title="Blocked issue"></iron-icon>
+                </div>
+            </template>
+
+            <template is="dom-if" if="{{issueCancelada(item)}}">
+                <div class="cancelada">
+                    <iron-icon id="issueCanceladaIcon" class="iconImpedidaCancelada" icon="warning"
+                               title="Canceled issue"></iron-icon>
+                </div>
+            </template>
+
+            <div class="top">
+                <div class="module line-clamp"><p>{{item.summary}}</p></div>
+            </div>
+
+            <div class="bottom">
+                <div class="info-issue">
+                    <div class="size-classe-de-servico">
+                        <span class="issue-size">{{item.customfields.tamanho}} </span> <!-- Tamanho -->
+                        <span class="classe-de-servico">{{item.customfields.classeDeServico}}</span> <!-- Classe de Servico -->
+                    </div>
+
+                    <div class="key" on-tap="openJira" title="Open in jira">{{item.issueKey}}</div>
+                </div>
+                <div class="icons">
+                	  <img id="issueTypeIcon" class="icon-small" src="{{getIssueTypeImage(item)}}"></img>
+                    <template is="dom-if" if="{{item.subresponsavel1}}">
+                        <img class="icon-small" src="{{item.subresponsavel1}}"></img>
+                    </template>
+                    <template is="dom-if" if="{{subResponsavelNotEquals(item)}}">
+                        <img class="icon-small" src="{{item.subresponsavel2}}"></img>
+                    </template>
+                </div>
+            </div>
+
+            <div class="filterButton">
+                <paper-icon-button id="filterButton" alt="Apply Filter" class="filterIcon" icon="filter-list"
+                                   on-tap="hierarchyFilterClick" title="Apply hierarchical filter"></paper-icon-button>
+            </div>
+
+        </paper-material>
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'issue-item',
+
+                properties: {
+                    item: {
+                        type: Object,
+                        notify: true
+                    },
+                    hidden: {
+                        type: Boolean
+                    }
+                },
+
+                getClasses: function(hierarchyMatch) {
+                    return hierarchyMatch == "DEP" ? "dependency" : "";
+                },
+
+                getUriImage: function (issue) {
+                    return 'images/projetos/logo_' + issue.project.toLowerCase()
+                            + '.png';
+                },
+
+                getIssueTypeImage: function (issue) {
+                    return issue.typeIconUri.replace('xsmall', 'medium');
+                },
+
+                openJira: function (event) {
+                    event.stopPropagation();
+                    window.open(window.urlJira + '/browse/' + this.item.issueKey, '_blank');
+                },
+
+                hierarchyFilterClick: function(event) {
+                    event.stopPropagation();
+                    if (!window.urlLinkGraph)
+                        return this.applyFilter();
+
+                    var self = this;
+                    onSingleOrDoubleClick(event.target,
+                        function onsingle() {
+                            self.applyFilter();
+                        },
+                        function ondouble() {
+                            window.open(window.urlLinkGraph + '?issue=' + self.item.issueKey, '_blank');
+                        }
+                    );
+                },
+
+                applyFilter: function (event) {
+                    taskboard.toggleHierarchicalFilter();
+                    if (taskboard.isUsingHierarchicalFilter()) {
+                        this.showInHierarchyMatch();
+                        this.fire('iron-signal', {
+                            name: 'issue-filter-parent',
+                            data: {
+                                issueKey: this.item.issueKey,
+                                parentKey: this.item.parent
+                            }
+                        });
+                        this.fire('iron-signal', {
+                            name: 'issue-filter-children',
+                            data: {
+                                issueKey: this.item.issueKey,
+                                parentKey: this.item.parent
+                            }
+                        });
+                        this.fireFilterDependentIssues();
+                    }
+                    else
+                        this.fire('iron-signal', {name: 'issue-filter-reset', data: {}});
+                    this.fire('iron-signal', {name: 'hierarchical-filter-changed', data: {}});
+                },
+
+                issueFilterParent: function (evt, data) {
+                    if (this.item.issueKey === data.parentKey) {
+                        this.showInHierarchyMatch();
+                        this.fire('iron-signal', {
+                            name: 'issue-filter-parent',
+                            data: {
+                                issueKey: this.item.issueKey,
+                                parentKey: this.item.parent
+                            }
+                        });
+                        this.fireFilterDependentIssues();
+                    }
+                },
+
+                issueFilterChildren: function (evt, data) {
+                    if (this.item.parent === data.issueKey) {
+                        this.showInHierarchyMatch();
+                        this.fire('iron-signal', {
+                            name: 'issue-filter-children',
+                            data: {
+                                issueKey: this.item.issueKey,
+                                parentKey: this.item.parent
+                            }
+                        });
+                        this.fireFilterDependentIssues();
+                    }
+                },
+
+                issueFilterReset: function() {
+                    this.hideFromHierarchyMatch();
+                },
+
+                issueFilterDependency: function (evt, issue) {
+                    if (issue.requires.indexOf(this.item.issueKey) >= 0)
+                        this.showInHierarchyMatch(true);
+                },
+
+                fireFilterDependentIssues: function () {
+                    this.fire('iron-signal', {
+                        name: 'issue-filter-dependents',
+                        data: this.item
+                    });
+                },
+
+                showInHierarchyMatch: function(isDependency) {
+                    this.set('item.hierarchyMatch', isDependency && this.item.hierarchyMatch !== true ? "DEP" : true);
+                },
+
+                hideFromHierarchyMatch: function() {
+                    this.set('item.hierarchyMatch', false);
+                },
+
+                getIssueColor: function (issue) {
+                    return 'background: ' + issue.color;
+                },
+
+                subResponsavelNotEquals: function (item) {
+                    return item.subresponsavel2
+                            && item.subresponsavel1 !== item.subresponsavel2;
+                },
+
+                opendialog: function () {
+                    //this.$.issuedialog.opendialog();
+                    this.fire('iron-signal', {name: 'show-details', data: {item: this.item}});
+                },
+
+                issueImpedida: function (item) {
+                    return this.item.customfields.impedido;
+                },
+
+                issueCancelada: function (item) {
+                    return this.item.status == STATUS_ID.CANCELADO;
+                }
+            });
+
+            function onSingleOrDoubleClick(el, onsingle, ondouble) {
+                if (el.getAttribute("data-dblclick") == null) {
+                    el.setAttribute("data-dblclick", 1);
+                    setTimeout(function () {
+                        if (el.getAttribute("data-dblclick") == 1)
+                            onsingle();
+                        el.removeAttribute("data-dblclick");
+                    }, 300);
+                } else {
+                    el.removeAttribute("data-dblclick");
+                    ondouble();
+                }
+            }
+
+        })();
+    </script>
+</dom-module>

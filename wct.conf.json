@@ -1,0 +1,15 @@
+{
+  "verbose": false,
+  "plugins": {
+    "local": {
+      "browsers": ["chrome"]
+    }
+  },
+  
+  "suites": ["test"],
+  "webserver": {
+    "pathMappings": [
+      {"/components/bower_components/": "src/main/resources/static/bower_components"}
+    ]
+  }
+}

@@ -1,0 +1,825 @@
+<!--
+  [LICENSE]
+  Taskboard
+  - - -
+  Copyright (C) 2015 - 2016 Objective Solutions
+  - - -
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  [/LICENSE]
+  -->
+<dom-module id="issue-detail">
+
+    <style>
+        :host {
+        }
+
+        .card-custom {
+            --paper-card: {
+                width: 100%;
+                font-size: 12px;
+                padding: 5px;
+                margin-top: 5px;
+                padding-top: 10px;
+                min-height: 360px;
+            }
+        }
+
+        .column-block {
+            display: table-cell;
+            padding-left: 5px;
+            padding-right: 5px;
+            min-height: 40px;
+        }
+
+        .half-column {
+            width: 47%;
+        }
+
+        .card-hearder-custom {
+            display: block;
+            width: 100%;
+        }
+
+        .card-header-custom div {
+            width: 100%;
+            font-size: 24px;
+            text-align: center;
+        }
+
+        .sub-header {
+            font-size: 13px;
+            font-weight: 500;
+            text-align: left;
+        }
+
+        .content-row {
+            width: 100%;
+            display: table;
+        }
+
+        .sub-content {
+            min-height: 25px;
+            font-size: 15px;
+        }
+
+        paper-button {
+            margin-bottom: 12px;
+        }
+
+        .buttons {
+            margin-right: 19px;
+            padding: 0;
+            width: auto !important;
+            height: auto;
+            display: initial;
+            float: right;
+        }
+
+        .buttons paper-button {
+            margin-bottom: 0;
+            left: 20px;
+        }
+
+        .assign-icon {
+            height: 17px;
+            width: 18px;
+        }
+
+        paper-button.colorful {
+            color: #4285f4;
+        }
+
+        paper-button[raised].colorful {
+            background: #4285f4;
+            color: #fff;
+        }
+
+        paper-button[toggles] {
+            transition: all 0.3s;
+        }
+
+        paper-button[toggles][active] {
+            background-color: rgba(0, 0, 0, 0.25);
+        }
+
+        paper-button[toggles][active].colorful {
+            background-color: rgba(66, 133, 244, 0.25);
+        }
+
+        paper-button[toggles][active][raised].colorful {
+            background-color: rgba(66, 133, 244, 0.75);
+        }
+
+        paper-button.headerLink {
+            margin-bottom: 0px;
+            margin-left: 10%;
+            padding: 4px;
+            font-size: 22px;
+            font-weight: 600;
+            color: #3B50C7;
+        }
+
+        paper-button.parentLink {
+            font-size: 15px;
+            font-weight: 600;
+            margin: 0px;
+            padding: 0px;
+            text-align: left;
+            color: #3B50C7;
+        }
+
+        paper-button.subtaskLink {
+            font-size: 15px;
+            font-weight: 600;
+            color: #3B50C7;
+            margin: 0px;
+        }
+
+        paper-material.subtaskPanel {
+            height: 30px;
+        }
+
+        paper-material.responsavelPanel {
+            padding: 4px;
+            padding-left: 8px;
+            padding-right: 8px;
+            border-radius: 5px;
+            color: white;
+            background-color: #7180D6;
+            margin: 2px;
+        }
+
+        .red {
+            --paper-progress-active-color: var(--paper-red-500);
+            --paper-progress-secondary-color: var(--paper-red-100);
+        }
+
+        .green {
+            --paper-progress-active-color: var(--paper-light-green-500);
+            --paper-progress-secondary-color: var(--paper-light-green-100);
+        }
+
+        .content-box {
+            background-color: #eee;
+            width: 100%;
+            min-height: 360px;
+            border-radius: 5px;
+            box-shadow: inset 1px 1px 1px #A5A1A1;
+            padding-top: 6px;
+        }
+
+        #timetracking_content paper-progress {
+            width: 100%;
+            height: 10px;
+            margin-top: 10px;
+        }
+
+        #modal {
+            padding-left: 5px;
+            padding-right: 5px;
+            min-width: 500px;
+            min-height: 360px;
+            background-color: #ccc;
+        }
+
+        #loadCard {
+            margin-top: 12px;
+        }
+
+        .bottom {
+            margin: 4px;
+            display: flex;
+        }
+
+        .icon-impedida {
+            color: #F78181;
+            bottom: 3px;
+            -webkit-filter: drop-shadow(1px 1px 1px #616161);
+            filter: drop-shadow(1px 1px 1px #616161);
+        }
+
+        .icon-cancelada {
+            color: #FFCD00;
+            bottom: 3px;
+            -webkit-filter: drop-shadow(1px 1px 1px #616161);
+            filter: drop-shadow(1px 1px 1px #616161);
+        }
+
+        .info {
+            -webkit-filter: drop-shadow(1px 1px 1px #616161);
+            filter: drop-shadow(1px 1px 1px #616161);
+        }
+
+        .error-message {
+            white-space: pre;
+            margin-left: 10px;
+            color: red;
+            font-weight: bold;
+            width: 100%;
+        }
+
+        .buttonClose {
+            margin-right: 3px;
+            display: inline;
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+
+    <template>
+        <iron-ajax id="ajaxTransitions"
+                   method="POST"
+                   url="/ws/issues/transitions"
+                   body="{{item}}"
+                   content-type='application/json'
+                   headers='{"Content-Type": "application/json"}'
+                   last-response="{{transitions}}"
+                   on-response="hideSpinnerTransitions"></iron-ajax>
+        <iron-ajax id="ajaxSubtasks"
+                   method="POST"
+                   url="/ws/issues/subtasks"
+                   body="{{item}}"
+                   content-type='application/json'
+                   headers='{"Content-Type": "application/json"}'
+                   last-response="{{subtasks}}"
+                   on-response="subtasksCallback"></iron-ajax>
+        <iron-ajax id="ajaxTimetracking"
+                   method="POST"
+                   url="/ws/issues/timetracking"
+                   body="{{item}}"
+                   content-type='application/json'
+                   headers='{"Content-Type": "application/json"}'
+                   last-response="{{timetracking}}"
+                   on-response="timetrackingCallback"
+                   on-error="hideTimetracking"></iron-ajax>
+        <paper-dialog id="modal" entry-animation="scale-up-animation" exit-animation="fade-out-animation" with-backdrop
+                      modal>
+            <paper-card class="card-custom">
+                <div class="card-header-custom" style="padding-bottom: 15px;">
+                    <div>
+                        <paper-button class="headerLink" on-tap="openJira">{{item.issueKey}}</paper-button>
+                        <div class="buttons">
+                            <paper-button class="buttonClose" on-tap="clearProperties" dialog-confirm autofocus>
+                                <iron-icon icon="clear"></iron-icon>
+                            </paper-button>
+                        </div>
+                        <template is="dom-if" if="{{issueImpedida(item)}}">
+                            <div>
+                                <iron-icon class="icon-impedida" icon="icons:block"></iron-icon>
+                                <span class="info">Blocked</span>
+                            </div>
+                        </template>
+                        <template is="dom-if" if="{{issueCancelada(item)}}">
+                            <div>
+                                <iron-icon class="icon-cancelada" icon="warning"></iron-icon>
+                                <span class="info">Canceled</span>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+                <div class="content-box">
+                    <div class="content-row">
+                        <div class="column-block half-column">
+                            <div class="sub-header">Project</div>
+                            <div class="sub-content">
+                                <span>{{item.project}}</span>
+                            </div>
+                        </div>
+                        <div class="column-block half-column">
+                            <div class="sub-header">Parent</div>
+                            <div class="sub-content">
+                                <paper-button class="parentLink" on-tap="openJira">{{item.parent}}</paper-button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="content-row">
+                        <div class="column-block">
+                            <div class="sub-header">Summary</div>
+                            <div class="sub-content">
+                                <span>{{item.summary}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="content-row">
+                        <div class="column-block">
+                            <div class="sub-header">Assignees</div>
+                            <div class="sub-content flex horizontal layout wrap">
+                                <template is="dom-repeat" items="{{listaResponsaveis(item)}}" as="responsavel">
+                                    <paper-material class="responsavelPanel">{{responsavel}}</paper-material>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="content-row">
+                        <div class="column-block half-column">
+                            <div class="sub-header">Size</div>
+                            <div class="sub-content">
+                                <span>{{item.customfields.tamanho}}</span> <!-- Tamanho -->
+                            </div>
+                        </div>
+                        <div class="column-block half-column">
+                            <div class="sub-header">Class of Service</div>
+                            <div class="sub-content">
+                                <span>{{item.customfields.classeDeServico}}</span> <!-- Classe de Servico -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="content-row">
+                        <div class="column-block">
+                            <template is="dom-if" if="{{shouldShowSubtasks}}">
+                                <div class="sub-header">{{showHeaderSubtasks(item)}}</div>
+                                <div id="subtasks_content" class="sub-content">
+                                    <div style="overflow: auto; max-height: 150px; max-width: 100%; overflow-x: hidden; background-color: white;">
+                                        <template is="dom-repeat" items="{{subtasks}}" as="subtask">
+                                            <paper-material class="subtaskPanel" elevation="0">
+                                                <paper-button class="subtaskLink" on-tap="openJira">
+                                                    {{subtask.issueKey}}
+                                                </paper-button>
+                                                {{subtask.summary}}
+                                            </paper-material>
+                                        </template>
+                                    </div>
+                                    <paper-spinner id="loadSubtasks" active alt="Loading..." active></paper-spinner>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                    <div class="content-row">
+                        <template is="dom-if" if="{{shouldShowTimetracking}}">
+                            <div class="column-block">
+                                <div class="sub-header">Effort</div>
+                                <div id="timetracking_content" class="sub-content">
+                                    <template is="dom-if" if="{{timetracking}}">
+                                        <template is="dom-if" if="{{timetrackerBlown}}">
+                                            <paper-progress id="timeTracking" min="0"
+                                                            max="[[timetracking.originalEstimateMinutes]]"
+                                                            value="[[timetracking.timeSpentMinutes]]"
+                                                            class="red"></paper-progress>
+                                        </template>
+                                        <template is="dom-if" if="{{!timetrackerBlown}}">
+                                            <paper-progress id="timeTracking" min="0"
+                                                            max="[[timetracking.originalEstimateMinutes]]"
+                                                            value="[[timetracking.timeSpentMinutes]]"
+                                                            class="green"></paper-progress>
+                                        </template>
+                                        <paper-tooltip for="timetracking_content" position="top">[[timetrackingLabel]]
+                                        </paper-tooltip>
+                                    </template>
+                                    <paper-spinner id="loadTimetracking" active alt="Loading..."></paper-spinner>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    <div class="content-row">
+                        <div class="column-block">
+                            <div id="transitions_content" class="sub-content">
+                                <paper-button id="assignButton" raised class="colorful" on-tap="assignIssue"
+                                              title="Assign to me">
+                                    Assign to me
+                                </paper-button>
+
+                                <template is="dom-if" if="{{hasRecords(transitions)}}">
+                                    <template is="dom-repeat" items="{{transitions}}" as="transition">
+                                        <paper-button raised class="colorful" on-tap="requestTransition"
+                                                      data-args={{transition.name}}>{{transition.name}}
+                                        </paper-button>
+                                    </template>
+                                </template>
+
+                                <template is="dom-if" if="{{canImpede}}">
+                                    <paper-button id="impedeButton" raised class="colorful" on-tap="impede"
+                                                  title="Block">Block
+                                    </paper-button>
+                                </template>
+                                <template is="dom-if" if="{{canUnimpede}}">
+                                    <paper-button id="unimpedeButton" raised class="colorful" on-tap="unimpede"
+                                                  title="Unblock">Unblock
+                                    </paper-button>
+                                </template>
+
+                                <paper-spinner id="loadTransitions" active alt="Loading..."></paper-spinner>
+                                <!--
+                                                                 <template is="dom-if" if="{{shouldShowNewSubtask(item)}}">
+                                                                     <paper-button id="buttonNewSubTask" raised class="colorful" style='float: right'
+                                                                                   on-tap="openDialogNewTask"> Nova Sub-Task
+                                                                     </paper-button>
+                                                                 </template>
+                                -->
+                            </div>
+                        </div>
+                    </div>
+                    <span class="error-message" hidden$="{{!errorMessage}}">{{errorMessage}}</span>
+                </div>
+            </paper-card>
+        </paper-dialog>
+        <transition-required-modal id="transitionRequiredDialog"></transition-required-modal>
+        <confirm-modal id="confirmDialog"></confirm-modal>
+        <issue-new-task id="dialogNewTask" item="{{item}}"></issue-new-task>
+    </template>
+    <script>
+        (function () {
+            Polymer({
+                is: 'issue-detail',
+
+                properties: {
+                    item: {
+                        type: Object,
+                        notify: true
+                    },
+
+                    timetracking: {
+                        type: Object,
+                        notify: true
+                    },
+
+                    transitions: {
+                        type: Object,
+                        notify: true
+                    },
+
+                    subtasks: {
+                        type: Object,
+                        notify: true
+                    },
+
+                    resolution: {
+                        type: Object,
+                        notify: true
+                    },
+
+                    shouldShowTimetracking: {
+                        type: Boolean,
+                        value: true,
+                        notify: true
+                    },
+
+                    timetrackerBlown: {
+                        type: Boolean,
+                        notify: true
+                    },
+
+                    timetrackingLabel: {
+                        type: String,
+                        notify: true
+                    },
+
+                    shouldShowSubtasks: {
+                        type: Boolean,
+                        value: true,
+                        notify: true
+                    },
+
+                    showFieldsRequiredDialog: {
+                        type: Boolean,
+                        value: false,
+                        notify: true
+                    },
+
+                    errorMessage: {
+                        type: String,
+                        value: null
+                    },
+
+                    canImpede: {
+                        type: Boolean,
+                        value: false,
+                        notify: true
+                    },
+
+                    canUnimpede: {
+                        type: Boolean,
+                        value: false,
+                        notify: true
+                    }
+
+                },
+
+                observers: [
+                    'doTransitionWithResolution(resolution.*)'
+                ],
+
+                computeTimeTrackingLabel: function () {
+                    this.timetrackingLabel = this.parseMinutesToHours(this.timetracking.timeSpentMinutes) + '/' + this.parseMinutesToHours(this.timetracking.originalEstimateMinutes);
+                },
+
+                parseMinutesToHours: function (minutes) {
+                    var hours = Math.floor(minutes / 60);
+                    var min = minutes % 60;
+
+                    return hours + 'h ' + min + 'm';
+                },
+
+                subtasksCallback: function () {
+                    this.$.modal.refit();
+                    this.shouldShowSubtasks = this.hasRecords(this.subtasks);
+                    if (this.$$('#loadSubtasks'))
+                        this.$$('#loadSubtasks').active = false;
+                },
+
+                showSpinnerTransitions: function () {
+                    this.$.modal.refit();
+                    if (this.$$('#loadTransitions'))
+                        this.$$('#loadTransitions').active = true;
+                },
+
+                hideSpinnerTransitions: function () {
+                    this.$.modal.refit();
+                    if (this.$$('#loadTransitions'))
+                        this.$$('#loadTransitions').active = false;
+                },
+
+                timetrackingCallback: function (timetracking) {
+                    this.$.modal.refit();
+                    if (this.$$('#loadTimetracking'))
+                        this.$$('#loadTimetracking').active = false;
+                    this.timetracking = timetracking.detail.response;
+                    this.shouldShowTimetracking = true;
+                    this.updateTimetrackerColor();
+                    this.computeTimeTrackingLabel();
+                },
+
+                showHeaderSubtasks: function (item) {
+                    if (this.item.type == ISSUETYPE_ID.DEMANDA)
+                        return "Tasks";
+                    else
+                        return "Sub-Tasks";
+                },
+
+                hideTimetracking: function () {
+                    this.$.modal.refit();
+                    this.shouldShowTimetracking = false;
+                },
+
+                getUriImage: function (issue) {
+                    return 'images/projetos/logo_' + issue.project.toLowerCase() + '.png';
+                },
+
+                assignIssue: function () {
+                    var self = this;
+                    self.showSpinnerTransitions();
+
+                    $.ajax({
+                        url: '/ws/issues/assign',
+                        type: 'post',
+                        dataType: 'json',
+                        contentType: 'application/json',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        data: JSON.stringify(this.item),
+                        success: function () {
+                            location.reload(true);
+                        },
+                        error: function (jqXhr, textStatus, errorThrown) {
+                            console.error(errorThrown);
+                            self.errorMessage = jqXhr.responseJSON.message;
+                            self.hideSpinnerTransitions();
+                        },
+                        async: true
+                    });
+                },
+
+                impede: function () {
+                    this.impedeIssue(true);
+                },
+
+                unimpede: function () {
+                    this.impedeIssue(false);
+                },
+
+                impedeIssue: function (impede) {
+                    var self = this;
+                    var url = impede ? '/ws/issues/impede-task/' : '/ws/issues/unimpede-task/';
+                    self.showSpinnerTransitions();
+                    $.ajax({
+                        url: url + self.item.issueKey,
+                        type: 'get',
+                        success: function () {
+                            location.reload(true);
+                        },
+                        error: function (jqXhr, textStatus, errorThrown) {
+                            console.error(errorThrown);
+                            self.errorMessage = jqXhr.responseJSON.message;
+                            self.hideSpinnerTransitions();
+                        },
+                        async: true
+                    });
+                },
+
+                requestTransition: function (e) {
+                    var self =  this;
+                    var issue = self.item;
+                    var transitionName = e.target.dataArgs;
+                    var fieldsTransitions = self.getFieldsTransitions(transitionName);
+                    var text = "Do you want to execute transition \""+ transitionName + "\"?";
+					var callback = function(issue, transitionValuesRequired){
+						if(self.hasResolutions(transitionName))
+							self.doResolution(transitionName, issue);
+						else
+							self.doTransition(transitionName, issue);
+						fieldsTransitions = [];
+					}
+					if(self.showFieldsRequiredDialog)
+						self.$.transitionRequiredDialog.openDialog(fieldsTransitions, transitionName, issue, callback);
+					else
+						self.$.confirmDialog.openDialog("Confirmation", text, callback);
+                },
+
+                getFieldsTransitions: function(transitionName){
+                    var self = this;
+                    var fieldsTransitions = [];
+                    for (var t = 0; t < self.transitions.length; t++) {
+                       if (self.transitions[t].name == transitionName && self.transitions[t].fields.length != []){
+                            for (var f = 0; f < self.transitions[t].fields.length; f++) {
+                                if(self.transitions[t].fields[f].required && self.transitions[t].fields[f].id != "resolution"){
+                                    self.showFieldsRequiredDialog = true;
+                                    fieldsTransitions.push(self.transitions[t].fields[f]);
+                                }
+                            }
+                            if(TRANSITION_REQUIRED_COMMENT.includes(transitionName))
+							   self.showFieldsRequiredDialog = true;
+						    return fieldsTransitions;
+						}
+					}
+                },
+
+                hasResolutions: function (transitionName) {
+                    for (var t = 0; t < this.transitions.length; t++) {
+                        if (this.transitions[t].name === transitionName) {
+                            for (var f = 0; f < this.transitions[t].fields.length; f++) {
+                                if (this.transitions[t].fields[f].id === "resolution" && this.transitions[t].fields[f].required) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+
+                    return false;
+                },
+
+                doTransitionWithResolution: function () {
+                    if (this.resolution !== null) {
+                        this.doTransition(this.resolution.transition, this.resolution.resolution);
+                    }
+                },
+
+                doTransition: function (transition, issue, resolution) {
+                    var self = this;
+                    if(issue == null)
+                        issue = this.item;
+                    var params = {transition: transition, resolution: resolution, issue: issue};
+                    this.showSpinnerTransitions();
+                    $.ajax({
+                        url: '/ws/issues/transition',
+                        type: 'post',
+                        dataType: 'json',
+                        contentType: 'application/json',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        data: JSON.stringify(params),
+                        success: function (data, textStatus, jQxhr) {
+                            location.reload();
+                        },
+                        error: function (jqXhr, textStatus, errorThrown) {
+                            self.clearProperties();
+                        	self.errorMessage = jqXhr.responseJSON.message;
+                        	self.hideSpinnerTransitions();
+                            console.error(jqXhr);
+                        },
+                        async: true
+                    });
+                },
+
+                doResolution: function (transition, issue) {
+                    var self = this;
+                    $.ajax({
+                        url: '/ws/issues/resolutions/'+transition,
+                        type: 'get',
+                        success: function (data, textStatus, jQxhr) {
+                            self.doTransition(transition, issue, data);
+                        },
+                        error: function (jqXhr, textStatus, errorThrown) {
+                            self.errorMessage = jqXhr.responseJSON.message;
+                            console.error(jqXhr);
+                        },
+                    });
+                },
+
+                shouldShowNewSubtask: function (item) {
+                    var issueTypes = JSON.parse(localStorage.getItem("issueTypes"));
+                    var issueConf = JSON.parse(localStorage.getItem("issueTypeConfig"));
+
+                    for (x in issueConf)
+                        if (x == this.item.type)
+                            return true;
+                    return false;
+                },
+
+                opendialog: function (item) {
+                    this.item = item;
+                    $(this.$.modal).css('background-color', this.item.color);
+                    this.$.ajaxTimetracking.generateRequest();
+                    this.$.ajaxTransitions.generateRequest();
+                    this.$.ajaxSubtasks.generateRequest();
+                    this.$.modal.toggle();
+                    this.canImpede = !this.issueImpedida(item) && !this.issueFechada(item);
+                    this.canUnimpede = this.issueImpedida(item) && !this.issueFechada(item);
+                },
+
+                listaResponsaveis: function (item) {
+                    var responsaveis = "";
+
+                    if (item.subResponsaveis) {
+                        if (item.subResponsaveis.indexOf(item.assignee) < 0) {
+                            responsaveis = item.assignee + ',' + item.subResponsaveis;
+                        } else {
+                            responsaveis = item.subResponsaveis;
+                        }
+                    } else {
+                        responsaveis = item.assignee;
+                    }
+
+                    var responsaveisArray = [];
+
+                    if (!responsaveis) {
+                        return responsaveisArray;
+                    }
+
+                    var values = responsaveis.split(',');
+
+                    for (var i = 0; i < values.length; i++) {
+                        responsaveisArray.push(values[i]);
+                    }
+
+                    return responsaveisArray;
+                },
+
+                hasRecords: function (records) {
+                    return records && records.length > 0;
+                },
+
+                updateTimetrackerColor: function () {
+                    if (this.timetracking.originalEstimateMinutes)
+                        this.timetrackerBlown = this.timetracking.timeSpentMinutes > this.timetracking.originalEstimateMinutes;
+                    else
+                        this.timetrackerBlown = false;
+                },
+
+                getIssueColor: function (issue) {
+                    return 'background: ' + issue.color;
+                },
+
+                openDialogNewTask: function () {
+                    this.$.dialogNewTask.opendialog(this.item);
+                    this.$.modal.close();
+                },
+
+                openJira: function (event) {
+                    var win = window.open(window.urlJira + '/browse/' + $(event.target).text().trim(), '_blank');
+                },
+
+                clearProperties: function () {
+                    this.timetracking = {};
+                    this.transitions = [];
+                    this.subtasks = null;
+                    this.resolution = null;
+                    this.shouldShowTimetracking = false;
+                    this.shouldShowSubtasks = false;
+                    this.errorMessage = null;
+                    this.showFieldsRequiredDialog = false;
+                },
+
+                issueFechada: function (item) {
+                    return item.status == STATUS_ID.DONE ||
+                           item.status == STATUS_ID.FECHADO ||
+                           item.status == STATUS_ID.CANCELADO;
+                },
+
+                issueCancelada: function (item) {
+                    return this.item.status == STATUS_ID.CANCELADO;
+                },
+
+                issueImpedida: function (item) {
+                    return this.item.customfields.impedido;
+                }
+
+            });
+
+        })();
+    </script>
+
+</dom-module>

@@ -1,0 +1,392 @@
+<!--
+  [LICENSE]
+  Taskboard
+  - - -
+  Copyright (C) 2015 - 2016 Objective Solutions
+  - - -
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  [/LICENSE]
+  -->
+<dom-module id="taskboard-home">
+    <style>
+        paper-spinner {
+            --paper-spinner-layer-1-color: var(--accent-color);
+            --paper-spinner-layer-2-color: var(--accent-color);
+            --paper-spinner-layer-3-color: var(--accent-color);
+            --paper-spinner-layer-4-color: var(--accent-color);
+            position: absolute;
+        }
+
+        paper-drawer-panel {
+            --paper-drawer-panel-main-container: {
+                position: static;
+            };
+            --paper-drawer-panel-right-drawer-container: {
+                background-color: white;
+                z-index: 100
+            };
+
+            --paper-drawer-panel-scrim: {
+                z-index: 99;
+            };
+        }
+
+        .app-name {
+            background-color: #3f51b5;
+            color: white;
+            font-weight: 400;
+            font-size: x-large;
+            padding: 35px;
+            z-index: 1;
+        }
+
+        .bottom {
+            background-color: #3F51B5;
+            height: 35px;
+            width: 100%;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+        }
+
+        .label-colors {
+            font-size: 15px;
+            font-weight: 600;
+            padding-left: 5px;
+            margin-left: 10px;
+        }
+
+        .label-colors.os {
+            color: #add9fe;
+        }
+
+        .label-colors.task {
+            color: #FDD28A;
+        }
+
+        .label-colors.bug {
+            color: #FF8B94;
+        }
+
+        .label-colors.outros {
+            color: #A0CB9C;
+        }
+
+        .legendas {
+            justify-content: center;
+            position: absolute;
+            width: 100%;
+            bottom: 0;
+            left: 0;
+        }
+
+        #toastError .yellow-button {
+            text-transform: none;
+            color: #eeff41;
+        }
+
+        .menu-header {
+            width: 100%;
+            position: relative;
+            height: 45px;
+            background-color: #3f51b5;
+            display: block;
+        }
+
+        .search {
+            margin-left: 10px;
+            position: relative;
+            float: left;
+        }
+
+        .visibility {
+            float: left;
+            position: relative;
+            margin-top: 5px;
+            z-index: 5;
+            margin-left: 9px;
+        }
+
+        .title {
+            color: white;
+            font-weight: 400;
+            font-size: x-large;
+            padding: 8px;
+            margin-left: 46%;
+            position: absolute;
+        }
+
+        .user {
+            position: relative;
+            float: right;
+            margin-right: 2px;
+            margin-top: 5px;
+            z-index: 5;
+        }
+
+        .openMenu {
+            position: relative;
+            float: right;
+            margin-top: 5px;
+            margin-right: 16px;
+        }
+
+        .menuLink {
+            font-size: 15px;
+            font-weight: bold;
+        }
+
+        .menuLink:hover {
+            -webkit-transition: all .5s;
+            -moz-transition: all .5s;
+            transition: all .5s;
+            opacity: 0.9;
+            background: rgba(255, 255, 255, 0.27);
+            border-radius: 3px;
+        }
+
+        paper-toolbar {
+            height: 35px;
+            cursor: pointer;
+        }
+
+        paper-toolbar ::shadow #topBar {
+            height: 35px;
+            padding: 0px 3px 0px;
+        }
+
+        .menu-icon {
+            height: 31px;
+            width: 31px;
+        }
+
+    </style>
+
+    <template>
+        <iron-signals on-iron-signal-level-config-changed="storageLevelsConfig"
+                      on-iron-signal-level-weight-changed="storageLevelsConfig"
+                      on-iron-signal-level-show-header-changed="storageLevelsConfig"
+                      on-iron-signal-level-visibility-changed="storageLevelsConfig"
+                      on-iron-signal-config-visibility-synthetic-changed="updateUserPreferences"
+                      on-iron-signal-config-visibility-issue-order="updateUserPreferences"
+                      on-iron-signal-update-user-preferences="updateUserPreferences"
+                      on-iron-signal-show-error-message="showErrorMessage">
+        </iron-signals>
+        <paper-spinner id="spinner" active="{{!done}}" alt="Loading..."></paper-spinner>
+
+        <paper-drawer-panel disable-swipe right-drawer force-narrow drawer-width="350px">
+            <template is="dom-if" if={{done}}>
+                <div main>
+                    <paper-toast duration="0" id="toastError">
+                        <iron-icon icon="icons:error"></iron-icon>
+                        <span>{{errorMessage}}
+                        </span>
+                        <paper-button onclick="toastError.toggle()" class="yellow-button">Fechar</paper-button>
+                    </paper-toast>
+                    <paper-material class="menu-header">
+                        <div class="search">
+                            <board-search></board-search>
+                        </div>
+                        <div class="visibility">
+                            <config-visibility></config-visibility>
+                        </div>
+                        <div class="title"> Taskboard</div>
+                        <div class="openMenu">
+                            <paper-toolbar class="menuLink" paper-drawer-toggle>
+                                <iron-icon class="menu-icon" icon="settings" paper-drawer-toggle></iron-icon>
+                            </paper-toolbar>
+                        </div>
+                        <div class="user">
+                            <user-account></user-account>
+                        </div>
+                    </paper-material>
+                    <board-table id="table" conf={{conf}} aspects-filter="{{aspectsFilter}}"></board-table>
+                </div>
+                <paper-header-panel drawer>
+                    <paper-material class="app-name">
+                        <div class="title">Filters</div>
+                    </paper-material>
+                    <paper-material class="layout vertical">
+                        <aspects-filter aspects-filter="{{aspectsFilter}}"></aspects-filter>
+                        <config-table config={{conf}}></config-table>
+                    </paper-material>
+<!--                     <paper-material class="bottom"> -->
+<!--                         <paper-material class="legendas flex layout horizontal"> -->
+<!--                             <div class="label-colors os">OS</div> -->
+<!--                             <div class="label-colors task">TASK</div> -->
+<!--                             <div class="label-colors bug">BUG</div> -->
+<!--                             <div class="label-colors outros">OTHERS</div> -->
+<!--                         </paper-material> -->
+<!--                     </paper-material> -->
+                </paper-header-panel>
+            </template>
+        </paper-drawer-panel>
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'taskboard-home',
+
+                observers: [
+                    'refreshDone(aspectsFilter, conf)'
+                ],
+
+                properties: {
+                    aspectsFilter: {
+                        type: Object,
+                        notify: true
+                    },
+
+                    conf: {
+                        type: Object
+                    },
+
+                    user: {
+                        type: Object
+                    },
+
+                    done: {
+                        type: Boolean,
+                        notify: true,
+                        value: false
+                    },
+
+                    errorMessage: {
+                        type: String,
+                        value: "An unexpected error ocurred. Could not save your preferences on server."
+                    }
+                },
+
+                ready: function () {
+                    analytics.trackView();
+                    this.retrieveBoardFeatures();
+                },
+
+                retrieveFilters: function () {
+                    $.getJSON("/ws/issues/aspects-filter", $.proxy(function (data) {
+                        this.aspectsFilter = this.getFilterPreferences(data);
+                        taskboard.setAspectFilters(this.aspectsFilter);
+                    }, this));
+                },
+
+                getFilterPreferences: function (itens) {
+                    var filterPreferences = userPreferences.getFilters();
+                    itens.forEach(function (item) {
+                        item.aspectsSubitemFilter.forEach(function (filter) {
+                            if (this.description === 'Issue Type') {
+                                if (filterPreferences[filter.value.id] != null)
+                                    filter.selected = filterPreferences[filter.value.id];
+                            } else {
+                                if (filterPreferences[filter.value] != null)
+                                    filter.selected = filterPreferences[filter.value];
+                            }
+                        }, item);
+                    });
+                    return itens;
+                },
+
+                updateUserPreferences: function () {
+                    var self = this;
+                    $.ajax({
+                        data: JSON.stringify(userPreferences.getPreferences()),
+                        type: 'POST',
+                        contentType: "text/plain; charset=utf-8",
+                        url: '/ws/user-preferences/update'
+                    }).fail(function (jqXHR, textStatus, errorThrown) {
+                        console.error(errorThrown);
+                        self.errorMessage = "An unexpected error ocurred. Could not save your preferences on server.";
+                        toastError.open();
+                    });
+                },
+
+                currentLevelPreferences: function () {
+                    var levelConfig = [];
+                    for (var l = 0; l < this.conf.length; l++) {
+                        levelConfig.push({
+                            level: this.conf[l].level,
+                            showLevel: this.conf[l].showLevel,
+                            showLaneTeam: this.conf[l].showLaneTeam,
+                            showHeader: this.conf[l].showHeader,
+                            weightLevel: this.conf[l].weight
+                        });
+                    }
+                    return levelConfig;
+                },
+
+                storageLevelsConfig: function () {
+                    console.log("storageLevelsConfig");
+                    if (this.conf.length === 0)
+                        return;
+                    userPreferences.setLevels(this.currentLevelPreferences());
+                    this.updateUserPreferences();
+                },
+
+                retrieveBoardFeatures: function () {
+                    var configBoard = [];
+                    var self = this;
+                    $.ajax({
+                        url: "/ws/issues/configuration",
+                        dataType: "json",
+                        success: function (data) {
+                            taskboard.setLaneConfiguration(data.laneConfiguration);
+                            configBoard = data.laneConfiguration;
+                            localStorage.setItem("issueTypes", JSON.stringify(data.issueTypes));
+                            localStorage.setItem("issueTypeConfig", JSON.stringify(data.issueTypesConfig));
+                            localStorage.setItem("priorities", JSON.stringify(data.priorities));
+                            localStorage.setItem("statuses", JSON.stringify(data.statuses));
+
+                            userPreferences.setPreferences(JSON.parse(data.userPreferences));
+                            self.retrieveFilters();
+
+                            window.urlJira = data.urlJira;
+                            window.urlLinkGraph = data.urlLinkGraph;
+
+                            var levelPreferences = userPreferences.getLevels();
+                            if (levelPreferences && levelPreferences.length > 0) {
+                                for (var l = 0; l < configBoard.length; l++) {
+                                    for (var s = 0; s < levelPreferences.length; s++) {
+                                        var tmpConf = configBoard[l];
+                                        if (tmpConf.level === levelPreferences[s].level) {
+                                            tmpConf.showLevel = levelPreferences[s].showLevel;
+                                            tmpConf.weight = levelPreferences[s].weightLevel;
+                                            tmpConf.showLaneTeam = levelPreferences[s].showLaneTeam;
+                                            tmpConf.showHeader = levelPreferences[s].showHeader;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
+                            self.conf = configBoard;
+                        }
+                    });
+                },
+
+                refreshDone: function (f) {
+                    if (this.conf && this.aspectsFilter)
+                        this.done = true;
+                },
+
+                showErrorMessage: function(event) {
+                    this.errorMessage = event.detail;
+                    if (this.errorMessage.length > 0)
+                        toastError.open();
+                    else
+                        toastError.close();
+                }
+            });
+        })();
+    </script>
+</dom-module>

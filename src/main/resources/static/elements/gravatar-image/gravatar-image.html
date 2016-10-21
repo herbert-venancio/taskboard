@@ -1,0 +1,90 @@
+<!--
+  [LICENSE]
+  Taskboard
+  - - -
+  Copyright (C) 2015 - 2016 Objective Solutions
+  - - -
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  [/LICENSE]
+  -->
+<dom-module id="gravatar-image">
+
+	<template>
+		<style>
+			img {
+				margin: 0;
+				padding: 0;
+			}
+		</style>
+
+		<div id="imagme"></div>
+		<!-- 	<template is="dom-if" if="{{email}}"> -->
+		<img style$="{{applyStyle(imageStyle)}}" id="username_image"/>
+		<!--     </template> -->
+	</template>
+
+	<script>
+		(function () {
+			Polymer({
+				is: 'gravatar-image',
+
+				properties: {
+					email: {
+						type: String,
+						observer: 'ready'
+					},
+
+					size: String,
+					hash: String,
+					placeholder: String,
+
+					imageStyle: {
+						type: String,
+						value: ""
+					}
+				},
+
+				ready: function () {
+					this.size = this.size || 80;
+					this.hash = this.hash || "";
+
+					if (this.email) {
+//         	$("#imagem").append("<img style$='{{applyStyle(imageStyle)}}' id='username_image' />");
+
+
+						this.$.username_image.src = this.email;
+					}
+				},
+
+				imageURL: function (email, size, hash, placeholder) {
+					var avatarString = (hash.length > 0) ? hash : md5(email);
+
+					var url = email;
+
+					if (placeholder && placeholder.length > 0) {
+						url += '&d=' + placeholder;
+					}
+
+					return url;
+				},
+
+				applyStyle(imageStyle) {
+					return imageStyle;
+				}
+
+			});
+		})();
+	</script>
+
+</dom-module>

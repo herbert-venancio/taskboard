@@ -1,0 +1,165 @@
+<!--
+  [LICENSE]
+  Taskboard
+  - - -
+  Copyright (C) 2015 - 2016 Objective Solutions
+  - - -
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  [/LICENSE]
+  -->
+<dom-module id="issue-item-synthetic">
+    <style is="custom-style">
+
+        :host {
+            margin-top: auto;
+            margin-bottom: auto;
+        }
+
+        .icons_s {
+            display: flex;
+            --iron-icon-height: 100%;
+            --iron-icon-width: 100%;
+        }
+
+        .size-pp {
+            padding: 0px;
+            height: 25px;
+            width: 25px;
+        }
+
+        .size-p {
+            padding: 0px;
+            height: 25px;
+            width: 25px;
+        }
+
+        .size-m {
+            padding: 0px;
+            height: 35px;
+            width: 35px;
+        }
+
+        .size-g {
+            padding: 0px;
+            height: 40px;
+            width: 40px;
+        }
+
+        .size-gg {
+            padding: 0px;
+            height: 40px;
+            width: 40px;
+        }
+
+        .icon-impedida {
+            text-align: center;
+            color: #F45151;
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0.9;
+        }
+
+        .cancelada {
+            opacity: 0.4;
+        }
+
+    </style>
+
+
+    <template>
+        <paper-material on-tap="opendialog" elevation="0">
+            <div>
+                <iron-icon id="[[item.issueKey]]" class$="{{getItemClass(item)}}" src="{{getIssueTypeImage(item, parentTypeIcon)}}"></paper-icon-button>
+            </div>
+            <template is="dom-if" if="{{issueImpedida(item)}}">
+                <div>
+                    <iron-icon class$="{{getItemClass(item)}} icon-impedida" icon="icons:block"></paper-icon-button>
+                </div>
+            </template>
+        </paper-material>
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'issue-item-synthetic',
+
+                properties: {
+                    parentTypeIcon: {
+                      type: Boolean
+                    },
+                    item: {
+                        type: Object,
+                        notify: true
+                    },
+
+                    hidden: {
+                        type: Boolean
+                    }
+                },
+
+                issueImpedida: function (item) {
+                    return this.item.customfields.impedido;
+                },
+
+                issueCancelada: function (item) {
+                    return this.item.status == STATUS_ID.CANCELADO;
+                },
+
+                getIssueTypeImage: function (issue) {
+                    var iconUri = issue.typeIconUri;
+                    if (this.parentTypeIcon && issue.parentTypeIconUri)
+                        iconUri = issue.parentTypeIconUri;
+
+                    return iconUri.replace('xsmall', 'xlarge');
+                },
+
+                getItemClass: function (item) {
+                    var clazz = this.getSizeClass(item);
+                    if (this.issueCancelada(item))
+                        clazz += " cancelada";
+
+                    return clazz;
+                },
+
+                getSizeClass: function(item) {
+                    var issueSize = item.customfields.tamanho;
+                    switch (issueSize) {
+                        case TAMANHO.PP:
+                            return "size-pp";
+                        case TAMANHO.P:
+                            return "size-p";
+                        case TAMANHO.M:
+                            return "size-m";
+                        case TAMANHO.G:
+                            return "size-g";
+                        case TAMANHO.GG:
+                            return "size-gg";
+                        default:
+                            return "size-m";
+                    }
+                },
+
+                opendialog: function () {
+                    this.fire('iron-signal', {name: 'show-details', data: {item: this.item, favorite: this.favorite}});
+                }
+
+            });
+
+        })();
+    </script>
+</dom-module>

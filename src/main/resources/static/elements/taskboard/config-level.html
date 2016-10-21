@@ -1,0 +1,82 @@
+<!--
+  [LICENSE]
+  Taskboard
+  - - -
+  Copyright (C) 2015 - 2016 Objective Solutions
+  - - -
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  [/LICENSE]
+  -->
+<dom-module id="config-level">
+
+    <style>
+        .title {
+            font-size: 15px;
+            font-weight: bold;
+        }
+
+        .title:hover {
+            -webkit-transition: all .5s;
+            -moz-transition: all .5s;
+            transition: all .5s;
+            opacity: 0.9;
+        }
+
+        paper-toolbar {
+            height: 35px;
+            background-color: var(--dark-primary-color);
+        }
+
+        paper-toolbar ::shadow #topBar {
+            height: 35px;
+        }
+
+        iron-collapse {
+            padding-bottom: 10px;
+        }
+    </style>
+
+    <template>
+        <paper-toolbar class="title" on-tap="collapseLevelConfig">
+            <span>Levels</span>
+        </paper-toolbar>
+        <iron-collapse id="collapseLevelConfig">
+            <paper-material class="layout vertical" elevation="0">
+                <template is="dom-repeat" items="{{levels}}" as="level">
+                    <config-level-item level="{{level}}"></config-level-item>
+                </template>
+            </paper-material>
+        </iron-collapse>
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'config-level',
+
+                properties: {
+                    levels: {
+                        type: Object,
+                        notify: true
+                    }
+                },
+
+                collapseLevelConfig: function (e) {
+                    this.$.collapseLevelConfig.toggle();
+                },
+            });
+        })();
+    </script>
+
+</dom-module>

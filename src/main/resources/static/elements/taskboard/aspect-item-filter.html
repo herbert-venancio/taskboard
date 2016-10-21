@@ -1,0 +1,125 @@
+<!--
+  [LICENSE]
+  Taskboard
+  - - -
+  Copyright (C) 2015 - 2016 Objective Solutions
+  - - -
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  [/LICENSE]
+  -->
+<dom-module id="aspect-item-filter">
+
+    <style>
+        .title:hover {
+            -webkit-transition: all .5s;
+            -moz-transition: all .5s;
+            transition: all .5s;
+            opacity: 0.9;
+        }
+
+        paper-toolbar {
+            height: 35px;
+            background-color: var(--dark-primary-color);
+        }
+
+        paper-toolbar ::shadow #topBar {
+            height: 35px;
+        }
+
+        paper-toolbar paper-checkbox {
+            --paper-checkbox-checked-color: var(--accent-color);
+            margin-left: 4px;
+        }
+
+        iron-collapse {
+            padding-bottom: 10px;
+        }
+    </style>
+
+    <template>
+        <paper-toolbar class="title" on-tap="collapseFilter">
+            <paper-checkbox id="checkAll"></paper-checkbox>
+            <span>[[aspectItemFilter.description]]</span>
+        </paper-toolbar>
+        <iron-collapse id="collapseFilter">
+            <paper-material class="layout vertical" elevation="0">
+                <template is="dom-repeat" items="{{aspectItemFilter.aspectsSubitemFilter}}" as="aspectSubitemFilter">
+                    <aspect-subitem-filter aspect-subitem-filter="{{aspectSubitemFilter}}" description="{{aspectItemFilter.description}}"
+                                           selected="{{aspectSubitemFilter.selected}}"></aspect-subitem-filter>
+                </template>
+            </paper-material>
+        </iron-collapse>
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'aspect-item-filter',
+
+                properties: {
+                    aspectItemFilter: {
+                        type: Object,
+                        notify: true
+                    }
+                },
+
+                listeners: {
+                    'checkAll.change': 'checkAll'
+                },
+
+                observers: [
+                    'refreshCheckBox(aspectItemFilter)'
+                ],
+
+                description: function () {
+                    return this.aspectItemFilter.description;
+                },
+
+                checkAll: function () {
+                    var checkAll = this.$$('#checkAll').checked;
+
+                    $(this.$$('#collapseFilter'))
+                            .find('aspect-subitem-filter')
+                            .each(function (i, e) {
+                                if (checkAll) {
+                                    e.selected = true;
+                                } else {
+                                    e.selected = false;
+                                }
+                            });
+
+                    this.fire('iron-signal', {name: 'update-user-preferences'});
+                },
+
+                collapseFilter: function (e) {
+                    if (e.target.parentElement.id !== 'checkAll') {
+                        this.$.collapseFilter.toggle();
+                    }
+                },
+
+                refreshCheckBox: function() {
+                    var subitems = this.aspectItemFilter.aspectsSubitemFilter;
+                    for (var subitemIndex in subitems) {
+                        var subitem = subitems[subitemIndex];
+                        if (subitem.selected) {
+                            this.$$('#checkAll').checked = true;
+                            return;
+                        }
+                    }
+                }
+            });
+        })();
+    </script>
+
+</dom-module>

@@ -1,0 +1,293 @@
+<!--
+  [LICENSE]
+  Taskboard
+  - - -
+  Copyright (C) 2015 - 2016 Objective Solutions
+  - - -
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  [/LICENSE]
+  -->
+<dom-module id="board-step">
+    <style>
+
+    </style>
+
+    <template>
+        <iron-signals on-iron-signal-update-user-preferences="preferencesUpdated"
+                      on-iron-signal-config-visibility-synthetic-changed="viewChanged"
+                      on-iron-signal-config-visibility-issue-order="preferencesUpdated"
+                      on-iron-signal-search-filter-changed="searchFilterChanged"
+                      on-iron-signal-level-config-changed="preferencesUpdated"
+                      on-iron-signal-hierarchical-filter-changed="preferencesUpdated"></iron-signals>
+        <div class="wrap layout horizontal" style="width: 100%">
+
+            <!-- Issue Counter -->
+            <template is="dom-if" if="{{showTeamCount(issues, lastPreferenceUpdate)}}">
+                <div style="width:100%" class="layout horizontal">
+                    <div>
+                        <inline-badge value="{{getIssueCount(issues, lastPreferenceUpdate)}}"></inline-badge>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Issues -->
+            <template is="dom-repeat" items="{{filteredIssues}}" as="issue" sort="{{getSorter()}}">
+                <issue-item item="{{issue}}" style="{{getOptimalIssueWidth(columns, issue)}}" hidden="{{showSynthetic(lastPreferenceUpdate)}}"></issue-item>
+                <issue-item-synthetic item="{{issue}}" parent-type-icon="{{showParentIconInSynthetic(parentLaneConfig)}}" hidden="{{!showSynthetic(lastPreferenceUpdate)}}"></issue-item-synthetic>
+            </template>
+
+        </div>
+    </template>
+
+    <script>
+
+        var checkingInvalidTeam = false;
+
+        var sortIssue = new function () {
+            var self = this;
+
+            var compareElements = function (a, b) {
+                return (a === b) ? 0 : ((a < b) ? 1 : -1);
+            };
+
+            var getRealSize = function (a) {
+                if (a.customfields.tamanho == TAMANHO.PP)
+                    return 1;
+                if (a.customfields.tamanho == TAMANHO.P)
+                    return 2;
+                if (a.customfields.tamanho == TAMANHO.M)
+                    return 3;
+                if (a.customfields.tamanho == TAMANHO.G)
+                    return 4;
+                if (a.customfields.tamanho == TAMANHO.GG)
+                    return 5;
+                return 3;
+            };
+
+            this.sortBySize = function (a, b) {
+                return compareElements(getRealSize(a), getRealSize(b));
+            };
+
+            this.sortByTypeAndSize = function (a, b) {
+                var rdc = compareElements(a.color, b.color);
+                return rdc != 0 ? rdc : self.sortBySize(a, b);
+            }
+        }();
+
+
+        (function () {
+            Polymer({
+                is: 'board-step',
+
+                behaviors: [
+                    Polymer.IronResizableBehavior
+                ],
+
+                properties: {
+                    parentLaneConfig: {
+                        type: Object
+                    },
+                    stepMetadata: {
+                        type: Object
+                    },
+                    parentLaneId: {
+                        type: Number
+                    },
+                    issues: {
+                        type: Array,
+                        notify: true,
+                        observer: 'filter'
+                    },
+                    filteredIssues: {
+                        type: Array,
+                        value: []
+                    },
+                    team: {
+                        type: String
+                    },
+                    lastPreferenceUpdate: {
+                        type: Date,
+                        value: new Date(),
+                        notify: true
+                    },
+                    columns: {
+                        type: Number,
+                        value: 1
+                    },
+                    idealIssueSize: {
+                        type: Number,
+                        value: 150
+                    },
+                    searchFilter: {
+                        type: String
+                    }
+                },
+
+                listeners: {
+                    'iron-resize': 'refit'
+                },
+
+                ready: function() {
+
+                },
+
+                showParentIconInSynthetic: function() {
+                    return this.parentLaneConfig.showParentIconInSynthetic;
+                },
+
+                showTeamCount: function() {
+                    return userPreferences.getPreferences().laneConfiguration[0].showCount && this.getIssueCount() > 0;
+                },
+
+                showSynthetic: function() {
+                    return userPreferences.getView().showSynthetic;
+                },
+
+                getIssueOrder: function () {
+                    return userPreferences.getView().issueOrder;
+                },
+
+                getParentLane: function() {
+                    return taskboard.getLane(this.parentLaneId);
+                },
+
+                getOptimalIssueWidth: function(columns) {
+                    return 'width: '+(100/columns)+'%';
+                },
+
+                filter: function() {
+                    if(this.issues)
+                        this.set('filteredIssues', this.filterIssues(this.issues));
+                },
+
+                filterIssues: function(issues) {
+                    var filteredIssues = new Array();
+                    for (var i in issues)
+                        if (this.shouldShowIssue(issues[i]))
+                            filteredIssues.push(issues[i]);
+
+                    return filteredIssues;
+                },
+
+                filterIssuesInvalidTeam: function(issues) {
+                    checkingInvalidTeam = true;
+                    var filteredIssuesStepNoTeam = this.filterIssues(issues);
+                    checkingInvalidTeam = false;
+                    return filteredIssuesStepNoTeam;
+                },
+
+                getSorter: function () {
+                    var order = this.getIssueOrder();
+                    if (order == "type_size")
+                        return sortIssue.sortByTypeAndSize;
+                    else if (order == "size")
+                        return sortIssue.sortBySize;
+                    else return null;
+                },
+
+                shouldShowIssue: function(issue) {
+                    return this.doFiltersAllow(issue) && this.doPreferencesAllow(issue) &&
+                            (!this.searchFilter || this.searchFilter && this.searchFilterMatches(issue)) &&
+                            this.hierarchicalFilterMatches(issue);
+                },
+
+                doFiltersAllow: function(issue) {
+                    if (checkingInvalidTeam)
+                        return true;
+
+                    if (taskboard.isInvalidTeam(issue.teams))
+                        return false;
+
+                    if (!this.team || issue.teams.indexOf(this.team) !== -1)
+                        return true;
+
+                    return false;
+                },
+
+                doPreferencesAllow: function(issue) {
+                    for (var i = 0; i < taskboard.getAspectFilters().length; i++) {
+                        var value = issue[taskboard.getAspectFilters()[i].field]
+                        var filters = userPreferences.getFilters()
+
+                        if (!this.checkPreference(value,  filters))
+                            return false;
+                    }
+
+                    return true;
+                },
+
+                checkPreference: function(values, filters) {
+                    if (!Array.isArray(values))
+                        values = [ values ];
+
+                    if (checkingInvalidTeam && taskboard.isInvalidTeam(values))
+                        return true;
+
+                    for (var index in values) {
+                        if (filters[values[index]])
+                            return true;
+                    }
+
+                    return false;
+                },
+
+                searchFilterMatches: function(issue) {
+                    var query = this.searchFilter.toUpperCase();
+                    if (issue.issueKey.toUpperCase().indexOf(query) !== -1)
+                        return true;
+                    else if (issue.assignee && issue.assignee.toUpperCase().indexOf(query) !== -1)
+                        return true;
+                    else if (issue.subResponsaveis && issue.subResponsaveis.toUpperCase().indexOf(query) !== -1)
+                        return true;
+                    else if (issue.summary && issue.summary.toUpperCase().indexOf(query) !== -1)
+                        return true;
+                    else
+                        return false;
+                },
+
+                hierarchicalFilterMatches: function(issue) {
+                    return taskboard.isUsingHierarchicalFilter() && issue.hierarchyMatch || !taskboard.isUsingHierarchicalFilter();
+                },
+
+                getIssueCount: function() {
+                    return this.filteredIssues.length;
+                },
+
+                refit: function() {
+                    var rowNode = this.parentNode.parentNode;
+                    var totalStepWeight = this.getParentLane().getTotalStepWeight();
+                    var weight = this.stepMetadata.weight;
+                    var size = rowNode.offsetWidth * weight / totalStepWeight;
+                    this.columns = Math.min(Math.max(Math.floor(size / this.idealIssueSize), 1), this.getIssueCount());
+                },
+
+                preferencesUpdated: function() {
+                    this.lastPreferenceUpdate = new Date();
+                    this.filter();
+                },
+
+                searchFilterChanged: function (evt, data) {
+                    this.searchFilter = data.query;
+                    this.preferencesUpdated();
+                },
+
+                viewChanged: function() {
+                    this.preferencesUpdated();
+                }
+
+            });
+        })();
+    </script>
+
+</dom-module>

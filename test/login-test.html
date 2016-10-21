@@ -1,0 +1,98 @@
+<!doctype html>
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<html>
+<head>
+	<meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+	<title>Login Test</title>
+
+	<script src="../src/main/resources/static/bower_components/webcomponentsjs/webcomponents.min.js"></script>
+	<link rel="import" href="../src/main/resources/static/bower_components/polymer/polymer.html">
+	<script src="../src/main/resources/static/bower_components/web-component-tester/browser.js"></script>
+	<script src="../src/main/resources/static/bower_components/test-fixture/test-fixture-mocha.js"></script>
+
+  	<!-- Import the element to test -->
+  	<link rel="import" href="../src/main/resources/static/elements/security/log-in.html">
+  	
+	<link rel="import" href="../src/main/resources/static/bower_components/test-fixture/test-fixture.html">
+	<link rel="import" href="../src/main/resources/static/bower_components/iron-ajax/iron-ajax.html">
+</head>
+<body>
+
+	<test-fixture id="login-fixture">
+		<template>
+			<log-in></log-in>
+		</template>
+	</test-fixture>
+	
+	<test-fixture id="simple-post">
+		<template>
+			<iron-ajax method="POST" url="/login"></iron-ajax>
+		</template>
+	</test-fixture>
+
+	<script>
+		suite('<iron-ajax>', function() {
+			var server, request, ajax;
+			var responseHeaders = {
+				json: { 'Content-Type': 'application/json' }
+			};
+
+			setup(function(){
+				server = sinon.fakeServer.create();
+				server.respondWith('POST', '/login', [ 401, responseHeaders.json, '{"error":"Unauthorized"}']);
+			});
+
+			teardown(function() {
+				server.restore();
+			});
+			
+			suite('<log-in>', function() {
+				var login, user, pass, button, incorrect;
+	
+				setup(function() {
+					login = fixture('login-fixture');
+					ajax = fixture('simple-post');
+					user = Polymer.dom(login.root).querySelector('paper-input#username');
+					pass = Polymer.dom(login.root).querySelector('paper-input#password');
+					button = Polymer.dom(login.root).querySelector('paper-button#login');
+					incorrect = Polymer.dom(login.root).querySelector('span.incorrect');
+				});
+	
+				test('componente de login foi definido?', function() {
+					assert.isDefined(login.root, 'deveria estar definido.');
+				});
+	
+				test('todos os elementos necessários estão definidos?', function() {
+					assert.isDefined(user, 'input username deveria estar definido.');
+					assert.isDefined(pass, 'input password deveria estar definido.');
+					assert.isDefined(button, 'input button deveria estar definido.');
+					assert.isDefined(incorrect, 'span incorrect deveria estar definido.');
+				});
+				
+				test('as labels dos inputs estão corretas?', function() {
+					assert.equal(user.attributes['label'].value, 'User');
+					assert.equal(pass.attributes['label'].value, 'Password');
+				});
+	
+				test('quando o usuário digita username/password incorretos, ele é avisado?', function() {
+					assert.isDefined(incorrect.attributes['hidden']);
+					button.click();
+					request = ajax.generateRequest();
+		            server.respond();
+		            expect(request.response).to.be.not.ok;
+					assert.isUndefined(incorrect.attributes['hidden']);
+				});
+			});
+		});
+	</script>
+</body>
+</html>

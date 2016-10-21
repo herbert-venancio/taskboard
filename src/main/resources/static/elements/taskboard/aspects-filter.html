@@ -1,0 +1,83 @@
+<!--
+  [LICENSE]
+  Taskboard
+  - - -
+  Copyright (C) 2015 - 2016 Objective Solutions
+  - - -
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  [/LICENSE]
+  -->
+<dom-module id="aspects-filter">
+
+    <style>
+        paper-toolbar {
+            height: 40px;
+        }
+
+        paper-toolbar ::shadow #topBar {
+            height: 40px;
+        }
+
+        .title {
+            width: 95%;
+            font-size: 18px !important;
+        }
+    </style>
+
+    <template>
+        <paper-material>
+            <paper-toolbar on-tap="aspectsFilterTap">
+                <paper-material class="flex layout horizontal" elevation=0>
+                    <paper-material class="title" elevation=0>Aspects Filter</paper-material>
+                    <iron-icon id="toggleIcon" class="icon-small" icon="chevron-left"></iron-icon>
+                </paper-material>
+            </paper-toolbar>
+            <iron-collapse id="aspectsFilter">
+                <template is="dom-repeat" items="{{aspectsFilter}}" as="aspectsFilter">
+                    <aspect-item-filter aspect-item-filter="{{aspectsFilter}}"></aspect-item-filter>
+                </template>
+            </iron-collapse>
+        </paper-material>
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'aspects-filter',
+
+                properties: {
+                    aspectsFilter: {
+                        type: Object,
+                        notify: true
+                    },
+                },
+
+                toggleAjax: function () {
+                    this.$.spinner.active = false;
+                },
+
+                aspectsFilterTap: function (e) {
+                    this.$.aspectsFilter.toggle();
+
+                    if (this.$.aspectsFilter.opened) {
+                        this.$.toggleIcon.icon = 'expand-more';
+                    } else {
+                        this.$.toggleIcon.icon = 'chevron-left';
+                    }
+                },
+            });
+        })();
+    </script>
+
+</dom-module>

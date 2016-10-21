@@ -1,0 +1,149 @@
+<!--
+  [LICENSE]
+  Taskboard
+  - - -
+  Copyright (C) 2015 - 2016 Objective Solutions
+  - - -
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  [/LICENSE]
+  -->
+<dom-module id="lane-resizer">
+
+    <style>
+        :host {
+            margin-bottom: -5px;
+            z-index: 2;
+            opacity: 0;
+        }
+
+        .resizer {
+            cursor: ns-resize;
+            background-color: darkgray;
+            width: 100%;
+            height: 5px;
+        }
+
+        .blocker {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            opacity: 0;
+
+            -webkit-touch-callout: none; /* iOS Safari */
+            -webkit-user-select: none;   /* Chrome/Safari/Opera */
+            -moz-user-select: none;      /* Firefox */
+            -ms-user-select: none;       /* Internet Explorer/Edge */
+            user-select: none;           /* Generic */
+        }
+    </style>
+
+    <template>
+        <div class="resizer" on-down="handleMousePress" on-up="handleMouseRelease" on-track="handleTrack"></div>
+        <template is="dom-if" if="{{blockInput}}">
+            <div class="blocker"></div>
+        </template>
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'lane-resizer',
+
+                properties: {
+                    parentLane: {
+                        type: Number
+                    },
+                    oWeight1: {
+                        type: Number
+                    },
+                    oWeight2: {
+                        type: Number
+                    },
+                    blockInput: {
+                        type: Boolean,
+                        value: false,
+                        notify: true
+                    }
+                },
+
+                getParentLane: function() {
+                    return taskboard.getLane(this.parentLane);
+                },
+
+                getLastVisibleLaneBeforeParent: function() {
+                    var lanes = document.querySelectorAll('board-lane');
+                    var parentIndex = null;
+                    var self = this;
+                    _.each(lanes, function(lane, id) {
+                        if (lane.metadata.id == self.parentLane)
+                            parentIndex = id;
+                    });
+
+                    return lanes[parentIndex - 1];
+                },
+
+                canResize: function() {
+                    var parent = this.getParentLane();
+                    var prev = this.getLastVisibleLaneBeforeParent();
+                    return parent.show && prev != null && prev.show;
+                },
+
+                handleMousePress: function(e) {
+                    this.oWeight1 = this.getLastVisibleLaneBeforeParent().weight;
+                    this.oWeight2 = this.getParentLane().weight;
+                    this.blockInput = true;
+                },
+
+                handleMouseRelease: function(e) {
+                    this.blockInput = false;
+                    this.save();
+                    $('table').floatThead('reflow');
+                },
+
+                handleTrack: function(e) {
+                    var l1 = this.getLastVisibleLaneBeforeParent();
+                    var l2 = this.getParentLane();
+                    if(this.canResize()) {
+                        var dw = this.normalise((l1.weight + l2.weight) * e.detail.dy / (l1.offsetHeight + l2.offsetHeight));
+                        l1.setWeight(this.oWeight1 + dw);
+                        l2.setWeight(this.oWeight2 - dw);
+                    }
+                },
+
+                normalise: function(dw) {
+                    var minHeight = 0.1;
+                    var totalWeight = taskboard.getTotalLaneWeight();
+                    var minWeight = minHeight * totalWeight;
+
+                    var minChange = minWeight - this.oWeight1;
+                    var maxChange = this.oWeight2 - minWeight;
+
+                    dw = Math.max(minChange, dw);
+                    dw = Math.min(maxChange, dw);
+
+                    return dw;
+                },
+
+                save: function() {
+                    this.fire('iron-signal', {name: 'level-weight-changed'});
+                }
+
+            });
+        })();
+    </script>
+
+</dom-module>

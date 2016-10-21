@@ -1,0 +1,99 @@
+<!--
+  [LICENSE]
+  Taskboard
+  - - -
+  Copyright (C) 2015 - 2016 Objective Solutions
+  - - -
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  [/LICENSE]
+  -->
+<dom-module id="confirm-modal">
+
+    <style>
+        paper-dialog {
+            padding: 6px;
+            background: #FFF;
+        }
+
+        paper-button {
+            float: right;
+            padding: 10px;
+        }
+
+        paper-button.colorful {
+            color: #4285f4;
+            margin-bottom: 6px;
+        }
+
+        paper-button[raised].colorful {
+            background: #4285f4;
+            color: #fff;
+        }
+
+        .confirmText {
+            padding: 18px;
+        }
+
+    </style>
+
+    <template>
+        <paper-dialog id="confirmModal">
+            <h2>[[title]]</h2>
+            <div class="confirmText">[[text]]</div>
+            <paper-button class="colorful" on-tap="confirmed" raised>Confirm</paper-button>
+            <paper-button class="colorful" on-tap="closeDialog">Cancel</paper-button>
+        </paper-dialog>
+    </template>
+    <script>
+        (function () {
+            Polymer({
+                is: 'confirm-modal',
+
+                properties: {
+                    title: {
+                        type: String,
+                        notify: true
+                    },
+
+                    text: {
+                        type: String,
+                        notify: true
+                    },
+
+                    callback: {
+                        type: Object
+                    }
+                },
+
+                confirmed: function () {
+                    this.callback();
+                    this.closeDialog();
+                },
+
+                closeDialog: function () {
+                    this.$.confirmModal.close();
+                },
+
+                openDialog: function (title, text, callback) {
+                    this.title = title;
+                    this.text = text;
+                    this.callback = callback;
+                    this.$.confirmModal.toggle();
+                }
+
+            });
+        })();
+    </script>
+
+</dom-module>

@@ -1,0 +1,141 @@
+<!--
+  [LICENSE]
+  Taskboard
+  - - -
+  Copyright (C) 2015 - 2016 Objective Solutions
+  - - -
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  [/LICENSE]
+  -->
+<dom-module id="user-account">
+
+    <style>
+        .userName {
+            background: #3F51B5;
+            color: white;
+            padding: 10px;
+        }
+
+        paper-item {
+            cursor: pointer;
+        }
+
+        paper-item:hover {
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 3px;
+        }
+
+        paper-menu-button {
+            height: 35px;
+            cursor: pointer;
+            -webkit-transition: all .5s;
+            -moz-transition: all .5s;
+            transition: all .5s;
+        }
+
+        paper-menu-button ::shadow #topBar {
+            height: 35px;
+            padding: 0px 10px 0px;
+            justify-content: flex-end;
+
+        }
+
+        paper-menu {
+            padding: 10px 0px 10px 0px;
+            background: #D7DBF1;
+            border-radius: 3px;
+            margin-top: 45px;
+            right: 57px;
+            position: fixed;
+        }
+
+        .title {
+            font-size: 17px;
+            color: white;
+        }
+
+        .title:hover {
+            -webkit-transition: all .5s;
+            -moz-transition: all .5s;
+            transition: all .5s;
+            opacity: 0.9;
+            background: rgba(255, 255, 255, 0.27);
+            border-radius: 3px;
+        }
+
+        .avatar {
+            border-radius: 150px;
+            width: 31px;
+            margin-left: 8px;
+            padding: 2px;
+            vertical-align: middle;
+        }
+
+        .nameButton {
+            vertical-align: middle;
+        }
+
+        .configUser {
+            padding: 0;
+        }
+    </style>
+
+    <template>
+        <paper-menu-button class="configUser">
+            <div class="dropdown-trigger title">
+                <span class="nameButton">{{user.user}}</span>
+                <img class="avatar" src="{{user.avatar}}"></img>
+            </div>
+            <paper-menu class="dropdown-content shadow-elevation-8dp menu">
+                <paper-material class="userName">{{user.name}}</paper-material>
+                <paper-item on-tap="logout">
+                    <iron-icon class="logout" icon="power-settings-new"></iron-icon>
+                    Logout
+                </paper-item>
+            </paper-menu>
+        </paper-menu-button>
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'user-account',
+
+                properties: {
+                    user: {
+                        type: Object,
+                        notify: true
+                    }
+                },
+
+                ready: function () {
+                    this.user = window.user;
+                },
+
+                logout: function () {
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    $.get("/ws/users/logout", $.proxy(function () {
+                        location.reload(true);
+                    }, this));
+                },
+
+                collapseUserConfig: function (e) {
+                    this.$.collapseUserConfig.toggle();
+                }
+            });
+        })();
+    </script>
+
+</dom-module>

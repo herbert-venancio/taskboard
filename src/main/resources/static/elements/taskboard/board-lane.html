@@ -1,0 +1,361 @@
+<!--
+  [LICENSE]
+  Taskboard
+  - - -
+  Copyright (C) 2015 - 2016 Objective Solutions
+  - - -
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  [/LICENSE]
+  -->
+<dom-module id="board-lane">
+    <style>
+
+        :host {
+            width: 100%;
+        }
+
+        .header {
+            align-items: center;
+        }
+
+        .header-lane {
+            background-color: #3366CC;
+            display: flex;
+        }
+
+        .label {
+            font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: white;
+            margin: auto;
+            white-space: nowrap;
+        }
+
+        .label-lane {
+            padding: 6px;
+            font-size: 14px;
+            font-weight: 900;
+        }
+
+        .label-stage {
+            height: 26px;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: left;
+            box-shadow: 2px 2px 8px 0 #666666;
+        }
+
+        .lane-body {
+            table-layout: fixed;
+            border-collapse: collapse;
+            width: 100%;
+            height: 100%;
+        }
+
+        .wrapper {
+            box-shadow: 0 4px 9px -3px rgba(0,0,0,0.75);
+        }
+
+        .table-wrapper {
+            overflow: auto;
+        }
+
+        .counter {
+            margin-left: 3px;
+            margin-right: 3px;
+        }
+
+        .table-body {
+            width: 100%;
+            height: 100%;
+        }
+
+        .team-header {
+            width: 100%;
+            height: 100%;
+            background-color: white;
+        }
+
+        .team-col {
+            width: 118px;
+            padding: 0;
+        }
+
+        .cell {
+            vertical-align: top;
+            border-bottom: 1px solid;
+            border-color: #ededed;
+        }
+
+        .team-cell {
+            font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 14px;
+            padding: 6px;
+        }
+
+        .step-cell {
+            border-left: 1px solid;
+            border-color: #ededed;
+        }
+
+    </style>
+
+    <template>
+        <iron-signals on-iron-signal-update-user-preferences="preferencesUpdated"
+                      on-iron-signal-level-visibility-changed="preferencesUpdated"
+                      on-iron-signal-hierarchical-filter-changed="preferencesUpdated"></iron-signals>
+
+        <!-- Lane Header -->
+        <div class="paper-header header header-lane">
+            <span class="text-ellipsis label label-lane">{{metadata.level}}</span>
+        </div>
+
+        <!-- Lane Body -->
+        <div class="table-wrapper" style$="height:{{getWrapperHeight(weight, issues, lastPreferenceUpdate)}}px">
+            <table class="lane-body">
+
+                <!-- Headers -->
+                <thead>
+
+                <!-- Stage Headers -->
+                <template is="dom-if" if="{{metadata.showHeader}}">
+                    <tr>
+                        <!-- Empty Team Label -->
+                        <template is="dom-if" if="{{metadata.showLaneTeam}}">
+                            <th class="label label-stage team-col" rowspan="2">
+                                <div class="team-header"></div>
+                            </th>
+                        </template>
+
+                        <!-- Stage Labels -->
+                        <template is="dom-repeat" items="{{metadata.stages}}" as="stage">
+                            <th class="label label-stage" colspan$="{{getColspan(stage)}}" style="background-color:{{stage.color}}">
+                                <inline-badge class="counter" value="{{getStageIssueCount(stage, issues, lastPreferenceUpdate)}}"></inline-badge>
+                                {{stage.stage}}
+                            </th>
+                        </template>
+                    </tr>
+                </template>
+
+                <!-- Step Headers -->
+                <tr>
+                    <!-- If no stage headers are present, the empty team label must be rendered here -->
+                    <template is="dom-if" if="{{showTeamHeaderInStepRow(metadata.showLaneTeam, metadata.showHeader)}}">
+                        <th class="label label-stage team-col">
+                            <div class="team-header"></div>
+                        </th>
+                    </template>
+
+                    <!-- Step Labels -->
+                    <template is="dom-repeat" items="{{metadata.stages}}" as="stage">
+                        <template is="dom-repeat" items="{{stage.steps}}" as="step">
+                            <th class="label label-stage" style="{{getStepStyle(stage, step, issues)}}">
+                                <inline-badge class="counter" value="{{getIssueCountByStep(step.id, issues, lastPreferenceUpdate)}}"></inline-badge>
+                                {{step.step}}
+                            </th>
+                        </template>
+                    </template>
+                </tr>
+                </thead>
+
+                <!-- Table Body -->
+                <tbody class="table-body">
+
+                <!-- If segregated by teams -->
+                <template is="dom-if" if="{{metadata.showLaneTeam}}">
+                    <template is="dom-repeat" items="{{getTeams(lastPreferenceUpdate)}}" as="team">
+                        <template is="dom-if" if="{{isTeamVisible(team, lastPreferenceUpdate)}}">
+                            <tr>
+                                <!-- Team Cell -->
+                                <td class="team-col cell team-cell" style="width:{{teamColumnWidth}}">
+                                    {{prettify(team.name)}}
+                                </td>
+
+                                <!-- Step Cells -->
+                                <template is="dom-repeat" items="{{metadata.stages}}" as="stage">
+                                    <template is="dom-repeat" items="{{stage.steps}}" as="step">
+                                        <td class="cell step-cell">
+                                            <board-step parent-lane-id="{{metadata.id}}" parent-lane-config="{{metadata}}"
+                                                      class$="step-{{step.id}}" step-metadata="{{step}}" issues="{{getIssuesByStep(step.id, issues)}}" team="{{team.name}}"></board-step>
+                                        </td>
+                                    </template>
+                                </template>
+                            </tr>
+                        </template>
+                    </template>
+                </template>
+
+                <!-- If not segregated by teams -->
+                <template is="dom-if" if="{{!metadata.showLaneTeam}}">
+                    <tr>
+                        <!-- Step Cells -->
+                        <template is="dom-repeat" items="{{metadata.stages}}" as="stage">
+                            <template is="dom-repeat" items="{{stage.steps}}" as="step">
+                                <td class="cell step-cell">
+                                    <board-step parent-lane-id="{{metadata.id}}" parent-lane-config="{{metadata}}" class$="step-{{step.id}}" step-metadata="{{step}}" issues="{{getIssuesByStep(step.id, issues)}}"></board-step>
+                                </td>
+                            </template>
+                        </template>
+                    </tr>
+                </template>
+
+                </tbody>
+
+            </table>
+        </div>
+
+        <script>
+            $('table').floatThead({
+                position: 'absolute',
+                scrollContainer: true,
+                floatContainerClass: 'board-lane wrapper',
+                zIndex: 2
+            });
+        </script>
+
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+
+                is: 'board-lane',
+
+                properties: {
+                    metadata: {
+                        type: Object,
+                        notify: true
+                    },
+                    issues: {
+                        type: Array,
+                        notify: true
+                    },
+                    weight: {
+                        type: Number,
+                        notify: true
+                    },
+                    show: {
+                        type: Boolean,
+                        value: true
+                    },
+                    lastPreferenceUpdate: {
+                        type: Date,
+                        value: new Date(),
+                        notify: true
+                    }
+                },
+
+                ready: function () {
+                    var pref = userPreferences.getLevel(this.metadata.id);
+                    this.weight = pref ? pref.weightLevel : this.metadata.weight;
+
+                    this.addEventListener('dom-change', function() {
+                        taskboard.refitSteps();
+                    });
+                },
+
+                prettify: function(team) {
+                    return team.replace('_', ' ');
+                },
+
+                isTeamVisible: function(team) {
+                    return team.selected;
+                },
+
+                getColspan: function(stage) {
+                    return stage.steps.length;
+                },
+
+                getStepStyle: function(stage, step) {
+                    return "background-color:"+stage.color+";width:"+this.getStepWidth(step)+"%";
+                },
+
+                getTotalStepWeight: function() {
+                    var self = this;
+                    var totalStepWeight = 0;
+                    this.metadata.stages.forEach(function(stage) {
+                        stage.steps.forEach(function(x) {
+                            totalStepWeight += x.weight;
+                        });
+                    });
+                    return totalStepWeight;
+                },
+
+                getStepWidth: function(step) {
+                    return 100 * step.weight / this.getTotalStepWeight();
+                },
+
+                getTeams: function() {
+                    return taskboard.getTeams();
+                },
+
+                shouldShowTeam: function(team) {
+                    var teamFilter = _.find(taskboard.getTeams(), function (team) {
+                        return team.name == team.name
+                    });
+                    return teamFilter.selected;
+                },
+
+                getWrapperHeight: function(weight) {
+                    var laneHeight = taskboard.getLaneContainerHeight() * weight / taskboard.getTotalLaneWeight();
+                    var laneLabelHeight = 28;
+                    return Math.max(laneHeight - laneLabelHeight, 0);
+                },
+
+                showTeamHeaderInStepRow: function(showLaneTeam, showHeader) {
+                    return showLaneTeam && !showHeader;
+                },
+
+                getStageIssueCount: function(stage) {
+                    var count = 0;
+                    var self = this;
+                    stage.steps.forEach(function(step){count += self.getIssueCountByStep(step.id)});
+                    return count;
+                },
+
+                getStepIssueCount: function(step) {
+                    var count = 0;
+                    var steps = document.querySelectorAll('#lane-'+this.metadata.id+' .step-'+step.id);
+                    for(var i = 0; i < steps.length; i++)
+                        count += steps[i].getIssueCount();
+
+                    return count;
+                },
+
+                setWeight: function(weight) {
+                    this.weight = weight;
+                    this.metadata.weight = weight;
+                },
+
+                preferencesUpdated: function() {
+                    this.lastPreferenceUpdate = new Date();
+                },
+
+                getIssueCountByStep: function(stepId) {
+                    var count = 0;
+                    var steps = document.querySelectorAll('#lane-'+this.metadata.id+' .step-'+stepId);
+                    for(var i = 0; i < steps.length; i++)
+                        count += steps[i].filterIssues(this.getIssuesByStep(stepId)).length;
+
+                    return count;
+                },
+
+                getIssuesByStep: function(stepId) {
+                    return taskboard.getIssuesByStep(stepId);
+                }
+
+            });
+        })();
+    </script>
+
+</dom-module>

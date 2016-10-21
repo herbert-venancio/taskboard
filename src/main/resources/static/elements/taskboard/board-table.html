@@ -1,0 +1,179 @@
+<!--
+  [LICENSE]
+  Taskboard
+  - - -
+  Copyright (C) 2015 - 2016 Objective Solutions
+  - - -
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  [/LICENSE]
+  -->
+<dom-module id="board-table">
+    <style>
+        .board {
+            margin-top: 49px;
+        }
+    </style>
+
+    <template>
+        <iron-ajax id=ajax
+                   method="POST"
+                   url="/ws/issues/"
+                   handle-as="json"
+                   content-type='application/json'
+                   headers='{"Content-Type": "application/json", "Accept" : "application/json"}'
+                   on-response="issuesReceived"
+                   auto verbose>
+        </iron-ajax>
+        <iron-signals on-iron-signal-level-visibility-changed="laneVisibilityUpdated"
+                      on-iron-signal-show-details="showDetails"
+                      on-iron-signal-update-user-preferences="checkIssuesInvalidTeam"
+                      on-iron-signal-level-config-changed="checkIssuesInvalidTeam"></iron-signals>
+        <div id="lane-container" class="fit layout vertical board">
+            <template id="levels" is="dom-repeat" items="{{conf}}" as="level">
+                <template is="dom-if" if="{{showLevel(level.showLevel, lastLaneUpdate)}}">
+                    <template is="dom-if" if="{{index}}">
+                        <lane-resizer parent-lane="{{level.id}}"></lane-resizer>
+                    </template>
+                    <board-lane id="lane-{{level.id}}" metadata="{{level}}" issues="{{issues}}"></board-lane>
+                </template>
+            </template>
+        </div>
+        <issue-detail id="issuedialog"></issue-detail>
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'board-table',
+
+                properties: {
+                    aspectsFilter: {
+                        type: Object,
+                        notify: true
+                    },
+
+                    conf: {
+                        type: Object,
+                        notify: true
+                    },
+
+                    totalWeight: {
+                        type: Number,
+                        notify: true,
+                        value: 0
+                    },
+
+                    issues: {
+                        type: Array,
+                        notify: true
+                    },
+
+                    lastLaneUpdate: {
+                        type: Date,
+                        value: new Date(),
+                        notify: true
+                    }
+                },
+
+                showLevel: function(show) {
+                    return show;
+                },
+
+                laneVisibilityUpdated: function () {
+                    this.lastLaneUpdate = new Date();
+                    this.checkIssuesInvalidTeam();
+                },
+
+                showDetails: function (e) {
+                    this.$.issuedialog.opendialog(e.detail.item);
+                },
+
+                issuesReceived: function(data) {
+                    var issues = data.detail.response;
+                    for (var i in issues) {
+                        var issue = issues[i];
+                        issue.customfields = {
+                            tamanho: issue[CUSTOMFIELD.TAMANHO],
+                            classeDeServico: issue[CUSTOMFIELD.CLASSE_DE_SERVICO],
+                            impedido: issue[CUSTOMFIELD.IMPEDIDO]
+                        };
+                    }
+                    taskboard.setIssues(issues);
+                    this.issues = issues;
+                    this.checkIssuesInvalidTeam();
+                },
+
+                checkIssuesInvalidTeam: function() {
+                    var filteredIssues = this.getFilteredIssues();
+                    var issuesInvalidTeam = this.getIssuesInvalidTeam(filteredIssues);
+
+                    this.fire("iron-signal", {name:"show-error-message",
+                                              data:issuesInvalidTeam.length > 0 ?
+                                                       "Assignee must be in a team: " +
+                                                       issuesInvalidTeam.slice(0, 5).join("; ") +
+                                                       (issuesInvalidTeam.length > 5 ? " ..." : "")
+                                                   : ""});
+                },
+
+                getFilteredIssues: function() {
+                    var self = this;
+                    var filteredIssues = [];
+
+                    this.conf.forEach(function(lane) {
+                        if (!self.isLaneTeamVisible(lane))
+                            return;
+
+                        var stepsOfLane = self.getStepsOfLane(lane);
+                        stepsOfLane.forEach(function(step) {
+                            var boardStep = document.querySelector('.step-' + step.id);
+                            if (boardStep == null)
+                                boardStep = document.querySelector('board-step');
+
+                            if (boardStep == null || !taskboard.hasTeamSelected())
+                                return;
+
+                            var allIssuesStep = taskboard.getIssuesByStep(step.id);
+                            var filteredIssuesStep = boardStep.filterIssuesInvalidTeam(allIssuesStep);
+                            filteredIssues = filteredIssues.concat(filteredIssuesStep);
+                        });
+                    });
+                    return filteredIssues;
+                },
+
+                isLaneTeamVisible: function(lane) {
+                    return lane.showLevel && lane.showLaneTeam;
+                },
+
+                getStepsOfLane: function(lane) {
+                    var stepsOfLane = [];
+                    lane.stages.forEach(function(stage) {
+                        stepsOfLane = stepsOfLane.concat(stage.steps);
+                    });
+                    return stepsOfLane;
+                },
+
+                getIssuesInvalidTeam: function(issues) {
+                    var issuesInvalidTeam = [];
+                    issues.forEach(function(issue) {
+                        if (taskboard.isInvalidTeam(issue.teams))
+                            issuesInvalidTeam.push(issue.issueKey + ": " + issue.usersInvalidTeam);
+                    });
+                    return issuesInvalidTeam;
+                }
+            });
+        })();
+
+    </script>
+
+</dom-module>
