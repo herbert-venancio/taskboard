@@ -27,7 +27,7 @@ import java.util.List;
 
 public abstract class Constants {
     
-    public static final String SCHEMA_MAD = "mad";
+    public static final String SCHEMA_MAD = "taskboard";
     public static final String SCHEMA_JIRA = "jira";
     
     public static final String CUSTOMFIELD_TAMANHO = "customfield_18520";
