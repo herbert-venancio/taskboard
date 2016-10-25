@@ -36,7 +36,6 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import objective.taskboard.Constants;
 
 @Data
 @NoArgsConstructor
@@ -44,12 +43,6 @@ import objective.taskboard.Constants;
 public class Issue implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
-    private static final int TASK = Constants.ISSUETYPE_ID_TASK;
-
-    private static final int OS = Constants.ISSUETYPE_ID_OS;
-
-    private static final int BUG = Constants.ISSUETYPE_ID_BUG;
 
     private String issueKey;
 
@@ -93,8 +86,6 @@ public class Issue implements Serializable {
 
     private long priority;
 
-    private String estimativa;
-
     @JsonDeserialize(using = DateDeserializer.class)
     private Date dueDate;
 
@@ -108,11 +99,11 @@ public class Issue implements Serializable {
     private Map<String, Object> customFields;
 
     public static Issue from(String issueKey, String projectKey, String project, long issueType, String typeIconUri, String summary, long status, String subresponsavel1,
-                             String subresponsavel2, String parent, long parentType, String parentTypeIconUri, List<String> requires, String subResponsaveis, String assignee,
-                             String usersInvalidTeam, long priority, String estimativa, Date dueDate, String description, List<String> teams, String comments, Map<String, Object> customFields) {
-        String color = setIssueColor(issueType, parentType);
+            String subresponsavel2, String parent, long parentType, String parentTypeIconUri, List<String> requires, String subResponsaveis, String assignee,
+            String usersInvalidTeam, long priority, Date dueDate, String description, List<String> teams, String comments, Map<String, Object> customFields,
+            String color) {
         return new Issue(issueKey, projectKey, project, issueType, typeIconUri, summary, status, subresponsavel1, subresponsavel2,
-                parent, parentType, parentTypeIconUri, requires, false, false, false, color, subResponsaveis, assignee, usersInvalidTeam, priority, estimativa, dueDate, description, teams, comments, customFields);
+                parent, parentType, parentTypeIconUri, requires, false, false, false, color, subResponsaveis, assignee, usersInvalidTeam, priority, dueDate, description, teams, comments, customFields);
     }
 
     /**
@@ -123,18 +114,6 @@ public class Issue implements Serializable {
         issue.setIssueKey(issueKey);
         issue.setSummary(summary);
         return issue;
-    }
-
-    private static String setIssueColor(long type, long parentType) {
-        String color = "#ddf9d9";
-        if (type == OS || parentType == OS) {
-            color = "#add9fe";
-        } else if (type == TASK || parentType == TASK) {
-            color = "#fee5bc";
-        } else if (type == BUG || parentType == BUG) {
-            color = "#FF8B94";
-        }
-        return color;
     }
 
     @JsonAnyGetter

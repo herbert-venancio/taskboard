@@ -97,7 +97,29 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <template is="dom-bind" id="app">
     <taskboard-home class="fit"></taskboard-home>
 </template>
-
+<script th:inline="javascript">
+	var CUSTOMFIELD = {
+	    TAMANHO: [[${jiraCustomfields.tShirtSize.id}]],
+	    CLASSE_DE_SERVICO: [[${jiraCustomfields.classOfService.id}]],
+	    IMPEDIDO: [[${jiraCustomfields.blocked.id}]]
+	};
+	
+	var TAMANHO = {
+	    PP: [[${jiraCustomfields.tShirtSize.extraSmall}]],
+	    P: [[${jiraCustomfields.tShirtSize.small}]],
+	    M: [[${jiraCustomfields.tShirtSize.medium}]],
+	    G: [[${jiraCustomfields.tShirtSize.large}]],
+	    GG: [[${jiraCustomfields.tShirtSize.extraLarge}]]
+	};
+	
+	var ISSUETYPE_ID = {
+	    DEMANDA: [[${jiraIssuetypes.demand.id}]]
+	};
+	
+	var STATUSES_CANCELED_IDS = JSON.parse([[${jiraStatusesCanceledIds}]]);
+	var STATUSES_COMPLETED_IDS = JSON.parse([[${jiraStatusesCompletedIds}]]).concat(STATUSES_CANCELED_IDS);
+	var TRANSITION_REQUIRED_COMMENT = JSON.parse([[${jiraTransitionsWithRequiredCommentNames}]]);
+</script>
 <!-- build:js scripts/app.js -->
 <script src="/static/scripts/app.js"></script>
 <script src="/static/scripts/md5.js"></script>

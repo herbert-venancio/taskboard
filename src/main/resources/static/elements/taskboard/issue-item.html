@@ -436,7 +436,7 @@
                 },
 
                 issueCancelada: function (item) {
-                    return this.item.status == STATUS_ID.CANCELADO;
+                    return STATUSES_CANCELED_IDS.indexOf(item.status) != -1;
                 }
             });
 

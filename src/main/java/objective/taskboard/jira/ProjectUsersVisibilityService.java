@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -44,15 +43,9 @@ public class ProjectUsersVisibilityService {
 
     @Autowired
     private ProjectFilterConfigurationCachedRepository projectFilterConfiguration;
-
-    @Value("${lousa.username}")
-    private String lousaUser;
-
-    @Value("${lousa.password}")
-    private String lousaPass;
-
-    @Value("${jira.url}")
-    private String jiraUrl;
+    
+    @Autowired
+    private JiraProperties jiraProperties;
 
     @Cacheable("projectUsers")
     public Map<String, List<String>> getProjectUsers() {
@@ -64,7 +57,7 @@ public class ProjectUsersVisibilityService {
 
     private List<String> fetchUsersForProject(String projectKey) {
         return new RestTemplate().exchange(
-                        String.format("%s/rest/api/2/user/permission/search?permissions=BROWSE&projectKey=%s&username&maxResults=1000", jiraUrl, projectKey),
+                        String.format("%s/rest/api/2/user/permission/search?permissions=BROWSE&projectKey=%s&username&maxResults=1000", jiraProperties.getUrl(), projectKey),
                         HttpMethod.GET, new HttpEntity<>(getAuthorizationRequestHeader()),
                         new ParameterizedTypeReference<List<Map<String, Object>>>() {})
                 .getBody().stream()
@@ -74,7 +67,8 @@ public class ProjectUsersVisibilityService {
 
     private HttpHeaders getAuthorizationRequestHeader() {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Basic " + new String(Base64.encodeBase64((lousaUser + ":" + lousaPass).getBytes())));
+        String userAndPass = jiraProperties.getLousa().getUsername() + ":" + jiraProperties.getLousa().getPassword();
+        headers.add("Authorization", "Basic " + new String(Base64.encodeBase64((userAndPass).getBytes())));
         return headers;
     }
 }

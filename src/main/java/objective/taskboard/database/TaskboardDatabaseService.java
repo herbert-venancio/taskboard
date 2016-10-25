@@ -31,10 +31,10 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import objective.taskboard.Constants;
 import objective.taskboard.data.Issue;
 import objective.taskboard.data.LaneConfiguration;
 import objective.taskboard.domain.Lane;
+import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.repository.LaneCachedRepository;
 
 @Service
@@ -45,6 +45,9 @@ public class TaskboardDatabaseService {
 
     @Autowired
     private LaneCachedRepository laneRepository;
+    
+    @Autowired
+    private JiraProperties jiraProperties;
 
     public List<LaneConfiguration> laneConfiguration() throws SQLException {
         return getConfigurations();
@@ -75,7 +78,7 @@ public class TaskboardDatabaseService {
                 + " join " + SCHEMA_JIRA +  ".project project on project.id = source.project"
                 + " join " + SCHEMA_JIRA +  ".jiraissue issue on issue.id = il.destination"
                 + " join " + SCHEMA_JIRA +  ".project projectIssue on issue.project = projectIssue.id"
-                + " where lt.linkname = '" + Constants.LINK_DEMANDA_NAME + "'"
+                + " where lt.linkname = '" + jiraProperties.getIssuelink().getDemand().getName() + "'"
                 + " and CONCAT(CONCAT(project.pkey, '-'), source.issuenum) = '" + parent + "'", new SubtaskRowMapper());
     }
 

@@ -22,8 +22,6 @@ package objective.taskboard.jira;
  */
 
 import static com.google.common.collect.Lists.newArrayList;
-import static objective.taskboard.Constants.*;
-import static objective.taskboard.enumeration.CustomFields.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -71,6 +69,9 @@ public class JiraService extends AbstractJiraService {
 
     @Autowired
     private TaskboardDatabaseService taskboardDatabaseService;
+    
+    @Autowired
+    private JiraProperties properties;
 
     public boolean authenticate(String username, String password) {
         log.debug("⬣⬣⬣⬣⬣  authenticate");
@@ -100,7 +101,7 @@ public class JiraService extends AbstractJiraService {
             subResponsaveis.add(jiraUser);
             List<ComplexIssueInputFieldValue> issueFieldValues =
                     subResponsaveis.stream().map(subResponsavel -> ComplexIssueInputFieldValue.with("name", subResponsavel)).collect(Collectors.toList());
-            updateIssue(issueKey, new IssueInputBuilder().setFieldValue(SUB_RESPONSAVEIS, issueFieldValues));
+            updateIssue(issueKey, new IssueInputBuilder().setFieldValue(properties.getCustomfield().getCoAssignees().getId(), issueFieldValues));
         }
     }
 
@@ -131,11 +132,12 @@ public class JiraService extends AbstractJiraService {
         Iterable<Resolution> response = executeRequest(client -> client.getMetadataClient().getResolutions());
         List<Resolution> resolutions = Lists.newArrayList(response);
 
-        if (TRANSITIONS_DONE.contains(transitionName)) {
-            resolutionTransition = resolutions.stream().filter(resolution -> resolution.getName().equals(RESOLUTION_DONE)).findFirst().orElse(null);
+        if (properties.getTransitionsDoneNames().contains(transitionName)) {
+            String done = properties.getResolutions().getDone().getName();
+            resolutionTransition = resolutions.stream().filter(resolution -> resolution.getName().equals(done)).findFirst().orElse(null);
             return resolutionTransition.getName();
-        } else if(transitionName.equals(TRANSITION_CANCELAR))
-            return RESOLUTION_CANCELED;
+        } else if(properties.getTransitionsCancelNames().contains(transitionName))
+            return properties.getResolutions().getCanceled().getName();
         return null;
     }
 
@@ -191,7 +193,7 @@ public class JiraService extends AbstractJiraService {
 
     private Set<String> getSubResponsaveis(String key) throws JSONException {
         Set<String> subResponsaveis = new HashSet<>();
-        final IssueField fieldSubResponsaveis = getIssueByKey(key).getField(SUB_RESPONSAVEIS);
+        final IssueField fieldSubResponsaveis = getIssueByKey(key).getField(properties.getCustomfield().getCoAssignees().getId());
 
         if (fieldSubResponsaveis != null && fieldSubResponsaveis.getValue() != null) {
             final JSONArray subResponsaveisJson = (JSONArray) fieldSubResponsaveis.getValue();
@@ -224,7 +226,7 @@ public class JiraService extends AbstractJiraService {
     public List<objective.taskboard.data.Issue> getIssueSubTasks(String issueKey) {
         Issue issue = getIssueByKey(issueKey);
         List<objective.taskboard.data.Issue> subs = new ArrayList<>();
-        if (issue.getIssueType().getName().equalsIgnoreCase(ISSUETYPE_DEMANDA))
+        if (issue.getIssueType().getId() == properties.getIssuetype().getDemand().getId())
             subs.addAll(taskboardDatabaseService.getSubtasksDemanda(issue.getKey()));
         else
             subs.addAll(taskboardDatabaseService.getSubtasks(issue.getKey()));
@@ -235,8 +237,11 @@ public class JiraService extends AbstractJiraService {
         log.debug("⬣⬣⬣⬣⬣  searchIssues");
         return executeWrappedRequest(client -> {
             Set<String> fields = Sets.newHashSet("parent", "project", "status", "created", "updated", "issuelinks",
-                    "issuetype", "summary", "description", "name", "assignee", "reporter", "priority", CLASSE_DE_SERVICO,
-                    SUB_RESPONSAVEIS, ESTIMATIVA, TAMANHO, IMPEDIDO, AMBIENTE_CLIENTE, DETECTADO_POR, ASSUNTO_COPEL);
+                    "issuetype", "summary", "description", "name", "assignee", "reporter", "priority",
+                    properties.getCustomfield().getClassOfService().getId(),
+                    properties.getCustomfield().getCoAssignees().getId(),
+                    properties.getCustomfield().getTShirtSize().getId(),
+                    properties.getCustomfield().getBlocked().getId());
             try {
                 SearchRestClient search = client.getSearchClient();
 
@@ -278,8 +283,9 @@ public class JiraService extends AbstractJiraService {
 
     private void setImpeded(String issueKey, boolean impeded) {
         log.debug("⬣⬣⬣⬣⬣  setImpeded");
-        ComplexIssueInputFieldValue value = new ComplexIssueInputFieldValue(Collections.singletonMap("id", impeded ? IMPEDED_ID_OPTION : null));
-        updateIssue(issueKey, new IssueInputBuilder().setFieldValue(IMPEDIDO, Collections.singletonList(value)));
+        int yesOptionId = properties.getCustomfield().getBlocked().getYesOptionId();
+        ComplexIssueInputFieldValue value = new ComplexIssueInputFieldValue(Collections.singletonMap("id", impeded ? yesOptionId : null));
+        updateIssue(issueKey, new IssueInputBuilder().setFieldValue(properties.getCustomfield().getBlocked().getId(), Collections.singletonList(value)));
     }
 
     private void updateIssue(String issueKey, IssueInputBuilder changes) {

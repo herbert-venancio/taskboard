@@ -30,6 +30,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import objective.taskboard.data.User;
+import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraService;
 
 @Controller
@@ -38,16 +39,24 @@ public class HomeController {
     @Autowired
     private JiraService jiraService;
 
+    @Autowired
+    private JiraProperties jiraPropeties;
+
     @RequestMapping("/")
     public String home(Model model) {
         User user = jiraService.getUser();
         model.addAttribute("user", serialize(user));
+        model.addAttribute("jiraCustomfields", jiraPropeties.getCustomfield());
+        model.addAttribute("jiraIssuetypes", jiraPropeties.getIssuetype());
+        model.addAttribute("jiraStatusesCompletedIds", serialize(jiraPropeties.getStatusesCompletedIds()));
+        model.addAttribute("jiraStatusesCanceledIds", serialize(jiraPropeties.getStatusesCanceledIds()));
+        model.addAttribute("jiraTransitionsWithRequiredCommentNames", serialize(jiraPropeties.getTransitionsWithRequiredCommentNames()));
         return "index";
     }
 
-    private String serialize(User user) {
+    private String serialize(Object obj) {
         try {
-            return new ObjectMapper().writeValueAsString(user);
+            return new ObjectMapper().writeValueAsString(obj);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

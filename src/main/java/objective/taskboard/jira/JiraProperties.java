@@ -22,14 +22,152 @@ package objective.taskboard.jira;
  */
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import java.util.List;
+
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
+import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 @Data
-@Component
-@ConfigurationProperties("jira")
+@ConfigurationProperties(prefix = "jira")
 public class JiraProperties {
-
+    
+    @NotNull
+    @NotEmpty
     private String url;
-
+    @NotNull
+    private Lousa lousa;
+    @NotNull
+    private CustomField customfield;
+    @NotNull
+    private IssueLink issuelink;
+    @NotNull
+    private IssueType issuetype;
+    @NotNull
+    @NotEmpty
+    private List<Integer> statusesCompletedIds;
+    @NotNull
+    @NotEmpty
+    private List<Integer> statusesCanceledIds;
+    @NotNull
+    @NotEmpty
+    private List<String> transitionsWithRequiredCommentNames;
+    @NotNull
+    @NotEmpty
+    private List<String> transitionsDoneNames;
+    @NotNull
+    @NotEmpty
+    private List<String> transitionsCancelNames;
+    @NotNull
+    private Resolutions resolutions;
+    
+    @Data 
+    public static class Lousa {
+        @NotNull
+        @NotEmpty
+        private String username;
+        @NotNull
+        @NotEmpty
+        private String password;
+    }
+    
+    @Data
+    public static class CustomField {
+        @NotNull
+        private TShirtSize tShirtSize; 
+        @NotNull
+        private CustomFieldDetails classOfService; 
+        @NotNull
+        private Blocked blocked;
+        @NotNull
+        private CustomFieldDetails coAssignees;
+        
+        @Data
+        public static class CustomFieldDetails {
+            @NotNull
+            @NotEmpty
+            private String id; 
+        }
+        
+        @Data
+        @EqualsAndHashCode(callSuper = true)
+        public static class TShirtSize extends CustomFieldDetails {
+            @NotNull
+            @NotEmpty
+            private String extraSmall = "XS"; 
+            @NotNull
+            @NotEmpty
+            private String small = "S"; 
+            @NotNull
+            @NotEmpty
+            private String medium = "M";
+            @NotNull
+            @NotEmpty
+            private String large = "L";
+            @NotNull
+            @NotEmpty
+            private String extraLarge = "XL";
+        }
+        
+        @Data
+        @EqualsAndHashCode(callSuper = true)
+        public static class Blocked extends CustomFieldDetails {
+            @NotNull
+            @Size(min = 1)
+            private int yesOptionId;
+        }
+    }
+    
+    @Data
+    public static class IssueLink {
+        @NotNull
+        private LinkDetails requirement;
+        @NotNull
+        private LinkDetails demand;
+        
+        @Data
+        public static class LinkDetails {
+            @NotNull
+            @NotEmpty
+            private String name;
+        }
+    }
+    
+    @Data
+    public static class IssueType {
+        @NotNull
+        private IssueTypeDetails task;
+        @NotNull
+        private IssueTypeDetails os;
+        @NotNull
+        private IssueTypeDetails bug;
+        @NotNull
+        private IssueTypeDetails demand;
+        
+        @Data
+        public static class IssueTypeDetails {
+            @NotNull
+            @Size(min = 1)
+            private int id;
+        }
+    }
+    
+    @Data
+    public static class Resolutions {
+        @NotNull
+        private Resolution done;
+        @NotNull
+        private Resolution canceled;
+        
+        @Data
+        public static class Resolution {
+            @NotNull
+            @NotEmpty
+            private String name;
+        }
+    }
 }

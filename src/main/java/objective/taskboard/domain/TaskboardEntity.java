@@ -1,5 +1,7 @@
 package objective.taskboard.domain;
 
+import lombok.Data;
+
 /*-
  * [LICENSE]
  * Taskboard
@@ -27,6 +29,7 @@ import javax.persistence.*;
 
 //import static javax.persistence.GenerationType.SEQUENCE;
 
+@Data
 @MappedSuperclass
 public abstract class TaskboardEntity {
 

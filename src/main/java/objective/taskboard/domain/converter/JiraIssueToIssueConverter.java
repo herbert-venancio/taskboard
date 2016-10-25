@@ -22,7 +22,6 @@ package objective.taskboard.domain.converter;
  */
 
 import static com.google.common.collect.Lists.newArrayList;
-import static objective.taskboard.enumeration.CustomFields.*;
 
 import java.util.List;
 import java.util.Map;
@@ -47,15 +46,15 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import lombok.extern.slf4j.Slf4j;
-import objective.taskboard.Constants;
 import objective.taskboard.data.Issue;
 import objective.taskboard.data.Team;
 import objective.taskboard.data.UserTeam;
+import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.domain.ParentIssueLink;
 import objective.taskboard.filterConfiguration.TeamFilterConfigurationService;
+import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraService;
 import objective.taskboard.repository.ParentIssueLinkRepository;
-import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.repository.UserTeamCachedRepository;
 
 @Slf4j
@@ -68,9 +67,6 @@ public class JiraIssueToIssueConverter {
     private UserTeamCachedRepository userTeamRepository;
 
     @Autowired
-    private TeamCachedRepository teamRepository;
-
-    @Autowired
     private TeamFilterConfigurationService teamFilterConfigurationService;
 
     @Autowired
@@ -78,7 +74,13 @@ public class JiraIssueToIssueConverter {
 
     @Autowired
     private JiraService jiraService;
-
+    
+    @Autowired
+    private JiraProperties jiraProperties;
+    
+    @Autowired
+    private IssueColorService issueColorService;
+    
     private List<String> parentIssueLinks;
     private List<com.atlassian.jira.rest.client.api.domain.Issue> issuesList;
     private List<String> usersInvalidTeam;
@@ -108,13 +110,9 @@ public class JiraIssueToIssueConverter {
 
         Map<String, Object> customFields = Maps.newHashMap();
 
-        customFields.put(TAMANHO, getTamanho(jiraIssue));
-        customFields.put(CLASSE_DE_SERVICO, getClasseDeServico(jiraIssue));
-        customFields.put(TEAM, getTeam(jiraIssue.getAssignee()));
-        customFields.put(IMPEDIDO, getImpedido(jiraIssue));
-        customFields.put(AMBIENTE_CLIENTE, getAmbienteCliente(jiraIssue));
-        customFields.put(DETECTADO_POR, getDetectadoPor(jiraIssue));
-        customFields.put(ASSUNTO_COPEL, getAssuntoCopel(jiraIssue));
+        customFields.put(jiraProperties.getCustomfield().getTShirtSize().getId(), getTamanho(jiraIssue));
+        customFields.put(jiraProperties.getCustomfield().getClassOfService().getId(), getClasseDeServico(jiraIssue));
+        customFields.put(jiraProperties.getCustomfield().getBlocked().getId(), getImpedido(jiraIssue));
 
         List<String> teamGroups = getTeamGroups(jiraIssue);
 
@@ -122,40 +120,34 @@ public class JiraIssueToIssueConverter {
                                .distinct()
                                .collect(Collectors.toList());
 
+        long parentTypeId = getParentType(jiraIssue);
+        Long issueTypeId = jiraIssue.getIssueType().getId();
+        String color = issueColorService.getColor(issueTypeId, parentTypeId);
         return Issue.from(
                 jiraIssue.getKey(),
                 jiraIssue.getProject().getKey(),
                 jiraIssue.getProject().getName(),
-                jiraIssue.getIssueType().getId(),
+                issueTypeId,
                 jiraIssue.getIssueType().getIconUri().toASCIIString(),
                 jiraIssue.getSummary() != null ? jiraIssue.getSummary() : "",
                 jiraIssue.getStatus().getId(),
                 subResponsavel1,
                 subResponsavel2,
                 getParentKey(jiraIssue),
-                getParentType(jiraIssue),
+                parentTypeId,
                 getParentTypeIconUri(jiraIssue),
                 getRequired(jiraIssue),
                 String.join(",", nameSubResponsaveis),
                 jiraIssue.getAssignee() != null ? jiraIssue.getAssignee().getName() : "",
                 String.join(",", usersInvalidTeam),
                 jiraIssue.getPriority() != null ? jiraIssue.getPriority().getId() : 0l,
-                getEstimativa(jiraIssue),
                 jiraIssue.getDueDate() != null ? jiraIssue.getDueDate().toDate() : null,
                 jiraIssue.getDescription() != null ? jiraIssue.getDescription() : "",
                 teamGroups,
                 getComments(jiraIssue),
-                customFields
+                customFields,
+                color
         );
-    }
-
-    private Long getTeam(User assignee) {
-        if (assignee == null)
-            return 0L;
-
-        UserTeam user = userTeamRepository.findByUserName(assignee.getName());
-
-        return user != null && !Strings.isNullOrEmpty(user.getTeam()) ? teamRepository.findByName(user.getTeam()).getId() : 0L;
     }
 
     private long getParentType(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
@@ -221,13 +213,13 @@ public class JiraIssueToIssueConverter {
 
     private List<String> getRequired(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
         return Lists.newArrayList(jiraIssue.getIssueLinks()).stream()
-                .filter(JiraIssueToIssueConverter::isRequiresLink)
+                .filter(this::isRequiresLink)
                 .map(link -> link.getTargetIssueKey())
                 .collect(Collectors.toList());
     }
 
-    private static boolean isRequiresLink(final IssueLink link) {
-         return link.getIssueLinkType().getName().equals(Constants.LINK_REQUIREMENT_NAME)
+    private boolean isRequiresLink(final IssueLink link) {
+         return link.getIssueLinkType().getName().equals(jiraProperties.getIssuelink().getRequirement().getName())
              && link.getIssueLinkType().getDirection() == Direction.OUTBOUND;
     }
 
@@ -240,7 +232,7 @@ public class JiraIssueToIssueConverter {
     }
 
     private String getTamanho(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        IssueField field = jiraIssue.getField(TAMANHO);
+        IssueField field = jiraIssue.getField(jiraProperties.getCustomfield().getTShirtSize().getId());
 
         if (field == null)
             return "";
@@ -256,7 +248,7 @@ public class JiraIssueToIssueConverter {
     }
 
     private String getImpedido(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        IssueField field = jiraIssue.getField(IMPEDIDO);
+        IssueField field = jiraIssue.getField(jiraProperties.getCustomfield().getBlocked().getId());
 
         if (field == null) return "";
 
@@ -270,45 +262,8 @@ public class JiraIssueToIssueConverter {
         }
     }
 
-    private String getAmbienteCliente(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        IssueField field = jiraIssue.getField(AMBIENTE_CLIENTE);
-
-        if (field != null)
-            return (field.getValue() != null) ? (field.getValue()).toString() : "";
-        else
-            return "";
-    }
-
-    private String getDetectadoPor(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        IssueField field = jiraIssue.getField(DETECTADO_POR);
-
-        if (field != null)
-            return (field.getValue() != null) ? (field.getValue()).toString() : "";
-        else
-            return "";
-    }
-
-    private String getAssuntoCopel(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        IssueField field = jiraIssue.getField(ASSUNTO_COPEL);
-
-        if (field != null)
-            return (field.getValue() != null) ? (field.getValue()).toString() : "";
-        else
-            return "";
-    }
-
-    private String getEstimativa(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        IssueField estimativa = jiraIssue.getField(ESTIMATIVA);
-
-        if (estimativa != null) {
-            return (estimativa.getValue() != null) ? ((Double) estimativa.getValue()).toString() : "";
-        } else {
-            return "";
-        }
-    }
-
     private String getClasseDeServico(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        IssueField jiraField = jiraIssue.getField(CLASSE_DE_SERVICO);
+        IssueField jiraField = jiraIssue.getField(jiraProperties.getCustomfield().getClassOfService().getId());
 
         if (jiraField == null)
             return "";
@@ -324,7 +279,7 @@ public class JiraIssueToIssueConverter {
     }
 
     private List<String> getSubResponsaveisAvatar(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        IssueField field = jiraIssue.getField(SUB_RESPONSAVEIS);
+        IssueField field = jiraIssue.getField(jiraProperties.getCustomfield().getCoAssignees().getId());
         List<String> names = Lists.newArrayList();
 
         if (field == null)
@@ -346,7 +301,7 @@ public class JiraIssueToIssueConverter {
     }
 
     private List<String> getSubResponsaveisName(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        IssueField field = jiraIssue.getField(SUB_RESPONSAVEIS);
+        IssueField field = jiraIssue.getField(jiraProperties.getCustomfield().getCoAssignees().getId());
         List<String> names = Lists.newArrayList();
 
         if (field == null)

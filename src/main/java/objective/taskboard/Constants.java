@@ -21,41 +21,11 @@ package objective.taskboard;
  * [/LICENSE]
  */
 
-import static com.google.common.collect.Lists.newArrayList;
-
-import java.util.List;
-
 public abstract class Constants {
     
     public static final String SCHEMA_MAD = "taskboard";
     public static final String SCHEMA_JIRA = "jira";
-    
-    public static final String CUSTOMFIELD_TAMANHO = "customfield_18520";
-    public static final String CUSTOMFIELD_CLASSE_DE_SERVICO = "customfield_18522";
-    public static final String CUSTOMFIELD_TEAM = "customfield_10463";
-    public static final String CUSTOMFIELD_IMPEDIDO = "customfield_18521";
-    public static final String CUSTOMFIELD_SUB_RESPONSAVEIS = "customfield_18523";
-    public static final String CUSTOMFIELD_AMBIENTE_CLIENTE = "customfield_10013";
-    public static final String CUSTOMFIELD_DETECTADO_POR = "customfield_10534";
-    public static final String CUSTOMFIELD_ASSUNTO_COPEL = "customfield_10290";
-    public static final String CUSTOMFIELD_ESTIMATIVA = "customfield_10170";
-
-    public static final String LINK_REQUIREMENT_NAME = "Depends";
-    public static final String LINK_DEMANDA_NAME = "Demand";
-
-    public static final int ISSUETYPE_ID_TASK = 9999999;
-    public static final int ISSUETYPE_ID_OS = 11701;
-    public static final int ISSUETYPE_ID_BUG = 1;
-
-    public static final String ISSUETYPE_DEMANDA = "DEMAND";
 
     public static final int STATUS_CATEGORY_ID_IN_PROGRESS = 4;
 
-    public static final List<String> TRANSITIONS_DONE = newArrayList("Done");
-    public static final String TRANSITION_CANCELAR = "Won't Do";
-
-    public static final String RESOLUTION_DONE = "Done";
-    public static final String RESOLUTION_CANCELED = "Won't Do";
-
-    public static final String IMPEDED_ID_OPTION = "19315";
 }

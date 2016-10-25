@@ -18,31 +18,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
-var CUSTOMFIELD = {
-    TAMANHO: "customfield_18520",
-    CLASSE_DE_SERVICO: "customfield_18522",
-    IMPEDIDO: "customfield_18521"
-};
-
-var TAMANHO = {
-    PP: 'XS',
-    P: 'S',
-    M: 'M',
-    G: 'L',
-    GG: 'XL'
-};
-
-var ISSUETYPE_ID = {
-    DEMANDA: 11700
-};
-
-var STATUS_ID = {
-    DONE: 10118,
-    FECHADO: 10118,
-    CANCELADO: 9999999
-};
-
-var TRANSITION_REQUIRED_COMMENT = [];
 
 function Taskboard() {
     var self = this;

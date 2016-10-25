@@ -648,7 +648,7 @@
                                     fieldsTransitions.push(self.transitions[t].fields[f]);
                                 }
                             }
-                            if(TRANSITION_REQUIRED_COMMENT.includes(transitionName))
+                            if(TRANSITION_REQUIRED_COMMENT.indexOf(transitionName) != -1)
 							   self.showFieldsRequiredDialog = true;
 						    return fieldsTransitions;
 						}
@@ -804,13 +804,11 @@
                 },
 
                 issueFechada: function (item) {
-                    return item.status == STATUS_ID.DONE ||
-                           item.status == STATUS_ID.FECHADO ||
-                           item.status == STATUS_ID.CANCELADO;
+                    return STATUSES_COMPLETED_IDS.indexOf(item.status) != -1;
                 },
 
                 issueCancelada: function (item) {
-                    return this.item.status == STATUS_ID.CANCELADO;
+                    return STATUSES_CANCELED_IDS.indexOf(item.status) != -1;
                 },
 
                 issueImpedida: function (item) {
