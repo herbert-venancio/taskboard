@@ -22,8 +22,8 @@ package objective.taskboard.domain;
  */
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -64,7 +64,7 @@ public class Lane extends TaskboardEntity implements Serializable {
     private List<Stage> stages;
 
     @OneToMany(mappedBy = "lane", fetch = FetchType.EAGER)
-    private Collection<Rule> rules;
+    private Set<Rule> rules;
 
 
 }
