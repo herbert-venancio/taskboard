@@ -46,12 +46,8 @@
             width: 47%;
         }
 
-        .card-hearder-custom {
-            display: block;
-            width: 100%;
-        }
-
-        .card-header-custom div {
+        .card-header-custom {
+            padding-bottom: 15px;
             width: 100%;
             font-size: 24px;
             text-align: center;
@@ -202,7 +198,7 @@
             display: flex;
         }
 
-        .icon-impedida {
+        .icon-blocked {
             color: #F78181;
             bottom: 3px;
             -webkit-filter: drop-shadow(1px 1px 1px #616161);
@@ -235,6 +231,16 @@
             padding: 0;
             margin: 0;
         }
+
+        textarea {
+            height: 30px;
+            width: 470px;
+            border: none;
+            background: #EEE;
+            margin-top: 7px;
+            max-width: 470px;
+            max-height: 400px;
+        }
     </style>
 
     <template>
@@ -266,27 +272,25 @@
         <paper-dialog id="modal" entry-animation="scale-up-animation" exit-animation="fade-out-animation" with-backdrop
                       modal>
             <paper-card class="card-custom">
-                <div class="card-header-custom" style="padding-bottom: 15px;">
-                    <div>
-                        <paper-button class="headerLink" on-tap="openJira">{{item.issueKey}}</paper-button>
-                        <div class="buttons">
-                            <paper-button class="buttonClose" on-tap="clearProperties" dialog-confirm autofocus>
-                                <iron-icon icon="clear"></iron-icon>
-                            </paper-button>
-                        </div>
-                        <template is="dom-if" if="{{issueImpedida(item)}}">
-                            <div>
-                                <iron-icon class="icon-impedida" icon="icons:block"></iron-icon>
-                                <span class="info">Blocked</span>
-                            </div>
-                        </template>
-                        <template is="dom-if" if="{{issueCancelada(item)}}">
-                            <div>
-                                <iron-icon class="icon-cancelada" icon="warning"></iron-icon>
-                                <span class="info">Canceled</span>
-                            </div>
-                        </template>
+                <div class="card-header-custom">
+                    <paper-button class="headerLink" on-tap="openJira">{{item.issueKey}}</paper-button>
+                    <div class="buttons">
+                        <paper-button class="buttonClose" on-tap="clearProperties" dialog-confirm autofocus>
+                            <iron-icon icon="clear"></iron-icon>
+                        </paper-button>
                     </div>
+                    <template is="dom-if" if="{{issueBlocked(item)}}">
+                        <div>
+                            <iron-icon class="icon-blocked" icon="icons:block"></iron-icon>
+                            <span class="info">Blocked</span>
+                        </div>
+                    </template>
+                    <template is="dom-if" if="{{issueCancelada(item)}}">
+                        <div>
+                            <iron-icon class="icon-cancelada" icon="warning"></iron-icon>
+                            <span class="info">Canceled</span>
+                        </div>
+                    </template>
                 </div>
                 <div class="content-box">
                     <div class="content-row">
@@ -325,16 +329,26 @@
                         <div class="column-block half-column">
                             <div class="sub-header">Size</div>
                             <div class="sub-content">
-                                <span>{{item.customfields.tamanho}}</span> <!-- Tamanho -->
+                                <span>{{item.customfields.tamanho}}</span>
                             </div>
                         </div>
                         <div class="column-block half-column">
                             <div class="sub-header">Class of Service</div>
                             <div class="sub-content">
-                                <span>{{item.customfields.classeDeServico}}</span> <!-- Classe de Servico -->
+                                <span>{{item.customfields.classeDeServico}}</span>
                             </div>
                         </div>
                     </div>
+                    <template is="dom-if" if="{{issueBlocked(item)}}">
+                        <div class="content-row">
+                            <div class="column-block">
+                                <div class="sub-header">Last Block Reason</div>
+                                <div class="sub-content">
+                                    <textarea disabled>{{item.customfields.lastBlockReason}}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
                     <div class="content-row">
                         <div class="column-block">
                             <template is="dom-if" if="{{shouldShowSubtasks}}">
@@ -397,13 +411,13 @@
                                     </template>
                                 </template>
 
-                                <template is="dom-if" if="{{canImpede}}">
-                                    <paper-button id="impedeButton" raised class="colorful" on-tap="impede"
+                                <template is="dom-if" if="{{canBlock}}">
+                                    <paper-button id="blockButton" raised class="colorful" on-tap="block"
                                                   title="Block">Block
                                     </paper-button>
                                 </template>
-                                <template is="dom-if" if="{{canUnimpede}}">
-                                    <paper-button id="unimpedeButton" raised class="colorful" on-tap="unimpede"
+                                <template is="dom-if" if="{{canUnblock}}">
+                                    <paper-button id="unblockButton" raised class="colorful" on-tap="unblock"
                                                   title="Unblock">Unblock
                                     </paper-button>
                                 </template>
@@ -425,6 +439,7 @@
         </paper-dialog>
         <transition-required-modal id="transitionRequiredDialog"></transition-required-modal>
         <confirm-modal id="confirmDialog"></confirm-modal>
+        <fields-required-modal id="fieldsRequiredDialog"></fields-required-modal>
         <issue-new-task id="dialogNewTask" item="{{item}}"></issue-new-task>
     </template>
     <script>
@@ -491,13 +506,13 @@
                         value: null
                     },
 
-                    canImpede: {
+                    canBlock: {
                         type: Boolean,
                         value: false,
                         notify: true
                     },
 
-                    canUnimpede: {
+                    canUnblock: {
                         type: Boolean,
                         value: false,
                         notify: true
@@ -591,20 +606,56 @@
                     });
                 },
 
-                impede: function () {
-                    this.impedeIssue(true);
-                },
-
-                unimpede: function () {
-                    this.impedeIssue(false);
-                },
-
-                impedeIssue: function (impede) {
+                block: function () {
                     var self = this;
-                    var url = impede ? '/ws/issues/impede-task/' : '/ws/issues/unimpede-task/';
+                    self.showSpinnerTransitions();
+                    var callback = function(issue) {
+                        self.showSpinnerTransitions();
+                        $.ajax({
+                            url: '/ws/issues/block-task/' + issue.issueKey,
+                            type: 'post',
+                            dataType: 'json',
+                            contentType: 'application/json',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            },
+                            data: issue.customFields[CUSTOMFIELD.LAST_BLOCK_REASON],
+                            success: function () {
+                                location.reload(true);
+                            },
+                            error: function (jqXhr, textStatus, errorThrown) {
+                                console.error(errorThrown);
+                                self.errorMessage = jqXhr.responseJSON.message;
+                                self.hideSpinnerTransitions();
+                            },
+                            async: true
+                        });
+                    };
+
+                    $.ajax({
+                        url: '/ws/field/' + CUSTOMFIELD.LAST_BLOCK_REASON,
+                        type: 'get',
+                        success: function(data) {
+                            var fields = [{id: CUSTOMFIELD.LAST_BLOCK_REASON,
+                                           name: data.name,
+                                           type: TYPE_FIELD.TEXTAREA}];
+                            self.$.fieldsRequiredDialog.openDialog(fields, "Block", self.item, callback);
+                            self.hideSpinnerTransitions();
+                        },
+                        error: function(jqXhr, textStatus, errorThrown) {
+                            console.error(errorThrown);
+                            self.errorMessage = jqXhr.responseJSON.message;
+                            self.hideSpinnerTransitions();
+                        }
+                    });
+                },
+
+                unblock: function () {
+                    var self = this;
                     self.showSpinnerTransitions();
                     $.ajax({
-                        url: url + self.item.issueKey,
+                        url: '/ws/issues/unblock-task/' + self.item.issueKey,
                         type: 'get',
                         success: function () {
                             location.reload(true);
@@ -629,12 +680,12 @@
 							self.doResolution(transitionName, issue);
 						else
 							self.doTransition(transitionName, issue);
-						fieldsTransitions = [];
 					}
 					if(self.showFieldsRequiredDialog)
 						self.$.transitionRequiredDialog.openDialog(fieldsTransitions, transitionName, issue, callback);
 					else
 						self.$.confirmDialog.openDialog("Confirmation", text, callback);
+                    self.showFieldsRequiredDialog = false;
                 },
 
                 getFieldsTransitions: function(transitionName){
@@ -736,8 +787,8 @@
                     this.$.ajaxTransitions.generateRequest();
                     this.$.ajaxSubtasks.generateRequest();
                     this.$.modal.toggle();
-                    this.canImpede = !this.issueImpedida(item) && !this.issueFechada(item);
-                    this.canUnimpede = this.issueImpedida(item) && !this.issueFechada(item);
+                    this.canBlock = !this.issueBlocked(item) && !this.issueFechada(item);
+                    this.canUnblock = this.issueBlocked(item) && !this.issueFechada(item);
                 },
 
                 listaResponsaveis: function (item) {
@@ -811,7 +862,7 @@
                     return STATUSES_CANCELED_IDS.indexOf(item.status) != -1;
                 },
 
-                issueImpedida: function (item) {
+                issueBlocked: function (item) {
                     return this.item.customfields.impedido;
                 }
 

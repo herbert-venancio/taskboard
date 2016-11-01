@@ -202,15 +202,15 @@ public class IssueController {
         return aspectsItem;
     }
 
-    @RequestMapping("impede-task/{issue}")
-    public void impedeTask(@PathVariable("issue") String issue) {
-        jiraBean.impede(issue);
-        issueBufferService.updateIssueBuffer(issue);
+    @RequestMapping(path = "block-task/{issue}", method = RequestMethod.POST)
+    public Issue blockTask(@PathVariable("issue") String issue, @RequestBody String lastBlockReason) {
+        jiraBean.block(issue, lastBlockReason);
+        return issueBufferService.updateIssueBuffer(issue);
     }
 
-    @RequestMapping("unimpede-task/{issue}")
-    public void unimpedeTask(@PathVariable("issue") String issue) {
-        jiraBean.unimpede(issue);
+    @RequestMapping("unblock-task/{issue}")
+    public void unblockTask(@PathVariable("issue") String issue) {
+        jiraBean.unblock(issue);
         issueBufferService.updateIssueBuffer(issue);
     }
 

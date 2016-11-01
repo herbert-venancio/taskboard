@@ -248,7 +248,7 @@
             <template is="dom-if" if="{{issueImpedida(item)}}">
                 <div class="impedida">
                     <iron-icon id="issueImpedidaIcon" class="iconImpedidaCancelada" icon="av:not-interested"
-                               title="Blocked issue"></iron-icon>
+                               title="Blocked issue. Last Block Reason: {{item.customfields.lastBlockReason}}"></iron-icon>
                 </div>
             </template>
 

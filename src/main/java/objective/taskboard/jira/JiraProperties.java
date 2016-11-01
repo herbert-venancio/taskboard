@@ -84,6 +84,8 @@ public class JiraProperties {
         @NotNull
         private Blocked blocked;
         @NotNull
+        private CustomFieldDetails lastBlockReason;
+        @NotNull
         private CustomFieldDetails coAssignees;
         
         @Data
@@ -118,7 +120,7 @@ public class JiraProperties {
         public static class Blocked extends CustomFieldDetails {
             @NotNull
             @Size(min = 1)
-            private int yesOptionId;
+            private Integer yesOptionId;
         }
     }
     

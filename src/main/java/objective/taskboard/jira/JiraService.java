@@ -241,7 +241,8 @@ public class JiraService extends AbstractJiraService {
                     properties.getCustomfield().getClassOfService().getId(),
                     properties.getCustomfield().getCoAssignees().getId(),
                     properties.getCustomfield().getTShirtSize().getId(),
-                    properties.getCustomfield().getBlocked().getId());
+                    properties.getCustomfield().getBlocked().getId(),
+                    properties.getCustomfield().getLastBlockReason().getId());
             try {
                 SearchRestClient search = client.getSearchClient();
 
@@ -273,19 +274,21 @@ public class JiraService extends AbstractJiraService {
         });
     }
 
-    public void impede(String issueKey) {
-        setImpeded(issueKey, true);
+    public void block(String issueKey, String lastBlockReason) {
+        setBlocked(issueKey, true, lastBlockReason);
     }
 
-    public void unimpede(String issueKey) {
-        setImpeded(issueKey, false);
+    public void unblock(String issueKey) {
+        setBlocked(issueKey, false, "");
     }
 
-    private void setImpeded(String issueKey, boolean impeded) {
-        log.debug("⬣⬣⬣⬣⬣  setImpeded");
-        int yesOptionId = properties.getCustomfield().getBlocked().getYesOptionId();
-        ComplexIssueInputFieldValue value = new ComplexIssueInputFieldValue(Collections.singletonMap("id", impeded ? yesOptionId : null));
-        updateIssue(issueKey, new IssueInputBuilder().setFieldValue(properties.getCustomfield().getBlocked().getId(), Collections.singletonList(value)));
+    private void setBlocked(String issueKey, boolean blocked, String lastBlockReason) {
+        log.debug("⬣⬣⬣⬣⬣  setBlocked");
+        String yesOptionId = properties.getCustomfield().getBlocked().getYesOptionId().toString();
+        ComplexIssueInputFieldValue value = new ComplexIssueInputFieldValue(Collections.singletonMap("id", blocked ? yesOptionId : null));
+        updateIssue(issueKey, new IssueInputBuilder()
+                                    .setFieldValue(properties.getCustomfield().getBlocked().getId(), Collections.singletonList(value))
+                                    .setFieldValue(properties.getCustomfield().getLastBlockReason().getId(), lastBlockReason));
     }
 
     private void updateIssue(String issueKey, IssueInputBuilder changes) {

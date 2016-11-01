@@ -48,6 +48,13 @@
             }
         }
 
+        .card-header-custom {
+            padding-bottom: 15px;
+            width: 100%;
+            font-size: 24px;
+            text-align: center;
+        }
+
         .content-box {
             background-color: #eee;
             width: auto;
@@ -74,10 +81,6 @@
             min-height: auto;
         }
 
-        .half-column {
-            width: 47%;
-        }
-
         .half-button {
             width: 100%;
             padding: 10px;
@@ -86,35 +89,23 @@
         .input-fields {
             border-radius: 3px;
             height: 30px;
-            width: 340px;
+            width: 470px;
             border: none;
             background: #E6E3E3;
             box-shadow: inset 1px 1px 1px #ABABAF;
             margin-top: 7px;
         }
 
-        .input-conteiner {
-            border-radius: 3px;
-            height: auto;
-            width: 314px;
-            border: none;
-            background: #E6E3E3;
-            box-shadow: inset 1px 1px 1px #ABABAF;
-            border-radius: 3px 0px 0px 3px;
-            margin-top: 7px;
-            display: flex;
-            min-height: 30px;
-        }
-
-        .card-hearder-custom {
-            display: block;
-            width: 100%;
+        textarea {
+            max-width: 470px;
+            max-height: 400px;
         }
 
         .title {
             font-size: 24px;
             display: inline;
             color: #3F51B5;
+            font-weight: bold;
         }
 
         .buttonClose {
@@ -144,26 +135,6 @@
             text-align: left;
         }
 
-        .button-selector {
-            padding: 0;
-            margin-top: 7px;
-            color: #bdbdbd;
-        }
-
-        .button-icon-selector {
-            height: 32px;
-            width: 25px;
-            padding: 0;
-            padding-top: 9px;
-            background: #E6E3E3;
-            border-radius: 0px 5px 5px 0px;
-            box-shadow: inset 0px 1px 0px #ABABAF;
-        }
-
-        .inputSelector {
-            display: inline-flex;
-        }
-
         paper-menu {
             right: 43.5%;
             margin-top: 40px;
@@ -178,9 +149,9 @@
     <template>
         <paper-dialog id="fieldsModal" entry-animation="scale-up-animation" exit-animation="fade-out-animation" with-backdrop modal>
              <paper-card class="card-custom">
-                <div class="card-header-custom" style="padding-bottom: 15px;">
+                <div class="card-header-custom">
                     <div class="title">
-                        <span>{{transitionName}}</span>
+                        {{transitionName}}
                     </div>
                     <div class="buttons">
                         <paper-button class="buttonClose" on-tap="clearProperties" >
@@ -192,11 +163,17 @@
                     <template is="dom-if" if="{{hasRecords(fields)}}">
                          <template is="dom-repeat" items="{{fields}}" as="field">
                                <div class="content-row">
-                                    <div class="column-block half-column">
+                                    <div class="column-block">
                                         <span class="required">* </span>
                                         <span class="sub-header">[[field.name]]: </span>
+                                        <br/>
                                         <template is="dom-if" if="{{!field.showOptions}}">
-                                             <input is="iron-input" id="{{field.name}}"  class="input-fields" type="text" required value="{{getValue(field.id)}}"></input>
+                                            <template is="dom-if" if="{{!isTextArea(field.type)}}">
+                                                <input is="iron-input" id="{{field.name}}" class="input-fields" type="text" required value="{{getValue(field.id)}}"></input>
+                                            </template>
+                                            <template is="dom-if" if="{{isTextArea(field.type)}}">
+                                                <textarea id="{{field.name}}" class="input-fields" required>{{getValue(field.id)}}</textarea>
+                                            </template>
                                         </template>
                                         <template is="dom-if" if="{{field.showOptions}}">
                                              <paper-dropdown-menu-light no-label-float required >
@@ -214,6 +191,7 @@
                                              </paper-dropdown-menu-light>
                                         </template>
                                         <template is="dom-if" if="{{errorMessage}}">
+                                            <br/>
                                             <span class="error-message">{{field.name}} Required</span>
                                         </template>
                                     </div>
@@ -320,6 +298,7 @@
 
 	                for(var f = 0; f < field.length; f++){
 
+                        var typeField = this.getTypeField(field[f]);
                         var listOptions = this.getOptions(field[f]);
                         var showOptions = listOptions.length == 0 ? false : true;
 
@@ -328,23 +307,38 @@
                             name: field[f].name,
                             options: listOptions,
                             showOptions: showOptions,
-                            required: null
-		                });
-		                listOptions = [];
-	                }
-	                if(this.transitionName == "Cancelar" ||
-                        this.transitionName == "Impedir" ||
-                        this.transitionName == "Desimpedir"){
+                            required: null,
+                            type: typeField
+                        });
+                        listOptions = [];
+                    }
+
+                    if (TRANSITION_REQUIRED_COMMENT.indexOf(this.transitionName) != -1) {
 
                         listFilds.push({
                             id: "comments",
                             name: "Comments",
                             options: null,
                             showOptions: false,
-                            required: null
+                            required: null,
+                            type: TYPE_FIELD.TEXTAREA
                         });
                     }
                     this.fields = listFilds;
+                },
+
+                getTypeField: function(field) {
+                    if (field.schema == null)
+                        return TYPE_FIELD.TEXT;
+
+                    if (CUSTOM_TEXTAREA.includes(field.schema.custom))
+                        return TYPE_FIELD.TEXTAREA;
+
+                    return TYPE_FIELD.TEXT;
+                },
+
+                isTextArea: function(type) {
+                    return type == TYPE_FIELD.TEXTAREA;
                 },
 
                 getOptions: function(field){
@@ -452,7 +446,7 @@
                         document.getElementById(this.fields[f].name).value = "";
                         document.getElementById(this.fields[f].name).selected = "";
                     }
-                },
+                }
             });
         })();
     </script>

@@ -112,7 +112,8 @@ public class JiraIssueToIssueConverter {
 
         customFields.put(jiraProperties.getCustomfield().getTShirtSize().getId(), getTamanho(jiraIssue));
         customFields.put(jiraProperties.getCustomfield().getClassOfService().getId(), getClasseDeServico(jiraIssue));
-        customFields.put(jiraProperties.getCustomfield().getBlocked().getId(), getImpedido(jiraIssue));
+        customFields.put(jiraProperties.getCustomfield().getBlocked().getId(), getBlocked(jiraIssue));
+        customFields.put(jiraProperties.getCustomfield().getLastBlockReason().getId(), getLastBlockReason(jiraIssue));
 
         List<String> teamGroups = getTeamGroups(jiraIssue);
 
@@ -232,7 +233,15 @@ public class JiraIssueToIssueConverter {
     }
 
     private String getTamanho(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        IssueField field = jiraIssue.getField(jiraProperties.getCustomfield().getTShirtSize().getId());
+        return getJsonValue(jiraIssue, jiraProperties.getCustomfield().getTShirtSize().getId());
+    }
+
+    private String getClasseDeServico(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
+        return getJsonValue(jiraIssue, jiraProperties.getCustomfield().getClassOfService().getId());
+    }
+
+    private String getJsonValue(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue, String fieldId) {
+        IssueField field = jiraIssue.getField(fieldId);
 
         if (field == null)
             return "";
@@ -247,7 +256,7 @@ public class JiraIssueToIssueConverter {
         }
     }
 
-    private String getImpedido(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
+    private String getBlocked(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
         IssueField field = jiraIssue.getField(jiraProperties.getCustomfield().getBlocked().getId());
 
         if (field == null) return "";
@@ -262,20 +271,13 @@ public class JiraIssueToIssueConverter {
         }
     }
 
-    private String getClasseDeServico(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        IssueField jiraField = jiraIssue.getField(jiraProperties.getCustomfield().getClassOfService().getId());
+    private String getLastBlockReason(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
+        IssueField field = jiraIssue.getField(jiraProperties.getCustomfield().getLastBlockReason().getId());
 
-        if (jiraField == null)
-            return "";
+        if (field == null || field.getValue() == null) return "";
 
-        JSONObject jsonField = (JSONObject) jiraField.getValue();
-
-        try {
-            return (jsonField != null) ? jsonField.getString("value") : "";
-        } catch (JSONException e) {
-            log.error(e.getMessage(), e);
-            return "";
-        }
+        String lastBlockReason = field.getValue().toString();
+        return lastBlockReason.length() > 200 ? lastBlockReason.substring(0, 200) + "..." : lastBlockReason;
     }
 
     private List<String> getSubResponsaveisAvatar(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {

@@ -36,6 +36,8 @@ import java.util.concurrent.TimeUnit;
 @EnableCaching
 public class CacheConfiguration {
 
+    public static final String JIRA_FIELD_METADATA = "jira-field-metadata";
+
     @Bean
     public CacheManager cacheManager() {
         SimpleCacheManager simpleCacheManager = new SimpleCacheManager();
@@ -53,7 +55,8 @@ public class CacheConfiguration {
                 new GuavaCache("visibleTeams", CacheBuilder.newBuilder().expireAfterAccess(12, TimeUnit.HOURS).concurrencyLevel(1).build()),
                 new GuavaCache("issueTypeConfiguration", CacheBuilder.newBuilder().expireAfterAccess(10, TimeUnit.MINUTES).concurrencyLevel(1).build()),
                 new GuavaCache("userTeam", CacheBuilder.newBuilder().expireAfterAccess(30, TimeUnit.MINUTES).concurrencyLevel(1).build()),
-                new GuavaCache("projectUsers", CacheBuilder.newBuilder().expireAfterAccess(6, TimeUnit.HOURS).concurrencyLevel(1).build())
+                new GuavaCache("projectUsers", CacheBuilder.newBuilder().expireAfterAccess(6, TimeUnit.HOURS).concurrencyLevel(1).build()),
+                new GuavaCache(JIRA_FIELD_METADATA, CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).concurrencyLevel(1).build())
         ));
         return simpleCacheManager;
     }
