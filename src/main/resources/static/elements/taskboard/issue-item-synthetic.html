@@ -83,11 +83,11 @@
     <template>
         <paper-material on-tap="opendialog" elevation="0">
             <div>
-                <iron-icon id="[[item.issueKey]]" class$="{{getItemClass(item)}}" src="{{getIssueTypeImage(item, parentTypeIcon)}}"></paper-icon-button>
+                <iron-icon id="[[item.issueKey]]" class$="{{getItemClass(item)}}" title="{{getIssueTypeName(item)}}" src="{{getIssueTypeImage(item, parentTypeIcon)}}"></paper-icon-button>
             </div>
             <template is="dom-if" if="{{issueImpedida(item)}}">
                 <div>
-                    <iron-icon class$="{{getItemClass(item)}} icon-impedida" icon="icons:block"></paper-icon-button>
+                    <iron-icon class$="{{getItemClass(item)}} icon-impedida" title="{{getIssueTypeName(item)}}" icon="icons:block"></paper-icon-button>
                 </div>
             </template>
         </paper-material>
@@ -156,6 +156,10 @@
 
                 opendialog: function () {
                     this.fire('iron-signal', {name: 'show-details', data: {item: this.item, favorite: this.favorite}});
+                },
+                
+                getIssueTypeName: function(item) {
+                    return taskboard.getIssueTypeName(item);
                 }
 
             });

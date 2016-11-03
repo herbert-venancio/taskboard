@@ -273,7 +273,7 @@
                     <div class="key" on-tap="openJira" title="Open in jira">{{item.issueKey}}</div>
                 </div>
                 <div class="icons">
-                	  <img id="issueTypeIcon" class="icon-small" src="{{getIssueTypeImage(item)}}"></img>
+                	  <img id="issueTypeIcon" class="icon-small" title="{{getIssueTypeName(item)}}" src="{{getIssueTypeImage(item)}}"></img>
                     <template is="dom-if" if="{{item.subresponsavel1}}">
                         <img class="icon-small" src="{{item.subresponsavel1}}"></img>
                     </template>
@@ -437,6 +437,10 @@
 
                 issueCancelada: function (item) {
                     return STATUSES_CANCELED_IDS.indexOf(item.status) != -1;
+                },
+                
+                getIssueTypeName: function(item) {
+                    return taskboard.getIssueTypeName(item);
                 }
             });
 
