@@ -30,6 +30,7 @@ import objective.taskboard.repository.FilterCachedRepository;
 import objective.taskboard.repository.IssueTypeConfigurationRepository;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -37,6 +38,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class JiraIssueService {
+    
+    public static final String ISSUES_BY_USER_CACHE_NAME = "issues-by-user";
 
     @Autowired
     JiraService jiraService;
@@ -92,24 +95,10 @@ public class JiraIssueService {
             return null;
         return searchIssues.get(0);
     }
-
-    public List<Issue> searchAll() {
+    
+    @Cacheable(cacheNames = ISSUES_BY_USER_CACHE_NAME, sync = true)
+    public List<Issue> searchAll(String user) {
         return searchIssues(null);
-//=======
-//		stopWatch.stop();
-//		
-//		stopWatch.start("jiraService.searchIssues");
-//		List<com.atlassian.jira.rest.client.api.domain.Issue> searchIssues = jiraService.searchIssues(createJql(configs));
-//		stopWatch.stop();
-//		
-//		stopWatch.start("jiraIssue -> taskboard issue");
-//		List<Issue> issues = issueConverter.convert(searchIssues);
-//		stopWatch.stop();
-//		
-//		LOGGER.info(stopWatch.prettyPrint());
-//		
-//		return issues;
-//>>>>>>> Stashed changes
     }
     
     private List<Issue> searchIssues(String additionalJqlCondition) {

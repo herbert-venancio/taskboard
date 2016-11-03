@@ -121,7 +121,7 @@ public class JiraIssueServiceTest {
 
     //	@Test
     public void searchAllFilters() {
-        List<Issue> searchIssues = jiraIssueService.searchAll();
+        List<Issue> searchIssues = jiraIssueService.searchAll("");
         assertNotNull(searchIssues);
         assertFalse(searchIssues.isEmpty());
     }

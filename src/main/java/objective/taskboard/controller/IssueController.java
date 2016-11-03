@@ -31,24 +31,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-import lombok.extern.slf4j.Slf4j;
-import objective.taskboard.auth.CredentialsHolder;
-import objective.taskboard.data.AspectItemFilter;
-import objective.taskboard.data.AspectSubitemFilter;
-import objective.taskboard.data.Issue;
-import objective.taskboard.data.Team;
-import objective.taskboard.database.TaskboardDatabaseService;
-import objective.taskboard.filterConfiguration.TeamFilterConfigurationService;
-import objective.taskboard.filterPreferences.UserPreferencesService;
-import objective.taskboard.issueBuffer.IssueBufferService;
-import objective.taskboard.issueTypeVisibility.IssueTypeVisibilityService;
-import objective.taskboard.jira.JiraProperties;
-import objective.taskboard.jira.JiraService;
-import objective.taskboard.jira.JiraService.PermissaoNegadaException;
-import objective.taskboard.jira.MetadataService;
-import objective.taskboard.jira.ProjectVisibilityService;
-import objective.taskboard.linkgraph.LinkGraphProperties;
-
 import org.codehaus.jettison.json.JSONException;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +47,25 @@ import com.atlassian.jira.rest.client.api.domain.Transition;
 import com.atlassian.jira.rest.client.api.domain.input.ComplexIssueInputFieldValue;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder;
 import com.google.common.collect.Lists;
+
+import lombok.extern.slf4j.Slf4j;
+import objective.taskboard.auth.CredentialsHolder;
+import objective.taskboard.data.AspectItemFilter;
+import objective.taskboard.data.AspectSubitemFilter;
+import objective.taskboard.data.Issue;
+import objective.taskboard.data.Team;
+import objective.taskboard.database.TaskboardDatabaseService;
+import objective.taskboard.filterConfiguration.TeamFilterConfigurationService;
+import objective.taskboard.filterPreferences.UserPreferencesService;
+import objective.taskboard.issueBuffer.IssueBufferService;
+import objective.taskboard.issueBuffer.IssueChangedNotificationService;
+import objective.taskboard.issueTypeVisibility.IssueTypeVisibilityService;
+import objective.taskboard.jira.JiraProperties;
+import objective.taskboard.jira.JiraService;
+import objective.taskboard.jira.JiraService.PermissaoNegadaException;
+import objective.taskboard.jira.MetadataService;
+import objective.taskboard.jira.ProjectVisibilityService;
+import objective.taskboard.linkgraph.LinkGraphProperties;
 
 @Slf4j
 @RestController
@@ -103,16 +104,21 @@ public class IssueController {
 
     @Autowired
     private LinkGraphProperties linkGraphProperties;
+    
+    @Autowired
+    private IssueChangedNotificationService issueChangedNotificationService;
+    
 
     @RequestMapping(path = "/", method = RequestMethod.POST)
     public List<Issue> issues() throws SQLException, JSONException {
-        return issueBufferService.getIssues(CredentialsHolder.username());
+        return issueBufferService.getIssues();
     }
 
     @RequestMapping(path = "assign", method = RequestMethod.POST)
     public Issue assign(@RequestBody Issue issue) throws JSONException {
         jiraBean.toggleAssignAndSubresponsavelToUser(issue.getIssueKey());
-        return issueBufferService.updateIssueBuffer(issue.getIssueKey());
+        issueChangedNotificationService.notifyUpdated(issue.getIssueKey());
+        return issueBufferService.getIssue(issue.getIssueKey());
     }
 
     @RequestMapping(path = "create-issue", method = RequestMethod.POST)
@@ -136,7 +142,7 @@ public class IssueController {
     @RequestMapping(path = "transition", method = RequestMethod.POST)
     public Map<String, Object> transition(@RequestBody TransitionDTO params) throws JSONException {
         jiraBean.doTransitionByName(params.issue, params.transition, params.resolution);
-        issueBufferService.updateIssueBuffer(params.issue.getIssueKey());
+        issueChangedNotificationService.notifyUpdated(params.issue.getIssueKey());
         return new HashMap<>();
     }
 
@@ -205,13 +211,15 @@ public class IssueController {
     @RequestMapping(path = "block-task/{issue}", method = RequestMethod.POST)
     public Issue blockTask(@PathVariable("issue") String issue, @RequestBody String lastBlockReason) {
         jiraBean.block(issue, lastBlockReason);
-        return issueBufferService.updateIssueBuffer(issue);
+        issueChangedNotificationService.notifyUpdated(issue);
+        return issueBufferService.getIssue(issue);
     }
 
     @RequestMapping("unblock-task/{issue}")
-    public void unblockTask(@PathVariable("issue") String issue) {
+    public Issue unblockTask(@PathVariable("issue") String issue) {
         jiraBean.unblock(issue);
-        issueBufferService.updateIssueBuffer(issue);
+        issueChangedNotificationService.notifyUpdated(issue);
+        return issueBufferService.getIssue(issue);
     }
 
     private List<AspectItemFilter> getDefaultFieldFilterList() throws InterruptedException, ExecutionException {

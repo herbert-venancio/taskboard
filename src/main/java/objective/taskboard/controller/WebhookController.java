@@ -35,10 +35,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
-import objective.taskboard.auth.Authenticator;
 import objective.taskboard.domain.Filter;
 import objective.taskboard.domain.ProjectFilterConfiguration;
-import objective.taskboard.issueBuffer.IssueBufferService;
+import objective.taskboard.issueBuffer.IssueChangedNotificationService;
 import objective.taskboard.issueBuffer.IssueEvent;
 import objective.taskboard.repository.FilterCachedRepository;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
@@ -50,16 +49,13 @@ import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository
 public class WebhookController {
 
     @Autowired
-    private IssueBufferService issueBufferService;
-
-    @Autowired
     private FilterCachedRepository filterCachedRepository;
 
     @Autowired
     ProjectFilterConfigurationCachedRepository projectRepository;
     
     @Autowired
-    private Authenticator authenticator;
+    private IssueChangedNotificationService issueChangedNotificationService;
 
     @Autowired
     private ObjectMapper mapper;
@@ -68,7 +64,7 @@ public class WebhookController {
     public void webhook(@RequestBody Map<String, Object> body, @PathVariable("projectKey") String projectKey, @PathVariable("issueKey") String issueKey) throws JsonProcessingException {
         String webhookEvent = body.get("webhookEvent").toString().replace("jira:", "");
         
-        log.info("WEBHOOK: (" + webhookEvent +  ") project=" + projectKey + " issue=" + issueKey);
+        log.info("WEBHOOK: " + issueKey + " (" + webhookEvent +  ")");
         log.debug("WEBHOOK REQUEST BODY: " + mapper.writeValueAsString(body));
 
         if (!belongsToAnyProjectFilter(projectKey))
@@ -79,9 +75,7 @@ public class WebhookController {
             return;
         
         IssueEvent event = IssueEvent.valueOf(webhookEvent.toUpperCase());
-                
-        authenticator.authenticateAsServer();
-        issueBufferService.updateIssueBuffer(event, issueKey);
+        event.notifyChange(issueKey, issueChangedNotificationService);
     }
 
     private boolean belongsToAnyProjectFilter(String projectKey) {

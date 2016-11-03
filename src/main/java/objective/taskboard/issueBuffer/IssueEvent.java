@@ -23,9 +23,26 @@ package objective.taskboard.issueBuffer;
 
 public enum IssueEvent {
 
-    ISSUE_CREATED,
     ISSUE_UPDATED,
-    ISSUE_DELETED,
-    WORKLOG_UPDATED;
+    
+    WORKLOG_UPDATED,
+    
+    ISSUE_CREATED {
+        @Override
+        public void notifyChange(String issueKey, IssueChangedNotificationService issueChangedNotificationService) {
+            issueChangedNotificationService.notifyCreated(issueKey);
+        }
+    },
+    
+    ISSUE_DELETED {
+        @Override
+        public void notifyChange(String issueKey, IssueChangedNotificationService issueChangedNotificationService) {
+            issueChangedNotificationService.notifyDeleted(issueKey);
+        }
+    };
+    
+    public void notifyChange(String issueKey, IssueChangedNotificationService issueChangedNotificationService) {
+        issueChangedNotificationService.notifyUpdated(issueKey);
+    }
 
 }

@@ -1,5 +1,7 @@
 package objective.taskboard.issueBuffer;
 
+import static objective.taskboard.jira.JiraIssueService.ISSUES_BY_USER_CACHE_NAME;
+
 /*-
  * [LICENSE]
  * Taskboard
@@ -24,70 +26,69 @@ package objective.taskboard.issueBuffer;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 
-import objective.taskboard.auth.Authenticator;
+import lombok.extern.slf4j.Slf4j;
+import objective.taskboard.auth.CredentialsHolder;
 import objective.taskboard.data.Issue;
 import objective.taskboard.domain.converter.JiraIssueToIssueConverter;
+import objective.taskboard.issueBuffer.IssueChangedNotificationService.IssueChangedListener;
 import objective.taskboard.jira.JiraIssueService;
-import objective.taskboard.jira.ProjectVisibilityService;
 
+@Slf4j
 @Service
-public class IssueBufferService {
+public class IssueBufferService implements IssueChangedListener {
 
-    @Autowired
-    private JiraIssueToIssueConverter issueConverter;
-
-    @Autowired
-    private JiraIssueService jiraIssueService;
-
-    @Autowired
-    private Authenticator authenticator;
-
-    @Autowired
-    private ProjectVisibilityService projectService;
-
-    private Map<String, Issue> issueBuffer = new LinkedHashMap<>();
-
-    @PostConstruct
-    private void load() {
-        updateIssueBuffer();
+    private final JiraIssueToIssueConverter issueConverter;
+    private final JiraIssueService jiraIssueService;
+    private final Map<String, Issue> issueBuffer = new LinkedHashMap<>();
+    private final CacheManager cacheManager;
+    
+    public IssueBufferService(JiraIssueToIssueConverter issueConverter, JiraIssueService jiraIssueService, CacheManager cacheManager) {
+        this.issueConverter = issueConverter;
+        this.jiraIssueService = jiraIssueService;
+        this.cacheManager = cacheManager;
+    }
+    
+    @Override
+    public void onIssueUpdate(String issueKey) {
+        log.debug("Issue updated " + issueKey);
+        clearCache();
+    }
+    
+    @Override
+    public void onIssueCreated(String issueKey) {
+        log.debug("Issue created " + issueKey);
+        clearCache();
+    }
+    
+    @Override
+    public void onIssueDeleted(String issueKey) {
+        log.debug("Issue deleted " + issueKey);
+        clearCache();
+    }
+    
+    private void clearCache() {
+        log.debug("Clearing issues cache");
+        cacheManager.getCache(ISSUES_BY_USER_CACHE_NAME).clear();        
     }
 
-    public void updateIssueBuffer() {
-        authenticator.authenticateAsServer();
-        setIssues(issueConverter.convert(jiraIssueService.searchAll()));
+    public List<Issue> getIssues() {
+        String user = CredentialsHolder.username();
+        log.debug("❱❱❱❱❱❱ getIssues[] ❱❱ {}", user);
+        List<Issue> issues = issueConverter.convert(jiraIssueService.searchAll(user));
+        setIssues(issues);
+        return issues;
     }
 
-    public Issue updateIssueBuffer(final String key) {
-        return updateIssueBuffer(IssueEvent.ISSUE_UPDATED, key);
+    public Issue getIssue(String issueKey) {
+        log.debug("❱❱❱❱❱❱ getIssue ❱❱ {}", CredentialsHolder.username());
+        return issueBuffer.get(issueKey);
     }
-
-    public synchronized Issue updateIssueBuffer(IssueEvent event, final String key) {
-        if (event == IssueEvent.ISSUE_DELETED)
-            return issueBuffer.remove(key);
-        
-        final com.atlassian.jira.rest.client.api.domain.Issue searchIssue = jiraIssueService.searchIssue(key);
-        if (searchIssue == null)
-            return issueBuffer.remove(key);
-
-        final Issue issue = issueConverter.convert(searchIssue);
-        putIssue(issue);
-        return issue;
-    }
-
-    public synchronized List<Issue> getIssues(String user) {
-        return issueBuffer.values().stream()
-                .filter(t -> projectService.isProjectVisibleForUser(t.getProjectKey(), user))
-                .collect(Collectors.toList());
-    }
-
-    private synchronized void setIssues(List<Issue> issues) {
+    
+    private void setIssues(List<Issue> issues) {
         issueBuffer.clear();
         for (Issue issue : issues)
             putIssue(issue);

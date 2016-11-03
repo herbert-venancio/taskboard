@@ -27,15 +27,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.task.RefreshCacheTask;
 
 @RestController
 @RequestMapping("cache")
 public class CacheRefreshController {
-
-    @Autowired
-    private IssueBufferService issueBufferService;
 
     @Autowired
     private RefreshCacheTask refreshCacheTask;
@@ -45,7 +41,6 @@ public class CacheRefreshController {
 
     @RequestMapping("issues")
     public String issues() {
-        issueBufferService.updateIssueBuffer();
         cacheManager.getCache("issues").clear();
 
         return "ISSUES UPDATED";
@@ -53,7 +48,6 @@ public class CacheRefreshController {
 
     @RequestMapping("issues/{key}")
     public String issue(@PathVariable("key") String key) {
-        issueBufferService.updateIssueBuffer(key);
         cacheManager.getCache("issues").clear();
 
         return "ISSUE " + key + " UPDATED";
@@ -70,8 +64,7 @@ public class CacheRefreshController {
         refreshCacheTask.refreshIssueTypeVisibility();
 
         cacheManager.getCacheNames().forEach(cache -> {
-            if (!"issues".equals(cache))
-                cacheManager.getCache(cache).clear();
+            cacheManager.getCache(cache).clear();
         });
 
         return "CONFIGURATION UPDATED";
