@@ -23,9 +23,7 @@ import static objective.taskboard.jira.JiraIssueService.ISSUES_BY_USER_CACHE_NAM
  * [/LICENSE]
  */
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
@@ -43,7 +41,6 @@ public class IssueBufferService implements IssueChangedListener {
 
     private final JiraIssueToIssueConverter issueConverter;
     private final JiraIssueService jiraIssueService;
-    private final Map<String, Issue> issueBuffer = new LinkedHashMap<>();
     private final CacheManager cacheManager;
     
     public IssueBufferService(JiraIssueToIssueConverter issueConverter, JiraIssueService jiraIssueService, CacheManager cacheManager) {
@@ -78,24 +75,7 @@ public class IssueBufferService implements IssueChangedListener {
     public List<Issue> getIssues() {
         String user = CredentialsHolder.username();
         log.debug("❱❱❱❱❱❱ getIssues[] ❱❱ {}", user);
-        List<Issue> issues = issueConverter.convert(jiraIssueService.searchAll(user));
-        setIssues(issues);
-        return issues;
-    }
-
-    public Issue getIssue(String issueKey) {
-        log.debug("❱❱❱❱❱❱ getIssue ❱❱ {}", CredentialsHolder.username());
-        return issueBuffer.get(issueKey);
-    }
-    
-    private void setIssues(List<Issue> issues) {
-        issueBuffer.clear();
-        for (Issue issue : issues)
-            putIssue(issue);
-    }
-
-    private void putIssue(Issue issue) {
-        issueBuffer.put(issue.getIssueKey(), issue);
+        return issueConverter.convert(jiraIssueService.searchAll(user));
     }
 
 }

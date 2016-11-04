@@ -115,10 +115,10 @@ public class IssueController {
     }
 
     @RequestMapping(path = "assign", method = RequestMethod.POST)
-    public Issue assign(@RequestBody Issue issue) throws JSONException {
+    public Object assign(@RequestBody Issue issue) throws JSONException {
         jiraBean.toggleAssignAndSubresponsavelToUser(issue.getIssueKey());
         issueChangedNotificationService.notifyUpdated(issue.getIssueKey());
-        return issueBufferService.getIssue(issue.getIssueKey());
+        return RESPONSE_OK;
     }
 
     @RequestMapping(path = "create-issue", method = RequestMethod.POST)
@@ -209,17 +209,17 @@ public class IssueController {
     }
 
     @RequestMapping(path = "block-task/{issue}", method = RequestMethod.POST)
-    public Issue blockTask(@PathVariable("issue") String issue, @RequestBody String lastBlockReason) {
+    public Object blockTask(@PathVariable("issue") String issue, @RequestBody String lastBlockReason) {
         jiraBean.block(issue, lastBlockReason);
         issueChangedNotificationService.notifyUpdated(issue);
-        return issueBufferService.getIssue(issue);
+        return RESPONSE_OK;
     }
 
     @RequestMapping("unblock-task/{issue}")
-    public Issue unblockTask(@PathVariable("issue") String issue) {
+    public Object unblockTask(@PathVariable("issue") String issue) {
         jiraBean.unblock(issue);
         issueChangedNotificationService.notifyUpdated(issue);
-        return issueBufferService.getIssue(issue);
+        return RESPONSE_OK;
     }
 
     private List<AspectItemFilter> getDefaultFieldFilterList() throws InterruptedException, ExecutionException {
@@ -268,4 +268,7 @@ public class IssueController {
         public String resolution;
         public Issue issue;
     }
+    
+    public static final Object RESPONSE_OK = new Object();
+
 }

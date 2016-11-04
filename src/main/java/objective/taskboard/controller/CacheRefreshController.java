@@ -21,9 +21,10 @@ package objective.taskboard.controller;
  * [/LICENSE]
  */
 
+import static objective.taskboard.jira.JiraIssueService.ISSUES_BY_USER_CACHE_NAME;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -41,16 +42,9 @@ public class CacheRefreshController {
 
     @RequestMapping("issues")
     public String issues() {
-        cacheManager.getCache("issues").clear();
+        cacheManager.getCache(ISSUES_BY_USER_CACHE_NAME).clear();
 
         return "ISSUES UPDATED";
-    }
-
-    @RequestMapping("issues/{key}")
-    public String issue(@PathVariable("key") String key) {
-        cacheManager.getCache("issues").clear();
-
-        return "ISSUE " + key + " UPDATED";
     }
 
     @RequestMapping("configuration")
