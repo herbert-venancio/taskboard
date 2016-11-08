@@ -127,7 +127,7 @@ public class JiraProperties {
     @Data
     public static class IssueLink {
         @NotNull
-        private LinkDetails requirement;
+        private List<String> dependencies;
         @NotNull
         private LinkDetails demand;
         

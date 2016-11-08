@@ -220,7 +220,7 @@ public class JiraIssueToIssueConverter {
     }
 
     private boolean isRequiresLink(final IssueLink link) {
-         return link.getIssueLinkType().getName().equals(jiraProperties.getIssuelink().getRequirement().getName())
+         return jiraProperties.getIssuelink().getDependencies().contains(link.getIssueLinkType().getName())
              && link.getIssueLinkType().getDirection() == Direction.OUTBOUND;
     }
 
