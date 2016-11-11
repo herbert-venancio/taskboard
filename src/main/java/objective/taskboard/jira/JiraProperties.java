@@ -99,6 +99,7 @@ public class JiraProperties {
         @Data
         @EqualsAndHashCode(callSuper = true)
         public static class ClassOfServiceDetails extends CustomFieldDetails {
+            private String defaultValue = "Standard";
             private Map<Long, String> colors;
         }
         

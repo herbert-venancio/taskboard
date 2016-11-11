@@ -32,8 +32,8 @@ public class IssueColorService {
     @Autowired
     private JiraProperties jiraProperties;
     
-    public String getColor(Long classOfService) {
-        String color = jiraProperties.getCustomfield().getClassOfService().getColors().get(classOfService);
+    public String getColor(Long classOfServiceId) {
+        String color = jiraProperties.getCustomfield().getClassOfService().getColors().get(classOfServiceId);
 
         if (color != null)
             return color;

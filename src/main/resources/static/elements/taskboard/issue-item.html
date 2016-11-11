@@ -220,11 +220,6 @@
             transition: all .5s;
         }
 
-        .classe-de-servico {
-            opacity: 0.8;
-            font-size: 55%;
-        }
-
         .icon-issuetype {
             z-index: 0;
         }
@@ -267,8 +262,7 @@
             <div class="bottom">
                 <div class="info-issue">
                     <div class="size-classe-de-servico">
-                        <span class="issue-size">{{item.customfields.tamanho}} </span> <!-- Tamanho -->
-                        <span class="classe-de-servico">{{item.customfields.classeDeServico}}</span> <!-- Classe de Servico -->
+                        <span class="issue-size">{{item.customfields.tamanho}} </span>
                     </div>
 
                     <div class="key" on-tap="openJira" title="Open in jira">{{item.issueKey}}</div>

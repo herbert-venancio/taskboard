@@ -22,6 +22,7 @@ package objective.taskboard.domain.converter;
  */
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 import java.util.List;
 import java.util.Map;
@@ -123,7 +124,7 @@ public class JiraIssueToIssueConverter {
         long parentTypeId = getParentType(jiraIssue);
         Long issueTypeId = jiraIssue.getIssueType().getId();
 
-        String color = issueColorService.getColor(getClassOfServiceOptionId(jiraIssue));
+        String color = issueColorService.getColor(getClassOfServiceId(jiraIssue));
 
         return Issue.from(
                 jiraIssue.getKey(),
@@ -238,7 +239,12 @@ public class JiraIssueToIssueConverter {
     }
 
     private String getClassOfService(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        return getJsonValue(jiraIssue, jiraProperties.getCustomfield().getClassOfService().getId());
+        String classOfService = getJsonValue(jiraIssue, jiraProperties.getCustomfield().getClassOfService().getId());
+
+        if (isNullOrEmpty(classOfService))
+            return jiraProperties.getCustomfield().getClassOfService().getDefaultValue();
+
+        return classOfService;
     }
 
     private String getJsonValue(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue, String fieldId) {
@@ -257,7 +263,7 @@ public class JiraIssueToIssueConverter {
         }
     }
 
-    private Long getClassOfServiceOptionId(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
+    private Long getClassOfServiceId(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
         IssueField field = jiraIssue.getField(jiraProperties.getCustomfield().getClassOfService().getId());
 
         if (field == null)
