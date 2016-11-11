@@ -109,9 +109,8 @@ public class JiraIssueToIssueConverter {
         String subResponsavel2 = avatarSubResponsaveis.stream().filter(x -> !x.equals(subResponsavel1)).findFirst().orElse("");
 
         Map<String, Object> customFields = Maps.newHashMap();
-
-        customFields.put(jiraProperties.getCustomfield().getTShirtSize().getId(), getTamanho(jiraIssue));
-        customFields.put(jiraProperties.getCustomfield().getClassOfService().getId(), getClasseDeServico(jiraIssue));
+        customFields.put(jiraProperties.getCustomfield().getTShirtSize().getId(), getTShirtSize(jiraIssue));
+        customFields.put(jiraProperties.getCustomfield().getClassOfService().getId(), getClassOfService(jiraIssue));
         customFields.put(jiraProperties.getCustomfield().getBlocked().getId(), getBlocked(jiraIssue));
         customFields.put(jiraProperties.getCustomfield().getLastBlockReason().getId(), getLastBlockReason(jiraIssue));
 
@@ -123,7 +122,9 @@ public class JiraIssueToIssueConverter {
 
         long parentTypeId = getParentType(jiraIssue);
         Long issueTypeId = jiraIssue.getIssueType().getId();
-        String color = issueColorService.getColor(issueTypeId, parentTypeId);
+
+        String color = issueColorService.getColor(getClassOfServiceOptionId(jiraIssue));
+
         return Issue.from(
                 jiraIssue.getKey(),
                 jiraIssue.getProject().getKey(),
@@ -232,11 +233,11 @@ public class JiraIssueToIssueConverter {
             return comment.iterator().next().toString();
     }
 
-    private String getTamanho(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
+    private String getTShirtSize(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
         return getJsonValue(jiraIssue, jiraProperties.getCustomfield().getTShirtSize().getId());
     }
 
-    private String getClasseDeServico(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
+    private String getClassOfService(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
         return getJsonValue(jiraIssue, jiraProperties.getCustomfield().getClassOfService().getId());
     }
 
@@ -253,6 +254,22 @@ public class JiraIssueToIssueConverter {
         } catch (JSONException e) {
             log.error(e.getMessage(), e);
             return "";
+        }
+    }
+
+    private Long getClassOfServiceOptionId(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
+        IssueField field = jiraIssue.getField(jiraProperties.getCustomfield().getClassOfService().getId());
+
+        if (field == null)
+            return 0L;
+
+        JSONObject json = (JSONObject) field.getValue();
+
+        try {
+            return (json != null) ? json.getLong("id") : 0L;
+        } catch (JSONException e) {
+            log.error(e.getMessage(), e);
+            return 0L;
         }
     }
 

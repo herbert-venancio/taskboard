@@ -32,20 +32,12 @@ public class IssueColorService {
     @Autowired
     private JiraProperties jiraProperties;
     
-    public String getColor(long issueTypeId, long parentTypeId) {
-        int os = jiraProperties.getIssuetype().getOs().getId();
-        int task = jiraProperties.getIssuetype().getTask().getId();
-        int bug = jiraProperties.getIssuetype().getBug().getId();
-        
-        if (issueTypeId == os || parentTypeId == os)
-            return "#add9fe";
-        
-        if (issueTypeId == task || parentTypeId == task)
-            return "#fee5bc";
-        
-        if (issueTypeId == bug || parentTypeId == bug)
-            return "#FF8B94";
+    public String getColor(Long classOfService) {
+        String color = jiraProperties.getCustomfield().getClassOfService().getColors().get(classOfService);
 
-        return "#ddf9d9";
+        if (color != null)
+            return color;
+
+        return "#BCBCBC";
     }
 }

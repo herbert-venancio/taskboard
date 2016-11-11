@@ -34,15 +34,12 @@
             height: 100%;
             overflow: hidden;
             cursor: pointer;
+            border: 2px solid transparent;
         }
 
         .issue:hover {
             -webkit-filter: brightness(90%);
             -moz-filter: brightness(90%);
-        }
-
-        .issue {
-            border: 2px solid transparent;
         }
 
         .issue.dependency {
@@ -227,6 +224,10 @@
             opacity: 0.8;
             font-size: 55%;
         }
+
+        .icon-issuetype {
+            z-index: 0;
+        }
     </style>
 
     <template>
@@ -273,7 +274,7 @@
                     <div class="key" on-tap="openJira" title="Open in jira">{{item.issueKey}}</div>
                 </div>
                 <div class="icons">
-                	  <img id="issueTypeIcon" class="icon-small" title="{{getIssueTypeName(item)}}" src="{{getIssueTypeImage(item)}}"></img>
+                    <img id="issueTypeIcon" class="icon-small icon-issuetype" title="{{getIssueTypeName(item.type)}}" src="{{getIssueTypeImage(item)}}"></img>
                     <template is="dom-if" if="{{item.subresponsavel1}}">
                         <img class="icon-small" src="{{item.subresponsavel1}}"></img>
                     </template>
@@ -438,9 +439,9 @@
                 issueCancelada: function (item) {
                     return STATUSES_CANCELED_IDS.indexOf(item.status) != -1;
                 },
-                
-                getIssueTypeName: function(item) {
-                    return taskboard.getIssueTypeName(item);
+
+                getIssueTypeName: function(issueTypeId) {
+                    return taskboard.getIssueTypeName(issueTypeId);
                 }
             });
 

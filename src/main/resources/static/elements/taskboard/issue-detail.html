@@ -119,8 +119,8 @@
 
         paper-button.headerLink {
             margin-bottom: 0px;
-            margin-left: 10%;
             padding: 4px;
+            padding-left: 0px;
             font-size: 22px;
             font-weight: 600;
             color: #3B50C7;
@@ -140,13 +140,14 @@
             font-weight: 600;
             color: #3B50C7;
             margin: 0px;
+            padding: 5px;
         }
 
         paper-material.subtaskPanel {
             height: 30px;
         }
 
-        paper-material.responsavelPanel {
+        paper-material.highlightPanel {
             padding: 4px;
             padding-left: 8px;
             padding-right: 8px;
@@ -241,6 +242,17 @@
             max-width: 470px;
             max-height: 400px;
         }
+
+        .icon {
+            margin-left: 10%;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .icon-small {
+            width: 25px;
+            height: 25px;
+        }
     </style>
 
     <template>
@@ -273,6 +285,10 @@
                       modal>
             <paper-card class="card-custom">
                 <div class="card-header-custom">
+                    <div class="icon">
+                        <img id="issueTypeIcon" class="icon-small"
+                             title="{{getIssueTypeName(item.type)}}" src="{{getIssueTypeImage(item)}}"></img>
+                    </div>
                     <paper-button class="headerLink" on-tap="openJira">{{item.issueKey}}</paper-button>
                     <div class="buttons">
                         <paper-button class="buttonClose" on-tap="clearProperties" dialog-confirm autofocus>
@@ -293,6 +309,20 @@
                     </template>
                 </div>
                 <div class="content-box">
+                    <div class="content-row">
+                        <div class="column-block half-column">
+                            <div class="sub-header">Issue type</div>
+                            <div class="sub-content">
+                                <span>{{getIssueTypeName(item.type)}}</span>
+                            </div>
+                        </div>
+                        <div class="column-block half-column">
+                            <div class="sub-header">Status</div>
+                            <div class="sub-content horizontal layout">
+                                <paper-material class="highlightPanel">{{getStatusName(item.status)}}</paper-material>
+                            </div>
+                        </div>
+                    </div>
                     <div class="content-row">
                         <div class="column-block half-column">
                             <div class="sub-header">Project</div>
@@ -320,7 +350,7 @@
                             <div class="sub-header">Assignees</div>
                             <div class="sub-content flex horizontal layout wrap">
                                 <template is="dom-repeat" items="{{listaResponsaveis(item)}}" as="responsavel">
-                                    <paper-material class="responsavelPanel">{{responsavel}}</paper-material>
+                                    <paper-material class="highlightPanel">{{responsavel}}</paper-material>
                                 </template>
                             </div>
                         </div>
@@ -864,6 +894,18 @@
 
                 issueBlocked: function (item) {
                     return this.item.customfields.impedido;
+                },
+
+                getIssueTypeName: function(issueTypeId) {
+                    return taskboard.getIssueTypeName(issueTypeId);
+                },
+
+                getIssueTypeImage: function(issue) {
+                    return issue.typeIconUri.replace('xsmall', 'medium');
+                },
+
+                getStatusName: function(statusId) {
+                    return taskboard.getStatusName(statusId);
                 }
 
             });

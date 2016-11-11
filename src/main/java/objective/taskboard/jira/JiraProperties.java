@@ -25,6 +25,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -80,7 +81,7 @@ public class JiraProperties {
         @NotNull
         private TShirtSize tShirtSize; 
         @NotNull
-        private CustomFieldDetails classOfService; 
+        private ClassOfServiceDetails classOfService;
         @NotNull
         private Blocked blocked;
         @NotNull
@@ -93,6 +94,12 @@ public class JiraProperties {
             @NotNull
             @NotEmpty
             private String id; 
+        }
+        
+        @Data
+        @EqualsAndHashCode(callSuper = true)
+        public static class ClassOfServiceDetails extends CustomFieldDetails {
+            private Map<Long, String> colors;
         }
         
         @Data
@@ -141,12 +148,6 @@ public class JiraProperties {
     
     @Data
     public static class IssueType {
-        @NotNull
-        private IssueTypeDetails task;
-        @NotNull
-        private IssueTypeDetails os;
-        @NotNull
-        private IssueTypeDetails bug;
         @NotNull
         private IssueTypeDetails demand;
         

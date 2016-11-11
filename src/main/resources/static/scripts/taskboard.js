@@ -170,13 +170,21 @@ function Taskboard() {
     this.isInvalidTeam = function(teams) {
         return teams.includes("NO TEAM");
     };
-    
-    this.getIssueTypeName = function(issue) {
-    	var types = JSON.parse(localStorage.getItem("issueTypes"));                
-    	for (var i in types) 
-    		if (types[i].id == issue.type)
-    			return types[i].name;
-    	return "";
+
+    this.getIssueTypeName = function(issueTypeId) {
+        var types = JSON.parse(localStorage.getItem("issueTypes"));
+        for (var i in types)
+            if (types[i].id == issueTypeId)
+                return types[i].name;
+        return "";
+    };
+
+    this.getStatusName = function(statusId) {
+        var statuses = JSON.parse(localStorage.getItem("statuses"));
+        for (var i in statuses)
+            if (statuses[i].id == statusId)
+                return statuses[i].name;
+        return "";
     };
 
 }

@@ -81,13 +81,17 @@
 
 
     <template>
-        <paper-material on-tap="opendialog" elevation="0">
+        <paper-material style$="{{getIssueColor(item)}}" on-tap="opendialog" elevation="0">
             <div>
-                <iron-icon id="[[item.issueKey]]" class$="{{getItemClass(item)}}" title="{{getIssueTypeName(item)}}" src="{{getIssueTypeImage(item, parentTypeIcon)}}"></paper-icon-button>
+                <iron-icon id="[[item.issueKey]]" class$="{{getItemClass(item)}}"
+                           title="{{item.issueKey}} : {{getIssueTypeName(item.type)}}"
+                           src="{{getIssueTypeImage(item, parentTypeIcon)}}"></iron-icon>
             </div>
             <template is="dom-if" if="{{issueImpedida(item)}}">
                 <div>
-                    <iron-icon class$="{{getItemClass(item)}} icon-impedida" title="{{getIssueTypeName(item)}}" icon="icons:block"></paper-icon-button>
+                    <iron-icon class$="{{getItemClass(item)}} icon-impedida"
+                               title="{{item.issueKey}} : {{getIssueTypeName(item.type)}}. Blocked issue. Last Block Reason: {{item.customfields.lastBlockReason}}"
+                               icon="icons:block"></iron-icon>
                 </div>
             </template>
         </paper-material>
@@ -157,9 +161,13 @@
                 opendialog: function () {
                     this.fire('iron-signal', {name: 'show-details', data: {item: this.item, favorite: this.favorite}});
                 },
-                
-                getIssueTypeName: function(item) {
-                    return taskboard.getIssueTypeName(item);
+
+                getIssueTypeName: function(issueTypeId) {
+                    return taskboard.getIssueTypeName(issueTypeId);
+                },
+
+                getIssueColor: function (issue) {
+                    return 'background: ' + issue.color;
                 }
 
             });
