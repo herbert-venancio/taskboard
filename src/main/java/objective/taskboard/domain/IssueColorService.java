@@ -1,5 +1,7 @@
 package objective.taskboard.domain;
 
+import java.util.Map;
+
 /*-
  * [LICENSE]
  * Taskboard
@@ -33,11 +35,12 @@ public class IssueColorService {
     private JiraProperties jiraProperties;
     
     public String getColor(Long classOfServiceId) {
-        String color = jiraProperties.getCustomfield().getClassOfService().getColors().get(classOfServiceId);
+        Map<Long, String> colors = jiraProperties.getCustomfield().getClassOfService().getColors();
+        String color = colors == null ? null : colors.get(classOfServiceId);
 
         if (color != null)
             return color;
 
-        return "#BCBCBC";
+        return "#DDF9D9";
     }
 }
