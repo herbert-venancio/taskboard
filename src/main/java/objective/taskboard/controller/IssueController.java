@@ -124,8 +124,13 @@ public class IssueController {
         issueBuilder.setDescription(issue.getDescription());
         issueBuilder.setSummary(issue.getSummary());
         issueBuilder.setFieldValue("parent", ComplexIssueInputFieldValue.with("key", parent.getKey()));
-        issueBuilder.setFieldValue(jiraProperties.getCustomfield().getTShirtSize().getId(), ComplexIssueInputFieldValue.with("id", issue.getCustomFields().get(jiraProperties.getCustomfield().getTShirtSize()).toString())); 
-        issueBuilder.setFieldValue(jiraProperties.getCustomfield().getClassOfService().getId(), ComplexIssueInputFieldValue.with("id", issue.getCustomFields().get(jiraProperties.getCustomfield().getClassOfService()).toString())); 
+
+        List<String> tSizeIds = jiraProperties.getCustomfield().getTShirtSize().getIds();
+        for (String tSizeId : tSizeIds)
+            issueBuilder.setFieldValue(tSizeId, ComplexIssueInputFieldValue.with("id", issue.getCustomFields().get(tSizeId).toString()));
+
+        String classOfServiceId = jiraProperties.getCustomfield().getClassOfService().getId();
+        issueBuilder.setFieldValue(classOfServiceId, ComplexIssueInputFieldValue.with("id", issue.getCustomFields().get(classOfServiceId).toString()));
         log.info("Creating issue: " + issue);
         String issueKey = jiraBean.createIssue(issueBuilder.build());
         log.info("Created issue " + issueKey);

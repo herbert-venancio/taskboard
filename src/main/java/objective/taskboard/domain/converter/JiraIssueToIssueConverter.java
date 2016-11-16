@@ -47,6 +47,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import lombok.extern.slf4j.Slf4j;
+import objective.taskboard.data.CustomField;
 import objective.taskboard.data.Issue;
 import objective.taskboard.data.Team;
 import objective.taskboard.data.UserTeam;
@@ -110,10 +111,10 @@ public class JiraIssueToIssueConverter {
         String subResponsavel2 = avatarSubResponsaveis.stream().filter(x -> !x.equals(subResponsavel1)).findFirst().orElse("");
 
         Map<String, Object> customFields = Maps.newHashMap();
-        customFields.put(jiraProperties.getCustomfield().getTShirtSize().getId(), getTShirtSize(jiraIssue));
         customFields.put(jiraProperties.getCustomfield().getClassOfService().getId(), getClassOfService(jiraIssue));
         customFields.put(jiraProperties.getCustomfield().getBlocked().getId(), getBlocked(jiraIssue));
         customFields.put(jiraProperties.getCustomfield().getLastBlockReason().getId(), getLastBlockReason(jiraIssue));
+        customFields.putAll(getTShirtSizes(jiraIssue));
 
         List<String> teamGroups = getTeamGroups(jiraIssue);
 
@@ -234,8 +235,21 @@ public class JiraIssueToIssueConverter {
             return comment.iterator().next().toString();
     }
 
-    private String getTShirtSize(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        return getJsonValue(jiraIssue, jiraProperties.getCustomfield().getTShirtSize().getId());
+    private Map<String, Object> getTShirtSizes(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
+        Map<String, Object> tShirtSizes = Maps.newHashMap();
+
+        for (String tSizeId : jiraProperties.getCustomfield().getTShirtSize().getIds()) {
+            String tShirtSizeValue = getJsonValue(jiraIssue, tSizeId);
+
+            if (isNullOrEmpty(tShirtSizeValue))
+                continue;
+
+            String fieldName = jiraIssue.getField(tSizeId).getName();
+            CustomField tShirtSize = CustomField.from(fieldName, tShirtSizeValue);
+            tShirtSizes.put(tSizeId, tShirtSize);
+        }
+
+        return tShirtSizes;
     }
 
     private String getClassOfService(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {

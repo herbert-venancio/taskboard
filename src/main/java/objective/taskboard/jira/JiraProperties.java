@@ -27,8 +27,9 @@ import lombok.EqualsAndHashCode;
 import java.util.List;
 import java.util.Map;
 
+import javax.validation.Valid;
+import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -43,10 +44,13 @@ public class JiraProperties {
     @NotNull
     private Lousa lousa;
     @NotNull
+    @Valid
     private CustomField customfield;
     @NotNull
+    @Valid
     private IssueLink issuelink;
     @NotNull
+    @Valid
     private IssueType issuetype;
     @NotNull
     @NotEmpty
@@ -64,6 +68,7 @@ public class JiraProperties {
     @NotEmpty
     private List<String> transitionsCancelNames;
     @NotNull
+    @Valid
     private Resolutions resolutions;
     
     @Data 
@@ -79,14 +84,19 @@ public class JiraProperties {
     @Data
     public static class CustomField {
         @NotNull
+        @Valid
         private TShirtSize tShirtSize; 
         @NotNull
+        @Valid
         private ClassOfServiceDetails classOfService;
         @NotNull
+        @Valid
         private Blocked blocked;
         @NotNull
+        @Valid
         private CustomFieldDetails lastBlockReason;
         @NotNull
+        @Valid
         private CustomFieldDetails coAssignees;
         
         @Data
@@ -104,8 +114,10 @@ public class JiraProperties {
         }
         
         @Data
-        @EqualsAndHashCode(callSuper = true)
-        public static class TShirtSize extends CustomFieldDetails {
+        public static class TShirtSize {
+            @NotNull
+            @NotEmpty
+            private List<String> ids;
             @NotNull
             @NotEmpty
             private String extraSmall = "XS"; 
@@ -127,7 +139,7 @@ public class JiraProperties {
         @EqualsAndHashCode(callSuper = true)
         public static class Blocked extends CustomFieldDetails {
             @NotNull
-            @Size(min = 1)
+            @DecimalMin("1")
             private Integer yesOptionId;
         }
     }
@@ -137,6 +149,7 @@ public class JiraProperties {
         @NotNull
         private List<String> dependencies;
         @NotNull
+        @Valid
         private LinkDetails demand;
         
         @Data
@@ -150,12 +163,13 @@ public class JiraProperties {
     @Data
     public static class IssueType {
         @NotNull
+        @Valid
         private IssueTypeDetails demand;
         
         @Data
         public static class IssueTypeDetails {
             @NotNull
-            @Size(min = 1)
+            @DecimalMin("1")
             private int id;
         }
     }
@@ -163,8 +177,10 @@ public class JiraProperties {
     @Data
     public static class Resolutions {
         @NotNull
+        @Valid
         private Resolution done;
         @NotNull
+        @Valid
         private Resolution canceled;
         
         @Data

@@ -99,7 +99,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 </template>
 <script th:inline="javascript">
 	var CUSTOMFIELD = {
-	    TAMANHO: [[${jiraCustomfields.tShirtSize.id}]],
+	    SIZES: [[${jiraCustomfields.tShirtSize.ids}]],
 	    CLASSE_DE_SERVICO: [[${jiraCustomfields.classOfService.id}]],
 	    IMPEDIDO: [[${jiraCustomfields.blocked.id}]],
 	    LAST_BLOCK_REASON: [[${jiraCustomfields.lastBlockReason.id}]]

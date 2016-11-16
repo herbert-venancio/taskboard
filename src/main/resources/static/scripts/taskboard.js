@@ -187,6 +187,10 @@ function Taskboard() {
         return "";
     };
 
+    this.getOnlyOneSize = function(sizes) {
+        return sizes.length != 1 ? null : sizes[0].value;
+    };
+
 }
 
 var taskboard = new Taskboard();

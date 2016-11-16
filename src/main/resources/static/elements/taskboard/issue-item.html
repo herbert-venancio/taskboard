@@ -90,7 +90,7 @@
             width: 50%;
         }
 
-        .size-classe-de-servico {
+        .size {
             flex-direction: row;
             margin-bottom: 12px;
         }
@@ -261,9 +261,11 @@
 
             <div class="bottom">
                 <div class="info-issue">
-                    <div class="size-classe-de-servico">
-                        <span class="issue-size">{{item.customfields.tamanho}} </span>
-                    </div>
+                    <template is="dom-if" if="{{getOnlyOneSize(item.customfields.sizes)}}">
+                        <div class="size">
+                            <span class="issue-size">{{getOnlyOneSize(item.customfields.sizes)}}</span>
+                        </div>
+                    </template>
 
                     <div class="key" on-tap="openJira" title="Open in jira">{{item.issueKey}}</div>
                 </div>
@@ -436,6 +438,10 @@
 
                 getIssueTypeName: function(issueTypeId) {
                     return taskboard.getIssueTypeName(issueTypeId);
+                },
+
+                getOnlyOneSize: function(sizes) {
+                    return taskboard.getOnlyOneSize(sizes);
                 }
             });
 

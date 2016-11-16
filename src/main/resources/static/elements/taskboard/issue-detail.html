@@ -178,7 +178,7 @@
 
         #timetracking_content paper-progress {
             width: 100%;
-            height: 10px;
+            --paper-progress-height: 10px;
             margin-top: 10px;
         }
 
@@ -235,12 +235,10 @@
 
         textarea {
             height: 30px;
-            width: 470px;
+            width: 100%;
             border: none;
-            background: #EEE;
+            background-color: inherit;
             margin-top: 7px;
-            max-width: 470px;
-            max-height: 400px;
         }
 
         .icon {
@@ -252,6 +250,13 @@
         .icon-small {
             width: 25px;
             height: 25px;
+        }
+
+        .scroll {
+            overflow: auto;
+            overflow-x: hidden;
+            max-height: 150px;
+            max-width: 100%;
         }
     </style>
 
@@ -356,12 +361,18 @@
                         </div>
                     </div>
                     <div class="content-row">
-                        <div class="column-block half-column">
-                            <div class="sub-header">Size</div>
-                            <div class="sub-content">
-                                <span>{{item.customfields.tamanho}}</span>
+                        <template is="dom-if" if="{{item.customfields.sizes.length}}">
+                            <div class="column-block half-column">
+                                <div class="scroll" style="max-height: 135px">
+                                    <template is="dom-repeat" items="{{item.customfields.sizes}}" as="size">
+                                        <div class="sub-header">{{size.name}}</div>
+                                        <div class="sub-content">
+                                            <span>{{size.value}}</span>
+                                        </div>
+                                    </template>
+                                </div>
                             </div>
-                        </div>
+                        </template>
                         <div class="column-block half-column">
                             <div class="sub-header">Class of Service</div>
                             <div class="sub-content">
@@ -384,7 +395,7 @@
                             <template is="dom-if" if="{{shouldShowSubtasks}}">
                                 <div class="sub-header">{{showHeaderSubtasks(item)}}</div>
                                 <div id="subtasks_content" class="sub-content">
-                                    <div style="overflow: auto; max-height: 150px; max-width: 100%; overflow-x: hidden; background-color: white;">
+                                    <div class="scroll" style="background-color: white">
                                         <template is="dom-repeat" items="{{subtasks}}" as="subtask">
                                             <paper-material class="subtaskPanel" elevation="0">
                                                 <paper-button class="subtaskLink" on-tap="openJira">
@@ -405,20 +416,11 @@
                                 <div class="sub-header">Effort</div>
                                 <div id="timetracking_content" class="sub-content">
                                     <template is="dom-if" if="{{timetracking}}">
-                                        <template is="dom-if" if="{{timetrackerBlown}}">
-                                            <paper-progress id="timeTracking" min="0"
-                                                            max="[[timetracking.originalEstimateMinutes]]"
-                                                            value="[[timetracking.timeSpentMinutes]]"
-                                                            class="red"></paper-progress>
-                                        </template>
-                                        <template is="dom-if" if="{{!timetrackerBlown}}">
-                                            <paper-progress id="timeTracking" min="0"
-                                                            max="[[timetracking.originalEstimateMinutes]]"
-                                                            value="[[timetracking.timeSpentMinutes]]"
-                                                            class="green"></paper-progress>
-                                        </template>
-                                        <paper-tooltip for="timetracking_content" position="top">[[timetrackingLabel]]
-                                        </paper-tooltip>
+                                        <span>[[timetrackingLabel]]</span>
+                                        <paper-progress id="timeTracking" min="0"
+                                                        max="[[timetracking.originalEstimateMinutes]]"
+                                                        value="[[timetracking.timeSpentMinutes]]"
+                                                        class$="{{getTimeTrackingColor()}}"></paper-progress>
                                     </template>
                                     <paper-spinner id="loadTimetracking" active alt="Loading..."></paper-spinner>
                                 </div>
@@ -559,10 +561,13 @@
                 },
 
                 parseMinutesToHours: function (minutes) {
+                    if (minutes == 0)
+                        return '0h';
+
                     var hours = Math.floor(minutes / 60);
                     var min = minutes % 60;
 
-                    return hours + 'h ' + min + 'm';
+                    return (hours > 0 ? hours + 'h ' : '') + (min > 0 ? min + 'm' : '');
                 },
 
                 subtasksCallback: function () {
@@ -858,6 +863,10 @@
                         this.timetrackerBlown = this.timetracking.timeSpentMinutes > this.timetracking.originalEstimateMinutes;
                     else
                         this.timetrackerBlown = false;
+                },
+
+                getTimeTrackingColor: function() {
+                    return this.timetrackerBlown ? 'red' : 'green';
                 },
 
                 getIssueColor: function (issue) {

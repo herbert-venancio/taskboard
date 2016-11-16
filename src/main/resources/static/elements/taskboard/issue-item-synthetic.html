@@ -124,9 +124,9 @@
                     return STATUSES_CANCELED_IDS.indexOf(item.status) != -1;
                 },
 
-                getIssueTypeImage: function (issue) {
+                getIssueTypeImage: function(issue, parentTypeIcon) {
                     var iconUri = issue.typeIconUri;
-                    if (this.parentTypeIcon && issue.parentTypeIconUri)
+                    if (parentTypeIcon && issue.parentTypeIconUri)
                         iconUri = issue.parentTypeIconUri;
 
                     return iconUri.replace('xsmall', 'xlarge');
@@ -141,7 +141,7 @@
                 },
 
                 getSizeClass: function(item) {
-                    var issueSize = item.customfields.tamanho;
+                    var issueSize = taskboard.getOnlyOneSize(item.customfields.sizes);
                     switch (issueSize) {
                         case TAMANHO.PP:
                             return "size-pp";

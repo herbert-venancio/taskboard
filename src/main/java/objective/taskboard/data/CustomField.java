@@ -1,4 +1,4 @@
-package objective.taskboard.domain;
+package objective.taskboard.data;
 
 /*-
  * [LICENSE]
@@ -21,26 +21,23 @@ package objective.taskboard.domain;
  * [/LICENSE]
  */
 
-import java.util.Map;
+import java.io.Serializable;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
-import objective.taskboard.jira.JiraProperties;
+@Data
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public class CustomField implements Serializable {
 
-@Service
-public class IssueColorService {
+    private static final long serialVersionUID = 1L;
 
-    @Autowired
-    private JiraProperties jiraProperties;
-    
-    public String getColor(Long classOfServiceId) {
-        Map<Long, String> colors = jiraProperties.getCustomfield().getClassOfService().getColors();
-        String color = colors == null ? null : colors.get(classOfServiceId);
+    private String name;
 
-        if (color != null)
-            return color;
+    private Object value;
 
-        return "#DDF9D9";
+    public static CustomField from(String name, Object value) {
+        return new CustomField(name, value);
     }
 }

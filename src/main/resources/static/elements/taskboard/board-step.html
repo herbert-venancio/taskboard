@@ -62,17 +62,21 @@
             };
 
             var getRealSize = function (a) {
-                if (a.customfields.tamanho == TAMANHO.PP)
-                    return 1;
-                if (a.customfields.tamanho == TAMANHO.P)
-                    return 2;
-                if (a.customfields.tamanho == TAMANHO.M)
-                    return 3;
-                if (a.customfields.tamanho == TAMANHO.G)
-                    return 4;
-                if (a.customfields.tamanho == TAMANHO.GG)
-                    return 5;
-                return 3;
+                var size = taskboard.getOnlyOneSize(a.customfields.sizes);
+                switch (size) {
+                    case TAMANHO.PP:
+                        return 1;
+                    case TAMANHO.P:
+                        return 2;
+                    case TAMANHO.M:
+                        return 3;
+                    case TAMANHO.G:
+                        return 4;
+                    case TAMANHO.GG:
+                        return 5;
+                    default:
+                        return 3;
+                }
             };
 
             this.sortBySize = function (a, b) {

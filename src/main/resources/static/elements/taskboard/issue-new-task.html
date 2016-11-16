@@ -415,8 +415,8 @@
 
                 populateMenuTamanho: function () {
                     if (this.tipoIssue) {
-                        var tamanho = this.getIssueTypeById(this.tipoIssue.value);
-                        var field = this.getFieldFromIssueType(tamanho, CUSTOMFIELD.TAMANHO);
+                        var issueType = this.getIssueTypeById(this.tipoIssue.value);
+                        var field = this.getFieldFromIssueType(issueType, CUSTOMFIELD.SIZES[0]);
                         var list = [];
                         for (x in field.allowedValues)
                             list.push({
@@ -500,7 +500,7 @@
                             "estimativa": this.estimativa,
                             "customFields": {}
                         };
-                        subtask.customFields[CUSTOMFIELD.TAMANHO] = this.tamanho.value;
+                        subtask.customFields[CUSTOMFIELD.SIZES[0]] = this.tamanho.value;
                         subtask.customFields[CUSTOMFIELD.CLASSE_DE_SERVICO] = this.classeDeServico.value;
 
                         $.ajax({
