@@ -22,6 +22,7 @@ package objective.taskboard.domain.converter;
  */
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.base.Strings.isNullOrEmpty;
 
 import java.util.List;
@@ -44,7 +45,6 @@ import com.atlassian.jira.rest.client.api.domain.IssueLinkType.Direction;
 import com.atlassian.jira.rest.client.api.domain.User;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.data.CustomField;
@@ -110,10 +110,11 @@ public class JiraIssueToIssueConverter {
         String subResponsavel1 = jiraIssue.getAssignee() != null ? jiraIssue.getAssignee().getAvatarUri("24x24").toString() : "";
         String subResponsavel2 = avatarSubResponsaveis.stream().filter(x -> !x.equals(subResponsavel1)).findFirst().orElse("");
 
-        Map<String, Object> customFields = Maps.newHashMap();
+        Map<String, Object> customFields = newHashMap();
         customFields.put(jiraProperties.getCustomfield().getClassOfService().getId(), getClassOfService(jiraIssue));
         customFields.put(jiraProperties.getCustomfield().getBlocked().getId(), getBlocked(jiraIssue));
         customFields.put(jiraProperties.getCustomfield().getLastBlockReason().getId(), getLastBlockReason(jiraIssue));
+        customFields.putAll(getAdditionalEstimatedHours(jiraIssue));
         customFields.putAll(getTShirtSizes(jiraIssue));
 
         List<String> teamGroups = getTeamGroups(jiraIssue);
@@ -236,7 +237,7 @@ public class JiraIssueToIssueConverter {
     }
 
     private Map<String, Object> getTShirtSizes(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        Map<String, Object> tShirtSizes = Maps.newHashMap();
+        Map<String, Object> tShirtSizes = newHashMap();
 
         for (String tSizeId : jiraProperties.getCustomfield().getTShirtSize().getIds()) {
             String tShirtSizeValue = getJsonValue(jiraIssue, tSizeId);
@@ -315,6 +316,22 @@ public class JiraIssueToIssueConverter {
 
         String lastBlockReason = field.getValue().toString();
         return lastBlockReason.length() > 200 ? lastBlockReason.substring(0, 200) + "..." : lastBlockReason;
+    }
+
+    private Map<String, Object> getAdditionalEstimatedHours(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
+        String additionalEstimatedHoursId = jiraProperties.getCustomfield().getAdditionalEstimatedHours().getId();
+        IssueField field = jiraIssue.getField(additionalEstimatedHoursId);
+        if (field == null)
+            return newHashMap();
+
+        Double additionalHours = field.getValue() == null ? 0D : (Double) field.getValue();
+        if (additionalHours == 0D)
+            return newHashMap();
+
+        CustomField customFieldAdditionalHours = CustomField.from(field.getName(), additionalHours);
+        Map<String, Object> mapAdditionalHours = newHashMap();
+        mapAdditionalHours.put(additionalEstimatedHoursId, customFieldAdditionalHours);
+        return mapAdditionalHours;
     }
 
     private List<String> getSubResponsaveisAvatar(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {

@@ -55,8 +55,9 @@
 
         .sub-header {
             font-size: 13px;
-            font-weight: 500;
+            font-weight: 600;
             text-align: left;
+            max-width: 100px;
         }
 
         .content-row {
@@ -257,6 +258,11 @@
             overflow-x: hidden;
             max-height: 150px;
             max-width: 100%;
+            background-color: white;
+        }
+
+        .table-row {
+            display: table-row;
         }
     </style>
 
@@ -351,7 +357,7 @@
                         </div>
                     </div>
                     <div class="content-row">
-                        <div class="column-block">
+                        <div class="column-block half-column">
                             <div class="sub-header">Assignees</div>
                             <div class="sub-content flex horizontal layout wrap">
                                 <template is="dom-repeat" items="{{listaResponsaveis(item)}}" as="responsavel">
@@ -359,20 +365,6 @@
                                 </template>
                             </div>
                         </div>
-                    </div>
-                    <div class="content-row">
-                        <template is="dom-if" if="{{item.customfields.sizes.length}}">
-                            <div class="column-block half-column">
-                                <div class="scroll" style="max-height: 135px">
-                                    <template is="dom-repeat" items="{{item.customfields.sizes}}" as="size">
-                                        <div class="sub-header">{{size.name}}</div>
-                                        <div class="sub-content">
-                                            <span>{{size.value}}</span>
-                                        </div>
-                                    </template>
-                                </div>
-                            </div>
-                        </template>
                         <div class="column-block half-column">
                             <div class="sub-header">Class of Service</div>
                             <div class="sub-content">
@@ -380,6 +372,32 @@
                             </div>
                         </div>
                     </div>
+                    <div class="content-row">
+                        <template is="dom-if" if="{{item.customfields.sizes.length}}">
+                            <div class="table-row">
+                                <template is="dom-repeat" items="{{item.customfields.sizes}}" as="size">
+                                    <div class="column-block sub-header" style="padding-right: 10px">{{size.name}}</div>
+                                </template>
+                            </div>
+                            <div class="table-row">
+                                <template is="dom-repeat" items="{{item.customfields.sizes}}" as="size">
+                                    <div class="column-block sub-content">
+                                        <span>{{size.value}}</span>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                    <template is="dom-if" if="{{item.customfields.additionalEstimatedHours}}">
+                        <div class="content-row">
+                            <div class="column-block">
+                                <div class="sub-header">{{item.customfields.additionalEstimatedHours.name}}</div>
+                                <div class="sub-content">
+                                    <span>{{item.customfields.additionalEstimatedHours.value}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
                     <template is="dom-if" if="{{issueBlocked(item)}}">
                         <div class="content-row">
                             <div class="column-block">
@@ -395,7 +413,7 @@
                             <template is="dom-if" if="{{shouldShowSubtasks}}">
                                 <div class="sub-header">{{showHeaderSubtasks(item)}}</div>
                                 <div id="subtasks_content" class="sub-content">
-                                    <div class="scroll" style="background-color: white">
+                                    <div class="scroll">
                                         <template is="dom-repeat" items="{{subtasks}}" as="subtask">
                                             <paper-material class="subtaskPanel" elevation="0">
                                                 <paper-button class="subtaskLink" on-tap="openJira">
@@ -405,7 +423,7 @@
                                             </paper-material>
                                         </template>
                                     </div>
-                                    <paper-spinner id="loadSubtasks" active alt="Loading..." active></paper-spinner>
+                                    <paper-spinner id="loadSubtasks" active alt="Loading..."></paper-spinner>
                                 </div>
                             </template>
                         </div>

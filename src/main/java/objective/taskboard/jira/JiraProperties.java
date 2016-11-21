@@ -21,8 +21,11 @@ package objective.taskboard.jira;
  * [/LICENSE]
  */
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.Map;
@@ -99,6 +102,10 @@ public class JiraProperties {
         @Valid
         private CustomFieldDetails coAssignees;
         
+        private CustomFieldDetails additionalEstimatedHours = new CustomFieldDetails("");
+        
+        @NoArgsConstructor
+        @AllArgsConstructor(access = AccessLevel.PRIVATE)
         @Data
         public static class CustomFieldDetails {
             @NotNull

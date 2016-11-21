@@ -241,7 +241,8 @@ public class JiraService extends AbstractJiraService {
                     properties.getCustomfield().getClassOfService().getId(),
                     properties.getCustomfield().getCoAssignees().getId(),
                     properties.getCustomfield().getBlocked().getId(),
-                    properties.getCustomfield().getLastBlockReason().getId());
+                    properties.getCustomfield().getLastBlockReason().getId(),
+                    properties.getCustomfield().getAdditionalEstimatedHours().getId());
             fields.addAll(properties.getCustomfield().getTShirtSize().getIds());
             try {
                 SearchRestClient search = client.getSearchClient();
