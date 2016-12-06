@@ -256,8 +256,10 @@
                         return true;
                     else if (issue.summary && issue.summary.toUpperCase().indexOf(query) !== -1)
                         return true;
-                    else
-                        return false;
+                    else if (issue.customfields.release && issue.customfields.release.value.toUpperCase().indexOf(query) !== -1)
+                        return true;
+
+                    return false;
                 },
 
                 hierarchicalFilterMatches: function(issue) {

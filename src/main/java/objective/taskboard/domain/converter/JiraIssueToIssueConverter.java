@@ -43,7 +43,6 @@ import com.atlassian.jira.rest.client.api.domain.IssueField;
 import com.atlassian.jira.rest.client.api.domain.IssueLink;
 import com.atlassian.jira.rest.client.api.domain.IssueLinkType.Direction;
 import com.atlassian.jira.rest.client.api.domain.User;
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
 import lombok.extern.slf4j.Slf4j;
@@ -116,6 +115,7 @@ public class JiraIssueToIssueConverter {
         customFields.put(jiraProperties.getCustomfield().getLastBlockReason().getId(), getLastBlockReason(jiraIssue));
         customFields.putAll(getAdditionalEstimatedHours(jiraIssue));
         customFields.putAll(getTShirtSizes(jiraIssue));
+        customFields.putAll(getRelease(jiraIssue));
 
         List<String> teamGroups = getTeamGroups(jiraIssue);
 
@@ -123,23 +123,20 @@ public class JiraIssueToIssueConverter {
                                .distinct()
                                .collect(Collectors.toList());
 
-        long parentTypeId = getParentType(jiraIssue);
-        Long issueTypeId = jiraIssue.getIssueType().getId();
-
         String color = issueColorService.getColor(getClassOfServiceId(jiraIssue));
 
         return Issue.from(
                 jiraIssue.getKey(),
                 jiraIssue.getProject().getKey(),
                 jiraIssue.getProject().getName(),
-                issueTypeId,
+                jiraIssue.getIssueType().getId(),
                 jiraIssue.getIssueType().getIconUri().toASCIIString(),
                 jiraIssue.getSummary() != null ? jiraIssue.getSummary() : "",
                 jiraIssue.getStatus().getId(),
                 subResponsavel1,
                 subResponsavel2,
                 getParentKey(jiraIssue),
-                parentTypeId,
+                getParentType(jiraIssue),
                 getParentTypeIconUri(jiraIssue),
                 getRequired(jiraIssue),
                 String.join(",", nameSubResponsaveis),
@@ -324,14 +321,43 @@ public class JiraIssueToIssueConverter {
         if (field == null)
             return newHashMap();
 
-        Double additionalHours = field.getValue() == null ? 0D : (Double) field.getValue();
-        if (additionalHours == 0D)
+        if (field.getValue() == null)
             return newHashMap();
 
+        Double additionalHours = (Double) field.getValue();
         CustomField customFieldAdditionalHours = CustomField.from(field.getName(), additionalHours);
         Map<String, Object> mapAdditionalHours = newHashMap();
         mapAdditionalHours.put(additionalEstimatedHoursId, customFieldAdditionalHours);
         return mapAdditionalHours;
+    }
+
+    private Map<String, Object> getRelease(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
+        String releaseId = jiraProperties.getCustomfield().getRelease().getId();
+        IssueField field = jiraIssue.getField(releaseId);
+        if (field == null)
+            return newHashMap();
+
+        JSONObject json = (JSONObject) field.getValue();
+
+        try {
+            if (json == null) {
+                String parentKey = getParentKey(jiraIssue);
+                com.atlassian.jira.rest.client.api.domain.Issue parent = getIssueByKey(parentKey);
+                if (parent == null)
+                    return newHashMap();
+
+                return getRelease(parent);
+            }
+
+            String release = json.getString("name");
+            CustomField customFieldRelease = CustomField.from(field.getName(), release);
+            Map<String, Object> mapRelease = newHashMap();
+            mapRelease.put(releaseId, customFieldRelease);
+            return mapRelease;
+        } catch (JSONException e) {
+            log.error(e.getMessage(), e);
+            return newHashMap();
+        }
     }
 
     private List<String> getSubResponsaveisAvatar(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
@@ -434,9 +460,6 @@ public class JiraIssueToIssueConverter {
     private List<UserTeam> getParentUsersResponsaveis(com.atlassian.jira.rest.client.api.domain.Issue issue) {
         List<UserTeam> parentUsers = newArrayList();
         String parentKey = getParentKey(issue);
-        if (Strings.isNullOrEmpty(parentKey))
-            return parentUsers;
-
         com.atlassian.jira.rest.client.api.domain.Issue parent = getIssueByKey(parentKey);
         if (parent != null)
             parentUsers = getUsersResponsaveis(parent);
@@ -444,6 +467,9 @@ public class JiraIssueToIssueConverter {
     }
 
     private com.atlassian.jira.rest.client.api.domain.Issue getIssueByKey(String parentKey) {
+        if (isNullOrEmpty(parentKey))
+            return null;
+
         com.atlassian.jira.rest.client.api.domain.Issue parent = issuesList.stream()
                 .filter(i -> i.getKey().equals(parentKey))
                 .findFirst()

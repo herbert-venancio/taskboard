@@ -102,6 +102,8 @@ public class JiraProperties {
         @Valid
         private CustomFieldDetails coAssignees;
         
+        private CustomFieldDetails release = new CustomFieldDetails("");
+        
         private CustomFieldDetails additionalEstimatedHours = new CustomFieldDetails("");
         
         @NoArgsConstructor
