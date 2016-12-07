@@ -23,7 +23,13 @@ package objective.taskboard.jira;
 
 import java.util.concurrent.ExecutionException;
 
+import org.apache.commons.codec.binary.Base64;
+import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.web.client.RestTemplate;
 
 import com.atlassian.jira.rest.client.api.JiraRestClient;
 import com.atlassian.jira.rest.client.api.RestClientException;
@@ -34,7 +40,10 @@ import objective.taskboard.auth.CredentialsHolder;
 
 @Slf4j
 public class AbstractJiraService {
-    
+
+    protected static final int HTTP_BAD_REQUEST = 400;
+    protected static final int HTTP_FORBIDDEN = 403;
+
     @Autowired private JiraProperties jiraProperties;
 
     protected <T> T executeRequest(PromisedRequest<T> request) {       
@@ -55,7 +64,7 @@ public class AbstractJiraService {
     protected <T> T executeWrappedRequest(Request<T> request) {
         return executeWrappedRequest(CredentialsHolder.username(), CredentialsHolder.password(), request);
     }
-    
+
     protected <T> T executeWrappedRequest(String username, String password, Request<T> request) {
         JiraRestClient client = getClientWithUsernameAndPassword(username, password);
         try {
@@ -64,12 +73,27 @@ public class AbstractJiraService {
             closeClient(client);
         }
     }
-    
+
+    protected String postWithRestTemplate(String path, MediaType mediaType, JSONObject jsonRequest) {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpEntity<String> request = new HttpEntity<>(jsonRequest.toString(), getAuthorizationRequestHeader(mediaType));
+        String url = jiraProperties.getUrl() + path;
+        return restTemplate.postForObject(url, request, String.class);
+    }
+
+    private HttpHeaders getAuthorizationRequestHeader(MediaType mediaType) {
+        HttpHeaders headers = new HttpHeaders();
+        String userAndPass = jiraProperties.getLousa().getUsername() + ":" + jiraProperties.getLousa().getPassword();
+        headers.add("Authorization", "Basic " + new String(Base64.encodeBase64((userAndPass).getBytes())));
+        headers.setContentType(mediaType);
+        return headers;
+    }
+
     private JiraRestClient getClientWithUsernameAndPassword(String username, String password) {
         JiraClientFactory jiraClient = new JiraClientFactory();
         return jiraClient.getInstance(jiraProperties.getUrl(), username, password);
     }
-    
+
     private void closeClient(JiraRestClient client) {
         try {
             client.close();

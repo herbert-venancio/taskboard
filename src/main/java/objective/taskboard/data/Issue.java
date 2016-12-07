@@ -58,6 +58,8 @@ public class Issue implements Serializable {
 
     private long status;
 
+    private long startDateStepMillis;
+
     private String subresponsavel1;
 
     private String subresponsavel2;
@@ -98,11 +100,11 @@ public class Issue implements Serializable {
     @JsonProperty(access = Access.WRITE_ONLY)
     private Map<String, Object> customFields;
 
-    public static Issue from(String issueKey, String projectKey, String project, long issueType, String typeIconUri, String summary, long status, String subresponsavel1,
-            String subresponsavel2, String parent, long parentType, String parentTypeIconUri, List<String> requires, String subResponsaveis, String assignee,
-            String usersInvalidTeam, long priority, Date dueDate, String description, List<String> teams, String comments, Map<String, Object> customFields,
+    public static Issue from(String issueKey, String projectKey, String project, long issueType, String typeIconUri, String summary, long status, long startDateStepMillis,
+            String subresponsavel1, String subresponsavel2, String parent, long parentType, String parentTypeIconUri, List<String> requires, String subResponsaveis,
+            String assignee, String usersInvalidTeam, long priority, Date dueDate, String description, List<String> teams, String comments, Map<String, Object> customFields,
             String color) {
-        return new Issue(issueKey, projectKey, project, issueType, typeIconUri, summary, status, subresponsavel1, subresponsavel2,
+        return new Issue(issueKey, projectKey, project, issueType, typeIconUri, summary, status, startDateStepMillis, subresponsavel1, subresponsavel2,
                 parent, parentType, parentTypeIconUri, requires, false, false, false, color, subResponsaveis, assignee, usersInvalidTeam, priority, dueDate, description, teams, comments, customFields);
     }
 

@@ -24,11 +24,11 @@ package objective.taskboard.domain.converter;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.stream.Collectors.toList;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
@@ -75,13 +75,16 @@ public class JiraIssueToIssueConverter {
 
     @Autowired
     private JiraService jiraService;
-    
+
     @Autowired
     private JiraProperties jiraProperties;
-    
+
     @Autowired
     private IssueColorService issueColorService;
-    
+
+    @Autowired
+    private StartDateStepGetter startDateStepGetter;
+
     private List<String> parentIssueLinks;
     private List<com.atlassian.jira.rest.client.api.domain.Issue> issuesList;
     private List<String> usersInvalidTeam;
@@ -90,14 +93,14 @@ public class JiraIssueToIssueConverter {
     private void loadParentIssueLinks() {
         parentIssueLinks = parentIssueLinkRepository.findAll().stream()
                                .map(ParentIssueLink::getDescriptionIssueLink)
-                               .collect(Collectors.toList());
+                               .collect(toList());
     }
 
     public List<Issue> convert(List<com.atlassian.jira.rest.client.api.domain.Issue> issueList) {
         issuesList = issueList;
         List<Issue> collect = issueList.stream()
                                   .map(this::convert)
-                                  .collect(Collectors.toList());
+                                  .collect(toList());
         System.out.println(collect.size());
         return collect;
     }
@@ -121,7 +124,7 @@ public class JiraIssueToIssueConverter {
 
         usersInvalidTeam = usersInvalidTeam.stream()
                                .distinct()
-                               .collect(Collectors.toList());
+                               .collect(toList());
 
         String color = issueColorService.getColor(getClassOfServiceId(jiraIssue));
 
@@ -133,6 +136,7 @@ public class JiraIssueToIssueConverter {
                 jiraIssue.getIssueType().getIconUri().toASCIIString(),
                 jiraIssue.getSummary() != null ? jiraIssue.getSummary() : "",
                 jiraIssue.getStatus().getId(),
+                startDateStepGetter.get(jiraIssue),
                 subResponsavel1,
                 subResponsavel2,
                 getParentKey(jiraIssue),
@@ -194,7 +198,7 @@ public class JiraIssueToIssueConverter {
                 List<IssueLink> links = Lists.newArrayList(jiraIssue.getIssueLinks());
                 List<IssueLink> collect = links.stream()
                         .filter(l -> parentIssueLinks.contains(l.getIssueLinkType().getDescription()))
-                        .collect(Collectors.toList());
+                        .collect(toList());
                 if (!collect.isEmpty()) {
                     IssueLink link = collect.stream().findFirst().orElse(null);
                     return (link != null) ? link.getTargetIssueKey() : "";
@@ -217,7 +221,7 @@ public class JiraIssueToIssueConverter {
         return Lists.newArrayList(jiraIssue.getIssueLinks()).stream()
                 .filter(this::isRequiresLink)
                 .map(link -> link.getTargetIssueKey())
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     private boolean isRequiresLink(final IssueLink link) {
@@ -413,7 +417,7 @@ public class JiraIssueToIssueConverter {
                 .filter(Objects::nonNull)
                 .map(u -> u.getTeam())
                 .distinct()
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     private List<UserTeam> getUsers(com.atlassian.jira.rest.client.api.domain.Issue issue) {

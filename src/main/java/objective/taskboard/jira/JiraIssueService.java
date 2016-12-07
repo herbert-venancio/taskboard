@@ -25,9 +25,7 @@ import com.atlassian.jira.rest.client.api.domain.Issue;
 import objective.taskboard.data.IssuesConfiguration;
 import objective.taskboard.domain.Filter;
 import objective.taskboard.domain.ProjectFilterConfiguration;
-import objective.taskboard.domain.converter.JiraIssueToIssueConverter;
 import objective.taskboard.repository.FilterCachedRepository;
-import objective.taskboard.repository.IssueTypeConfigurationRepository;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,17 +37,11 @@ import java.util.stream.Collectors;
 public class JiraIssueService {
 
     @Autowired
-    JiraService jiraService;
+    private JiraSearchService jiraSearchService;
 
     @Autowired
-    ProjectFilterConfigurationCachedRepository projectRepository;
+    private ProjectFilterConfigurationCachedRepository projectRepository;
 
-    @Autowired
-    IssueTypeConfigurationRepository issueTypeConfigRepository;
-    
-    @Autowired
-    JiraIssueToIssueConverter issueConverter;
-    
     @Autowired
     private FilterCachedRepository filterRepository;
 
@@ -68,7 +60,7 @@ public class JiraIssueService {
         return String.format("project in (%s) ", projectKeys);
     }
 
-    public String issueTypeAndStatusAndLimitInDays(List<IssuesConfiguration> configs) {
+    private String issueTypeAndStatusAndLimitInDays(List<IssuesConfiguration> configs) {
         List<IssuesConfiguration> configsWithRangeDate = configs.stream().filter(c -> !(c.getLimitInDays() == null)).collect(Collectors.toList());
         List<IssuesConfiguration> configsWithoutRangeDate = configs.stream().filter(c -> c.getLimitInDays() == null).collect(Collectors.toList());
 
@@ -83,7 +75,7 @@ public class JiraIssueService {
         String jql = createJql(configs);
         if (additionalJqlCondition != null)
             jql = "(" + additionalJqlCondition + ") AND " + jql; 
-        return jiraService.searchIssues(jql);
+        return jiraSearchService.searchIssues(jql);
     }
 
     public Issue searchIssue(final String key) {
@@ -120,7 +112,7 @@ public class JiraIssueService {
         if (additionalJqlCondition != null)
             jql = "(" + additionalJqlCondition + ") AND " + jql;
 
-        return jiraService.searchIssues(jql);
+        return jiraSearchService.searchIssues(jql);
     }
 
 }

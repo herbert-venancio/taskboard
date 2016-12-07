@@ -373,6 +373,14 @@
                         </div>
                     </div>
                     <div class="content-row">
+                        <div class="column-block">
+                            <div class="sub-header">Cycle Time</div>
+                            <div class="sub-content">
+                                <span>{{item.cycletime}} days</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="content-row">
                         <template is="dom-if" if="{{item.customfields.sizes.length}}">
                             <div class="table-row">
                                 <template is="dom-repeat" items="{{item.customfields.sizes}}" as="size">

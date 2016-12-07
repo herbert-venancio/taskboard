@@ -37,7 +37,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.stereotype.Service;
 
 import com.atlassian.jira.rest.client.api.RestClientException;
-import com.atlassian.jira.rest.client.api.SearchRestClient;
 import com.atlassian.jira.rest.client.api.domain.BasicIssue;
 import com.atlassian.jira.rest.client.api.domain.Comment;
 import com.atlassian.jira.rest.client.api.domain.Issue;
@@ -52,8 +51,6 @@ import com.atlassian.jira.rest.client.api.domain.input.IssueInput;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder;
 import com.atlassian.jira.rest.client.api.domain.input.TransitionInput;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.auth.CredentialsHolder;
@@ -64,12 +61,9 @@ import objective.taskboard.database.TaskboardDatabaseService;
 @EnableConfigurationProperties(JiraProperties.class)
 public class JiraService extends AbstractJiraService {
 
-    private static final int HTTP_BAD_REQUEST = 400;
-    private static final int HTTP_FORBIDDEN = 403;
-
     @Autowired
     private TaskboardDatabaseService taskboardDatabaseService;
-    
+
     @Autowired
     private JiraProperties properties;
 
@@ -118,7 +112,7 @@ public class JiraService extends AbstractJiraService {
             transitionInput = issueComment.isEmpty()? new TransitionInput(transition.getId()) :
                 new TransitionInput(transition.getId(), Comment.valueOf(issueComment));
         } else {
-            final List<FieldInput> fields = Lists.newArrayList(new FieldInput("resolution", ComplexIssueInputFieldValue.with("name", resolution)));
+            final List<FieldInput> fields = newArrayList(new FieldInput("resolution", ComplexIssueInputFieldValue.with("name", resolution)));
             transitionInput = issueComment.isEmpty()? new TransitionInput(transition.getId(), fields):
                 new TransitionInput(transition.getId(), fields, Comment.valueOf(issueComment));
         }
@@ -130,7 +124,7 @@ public class JiraService extends AbstractJiraService {
         Resolution resolutionTransition = null;
 
         Iterable<Resolution> response = executeRequest(client -> client.getMetadataClient().getResolutions());
-        List<Resolution> resolutions = Lists.newArrayList(response);
+        List<Resolution> resolutions = newArrayList(response);
 
         if (properties.getTransitionsDoneNames().contains(transitionName)) {
             String done = properties.getResolutions().getDone().getName();
@@ -231,49 +225,6 @@ public class JiraService extends AbstractJiraService {
         else
             subs.addAll(taskboardDatabaseService.getSubtasks(issue.getKey()));
         return subs;
-    }
-
-    public List<Issue> searchIssues(String jql) {
-        log.debug("⬣⬣⬣⬣⬣  searchIssues");
-        return executeWrappedRequest(client -> {
-            Set<String> fields = Sets.newHashSet("parent", "project", "status", "created", "updated", "issuelinks",
-                    "issuetype", "summary", "description", "name", "assignee", "reporter", "priority",
-                    properties.getCustomfield().getClassOfService().getId(),
-                    properties.getCustomfield().getCoAssignees().getId(),
-                    properties.getCustomfield().getBlocked().getId(),
-                    properties.getCustomfield().getLastBlockReason().getId(),
-                    properties.getCustomfield().getAdditionalEstimatedHours().getId(),
-                    properties.getCustomfield().getRelease().getId());
-            fields.addAll(properties.getCustomfield().getTShirtSize().getIds());
-            try {
-                SearchRestClient search = client.getSearchClient();
-
-
-                // <workaround reason="timeout is hardcoded">
-                List<Issue> list = new ArrayList<>();
-                int step = 100;
-                try {
-                    for (int i = 0; true; i++) {
-                        List<Issue> newList = newArrayList(search.searchJql(jql, step, i * step, fields).claim().getIssues());
-                        list.addAll(newList);
-                        if (newList.isEmpty()) break;
-                    }
-                } catch (RestClientException e) {
-                    log.error(jql);
-                    e.printStackTrace();
-                }
-                // </workaround>
-
-
-                return list;
-            } catch (RestClientException e) {
-                if (HTTP_FORBIDDEN == e.getStatusCode().or(0))
-                    throw new PermissaoNegadaException(e);
-                if (HTTP_BAD_REQUEST == e.getStatusCode().or(0))
-                    throw new ParametrosDePesquisaInvalidosException(e);
-                throw e;
-            }
-        });
     }
 
     public void block(String issueKey, String lastBlockReason) {
