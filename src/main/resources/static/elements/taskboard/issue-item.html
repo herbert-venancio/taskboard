@@ -270,7 +270,7 @@
                     <div class="key" on-tap="openJira" title="Open in jira">{{item.issueKey}}</div>
                 </div>
                 <div class="icons">
-                    <img id="issueTypeIcon" class="icon-small icon-issuetype" title="{{getIssueTypeName(item.type)}}" src="{{getIssueTypeImage(item)}}"></img>
+                    <img id="issueTypeIcon" class="icon-small icon-issuetype" title="{{item.issueKey}}&#010;{{getIssueTypeName(item.type)}}&#010;{{getStatusName(item.status)}}" src="{{getIssueTypeImage(item)}}"></img>
                     <template is="dom-if" if="{{item.subresponsavel1}}">
                         <img class="icon-small" src="{{item.subresponsavel1}}"></img>
                     </template>
@@ -442,6 +442,10 @@
 
                 getOnlyOneSize: function(sizes) {
                     return taskboard.getOnlyOneSize(sizes);
+                },
+
+                getStatusName: function(statusId) {
+                    return taskboard.getStatusName(statusId);
                 }
             });
 

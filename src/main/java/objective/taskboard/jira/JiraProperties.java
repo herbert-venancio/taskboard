@@ -73,6 +73,10 @@ public class JiraProperties {
     @NotNull
     @Valid
     private Resolutions resolutions;
+    @Valid
+    private Time startBusinessHours = new Time(9, 0, "am");
+    @Valid
+    private Time endBusinessHours = new Time(6, 0, "pm");
     
     @Data 
     public static class Lousa {
@@ -198,5 +202,17 @@ public class JiraProperties {
             @NotEmpty
             private String name;
         }
+    }
+    
+    @Data
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    public static class Time {
+        @NotNull
+        private Integer hour;
+        @NotNull
+        private Integer minute;
+        @NotNull
+        @NotEmpty
+        private String period;
     }
 }

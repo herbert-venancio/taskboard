@@ -21,7 +21,9 @@
 
 function CycleTime() {
 
-    var oneWorkedDayInMillis = 9 * 60 * 60 * 1000;
+    var ONE_DAY_IN_MILLIS = 24 * 60 * 60 * 1000;
+    var SUNDAY = 0;
+    var SATURDAY = 6;
 
     this.getCycleTime = function(startDate, endDate) {
         if (endDate < startDate) { return 0; }
@@ -40,9 +42,9 @@ function CycleTime() {
         var millisecondsWorked = millisecondsWorkedStartDate + millisecondsWorkedEndDate;
         var current = getNextDay(startDateAux);
 
-        while (current < endDateAux) {
+        while (!isSameDay(current, endDateAux)) {
             if (isNotWeekend(current.getDay()))
-                millisecondsWorked += oneWorkedDayInMillis;
+                millisecondsWorked += getOneWorkedDayInMillis();
 
             current = getNextDay(current);
         }
@@ -51,11 +53,17 @@ function CycleTime() {
     };
 
     getStartBusinessHours = function(date) {
-        return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 9, 0, 0, 0);
+        var hour = getHourPeriod(START_BUSINESS_HOURS.hour, START_BUSINESS_HOURS.period);
+        return new Date(date.getFullYear(), date.getMonth(), date.getDate(), hour, START_BUSINESS_HOURS.minute, 0, 0);
     };
 
     getEndBusinessHours = function(date) {
-        return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 18, 0, 0, 0);
+        var hour = getHourPeriod(END_BUSINESS_HOURS.hour, END_BUSINESS_HOURS.period);
+        return new Date(date.getFullYear(), date.getMonth(), date.getDate(), hour, END_BUSINESS_HOURS.minute, 0, 0);
+    };
+
+    getHourPeriod = function(hour, period) {
+        return period == 'pm' ? hour + 12 : hour;
     };
 
     isSameDay = function(startDate, endDate) {
@@ -65,16 +73,20 @@ function CycleTime() {
     };
 
     isNotWeekend = function(day) {
-        return day !== 0 && day !== 6;
+        return day !== SUNDAY && day !== SATURDAY;
+    };
+
+    getOneWorkedDayInMillis = function() {
+        return getEndBusinessHours(new Date()).getTime() - getStartBusinessHours(new Date()).getTime();
     };
 
     getNextDay = function(date) {
-        var nextDay = new Date(date.getTime() + 24 * 60 * 60 * 1000);
+        var nextDay = new Date(date.getTime() + ONE_DAY_IN_MILLIS);
         return nextDay;
     };
 
     toWorkedDays = function(milliseconds) {
-        return milliseconds / oneWorkedDayInMillis;
+        return milliseconds / getOneWorkedDayInMillis();
     };
 
 }

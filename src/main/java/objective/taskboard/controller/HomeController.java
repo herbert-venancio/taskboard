@@ -51,6 +51,8 @@ public class HomeController {
         model.addAttribute("jiraStatusesCompletedIds", serialize(jiraPropeties.getStatusesCompletedIds()));
         model.addAttribute("jiraStatusesCanceledIds", serialize(jiraPropeties.getStatusesCanceledIds()));
         model.addAttribute("jiraTransitionsWithRequiredCommentNames", serialize(jiraPropeties.getTransitionsWithRequiredCommentNames()));
+        model.addAttribute("jiraStartBusinessHours", serialize(jiraPropeties.getStartBusinessHours()));
+        model.addAttribute("jiraEndBusinessHours", serialize(jiraPropeties.getEndBusinessHours()));
         return "index";
     }
 
