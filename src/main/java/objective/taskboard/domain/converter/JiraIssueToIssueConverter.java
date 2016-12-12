@@ -43,7 +43,6 @@ import com.atlassian.jira.rest.client.api.domain.IssueField;
 import com.atlassian.jira.rest.client.api.domain.IssueLink;
 import com.atlassian.jira.rest.client.api.domain.IssueLinkType.Direction;
 import com.atlassian.jira.rest.client.api.domain.User;
-import com.google.common.collect.Lists;
 
 import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.data.CustomField;
@@ -62,7 +61,7 @@ import objective.taskboard.repository.UserTeamCachedRepository;
 @Service
 public class JiraIssueToIssueConverter {
 
-    private final String SEM_TIME = "NO TEAM";
+    private static final String SEM_TIME = "NO TEAM";
 
     @Autowired
     private UserTeamCachedRepository userTeamRepository;
@@ -195,7 +194,7 @@ public class JiraIssueToIssueConverter {
 
         if (field == null) {
             if (jiraIssue.getIssueLinks() != null) {
-                List<IssueLink> links = Lists.newArrayList(jiraIssue.getIssueLinks());
+                List<IssueLink> links = newArrayList(jiraIssue.getIssueLinks());
                 List<IssueLink> collect = links.stream()
                         .filter(l -> parentIssueLinks.contains(l.getIssueLinkType().getDescription()))
                         .collect(toList());
@@ -218,7 +217,7 @@ public class JiraIssueToIssueConverter {
     }
 
     private List<String> getRequired(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        return Lists.newArrayList(jiraIssue.getIssueLinks()).stream()
+        return newArrayList(jiraIssue.getIssueLinks()).stream()
                 .filter(this::isRequiresLink)
                 .map(link -> link.getTargetIssueKey())
                 .collect(toList());
@@ -231,7 +230,7 @@ public class JiraIssueToIssueConverter {
 
     private String getComments(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
         Iterable<Comment> comment = jiraIssue.getComments();
-        if (Lists.newArrayList(comment).size() == 0)
+        if (newArrayList(comment).size() == 0)
             return "";
         else
             return comment.iterator().next().toString();
@@ -255,12 +254,40 @@ public class JiraIssueToIssueConverter {
     }
 
     private String getClassOfService(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        String classOfService = getJsonValue(jiraIssue, jiraProperties.getCustomfield().getClassOfService().getId());
+        String defaultClassOfService = jiraProperties.getCustomfield().getClassOfService().getDefaultValue();
+        JSONObject json = getJSONClassOfService(jiraIssue);
+        try {
+            return json == null ? defaultClassOfService : json.getString("value");
+        } catch (JSONException e) {
+            return "";
+        }
+    }
 
-        if (isNullOrEmpty(classOfService))
-            return jiraProperties.getCustomfield().getClassOfService().getDefaultValue();
+    private Long getClassOfServiceId(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
+        JSONObject json = getJSONClassOfService(jiraIssue);
+        try {
+            return json == null ? 0L : json.getLong("id");
+        } catch (JSONException e) {
+            log.error(e.getMessage(), e);
+            return 0L;
+        }
+    }
 
-        return classOfService;
+    private JSONObject getJSONClassOfService(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
+        String defaultClassOfService = jiraProperties.getCustomfield().getClassOfService().getDefaultValue();
+        String classOfServiceId = jiraProperties.getCustomfield().getClassOfService().getId();
+
+        String classOfService = getJsonValue(jiraIssue, classOfServiceId);
+        boolean isNotDefaultClassOfService = !isNullOrEmpty(classOfService) && !classOfService.equals(defaultClassOfService);
+        boolean isDemand = jiraIssue.getIssueType().getId().equals(jiraProperties.getIssuetype().getDemand().getId());
+        if (isNotDefaultClassOfService || isDemand) {
+            IssueField field = jiraIssue.getField(classOfServiceId);
+            return field == null ? null : (JSONObject) field.getValue();
+        }
+
+        String parentKey = getParentKey(jiraIssue);
+        com.atlassian.jira.rest.client.api.domain.Issue parent = getIssueByKey(parentKey);
+        return parent == null ? null : getJSONClassOfService(parent);
     }
 
     private String getJsonValue(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue, String fieldId) {
@@ -276,22 +303,6 @@ public class JiraIssueToIssueConverter {
         } catch (JSONException e) {
             log.error(e.getMessage(), e);
             return "";
-        }
-    }
-
-    private Long getClassOfServiceId(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        IssueField field = jiraIssue.getField(jiraProperties.getCustomfield().getClassOfService().getId());
-
-        if (field == null)
-            return 0L;
-
-        JSONObject json = (JSONObject) field.getValue();
-
-        try {
-            return (json != null) ? json.getLong("id") : 0L;
-        } catch (JSONException e) {
-            log.error(e.getMessage(), e);
-            return 0L;
         }
     }
 
@@ -366,7 +377,7 @@ public class JiraIssueToIssueConverter {
 
     private List<String> getSubResponsaveisAvatar(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
         IssueField field = jiraIssue.getField(jiraProperties.getCustomfield().getCoAssignees().getId());
-        List<String> names = Lists.newArrayList();
+        List<String> names = newArrayList();
 
         if (field == null)
             return names;
@@ -388,7 +399,7 @@ public class JiraIssueToIssueConverter {
 
     private List<String> getSubResponsaveisName(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
         IssueField field = jiraIssue.getField(jiraProperties.getCustomfield().getCoAssignees().getId());
-        List<String> names = Lists.newArrayList();
+        List<String> names = newArrayList();
 
         if (field == null)
             return names;
