@@ -29,6 +29,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import objective.taskboard.cycletime.CycleTimeProperties;
+import objective.taskboard.cycletime.HolidayService;
 import objective.taskboard.data.User;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraService;
@@ -40,7 +42,13 @@ public class HomeController {
     private JiraService jiraService;
 
     @Autowired
+    private HolidayService holidayService;
+
+    @Autowired
     private JiraProperties jiraPropeties;
+
+    @Autowired
+    private CycleTimeProperties cycleTimePropeties;
 
     @RequestMapping("/")
     public String home(Model model) {
@@ -51,8 +59,9 @@ public class HomeController {
         model.addAttribute("jiraStatusesCompletedIds", serialize(jiraPropeties.getStatusesCompletedIds()));
         model.addAttribute("jiraStatusesCanceledIds", serialize(jiraPropeties.getStatusesCanceledIds()));
         model.addAttribute("jiraTransitionsWithRequiredCommentNames", serialize(jiraPropeties.getTransitionsWithRequiredCommentNames()));
-        model.addAttribute("jiraStartBusinessHours", serialize(jiraPropeties.getStartBusinessHours()));
-        model.addAttribute("jiraEndBusinessHours", serialize(jiraPropeties.getEndBusinessHours()));
+        model.addAttribute("cycleTimeStartBusinessHours", serialize(cycleTimePropeties.getStartBusinessHours()));
+        model.addAttribute("cycleTimeEndBusinessHours", serialize(cycleTimePropeties.getEndBusinessHours()));
+        model.addAttribute("holidays", serialize(holidayService.getHolidays()));
         return "index";
     }
 

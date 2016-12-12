@@ -26,30 +26,52 @@ function CycleTime() {
     var SATURDAY = 6;
 
     this.getCycleTime = function(startDate, endDate) {
-        if (endDate < startDate) { return 0; }
+        var startWorkDay = getStartWorkDay(startDate);
+        var endWorkDay = getEndWorkDay(endDate);
 
-        var startBusinessHours = getStartBusinessHours(startDate);
-        var startDateAux = startDate < startBusinessHours ? startBusinessHours : startDate;
+        if (endWorkDay < startWorkDay)
+            return 0;
 
-        var endBusinessHours = getEndBusinessHours(endDate);
-        var endDateAux = endDate > endBusinessHours ? endBusinessHours : endDate;
+        if (isSameDay(startWorkDay, endWorkDay))
+            return toWorkedDays(endWorkDay.getTime() - startWorkDay.getTime());
 
-        if (isSameDay(startDateAux, endDateAux))
-            return toWorkedDays(endDateAux.getTime() - startDateAux.getTime());
-
-        var millisecondsWorkedStartDate = getEndBusinessHours(startDateAux).getTime() - startDateAux.getTime();
-        var millisecondsWorkedEndDate = endDateAux.getTime() - getStartBusinessHours(endDateAux).getTime();
+        var millisecondsWorkedStartDate = getEndBusinessHours(startWorkDay).getTime() - startWorkDay.getTime();
+        var millisecondsWorkedEndDate = endWorkDay.getTime() - getStartBusinessHours(endWorkDay).getTime();
         var millisecondsWorked = millisecondsWorkedStartDate + millisecondsWorkedEndDate;
-        var current = getNextDay(startDateAux);
 
-        while (!isSameDay(current, endDateAux)) {
-            if (isNotWeekend(current.getDay()))
+        var currentDate = getNextDay(startWorkDay);
+        while (!isSameDay(currentDate, endWorkDay)) {
+            if (isWorkDay(currentDate))
                 millisecondsWorked += getOneWorkedDayInMillis();
 
-            current = getNextDay(current);
+            currentDate = getNextDay(currentDate);
         }
 
         return toWorkedDays(millisecondsWorked);
+    };
+
+    getStartWorkDay = function(startDate) {
+        var startBusinessHours = getStartBusinessHours(startDate);
+        if (isWorkDay(startDate))
+            return startDate < startBusinessHours ? startBusinessHours : startDate;
+
+        var currentDate = getNextDay(startBusinessHours);
+        while (!isWorkDay(currentDate))
+            currentDate = getNextDay(currentDate);
+
+        return currentDate;
+    };
+
+    getEndWorkDay = function(endDate) {
+        var endBusinessHours = getEndBusinessHours(endDate);
+        if (isWorkDay(endDate))
+            return endDate > endBusinessHours ? endBusinessHours : endDate;
+
+        var currentDate = getPreviousDay(endBusinessHours);
+        while (!isWorkDay(currentDate))
+            currentDate = getPreviousDay(currentDate);
+
+        return currentDate;
     };
 
     getStartBusinessHours = function(date) {
@@ -72,8 +94,17 @@ function CycleTime() {
                startDate.getFullYear() == endDate.getFullYear();
     };
 
-    isNotWeekend = function(day) {
-        return day !== SUNDAY && day !== SATURDAY;
+    isWorkDay = function(date) {
+        if (date.getDay() == SUNDAY || date.getDay() == SATURDAY)
+            return false;
+
+        for (var h in HOLIDAYS) {
+            var holiday = new Date(HOLIDAYS[h].day);
+            if (isSameDay(date, holiday))
+                return false;
+        }
+
+        return true;
     };
 
     getOneWorkedDayInMillis = function() {
@@ -81,8 +112,11 @@ function CycleTime() {
     };
 
     getNextDay = function(date) {
-        var nextDay = new Date(date.getTime() + ONE_DAY_IN_MILLIS);
-        return nextDay;
+        return new Date(date.getTime() + ONE_DAY_IN_MILLIS);
+    };
+
+    getPreviousDay = function(date) {
+        return new Date(date.getTime() - ONE_DAY_IN_MILLIS);;
     };
 
     toWorkedDays = function(milliseconds) {

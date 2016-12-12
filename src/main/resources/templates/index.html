@@ -122,8 +122,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 	var STATUSES_CANCELED_IDS = JSON.parse([[${jiraStatusesCanceledIds}]]);
 	var STATUSES_COMPLETED_IDS = JSON.parse([[${jiraStatusesCompletedIds}]]).concat(STATUSES_CANCELED_IDS);
 	var TRANSITION_REQUIRED_COMMENT = JSON.parse([[${jiraTransitionsWithRequiredCommentNames}]]);
-	var START_BUSINESS_HOURS = JSON.parse([[${jiraStartBusinessHours}]]);
-	var END_BUSINESS_HOURS = JSON.parse([[${jiraEndBusinessHours}]]);
+	var START_BUSINESS_HOURS = JSON.parse([[${cycleTimeStartBusinessHours}]]);
+	var END_BUSINESS_HOURS = JSON.parse([[${cycleTimeEndBusinessHours}]]);
+	var HOLIDAYS = JSON.parse([[${holidays}]]);
 
 	var TYPE_FIELD = {
 		TEXT: "text",
