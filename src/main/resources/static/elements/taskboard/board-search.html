@@ -32,6 +32,7 @@
     </style>
 
     <template>
+        <iron-signals on-iron-signal-search-filter-reset="searchReset"></iron-signals>
         <input id="searchIssues" class="input-search" value="{{query::input}}" type="search"
                placeholder="Search Issues" results="5" autocomplete="off"></input>
     </template>
@@ -56,6 +57,10 @@
                 searchIssue: function () {
                     this.fire('iron-signal', {name: 'search-filter-changed', data: {query: this.query}});
                 },
+
+                searchReset: function() {
+                    this.query = "";
+                }
             });
         })();
     </script>

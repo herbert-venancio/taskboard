@@ -50,7 +50,7 @@ function CycleTime() {
         return toWorkedDays(millisecondsWorked);
     };
 
-    getStartWorkDay = function(startDate) {
+    var getStartWorkDay = function(startDate) {
         var startBusinessHours = getStartBusinessHours(startDate);
         if (isWorkDay(startDate))
             return startDate < startBusinessHours ? startBusinessHours : startDate;
@@ -62,7 +62,7 @@ function CycleTime() {
         return currentDate;
     };
 
-    getEndWorkDay = function(endDate) {
+    var getEndWorkDay = function(endDate) {
         var endBusinessHours = getEndBusinessHours(endDate);
         if (isWorkDay(endDate))
             return endDate > endBusinessHours ? endBusinessHours : endDate;
@@ -74,27 +74,27 @@ function CycleTime() {
         return currentDate;
     };
 
-    getStartBusinessHours = function(date) {
+    var getStartBusinessHours = function(date) {
         var hour = getHourPeriod(START_BUSINESS_HOURS.hour, START_BUSINESS_HOURS.period);
         return new Date(date.getFullYear(), date.getMonth(), date.getDate(), hour, START_BUSINESS_HOURS.minute, 0, 0);
     };
 
-    getEndBusinessHours = function(date) {
+    var getEndBusinessHours = function(date) {
         var hour = getHourPeriod(END_BUSINESS_HOURS.hour, END_BUSINESS_HOURS.period);
         return new Date(date.getFullYear(), date.getMonth(), date.getDate(), hour, END_BUSINESS_HOURS.minute, 0, 0);
     };
 
-    getHourPeriod = function(hour, period) {
+    var getHourPeriod = function(hour, period) {
         return period == 'pm' ? hour + 12 : hour;
     };
 
-    isSameDay = function(startDate, endDate) {
+    var isSameDay = function(startDate, endDate) {
         return startDate.getDate() == endDate.getDate() &&
                startDate.getMonth() == endDate.getMonth() &&
                startDate.getFullYear() == endDate.getFullYear();
     };
 
-    isWorkDay = function(date) {
+    var isWorkDay = function(date) {
         if (date.getDay() == SUNDAY || date.getDay() == SATURDAY)
             return false;
 
@@ -107,19 +107,19 @@ function CycleTime() {
         return true;
     };
 
-    getOneWorkedDayInMillis = function() {
+    var getOneWorkedDayInMillis = function() {
         return getEndBusinessHours(new Date()).getTime() - getStartBusinessHours(new Date()).getTime();
     };
 
-    getNextDay = function(date) {
+    var getNextDay = function(date) {
         return new Date(date.getTime() + ONE_DAY_IN_MILLIS);
     };
 
-    getPreviousDay = function(date) {
+    var getPreviousDay = function(date) {
         return new Date(date.getTime() - ONE_DAY_IN_MILLIS);;
     };
 
-    toWorkedDays = function(milliseconds) {
+    var toWorkedDays = function(milliseconds) {
         return milliseconds / getOneWorkedDayInMillis();
     };
 

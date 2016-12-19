@@ -46,6 +46,10 @@
             border: 2px solid red;
         }
 
+        .issue.root {
+            border: 2px solid black;
+        }
+
         .top {
             display: flex;
             flex-direction: row;
@@ -233,14 +237,9 @@
                    body="{{item}}"
                    headers='{"Content-Type": "application/json"}'>
         </iron-ajax>
-        <iron-signals
-                on-iron-signal-issue-filter-parent="issueFilterParent"
-                on-iron-signal-issue-filter-dependents="issueFilterDependency"
-                on-iron-signal-issue-filter-children="issueFilterChildren"
-                on-iron-signal-issue-filter-reset="issueFilterReset">
-        </iron-signals>
-        <paper-material class$="issue {{getClasses(item.hierarchyMatch)}}" elevation="0" style$="{{getIssueColor(item)}}" on-tap="opendialog"
-                        title="Issue details">
+        <iron-signals on-iron-signal-hierarchical-filter-changed="forceRefreshHierarchyMatch"></iron-signals>
+        <paper-material class$="issue {{getClasses(item.hierarchyMatch, item.issueKey)}}" elevation="0" style$="{{getIssueColor(item)}}"
+                        on-tap="opendialog" title="Issue details">
             <template is="dom-if" if="{{issueImpedida(item)}}">
                 <div class="impedida">
                     <iron-icon id="issueImpedidaIcon" class="iconImpedidaCancelada" icon="av:not-interested"
@@ -270,7 +269,9 @@
                     <div class="key" on-tap="openJira" title="Open in jira">{{item.issueKey}}</div>
                 </div>
                 <div class="icons">
-                    <img id="issueTypeIcon" class="icon-small icon-issuetype" title="{{item.issueKey}}&#010;{{getIssueTypeName(item.type)}}&#010;{{getStatusName(item.status)}}" src="{{getIssueTypeImage(item)}}"></img>
+                    <img id="issueTypeIcon" class="icon-small icon-issuetype"
+                         title="- {{item.issueKey}}&#010;- {{getIssueTypeName(item.type)}}&#010;- {{getStatusName(item.status)}}"
+                         src="{{getIssueTypeImage(item)}}"></img>
                     <template is="dom-if" if="{{item.subresponsavel1}}">
                         <img class="icon-small" src="{{item.subresponsavel1}}"></img>
                     </template>
@@ -303,8 +304,12 @@
                     }
                 },
 
-                getClasses: function(hierarchyMatch) {
-                    return hierarchyMatch == "DEP" ? "dependency" : "";
+                getClasses: function(hierarchyMatch, issueKey) {
+                    return hierarchyMatch == "DEP" ? "dependency" : this.getClassRoot(issueKey);
+                },
+
+                getClassRoot: function(issueKey) {
+                    return taskboard.getRootHierarchicalFilter() == issueKey ? "root" : "";
                 },
 
                 getUriImage: function (issue) {
@@ -338,80 +343,19 @@
                 },
 
                 applyFilter: function (event) {
-                    taskboard.toggleHierarchicalFilter();
-                    if (taskboard.isUsingHierarchicalFilter()) {
-                        this.showInHierarchyMatch();
-                        this.fire('iron-signal', {
-                            name: 'issue-filter-parent',
-                            data: {
-                                issueKey: this.item.issueKey,
-                                parentKey: this.item.parent
-                            }
-                        });
-                        this.fire('iron-signal', {
-                            name: 'issue-filter-children',
-                            data: {
-                                issueKey: this.item.issueKey,
-                                parentKey: this.item.parent
-                            }
-                        });
-                        this.fireFilterDependentIssues();
+                    taskboard.clearHierarchyMatch();
+                    taskboard.toggleRootHierarchicalFilter(this.item.issueKey);
+                    if (taskboard.getRootHierarchicalFilter()) {
+                        this.fire('iron-signal', {name: 'search-filter-reset'});
+                        taskboard.setHierarchyMatch(this.item);
                     }
-                    else
-                        this.fire('iron-signal', {name: 'issue-filter-reset', data: {}});
-                    this.fire('iron-signal', {name: 'hierarchical-filter-changed', data: {}});
+                    this.fire('iron-signal', {name: 'hierarchical-filter-changed'});
                 },
 
-                issueFilterParent: function (evt, data) {
-                    if (this.item.issueKey === data.parentKey) {
-                        this.showInHierarchyMatch();
-                        this.fire('iron-signal', {
-                            name: 'issue-filter-parent',
-                            data: {
-                                issueKey: this.item.issueKey,
-                                parentKey: this.item.parent
-                            }
-                        });
-                        this.fireFilterDependentIssues();
-                    }
-                },
-
-                issueFilterChildren: function (evt, data) {
-                    if (this.item.parent === data.issueKey) {
-                        this.showInHierarchyMatch();
-                        this.fire('iron-signal', {
-                            name: 'issue-filter-children',
-                            data: {
-                                issueKey: this.item.issueKey,
-                                parentKey: this.item.parent
-                            }
-                        });
-                        this.fireFilterDependentIssues();
-                    }
-                },
-
-                issueFilterReset: function() {
-                    this.hideFromHierarchyMatch();
-                },
-
-                issueFilterDependency: function (evt, issue) {
-                    if (issue.requires.indexOf(this.item.issueKey) >= 0)
-                        this.showInHierarchyMatch(true);
-                },
-
-                fireFilterDependentIssues: function () {
-                    this.fire('iron-signal', {
-                        name: 'issue-filter-dependents',
-                        data: this.item
-                    });
-                },
-
-                showInHierarchyMatch: function(isDependency) {
-                    this.set('item.hierarchyMatch', isDependency && this.item.hierarchyMatch !== true ? "DEP" : true);
-                },
-
-                hideFromHierarchyMatch: function() {
-                    this.set('item.hierarchyMatch', false);
+                forceRefreshHierarchyMatch: function () {
+                    var bkp = this.item.hierarchyMatch;
+                    this.set('item.hierarchyMatch', !bkp);
+                    this.set('item.hierarchyMatch', bkp);
                 },
 
                 getIssueColor: function (issue) {

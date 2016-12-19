@@ -263,7 +263,7 @@
                 },
 
                 hierarchicalFilterMatches: function(issue) {
-                    return taskboard.isUsingHierarchicalFilter() && issue.hierarchyMatch || !taskboard.isUsingHierarchicalFilter();
+                    return taskboard.getRootHierarchicalFilter() && issue.hierarchyMatch || !taskboard.getRootHierarchicalFilter();
                 },
 
                 getIssueCount: function() {

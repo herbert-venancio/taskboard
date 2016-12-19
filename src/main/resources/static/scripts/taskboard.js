@@ -26,7 +26,7 @@ function Taskboard() {
     var issues;
     var filteredIssues;
     var laneConfiguration;
-    var usingHierarchicalFilter = false;
+    var rootHierarchicalFilter;
 
     this.setAspectFilters = function(filters) {
         this.aspectFilters = filters;
@@ -150,12 +150,52 @@ function Taskboard() {
         $('table').floatThead('reflow');
     };
 
-    this.isUsingHierarchicalFilter = function() {
-        return usingHierarchicalFilter;
+    this.getRootHierarchicalFilter = function() {
+        return rootHierarchicalFilter;
     };
 
-    this.toggleHierarchicalFilter = function() {
-        usingHierarchicalFilter = !usingHierarchicalFilter;
+    this.toggleRootHierarchicalFilter = function(issueKey) {
+        rootHierarchicalFilter = rootHierarchicalFilter == issueKey ? null : issueKey;
+    };
+
+    this.clearHierarchyMatch = function() {
+        this.issues.forEach(function(i) {
+            i.hierarchyMatch = false;
+        });
+    };
+
+    this.setHierarchyMatch = function(issue) {
+        issue.hierarchyMatch = true;
+        setParentHierarchyMatch(issue);
+        setChildrenHierarchyMatch(issue);
+        setDependencyHierarchyMatch(issue);
+    };
+
+    var setParentHierarchyMatch = function(issue) {
+        self.issues.forEach(function(i) {
+            if (i.issueKey !== issue.parent)
+                return;
+            i.hierarchyMatch = true;
+            setParentHierarchyMatch(i);
+            setDependencyHierarchyMatch(i);
+        });
+    };
+
+    var setChildrenHierarchyMatch = function(issue) {
+        self.issues.forEach(function(i) {
+            if (i.parent !== issue.issueKey)
+                return;
+            i.hierarchyMatch = true;
+            setChildrenHierarchyMatch(i);
+            setDependencyHierarchyMatch(i);
+        });
+    };
+
+    var setDependencyHierarchyMatch = function(issue) {
+        self.issues.forEach(function(i) {
+            if (issue.requires.indexOf(i.issueKey) >= 0 && i.hierarchyMatch !== true)
+                i.hierarchyMatch = "DEP";
+        });
     };
 
     this.hasTeamSelected = function() {

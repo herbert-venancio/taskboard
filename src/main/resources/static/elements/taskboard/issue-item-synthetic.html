@@ -84,7 +84,7 @@
         <paper-material style$="{{getIssueColor(item)}}" on-tap="opendialog" elevation="0">
             <div>
                 <iron-icon id="[[item.issueKey]]" class$="{{getItemClass(item)}}"
-                           title="{{item.issueKey}}&#010;{{getIssueTypeName(item.type)}}&#010;{{getStatusName(item.status)}}"
+                           title="- {{item.issueKey}}&#010;- {{getIssueTypeName(item.type)}}&#010;- {{getStatusName(item.status)}}"
                            src="{{getIssueTypeImage(item, parentTypeIcon)}}"></iron-icon>
             </div>
             <template is="dom-if" if="{{issueImpedida(item)}}">
