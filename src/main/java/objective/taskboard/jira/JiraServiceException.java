@@ -41,12 +41,19 @@ public class JiraServiceException extends RuntimeException {
     private static String trataMensagemRestClientException(RestClientException ex) {
         StringBuilder sbErrorMessages = new StringBuilder();
         sbErrorMessages.append("Could not execute command:\n");
-        
-        for (ErrorCollection errorCollection : ex.getErrorCollections())
-            for (Entry<String, String> entry : errorCollection.getErrors().entrySet())
-                sbErrorMessages.append("\t- ").append(entry.getValue()).append("\n");
 
-        sbErrorMessages.append("\t* Try this operation on Jira.");
+        boolean tryOnJira = false;
+        for (ErrorCollection errorCollection : ex.getErrorCollections()) {
+            for (Entry<String, String> entry : errorCollection.getErrors().entrySet()) {
+                sbErrorMessages.append("\t- ").append(entry.getValue()).append("\n");
+                tryOnJira = true;
+            }
+            for (String errorMessage : errorCollection.getErrorMessages())
+                sbErrorMessages.append("\t- ").append(errorMessage).append("\n");
+        }
+
+        if (tryOnJira)
+            sbErrorMessages.append("\t* Try this operation on Jira.");
 
         return sbErrorMessages.toString();
     }

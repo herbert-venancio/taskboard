@@ -147,7 +147,7 @@
                 this.clearStorages();
 
                 event.preventDefault();
-                var data = {"username": that.username, "password": that.password};
+                var data = {"username": that.username.toLowerCase(), "password": that.password};
                 $.ajax({
                     data: data,
                     type: 'POST',
