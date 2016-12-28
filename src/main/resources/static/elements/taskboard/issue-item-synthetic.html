@@ -90,7 +90,7 @@
             <template is="dom-if" if="{{issueImpedida(item)}}">
                 <div>
                     <iron-icon class$="{{getItemClass(item)}} icon-impedida"
-                               title="{{item.issueKey}} : {{getIssueTypeName(item.type)}}. Blocked issue. Last Block Reason: {{item.customfields.lastBlockReason}}"
+                               title="- {{item.issueKey}}&#010;- {{getIssueTypeName(item.type)}}&#010;- Blocked issue. Last Block Reason: {{item.customfields.lastBlockReason}}"
                                icon="icons:block"></iron-icon>
                 </div>
             </template>

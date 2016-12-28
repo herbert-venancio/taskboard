@@ -24,7 +24,6 @@ function UserPreferences() {
 
     var getDefaultVisibilityConfiguration = function () {
         return {
-            "issueOrder": "",
             "showSynthetic": false
         };
     };

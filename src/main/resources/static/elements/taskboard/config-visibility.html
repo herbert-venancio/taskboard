@@ -21,17 +21,6 @@
 <dom-module id="config-visibility">
 
     <style>
-        paper-dropdown-menu-light.custom {
-            float: left;
-            width: auto;
-            margin-left: 13px;
-            --paper-dropdown-menu-input: {
-                color: #ffffff;
-                width: 100%;
-                border-bottom: none;
-            }
-        }
-
         paper-listbox {
             background: #D7DBF1;
             margin-top: 50px;
@@ -101,14 +90,6 @@
                                icon="image:grain" title="Synthetic View"
                                on-tap="visibilityAnalytical"></paper-icon-button>
         </div>
-        <paper-dropdown-menu-light class="custom" no-label-float>
-            <paper-listbox class="dropdown-content shadow-elevation-8dp"
-                           selected="{{visibilityConfiguration.issueOrder}}" attr-for-selected="value">
-                <paper-item value="">Order by Plan</paper-item>
-                <paper-item value="size">Order by Size</paper-item>
-                <paper-item value="type_size">Order by Type/Size</paper-item>
-            </paper-listbox>
-        </paper-dropdown-menu-light>
     </template>
 
     <script>
@@ -127,31 +108,15 @@
                         type: Object,
                         notify: true,
                         reflectToAttribute: true
-                    },
-                    isReady: {
-                        type: Boolean,
-                        value: false
                     }
-
                 },
 
                 observers: [
-                    'issueOrderObserver(visibilityConfiguration.issueOrder)',
                     'syntheticObserver(visibilityConfiguration.showSynthetic)'
                 ],
 
                 ready: function () {
                     this.visibilityConfiguration = userPreferences.getView();
-                    this.isReady = true;
-                },
-
-                issueOrderObserver: function (newOrder) {
-                    if (this.isReady) {
-                        this.fire('iron-signal', {
-                            name: 'config-visibility-issue-order',
-                            data: {}
-                        });
-                    }
                 },
 
                 syntheticObserver: function (show) {

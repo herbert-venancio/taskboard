@@ -26,7 +26,6 @@
     <template>
         <iron-signals on-iron-signal-update-user-preferences="preferencesUpdated"
                       on-iron-signal-config-visibility-synthetic-changed="viewChanged"
-                      on-iron-signal-config-visibility-issue-order="preferencesUpdated"
                       on-iron-signal-search-filter-changed="searchFilterChanged"
                       on-iron-signal-level-config-changed="preferencesUpdated"
                       on-iron-signal-hierarchical-filter-changed="preferencesUpdated"></iron-signals>
@@ -55,38 +54,26 @@
         var checkingInvalidTeam = false;
 
         var sortIssue = new function () {
-            var self = this;
-
             var compareElements = function (a, b) {
                 return (a === b) ? 0 : ((a < b) ? 1 : -1);
             };
 
-            var getRealSize = function (a) {
-                var size = taskboard.getOnlyOneSize(a.customfields.sizes);
-                switch (size) {
-                    case TAMANHO.PP:
-                        return 1;
-                    case TAMANHO.P:
-                        return 2;
-                    case TAMANHO.M:
-                        return 3;
-                    case TAMANHO.G:
-                        return 4;
-                    case TAMANHO.GG:
-                        return 5;
-                    default:
-                        return 3;
+            var sortByCreated = function (a, b) {
+                return compareElements(-a.created, -b.created);
+            };
+
+            this.sortByType = function (a, b) {
+                var orderA = a.type;
+                var orderB = b.type;
+                if (ISSUETYPE_ORDER.length > 0) {
+                    var indexTypeA = ISSUETYPE_ORDER.indexOf(a.type);
+                    orderA = indexTypeA == -1 ? 999 : indexTypeA;
+                    var indexTypeB = ISSUETYPE_ORDER.indexOf(b.type);
+                    orderB = indexTypeB == -1 ? 999 : indexTypeB;
                 }
+                var compareType = compareElements(-orderA, -orderB);
+                return compareType != 0 ? compareType : sortByCreated(a, b);
             };
-
-            this.sortBySize = function (a, b) {
-                return compareElements(getRealSize(a), getRealSize(b));
-            };
-
-            this.sortByTypeAndSize = function (a, b) {
-                var rdc = compareElements(a.color, b.color);
-                return rdc != 0 ? rdc : self.sortBySize(a, b);
-            }
         }();
 
 
@@ -158,10 +145,6 @@
                     return userPreferences.getView().showSynthetic;
                 },
 
-                getIssueOrder: function () {
-                    return userPreferences.getView().issueOrder;
-                },
-
                 getParentLane: function() {
                     return taskboard.getLane(this.parentLaneId);
                 },
@@ -192,12 +175,7 @@
                 },
 
                 getSorter: function () {
-                    var order = this.getIssueOrder();
-                    if (order == "type_size")
-                        return sortIssue.sortByTypeAndSize;
-                    else if (order == "size")
-                        return sortIssue.sortBySize;
-                    else return null;
+                    return sortIssue.sortByType;
                 },
 
                 shouldShowIssue: function(issue) {

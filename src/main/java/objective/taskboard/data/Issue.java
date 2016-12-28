@@ -91,6 +91,8 @@ public class Issue implements Serializable {
     @JsonDeserialize(using = DateDeserializer.class)
     private Date dueDate;
 
+    private long created;
+
     private String description;
 
     private List<String> teams;
@@ -102,10 +104,10 @@ public class Issue implements Serializable {
 
     public static Issue from(String issueKey, String projectKey, String project, long issueType, String typeIconUri, String summary, long status, long startDateStepMillis,
             String subresponsavel1, String subresponsavel2, String parent, long parentType, String parentTypeIconUri, List<String> requires, String subResponsaveis,
-            String assignee, String usersInvalidTeam, long priority, Date dueDate, String description, List<String> teams, String comments, Map<String, Object> customFields,
+            String assignee, String usersInvalidTeam, long priority, Date dueDate, long created, String description, List<String> teams, String comments, Map<String, Object> customFields,
             String color) {
-        return new Issue(issueKey, projectKey, project, issueType, typeIconUri, summary, status, startDateStepMillis, subresponsavel1, subresponsavel2,
-                parent, parentType, parentTypeIconUri, requires, false, false, false, color, subResponsaveis, assignee, usersInvalidTeam, priority, dueDate, description, teams, comments, customFields);
+        return new Issue(issueKey, projectKey, project, issueType, typeIconUri, summary, status, startDateStepMillis, subresponsavel1, subresponsavel2, parent, parentType, parentTypeIconUri,
+                requires, false, false, false, color, subResponsaveis, assignee, usersInvalidTeam, priority, dueDate, created, description, teams, comments, customFields);
     }
 
     /**

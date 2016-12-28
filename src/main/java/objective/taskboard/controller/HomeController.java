@@ -56,6 +56,7 @@ public class HomeController {
         model.addAttribute("user", serialize(user));
         model.addAttribute("jiraCustomfields", jiraPropeties.getCustomfield());
         model.addAttribute("jiraIssuetypes", jiraPropeties.getIssuetype());
+        model.addAttribute("jiraIssuetypesOrder", serialize(jiraPropeties.getIssuetypeOrder()));
         model.addAttribute("jiraStatusesCompletedIds", serialize(jiraPropeties.getStatusesCompletedIds()));
         model.addAttribute("jiraStatusesCanceledIds", serialize(jiraPropeties.getStatusesCanceledIds()));
         model.addAttribute("jiraTransitionsWithRequiredCommentNames", serialize(jiraPropeties.getTransitionsWithRequiredCommentNames()));
