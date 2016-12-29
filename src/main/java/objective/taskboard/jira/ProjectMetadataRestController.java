@@ -21,22 +21,28 @@ package objective.taskboard.jira;
  * [/LICENSE]
  */
 
-import com.atlassian.jira.rest.client.api.domain.BasicProject;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.atlassian.jira.rest.client.api.domain.BasicProject;
+
 @RestController
 public class ProjectMetadataRestController {
 
     @Autowired
-    public ProjectMetadataService projectMetadataService;
+    private ProjectService projectService;
 
     @RequestMapping(path = "/ws/issues/project-metadata", method = RequestMethod.GET)
-    public BasicProject getProjectMetadata(@RequestParam(name = "projectKey") String projectKey) {
-        return projectMetadataService.getProjectMetadata(projectKey);
+    public ResponseEntity<BasicProject> getProjectMetadata(@RequestParam(name = "projectKey") String projectKey) {
+        Optional<BasicProject> project = projectService.getProject(projectKey);
+        return project.isPresent() ? ResponseEntity.ok(project.get()) : new ResponseEntity<BasicProject>(HttpStatus.NOT_FOUND);
     }
 
 }

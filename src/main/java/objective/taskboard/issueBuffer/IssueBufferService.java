@@ -35,7 +35,7 @@ import objective.taskboard.auth.Authenticator;
 import objective.taskboard.data.Issue;
 import objective.taskboard.domain.converter.JiraIssueToIssueConverter;
 import objective.taskboard.jira.JiraIssueService;
-import objective.taskboard.jira.ProjectVisibilityService;
+import objective.taskboard.jira.ProjectService;
 
 @Service
 public class IssueBufferService {
@@ -50,7 +50,7 @@ public class IssueBufferService {
     private Authenticator authenticator;
 
     @Autowired
-    private ProjectVisibilityService projectService;
+    private ProjectService projectService;
 
     private Map<String, Issue> issueBuffer = new LinkedHashMap<>();
 
@@ -81,9 +81,9 @@ public class IssueBufferService {
         return issue;
     }
 
-    public synchronized List<Issue> getIssues(String user) {
+    public synchronized List<Issue> getIssues() {
         return issueBuffer.values().stream()
-                .filter(t -> projectService.isProjectVisibleForUser(t.getProjectKey(), user))
+                .filter(t -> projectService.isProjectVisible(t.getProjectKey()))
                 .collect(Collectors.toList());
     }
 

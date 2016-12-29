@@ -1,5 +1,8 @@
 package objective.taskboard.jira;
 
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toList;
+
 /*-
  * [LICENSE]
  * Taskboard
@@ -22,37 +25,32 @@ package objective.taskboard.jira;
  */
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.atlassian.jira.rest.client.api.domain.BasicProject;
 
-import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
-
 @Service
-public class ProjectVisibilityService {
+public class ProjectService {
 
     @Autowired
-    private ProjectFilterConfigurationCachedRepository projectFilterConfiguration;
+    private ProjectCache projectCache;
 
-    @Autowired
-    private ProjectMetadataService projectMetadataService;
+    public List<BasicProject> getProjects() {
+        return projectCache.getProjects()
+                .values()
+                .stream()
+                .sorted(comparing(BasicProject::getName))
+                .collect(toList());
+    }
     
-//    @Autowired
-//    private ProjectUsersVisibilityService projectUsersVisibilityService;
-
-    public List<BasicProject> getProjectsVisibleToUser(String user) {
-        return projectFilterConfiguration.getProjects().stream()
-                    .map(t -> projectMetadataService.getProjectMetadata(t.getProjectKey()))
-                    .filter(t -> isProjectVisibleForUser(t.getKey(), user))
-                    .collect(Collectors.toList());
+    public Optional<BasicProject> getProject(String key) {
+        return Optional.ofNullable(projectCache.getProjects().get(key));
     }
 
-    public boolean isProjectVisibleForUser(String projectKey, String user) {
-        return true;
-//        return projectUsersVisibilityService.getProjectUsers().get(projectKey).contains(user);
+    public boolean isProjectVisible(String projectKey) {
+        return projectCache.getProjects().containsKey(projectKey);
     }
-
 }
