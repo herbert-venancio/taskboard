@@ -3,9 +3,9 @@ package objective.taskboard.jira;
 /*-
  * [LICENSE]
  * Taskboard
- * - - -
+ * ---
  * Copyright (C) 2015 - 2016 Objective Solutions
- * - - -
+ * ---
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -21,93 +21,28 @@ package objective.taskboard.jira;
  * [/LICENSE]
  */
 
-import java.util.concurrent.ExecutionException;
-
-import org.apache.commons.codec.binary.Base64;
 import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.web.client.RestTemplate;
 
-import com.atlassian.jira.rest.client.api.JiraRestClient;
-import com.atlassian.jira.rest.client.api.RestClientException;
-import com.atlassian.util.concurrent.Promise;
-
-import lombok.extern.slf4j.Slf4j;
-import objective.taskboard.auth.CredentialsHolder;
-
-@Slf4j
 public class AbstractJiraService {
 
-    protected static final int HTTP_BAD_REQUEST = 400;
-    protected static final int HTTP_FORBIDDEN = 403;
+    @Autowired 
+    protected JiraEndpoint jiraEndpoint;
 
-    @Autowired private JiraProperties jiraProperties;
-
-    protected <T> T executeRequest(PromisedRequest<T> request) {       
-        return executeWrappedRequest(
-                client -> {
-            try {
-                return request.execute(client).get();
-            } catch (InterruptedException | ExecutionException e) {
-                log.error(e.getMessage(), e);
-                Throwable cause = e.getCause();
-                if (cause instanceof RestClientException)
-                    throw new JiraServiceException((RestClientException)cause);                 
-                throw new RuntimeException(e.getMessage(), e);
-            }
-        });
+    protected <T> T executeRequest(JiraEndpoint.PromisedRequest<T> request) {       
+        return jiraEndpoint.executeRequest(request);
     }
 
-    protected <T> T executeWrappedRequest(Request<T> request) {
-        return executeWrappedRequest(CredentialsHolder.username(), CredentialsHolder.password(), request);
+    protected <T> T executeWrappedRequest(JiraEndpoint.Request<T> request) {
+        return jiraEndpoint.executeWrappedRequest(request);
     }
 
-    protected <T> T executeWrappedRequest(String username, String password, Request<T> request) {
-        JiraRestClient client = getClientWithUsernameAndPassword(username, password);
-        try {
-            return request.execute(client);
-        } finally {
-            closeClient(client);
-        }
+    protected <T> T executeWrappedRequest(String username, String password, JiraEndpoint.Request<T> request) {
+        return jiraEndpoint.executeWrappedRequest(username, password, request);
     }
 
     protected String postWithRestTemplate(String path, MediaType mediaType, JSONObject jsonRequest) {
-        RestTemplate restTemplate = new RestTemplate();
-        HttpEntity<String> request = new HttpEntity<>(jsonRequest.toString(), getAuthorizationRequestHeader(mediaType));
-        String url = jiraProperties.getUrl() + path;
-        return restTemplate.postForObject(url, request, String.class);
+        return jiraEndpoint.postWithRestTemplate(path, mediaType, jsonRequest);
     }
-
-    private HttpHeaders getAuthorizationRequestHeader(MediaType mediaType) {
-        HttpHeaders headers = new HttpHeaders();
-        String userAndPass = jiraProperties.getLousa().getUsername() + ":" + jiraProperties.getLousa().getPassword();
-        headers.add("Authorization", "Basic " + new String(Base64.encodeBase64((userAndPass).getBytes())));
-        headers.setContentType(mediaType);
-        return headers;
-    }
-
-    private JiraRestClient getClientWithUsernameAndPassword(String username, String password) {
-        JiraClientFactory jiraClient = new JiraClientFactory();
-        return jiraClient.getInstance(jiraProperties.getUrl(), username, password);
-    }
-
-    private void closeClient(JiraRestClient client) {
-        try {
-            client.close();
-        } catch (Exception e) {
-            log.error("Could not close jira rest client", e);
-        }
-    }
-
-    protected interface PromisedRequest<T> {
-        Promise<T> execute(JiraRestClient client);
-    }
-
-    protected interface Request<T> {
-        T execute(JiraRestClient client);
-    }
-
 }

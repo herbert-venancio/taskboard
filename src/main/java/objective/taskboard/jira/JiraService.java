@@ -205,7 +205,7 @@ public class JiraService extends AbstractJiraService {
             Issue issue = getIssueByKey(issueKey);
             return this.getTransitions(issue);
         } catch (RestClientException e) {
-            if (HTTP_FORBIDDEN == e.getStatusCode().or(0))
+            if (JiraEndpoint.HTTP_FORBIDDEN == e.getStatusCode().or(0))
                 throw new PermissaoNegadaException(e);
 
             throw e;
