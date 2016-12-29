@@ -31,6 +31,13 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 
+	<repositories>
+		<repository>
+			<id>atlassian-public</id>
+			<url>https://maven.atlassian.com/content/repositories/atlassian-public</url>
+		</repository>
+	</repositories>
+
 	<scm>
 		<url>https://github.com/objective-solutions/taskboard</url>
 		<connection>scm:git:git://github.com/objective-solutions/taskboard.git</connection>

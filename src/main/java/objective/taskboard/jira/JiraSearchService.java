@@ -93,9 +93,9 @@ public class JiraSearchService extends AbstractJiraService {
             }
             return listIssues;
         } catch (RestClientException e) {
-            if (HTTP_FORBIDDEN == e.getStatusCode().or(0))
+            if (JiraEndpoint.HTTP_FORBIDDEN == e.getStatusCode().or(0))
                 throw new PermissaoNegadaException(e);
-            if (HTTP_BAD_REQUEST == e.getStatusCode().or(0))
+            if (JiraEndpoint.HTTP_BAD_REQUEST == e.getStatusCode().or(0))
                 throw new ParametrosDePesquisaInvalidosException(e);
             throw e;
         }

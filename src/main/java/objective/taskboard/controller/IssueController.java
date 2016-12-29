@@ -31,23 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import lombok.extern.slf4j.Slf4j;
-import objective.taskboard.auth.CredentialsHolder;
-import objective.taskboard.data.AspectItemFilter;
-import objective.taskboard.data.AspectSubitemFilter;
-import objective.taskboard.data.Issue;
-import objective.taskboard.database.TaskboardDatabaseService;
-import objective.taskboard.filterConfiguration.TeamFilterConfigurationService;
-import objective.taskboard.filterPreferences.UserPreferencesService;
-import objective.taskboard.issueBuffer.IssueBufferService;
-import objective.taskboard.issueTypeVisibility.IssueTypeVisibilityService;
-import objective.taskboard.jira.JiraProperties;
-import objective.taskboard.jira.JiraService;
-import objective.taskboard.jira.JiraService.PermissaoNegadaException;
-import objective.taskboard.jira.MetadataService;
-import objective.taskboard.jira.ProjectVisibilityService;
-import objective.taskboard.linkgraph.LinkGraphProperties;
-
 import org.codehaus.jettison.json.JSONException;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +48,22 @@ import com.atlassian.jira.rest.client.api.domain.Transition;
 import com.atlassian.jira.rest.client.api.domain.input.ComplexIssueInputFieldValue;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder;
 import com.google.common.collect.Lists;
+
+import lombok.extern.slf4j.Slf4j;
+import objective.taskboard.data.AspectItemFilter;
+import objective.taskboard.data.AspectSubitemFilter;
+import objective.taskboard.data.Issue;
+import objective.taskboard.database.TaskboardDatabaseService;
+import objective.taskboard.filterConfiguration.TeamFilterConfigurationService;
+import objective.taskboard.filterPreferences.UserPreferencesService;
+import objective.taskboard.issueBuffer.IssueBufferService;
+import objective.taskboard.issueTypeVisibility.IssueTypeVisibilityService;
+import objective.taskboard.jira.JiraProperties;
+import objective.taskboard.jira.JiraService;
+import objective.taskboard.jira.JiraService.PermissaoNegadaException;
+import objective.taskboard.jira.MetadataService;
+import objective.taskboard.jira.ProjectService;
+import objective.taskboard.linkgraph.LinkGraphProperties;
 
 @Slf4j
 @RestController
@@ -90,7 +89,7 @@ public class IssueController {
     private IssueBufferService issueBufferService;
 
     @Autowired
-    private ProjectVisibilityService projectService;
+    private ProjectService projectService;
 
     @Autowired
     private UserPreferencesService userPreferencesService;
@@ -106,7 +105,7 @@ public class IssueController {
 
     @RequestMapping(path = "/", method = RequestMethod.POST)
     public List<Issue> issues() throws SQLException, JSONException {
-        return issueBufferService.getIssues(CredentialsHolder.username());
+        return issueBufferService.getIssues();
     }
 
     @RequestMapping(path = "assign", method = RequestMethod.POST)
@@ -244,7 +243,7 @@ public class IssueController {
     }
 
     private List<AspectSubitemFilter> getProjectFilterItems() {
-        return projectService.getProjectsVisibleToUser(CredentialsHolder.username()).stream()
+        return projectService.getProjects().stream()
                 .map(p -> AspectSubitemFilter.from(p.getName(), p.getKey(), true))
                 .sorted(getComparatorFilter())
                 .collect(toList());
