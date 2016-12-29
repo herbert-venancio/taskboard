@@ -27,6 +27,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -54,6 +55,7 @@ public class JiraProperties {
     @NotNull
     @Valid
     private IssueType issuetype;
+    private List<Integer> issuetypeOrder = new ArrayList<>();
     @NotNull
     @NotEmpty
     private List<Integer> statusesCompletedIds;

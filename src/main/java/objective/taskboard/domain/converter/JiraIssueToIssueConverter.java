@@ -147,6 +147,7 @@ public class JiraIssueToIssueConverter {
                 String.join(",", usersInvalidTeam),
                 jiraIssue.getPriority() != null ? jiraIssue.getPriority().getId() : 0l,
                 jiraIssue.getDueDate() != null ? jiraIssue.getDueDate().toDate() : null,
+                jiraIssue.getCreationDate().getMillis(),
                 jiraIssue.getDescription() != null ? jiraIssue.getDescription() : "",
                 teamGroups,
                 getComments(jiraIssue),

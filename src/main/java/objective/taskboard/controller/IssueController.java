@@ -21,15 +21,15 @@ package objective.taskboard.controller;
  * [/LICENSE]
  */
 
+import static java.util.stream.Collectors.toList;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 import org.codehaus.jettison.json.JSONException;
 import org.joda.time.DateTime;
@@ -41,6 +41,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.atlassian.jira.rest.client.api.domain.IssueType;
 import com.atlassian.jira.rest.client.api.domain.Subtask;
 import com.atlassian.jira.rest.client.api.domain.TimeTracking;
 import com.atlassian.jira.rest.client.api.domain.Transition;
@@ -52,7 +53,6 @@ import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.data.AspectItemFilter;
 import objective.taskboard.data.AspectSubitemFilter;
 import objective.taskboard.data.Issue;
-import objective.taskboard.data.Team;
 import objective.taskboard.database.TaskboardDatabaseService;
 import objective.taskboard.filterConfiguration.TeamFilterConfigurationService;
 import objective.taskboard.filterPreferences.UserPreferencesService;
@@ -227,36 +227,45 @@ public class IssueController {
     }
 
     private List<AspectSubitemFilter> getIssueTypeFilterItems() throws InterruptedException, ExecutionException {
-        return issueTypeVisibilityService.getVisibleIssueTypes()
-                .stream()
+        return issueTypeVisibilityService.getVisibleIssueTypes().stream()
+                .sorted(new Comparator<IssueType>() {
+                    @Override
+                    public int compare(IssueType t1, IssueType t2) {
+                        if (t1 == null && t2 == null) return 0;
+                        if (t1 == null) return 1;
+                        if (t2 == null) return -1;
+                        if (t1.isSubtask() == t2.isSubtask()) return t1.getName().compareTo(t2.getName());
+                        return Boolean.compare(t1.isSubtask(), t2.isSubtask());
+                    }
+                })
                 .map(t -> AspectSubitemFilter.from(t.getName(), t, true))
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     private List<AspectSubitemFilter> getProjectFilterItems() {
-        return projectService.getProjects()
-                .stream().map(t -> AspectSubitemFilter.from(t.getName(), t.getKey(), true)).collect(Collectors.toList());
+        return projectService.getProjects().stream()
+                .map(p -> AspectSubitemFilter.from(p.getName(), p.getKey(), true))
+                .sorted(getComparatorFilter())
+                .collect(toList());
     }
 
     private List<AspectSubitemFilter> getTeamFilterItems() {
-        final List<Team> visibleTeams = teamFilterConfigurationService.getVisibleTeams();
-        sortTeam(visibleTeams);
-
-        final List<AspectSubitemFilter> result = visibleTeams.stream()
+        return teamFilterConfigurationService.getVisibleTeams().stream()
                 .map(t -> AspectSubitemFilter.from(t.getName(), t.getName(), true))
-                .collect(Collectors.toList());
-
-        return result;
+                .sorted(getComparatorFilter())
+                .collect(toList());
     }
 
-    private void sortTeam(final List<Team> visibleTeams) {
-        final Comparator<Team> teamComparator = (o1, o2) -> {
-            if (o1 == null && o2 == null) return 0;
-            if (o1 == null) return 1;
-            if (o2 == null) return -1;
-            return o1.getName().compareTo(o2.getName());
+    private Comparator<AspectSubitemFilter> getComparatorFilter() {
+        return new Comparator<AspectSubitemFilter>() {
+            @Override
+            public int compare(AspectSubitemFilter f1, AspectSubitemFilter f2) {
+                if (f1 == null && f2 == null) return 0;
+                if (f1 == null) return 1;
+                if (f2 == null) return -1;
+                return f1.getName().compareTo(f2.getName());
+            }
         };
-        Collections.sort(visibleTeams, teamComparator);
     }
 
     public static class TransitionDTO {
