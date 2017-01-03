@@ -50,7 +50,7 @@ class ProjectCache {
     private JiraEndpoint jiraEndpoint;
 
     @Cacheable(cacheNames=CacheConfiguration.PROJECTS, keyGenerator=LoggedInUserKeyGenerator.NAME)
-    public Map<String, BasicProject> getProjects() {
+    public Map<String, BasicProject> getVisibleProjects() {
         Set<String> configuredProjectsKeys = projectFilterConfiguration.getProjects()
                 .stream()
                 .map(ProjectFilterConfiguration::getProjectKey)

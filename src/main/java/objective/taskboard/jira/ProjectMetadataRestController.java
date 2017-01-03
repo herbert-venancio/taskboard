@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.atlassian.jira.rest.client.api.domain.BasicProject;
+import com.atlassian.jira.rest.client.api.domain.CimProject;
 
 @RestController
 public class ProjectMetadataRestController {
@@ -41,8 +42,7 @@ public class ProjectMetadataRestController {
 
     @RequestMapping(path = "/ws/issues/project-metadata", method = RequestMethod.GET)
     public ResponseEntity<BasicProject> getProjectMetadata(@RequestParam(name = "projectKey") String projectKey) {
-        Optional<BasicProject> project = projectService.getProject(projectKey);
+        Optional<CimProject> project = projectService.getProjectMetadata(projectKey);
         return project.isPresent() ? ResponseEntity.ok(project.get()) : new ResponseEntity<BasicProject>(HttpStatus.NOT_FOUND);
     }
-
 }

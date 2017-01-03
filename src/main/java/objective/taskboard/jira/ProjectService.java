@@ -1,8 +1,5 @@
 package objective.taskboard.jira;
 
-import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.toList;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -24,13 +21,20 @@ import static java.util.stream.Collectors.toList;
  * [/LICENSE]
  */
 
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toList;
+
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.atlassian.jira.rest.client.api.GetCreateIssueMetadataOptions;
+import com.atlassian.jira.rest.client.api.GetCreateIssueMetadataOptionsBuilder;
 import com.atlassian.jira.rest.client.api.domain.BasicProject;
+import com.atlassian.jira.rest.client.api.domain.CimProject;
 
 @Service
 public class ProjectService {
@@ -38,19 +42,38 @@ public class ProjectService {
     @Autowired
     private ProjectCache projectCache;
 
-    public List<BasicProject> getProjects() {
-        return projectCache.getProjects()
+    @Autowired
+    private JiraEndpoint jiraEndpoint;
+
+    public List<BasicProject> getVisibleProjects() {
+        return projectCache.getVisibleProjects()
                 .values()
                 .stream()
                 .sorted(comparing(BasicProject::getName))
                 .collect(toList());
     }
-    
-    public Optional<BasicProject> getProject(String key) {
-        return Optional.ofNullable(projectCache.getProjects().get(key));
+
+    public Set<String> getProjectsKeys() {
+        return projectCache.getVisibleProjects().keySet();
+    }
+
+    public Optional<CimProject> getProjectMetadata(String projectKey) {
+        if (!isProjectVisible(projectKey))
+            return Optional.empty();
+
+        GetCreateIssueMetadataOptions options = new GetCreateIssueMetadataOptionsBuilder()
+                .withExpandedIssueTypesFields()
+                .withProjectKeys(projectKey)
+                .build();
+
+        Iterable<CimProject> projects = jiraEndpoint.executeRequest(c -> c.getIssueClient().getCreateIssueMetadata(options));
+
+        return projects.iterator().hasNext() ?
+                Optional.of(projects.iterator().next()) :
+                Optional.empty();
     }
 
     public boolean isProjectVisible(String projectKey) {
-        return projectCache.getProjects().containsKey(projectKey);
+        return projectCache.getVisibleProjects().containsKey(projectKey);
     }
 }

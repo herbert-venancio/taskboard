@@ -243,7 +243,7 @@ public class IssueController {
     }
 
     private List<AspectSubitemFilter> getProjectFilterItems() {
-        return projectService.getProjects().stream()
+        return projectService.getVisibleProjects().stream()
                 .map(p -> AspectSubitemFilter.from(p.getName(), p.getKey(), true))
                 .sorted(getComparatorFilter())
                 .collect(toList());
