@@ -32,6 +32,7 @@ import java.util.Set;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.atlassian.jira.rest.client.api.RestClientException;
@@ -45,7 +46,7 @@ import objective.taskboard.jira.JiraService.PermissaoNegadaException;
 
 @Slf4j
 @Service
-public class JiraSearchService extends AbstractJiraService {
+public class JiraSearchService {
 
     private static final String JQL_ATTRIBUTE = "jql";
     private static final String EXPAND_ATTRIBUTE = "expand";
@@ -60,6 +61,9 @@ public class JiraSearchService extends AbstractJiraService {
     
     @Autowired
     private JiraProperties properties;
+
+    @Autowired
+    private JiraEndpoint jiraEndpoint;
 
     public List<Issue> searchIssues(String jql) {
         log.debug("⬣⬣⬣⬣⬣  searchIssues");
@@ -77,7 +81,7 @@ public class JiraSearchService extends AbstractJiraService {
                                  .put(START_AT_ATTRIBUTE, i * MAX_RESULTS)
                                  .put(FIELDS_ATTRIBUTE, getFields());
 
-                    String jsonResponse = postWithRestTemplate(PATH_REST_API_SEARCH, APPLICATION_JSON, searchRequest);
+                    String jsonResponse = jiraEndpoint.postWithRestTemplate(PATH_REST_API_SEARCH, APPLICATION_JSON, searchRequest);
 
                     SearchResult searchResult = searchResultParser.parse(new JSONObject(jsonResponse));
                     List<Issue> issuesSearchResult = newArrayList(searchResult.getIssues());
@@ -93,9 +97,9 @@ public class JiraSearchService extends AbstractJiraService {
             }
             return listIssues;
         } catch (RestClientException e) {
-            if (JiraEndpoint.HTTP_FORBIDDEN == e.getStatusCode().or(0))
+            if (HttpStatus.FORBIDDEN.value() == e.getStatusCode().or(0))
                 throw new PermissaoNegadaException(e);
-            if (JiraEndpoint.HTTP_BAD_REQUEST == e.getStatusCode().or(0))
+            if (HttpStatus.BAD_REQUEST.value() == e.getStatusCode().or(0))
                 throw new ParametrosDePesquisaInvalidosException(e);
             throw e;
         }

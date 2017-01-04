@@ -43,9 +43,6 @@ import objective.taskboard.auth.CredentialsHolder;
 @Component
 public class JiraEndpoint {
 
-    protected static final int HTTP_BAD_REQUEST = 400;
-    protected static final int HTTP_FORBIDDEN = 403;
-
     @Autowired 
     private JiraProperties jiraProperties;
 

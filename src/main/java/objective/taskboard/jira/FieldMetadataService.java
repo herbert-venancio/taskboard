@@ -26,17 +26,21 @@ import static objective.taskboard.config.CacheConfiguration.JIRA_FIELD_METADATA;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.atlassian.jira.rest.client.api.domain.Field;
 
 @Service
-public class FieldMetadataService extends AbstractJiraService {
+public class FieldMetadataService {
+
+    @Autowired
+    protected JiraEndpoint jiraEndpoint;
 
     @Cacheable(JIRA_FIELD_METADATA)
     public List<Field> getFieldsMetadata() {
-        Iterable<Field> fields = executeRequest(client -> client.getMetadataClient().getFields());
+        Iterable<Field> fields = jiraEndpoint.executeRequest(client -> client.getMetadataClient().getFields());
         return newArrayList(fields);
     }
 

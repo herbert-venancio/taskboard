@@ -34,6 +34,7 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.atlassian.jira.rest.client.api.RestClientException;
@@ -59,7 +60,7 @@ import objective.taskboard.database.TaskboardDatabaseService;
 @Slf4j
 @Service
 @EnableConfigurationProperties(JiraProperties.class)
-public class JiraService extends AbstractJiraService {
+public class JiraService {
 
     @Autowired
     private TaskboardDatabaseService taskboardDatabaseService;
@@ -67,10 +68,13 @@ public class JiraService extends AbstractJiraService {
     @Autowired
     private JiraProperties properties;
 
+    @Autowired
+    protected JiraEndpoint jiraEndpoint;
+
     public boolean authenticate(String username, String password) {
         log.debug("⬣⬣⬣⬣⬣  authenticate");
         try {
-            ServerInfo info = executeWrappedRequest(username, password, client -> client.getMetadataClient().getServerInfo().claim());
+            ServerInfo info = jiraEndpoint.executeWrappedRequest(username, password, client -> client.getMetadataClient().getServerInfo().claim());
             return info != null;
         } catch (Exception e) {
             return false;
@@ -116,14 +120,14 @@ public class JiraService extends AbstractJiraService {
             transitionInput = issueComment.isEmpty()? new TransitionInput(transition.getId(), fields):
                 new TransitionInput(transition.getId(), fields, Comment.valueOf(issueComment));
         }
-        executeRequest(client -> client.getIssueClient().transition(issueByJira, transitionInput));
+        jiraEndpoint.executeRequest(client -> client.getIssueClient().transition(issueByJira, transitionInput));
     }
 
     public String getResolutions(String transitionName) {
         log.debug("⬣⬣⬣⬣⬣  getResolutions");
         Resolution resolutionTransition = null;
 
-        Iterable<Resolution> response = executeRequest(client -> client.getMetadataClient().getResolutions());
+        Iterable<Resolution> response = jiraEndpoint.executeRequest(client -> client.getMetadataClient().getResolutions());
         List<Resolution> resolutions = newArrayList(response);
 
         if (properties.getTransitionsDoneNames().contains(transitionName)) {
@@ -137,18 +141,18 @@ public class JiraService extends AbstractJiraService {
 
     public List<Transition> getTransitions(Issue issue) {
         log.debug("⬣⬣⬣⬣⬣  getTransitions");
-        Iterable<Transition> response = executeRequest(client -> client.getIssueClient().getTransitions(issue));
+        Iterable<Transition> response = jiraEndpoint.executeRequest(client -> client.getIssueClient().getTransitions(issue));
         return ImmutableList.copyOf(response);
     }
 
     public Issue getIssueByKey(String key) {
         log.debug("⬣⬣⬣⬣⬣  getIssueByKey");
-        return executeRequest(client -> client.getIssueClient().getIssue(key));
+        return jiraEndpoint.executeRequest(client -> client.getIssueClient().getIssue(key));
     }
 
     public String createIssue(IssueInput issueInput) {
         log.debug("⬣⬣⬣⬣⬣  createIssue");
-        BasicIssue issue = executeRequest(client -> client.getIssueClient().createIssue(issueInput));
+        BasicIssue issue = jiraEndpoint.executeRequest(client -> client.getIssueClient().createIssue(issueInput));
         return issue.getKey();
     }
 
@@ -205,7 +209,7 @@ public class JiraService extends AbstractJiraService {
             Issue issue = getIssueByKey(issueKey);
             return this.getTransitions(issue);
         } catch (RestClientException e) {
-            if (JiraEndpoint.HTTP_FORBIDDEN == e.getStatusCode().or(0))
+            if (HttpStatus.FORBIDDEN.value() == e.getStatusCode().or(0))
                 throw new PermissaoNegadaException(e);
 
             throw e;
@@ -214,7 +218,7 @@ public class JiraService extends AbstractJiraService {
 
     public User getLoggedUser() {
         log.debug("⬣⬣⬣⬣⬣  getLoggedUser");
-        return executeRequest(client -> client.getUserClient().getUser(CredentialsHolder.username()));
+        return jiraEndpoint.executeRequest(client -> client.getUserClient().getUser(CredentialsHolder.username()));
     }
 
     public List<objective.taskboard.data.Issue> getIssueSubTasks(String issueKey) {
@@ -246,7 +250,7 @@ public class JiraService extends AbstractJiraService {
 
     private void updateIssue(String issueKey, IssueInputBuilder changes) {
         try {
-            executeRequest(client -> client.getIssueClient().updateIssue(issueKey, changes.build()));
+            jiraEndpoint.executeRequest(client -> client.getIssueClient().updateIssue(issueKey, changes.build()));
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             throw new RuntimeException("Could not update issue.", ex);

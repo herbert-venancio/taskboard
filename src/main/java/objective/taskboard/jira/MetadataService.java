@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +36,10 @@ import com.atlassian.jira.rest.client.api.domain.Priority;
 import com.atlassian.jira.rest.client.api.domain.Status;
 
 @Service
-public class MetadataService extends AbstractJiraService {
+public class MetadataService {
+
+    @Autowired
+    private JiraEndpoint jiraEndpoint;
 
     @Cacheable("issueTypeMetadata")
     public Map<Long, IssueType> getIssueTypeMetadata() throws InterruptedException, ExecutionException {
@@ -53,17 +57,17 @@ public class MetadataService extends AbstractJiraService {
     }
 
     private Map<Long, IssueType> loadIssueTypes() throws InterruptedException, ExecutionException {
-        Iterable<IssueType> issueTypes = executeRequest(client -> client.getMetadataClient().getIssueTypes());
+        Iterable<IssueType> issueTypes = jiraEndpoint.executeRequest(client -> client.getMetadataClient().getIssueTypes());
         return newArrayList(issueTypes).stream().collect(Collectors.toMap(IssueType::getId, t -> t));
     }
 
     private Map<Long, Priority> loadPriorities() throws InterruptedException, ExecutionException {
-        Iterable<Priority> priorities = executeRequest(client -> client.getMetadataClient().getPriorities());
+        Iterable<Priority> priorities = jiraEndpoint.executeRequest(client -> client.getMetadataClient().getPriorities());
         return newArrayList(priorities).stream().collect(Collectors.toMap(Priority::getId, t -> t));
     }
 
     private Map<Long, Status> loadStatuses() throws InterruptedException, ExecutionException {
-        Iterable<Status> statuses = executeRequest(client -> client.getMetadataClient().getStatuses());
+        Iterable<Status> statuses = jiraEndpoint.executeRequest(client -> client.getMetadataClient().getStatuses());
         return newArrayList(statuses).stream().collect(Collectors.toMap(Status::getId, t -> t));
     }
 
