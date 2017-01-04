@@ -26,8 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -53,11 +51,6 @@ public class IssueBufferService {
     private ProjectService projectService;
 
     private Map<String, Issue> issueBuffer = new LinkedHashMap<>();
-
-    @PostConstruct
-    private void load() {
-        updateIssueBuffer();
-    }
 
     public void updateIssueBuffer() {
         authenticator.authenticateAsServer();
