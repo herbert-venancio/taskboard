@@ -56,6 +56,9 @@ import com.google.common.collect.ImmutableList;
 import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.auth.CredentialsHolder;
 import objective.taskboard.database.TaskboardDatabaseService;
+import objective.taskboard.jira.endpoint.JiraEndpoint;
+import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
+import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
 
 @Slf4j
 @Service
@@ -69,14 +72,23 @@ public class JiraService {
     private JiraProperties properties;
 
     @Autowired
-    protected JiraEndpoint jiraEndpoint;
+    private JiraEndpoint jiraEndpoint;
+
+    @Autowired
+    private JiraEndpointAsLoggedInUser jiraEndpointAsUser;
+
+    @Autowired
+    private JiraEndpointAsMaster jiraEndpointAsMaster;
 
     public boolean authenticate(String username, String password) {
         log.debug("⬣⬣⬣⬣⬣  authenticate");
         try {
-            ServerInfo info = jiraEndpoint.executeWrappedRequest(username, password, client -> client.getMetadataClient().getServerInfo().claim());
+            ServerInfo info = jiraEndpoint.executeRequest(username, password, client -> client.getMetadataClient().getServerInfo());
             return info != null;
-        } catch (Exception e) {
+        } catch (JiraServiceException e) {
+            if (!e.getStatusCode().isPresent() || !e.getStatusCode().get().is4xxClientError())
+                log.error("Authentication error", e);
+            
             return false;
         }
     }
@@ -120,14 +132,14 @@ public class JiraService {
             transitionInput = issueComment.isEmpty()? new TransitionInput(transition.getId(), fields):
                 new TransitionInput(transition.getId(), fields, Comment.valueOf(issueComment));
         }
-        jiraEndpoint.executeRequest(client -> client.getIssueClient().transition(issueByJira, transitionInput));
+        jiraEndpointAsUser.executeRequest(client -> client.getIssueClient().transition(issueByJira, transitionInput));
     }
 
     public String getResolutions(String transitionName) {
         log.debug("⬣⬣⬣⬣⬣  getResolutions");
         Resolution resolutionTransition = null;
 
-        Iterable<Resolution> response = jiraEndpoint.executeRequest(client -> client.getMetadataClient().getResolutions());
+        Iterable<Resolution> response = jiraEndpointAsUser.executeRequest(client -> client.getMetadataClient().getResolutions());
         List<Resolution> resolutions = newArrayList(response);
 
         if (properties.getTransitionsDoneNames().contains(transitionName)) {
@@ -141,18 +153,23 @@ public class JiraService {
 
     public List<Transition> getTransitions(Issue issue) {
         log.debug("⬣⬣⬣⬣⬣  getTransitions");
-        Iterable<Transition> response = jiraEndpoint.executeRequest(client -> client.getIssueClient().getTransitions(issue));
+        Iterable<Transition> response = jiraEndpointAsUser.executeRequest(client -> client.getIssueClient().getTransitions(issue));
         return ImmutableList.copyOf(response);
     }
 
     public Issue getIssueByKey(String key) {
         log.debug("⬣⬣⬣⬣⬣  getIssueByKey");
-        return jiraEndpoint.executeRequest(client -> client.getIssueClient().getIssue(key));
+        return jiraEndpointAsUser.executeRequest(client -> client.getIssueClient().getIssue(key));
     }
 
+    public Issue getIssueByKeyAsMaster(String key) {
+        log.debug("⬣⬣⬣⬣⬣  getIssueByKey");
+        return jiraEndpointAsMaster.executeRequest(client -> client.getIssueClient().getIssue(key));
+    }
+    
     public String createIssue(IssueInput issueInput) {
         log.debug("⬣⬣⬣⬣⬣  createIssue");
-        BasicIssue issue = jiraEndpoint.executeRequest(client -> client.getIssueClient().createIssue(issueInput));
+        BasicIssue issue = jiraEndpointAsUser.executeRequest(client -> client.getIssueClient().createIssue(issueInput));
         return issue.getKey();
     }
 
@@ -218,7 +235,7 @@ public class JiraService {
 
     public User getLoggedUser() {
         log.debug("⬣⬣⬣⬣⬣  getLoggedUser");
-        return jiraEndpoint.executeRequest(client -> client.getUserClient().getUser(CredentialsHolder.username()));
+        return jiraEndpointAsUser.executeRequest(client -> client.getUserClient().getUser(CredentialsHolder.username()));
     }
 
     public List<objective.taskboard.data.Issue> getIssueSubTasks(String issueKey) {
@@ -250,7 +267,7 @@ public class JiraService {
 
     private void updateIssue(String issueKey, IssueInputBuilder changes) {
         try {
-            jiraEndpoint.executeRequest(client -> client.getIssueClient().updateIssue(issueKey, changes.build()));
+            jiraEndpointAsUser.executeRequest(client -> client.getIssueClient().updateIssue(issueKey, changes.build()));
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             throw new RuntimeException("Could not update issue.", ex);
@@ -261,8 +278,8 @@ public class JiraService {
         try {
             com.atlassian.jira.rest.client.api.domain.User jiraUser = getLoggedUser();
             return objective.taskboard.data.User.from(jiraUser.getDisplayName(), jiraUser.getName(), jiraUser.getEmailAddress(), jiraUser.getAvatarUri());
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
             return null;
         }
     }

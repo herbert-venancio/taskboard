@@ -35,7 +35,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
-import objective.taskboard.auth.Authenticator;
 import objective.taskboard.domain.Filter;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.issueBuffer.IssueBufferService;
@@ -57,9 +56,6 @@ public class WebhookController {
 
     @Autowired
     ProjectFilterConfigurationCachedRepository projectRepository;
-    
-    @Autowired
-    private Authenticator authenticator;
 
     @Autowired
     private ObjectMapper mapper;
@@ -80,7 +76,6 @@ public class WebhookController {
         
         IssueEvent event = IssueEvent.valueOf(webhookEvent.toUpperCase());
                 
-        authenticator.authenticateAsServer();
         issueBufferService.updateIssueBuffer(event, issueKey);
     }
 

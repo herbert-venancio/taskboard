@@ -36,6 +36,8 @@ import com.atlassian.jira.rest.client.api.GetCreateIssueMetadataOptionsBuilder;
 import com.atlassian.jira.rest.client.api.domain.BasicProject;
 import com.atlassian.jira.rest.client.api.domain.CimProject;
 
+import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
+
 @Service
 public class ProjectService {
 
@@ -43,7 +45,7 @@ public class ProjectService {
     private ProjectCache projectCache;
 
     @Autowired
-    private JiraEndpoint jiraEndpoint;
+    private JiraEndpointAsLoggedInUser jiraEndpointAsUser;
 
     public List<BasicProject> getVisibleProjects() {
         return projectCache.getVisibleProjects()
@@ -66,7 +68,7 @@ public class ProjectService {
                 .withProjectKeys(projectKey)
                 .build();
 
-        Iterable<CimProject> projects = jiraEndpoint.executeRequest(c -> c.getIssueClient().getCreateIssueMetadata(options));
+        Iterable<CimProject> projects = jiraEndpointAsUser.executeRequest(c -> c.getIssueClient().getCreateIssueMetadata(options));
 
         return projects.iterator().hasNext() ?
                 Optional.of(projects.iterator().next()) :

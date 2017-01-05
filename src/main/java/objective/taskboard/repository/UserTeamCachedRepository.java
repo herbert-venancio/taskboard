@@ -21,16 +21,18 @@ package objective.taskboard.repository;
  * [/LICENSE]
  */
 
-import com.google.common.collect.ImmutableList;
-import lombok.extern.slf4j.Slf4j;
-import objective.taskboard.auth.Authenticator;
-import objective.taskboard.data.UserTeam;
+import java.util.List;
+import java.util.Optional;
+
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import java.util.List;
-import java.util.Optional;
+import com.google.common.collect.ImmutableList;
+
+import lombok.extern.slf4j.Slf4j;
+import objective.taskboard.data.UserTeam;
 
 @Slf4j
 @Service
@@ -39,14 +41,10 @@ public class UserTeamCachedRepository {
     @Autowired
     private UserTeamRepository userTeamRepository;
 
-    @Autowired
-    private Authenticator authenticator;
-
     private List<UserTeam> cache;
 
     @PostConstruct
     private void load() {
-        authenticator.authenticateAsServer();
         loadCache();
     }
 

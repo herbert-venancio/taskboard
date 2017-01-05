@@ -21,16 +21,22 @@ package objective.taskboard.auth;
  * [/LICENSE]
  */
 
+import org.apache.commons.lang.Validate;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 public abstract class CredentialsHolder {
 
     public static String username() {
+        validateAuthentication();
         return SecurityContextHolder.getContext().getAuthentication().getName();
     }
 
     public static String password() {
+        validateAuthentication();
         return (String) SecurityContextHolder.getContext().getAuthentication().getCredentials();
     }
 
+    private static void validateAuthentication() {
+        Validate.isTrue(SecurityContextHolder.getContext().getAuthentication().isAuthenticated(), "Not authenticated");
+    }
 }

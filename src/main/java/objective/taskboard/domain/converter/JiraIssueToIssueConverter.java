@@ -494,7 +494,7 @@ public class JiraIssueToIssueConverter {
         if (parent != null)
             return parent;
 
-        return jiraService.getIssueByKey(parentKey);
+        return jiraService.getIssueByKeyAsMaster(parentKey);
     }
 
     private boolean isTeamVisible(String team) {

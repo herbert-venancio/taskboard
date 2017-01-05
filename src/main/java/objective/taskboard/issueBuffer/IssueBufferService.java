@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import objective.taskboard.auth.Authenticator;
 import objective.taskboard.data.Issue;
 import objective.taskboard.domain.converter.JiraIssueToIssueConverter;
 import objective.taskboard.jira.JiraIssueService;
@@ -45,15 +44,11 @@ public class IssueBufferService {
     private JiraIssueService jiraIssueService;
 
     @Autowired
-    private Authenticator authenticator;
-
-    @Autowired
     private ProjectService projectService;
 
     private Map<String, Issue> issueBuffer = new LinkedHashMap<>();
 
     public void updateIssueBuffer() {
-        authenticator.authenticateAsServer();
         setIssues(issueConverter.convert(jiraIssueService.searchAll()));
     }
 

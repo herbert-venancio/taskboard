@@ -29,6 +29,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -73,7 +74,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 if (authenticatedAgainstJira(name, password)) {
                     return new UsernamePasswordAuthenticationToken(name, password, Lists.newArrayList());
                 } else {
-                    throw new RuntimeException("Could not authenticate on Jira");
+                    throw new BadCredentialsException("Could not authenticate on Jira");
                 }
             }
 

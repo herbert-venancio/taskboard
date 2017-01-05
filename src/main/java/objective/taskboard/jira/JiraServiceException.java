@@ -22,22 +22,30 @@ package objective.taskboard.jira;
  */
 
 import java.util.Map.Entry;
+import java.util.Optional;
+
+import org.springframework.http.HttpStatus;
 
 import com.atlassian.jira.rest.client.api.RestClientException;
 import com.atlassian.jira.rest.client.api.domain.util.ErrorCollection;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 public class JiraServiceException extends RuntimeException {
 
     private static final long serialVersionUID = 4426760513185384513L;
+    
+    private final Optional<HttpStatus> statusCode;
 
     public JiraServiceException(RestClientException cause) {
-        super(trataMensagemRestClientException(cause));
-        log.error(getMessage(), cause);        
+        super(trataMensagemRestClientException(cause), cause);
+        this.statusCode = cause.getStatusCode().isPresent() ? 
+                Optional.of(HttpStatus.valueOf(cause.getStatusCode().get())) : 
+                Optional.empty();
     }
 
+    public Optional<HttpStatus> getStatusCode() {
+        return statusCode;
+    }
+    
     private static String trataMensagemRestClientException(RestClientException ex) {
         StringBuilder sbErrorMessages = new StringBuilder();
         sbErrorMessages.append("Could not execute command:\n");
@@ -57,5 +65,4 @@ public class JiraServiceException extends RuntimeException {
 
         return sbErrorMessages.toString();
     }
-
 }

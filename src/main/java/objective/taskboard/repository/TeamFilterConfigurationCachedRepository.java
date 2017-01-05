@@ -21,16 +21,18 @@ package objective.taskboard.repository;
  * [/LICENSE]
  */
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import lombok.extern.slf4j.Slf4j;
-import objective.taskboard.auth.Authenticator;
-import objective.taskboard.domain.TeamFilterConfiguration;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import java.util.List;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+
+import lombok.extern.slf4j.Slf4j;
+import objective.taskboard.domain.TeamFilterConfiguration;
 
 @Slf4j
 @Service
@@ -39,14 +41,10 @@ public class TeamFilterConfigurationCachedRepository {
     @Autowired
     private TeamFilterConfigurationRepository repository;
 
-    @Autowired
-    private Authenticator authenticator;
-
     private List<TeamFilterConfiguration> cache = Lists.newArrayList();
 
     @PostConstruct
     private void load() {
-        authenticator.authenticateAsServer();
         loadCache();
     }
 

@@ -38,6 +38,7 @@ import com.google.common.collect.Lists;
 import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.config.LoggedInUserKeyGenerator;
 import objective.taskboard.domain.ProjectFilterConfiguration;
+import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 
 @Component
@@ -47,7 +48,7 @@ class ProjectCache {
     private ProjectFilterConfigurationCachedRepository projectFilterConfiguration;
     
     @Autowired
-    private JiraEndpoint jiraEndpoint;
+    private JiraEndpointAsLoggedInUser jiraEndpointAsUser;
 
     @Cacheable(cacheNames=CacheConfiguration.PROJECTS, keyGenerator=LoggedInUserKeyGenerator.NAME)
     public Map<String, BasicProject> getVisibleProjects() {
@@ -63,7 +64,7 @@ class ProjectCache {
     }
 
     private List<BasicProject> getProjectsVisibleToUser() {
-        Iterable<BasicProject> projects = jiraEndpoint.executeRequest(client -> client.getProjectClient().getAllProjects());
+        Iterable<BasicProject> projects = jiraEndpointAsUser.executeRequest(client -> client.getProjectClient().getAllProjects());
         return Lists.newArrayList(projects);
     }
 }

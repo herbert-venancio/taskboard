@@ -43,6 +43,7 @@ import com.atlassian.jira.rest.client.internal.json.SearchResultJsonParser;
 import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.jira.JiraService.ParametrosDePesquisaInvalidosException;
 import objective.taskboard.jira.JiraService.PermissaoNegadaException;
+import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
 
 @Slf4j
 @Service
@@ -63,7 +64,7 @@ public class JiraSearchService {
     private JiraProperties properties;
 
     @Autowired
-    private JiraEndpoint jiraEndpoint;
+    private JiraEndpointAsMaster jiraEndpointAsMaster;
 
     public List<Issue> searchIssues(String jql) {
         log.debug("⬣⬣⬣⬣⬣  searchIssues");
@@ -81,7 +82,7 @@ public class JiraSearchService {
                                  .put(START_AT_ATTRIBUTE, i * MAX_RESULTS)
                                  .put(FIELDS_ATTRIBUTE, getFields());
 
-                    String jsonResponse = jiraEndpoint.postWithRestTemplate(PATH_REST_API_SEARCH, APPLICATION_JSON, searchRequest);
+                    String jsonResponse = jiraEndpointAsMaster.postWithRestTemplate(PATH_REST_API_SEARCH, APPLICATION_JSON, searchRequest);
 
                     SearchResult searchResult = searchResultParser.parse(new JSONObject(jsonResponse));
                     List<Issue> issuesSearchResult = newArrayList(searchResult.getIssues());

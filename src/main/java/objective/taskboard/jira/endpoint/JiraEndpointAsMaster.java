@@ -1,13 +1,11 @@
-package objective.taskboard.auth;
-
-import org.springframework.beans.factory.annotation.Autowired;
+package objective.taskboard.jira.endpoint;
 
 /*-
  * [LICENSE]
  * Taskboard
- * - - -
- * Copyright (C) 2015 - 2016 Objective Solutions
- * - - -
+ * ---
+ * Copyright (C) 2015 - 2017 Objective Solutions
+ * ---
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -23,24 +21,24 @@ import org.springframework.beans.factory.annotation.Autowired;
  * [/LICENSE]
  */
 
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import objective.taskboard.jira.JiraProperties;
 
 @Component
-public class Authenticator {
+public class JiraEndpointAsMaster extends AuthorizedJiraEndpoint {
 
-    @Autowired
+    @Autowired 
     private JiraProperties jiraProperties;
-    
-    public void simpleAuthentication(String user, String pass) {
-        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user, pass));
+
+    @Override
+    protected String getUsername() {
+        return jiraProperties.getLousa().getUsername();
     }
 
-    public void authenticateAsServer() {
-        simpleAuthentication(jiraProperties.getLousa().getUsername(), jiraProperties.getLousa().getPassword());
+    @Override
+    protected String getPassword() {
+        return jiraProperties.getLousa().getPassword();
     }
-
 }

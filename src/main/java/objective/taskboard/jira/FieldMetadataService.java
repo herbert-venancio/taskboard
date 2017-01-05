@@ -32,15 +32,17 @@ import org.springframework.stereotype.Service;
 
 import com.atlassian.jira.rest.client.api.domain.Field;
 
+import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
+
 @Service
 public class FieldMetadataService {
 
     @Autowired
-    protected JiraEndpoint jiraEndpoint;
+    private JiraEndpointAsMaster jiraEndpointAsMaster;
 
     @Cacheable(JIRA_FIELD_METADATA)
     public List<Field> getFieldsMetadata() {
-        Iterable<Field> fields = jiraEndpoint.executeRequest(client -> client.getMetadataClient().getFields());
+        Iterable<Field> fields = jiraEndpointAsMaster.executeRequest(client -> client.getMetadataClient().getFields());
         return newArrayList(fields);
     }
 
