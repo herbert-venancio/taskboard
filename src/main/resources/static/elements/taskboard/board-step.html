@@ -42,7 +42,7 @@
 
             <!-- Issues -->
             <template is="dom-repeat" items="{{filteredIssues}}" as="issue" sort="{{getSorter()}}">
-                <issue-item item="{{issue}}" style="{{getOptimalIssueWidth(columns, issue)}}" hidden="{{showSynthetic(lastPreferenceUpdate)}}"></issue-item>
+                <issue-item item="{{issue}}" style$="{{getOptimalIssueWidth(columns, issue)}}" hidden="{{showSynthetic(lastPreferenceUpdate)}}"></issue-item>
                 <issue-item-synthetic item="{{issue}}" parent-type-icon="{{showParentIconInSynthetic(parentLaneConfig)}}" hidden="{{!showSynthetic(lastPreferenceUpdate)}}"></issue-item-synthetic>
             </template>
 

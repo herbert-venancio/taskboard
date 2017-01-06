@@ -270,13 +270,13 @@
                 </div>
                 <div class="icons">
                     <img id="issueTypeIcon" class="icon-small icon-issuetype"
-                         title="- {{item.issueKey}}&#010;- {{getIssueTypeName(item.type)}}&#010;- {{getStatusName(item.status)}}"
-                         src="{{getIssueTypeImage(item)}}"></img>
+                         title$="- {{item.issueKey}}&#010;- {{getIssueTypeName(item.type)}}&#010;- {{getStatusName(item.status)}}"
+                         src$="{{getIssueTypeImage(item)}}"/>
                     <template is="dom-if" if="{{item.subresponsavel1}}">
-                        <img class="icon-small" src="{{item.subresponsavel1}}"></img>
+                        <img class="icon-small" src$="{{item.subresponsavel1}}"/>
                     </template>
                     <template is="dom-if" if="{{subResponsavelNotEquals(item)}}">
-                        <img class="icon-small" src="{{item.subresponsavel2}}"></img>
+                        <img class="icon-small" src$="{{item.subresponsavel2}}"/>
                     </template>
                 </div>
             </div>

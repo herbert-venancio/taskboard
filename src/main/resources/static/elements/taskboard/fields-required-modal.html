@@ -168,10 +168,10 @@
                                         <span class="sub-header">[[field.name]]: </span>
                                         <br/>
                                         <template is="dom-if" if="{{!isTextArea(field.type)}}">
-                                            <input is="iron-input" id="{{field.name}}" class="input-fields" type="text" required value="{{getValue(field.id)}}"></input>
+                                            <input is="iron-input" id$="{{field.name}}" class="input-fields" type="text" required value="{{getValue(field.id)}}"/>
                                         </template>
                                         <template is="dom-if" if="{{isTextArea(field.type)}}">
-                                            <textarea id="{{field.name}}" class="input-fields" required>{{getValue(field.id)}}</textarea>
+                                            <textarea id$="{{field.name}}" class="input-fields" required>{{getValue(field.id)}}</textarea>
                                         </template>
                                         <template is="dom-if" if="{{errorMessage}}">
                                             <br/>

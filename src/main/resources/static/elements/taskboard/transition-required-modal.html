@@ -169,16 +169,16 @@
                                         <br/>
                                         <template is="dom-if" if="{{!field.showOptions}}">
                                             <template is="dom-if" if="{{!isTextArea(field.type)}}">
-                                                <input is="iron-input" id="{{field.name}}" class="input-fields" type="text" required value="{{getValue(field.id)}}"></input>
+                                                <input is="iron-input" id$="{{field.name}}" class="input-fields" type="text" required value="{{getValue(field.id)}}"/>
                                             </template>
                                             <template is="dom-if" if="{{isTextArea(field.type)}}">
-                                                <textarea id="{{field.name}}" class="input-fields" required>{{getValue(field.id)}}</textarea>
+                                                <textarea id$="{{field.name}}" class="input-fields" required>{{getValue(field.id)}}</textarea>
                                             </template>
                                         </template>
                                         <template is="dom-if" if="{{field.showOptions}}">
                                              <paper-dropdown-menu-light no-label-float required >
                                                 <paper-menu class="dropdown-content shadow-elevation-8dp" attr-for-selected="fieldid"
-                                                            id="{{field.name}}" value="{{getValue(field.id)}}">
+                                                            id$="{{field.name}}" value="{{getValue(field.id)}}">
                                                     <template is="dom-repeat" id="optionsField" items="{{field.options}}" >
                                                         <template is="dom-if" if="{{item.value}}">
                                                             <paper-item  fieldid="[[item.id]]" value="{{item.id}}">{{item.value}}</paper-item>

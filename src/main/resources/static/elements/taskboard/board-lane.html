@@ -140,7 +140,7 @@
 
                         <!-- Stage Labels -->
                         <template is="dom-repeat" items="{{metadata.stages}}" as="stage">
-                            <th class="label label-stage" colspan$="{{getColspan(stage)}}" style="background-color:{{stage.color}}">
+                            <th class="label label-stage" colspan$="{{getColspan(stage)}}" style$="background-color:{{stage.color}}">
                                 <inline-badge class="counter" value="{{getStageIssueCount(stage, issues, lastPreferenceUpdate)}}"></inline-badge>
                                 {{stage.stage}}
                             </th>
@@ -160,7 +160,7 @@
                     <!-- Step Labels -->
                     <template is="dom-repeat" items="{{metadata.stages}}" as="stage">
                         <template is="dom-repeat" items="{{stage.steps}}" as="step">
-                            <th class="label label-stage" style="{{getStepStyle(stage, step, issues)}}">
+                            <th class="label label-stage" style$="{{getStepStyle(stage, step, issues)}}">
                                 <inline-badge class="counter" value="{{getIssueCountByStep(step.id, issues, lastPreferenceUpdate)}}"></inline-badge>
                                 {{step.step}}
                             </th>
@@ -178,7 +178,7 @@
                         <template is="dom-if" if="{{isTeamVisible(team, lastPreferenceUpdate)}}">
                             <tr>
                                 <!-- Team Cell -->
-                                <td class="team-col cell team-cell" style="width:{{teamColumnWidth}}">
+                                <td class="team-col cell team-cell" style$="width:{{teamColumnWidth}}">
                                     {{prettify(team.name)}}
                                 </td>
 
