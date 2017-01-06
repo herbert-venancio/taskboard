@@ -250,7 +250,7 @@ public class IssueController {
     }
 
     private List<AspectSubitemFilter> getTeamFilterItems() {
-        return teamFilterConfigurationService.getVisibleTeams().stream()
+        return teamFilterConfigurationService.getTeamsVisibleToUser().stream()
                 .map(t -> AspectSubitemFilter.from(t.getName(), t.getName(), true))
                 .sorted(getComparatorFilter())
                 .collect(toList());

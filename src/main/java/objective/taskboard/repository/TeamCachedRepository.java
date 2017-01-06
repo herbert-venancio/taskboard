@@ -21,15 +21,16 @@ package objective.taskboard.repository;
  * [/LICENSE]
  */
 
-import com.google.common.collect.ImmutableList;
-import lombok.extern.slf4j.Slf4j;
-import objective.taskboard.data.Team;
+import java.util.Collections;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import java.util.List;
-import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
+import objective.taskboard.data.Team;
 
 @Slf4j
 @Service
@@ -45,21 +46,13 @@ public class TeamCachedRepository {
         loadCache();
     }
 
-    public Team findByName(String team) {
-        if (cache == null)
-            throw new RuntimeException("loadCache() must be executed.");
-
-        Optional<Team> first = cache.stream().filter(ut -> ut.getName().equals(team)).findFirst();
-        return first.orElse(null);
-    }
-
     public List<Team> getCache() {
-        return ImmutableList.copyOf(cache);
+        return cache;
     }
 
     public void loadCache() {
         log.info("------------------------------ > TeamCachedRepository.loadCache()");
-        this.cache = teamRepository.findAll();
+        this.cache = Collections.unmodifiableList(teamRepository.findAll());
     }
 
 }

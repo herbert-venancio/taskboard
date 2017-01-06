@@ -21,9 +21,10 @@ package objective.taskboard.domain.converter;
  * [/LICENSE]
  */
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
@@ -47,7 +48,6 @@ import com.atlassian.jira.rest.client.api.domain.User;
 import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.data.CustomField;
 import objective.taskboard.data.Issue;
-import objective.taskboard.data.Team;
 import objective.taskboard.data.UserTeam;
 import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.domain.ParentIssueLink;
@@ -498,11 +498,8 @@ public class JiraIssueToIssueConverter {
     }
 
     private boolean isTeamVisible(String team) {
-        List<Team> visibleTeams = teamFilterConfigurationService.getVisibleTeams();
-        return visibleTeams.stream()
-                .filter(t -> Objects.equals(t.getName(), team))
-                .findFirst()
-                .isPresent();
+        return teamFilterConfigurationService.getConfiguredTeams()
+                .stream()
+                .anyMatch(t -> Objects.equals(t.getName(), team));
     }
-
 }

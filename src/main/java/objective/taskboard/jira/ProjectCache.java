@@ -22,11 +22,9 @@ package objective.taskboard.jira;
  */
 
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -37,6 +35,7 @@ import com.google.common.collect.Lists;
 
 import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.config.LoggedInUserKeyGenerator;
+import objective.taskboard.domain.Project;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
@@ -51,16 +50,16 @@ class ProjectCache {
     private JiraEndpointAsLoggedInUser jiraEndpointAsUser;
 
     @Cacheable(cacheNames=CacheConfiguration.PROJECTS, keyGenerator=LoggedInUserKeyGenerator.NAME)
-    public Map<String, BasicProject> getVisibleProjects() {
-        Set<String> configuredProjectsKeys = projectFilterConfiguration.getProjects()
+    public Map<String, Project> getVisibleProjects() {
+        Map<String, ProjectFilterConfiguration> configuredProjects = projectFilterConfiguration.getProjects()
                 .stream()
-                .map(ProjectFilterConfiguration::getProjectKey)
-                .collect(toSet());
+                .collect(toMap(ProjectFilterConfiguration::getProjectKey, p -> p));
 
         return getProjectsVisibleToUser()
                 .stream()
-                .filter(p -> configuredProjectsKeys.contains(p.getKey()))
-                .collect(toMap(BasicProject::getKey, p -> p));
+                .filter(bp -> configuredProjects.containsKey(bp.getKey()))
+                .map(bp -> Project.from(bp, configuredProjects.get(bp.getKey())))
+                .collect(toMap(Project::getKey, p -> p));
     }
 
     private List<BasicProject> getProjectsVisibleToUser() {

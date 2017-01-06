@@ -3,9 +3,9 @@ package objective.taskboard.domain;
 /*-
  * [LICENSE]
  * Taskboard
- * - - -
- * Copyright (C) 2015 - 2016 Objective Solutions
- * - - -
+ * ---
+ * Copyright (C) 2015 - 2017 Objective Solutions
+ * ---
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -23,33 +23,26 @@ package objective.taskboard.domain;
 
 import java.util.List;
 
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.Table;
+import com.atlassian.jira.rest.client.api.domain.BasicProject;
 
 import lombok.Data;
-import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Data
-@Entity
-@Table(name = "project_filter_configuration")
-public class ProjectFilterConfiguration {
-
-    @Id
-    @Getter
-    private String projectKey;
+@NoArgsConstructor
+public class Project {
     
-    @ElementCollection(fetch=FetchType.EAGER)
-    @CollectionTable(
-          name="project_team",
-          joinColumns=@JoinColumn(name="project_key")
-    )
-    @Column(name="team_id")
+    private String key;
+    private String name;
     private List<Long> teamsIds;
+    
+    public static Project from(BasicProject basicProject, ProjectFilterConfiguration projectFilterConfiguration) {
+        Project project = new Project();
+        project.setKey(basicProject.getKey());
+        project.setName(basicProject.getName());
+        project.setTeamsIds(projectFilterConfiguration.getTeamsIds());
+        
+        return project;
+    }
 
 }

@@ -26,17 +26,16 @@ import static java.util.stream.Collectors.toList;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.atlassian.jira.rest.client.api.GetCreateIssueMetadataOptions;
 import com.atlassian.jira.rest.client.api.GetCreateIssueMetadataOptionsBuilder;
-import com.atlassian.jira.rest.client.api.domain.BasicProject;
 import com.atlassian.jira.rest.client.api.domain.CimProject;
 
 import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
+import objective.taskboard.domain.Project;
 
 @Service
 public class ProjectService {
@@ -47,16 +46,12 @@ public class ProjectService {
     @Autowired
     private JiraEndpointAsLoggedInUser jiraEndpointAsUser;
 
-    public List<BasicProject> getVisibleProjects() {
+    public List<Project> getVisibleProjects() {
         return projectCache.getVisibleProjects()
                 .values()
                 .stream()
-                .sorted(comparing(BasicProject::getName))
+                .sorted(comparing(Project::getName))
                 .collect(toList());
-    }
-
-    public Set<String> getProjectsKeys() {
-        return projectCache.getVisibleProjects().keySet();
     }
 
     public Optional<CimProject> getProjectMetadata(String projectKey) {

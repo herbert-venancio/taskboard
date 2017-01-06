@@ -21,15 +21,21 @@ package objective.taskboard.filterConfiguration;
  * [/LICENSE]
  */
 
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import objective.taskboard.config.CacheConfiguration;
+import objective.taskboard.config.LoggedInUserKeyGenerator;
 import objective.taskboard.data.Team;
 import objective.taskboard.domain.TeamFilterConfiguration;
+import objective.taskboard.jira.ProjectService;
 import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.repository.TeamFilterConfigurationCachedRepository;
 
@@ -41,15 +47,33 @@ public class TeamFilterConfigurationService {
 
     @Autowired
     private TeamCachedRepository teamRepository;
+    
+    @Autowired
+    private ProjectService projectService;
 
-    @Cacheable("visibleTeams")
-    public List<Team> getVisibleTeams() {
-        List<Long> teamConfig = teamFilterConfigurationRepository.getCache().stream()
+    @Cacheable(CacheConfiguration.CONFIGURED_TEAMS)
+    public List<Team> getConfiguredTeams() {
+        Set<Long> configuredTeamsIds = teamFilterConfigurationRepository.getCache()
+                .stream()
                 .map(TeamFilterConfiguration::getTeamId)
-                .collect(Collectors.toList());
-        return teamRepository.getCache().stream()
-                .filter(t -> teamConfig.contains(t.getId()))
-                .collect(Collectors.toList());
+                .collect(toSet());
+
+        return teamRepository.getCache()
+                .stream()
+                .filter(t -> configuredTeamsIds.contains(t.getId()))
+                .collect(toList());
     }
 
+    @Cacheable(cacheNames = CacheConfiguration.TEAMS_VISIBLE_TO_USER, keyGenerator = LoggedInUserKeyGenerator.NAME)
+    public List<Team> getTeamsVisibleToUser() {
+        Set<Long> visibleTeamsIds = projectService.getVisibleProjects()
+                .stream()
+                .flatMap(p -> p.getTeamsIds().stream())
+                .collect(toSet());
+
+        return teamRepository.getCache()
+                .stream()
+                .filter(t -> visibleTeamsIds.contains(t.getId()))
+                .collect(toList());
+    }
 }

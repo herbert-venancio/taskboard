@@ -321,3 +321,17 @@ UPDATE stage set weight= 2 where id=50;
 
 -- Lane Team
 ALTER TABLE lane add (show_lane_team char(1) default 'F' not null);
+
+
+-- Cria tabela para configurar os times de cada projeto
+
+ALTER TABLE project_filter_configuration ADD CONSTRAINT project_key_unique UNIQUE (project_key);
+ALTER TABLE team_filter_configuration ADD CONSTRAINT team_id_unique UNIQUE (team_id);
+
+CREATE TABLE project_team (
+    project_key   VARCHAR2(255) NOT NULL,
+    team_id       NUMBER(38,0) NOT NULL,
+    CONSTRAINT project_fk FOREIGN KEY (project_key) REFERENCES project_filter_configuration (project_key),
+    CONSTRAINT team_fk FOREIGN KEY (team_id) REFERENCES team_filter_configuration (team_id)
+);
+
