@@ -76,7 +76,10 @@ public class StartDateStepGetter {
             }
         });
 
-        return getFirstStatusStep(changelogStatus, statusSteps).getCreated().getMillis();
+        ChangelogGroup firstStatusStep = getFirstStatusStep(changelogStatus, statusSteps);
+        return firstStatusStep == null ?
+                   jiraIssue.getCreationDate().getMillis() :
+                   firstStatusStep.getCreated().getMillis();
     }
 
     private List<ChangelogGroup> getChangelogsStatus(Iterable<ChangelogGroup> changelog) {

@@ -62,7 +62,7 @@ public class TaskboardDatabaseService {
     public List<Issue> getSubtasks(String parent) {
         return jdbcTemplate.query("select CONCAT(CONCAT(projectIssue.pkey, '-'), issue.issuenum) issueKey, issue.summary"
                 + " from " + SCHEMA_JIRA +  ".issuelink il"
-                + " join " + SCHEMA_JIRA +  ".issuelinktype lt on lt.id = il.linktype and nvl(lt.pstyle, ' ') = 'jira_subtask'"
+                + " join " + SCHEMA_JIRA +  ".issuelinktype lt on lt.id = il.linktype and COALESCE(lt.pstyle, ' ') = 'jira_subtask'"
                 + " join " + SCHEMA_JIRA +  ".jiraissue source on il.source = source.id"
                 + " join " + SCHEMA_JIRA +  ".project project on project.id = source.project"
                 + " join " + SCHEMA_JIRA +  ".jiraissue issue on issue.id = il.destination"

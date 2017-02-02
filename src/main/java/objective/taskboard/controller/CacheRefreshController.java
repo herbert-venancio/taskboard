@@ -46,7 +46,6 @@ public class CacheRefreshController {
     @RequestMapping("issues")
     public String issues() {
         issueBufferService.updateIssueBuffer();
-        cacheManager.getCache("issues").clear();
 
         return "ISSUES UPDATED";
     }
@@ -54,7 +53,6 @@ public class CacheRefreshController {
     @RequestMapping("issues/{key}")
     public String issue(@PathVariable("key") String key) {
         issueBufferService.updateIssueBuffer(key);
-        cacheManager.getCache("issues").clear();
 
         return "ISSUE " + key + " UPDATED";
     }
@@ -70,8 +68,7 @@ public class CacheRefreshController {
         refreshCacheTask.refreshIssueTypeVisibility();
 
         cacheManager.getCacheNames().forEach(cache -> {
-            if (!"issues".equals(cache))
-                cacheManager.getCache(cache).clear();
+            cacheManager.getCache(cache).clear();
         });
 
         return "CONFIGURATION UPDATED";
