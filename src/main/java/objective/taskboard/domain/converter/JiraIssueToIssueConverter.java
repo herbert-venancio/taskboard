@@ -96,7 +96,7 @@ public class JiraIssueToIssueConverter {
     }
 
     public List<Issue> convert(List<com.atlassian.jira.rest.client.api.domain.Issue> issueList) {
-        issuesList = issueList;
+        issuesList = newArrayList(issueList);
         List<Issue> collect = issueList.stream()
                                   .map(this::convert)
                                   .collect(toList());
@@ -325,7 +325,8 @@ public class JiraIssueToIssueConverter {
     private String getLastBlockReason(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
         IssueField field = jiraIssue.getField(jiraProperties.getCustomfield().getLastBlockReason().getId());
 
-        if (field == null || field.getValue() == null) return "";
+        if (field == null || field.getValue() == null)
+            return "";
 
         String lastBlockReason = field.getValue().toString();
         return lastBlockReason.length() > 200 ? lastBlockReason.substring(0, 200) + "..." : lastBlockReason;
@@ -334,10 +335,7 @@ public class JiraIssueToIssueConverter {
     private Map<String, Object> getAdditionalEstimatedHours(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
         String additionalEstimatedHoursId = jiraProperties.getCustomfield().getAdditionalEstimatedHours().getId();
         IssueField field = jiraIssue.getField(additionalEstimatedHoursId);
-        if (field == null)
-            return newHashMap();
-
-        if (field.getValue() == null)
+        if (field == null || field.getValue() == null)
             return newHashMap();
 
         Double additionalHours = (Double) field.getValue();
@@ -494,7 +492,9 @@ public class JiraIssueToIssueConverter {
         if (parent != null)
             return parent;
 
-        return jiraService.getIssueByKeyAsMaster(parentKey);
+        parent = jiraService.getIssueByKeyAsMaster(parentKey);
+        issuesList.add(parent);
+        return parent;
     }
 
     private boolean isTeamVisible(String team) {

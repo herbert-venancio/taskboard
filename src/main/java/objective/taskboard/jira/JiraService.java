@@ -163,7 +163,7 @@ public class JiraService {
     }
 
     public Issue getIssueByKeyAsMaster(String key) {
-        log.debug("⬣⬣⬣⬣⬣  getIssueByKey");
+        log.debug("⬣⬣⬣⬣⬣  getIssueByKeyAsMaster");
         return jiraEndpointAsMaster.executeRequest(client -> client.getIssueClient().getIssue(key));
     }
     

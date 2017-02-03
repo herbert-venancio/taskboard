@@ -39,9 +39,9 @@ public class CacheConfiguration {
 
     public static final String CONFIGURED_TEAMS = "configured-teams";
     public static final String TEAMS_VISIBLE_TO_USER = "teams-visible-to-user";
-    public static final String HOLIDAYS = "holidays";
-    public static final String JIRA_FIELD_METADATA = "jira-field-metadata";
     public static final String PROJECTS = "projects";
+    public static final String JIRA_FIELD_METADATA = "jira-field-metadata";
+    public static final String HOLIDAYS = "holidays";
 
     @Bean
     public CacheManager cacheManager() {
