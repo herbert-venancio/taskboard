@@ -22,7 +22,7 @@ package objective.taskboard.repository;
  */
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
@@ -48,12 +48,13 @@ public class UserTeamCachedRepository {
         loadCache();
     }
 
-    public UserTeam findByUserName(String userName) {
+    public List<UserTeam> findByUserName(String userName) {
         if (cache == null)
             throw new RuntimeException("loadCache() must be executed.");
 
-        Optional<UserTeam> first = cache.stream().filter(ut -> ut.getUserName().equals(userName) && ut.getEndDate() == null).findFirst();
-        return first.orElse(null);
+        return cache.stream()
+                    .filter(ut -> ut.getUserName().equals(userName) && ut.getEndDate() == null)
+                    .collect(Collectors.toList());
     }
 
     public List<UserTeam> getCache() {

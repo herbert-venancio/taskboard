@@ -25,8 +25,8 @@
 
     <template>
         <iron-signals on-iron-signal-update-user-preferences="preferencesUpdated"
-                      on-iron-signal-config-visibility-synthetic-changed="viewChanged"
-                      on-iron-signal-search-filter-changed="searchFilterChanged"
+                      on-iron-signal-config-visibility-synthetic-changed="preferencesUpdated"
+                      on-iron-signal-search-filter-changed="preferencesUpdated"
                       on-iron-signal-level-config-changed="preferencesUpdated"
                       on-iron-signal-hierarchical-filter-changed="preferencesUpdated"></iron-signals>
         <div class="wrap layout horizontal" style="width: 100%">
@@ -98,7 +98,7 @@
                     issues: {
                         type: Array,
                         notify: true,
-                        observer: 'filter'
+                        observer: 'preferencesUpdated'
                     },
                     filteredIssues: {
                         type: Array,
@@ -119,9 +119,6 @@
                     idealIssueSize: {
                         type: Number,
                         value: 150
-                    },
-                    searchFilter: {
-                        type: String
                     }
                 },
 
@@ -169,9 +166,17 @@
 
                 filterIssuesInvalidTeam: function(issues) {
                     checkingInvalidTeam = true;
-                    var filteredIssuesStepNoTeam = this.filterIssues(issues);
+                    var issuesInvalidTeam = this.filterIssues(issues);
                     checkingInvalidTeam = false;
-                    return filteredIssuesStepNoTeam;
+                    return issuesInvalidTeam;
+                },
+
+                filterIssuesDisabledTeam: function(issues) {
+                    var bkpTeam = this.team;
+                    this.team = null;
+                    var issuesDisabledTeam = this.filterIssues(issues);
+                    this.team = bkpTeam;
+                    return issuesDisabledTeam;
                 },
 
                 getSorter: function () {
@@ -180,7 +185,7 @@
 
                 shouldShowIssue: function(issue) {
                     return this.doFiltersAllow(issue) && this.doPreferencesAllow(issue) &&
-                            (!this.searchFilter || this.searchFilter && this.searchFilterMatches(issue)) &&
+                            (!searchFilter.get() || searchFilter.get() && this.searchFilterMatches(issue)) &&
                             this.hierarchicalFilterMatches(issue);
                 },
 
@@ -225,7 +230,7 @@
                 },
 
                 searchFilterMatches: function(issue) {
-                    var query = this.searchFilter.toUpperCase();
+                    var query = searchFilter.get().toUpperCase();
                     if (issue.issueKey.toUpperCase().indexOf(query) !== -1)
                         return true;
                     else if (issue.assignee && issue.assignee.toUpperCase().indexOf(query) !== -1)
@@ -235,6 +240,8 @@
                     else if (issue.summary && issue.summary.toUpperCase().indexOf(query) !== -1)
                         return true;
                     else if (issue.customfields.release && issue.customfields.release.value.toUpperCase().indexOf(query) !== -1)
+                        return true;
+                    else if (issue.usersInvalidTeam && issue.usersInvalidTeam.toUpperCase().indexOf(query) !== -1)
                         return true;
 
                     return false;
@@ -257,17 +264,8 @@
                 },
 
                 preferencesUpdated: function() {
-                    this.lastPreferenceUpdate = new Date();
                     this.filter();
-                },
-
-                searchFilterChanged: function (evt, data) {
-                    this.searchFilter = data.query;
-                    this.preferencesUpdated();
-                },
-
-                viewChanged: function() {
-                    this.preferencesUpdated();
+                    this.lastPreferenceUpdate = new Date();
                 }
 
             });

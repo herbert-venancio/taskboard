@@ -187,7 +187,7 @@
                                     <template is="dom-repeat" items="{{stage.steps}}" as="step">
                                         <td class="cell step-cell">
                                             <board-step parent-lane-id="{{metadata.id}}" parent-lane-config="{{metadata}}"
-                                                      class$="step-{{step.id}}" step-metadata="{{step}}" issues="{{getIssuesByStep(step.id, issues)}}" team="{{team.name}}"></board-step>
+                                                class$="step-{{step.id}}" step-metadata="{{step}}" issues="{{getIssuesByStep(step.id, issues)}}" team="{{team.name}}"></board-step>
                                         </td>
                                     </template>
                                 </template>
@@ -203,7 +203,8 @@
                         <template is="dom-repeat" items="{{metadata.stages}}" as="stage">
                             <template is="dom-repeat" items="{{stage.steps}}" as="step">
                                 <td class="cell step-cell">
-                                    <board-step parent-lane-id="{{metadata.id}}" parent-lane-config="{{metadata}}" class$="step-{{step.id}}" step-metadata="{{step}}" issues="{{getIssuesByStep(step.id, issues)}}"></board-step>
+                                    <board-step parent-lane-id="{{metadata.id}}" parent-lane-config="{{metadata}}"
+                                        class$="step-{{step.id}}" step-metadata="{{step}}" issues="{{getIssuesByStep(step.id, issues)}}"></board-step>
                                 </td>
                             </template>
                         </template>
@@ -324,15 +325,6 @@
                     return count;
                 },
 
-                getStepIssueCount: function(step) {
-                    var count = 0;
-                    var steps = document.querySelectorAll('#lane-'+this.metadata.id+' .step-'+step.id);
-                    for(var i = 0; i < steps.length; i++)
-                        count += steps[i].getIssueCount();
-
-                    return count;
-                },
-
                 setWeight: function(weight) {
                     this.weight = weight;
                     this.metadata.weight = weight;
@@ -343,12 +335,13 @@
                 },
 
                 getIssueCountByStep: function(stepId) {
-                    var count = 0;
                     var steps = document.querySelectorAll('#lane-'+this.metadata.id+' .step-'+stepId);
-                    for(var i = 0; i < steps.length; i++)
-                        count += steps[i].filterIssues(this.getIssuesByStep(stepId)).length;
 
-                    return count;
+                    if (steps.length == 0)
+                        return 0;
+
+                    var issuesByStep = this.getIssuesByStep(stepId);
+                    return steps[0].filterIssuesDisabledTeam(issuesByStep).length;
                 },
 
                 getIssuesByStep: function(stepId) {

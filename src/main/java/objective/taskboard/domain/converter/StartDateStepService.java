@@ -41,7 +41,7 @@ import objective.taskboard.domain.Step;
 import objective.taskboard.repository.FilterCachedRepository;
 
 @Service
-public class StartDateStepGetter {
+public class StartDateStepService {
 
     @Autowired
     private FilterCachedRepository filterRepository;

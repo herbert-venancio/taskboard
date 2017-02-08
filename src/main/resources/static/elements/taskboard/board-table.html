@@ -38,7 +38,8 @@
         <iron-signals on-iron-signal-level-visibility-changed="laneVisibilityUpdated"
                       on-iron-signal-show-details="showDetails"
                       on-iron-signal-update-user-preferences="checkIssuesInvalidTeam"
-                      on-iron-signal-level-config-changed="checkIssuesInvalidTeam"></iron-signals>
+                      on-iron-signal-level-config-changed="checkIssuesInvalidTeam"
+                      on-iron-signal-search-filter-changed="searchFilterChanged"></iron-signals>
         <div id="lane-container" class="fit layout vertical board">
             <template id="levels" is="dom-repeat" items="{{conf}}" as="level">
                 <template is="dom-if" if="{{showLevel(level.showLevel, lastLaneUpdate)}}">
@@ -179,6 +180,11 @@
                             issuesInvalidTeam.push(issue.issueKey + ": " + issue.usersInvalidTeam);
                     });
                     return issuesInvalidTeam;
+                },
+
+                searchFilterChanged: function(event, data) {
+                    searchFilter.set(data.query);
+                    this.checkIssuesInvalidTeam();
                 }
             });
         })();
