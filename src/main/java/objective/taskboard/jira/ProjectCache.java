@@ -21,6 +21,7 @@ package objective.taskboard.jira;
  * [/LICENSE]
  */
 
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 import java.util.List;
@@ -33,37 +34,63 @@ import org.springframework.stereotype.Component;
 import com.atlassian.jira.rest.client.api.domain.BasicProject;
 import com.google.common.collect.Lists;
 
+import objective.taskboard.auth.CredentialsHolder;
 import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.config.LoggedInUserKeyGenerator;
+import objective.taskboard.data.Team;
 import objective.taskboard.domain.Project;
 import objective.taskboard.domain.ProjectFilterConfiguration;
+import objective.taskboard.filterConfiguration.TeamFilterConfigurationService;
 import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
+import objective.taskboard.repository.UserTeamCachedRepository;
 
 @Component
 class ProjectCache {
 
     @Autowired
     private ProjectFilterConfigurationCachedRepository projectFilterConfiguration;
-    
+
     @Autowired
     private JiraEndpointAsLoggedInUser jiraEndpointAsUser;
 
+    @Autowired
+    private UserTeamCachedRepository userTeamRepository;
+
+    @Autowired
+    private TeamFilterConfigurationService teamFilterConfigurationService;
+
     @Cacheable(cacheNames=CacheConfiguration.PROJECTS, keyGenerator=LoggedInUserKeyGenerator.NAME)
     public Map<String, Project> getVisibleProjects() {
-        Map<String, ProjectFilterConfiguration> configuredProjects = projectFilterConfiguration.getProjects()
+        List<Long> teamsIdUser = getTeamsIdUser();
+
+        Map<String, ProjectFilterConfiguration> configuredTeamProjects = projectFilterConfiguration.getProjects()
                 .stream()
+                .filter(pf -> pf.getTeamsIds().stream().anyMatch(id -> teamsIdUser.contains(id)))
                 .collect(toMap(ProjectFilterConfiguration::getProjectKey, p -> p));
 
-        return getProjectsVisibleToUser()
+        return getProjectsVisibleToUserInJira()
                 .stream()
-                .filter(bp -> configuredProjects.containsKey(bp.getKey()))
-                .map(bp -> Project.from(bp, configuredProjects.get(bp.getKey())))
+                .filter(bp -> configuredTeamProjects.containsKey(bp.getKey()))
+                .map(bp -> Project.from(bp, configuredTeamProjects.get(bp.getKey())))
                 .collect(toMap(Project::getKey, p -> p));
     }
 
-    private List<BasicProject> getProjectsVisibleToUser() {
+    private List<BasicProject> getProjectsVisibleToUserInJira() {
         Iterable<BasicProject> projects = jiraEndpointAsUser.executeRequest(client -> client.getProjectClient().getAllProjects());
         return Lists.newArrayList(projects);
+    }
+
+    private List<Long> getTeamsIdUser() {
+        List<String> teamsUser = userTeamRepository.findByUserName(CredentialsHolder.username())
+                .stream()
+                .map(ut -> ut.getTeam())
+                .collect(toList());
+
+        return teamFilterConfigurationService.getConfiguredTeams()
+                .stream()
+                .filter(tf -> teamsUser.contains(tf.getName()))
+                .map(Team::getId)
+                .collect(toList());
     }
 }

@@ -47,7 +47,7 @@ public class TeamFilterConfigurationService {
 
     @Autowired
     private TeamCachedRepository teamRepository;
-    
+
     @Autowired
     private ProjectService projectService;
 
