@@ -177,7 +177,7 @@
                     var issuesInvalidTeam = [];
                     issues.forEach(function(issue) {
                         if (taskboard.isInvalidTeam(issue.teams))
-                            issuesInvalidTeam.push(issue.issueKey + ": " + issue.usersInvalidTeam);
+                            issuesInvalidTeam.push(issue.issueKey + ": " + issue.usersTeam);
                     });
                     return issuesInvalidTeam;
                 },

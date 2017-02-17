@@ -21,6 +21,8 @@ package objective.taskboard.controller;
  * [/LICENSE]
  */
 
+import static objective.taskboard.domain.converter.JiraIssueToIssueConverter.INVALID_TEAM;
+
 import java.io.IOException;
 
 import org.codehaus.jackson.map.ObjectMapper;
@@ -63,6 +65,7 @@ public class HomeController {
         model.addAttribute("cycleTimeStartBusinessHours", serialize(cycleTimePropeties.getStartBusinessHours()));
         model.addAttribute("cycleTimeEndBusinessHours", serialize(cycleTimePropeties.getEndBusinessHours()));
         model.addAttribute("holidays", serialize(holidayService.getHolidays()));
+        model.addAttribute("invalidTeam", INVALID_TEAM);
         return "index";
     }
 

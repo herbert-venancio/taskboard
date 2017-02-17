@@ -204,8 +204,12 @@
 
                 doPreferencesAllow: function(issue) {
                     for (var i = 0; i < taskboard.getAspectFilters().length; i++) {
-                        var value = issue[taskboard.getAspectFilters()[i].field]
+                        var field = taskboard.getAspectFilters()[i].field;
+                        var value = issue[field]
                         var filters = userPreferences.getFilters()
+
+                        if (checkingInvalidTeam && field == 'teams')
+                            continue;
 
                         if (!this.checkPreference(value,  filters))
                             return false;
@@ -217,9 +221,6 @@
                 checkPreference: function(values, filters) {
                     if (!Array.isArray(values))
                         values = [ values ];
-
-                    if (checkingInvalidTeam && taskboard.isInvalidTeam(values))
-                        return true;
 
                     for (var index in values) {
                         if (filters[values[index]])
@@ -241,7 +242,7 @@
                         return true;
                     else if (issue.customfields.release && issue.customfields.release.value.toUpperCase().indexOf(query) !== -1)
                         return true;
-                    else if (issue.usersInvalidTeam && issue.usersInvalidTeam.toUpperCase().indexOf(query) !== -1)
+                    else if (issue.usersTeam && issue.usersTeam.toUpperCase().indexOf(query) !== -1)
                         return true;
 
                     return false;

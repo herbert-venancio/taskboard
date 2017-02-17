@@ -208,7 +208,17 @@ function Taskboard() {
     };
 
     this.isInvalidTeam = function(teams) {
-        return teams.includes("NO TEAM");
+        if (teams.includes(INVALID_TEAM))
+            return true;
+
+        var visibleTeamsToUser = this.getTeams();
+        for (var index in visibleTeamsToUser) {
+            var visibleTeam = visibleTeamsToUser[index];
+            if (teams.includes(visibleTeam.name))
+                return false;
+        }
+
+        return true;
     };
 
     this.getIssueTypeName = function(issueTypeId) {

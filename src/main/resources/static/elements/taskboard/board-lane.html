@@ -301,13 +301,6 @@
                     return taskboard.getTeams();
                 },
 
-                shouldShowTeam: function(team) {
-                    var teamFilter = _.find(taskboard.getTeams(), function (team) {
-                        return team.name == team.name
-                    });
-                    return teamFilter.selected;
-                },
-
                 getWrapperHeight: function(weight) {
                     var laneHeight = taskboard.getLaneContainerHeight() * weight / taskboard.getTotalLaneWeight();
                     var laneLabelHeight = 28;

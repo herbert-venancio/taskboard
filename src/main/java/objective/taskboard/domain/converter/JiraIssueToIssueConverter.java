@@ -61,7 +61,7 @@ import objective.taskboard.repository.UserTeamCachedRepository;
 @Service
 public class JiraIssueToIssueConverter {
 
-    private static final String NO_TEAM = "NO TEAM";
+    public static final String INVALID_TEAM = "INVALID_TEAM";
 
     @Autowired
     private UserTeamCachedRepository userTeamRepository;
@@ -86,7 +86,7 @@ public class JiraIssueToIssueConverter {
 
     private List<String> parentIssueLinks;
     private List<com.atlassian.jira.rest.client.api.domain.Issue> issuesList;
-    private List<String> usersInvalidTeam;
+    private List<String> usersTeam;
 
     @PostConstruct
     private void loadParentIssueLinks() {
@@ -121,9 +121,9 @@ public class JiraIssueToIssueConverter {
 
         List<String> teamGroups = getTeamGroups(jiraIssue);
 
-        usersInvalidTeam = usersInvalidTeam.stream()
-                               .distinct()
-                               .collect(toList());
+        usersTeam = usersTeam.stream()
+                .distinct()
+                .collect(toList());
 
         String color = issueColorService.getColor(getClassOfServiceId(jiraIssue));
 
@@ -144,7 +144,7 @@ public class JiraIssueToIssueConverter {
                 getRequired(jiraIssue),
                 String.join(",", nameSubResponsaveis),
                 jiraIssue.getAssignee() != null ? jiraIssue.getAssignee().getName() : "",
-                String.join(",", usersInvalidTeam),
+                String.join(",", usersTeam),
                 jiraIssue.getPriority() != null ? jiraIssue.getPriority().getId() : 0l,
                 jiraIssue.getDueDate() != null ? jiraIssue.getDueDate().toDate() : null,
                 jiraIssue.getCreationDate().getMillis(),
@@ -421,7 +421,7 @@ public class JiraIssueToIssueConverter {
     private List<String> getTeamGroups(com.atlassian.jira.rest.client.api.domain.Issue issue) {
         List<UserTeam> users = getUsers(issue);
         if (users.isEmpty())
-            return newArrayList(NO_TEAM);
+            return newArrayList(INVALID_TEAM);
 
         return users.stream()
                 .filter(Objects::nonNull)
@@ -431,7 +431,7 @@ public class JiraIssueToIssueConverter {
     }
 
     private List<UserTeam> getUsers(com.atlassian.jira.rest.client.api.domain.Issue issue) {
-        usersInvalidTeam = newArrayList();
+        usersTeam = newArrayList();
         List<UserTeam> users = getUsersResponsaveis(issue);
         if (foundSomeUser(users))
             return users;
@@ -459,20 +459,16 @@ public class JiraIssueToIssueConverter {
     }
 
     private boolean foundSomeUser(List<UserTeam> users) {
-        return !users.isEmpty() || !usersInvalidTeam.isEmpty();
+        return !users.isEmpty() || !usersTeam.isEmpty();
     }
 
     private List<UserTeam> getUserTeam(String userName) {
-        List<UserTeam> usersTeam = userTeamRepository.findByUserName(userName)
+        usersTeam.add(userName);
+
+        return userTeamRepository.findByUserName(userName)
                 .stream()
                 .filter(ut -> isTeamVisible(ut.getTeam()))
                 .collect(toList());
-
-        if (!usersTeam.isEmpty())
-            return usersTeam;
-
-        usersInvalidTeam.add(userName);
-        return newArrayList();
     }
 
     private List<UserTeam> getParentUsersResponsaveis(com.atlassian.jira.rest.client.api.domain.Issue issue) {
