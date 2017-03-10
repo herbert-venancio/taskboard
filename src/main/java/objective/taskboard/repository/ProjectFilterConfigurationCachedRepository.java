@@ -57,4 +57,7 @@ public class ProjectFilterConfigurationCachedRepository {
         this.cache = projectFilterRepository.findAll();
     }
 
+    public void save(ProjectFilterConfiguration f) {
+        projectFilterRepository.save(f);
+    }
 }
