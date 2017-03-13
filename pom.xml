@@ -40,7 +40,7 @@
 
 	<scm>
 		<url>https://github.com/objective-solutions/taskboard</url>
-		<connection>scm:git:git://github.com/objective-solutions/taskboard.git</connection>
+		<connection>scm:git:git@github.com/objective-solutions/taskboard.git</connection>
 		<developerConnection>scm:git:git@github.com:objective-solutions/taskboard.git</developerConnection>
 	</scm>
 	<build>
