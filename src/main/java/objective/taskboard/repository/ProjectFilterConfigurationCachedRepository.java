@@ -59,5 +59,6 @@ public class ProjectFilterConfigurationCachedRepository {
 
     public void save(ProjectFilterConfiguration f) {
         projectFilterRepository.save(f);
+        loadCache();
     }
 }
