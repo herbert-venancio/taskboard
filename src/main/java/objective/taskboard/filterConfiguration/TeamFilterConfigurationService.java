@@ -25,6 +25,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,5 +76,11 @@ public class TeamFilterConfigurationService {
                 .stream()
                 .filter(t -> visibleTeamsIds.contains(t.getId()))
                 .collect(toList());
+    }
+
+    public boolean isTeamVisible(String team) {
+        return getConfiguredTeams()
+                .stream()
+                .anyMatch(t -> Objects.equals(t.getName(), team));
     }
 }

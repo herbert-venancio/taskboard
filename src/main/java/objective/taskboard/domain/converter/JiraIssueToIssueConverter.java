@@ -26,36 +26,26 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import javax.annotation.PostConstruct;
 
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.atlassian.jira.rest.client.api.domain.Comment;
-import com.atlassian.jira.rest.client.api.domain.IssueField;
-import com.atlassian.jira.rest.client.api.domain.IssueLink;
-import com.atlassian.jira.rest.client.api.domain.IssueLinkType.Direction;
-import com.atlassian.jira.rest.client.api.domain.User;
+import com.atlassian.jira.rest.client.api.domain.Issue;
 
 import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.data.CustomField;
-import objective.taskboard.data.Issue;
-import objective.taskboard.data.UserTeam;
 import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.domain.ParentIssueLink;
-import objective.taskboard.filterConfiguration.TeamFilterConfigurationService;
+import objective.taskboard.domain.converter.IssueTeamService.InvalidTeamException;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraService;
 import objective.taskboard.repository.ParentIssueLinkRepository;
-import objective.taskboard.repository.UserTeamCachedRepository;
 
 @Slf4j
 @Service
@@ -64,13 +54,10 @@ public class JiraIssueToIssueConverter {
     public static final String INVALID_TEAM = "INVALID_TEAM";
 
     @Autowired
-    private UserTeamCachedRepository userTeamRepository;
-
-    @Autowired
-    private TeamFilterConfigurationService teamFilterConfigurationService;
-
-    @Autowired
     private ParentIssueLinkRepository parentIssueLinkRepository;
+
+    @Autowired
+    private IssueTeamService issueTeamService;
 
     @Autowired
     private JiraService jiraService;
@@ -85,8 +72,8 @@ public class JiraIssueToIssueConverter {
     private StartDateStepService startDateStepService;
 
     private List<String> parentIssueLinks;
-    private List<com.atlassian.jira.rest.client.api.domain.Issue> issuesList;
-    private List<String> usersTeam;
+
+    private Map<String, IssueMetadata> metadatasByIssueKey = newHashMap();
 
     @PostConstruct
     private void loadParentIssueLinks() {
@@ -95,39 +82,50 @@ public class JiraIssueToIssueConverter {
                                .collect(toList());
     }
 
-    public List<Issue> convert(List<com.atlassian.jira.rest.client.api.domain.Issue> issueList) {
-        issuesList = newArrayList(issueList);
-        List<Issue> collect = issueList.stream()
-                                  .map(this::convert)
+    public List<objective.taskboard.data.Issue> convert(List<Issue> issueList) {
+        loadParentIssueLinks();
+
+        metadatasByIssueKey = issueList.stream()
+            .collect(toMap(i -> i.getKey(), i -> new IssueMetadata(i, jiraProperties, parentIssueLinks, log)));
+
+        List<objective.taskboard.data.Issue> converted = issueList.stream()
+                                  .map(i -> convert(i))
                                   .collect(toList());
-        System.out.println(collect.size());
-        return collect;
+        System.out.println(converted.size());
+        return converted;
     }
 
-    public Issue convert(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        List<String> avatarSubResponsaveis = getSubResponsaveisAvatar(jiraIssue);
-        List<String> nameSubResponsaveis = getSubResponsaveisName(jiraIssue);
+    public objective.taskboard.data.Issue convert(Issue jiraIssue) {
+        IssueMetadata metadata = new IssueMetadata(jiraIssue, jiraProperties, parentIssueLinks, log);
+        metadatasByIssueKey.put(jiraIssue.getKey(), metadata);
 
-        String subResponsavel1 = jiraIssue.getAssignee() != null ? jiraIssue.getAssignee().getAvatarUri("24x24").toString() : "";
-        String subResponsavel2 = avatarSubResponsaveis.stream().filter(x -> !x.equals(subResponsavel1)).findFirst().orElse("");
+        String avatarCoAssignee1 = jiraIssue.getAssignee() != null ? jiraIssue.getAssignee().getAvatarUri("24x24").toString() : "";
+        String avatarCoAssignee2 = metadata.getCoAssignees().stream()
+                .map(c -> c.getAvatarUrl())
+                .filter(url -> !url.equals(avatarCoAssignee1))
+                .findFirst().orElse("");
 
-        Map<String, Object> customFields = newHashMap();
-        customFields.put(jiraProperties.getCustomfield().getClassOfService().getId(), getClassOfService(jiraIssue));
-        customFields.put(jiraProperties.getCustomfield().getBlocked().getId(), getBlocked(jiraIssue));
-        customFields.put(jiraProperties.getCustomfield().getLastBlockReason().getId(), getLastBlockReason(jiraIssue));
-        customFields.putAll(getAdditionalEstimatedHours(jiraIssue));
-        customFields.putAll(getTShirtSizes(jiraIssue));
-        customFields.putAll(getRelease(jiraIssue));
+        List<String> issueTeams = newArrayList();
+        List<String> usersTeam = newArrayList();
+        try {
+            IssueMetadata parentMetadata = getParentMetadata(metadata);
 
-        List<String> teamGroups = getTeamGroups(jiraIssue);
+            Map<String, List<String>> mapUsersTeams = issueTeamService.getIssueTeams(metadata, parentMetadata);
 
-        usersTeam = usersTeam.stream()
-                .distinct()
-                .collect(toList());
+            for (List<String> teams : mapUsersTeams.values())
+                issueTeams.addAll(teams);
 
-        String color = issueColorService.getColor(getClassOfServiceId(jiraIssue));
+            issueTeams = issueTeams.stream()
+                    .distinct()
+                    .collect(toList());
 
-        return Issue.from(
+            usersTeam.addAll(mapUsersTeams.keySet());
+        } catch (InvalidTeamException e) {
+            issueTeams.add(INVALID_TEAM);
+            usersTeam.addAll(e.getUsersInInvalidTeam());
+        }
+
+        return objective.taskboard.data.Issue.from(
                 jiraIssue.getKey(),
                 jiraIssue.getProject().getKey(),
                 jiraIssue.getProject().getName(),
@@ -136,369 +134,115 @@ public class JiraIssueToIssueConverter {
                 jiraIssue.getSummary() != null ? jiraIssue.getSummary() : "",
                 jiraIssue.getStatus().getId(),
                 startDateStepService.get(jiraIssue),
-                subResponsavel1,
-                subResponsavel2,
-                getParentKey(jiraIssue),
-                getParentType(jiraIssue),
-                getParentTypeIconUri(jiraIssue),
-                getRequired(jiraIssue),
-                String.join(",", nameSubResponsaveis),
+                avatarCoAssignee1,
+                avatarCoAssignee2,
+                metadata.getParentKey(),
+                getParentTypeId(metadata),
+                getParentTypeIconUri(metadata),
+                metadata.getDependenciesIssuesKey(),
+                String.join(",", getCoAssigneesName(metadata)),
                 jiraIssue.getAssignee() != null ? jiraIssue.getAssignee().getName() : "",
                 String.join(",", usersTeam),
                 jiraIssue.getPriority() != null ? jiraIssue.getPriority().getId() : 0l,
                 jiraIssue.getDueDate() != null ? jiraIssue.getDueDate().toDate() : null,
                 jiraIssue.getCreationDate().getMillis(),
                 jiraIssue.getDescription() != null ? jiraIssue.getDescription() : "",
-                teamGroups,
-                getComments(jiraIssue),
-                customFields,
-                color
+                issueTeams,
+                getComments(metadata),
+                getCustomFields(metadata),
+                issueColorService.getColor(getClassOfServiceId(metadata))
         );
     }
 
-    private long getParentType(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        IssueField field = jiraIssue.getField("parent");
-
-        if (field == null)
+    private long getParentTypeId(IssueMetadata metadata) {
+        if (metadata.getRealParent() == null)
             return 0;
-
-        JSONObject json = (JSONObject) field.getValue();
-
-        try {
-            return (json != null) ? json.getJSONObject("fields").getJSONObject("issuetype").getLong("id") : 0;
-        } catch (JSONException e) {
-            e.printStackTrace();
-            log.error(e.getMessage(), e);
-            return 0;
-        }
+        return metadata.getRealParent().getTypeId();
     }
 
-    private String getParentTypeIconUri(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        IssueField field = jiraIssue.getField("parent");
-        if (field == null)
+    private String getParentTypeIconUri(IssueMetadata metadata) {
+        if (metadata.getRealParent() == null)
             return "";
-
-        JSONObject json = (JSONObject) field.getValue();
-        if (json != null) {
-            try {
-                return json.getJSONObject("fields").getJSONObject("issuetype").getString("iconUrl");
-            } catch (JSONException e) {
-                log.error(e.getMessage(), e);
-            }
-        }
-
-        return "";
+        return metadata.getRealParent().getTypeIconUrl();
     }
 
-    private String getParentKey(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        IssueField field = jiraIssue.getField("parent");
-
-        if (field == null) {
-            if (jiraIssue.getIssueLinks() != null) {
-                List<IssueLink> links = newArrayList(jiraIssue.getIssueLinks());
-                List<IssueLink> collect = links.stream()
-                        .filter(l -> parentIssueLinks.contains(l.getIssueLinkType().getDescription()))
-                        .collect(toList());
-                if (!collect.isEmpty()) {
-                    IssueLink link = collect.stream().findFirst().orElse(null);
-                    return (link != null) ? link.getTargetIssueKey() : "";
-                }
-            }
-            return "";
-        }
-
-        JSONObject json = (JSONObject) field.getValue();
-
-        try {
-            return (json != null) ? json.getString("key") : "";
-        } catch (JSONException e) {
-            log.error(e.getMessage(), e);
-            return "";
-        }
-    }
-
-    private List<String> getRequired(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        return newArrayList(jiraIssue.getIssueLinks()).stream()
-                .filter(this::isRequiresLink)
-                .map(link -> link.getTargetIssueKey())
+    private List<String> getCoAssigneesName(IssueMetadata metadata) {
+        return metadata.getCoAssignees().stream()
+                .map(x -> x.getName())
                 .collect(toList());
     }
 
-    private boolean isRequiresLink(final IssueLink link) {
-         return jiraProperties.getIssuelink().getDependencies().contains(link.getIssueLinkType().getName())
-             && link.getIssueLinkType().getDirection() == Direction.OUTBOUND;
-    }
-
-    private String getComments(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        Iterable<Comment> comment = jiraIssue.getComments();
-        if (newArrayList(comment).size() == 0)
+    private String getComments(IssueMetadata metadata) {
+        if (metadata.getComments().isEmpty())
             return "";
-        else
-            return comment.iterator().next().toString();
+        return metadata.getComments().get(0);
     }
 
-    private Map<String, Object> getTShirtSizes(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        Map<String, Object> tShirtSizes = newHashMap();
-
-        for (String tSizeId : jiraProperties.getCustomfield().getTShirtSize().getIds()) {
-            String tShirtSizeValue = getJsonValue(jiraIssue, tSizeId);
-
-            if (isNullOrEmpty(tShirtSizeValue))
-                continue;
-
-            String fieldName = jiraIssue.getField(tSizeId).getName();
-            CustomField tShirtSize = CustomField.from(fieldName, tShirtSizeValue);
-            tShirtSizes.put(tSizeId, tShirtSize);
-        }
-
-        return tShirtSizes;
+    private Map<String, Object> getCustomFields(IssueMetadata metadata) {
+        Map<String, Object> customFields = newHashMap();
+        customFields.put(jiraProperties.getCustomfield().getClassOfService().getId(), getClassOfServiceValue(metadata));
+        customFields.put(jiraProperties.getCustomfield().getBlocked().getId(), metadata.getBlocked());
+        customFields.put(jiraProperties.getCustomfield().getLastBlockReason().getId(), metadata.getLastBlockReason());
+        customFields.putAll(metadata.getTShirtSizes());
+        customFields.putAll(metadata.getAdditionalEstimatedHours());
+        customFields.putAll(getRelease(metadata));
+        return customFields;
     }
 
-    private String getClassOfService(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
+    private String getClassOfServiceValue(IssueMetadata metadata) {
         String defaultClassOfService = jiraProperties.getCustomfield().getClassOfService().getDefaultValue();
-        JSONObject json = getJSONClassOfService(jiraIssue);
-        try {
-            return json == null ? defaultClassOfService : json.getString("value");
-        } catch (JSONException e) {
-            return "";
-        }
+        CustomField classOfService = getClassOfService(metadata);
+        return classOfService == null ? defaultClassOfService : (String)classOfService.getValue();
     }
 
-    private Long getClassOfServiceId(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        JSONObject json = getJSONClassOfService(jiraIssue);
-        try {
-            return json == null ? 0L : json.getLong("id");
-        } catch (JSONException e) {
-            log.error(e.getMessage(), e);
-            return 0L;
-        }
+    private Long getClassOfServiceId(IssueMetadata metadata) {
+        CustomField classOfService = getClassOfService(metadata);
+        return classOfService == null ? 0L : classOfService.getOptionId();
     }
 
-    private JSONObject getJSONClassOfService(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
+    private CustomField getClassOfService(IssueMetadata metadata) {
         String defaultClassOfService = jiraProperties.getCustomfield().getClassOfService().getDefaultValue();
-        String classOfServiceId = jiraProperties.getCustomfield().getClassOfService().getId();
+        CustomField classOfService = metadata.getClassOfService();
 
-        String classOfService = getJsonValue(jiraIssue, classOfServiceId);
-        boolean isNotDefaultClassOfService = !isNullOrEmpty(classOfService) && !classOfService.equals(defaultClassOfService);
-        boolean isDemand = jiraIssue.getIssueType().getId().equals(jiraProperties.getIssuetype().getDemand().getId());
-        if (isNotDefaultClassOfService || isDemand) {
-            IssueField field = jiraIssue.getField(classOfServiceId);
-            return field == null ? null : (JSONObject) field.getValue();
-        }
+        boolean isNotDefaultClassOfService = classOfService != null
+                                             && classOfService.getValue() != null
+                                             && !classOfService.getValue().toString().equals(defaultClassOfService);
+        if (isNotDefaultClassOfService)
+            return classOfService;
 
-        String parentKey = getParentKey(jiraIssue);
-        com.atlassian.jira.rest.client.api.domain.Issue parent = getIssueByKey(parentKey);
-        return parent == null ? null : getJSONClassOfService(parent);
+        IssueMetadata parentMetadata = getParentMetadata(metadata);
+        if (parentMetadata == null)
+            return classOfService;
+
+        return getClassOfService(parentMetadata);
     }
 
-    private String getJsonValue(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue, String fieldId) {
-        IssueField field = jiraIssue.getField(fieldId);
+    private Map<String, CustomField> getRelease(IssueMetadata metadata) {
+        Map<String, CustomField> release = metadata.getRelease();
 
-        if (field == null)
-            return "";
+        if (!release.isEmpty())
+            return release;
 
-        JSONObject json = (JSONObject) field.getValue();
-
-        try {
-            return (json != null) ? json.getString("value") : "";
-        } catch (JSONException e) {
-            log.error(e.getMessage(), e);
-            return "";
-        }
-    }
-
-    private String getBlocked(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        IssueField field = jiraIssue.getField(jiraProperties.getCustomfield().getBlocked().getId());
-
-        if (field == null) return "";
-
-        JSONArray jsonArray = (JSONArray) field.getValue();
-
-        try {
-            return (jsonArray != null) ? jsonArray.getJSONObject(0).getString("value") : "";
-        } catch (JSONException e) {
-            log.error(e.getMessage(), e);
-            return "";
-        }
-    }
-
-    private String getLastBlockReason(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        IssueField field = jiraIssue.getField(jiraProperties.getCustomfield().getLastBlockReason().getId());
-
-        if (field == null || field.getValue() == null)
-            return "";
-
-        String lastBlockReason = field.getValue().toString();
-        return lastBlockReason.length() > 200 ? lastBlockReason.substring(0, 200) + "..." : lastBlockReason;
-    }
-
-    private Map<String, Object> getAdditionalEstimatedHours(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        String additionalEstimatedHoursId = jiraProperties.getCustomfield().getAdditionalEstimatedHours().getId();
-        IssueField field = jiraIssue.getField(additionalEstimatedHoursId);
-        if (field == null || field.getValue() == null)
+        IssueMetadata parentMetadata = getParentMetadata(metadata);
+        if (parentMetadata == null)
             return newHashMap();
 
-        Double additionalHours = (Double) field.getValue();
-        CustomField customFieldAdditionalHours = CustomField.from(field.getName(), additionalHours);
-        Map<String, Object> mapAdditionalHours = newHashMap();
-        mapAdditionalHours.put(additionalEstimatedHoursId, customFieldAdditionalHours);
-        return mapAdditionalHours;
+        return getRelease(parentMetadata);
     }
 
-    private Map<String, Object> getRelease(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        String releaseId = jiraProperties.getCustomfield().getRelease().getId();
-        IssueField field = jiraIssue.getField(releaseId);
-        if (field == null)
-            return newHashMap();
-
-        JSONObject json = (JSONObject) field.getValue();
-
-        try {
-            if (json == null) {
-                String parentKey = getParentKey(jiraIssue);
-                com.atlassian.jira.rest.client.api.domain.Issue parent = getIssueByKey(parentKey);
-                if (parent == null)
-                    return newHashMap();
-
-                return getRelease(parent);
-            }
-
-            String release = json.getString("name");
-            CustomField customFieldRelease = CustomField.from(field.getName(), release);
-            Map<String, Object> mapRelease = newHashMap();
-            mapRelease.put(releaseId, customFieldRelease);
-            return mapRelease;
-        } catch (JSONException e) {
-            log.error(e.getMessage(), e);
-            return newHashMap();
-        }
-    }
-
-    private List<String> getSubResponsaveisAvatar(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        IssueField field = jiraIssue.getField(jiraProperties.getCustomfield().getCoAssignees().getId());
-        List<String> names = newArrayList();
-
-        if (field == null)
-            return names;
-
-        JSONArray value = (JSONArray) field.getValue();
-
-        if (value != null) {
-            for (int i = 0; i < value.length(); i++) {
-                try {
-                    names.add(value.getJSONObject(i).getJSONObject("avatarUrls").getString("24x24"));
-                } catch (JSONException e) {
-                    log.error(e.getMessage(), e);
-                }
-            }
-        }
-
-        return names;
-    }
-
-    private List<String> getSubResponsaveisName(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        IssueField field = jiraIssue.getField(jiraProperties.getCustomfield().getCoAssignees().getId());
-        List<String> names = newArrayList();
-
-        if (field == null)
-            return names;
-
-        JSONArray value = (JSONArray) field.getValue();
-
-        if (value != null) {
-            for (int i = 0; i < value.length(); i++) {
-                try {
-                    names.add(value.getJSONObject(i).getString("name"));
-                } catch (JSONException e) {
-                    log.error(e.getMessage(), e);
-                }
-            }
-        }
-
-        return names;
-    }
-
-    private List<String> getTeamGroups(com.atlassian.jira.rest.client.api.domain.Issue issue) {
-        List<UserTeam> users = getUsers(issue);
-        if (users.isEmpty())
-            return newArrayList(INVALID_TEAM);
-
-        return users.stream()
-                .filter(Objects::nonNull)
-                .map(u -> u.getTeam())
-                .distinct()
-                .collect(toList());
-    }
-
-    private List<UserTeam> getUsers(com.atlassian.jira.rest.client.api.domain.Issue issue) {
-        usersTeam = newArrayList();
-        List<UserTeam> users = getUsersResponsaveis(issue);
-        if (foundSomeUser(users))
-            return users;
-
-        users = getParentUsersResponsaveis(issue);
-        if (foundSomeUser(users))
-            return users;
-
-        User reporter = issue.getReporter();
-        if (reporter != null)
-            users.addAll(getUserTeam(reporter.getName()));
-        return users;
-    }
-
-    private List<UserTeam> getUsersResponsaveis(com.atlassian.jira.rest.client.api.domain.Issue issue) {
-        List<UserTeam> users = newArrayList();
-        User assignee = issue.getAssignee();
-        if (assignee != null)
-            users.addAll(getUserTeam(assignee.getName()));
-
-        for (String subResponsavel : getSubResponsaveisName(issue))
-            users.addAll(getUserTeam(subResponsavel));
-
-        return users;
-    }
-
-    private boolean foundSomeUser(List<UserTeam> users) {
-        return !users.isEmpty() || !usersTeam.isEmpty();
-    }
-
-    private List<UserTeam> getUserTeam(String userName) {
-        usersTeam.add(userName);
-
-        return userTeamRepository.findByUserName(userName)
-                .stream()
-                .filter(ut -> isTeamVisible(ut.getTeam()))
-                .collect(toList());
-    }
-
-    private List<UserTeam> getParentUsersResponsaveis(com.atlassian.jira.rest.client.api.domain.Issue issue) {
-        String parentKey = getParentKey(issue);
-        com.atlassian.jira.rest.client.api.domain.Issue parent = getIssueByKey(parentKey);
-        if (parent == null)
-            return newArrayList();
-        return getUsersResponsaveis(parent);
-    }
-
-    private com.atlassian.jira.rest.client.api.domain.Issue getIssueByKey(String parentKey) {
+    private IssueMetadata getParentMetadata(IssueMetadata metadata) {
+        String parentKey = metadata.getParentKey();
         if (isNullOrEmpty(parentKey))
             return null;
 
-        com.atlassian.jira.rest.client.api.domain.Issue parent = issuesList.stream()
-                .filter(i -> i.getKey().equals(parentKey))
-                .findFirst()
-                .orElse(null);
+        IssueMetadata parentMetadata = metadatasByIssueKey.get(parentKey);
 
-        if (parent != null)
-            return parent;
+        if (parentMetadata != null)
+            return parentMetadata;
 
-        parent = jiraService.getIssueByKeyAsMaster(parentKey);
-        issuesList.add(parent);
-        return parent;
-    }
-
-    private boolean isTeamVisible(String team) {
-        return teamFilterConfigurationService.getConfiguredTeams()
-                .stream()
-                .anyMatch(t -> Objects.equals(t.getName(), team));
+        Issue parent = jiraService.getIssueByKeyAsMaster(parentKey);
+        parentMetadata = new IssueMetadata(parent, jiraProperties, parentIssueLinks, log);
+        metadatasByIssueKey.put(parent.getKey(), parentMetadata);
+        return parentMetadata;
     }
 }

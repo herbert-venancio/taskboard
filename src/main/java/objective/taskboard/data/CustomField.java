@@ -23,12 +23,9 @@ package objective.taskboard.data;
 
 import java.io.Serializable;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class CustomField implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -37,7 +34,16 @@ public class CustomField implements Serializable {
 
     private Object value;
 
-    public static CustomField from(String name, Object value) {
-        return new CustomField(name, value);
+    private Long optionId;
+
+    public CustomField(String name, Object value, Long optionId) {
+        this.name = name;
+        this.value = value;
+        this.optionId = optionId;
+    }
+
+    public CustomField(String name, Object value) {
+        this.name = name;
+        this.value = value;
     }
 }

@@ -49,9 +49,9 @@ public class Issue implements Serializable {
     private String projectKey;
 
     private String project;
-    
-	private long type;
-	
+
+    private long type;
+
     private String typeIconUri;
 
     private String summary;
@@ -67,10 +67,10 @@ public class Issue implements Serializable {
     private String parent;
 
     private long parentType;
-    
+
     private String parentTypeIconUri;
 
-    private List<String> requires;
+    private List<String> dependencies;
 
     private boolean render;
 
@@ -83,7 +83,7 @@ public class Issue implements Serializable {
     private String subResponsaveis;
 
     private String assignee;
-    
+
     private String usersTeam;
 
     private long priority;
@@ -103,11 +103,11 @@ public class Issue implements Serializable {
     private Map<String, Object> customFields;
 
     public static Issue from(String issueKey, String projectKey, String project, long issueType, String typeIconUri, String summary, long status, long startDateStepMillis,
-            String subresponsavel1, String subresponsavel2, String parent, long parentType, String parentTypeIconUri, List<String> requires, String subResponsaveis,
+            String subresponsavel1, String subresponsavel2, String parent, long parentType, String parentTypeIconUri, List<String> dependencies, String subResponsaveis,
             String assignee, String usersTeam, long priority, Date dueDate, long created, String description, List<String> teams, String comments, Map<String, Object> customFields,
             String color) {
         return new Issue(issueKey, projectKey, project, issueType, typeIconUri, summary, status, startDateStepMillis, subresponsavel1, subresponsavel2, parent, parentType, parentTypeIconUri,
-                requires, false, false, false, color, subResponsaveis, assignee, usersTeam, priority, dueDate, created, description, teams, comments, customFields);
+                dependencies, false, false, false, color, subResponsaveis, assignee, usersTeam, priority, dueDate, created, description, teams, comments, customFields);
     }
 
     /**

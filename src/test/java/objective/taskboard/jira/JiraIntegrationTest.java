@@ -111,12 +111,6 @@ public class JiraIntegrationTest {
 //		assertEquals("Resolvido", issueAfterTransition.getStatus().getName());
 //	}
 
-    //	@Test
-    public void issueSubTasks() {
-        final List<objective.taskboard.data.Issue> subTasks = jiraService.getIssueSubTasks("NET-43");
-        assertFalse(subTasks.isEmpty());
-    }
-
     private Issue createTestIssueArquitetura() {
         final IssueInput issueInput = createIssueInputArquitetura(PROJECTKEY_OBJ, ISSUETYPE_ATIVIDADE, "Teste unitário de transição: To Do -> Doing", "Reunião", "Arquitetura");
         final String newIssueKey = jiraService.createIssue(issueInput);

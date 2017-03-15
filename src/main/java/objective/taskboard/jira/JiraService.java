@@ -238,13 +238,12 @@ public class JiraService {
         return jiraEndpointAsUser.executeRequest(client -> client.getUserClient().getUser(CredentialsHolder.username()));
     }
 
-    public List<objective.taskboard.data.Issue> getIssueSubTasks(String issueKey) {
-        Issue issue = getIssueByKey(issueKey);
+    public List<objective.taskboard.data.Issue> getIssueSubTasks(objective.taskboard.data.Issue issue) {
         List<objective.taskboard.data.Issue> subs = new ArrayList<>();
-        if (issue.getIssueType().getId() == properties.getIssuetype().getDemand().getId())
-            subs.addAll(taskboardDatabaseService.getSubtasksDemanda(issue.getKey()));
+        if (issue.getType() == properties.getIssuetype().getDemand().getId())
+            subs.addAll(taskboardDatabaseService.getSubtasksDemanda(issue.getIssueKey()));
         else
-            subs.addAll(taskboardDatabaseService.getSubtasks(issue.getKey()));
+            subs.addAll(taskboardDatabaseService.getSubtasks(issue.getIssueKey()));
         return subs;
     }
 

@@ -78,11 +78,8 @@ public class JiraIssueService {
         return jiraSearchService.searchIssues(jql);
     }
 
-    public Issue searchIssue(final String key) {
-        final List<Issue> searchIssues = searchIssues("key = " + key);
-        if (searchIssues.size() != 1)
-            return null;
-        return searchIssues.get(0);
+    public List<Issue> searchIssuesByKeys(final List<String> keys) {
+        return searchIssues("key IN (" + String.join(",", keys) + ")");
     }
 
     public List<Issue> searchAll() {
@@ -103,7 +100,7 @@ public class JiraIssueService {
 //		return issues;
 //>>>>>>> Stashed changes
     }
-    
+
     private List<Issue> searchIssues(String additionalJqlCondition) {
         List<Filter> filters = filterRepository.getCache();
         List<IssuesConfiguration> configs = filters.stream().map(x -> IssuesConfiguration.fromFilter(x)).collect(Collectors.toList());

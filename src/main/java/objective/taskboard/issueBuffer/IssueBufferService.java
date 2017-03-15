@@ -21,13 +21,17 @@ package objective.taskboard.issueBuffer;
  * [/LICENSE]
  */
 
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
+
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 
 import objective.taskboard.data.Issue;
 import objective.taskboard.domain.converter.JiraIssueToIssueConverter;
@@ -59,20 +63,48 @@ public class IssueBufferService {
     public synchronized Issue updateIssueBuffer(IssueEvent event, final String key) {
         if (event == IssueEvent.ISSUE_DELETED)
             return issueBuffer.remove(key);
-        
-        final com.atlassian.jira.rest.client.api.domain.Issue searchIssue = jiraIssueService.searchIssue(key);
-        if (searchIssue == null)
+
+        List<com.atlassian.jira.rest.client.api.domain.Issue> jiraIssues = jiraIssueService.searchIssuesByKeys(asList(key));
+        if (jiraIssues.isEmpty())
             return issueBuffer.remove(key);
 
-        final Issue issue = issueConverter.convert(searchIssue);
+        final Issue issue = issueConverter.convert(jiraIssues.get(0));
         putIssue(issue);
+
+        updateSubtasks(issue.getIssueKey());
+
         return issue;
+    }
+
+    private void updateSubtasks(String key) {
+        List<String> subtasksKeys = getSubtasksKeys(key);
+        List<com.atlassian.jira.rest.client.api.domain.Issue> jiraSubtasks = jiraIssueService.searchIssuesByKeys(subtasksKeys);
+        for (com.atlassian.jira.rest.client.api.domain.Issue jiraSubtask : jiraSubtasks) {
+            Issue subtaskConverted = issueConverter.convert(jiraSubtask);
+            putIssue(subtaskConverted);
+        }
+    }
+
+    private List<String> getSubtasksKeys(String key) {
+        List<String> subtasksKeys = issueBuffer.values().stream()
+            .filter(i -> key.equals(i.getParent()))
+            .map(i -> i.getIssueKey())
+            .collect(toList());
+
+        if (subtasksKeys.isEmpty())
+            return newArrayList();
+
+        List<String> allSubtasksKeys = newArrayList(subtasksKeys);
+        for (String subtaskKey : subtasksKeys)
+            allSubtasksKeys.addAll(getSubtasksKeys(subtaskKey));
+
+        return allSubtasksKeys;
     }
 
     public synchronized List<Issue> getIssues() {
         return issueBuffer.values().stream()
                 .filter(t -> projectService.isProjectVisible(t.getProjectKey()))
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     private synchronized void setIssues(List<Issue> issues) {

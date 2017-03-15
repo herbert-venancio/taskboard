@@ -50,6 +50,9 @@ public class StartDateStepService {
         if (jiraIssue == null)
             return 0;
 
+        if (jiraIssue.getChangelog() == null)
+            return jiraIssue.getCreationDate().getMillis();
+
         List<ChangelogGroup> changelogStatus = getChangelogsStatus(jiraIssue.getChangelog());
 
         if (changelogStatus.isEmpty())

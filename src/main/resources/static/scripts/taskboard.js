@@ -193,7 +193,7 @@ function Taskboard() {
 
     var setDependencyHierarchyMatch = function(issue) {
         self.issues.forEach(function(i) {
-            if (issue.requires.indexOf(i.issueKey) >= 0 && i.hierarchyMatch !== true)
+            if (issue.dependencies.indexOf(i.issueKey) >= 0 && i.hierarchyMatch !== true)
                 i.hierarchyMatch = "DEP";
         });
     };
