@@ -275,25 +275,10 @@
 
                 retrieveFilters: function () {
                     $.getJSON("/ws/issues/aspects-filter", $.proxy(function (data) {
-                        this.aspectsFilter = this.getFilterPreferences(data);
-                        taskboard.setAspectFilters(this.aspectsFilter);
+                        taskboard.setAspectFilters(data);
+                        taskboard.applyFilterPreferences();
+                        this.aspectsFilter = taskboard.getAspectFilters();
                     }, this));
-                },
-
-                getFilterPreferences: function (itens) {
-                    var filterPreferences = userPreferences.getFilters();
-                    itens.forEach(function (item) {
-                        item.aspectsSubitemFilter.forEach(function (filter) {
-                            if (this.description === 'Issue Type') {
-                                if (filterPreferences[filter.value.id] != null)
-                                    filter.selected = filterPreferences[filter.value.id];
-                            } else {
-                                if (filterPreferences[filter.value] != null)
-                                    filter.selected = filterPreferences[filter.value];
-                            }
-                        }, item);
-                    });
-                    return itens;
                 },
 
                 updateUserPreferences: function () {

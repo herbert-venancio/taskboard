@@ -29,11 +29,11 @@ function Taskboard() {
     var rootHierarchicalFilter;
 
     this.setAspectFilters = function(filters) {
-        this.aspectFilters = filters;
+        aspectFilters = filters;
     };
 
     this.getAspectFilters = function() {
-        return this.aspectFilters;
+        return aspectFilters;
     };
 
     this.getTeams = function() {
@@ -202,7 +202,8 @@ function Taskboard() {
         var teams = this.getTeams();
         for (var index in teams) {
             var team = teams[index];
-            if (team.selected) return true;
+            if (team.visible && team.selected)
+                return true;
         }
         return false;
     };
@@ -217,9 +218,36 @@ function Taskboard() {
             if (teams.includes(visibleTeam.name))
                 return false;
         }
-
         return true;
     };
+
+    this.applyFilterPreferences = function() {
+        var filterPreferences = userPreferences.getFilters();
+
+        var filterTeams = [];
+        aspectFilters.forEach(function(item) {
+            if (item.description === 'Project')
+                item.aspectsSubitemFilter.forEach(function(subitem) {
+                    if (filterPreferences[subitem.value])
+                        filterTeams = filterTeams.concat(subitem.dependents);
+                });
+        });
+
+        aspectFilters.forEach(function(item) {
+            item.aspectsSubitemFilter.forEach(function(subitem) {
+                if (this.description === 'Issue Type') {
+                    if (filterPreferences[subitem.value.id] != null)
+                        subitem.selected = filterPreferences[subitem.value.id];
+                } else {
+                    if (filterPreferences[subitem.value] != null)
+                        subitem.selected = filterPreferences[subitem.value];
+                    subitem.visible = true;
+                    if (this.description === 'Team' && !filterTeams.includes(subitem.value))
+                        subitem.visible = false;
+                }
+            }, item);
+        });
+    },
 
     this.getIssueTypeName = function(issueTypeId) {
         var types = JSON.parse(localStorage.getItem("issueTypes"));

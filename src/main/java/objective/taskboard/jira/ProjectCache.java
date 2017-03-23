@@ -37,13 +37,11 @@ import com.google.common.collect.Lists;
 import objective.taskboard.auth.CredentialsHolder;
 import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.config.LoggedInUserKeyGenerator;
-import objective.taskboard.data.Team;
 import objective.taskboard.domain.Project;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.filterConfiguration.TeamFilterConfigurationService;
 import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
-import objective.taskboard.repository.UserTeamCachedRepository;
 
 @Component
 class ProjectCache {
@@ -55,14 +53,14 @@ class ProjectCache {
     private JiraEndpointAsLoggedInUser jiraEndpointAsUser;
 
     @Autowired
-    private UserTeamCachedRepository userTeamRepository;
-
-    @Autowired
     private TeamFilterConfigurationService teamFilterConfigurationService;
 
     @Cacheable(cacheNames=CacheConfiguration.PROJECTS, keyGenerator=LoggedInUserKeyGenerator.NAME)
     public Map<String, Project> getVisibleProjects() {
-        List<Long> teamsIdUser = getTeamsIdUser();
+        List<Long> teamsIdUser = teamFilterConfigurationService.getConfiguredTeamsByUser(CredentialsHolder.username())
+                .stream()
+                .map(t -> t.getId())
+                .collect(toList());
 
         Map<String, ProjectFilterConfiguration> configuredTeamProjects = projectFilterConfiguration.getProjects()
                 .stream()
@@ -79,18 +77,5 @@ class ProjectCache {
     private List<BasicProject> getProjectsVisibleToUserInJira() {
         Iterable<BasicProject> projects = jiraEndpointAsUser.executeRequest(client -> client.getProjectClient().getAllProjects());
         return Lists.newArrayList(projects);
-    }
-
-    private List<Long> getTeamsIdUser() {
-        List<String> teamsUser = userTeamRepository.findByUserName(CredentialsHolder.username())
-                .stream()
-                .map(ut -> ut.getTeam())
-                .collect(toList());
-
-        return teamFilterConfigurationService.getConfiguredTeams()
-                .stream()
-                .filter(tf -> teamsUser.contains(tf.getName()))
-                .map(Team::getId)
-                .collect(toList());
     }
 }

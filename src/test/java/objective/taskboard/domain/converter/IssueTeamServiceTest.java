@@ -35,14 +35,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.atlassian.jira.rest.client.api.domain.BasicProject;
 import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.User;
 
-import objective.taskboard.data.UserTeam;
 import objective.taskboard.domain.converter.IssueMetadata.IssueCoAssignee;
 import objective.taskboard.domain.converter.IssueTeamService.InvalidTeamException;
 import objective.taskboard.filterConfiguration.TeamFilterConfigurationService;
-import objective.taskboard.repository.UserTeamCachedRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class IssueTeamServiceTest {
@@ -59,13 +58,11 @@ public class IssueTeamServiceTest {
     private IssueTeamService subject;
 
     @Mock
-    private UserTeamCachedRepository userTeamRepository;
-    @Mock
     private TeamFilterConfigurationService teamFilterConfigurationService;
     @Mock
-    private UserTeam userTeam;
-    @Mock
     private User userJira;
+    @Mock
+    private BasicProject project;
     @Mock
     private Issue issue;
     @Mock
@@ -77,20 +74,12 @@ public class IssueTeamServiceTest {
     @Mock
     private IssueCoAssignee coAssignee;
 
-    private void assertUserTeam(Map<String, List<String>> issueTeams, String nameCoAssignee) {
-        assertTrue("User should have been found", issueTeams.containsKey(nameCoAssignee));
-
-        List<String> teams = issueTeams.get(nameCoAssignee);
-        assertEquals("User teams quantity", 1, teams.size());
-        assertEquals("User team", "Team", teams.get(0));
-    }
-
     @Before
     public void before() {
-        when(userTeam.getTeam()).thenReturn("Team");
-        when(userTeamRepository.findByUserName(anyString())).thenReturn(asList(userTeam));
-        when(teamFilterConfigurationService.isTeamVisible(anyString())).thenReturn(true);
+        when(teamFilterConfigurationService.getConfiguredTeamsNamesByUserAndProject(anyString(), anyString())).thenReturn(asList("Team"));
+        when(issue.getProject()).thenReturn(project);
         when(issueMetadata.getIssue()).thenReturn(issue);
+        when(parentIssue.getProject()).thenReturn(project);
         when(parentMetadata.getIssue()).thenReturn(parentIssue);
     }
 
@@ -116,7 +105,7 @@ public class IssueTeamServiceTest {
     public void issueWithInvalidAssignee() {
         when(userJira.getName()).thenReturn(NAME_ASSIGNEE);
         when(issue.getAssignee()).thenReturn(userJira);
-        when(teamFilterConfigurationService.isTeamVisible(anyString())).thenReturn(false);
+        when(teamFilterConfigurationService.getConfiguredTeamsNamesByUserAndProject(anyString(), anyString())).thenReturn(asList());
 
         try {
             subject.getIssueTeams(issueMetadata, null);
@@ -164,6 +153,14 @@ public class IssueTeamServiceTest {
     public void issueWithReporterNull() throws InvalidTeamException {
         Map<String, List<String>> issueTeams = subject.getIssueTeams(issueMetadata, parentMetadata);
         assertTrue(MSG_USERS_SHOULD_BE_EMPTY, issueTeams.isEmpty());
+    }
+
+    private void assertUserTeam(Map<String, List<String>> issueTeams, String nameCoAssignee) {
+        assertTrue("User should have been found", issueTeams.containsKey(nameCoAssignee));
+
+        List<String> teams = issueTeams.get(nameCoAssignee);
+        assertEquals("User teams quantity", 1, teams.size());
+        assertEquals("User team", "Team", teams.get(0));
     }
 
 }

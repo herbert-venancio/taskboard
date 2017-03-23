@@ -37,8 +37,10 @@ import objective.taskboard.config.LoggedInUserKeyGenerator;
 import objective.taskboard.data.Team;
 import objective.taskboard.domain.TeamFilterConfiguration;
 import objective.taskboard.jira.ProjectService;
+import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.repository.TeamFilterConfigurationCachedRepository;
+import objective.taskboard.repository.UserTeamCachedRepository;
 
 @Service
 public class TeamFilterConfigurationService {
@@ -52,6 +54,12 @@ public class TeamFilterConfigurationService {
     @Autowired
     private ProjectService projectService;
 
+    @Autowired
+    private ProjectFilterConfigurationCachedRepository projectFilterConfiguration;
+
+    @Autowired
+    private UserTeamCachedRepository userTeamRepository;
+
     @Cacheable(CacheConfiguration.CONFIGURED_TEAMS)
     public List<Team> getConfiguredTeams() {
         Set<Long> configuredTeamsIds = teamFilterConfigurationRepository.getCache()
@@ -59,10 +67,7 @@ public class TeamFilterConfigurationService {
                 .map(TeamFilterConfiguration::getTeamId)
                 .collect(toSet());
 
-        return teamRepository.getCache()
-                .stream()
-                .filter(t -> configuredTeamsIds.contains(t.getId()))
-                .collect(toList());
+        return getTeamsByIds(configuredTeamsIds);
     }
 
     @Cacheable(cacheNames = CacheConfiguration.TEAMS_VISIBLE_TO_USER, keyGenerator = LoggedInUserKeyGenerator.NAME)
@@ -72,15 +77,41 @@ public class TeamFilterConfigurationService {
                 .flatMap(p -> p.getTeamsIds().stream())
                 .collect(toSet());
 
+        return getTeamsByIds(visibleTeamsIds);
+    }
+
+    private List<Team> getTeamsByIds(Set<Long> teamsIds) {
         return teamRepository.getCache()
                 .stream()
-                .filter(t -> visibleTeamsIds.contains(t.getId()))
+                .filter(t -> teamsIds.contains(t.getId()))
                 .collect(toList());
     }
 
-    public boolean isTeamVisible(String team) {
-        return getConfiguredTeams()
+    public List<String> getConfiguredTeamsNamesByUserAndProject(String user, String projectKey) {
+        Set<Long> teamsIdsProject = projectFilterConfiguration.getProjects()
+            .stream()
+            .filter(pf -> Objects.equals(pf.getProjectKey(), projectKey))
+            .flatMap(pf -> pf.getTeamsIds().stream())
+            .collect(toSet());
+
+        return getConfiguredTeamsByUser(user).stream()
+                .filter(t -> teamsIdsProject.contains(t.getId()))
+                .map(t -> t.getName())
+                .collect(toList());
+    }
+
+    public List<Team> getConfiguredTeamsByUser(String user) {
+        return userTeamRepository.findByUserName(user)
                 .stream()
-                .anyMatch(t -> Objects.equals(t.getName(), team));
+                .map(ut -> getConfiguredTeamByName(ut.getTeam()))
+                .filter(Objects::nonNull)
+                .collect(toList());
+    }
+
+    private Team getConfiguredTeamByName(String teamName) {
+        return getConfiguredTeams().stream()
+                .filter(t -> Objects.equals(t.getName(), teamName))
+                .findFirst()
+                .orElse(null);
     }
 }

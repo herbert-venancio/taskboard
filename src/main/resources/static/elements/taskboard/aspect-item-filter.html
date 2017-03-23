@@ -43,11 +43,12 @@
         }
 
         iron-collapse {
-            padding-bottom: 10px;
+            padding: 5px 0px;
         }
     </style>
 
     <template>
+        <iron-signals on-iron-signal-refresh-filter-teams="refreshFilterTeams"></iron-signals>
         <paper-toolbar class="title" on-tap="collapseFilter">
             <paper-checkbox id="checkAll"></paper-checkbox>
             <span>[[aspectItemFilter.description]]</span>
@@ -55,8 +56,10 @@
         <iron-collapse id="collapseFilter">
             <paper-material class="layout vertical" elevation="0">
                 <template is="dom-repeat" items="{{aspectItemFilter.aspectsSubitemFilter}}" as="aspectSubitemFilter">
-                    <aspect-subitem-filter aspect-subitem-filter="{{aspectSubitemFilter}}" description="{{aspectItemFilter.description}}"
-                                           selected="{{aspectSubitemFilter.selected}}"></aspect-subitem-filter>
+                    <template is="dom-if" if="{{isVisible(aspectSubitemFilter, notified)}}">
+                        <aspect-subitem-filter aspect-subitem-filter="{{aspectSubitemFilter}}" description="{{aspectItemFilter.description}}"
+                                               selected="{{aspectSubitemFilter.selected}}"></aspect-subitem-filter>
+                    </template>
                 </template>
             </paper-material>
         </iron-collapse>
@@ -71,6 +74,11 @@
                     aspectItemFilter: {
                         type: Object,
                         notify: true
+                    },
+                    notified: {
+                        type: Date,
+                        value: new Date(),
+                        notify: true
                     }
                 },
 
@@ -79,24 +87,17 @@
                 },
 
                 observers: [
-                    'refreshCheckBox(aspectItemFilter)'
+                    'refreshCheckBox(aspectItemFilter.aspectsSubitemFilter.*)'
                 ],
-
-                description: function () {
-                    return this.aspectItemFilter.description;
-                },
 
                 checkAll: function () {
                     var checkAll = this.$$('#checkAll').checked;
-
                     $(this.$$('#collapseFilter'))
                             .find('aspect-subitem-filter')
                             .each(function (i, e) {
-                                if (checkAll) {
-                                    e.selected = true;
-                                } else {
-                                    e.selected = false;
-                                }
+                                if (!e.aspectSubitemFilter.visible)
+                                    return;
+                                e.selected = checkAll;
                             });
 
                     this.fire('iron-signal', {name: 'update-user-preferences'});
@@ -109,13 +110,25 @@
                 },
 
                 refreshCheckBox: function() {
+                    this.$$('#checkAll').checked = false;
                     var subitems = this.aspectItemFilter.aspectsSubitemFilter;
                     for (var subitemIndex in subitems) {
                         var subitem = subitems[subitemIndex];
-                        if (subitem.selected) {
+                        if (subitem.visible && subitem.selected) {
                             this.$$('#checkAll').checked = true;
                             return;
                         }
+                    }
+                },
+
+                isVisible: function(aspectSubitemFilter) {
+                    return aspectSubitemFilter.visible;
+                },
+
+                refreshFilterTeams: function() {
+                    if (this.aspectItemFilter.description === 'Team') {
+                        this.notified = new Date();
+                        this.refreshCheckBox();
                     }
                 }
             });

@@ -36,13 +36,9 @@ import com.atlassian.jira.rest.client.api.domain.User;
 
 import objective.taskboard.domain.converter.IssueMetadata.IssueCoAssignee;
 import objective.taskboard.filterConfiguration.TeamFilterConfigurationService;
-import objective.taskboard.repository.UserTeamCachedRepository;
 
 @Service
 public class IssueTeamService {
-
-    @Autowired
-    private UserTeamCachedRepository userTeamRepository;
 
     @Autowired
     private TeamFilterConfigurationService teamFilterConfigurationService;
@@ -60,7 +56,7 @@ public class IssueTeamService {
         if (reporter == null)
             return newHashMap();
 
-        return getUsersTeams(newArrayList(reporter.getName()));
+        return getUsersTeams(newArrayList(reporter.getName()), metadata.getIssue().getProject().getKey());
     }
 
     private Map<String, List<String>> getIssueUsersTeams(IssueMetadata metadata) throws InvalidTeamException {
@@ -76,18 +72,15 @@ public class IssueTeamService {
                 .distinct()
                 .collect(toList());
 
-        return getUsersTeams(users);
+        return getUsersTeams(users, metadata.getIssue().getProject().getKey());
     }
 
-    private Map<String, List<String>> getUsersTeams(List<String> users) throws InvalidTeamException {
+    private Map<String, List<String>> getUsersTeams(List<String> users, String projectKey) throws InvalidTeamException {
         Map<String, List<String>> usersTeams = newHashMap();
 
         boolean foundSomeTeam = false;
         for (String user : users) {
-            List<String> teams = userTeamRepository.findByUserName(user).stream()
-                    .map(u -> u.getTeam())
-                    .filter(t -> teamFilterConfigurationService.isTeamVisible(t))
-                    .collect(toList());
+            List<String> teams = teamFilterConfigurationService.getConfiguredTeamsNamesByUserAndProject(user, projectKey);
 
             if (!teams.isEmpty())
                 foundSomeTeam = true;

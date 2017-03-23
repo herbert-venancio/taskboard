@@ -27,6 +27,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -38,9 +39,15 @@ public class AspectSubitemFilter implements Serializable {
     private String name;
     private Object value;
     private boolean selected;
+    private boolean visible;
+    private List<String> dependents;
 
     public static AspectSubitemFilter from(String name, Object value, boolean selected) {
-        return new AspectSubitemFilter(name, value, selected);
+        return new AspectSubitemFilter(name, value, selected, true, null);
+    }
+
+    public static AspectSubitemFilter from(String name, Object value, boolean selected, List<String> dependents) {
+        return new AspectSubitemFilter(name, value, selected, true, dependents);
     }
 
 }

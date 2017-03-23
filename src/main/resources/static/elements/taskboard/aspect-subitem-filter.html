@@ -22,15 +22,22 @@
 
     <style>
         :host {
-            height: 34px;
             text-align: left;
             font-size: 12px;
         }
 
         paper-button {
+            padding: 0;
             display: inline-block;
             width: 100%;
             text-align: left;
+        }
+
+        paper-icon-button {
+            margin: 0px 6px 0px 10px;
+            padding: 5px;
+            width: 35px;
+            height: 35px;
         }
 
         .icon:after {
@@ -39,8 +46,8 @@
             width: 35px;
             background-color: red;
             position: absolute;
-            top: 25px;
-            left: 8px;
+            top: 16px;
+            left: 10px;
             -moz-transform: rotate(45deg);
             -webkit-transform: rotate(45deg);
             -o-transform: rotate(45deg);
@@ -54,8 +61,8 @@
             width: 35px;
             background-color: red;
             position: absolute;
-            top: 25px;
-            left: 8px;
+            top: 16px;
+            left: 10px;
             -moz-transform: rotate(135deg);
             -webkit-transform: rotate(135deg);
             -o-transform: rotate(135deg);
@@ -68,10 +75,10 @@
     <template>
         <paper-button elevation="0" on-tap="toggle">
           <template is="dom-if" if="{{isUrl(aspectSubitemFilter)}}">
-              <paper-icon-button src="{{getIssueTypeImage(aspectSubitemFilter)}}"></paper-icon-button>
+              <paper-icon-button src="{{getIconImage(aspectSubitemFilter)}}"></paper-icon-button>
           </template>
           <template is="dom-if" if="{{isNotUrl(aspectSubitemFilter)}}">
-              <paper-icon-button icon="{{getIssueTypeImage(aspectSubitemFilter)}}"></paper-icon-button>
+              <paper-icon-button icon="{{getIconImage(aspectSubitemFilter)}}"></paper-icon-button>
           </template>
             <span>{{aspectSubitemFilter.name}}</span>
         </paper-button>
@@ -88,7 +95,7 @@
                         notify: true
                     },
                     description: {
-                      	type: String
+                        type: String
                     },
                     selected: {
                         type: Boolean,
@@ -115,10 +122,14 @@
                 },
 
                 toggleIcon: function (selected) {
-                    if (selected) {
+                    if (selected)
                         $(this).children().removeClass('icon');
-                    } else {
+                    else
                         $(this).children().addClass('icon');
+
+                    if (this.description === 'Project') {
+                        taskboard.applyFilterPreferences();
+                        this.fire('iron-signal', {name: 'refresh-filter-teams'});
                     }
                 },
 
@@ -128,12 +139,12 @@
 
                 isUrl: function (item) {
                    var regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
-                   return regexp.test(this.getIssueTypeImage(item));
+                   return regexp.test(this.getIconImage(item));
                 },
 
-                getIssueTypeImage: function (item) {
+                getIconImage: function (item) {
                     return item.value.iconUri ? item.value.iconUri.replace('xsmall', 'medium') : 'visibility';
-                },
+                }
             });
         })();
     </script>

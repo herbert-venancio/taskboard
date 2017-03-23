@@ -25,7 +25,6 @@ import static java.util.stream.Collectors.toList;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +40,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.atlassian.jira.rest.client.api.domain.IssueType;
 import com.atlassian.jira.rest.client.api.domain.Subtask;
 import com.atlassian.jira.rest.client.api.domain.TimeTracking;
 import com.atlassian.jira.rest.client.api.domain.Transition;
@@ -53,6 +51,7 @@ import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.data.AspectItemFilter;
 import objective.taskboard.data.AspectSubitemFilter;
 import objective.taskboard.data.Issue;
+import objective.taskboard.data.Team;
 import objective.taskboard.database.TaskboardDatabaseService;
 import objective.taskboard.filterConfiguration.TeamFilterConfigurationService;
 import objective.taskboard.filterPreferences.UserPreferencesService;
@@ -228,44 +227,40 @@ public class IssueController {
 
     private List<AspectSubitemFilter> getIssueTypeFilterItems() throws InterruptedException, ExecutionException {
         return issueTypeVisibilityService.getVisibleIssueTypes().stream()
-                .sorted(new Comparator<IssueType>() {
-                    @Override
-                    public int compare(IssueType t1, IssueType t2) {
+                .sorted((t1, t2) -> {
                         if (t1 == null && t2 == null) return 0;
                         if (t1 == null) return 1;
                         if (t2 == null) return -1;
                         if (t1.isSubtask() == t2.isSubtask()) return t1.getName().compareTo(t2.getName());
                         return Boolean.compare(t1.isSubtask(), t2.isSubtask());
-                    }
                 })
                 .map(t -> AspectSubitemFilter.from(t.getName(), t, true))
                 .collect(toList());
     }
 
     private List<AspectSubitemFilter> getProjectFilterItems() {
+        List<Team> teamsVisibleToUser = teamFilterConfigurationService.getTeamsVisibleToUser();
         return projectService.getVisibleProjects().stream()
-                .map(p -> AspectSubitemFilter.from(p.getName(), p.getKey(), true))
-                .sorted(getComparatorFilter())
+                .map(p -> AspectSubitemFilter.from(p.getName(), p.getKey(), true, teamsVisibleToUser.stream()
+                        .filter(t -> p.getTeamsIds().contains(t.getId()))
+                        .map(t -> t.getName())
+                        .collect(toList())))
+                .sorted(this::compareFilter)
                 .collect(toList());
     }
 
     private List<AspectSubitemFilter> getTeamFilterItems() {
         return teamFilterConfigurationService.getTeamsVisibleToUser().stream()
                 .map(t -> AspectSubitemFilter.from(t.getName(), t.getName(), true))
-                .sorted(getComparatorFilter())
+                .sorted(this::compareFilter)
                 .collect(toList());
     }
 
-    private Comparator<AspectSubitemFilter> getComparatorFilter() {
-        return new Comparator<AspectSubitemFilter>() {
-            @Override
-            public int compare(AspectSubitemFilter f1, AspectSubitemFilter f2) {
-                if (f1 == null && f2 == null) return 0;
-                if (f1 == null) return 1;
-                if (f2 == null) return -1;
-                return f1.getName().compareTo(f2.getName());
-            }
-        };
+    private int compareFilter(AspectSubitemFilter f1, AspectSubitemFilter f2) {
+        if (f1 == null && f2 == null) return 0;
+        if (f1 == null) return 1;
+        if (f2 == null) return -1;
+        return f1.getName().compareTo(f2.getName());
     }
 
     public static class TransitionDTO {
