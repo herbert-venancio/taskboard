@@ -50,7 +50,6 @@ public class ProjectCreationController {
     @Autowired
     ProjectTeamRespository projectTeamRepo;
     
-    
     @Autowired
     TeamCachedRepository teamRepository;
     
@@ -97,5 +96,7 @@ public class ProjectCreationController {
         projectTeam.setProjectKey(data.projectKey);
         projectTeam.setTeamId(persistedTeamFilter.getTeamId());
         projectTeamRepo.save(projectTeam);
+        
+        
     }
 }
