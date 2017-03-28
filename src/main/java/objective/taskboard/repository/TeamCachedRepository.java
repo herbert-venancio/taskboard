@@ -49,10 +49,23 @@ public class TeamCachedRepository {
     public List<Team> getCache() {
         return cache;
     }
+    
+    public Team findByName(String teamName) {
+        for (Team team : cache) {
+            if (team.getName().equals(teamName))
+                return team;
+        }
+        return null;
+    }
 
     public void loadCache() {
         log.info("------------------------------ > TeamCachedRepository.loadCache()");
         this.cache = Collections.unmodifiableList(teamRepository.findAll());
     }
 
+    public Team save(Team team) {
+        Team saved = teamRepository.save(team);
+        loadCache();
+        return saved;
+    }
 }

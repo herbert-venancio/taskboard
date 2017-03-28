@@ -1,5 +1,17 @@
 package objective.taskboard.data;
 
+import java.io.Serializable;
+import java.sql.Date;
+import java.util.List;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+
 /*-
  * [LICENSE]
  * Taskboard
@@ -26,17 +38,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import objective.taskboard.Constants;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import java.sql.Date;
-
 @Data
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(schema = Constants.SCHEMA_MAD, name = "TEAM")
-public class Team {
+public class Team implements Serializable {
+    private static final long serialVersionUID = 1794216649849732935L;
 
     @Id
     private Long id;
@@ -58,5 +66,8 @@ public class Team {
     private String jiraEquipe;
 
     private String jiraSubequipe;
-
+    
+    @OneToMany(fetch=FetchType.EAGER, cascade=CascadeType.ALL)
+    @JoinColumn(name="team", referencedColumnName="name")
+    private List<UserTeam> members;
 }
