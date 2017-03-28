@@ -7,6 +7,8 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
@@ -45,7 +47,8 @@ import objective.taskboard.Constants;
 @Table(schema = Constants.SCHEMA_MAD, name = "TEAM")
 public class Team implements Serializable {
     private static final long serialVersionUID = 1794216649849732935L;
-
+    
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Id
     private Long id;
 

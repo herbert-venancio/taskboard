@@ -26,20 +26,36 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import objective.taskboard.data.Team;
 import objective.taskboard.domain.ProjectFilterConfiguration;
+import objective.taskboard.domain.ProjectTeam;
+import objective.taskboard.domain.TeamFilterConfiguration;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
+import objective.taskboard.repository.ProjectTeamRespository;
+import objective.taskboard.repository.TeamCachedRepository;
+import objective.taskboard.repository.TeamFilterConfigurationCachedRepository;
 
 @RestController
-@RequestMapping("/api/projectfilter")
-public class ProjectFilterCreationController {
+@RequestMapping("/api/project")
+public class ProjectCreationController {
     
     @Autowired
     ProjectFilterConfigurationCachedRepository projectRepository;
+    
+    @Autowired
+    ProjectTeamRespository projectTeamRepo;
+    
+    
+    @Autowired
+    TeamCachedRepository teamRepository;
+    
+    @Autowired
+    TeamFilterConfigurationCachedRepository teamFilterConfigurationRepository;
     
     @RequestMapping(method = RequestMethod.GET)
     public List<ProjectFilterConfiguration> get() {
@@ -56,16 +72,30 @@ public class ProjectFilterCreationController {
         return ResponseEntity.notFound().build();
     }
     
-    @RequestMapping(method = RequestMethod.POST)
-    public void create(@RequestParam(name = "projectKey") String projectKey) {
-        List<ProjectFilterConfiguration> projects = projectRepository.getProjects();
+    @RequestMapping(method = RequestMethod.POST, consumes="application/json")
+    public void create(@RequestBody ProjectCreationData data) {
+        final List<ProjectFilterConfiguration> projects = projectRepository.getProjects();
         for (ProjectFilterConfiguration projectFilterConfiguration : projects) {
-            if (projectFilterConfiguration.getProjectKey().equals(projectKey))
+            if (projectFilterConfiguration.getProjectKey().equals(data.projectKey))
                 return;
         }
         
-        ProjectFilterConfiguration configuration = new ProjectFilterConfiguration();
-        configuration.setProjectKey(projectKey);
+        final ProjectFilterConfiguration configuration = new ProjectFilterConfiguration();
+        configuration.setProjectKey(data.projectKey);
         projectRepository.save(configuration);
+        
+        final Team team = new Team();
+        team.setName(data.projectKey+"_TEAM");
+        team.setManager(data.teamLeader);
+        Team persistedTeam = teamRepository.save(team);
+
+        final TeamFilterConfiguration teamFilterConfiguration = new TeamFilterConfiguration();
+        teamFilterConfiguration.setTeamId(persistedTeam.getId());
+        TeamFilterConfiguration persistedTeamFilter = teamFilterConfigurationRepository.save(teamFilterConfiguration);
+        
+        final ProjectTeam projectTeam = new ProjectTeam();
+        projectTeam.setProjectKey(data.projectKey);
+        projectTeam.setTeamId(persistedTeamFilter.getTeamId());
+        projectTeamRepo.save(projectTeam);
     }
 }

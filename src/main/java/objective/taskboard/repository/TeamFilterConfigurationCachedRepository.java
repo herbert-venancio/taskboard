@@ -58,4 +58,9 @@ public class TeamFilterConfigurationCachedRepository {
         this.cache = findAll;
     }
 
+    public TeamFilterConfiguration save(TeamFilterConfiguration teamFilterConfiguration) {
+        TeamFilterConfiguration persisted = repository.save(teamFilterConfiguration);
+        loadCache();
+        return persisted;
+    }
 }
