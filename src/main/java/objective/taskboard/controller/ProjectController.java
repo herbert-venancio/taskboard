@@ -1,5 +1,9 @@
 package objective.taskboard.controller;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+
 /*-
  * [LICENSE]
  * Taskboard
@@ -22,7 +26,10 @@ package objective.taskboard.controller;
  */
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,19 +43,19 @@ import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.domain.ProjectTeam;
 import objective.taskboard.domain.TeamFilterConfiguration;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
-import objective.taskboard.repository.ProjectTeamRespository;
+import objective.taskboard.repository.ProjectTeamRepository;
 import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.repository.TeamFilterConfigurationCachedRepository;
 
 @RestController
-@RequestMapping("/api/project")
-public class ProjectCreationController {
+@RequestMapping("/api/projects")
+public class ProjectController {
     
     @Autowired
     ProjectFilterConfigurationCachedRepository projectRepository;
     
     @Autowired
-    ProjectTeamRespository projectTeamRepo;
+    ProjectTeamRepository projectTeamRepo;
     
     @Autowired
     TeamCachedRepository teamRepository;
@@ -56,9 +63,74 @@ public class ProjectCreationController {
     @Autowired
     TeamFilterConfigurationCachedRepository teamFilterConfigurationRepository;
     
-    @RequestMapping(method = RequestMethod.GET)
-    public List<ProjectFilterConfiguration> get() {
-        return projectRepository.getProjects();
+    @RequestMapping
+    public List<ProjectData> get() {
+        List<ProjectTeam> projects = projectTeamRepo.findAll();
+                
+        List<ProjectData> response = new ArrayList<>();
+        Map<String, ProjectData> projectXData = new LinkedHashMap<>();
+        for (ProjectTeam projectTeam : projects) {   
+            if (!projectXData.containsKey(projectTeam.getProjectKey())) {
+                ProjectData value = new ProjectData(projectTeam);
+                response.add(value);
+                projectXData.put(projectTeam.getProjectKey(), value);
+            }
+            ProjectData p = projectXData.get(projectTeam.getProjectKey());
+            p.teams.add(getProjectTeamName(projectTeam));
+        }
+        
+        List<ProjectFilterConfiguration> projectFilter = projectRepository.getProjects();
+        for (ProjectFilterConfiguration projectFilterConfiguration : projectFilter) {
+            if (!projectXData.containsKey(projectFilterConfiguration.getProjectKey())) {
+                ProjectData value = new ProjectData();
+                value.projectKey = projectFilterConfiguration.getProjectKey();
+                response.add(value);
+                projectXData.put(value.projectKey, value);
+            }
+        }
+        
+        return response;
+    }
+    
+    @RequestMapping(method = RequestMethod.PATCH, consumes="application/json")
+    public ResponseEntity<String> updateProjectsTeams(@RequestBody ProjectData [] projectsTeams) {
+        List<ProjectTeam> projectTeamCfgsToAdd = new LinkedList<>();
+        List<String> errors = new LinkedList<>();
+        List<ProjectTeam> projectTeamCfgsToRemove = new LinkedList<>();
+        for (ProjectData ptd : projectsTeams) {
+            List<ProjectTeam> projectTeamsThatAreNotInTheRequest = projectTeamRepo.findByIdProjectKey(ptd.projectKey);
+            
+            for (String teamName : ptd.teams) {
+                Team team = teamRepository.findByName(teamName);
+
+                if (team == null) {
+                    errors.add("Team " + teamName + " not found.");
+                    continue;
+                }
+                Optional<ProjectTeam> projectXteam = projectTeamsThatAreNotInTheRequest.stream()
+                        .filter(pt -> pt.getTeamId() == team.getId())
+                        .findFirst();
+                
+                if (projectXteam.isPresent()) 
+                    projectTeamsThatAreNotInTheRequest.remove(projectXteam.get());
+                else {
+                    ProjectTeam projectTeam = new ProjectTeam();
+                    projectTeam.setProjectKey(ptd.projectKey);
+                    projectTeam.setTeamId(team.getId());
+                    projectTeamCfgsToAdd.add(projectTeam);
+                }
+            }
+            projectTeamCfgsToRemove.addAll(projectTeamsThatAreNotInTheRequest);
+        }
+        if (!errors.isEmpty()) 
+            return ResponseEntity.badRequest().body(StringUtils.join(errors,"\n"));
+        
+        for (ProjectTeam pt : projectTeamCfgsToAdd) 
+            projectTeamRepo.save(pt);
+        
+        projectTeamCfgsToRemove.stream().forEach(ptcfg -> projectTeamRepo.delete(ptcfg));
+        
+        return ResponseEntity.ok("");
     }
     
     @RequestMapping(value="{projectKey}", method = RequestMethod.GET)
@@ -98,5 +170,9 @@ public class ProjectCreationController {
         projectTeamRepo.save(projectTeam);
         
         
+    }
+    
+    private String getProjectTeamName(ProjectTeam projectTeam) {
+        return teamRepository.findById(projectTeam.getTeamId()).getName();
     }
 }

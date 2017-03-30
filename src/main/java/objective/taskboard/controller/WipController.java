@@ -1,6 +1,8 @@
 package objective.taskboard.controller;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,10 +39,29 @@ import objective.taskboard.repository.WipConfigurationRepository;
  */
 
 @RestController
-@RequestMapping("/api/wip")
+@RequestMapping("/api/wips")
 public class WipController {
     @Autowired
     private WipConfigurationRepository wipConfigRepo; 
+    
+    @RequestMapping()
+    public ResponseEntity<Map<String, WipUpdateData>> getWips() {
+        List<WipConfiguration> wipConfigurations = wipConfigRepo.findAll();
+        
+        Map<String, WipUpdateData> response = new LinkedHashMap<>(); 
+        for (WipConfiguration wipConfig : wipConfigurations) {
+            if (!response.containsKey(wipConfig.getTeam())) {
+                WipUpdateData value = new WipUpdateData();
+                value.team = wipConfig.getTeam();
+                response.put(wipConfig.getTeam(), value);
+            }
+            
+            WipUpdateData wud = response.get(wipConfig.getTeam());
+            wud.statusWip.put(wipConfig.getStatus(), wipConfig.getWip());
+        }
+        
+        return new ResponseEntity<Map<String, WipUpdateData>>(response, HttpStatus.OK);
+    }
     
     @RequestMapping(path="{teamName}")
     public ResponseEntity<WipUpdateData> getWip(@PathVariable("teamName") String teamName) {
@@ -51,11 +72,19 @@ public class WipController {
         for (WipConfiguration wipConfiguration : wipConfigurations) 
             response.statusWip.put(wipConfiguration.getStatus(), wipConfiguration.getWip());
         
-        return new ResponseEntity<WipUpdateData>(response, HttpStatus.FOUND);
+        return new ResponseEntity<WipUpdateData>(response, HttpStatus.OK);
     }
     
-    @RequestMapping(path="{teamName}", method = RequestMethod.PATCH, consumes="application/json")
-    public ResponseEntity<Void> updateWip(@PathVariable("teamName") String teamName, @RequestBody WipUpdateData update) {
+    @RequestMapping(method = RequestMethod.PATCH, consumes="application/json")
+    public ResponseEntity<Void> updateWips(@RequestBody WipUpdateData [] update) {
+        for (WipUpdateData wipUpdateData : update) {
+            updateWip(wipUpdateData.team, wipUpdateData);
+        }
+    
+        return ResponseEntity.ok().build();
+    }
+    
+    protected void updateWip(String teamName, @RequestBody WipUpdateData update) {
         List<WipConfiguration> wipConfigurations = wipConfigRepo.findByTeam(teamName);
         for (WipConfiguration wipConfiguration : wipConfigurations) {
             if (update.statusWip.containsKey(wipConfiguration.getStatus())) {
@@ -72,7 +101,5 @@ public class WipController {
             wipConfiguration.setWip(newWip.getValue());
             wipConfigRepo.save(wipConfiguration);
         }
-        
-        return ResponseEntity.ok().build();
     }
 }

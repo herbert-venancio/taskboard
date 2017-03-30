@@ -1,5 +1,7 @@
 package objective.taskboard.repository;
 
+import java.util.List;
+
 /*-
  * [LICENSE]
  * Taskboard
@@ -21,12 +23,10 @@ package objective.taskboard.repository;
  * [/LICENSE]
  */
 
-import java.util.List;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import objective.taskboard.domain.WipConfiguration;
+import objective.taskboard.domain.ProjectTeam;
 
-public interface WipConfigurationRepository extends JpaRepository<WipConfiguration, Long> {
-    List<WipConfiguration> findByTeam(String teamName);
+public interface ProjectTeamRepository extends JpaRepository<ProjectTeam, String> {
+    public List<ProjectTeam> findByIdProjectKey(String projectKey);
 }

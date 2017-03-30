@@ -51,6 +51,14 @@ public class TeamFilterConfigurationCachedRepository {
     public List<TeamFilterConfiguration> getCache() {
         return ImmutableList.copyOf(cache);
     }
+    
+    public TeamFilterConfiguration findByTeamId(Long teamId) {
+        for (TeamFilterConfiguration teamFilterConfiguration : cache) {
+            if (teamFilterConfiguration.getTeamId() == teamId)
+                return teamFilterConfiguration;
+        }
+        return null;
+    }
 
     public void loadCache() {
         log.info("------------------------------ > TeamFilterConfigurationRepository.loadCache()");

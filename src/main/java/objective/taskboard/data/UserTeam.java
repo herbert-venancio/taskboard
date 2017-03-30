@@ -40,6 +40,10 @@ import java.util.Date;
 @AllArgsConstructor
 @Table(schema = Constants.SCHEMA_MAD, name = "USER_TEAM")
 public class UserTeam implements Serializable {
+    public UserTeam(String memberName, String teamName) {
+        this.userName = memberName;
+        this.team = teamName;
+    }
 
     private static final long serialVersionUID = 1L;
 

@@ -1,21 +1,47 @@
 package objective.taskboard.domain;
 
-import javax.persistence.Column;
+import java.io.Serializable;
+
+import javax.persistence.Embeddable;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.persistence.Table;
 
-import lombok.Data;
 import objective.taskboard.Constants;
 
-@Data
 @Entity
 @Table(schema = Constants.SCHEMA_MAD, name = "PROJECT_TEAM")
 public class ProjectTeam {
-    @Id
-    @Column(name="project_key")
-    private String projectKey;
+    @EmbeddedId
+    ProjectTeamId id;
     
-    @Column(name="team_id")
-    private Long teamId; 
+    public ProjectTeam() {
+        id = new ProjectTeamId();
+    }
+    
+    public String getProjectKey() {
+        return id.projectKey;
+    }
+    
+    public void setProjectKey(String key) {
+        id.projectKey = key;
+    }
+
+    public Long getTeamId() { 
+        return id.teamId; 
+    }
+    
+    public void setTeamId(Long teamId) {
+        id.teamId = teamId;
+    }
+
+}
+    
+@Embeddable
+class ProjectTeamId implements Serializable {
+    private static final long serialVersionUID = -7879137502491962905L;
+
+    String projectKey;
+    
+    Long teamId;
 }

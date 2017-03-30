@@ -1,6 +1,8 @@
 package objective.taskboard.controller;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -38,11 +40,22 @@ import objective.taskboard.repository.TeamCachedRepository;
 
 
 @RestController
-@RequestMapping("/api/team")
+@RequestMapping("/api/teams")
 public class TeamController {
     
     @Autowired
     private TeamCachedRepository teamRepo;
+    
+    @RequestMapping(method = RequestMethod.GET)
+    public ResponseEntity<List<TeamControllerData>> getTeams() {
+        List<Team> cache = teamRepo.getCache();
+        ArrayList<TeamControllerData> availableTeams = new ArrayList<>();
+        for (Team team : cache) {
+            availableTeams.add(new TeamControllerData(team));
+        }
+        
+        return new ResponseEntity<List<TeamControllerData>>(availableTeams, HttpStatus.OK);
+    }
     
     @RequestMapping(path="{teamName}", method = RequestMethod.GET)
     public ResponseEntity<TeamControllerData> getTeamMembers(@PathVariable("teamName") String teamName) {
@@ -52,7 +65,15 @@ public class TeamController {
         
         TeamControllerData teamController = new TeamControllerData(team);
         
-        return new ResponseEntity<TeamControllerData>(teamController, HttpStatus.FOUND);
+        return new ResponseEntity<TeamControllerData>(teamController, HttpStatus.OK);
+    }
+    
+    @RequestMapping(method = RequestMethod.PATCH, consumes="application/json")
+    public ResponseEntity<Void> updateTeamMembers(@RequestBody TeamControllerData [] data) {
+        for (TeamControllerData teamData : data) 
+            updateTeamMembers(teamData.teamName, teamData);
+        
+        return ResponseEntity.ok().build();
     }
     
     @RequestMapping(path="{teamName}", method = RequestMethod.PATCH, consumes="application/json")
@@ -72,12 +93,9 @@ public class TeamController {
             else
                 data.teamMembers.remove(userInTeam.getUserName());
         }
-        for (String memberName : data.teamMembers) {
-            UserTeam userTeam = new UserTeam();
-            userTeam.setUserName(memberName);
-            userTeam.setTeam(teamName);
-            team.getMembers().add(userTeam);
-        }
+        for (String memberName : data.teamMembers) 
+            team.getMembers().add(new UserTeam(memberName, teamName));
+        
         teamRepo.save(team);
         
         return ResponseEntity.ok().build();

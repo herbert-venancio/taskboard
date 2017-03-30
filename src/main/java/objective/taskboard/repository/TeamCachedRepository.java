@@ -57,6 +57,14 @@ public class TeamCachedRepository {
         }
         return null;
     }
+    
+    public Team findById(Long teamId) {
+        for (Team team : cache) {
+            if (team.getId() == teamId)
+                return team;
+        }
+        return null;
+    }
 
     public void loadCache() {
         log.info("------------------------------ > TeamCachedRepository.loadCache()");

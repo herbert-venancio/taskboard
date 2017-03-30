@@ -25,7 +25,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.io.Serializable;
@@ -41,5 +40,4 @@ public class TeamFilterConfiguration extends TaskboardEntity implements Serializ
     private static final long serialVersionUID = 1L;
 
     private long teamId;
-
 }
