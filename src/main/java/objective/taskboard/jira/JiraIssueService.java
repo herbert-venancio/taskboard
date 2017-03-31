@@ -79,6 +79,8 @@ public class JiraIssueService {
     }
 
     public List<Issue> searchIssuesByKeys(final List<String> keys) {
+        if (keys.isEmpty())
+            return searchIssues(null);
         return searchIssues("key IN (" + String.join(",", keys) + ")");
     }
 
