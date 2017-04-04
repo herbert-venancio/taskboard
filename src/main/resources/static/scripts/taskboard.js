@@ -228,7 +228,7 @@ function Taskboard() {
         aspectFilters.forEach(function(item) {
             if (item.description === 'Project')
                 item.aspectsSubitemFilter.forEach(function(subitem) {
-                    if (filterPreferences[subitem.value])
+                    if (filterPreferences[subitem.value] == true || filterPreferences[subitem.value] == undefined)
                         filterTeams = filterTeams.concat(subitem.dependents);
                 });
         });

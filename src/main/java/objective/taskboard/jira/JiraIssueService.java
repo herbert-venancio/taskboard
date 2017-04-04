@@ -30,6 +30,7 @@ import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -80,7 +81,7 @@ public class JiraIssueService {
 
     public List<Issue> searchIssuesByKeys(final List<String> keys) {
         if (keys.isEmpty())
-            return searchIssues(null);
+            return Arrays.asList();
         return searchIssues("key IN (" + String.join(",", keys) + ")");
     }
 
