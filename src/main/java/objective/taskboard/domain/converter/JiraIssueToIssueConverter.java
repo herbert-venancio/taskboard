@@ -85,6 +85,7 @@ public class JiraIssueToIssueConverter {
     public List<objective.taskboard.data.Issue> convert(List<Issue> issueList) {
         loadParentIssueLinks();
 
+        metadatasByIssueKey = newHashMap();
         metadatasByIssueKey = issueList.stream()
             .collect(toMap(i -> i.getKey(), i -> new IssueMetadata(i, jiraProperties, parentIssueLinks, log)));
 

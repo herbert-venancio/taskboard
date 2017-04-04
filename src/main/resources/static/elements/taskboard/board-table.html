@@ -136,7 +136,8 @@
                                               data:issuesInvalidTeam.length > 0 ?
                                                        "Assignee must be in a team: " +
                                                        issuesInvalidTeam.slice(0, 5).join("; ") +
-                                                       (issuesInvalidTeam.length > 5 ? " ..." : "")
+                                                       (issuesInvalidTeam.length > 5 ? " ..." : ";") +
+                                                       " Total: " + issuesInvalidTeam.length
                                                    : ""});
                 },
 
