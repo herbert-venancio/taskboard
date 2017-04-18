@@ -21,7 +21,6 @@ package objective.taskboard.jira;
  * [/LICENSE]
  */
 
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 import java.util.List;
@@ -34,12 +33,10 @@ import org.springframework.stereotype.Component;
 import com.atlassian.jira.rest.client.api.domain.BasicProject;
 import com.google.common.collect.Lists;
 
-import objective.taskboard.auth.CredentialsHolder;
 import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.config.LoggedInUserKeyGenerator;
 import objective.taskboard.domain.Project;
 import objective.taskboard.domain.ProjectFilterConfiguration;
-import objective.taskboard.filterConfiguration.TeamFilterConfigurationService;
 import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 
@@ -52,19 +49,12 @@ class ProjectCache {
     @Autowired
     private JiraEndpointAsLoggedInUser jiraEndpointAsUser;
 
-    @Autowired
-    private TeamFilterConfigurationService teamFilterConfigurationService;
 
     @Cacheable(cacheNames=CacheConfiguration.PROJECTS, keyGenerator=LoggedInUserKeyGenerator.NAME)
     public Map<String, Project> getVisibleProjects() {
-        List<Long> teamsIdUser = teamFilterConfigurationService.getConfiguredTeamsByUser(CredentialsHolder.username())
-                .stream()
-                .map(t -> t.getId())
-                .collect(toList());
 
         Map<String, ProjectFilterConfiguration> configuredTeamProjects = projectFilterConfiguration.getProjects()
                 .stream()
-                .filter(pf -> pf.getTeamsIds().stream().anyMatch(id -> teamsIdUser.contains(id)))
                 .collect(toMap(ProjectFilterConfiguration::getProjectKey, p -> p));
 
         return getProjectsVisibleToUserInJira()
