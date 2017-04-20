@@ -29,4 +29,16 @@ import objective.taskboard.domain.WipConfiguration;
 
 public interface WipConfigurationRepository extends JpaRepository<WipConfiguration, Long> {
     List<WipConfiguration> findByTeam(String teamName);
+
+//    @Query("SELECT W                                  " +
+//           "  FROM WIP_CONFIG W                       " +
+//           "  JOIN TEAM T ON T.NAME = W.TEAM          " +
+//           "  JOIN PROJECT_TEAM P ON P.TEAM_ID = T.ID " +
+//           "  JOIN USER_TEAM UT ON UT.TEAM = T.NAME   " +
+//           " WHERE W.STATUS = ':status'               " +
+//           "   AND P.PROJECT_KEY = ':project'         " +
+//           "   AND UT.END_DATE IS NULL                " +
+//           "   AND UT.USER_NAME = ':user'             " +
+//           " ORDER BY W.WIP, T.NAME")
+    List<WipConfiguration> findByTeamAndStatus(String team, String status);
 }

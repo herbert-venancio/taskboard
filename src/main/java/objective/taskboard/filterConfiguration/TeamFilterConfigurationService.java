@@ -61,7 +61,7 @@ public class TeamFilterConfigurationService {
     private UserTeamCachedRepository userTeamRepository;
 
     @Cacheable(CacheConfiguration.CONFIGURED_TEAMS)
-    public List<Team> getConfiguredTeams() {
+    private List<Team> getConfiguredTeams() {
         Set<Long> configuredTeamsIds = teamFilterConfigurationRepository.getCache()
                 .stream()
                 .map(TeamFilterConfiguration::getTeamId)
@@ -100,7 +100,7 @@ public class TeamFilterConfigurationService {
                 .collect(toList());
     }
 
-    public List<Team> getConfiguredTeamsByUser(String user) {
+    private List<Team> getConfiguredTeamsByUser(String user) {
         return userTeamRepository.findByUserName(user)
                 .stream()
                 .map(ut -> getConfiguredTeamByName(ut.getTeam()))
@@ -108,7 +108,7 @@ public class TeamFilterConfigurationService {
                 .collect(toList());
     }
 
-    private Team getConfiguredTeamByName(String teamName) {
+    public Team getConfiguredTeamByName(String teamName) {
         return getConfiguredTeams().stream()
                 .filter(t -> Objects.equals(t.getName(), teamName))
                 .findFirst()

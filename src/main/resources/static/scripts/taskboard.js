@@ -209,13 +209,13 @@ function Taskboard() {
     };
 
     this.isInvalidTeam = function(teams) {
-        if (teams.includes(INVALID_TEAM))
+        if (teams.indexOf(INVALID_TEAM) != -1)
             return true;
 
         var visibleTeamsToUser = this.getTeams();
         for (var index in visibleTeamsToUser) {
             var visibleTeam = visibleTeamsToUser[index];
-            if (teams.includes(visibleTeam.name))
+            if (teams.indexOf(visibleTeam.name) != -1)
                 return false;
         }
         return true;
@@ -242,7 +242,7 @@ function Taskboard() {
                     if (filterPreferences[subitem.value] != null)
                         subitem.selected = filterPreferences[subitem.value];
                     subitem.visible = true;
-                    if (this.description === 'Team' && !filterTeams.includes(subitem.value))
+                    if (this.description === 'Team' && filterTeams.indexOf(subitem.value) == -1)
                         subitem.visible = false;
                 }
             }, item);

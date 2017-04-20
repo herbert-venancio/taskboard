@@ -1,22 +1,5 @@
 package objective.taskboard.controller;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
-
-import objective.taskboard.domain.WipConfiguration;
-import objective.taskboard.repository.WipConfigurationRepository;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -37,6 +20,23 @@ import objective.taskboard.repository.WipConfigurationRepository;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import objective.taskboard.domain.WipConfiguration;
+import objective.taskboard.repository.WipConfigurationRepository;
 
 @RestController
 @RequestMapping("/api/wips")
