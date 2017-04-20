@@ -1,7 +1,5 @@
 package objective.taskboard.repository;
 
-import java.util.List;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -23,10 +21,14 @@ import java.util.List;
  * [/LICENSE]
  */
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import objective.taskboard.domain.ProjectTeam;
 
 public interface ProjectTeamRepository extends JpaRepository<ProjectTeam, String> {
     public List<ProjectTeam> findByIdProjectKey(String projectKey);
+    public List<ProjectTeam> findByIdTeamId(Long teamId);
+    public List<ProjectTeam> findByIdProjectKeyAndIdTeamId(String projectKey, Long teamId);
 }

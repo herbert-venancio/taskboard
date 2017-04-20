@@ -331,7 +331,7 @@
                     if (field.schema == null)
                         return TYPE_FIELD.TEXT;
 
-                    if (CUSTOM_TEXTAREA.includes(field.schema.custom))
+                    if (CUSTOM_TEXTAREA.indexOf(field.schema.custom) != -1)
                         return TYPE_FIELD.TEXTAREA;
 
                     return TYPE_FIELD.TEXT;
