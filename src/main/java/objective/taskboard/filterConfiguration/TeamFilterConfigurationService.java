@@ -108,7 +108,7 @@ public class TeamFilterConfigurationService {
                 .collect(toList());
     }
 
-    public Team getConfiguredTeamByName(String teamName) {
+    private Team getConfiguredTeamByName(String teamName) {
         return getConfiguredTeams().stream()
                 .filter(t -> Objects.equals(t.getName(), teamName))
                 .findFirst()
