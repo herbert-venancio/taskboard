@@ -107,10 +107,6 @@ public class IssueBufferService {
                 .collect(toList());
     }
 
-    public Issue getIssueByKey(String key) {
-        return issueBuffer.get(key);
-    }
-
     private synchronized void setIssues(List<Issue> issues) {
         issueBuffer.clear();
         for (Issue issue : issues)
