@@ -138,9 +138,13 @@ public class WipValidatorController {
                                     "and issuetype in standardIssueTypes()"))
                     .size();
 
-            response.team = wipConfig.getTeam();
-            response.wipConfig = wipConfig.getWip();
-            response.wipActual = wipActual;
+            if (wipActual >= wipConfig.getWip()) {
+                response.isWipExceeded = true;
+                response.message = "You can't exceed your team's WIP limit ";
+            }
+
+            response.message += String.format("(Team: %s, Actual: %d, Limit: %d)", wipConfig.getTeam(),
+                    wipActual, wipConfig.getWip());
 
             return new ResponseEntity<WipValidatorResponse>(response, OK);
         } catch (Exception e) {
