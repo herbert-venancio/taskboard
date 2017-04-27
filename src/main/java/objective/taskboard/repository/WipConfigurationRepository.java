@@ -29,4 +29,5 @@ import objective.taskboard.domain.WipConfiguration;
 
 public interface WipConfigurationRepository extends JpaRepository<WipConfiguration, Long> {
     List<WipConfiguration> findByTeam(String teamName);
+    List<WipConfiguration> findByTeamAndStatus(String team, String status);
 }

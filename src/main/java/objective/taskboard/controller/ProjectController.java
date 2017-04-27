@@ -1,9 +1,5 @@
 package objective.taskboard.controller;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -25,6 +21,9 @@ import java.util.LinkedList;
  * [/LICENSE]
  */
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;

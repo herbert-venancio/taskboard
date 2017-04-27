@@ -1,4 +1,4 @@
-package objective.taskboard.repository;
+package objective.taskboard.controller;
 
 /*-
  * [LICENSE]
@@ -21,14 +21,14 @@ package objective.taskboard.repository;
  * [/LICENSE]
  */
 
-import java.util.List;
+public class WipValidatorResponse {
 
-import org.springframework.data.jpa.repository.JpaRepository;
+    public WipValidatorResponse() {
+        this.message = "";
+        this.isWipExceeded = false;
+    }
 
-import objective.taskboard.domain.ProjectTeam;
+    public String message;
+    public boolean isWipExceeded;
 
-public interface ProjectTeamRepository extends JpaRepository<ProjectTeam, String> {
-    public List<ProjectTeam> findByIdProjectKey(String projectKey);
-    public List<ProjectTeam> findByIdTeamId(Long teamId);
-    public List<ProjectTeam> findByIdProjectKeyAndIdTeamId(String projectKey, Long teamId);
 }
