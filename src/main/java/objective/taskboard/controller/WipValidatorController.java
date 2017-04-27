@@ -130,8 +130,8 @@ public class WipValidatorController {
                     .collect(toList());
 
             Integer wipActual = jiraSearchService
-                    .searchIssues("assignee in ('" + String.join(",", userTeamsWip) + "') " +
-                            "and project in ('" + String.join(",", projectTeams) + "') " +
+                    .searchIssues("assignee in ('" + String.join("','", userTeamsWip) + "') " +
+                            "and project in ('" + String.join("','", projectTeams) + "') " +
                             "and status = '" + status + "' " +
                             (i.getIssueType().isSubtask() ?
                                     "and issuetype in subTaskIssueTypes()" :
