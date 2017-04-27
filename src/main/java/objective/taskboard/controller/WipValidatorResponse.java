@@ -25,11 +25,10 @@ public class WipValidatorResponse {
 
     public WipValidatorResponse() {
         this.message = "";
+        this.isWipExceeded = false;
     }
 
-    public String team;
-    public Integer wipConfig;
-    public Integer wipActual;
     public String message;
+    public boolean isWipExceeded;
 
 }
