@@ -86,8 +86,11 @@ public class JiraService {
             ServerInfo info = jiraEndpoint.executeRequest(username, password, client -> client.getMetadataClient().getServerInfo());
             return info != null;
         } catch (JiraServiceException e) {
-            if (!e.getStatusCode().isPresent() || !e.getStatusCode().get().is4xxClientError())
-                log.error("Authentication error", e);
+            if (e.getStatusCode().isPresent()){
+                log.error("Authentication error "+ e.getStatusCode().get().value() +" for user " + username);
+            } else {
+                log.error("Authentication error for user " + username, e);
+            }
             
             return false;
         }
