@@ -64,11 +64,6 @@ public class JiraIntegrationTest {
     }
 
     //	@Test
-    public void authenticate() {
-        assertTrue(jiraService.authenticate(USERNAME_LOUSA, PASSWORD_OBJECTIVE));
-    }
-
-    //	@Test
     public void issueByKey() {
         Issue issue = jiraService.getIssueByKey(ISSUEKEY_OBJ_1951);
         assertNotNull(issue);

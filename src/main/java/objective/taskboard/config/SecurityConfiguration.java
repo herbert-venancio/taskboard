@@ -31,13 +31,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+
 
 @Configuration
 @Order(SecurityProperties.ACCESS_OVERRIDE_ORDER)
@@ -76,16 +76,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 String name = authentication.getName();
                 String password = authentication.getCredentials().toString();
 
-                if (authenticatedAgainstJira(name, password)) {
-                    return new UsernamePasswordAuthenticationToken(name, password, Lists.newArrayList());
-                } else {
-                    throw new BadCredentialsException("Could not authenticate on Jira");
-                }
+                jiraService.authenticate(name, password);
+                return new UsernamePasswordAuthenticationToken(name, password, Lists.newArrayList());
             }
 
-            private boolean authenticatedAgainstJira(String username, String password) {
-                return jiraService.authenticate(username, password);
-            }
         });
     }
 

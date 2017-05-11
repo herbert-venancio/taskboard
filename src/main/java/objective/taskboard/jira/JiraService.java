@@ -35,6 +35,7 @@ import org.codehaus.jettison.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.atlassian.jira.rest.client.api.RestClientException;
@@ -57,6 +58,7 @@ import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.auth.CredentialsHolder;
 import objective.taskboard.database.TaskboardDatabaseService;
 import objective.taskboard.jira.endpoint.JiraEndpoint;
+import objective.taskboard.jira.endpoint.JiraEndpoint.Request;
 import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
 import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
 
@@ -64,6 +66,10 @@ import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
 @Service
 @EnableConfigurationProperties(JiraProperties.class)
 public class JiraService {
+
+    private static String MSG_UNAUTHORIZED = "Incorrect user or password";
+    private static String MSG_FORBIDDEN = "The jira account is locked";
+    private static String MSG_SERVICE_ERROR = "Error accessing the jira";
 
     @Autowired
     private TaskboardDatabaseService taskboardDatabaseService;
@@ -80,19 +86,29 @@ public class JiraService {
     @Autowired
     private JiraEndpointAsMaster jiraEndpointAsMaster;
 
-    public boolean authenticate(String username, String password) {
+    public void authenticate(String username, String password) {
         log.debug("⬣⬣⬣⬣⬣  authenticate");
         try {
-            ServerInfo info = jiraEndpoint.executeRequest(username, password, client -> client.getMetadataClient().getServerInfo());
-            return info != null;
-        } catch (JiraServiceException e) {
-            if (e.getStatusCode().isPresent()){
-                log.error("Authentication error "+ e.getStatusCode().get().value() +" for user " + username);
-            } else {
-                log.error("Authentication error for user " + username, e);
+            Request<ServerInfo> request = client -> client.getMetadataClient().getServerInfo();
+            ServerInfo info = jiraEndpoint.executeRequest(username, password, request);
+            if (info == null)
+                throw new RuntimeException("The server did not respond");
+        } catch (JiraServiceException ex) {
+            if (ex.getStatusCode().isPresent()) {
+                HttpStatus httpStatus = ex.getStatusCode().get();
+                log.error("Authentication error " + httpStatus.value() + " for user " + username);
+
+                if (httpStatus == HttpStatus.UNAUTHORIZED)
+                    throw new AccessDeniedException(MSG_UNAUTHORIZED, ex);
+
+                if (httpStatus == HttpStatus.FORBIDDEN)
+                    throw new AccessDeniedException(MSG_FORBIDDEN, ex);
             }
-            
-            return false;
+            log.error("Authentication error for user " + username);
+            throw new AccessDeniedException(MSG_SERVICE_ERROR, ex);
+        } catch (Exception ex) {
+            log.error("Authentication error for user " + username);
+            throw new AccessDeniedException(MSG_SERVICE_ERROR, ex);
         }
     }
 
