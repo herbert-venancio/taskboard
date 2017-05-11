@@ -49,6 +49,8 @@ public class IssueBufferService {
 
     @Autowired
     private ProjectService projectService;
+    
+    private UpdateState state = UpdateState.Unitialised;
 
     private Map<String, Issue> issueBuffer = new LinkedHashMap<>();
 
@@ -57,7 +59,19 @@ public class IssueBufferService {
     }
 
     public Issue updateIssueBuffer(final String key) {
-        return updateIssueBuffer(IssueEvent.ISSUE_UPDATED, key);
+        try {
+            Issue updateIssueBuffer = updateIssueBuffer(IssueEvent.ISSUE_UPDATED, key);
+            state = UpdateState.Successful;
+            return updateIssueBuffer;
+        }catch(Exception e) {
+            state = UpdateState.Failed;
+            throw e;
+        }
+
+    }
+    
+    public UpdateState getLastUpdateState() {
+        return state;
     }
 
     public synchronized Issue updateIssueBuffer(IssueEvent event, final String key) {

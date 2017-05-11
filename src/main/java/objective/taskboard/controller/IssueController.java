@@ -103,8 +103,13 @@ public class IssueController {
     private LinkGraphProperties linkGraphProperties;
 
     @RequestMapping(path = "/", method = RequestMethod.POST)
-    public List<Issue> issues() throws SQLException, JSONException {
+    public List<Issue> issues() {
         return issueBufferService.getIssues();
+    }
+    
+    @RequestMapping(path = "/state", method = RequestMethod.GET)
+    public String updateState() {
+        return issueBufferService.getLastUpdateState().toString();
     }
 
     @RequestMapping(path = "assign", method = RequestMethod.POST)

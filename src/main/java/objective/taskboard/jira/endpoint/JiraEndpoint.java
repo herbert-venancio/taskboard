@@ -1,5 +1,7 @@
 package objective.taskboard.jira.endpoint;
 
+import java.util.concurrent.TimeUnit;
+
 /*-
  * [LICENSE]
  * Taskboard
@@ -27,6 +29,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -77,7 +81,17 @@ public class JiraEndpoint {
         RestTemplate restTemplate = new RestTemplate();
         HttpEntity<String> request = new HttpEntity<>(jsonRequest.toString(), getAuthorizationRequestHeader(username, password, mediaType));
         String url = jiraProperties.getUrl() + path;
+        setConnectionTimeout(restTemplate);
         return restTemplate.postForObject(url, request, String.class);
+    }
+
+    public void setConnectionTimeout(RestTemplate restTemplate) {
+        ClientHttpRequestFactory rf = restTemplate.getRequestFactory();
+        if (rf instanceof HttpComponentsClientHttpRequestFactory) {
+            HttpComponentsClientHttpRequestFactory httprf = (HttpComponentsClientHttpRequestFactory)rf;
+            httprf.setReadTimeout((int) TimeUnit.SECONDS.toMillis(60));
+            httprf.setConnectTimeout((int) TimeUnit.SECONDS.toMillis(60));
+        }
     }
 
     private HttpHeaders getAuthorizationRequestHeader(String username, String password, MediaType mediaType) {
