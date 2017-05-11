@@ -90,7 +90,7 @@
             <form is="iron-form" id="form" name="form" th:action="@{/login}" action="/login" method="POST">
                 <paper-material class="right" elevation="2">
                     <span class="incorrect" bind-value="{{error}}"
-                          hidden$="{{!error}}">Incorrect User or Password</span>
+                          hidden$="{{!!errorMsg}}">{{errorMsg}}</span>
                     <div>
                         <paper-input id="username" bind-value="{{username}}" name="username" label="User"
                                      required></paper-input>
@@ -114,10 +114,7 @@
             is: 'log-in',
 
             properties: {
-                error: {
-                    type: Boolean,
-                    value: false
-                },
+                errorMsg: String,
                 username: String,
                 password: String
             },
@@ -130,13 +127,13 @@
             },
 
             submit: function (event) {
-                this.error = false;
+                this.errorMsg = null;
                 this.requestLogin(event, this);
                 this.$.loginLoad.active = true;
             },
 
             onEnter: function () {
-                this.error = false;
+                this.errorMsg = null;
                 this.requestLogin(event, this);
                 this.$.loginLoad.active = true;
             },
@@ -154,8 +151,15 @@
                     that.$.login.disable = true;
                     window.location = "/";
                 }).fail(function (jqXHR, textStatus, errorThrown) {
+                    if (jqXHR.responseJSON &&
+                        jqXHR.responseJSON.exception &&
+                        jqXHR.responseJSON.exception.indexOf("AccessDeniedException") >= 0) {
+
+                        that.errorMsg =  jqXHR.responseJSON.message;
+                    } else {
+                        that.errorMsg = "Error accessing the jira"
+                    }
                     that.$.loginLoad.active = false;
-                    that.error = true;
                 });
             },
 
