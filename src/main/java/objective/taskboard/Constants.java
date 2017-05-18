@@ -23,9 +23,6 @@ package objective.taskboard;
 
 public abstract class Constants {
     
-    public static final String SCHEMA_MAD = "taskboard";
-    public static final String SCHEMA_JIRA = "jira";
-
     public static final int STATUS_CATEGORY_ID_IN_PROGRESS = 4;
 
 }

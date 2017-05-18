@@ -22,14 +22,13 @@ package objective.taskboard.domain;
  */
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import lombok.Data;
@@ -44,12 +43,19 @@ public class ProjectFilterConfiguration {
     @Getter
     private String projectKey;
     
-    @ElementCollection(fetch=FetchType.EAGER)
-    @CollectionTable(
-          name="project_team",
-          joinColumns=@JoinColumn(name="project_key")
-    )
-    @Column(name="team_id")
-    private List<Long> teamsIds;
+//    @ElementCollection(fetch=FetchType.EAGER)
+//    @CollectionTable(
+//          name="ProjectTeam",
+//          joinColumns=@JoinColumn(name="project_key")
+//    )
+//    @Column(name="team_id")
+//    private List<Long> teamsIds;
 
+    @OneToMany(fetch=FetchType.EAGER)
+    @JoinColumn(name="projectKey")
+    private List<ProjectTeam> projectTeams;
+    
+    public List<Long> getTeamsIds() {
+        return projectTeams.stream().map(el->el.getTeamId()).collect(Collectors.toList());
+    }
 }

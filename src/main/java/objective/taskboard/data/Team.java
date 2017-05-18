@@ -39,13 +39,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import objective.taskboard.Constants;
-
 @Data
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(schema = Constants.SCHEMA_MAD, name = "TEAM")
+@Table(name = "TEAM")
 public class Team implements Serializable {
     private static final long serialVersionUID = 1794216649849732935L;
     

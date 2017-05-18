@@ -1,5 +1,14 @@
 package objective.taskboard.data;
 
+import java.io.Serializable;
+import java.util.Date;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
 /*-
  * [LICENSE]
  * Taskboard
@@ -24,21 +33,12 @@ package objective.taskboard.data;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import objective.taskboard.Constants;
-
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import java.io.Serializable;
-import java.util.Date;
 
 @Data
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(schema = Constants.SCHEMA_MAD, name = "USER_TEAM")
+@Table(name = "USER_TEAM")
 public class UserTeam implements Serializable {
     public UserTeam(String memberName, String teamName) {
         this.userName = memberName;

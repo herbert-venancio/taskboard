@@ -75,6 +75,8 @@ public class JiraProperties {
     @Valid
     private Resolutions resolutions;
     
+    private String schema;
+    
     @Data 
     public static class Lousa {
         @NotNull

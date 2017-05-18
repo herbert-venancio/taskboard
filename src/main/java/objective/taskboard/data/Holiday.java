@@ -29,11 +29,10 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 import lombok.Data;
-import objective.taskboard.Constants;
 
 @Data
 @Entity
-@Table(schema = Constants.SCHEMA_MAD, name = "holiday")
+@Table(name = "holiday")
 public class Holiday implements Serializable {
 
     private static final long serialVersionUID = 1L;

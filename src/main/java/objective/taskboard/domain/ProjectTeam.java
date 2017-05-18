@@ -28,10 +28,8 @@ import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import objective.taskboard.Constants;
-
 @Entity
-@Table(schema = Constants.SCHEMA_MAD, name = "PROJECT_TEAM")
+@Table(name = "PROJECT_TEAM")
 public class ProjectTeam {
     @EmbeddedId
     ProjectTeamId id;
