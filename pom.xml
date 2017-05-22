@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>br.com.objective</groupId>
 	<artifactId>taskboard</artifactId>
@@ -41,8 +42,7 @@
 		<url>https://github.com/objective-solutions/taskboard</url>
 		<connection>scm:git:git@github.com/objective-solutions/taskboard.git</connection>
 		<developerConnection>scm:git:git@github.com:objective-solutions/taskboard.git</developerConnection>
-	  <tag>taskboard-0.0.1</tag>
-  </scm>
+	</scm>
 	<build>
 		<plugins>
 			<plugin>
@@ -86,16 +86,16 @@
 				</configuration>
 			</plugin>
 			<plugin>
-			    <groupId>org.apache.maven.plugins</groupId>
-			    <artifactId>maven-release-plugin</artifactId>
-			    <version>2.5.2</version>
-			    <dependencies>
-			        <dependency>
-			            <groupId>org.apache.maven.scm</groupId>
-			            <artifactId>maven-scm-provider-gitexe</artifactId>
-			            <version>1.9.4</version>
-			        </dependency>
-			    </dependencies>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.5.2</version>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.maven.scm</groupId>
+						<artifactId>maven-scm-provider-gitexe</artifactId>
+						<version>1.9.4</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 		</plugins>
 		<pluginManagement>
@@ -305,9 +305,9 @@
 	<dependencies>
 		<!-- SPRING -->
 		<dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-jdbc</artifactId>
@@ -350,6 +350,13 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-rest-repository</artifactId>
+			<version>1.0.0.RELEASE</version>
+		</dependency>
+
 		<!-- LOMBOK -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -395,8 +402,23 @@
 			<version>3.0.0</version>
 		</dependency>
 		<dependency>
-    		<groupId>org.mockito</groupId>
-    		<artifactId>mockito-core</artifactId>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+			<version>4.2.0</version><!--$NO-MVN-MAN-VER$ -->
 		</dependency>
 	</dependencies>
 </project>
