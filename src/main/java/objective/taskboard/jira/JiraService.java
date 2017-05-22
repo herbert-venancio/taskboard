@@ -69,7 +69,6 @@ public class JiraService {
 
     private static String MSG_UNAUTHORIZED = "Incorrect user or password";
     private static String MSG_FORBIDDEN = "The jira account is locked";
-    private static String MSG_SERVICE_ERROR = "Error accessing the jira";
 
     @Autowired
     private TaskboardDatabaseService taskboardDatabaseService;
@@ -93,22 +92,25 @@ public class JiraService {
             ServerInfo info = jiraEndpoint.executeRequest(username, password, request);
             if (info == null)
                 throw new RuntimeException("The server did not respond");
-        } catch (JiraServiceException ex) {
-            if (ex.getStatusCode().isPresent()) {
-                HttpStatus httpStatus = ex.getStatusCode().get();
-                log.error("Authentication error " + httpStatus.value() + " for user " + username);
-
-                if (httpStatus == HttpStatus.UNAUTHORIZED)
-                    throw new AccessDeniedException(MSG_UNAUTHORIZED, ex);
-
-                if (httpStatus == HttpStatus.FORBIDDEN)
-                    throw new AccessDeniedException(MSG_FORBIDDEN, ex);
-            }
+        } catch (RuntimeException ex) {
+            checkAuthenticationError(ex, username);
             log.error("Authentication error for user " + username);
-            throw new AccessDeniedException(MSG_SERVICE_ERROR, ex);
-        } catch (Exception ex) {
-            log.error("Authentication error for user " + username);
-            throw new AccessDeniedException(MSG_SERVICE_ERROR, ex);
+            throw ex;
+        }
+    }
+
+    private void checkAuthenticationError(RuntimeException ex, String username) {
+        if (ex instanceof JiraServiceException) {
+            JiraServiceException jse = (JiraServiceException) ex;
+            HttpStatus httpStatus = jse.getStatusCode().get();
+            log.error("Authentication error " + httpStatus.value() + " for user " + username);
+
+            if (httpStatus == HttpStatus.UNAUTHORIZED)
+                throw new AccessDeniedException(MSG_UNAUTHORIZED, ex);
+
+            if (httpStatus == HttpStatus.FORBIDDEN)
+                throw new AccessDeniedException(MSG_FORBIDDEN, ex);
+
         }
     }
 
