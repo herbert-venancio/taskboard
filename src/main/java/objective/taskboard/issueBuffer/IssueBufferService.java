@@ -30,10 +30,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
-
 import objective.taskboard.data.Issue;
+import objective.taskboard.data.TaskboardIssue;
+import objective.taskboard.data.IssuePriorityOrderChanged;
 import objective.taskboard.domain.converter.JiraIssueToIssueConverter;
 import objective.taskboard.jira.JiraIssueService;
 import objective.taskboard.jira.ProjectService;
@@ -50,24 +52,22 @@ public class IssueBufferService {
     @Autowired
     private ProjectService projectService;
     
-    private UpdateState state = UpdateState.Unitialised;
+    private UpdateState state = UpdateState.Uninitialised;
 
     private Map<String, Issue> issueBuffer = new LinkedHashMap<>();
 
     public void updateIssueBuffer() {
-        setIssues(issueConverter.convert(jiraIssueService.searchAll()));
-    }
-
-    public Issue updateIssueBuffer(final String key) {
         try {
-            Issue updateIssueBuffer = updateIssueBuffer(IssueEvent.ISSUE_UPDATED, key);
+            setIssues(issueConverter.convert(jiraIssueService.searchAll()));
             state = UpdateState.Successful;
-            return updateIssueBuffer;
         }catch(Exception e) {
             state = UpdateState.Failed;
             throw e;
         }
+    }
 
+    public Issue updateIssueBuffer(final String key) {
+        return updateIssueBuffer(IssueEvent.ISSUE_UPDATED, key);
     }
     
     public UpdateState getLastUpdateState() {
@@ -131,4 +131,9 @@ public class IssueBufferService {
         issueBuffer.put(issue.getIssueKey(), issue);
     }
 
+    @EventListener
+    protected void onAfterSave(IssuePriorityOrderChanged event) {
+        TaskboardIssue entity = event.getTarget();
+        issueBuffer.get(entity.getProjectKey()).setPriorityOrder(entity.getPriority());
+    }
 }

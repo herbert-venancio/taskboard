@@ -22,7 +22,7 @@ package objective.taskboard.issueBuffer;
  */
 
 public enum UpdateState {
-    Unitialised,
+    Uninitialised,
     Successful,
     Failed
 }

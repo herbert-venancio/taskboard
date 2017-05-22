@@ -32,17 +32,14 @@ import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.DateDeserializers.DateDeserializer;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Issue implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    
+    private Long id;
 
     private String issueKey;
 
@@ -101,13 +98,15 @@ public class Issue implements Serializable {
 
     @JsonProperty(access = Access.WRITE_ONLY)
     private Map<String, Object> customFields;
-
-    public static Issue from(String issueKey, String projectKey, String project, long issueType, String typeIconUri, String summary, long status, long startDateStepMillis,
+    
+    private Long priorityOrder;
+    
+    public static Issue from(Long id, String issueKey, String projectKey, String project, long issueType, String typeIconUri, String summary, long status, long startDateStepMillis,
             String subresponsavel1, String subresponsavel2, String parent, long parentType, String parentTypeIconUri, List<String> dependencies, String subResponsaveis,
             String assignee, String usersTeam, long priority, Date dueDate, long created, String description, List<String> teams, String comments, Map<String, Object> customFields,
-            String color) {
-        return new Issue(issueKey, projectKey, project, issueType, typeIconUri, summary, status, startDateStepMillis, subresponsavel1, subresponsavel2, parent, parentType, parentTypeIconUri,
-                dependencies, false, false, false, color, subResponsaveis, assignee, usersTeam, priority, dueDate, created, description, teams, comments, customFields);
+            String color, Long priorityOrder) {
+        return new Issue(id, issueKey, projectKey, project, issueType, typeIconUri, summary, status, startDateStepMillis, subresponsavel1, subresponsavel2, parent, parentType, parentTypeIconUri,
+                dependencies, false, false, false, color, subResponsaveis, assignee, usersTeam, priority, dueDate, created, description, teams, comments, customFields, priorityOrder);
     }
 
     /**
@@ -124,5 +123,44 @@ public class Issue implements Serializable {
     public Map<String, Object> getCustomFields() {
         return customFields;
     }
+    
+    public Issue(){}
 
+    private Issue(Long id, String issueKey, String projectKey, String project, long type, String typeIconUri,
+            String summary, long status, long startDateStepMillis, String subresponsavel1, String subresponsavel2,
+            String parent, long parentType, String parentTypeIconUri, List<String> dependencies, boolean render,
+            boolean favorite, boolean hidden, String color, String subResponsaveis, String assignee, String usersTeam,
+            long priority, Date dueDate, long created, String description, List<String> teams, String comments,
+            Map<String, Object> customFields, Long priorityOrder) {
+        this.id = id;
+        this.issueKey = issueKey;
+        this.projectKey = projectKey;
+        this.project = project;
+        this.type = type;
+        this.typeIconUri = typeIconUri;
+        this.summary = summary;
+        this.status = status;
+        this.startDateStepMillis = startDateStepMillis;
+        this.subresponsavel1 = subresponsavel1;
+        this.subresponsavel2 = subresponsavel2;
+        this.parent = parent;
+        this.parentType = parentType;
+        this.parentTypeIconUri = parentTypeIconUri;
+        this.dependencies = dependencies;
+        this.render = render;
+        this.favorite = favorite;
+        this.hidden = hidden;
+        this.color = color;
+        this.subResponsaveis = subResponsaveis;
+        this.assignee = assignee;
+        this.usersTeam = usersTeam;
+        this.priority = priority;
+        this.dueDate = dueDate;
+        this.created = created;
+        this.description = description;
+        this.teams = teams;
+        this.comments = comments;
+        this.customFields = customFields;
+        this.priorityOrder = priorityOrder;
+    }
 }

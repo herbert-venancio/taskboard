@@ -23,11 +23,13 @@
     <style is="custom-style">
         :host {
             box-sizing: border-box;
-            padding: 2px;
             max-width: 300px;
-            margin: 1px 0px;
         }
 
+		.sortable-issue-item {
+			margin: 1px 0px;
+            padding: 2px;			
+		}
         .issue {
             display: flex;
             flex-direction: column;
@@ -230,63 +232,66 @@
     </style>
 
     <template>
-        <iron-ajax id="ajax"
-                   method="POST"
-                   url="/ws/issues/assign"
-                   content-type='application/json'
-                   body="{{item}}"
-                   headers='{"Content-Type": "application/json"}'>
-        </iron-ajax>
-        <iron-signals on-iron-signal-hierarchical-filter-changed="forceRefreshHierarchyMatch"></iron-signals>
-        <paper-material class$="issue {{getClasses(item.hierarchyMatch, item.issueKey)}}" elevation="0" style$="{{getIssueColor(item)}}"
-                        on-tap="opendialog" title="Issue details">
-            <template is="dom-if" if="{{issueImpedida(item)}}">
-                <div class="impedida">
-                    <iron-icon id="issueImpedidaIcon" class="iconImpedidaCancelada" icon="av:not-interested"
-                               title="Blocked issue. Last Block Reason: {{item.customfields.lastBlockReason}}"></iron-icon>
-                </div>
-            </template>
-
-            <template is="dom-if" if="{{issueCancelada(item)}}">
-                <div class="cancelada">
-                    <iron-icon id="issueCanceladaIcon" class="iconImpedidaCancelada" icon="warning"
-                               title="Canceled issue"></iron-icon>
-                </div>
-            </template>
-
-            <div class="top">
-                <div class="module line-clamp"><p>{{item.summary}}</p></div>
-            </div>
-
-            <div class="bottom">
-                <div class="info-issue">
-                    <template is="dom-if" if="{{getOnlyOneSize(item.customfields.sizes)}}">
-                        <div class="size">
-                            <span class="issue-size">{{getOnlyOneSize(item.customfields.sizes)}}</span>
-                        </div>
-                    </template>
-
-                    <div class="key" on-tap="openJira" title="Open in jira">{{item.issueKey}}</div>
-                </div>
-                <div class="icons">
-                    <img id="issueTypeIcon" class="icon-small icon-issuetype"
-                         title$="- {{item.issueKey}}&#010;- {{getIssueTypeName(item.type)}}&#010;- {{getStatusName(item.status)}}"
-                         src$="{{getIssueTypeImage(item)}}"/>
-                    <template is="dom-if" if="{{item.subresponsavel1}}">
-                        <img class="icon-small" src$="{{item.subresponsavel1}}"/>
-                    </template>
-                    <template is="dom-if" if="{{subResponsavelNotEquals(item)}}">
-                        <img class="icon-small" src$="{{item.subresponsavel2}}"/>
-                    </template>
-                </div>
-            </div>
-
-            <div class="filterButton">
-                <paper-icon-button id="filterButton" alt="Apply Filter" class="filterIcon" icon="filter-list"
-                                   on-tap="hierarchyFilterClick" title="Apply hierarchical filter"></paper-icon-button>
-            </div>
-
-        </paper-material>
+	    <div class="sortable-issue-item">
+	    	<input type="hidden" name="issueKey" value="{{item.issueKey}}" />
+	        <iron-ajax id="ajax"
+	                   method="POST"
+	                   url="/ws/issues/assign"
+	                   content-type='application/json'
+	                   body="{{item}}"
+	                   headers='{"Content-Type": "application/json"}'>
+	        </iron-ajax>
+	        <iron-signals on-iron-signal-hierarchical-filter-changed="forceRefreshHierarchyMatch"></iron-signals>
+	        <paper-material class$="issue {{getClasses(item.hierarchyMatch, item.issueKey)}}" elevation="0" style$="{{getIssueColor(item)}}"
+	                        on-tap="opendialog" title="Issue details">
+	            <template is="dom-if" if="{{issueImpedida(item)}}">
+	                <div class="impedida">
+	                    <iron-icon id="issueImpedidaIcon" class="iconImpedidaCancelada" icon="av:not-interested"
+	                               title="Blocked issue. Last Block Reason: {{item.customfields.lastBlockReason}}"></iron-icon>
+	                </div>
+	            </template>
+	
+	            <template is="dom-if" if="{{issueCancelada(item)}}">
+	                <div class="cancelada">
+	                    <iron-icon id="issueCanceladaIcon" class="iconImpedidaCancelada" icon="warning"
+	                               title="Canceled issue"></iron-icon>
+	                </div>
+	            </template>
+	
+	            <div class="top">
+	                <div class="module line-clamp"><p>{{item.summary}}</p></div>
+	            </div>
+	
+	            <div class="bottom">
+	                <div class="info-issue">
+	                    <template is="dom-if" if="{{getOnlyOneSize(item.customfields.sizes)}}">
+	                        <div class="size">
+	                            <span class="issue-size">{{getOnlyOneSize(item.customfields.sizes)}}</span>
+	                        </div>
+	                    </template>
+	
+	                    <div class="key" on-tap="openJira" title="Open in jira">{{item.issueKey}}</div>
+	                </div>
+	                <div class="icons">
+	                    <img id="issueTypeIcon" class="icon-small icon-issuetype"
+	                         title$="- {{item.issueKey}}&#010;- {{getIssueTypeName(item.type)}}&#010;- {{getStatusName(item.status)}}"
+	                         src$="{{getIssueTypeImage(item)}}"/>
+	                    <template is="dom-if" if="{{item.subresponsavel1}}">
+	                        <img class="icon-small" src$="{{item.subresponsavel1}}"/>
+	                    </template>
+	                    <template is="dom-if" if="{{subResponsavelNotEquals(item)}}">
+	                        <img class="icon-small" src$="{{item.subresponsavel2}}"/>
+	                    </template>
+	                </div>
+	            </div>
+	
+	            <div class="filterButton">
+	                <paper-icon-button id="filterButton" alt="Apply Filter" class="filterIcon" icon="filter-list"
+	                                   on-tap="hierarchyFilterClick" title="Apply hierarchical filter"></paper-icon-button>
+	            </div>
+	
+	        </paper-material>
+	    </div>
     </template>
 
     <script>

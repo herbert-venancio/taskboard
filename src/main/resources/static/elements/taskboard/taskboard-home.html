@@ -331,7 +331,12 @@
                             localStorage.setItem("priorities", JSON.stringify(data.priorities));
                             localStorage.setItem("statuses", JSON.stringify(data.statuses));
 
-                            userPreferences.setPreferences(JSON.parse(data.userPreferences));
+                            try {
+                            	userPreferences.setPreferences(JSON.parse(data.userPreferences));
+                            }catch(e) {
+                            	console.error(e)
+                            }
+                            
                             self.retrieveFilters();
 
                             window.urlJira = data.urlJira;
