@@ -38,7 +38,6 @@ public class RefreshIssueBufferTask implements ApplicationListener<ContextRefres
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        //issueBufferService.updateIssueBuffer();
     }
 
     @Scheduled(fixedRate = RATE_MILISECONDS, initialDelay = 0)
