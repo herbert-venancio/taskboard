@@ -110,11 +110,6 @@ public class IssueController {
         return issueBufferService.getIssues();
     }
     
-    @RequestMapping(path = "/state", method = RequestMethod.GET)
-    public String updateState() {
-        return issueBufferService.getLastUpdateState().toString();
-    }
-
     @RequestMapping(path = "assign", method = RequestMethod.POST)
     public Issue assign(@RequestBody Issue issue) throws JSONException {
         jiraBean.toggleAssignAndSubresponsavelToUser(issue.getIssueKey());

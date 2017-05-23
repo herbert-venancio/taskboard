@@ -52,28 +52,16 @@ public class IssueBufferService {
     @Autowired
     private ProjectService projectService;
     
-    private UpdateState state = UpdateState.Uninitialised;
-
     private Map<String, Issue> issueBuffer = new LinkedHashMap<>();
 
     public void updateIssueBuffer() {
-        try {
-            setIssues(issueConverter.convert(jiraIssueService.searchAll()));
-            state = UpdateState.Successful;
-        }catch(Exception e) {
-            state = UpdateState.Failed;
-            throw e;
-        }
+        setIssues(issueConverter.convert(jiraIssueService.searchAll()));
     }
 
     public Issue updateIssueBuffer(final String key) {
         return updateIssueBuffer(IssueEvent.ISSUE_UPDATED, key);
     }
     
-    public UpdateState getLastUpdateState() {
-        return state;
-    }
-
     public synchronized Issue updateIssueBuffer(IssueEvent event, final String key) {
         if (event == IssueEvent.ISSUE_DELETED)
             return issueBuffer.remove(key);
