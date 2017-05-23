@@ -50,6 +50,7 @@ import com.atlassian.jira.rest.client.api.domain.IssueType;
 import com.atlassian.jira.rest.client.api.domain.Status;
 import com.atlassian.jira.rest.client.api.domain.User;
 
+import objective.taskboard.controller.IssuePriorityService;
 import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.domain.converter.IssueTeamService.InvalidTeamException;
 import objective.taskboard.jira.JiraProperties;
@@ -136,6 +137,9 @@ public class JiraIssueToIssueConverterTest {
     private IssueField releaseField;
     @Mock
     private IssueField parentField;
+    
+    @Mock
+    private IssuePriorityService priorityService;
 
     @Before
     public void before() {
@@ -166,6 +170,8 @@ public class JiraIssueToIssueConverterTest {
 
         when(issueType.getIconUri()).thenReturn(URI.create(TYPE_ICON_URI));
         mockIssue(issue, ISSUE_KEY);
+        
+        when(priorityService.determinePriority(any())).thenReturn(0L);
     }
 
     @Test

@@ -86,6 +86,9 @@ public class IssueController {
 
     @Autowired
     private IssueBufferService issueBufferService;
+    
+    @Autowired
+    private IssuePriorityService issuePriorityService;
 
     @Autowired
     private ProjectService projectService;
@@ -101,12 +104,12 @@ public class IssueController {
 
     @Autowired
     private LinkGraphProperties linkGraphProperties;
-
+    
     @RequestMapping(path = "/", method = RequestMethod.POST)
-    public List<Issue> issues() throws SQLException, JSONException {
+    public List<Issue> issues() {
         return issueBufferService.getIssues();
     }
-
+    
     @RequestMapping(path = "assign", method = RequestMethod.POST)
     public Issue assign(@RequestBody Issue issue) throws JSONException {
         jiraBean.toggleAssignAndSubresponsavelToUser(issue.getIssueKey());
@@ -215,6 +218,11 @@ public class IssueController {
     public void unblockTask(@PathVariable("issue") String issue) {
         jiraBean.unblock(issue);
         issueBufferService.updateIssueBuffer(issue);
+    }
+    
+    @RequestMapping("reorder")
+    public void reorder(@RequestBody String [] issues) {
+        issuePriorityService.reorder(issues);
     }
 
     private List<AspectItemFilter> getDefaultFieldFilterList() throws InterruptedException, ExecutionException {

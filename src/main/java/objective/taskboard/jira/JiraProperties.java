@@ -21,13 +21,6 @@ package objective.taskboard.jira;
  * [/LICENSE]
  */
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +30,11 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @Data
 @ConfigurationProperties(prefix = "jira")
@@ -55,7 +53,7 @@ public class JiraProperties {
     @NotNull
     @Valid
     private IssueType issuetype;
-    private List<Integer> issuetypeOrder = new ArrayList<>();
+    
     @NotNull
     @NotEmpty
     private List<Integer> statusesCompletedIds;

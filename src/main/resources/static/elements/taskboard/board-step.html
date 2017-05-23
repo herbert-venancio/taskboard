@@ -18,6 +18,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
   [/LICENSE]
   -->
+
 <dom-module id="board-step">
     <style>
 
@@ -29,7 +30,7 @@
                       on-iron-signal-search-filter-changed="preferencesUpdated"
                       on-iron-signal-level-config-changed="preferencesUpdated"
                       on-iron-signal-hierarchical-filter-changed="preferencesUpdated"></iron-signals>
-        <div class="wrap layout horizontal" style="width: 100%">
+        <div id="board-step-{{parentLaneId}}-{{stepMetadata.id}}-{{team}}" class="wrap layout horizontal sortable-board-step" style="width: 100%">
 
             <!-- Issue Counter -->
             <template is="dom-if" if="{{showTeamCount(issues, lastPreferenceUpdate)}}">
@@ -45,12 +46,10 @@
                 <issue-item item="{{issue}}" style$="{{getOptimalIssueWidth(columns, issue)}}" hidden="{{showSynthetic(lastPreferenceUpdate)}}"></issue-item>
                 <issue-item-synthetic item="{{issue}}" parent-type-icon="{{showParentIconInSynthetic(parentLaneConfig)}}" hidden="{{!showSynthetic(lastPreferenceUpdate)}}"></issue-item-synthetic>
             </template>
-
         </div>
     </template>
 
     <script>
-
         var checkingInvalidTeam = false;
 
         var sortIssue = new function () {
@@ -61,18 +60,9 @@
             var sortByCreated = function (a, b) {
                 return compareElements(-a.created, -b.created);
             };
-
-            this.sortByType = function (a, b) {
-                var orderA = a.type;
-                var orderB = b.type;
-                if (ISSUETYPE_ORDER.length > 0) {
-                    var indexTypeA = ISSUETYPE_ORDER.indexOf(a.type);
-                    orderA = indexTypeA == -1 ? 999 : indexTypeA;
-                    var indexTypeB = ISSUETYPE_ORDER.indexOf(b.type);
-                    orderB = indexTypeB == -1 ? 999 : indexTypeB;
-                }
-                var compareType = compareElements(-orderA, -orderB);
-                return compareType != 0 ? compareType : sortByCreated(a, b);
+            
+            this.sortByOrder = function (a, b) {
+            	return a.priorityOrder-b.priorityOrder;
             };
         }();
 
@@ -125,9 +115,56 @@
                 listeners: {
                     'iron-resize': 'refit'
                 },
-
+                
                 ready: function() {
-
+                   
+                },
+                
+                attached: function() {
+                	this.makeStepSortable();
+                },
+                
+                makeStepSortable: function() {
+                	var handle = function(e,ui) {
+            			var si = this.stepItem();
+            			var issueKeysEl = si.find("input[type='hidden']").map(function(i,e) { 
+            				return e.value;
+            			})
+            			var issueKeys = [];
+            			for (i in issueKeysEl) {
+            				if ($.isNumeric(i)) {
+            					issueKeys.push(issueKeysEl[i])
+            				}
+            			}
+            			var self = this;
+            			$.ajax({
+                             url: '/ws/issues/reorder',
+                             type: 'post',
+                             contentType: 'application/json',
+                             data: JSON.stringify(issueKeys),
+                             error: function (jqXhr, textStatus, errorThrown) {
+                            	 self.fire("iron-signal", {name:"show-error-message", data:"Repriorization failed. Reason: status ("+jqXhr.status+") " + textStatus	})
+                            	 si.sortable("cancel");
+                            	 var original = ui.item.css('backgroundColor');
+                            	 ui.item.animate({backgroundColor:"red"},300).animate({backgroundColor:original},800)
+                            	 ui.item.closest(".board-lane.table-wrapper").animate({scrollTop: ui.item.offset().top})
+                             }
+                         });
+            		}.bind(this);
+            		this.stepItem().sortable({
+                		items: 'issue-item',
+                		opacity: 0.7,
+                		animation: 150,
+                		forceHelperSize: true,
+                		stop: handle
+                	});
+                },
+                
+                stepItem: function() {
+                	var t = "";
+                	if (typeof this.team !== 'undefined')
+                		t = this.team
+                	return $("#board-step-"+this.parentLaneId+"-"+this.stepMetadata.id+"-"+t);
                 },
 
                 showParentIconInSynthetic: function() {
@@ -180,7 +217,7 @@
                 },
 
                 getSorter: function () {
-                    return sortIssue.sortByType;
+                    return sortIssue.sortByOrder;
                 },
 
                 shouldShowIssue: function(issue) {

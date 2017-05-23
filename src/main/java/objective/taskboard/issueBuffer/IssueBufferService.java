@@ -30,10 +30,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
-
 import objective.taskboard.data.Issue;
+import objective.taskboard.data.TaskboardIssue;
+import objective.taskboard.data.IssuePriorityOrderChanged;
 import objective.taskboard.domain.converter.JiraIssueToIssueConverter;
 import objective.taskboard.jira.JiraIssueService;
 import objective.taskboard.jira.ProjectService;
@@ -49,7 +51,7 @@ public class IssueBufferService {
 
     @Autowired
     private ProjectService projectService;
-
+    
     private Map<String, Issue> issueBuffer = new LinkedHashMap<>();
 
     public void updateIssueBuffer() {
@@ -59,7 +61,7 @@ public class IssueBufferService {
     public Issue updateIssueBuffer(final String key) {
         return updateIssueBuffer(IssueEvent.ISSUE_UPDATED, key);
     }
-
+    
     public synchronized Issue updateIssueBuffer(IssueEvent event, final String key) {
         if (event == IssueEvent.ISSUE_DELETED)
             return issueBuffer.remove(key);
@@ -117,4 +119,9 @@ public class IssueBufferService {
         issueBuffer.put(issue.getIssueKey(), issue);
     }
 
+    @EventListener
+    protected void onAfterSave(IssuePriorityOrderChanged event) {
+        TaskboardIssue entity = event.getTarget();
+        issueBuffer.get(entity.getProjectKey()).setPriorityOrder(entity.getPriority());
+    }
 }

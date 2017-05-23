@@ -1,0 +1,5 @@
+CREATE TABLE TASKBOARD_ISSUE (
+	issue_key VARCHAR2(255) NOT NULL,
+	priority NUMBER NOT NULL,
+	CONSTRAINT issueprioritorder_pk PRIMARY KEY (issue_key)
+)

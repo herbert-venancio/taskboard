@@ -22,7 +22,6 @@ package objective.taskboard.domain.converter;
  */
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.stream.Collectors.toList;
@@ -39,6 +38,7 @@ import org.springframework.stereotype.Service;
 import com.atlassian.jira.rest.client.api.domain.Issue;
 
 import lombok.extern.slf4j.Slf4j;
+import objective.taskboard.controller.IssuePriorityService;
 import objective.taskboard.data.CustomField;
 import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.domain.ParentIssueLink;
@@ -70,6 +70,9 @@ public class JiraIssueToIssueConverter {
 
     @Autowired
     private StartDateStepService startDateStepService;
+    
+    @Autowired
+    private IssuePriorityService priorityService;
 
     private List<String> parentIssueLinks;
 
@@ -125,8 +128,9 @@ public class JiraIssueToIssueConverter {
             issueTeams.add(INVALID_TEAM);
             usersTeam.addAll(e.getUsersInInvalidTeam());
         }
-
-        return objective.taskboard.data.Issue.from(
+        Long priorityOrder = priorityService.determinePriority(jiraIssue);
+        objective.taskboard.data.Issue i = objective.taskboard.data.Issue.from(
+                jiraIssue.getId(),
                 jiraIssue.getKey(),
                 jiraIssue.getProject().getKey(),
                 jiraIssue.getProject().getName(),
@@ -151,8 +155,10 @@ public class JiraIssueToIssueConverter {
                 issueTeams,
                 getComments(metadata),
                 getCustomFields(metadata),
-                issueColorService.getColor(getClassOfServiceId(metadata))
+                issueColorService.getColor(getClassOfServiceId(metadata)),
+                priorityOrder
         );
+        return i;
     }
 
     private long getParentTypeId(IssueMetadata metadata) {
