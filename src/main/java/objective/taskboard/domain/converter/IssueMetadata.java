@@ -34,6 +34,7 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 
+import com.atlassian.jira.rest.client.api.domain.BasicComponent;
 import com.atlassian.jira.rest.client.api.domain.Comment;
 import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.IssueField;
@@ -62,6 +63,8 @@ public class IssueMetadata {
     private final String linkedParentKey;
     private final Map<String, CustomField> additionalEstimatedHours;
     private final Map<String, CustomField> release;
+    private final List<String> labels;
+    private final List<String> components;
 
     public IssueMetadata(Issue issue, JiraProperties jiraProperties, List<String> parentIssueLinks, Logger log) {
         this.issue = issue;
@@ -78,6 +81,8 @@ public class IssueMetadata {
         this.dependenciesIssuesKey = extractDependenciesIssues();
         this.additionalEstimatedHours = extractAdditionalEstimatedHours();
         this.release = extractRelease();
+        this.labels = extractLabels();
+        this.components = extractComponents();
     }
 
     private IssueParent extractRealParent() {
@@ -284,6 +289,22 @@ public class IssueMetadata {
             logErrorExtractField(field, e);
             return newHashMap();
         }
+    }
+
+    private List<String> extractLabels() {
+        if (issue.getLabels() == null)
+            return newArrayList();
+
+        return issue.getLabels().stream().collect(toList());
+    }
+
+    private List<String> extractComponents() {
+        if (issue.getComponents() == null)
+            return newArrayList();
+
+        return newArrayList(issue.getComponents()).stream()
+                .map(BasicComponent::getName)
+                .collect(toList());
     }
 
     private void logErrorExtractField(IssueField field, JSONException e) {

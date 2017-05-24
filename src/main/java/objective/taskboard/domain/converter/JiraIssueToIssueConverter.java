@@ -145,6 +145,7 @@ public class JiraIssueToIssueConverter {
                 getParentTypeId(metadata),
                 getParentTypeIconUri(metadata),
                 metadata.getDependenciesIssuesKey(),
+                issueColorService.getColor(getClassOfServiceId(metadata)),
                 String.join(",", getCoAssigneesName(metadata)),
                 jiraIssue.getAssignee() != null ? jiraIssue.getAssignee().getName() : "",
                 String.join(",", usersTeam),
@@ -154,8 +155,9 @@ public class JiraIssueToIssueConverter {
                 jiraIssue.getDescription() != null ? jiraIssue.getDescription() : "",
                 issueTeams,
                 getComments(metadata),
+                metadata.getLabels(),
+                metadata.getComponents(),
                 getCustomFields(metadata),
-                issueColorService.getColor(getClassOfServiceId(metadata)),
                 priorityOrder
         );
         return i;

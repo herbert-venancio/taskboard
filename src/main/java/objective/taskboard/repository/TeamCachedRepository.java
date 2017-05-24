@@ -60,7 +60,7 @@ public class TeamCachedRepository {
     
     public Team findById(Long teamId) {
         for (Team team : cache) {
-            if (team.getId() == teamId)
+            if (team.getId().equals(teamId))
                 return team;
         }
         return null;
