@@ -121,6 +121,9 @@
                 },
                 
                 attached: function() {
+                	if (this.stepItem().length == 0) {
+                		throw "Failed to enable prioritization because the step item could not be found";
+                	}
                 	this.makeStepSortable();
                 },
                 
@@ -164,6 +167,7 @@
                 	var t = "";
                 	if (typeof this.team !== 'undefined')
                 		t = this.team
+                	t = t.replace(/ /,"\\ ")
                 	return $("#board-step-"+this.parentLaneId+"-"+this.stepMetadata.id+"-"+t);
                 },
 
