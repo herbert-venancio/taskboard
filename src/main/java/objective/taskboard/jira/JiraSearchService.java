@@ -58,7 +58,7 @@ public class JiraSearchService {
     private static final Set<String> EXPAND = newHashSet("schema", "names", "changelog");
     private static final int MAX_RESULTS = 100;
 
-    private static final String PATH_REST_API_SEARCH = "/rest/api/2/search";
+    private static final String PATH_REST_API_SEARCH = "/rest/api/latest/search";
     
     @Autowired
     private JiraProperties properties;
@@ -108,7 +108,7 @@ public class JiraSearchService {
 
     private Set<String> getFields() {
         Set<String> fields = newHashSet("parent", "project", "status", "created", "updated", "issuelinks",
-            "issuetype", "summary", "description", "name", "assignee", "reporter", "priority",
+            "issuetype", "summary", "description", "name", "assignee", "reporter", "priority", "labels", "components",
             properties.getCustomfield().getClassOfService().getId(),
             properties.getCustomfield().getCoAssignees().getId(),
             properties.getCustomfield().getBlocked().getId(),

@@ -38,7 +38,7 @@ import lombok.Data;
 public class Issue implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    
+
     private Long id;
 
     private String issueKey;
@@ -96,17 +96,21 @@ public class Issue implements Serializable {
 
     private String comments;
 
+    private List<String> labels;
+
+    private List<String> components;
+
     @JsonProperty(access = Access.WRITE_ONLY)
     private Map<String, Object> customFields;
-    
+
     private Long priorityOrder;
-    
+
     public static Issue from(Long id, String issueKey, String projectKey, String project, long issueType, String typeIconUri, String summary, long status, long startDateStepMillis,
-            String subresponsavel1, String subresponsavel2, String parent, long parentType, String parentTypeIconUri, List<String> dependencies, String subResponsaveis,
-            String assignee, String usersTeam, long priority, Date dueDate, long created, String description, List<String> teams, String comments, Map<String, Object> customFields,
-            String color, Long priorityOrder) {
+            String subresponsavel1, String subresponsavel2, String parent, long parentType, String parentTypeIconUri, List<String> dependencies, String color, String subResponsaveis,
+            String assignee, String usersTeam, long priority, Date dueDate, long created, String description, List<String> teams, String comments, List<String> labels,
+            List<String> components, Map<String, Object> customFields, Long priorityOrder) {
         return new Issue(id, issueKey, projectKey, project, issueType, typeIconUri, summary, status, startDateStepMillis, subresponsavel1, subresponsavel2, parent, parentType, parentTypeIconUri,
-                dependencies, false, false, false, color, subResponsaveis, assignee, usersTeam, priority, dueDate, created, description, teams, comments, customFields, priorityOrder);
+                dependencies, false, false, false, color, subResponsaveis, assignee, usersTeam, priority, dueDate, created, description, teams, comments, labels, components, customFields, priorityOrder);
     }
 
     /**
@@ -123,7 +127,7 @@ public class Issue implements Serializable {
     public Map<String, Object> getCustomFields() {
         return customFields;
     }
-    
+
     public Issue(){}
 
     private Issue(Long id, String issueKey, String projectKey, String project, long type, String typeIconUri,
@@ -131,7 +135,7 @@ public class Issue implements Serializable {
             String parent, long parentType, String parentTypeIconUri, List<String> dependencies, boolean render,
             boolean favorite, boolean hidden, String color, String subResponsaveis, String assignee, String usersTeam,
             long priority, Date dueDate, long created, String description, List<String> teams, String comments,
-            Map<String, Object> customFields, Long priorityOrder) {
+            List<String> labels, List<String> components, Map<String, Object> customFields, Long priorityOrder) {
         this.id = id;
         this.issueKey = issueKey;
         this.projectKey = projectKey;
@@ -160,6 +164,8 @@ public class Issue implements Serializable {
         this.description = description;
         this.teams = teams;
         this.comments = comments;
+        this.labels = labels;
+        this.components = components;
         this.customFields = customFields;
         this.priorityOrder = priorityOrder;
     }

@@ -44,6 +44,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.atlassian.jira.rest.client.api.domain.BasicPriority;
 import com.atlassian.jira.rest.client.api.domain.BasicProject;
+import com.atlassian.jira.rest.client.api.domain.Comment;
 import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.IssueField;
 import com.atlassian.jira.rest.client.api.domain.IssueType;
@@ -137,9 +138,10 @@ public class JiraIssueToIssueConverterTest {
     private IssueField releaseField;
     @Mock
     private IssueField parentField;
-    
     @Mock
     private IssuePriorityService priorityService;
+    @Mock
+    private Comment comment;
 
     @Before
     public void before() {
@@ -170,7 +172,7 @@ public class JiraIssueToIssueConverterTest {
 
         when(issueType.getIconUri()).thenReturn(URI.create(TYPE_ICON_URI));
         mockIssue(issue, ISSUE_KEY);
-        
+
         when(priorityService.determinePriority(any())).thenReturn(0L);
     }
 
@@ -226,10 +228,12 @@ public class JiraIssueToIssueConverterTest {
         assertTrue("Blocked should be in custom fields", customFields.containsKey(BLOCKED_ID));
         assertTrue("Last block reason should be in custom fields", customFields.containsKey(LAST_BLOCK_REASON_ID));
         assertEquals("Color", null, converted.getColor());
+        assertEquals("Priority order", 0L, converted.getPriorityOrder().longValue());
     }
 
     @Test
     public void issueWithParentConvert() throws JSONException {
+        when(classOfServiceDetails.getDefaultValue()).thenReturn("Standard");
         mockIssue(parent, PARENT_ISSUE_KEY);
 
         mockIssueField(parent, classOfServiceField, CLASS_OF_SERVICE_ID, format(JSON_CLASS_OF_SERVICE, CLASS_OF_SERVICE_EXPEDITE));
@@ -250,25 +254,6 @@ public class JiraIssueToIssueConverterTest {
     }
 
     @Test
-    public void issueWithNoDefaultClassOfServiceConvert() throws JSONException {
-        when(classOfServiceDetails.getDefaultValue()).thenReturn("Standard");
-
-        mockIssue(parent, PARENT_ISSUE_KEY);
-
-        mockIssueField(issue, classOfServiceField, CLASS_OF_SERVICE_ID, format(JSON_CLASS_OF_SERVICE, CLASS_OF_SERVICE_EXPEDITE));
-        mockIssueField(issue, parentField, PARENT_ID, format(JSON_PARENT, PARENT_ISSUE_KEY, TYPE_ICON_URI));
-
-        List<objective.taskboard.data.Issue> issuesConverted = subject.convert(asList(parent, issue));
-
-        assertEquals("Issues converted quantity", 2, issuesConverted.size());
-        objective.taskboard.data.Issue converted = issuesConverted.stream()
-                .filter(i -> i.getIssueKey().equals(ISSUE_KEY))
-                .findFirst().orElse(null);
-        assertIssueWithParent(converted);
-        assertClassOfService(converted.getCustomFields());
-    }
-
-    @Test
     public void callJiraServiceToGetParentConvert() throws JSONException {
         when(jiraService.getIssueByKeyAsMaster(anyString())).thenReturn(parent);
 
@@ -283,6 +268,18 @@ public class JiraIssueToIssueConverterTest {
         objective.taskboard.data.Issue converted = issuesConverted.get(0);
         assertIssueWithParent(converted);
         assertClassOfService(converted.getCustomFields());
+    }
+
+    @Test
+    public void issueWithComment() {
+        when(comment.toString()).thenReturn("comment");
+        when(issue.getComments()).thenReturn(asList(comment));
+
+        List<objective.taskboard.data.Issue> issuesConverted = subject.convert(asList(issue));
+
+        assertEquals("Issues converted quantity", 1, issuesConverted.size());
+        objective.taskboard.data.Issue converted = issuesConverted.get(0);
+        assertEquals("Comment", "comment", converted.getComments());
     }
 
     private void mockIssue(Issue issue, String issueKey) {

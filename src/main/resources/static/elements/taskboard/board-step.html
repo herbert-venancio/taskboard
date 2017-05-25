@@ -269,18 +269,35 @@
 
                 searchFilterMatches: function(issue) {
                     var query = searchFilter.get().toUpperCase();
-                    if (issue.issueKey.toUpperCase().indexOf(query) !== -1)
+                    if (this.searchFilterMatch(issue.issueKey, query))
                         return true;
-                    else if (issue.assignee && issue.assignee.toUpperCase().indexOf(query) !== -1)
+                    else if (this.searchFilterMatch(issue.assignee, query))
                         return true;
-                    else if (issue.subResponsaveis && issue.subResponsaveis.toUpperCase().indexOf(query) !== -1)
+                    else if (this.searchFilterMatch(issue.subResponsaveis, query))
                         return true;
-                    else if (issue.summary && issue.summary.toUpperCase().indexOf(query) !== -1)
+                    else if (this.searchFilterMatch(issue.summary, query))
                         return true;
-                    else if (issue.customfields.release && issue.customfields.release.value.toUpperCase().indexOf(query) !== -1)
+                    else if (issue.customfields.release && this.searchFilterMatch(issue.customfields.release.value, query))
                         return true;
-                    else if (issue.usersTeam && issue.usersTeam.toUpperCase().indexOf(query) !== -1)
+                    else if (this.searchFilterMatch(issue.usersTeam, query))
                         return true;
+                    else if (this.searchFilterMatch(issue.labels, query))
+                        return true;
+                    else if (this.searchFilterMatch(issue.components, query))
+                        return true;
+
+                    return false;
+                },
+
+                searchFilterMatch: function (attribute, search) {
+                    if (!Array.isArray(attribute))
+                        attribute = [ attribute ];
+
+                    for (var index in attribute) {
+                        var value = attribute[index];
+                        if (value && value.toUpperCase().indexOf(search) !== -1)
+                            return true;
+                    }
 
                     return false;
                 },

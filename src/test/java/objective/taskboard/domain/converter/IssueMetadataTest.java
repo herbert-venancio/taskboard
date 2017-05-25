@@ -26,6 +26,8 @@ import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 
 import org.codehaus.jettison.json.JSONArray;
@@ -38,6 +40,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
 
+import com.atlassian.jira.rest.client.api.domain.BasicComponent;
 import com.atlassian.jira.rest.client.api.domain.Comment;
 import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.IssueField;
@@ -120,6 +123,8 @@ public class IssueMetadataTest {
     private Comment comment;
     @Mock
     private Logger log;
+    @Mock
+    private BasicComponent basicComponent;
 
     private void mockIssueField(String fieldId, Object fieldValue) {
         when(issueField.getValue()).thenReturn(fieldValue);
@@ -582,6 +587,49 @@ public class IssueMetadataTest {
         IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
 
         assertEquals("Parent key", "", metadata.getParentKey());
+    }
+
+    @Test
+    public void extractLabelsValid() {
+        HashSet<String> labels = new HashSet<String>();
+        labels.add("label1");
+        labels.add("label2");
+        when(issue.getLabels()).thenReturn(labels);
+
+        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
+
+        Collections.sort(metadata.getLabels());
+        assertEquals("Labels quantity", 2, metadata.getLabels().size());
+        assertEquals("First label", "label1", metadata.getLabels().get(0));
+        assertEquals("Second label", "label2", metadata.getLabels().get(1));
+    }
+
+    @Test
+    public void extractLabelsNull() {
+        when(issue.getLabels()).thenReturn(null);
+
+        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
+
+        assertTrue("Labels should be empty", metadata.getLabels().isEmpty());
+    }
+
+    @Test
+    public void extractComponentsValid() {
+        when(basicComponent.getName()).thenReturn("component1");
+        when(issue.getComponents()).thenReturn(asList(basicComponent));
+
+        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
+
+        Collections.sort(metadata.getComponents());
+        assertEquals("Components quantity", 1, metadata.getComponents().size());
+        assertEquals("Component name", "component1", metadata.getComponents().get(0));
+    }
+
+    @Test
+    public void extractComponentsNull() {
+        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
+
+        assertTrue("Components should be empty", metadata.getComponents().isEmpty());
     }
 
 }
