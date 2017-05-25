@@ -1,9 +1,9 @@
 <!--
   [LICENSE]
   Taskboard
-  - - -
+  ---
   Copyright (C) 2015 - 2016 Objective Solutions
-  - - -
+  ---
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU Affero General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
@@ -24,17 +24,48 @@
         .input-search {
             border-radius: 3px;
             height: 30px;
-            width: 300px;
+            width: 50%;
             border: none;
             background: #D7DBF1;
             margin-top: 7px;
         }
+
+        paper-dropdown-menu.custom {
+            float: right;
+            width: 45%;
+            margin-left: 10px;
+            margin-top: 5px;
+            --paper-input-container-underline: { display: none; };
+            --paper-input-container-label: { font-size: 14px; };
+            --paper-input-container-input: { font-size: 14px; };
+         }
+
+         paper-listbox {
+             background: #D7DBF1;
+             border-radius: 3px;
+             padding: 0;
+         }
+
+         paper-item {
+            --paper-item-min-height: 30px;
+            font-size: 14px;
+         }
     </style>
 
     <template>
         <iron-signals on-iron-signal-search-filter-reset="searchReset"></iron-signals>
         <input id="searchIssues" class="input-search" value="{{query::input}}" type="search"
                placeholder="Search Issues" results="5" autocomplete="off"/>
+        <template is="dom-if" if="{{hasReleases(releases)}}">
+            <paper-dropdown-menu class="custom" id="searchRelease" label="Release" no-label-float
+                                 on-value-changed="onSearchReleaseChanged">
+                <paper-listbox class="dropdown-content" attr-for-selected="value" selected="{{releaseSelected}}">
+                    <template is="dom-repeat" items="{{releases}}" as="itemRelease">
+                        <paper-item value="{{itemRelease}}">{{itemRelease}}</paper-item>
+                    </template>
+                </paper-listbox>
+            </paper-dropdown-menu>
+        </template>
     </template>
 
     <script>
@@ -46,6 +77,14 @@
                     query: {
                         type: String,
                         notify: true
+                    },
+                    releaseSelected: {
+                        type: String,
+                        notify: true
+                    },
+                    releases: {
+                        type: Array,
+                        notify: true
                     }
                 },
 
@@ -55,11 +94,22 @@
                 },
 
                 searchIssue: function () {
-                    this.fire('iron-signal', {name: 'search-filter-changed', data: {query: this.query}});
+                    searchFilter.set(this.query);
+                    this.fire('iron-signal', {name: 'search-filter-changed'});
                 },
 
                 searchReset: function() {
                     this.query = "";
+                    this.releaseSelected = "";
+                },
+
+                hasReleases: function(releases) {
+                    return releases && releases.length > 0;
+                },
+
+                onSearchReleaseChanged: function() {
+                    searchFilter.set(this.releaseSelected);
+                    this.fire('iron-signal', {name: 'search-filter-changed'});
                 }
             });
         })();

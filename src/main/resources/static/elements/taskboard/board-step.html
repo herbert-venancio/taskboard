@@ -1,9 +1,9 @@
 <!--
   [LICENSE]
   Taskboard
-  - - -
+  ---
   Copyright (C) 2015 - 2016 Objective Solutions
-  - - -
+  ---
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU Affero General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
@@ -281,7 +281,7 @@
                         return true;
                     else if (this.searchFilterMatch(issue.summary, query))
                         return true;
-                    else if (issue.customfields.release && this.searchFilterMatch(issue.customfields.release.value, query))
+                    else if (issue.customfields.release && issue.customfields.release.value.toUpperCase() == query)
                         return true;
                     else if (this.searchFilterMatch(issue.usersTeam, query))
                         return true;
