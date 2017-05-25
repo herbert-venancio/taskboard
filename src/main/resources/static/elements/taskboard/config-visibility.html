@@ -21,50 +21,20 @@
 <dom-module id="config-visibility">
 
     <style>
-        paper-listbox {
-            background: #D7DBF1;
-            margin-top: 50px;
-            position: fixed;
-            border-radius: 3px;
-            left: 22%;
-        }
-
         .customViews {
             float: left;
             margin-left: 10px;
         }
 
-        .iconsAnalytics {
-            color: #D7DBF1;
-            background: #303f9f;
-            border-radius: 5px 0px 0px 5px;
-            padding: 4px;
-            width: 30px;
-            height: 34px;
-            --paper-icon-button-ink: {
-                border-radius: 5px 0px 0px 5px;
-            }
-        }
-
-        .iconsAnalytics:hover {
-            -webkit-transition: all .5s;
-            -moz-transition: all .5s;
-            transition: all .5s;
-            opacity: 0.9;
-            background: rgba(255, 255, 255, 0.27);
-            border-radius: 3px;
-        }
-
         .iconsSynthetic {
             color: #D7DBF1;
             background: #303f9f;
-            border-radius: 0px 5px 5px 0px;
+            border-radius: 5px 5px 5px 5px;
             padding: 4px;
-            margin-left: -3px;
             width: 30px;
             height: 34px;
             --paper-icon-button-ink: {
-                border-radius: 0px 5px 5px 0px;
+                border-radius: 5px 5px 5px 5px;
             }
         }
 
@@ -81,14 +51,10 @@
 
     <template>
         <div class="customViews">
-            <paper-icon-button class="iconsAnalytics"
-                               style$="{{getStyleSynthetic(visibilityConfiguration.showSynthetic)}}"
-                               icon="image:view-compact" title="Analytical View"
-                               on-tap="visibilitySynthetic"></paper-icon-button>
             <paper-icon-button class="iconsSynthetic"
-                               style$="{{getStyleAnalytical(visibilityConfiguration.showSynthetic)}}"
+                               style$="{{getStyleSynthetic(visibilityConfiguration.showSynthetic)}}"
                                icon="image:grain" title="Synthetic View"
-                               on-tap="visibilityAnalytical"></paper-icon-button>
+                               on-tap="toggleVisibility"></paper-icon-button>
         </div>
     </template>
 
@@ -120,7 +86,6 @@
                 },
 
                 syntheticObserver: function (show) {
-
                     this.fire('iron-signal', {
                         name: 'config-visibility-synthetic-changed',
                         data: {}
@@ -131,26 +96,15 @@
                     this.$.collapseLevelConfig.toggle();
                 },
 
-                visibilityAnalytical: function () {
-                    this.set('visibilityConfiguration.showSynthetic', true);
+                toggleVisibility: function () {
+                    this.set('visibilityConfiguration.showSynthetic', !this.visibilityConfiguration.showSynthetic);
                 },
 
-                visibilitySynthetic: function () {
-                    this.set('visibilityConfiguration.showSynthetic', false);
-                },
-
-                getStyleAnalytical: function (show) {
+                getStyleSynthetic: function(show) {
                     if (show)
                         return 'box-shadow: inset 2px 2px 2px #161A35;';
                     else
                         return '';
-                },
-
-                getStyleSynthetic: function (show) {
-                    if (show)
-                        return '';
-                    else
-                        return 'box-shadow: inset 2px 2px 2px #161A35;';
                 }
 
             });
