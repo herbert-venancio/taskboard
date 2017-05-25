@@ -21,12 +21,12 @@
 <dom-module id="config-lane-team">
 
     <style>
-        .title {
+    	.config-item-title {
+    		padding: 0 5px;
             font-size: 15px;
             font-weight: bold;
-        }
-
-        .title:hover {
+    	}
+        .config-item-title:hover {
             -webkit-transition: all .5s;
             -moz-transition: all .5s;
             transition: all .5s;
@@ -53,7 +53,7 @@
 
     <template>
 
-        <paper-toolbar class="title" on-tap="collapseLevelConfig">
+        <paper-toolbar class="config-item-title" on-tap="collapseLevelConfig">
             <span>Lane Team</span>
         </paper-toolbar>
         <iron-collapse id="collapseLevelConfig">

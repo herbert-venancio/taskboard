@@ -21,7 +21,21 @@
 
 <dom-module id="board-step">
     <style>
-
+    	
+    	.step-count-wrapper {
+    		width: 100%;
+    	}
+		
+		.step-count {
+			background: #777;
+			display: inline-block;
+			padding: 3px 10px;
+			color: #FFF;
+			border-radius: 3px;
+			margin: 3px;
+			font-size: 13px;
+		}
+		
     </style>
 
     <template>
@@ -34,10 +48,8 @@
 
             <!-- Issue Counter -->
             <template is="dom-if" if="{{showTeamCount(issues, lastPreferenceUpdate)}}">
-                <div style="width:100%" class="layout horizontal">
-                    <div>
-                        <inline-badge value="{{getIssueCount(issues, lastPreferenceUpdate)}}"></inline-badge>
-                    </div>
+                <div style="width:100%" class="step-count-wrapper layout horizontal">
+					<inline-badge class="step-count" value="{{getIssueCount(issues, lastPreferenceUpdate)}}"></inline-badge>
                 </div>
             </template>
 
@@ -162,6 +174,7 @@
                 		opacity: 0.7,
                 		animation: 150,
                 		forceHelperSize: true,
+                		forcePlaceholderSize: true,
                 		stop: handle
                 	});
                 },

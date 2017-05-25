@@ -26,6 +26,10 @@
             --paper-spinner-layer-3-color: var(--accent-color);
             --paper-spinner-layer-4-color: var(--accent-color);
             position: absolute;
+            left: 50%;
+            margin-left: -14px;
+            top: 50%;
+            margin-top: -14px;
         }
 
         paper-drawer-panel {
@@ -47,7 +51,7 @@
             color: white;
             font-weight: 400;
             font-size: x-large;
-            padding: 35px;
+            padding: 20px;
             z-index: 1;
         }
 
@@ -97,55 +101,54 @@
         }
 
         .menu-header {
-            width: 100%;
+        	display: flex;
+        	align-items: center;
+        	
+        	height: 40px;
+        	padding: 0 20px;
             position: relative;
-            height: 45px;
-            background-color: #3f51b5;
-            display: block;
+            z-index: 10;
+            background-color: #EFEFEF;
+            color: #333;
+            box-shadow: none;
         }
 
         .search {
+<<<<<<< 27d6fbc503e1a9693dff8c06e33687e47d89023a
             margin-left: 10px;
             position: relative;
             float: left;
             width: 20%;
+=======
+>>>>>>> [TOOLS-27] New theme for a better user experience
         }
 
         .visibility {
-            float: left;
-            position: relative;
-            margin-top: 5px;
-            z-index: 5;
-            margin-left: 9px;
+        	margin-left: 20px;
         }
 
         .title {
-            color: white;
-            font-weight: 400;
-            font-size: x-large;
-            padding: 8px;
-            margin-left: 46%;
+        	width: 150px;
+            left: 50%;
+            margin-left: -75px;
             position: absolute;
+            font-size: x-large;
+            text-align: center;
         }
 
         .user {
-            position: relative;
-            float: right;
-            margin-right: 2px;
-            margin-top: 5px;
-            z-index: 5;
+        	margin-left: auto;
         }
 
         .openMenu {
-            position: relative;
-            float: right;
-            margin-top: 5px;
-            margin-right: 16px;
+        	margin-left: 10px;
         }
 
         .menuLink {
+        	background: transparent;
             font-size: 15px;
             font-weight: bold;
+            color: inherit;
         }
 
         .menuLink:hover {
@@ -153,7 +156,7 @@
             -moz-transition: all .5s;
             transition: all .5s;
             opacity: 0.9;
-            background: rgba(255, 255, 255, 0.27);
+            background: #CCC;
             border-radius: 3px;
         }
 
@@ -194,28 +197,28 @@
                         </span>
                         <paper-button onclick="toastError.toggle()" class="yellow-button">Fechar</paper-button>
                     </paper-toast>
-                    <paper-material class="menu-header">
+                    <paper-material class="menu-header u-clearfix">
+						<div class="title">Taskboard</div>
                         <div class="search">
                             <board-search releases="{{releases}}"></board-search>
                         </div>
                         <div class="visibility">
                             <config-visibility></config-visibility>
                         </div>
-                        <div class="title"> Taskboard</div>
+                        <div class="user">
+                            <user-account></user-account>
+                        </div>
                         <div class="openMenu">
                             <paper-toolbar class="menuLink" paper-drawer-toggle>
                                 <iron-icon class="menu-icon" icon="settings" paper-drawer-toggle></iron-icon>
                             </paper-toolbar>
-                        </div>
-                        <div class="user">
-                            <user-account></user-account>
                         </div>
                     </paper-material>
                     <board-table id="table" conf={{conf}} aspects-filter="{{aspectsFilter}}"></board-table>
                 </div>
                 <paper-header-panel drawer>
                     <paper-material class="app-name">
-                        <div class="title">Filters</div>
+                        <div class="filters-title">Filters</div>
                     </paper-material>
                     <paper-material class="layout vertical">
                         <aspects-filter aspects-filter="{{aspectsFilter}}"></aspects-filter>

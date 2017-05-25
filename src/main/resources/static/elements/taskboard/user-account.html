@@ -21,14 +21,12 @@
 <dom-module id="user-account">
 
     <style>
-        .userName {
-            background: #3F51B5;
-            color: white;
-            padding: 10px;
-        }
-
-        paper-item {
-            cursor: pointer;
+    	user-account {
+    		display: block;
+    	}
+        
+        .dropdow-menu-item:first-child {
+        	margin-top: 0;
         }
 
         paper-item:hover {
@@ -37,11 +35,7 @@
         }
 
         paper-menu-button {
-            height: 35px;
             cursor: pointer;
-            -webkit-transition: all .5s;
-            -moz-transition: all .5s;
-            transition: all .5s;
         }
 
         paper-menu-button ::shadow #topBar {
@@ -52,43 +46,53 @@
         }
 
         paper-menu {
-            padding: 10px 0px 10px 0px;
+        	min-width: 170px;
+            padding: 10px;
             background: #D7DBF1;
-            border-radius: 3px;
-            margin-top: 45px;
-            right: 57px;
+            margin-top: 35px;
+            right: 70px;
             position: fixed;
         }
 
         .title {
             font-size: 17px;
-            color: white;
+            padding: 0 5px;
         }
 
         .title:hover {
-            -webkit-transition: all .5s;
+			-webkit-transition: all .5s;
             -moz-transition: all .5s;
             transition: all .5s;
             opacity: 0.9;
-            background: rgba(255, 255, 255, 0.27);
+            background: #CCC;
             border-radius: 3px;
         }
-
+        
         .avatar {
-            border-radius: 150px;
-            width: 31px;
+            border-radius: 50%;
+            width: 30px;
             margin-left: 8px;
-            padding: 2px;
             vertical-align: middle;
         }
-
-        .nameButton {
-            vertical-align: middle;
-        }
-
+        
         .configUser {
             padding: 0;
         }
+        
+        .dropdow-menu-item {
+			min-height: 0;
+        	margin-top: 5px;
+        	padding: 5px;
+            cursor: pointer;
+            box-shadow: none;
+        }
+        
+        .dropdow-menu-item .icon {
+        }
+        
+        .dropdow-menu-item .text {
+        }
+        
     </style>
 
     <template>
@@ -98,10 +102,12 @@
                 <img class="avatar" src$="{{user.avatar}}"/>
             </div>
             <paper-menu class="dropdown-content shadow-elevation-8dp menu">
-                <paper-material class="userName">{{user.name}}</paper-material>
-                <paper-item on-tap="logout">
-                    <iron-icon class="logout" icon="power-settings-new"></iron-icon>
-                    Logout
+                <paper-material class="dropdow-menu-item">{{user.name}}</paper-material>
+                <paper-item class="dropdow-menu-item" on-tap="logout">
+                    <iron-icon class="icon" class="logout" icon="power-settings-new"></iron-icon>
+                    <span class="text">
+                    	Logout
+                    </span>
                 </paper-item>
             </paper-menu>
         </paper-menu-button>
