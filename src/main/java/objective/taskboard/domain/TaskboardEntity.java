@@ -36,8 +36,6 @@ public abstract class TaskboardEntity {
     @Id
     @Getter
     @Column(name = "ID")
-//    @SequenceGenerator(name = "taskboard_seq", sequenceName = "taskboard_seq", allocationSize = 1)
-//    @GeneratedValue(strategy = SEQUENCE, generator = "taskboard_seq")
     @GeneratedValue(strategy = GenerationType.AUTO)
     protected Long id;
 

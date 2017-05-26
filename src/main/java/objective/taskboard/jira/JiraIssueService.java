@@ -87,21 +87,6 @@ public class JiraIssueService {
 
     public List<Issue> searchAll() {
         return searchIssues(null);
-//=======
-//		stopWatch.stop();
-//		
-//		stopWatch.start("jiraService.searchIssues");
-//		List<com.atlassian.jira.rest.client.api.domain.Issue> searchIssues = jiraService.searchIssues(createJql(configs));
-//		stopWatch.stop();
-//		
-//		stopWatch.start("jiraIssue -> taskboard issue");
-//		List<Issue> issues = issueConverter.convert(searchIssues);
-//		stopWatch.stop();
-//		
-//		LOGGER.info(stopWatch.prettyPrint());
-//		
-//		return issues;
-//>>>>>>> Stashed changes
     }
 
     private List<Issue> searchIssues(String additionalJqlCondition) {
