@@ -1,9 +1,9 @@
 <!--
   [LICENSE]
   Taskboard
-  - - -
+  ---
   Copyright (C) 2015 - 2016 Objective Solutions
-  - - -
+  ---
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU Affero General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
@@ -39,7 +39,7 @@
                       on-iron-signal-show-details="showDetails"
                       on-iron-signal-update-user-preferences="checkIssuesInvalidTeam"
                       on-iron-signal-level-config-changed="checkIssuesInvalidTeam"
-                      on-iron-signal-search-filter-changed="searchFilterChanged"></iron-signals>
+                      on-iron-signal-search-filter-changed="checkIssuesInvalidTeam"></iron-signals>
         <div id="lane-container" class="fit layout vertical board">
             <template id="levels" is="dom-repeat" items="{{conf}}" as="level">
                 <template is="dom-if" if="{{showLevel(level.showLevel, lastLaneUpdate)}}">
@@ -181,11 +181,6 @@
                             issuesInvalidTeam.push(issue.issueKey + ": " + issue.usersTeam);
                     });
                     return issuesInvalidTeam;
-                },
-
-                searchFilterChanged: function(event, data) {
-                    searchFilter.set(data.query);
-                    this.checkIssuesInvalidTeam();
                 }
             });
         })();

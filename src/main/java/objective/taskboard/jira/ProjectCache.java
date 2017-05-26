@@ -25,13 +25,11 @@ import static java.util.stream.Collectors.toMap;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
-
-import com.atlassian.jira.rest.client.api.domain.BasicProject;
-import com.google.common.collect.Lists;
 
 import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.config.LoggedInUserKeyGenerator;
@@ -49,23 +47,24 @@ class ProjectCache {
     @Autowired
     private JiraEndpointAsLoggedInUser jiraEndpointAsUser;
 
-
     @Cacheable(cacheNames=CacheConfiguration.PROJECTS, keyGenerator=LoggedInUserKeyGenerator.NAME)
     public Map<String, Project> getVisibleProjects() {
+        List<ProjectFilterConfiguration> configuredProjects = projectFilterConfiguration.getProjects();
 
-        Map<String, ProjectFilterConfiguration> configuredTeamProjects = projectFilterConfiguration.getProjects()
+        Map<String, com.atlassian.jira.rest.client.api.domain.Project> configuredJiraProjectsToUser = configuredProjects
                 .stream()
-                .collect(toMap(ProjectFilterConfiguration::getProjectKey, p -> p));
+                .map(pf -> getJiraProjectByKeyAsUser(pf.getProjectKey()))
+                .filter(Objects::nonNull)
+                .collect(toMap(com.atlassian.jira.rest.client.api.domain.Project::getKey, p -> p));
 
-        return getProjectsVisibleToUserInJira()
+        return configuredProjects
                 .stream()
-                .filter(bp -> configuredTeamProjects.containsKey(bp.getKey()))
-                .map(bp -> Project.from(bp, configuredTeamProjects.get(bp.getKey())))
+                .filter(pf -> configuredJiraProjectsToUser.containsKey(pf.getProjectKey()))
+                .map(pf -> Project.from(configuredJiraProjectsToUser.get(pf.getProjectKey()), pf))
                 .collect(toMap(Project::getKey, p -> p));
     }
 
-    private List<BasicProject> getProjectsVisibleToUserInJira() {
-        Iterable<BasicProject> projects = jiraEndpointAsUser.executeRequest(client -> client.getProjectClient().getAllProjects());
-        return Lists.newArrayList(projects);
+    private com.atlassian.jira.rest.client.api.domain.Project getJiraProjectByKeyAsUser(String projectKey) {
+        return jiraEndpointAsUser.executeRequest(client -> client.getProjectClient().getProject(projectKey));
     }
 }

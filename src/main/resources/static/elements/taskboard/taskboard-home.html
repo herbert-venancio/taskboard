@@ -1,9 +1,9 @@
 <!--
   [LICENSE]
   Taskboard
-  - - -
+  ---
   Copyright (C) 2015 - 2016 Objective Solutions
-  - - -
+  ---
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU Affero General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
@@ -108,6 +108,7 @@
             margin-left: 10px;
             position: relative;
             float: left;
+            width: 20%;
         }
 
         .visibility {
@@ -195,7 +196,7 @@
                     </paper-toast>
                     <paper-material class="menu-header">
                         <div class="search">
-                            <board-search></board-search>
+                            <board-search releases="{{releases}}"></board-search>
                         </div>
                         <div class="visibility">
                             <config-visibility></config-visibility>
@@ -265,6 +266,11 @@
                     errorMessage: {
                         type: String,
                         value: "An unexpected error ocurred. Could not save your preferences on server."
+                    },
+
+                    releases: {
+                        type: Array,
+                        notify: true
                     }
                 },
 
@@ -278,6 +284,7 @@
                         taskboard.setAspectFilters(data);
                         taskboard.applyFilterPreferences();
                         this.aspectsFilter = taskboard.getAspectFilters();
+                        this.retrieveReleases();
                     }, this));
                 },
 
@@ -374,6 +381,12 @@
                         toastError.open();
                     else
                         toastError.close();
+                },
+
+                retrieveReleases: function() {
+                    $.get("/api/versions", $.proxy(function(data) {
+                        this.releases = [""].concat(data);
+                    }, this));
                 }
             });
         })();

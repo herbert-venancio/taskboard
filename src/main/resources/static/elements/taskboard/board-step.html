@@ -1,9 +1,9 @@
 <!--
   [LICENSE]
   Taskboard
-  - - -
+  ---
   Copyright (C) 2015 - 2016 Objective Solutions
-  - - -
+  ---
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU Affero General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
@@ -27,7 +27,7 @@
     <template>
         <iron-signals on-iron-signal-update-user-preferences="preferencesUpdated"
                       on-iron-signal-config-visibility-synthetic-changed="preferencesUpdated"
-                      on-iron-signal-search-filter-changed="preferencesUpdated"
+                      on-iron-signal-search-filter-changed="searchFilterChanged"
                       on-iron-signal-level-config-changed="preferencesUpdated"
                       on-iron-signal-hierarchical-filter-changed="preferencesUpdated"></iron-signals>
         <div id="board-step-{{parentLaneId}}-{{stepMetadata.id}}-{{team}}" class="wrap layout horizontal sortable-board-step" style="width: 100%">
@@ -109,6 +109,9 @@
                     idealIssueSize: {
                         type: Number,
                         value: 150
+                    },
+                    search: {
+                        type: Object
                     }
                 },
 
@@ -226,7 +229,7 @@
 
                 shouldShowIssue: function(issue) {
                     return this.doFiltersAllow(issue) && this.doPreferencesAllow(issue) &&
-                            (!searchFilter.get() || searchFilter.get() && this.searchFilterMatches(issue)) &&
+                            searchFilter.match(issue, this.search) &&
                             this.hierarchicalFilterMatches(issue);
                 },
 
@@ -271,41 +274,6 @@
                     return false;
                 },
 
-                searchFilterMatches: function(issue) {
-                    var query = searchFilter.get().toUpperCase();
-                    if (this.searchFilterMatch(issue.issueKey, query))
-                        return true;
-                    else if (this.searchFilterMatch(issue.assignee, query))
-                        return true;
-                    else if (this.searchFilterMatch(issue.subResponsaveis, query))
-                        return true;
-                    else if (this.searchFilterMatch(issue.summary, query))
-                        return true;
-                    else if (issue.customfields.release && this.searchFilterMatch(issue.customfields.release.value, query))
-                        return true;
-                    else if (this.searchFilterMatch(issue.usersTeam, query))
-                        return true;
-                    else if (this.searchFilterMatch(issue.labels, query))
-                        return true;
-                    else if (this.searchFilterMatch(issue.components, query))
-                        return true;
-
-                    return false;
-                },
-
-                searchFilterMatch: function (attribute, search) {
-                    if (!Array.isArray(attribute))
-                        attribute = [ attribute ];
-
-                    for (var index in attribute) {
-                        var value = attribute[index];
-                        if (value && value.toUpperCase().indexOf(search) !== -1)
-                            return true;
-                    }
-
-                    return false;
-                },
-
                 hierarchicalFilterMatches: function(issue) {
                     return taskboard.getRootHierarchicalFilter() && issue.hierarchyMatch || !taskboard.getRootHierarchicalFilter();
                 },
@@ -325,6 +293,11 @@
                 preferencesUpdated: function() {
                     this.filter();
                     this.lastPreferenceUpdate = new Date();
+                },
+
+                searchFilterChanged: function(event, data) {
+                    this.search = data;
+                    this.preferencesUpdated();
                 }
 
             });

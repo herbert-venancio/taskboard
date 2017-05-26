@@ -1,9 +1,9 @@
 /*-
  * [LICENSE]
  * Taskboard
- * - - -
+ * ---
  * Copyright (C) 2015 - 2016 Objective Solutions
- * - - -
+ * ---
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -20,14 +20,59 @@
  */
 
 function SearchFilter() {
-    var search;
+    this.match = function(issue, search) {
+        if (!issue || !search)
+            return true;
 
-    this.set = function(s) {
-        search = s;
+        if (matchByString(issue, search.query) &&
+             filterByRelease(issue, search.release))
+            return true;
     };
 
-    this.get = function() {
-        return search;
+    var matchByString = function(issue, searchString) {
+        if (!searchString)
+            return true;
+
+        var searchUpperCase = searchString.toUpperCase();
+        if (matchByAttribute(issue.issueKey, searchUpperCase))
+            return true;
+        else if (matchByAttribute(issue.assignee, searchUpperCase))
+            return true;
+        else if (matchByAttribute(issue.subResponsaveis, searchUpperCase))
+            return true;
+        else if (matchByAttribute(issue.summary, searchUpperCase))
+            return true;
+        else if (issue.customfields.release && matchByAttribute(issue.customfields.release.value, searchUpperCase))
+            return true;
+        else if (matchByAttribute(issue.usersTeam, searchUpperCase))
+            return true;
+        else if (matchByAttribute(issue.labels, searchUpperCase))
+            return true;
+        else if (matchByAttribute(issue.components, searchUpperCase))
+            return true;
+
+        return false;
+    };
+
+    var matchByAttribute = function(attribute, search) {
+        if (!Array.isArray(attribute))
+            attribute = [ attribute ];
+
+        for (var index in attribute) {
+            var value = attribute[index];
+            if (value && value.toUpperCase().indexOf(search) !== -1)
+                return true;
+        }
+        return false;
+    };
+
+    var filterByRelease = function(issue, release) {
+        if (!release)
+            return true;
+
+        var issueRelease = issue.customfields.release;
+        return issueRelease && issueRelease.value &&
+               issueRelease.value.toUpperCase() == release.toUpperCase();
     };
 }
 
