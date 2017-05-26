@@ -30,9 +30,13 @@
             margin-top: 7px;
         }
 
-        paper-dropdown-menu.custom {
+        .dropdown-release {
             float: right;
-            width: 30%;
+            width: 35%;
+        }
+
+        paper-dropdown-menu.custom {
+            width: 80%;
             margin-left: 10px;
             margin-top: 5px;
             --paper-input-container-underline: { display: none; };
@@ -50,6 +54,16 @@
             --paper-item-min-height: 30px;
             font-size: 14px;
          }
+
+         paper-icon-button {
+            float: right;
+            padding: 0;
+            width: 15px;
+            height: 15px;
+            color: #D7DBF1;
+            margin-top: 14px;
+            position: absolute;
+         }
     </style>
 
     <template>
@@ -57,14 +71,17 @@
         <input id="searchIssues" class="input-search" value="{{query::input}}" type="search"
                placeholder="Search Issues" results="5" autocomplete="off"/>
         <template is="dom-if" if="{{hasReleases(releases)}}">
-            <paper-dropdown-menu class="custom" id="searchRelease" label="Release" no-label-float
-                                 on-value-changed="searchIssue">
-                <paper-listbox class="dropdown-content" attr-for-selected="value" selected="{{releaseSelected}}">
-                    <template is="dom-repeat" items="{{releases}}" as="itemRelease">
-                        <paper-item value="{{itemRelease}}">{{itemRelease}}</paper-item>
-                    </template>
-                </paper-listbox>
-            </paper-dropdown-menu>
+            <div class="dropdown-release">
+                <paper-dropdown-menu class="custom" id="searchRelease" label="Release" no-label-float
+                                     on-value-changed="searchIssue">
+                    <paper-listbox class="dropdown-content" attr-for-selected="value" selected="{{releaseSelected}}">
+                        <template is="dom-repeat" items="{{releases}}" as="itemRelease">
+                            <paper-item value="{{itemRelease}}">{{itemRelease}}</paper-item>
+                        </template>
+                    </paper-listbox>
+                </paper-dropdown-menu>
+                <paper-icon-button id="clearReleaseButton" icon="clear" on-click="clearRelease" hidden></paper-icon-button>
+            </div>
         </template>
     </template>
 
@@ -94,6 +111,7 @@
                 },
 
                 searchIssue: function () {
+                    clearReleaseButton.hidden = this.releaseSelected == "" ? true : false;
                     this.fire('iron-signal', {name: 'search-filter-changed',
                                               data: { query: this.query , release: this.releaseSelected }});
                 },
@@ -105,6 +123,10 @@
 
                 hasReleases: function(releases) {
                     return releases && releases.length > 0;
+                },
+
+                clearRelease: function() {
+                    this.releaseSelected = "";
                 }
             });
         })();
