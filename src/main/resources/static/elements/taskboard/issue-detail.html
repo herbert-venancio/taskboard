@@ -54,6 +54,7 @@
         paper-button.headerLink {
             margin: 0px;
             padding: 0px;
+            font-weight: normal;
         }
         
         .issue-key-link {
@@ -83,9 +84,17 @@
         	margin-left: 10px;
         	margin-right: 10px;
         }
+        
+        .column-block.top-bottom-alignment {
+			display: flex;
+			flex-direction: column;
+        }
+        
+        .column-block.top-bottom-alignment .sub-content {
+			margin-top: auto;
+        }
 
         .sub-content {
-            min-height: 25px;
             font-size: 15px;
         }
 
@@ -153,15 +162,20 @@
         }
 
         paper-button.subtaskLink {
-            font-size: 15px;
-            font-weight: 600;
-            color: #3B50C7;
-            margin: 0px;
-            padding: 5px;
+		    font-size: inherit;
+		    font-weight: 600;
+		    color: #3B50C7;
+		    margin: 0 5px 0 0;
+		    padding: 0;
+		    display: inline;
         }
 
         paper-material.subtaskPanel {
-            height: 30px;
+        	margin-top: 5px;
+        }
+        
+        paper-material.subtaskPanel:first-child {
+        	margin-top: 0;
         }
 
         paper-material.highlightPanel {
@@ -188,13 +202,13 @@
         }
         
         #timetracking_content {
-        	min-height: 75px;
+        	height: 40px;
         }
 
         #timetracking_content paper-progress {
             width: 100%;
             --paper-progress-height: 10px;
-            margin-top: 10px;
+            margin-top: 5px;
         }
 
         #modal {
@@ -267,6 +281,7 @@
         }
 
         .scroll {
+        	padding: 10px;
             overflow: auto;
             overflow-x: hidden;
             max-height: 150px;
@@ -291,7 +306,7 @@
         	text-align: center;
         }
         
-		.custom-footer-buttons paper-spinner[aria-hidden=true] {
+		paper-spinner[aria-hidden=true] {
 		    display: none;
 		}
         
@@ -336,16 +351,16 @@
 		                	<template is="dom-if" if="{{item.parent}}">
 			                	<span class="parent-key">
 									<span class="arrow">></span>
-									<paper-button class="parentLink" on-tap="openJira">{{item.parent}}</paper-button>
+									<paper-button class="parentLink" on-tap="openJira" data-issue-key$="{{item.parent}}">{{item.parent}}</paper-button>
 			                	</span>
 		                	</template>
 		                	<span class="issue-key">
 		                		<span class="arrow">></span>
-		                		<paper-button class="headerLink issue-key-link" on-tap="openJira">{{item.issueKey}}</paper-button>
+		                		<paper-button class="headerLink issue-key-link" on-tap="openJira" data-issue-key$="{{item.issueKey}}">{{item.issueKey}}</paper-button>
 		                	</span>         
 	                    </div>
 	                    <div class="card-header-title">
-	                    	<paper-button class="headerLink" on-tap="openJira">{{item.summary}}</paper-button>
+	                    	<paper-button class="headerLink" on-tap="openJira" data-issue-key$="{{item.issueKey}}">{{item.summary}}</paper-button>
 	                    </div>
                     </div>
                     <div class="card-header-buttons">
@@ -429,7 +444,7 @@
 						<div class="content-row">
 	                        
 							<template is="dom-repeat" items="{{item.customfields.sizes}}" as="size">
-								<div class="column-block">
+								<div class="column-block top-bottom-alignment">
 							    	<div class="sub-header">{{size.name}}</div>
 							    	<div class="sub-content">
 							    		{{size.value}}
@@ -491,14 +506,14 @@
                                     <div class="scroll">
                                         <template is="dom-repeat" items="{{subtasks}}" as="subtask">
                                             <paper-material class="subtaskPanel" elevation="0">
-                                                <paper-button class="subtaskLink" on-tap="openJira">
+                                                <paper-button class="subtaskLink" on-tap="openJira"  data-issue-key$="{{subtask.issueKey}}">
                                                     {{subtask.issueKey}}
                                                 </paper-button>
                                                 {{subtask.summary}}
                                             </paper-material>
                                         </template>
+                                        <paper-spinner id="loadSubtasks" active alt="Loading..."></paper-spinner>
                                     </div>
-                                    <paper-spinner id="loadSubtasks" active alt="Loading..."></paper-spinner>
                                 </div>
 	                        </div>
 	                        
@@ -985,7 +1000,9 @@
                 },
 
                 openJira: function (event) {
-                    var win = window.open(window.urlJira + '/browse/' + $(event.target).text().trim(), '_blank');
+                	event.stopPropagation();
+                	var issueKey = event.target.getAttribute('data-issue-key');
+                    var win = window.open(window.urlJira + '/browse/' + issueKey, '_blank');
                 },
 
                 clearProperties: function () {

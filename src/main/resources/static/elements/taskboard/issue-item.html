@@ -249,7 +249,7 @@
 	                        </div>
 	                    </template>
 	
-	                    <div class="key" on-tap="openJira" title="Open in jira">{{item.issueKey}}</div>
+	                    <div class="key" on-tap="openJira" data-issue-key$="{{item.issueKey}}" title="Open in jira">{{item.issueKey}}</div>
 	                </div>
 	                <div class="icons">
 	                    <img id="issueTypeIcon" class="icon-small icon-issuetype"
@@ -308,6 +308,11 @@
                 openJira: function (event) {
                     event.stopPropagation();
                     window.open(window.urlJira + '/browse/' + this.item.issueKey, '_blank');
+                },
+                openJira: function (event) {
+                	event.stopPropagation();
+                	var issueKey = event.target.getAttribute('data-issue-key');
+                    var win = window.open(window.urlJira + '/browse/' + issueKey, '_blank');
                 },
 
                 hierarchyFilterClick: function(event) {
