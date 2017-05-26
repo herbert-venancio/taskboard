@@ -41,7 +41,7 @@ public class JiraMockServer {
     public static void begin() { 
         Thread thread = new Thread(JiraMockServer::defineRoutesAndStart);
         thread.setDaemon(true);
-        thread.start();;
+        thread.start();
     }
     
     public static void defineRoutesAndStart() {
