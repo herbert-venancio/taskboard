@@ -96,6 +96,7 @@ public class JiraSearchService {
                     e.printStackTrace();
                 }
             }
+            log.debug("⬣⬣⬣⬣⬣  searchIssues complete");
             return listIssues;
         } catch (RestClientException e) {
             if (HttpStatus.FORBIDDEN.value() == e.getStatusCode().or(0))

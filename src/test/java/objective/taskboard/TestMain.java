@@ -1,11 +1,11 @@
-package objective.taskboard.domain;
+package objective.taskboard;
 
 /*-
  * [LICENSE]
  * Taskboard
- * - - -
- * Copyright (C) 2015 - 2016 Objective Solutions
- * - - -
+ * ---
+ * Copyright (C) 2015 - 2017 Objective Solutions
+ * ---
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -21,21 +21,18 @@ package objective.taskboard.domain;
  * [/LICENSE]
  */
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
-@Data
-@Entity
-@Table(name = "user_preferences")
-@EqualsAndHashCode(callSuper = true)
-public class UserPreferences extends TaskboardEntity {
-
-    private String jiraUser;
-
-    @Column(length = 2000)
-    private String preferences;
+@EnableAutoConfiguration
+@EnableScheduling
+@SpringBootApplication
+public class TestMain {
+    public static void main(String[] args) {
+        JiraMockServer.begin();
+        SpringApplication.run(TestMain.class, args);
+    }
 
 }

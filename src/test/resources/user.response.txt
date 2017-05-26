@@ -1,0 +1,29 @@
+{
+  "self": "http://54.68.128.117:8100/rest/api/2/user?username=taskboard",
+  "key": "taskboard",
+  "name": "taskboard",
+  "avatarUrls": {
+    "16x16": "http://54.68.128.117:8100/secure/useravatar?size=xsmall&avatarId=11670",
+    "24x24": "http://54.68.128.117:8100/secure/useravatar?size=small&avatarId=11670",
+    "32x32": "http://54.68.128.117:8100/secure/useravatar?size=medium&avatarId=11670",
+    "48x48": "http://54.68.128.117:8100/secure/useravatar?avatarId=11670"
+  },
+  "displayName": "Taskboard",
+  "active": true,
+  "timeZone": "America/Sao_Paulo",
+  "locale": "en_US",
+  "groups": {
+    "size": 1,
+    "items": [
+      {
+        "name": "jira-users",
+        "self": "http://54.68.128.117:8100/rest/api/2/group?groupname=jira-users"
+      }
+    ]
+  },
+  "applicationRoles": {
+    "size": 1,
+    "items": []
+  },
+  "expand": "groups,applicationRoles"
+}

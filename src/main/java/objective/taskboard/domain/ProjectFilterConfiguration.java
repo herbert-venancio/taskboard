@@ -38,18 +38,11 @@ import lombok.Getter;
 @Entity
 @Table(name = "project_filter_configuration")
 public class ProjectFilterConfiguration {
-
+    private Long id;
+    
     @Id
     @Getter
     private String projectKey;
-    
-//    @ElementCollection(fetch=FetchType.EAGER)
-//    @CollectionTable(
-//          name="ProjectTeam",
-//          joinColumns=@JoinColumn(name="project_key")
-//    )
-//    @Column(name="team_id")
-//    private List<Long> teamsIds;
 
     @OneToMany(fetch=FetchType.EAGER)
     @JoinColumn(name="projectKey")
