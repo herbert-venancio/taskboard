@@ -21,20 +21,24 @@
 <dom-module id="board-search">
 
     <style is="custom-style">
+    
+    	:host {
+    		display: flex;
+			align-items: center;
+    	}
+    
         .input-search {
             border-radius: 3px;
             height: 30px;
-            width: 65%;
+            width: 200px;
+            padding: 0 10px;
             border: none;
-            background: #D7DBF1;
-            margin-top: 7px;
+            background: #DDD;
         }
 
         paper-dropdown-menu.custom {
-            float: right;
-            width: 30%;
+        	width: 100px;
             margin-left: 10px;
-            margin-top: 5px;
             --paper-input-container-underline: { display: none; };
             --paper-input-container-label: { font-size: 14px; };
             --paper-input-container-input: { font-size: 14px; };
@@ -57,7 +61,7 @@
         <input id="searchIssues" class="input-search" value="{{query::input}}" type="search"
                placeholder="Search Issues" results="5" autocomplete="off"/>
         <template is="dom-if" if="{{hasReleases(releases)}}">
-            <paper-dropdown-menu class="custom" id="searchRelease" label="Release" no-label-float
+            <paper-dropdown-menu class="releases-dropdown custom" id="searchRelease" label="Release" no-label-float
                                  on-value-changed="searchIssue">
                 <paper-listbox class="dropdown-content" attr-for-selected="value" selected="{{releaseSelected}}">
                     <template is="dom-repeat" items="{{releases}}" as="itemRelease">

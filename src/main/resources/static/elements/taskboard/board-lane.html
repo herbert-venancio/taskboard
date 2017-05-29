@@ -20,9 +20,13 @@
   -->
 <dom-module id="board-lane">
     <style>
-
         :host {
             width: 100%;
+        }
+        
+        .ui-sortable-placeholder {
+        	background: #000;
+        	opacity: 0.8;
         }
 
         .header {
@@ -30,25 +34,25 @@
         }
 
         .header-lane {
-            background-color: #3366CC;
+            background-color: #333;
             display: flex;
         }
 
         .label {
-            font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif;
             color: white;
-            margin: auto;
+            margin: 0 auto;
             white-space: nowrap;
         }
 
         .label-lane {
-            padding: 6px;
-            font-size: 14px;
-            font-weight: 900;
+            padding: 3px;
+            font-size: 12px;
+            text-transform: uppercase;
         }
 
         .label-stage {
-            height: 26px;
+            height: 25px;
+            padding: 0 10px;
             font-size: 12px;
             font-weight: 500;
             text-align: left;
@@ -64,15 +68,30 @@
 
         .wrapper {
             box-shadow: 0 4px 9px -3px rgba(0,0,0,0.75);
+            opacity: 0.9;
         }
 
         .table-wrapper {
+        	background: #555;
+        	height: 300px;
             overflow: auto;
         }
 
         .counter {
-            margin-left: 3px;
-            margin-right: 3px;
+        	background: transparent;
+        	padding: 0;
+            margin-right: 5px;
+            display: block;
+            float: left;
+            font-size: inherit;
+            color: inherit;
+            border-radius: 0;
+            vertical-align: middle;
+            font-weight: inherit;
+        }
+        
+        .name {
+        	
         }
 
         .table-body {
@@ -92,20 +111,21 @@
         }
 
         .cell {
+        	padding: 2px 2px 5px 2px;
             vertical-align: top;
             border-bottom: 1px solid;
-            border-color: #ededed;
+            border-color: #666;
         }
 
         .team-cell {
-            font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        	background: #EFEFEF;
+        	border-color: #DDD;
             font-size: 14px;
-            padding: 6px;
+            padding: 10px 8px;
         }
 
         .step-cell {
-            border-left: 1px solid;
-            border-color: #ededed;
+            border-left: 1px solid #666;
         }
         
         .issue-item {
@@ -146,7 +166,9 @@
                         <template is="dom-repeat" items="{{metadata.stages}}" as="stage">
                             <th class="label label-stage" colspan$="{{getColspan(stage)}}" style$="background-color:{{stage.color}}">
                                 <inline-badge class="counter" value="{{getStageIssueCount(stage, issues, lastPreferenceUpdate)}}"></inline-badge>
-                                {{stage.stage}}
+                                <span class="name">
+                                	{{stage.stage}}
+                                </span>
                             </th>
                         </template>
                     </tr>
@@ -307,7 +329,7 @@
 
                 getWrapperHeight: function(weight) {
                     var laneHeight = taskboard.getLaneContainerHeight() * weight / taskboard.getTotalLaneWeight();
-                    var laneLabelHeight = 28;
+                    var laneLabelHeight = 20;
                     return Math.max(laneHeight - laneLabelHeight, 0);
                 },
 

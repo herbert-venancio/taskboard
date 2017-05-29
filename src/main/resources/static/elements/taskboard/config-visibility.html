@@ -22,39 +22,61 @@
 
     <style>
         .customViews {
-            float: left;
-            margin-left: 10px;
+        	display: flex;
         }
-
-        .iconsSynthetic {
-            color: #D7DBF1;
-            background: #303f9f;
-            border-radius: 5px 5px 5px 5px;
-            padding: 4px;
+        
+        .customViews-icon {
             width: 30px;
-            height: 34px;
-            --paper-icon-button-ink: {
-                border-radius: 5px 5px 5px 5px;
-            }
+            height: 30px;
+            padding: 4px;
+            margin-left: 5px;
+            display: block;
         }
-
-        .iconsSynthetic:hover {
+        
+        .customViews-icon:first-child {
+        	margin-left: 0px;
+        }
+        
+        .customViews-icon:hover {
+        	background: #CCC;
+            opacity: 0.8;
+            
             -webkit-transition: all .5s;
             -moz-transition: all .5s;
             transition: all .5s;
-            opacity: 0.9;
-            background: rgba(255, 255, 255, 0.27);
-            border-radius: 3px;
+        }
+        
+        .customViews-icon.active {
+        	background: #CCC;
+        }
+
+        .iconsAnalytics {
+        }
+
+        .iconsAnalytics:hover {
+        }
+        
+        .iconsAnalytics.active {
+        }
+
+        .iconsSynthetic {
+        }
+
+        .iconsSynthetic:hover {
+        }
+        
+        .iconsSynthetic.active {
         }
 
     </style>
 
     <template>
         <div class="customViews">
-            <paper-icon-button class="iconsSynthetic"
-                               style$="{{getStyleSynthetic(visibilityConfiguration.showSynthetic)}}"
+        
+            <paper-icon-button class$="customViews-icon iconsSynthetic {{getStyleSynthetic(visibilityConfiguration.showSynthetic)}}"
                                icon="image:grain" title="Synthetic View"
                                on-tap="toggleVisibility"></paper-icon-button>
+                               
         </div>
     </template>
 
@@ -102,7 +124,7 @@
 
                 getStyleSynthetic: function(show) {
                     if (show)
-                        return 'box-shadow: inset 2px 2px 2px #161A35;';
+                        return 'active';
                     else
                         return '';
                 }

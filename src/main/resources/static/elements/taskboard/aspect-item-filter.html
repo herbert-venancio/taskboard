@@ -21,7 +21,11 @@
 <dom-module id="aspect-item-filter">
 
     <style>
-        .title:hover {
+        .config-item-title {
+        	padding: 0 5px;
+        }
+        
+        .config-item-title:hover {
             -webkit-transition: all .5s;
             -moz-transition: all .5s;
             transition: all .5s;
@@ -49,7 +53,7 @@
 
     <template>
         <iron-signals on-iron-signal-refresh-filter-teams="refreshFilterTeams"></iron-signals>
-        <paper-toolbar class="title" on-tap="collapseFilter">
+        <paper-toolbar class="config-item-title" on-tap="collapseFilter">
             <paper-checkbox id="checkAll"></paper-checkbox>
             <span>[[aspectItemFilter.description]]</span>
         </paper-toolbar>
@@ -57,8 +61,7 @@
             <paper-material class="layout vertical" elevation="0">
                 <template is="dom-repeat" items="{{aspectItemFilter.aspectsSubitemFilter}}" as="aspectSubitemFilter">
                     <template is="dom-if" if="{{isVisible(aspectSubitemFilter, notified)}}">
-                        <aspect-subitem-filter aspect-subitem-filter="{{aspectSubitemFilter}}" description="{{aspectItemFilter.description}}"
-                                               selected="{{aspectSubitemFilter.selected}}"></aspect-subitem-filter>
+                        <aspect-subitem-filter aspect-subitem-filter="{{aspectSubitemFilter}}" description="{{aspectItemFilter.description}}" selected="{{aspectSubitemFilter.selected}}"></aspect-subitem-filter>
                     </template>
                 </template>
             </paper-material>

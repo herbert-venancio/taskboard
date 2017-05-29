@@ -25,48 +25,76 @@
         }
 
         .card-custom {
-            --paper-card: {
-                width: 100%;
-                font-size: 12px;
-                padding: 5px;
-                margin-top: 5px;
-                padding-top: 10px;
-                min-height: 360px;
-            }
-        }
-
-        .column-block {
-            display: table-cell;
-            padding-left: 5px;
-            padding-right: 5px;
-            min-height: 40px;
+        	background: transparent;
+			width: 100%;
+			min-height: 360px;
+			padding: 20px;
+			margin: 0;
         }
 
         .half-column {
-            width: 47%;
         }
 
         .card-header-custom {
-            padding-bottom: 15px;
             width: 100%;
+            margin-bottom: 30px;
             font-size: 24px;
-            text-align: center;
+            display: flex;
+        }
+        
+        .card-header-breadcrumb {
+        	margin-bottom: 10px;
+        	font-size: 15px;
+        }
+        
+        .arrow {
+        	margin: 0 5px;
+        }
+        
+        paper-button.headerLink {
+            margin: 0px;
+            padding: 0px;
+            font-weight: normal;
+        }
+        
+        .issue-key-link {
+        	font-weight: 600;
         }
 
         .sub-header {
+        	line-height: normal;
+        	margin-bottom: 5px;
             font-size: 13px;
             font-weight: 600;
-            text-align: left;
-            max-width: 100px;
         }
 
         .content-row {
-            width: 100%;
-            display: table;
+            display: flex;
+            margin-top: 20px;
+            margin-left: -10px;
+            margin-right: -10px;
+        }
+        
+        .content-row:first-child {
+        	margin-top: 0;
+        }
+        
+        .column-block {
+        	flex: 1;
+        	margin-left: 10px;
+        	margin-right: 10px;
+        }
+        
+        .column-block.top-bottom-alignment {
+			display: flex;
+			flex-direction: column;
+        }
+        
+        .column-block.top-bottom-alignment .sub-content {
+			margin-top: auto;
         }
 
         .sub-content {
-            min-height: 25px;
             font-size: 15px;
         }
 
@@ -74,23 +102,29 @@
             margin-bottom: 12px;
         }
 
-        .buttons {
-            margin-right: 19px;
-            padding: 0;
-            width: auto !important;
-            height: auto;
-            display: initial;
-            float: right;
+        .card-header-buttons {
+        	padding: 0;
+            margin-left: auto;
         }
-
-        .buttons paper-button {
-            margin-bottom: 0;
-            left: 20px;
+        
+        .icon-text {
+        	display: flex;
+        	align-items: center;
+        }
+        
+        .icon-text .icon {
+		    margin-right: 5px;
+		    filter: initial;
+		    bottom: initial;
         }
 
         .assign-icon {
             height: 17px;
             width: 18px;
+        }
+        
+        paper-material, paper-button {
+        	box-shadow: none !important;
         }
 
         paper-button.colorful {
@@ -118,15 +152,6 @@
             background-color: rgba(66, 133, 244, 0.75);
         }
 
-        paper-button.headerLink {
-            margin-bottom: 0px;
-            padding: 4px;
-            padding-left: 0px;
-            font-size: 22px;
-            font-weight: 600;
-            color: #3B50C7;
-        }
-
         paper-button.parentLink {
             font-size: 15px;
             font-weight: 600;
@@ -137,15 +162,20 @@
         }
 
         paper-button.subtaskLink {
-            font-size: 15px;
-            font-weight: 600;
-            color: #3B50C7;
-            margin: 0px;
-            padding: 5px;
+		    font-size: inherit;
+		    font-weight: 600;
+		    color: #3B50C7;
+		    margin: 0 5px 0 0;
+		    padding: 0;
+		    display: inline;
         }
 
         paper-material.subtaskPanel {
-            height: 30px;
+        	margin-top: 5px;
+        }
+        
+        paper-material.subtaskPanel:first-child {
+        	margin-top: 0;
         }
 
         paper-material.highlightPanel {
@@ -169,26 +199,25 @@
         }
 
         .content-box {
-            background-color: #eee;
-            width: 100%;
-            min-height: 360px;
-            border-radius: 5px;
-            box-shadow: inset 1px 1px 1px #A5A1A1;
-            padding-top: 6px;
+        }
+        
+        #timetracking_content {
+        	height: 40px;
         }
 
         #timetracking_content paper-progress {
             width: 100%;
             --paper-progress-height: 10px;
-            margin-top: 10px;
+            margin-top: 5px;
         }
 
         #modal {
-            padding-left: 5px;
-            padding-right: 5px;
-            min-width: 500px;
-            min-height: 360px;
-            background-color: #ccc;
+		    background: transparent;
+		    min-width: 600px;
+		    min-height: 360px;
+		    margin: 0;
+		    display: block;
+		    font-family: inherit;
         }
 
         #loadCard {
@@ -228,7 +257,7 @@
         }
 
         .buttonClose {
-            margin-right: 3px;
+        	min-width: auto;
             display: inline;
             padding: 0;
             margin: 0;
@@ -241,11 +270,9 @@
             background-color: inherit;
             margin-top: 7px;
         }
-
-        .icon {
-            margin-left: 10%;
-            display: inline-block;
-            vertical-align: middle;
+        
+        .icon img {
+        	display: block;
         }
 
         .icon-small {
@@ -254,16 +281,35 @@
         }
 
         .scroll {
+        	padding: 10px;
             overflow: auto;
             overflow-x: hidden;
             max-height: 150px;
             max-width: 100%;
             background-color: white;
         }
-
-        .table-row {
-            display: table-row;
+        
+        .custom-footer {
+        	margin-top: 30px;
         }
+        
+        .custom-footer-buttons {
+        	display: flex;
+        	margin-left: -5px;
+        	margin-right: -5px;
+        }
+        
+        .custom-footer-buttons paper-button {
+        	padding: 5px 10px;
+        	margin: 0 5px;
+        	text-transform: none;
+        	text-align: center;
+        }
+        
+		paper-spinner[aria-hidden=true] {
+		    display: none;
+		}
+        
     </style>
 
     <template>
@@ -295,68 +341,94 @@
         <paper-dialog id="modal" entry-animation="scale-up-animation" exit-animation="fade-out-animation" with-backdrop
                       modal>
             <paper-card class="card-custom">
+            
                 <div class="card-header-custom">
-                    <div class="icon">
-                        <img id="issueTypeIcon" class="icon-small"
-                             title$="{{getIssueTypeName(item.type)}}" src$="{{getIssueTypeImage(item)}}"/>
+                	<div class="card-header-info">
+	                	<div class="card-header-breadcrumb">
+		                	<span class="project-title">
+		                		{{item.project}}
+		                	</span>
+		                	<template is="dom-if" if="{{item.parent}}">
+			                	<span class="parent-key">
+									<span class="arrow">></span>
+									<paper-button class="parentLink" on-tap="openJira" data-issue-key$="{{item.parent}}">{{item.parent}}</paper-button>
+			                	</span>
+		                	</template>
+		                	<span class="issue-key">
+		                		<span class="arrow">></span>
+		                		<paper-button class="headerLink issue-key-link" on-tap="openJira" data-issue-key$="{{item.issueKey}}">{{item.issueKey}}</paper-button>
+		                	</span>         
+	                    </div>
+	                    <div class="card-header-title">
+	                    	<paper-button class="headerLink" on-tap="openJira" data-issue-key$="{{item.issueKey}}">{{item.summary}}</paper-button>
+	                    </div>
                     </div>
-                    <paper-button class="headerLink" on-tap="openJira">{{item.issueKey}}</paper-button>
-                    <div class="buttons">
+                    <div class="card-header-buttons">
                         <paper-button class="buttonClose" on-tap="clearProperties" dialog-confirm autofocus>
                             <iron-icon icon="clear"></iron-icon>
                         </paper-button>
                     </div>
-                    <template is="dom-if" if="{{issueBlocked(item)}}">
-                        <div>
-                            <iron-icon class="icon-blocked" icon="icons:block"></iron-icon>
-                            <span class="info">Blocked</span>
-                        </div>
-                    </template>
-                    <template is="dom-if" if="{{issueCancelada(item)}}">
-                        <div>
-                            <iron-icon class="icon-cancelada" icon="warning"></iron-icon>
-                            <span class="info">Canceled</span>
-                        </div>
-                    </template>
-                </div>
+				</div>
+                
                 <div class="content-box">
-                    <div class="content-row">
-                        <div class="column-block half-column">
-                            <div class="sub-header">Issue type</div>
-                            <div class="sub-content">
-                                <span>{{getIssueTypeName(item.type)}}</span>
-                            </div>
-                        </div>
-                        <div class="column-block half-column">
+                
+                	<div class="content-row">
+                	
+	                    <div class="column-block issue-type">
+	                    	<div class="sub-header">Issue type</div>
+	                    	<div class="icon-text">
+								<div class="icon">
+			                        <img id="issueTypeIcon" class="icon-small"
+			                             title$="{{getIssueTypeName(item.type)}}" src$="{{getIssueTypeImage(item)}}"/>
+			                    </div>
+			                    <div class="text">
+			                    	{{getIssueTypeName(item.type)}}
+			                    </div>
+		                    </div>
+	                    </div>
+	                    
+	                    <template is="dom-if" if="{{issueBlocked(item)}}">
+	                        <div class="column-block item-icon-text blocked">
+	                        	<div class="sub-header">Blocked</div>
+	                        	<div class="icon-text">
+	                            	<iron-icon class="icon icon-blocked icon-small" icon="icons:block"></iron-icon>
+				                    <div class="text">
+				                    	Blocked
+				                    </div>
+	                            </div>
+	                        </div>
+	                    </template>
+	                    
+	                    <template is="dom-if" if="{{issueCancelada(item)}}">
+	                        <div class="column-block item-icon-text-canceled">
+	                        	<div class="sub-header">Canceled</div>
+	                        	<div class="icon-text">
+	                            	<iron-icon class="icon icon-cancelada icon-small" icon="warning"></iron-icon>
+				                    <div class="text">
+				                    	Canceled
+				                    </div>
+	                            </div>
+	                        </div>
+	                    </template>
+	                    
+                        <div class="column-block">
                             <div class="sub-header">Status</div>
                             <div class="sub-content horizontal layout">
                                 <paper-material class="highlightPanel">{{getStatusName(item.status)}}</paper-material>
                             </div>
                         </div>
-                    </div>
-                    <div class="content-row">
+                        
                         <div class="column-block half-column">
-                            <div class="sub-header">Project</div>
+                            <div class="sub-header">Class of Service</div>
                             <div class="sub-content">
-                                <span>{{item.project}}</span>
+                                {{item.customfields.classeDeServico}}
                             </div>
                         </div>
-                        <div class="column-block half-column">
-                            <div class="sub-header">Parent</div>
-                            <div class="sub-content">
-                                <paper-button class="parentLink" on-tap="openJira">{{item.parent}}</paper-button>
-                            </div>
-                        </div>
+	                    
                     </div>
+                    
                     <div class="content-row">
-                        <div class="column-block">
-                            <div class="sub-header">Summary</div>
-                            <div class="sub-content">
-                                <span>{{item.summary}}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="content-row">
+                    
                         <div class="column-block half-column">
                             <div class="sub-header">Assignees</div>
                             <div class="sub-content flex horizontal layout wrap">
@@ -365,89 +437,94 @@
                                 </template>
                             </div>
                         </div>
-                        <div class="column-block half-column">
-                            <div class="sub-header">Class of Service</div>
-                            <div class="sub-content">
-                                <span>{{item.customfields.classeDeServico}}</span>
-                            </div>
-                        </div>
+
                     </div>
+                    
+					<template is="dom-if" if="{{item.customfields.sizes.length}}">
+						<div class="content-row">
+	                        
+							<template is="dom-repeat" items="{{item.customfields.sizes}}" as="size">
+								<div class="column-block top-bottom-alignment">
+							    	<div class="sub-header">{{size.name}}</div>
+							    	<div class="sub-content">
+							    		{{size.value}}
+							    	</div>
+							    </div>
+							</template>
+							
+						</div>
+
+					</template>
+                    
                     <div class="content-row">
+                    
                         <div class="column-block">
                             <div class="sub-header">Cycle Time</div>
                             <div class="sub-content">
-                                <span>{{item.cycletime}} days</span>
+                                {{item.cycletime}} days
                             </div>
                         </div>
-                    </div>
-                    <div class="content-row">
-                        <template is="dom-if" if="{{item.customfields.sizes.length}}">
-                            <div class="table-row">
-                                <template is="dom-repeat" items="{{item.customfields.sizes}}" as="size">
-                                    <div class="column-block sub-header" style="padding-right: 10px">{{size.name}}</div>
-                                </template>
-                            </div>
-                            <div class="table-row">
-                                <template is="dom-repeat" items="{{item.customfields.sizes}}" as="size">
-                                    <div class="column-block sub-content">
-                                        <span>{{size.value}}</span>
-                                    </div>
-                                </template>
-                            </div>
-                        </template>
-                    </div>
-                    <template is="dom-if" if="{{item.customfields.additionalEstimatedHours}}">
-                        <div class="content-row">
+                        
+	                    <template is="dom-if" if="{{item.customfields.additionalEstimatedHours}}">
                             <div class="column-block">
                                 <div class="sub-header">{{item.customfields.additionalEstimatedHours.name}}</div>
                                 <div class="sub-content">
                                     <span>{{item.customfields.additionalEstimatedHours.value}}</span>
                                 </div>
                             </div>
-                        </div>
-                    </template>
-                    <template is="dom-if" if="{{item.customfields.release}}">
-                        <div class="content-row">
+	                    </template>
+	                    
+	                    <template is="dom-if" if="{{item.customfields.release}}">
                             <div class="column-block">
                                 <div class="sub-header">{{item.customfields.release.name}}</div>
                                 <div class="sub-content">
                                     <span>{{item.customfields.release.value}}</span>
                                 </div>
                             </div>
-                        </div>
-                    </template>
-                    <template is="dom-if" if="{{issueBlocked(item)}}">
-                        <div class="content-row">
-                            <div class="column-block">
-                                <div class="sub-header">Last Block Reason</div>
-                                <div class="sub-content">
-                                    <textarea disabled>{{item.customfields.lastBlockReason}}</textarea>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-                    <div class="content-row">
-                        <div class="column-block">
-                            <template is="dom-if" if="{{shouldShowSubtasks}}">
+	                    </template>
+	                    
+	                   	<template is="dom-if" if="{{issueBlocked(item)}}">
+	                        <div class="content-row">
+	                            <div class="column-block">
+	                                <div class="sub-header">Last Block Reason</div>
+	                                <div class="sub-content">
+	                                    <textarea disabled>{{item.customfields.lastBlockReason}}</textarea>
+	                                </div>
+	                            </div>
+	                        </div>
+	                    </template>
+                        
+                    </div>
+ 
+ 					<template is="dom-if" if="{{shouldShowSubtasks}}">
+ 					
+	                    <div class="content-row">
+	                    
+	                        <div class="column-block">
                                 <div class="sub-header">{{showHeaderSubtasks(item)}}</div>
                                 <div id="subtasks_content" class="sub-content">
                                     <div class="scroll">
                                         <template is="dom-repeat" items="{{subtasks}}" as="subtask">
                                             <paper-material class="subtaskPanel" elevation="0">
-                                                <paper-button class="subtaskLink" on-tap="openJira">
+                                                <paper-button class="subtaskLink" on-tap="openJira"  data-issue-key$="{{subtask.issueKey}}">
                                                     {{subtask.issueKey}}
                                                 </paper-button>
                                                 {{subtask.summary}}
                                             </paper-material>
                                         </template>
+                                        <paper-spinner id="loadSubtasks" active alt="Loading..."></paper-spinner>
                                     </div>
-                                    <paper-spinner id="loadSubtasks" active alt="Loading..."></paper-spinner>
                                 </div>
-                            </template>
-                        </div>
-                    </div>
-                    <div class="content-row">
-                        <template is="dom-if" if="{{shouldShowTimetracking}}">
+	                        </div>
+	                        
+	                    </div>
+	                    
+                    </template>
+                    
+                    <template is="dom-if" if="{{shouldShowTimetracking}}">
+                    
+                    	<div class="content-row">
+                    	
                             <div class="column-block">
                                 <div class="sub-header">Effort</div>
                                 <div id="timetracking_content" class="sub-content">
@@ -461,48 +538,56 @@
                                     <paper-spinner id="loadTimetracking" active alt="Loading..."></paper-spinner>
                                 </div>
                             </div>
-                        </template>
-                    </div>
-                    <div class="content-row">
-                        <div class="column-block">
-                            <div id="transitions_content" class="sub-content">
-                                <paper-button id="assignButton" raised class="colorful" on-tap="assignIssue"
-                                              title="Assign to me">
-                                    Assign to me
-                                </paper-button>
-
-                                <template is="dom-if" if="{{hasRecords(transitions)}}">
-                                    <template is="dom-repeat" items="{{transitions}}" as="transition">
-                                        <paper-button raised class="colorful" on-tap="requestTransition"
-                                                      data-args={{transition.name}}>{{transition.name}}
-                                        </paper-button>
-                                    </template>
-                                </template>
-
-                                <template is="dom-if" if="{{canBlock}}">
-                                    <paper-button id="blockButton" raised class="colorful" on-tap="block"
-                                                  title="Block">Block
-                                    </paper-button>
-                                </template>
-                                <template is="dom-if" if="{{canUnblock}}">
-                                    <paper-button id="unblockButton" raised class="colorful" on-tap="unblock"
-                                                  title="Unblock">Unblock
-                                    </paper-button>
-                                </template>
-
-                                <paper-spinner id="loadTransitions" active alt="Loading..."></paper-spinner>
-                                <!--
-                                                                 <template is="dom-if" if="{{shouldShowNewSubtask(item)}}">
-                                                                     <paper-button id="buttonNewSubTask" raised class="colorful" style='float: right'
-                                                                                   on-tap="openDialogNewTask"> Nova Sub-Task
-                                                                     </paper-button>
-                                                                 </template>
-                                -->
-                            </div>
-                        </div>
-                    </div>
+                            
+                    	</div>
+                    	
+                    </template>
+                    
                     <span class="error-message" hidden$="{{!errorMessage}}">{{errorMessage}}</span>
                 </div>
+                
+				<div class="custom-footer">
+                                            
+					<div id="transitions_content" class="custom-footer-buttons">
+						
+						<paper-button id="assignButton" raised class="colorful" on-tap="assignIssue" title="Assign to me">
+							Assign to me
+						</paper-button>
+						
+						<template is="dom-if" if="{{hasRecords(transitions)}}">
+							<template is="dom-repeat" items="{{transitions}}" as="transition">
+						    	<paper-button raised class="colorful" on-tap="requestTransition" data-args={{transition.name}}>
+						    		{{transition.name}}
+						        </paper-button>
+							</template>
+						</template>
+						
+						<template is="dom-if" if="{{canBlock}}">
+							<paper-button id="blockButton" raised class="colorful" on-tap="block" title="Block">
+								Block
+							</paper-button>
+						</template>
+						    
+						<template is="dom-if" if="{{canUnblock}}">
+							<paper-button id="unblockButton" raised class="colorful" on-tap="unblock" title="Unblock">
+								Unblock
+							</paper-button>
+						</template>
+						
+						<paper-spinner id="loadTransitions" active alt="Loading..."></paper-spinner>
+						    
+						<!--
+							<template is="dom-if" if="{{shouldShowNewSubtask(item)}}">
+							    <paper-button id="buttonNewSubTask" raised class="colorful" style='float: right'
+							                  on-tap="openDialogNewTask"> Nova Sub-Task
+							    </paper-button>
+							</template>
+						-->
+						                                                        
+                    </div>
+                    
+				</div>
+                
             </paper-card>
         </paper-dialog>
         <transition-required-modal id="transitionRequiredDialog"></transition-required-modal>
@@ -915,7 +1000,9 @@
                 },
 
                 openJira: function (event) {
-                    var win = window.open(window.urlJira + '/browse/' + $(event.target).text().trim(), '_blank');
+                	event.stopPropagation();
+                	var issueKey = event.target.getAttribute('data-issue-key');
+                    var win = window.open(window.urlJira + '/browse/' + issueKey, '_blank');
                 },
 
                 clearProperties: function () {
