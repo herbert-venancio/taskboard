@@ -73,7 +73,7 @@
         <template is="dom-if" if="{{hasReleases(releases)}}">
             <div class="dropdown-release">
                 <paper-dropdown-menu class="custom" id="searchRelease" label="Release" no-label-float
-                                     on-value-changed="searchIssue">
+                                     on-value-changed="searchIssue" on-keydown="searchReleaseOnKeyDown">
                     <paper-listbox class="dropdown-content" attr-for-selected="value" selected="{{releaseSelected}}">
                         <template is="dom-repeat" items="{{releases}}" as="itemRelease">
                             <paper-item value="{{itemRelease}}">{{itemRelease}}</paper-item>
@@ -111,7 +111,7 @@
                 },
 
                 searchIssue: function () {
-                    clearReleaseButton.hidden = this.releaseSelected == "" ? true : false;
+                    clearReleaseButton.hidden = this.releaseSelected ? false : true;
                     this.fire('iron-signal', {name: 'search-filter-changed',
                                               data: { query: this.query , release: this.releaseSelected }});
                 },
@@ -127,6 +127,11 @@
 
                 clearRelease: function() {
                     this.releaseSelected = "";
+                },
+
+                searchReleaseOnKeyDown: function(e) {
+                    if (e.key === 'Escape')
+                        this.clearRelease();
                 }
             });
         })();
