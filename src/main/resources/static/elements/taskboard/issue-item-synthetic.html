@@ -25,6 +25,10 @@
             margin-top: auto;
             margin-bottom: auto;
         }
+        
+        paper-material {
+        	cursor: pointer;
+        }
 
         .icons_s {
             display: flex;
@@ -62,38 +66,90 @@
             width: 40px;
         }
 
-        .icon-impedida {
+        .impedida {
             text-align: center;
-            color: #F45151;
+            color: #F78181;
             height: 100%;
             width: 100%;
             position: absolute;
+            background: rgba(0, 0, 0, .3);
             top: 0;
             left: 0;
-            opacity: 0.9;
+            -webkit-filter: drop-shadow(1px 1px 1px #616161);
+            filter: drop-shadow(1px 1px 1px #616161);
         }
 
         .cancelada {
-            opacity: 0.4;
+            text-align: center;
+            color: #FFCD00;
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            background: rgba(0, 0, 0, .3);
+            top: 0;
+            left: 0;
+            -webkit-filter: drop-shadow(1px 1px 1px #616161);
+            filter: drop-shadow(1px 1px 1px #616161);
+        }
+
+        .iconImpedidaCancelada {
+            width: 25px;
+            height: 25px;
+            display: block;
+		    position: absolute;
+		    top: 50%;
+		    left: 50%;
+		    transform: translate(-50%, -50%);
+        }
+
+        .image {
+            -webkit-mask-size: 100% auto;
+            -moz-mask-size: 100% auto;
+            -ms-mask-size: 100% auto;
+            mask-size: 100% auto;
+
+            -webkit-mask-position: center center;
+            -moz-mask-position: center center;
+            -ms-mask-position: center center;
+            mask-position: center center;
+
+            -webkit-mask-repeat: no-repeat;
+            -moz-mask-repeat: no-repeat;
+            -ms-mask-repeat: no-repeat;
+            mask-repeat: no-repeat;
+            
+            display: block;
+            text-indent: -9000px;
+            overflow: hidden;
         }
 
     </style>
 
 
     <template>
-        <paper-material style$="{{getIssueColor(item)}}" on-tap="opendialog" elevation="0">
+        <paper-material on-tap="opendialog" elevation="0">
             <div>
-                <iron-icon id$="[[item.issueKey]]" class$="{{getItemClass(item)}}"
-                           title="- {{item.issueKey}}&#010;- {{getIssueTypeName(item.type)}}&#010;- {{getStatusName(item.status)}}"
-                           src="{{getIssueTypeImage(item, parentTypeIcon)}}"></iron-icon>
+                <img id$="[[item.issueKey]]"
+                    title$="{{item.issueKey}} - {{getIssueTypeName(item.type)}} - {{getStatusName(item.status)}}"
+                    alt$="{{item.issueKey}} - {{getIssueTypeName(item.type)}} - {{getStatusName(item.status)}}"
+                    class$="image {{getItemClass(item)}}" id="[[item.issueKey]]"
+                    style$="{{getIssueColor(item)}} -webkit-mask-image:url({{getIssueTypeImage(item, parentTypeIcon)}}); -moz-mask-image:url({{getIssueTypeImage(item, parentTypeIcon)}}); mask-image:url({{getIssueTypeImage(item, parentTypeIcon)}});">
             </div>
+
             <template is="dom-if" if="{{issueImpedida(item)}}">
-                <div>
-                    <iron-icon class$="{{getItemClass(item)}} icon-impedida"
-                               title="- {{item.issueKey}}&#010;- {{getIssueTypeName(item.type)}}&#010;- Blocked issue. Last Block Reason: {{item.customfields.lastBlockReason}}"
-                               icon="icons:block"></iron-icon>
+                <div class="impedida">
+                    <iron-icon id="issueImpedidaIcon" class="iconImpedidaCancelada" icon="av:not-interested"
+                               title="Blocked issue. Last Block Reason: {{item.customfields.lastBlockReason}}"></iron-icon>
                 </div>
             </template>
+
+            <template is="dom-if" if="{{issueCancelada(item)}}">
+                <div class="cancelada">
+                    <iron-icon id="issueCanceladaIcon" class="iconImpedidaCancelada" icon="warning"
+                               title="Canceled issue"></iron-icon>
+                </div>
+            </template>
+
         </paper-material>
     </template>
 
@@ -167,7 +223,7 @@
                 },
 
                 getIssueColor: function (issue) {
-                    return 'filter: drop-shadow(1px 1px 0px ' + issue.color + ')';
+                    return 'background-color: ' + issue.color + ';';
                 },
 
                 getStatusName: function(statusId) {
