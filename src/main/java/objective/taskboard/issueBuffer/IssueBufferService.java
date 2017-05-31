@@ -29,6 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
@@ -114,7 +115,7 @@ public class IssueBufferService {
     	
     	boolean visible = false;
     	    	
-    	if (issue.getParent() == null || "".equals(issue.getParent()))
+    	if (StringUtils.isEmpty(issue.getParent()))
     		return true;
     	
     	Issue findFirst = issueBuffer.values().stream()
