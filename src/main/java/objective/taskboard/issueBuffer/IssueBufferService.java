@@ -106,8 +106,27 @@ public class IssueBufferService {
     public synchronized List<Issue> getIssues() {
         return issueBuffer.values().stream()
                 .filter(t -> projectService.isProjectVisible(t.getProjectKey()))
+                .filter(t -> isParentVisible(t))
                 .collect(toList());
     }
+
+    private boolean isParentVisible(Issue issue) {
+    	
+    	boolean visible = false;
+    	    	
+    	if (issue.getParent() == null || "".equals(issue.getParent()))
+    		return true;
+    	
+    	Issue findFirst = issueBuffer.values().stream()
+		    .filter(t -> t.getIssueKey().equals(issue.getParent()))
+		    .findFirst().orElse(null);
+    	
+    	if (findFirst != null)
+    		visible = isParentVisible(findFirst);
+
+		return visible;
+    	
+	}
 
     private synchronized void setIssues(List<Issue> issues) {
         issueBuffer.clear();
