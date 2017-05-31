@@ -29,20 +29,41 @@
         }
 
         paper-material {
-            width: 235px;
-            height: 200px;
-            border-radius: 10px;
-            padding: 25px;
-            @apply(--layout-vertical);
+            width: 280px;
+            height: auto;
+            box-shadow: none !important;
+            
+		    position: absolute;
+		    top: 50%;
+		    left: 50%;
+		    transform: translate(-50%, -50%);
         }
-
+        
+        .fields {
+        	position: relative;
+        	padding: 20px 25px 40px 25px;
+        	border-radius: 10px;
+        	box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
+        }
+        
+        .field {
+        }
+        
+        .incorrect {
+        	left: 0;
+        	bottom: calc(100% + 10px);
+        	position: absolute;
+        }
+        
         span {
             color: red;
         }
 
         paper-toolbar .app-name {
+        	width: 100%;
             font-size: 30px;
             font-weight: 300;
+            justify-content: center;
         }
 
         paper-input {
@@ -51,16 +72,11 @@
             --paper-input-container-input-color: #3F3F3F;
         }
 
-        paper-spinner {
-            margin-right: 100px;
-        }
-
         .content {
-            height: 600px;
         }
 
         .button-content {
-            padding-top: 30px;
+            padding-top: 10px;
             text-align: right;
         }
 
@@ -68,19 +84,20 @@
             background-color: #3F51B5;
             color: white;
         }
-
-        .right {
-            margin-left: calc(50% - 140px);
-            margin-top: calc(100px);
+        
+        #loginLoad {
+		    position: absolute;
+		    top: 50%;
+		    left: 50%;
+		    transform: translate(-50%, -50%);
         }
-
     </style>
 
     <template>
         <paper-header-panel class="layout vertical">
             <paper-toolbar id="mainToolbar">
-                <div class="middle middle-container horizontal layout">
-                    <div flex left class="app-name">Taskboard</div>
+                <div class="middle middle-container horizontal layout app-name">
+                    <div flex left class="app-name-container">Taskboard</div>
                 </div>
                 <span class="flex"></span>
             </paper-toolbar>
@@ -88,17 +105,17 @@
             <iron-a11y-keys id="a11y" target="[[target]]" keys="enter" on-keys-pressed="onEnter"></iron-a11y-keys>
 
             <form is="iron-form" id="form" name="form" th:action="@{/login}" action="/login" method="POST">
-                <paper-material class="right" elevation="2">
+                <paper-material class="content" elevation="2">
                     <span class="incorrect" bind-value="{{error}}"
                           hidden$="{{!!errorMsg}}">{{errorMsg}}</span>
-                    <div>
-                        <paper-input id="username" bind-value="{{username}}" name="username" label="User"
+                    <div class="fields">
+                        <paper-input class="field" id="username" bind-value="{{username}}" name="username" label="User"
                                      required></paper-input>
-                        <paper-input id="password" bind-value="{{password}}" name="password" label="Password"
+                        <paper-input class="field" id="password" bind-value="{{password}}" name="password" label="Password"
                                      type="password" required></paper-input>
+						<paper-spinner id="loginLoad" alt="Loading..."></paper-spinner>
                     </div>
                     <div class="button-content">
-                        <paper-spinner id="loginLoad" alt="Loading..."></paper-spinner>
                         <paper-button id="login" class="button" raised on-click="submit">Login</paper-button>
                     </div>
             </form>

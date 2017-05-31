@@ -310,6 +310,26 @@
 		    display: none;
 		}
         
+        .last-block-reason-textarea {
+			border: 1px solid #CCC;
+			background: #FFF;
+			width: 100%;
+			min-height: 54px;
+			min-width: 100%;
+			max-width: 100%;
+			padding: 5px;
+			margin: 0px;
+			font-size: inherit;
+			line-height: normal;
+			font-family: inherit;
+			color: inherit;
+        }
+        
+        .last-block-reason-textarea:disabled {
+        	background: #DDD;
+        	color: #555;
+        }
+
     </style>
 
     <template>
@@ -482,19 +502,19 @@
                                 </div>
                             </div>
 	                    </template>
-	                    
-	                   	<template is="dom-if" if="{{issueBlocked(item)}}">
-	                        <div class="content-row">
-	                            <div class="column-block">
-	                                <div class="sub-header">Last Block Reason</div>
-	                                <div class="sub-content">
-	                                    <textarea disabled>{{item.customfields.lastBlockReason}}</textarea>
-	                                </div>
-	                            </div>
-	                        </div>
-	                    </template>
-                        
+
                     </div>
+
+					<template is="dom-if" if="{{issueBlocked(item)}}">
+						<div class="content-row">
+							<div class="column-block">
+								<div class="sub-header">Last Block Reason</div>
+								<div class="sub-content">
+									<textarea class="last-block-reason-textarea" disabled>{{item.customfields.lastBlockReason}}</textarea>
+								</div>
+							</div>
+						</div>
+					</template>
  
  					<template is="dom-if" if="{{shouldShowSubtasks}}">
  					
