@@ -1,0 +1,139 @@
+    <row r="${rowNumber}" customFormat="false" ht="15" hidden="false" customHeight="false" outlineLevel="0" collapsed="false">
+      <c r="A2" s="0" t="s">
+        <v>${project}</v>
+      </c>
+      <c r="G2" s="0" t="s">
+        <v>381</v>
+      </c>
+      <c r="H2" s="0" t="s">
+        <v>382</v>
+      </c>
+      <c r="I2" s="0" t="s">
+        <v>383</v>
+      </c>
+      <c r="J2" s="0" t="s">
+        <v>384</v>
+      </c>
+      <c r="K2" s="0" t="s">
+        <v>385</v>
+      </c>
+      <c r="L2" s="0" t="s">
+        <v>386</v>
+      </c>
+      <c r="M2" s="0" t="s">
+        <v>50</v>
+      </c>
+      <c r="N2" s="141" t="s">
+        <v>387</v>
+      </c>
+      <c r="O2" s="0" t="s">
+        <v>388</v>
+      </c>
+      <c r="P2" s="0" t="s">
+        <v>389</v>
+      </c>
+      <c r="Q2" s="0" t="s">
+        <v>390</v>
+      </c>
+      <c r="R2" s="0" t="s">
+        <v>391</v>
+      </c>
+      <c r="T2" s="0" t="n">
+        <v>355481</v>
+      </c>
+      <c r="U2" s="0" t="n">
+        <v>356083</v>
+      </c>
+      <c r="V2" s="0" t="s">
+        <v>327</v>
+      </c>
+      <c r="W2" s="0" t="s">
+        <v>22</v>
+      </c>
+      <c r="Y2" s="141" t="n">
+        <v>0</v>
+      </c>
+      <c r="AC2" s="0" t="s">
+        <v>392</v>
+      </c>
+      <c r="AD2" s="0" t="e">
+        <f aca="false">SUMIFS(Clusters[effort],Clusters[cluster name],AllIssues[[#this row],[subtask_type]],Clusters[t-shirt size],AllIssues[tshirt_size])</f>
+        <v>#VALUE!</v>
+      </c>
+      <c r="AE2" s="0" t="e">
+        <f aca="false">SUMIFS(Clusters[cycle],Clusters[cluster name],AllIssues[[#this row],[subtask_type]],Clusters[t-shirt size],AllIssues[tshirt_size])</f>
+        <v>#VALUE!</v>
+      </c>
+      <c r="AF2" s="0" t="e">
+        <f aca="false">AllIssues[effortestimate]-AllIssues[effortdone]</f>
+        <v>#VALUE!</v>
+      </c>
+      <c r="AG2" s="0" t="e">
+        <f aca="false">AllIssues[cycleestimate]-AllIssues[cycledone]</f>
+        <v>#VALUE!</v>
+      </c>
+      <c r="AH2" s="143" t="e">
+        <f aca="false">IF(AllIssues[[#this row],[planning_type]]="Ballpark",AllIssues[effortestimate],0)</f>
+        <v>#VALUE!</v>
+      </c>
+      <c r="AI2" s="0" t="e">
+        <f aca="false">IF(AllIssues[[#this row],[planning_type]]="Plan",AllIssues[effortestimate],0)</f>
+        <v>#VALUE!</v>
+      </c>
+      <c r="AJ2" s="0" t="e">
+        <f aca="false">IF(OR(AllIssues[subtask_status]="Done",AllIssues[subtask_status]="Cancelled"),AllIssues[effortestimate],0)</f>
+        <v>#VALUE!</v>
+      </c>
+      <c r="AK2" s="0" t="e">
+        <f aca="false">IF(OR(AllIssues[subtask_status]="Done",AllIssues[subtask_status]="Cancelled"),AllIssues[cycleestimate],0)</f>
+        <v>#VALUE!</v>
+      </c>
+      <c r="AL2" s="0" t="e">
+        <f aca="false">IF(OR(AllIssues[subtask_status]="Done",AllIssues[subtask_status]="Cancelled"),AllIssues[worklog],0)</f>
+        <v>#VALUE!</v>
+      </c>
+      <c r="AM2" s="0" t="e">
+        <f aca="false">IF(OR(AllIssues[subtask_status]="Done",AllIssues[subtask_status]="Cancelled"),0, AllIssues[worklog])</f>
+        <v>#VALUE!</v>
+      </c>
+      <c r="AN2" s="0" t="e">
+        <f aca="false">IF(COUNTIFS(AllIssues[task_id],AllIssues[task_id],AllIssues[task_id],"&gt;0")=0,0,1/COUNTIFS(AllIssues[task_id],AllIssues[task_id],AllIssues[task_id],"&gt;0"))</f>
+        <v>#VALUE!</v>
+      </c>
+      <c r="AO2" s="0" t="e">
+        <f aca="false">IF(COUNTIFS(AllIssues[demand_description],AllIssues[demand_description])=0,0,1/COUNTIFS(AllIssues[demand_description],AllIssues[demand_description]))</f>
+        <v>#VALUE!</v>
+      </c>
+      <c r="AP2" s="0" t="e">
+        <f aca="false">IF(AllIssues[planning_type]="Plan",1,0)</f>
+        <v>#VALUE!</v>
+      </c>
+      <c r="AQ2" s="0" t="e">
+        <f aca="false">IF(AllIssues[[#this row],[subtask_status]]="Done", AllIssues[[#this row],[effortdone]],0)</f>
+        <v>#VALUE!</v>
+      </c>
+      <c r="AR2" s="144" t="e">
+        <f aca="false">IF(AllIssues[demand_description]="","",VLOOKUP(AllIssues[demand_status],'Ordered Status'!A:B,2, 0))</f>
+        <v>#VALUE!</v>
+      </c>
+      <c r="AS2" s="144" t="e">
+        <f aca="false">IF(AllIssues[task_description]="","",VLOOKUP(AllIssues[task_status],'Ordered Status'!C:D,2, 0))</f>
+        <v>#VALUE!</v>
+      </c>
+      <c r="AT2" s="144" t="e">
+        <f aca="false">IF(AllIssues[subtask_description]="","",VLOOKUP(AllIssues[subtask_status],'Ordered Status'!E:F,2, 0))</f>
+        <v>#VALUE!</v>
+      </c>
+      <c r="AU2" s="144" t="e">
+        <f aca="false">CONCATENATE(AllIssues[subtaskorderedstatus]," &gt; ",AllIssues[subtask_full_description])</f>
+        <v>#VALUE!</v>
+      </c>
+      <c r="AV2" s="144" t="e">
+        <f aca="false">IF(AllIssues[task_type]="Bug",AllIssues[effortestimate], 0)</f>
+        <v>#VALUE!</v>
+      </c>
+      <c r="AW2" s="144" t="e">
+        <f aca="false">IF(AllIssues[task_type]="Bug",AllIssues[worklog],0)</f>
+        <v>#VALUE!</v>
+      </c>
+    </row>
