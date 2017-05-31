@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.atlassian.jira.rest.client.api.domain.TimeTracking;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
@@ -104,13 +105,102 @@ public class Issue implements Serializable {
     private Map<String, Object> customFields;
 
     private Long priorityOrder;
+    
+    private TaskboardTimeTracking timeTracking;
 
-    public static Issue from(Long id, String issueKey, String projectKey, String project, long issueType, String typeIconUri, String summary, long status, long startDateStepMillis,
-            String subresponsavel1, String subresponsavel2, String parent, long parentType, String parentTypeIconUri, List<String> dependencies, String color, String subResponsaveis,
-            String assignee, String usersTeam, long priority, Date dueDate, long created, String description, List<String> teams, String comments, List<String> labels,
-            List<String> components, Map<String, Object> customFields, Long priorityOrder) {
-        return new Issue(id, issueKey, projectKey, project, issueType, typeIconUri, summary, status, startDateStepMillis, subresponsavel1, subresponsavel2, parent, parentType, parentTypeIconUri,
-                dependencies, false, false, false, color, subResponsaveis, assignee, usersTeam, priority, dueDate, created, description, teams, comments, labels, components, customFields, priorityOrder);
+    public static Issue from(Long id, 
+            String issueKey, 
+            String projectKey, 
+            String project, 
+            long issueType, 
+            String typeIconUri, 
+            String summary, 
+            long status, 
+            long startDateStepMillis,
+            String subresponsavel1, 
+            String subresponsavel2, 
+            String parent, 
+            long parentType, 
+            String parentTypeIconUri, 
+            List<String> dependencies, 
+            String color, 
+            String subResponsaveis,
+            String assignee, 
+            String usersTeam, 
+            long priority, 
+            Date dueDate, 
+            long created, 
+            String description, 
+            List<String> teams, 
+            String comments, 
+            List<String> labels,
+            List<String> components, 
+            Map<String, Object> customFields, 
+            Long priorityOrder,
+            TaskboardTimeTracking timeTracking) 
+    {
+        return new Issue(id, 
+                issueKey, 
+                projectKey, 
+                project, 
+                issueType, 
+                typeIconUri, 
+                summary, 
+                status, 
+                startDateStepMillis, 
+                subresponsavel1, 
+                subresponsavel2, 
+                parent, 
+                parentType, 
+                parentTypeIconUri,
+                dependencies, 
+                false, 
+                false, 
+                false, 
+                color, 
+                subResponsaveis, 
+                assignee, 
+                usersTeam, 
+                priority, 
+                dueDate, 
+                created, 
+                description, 
+                teams, 
+                comments, 
+                labels, 
+                components, 
+                customFields, 
+                priorityOrder,
+                timeTracking);
+    }
+    
+    public static class TaskboardTimeTracking {
+        private Integer originalEstimateMinutes;
+        private Integer timeSpentMinutes;
+        
+        public TaskboardTimeTracking(Integer originalEstimateMinutes, Integer timeSpentMinutes) {
+            this.originalEstimateMinutes = originalEstimateMinutes;
+            this.timeSpentMinutes = timeSpentMinutes;
+        }
+        
+        public static TaskboardTimeTracking fromJira(TimeTracking tt) {
+            if (tt == null)
+                return null;
+            return new TaskboardTimeTracking(tt.getOriginalEstimateMinutes(), tt.getTimeSpentMinutes());
+        }
+        
+        public Integer getOriginalEstimateMinutes() {
+            return originalEstimateMinutes;
+        }
+        public void setOriginalEstimateMinutes(Integer originalEstimateMinutes) {
+            this.originalEstimateMinutes = originalEstimateMinutes;
+        }
+        public Integer getTimeSpentMinutes() {
+            return timeSpentMinutes;
+        }
+        public void setTimeSpentMinutes(Integer timeSpentMinutes) {
+            this.timeSpentMinutes = timeSpentMinutes;
+        }
     }
 
     /**
@@ -135,7 +225,7 @@ public class Issue implements Serializable {
             String parent, long parentType, String parentTypeIconUri, List<String> dependencies, boolean render,
             boolean favorite, boolean hidden, String color, String subResponsaveis, String assignee, String usersTeam,
             long priority, Date dueDate, long created, String description, List<String> teams, String comments,
-            List<String> labels, List<String> components, Map<String, Object> customFields, Long priorityOrder) {
+            List<String> labels, List<String> components, Map<String, Object> customFields, Long priorityOrder, TaskboardTimeTracking timeTracking) {
         this.id = id;
         this.issueKey = issueKey;
         this.projectKey = projectKey;
@@ -168,5 +258,10 @@ public class Issue implements Serializable {
         this.components = components;
         this.customFields = customFields;
         this.priorityOrder = priorityOrder;
+        this.timeTracking = timeTracking;
+    }
+    
+    public Integer getIssueKeyNum() {
+        return Integer.parseInt(issueKey.replace(projectKey+"-", ""));
     }
 }

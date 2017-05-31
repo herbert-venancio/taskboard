@@ -161,7 +161,7 @@ public class IssueMetadataTest {
         when(issueLinkProperty.getDependencies()).thenReturn(asList());
         when(jiraProperties.getIssuelink()).thenReturn(issueLinkProperty);
 
-        when(issueTypeDetails.getId()).thenReturn(1);
+        when(issueTypeDetails.getId()).thenReturn(1L);
         when(issueTypeProperty.getDemand()).thenReturn(issueTypeDetails);
         when(jiraProperties.getIssuetype()).thenReturn(issueTypeProperty);
 

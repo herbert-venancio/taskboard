@@ -40,6 +40,7 @@ import com.atlassian.jira.rest.client.api.domain.Issue;
 import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.controller.IssuePriorityService;
 import objective.taskboard.data.CustomField;
+import objective.taskboard.data.Issue.TaskboardTimeTracking;
 import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.domain.ParentIssueLink;
 import objective.taskboard.domain.converter.IssueTeamService.InvalidTeamException;
@@ -100,8 +101,9 @@ public class JiraIssueToIssueConverter {
     }
 
     public objective.taskboard.data.Issue convert(Issue jiraIssue) {
-        IssueMetadata metadata = new IssueMetadata(jiraIssue, jiraProperties, parentIssueLinks, log);
-        metadatasByIssueKey.put(jiraIssue.getKey(), metadata);
+//        IssueMetadata metadata = new IssueMetadata(jiraIssue, jiraProperties, parentIssueLinks, log);
+//        metadatasByIssueKey.put(jiraIssue.getKey(), metadata);
+        IssueMetadata metadata = metadatasByIssueKey.get(jiraIssue.getKey());
 
         String avatarCoAssignee1 = jiraIssue.getAssignee() != null ? jiraIssue.getAssignee().getAvatarUri("24x24").toString() : "";
         String avatarCoAssignee2 = metadata.getCoAssignees().stream()
@@ -136,7 +138,7 @@ public class JiraIssueToIssueConverter {
                 jiraIssue.getProject().getName(),
                 jiraIssue.getIssueType().getId(),
                 jiraIssue.getIssueType().getIconUri().toASCIIString(),
-                jiraIssue.getSummary() != null ? jiraIssue.getSummary() : "",
+                coalesce(jiraIssue.getSummary(),""),
                 jiraIssue.getStatus().getId(),
                 startDateStepService.get(jiraIssue),
                 avatarCoAssignee1,
@@ -152,15 +154,20 @@ public class JiraIssueToIssueConverter {
                 jiraIssue.getPriority() != null ? jiraIssue.getPriority().getId() : 0l,
                 jiraIssue.getDueDate() != null ? jiraIssue.getDueDate().toDate() : null,
                 jiraIssue.getCreationDate().getMillis(),
-                jiraIssue.getDescription() != null ? jiraIssue.getDescription() : "",
+                coalesce(jiraIssue.getDescription(), ""),
                 issueTeams,
                 getComments(metadata),
                 metadata.getLabels(),
                 metadata.getComponents(),
                 getCustomFields(metadata),
-                priorityOrder
+                priorityOrder,
+                TaskboardTimeTracking.fromJira(jiraIssue.getTimeTracking())
         );
         return i;
+    }
+    
+    private <T> T coalesce(T value, T def) {
+        return value == null? def: value;
     }
 
     private long getParentTypeId(IssueMetadata metadata) {
@@ -192,6 +199,8 @@ public class JiraIssueToIssueConverter {
         customFields.put(jiraProperties.getCustomfield().getClassOfService().getId(), getClassOfServiceValue(metadata));
         customFields.put(jiraProperties.getCustomfield().getBlocked().getId(), metadata.getBlocked());
         customFields.put(jiraProperties.getCustomfield().getLastBlockReason().getId(), metadata.getLastBlockReason());
+        if (metadata.getTShirtSizes().size() > 0)
+            System.out.println();
         customFields.putAll(metadata.getTShirtSizes());
         customFields.putAll(metadata.getAdditionalEstimatedHours());
         customFields.putAll(getRelease(metadata));

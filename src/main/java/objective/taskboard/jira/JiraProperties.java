@@ -35,6 +35,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import objective.taskboard.data.Issue;
 
 @Data
 @ConfigurationProperties(prefix = "jira")
@@ -128,6 +129,11 @@ public class JiraProperties {
             @NotNull
             @NotEmpty
             private List<String> ids;
+            
+            @NotNull
+            @NotEmpty            
+            private String mainTShirtSizeFieldId;
+            
             @NotNull
             @NotEmpty
             private String extraSmall = "XS"; 
@@ -143,6 +149,10 @@ public class JiraProperties {
             @NotNull
             @NotEmpty
             private String extraLarge = "XL";
+            
+            public List<String> getIds() {
+                return ids;
+            }
         }
         
         @Data
@@ -158,15 +168,22 @@ public class JiraProperties {
     public static class IssueLink {
         @NotNull
         private List<String> dependencies;
+        
         @NotNull
         @Valid
         private LinkDetails demand;
+        
+        public IssueLink(){}
+        public IssueLink(LinkDetails details){this.demand=details;}
         
         @Data
         public static class LinkDetails {
             @NotNull
             @NotEmpty
             private String name;
+            
+            public LinkDetails(){}
+            public LinkDetails(String name){this.name=name;}
         }
     }
     
@@ -176,12 +193,21 @@ public class JiraProperties {
         @Valid
         private IssueTypeDetails demand;
         
+        @NotNull
+        private List<IssueTypeDetails> features; 
+        
         @Data
         public static class IssueTypeDetails {
+            public IssueTypeDetails(long taskissuetype) {
+                id = taskissuetype;
+            }
+            public IssueTypeDetails() {}
+
             @NotNull
             @DecimalMin("1")
-            private int id;
+            private long id;
         }
+        
     }
     
     @Data
@@ -199,5 +225,13 @@ public class JiraProperties {
             @NotEmpty
             private String name;
         }
+    }
+    
+    public boolean isDemand(Issue i) {
+        return issuetype.getDemand().id == i.getType();
+    }
+    
+    public boolean isFeature(Issue i) {
+        return issuetype.getFeatures().stream().anyMatch(ft -> ft.id == i.getType());
     }
 }
