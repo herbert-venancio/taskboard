@@ -1,6 +1,7 @@
 package objective.taskboard.followup;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -183,6 +184,13 @@ public class FollowupDataProviderImplTest {
     
     @Test
     public void subtaskWithDemandAndSubtask_shouldCreateOnlyOneSubTaskAndNoBallparks() {
+        configureBallparkMappings(
+                taskIssueType + " : \n" +
+                "  - issueType : BALLPARK - Development\n" + 
+                "    tshirtCustomFieldId: Dev_Tshirt\n" + 
+                "    jiraIssueTypes:\n" + 
+                "      - " + devIssueType + "\n"
+                );
         issues( 
                 demand().id(1).key("PROJ-1").summary("Smry 1").originalEstimateInHours(1).timeSpentInHours(10),
                 demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1),
@@ -257,14 +265,13 @@ public class FollowupDataProviderImplTest {
     @Test
     public void featureWithoutAnySubtasks_ShouldCreateDummyFeaturesForAllTShirts() {
         configureBallparkMappings(
+            taskIssueType + " : \n" +
             "  - issueType : BALLPARK - Development\n" + 
-            "    parentIssueType: " + taskIssueType + "\n" + 
             "    tshirtCustomFieldId: Dev_Tshirt\n" + 
             "    jiraIssueTypes:\n" + 
             "      - "+ devIssueType + "\n" + 
     
             "  - issueType : BALLPARK - Alpha\n" + 
-            "    parentIssueType: " + taskIssueType + "\n" + 
             "    tshirtCustomFieldId: Alpha_TestTshirt\n" + 
             "    jiraIssueTypes:\n" + 
             "      - " + alphaIssueType + " # UX\n");
@@ -347,27 +354,25 @@ public class FollowupDataProviderImplTest {
     @Test
     public void featureWithOneSubtask_ShouldCreateOnlyDummyFeatureForMissingSubtask() {
         configureBallparkMappings(
+                taskIssueType + " : \n" +
                 "  - issueType : BALLPARK - Development\n" + 
-                "    parentIssueType: " + taskIssueType + "\n" + 
                 "    tshirtCustomFieldId: Dev_Tshirt\n" + 
                 "    jiraIssueTypes:\n" + 
                 "      - "+ frontEndIssueType + "\n" +
                 "      - "+ devIssueType + "\n" +
         
                 "  - issueType : BALLPARK - Alpha\n" + 
-                "    parentIssueType: " + taskIssueType + "\n" + 
                 "    tshirtCustomFieldId: Alpha_TestTshirt\n" + 
                 "    jiraIssueTypes:\n" + 
                 "      - " + alphaIssueType + "\n" +
                 
                 "  - issueType : BALLPARK - Deploy\n" + 
-                "    parentIssueType: " + taskIssueType + "\n" + 
                 "    tshirtCustomFieldId: Deploy_TestTshirt\n" + 
                 "    jiraIssueTypes:\n" + 
                 "      - " + deployIssueType + "\n" +
                 
+                reviewIssueType + " : \n" +
                 "  - issueType : BALLPARK - Review\n" + 
-                "    parentIssueType: " + reviewIssueType + "\n" + 
                 "    tshirtCustomFieldId: Review_Tshirt\n" + 
                 "    jiraIssueTypes:\n" + 
                 "      - "+ devIssueType + "\n"
@@ -452,14 +457,13 @@ public class FollowupDataProviderImplTest {
     @Test
     public void featureWithAllSubtasks_ShouldNotCreateDummies() {
         configureBallparkMappings(
+                taskIssueType + " : \n" +
                 "  - issueType : BALLPARK - Development\n" + 
-                "    parentIssueType: " + taskIssueType + "\n" + 
                 "    tshirtCustomFieldId: Dev_Tshirt\n" + 
                 "    jiraIssueTypes:\n" + 
                 "      - " + devIssueType + "\n" +
         
                 "  - issueType : BALLPARK - Alpha\n" + 
-                "    parentIssueType: " + taskIssueType + "\n" + 
                 "    tshirtCustomFieldId: Alpha_TestTshirt\n" + 
                 "    jiraIssueTypes:\n" + 
                 "      - " + alphaIssueType + "\n"
@@ -546,8 +550,8 @@ public class FollowupDataProviderImplTest {
     @Test
     public void featureWithRelease_ShouldCreateBallparksWithRelease() {
         configureBallparkMappings(
+            taskIssueType + " : \n" +
             "  - issueType : BALLPARK - Development\n" + 
-            "    parentIssueType: " + taskIssueType + "\n" + 
             "    tshirtCustomFieldId: Dev_Tshirt\n" + 
             "    jiraIssueTypes:\n" + 
             "      - "+ devIssueType + "\n");
@@ -597,8 +601,8 @@ public class FollowupDataProviderImplTest {
     @Test
     public void featureWithRelease_ShouldCreateSubtaskWithRelease() {
         configureBallparkMappings(
+                taskIssueType + " : \n" +
                 "  - issueType : BALLPARK - Development\n" + 
-                "    parentIssueType: " + taskIssueType + "\n" + 
                 "    tshirtCustomFieldId: Dev_Tshirt\n" + 
                 "    jiraIssueTypes:\n" + 
                 "      - " + devIssueType + "\n"
@@ -650,6 +654,13 @@ public class FollowupDataProviderImplTest {
     
     @Test
     public void subtaskWithoutParents_shouldSubTaskWithNullFields() {
+        configureBallparkMappings(
+                taskIssueType + " : \n" +
+                "  - issueType : BALLPARK - Development\n" + 
+                "    tshirtCustomFieldId: Dev_Tshirt\n" + 
+                "    jiraIssueTypes:\n" + 
+                "      - " + devIssueType + "\n"
+                );
         issues( 
                 task().id(3).key("PROJ-3").summary("Smry 3").originalEstimateInHours(2),
                 subtask().id(4).key("PROJ-4").summary("Smry 4").timeSpentInHours(5).parent("PROJ-3").issueType(devIssueType).tshirtSize("XL")
@@ -690,8 +701,8 @@ public class FollowupDataProviderImplTest {
     @Test
     public void featureWithCertainStatus_ShouldNotGenerateBallparks() {
         configureBallparkMappings(
+                taskIssueType + " : \n" +
                 "  - issueType : BALLPARK - Development\n" + 
-                "    parentIssueType: " + taskIssueType + "\n" + 
                 "    tshirtCustomFieldId: Dev_Tshirt\n" + 
                 "    jiraIssueTypes:\n" + 
                 "      - "+ frontEndIssueType + "\n" +
@@ -714,8 +725,8 @@ public class FollowupDataProviderImplTest {
     @Test
     public void subtaskWithCertainStatus_ShouldNotPreventBallparkGeneration() {
         configureBallparkMappings(
+                taskIssueType + " : \n" +
                 "  - issueType : BALLPARK - Development\n" + 
-                "    parentIssueType: " + taskIssueType + "\n" + 
                 "    tshirtCustomFieldId: Dev_Tshirt\n" + 
                 "    jiraIssueTypes:\n" + 
                 "      - "+ devIssueType + "\n"
@@ -797,12 +808,27 @@ public class FollowupDataProviderImplTest {
             " taskBallpark           : 2.0\n" + 
             " queryType              : SUBTASK PLAN");
     }
+    
+    @Test
+    public void withoutBallparkConfiguration_ShouldFail() {
+        issues( 
+                task().id(3).key("PROJ-3").summary("Smry 3").originalEstimateInHours(2),
+                subtask().id(4).key("PROJ-4").summary("Smry 4").timeSpentInHours(5).parent("PROJ-3").issueType(devIssueType).tshirtSize("XL")
+        );
+        
+        try {
+            subject.getJiraData();
+            fail("Should fail when trying to generate ballbark without mapping for given issue type");
+        } catch(IllegalStateException e) {
+            assertEquals("Ballpark mapping for issue type 'Task' (id 12) missing in configuration", e.getMessage());
+        }
+    }
 
     private void configureBallparkMappings(String string) {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        List<BallparkMapping> ballparkMappings;
+        Map<Long, List<BallparkMapping>> ballparkMappings;
         try {
-            ballparkMappings = mapper.readValue(string,new TypeReference<List<BallparkMapping>>(){});
+            ballparkMappings = mapper.readValue(string,new TypeReference<Map<Long, List<BallparkMapping>>>(){});
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
@@ -831,7 +857,7 @@ public class FollowupDataProviderImplTest {
         List<Issue> issueList = new ArrayList<>();
         for(IssueBuilder b : builders)
             issueList.add(b.build());
-        when(issueBufferService.getIssues()).thenReturn(issueList); 
+        when(issueBufferService.getAllIssuesVisibleToUser()).thenReturn(issueList); 
     }
     
     private IssueBuilder demand() {
@@ -951,7 +977,8 @@ public class FollowupDataProviderImplTest {
                 customFields, //customFields
                 0L,   //priorityOrder
                 new Issue.TaskboardTimeTracking(originalEstimateMinutes, timeSpentMinutes),
-                jiraProperties);
+                jiraProperties,
+                metadataService);
         }
     }
 }

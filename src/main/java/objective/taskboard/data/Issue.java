@@ -25,6 +25,8 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import com.atlassian.jira.rest.client.api.domain.TimeTracking;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
@@ -35,6 +37,8 @@ import com.fasterxml.jackson.databind.deser.std.DateDeserializers.DateDeserializ
 
 import lombok.Data;
 import objective.taskboard.jira.JiraProperties;
+import objective.taskboard.jira.JiraProperties.BallparkMapping;
+import objective.taskboard.jira.MetadataService;
 
 @Data
 public class Issue implements Serializable {
@@ -109,6 +113,10 @@ public class Issue implements Serializable {
     
     private TaskboardTimeTracking timeTracking;
 
+    private JiraProperties jiraProperties;
+    
+    private MetadataService metaDataService;
+
     public static Issue from(Long id, 
             String issueKey, 
             String projectKey, 
@@ -139,7 +147,8 @@ public class Issue implements Serializable {
             Map<String, Object> customFields, 
             Long priorityOrder,
             TaskboardTimeTracking timeTracking,
-            JiraProperties jiraProperties) 
+            JiraProperties jiraProperties,
+            MetadataService metaDataService) 
     {
         return new Issue(id, 
                 issueKey, 
@@ -174,7 +183,8 @@ public class Issue implements Serializable {
                 customFields, 
                 priorityOrder,
                 timeTracking,
-                jiraProperties);
+                jiraProperties,
+                metaDataService);
     }
     
     public static class TaskboardTimeTracking {
@@ -230,7 +240,7 @@ public class Issue implements Serializable {
             long priority, Date dueDate, long created, String description, List<String> teams, String comments,
             List<String> labels, List<String> components, Map<String, Object> customFields, Long priorityOrder, 
             TaskboardTimeTracking timeTracking,
-            JiraProperties properties) {
+            JiraProperties properties, MetadataService metaDataService) {
         this.id = id;
         this.issueKey = issueKey;
         this.projectKey = projectKey;
@@ -264,9 +274,59 @@ public class Issue implements Serializable {
         this.customFields = customFields;
         this.priorityOrder = priorityOrder;
         this.timeTracking = timeTracking;
+        this.jiraProperties = properties;
+        this.metaDataService = metaDataService;
     }
     
     public Integer getIssueKeyNum() {
         return Integer.parseInt(issueKey.replace(projectKey+"-", ""));
+    }
+    
+    public String getTShirtSize() {
+        String mainTShirtSizeFieldId = jiraProperties.getCustomfield().getTShirtSize().getMainTShirtSizeFieldId();
+        CustomField customField = (CustomField)customFields.get(mainTShirtSizeFieldId);
+        if (customField.getValue() == null)
+            return null;
+        return customField.getValue().toString();
+    }
+    
+    public void setTShirtSize(String value) {
+        String mainTShirtSizeFieldId = jiraProperties.getCustomfield().getTShirtSize().getMainTShirtSizeFieldId();
+        CustomField customField = (CustomField)customFields.get(mainTShirtSizeFieldId);
+        customField.setValue(value);        
+    }
+    
+    public String getTshirtSizeOfSubtaskForBallpark(BallparkMapping mapping) {
+        CustomField customField = (CustomField)customFields.get(mapping.getTshirtCustomFieldId());
+        if (customField == null || customField.getValue() == null) return null;
+        return customField.getValue().toString();
+    }
+
+    public List<BallparkMapping> getBallparkMappings() {
+        return jiraProperties.getBallparkMappings().get(getType());
+    }
+    
+    public List<BallparkMapping> getActiveBallparkMappings() {
+        List<BallparkMapping> list = jiraProperties.getBallparkMappings().get(getType());
+        if (list == null)
+            return null;
+        
+        return list.stream().filter(bm -> getTshirtSizeOfSubtaskForBallpark(bm)!=null).collect(Collectors.toList());
+    }
+    
+    public String getIssueTypeName() {
+        try {
+            return metaDataService.getIssueTypeMetadata().get(type).getName();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+    
+    public String getStatusName() {
+        try {
+            return metaDataService.getStatusesMetadata().get(status).getName();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }

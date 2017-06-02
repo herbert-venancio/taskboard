@@ -46,6 +46,7 @@ import objective.taskboard.domain.ParentIssueLink;
 import objective.taskboard.domain.converter.IssueTeamService.InvalidTeamException;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraService;
+import objective.taskboard.jira.MetadataService;
 import objective.taskboard.repository.ParentIssueLinkRepository;
 
 @Slf4j
@@ -74,6 +75,9 @@ public class JiraIssueToIssueConverter {
     
     @Autowired
     private IssuePriorityService priorityService;
+    
+    @Autowired
+    private MetadataService metadataService;
 
     private List<String> parentIssueLinks;
 
@@ -101,8 +105,6 @@ public class JiraIssueToIssueConverter {
     }
 
     public objective.taskboard.data.Issue convert(Issue jiraIssue) {
-//        IssueMetadata metadata = new IssueMetadata(jiraIssue, jiraProperties, parentIssueLinks, log);
-//        metadatasByIssueKey.put(jiraIssue.getKey(), metadata);
         IssueMetadata metadata = metadatasByIssueKey.get(jiraIssue.getKey());
 
         String avatarCoAssignee1 = jiraIssue.getAssignee() != null ? jiraIssue.getAssignee().getAvatarUri("24x24").toString() : "";
@@ -162,7 +164,8 @@ public class JiraIssueToIssueConverter {
                 getCustomFields(metadata),
                 priorityOrder,
                 TaskboardTimeTracking.fromJira(jiraIssue.getTimeTracking()),
-                jiraProperties
+                jiraProperties,
+                metadataService
         );
         return i;
     }

@@ -7,21 +7,16 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-
-import com.atlassian.jira.rest.client.api.domain.IssueType;
-import com.atlassian.jira.rest.client.api.domain.Status;
 
 import objective.taskboard.data.CustomField;
 import objective.taskboard.data.Issue;
 import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraProperties.BallparkMapping;
-import objective.taskboard.jira.MetadataService;
 
 @Service
 public class FollowupDataProviderImpl implements FollowupDataProvider {
@@ -31,13 +26,6 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
     @Autowired
     private IssueBufferService issueBufferService;
     
-    @Autowired
-    private MetadataService metadataService;
-
-    private Map<Long, Status> statusesMetadata;
-
-    private Map<Long, IssueType> issueTypeMetadata;
-
     private Map<String, Issue> demandsByKey;
     private Map<String, Issue> featuresByKey;
     private Map<String, FollowUpData> followUpBallparks;
@@ -45,8 +33,7 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
     
     @Override
     public List<FollowUpData> getJiraData() {
-        loadStatusAndIssueMapping();
-        LinkedList<Issue> issues = new LinkedList<>(issueBufferService.getIssues());
+        LinkedList<Issue> issues = new LinkedList<>(issueBufferService.getAllIssuesVisibleToUser());
         
         followUpBallparks = new LinkedHashMap<String, FollowUpData>();
         
@@ -80,27 +67,25 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
         
         Iterator<Issue> it = issues.iterator();
         while(it.hasNext()) {
-            Issue issue = it.next();
-            if (!isFeature(issue)) 
+            Issue feature = it.next();
+            if (!isFeature(feature)) 
                 continue;
             it.remove();
             
-            Issue demand = demandsByKey.get(issue.getParent());
+            Issue demand = demandsByKey.get(feature.getParent());
             if (demand != null)
                 followUpBallparks.remove(demand.getIssueKey());
             
-            features.put(issue.getIssueKey(), issue);
+            features.put(feature.getIssueKey(), feature);
             
-            if (jiraProperties.getFeatureStatusThatDontGenerateBallpark().contains(issue.getStatus()))
+            if (jiraProperties.getFeatureStatusThatDontGenerateBallpark().contains(feature.getStatus()))
                 continue;
             
-            for (BallparkMapping mapping : jiraProperties.getBallparkMappings()) {
-                if (!mapping.getParentIssueType().equals(issue.getType())) continue;
-                String tshirtSize = getTshirtSize(issue, mapping.getTshirtCustomFieldId());
-                if (tshirtSize == null) continue;
-                
-                String issueKeyAndTShirtSize = issue.getIssueKey()+mapping.getTshirtCustomFieldId();
-                followUpBallparks.put( issueKeyAndTShirtSize, createBallparkFeature(demand, issue, mapping));
+            List<BallparkMapping> mappingList = getBallparksOrCry(feature);
+
+            for (BallparkMapping mapping : mappingList) {
+                String issueKeyAndTShirtSize = feature.getIssueKey()+mapping.getTshirtCustomFieldId();
+                followUpBallparks.put( issueKeyAndTShirtSize, createBallparkFeature(demand, feature, mapping));
             }
         }
         return features;
@@ -124,16 +109,24 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
                 continue;
             
             String featureTshirtForThisSubTask = "";
-            
-            for (BallparkMapping mapping : jiraProperties.getBallparkMappings()) {
-                if (mapping.getJiraIssueTypes().contains(issue.getType()) && 
-                    mapping.getParentIssueType().equals(feature.getType())) 
+            List<BallparkMapping> mappingList = getBallparksOrCry(feature);
+            for (BallparkMapping mapping : mappingList) {
+                if (mapping.getJiraIssueTypes().contains(issue.getType())) 
                     featureTshirtForThisSubTask = mapping.getTshirtCustomFieldId();
             }
             
             followUpBallparks.remove(feature.getIssueKey()+featureTshirtForThisSubTask);
         }
         return subtasksFollowups;
+    }
+    
+    private List<BallparkMapping> getBallparksOrCry(Issue issue) {
+        List<BallparkMapping> mappings = issue.getActiveBallparkMappings();
+        if (mappings == null) {
+            throw new IllegalStateException(
+                    "Ballpark mapping for issue type '"+issue.getIssueTypeName()+"' (id "+issue.getType()+") missing in configuration");
+        }
+        return mappings;
     }
 
     private FollowUpData createBallparkDemand(Issue demand) {
@@ -142,8 +135,8 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
         followUpData.project = demand.getProject();
         
         followUpData.demandId = demand.getId();
-        followUpData.demandType = getIssueTypeName(demand);
-        followUpData.demandStatus= getIssueStatusName(demand);
+        followUpData.demandType = demand.getIssueTypeName();
+        followUpData.demandStatus= demand.getStatusName();
         followUpData.demandNum = demand.getIssueKey();
         followUpData.demandSummary = demand.getSummary();
         followUpData.demandDescription = issueDescription("M", demand);
@@ -173,22 +166,22 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
         return followUpData;
     }
     
-    private FollowUpData createBallparkFeature(Issue demand, Issue task, BallparkMapping m) {
+    private FollowUpData createBallparkFeature(Issue demand, Issue task, BallparkMapping ballparkMapping) {
         FollowUpData followUpData = new FollowUpData();
         followUpData.planningType = "Ballpark";
         followUpData.project = task.getProject();
         
         if (demand != null) {
-            followUpData.demandType = getIssueTypeName(demand);
-            followUpData.demandStatus= getIssueStatusName(demand);
+            followUpData.demandType = demand.getIssueTypeName();
+            followUpData.demandStatus= demand.getStatusName();
             followUpData.demandId = demand.getId();
             followUpData.demandNum = demand.getIssueKey();
             followUpData.demandSummary = demand.getSummary();
             followUpData.demandDescription = issueDescription("", demand);
         }
         
-        followUpData.taskType = getIssueTypeName(task);
-        followUpData.taskStatus = getIssueStatusName(task);
+        followUpData.taskType = task.getIssueTypeName();
+        followUpData.taskStatus = task.getStatusName();
         followUpData.taskId = task.getId();
         followUpData.taskNum = task.getIssueKey();
         followUpData.taskSummary=task.getSummary();
@@ -196,14 +189,14 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
         followUpData.taskFullDescription = issueFullDescription(task);
         followUpData.taskRelease = (String) defaultIfNull(getRelease(task), "No release set");
         
-        followUpData.subtaskType = m.getIssueType();
-        followUpData.subtaskStatus = getIssueStatusName(task);
+        followUpData.subtaskType = ballparkMapping.getIssueType();
+        followUpData.subtaskStatus = task.getStatusName();
         followUpData.subtaskId = 0L;
         followUpData.subtaskNum = task.getProjectKey()+"-0";
-        followUpData.subtaskSummary = m.getIssueType();
+        followUpData.subtaskSummary = ballparkMapping.getIssueType();
         followUpData.subtaskDescription = issueDescription(0, task.getSummary());
-        followUpData.subtaskFullDescription = issueFullDescription(m.getIssueType(), "", 0, task.getSummary());
-        followUpData.tshirtSize = getTshirtSize(task, m.getTshirtCustomFieldId());
+        followUpData.subtaskFullDescription = issueFullDescription(ballparkMapping.getIssueType(), "", 0, task.getSummary());
+        followUpData.tshirtSize = task.getTshirtSizeOfSubtaskForBallpark(ballparkMapping);
         followUpData.worklog = 0.0;
         followUpData.wrongWorklog = task.getTimeTracking().getTimeSpentMinutes()/60.0; 
         followUpData.demandBallpark = demand.getTimeTracking().getOriginalEstimateMinutes()/60.0;
@@ -219,16 +212,16 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
         
         if (demand != null) {
             followUpData.demandId = demand.getId();
-            followUpData.demandType = getIssueTypeName(demand);
-            followUpData.demandStatus= getIssueStatusName(demand);
+            followUpData.demandType = demand.getIssueTypeName();
+            followUpData.demandStatus= demand.getStatusName();
             followUpData.demandNum = demand.getIssueKey();
             followUpData.demandSummary = demand.getSummary();
             followUpData.demandDescription = issueDescription("",demand);
             followUpData.demandBallpark = demand.getTimeTracking().getOriginalEstimateMinutes()/60.0;
         }
         
-        followUpData.taskType = getIssueTypeName(task);
-        followUpData.taskStatus = getIssueStatusName(task);
+        followUpData.taskType = task.getIssueTypeName();
+        followUpData.taskStatus = task.getStatusName();
         followUpData.taskId = task.getId();
         followUpData.taskNum = task.getIssueKey();
         followUpData.taskSummary=task.getSummary();
@@ -236,15 +229,15 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
         followUpData.taskFullDescription = issueFullDescription(task);
         followUpData.taskRelease = (String) defaultIfNull(getRelease(task), "No release set");
         
-        followUpData.subtaskType = getIssueTypeName(subtask);
-        followUpData.subtaskStatus = getIssueStatusName(subtask);
+        followUpData.subtaskType = subtask.getIssueTypeName();
+        followUpData.subtaskStatus = subtask.getStatusName();
         followUpData.subtaskId = subtask.getId();
         followUpData.subtaskNum = subtask.getIssueKey();
         followUpData.subtaskSummary = subtask.getSummary();
         
         followUpData.subtaskDescription = issueDescription(subtask);
         followUpData.subtaskFullDescription = issueFullDescription(subtask);
-        followUpData.tshirtSize = getTshirtSize(subtask);
+        followUpData.tshirtSize = subtask.getTShirtSize();
         followUpData.worklog = subtask.getTimeTracking().getTimeSpentMinutes()/60.0;;
         followUpData.wrongWorklog = 0.0; 
         followUpData.taskBallpark = task.getTimeTracking().getOriginalEstimateMinutes()/60.0;
@@ -255,13 +248,7 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
     private String getTshirtSize(Issue i) {
         if (isFeature(i)) return "";
         if (isDemand(i)) return "M";
-        return ((CustomField)i.getCustomFields().get(jiraProperties.getCustomfield().getTShirtSize().getMainTShirtSizeFieldId())).getValue().toString();
-    }
-    
-    private String getTshirtSize(Issue i, String tshirtSizeId) {
-        CustomField customField = (CustomField)i.getCustomFields().get(tshirtSizeId);
-        if (customField == null) return null;
-        return customField.getValue().toString();
+        return i.getTShirtSize();
     }
     
     private String getRelease(Issue i) {
@@ -277,26 +264,9 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
     }
 
     private boolean isDemand(Issue issue) {
-        return jiraProperties.getIssuelink().getDemand().getName().equals(getIssueTypeName(issue));
+        return jiraProperties.getIssuelink().getDemand().getName().equals(issue.getIssueTypeName());
     }
 
-    private String getIssueStatusName(Issue issue) {
-        return statusesMetadata.get(issue.getStatus()).getName();
-    }
-    
-    private String getIssueTypeName(Issue issue) {
-        return issueTypeMetadata.get(issue.getType()).getName();
-    }
-    
-    private void loadStatusAndIssueMapping() {
-        try {
-            statusesMetadata = metadataService.getStatusesMetadata();
-            issueTypeMetadata = metadataService.getIssueTypeMetadata();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new IllegalStateException("Could not retrieve status metadata", e);
-        }
-    }
-    
     private String issueDescription(Issue issue) {
         return issueDescription(getTshirtSize(issue), issue.getIssueKeyNum(), issue.getSummary());
     }
@@ -315,7 +285,7 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
     }
     
     private String issueFullDescription(Issue issue) {
-        return getIssueTypeName(issue) + " | " +issueDescription(getTshirtSize(issue), issue.getIssueKeyNum(), issue.getSummary());
+        return issue.getIssueTypeName() + " | " +issueDescription(getTshirtSize(issue), issue.getIssueKeyNum(), issue.getSummary());
     }
     
     private String issueFullDescription(String issueType, String size, Integer issueNum, String description) {

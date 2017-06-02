@@ -78,7 +78,7 @@ public class JiraProperties {
     private String schema;
    
     @NotNull
-    private List<BallparkMapping> ballparkMappings;
+    private Map<Long, List<BallparkMapping>> ballparkMappings;
     
     @NotNull
     private List<Long> featureStatusThatDontGenerateBallpark;
@@ -247,9 +247,6 @@ public class JiraProperties {
         
         @NotNull
         private String tshirtCustomFieldId;
-        
-        @NotNull
-        private Long parentIssueType; 
         
         @NotNull
         private Integer valueStreamOrder;

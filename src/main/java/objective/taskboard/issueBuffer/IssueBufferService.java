@@ -110,6 +110,12 @@ public class IssueBufferService {
                 .filter(t -> isParentVisible(t))
                 .collect(toList());
     }
+    
+    public synchronized List<Issue> getAllIssuesVisibleToUser() {
+        return issueBuffer.values().stream()
+                .filter(t -> projectService.isProjectVisible(t.getProjectKey()))
+                .collect(toList());
+    }
 
     private boolean isParentVisible(Issue issue) {
     	
@@ -126,7 +132,6 @@ public class IssueBufferService {
     		visible = isParentVisible(findFirst);
 
 		return visible;
-    	
 	}
 
     private synchronized void setIssues(List<Issue> issues) {
