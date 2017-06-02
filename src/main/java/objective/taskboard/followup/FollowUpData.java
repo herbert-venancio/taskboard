@@ -1,5 +1,7 @@
 package objective.taskboard.followup;
 
+import static org.apache.commons.lang.ObjectUtils.defaultIfNull;
+
 /*-
  * [LICENSE]
  * Taskboard
@@ -24,12 +26,12 @@ package objective.taskboard.followup;
 public class FollowUpData {
     public String planningType;
     public String project;
-    public String demandType;
-    public String demandStatus;
+    public String demandType = "";
+    public String demandStatus  = "";
     public Long demandId;
-    public String demandNum;
-    public String demandSummary;
-    public String demandDescription;
+    public String demandNum = "";
+    public String demandSummary = "";
+    public String demandDescription = "";
 
     public String taskType;
     public String taskStatus;
@@ -51,7 +53,7 @@ public class FollowUpData {
     
     public Double worklog;
     public Double wrongWorklog;
-    public Double demandBallpark;
+    public Double demandBallpark = 0.0;
     public Double taskBallpark;
 
     public String queryType;
@@ -63,7 +65,7 @@ public class FollowUpData {
                 +"\n project                : "+ project
                 +"\n demandType             : "+ demandType
                 +"\n demandStatus           : "+ demandStatus
-                +"\n demandId               : "+ demandId
+                +"\n demandId               : "+ defaultIfNull(demandId,"")
                 +"\n demandNum              : "+ demandNum
                 +"\n demandSummary          : "+ demandSummary
                 +"\n demandDescription      : "+ demandDescription

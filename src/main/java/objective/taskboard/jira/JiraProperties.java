@@ -30,7 +30,7 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import lombok.AccessLevel;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -74,7 +74,17 @@ public class JiraProperties {
     @Valid
     private Resolutions resolutions;
     
+    @NotNull
     private String schema;
+   
+    @NotNull
+    private List<BallparkMapping> ballparkMappings;
+    
+    @NotNull
+    private List<Long> featureStatusThatDontGenerateBallpark;
+    
+    @NotNull
+    private List<Long> subtaskStatusThatDontPreventBallparkGeneration;
     
     @Data 
     public static class Lousa {
@@ -109,7 +119,7 @@ public class JiraProperties {
         private CustomFieldDetails additionalEstimatedHours = new CustomFieldDetails("");
         
         @NoArgsConstructor
-        @AllArgsConstructor(access = AccessLevel.PRIVATE)
+        @AllArgsConstructor
         @Data
         public static class CustomFieldDetails {
             @NotNull
@@ -225,6 +235,24 @@ public class JiraProperties {
             @NotEmpty
             private String name;
         }
+    }
+    
+    @Data
+    public static class BallparkMapping {
+        @NotNull
+        private String issueType;
+        
+        @NotNull
+        private List <Long> jiraIssueTypes;
+        
+        @NotNull
+        private String tshirtCustomFieldId;
+        
+        @NotNull
+        private Long parentIssueType; 
+        
+        @NotNull
+        private Integer valueStreamOrder;
     }
     
     public boolean isDemand(Issue i) {

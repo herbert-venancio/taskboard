@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.DateDeserializers.DateDeserializer;
 
 import lombok.Data;
+import objective.taskboard.jira.JiraProperties;
 
 @Data
 public class Issue implements Serializable {
@@ -137,7 +138,8 @@ public class Issue implements Serializable {
             List<String> components, 
             Map<String, Object> customFields, 
             Long priorityOrder,
-            TaskboardTimeTracking timeTracking) 
+            TaskboardTimeTracking timeTracking,
+            JiraProperties jiraProperties) 
     {
         return new Issue(id, 
                 issueKey, 
@@ -171,7 +173,8 @@ public class Issue implements Serializable {
                 components, 
                 customFields, 
                 priorityOrder,
-                timeTracking);
+                timeTracking,
+                jiraProperties);
     }
     
     public static class TaskboardTimeTracking {
@@ -225,7 +228,9 @@ public class Issue implements Serializable {
             String parent, long parentType, String parentTypeIconUri, List<String> dependencies, boolean render,
             boolean favorite, boolean hidden, String color, String subResponsaveis, String assignee, String usersTeam,
             long priority, Date dueDate, long created, String description, List<String> teams, String comments,
-            List<String> labels, List<String> components, Map<String, Object> customFields, Long priorityOrder, TaskboardTimeTracking timeTracking) {
+            List<String> labels, List<String> components, Map<String, Object> customFields, Long priorityOrder, 
+            TaskboardTimeTracking timeTracking,
+            JiraProperties properties) {
         this.id = id;
         this.issueKey = issueKey;
         this.projectKey = projectKey;

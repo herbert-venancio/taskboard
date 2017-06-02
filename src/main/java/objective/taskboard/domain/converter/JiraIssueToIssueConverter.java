@@ -161,7 +161,8 @@ public class JiraIssueToIssueConverter {
                 metadata.getComponents(),
                 getCustomFields(metadata),
                 priorityOrder,
-                TaskboardTimeTracking.fromJira(jiraIssue.getTimeTracking())
+                TaskboardTimeTracking.fromJira(jiraIssue.getTimeTracking()),
+                jiraProperties
         );
         return i;
     }
