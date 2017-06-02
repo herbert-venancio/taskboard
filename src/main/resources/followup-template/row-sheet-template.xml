@@ -1,170 +1,170 @@
 
-    <row r="${rowNumber}" customFormat="false" ht="15" hidden="false" customHeight="false" outlineLevel="0" collapsed="false">
-      <c r="A${rowNumber}" s="0" t="s">
+    <row r="${rowNumber}" spans="1:49" x14ac:dyDescent="0.25">
+      <c r="A${rowNumber}" t="s">
         <v>${project}</v>
       </c>
-      <c r="B${rowNumber}" s="0" t="s">
+      <c r="B${rowNumber}" t="s">
         <v>${demandType}</v>
       </c>
-      <c r="C${rowNumber}" s="0" t="s">
+      <c r="C${rowNumber}" t="s">
         <v>${demandStatus}</v>
       </c>
-      <c r="D${rowNumber}" s="0" t="s">
+      <c r="D${rowNumber}" t="s">
         <v>${demandNum}</v>
       </c>
-      <c r="E${rowNumber}" s="0" t="s">
+      <c r="E${rowNumber}" t="s">
         <v>${demandSummary}</v>
       </c>
-      <c r="F${rowNumber}" s="0" t="s">
+      <c r="F${rowNumber}" t="s">
         <v>${demandDescription}</v>
       </c>
-      <c r="G${rowNumber}" s="0" t="s">
+      <c r="G${rowNumber}" t="s">
         <v>${taskType}</v>
       </c>
-      <c r="H${rowNumber}" s="0" t="s">
+      <c r="H${rowNumber}" t="s">
         <v>${taskStatus}</v>
       </c>
-      <c r="I${rowNumber}" s="0" t="s">
+      <c r="I${rowNumber}" t="s">
         <v>${taskNum}</v>
       </c>
-      <c r="J${rowNumber}" s="0" t="s">
+      <c r="J${rowNumber}" t="s">
         <v>${taskSummary}</v>
       </c>
-      <c r="K${rowNumber}" s="0" t="s">
+      <c r="K${rowNumber}" t="s">
         <v>${taskDescription}</v>
       </c>
-      <c r="L${rowNumber}" s="0" t="s">
+      <c r="L${rowNumber}" t="s">
         <v>${taskFullSescription}</v>
       </c>
-      <c r="M${rowNumber}" s="0" t="s">
+      <c r="M${rowNumber}" t="s">
         <v>${subtaskType}</v>
       </c>
-      <c r="N${rowNumber}" s="141" t="s">
+      <c r="N${rowNumber}" t="s">
         <v>${subtaskStatus}</v>
       </c>
-      <c r="O${rowNumber}" s="0" t="s">
+      <c r="O${rowNumber}" t="s">
         <v>${subtaskNum}</v>
       </c>
-      <c r="P${rowNumber}" s="0" t="s">
+      <c r="P${rowNumber}" t="s">
         <v>${subtaskSummary}</v>
       </c>
-      <c r="Q${rowNumber}" s="0" t="s">
+      <c r="Q${rowNumber}" t="s">
         <v>${subtaskDescription}</v>
       </c>
-      <c r="R${rowNumber}" s="0" t="s">
+      <c r="R${rowNumber}" t="s">
         <v>${subtaskFullDescription}</v>
       </c>
-      <c r="S${rowNumber}" s="0" t="n">
+      <c r="S${rowNumber}">
         <v>${demandId}</v>
       </c>
-      <c r="T${rowNumber}" s="0" t="n">
+      <c r="T${rowNumber}">
         <v>${taskId}</v>
       </c>
-      <c r="U${rowNumber}" s="0" t="n">
+      <c r="U${rowNumber}">
         <v>${subtaskId}</v>
       </c>
-      <c r="V${rowNumber}" s="0" t="s">
+      <c r="V${rowNumber}" t="s">
         <v>${planningType}</v>
       </c>
-      <c r="W${rowNumber}" s="0" t="s">
+      <c r="W${rowNumber}" t="s">
         <v>${taskRelease}</v>
       </c>
-      <c r="X${rowNumber}" s="0" t="n">
+      <c r="X${rowNumber}">
         <v>${worklog}</v>
       </c>
-      <c r="Y${rowNumber}" s="141" t="n">
+      <c r="Y${rowNumber}">
         <v>${wrongWorklog}</v>
       </c>
-      <c r="Z${rowNumber}" s="0" t="n">
+      <c r="Z${rowNumber}">
         <v>${demandBallpark}</v>
       </c>
-      <c r="AA${rowNumber}" s="0" t="n">
+      <c r="AA${rowNumber}">
         <v>${taskBallpark}</v>
       </c>
-      <c r="AB${rowNumber}" s="0" t="s">
+      <c r="AB${rowNumber}" t="s">
         <v>${tshirtSize}</v>
       </c>
-      <c r="AC${rowNumber}" s="0" t="s">
+      <c r="AC${rowNumber}" t="s">
         <v>${queryType}</v>
       </c>
-      <c r="AD${rowNumber}" s="0" t="e">
-        <f aca="false">SUMIFS(Clusters[effort],Clusters[cluster name],AllIssues[[#this row],[subtask_type]],Clusters[t-shirt size],AllIssues[tshirt_size])</f>
-        <v>#VALUE!</v>
+      <c r="AD${rowNumber}" s="4">
+        <f>SUMIFS(Clusters[Effort],Clusters[Cluster Name],AllIssues[[#This Row],[SUBTASK_TYPE]],Clusters[T-Shirt Size],AllIssues[tshirt_size])</f>
+        <v></v>
       </c>
-      <c r="AE${rowNumber}" s="0" t="e">
-        <f aca="false">SUMIFS(Clusters[cycle],Clusters[cluster name],AllIssues[[#this row],[subtask_type]],Clusters[t-shirt size],AllIssues[tshirt_size])</f>
-        <v>#VALUE!</v>
+      <c r="AE${rowNumber}" s="4">
+        <f>SUMIFS(Clusters[Cycle],Clusters[Cluster Name],AllIssues[[#This Row],[SUBTASK_TYPE]],Clusters[T-Shirt Size],AllIssues[tshirt_size])</f>
+        <v></v>
       </c>
-      <c r="AF${rowNumber}" s="0" t="e">
-        <f aca="false">AllIssues[effortestimate]-AllIssues[effortdone]</f>
-        <v>#VALUE!</v>
+      <c r="AF${rowNumber}" s="4">
+        <f>AllIssues[EffortEstimate]-AllIssues[EffortDone]</f>
+        <v></v>
       </c>
-      <c r="AG${rowNumber}" s="0" t="e">
-        <f aca="false">AllIssues[cycleestimate]-AllIssues[cycledone]</f>
-        <v>#VALUE!</v>
+      <c r="AG${rowNumber}" s="4">
+        <f>AllIssues[CycleEstimate]-AllIssues[CycleDone]</f>
+        <v></v>
       </c>
-      <c r="AH${rowNumber}" s="143" t="e">
-        <f aca="false">IF(AllIssues[[#this row],[planning_type]]="Ballpark",AllIssues[effortestimate],0)</f>
-        <v>#VALUE!</v>
+      <c r="AH${rowNumber}" s="4">
+        <f>IF(AllIssues[[#This Row],[planning_type]]="Ballpark",AllIssues[EffortEstimate],0)</f>
+        <v></v>
       </c>
-      <c r="AI${rowNumber}" s="0" t="e">
-        <f aca="false">IF(AllIssues[[#this row],[planning_type]]="Plan",AllIssues[effortestimate],0)</f>
-        <v>#VALUE!</v>
+      <c r="AI${rowNumber}" s="4">
+        <f>IF(AllIssues[[#This Row],[planning_type]]="Plan",AllIssues[EffortEstimate],0)</f>
+        <v></v>
       </c>
-      <c r="AJ${rowNumber}" s="0" t="e">
-        <f aca="false">IF(OR(AllIssues[subtask_status]="Done",AllIssues[subtask_status]="Cancelled"),AllIssues[effortestimate],0)</f>
-        <v>#VALUE!</v>
+      <c r="AJ${rowNumber}" s="4">
+        <f>IF(OR(AllIssues[SUBTASK_STATUS]="Done",AllIssues[SUBTASK_STATUS]="Cancelled"),AllIssues[EffortEstimate],0)</f>
+        <v></v>
       </c>
-      <c r="AK${rowNumber}" s="0" t="e">
-        <f aca="false">IF(OR(AllIssues[subtask_status]="Done",AllIssues[subtask_status]="Cancelled"),AllIssues[cycleestimate],0)</f>
-        <v>#VALUE!</v>
+      <c r="AK${rowNumber}" s="4">
+        <f>IF(OR(AllIssues[SUBTASK_STATUS]="Done",AllIssues[SUBTASK_STATUS]="Cancelled"),AllIssues[CycleEstimate],0)</f>
+        <v></v>
       </c>
-      <c r="AL${rowNumber}" s="0" t="e">
-        <f aca="false">IF(OR(AllIssues[subtask_status]="Done",AllIssues[subtask_status]="Cancelled"),AllIssues[worklog],0)</f>
-        <v>#VALUE!</v>
+      <c r="AL${rowNumber}" s="4">
+        <f>IF(OR(AllIssues[SUBTASK_STATUS]="Done",AllIssues[SUBTASK_STATUS]="Cancelled"),AllIssues[worklog],0)</f>
+        <v></v>
       </c>
-      <c r="AM${rowNumber}" s="0" t="e">
-        <f aca="false">IF(OR(AllIssues[subtask_status]="Done",AllIssues[subtask_status]="Cancelled"),0, AllIssues[worklog])</f>
-        <v>#VALUE!</v>
+      <c r="AM${rowNumber}" s="4">
+        <f>IF(OR(AllIssues[SUBTASK_STATUS]="Done",AllIssues[SUBTASK_STATUS]="Cancelled"),0, AllIssues[worklog])</f>
+        <v></v>
       </c>
-      <c r="AN${rowNumber}" s="0" t="e">
-        <f aca="false">IF(COUNTIFS(AllIssues[task_id],AllIssues[task_id],AllIssues[task_id],"&gt;0")=0,0,1/COUNTIFS(AllIssues[task_id],AllIssues[task_id],AllIssues[task_id],"&gt;0"))</f>
-        <v>#VALUE!</v>
+      <c r="AN${rowNumber}" s="4">
+        <f>IF(COUNTIFS(AllIssues[TASK_ID],AllIssues[TASK_ID],AllIssues[TASK_ID],"&gt;0")=0,0,1/COUNTIFS(AllIssues[TASK_ID],AllIssues[TASK_ID],AllIssues[TASK_ID],"&gt;0"))</f>
+        <v></v>
       </c>
-      <c r="AO${rowNumber}" s="0" t="e">
-        <f aca="false">IF(COUNTIFS(AllIssues[demand_description],AllIssues[demand_description])=0,0,1/COUNTIFS(AllIssues[demand_description],AllIssues[demand_description]))</f>
-        <v>#VALUE!</v>
+      <c r="AO${rowNumber}" s="4">
+        <f>IF(COUNTIFS(AllIssues[demand_description],AllIssues[demand_description])=0,0,1/COUNTIFS(AllIssues[demand_description],AllIssues[demand_description]))</f>
+        <v></v>
       </c>
-      <c r="AP${rowNumber}" s="0" t="e">
-        <f aca="false">IF(AllIssues[planning_type]="Plan",1,0)</f>
-        <v>#VALUE!</v>
+      <c r="AP${rowNumber}" s="4">
+        <f>IF(AllIssues[planning_type]="Plan",1,0)</f>
+        <v></v>
       </c>
-      <c r="AQ${rowNumber}" s="0" t="e">
-        <f aca="false">IF(AllIssues[[#this row],[subtask_status]]="Done", AllIssues[[#this row],[effortdone]],0)</f>
-        <v>#VALUE!</v>
+      <c r="AQ${rowNumber}" s="4">
+        <f>IF(AllIssues[[#This Row],[SUBTASK_STATUS]]="Done", AllIssues[[#This Row],[EffortDone]],0)</f>
+        <v></v>
       </c>
-      <c r="AR${rowNumber}" s="144" t="e">
-        <f aca="false">IF(AllIssues[demand_description]="","",VLOOKUP(AllIssues[demand_status],'Ordered Status'!A:B,2, 0))</f>
-        <v>#VALUE!</v>
+      <c r="AR${rowNumber}" s="4" t="str">
+        <f>IF(AllIssues[demand_description]="","",VLOOKUP(AllIssues[demand_status],'Ordered Status'!A:B,2, FALSE))</f>
+        <v></v>
       </c>
-      <c r="AS${rowNumber}" s="144" t="e">
-        <f aca="false">IF(AllIssues[task_description]="","",VLOOKUP(AllIssues[task_status],'Ordered Status'!C:D,2, 0))</f>
-        <v>#VALUE!</v>
+      <c r="AS${rowNumber}" s="4" t="str">
+        <f>IF(AllIssues[TASK_DESCRIPTION]="","",VLOOKUP(AllIssues[TASK_STATUS],'Ordered Status'!C:D,2, FALSE))</f>
+        <v></v>
       </c>
-      <c r="AT${rowNumber}" s="144" t="e">
-        <f aca="false">IF(AllIssues[subtask_description]="","",VLOOKUP(AllIssues[subtask_status],'Ordered Status'!E:F,2, 0))</f>
-        <v>#VALUE!</v>
+      <c r="AT${rowNumber}" s="4" t="str">
+        <f>IF(AllIssues[SUBTASK_DESCRIPTION]="","",VLOOKUP(AllIssues[SUBTASK_STATUS],'Ordered Status'!E:F,2, FALSE))</f>
+        <v></v>
       </c>
-      <c r="AU${rowNumber}" s="144" t="e">
-        <f aca="false">CONCATENATE(AllIssues[subtaskorderedstatus]," &gt; ",AllIssues[subtask_full_description])</f>
-        <v>#VALUE!</v>
+      <c r="AU${rowNumber}" s="4" t="str">
+        <f>CONCATENATE(AllIssues[SubtaskOrderedStatus]," &gt; ",AllIssues[SUBTASK_FULL_DESCRIPTION])</f>
+        <v></v>
       </c>
-      <c r="AV${rowNumber}" s="144" t="e">
-        <f aca="false">IF(AllIssues[task_type]="Bug",AllIssues[effortestimate], 0)</f>
-        <v>#VALUE!</v>
+      <c r="AV${rowNumber}" s="4">
+        <f>IF(AllIssues[TASK_TYPE]="Bug",AllIssues[EffortEstimate], 0)</f>
+        <v></v>
       </c>
-      <c r="AW${rowNumber}" s="144" t="e">
-        <f aca="false">IF(AllIssues[task_type]="Bug",AllIssues[worklog],0)</f>
-        <v>#VALUE!</v>
+      <c r="AW${rowNumber}" s="4">
+        <f>IF(AllIssues[TASK_TYPE]="Bug",AllIssues[worklog],0)</f>
+        <v></v>
       </c>
     </row>

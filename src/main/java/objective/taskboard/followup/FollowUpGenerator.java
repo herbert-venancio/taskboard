@@ -35,6 +35,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -48,6 +49,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class FollowUpGenerator {
 
+    private static final String PROPERTY_XML_SPACE_PRESERVE = " xml:space=\"preserve\"";
     private static final String TAG_T_IN_SHARED_STRINGS = "t";
     private static final String PATH_SHARED_STRINGS_INITIAL = "followup-template/sharedStrings-initial.xml";
     private static final String PATH_SHARED_STRINGS_TEMPLATE = "followup-template/sharedStrings-template.xml";
@@ -167,7 +169,8 @@ public class FollowUpGenerator {
 
         for (String sharedString : sharedStringsSorted) {
             Map<String, Object> siValues = new HashMap<String, Object>();
-            siValues.put("sharedString", sharedString);
+            siValues.put("preserve", sharedString.endsWith(" ") ? PROPERTY_XML_SPACE_PRESERVE : "");
+            siValues.put("sharedString", StringEscapeUtils.escapeXml(sharedString));
             allSharedStrings += StrSubstitutor.replace(siSharedStringsTemplate, siValues);
         }
 

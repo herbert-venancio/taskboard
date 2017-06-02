@@ -1,4 +1,4 @@
 
   <si>
-    <t>${sharedString}</t>
+    <t${preserve}>${sharedString}</t>
   </si>

@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -85,16 +86,17 @@ public class FollowUpGeneratorTest {
     @Test
     public void getSharedStringsTemplateTest() throws ParserConfigurationException, SAXException, IOException {
         Map<String, Long> sharedStrings = subject.getSharedStringsTemplate();
-        assertEquals("Shared strings size", 457, sharedStrings.size());
-        assertEquals("First shared string", 0L, sharedStrings.get("project").longValue());
-        assertEquals("Any shared string", 223L, sharedStrings.get("Feature | 00236 - Global Solutions").longValue());
-        assertEquals("Last shared string", 456L, sharedStrings.get("AllocatedHours").longValue());
+        assertEquals("Shared strings size", 555, sharedStrings.size());
+        assertEquals("First shared string", 0, sharedStrings.get("project").longValue());
+        assertEquals("Some special character shared string", 434, sharedStrings.get("00069 - UI & Theme").longValue());
+        assertEquals("Any shared string", 394, sharedStrings.get("Feature | 00236 - Global Solutions").longValue());
+        assertEquals("Last shared string", 181, sharedStrings.get("AllocatedHours").longValue());
     }
 
     @Test
     public void generateJiraDataSheetTest() throws ParserConfigurationException, SAXException, IOException {
         when(provider.getJiraData()).thenReturn(asList(getFollowUpDataDefault()));
-        Map<String, Long> sharedStrings = subject.getSharedStringsTemplate();
+        HashMap<String, Long> sharedStrings = new HashMap<String, Long>();
         String jiraDataSheet = subject.generateJiraDataSheet(sharedStrings);
 
         InputStream inputStream = getClass().getClassLoader()
@@ -102,13 +104,20 @@ public class FollowUpGeneratorTest {
         String jiraDataSheetExpected = IOUtils.toString(inputStream, "UTF-8");
 
         assertEquals("Jira data sheet", jiraDataSheetExpected, jiraDataSheet);
+        assertEquals("Shared strings size", 24, sharedStrings.size());
+        assertEquals("First shared string", 0, sharedStrings.get("PROJECT TEST").longValue());
+        assertEquals("Any shared string", 14, sharedStrings.get("Description Sub-task").longValue());
+        assertEquals("Last shared string", 23, sharedStrings.get("Type").longValue());
     }
 
     @Test
     public void generateSharedStringsTest() throws ParserConfigurationException, SAXException, IOException {
-        Map<String, Long> sharedStrings = subject.getSharedStringsTemplate();
-        when(provider.getJiraData()).thenReturn(asList(getFollowUpDataDefault()));
-        subject.generateJiraDataSheet(sharedStrings);
+        HashMap<String, Long> sharedStrings = new HashMap<String, Long>();
+        sharedStrings.put("sharedString1", 1L);
+        sharedStrings.put("sharedString2", 2L);
+        sharedStrings.put("sharedString0", 0L);
+        sharedStrings.put("sharedString special character &", 3L);
+        sharedStrings.put("sharedString preserve  ", 4L);
         String sharedStringsGenerated = subject.generateSharedStrings(sharedStrings);
 
         InputStream inputStream = getClass().getClassLoader()
