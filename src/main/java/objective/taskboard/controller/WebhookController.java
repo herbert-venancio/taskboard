@@ -41,12 +41,15 @@ import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.issueBuffer.IssueEvent;
 import objective.taskboard.repository.FilterCachedRepository;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
-
+import objective.taskboard.task.WebhookSchedule;
 
 @Slf4j
 @RestController
 @RequestMapping("webhook")
 public class WebhookController {
+
+    @Autowired
+    private WebhookSchedule webhookSchedule;
 
     @Autowired
     private IssueBufferService issueBufferService;
@@ -63,20 +66,39 @@ public class WebhookController {
     @RequestMapping(value = "{projectKey}/{issueKey}", method = RequestMethod.POST)
     public void webhook(@RequestBody Map<String, Object> body, @PathVariable("projectKey") String projectKey, @PathVariable("issueKey") String issueKey) throws JsonProcessingException {
         String webhookEvent = body.get("webhookEvent").toString().replace("jira:", "");
-        
+
         log.info("WEBHOOK: (" + webhookEvent +  ") project=" + projectKey + " issue=" + issueKey);
         log.debug("WEBHOOK REQUEST BODY: " + mapper.writeValueAsString(body));
 
         if (!belongsToAnyProjectFilter(projectKey))
             return;
 
-        Long issueTypeId = getIssueTypeId(body);
+        String issueTypeId = getIssueTypeId(body);
         if (!belongsToAnyIssueTypeFilter(issueTypeId))
             return;
-        
+
         IssueEvent event = IssueEvent.valueOf(webhookEvent.toUpperCase());
-                
+
         issueBufferService.updateIssueBuffer(event, issueKey);
+        webhookSchedule.processItems();
+    }
+
+    @RequestMapping(path = "webhook/{webhookEvent}/{projectKey}/{issueTypeId}/{issueKey}", method = RequestMethod.POST)
+    public void webhook(@PathVariable("webhookEvent") String webhookEvent,
+            @PathVariable("projectKey") String projectKey, @PathVariable("issueTypeId") String issueTypeId,
+            @PathVariable("issueKey") String issueKey) throws JsonProcessingException {
+
+        log.info("WEBHOOK PUT IN QUEUE: (" + webhookEvent + ") project=" + projectKey + " issue=" + issueKey);
+
+        if (!belongsToAnyProjectFilter(projectKey))
+            return;
+
+        if (!belongsToAnyIssueTypeFilter(issueTypeId))
+            return;
+
+        IssueEvent event = IssueEvent.valueOf(webhookEvent.toUpperCase());
+
+        webhookSchedule.add(event, issueKey);
     }
 
     private boolean belongsToAnyProjectFilter(String projectKey) {
@@ -84,16 +106,19 @@ public class WebhookController {
         return projects.stream().anyMatch(p -> p.getProjectKey().equals(projectKey));
     }
 
-    private boolean belongsToAnyIssueTypeFilter(Long issueTypeId) {
+    private boolean belongsToAnyIssueTypeFilter(String issueTypeId) {
         List<Filter> filters = filterCachedRepository.getCache();
-        return filters.stream().anyMatch(f -> issueTypeId.equals(f.getIssueTypeId()));
+        Long issueTypeIdLong = Long.parseLong(issueTypeId);
+        return filters.stream().anyMatch(f -> {
+            return issueTypeIdLong.equals(f.getIssueTypeId());
+        });
     }
 
-    private Long getIssueTypeId(Map<String, Object> requestBody) { 
+    private String getIssueTypeId(Map<String, Object> requestBody) {
         Map<String, Object> issue = toMap(requestBody.get("issue"));
         Map<String, Object> fields = toMap(issue.get("fields"));
         Map<String, Object> type = toMap(fields.get("issuetype"));
-        return Long.parseLong(type.get("id").toString());
+        return type.get("id").toString();
     }
 
     @SuppressWarnings("unchecked")
