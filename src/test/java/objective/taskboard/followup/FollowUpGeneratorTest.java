@@ -25,18 +25,19 @@ import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
-import java.util.HashMap;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import objective.taskboard.followup.FollowUpGenerator;
+import org.xml.sax.SAXException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FollowUpGeneratorTest {
@@ -47,9 +48,43 @@ public class FollowUpGeneratorTest {
     @Mock
     private FollowupDataProvider provider;
 
+    private FollowUpData getFollowUpDataDefault() {
+        FollowUpData followUpData = new FollowUpData();
+        followUpData.planningType = "Ballpark";
+        followUpData.project = "PROJECT TEST";
+        followUpData.demandType = "Demand";
+        followUpData.demandStatus = "Doing";
+        followUpData.demandId = "1";
+        followUpData.demandNum = "I-1";
+        followUpData.demandSummary = "Summary Demand";
+        followUpData.demandDescription = "Description Demand";
+        followUpData.taskType = "Feature";
+        followUpData.taskStatus = "Doing";
+        followUpData.taskId = 2L;
+        followUpData.taskNum = "I-2";
+        followUpData.taskSummary = "Summary Feature";
+        followUpData.taskDescription = "Description Feature";
+        followUpData.taskFullSescription = "Full Description Feature";
+        followUpData.taskRelease = "Release";
+        followUpData.subtaskType = "Sub-task";
+        followUpData.subtaskStatus = "Doing";
+        followUpData.subtaskId = 3L;
+        followUpData.subtaskNum = "I-3";
+        followUpData.subtaskSummary = "Summary Sub-task";
+        followUpData.subtaskDescription = "Description Sub-task";
+        followUpData.subtaskFullDescription = "Full Description Sub-task";
+        followUpData.tshirtSize = "M";
+        followUpData.worklog = 1D;
+        followUpData.wrongWorklog = 1D;
+        followUpData.demandBallpark = 1D;
+        followUpData.taskBallpark = 1D;
+        followUpData.queryType = "Type";
+        return followUpData;
+    }
+
     @Test
-    public void getSharedStringsTemplateSuccessTest() {
-        Map<String, Long> sharedStrings = subject.getSharedStringsTemplate("followup-template/sharedStrings-template.xml");
+    public void getSharedStringsTemplateTest() throws ParserConfigurationException, SAXException, IOException {
+        Map<String, Long> sharedStrings = subject.getSharedStringsTemplate();
         assertEquals("Shared strings size", 457, sharedStrings.size());
         assertEquals("First shared string", 0L, sharedStrings.get("project").longValue());
         assertEquals("Any shared string", 223L, sharedStrings.get("Feature | 00236 - Global Solutions").longValue());
@@ -57,18 +92,30 @@ public class FollowUpGeneratorTest {
     }
 
     @Test
-    public void getSharedStringsTemplateErrorTest() {
-        Map<String, Long> sharedStrings = subject.getSharedStringsTemplate("aaaaa");
-        assertTrue("Shared strings should be empty", sharedStrings.isEmpty());
+    public void generateJiraDataSheetTest() throws ParserConfigurationException, SAXException, IOException {
+        when(provider.getJiraData()).thenReturn(asList(getFollowUpDataDefault()));
+        Map<String, Long> sharedStrings = subject.getSharedStringsTemplate();
+        String jiraDataSheet = subject.generateJiraDataSheet(sharedStrings);
+
+        InputStream inputStream = getClass().getClassLoader()
+                .getResourceAsStream("followup/generateJiraDataSheetTest.xml");
+        String jiraDataSheetExpected = IOUtils.toString(inputStream, "UTF-8");
+
+        assertEquals("Jira data sheet", jiraDataSheetExpected, jiraDataSheet);
     }
 
-//    @Test
-//    public void generateJiraDataSheetSuccesTest() {
-//        FollowUpData jiraData = new FollowUpData();
-//        
-//        when(provider.getJiraData()).thenReturn(asList(jiraData));
-//        String jiraDataSheet = subject.generateJiraDataSheet();
-//        assertEquals("Jira data sheet", )
-//    }
+    @Test
+    public void generateSharedStringsTest() throws ParserConfigurationException, SAXException, IOException {
+        Map<String, Long> sharedStrings = subject.getSharedStringsTemplate();
+        when(provider.getJiraData()).thenReturn(asList(getFollowUpDataDefault()));
+        subject.generateJiraDataSheet(sharedStrings);
+        String sharedStringsGenerated = subject.generateSharedStrings(sharedStrings);
+
+        InputStream inputStream = getClass().getClassLoader()
+                .getResourceAsStream("followup/generateSharedStringsTest.xml");
+        String sharedStringsExpected = IOUtils.toString(inputStream, "UTF-8");
+
+        assertEquals("Shared strings", sharedStringsExpected, sharedStringsGenerated);
+    }
 
 }
