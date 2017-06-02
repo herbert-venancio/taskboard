@@ -1,133 +1,129 @@
 jira:
   ballparkMappings:
     # Feature mappings
-    - issueType : BALLPARK - Planning
-      parentIssueType: 11701 # Feature 
-      tshirtCustomFieldId: customfield_18620 # Feature Planning TSize
-      jiraIssueTypes:
-        - 11708 # Feature Planning
-        - 11707 # Tech Planning
-      valueStreamOrder: 1
-      
-    - issueType : BALLPARK - UX
-      parentIssueType: 11701 # Feature
-      tshirtCustomFieldId: customfield_18622 # UX TSize
-      jiraIssueTypes:
-        - 11705 # UX
-      valueStreamOrder: 2
-      
-    - issueType : BALLPARK - Development
-      parentIssueType: 11701 # Feature
-      tshirtCustomFieldId: customfield_18623 # Development TSize
-      jiraIssueTypes:
-        - 11800 # Frontend Development
-        - 11702 # Backend Development
-        - 11704 # Alpha Bug
-      valueStreamOrder: 3
-      
-    - issueType : BALLPARK - Alpha Test
-      parentIssueType: 11701 # Feature
-      tshirtCustomFieldId: customfield_18624 # Alpha Test TSize
-      jiraIssueTypes:
-        - 11703 # Alpha Test 
-      valueStreamOrder: 4
-      
-    - issueType : BALLPARK - Feature Review
-      parentIssueType: 11701 # Feature
-      tshirtCustomFieldId: customfield_18625 # Feature Review Tsize      
-      jiraIssueTypes:
-        - 11709 # Feature Review 
-      valueStreamOrder: 5
-            
-    - issueType : BALLPARK - Developer Support
-      parentIssueType: 11701 # Feature
-      tshirtCustomFieldId: customfield_18623 # Dev Support TSize      
-      jiraIssueTypes:
-        - 11800 # Frontend Development
-        - 11702 # Backend Development
-        - 11704 # Alpha Bug
-      valueStreamOrder: 6
+    11701 : # Parent issue type (Feature)
+      - issueType : BALLPARK - Planning
+        tshirtCustomFieldId: customfield_18620 # Feature Planning TSize
+        jiraIssueTypes:
+          - 11708 # Feature Planning
+          - 11707 # Tech Planning
+        valueStreamOrder: 1
+        
+      - issueType : BALLPARK - UX
+        tshirtCustomFieldId: customfield_18622 # UX TSize
+        jiraIssueTypes:
+          - 11705 # UX
+        valueStreamOrder: 2
+        
+      - issueType : BALLPARK - Development
+        tshirtCustomFieldId: customfield_18623 # Development TSize
+        jiraIssueTypes:
+          - 11800 # Frontend Development
+          - 11702 # Backend Development
+          - 11704 # Alpha Bug
+        valueStreamOrder: 3
+        
+      - issueType : BALLPARK - Alpha Test
+        tshirtCustomFieldId: customfield_18624 # Alpha Test TSize
+        jiraIssueTypes:
+          - 11703 # Alpha Test 
+        valueStreamOrder: 4
+        
+      - issueType : BALLPARK - Feature Review
+        tshirtCustomFieldId: customfield_18625 # Feature Review Tsize      
+        jiraIssueTypes:
+          - 11709 # Feature Review 
+        valueStreamOrder: 5
+              
+      - issueType : BALLPARK - Developer Support
+        tshirtCustomFieldId: customfield_18623 # Dev Support TSize      
+        jiraIssueTypes:
+          - 11800 # Frontend Development
+          - 11702 # Backend Development
+          - 11704 # Alpha Bug
+        valueStreamOrder: 6
 
-    - issueType : BALLPARK - QA/UAT Support
-      tshirtCustomFieldId: customfield_18627 # QA Support TSize
-      parentIssueType: 11701 # Feature
-      jiraIssueTypes:
-        - 11801 # QA
-      valueStreamOrder: 7
+      - issueType : BALLPARK - QA/UAT Support
+        tshirtCustomFieldId: customfield_18627 # QA Support TSize
+        jiraIssueTypes:
+          - 11801 # QA
+        valueStreamOrder: 7
 
-    - issueType : BALLPARK - Subtask
-      tshirtCustomFieldId: customfield_18627 # T-Shirt Size
-      parentIssueType: 11701 # Feature
-      jiraIssueTypes:
-        - 5 # Sub-Task
-      valueStreamOrder: 8
+      - issueType : BALLPARK - Subtask
+        tshirtCustomFieldId: customfield_18627 # T-Shirt Size
+        parentIssueType: 11701 # Feature
+        jiraIssueTypes:
+          - 5 # Sub-Task
+        valueStreamOrder: 8
       
     # Bug mappings
-    - issueType : BALLPARK - Planning
-      parentIssueType: 1 # Bug 
-      valueStreamOrder: 1
-      tshirtCustomFieldId: customfield_18620 # Feature Planning TSize
-      jiraIssueTypes:
-        - 11708 # Feature Planning
-        - 11707 # Tech Planning
-      
-    - issueType : BALLPARK - UX
-      parentIssueType: 1 # Bug
-      tshirtCustomFieldId: customfield_18622 # UX TSize
-      jiraIssueTypes:
-        - 11705 # UX
-      valueStreamOrder: 2
-      
-    - issueType : BALLPARK - Development
-      tshirtCustomFieldId: customfield_18623 # Development TSize
-      parentIssueType: 1 # Bug
-      jiraIssueTypes:
-        - 11800 # Frontend Development
-        - 11702 # Backend Development
-        - 11704 # Alpha Bug
-      valueStreamOrder: 3
-      
-    - issueType : BALLPARK - Alpha Test
-      parentIssueType: 1 # Bug
-      tshirtCustomFieldId: customfield_18624 # Alpha Test TSize
-      jiraIssueTypes:
-        - 11703 # Alpha Test 
-      valueStreamOrder: 4
-      
-    - issueType : BALLPARK - Feature Review
-      parentIssueType: 1 # Bug
-      tshirtCustomFieldId: customfield_18625 # Feature Review Tsize      
-      jiraIssueTypes:
-        - 11709 # Feature Review 
-      valueStreamOrder: 5
-                  
-    - issueType : BALLPARK - Developer Support
-      parentIssueType: 1 # Bug
-      tshirtCustomFieldId: customfield_18623 # Dev Support TSize      
-      jiraIssueTypes:
-        - 11800 # Frontend Development
-        - 11702 # Backend Development
-        - 11704 # Alpha Bug
-      valueStreamOrder: 6
+    1 : # Parent issue type (Bug)
+      - issueType : BALLPARK - Planning
+        parentIssueType: 1 # Bug 
+        valueStreamOrder: 1
+        tshirtCustomFieldId: customfield_18620 # Feature Planning TSize
+        jiraIssueTypes:
+          - 11708 # Feature Planning
+          - 11707 # Tech Planning
+        
+      - issueType : BALLPARK - UX
+        parentIssueType: 1 # Bug
+        tshirtCustomFieldId: customfield_18622 # UX TSize
+        jiraIssueTypes:
+          - 11705 # UX
+        valueStreamOrder: 2
+        
+      - issueType : BALLPARK - Development
+        tshirtCustomFieldId: customfield_18623 # Development TSize
+        parentIssueType: 1 # Bug
+        jiraIssueTypes:
+          - 11800 # Frontend Development
+          - 11702 # Backend Development
+          - 11704 # Alpha Bug
+        valueStreamOrder: 3
+        
+      - issueType : BALLPARK - Alpha Test
+        parentIssueType: 1 # Bug
+        tshirtCustomFieldId: customfield_18624 # Alpha Test TSize
+        jiraIssueTypes:
+          - 11703 # Alpha Test 
+        valueStreamOrder: 4
+        
+      - issueType : BALLPARK - Feature Review
+        parentIssueType: 1 # Bug
+        tshirtCustomFieldId: customfield_18625 # Feature Review Tsize      
+        jiraIssueTypes:
+          - 11709 # Feature Review 
+        valueStreamOrder: 5
+                    
+      - issueType : BALLPARK - Developer Support
+        parentIssueType: 1 # Bug
+        tshirtCustomFieldId: customfield_18623 # Dev Support TSize      
+        jiraIssueTypes:
+          - 11800 # Frontend Development
+          - 11702 # Backend Development
+          - 11704 # Alpha Bug
+        valueStreamOrder: 6
 
-    - issueType : BALLPARK - QA/UAT Support
-      parentIssueType: 1 # Bug
-      jiraIssueTypes:
-        - 11801 # QA
-      tshirtCustomFieldId: customfield_18627 # QA Support TSize
-      valueStreamOrder: 7
-      
-    - issueType : BALLPARK - Subtask
-      parentIssueType: 1 # Bug
-      tshirtCustomFieldId: customfield_18627 # T-Shirt Size      
-      jiraIssueTypes:
-        - 5 # Sub-Task
-      valueStreamOrder: 8
+      - issueType : BALLPARK - QA/UAT Support
+        parentIssueType: 1 # Bug
+        jiraIssueTypes:
+          - 11801 # QA
+        tshirtCustomFieldId: customfield_18627 # QA Support TSize
+        valueStreamOrder: 7
+        
+      - issueType : BALLPARK - Subtask
+        parentIssueType: 1 # Bug
+        tshirtCustomFieldId: customfield_18627 # T-Shirt Size      
+        jiraIssueTypes:
+          - 5 # Sub-Task
+        valueStreamOrder: 8
 
     # Task Mappings
-    - issueType : BALLPARK - Subtask
-      parentIssueType: 3 # Task
-      tshirtCustomFieldId: customfield_18627 # T-Shirt Size      
-      jiraIssueTypes:
-        - 5 # Sub-Task
-      valueStreamOrder: 8
+    3 : # Parent issue type (Task)
+      - issueType : BALLPARK - Subtask
+        parentIssueType: 3 # Task
+        tshirtCustomFieldId: customfield_18627 # T-Shirt Size      
+        jiraIssueTypes:
+          - 5 # Sub-Task
+        valueStreamOrder: 8
