@@ -86,11 +86,11 @@ public class FollowUpGeneratorTest {
     @Test
     public void getSharedStringsTemplateTest() throws ParserConfigurationException, SAXException, IOException {
         Map<String, Long> sharedStrings = subject.getSharedStringsTemplate();
-        assertEquals("Shared strings size", 555, sharedStrings.size());
+        assertEquals("Shared strings size", 215, sharedStrings.size());
         assertEquals("First shared string", 0, sharedStrings.get("project").longValue());
-        assertEquals("Some special character shared string", 434, sharedStrings.get("00069 - UI & Theme").longValue());
-        assertEquals("Any shared string", 394, sharedStrings.get("Feature | 00236 - Global Solutions").longValue());
-        assertEquals("Last shared string", 181, sharedStrings.get("AllocatedHours").longValue());
+        assertEquals("Some special character shared string", 48, sharedStrings.get("Demand Status > Demand > Task Status > Task > Subtask").longValue());
+        assertEquals("Any shared string", 130, sharedStrings.get("Group %").longValue());
+        assertEquals("Last shared string", 214, sharedStrings.get("(Tudo)").longValue());
     }
 
     @Test
@@ -125,6 +125,11 @@ public class FollowUpGeneratorTest {
         String sharedStringsExpected = IOUtils.toString(inputStream, "UTF-8");
 
         assertEquals("Shared strings", sharedStringsExpected, sharedStringsGenerated);
+    }
+
+    @Test
+    public void generateTest() throws ParserConfigurationException, SAXException, IOException {
+        subject.generate();
     }
 
 }

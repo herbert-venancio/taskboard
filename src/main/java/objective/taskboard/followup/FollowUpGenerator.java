@@ -21,14 +21,17 @@ package objective.taskboard.followup;
  * [/LICENSE]
  */
 
-import java.io.InputStream;
-
 import static java.util.stream.Collectors.toList;
 
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -63,8 +66,31 @@ public class FollowUpGenerator {
     public ByteArrayResource generate() {
         try {
             Map<String, Long> sharedStrings = getSharedStringsTemplate();
-            generateJiraDataSheet(sharedStrings);
-            generateSharedStrings(sharedStrings);
+            FileOutputStream outputSheet7 = new FileOutputStream("sheet7.xml");
+            outputSheet7.write(generateJiraDataSheet(sharedStrings).getBytes());
+            outputSheet7.close();
+            FileOutputStream outputSharedStrings = new FileOutputStream("sharedStrings.xml");
+            outputSharedStrings.write(generateSharedStrings(sharedStrings).getBytes());
+            outputSharedStrings.close();
+            
+            InputStream inputStream = getClass().getClassLoader()
+                    .getResourceAsStream("followup-template/Followup.xlsm");
+            ZipInputStream zipInputStream = new ZipInputStream(inputStream);
+            BufferedOutputStream dest = null;
+            ZipEntry entry;
+            int buffer = 2048;
+            while ((entry = zipInputStream.getNextEntry()) != null) {
+                int count;
+                byte data[] = new byte[buffer];
+                FileOutputStream fos = new FileOutputStream(entry.getName());
+                dest = new BufferedOutputStream(fos, buffer);
+                while ((count = zipInputStream.read(data, 0, buffer)) != -1) {
+                    dest.write(data, 0, count);
+                }
+                dest.flush();
+                dest.close();
+            }
+            zipInputStream.close();
             // write (generateJiraDataSheet)
             // write (generateSharedStrings)
             // zip
