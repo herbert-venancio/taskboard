@@ -208,7 +208,7 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
         followUpData.taskSummary=task.getSummary();
         followUpData.taskDescription = issueDescription(task);
         followUpData.taskFullDescription = issueFullDescription(task);
-        followUpData.taskRelease = (String) defaultIfNull(getRelease(task), "No release set");
+        followUpData.taskRelease = coalesce(getRelease(task), getRelease(demand) ,"No release set");
         
         followUpData.subtaskType = ballparkMapping.getIssueType();
         followUpData.subtaskStatus = task.getStatusName();
@@ -225,7 +225,7 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
         followUpData.queryType = "FEATURE BALLPARK";
         return followUpData;
     }
-
+    
     private FollowUpData createSubTaskFollowup(Issue demand, Issue task, Issue subtask) {
         FollowUpData followUpData = new FollowUpData();
         followUpData.planningType = "Plan";
@@ -248,7 +248,7 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
         followUpData.taskSummary=task.getSummary();
         followUpData.taskDescription = issueDescription(task);
         followUpData.taskFullDescription = issueFullDescription(task);
-        followUpData.taskRelease = (String) defaultIfNull(getRelease(task), "No release set");
+        followUpData.taskRelease = coalesce(getRelease(subtask), getRelease(task), getRelease(demand), "No release set");
         
         followUpData.subtaskType = subtask.getIssueTypeName();
         followUpData.subtaskStatus = subtask.getStatusName();
@@ -273,6 +273,9 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
     }
     
     private String getRelease(Issue i) {
+        if (i == null)
+            return null;
+        
         CustomField customField = (CustomField)i.getCustomFields().get(jiraProperties.getCustomfield().getRelease().getId());
         if (customField == null) return null;
         if (customField.getValue() == null)
@@ -312,4 +315,11 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
     private String issueFullDescription(String issueType, String size, Integer issueNum, String description) {
         return issueType + " | " +issueDescription(size, issueNum, description);
     }
+    
+    private static <T> T coalesce(@SuppressWarnings("unchecked") T ...items) {
+        for(T i : items) if(i != null) return i;
+        return null;
+    }
 }
+
+
