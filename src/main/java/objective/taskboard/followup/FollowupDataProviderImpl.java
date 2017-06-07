@@ -28,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -54,7 +55,11 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
     
     @Override
     public List<FollowUpData> getJiraData() {
-        LinkedList<Issue> issues = new LinkedList<>(issueBufferService.getAllIssuesVisibleToUser());
+        List<Issue> issuesVisibleToUser = issueBufferService.getAllIssuesVisibleToUser().stream()
+                .filter(issue -> isAllowedStatus(issue.getStatus()))
+                .collect(Collectors.toList());
+        
+        LinkedList<Issue> issues = new LinkedList<>(issuesVisibleToUser);
         
         followUpBallparks = new LinkedHashMap<String, FollowUpData>();
         
@@ -69,6 +74,10 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
         return result;
     }
     
+    private boolean isAllowedStatus(long status) {
+        return !jiraProperties.getStatusExcludedFromFollowup().contains(status);
+    }
+
     private Map<String, Issue> makeDemandBallparks(LinkedList<Issue> issues) {
         Map<String, Issue> demands = new LinkedHashMap<>();
         Iterator<Issue> it = issues.iterator();

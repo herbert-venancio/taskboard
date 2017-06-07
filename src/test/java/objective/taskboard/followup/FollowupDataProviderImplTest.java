@@ -77,6 +77,7 @@ public class FollowupDataProviderImplTest {
     
     @InjectMocks
     FollowupDataProviderImpl subject;
+
     
     private static final long demandIssueType  = 13;
     private static final long taskIssueType    = 12; 
@@ -86,6 +87,7 @@ public class FollowupDataProviderImplTest {
     private static final long deployIssueType  = 17;
     private static final long frontEndIssueType     = 18;
     
+    private static final long statusOpen = 11L;
     private static final long statusToDo = 13L;
     private static final long statusInProgress = 15L;
     private static final long statusCancelled = 16L;
@@ -94,6 +96,7 @@ public class FollowupDataProviderImplTest {
     @Before
     public void before() throws InterruptedException, ExecutionException {
         Map<Long, Status> statusMap = new LinkedHashMap<>();
+        statusMap.put(statusOpen,       new Status(null, statusOpen,       "Open", null, null));
         statusMap.put(statusToDo,       new Status(null, statusToDo,       "To Do", null, null));
         statusMap.put(statusInProgress, new Status(null, statusInProgress, "In Progress", null, null));
         statusMap.put(statusCancelled,  new Status(null, statusCancelled,  "Cancelled", null, null));
@@ -1092,6 +1095,33 @@ public class FollowupDataProviderImplTest {
             " taskBallpark           : 2.0\n" + 
             " queryType              : SUBTASK PLAN"
             );
+    }
+    
+    @Test
+    public void issuesInCertainStatus_shouldNotShowUpAtAll() {
+        configureBallparkMappings(
+                taskIssueType + " : \n" +
+                "  - issueType : BALLPARK - Development\n" + 
+                "    tshirtCustomFieldId: Dev_Tshirt\n" + 
+                "    jiraIssueTypes:\n" + 
+                "      - " + devIssueType + "\n"
+                );
+        
+        when(jiraProperties.getStatusExcludedFromFollowup()).thenReturn(Arrays.asList(statusOpen));
+        
+        issues( 
+                demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1).release("Demand Release #1").issueStatus(statusOpen),
+                
+                task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2).timeSpentInHours(1)
+                        .issueStatus(statusOpen)
+                        .tshirt("Dev_Tshirt", "L")
+                        .tshirt("Alpha_TestTshirt", "S"),
+                        
+                subtask().id(4).key("PROJ-4").summary("Smry 4").timeSpentInHours(5).parent("PROJ-3").issueType(devIssueType).tshirtSize("XL")
+                        .issueStatus(statusOpen)
+            );
+        
+        assertFollowupsForIssuesEquals("");
     }
     
     private void configureBallparkMappings(String string) {

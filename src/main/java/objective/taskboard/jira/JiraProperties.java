@@ -1,5 +1,7 @@
 package objective.taskboard.jira;
 
+import java.util.LinkedList;
+
 /*-
  * [LICENSE]
  * Taskboard
@@ -85,6 +87,9 @@ public class JiraProperties {
     
     @NotNull
     private List<Long> subtaskStatusThatDontPreventBallparkGeneration;
+    
+    
+    private List<Long> statusExcludedFromFollowup = new LinkedList<Long>();
     
     @Data 
     public static class Lousa {
@@ -258,5 +263,9 @@ public class JiraProperties {
     
     public boolean isFeature(Issue i) {
         return issuetype.getFeatures().stream().anyMatch(ft -> ft.id == i.getType());
+    }
+
+    public List<Long> getStatusExcludedFromFollowup() {
+        return statusExcludedFromFollowup;
     }
 }
