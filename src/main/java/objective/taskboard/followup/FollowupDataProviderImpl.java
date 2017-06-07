@@ -128,6 +128,8 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
         while(it.hasNext()) {
             Issue issue = it.next();
             Issue feature = featuresByKey.get(issue.getParent());
+            if (feature == null)
+                continue;
             
             Issue demand  = demandsByKey.get(feature.getParent());
             if (demand != null)

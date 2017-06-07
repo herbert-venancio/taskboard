@@ -33,14 +33,14 @@ public class FollowUpData {
     public String demandSummary = "";
     public String demandDescription = "";
 
-    public String taskType;
-    public String taskStatus;
-    public Long taskId;
-    public String taskNum;
-    public String taskSummary;
-    public String taskDescription;
-    public String taskFullDescription;
-    public String taskRelease;
+    public String taskType = "";
+    public String taskStatus = "";
+    public Long taskId = 0L;
+    public String taskNum = "";
+    public String taskSummary = "";
+    public String taskDescription = "";
+    public String taskFullDescription = "";
+    public String taskRelease = "";
 
     public String subtaskType;
     public String subtaskStatus;
@@ -54,7 +54,7 @@ public class FollowUpData {
     public Double worklog;
     public Double wrongWorklog;
     public Double demandBallpark = 0.0;
-    public Double taskBallpark;
+    public Double taskBallpark = 0.0;
 
     public String queryType;
     

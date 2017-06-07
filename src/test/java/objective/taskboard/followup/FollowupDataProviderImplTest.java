@@ -1124,6 +1124,22 @@ public class FollowupDataProviderImplTest {
         assertFollowupsForIssuesEquals("");
     }
     
+    @Test
+    public void issuesWithoutParent_shouldNotBreakTheFollowupGeneration() {
+        configureBallparkMappings(
+                taskIssueType + " : \n" +
+                "  - issueType : BALLPARK - Development\n" + 
+                "    tshirtCustomFieldId: Dev_Tshirt\n" + 
+                "    jiraIssueTypes:\n" + 
+                "      - " + devIssueType + "\n"
+                );
+        
+        issues( 
+                subtask().id(4).key("PROJ-4").summary("Smry 4").timeSpentInHours(5).issueType(devIssueType).tshirtSize("XL")
+            );
+        assertFollowupsForIssuesEquals("");
+    }
+    
     private void configureBallparkMappings(String string) {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         Map<Long, List<BallparkMapping>> ballparkMappings;
