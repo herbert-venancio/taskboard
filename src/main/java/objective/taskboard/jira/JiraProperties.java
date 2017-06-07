@@ -1,5 +1,6 @@
 package objective.taskboard.jira;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 
 /*-
@@ -80,16 +81,7 @@ public class JiraProperties {
     private String schema;
    
     @NotNull
-    private Map<Long, List<BallparkMapping>> ballparkMappings;
-    
-    @NotNull
-    private List<Long> featureStatusThatDontGenerateBallpark;
-    
-    @NotNull
-    private List<Long> subtaskStatusThatDontPreventBallparkGeneration;
-    
-    
-    private List<Long> statusExcludedFromFollowup = new LinkedList<Long>();
+    private Followup followup;
     
     @Data 
     public static class Lousa {
@@ -257,15 +249,29 @@ public class JiraProperties {
         private Integer valueStreamOrder;
     }
     
+    @Data
+    public static class Followup {
+        @NotNull
+        private Map<Long, List<BallparkMapping>> ballparkMappings = new LinkedHashMap<Long, List<BallparkMapping>>();
+        
+        @NotNull
+        private List<Long> featureStatusThatDontGenerateBallpark = new LinkedList<>();
+        
+        @NotNull
+        private List<Long> subtaskStatusThatDontPreventBallparkGeneration = new LinkedList<>();;
+        
+        private List<Long> statusExcludedFromFollowup = new LinkedList<Long>();
+        
+        public List<Long> getStatusExcludedFromFollowup() {
+            return statusExcludedFromFollowup;
+        }
+    }
+    
     public boolean isDemand(Issue i) {
         return issuetype.getDemand().id == i.getType();
     }
     
     public boolean isFeature(Issue i) {
         return issuetype.getFeatures().stream().anyMatch(ft -> ft.id == i.getType());
-    }
-
-    public List<Long> getStatusExcludedFromFollowup() {
-        return statusExcludedFromFollowup;
     }
 }

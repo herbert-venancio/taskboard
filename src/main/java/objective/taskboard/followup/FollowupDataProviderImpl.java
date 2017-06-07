@@ -75,7 +75,7 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
     }
     
     private boolean isAllowedStatus(long status) {
-        return !jiraProperties.getStatusExcludedFromFollowup().contains(status);
+        return !jiraProperties.getFollowup().getStatusExcludedFromFollowup().contains(status);
     }
 
     private Map<String, Issue> makeDemandBallparks(LinkedList<Issue> issues) {
@@ -108,7 +108,7 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
             
             features.put(feature.getIssueKey(), feature);
             
-            if (jiraProperties.getFeatureStatusThatDontGenerateBallpark().contains(feature.getStatus()))
+            if (jiraProperties.getFollowup().getFeatureStatusThatDontGenerateBallpark().contains(feature.getStatus()))
                 continue;
             
             List<BallparkMapping> mappingList = getBallparksOrCry(feature);
@@ -137,7 +137,7 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
             
             subtasksFollowups.add(createSubTaskFollowup(demand, feature, issue));
 
-            if (jiraProperties.getSubtaskStatusThatDontPreventBallparkGeneration().contains(issue.getStatus()))
+            if (jiraProperties.getFollowup().getSubtaskStatusThatDontPreventBallparkGeneration().contains(issue.getStatus()))
                 continue;
             
             String featureTshirtForThisSubTask = "";

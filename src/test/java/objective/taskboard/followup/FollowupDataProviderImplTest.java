@@ -75,9 +75,10 @@ public class FollowupDataProviderImplTest {
     CustomField propertiesCustomField;
     private TShirtSize tshirtSizeInfo;
     
+    private JiraProperties.Followup followup = new JiraProperties.Followup();
+    
     @InjectMocks
     FollowupDataProviderImpl subject;
-
     
     private static final long demandIssueType  = 13;
     private static final long taskIssueType    = 12; 
@@ -124,6 +125,7 @@ public class FollowupDataProviderImplTest {
         issueType.setFeatures(Arrays.asList(new IssueTypeDetails(taskIssueType)));
         
         when(jiraProperties.getIssuetype()).thenReturn(issueType);
+        when(jiraProperties.getFollowup()).thenReturn(followup);
         propertiesCustomField.setRelease(new CustomFieldDetails("RELEASE_CF_ID"));
 
     }
@@ -734,7 +736,7 @@ public class FollowupDataProviderImplTest {
                 );
             
         tshirtSizeInfo.setIds(Arrays.asList("Dev_Tshirt","Alpha_TestTshirt"));
-        when(jiraProperties.getFeatureStatusThatDontGenerateBallpark()).thenReturn(Arrays.asList(statusDone));
+        followup.setFeatureStatusThatDontGenerateBallpark(Arrays.asList(statusDone));
         
         issues( 
             demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1),
@@ -757,7 +759,7 @@ public class FollowupDataProviderImplTest {
                 );
             
         tshirtSizeInfo.setIds(Arrays.asList("Dev_Tshirt","Alpha_TestTshirt","Review_Tshirt"));
-        when(jiraProperties.getSubtaskStatusThatDontPreventBallparkGeneration()).thenReturn(Arrays.asList(statusCancelled));
+        followup.setSubtaskStatusThatDontPreventBallparkGeneration(Arrays.asList(statusCancelled));
         
         issues( 
             demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1),
@@ -1107,7 +1109,7 @@ public class FollowupDataProviderImplTest {
                 "      - " + devIssueType + "\n"
                 );
         
-        when(jiraProperties.getStatusExcludedFromFollowup()).thenReturn(Arrays.asList(statusOpen));
+        followup.setStatusExcludedFromFollowup(Arrays.asList(statusOpen));
         
         issues( 
                 demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1).release("Demand Release #1").issueStatus(statusOpen),
@@ -1148,7 +1150,7 @@ public class FollowupDataProviderImplTest {
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
-        when(jiraProperties.getBallparkMappings()).thenReturn(ballparkMappings);
+        followup.setBallparkMappings(ballparkMappings);
     }
     
     private List<FollowUpData> sortJiraDataByIssuesKeys(List<FollowUpData> actual) {

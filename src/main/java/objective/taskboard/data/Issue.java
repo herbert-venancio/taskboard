@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 
 import com.atlassian.jira.rest.client.api.domain.TimeTracking;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -41,6 +42,7 @@ import objective.taskboard.jira.JiraProperties.BallparkMapping;
 import objective.taskboard.jira.MetadataService;
 
 @Data
+@JsonIgnoreProperties({"jiraProperties","metaDataService"})
 public class Issue implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -285,7 +287,7 @@ public class Issue implements Serializable {
     public String getTShirtSize() {
         String mainTShirtSizeFieldId = jiraProperties.getCustomfield().getTShirtSize().getMainTShirtSizeFieldId();
         CustomField customField = (CustomField)customFields.get(mainTShirtSizeFieldId);
-        if (customField.getValue() == null)
+        if (customField == null || customField.getValue() == null)
             return null;
         return customField.getValue().toString();
     }
@@ -293,6 +295,10 @@ public class Issue implements Serializable {
     public void setTShirtSize(String value) {
         String mainTShirtSizeFieldId = jiraProperties.getCustomfield().getTShirtSize().getMainTShirtSizeFieldId();
         CustomField customField = (CustomField)customFields.get(mainTShirtSizeFieldId);
+        if (customField == null) {
+            customField = new CustomField(mainTShirtSizeFieldId, value);
+            customFields.put(mainTShirtSizeFieldId, customField);
+        }
         customField.setValue(value);        
     }
     
@@ -303,11 +309,11 @@ public class Issue implements Serializable {
     }
 
     public List<BallparkMapping> getBallparkMappings() {
-        return jiraProperties.getBallparkMappings().get(getType());
+        return jiraProperties.getFollowup().getBallparkMappings().get(getType());
     }
     
     public List<BallparkMapping> getActiveBallparkMappings() {
-        List<BallparkMapping> list = jiraProperties.getBallparkMappings().get(getType());
+        List<BallparkMapping> list = jiraProperties.getFollowup().getBallparkMappings().get(getType());
         if (list == null)
             return null;
         

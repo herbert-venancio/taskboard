@@ -203,8 +203,6 @@ public class JiraIssueToIssueConverter {
         customFields.put(jiraProperties.getCustomfield().getClassOfService().getId(), getClassOfServiceValue(metadata));
         customFields.put(jiraProperties.getCustomfield().getBlocked().getId(), metadata.getBlocked());
         customFields.put(jiraProperties.getCustomfield().getLastBlockReason().getId(), metadata.getLastBlockReason());
-        if (metadata.getTShirtSizes().size() > 0)
-            System.out.println();
         customFields.putAll(metadata.getTShirtSizes());
         customFields.putAll(metadata.getAdditionalEstimatedHours());
         customFields.putAll(getRelease(metadata));
