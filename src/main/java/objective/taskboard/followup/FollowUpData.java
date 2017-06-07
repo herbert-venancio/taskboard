@@ -1,5 +1,7 @@
 package objective.taskboard.followup;
 
+import static org.apache.commons.lang.ObjectUtils.defaultIfNull;
+
 /*-
  * [LICENSE]
  * Taskboard
@@ -24,12 +26,12 @@ package objective.taskboard.followup;
 public class FollowUpData {
     public String planningType;
     public String project;
-    public String demandType;
-    public String demandStatus;
-    public String demandId;
-    public String demandNum;
-    public String demandSummary;
-    public String demandDescription;
+    public String demandType = "";
+    public String demandStatus  = "";
+    public Long demandId;
+    public String demandNum = "";
+    public String demandSummary = "";
+    public String demandDescription = "";
 
     public String taskType;
     public String taskStatus;
@@ -37,7 +39,7 @@ public class FollowUpData {
     public String taskNum;
     public String taskSummary;
     public String taskDescription;
-    public String taskFullSescription;
+    public String taskFullDescription;
     public String taskRelease;
 
     public String subtaskType;
@@ -51,8 +53,42 @@ public class FollowUpData {
     
     public Double worklog;
     public Double wrongWorklog;
-    public Double demandBallpark;
+    public Double demandBallpark = 0.0;
     public Double taskBallpark;
 
     public String queryType;
+    
+    @Override
+    public String toString() {
+        return
+                   " planningType           : " + planningType
+                +"\n project                : "+ project
+                +"\n demandType             : "+ demandType
+                +"\n demandStatus           : "+ demandStatus
+                +"\n demandId               : "+ defaultIfNull(demandId,"")
+                +"\n demandNum              : "+ demandNum
+                +"\n demandSummary          : "+ demandSummary
+                +"\n demandDescription      : "+ demandDescription
+                +"\n taskType               : "+ taskType
+                +"\n taskStatus             : "+ taskStatus
+                +"\n taskId                 : "+ taskId
+                +"\n taskNum                : "+ taskNum
+                +"\n taskSummary            : "+ taskSummary
+                +"\n taskDescription        : "+ taskDescription
+                +"\n taskFullDescription    : "+ taskFullDescription
+                +"\n taskRelease            : "+ taskRelease
+                +"\n subtaskType            : "+ subtaskType
+                +"\n subtaskStatus          : "+ subtaskStatus
+                +"\n subtaskId              : "+ subtaskId
+                +"\n subtaskNum             : "+ subtaskNum
+                +"\n subtaskSummary         : "+ subtaskSummary
+                +"\n subtaskDescription     : "+ subtaskDescription
+                +"\n subtaskFullDescription : "+ subtaskFullDescription
+                +"\n tshirtSize             : "+ tshirtSize
+                +"\n worklog                : "+ worklog
+                +"\n wrongWorklog           : "+ wrongWorklog
+                +"\n demandBallpark         : "+ demandBallpark
+                +"\n taskBallpark           : "+ taskBallpark
+                +"\n queryType              : "+ queryType;
+    }
 }

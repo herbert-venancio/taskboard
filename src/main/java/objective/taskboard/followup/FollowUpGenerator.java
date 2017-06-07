@@ -52,45 +52,47 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class FollowUpGenerator {
 
+    private static final int BUFFER = 2048;
     private static final String PROPERTY_XML_SPACE_PRESERVE = " xml:space=\"preserve\"";
     private static final String TAG_T_IN_SHARED_STRINGS = "t";
     private static final String PATH_SHARED_STRINGS_INITIAL = "followup-template/sharedStrings-initial.xml";
     private static final String PATH_SHARED_STRINGS_TEMPLATE = "followup-template/sharedStrings-template.xml";
-    private static final String PATH_SI_SHARED_STRINGS_TEMPLATE = "followup-template/si-sharedStrings-template.xml";
+    private static final String PATH_SI_SHARED_STRINGS_TEMPLATE = "followup-template/sharedStrings-si-template.xml";
     private static final String PATH_SHEET_7_TEMPLATE = "followup-template/sheet7-template.xml";
-    private static final String PATH_ROW_SHEET_TEMPLATE = "followup-template/row-sheet-template.xml";
+    private static final String PATH_ROW_SHEET_TEMPLATE = "followup-template/sheet7-row-template.xml";
 
     @Autowired
     private FollowupDataProvider provider;
 
-    public ByteArrayResource generate() {
+    public ByteArrayResource generate() throws Exception {
         try {
-            Map<String, Long> sharedStrings = getSharedStringsTemplate();
-            FileOutputStream outputSheet7 = new FileOutputStream("sheet7.xml");
+            Map<String, Long> sharedStrings = getSharedStringsInitial();
+            FileOutputStream outputSheet7 = new FileOutputStream("Followup-gerado/xl/worksheets/sheet7.xml");
             outputSheet7.write(generateJiraDataSheet(sharedStrings).getBytes());
             outputSheet7.close();
-            FileOutputStream outputSharedStrings = new FileOutputStream("sharedStrings.xml");
+            FileOutputStream outputSharedStrings = new FileOutputStream("Followup-gerado/xl/sharedStrings.xml");
             outputSharedStrings.write(generateSharedStrings(sharedStrings).getBytes());
             outputSharedStrings.close();
-            
-            InputStream inputStream = getClass().getClassLoader()
-                    .getResourceAsStream("followup-template/Followup.xlsm");
-            ZipInputStream zipInputStream = new ZipInputStream(inputStream);
-            BufferedOutputStream dest = null;
-            ZipEntry entry;
-            int buffer = 2048;
-            while ((entry = zipInputStream.getNextEntry()) != null) {
-                int count;
-                byte data[] = new byte[buffer];
-                FileOutputStream fos = new FileOutputStream(entry.getName());
-                dest = new BufferedOutputStream(fos, buffer);
-                while ((count = zipInputStream.read(data, 0, buffer)) != -1) {
-                    dest.write(data, 0, count);
-                }
-                dest.flush();
-                dest.close();
-            }
-            zipInputStream.close();
+
+//            InputStream inputStream = getClass().getClassLoader()
+//                    .getResourceAsStream("followup-template/Followup.xlsm");
+//            ZipInputStream zipInputStream = new ZipInputStream(inputStream);
+//            BufferedOutputStream dest = null;
+//            ZipEntry entry;
+//            while ((entry = zipInputStream.getNextEntry()) != null) {
+//                int count;
+//                byte data[] = new byte[BUFFER];
+//                if (!entry.isDirectory()) {
+//                    FileOutputStream fos = new FileOutputStream(entry.getName());
+//                    dest = new BufferedOutputStream(fos, BUFFER);
+//                    while ((count = zipInputStream.read(data, 0, BUFFER)) != -1) {
+//                        dest.write(data, 0, count);
+//                    }
+//                    dest.flush();
+//                    dest.close();
+//                }
+//            }
+//            zipInputStream.close();
             // write (generateJiraDataSheet)
             // write (generateSharedStrings)
             // zip
@@ -99,11 +101,11 @@ public class FollowUpGenerator {
             return null;
         } catch (Exception e) {
             log.error(e.getMessage() == null ? e.toString() : e.getMessage());
-            return null;
+            throw e;
         }
     }
 
-    Map<String, Long> getSharedStringsTemplate() throws ParserConfigurationException, SAXException, IOException {
+    Map<String, Long> getSharedStringsInitial() throws ParserConfigurationException, SAXException, IOException {
         Map<String, Long> sharedStrings = new HashMap<String, Long>();
         InputStream inputStream = getClass().getClassLoader()
                 .getResourceAsStream(PATH_SHARED_STRINGS_INITIAL);
@@ -142,22 +144,22 @@ public class FollowUpGenerator {
             rowValues.put("taskNum", getIndexInSharedStrings(sharedStrings, followUpData.taskNum));
             rowValues.put("taskSummary", getIndexInSharedStrings(sharedStrings, followUpData.taskSummary));
             rowValues.put("taskDescription", getIndexInSharedStrings(sharedStrings, followUpData.taskDescription));
-            rowValues.put("taskFullSescription", getIndexInSharedStrings(sharedStrings, followUpData.taskFullSescription));
+            rowValues.put("taskFullSescription", getIndexInSharedStrings(sharedStrings, followUpData.taskFullDescription));
             rowValues.put("subtaskType", getIndexInSharedStrings(sharedStrings, followUpData.subtaskType));
             rowValues.put("subtaskStatus", getIndexInSharedStrings(sharedStrings, followUpData.subtaskStatus));
             rowValues.put("subtaskNum", getIndexInSharedStrings(sharedStrings, followUpData.subtaskNum));
             rowValues.put("subtaskSummary", getIndexInSharedStrings(sharedStrings, followUpData.subtaskSummary));
             rowValues.put("subtaskDescription", getIndexInSharedStrings(sharedStrings, followUpData.subtaskDescription));
             rowValues.put("subtaskFullDescription", getIndexInSharedStrings(sharedStrings, followUpData.subtaskFullDescription));
-            rowValues.put("demandId", getIndexInSharedStrings(sharedStrings, followUpData.demandId));
-            rowValues.put("taskId", getIndexInSharedStrings(sharedStrings, followUpData.taskId.toString()));
-            rowValues.put("subtaskId", getIndexInSharedStrings(sharedStrings, followUpData.subtaskId.toString()));
+            rowValues.put("demandId", String.valueOf(followUpData.demandId));
+            rowValues.put("taskId", String.valueOf(followUpData.taskId));
+            rowValues.put("subtaskId", String.valueOf(followUpData.subtaskId));
             rowValues.put("planningType", getIndexInSharedStrings(sharedStrings, followUpData.planningType));
             rowValues.put("taskRelease", getIndexInSharedStrings(sharedStrings, followUpData.taskRelease));
-            rowValues.put("worklog", getIndexInSharedStrings(sharedStrings, followUpData.worklog.toString()));
-            rowValues.put("wrongWorklog", getIndexInSharedStrings(sharedStrings, followUpData.wrongWorklog.toString()));
-            rowValues.put("demandBallpark", getIndexInSharedStrings(sharedStrings, followUpData.demandBallpark.toString()));
-            rowValues.put("taskBallpark", getIndexInSharedStrings(sharedStrings, followUpData.taskBallpark.toString()));
+            rowValues.put("worklog", String.valueOf(followUpData.worklog));
+            rowValues.put("wrongWorklog", String.valueOf(followUpData.wrongWorklog));
+            rowValues.put("demandBallpark", String.valueOf(followUpData.demandBallpark));
+            rowValues.put("taskBallpark", String.valueOf(followUpData.taskBallpark));
             rowValues.put("tshirtSize", getIndexInSharedStrings(sharedStrings, followUpData.tshirtSize));
             rowValues.put("queryType", getIndexInSharedStrings(sharedStrings, followUpData.queryType));
             rows += StrSubstitutor.replace(rowTemplate, rowValues);

@@ -5,9 +5,7 @@
   </sheetPr>
   <dimension ref="A1:BF3665"/>
   <sheetViews>
-    <sheetView tabSelected="1" workbookViewId="0">
-      <selection activeCell="A2" sqref="A2"/>
-    </sheetView>
+    <sheetView workbookViewId="0"/>
   </sheetViews>
   <sheetFormatPr defaultColWidth="8.7109375" defaultRowHeight="15" x14ac:dyDescent="0.25"/>
   <cols>
@@ -33,7 +31,7 @@
     <col min="22" max="22" width="16.140625" hidden="1" customWidth="1"/>
     <col min="23" max="23" width="14.42578125" customWidth="1"/>
     <col min="24" max="24" width="10.42578125" customWidth="1"/>
-    <col min="25" max="25" width="17.140625" style="24" customWidth="1"/>
+    <col min="25" max="25" width="17.140625" style="25" customWidth="1"/>
     <col min="26" max="26" width="19" customWidth="1"/>
     <col min="27" max="27" width="17.7109375" customWidth="1"/>
     <col min="28" max="28" width="12.42578125" customWidth="1"/>
@@ -109,148 +107,148 @@
         <v>0</v>
       </c>
       <c r="B1" t="s">
-        <v>15</v>
+        <v>14</v>
       </c>
       <c r="C1" t="s">
-        <v>16</v>
+        <v>15</v>
       </c>
       <c r="D1" t="s">
-        <v>17</v>
+        <v>16</v>
       </c>
       <c r="E1" t="s">
-        <v>223</v>
+        <v>198</v>
       </c>
       <c r="F1" t="s">
-        <v>18</v>
+        <v>17</v>
       </c>
       <c r="G1" t="s">
-        <v>224</v>
+        <v>199</v>
       </c>
       <c r="H1" t="s">
-        <v>225</v>
+        <v>200</v>
       </c>
       <c r="I1" t="s">
-        <v>227</v>
+        <v>202</v>
       </c>
       <c r="J1" t="s">
-        <v>228</v>
+        <v>203</v>
       </c>
       <c r="K1" t="s">
-        <v>229</v>
+        <v>204</v>
       </c>
       <c r="L1" t="s">
-        <v>230</v>
+        <v>205</v>
       </c>
       <c r="M1" t="s">
-        <v>231</v>
+        <v>206</v>
       </c>
       <c r="N1" t="s">
-        <v>232</v>
+        <v>207</v>
       </c>
       <c r="O1" t="s">
-        <v>234</v>
+        <v>209</v>
       </c>
       <c r="P1" t="s">
-        <v>235</v>
+        <v>210</v>
       </c>
       <c r="Q1" t="s">
-        <v>236</v>
+        <v>211</v>
       </c>
       <c r="R1" t="s">
-        <v>237</v>
+        <v>212</v>
       </c>
       <c r="S1" s="6" t="s">
-        <v>222</v>
+        <v>197</v>
       </c>
       <c r="T1" s="6" t="s">
-        <v>226</v>
+        <v>201</v>
       </c>
       <c r="U1" s="6" t="s">
-        <v>233</v>
+        <v>208</v>
       </c>
       <c r="V1" s="6" t="s">
-        <v>82</v>
+        <v>79</v>
       </c>
       <c r="W1" s="6" t="s">
-        <v>83</v>
+        <v>80</v>
       </c>
       <c r="X1" s="6" t="s">
-        <v>84</v>
+        <v>81</v>
       </c>
       <c r="Y1" s="6" t="s">
-        <v>95</v>
+        <v>91</v>
       </c>
       <c r="Z1" s="6" t="s">
-        <v>100</v>
+        <v>96</v>
       </c>
       <c r="AA1" s="6" t="s">
-        <v>238</v>
+        <v>213</v>
       </c>
       <c r="AB1" s="6" t="s">
-        <v>101</v>
+        <v>97</v>
       </c>
       <c r="AC1" s="6" t="s">
-        <v>133</v>
+        <v>127</v>
       </c>
       <c r="AD1" s="6" t="s">
-        <v>148</v>
+        <v>138</v>
       </c>
       <c r="AE1" s="6" t="s">
-        <v>150</v>
+        <v>140</v>
       </c>
       <c r="AF1" s="6" t="s">
-        <v>146</v>
+        <v>136</v>
       </c>
       <c r="AG1" s="6" t="s">
-        <v>147</v>
+        <v>137</v>
       </c>
       <c r="AH1" s="6" t="s">
-        <v>152</v>
+        <v>142</v>
       </c>
       <c r="AI1" s="6" t="s">
-        <v>153</v>
+        <v>143</v>
       </c>
       <c r="AJ1" t="s">
-        <v>94</v>
+        <v>90</v>
       </c>
       <c r="AK1" t="s">
-        <v>149</v>
+        <v>139</v>
       </c>
       <c r="AL1" t="s">
-        <v>167</v>
+        <v>157</v>
       </c>
       <c r="AM1" t="s">
-        <v>168</v>
+        <v>158</v>
       </c>
       <c r="AN1" t="s">
-        <v>35</v>
-      </c>
-      <c r="AO1" t="s">
         <v>34</v>
       </c>
-      <c r="AP1" t="s">
-        <v>37</v>
-      </c>
-      <c r="AQ1" t="s">
+      <c r="AO1" t="s">
         <v>33</v>
       </c>
+      <c r="AP1" t="s">
+        <v>36</v>
+      </c>
+      <c r="AQ1" t="s">
+        <v>32</v>
+      </c>
       <c r="AR1" t="s">
-        <v>45</v>
+        <v>44</v>
       </c>
       <c r="AS1" t="s">
-        <v>46</v>
+        <v>45</v>
       </c>
       <c r="AT1" t="s">
-        <v>47</v>
+        <v>46</v>
       </c>
       <c r="AU1" t="s">
-        <v>48</v>
+        <v>47</v>
       </c>
       <c r="AV1" t="s">
-        <v>53</v>
+        <v>52</v>
       </c>
       <c r="AW1" t="s">
-        <v>54</v>
+        <v>53</v>
       </c>
     </row>
     <row r="2" spans="1:49" x14ac:dyDescent="0.25">
@@ -309,37 +307,37 @@
         <v>15</v>
       </c>
       <c r="S2">
-        <v>16</v>
+        <v>1</v>
       </c>
       <c r="T2">
-        <v>17</v>
+        <v>2</v>
       </c>
       <c r="U2">
-        <v>18</v>
+        <v>3</v>
       </c>
       <c r="V2" t="s">
-        <v>19</v>
+        <v>16</v>
       </c>
       <c r="W2" t="s">
-        <v>20</v>
+        <v>17</v>
       </c>
       <c r="X2">
-        <v>21</v>
+        <v>1.0</v>
       </c>
       <c r="Y2">
-        <v>21</v>
+        <v>1.0</v>
       </c>
       <c r="Z2">
-        <v>21</v>
+        <v>1.0</v>
       </c>
       <c r="AA2">
-        <v>21</v>
+        <v>1.0</v>
       </c>
       <c r="AB2" t="s">
-        <v>22</v>
+        <v>18</v>
       </c>
       <c r="AC2" t="s">
-        <v>23</v>
+        <v>19</v>
       </c>
       <c r="AD2" s="4">
         <f>SUMIFS(Clusters[Effort],Clusters[Cluster Name],AllIssues[[#This Row],[SUBTASK_TYPE]],Clusters[T-Shirt Size],AllIssues[tshirt_size])</f>

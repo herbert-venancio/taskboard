@@ -89,82 +89,62 @@
       </c>
       <c r="AD${rowNumber}" s="4">
         <f>SUMIFS(Clusters[Effort],Clusters[Cluster Name],AllIssues[[#This Row],[SUBTASK_TYPE]],Clusters[T-Shirt Size],AllIssues[tshirt_size])</f>
-        <v></v>
       </c>
       <c r="AE${rowNumber}" s="4">
         <f>SUMIFS(Clusters[Cycle],Clusters[Cluster Name],AllIssues[[#This Row],[SUBTASK_TYPE]],Clusters[T-Shirt Size],AllIssues[tshirt_size])</f>
-        <v></v>
       </c>
       <c r="AF${rowNumber}" s="4">
         <f>AllIssues[EffortEstimate]-AllIssues[EffortDone]</f>
-        <v></v>
       </c>
       <c r="AG${rowNumber}" s="4">
         <f>AllIssues[CycleEstimate]-AllIssues[CycleDone]</f>
-        <v></v>
       </c>
       <c r="AH${rowNumber}" s="4">
         <f>IF(AllIssues[[#This Row],[planning_type]]="Ballpark",AllIssues[EffortEstimate],0)</f>
-        <v></v>
       </c>
       <c r="AI${rowNumber}" s="4">
         <f>IF(AllIssues[[#This Row],[planning_type]]="Plan",AllIssues[EffortEstimate],0)</f>
-        <v></v>
       </c>
       <c r="AJ${rowNumber}" s="4">
         <f>IF(OR(AllIssues[SUBTASK_STATUS]="Done",AllIssues[SUBTASK_STATUS]="Cancelled"),AllIssues[EffortEstimate],0)</f>
-        <v></v>
       </c>
       <c r="AK${rowNumber}" s="4">
         <f>IF(OR(AllIssues[SUBTASK_STATUS]="Done",AllIssues[SUBTASK_STATUS]="Cancelled"),AllIssues[CycleEstimate],0)</f>
-        <v></v>
       </c>
       <c r="AL${rowNumber}" s="4">
         <f>IF(OR(AllIssues[SUBTASK_STATUS]="Done",AllIssues[SUBTASK_STATUS]="Cancelled"),AllIssues[worklog],0)</f>
-        <v></v>
       </c>
       <c r="AM${rowNumber}" s="4">
         <f>IF(OR(AllIssues[SUBTASK_STATUS]="Done",AllIssues[SUBTASK_STATUS]="Cancelled"),0, AllIssues[worklog])</f>
-        <v></v>
       </c>
       <c r="AN${rowNumber}" s="4">
         <f>IF(COUNTIFS(AllIssues[TASK_ID],AllIssues[TASK_ID],AllIssues[TASK_ID],"&gt;0")=0,0,1/COUNTIFS(AllIssues[TASK_ID],AllIssues[TASK_ID],AllIssues[TASK_ID],"&gt;0"))</f>
-        <v></v>
       </c>
       <c r="AO${rowNumber}" s="4">
         <f>IF(COUNTIFS(AllIssues[demand_description],AllIssues[demand_description])=0,0,1/COUNTIFS(AllIssues[demand_description],AllIssues[demand_description]))</f>
-        <v></v>
       </c>
       <c r="AP${rowNumber}" s="4">
         <f>IF(AllIssues[planning_type]="Plan",1,0)</f>
-        <v></v>
       </c>
       <c r="AQ${rowNumber}" s="4">
         <f>IF(AllIssues[[#This Row],[SUBTASK_STATUS]]="Done", AllIssues[[#This Row],[EffortDone]],0)</f>
-        <v></v>
       </c>
       <c r="AR${rowNumber}" s="4" t="str">
         <f>IF(AllIssues[demand_description]="","",VLOOKUP(AllIssues[demand_status],'Ordered Status'!A:B,2, FALSE))</f>
-        <v></v>
       </c>
       <c r="AS${rowNumber}" s="4" t="str">
         <f>IF(AllIssues[TASK_DESCRIPTION]="","",VLOOKUP(AllIssues[TASK_STATUS],'Ordered Status'!C:D,2, FALSE))</f>
-        <v></v>
       </c>
       <c r="AT${rowNumber}" s="4" t="str">
         <f>IF(AllIssues[SUBTASK_DESCRIPTION]="","",VLOOKUP(AllIssues[SUBTASK_STATUS],'Ordered Status'!E:F,2, FALSE))</f>
-        <v></v>
       </c>
       <c r="AU${rowNumber}" s="4" t="str">
         <f>CONCATENATE(AllIssues[SubtaskOrderedStatus]," &gt; ",AllIssues[SUBTASK_FULL_DESCRIPTION])</f>
-        <v></v>
       </c>
       <c r="AV${rowNumber}" s="4">
         <f>IF(AllIssues[TASK_TYPE]="Bug",AllIssues[EffortEstimate], 0)</f>
-        <v></v>
       </c>
       <c r="AW${rowNumber}" s="4">
         <f>IF(AllIssues[TASK_TYPE]="Bug",AllIssues[worklog],0)</f>
-        <v></v>
       </c>
     </row>

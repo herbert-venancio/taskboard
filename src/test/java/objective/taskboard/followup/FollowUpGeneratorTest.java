@@ -55,7 +55,7 @@ public class FollowUpGeneratorTest {
         followUpData.project = "PROJECT TEST";
         followUpData.demandType = "Demand";
         followUpData.demandStatus = "Doing";
-        followUpData.demandId = "1";
+        followUpData.demandId = 1L;
         followUpData.demandNum = "I-1";
         followUpData.demandSummary = "Summary Demand";
         followUpData.demandDescription = "Description Demand";
@@ -65,7 +65,7 @@ public class FollowUpGeneratorTest {
         followUpData.taskNum = "I-2";
         followUpData.taskSummary = "Summary Feature";
         followUpData.taskDescription = "Description Feature";
-        followUpData.taskFullSescription = "Full Description Feature";
+        followUpData.taskFullDescription = "Full Description Feature";
         followUpData.taskRelease = "Release";
         followUpData.subtaskType = "Sub-task";
         followUpData.subtaskStatus = "Doing";
@@ -84,13 +84,13 @@ public class FollowUpGeneratorTest {
     }
 
     @Test
-    public void getSharedStringsTemplateTest() throws ParserConfigurationException, SAXException, IOException {
-        Map<String, Long> sharedStrings = subject.getSharedStringsTemplate();
-        assertEquals("Shared strings size", 215, sharedStrings.size());
+    public void getSharedStringsInitialTest() throws ParserConfigurationException, SAXException, IOException {
+        Map<String, Long> sharedStrings = subject.getSharedStringsInitial();
+        assertEquals("Shared strings size", 248, sharedStrings.size());
         assertEquals("First shared string", 0, sharedStrings.get("project").longValue());
         assertEquals("Some special character shared string", 48, sharedStrings.get("Demand Status > Demand > Task Status > Task > Subtask").longValue());
-        assertEquals("Any shared string", 130, sharedStrings.get("Group %").longValue());
-        assertEquals("Last shared string", 214, sharedStrings.get("(Tudo)").longValue());
+        assertEquals("Any shared string", 133, sharedStrings.get("Group %").longValue());
+        assertEquals("Last shared string", 247, sharedStrings.get("Rótulos de Coluna").longValue());
     }
 
     @Test
@@ -104,10 +104,10 @@ public class FollowUpGeneratorTest {
         String jiraDataSheetExpected = IOUtils.toString(inputStream, "UTF-8");
 
         assertEquals("Jira data sheet", jiraDataSheetExpected, jiraDataSheet);
-        assertEquals("Shared strings size", 24, sharedStrings.size());
+        assertEquals("Shared strings size", 20, sharedStrings.size());
         assertEquals("First shared string", 0, sharedStrings.get("PROJECT TEST").longValue());
         assertEquals("Any shared string", 14, sharedStrings.get("Description Sub-task").longValue());
-        assertEquals("Last shared string", 23, sharedStrings.get("Type").longValue());
+        assertEquals("Last shared string", 19, sharedStrings.get("Type").longValue());
     }
 
     @Test
@@ -128,7 +128,8 @@ public class FollowUpGeneratorTest {
     }
 
     @Test
-    public void generateTest() throws ParserConfigurationException, SAXException, IOException {
+    public void generateTest() throws Exception {
+        when(provider.getJiraData()).thenReturn(asList(getFollowUpDataDefault()));
         subject.generate();
     }
 
