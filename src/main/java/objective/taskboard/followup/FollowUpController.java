@@ -21,12 +21,9 @@ package objective.taskboard.followup;
  * [/LICENSE]
  */
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,22 +33,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/followup")
 public class FollowUpController {
 
+    @Autowired
+    private FollowUpGenerator followupGenerator;
+    
     @RequestMapping
-    public ResponseEntity download() {
-//        File file2Upload = new File("src/main/resources/followup-template/Followup.xlsm");
-//        Path path = Paths.get(file2Upload.getAbsolutePath());
-//        ByteArrayResource resource = null;
-//        try {
-//            resource = new ByteArrayResource(Files.readAllBytes(path));
-//        } catch (IOException e) {
-//            System.out.println("there was an error getting the file bytes " + e.getMessage());
-//        }
-//
-//        return ResponseEntity.ok()
-//                .contentLength(file2Upload.length())
-//                .header("Content-Disposition","attachment; filename=Followup.xlsm")
-//                .body(resource);
-        return null;
+    public ResponseEntity<Object> download() {
+        try {
+            ByteArrayResource resource = followupGenerator.generate();
+            return ResponseEntity.ok()
+                  .contentLength(resource.contentLength())
+                  .header("Content-Disposition","attachment; filename=Followup.xlsm")
+                  .body(resource);
+        } catch (Exception e) {
+            return new ResponseEntity<Object>(e.getMessage(), INTERNAL_SERVER_ERROR);
+        }
     }
 
 }

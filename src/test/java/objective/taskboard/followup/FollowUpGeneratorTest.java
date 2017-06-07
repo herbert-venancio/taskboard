@@ -38,6 +38,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.core.io.ByteArrayResource;
 import org.xml.sax.SAXException;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -130,7 +131,8 @@ public class FollowUpGeneratorTest {
     @Test
     public void generateTest() throws Exception {
         when(provider.getJiraData()).thenReturn(asList(getFollowUpDataDefault()));
-        subject.generate();
+        ByteArrayResource resource = subject.generate();
+        assertNotNull("Resource should't be null", resource);
     }
 
 }
