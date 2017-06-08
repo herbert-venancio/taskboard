@@ -1,4 +1,4 @@
-package objective.taskboard.followup;
+package objective.taskboard.controller;
 
 /*-
  * [LICENSE]
@@ -29,13 +29,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import objective.taskboard.followup.FollowUpGenerator;
+
 @RestController
 @RequestMapping("/api/followup")
 public class FollowUpController {
 
     @Autowired
     private FollowUpGenerator followupGenerator;
-    
+
     @RequestMapping
     public ResponseEntity<Object> download() {
         try {

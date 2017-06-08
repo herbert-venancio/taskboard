@@ -168,6 +168,22 @@
             width: 31px;
         }
 
+        .followup-button {
+            width: 35px;
+            height: 35px;
+            padding: 4px;
+            margin-left: 5px;
+            display: block;
+        }
+
+        .followup-button:hover {
+            background: #CCC;
+            opacity: 0.8;
+            -webkit-transition: all .5s;
+            -moz-transition: all .5s;
+            transition: all .5s;
+        }
+
     </style>
 
     <template>
@@ -205,6 +221,10 @@
                             <paper-toolbar class="menuLink" paper-drawer-toggle>
                                 <iron-icon class="menu-icon" icon="settings" paper-drawer-toggle></iron-icon>
                             </paper-toolbar>
+                        </div>
+                        <div>
+                            <paper-icon-button icon="file-download" title="Download Followup Spreadsheet"
+                                               class="followup-button" on-tap="downloadFollowup"></paper-icon-button>
                         </div>
                     </paper-material>
                     <board-table id="table" conf={{conf}} aspects-filter="{{aspectsFilter}}"></board-table>
@@ -383,6 +403,10 @@
                     $.get("/api/versions", $.proxy(function(data) {
                         this.releases = [""].concat(data);
                     }, this));
+                },
+
+                downloadFollowup: function() {
+                    window.location = "api/followup";
                 }
             });
         })();
