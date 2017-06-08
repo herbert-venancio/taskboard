@@ -1,0 +1,42 @@
+[
+  {
+    "self": "http://54.68.128.117:8100/rest/api/2/priority/6",
+    "statusColor": "#cc0000",
+    "description": "Produção parada, desenvolvimento ou testes obstruídos.",
+    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/blocker.svg",
+    "name": "Operação Parada",
+    "id": "6"
+  },
+  {
+    "self": "http://54.68.128.117:8100/rest/api/2/priority/7",
+    "statusColor": "#ff0000",
+    "description": "Quedas, perda de dados, memory leak severo.",
+    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/critical.svg",
+    "name": "Crítico",
+    "id": "7"
+  },
+  {
+    "self": "http://54.68.128.117:8100/rest/api/2/priority/8",
+    "statusColor": "#009900",
+    "description": "Considerável perda de funcionalidade.",
+    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/major.svg",
+    "name": "Alta",
+    "id": "8"
+  },
+  {
+    "self": "http://54.68.128.117:8100/rest/api/2/priority/9",
+    "statusColor": "#006600",
+    "description": "Pequena perda de funcionalidade, ou outro problema com workaround fácil.",
+    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
+    "name": "Média",
+    "id": "9"
+  },
+  {
+    "self": "http://54.68.128.117:8100/rest/api/2/priority/10",
+    "statusColor": "#003300",
+    "description": "Problema cosmético, como erros de ortografia ou texto desalinhado.",
+    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/trivial.svg",
+    "name": "Baixa",
+    "id": "10"
+  }
+]
