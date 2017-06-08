@@ -1,36 +1,37 @@
 jira:
-  ballparkMappings:
-    # Feature mappings
-    11 : # Parent issue type (Feature)
-      - issueType : Ballpark - Planejamento
-        tshirtCustomFieldId: customfield_11244 # Planejamento Tamanho
-        jiraIssueTypes:
-          - 32 # Análise Desenvolvimento
-        valueStreamOrder: 1
-        
-      - issueType : Ballpark - Desenvolvimento
-        tshirtCustomFieldId: customfield_11245 # Desenvolvimento Tamanho
-        jiraIssueTypes:
-          - 9 # Tarefa de Fábrica
-          - 10002 # Bug de Alfa
-          - 10006 # Reintegração de Branch
-          - 10005 # Preparação Produção
-        valueStreamOrder: 2
-        
-      - issueType : Ballpark - Alfa
-        tshirtCustomFieldId: customfield_11246 # Alfa Tamanho
-        jiraIssueTypes:
-          - 21 # Teste (Alfa)
-        valueStreamOrder: 3
-        
-      - issueType : Ballpark - Acompanhamento Desenvolvimento
-        tshirtCustomFieldId: customfield_11247 # Acompanhamento Tamanho
-        jiraIssueTypes:
-          - Acompanhamento Desenvolvimento # 10003 
-        valueStreamOrder: 4
-        
-      - issueType : Ballpark - Beta
-        tshirtCustomFieldId: customfield_11340 # Beta Tamanho      
-        jiraIssueTypes:
-          - 10004 # Acompanhamento Beta 
-        valueStreamOrder: 5
+  followup:
+    ballparkMappings:
+      # Feature mappings
+      11 : # Parent issue type (Feature)
+        - issueType : Ballpark - Planejamento
+          tshirtCustomFieldId: customfield_11244 # Planejamento Tamanho
+          jiraIssueTypes:
+            - 32 # Análise Desenvolvimento
+          valueStreamOrder: 1
+          
+        - issueType : Ballpark - Desenvolvimento
+          tshirtCustomFieldId: customfield_11245 # Desenvolvimento Tamanho
+          jiraIssueTypes:
+            - 9 # Tarefa de Fábrica
+            - 10002 # Bug de Alfa
+            - 10006 # Reintegração de Branch
+            - 10005 # Preparação Produção
+          valueStreamOrder: 2
+          
+        - issueType : Ballpark - Alfa
+          tshirtCustomFieldId: customfield_11246 # Alfa Tamanho
+          jiraIssueTypes:
+            - 21 # Teste (Alfa)
+          valueStreamOrder: 3
+          
+        - issueType : Ballpark - Acompanhamento Desenvolvimento
+          tshirtCustomFieldId: customfield_11247 # Acompanhamento Tamanho
+          jiraIssueTypes:
+            - 10003 # Acompanhamento Desenvolvimento 
+          valueStreamOrder: 4
+          
+        - issueType : Ballpark - Beta
+          tshirtCustomFieldId: customfield_11340 # Beta Tamanho      
+          jiraIssueTypes:
+            - 10004 # Acompanhamento Beta 
+          valueStreamOrder: 5

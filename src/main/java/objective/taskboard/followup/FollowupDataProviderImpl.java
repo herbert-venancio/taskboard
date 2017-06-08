@@ -83,6 +83,9 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
         Iterator<Issue> it = issues.iterator();
         while(it.hasNext()) {
             Issue issue = it.next();
+            if (issue.getIssueKey().equals("TASKB-611")) {
+                System.out.println();
+            }
             if (isDemand(issue)) {
                 followUpBallparks.put(issue.getIssueKey(), createBallparkDemand(issue));
                 demands.put(issue.getIssueKey(), issue);
@@ -191,11 +194,27 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
         followUpData.subtaskFullDescription = issueFullDescription("BALLPARK - Demand", "M", 0, demand.getSummary());
         followUpData.tshirtSize = "M";
         followUpData.worklog = 0.0;
-        followUpData.wrongWorklog = demand.getTimeTracking().getTimeSpentMinutes()/60.0; 
-        followUpData.demandBallpark = demand.getTimeTracking().getOriginalEstimateMinutes()/60.0;
+        followUpData.wrongWorklog = timeSpentInHour(demand); 
+        followUpData.demandBallpark = originalEstimateInHour(demand);
         followUpData.taskBallpark = 0.0;
         followUpData.queryType = "DEMAND BALLPARK";
         return followUpData;
+    }
+    
+    private Double timeSpentInHour(Issue issue) {
+        if (issue.getTimeTracking() == null)
+            return 0.0;
+        if (issue.getTimeTracking().getTimeSpentMinutes() == null)
+            return 0.0;
+        return issue.getTimeTracking().getTimeSpentMinutes()/60.0;
+    }
+    
+    private Double originalEstimateInHour(Issue issue) {
+        if (issue.getTimeTracking() == null)
+            return 0.0;
+        if (issue.getTimeTracking().getOriginalEstimateMinutes() == null)
+            return 0.0;
+        return issue.getTimeTracking().getOriginalEstimateMinutes()/60.0;
     }
     
     private FollowUpData createBallparkFeature(Issue demand, Issue task, BallparkMapping ballparkMapping) {
@@ -230,9 +249,9 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
         followUpData.subtaskFullDescription = issueFullDescription(ballparkMapping.getIssueType(), "", 0, task.getSummary());
         followUpData.tshirtSize = task.getTshirtSizeOfSubtaskForBallpark(ballparkMapping);
         followUpData.worklog = 0.0;
-        followUpData.wrongWorklog = task.getTimeTracking().getTimeSpentMinutes()/60.0; 
-        followUpData.demandBallpark = demand.getTimeTracking().getOriginalEstimateMinutes()/60.0;
-        followUpData.taskBallpark = task.getTimeTracking().getOriginalEstimateMinutes()/60.0;
+        followUpData.wrongWorklog = timeSpentInHour(task); 
+        followUpData.demandBallpark = originalEstimateInHour(demand);
+        followUpData.taskBallpark = originalEstimateInHour(task);
         followUpData.queryType = "FEATURE BALLPARK";
         return followUpData;
     }
@@ -249,7 +268,7 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
             followUpData.demandNum = demand.getIssueKey();
             followUpData.demandSummary = demand.getSummary();
             followUpData.demandDescription = issueDescription("",demand);
-            followUpData.demandBallpark = demand.getTimeTracking().getOriginalEstimateMinutes()/60.0;
+            followUpData.demandBallpark = originalEstimateInHour(demand);
         }
         
         followUpData.taskType = task.getIssueTypeName();
@@ -270,9 +289,9 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
         followUpData.subtaskDescription = issueDescription(subtask);
         followUpData.subtaskFullDescription = issueFullDescription(subtask);
         followUpData.tshirtSize = subtask.getTShirtSize();
-        followUpData.worklog = subtask.getTimeTracking().getTimeSpentMinutes()/60.0;;
+        followUpData.worklog = timeSpentInHour(subtask);
         followUpData.wrongWorklog = 0.0; 
-        followUpData.taskBallpark = task.getTimeTracking().getOriginalEstimateMinutes()/60.0;
+        followUpData.taskBallpark = originalEstimateInHour(task);
         followUpData.queryType = "SUBTASK PLAN";
         return followUpData;
     }

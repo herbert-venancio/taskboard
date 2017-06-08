@@ -1142,6 +1142,54 @@ public class FollowupDataProviderImplTest {
         assertFollowupsForIssuesEquals("");
     }
     
+    @Test
+    public void nullTimeSpent_ShouldNotBreak() {
+        configureBallparkMappings(
+                taskIssueType + " : \n" +
+                "  - issueType : BALLPARK - Development\n" + 
+                "    tshirtCustomFieldId: Dev_Tshirt\n" + 
+                "    jiraIssueTypes:\n" + 
+                "      - "+ frontEndIssueType + "\n" +
+                "      - "+ devIssueType + "\n" 
+                );
+            
+        tshirtSizeInfo.setIds(Arrays.asList("Dev_Tshirt","Alpha_TestTshirt"));
+        followup.setFeatureStatusThatDontGenerateBallpark(Arrays.asList(statusDone));
+        
+        issues( 
+            demand().id(2).key("PROJ-2").summary("Smry 2"),
+            task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3")
+                .issueStatus(statusOpen)
+                .tshirt("Dev_Tshirt", "L")
+                .tshirt("Alpha_TestTshirt", "S"),
+                subtask().id(4).key("PROJ-4").summary("Smry 4").parent("PROJ-3").issueType(devIssueType).tshirtSize("XL")
+                .issueStatus(statusOpen)
+        );
+        
+        subject.getJiraData();
+    }
+    
+    @Test
+    public void nullOriginalEstimate_ShouldNotBreak() {
+        configureBallparkMappings(
+                taskIssueType + " : \n" +
+                "  - issueType : BALLPARK - Development\n" + 
+                "    tshirtCustomFieldId: Dev_Tshirt\n" + 
+                "    jiraIssueTypes:\n" + 
+                "      - "+ frontEndIssueType + "\n" +
+                "      - "+ devIssueType + "\n" 
+                );
+            
+        tshirtSizeInfo.setIds(Arrays.asList("Dev_Tshirt","Alpha_TestTshirt"));
+        followup.setFeatureStatusThatDontGenerateBallpark(Arrays.asList(statusDone));
+        
+        issues( 
+            demand().id(2).key("PROJ-2").summary("Smry 2").timeSpentInHours(0).originalEstimateInHours(null)
+        );
+        
+        subject.getJiraData();
+    }
+    
     private void configureBallparkMappings(String string) {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         Map<Long, List<BallparkMapping>> ballparkMappings;
@@ -1205,8 +1253,8 @@ public class FollowupDataProviderImplTest {
         private String key; 
         private String summary; 
         private Long status = statusToDo;
-        private int originalEstimateMinutes;
-        private int timeSpentMinutes;
+        private Integer originalEstimateMinutes;
+        private Integer timeSpentMinutes;
         private String parent;
         private Map<String, Object> customFields = new LinkedHashMap<>();
         
@@ -1241,13 +1289,13 @@ public class FollowupDataProviderImplTest {
             return this;
         }
 
-        public IssueBuilder timeSpentInHours(int hours) {
+        public IssueBuilder timeSpentInHours(Integer hours) {
             this.timeSpentMinutes = hours * 60;
             return this;
         }
 
-        public IssueBuilder originalEstimateInHours(int hours) {
-            this.originalEstimateMinutes = hours * 60;
+        public IssueBuilder originalEstimateInHours(Integer hours) {
+            this.originalEstimateMinutes = (hours == null?0:hours) * 60;
             return this;
         }
         public IssueBuilder key(String key) {
@@ -1265,6 +1313,9 @@ public class FollowupDataProviderImplTest {
         }
         
         public Issue build() {
+            Issue.TaskboardTimeTracking timeTracking = new Issue.TaskboardTimeTracking(originalEstimateMinutes, timeSpentMinutes);
+            if (originalEstimateMinutes == null && timeSpentMinutes == null)
+                timeTracking = null;
             return Issue.from(id, 
                 key, 
                 getProjectKey(), 
@@ -1294,7 +1345,7 @@ public class FollowupDataProviderImplTest {
                 null, //components
                 customFields, //customFields
                 0L,   //priorityOrder
-                new Issue.TaskboardTimeTracking(originalEstimateMinutes, timeSpentMinutes),
+                timeTracking,
                 jiraProperties,
                 metadataService);
         }
