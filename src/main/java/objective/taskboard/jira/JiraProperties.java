@@ -268,10 +268,10 @@ public class JiraProperties {
     }
     
     public boolean isDemand(Issue i) {
-        return issuetype.getDemand().id == i.getType();
+        return getIssuetype().getDemand().id == i.getType();
     }
     
     public boolean isFeature(Issue i) {
-        return issuetype.getFeatures().stream().anyMatch(ft -> ft.id == i.getType());
+        return getIssuetype().getFeatures().stream().anyMatch(ft -> ft.id == i.getType());
     }
 }

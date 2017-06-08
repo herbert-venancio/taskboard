@@ -83,10 +83,7 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
         Iterator<Issue> it = issues.iterator();
         while(it.hasNext()) {
             Issue issue = it.next();
-            if (issue.getIssueKey().equals("TASKB-611")) {
-                System.out.println();
-            }
-            if (isDemand(issue)) {
+            if (jiraProperties.isDemand(issue)) {
                 followUpBallparks.put(issue.getIssueKey(), createBallparkDemand(issue));
                 demands.put(issue.getIssueKey(), issue);
                 it.remove();
@@ -101,7 +98,7 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
         Iterator<Issue> it = issues.iterator();
         while(it.hasNext()) {
             Issue feature = it.next();
-            if (!isFeature(feature)) 
+            if (!jiraProperties.isFeature(feature)) 
                 continue;
             it.remove();
             
@@ -297,8 +294,8 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
     }
 
     private String getTshirtSize(Issue i) {
-        if (isFeature(i)) return "";
-        if (isDemand(i)) return "M";
+        if (jiraProperties.isFeature(i)) return "";
+        if (jiraProperties.isDemand(i)) return "M";
         return i.getTShirtSize();
     }
     
@@ -311,14 +308,6 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
         if (customField.getValue() == null)
             return null;
         return customField.getValue().toString();
-    }
-
-    private boolean isFeature(Issue issue) {
-        return jiraProperties.getIssuetype().getFeatures().stream().anyMatch(f-> f.getId() == issue.getType());
-    }
-
-    private boolean isDemand(Issue issue) {
-        return jiraProperties.getIssuelink().getDemand().getName().equals(issue.getIssueTypeName());
     }
 
     private String issueDescription(Issue issue) {

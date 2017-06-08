@@ -40,6 +40,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -123,10 +124,13 @@ public class FollowupDataProviderImplTest {
         
         JiraProperties.IssueType issueType = new JiraProperties.IssueType();
         issueType.setFeatures(Arrays.asList(new IssueTypeDetails(taskIssueType)));
+        issueType.setDemand(new IssueTypeDetails(demandIssueType));
         
         when(jiraProperties.getIssuetype()).thenReturn(issueType);
         when(jiraProperties.getFollowup()).thenReturn(followup);
         propertiesCustomField.setRelease(new CustomFieldDetails("RELEASE_CF_ID"));
+        when(jiraProperties.isDemand(Matchers.any())).thenCallRealMethod();
+        when(jiraProperties.isFeature(Matchers.any())).thenCallRealMethod();
 
     }
     
