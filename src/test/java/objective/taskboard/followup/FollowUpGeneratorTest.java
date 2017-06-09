@@ -132,7 +132,7 @@ public class FollowUpGeneratorTest {
     public void generateTest() throws Exception {
         when(provider.getJiraData()).thenReturn(asList(getFollowUpDataDefault()));
         ByteArrayResource resource = subject.generate();
-        assertNotNull("Resource should't be null", resource);
+        assertNotNull("Resource shouldn't be null", resource);
     }
 
 }
