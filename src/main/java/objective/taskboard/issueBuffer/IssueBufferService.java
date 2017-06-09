@@ -29,6 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
@@ -106,8 +107,32 @@ public class IssueBufferService {
     public synchronized List<Issue> getIssues() {
         return issueBuffer.values().stream()
                 .filter(t -> projectService.isProjectVisible(t.getProjectKey()))
+                .filter(t -> isParentVisible(t))
                 .collect(toList());
     }
+    
+    public synchronized List<Issue> getAllIssuesVisibleToUser() {
+        return issueBuffer.values().stream()
+                .filter(t -> projectService.isProjectVisible(t.getProjectKey()))
+                .collect(toList());
+    }
+
+    private boolean isParentVisible(Issue issue) {
+    	
+    	boolean visible = false;
+    	    	
+    	if (StringUtils.isEmpty(issue.getParent()))
+    		return true;
+    	
+    	Issue findFirst = issueBuffer.values().stream()
+		    .filter(t -> t.getIssueKey().equals(issue.getParent()))
+		    .findFirst().orElse(null);
+    	
+    	if (findFirst != null)
+    		visible = isParentVisible(findFirst);
+
+		return visible;
+	}
 
     private synchronized void setIssues(List<Issue> issues) {
         issueBuffer.clear();

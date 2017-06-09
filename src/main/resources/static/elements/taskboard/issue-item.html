@@ -157,6 +157,7 @@
             left: 0;
             -webkit-filter: drop-shadow(1px 1px 1px #616161);
             filter: drop-shadow(1px 1px 1px #616161);
+            pointer-events: none;
         }
 
         .cancelada {
@@ -170,12 +171,17 @@
             left: 0;
             -webkit-filter: drop-shadow(1px 1px 1px #616161);
             filter: drop-shadow(1px 1px 1px #616161);
+            pointer-events: none;
         }
 
         .iconImpedidaCancelada {
             width: 25px;
             height: 25px;
-            padding: 25px;
+            display: block;
+		    position: absolute;
+		    top: 50%;
+		    left: 50%;
+		    transform: translate(-50%, -50%);
         }
 
         paper-spinner {
@@ -223,6 +229,7 @@
 	        <iron-signals on-iron-signal-hierarchical-filter-changed="forceRefreshHierarchyMatch"></iron-signals>
 	        <paper-material class$="issue {{getClasses(item.hierarchyMatch, item.issueKey)}}" elevation="0" style$="{{getIssueColor(item)}}"
 	                        on-tap="opendialog" title="Issue details">
+	                        
 	            <template is="dom-if" if="{{issueImpedida(item)}}">
 	                <div class="impedida">
 	                    <iron-icon id="issueImpedidaIcon" class="iconImpedidaCancelada" icon="av:not-interested"

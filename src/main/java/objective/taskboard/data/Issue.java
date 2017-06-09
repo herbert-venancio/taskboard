@@ -25,16 +25,24 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
+import com.atlassian.jira.rest.client.api.domain.TimeTracking;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.DateDeserializers.DateDeserializer;
 
 import lombok.Data;
+import objective.taskboard.jira.JiraProperties;
+import objective.taskboard.jira.JiraProperties.BallparkMapping;
+import objective.taskboard.jira.MetadataService;
 
 @Data
+@JsonIgnoreProperties({"jiraProperties","metaDataService"})
 public class Issue implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -104,13 +112,110 @@ public class Issue implements Serializable {
     private Map<String, Object> customFields;
 
     private Long priorityOrder;
+    
+    private TaskboardTimeTracking timeTracking;
 
-    public static Issue from(Long id, String issueKey, String projectKey, String project, long issueType, String typeIconUri, String summary, long status, long startDateStepMillis,
-            String subresponsavel1, String subresponsavel2, String parent, long parentType, String parentTypeIconUri, List<String> dependencies, String color, String subResponsaveis,
-            String assignee, String usersTeam, long priority, Date dueDate, long created, String description, List<String> teams, String comments, List<String> labels,
-            List<String> components, Map<String, Object> customFields, Long priorityOrder) {
-        return new Issue(id, issueKey, projectKey, project, issueType, typeIconUri, summary, status, startDateStepMillis, subresponsavel1, subresponsavel2, parent, parentType, parentTypeIconUri,
-                dependencies, false, false, false, color, subResponsaveis, assignee, usersTeam, priority, dueDate, created, description, teams, comments, labels, components, customFields, priorityOrder);
+    private JiraProperties jiraProperties;
+    
+    private MetadataService metaDataService;
+
+    public static Issue from(Long id, 
+            String issueKey, 
+            String projectKey, 
+            String project, 
+            long issueType, 
+            String typeIconUri, 
+            String summary, 
+            long status, 
+            long startDateStepMillis,
+            String subresponsavel1, 
+            String subresponsavel2, 
+            String parent, 
+            long parentType, 
+            String parentTypeIconUri, 
+            List<String> dependencies, 
+            String color, 
+            String subResponsaveis,
+            String assignee, 
+            String usersTeam, 
+            long priority, 
+            Date dueDate, 
+            long created, 
+            String description, 
+            List<String> teams, 
+            String comments, 
+            List<String> labels,
+            List<String> components, 
+            Map<String, Object> customFields, 
+            Long priorityOrder,
+            TaskboardTimeTracking timeTracking,
+            JiraProperties jiraProperties,
+            MetadataService metaDataService) 
+    {
+        return new Issue(id, 
+                issueKey, 
+                projectKey, 
+                project, 
+                issueType, 
+                typeIconUri, 
+                summary, 
+                status, 
+                startDateStepMillis, 
+                subresponsavel1, 
+                subresponsavel2, 
+                parent, 
+                parentType, 
+                parentTypeIconUri,
+                dependencies, 
+                false, 
+                false, 
+                false, 
+                color, 
+                subResponsaveis, 
+                assignee, 
+                usersTeam, 
+                priority, 
+                dueDate, 
+                created, 
+                description, 
+                teams, 
+                comments, 
+                labels, 
+                components, 
+                customFields, 
+                priorityOrder,
+                timeTracking,
+                jiraProperties,
+                metaDataService);
+    }
+    
+    public static class TaskboardTimeTracking {
+        private Integer originalEstimateMinutes;
+        private Integer timeSpentMinutes;
+        
+        public TaskboardTimeTracking(Integer originalEstimateMinutes, Integer timeSpentMinutes) {
+            this.originalEstimateMinutes = originalEstimateMinutes;
+            this.timeSpentMinutes = timeSpentMinutes;
+        }
+        
+        public static TaskboardTimeTracking fromJira(TimeTracking tt) {
+            if (tt == null)
+                return null;
+            return new TaskboardTimeTracking(tt.getOriginalEstimateMinutes(), tt.getTimeSpentMinutes());
+        }
+        
+        public Integer getOriginalEstimateMinutes() {
+            return originalEstimateMinutes;
+        }
+        public void setOriginalEstimateMinutes(Integer originalEstimateMinutes) {
+            this.originalEstimateMinutes = originalEstimateMinutes;
+        }
+        public Integer getTimeSpentMinutes() {
+            return timeSpentMinutes;
+        }
+        public void setTimeSpentMinutes(Integer timeSpentMinutes) {
+            this.timeSpentMinutes = timeSpentMinutes;
+        }
     }
 
     /**
@@ -135,7 +240,9 @@ public class Issue implements Serializable {
             String parent, long parentType, String parentTypeIconUri, List<String> dependencies, boolean render,
             boolean favorite, boolean hidden, String color, String subResponsaveis, String assignee, String usersTeam,
             long priority, Date dueDate, long created, String description, List<String> teams, String comments,
-            List<String> labels, List<String> components, Map<String, Object> customFields, Long priorityOrder) {
+            List<String> labels, List<String> components, Map<String, Object> customFields, Long priorityOrder, 
+            TaskboardTimeTracking timeTracking,
+            JiraProperties properties, MetadataService metaDataService) {
         this.id = id;
         this.issueKey = issueKey;
         this.projectKey = projectKey;
@@ -168,5 +275,64 @@ public class Issue implements Serializable {
         this.components = components;
         this.customFields = customFields;
         this.priorityOrder = priorityOrder;
+        this.timeTracking = timeTracking;
+        this.jiraProperties = properties;
+        this.metaDataService = metaDataService;
+    }
+    
+    public Integer getIssueKeyNum() {
+        return Integer.parseInt(issueKey.replace(projectKey+"-", ""));
+    }
+    
+    public String getTShirtSize() {
+        String mainTShirtSizeFieldId = jiraProperties.getCustomfield().getTShirtSize().getMainTShirtSizeFieldId();
+        CustomField customField = (CustomField)customFields.get(mainTShirtSizeFieldId);
+        if (customField == null || customField.getValue() == null)
+            return null;
+        return customField.getValue().toString();
+    }
+    
+    public void setTShirtSize(String value) {
+        String mainTShirtSizeFieldId = jiraProperties.getCustomfield().getTShirtSize().getMainTShirtSizeFieldId();
+        CustomField customField = (CustomField)customFields.get(mainTShirtSizeFieldId);
+        if (customField == null) {
+            customField = new CustomField(mainTShirtSizeFieldId, value);
+            customFields.put(mainTShirtSizeFieldId, customField);
+        }
+        customField.setValue(value);        
+    }
+    
+    public String getTshirtSizeOfSubtaskForBallpark(BallparkMapping mapping) {
+        CustomField customField = (CustomField)customFields.get(mapping.getTshirtCustomFieldId());
+        if (customField == null || customField.getValue() == null) return null;
+        return customField.getValue().toString();
+    }
+
+    public List<BallparkMapping> getBallparkMappings() {
+        return jiraProperties.getFollowup().getBallparkMappings().get(getType());
+    }
+    
+    public List<BallparkMapping> getActiveBallparkMappings() {
+        List<BallparkMapping> list = jiraProperties.getFollowup().getBallparkMappings().get(getType());
+        if (list == null)
+            return null;
+        
+        return list.stream().filter(bm -> getTshirtSizeOfSubtaskForBallpark(bm)!=null).collect(Collectors.toList());
+    }
+    
+    public String getIssueTypeName() {
+        try {
+            return metaDataService.getIssueTypeMetadata().get(type).getName();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+    
+    public String getStatusName() {
+        try {
+            return metaDataService.getStatusesMetadata().get(status).getName();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }

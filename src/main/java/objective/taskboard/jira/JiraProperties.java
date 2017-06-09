@@ -1,5 +1,8 @@
 package objective.taskboard.jira;
 
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+
 /*-
  * [LICENSE]
  * Taskboard
@@ -30,11 +33,12 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import lombok.AccessLevel;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import objective.taskboard.data.Issue;
 
 @Data
 @ConfigurationProperties(prefix = "jira")
@@ -73,7 +77,11 @@ public class JiraProperties {
     @Valid
     private Resolutions resolutions;
     
+    @NotNull
     private String schema;
+   
+    @NotNull
+    private Followup followup;
     
     @Data 
     public static class Lousa {
@@ -108,7 +116,7 @@ public class JiraProperties {
         private CustomFieldDetails additionalEstimatedHours = new CustomFieldDetails("");
         
         @NoArgsConstructor
-        @AllArgsConstructor(access = AccessLevel.PRIVATE)
+        @AllArgsConstructor
         @Data
         public static class CustomFieldDetails {
             @NotNull
@@ -128,6 +136,11 @@ public class JiraProperties {
             @NotNull
             @NotEmpty
             private List<String> ids;
+            
+            @NotNull
+            @NotEmpty            
+            private String mainTShirtSizeFieldId;
+            
             @NotNull
             @NotEmpty
             private String extraSmall = "XS"; 
@@ -143,6 +156,10 @@ public class JiraProperties {
             @NotNull
             @NotEmpty
             private String extraLarge = "XL";
+            
+            public List<String> getIds() {
+                return ids;
+            }
         }
         
         @Data
@@ -158,15 +175,22 @@ public class JiraProperties {
     public static class IssueLink {
         @NotNull
         private List<String> dependencies;
+        
         @NotNull
         @Valid
         private LinkDetails demand;
+        
+        public IssueLink(){}
+        public IssueLink(LinkDetails details){this.demand=details;}
         
         @Data
         public static class LinkDetails {
             @NotNull
             @NotEmpty
             private String name;
+            
+            public LinkDetails(){}
+            public LinkDetails(String name){this.name=name;}
         }
     }
     
@@ -176,12 +200,21 @@ public class JiraProperties {
         @Valid
         private IssueTypeDetails demand;
         
+        @NotNull
+        private List<IssueTypeDetails> features; 
+        
         @Data
         public static class IssueTypeDetails {
+            public IssueTypeDetails(long taskissuetype) {
+                id = taskissuetype;
+            }
+            public IssueTypeDetails() {}
+
             @NotNull
             @DecimalMin("1")
-            private int id;
+            private long id;
         }
+        
     }
     
     @Data
@@ -199,5 +232,46 @@ public class JiraProperties {
             @NotEmpty
             private String name;
         }
+    }
+    
+    @Data
+    public static class BallparkMapping {
+        @NotNull
+        private String issueType;
+        
+        @NotNull
+        private List <Long> jiraIssueTypes;
+        
+        @NotNull
+        private String tshirtCustomFieldId;
+        
+        @NotNull
+        private Integer valueStreamOrder;
+    }
+    
+    @Data
+    public static class Followup {
+        @NotNull
+        private Map<Long, List<BallparkMapping>> ballparkMappings = new LinkedHashMap<Long, List<BallparkMapping>>();
+        
+        @NotNull
+        private List<Long> featureStatusThatDontGenerateBallpark = new LinkedList<>();
+        
+        @NotNull
+        private List<Long> subtaskStatusThatDontPreventBallparkGeneration = new LinkedList<>();;
+        
+        private List<Long> statusExcludedFromFollowup = new LinkedList<Long>();
+        
+        public List<Long> getStatusExcludedFromFollowup() {
+            return statusExcludedFromFollowup;
+        }
+    }
+    
+    public boolean isDemand(Issue i) {
+        return getIssuetype().getDemand().id == i.getType();
+    }
+    
+    public boolean isFeature(Issue i) {
+        return getIssuetype().getFeatures().stream().anyMatch(ft -> ft.id == i.getType());
     }
 }
