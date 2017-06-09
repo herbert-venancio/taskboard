@@ -22,6 +22,7 @@ package objective.taskboard.followup;
  */
 
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.lang.ObjectUtils.defaultIfNull;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -39,7 +40,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -79,8 +79,10 @@ public class FollowUpGenerator {
     private FollowupDataProvider provider;
 
     public ByteArrayResource generate() throws Exception {
+        File directoryTempFollowup = null;
+        Path pathFollowupXLSM = null;
         try {
-            File directoryTempFollowup = decompressTemplate();
+            directoryTempFollowup = decompressTemplate();
 
             Map<String, Long> sharedStrings = getSharedStringsInitial();
 
@@ -89,61 +91,82 @@ public class FollowUpGenerator {
             File fileSharedStrings = new File(directoryTempFollowup, PATH_SHARED_STRINGS);
             writeXML(fileSharedStrings, generateSharedStrings(sharedStrings));
 
-            Path pathFollowupXLSM = compressXLSM(directoryTempFollowup);
-            FileUtils.deleteDirectory(directoryTempFollowup);
+            pathFollowupXLSM = compressXLSM(directoryTempFollowup);
             ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(pathFollowupXLSM));
-            Files.delete(pathFollowupXLSM);
+
             return resource;
         } catch (Exception e) {
             log.error(e.getMessage() == null ? e.toString() : e.getMessage());
             throw e;
+        } finally {
+            if (directoryTempFollowup != null && directoryTempFollowup.exists())
+                FileUtils.deleteDirectory(directoryTempFollowup);
+            if (pathFollowupXLSM != null && pathFollowupXLSM.toFile().exists())
+                Files.delete(pathFollowupXLSM);
         }
     }
 
     private File decompressTemplate() throws Exception {
         Path pathFollowup = Files.createTempDirectory("Followup");
 
-        InputStream inputStream = getClass().getClassLoader()
-                .getResourceAsStream(PATH_FOLLOWUP_TEMPLATE_XLSM);
-        ZipInputStream zipInputStream = new ZipInputStream(new BufferedInputStream(inputStream));
-
+        ZipInputStream zipInputStream = null;
         BufferedOutputStream bufferedOutput = null;
-        ZipEntry entry;
-        while ((entry = zipInputStream.getNextEntry()) != null) {
-            Path entryPath = pathFollowup.resolve(entry.getName());
-            if (entry.isDirectory()) {
-                Files.createDirectories(entryPath);
-                continue;
+        try {
+            InputStream inputStream = getClass().getClassLoader()
+                    .getResourceAsStream(PATH_FOLLOWUP_TEMPLATE_XLSM);
+            zipInputStream = new ZipInputStream(new BufferedInputStream(inputStream));
+
+            ZipEntry entry;
+            while ((entry = zipInputStream.getNextEntry()) != null) {
+                Path entryPath = pathFollowup.resolve(entry.getName());
+                if (entry.isDirectory()) {
+                    Files.createDirectories(entryPath);
+                    continue;
+                }
+    
+                int count;
+                byte data[] = new byte[BUFFER];
+                FileOutputStream fos = new FileOutputStream(entryPath.toFile());
+                bufferedOutput = new BufferedOutputStream(fos, BUFFER);
+                while ((count = zipInputStream.read(data, 0, BUFFER)) != -1)
+                    bufferedOutput.write(data, 0, count);
+                bufferedOutput.flush();
+                bufferedOutput.close();
             }
 
-            int count;
-            byte data[] = new byte[BUFFER];
-            FileOutputStream fos = new FileOutputStream(entryPath.toFile());
-            bufferedOutput = new BufferedOutputStream(fos, BUFFER);
-            while ((count = zipInputStream.read(data, 0, BUFFER)) != -1)
-                bufferedOutput.write(data, 0, count);
-            bufferedOutput.flush();
-            bufferedOutput.close();
+            return pathFollowup.toFile();
+        } finally {
+            if (bufferedOutput != null)
+                bufferedOutput.close();
+            if (zipInputStream != null)
+                zipInputStream.close();
         }
-        zipInputStream.close();
-
-        return pathFollowup.toFile();
     }
 
     private void writeXML(File file, String xml) throws Exception {
-        FileOutputStream output = new FileOutputStream(file);
-        output.write(xml.getBytes());
-        output.close();
+        FileOutputStream output = null;
+        try {
+            output = new FileOutputStream(file);
+            output.write(xml.getBytes("UTF-8"));
+        } finally {
+            if (output != null)
+                output.close();
+        }
     }
 
     private Path compressXLSM(File directoryFollowup) throws Exception {
         Path pathFollowupXLSM = Files.createTempFile("Followup", ".xlsm");
-        FileOutputStream fileOutputStream = new FileOutputStream(pathFollowupXLSM.toFile());
-        ZipOutputStream zipOutputStream = new ZipOutputStream(new BufferedOutputStream(fileOutputStream));
-        for (File fileInFollowup : directoryFollowup.listFiles())
-            compressFile(fileInFollowup, null, zipOutputStream);
-        zipOutputStream.close();
-        return pathFollowupXLSM;
+        ZipOutputStream zipOutputStream = null;
+        try {
+            FileOutputStream fileOutputStream = new FileOutputStream(pathFollowupXLSM.toFile());
+            zipOutputStream = new ZipOutputStream(new BufferedOutputStream(fileOutputStream));
+            for (File fileInFollowup : directoryFollowup.listFiles())
+                compressFile(fileInFollowup, null, zipOutputStream);
+            return pathFollowupXLSM;
+        } finally {
+            if (zipOutputStream != null)
+                zipOutputStream.close();
+        }
     }
 
     private void compressFile(File file, String parentDirectory, ZipOutputStream zipOutputStream) throws Exception {
@@ -158,16 +181,20 @@ public class FollowUpGenerator {
             return;
         }
 
-        ZipEntry entry = new ZipEntry(zipEntryName);
-        zipOutputStream.putNextEntry(entry);
+        zipOutputStream.putNextEntry(new ZipEntry(zipEntryName));
 
-        FileInputStream fis = new FileInputStream(file);
-        BufferedInputStream bufferedInput = new BufferedInputStream(fis, BUFFER);
-        int count;
-        byte data[] = new byte[BUFFER];
-        while((count = bufferedInput.read(data, 0, BUFFER)) != -1)
-            zipOutputStream.write(data, 0, count);
-        bufferedInput.close();
+        BufferedInputStream bufferedInput = null;
+        try {
+            FileInputStream fis = new FileInputStream(file);
+            bufferedInput = new BufferedInputStream(fis, BUFFER);
+            int count;
+            byte data[] = new byte[BUFFER];
+            while((count = bufferedInput.read(data, 0, BUFFER)) != -1)
+                zipOutputStream.write(data, 0, count);
+        } finally {
+            if (bufferedInput != null)
+                bufferedInput.close();
+        }
     }
 
     Map<String, Long> getSharedStringsInitial() throws ParserConfigurationException, SAXException, IOException {
@@ -175,8 +202,7 @@ public class FollowUpGenerator {
         InputStream inputStream = getClass().getClassLoader()
                 .getResourceAsStream(PATH_SHARED_STRINGS_INITIAL);
         DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
-        Document doc = docBuilder.parse(inputStream);
+        Document doc = docBuilderFactory.newDocumentBuilder().parse(inputStream);
         doc.getDocumentElement().normalize();
         NodeList nodes = doc.getElementsByTagName(TAG_T_IN_SHARED_STRINGS);
 
@@ -198,35 +224,35 @@ public class FollowUpGenerator {
         for (FollowUpData followUpData : provider.getJiraData()) {
             Map<String, Object> rowValues = new HashMap<String, Object>();
             rowValues.put("rowNumber", rowNumber);
-            rowValues.put("project", getIndexInSharedStrings(sharedStrings, followUpData.project));
-            rowValues.put("demandType", getIndexInSharedStrings(sharedStrings, followUpData.demandType));
-            rowValues.put("demandStatus", getIndexInSharedStrings(sharedStrings, followUpData.demandStatus));
-            rowValues.put("demandNum", getIndexInSharedStrings(sharedStrings, followUpData.demandNum));
-            rowValues.put("demandSummary", getIndexInSharedStrings(sharedStrings, followUpData.demandSummary));
-            rowValues.put("demandDescription", getIndexInSharedStrings(sharedStrings, followUpData.demandDescription));
-            rowValues.put("taskType", getIndexInSharedStrings(sharedStrings, followUpData.taskType));
-            rowValues.put("taskStatus", getIndexInSharedStrings(sharedStrings, followUpData.taskStatus));
-            rowValues.put("taskNum", getIndexInSharedStrings(sharedStrings, followUpData.taskNum));
-            rowValues.put("taskSummary", getIndexInSharedStrings(sharedStrings, followUpData.taskSummary));
-            rowValues.put("taskDescription", getIndexInSharedStrings(sharedStrings, followUpData.taskDescription));
-            rowValues.put("taskFullSescription", getIndexInSharedStrings(sharedStrings, followUpData.taskFullDescription));
-            rowValues.put("subtaskType", getIndexInSharedStrings(sharedStrings, followUpData.subtaskType));
-            rowValues.put("subtaskStatus", getIndexInSharedStrings(sharedStrings, followUpData.subtaskStatus));
-            rowValues.put("subtaskNum", getIndexInSharedStrings(sharedStrings, followUpData.subtaskNum));
-            rowValues.put("subtaskSummary", getIndexInSharedStrings(sharedStrings, followUpData.subtaskSummary));
-            rowValues.put("subtaskDescription", getIndexInSharedStrings(sharedStrings, followUpData.subtaskDescription));
-            rowValues.put("subtaskFullDescription", getIndexInSharedStrings(sharedStrings, followUpData.subtaskFullDescription));
-            rowValues.put("demandId", String.valueOf(followUpData.demandId));
-            rowValues.put("taskId", String.valueOf(followUpData.taskId));
-            rowValues.put("subtaskId", String.valueOf(followUpData.subtaskId));
-            rowValues.put("planningType", getIndexInSharedStrings(sharedStrings, followUpData.planningType));
-            rowValues.put("taskRelease", getIndexInSharedStrings(sharedStrings, followUpData.taskRelease));
-            rowValues.put("worklog", String.valueOf(followUpData.worklog));
-            rowValues.put("wrongWorklog", String.valueOf(followUpData.wrongWorklog));
-            rowValues.put("demandBallpark", String.valueOf(followUpData.demandBallpark));
-            rowValues.put("taskBallpark", String.valueOf(followUpData.taskBallpark));
-            rowValues.put("tshirtSize", getIndexInSharedStrings(sharedStrings, followUpData.tshirtSize));
-            rowValues.put("queryType", getIndexInSharedStrings(sharedStrings, followUpData.queryType));
+            rowValues.put("project", getOrSetIndexInSharedStrings(sharedStrings, followUpData.project));
+            rowValues.put("demandType", getOrSetIndexInSharedStrings(sharedStrings, followUpData.demandType));
+            rowValues.put("demandStatus", getOrSetIndexInSharedStrings(sharedStrings, followUpData.demandStatus));
+            rowValues.put("demandNum", getOrSetIndexInSharedStrings(sharedStrings, followUpData.demandNum));
+            rowValues.put("demandSummary", getOrSetIndexInSharedStrings(sharedStrings, followUpData.demandSummary));
+            rowValues.put("demandDescription", getOrSetIndexInSharedStrings(sharedStrings, followUpData.demandDescription));
+            rowValues.put("taskType", getOrSetIndexInSharedStrings(sharedStrings, followUpData.taskType));
+            rowValues.put("taskStatus", getOrSetIndexInSharedStrings(sharedStrings, followUpData.taskStatus));
+            rowValues.put("taskNum", getOrSetIndexInSharedStrings(sharedStrings, followUpData.taskNum));
+            rowValues.put("taskSummary", getOrSetIndexInSharedStrings(sharedStrings, followUpData.taskSummary));
+            rowValues.put("taskDescription", getOrSetIndexInSharedStrings(sharedStrings, followUpData.taskDescription));
+            rowValues.put("taskFullSescription", getOrSetIndexInSharedStrings(sharedStrings, followUpData.taskFullDescription));
+            rowValues.put("subtaskType", getOrSetIndexInSharedStrings(sharedStrings, followUpData.subtaskType));
+            rowValues.put("subtaskStatus", getOrSetIndexInSharedStrings(sharedStrings, followUpData.subtaskStatus));
+            rowValues.put("subtaskNum", getOrSetIndexInSharedStrings(sharedStrings, followUpData.subtaskNum));
+            rowValues.put("subtaskSummary", getOrSetIndexInSharedStrings(sharedStrings, followUpData.subtaskSummary));
+            rowValues.put("subtaskDescription", getOrSetIndexInSharedStrings(sharedStrings, followUpData.subtaskDescription));
+            rowValues.put("subtaskFullDescription", getOrSetIndexInSharedStrings(sharedStrings, followUpData.subtaskFullDescription));
+            rowValues.put("demandId", defaultIfNull(followUpData.demandId, ""));
+            rowValues.put("taskId", defaultIfNull(followUpData.taskId, ""));
+            rowValues.put("subtaskId", defaultIfNull(followUpData.subtaskId, ""));
+            rowValues.put("planningType", getOrSetIndexInSharedStrings(sharedStrings, followUpData.planningType));
+            rowValues.put("taskRelease", getOrSetIndexInSharedStrings(sharedStrings, followUpData.taskRelease));
+            rowValues.put("worklog", defaultIfNull(followUpData.worklog, ""));
+            rowValues.put("wrongWorklog", defaultIfNull(followUpData.wrongWorklog, ""));
+            rowValues.put("demandBallpark", defaultIfNull(followUpData.demandBallpark, ""));
+            rowValues.put("taskBallpark", defaultIfNull(followUpData.taskBallpark, ""));
+            rowValues.put("tshirtSize", getOrSetIndexInSharedStrings(sharedStrings, followUpData.tshirtSize));
+            rowValues.put("queryType", getOrSetIndexInSharedStrings(sharedStrings, followUpData.queryType));
             rows += StrSubstitutor.replace(rowTemplate, rowValues);
             rowNumber++;
         }
@@ -243,13 +269,16 @@ public class FollowUpGenerator {
         return IOUtils.toString(inputStream, "UTF-8");
     }
 
-    private Long getIndexInSharedStrings(Map<String, Long> sharedStrings, String followUpDataAttribute) {
-        Long index = sharedStrings.get(followUpDataAttribute);
+    private Object getOrSetIndexInSharedStrings(Map<String, Long> sharedStrings, String followUpDataAttrValue) {
+        if (followUpDataAttrValue == null || followUpDataAttrValue.isEmpty())
+            return "";
+
+        Long index = sharedStrings.get(followUpDataAttrValue);
         if (index != null)
             return index;
 
         index = Long.valueOf(sharedStrings.size());
-        sharedStrings.put(followUpDataAttribute, index);
+        sharedStrings.put(followUpDataAttrValue, index);
         return index;
     }
 
