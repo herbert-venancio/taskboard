@@ -1,5 +1,13 @@
 package objective.taskboard.jira;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 /*-
  * [LICENSE]
  * Taskboard
@@ -22,17 +30,12 @@ package objective.taskboard.jira;
  */
 
 import com.atlassian.jira.rest.client.api.domain.Issue;
+
 import objective.taskboard.data.IssuesConfiguration;
 import objective.taskboard.domain.Filter;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.repository.FilterCachedRepository;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class JiraIssueService {
@@ -45,6 +48,9 @@ public class JiraIssueService {
 
     @Autowired
     private FilterCachedRepository filterRepository;
+
+    @Autowired
+    private JiraProperties properties;
 
     public String createJql(List<IssuesConfiguration> configs) {
         String projectsJql = projectsJql();
@@ -83,6 +89,17 @@ public class JiraIssueService {
         if (keys.isEmpty())
             return Arrays.asList();
         return searchIssues("key IN (" + String.join(",", keys) + ")");
+    }
+
+    public List<Issue> searchIssueSubTasksAndDemandedByKey(String key) {
+    	String jql = "parent = " + key;
+    	String linkeTypes = properties.getIssuelink().getDemand().getName();
+    	if (!StringUtils.isEmpty(linkeTypes)) {
+    		for (String linkType : Arrays.asList(linkeTypes.split("\\s*,\\s*"))) {
+    			jql += " OR issuefunction in linkedIssuesOf('key = " + key + "', '" + linkType + "')";
+    		}
+    	}
+        return searchIssues(jql);
     }
 
     public List<Issue> searchAll() {
