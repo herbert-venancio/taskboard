@@ -355,6 +355,12 @@
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-rest-repository</artifactId>
 			<version>1.0.0.RELEASE</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.hibernate.javax.persistence</groupId>
+					<artifactId>hibernate-jpa-2.0-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- LOMBOK -->
