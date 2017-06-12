@@ -207,6 +207,8 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
     }
     
     private Double originalEstimateInHour(Issue issue) {
+        if (issue == null)
+            return 0.0;
         if (issue.getTimeTracking() == null)
             return 0.0;
         if (issue.getTimeTracking().getOriginalEstimateMinutes() == null)

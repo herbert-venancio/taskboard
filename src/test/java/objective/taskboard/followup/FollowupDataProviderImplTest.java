@@ -1194,6 +1194,53 @@ public class FollowupDataProviderImplTest {
         subject.getJiraData();
     }
     
+    @Test
+    public void featureWithoutDemand_ShouldNotBreak() {
+        configureBallparkMappings(
+            taskIssueType + " : \n" +
+            "  - issueType : BALLPARK - Development\n" + 
+            "    tshirtCustomFieldId: Dev_Tshirt\n" + 
+            "    jiraIssueTypes:\n" + 
+            "      - "+ devIssueType + "\n");
+        
+        tshirtSizeInfo.setIds(Arrays.asList("Dev_Tshirt","Alpha_TestTshirt"));
+        
+        issues( 
+            task()  .id(3).key("PROJ-3").summary("Smry 3").originalEstimateInHours(2).timeSpentInHours(1)
+                .tshirt("Dev_Tshirt","L")
+        );
+        assertFollowupsForIssuesEquals(
+                " planningType           : Ballpark\n" + 
+                " project                : A Project\n" + 
+                " demandType             : \n" + 
+                " demandStatus           : \n" + 
+                " demandId               : \n" + 
+                " demandNum              : \n" + 
+                " demandSummary          : \n" + 
+                " demandDescription      : \n" + 
+                " taskType               : Task\n" + 
+                " taskStatus             : To Do\n" + 
+                " taskId                 : 3\n" + 
+                " taskNum                : PROJ-3\n" + 
+                " taskSummary            : Smry 3\n" + 
+                " taskDescription        : 00003 - Smry 3\n" + 
+                " taskFullDescription    : Task | 00003 - Smry 3\n" + 
+                " taskRelease            : No release set\n" + 
+                " subtaskType            : BALLPARK - Development\n" + 
+                " subtaskStatus          : To Do\n" + 
+                " subtaskId              : 0\n" + 
+                " subtaskNum             : PROJ-0\n" + 
+                " subtaskSummary         : BALLPARK - Development\n" + 
+                " subtaskDescription     : 00000 - Smry 3\n" + 
+                " subtaskFullDescription : BALLPARK - Development | 00000 - Smry 3\n" + 
+                " tshirtSize             : L\n" + 
+                " worklog                : 0.0\n" + 
+                " wrongWorklog           : 1.0\n" + 
+                " demandBallpark         : 0.0\n" + 
+                " taskBallpark           : 2.0\n" + 
+                " queryType              : FEATURE BALLPARK");
+    }
+    
     private void configureBallparkMappings(String string) {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         Map<Long, List<BallparkMapping>> ballparkMappings;
