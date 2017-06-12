@@ -23,7 +23,6 @@ package objective.taskboard.jira;
 
 import static com.google.common.collect.Lists.newArrayList;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -56,7 +55,7 @@ import com.google.common.collect.ImmutableList;
 
 import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.auth.CredentialsHolder;
-import objective.taskboard.database.TaskboardDatabaseService;
+import objective.taskboard.domain.converter.JiraIssueToIssueConverter;
 import objective.taskboard.jira.endpoint.JiraEndpoint;
 import objective.taskboard.jira.endpoint.JiraEndpoint.Request;
 import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
@@ -71,9 +70,6 @@ public class JiraService {
     private static String MSG_FORBIDDEN = "The jira account is locked";
 
     @Autowired
-    private TaskboardDatabaseService taskboardDatabaseService;
-
-    @Autowired
     private JiraProperties properties;
 
     @Autowired
@@ -84,6 +80,12 @@ public class JiraService {
 
     @Autowired
     private JiraEndpointAsMaster jiraEndpointAsMaster;
+
+    @Autowired
+    private JiraIssueService jiraIssueService;
+
+    @Autowired
+    private JiraIssueToIssueConverter issueConverter;
 
     public void authenticate(String username, String password) {
         log.debug("⬣⬣⬣⬣⬣  authenticate");
@@ -260,12 +262,8 @@ public class JiraService {
     }
 
     public List<objective.taskboard.data.Issue> getIssueSubTasks(objective.taskboard.data.Issue issue) {
-        List<objective.taskboard.data.Issue> subs = new ArrayList<>();
-        if (issue.getType() == properties.getIssuetype().getDemand().getId())
-            subs.addAll(taskboardDatabaseService.getSubtasksDemanda(issue.getIssueKey()));
-        else
-            subs.addAll(taskboardDatabaseService.getSubtasks(issue.getIssueKey()));
-        return subs;
+        List<Issue> subtasksFromJira = jiraIssueService.searchIssueSubTasksAndDemandedByKey(issue.getIssueKey());
+        return issueConverter.convert(subtasksFromJira);
     }
 
     public void block(String issueKey, String lastBlockReason) {
