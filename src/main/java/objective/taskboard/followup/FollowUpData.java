@@ -44,7 +44,7 @@ public class FollowUpData {
 
     public String subtaskType;
     public String subtaskStatus;
-    public Long subtaskId;
+    public Long subtaskId = 0L;
     public String subtaskNum;
     public String subtaskSummary;
     public String subtaskDescription;
