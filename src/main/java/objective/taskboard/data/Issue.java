@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 
 import com.atlassian.jira.rest.client.api.domain.TimeTracking;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
@@ -285,20 +286,28 @@ public class Issue implements Serializable {
         this.metaDataService = metaDataService;
     }
     
+    @JsonIgnore
     public Integer getIssueKeyNum() {
         return Integer.parseInt(issueKey.replace(projectKey+"-", ""));
     }
     
+    @JsonIgnore
     public String getTShirtSize() {
         String mainTShirtSizeFieldId = jiraProperties.getCustomfield().getTShirtSize().getMainTShirtSizeFieldId();
+        if (customFields.get(mainTShirtSizeFieldId) == null)
+            return null;
+        
         CustomField customField = (CustomField)customFields.get(mainTShirtSizeFieldId);
         if (customField == null || customField.getValue() == null)
             return null;
         return customField.getValue().toString();
     }
     
+    @JsonIgnore
     public void setTShirtSize(String value) {
         String mainTShirtSizeFieldId = jiraProperties.getCustomfield().getTShirtSize().getMainTShirtSizeFieldId();
+        if (customFields.get(mainTShirtSizeFieldId) == null)
+            return;
         CustomField customField = (CustomField)customFields.get(mainTShirtSizeFieldId);
         if (customField == null) {
             customField = new CustomField(mainTShirtSizeFieldId, value);
@@ -307,16 +316,19 @@ public class Issue implements Serializable {
         customField.setValue(value);        
     }
     
+    @JsonIgnore
     public String getTshirtSizeOfSubtaskForBallpark(BallparkMapping mapping) {
         CustomField customField = (CustomField)customFields.get(mapping.getTshirtCustomFieldId());
         if (customField == null || customField.getValue() == null) return null;
         return customField.getValue().toString();
     }
 
+    @JsonIgnore
     public List<BallparkMapping> getBallparkMappings() {
         return jiraProperties.getFollowup().getBallparkMappings().get(getType());
     }
     
+    @JsonIgnore
     public List<BallparkMapping> getActiveBallparkMappings() {
         List<BallparkMapping> list = jiraProperties.getFollowup().getBallparkMappings().get(getType());
         if (list == null)
@@ -325,6 +337,7 @@ public class Issue implements Serializable {
         return list.stream().filter(bm -> getTshirtSizeOfSubtaskForBallpark(bm)!=null).collect(Collectors.toList());
     }
     
+    @JsonIgnore
     public String getIssueTypeName() {
         try {
             return metaDataService.getIssueTypeMetadata().get(type).getName();
@@ -333,6 +346,7 @@ public class Issue implements Serializable {
         }
     }
     
+    @JsonIgnore
     public String getStatusName() {
         try {
             return metaDataService.getStatusesMetadata().get(status).getName();
