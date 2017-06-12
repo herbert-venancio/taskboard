@@ -193,6 +193,11 @@ public class Issue implements Serializable {
         private Integer originalEstimateMinutes;
         private Integer timeSpentMinutes;
         
+        public TaskboardTimeTracking(){
+            originalEstimateMinutes = 0;
+            timeSpentMinutes = 0;
+        }
+        
         public TaskboardTimeTracking(Integer originalEstimateMinutes, Integer timeSpentMinutes) {
             this.originalEstimateMinutes = originalEstimateMinutes;
             this.timeSpentMinutes = timeSpentMinutes;
