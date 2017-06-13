@@ -172,7 +172,7 @@
                         jqXHR.responseJSON.exception &&
                         jqXHR.responseJSON.exception.indexOf("AccessDeniedException") >= 0) {
 
-                        that.errorMsg =  jqXHR.responseJSON.message;
+                        that.errorMsg =  jqXHR.responseJSON.message.replace("org.springframework.security.access.AccessDeniedException: ","");
                     } else {
                         that.errorMsg = "An internal error occurred"
                     }

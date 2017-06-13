@@ -28,8 +28,6 @@ import static spark.Spark.post;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
@@ -37,7 +35,6 @@ import org.apache.commons.io.IOUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 
 import spark.Spark;
 
@@ -53,40 +50,37 @@ public class JiraMockServer {
         thread.start();
     }
     
-    @SuppressWarnings("rawtypes")
-    private static Map issueInfo = new LinkedHashMap();
-    
     public static void defineRoutesAndStart() {
         Spark.exception(Exception.class, (ex, req, res) -> {
             ex.printStackTrace();
         });
         
-        get("rest/api/latest/project",  (req, res) ->{
-            return IOUtils.toString(JiraMockServer.class.getResourceAsStream("/project.response.json"), "UTF-8");
+        get("/rest/api/latest/project",  (req, res) ->{
+            return loadMockData("project.response.json");
         });
         
         get("/rest/api/latest/project/TASKB", (req, res) ->{
-            return IOUtils.toString(JiraMockServer.class.getResourceAsStream("/project_TASKB.response.json"), "UTF-8");
+            return loadMockData("project_TASKB.response.json");
         });
         
         get("rest/api/latest/status",  (req, res) ->{
-            return IOUtils.toString(JiraMockServer.class.getResourceAsStream("/status.response.json"), "UTF-8");
+            return loadMockData("status.response.json");
         });
         
         get("rest/api/latest/priority",  (req, res) ->{
-            return IOUtils.toString(JiraMockServer.class.getResourceAsStream("/priority.response.json"), "UTF-8");
+            return loadMockData("priority.response.json");
         });
         
         get("rest/api/latest/issuetype",  (req, res) ->{
-            return IOUtils.toString(JiraMockServer.class.getResourceAsStream("/issuetype.response.json"), "UTF-8");
+            return loadMockData("issuetype.response.json");
         });
         
         get("rest/api/latest/user",  (req, res) ->{
-            return IOUtils.toString(JiraMockServer.class.getResourceAsStream("/user.response.json"), "UTF-8");
+            return loadMockData("user.response.json");
         });
         
         get("rest/api/latest/serverInfo",  (req, res) ->{
-            return IOUtils.toString(JiraMockServer.class.getResourceAsStream("/serverInfo.response.json"), "UTF-8");
+            return loadMockData("serverInfo.response.json");
         });
         
         post("/rest/api/latest/search", "application/json", (req,res) -> {
@@ -95,57 +89,51 @@ public class JiraMockServer {
             return makeFakeRequest(Math.round((Double)searchData.get("startAt")));
         });
         
-        loadIssues();
-        
         get("/rest/api/latest/issue/:issueKey",  (req, res) ->{
             String issueKey = req.params(":issueKey");
-            try {
-                return IOUtils.toString(JiraMockServer.class.getResourceAsStream("/"+issueKey+".json"), "UTF-8");
-            }catch(Exception e) {
-                String string=RequestBuilder
-                    .url("http://54.68.128.117:8100/rest/api/2/issue/" + issueKey + "?expand=schema,names,transitions")
-                    .credentials("lousa","objective")
-                    .get()
-                    .content;
-                FileUtils.writeStringToFile(new File("/tmp/"+issueKey+".json"), string, "UTF-8");
-                return string;
+            String loadMockData = loadMockData(issueKey+".json");
+            if (loadMockData == null) {
+                return retryFromRealServer(issueKey);
             }
+            return loadMockData;
         });
     }
-
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private static Map loadIssues() {
-        issueInfo = new LinkedHashMap();
-        
-        for (int i = 0; i < 7; i++) {
-            String fName = "/searchIssueAt"+(i*100)+".json";
-            try {
-                String json = IOUtils.toString(JiraMockServer.class.getResourceAsStream(fName),"UTF-8");
-                Map<String, Object> map = new Gson().fromJson(json, new TypeToken<Map<String, Object>>() {
-                }.getType());
-                
-                for (Object o : ((ArrayList) map.get("issues"))) {
-                    Map m = (Map)o;
-                    issueInfo.put(m.get("key"), o);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+    
+    private static String retryFromRealServer(String issueKey) {
+        String string = RequestBuilder
+                .url("http://54.68.128.117:8100/rest/api/2/issue/" + issueKey + "?expand=schema,names,transitions")
+                .credentials("lousa", "objective").get().content;
+        try {
+            FileUtils.writeStringToFile(new File("/tmp/" + issueKey + ".json"), string, "UTF-8");
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
         }
-        return issueInfo;
+        return string;
     }
     
     private static String makeFakeRequest(long l) {
-        InputStream stream = JiraMockServer.class.getResourceAsStream("/search"+l+".json");
-        if (stream == null)
+        String result = loadMockData("search"+l+".json");
+        if (result == null)
             return "{\"startAt\":0,\"maxResults\":100,\"total\":605,\"issues\":[]}";
-        
+        return result;
+    }
+    
+
+    private static String loadMockData(String name) {
+        InputStream stream = JiraMockServer.class.getResourceAsStream("/" + environment() +"/" + name);
+        if (stream == null) 
+            return null;
         try {
             return IOUtils.toString(stream, "UTF-8");
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
     }
+
+    private static String environment() {
+        return "objective-jira-teste";
+    }
+
     
     private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
 }
