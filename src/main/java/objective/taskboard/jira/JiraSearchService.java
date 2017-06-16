@@ -91,10 +91,11 @@ public class JiraSearchService {
                     SearchResult searchResult = searchResultParser.parse(new JSONObject(jsonResponse));
                     List<Issue> issuesSearchResult = newArrayList(searchResult.getIssues());
 
-                    if (issuesSearchResult.isEmpty())
+                    listIssues.addAll(issuesSearchResult);
+                    
+                    if (issuesSearchResult.isEmpty() || issuesSearchResult.size() < searchResult.getMaxResults())
                         break;
 
-                    listIssues.addAll(issuesSearchResult);
                 } catch (JSONException e) {
                     log.error(jqlNotNull);
                     e.printStackTrace();
