@@ -29,6 +29,7 @@ import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import objective.taskboard.config.CacheConfiguration;
@@ -65,6 +66,12 @@ class ProjectCache {
     }
 
     private com.atlassian.jira.rest.client.api.domain.Project getJiraProjectByKeyAsUser(String projectKey) {
-        return jiraEndpointAsUser.executeRequest(client -> client.getProjectClient().getProject(projectKey));
+        try {
+            return jiraEndpointAsUser.executeRequest(client -> client.getProjectClient().getProject(projectKey));
+        }catch(JiraServiceException e) {
+            if (e.getStatusCode().isPresent() && e.getStatusCode().get() == HttpStatus.NOT_FOUND)
+                return null;
+            throw e;
+        }
     }
 }
