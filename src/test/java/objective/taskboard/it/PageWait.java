@@ -1,4 +1,4 @@
-package objective.taskboard;
+package objective.taskboard.it;
 
 /*-
  * [LICENSE]
@@ -21,15 +21,11 @@ package objective.taskboard;
  * [/LICENSE]
  */
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
-@EnableScheduling
-@SpringBootApplication
-public class TestMain {
-    public static void main(String[] args) {
-        JiraMockServer.begin();
-        SpringApplication.run(TestMain.class, args);
-    }    
+public class PageWait {
+    public static WebDriverWait wait(WebDriver driver) {
+        return new WebDriverWait(driver, 30);
+    }
 }
