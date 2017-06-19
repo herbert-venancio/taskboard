@@ -68,10 +68,10 @@ class ProjectCache {
     private com.atlassian.jira.rest.client.api.domain.Project getJiraProjectByKeyAsUser(String projectKey) {
         try {
             return jiraEndpointAsUser.executeRequest(client -> client.getProjectClient().getProject(projectKey));
-        } catch (JiraServiceException e) {
-            if (e.getStatusCode().get() != HttpStatus.NOT_FOUND)
-                throw e;
-            return null;
+        }catch(JiraServiceException e) {
+            if (e.getStatusCode().isPresent() && e.getStatusCode().get() == HttpStatus.NOT_FOUND)
+                return null;
+            throw e;
         }
     }
 }

@@ -67,7 +67,7 @@ public class WebhookController {
         addItemInTheQueue(webhookEvent, projectKey, issueTypeId, issueKey);
         log.debug("WEBHOOK REQUEST BODY: " + mapper.writeValueAsString(body));
 
-        webhookSchedule.processItems();
+//        webhookSchedule.processItems();
     }
 
     @RequestMapping(path = "webhook/{webhookEvent}/{projectKey}/{issueTypeId}/{issueKey}", method = RequestMethod.POST)
