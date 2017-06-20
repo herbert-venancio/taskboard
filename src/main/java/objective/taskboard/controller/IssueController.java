@@ -249,10 +249,12 @@ public class IssueController {
     private List<AspectSubitemFilter> getProjectFilterItems() {
         List<Team> teamsVisibleToUser = teamFilterConfigurationService.getTeamsVisibleToUser();
         return projectService.getVisibleProjects().stream()
-                .map(p -> AspectSubitemFilter.from(p.getName(), p.getKey(), true, teamsVisibleToUser.stream()
-                        .filter(t -> p.getTeamsIds().contains(t.getId()))
-                        .map(t -> t.getName())
-                        .collect(toList())))
+                .map(p -> AspectSubitemFilter.from(p.getName(), p.getKey(), true,
+                                                   teamsVisibleToUser.stream()
+                                                       .filter(t -> p.getTeamsIds().contains(t.getId()))
+                                                       .map(t -> t.getName())
+                                                       .collect(toList()),
+                                                   p.getVersions()))
                 .sorted(this::compareFilter)
                 .collect(toList());
     }

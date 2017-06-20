@@ -37,7 +37,7 @@
         }
 
         paper-dropdown-menu.custom {
-        	width: 100px;
+            min-width: 150px;
             margin-left: 10px;
             --paper-input-container-underline: { display: none; };
             --paper-input-container-label: { font-size: 14px; };
@@ -57,7 +57,8 @@
     </style>
 
     <template>
-        <iron-signals on-iron-signal-search-filter-reset="searchReset"></iron-signals>
+        <iron-signals on-iron-signal-search-filter-reset="searchReset"
+                      on-iron-signal-refresh-release-filter="retrieveReleases"></iron-signals>
         <input id="searchIssues" class="input-search" value="{{query::input}}" type="search"
                placeholder="Search Issues" results="5" autocomplete="off"/>
         <template is="dom-if" if="{{hasReleases(releases)}}">
@@ -65,7 +66,7 @@
                                  on-value-changed="searchIssue">
                 <paper-listbox class="dropdown-content" attr-for-selected="value" selected="{{releaseSelected}}">
                     <template is="dom-repeat" items="{{releases}}" as="itemRelease">
-                        <paper-item value="{{itemRelease}}">{{itemRelease}}</paper-item>
+                        <paper-item value="{{itemRelease}}">{{getReleaseString(itemRelease)}}</paper-item>
                     </template>
                 </paper-listbox>
             </paper-dropdown-menu>
@@ -92,6 +93,10 @@
                     }
                 },
 
+                ready: function() {
+                    this.retrieveReleases();
+                },
+
                 listeners: {
                     'searchIssues.change': 'searchIssue',
                     'query-changed': 'searchIssue'
@@ -109,6 +114,37 @@
 
                 hasReleases: function(releases) {
                     return CUSTOMFIELD.RELEASE && releases && releases.length > 0;
+                },
+
+                retrieveReleases: function() {
+                    this.releaseSelected = "";
+                    var listReleases = [];
+                    taskboard.getAspectFilters().forEach(function(itemFilter) {
+                        if (itemFilter.description !== 'Project')
+                            return;
+
+                        itemFilter.aspectsSubitemFilter.forEach(function(subitemFilter) {
+                            if (!subitemFilter.visible || !subitemFilter.selected ||
+                                subitemFilter.versions == null)
+                                return;
+
+                            subitemFilter.versions.forEach(function(v) {
+                                listReleases.push({ project: this.value, version: v })
+                            }, subitemFilter);
+                        });
+                    });
+
+                    if (listReleases.length > 0)
+                        listReleases = [null].concat(listReleases);
+
+                    this.releases = listReleases;
+                },
+
+                getReleaseString: function(release) {
+                    if (!release)
+                        return "";
+
+                    return release.project + " - " + release.version;
                 }
             });
         })();
