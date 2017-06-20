@@ -100,6 +100,7 @@
 				</dependencies>
 			</plugin>
 			<plugin>
+				<!-- https://github.com/Ardesco/selenium-standalone-server-plugin/ -->
 				<groupId>com.lazerycode.selenium</groupId>
 				<artifactId>driver-binary-downloader-maven-plugin</artifactId>
 				<version>1.0.14</version>
