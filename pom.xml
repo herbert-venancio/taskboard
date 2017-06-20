@@ -105,8 +105,8 @@
 				<artifactId>driver-binary-downloader-maven-plugin</artifactId>
 				<version>1.0.14</version>
 				<configuration>
-					<rootStandaloneServerDirectory>${project.basedir}/target/selenium_standalone_binaries</rootStandaloneServerDirectory>
-					<downloadedZipFileDirectory>${project.basedir}/target/selenium_standalone_zips</downloadedZipFileDirectory>
+					<rootStandaloneServerDirectory>${project.basedir}/drivers</rootStandaloneServerDirectory>
+					<downloadedZipFileDirectory>${project.basedir}/drivers</downloadedZipFileDirectory>
 					<onlyGetDriversForHostOperatingSystem>true</onlyGetDriversForHostOperatingSystem>
 					<customRepositoryMap>${project.basedir}/src/test/resources/CustomRepoMap.xml</customRepositoryMap>
 				</configuration>
@@ -177,6 +177,25 @@
 									</pluginExecutionFilter>
 									<action>
 										<ignore />
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											com.lazerycode.selenium
+										</groupId>
+										<artifactId>
+											driver-binary-downloader-maven-plugin
+										</artifactId>
+										<versionRange>
+											[1.0.14,)
+										</versionRange>
+										<goals>
+											<goal>selenium</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
@@ -366,6 +385,12 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>ch.qos.logback</groupId>
+					<artifactId>logback-classic</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -418,6 +443,10 @@
 				<exclusion>
 					<groupId>org.hibernate.javax.persistence</groupId>
 					<artifactId>hibernate-jpa-2.0-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>ch.qos.logback</groupId>
+					<artifactId>logback-classic</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
