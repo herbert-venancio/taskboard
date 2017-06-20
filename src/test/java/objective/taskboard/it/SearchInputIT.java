@@ -9,6 +9,6 @@ public class SearchInputIT extends AbstractUIIntegrationTest {
         MainPage mainPage = MainPage.produce(webDriver);
         mainPage.waitUserLabelToBe("foo");
         mainPage.typeSearch("TASKB-61");
-        mainPage.assertVisibleIssues("TASKB-611", "TASKB-612", "TASKB-613", "TASKB-610");
+        mainPage.assertVisibleIssues("TASKB-610", "TASKB-611", "TASKB-612", "TASKB-613");
     }
 }

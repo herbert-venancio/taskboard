@@ -8,8 +8,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 
 /*-
  * [LICENSE]
@@ -34,6 +36,7 @@ import org.openqa.selenium.By;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -78,5 +81,46 @@ public class MainPage extends AbstractUiPage {
         Collections.sort(actualIssueKeyList);
         
         assertEquals(join(expectedIssueKeyList,"\n"), join(actualIssueKeyList,"\n"));
+    }
+
+    public TestIssue issue(String issueKey) {
+        List<WebElement> elements = webDriver.findElements(By.cssSelector("paper-material.issue")).stream()
+            .filter(webEl -> hasChildThatMatches(webEl, By.cssSelector("[data-issue-key='"+issueKey+"']")))
+            .collect(Collectors.toList());
+        
+        if (elements.size() > 1)
+            throw new IllegalArgumentException("More than a single match was found");
+        if (elements.size() == 0)
+            return null;
+        return new TestIssue(elements.get(0));
+    }
+    
+    private Boolean hasChildThatMatches(WebElement webEl, By selector) {
+        try {
+            webEl.findElement(selector);
+            return true;
+        }catch (NoSuchElementException e) {
+            return false;
+        }
+    }
+
+    class TestIssue {
+        private WebElement webElement;
+
+        public TestIssue(WebElement webElement) {
+            this.webElement = webElement;
+        }
+        
+        public void click() {
+            webElement.click();
+        }
+
+        public void enableHierarchicalFilter() {
+            Actions builder = new Actions(webDriver);
+            builder.moveToElement(webElement).build().perform();
+            WebElement applyFilterButton = webElement.findElement(By.cssSelector("[alt='Apply Filter']"));
+            waitUntil(ExpectedConditions.visibilityOf(applyFilterButton));
+            applyFilterButton.click();;
+        }
     }
 }
