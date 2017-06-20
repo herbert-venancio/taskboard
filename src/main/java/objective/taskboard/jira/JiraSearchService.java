@@ -87,7 +87,6 @@ public class JiraSearchService {
                                  .put(FIELDS_ATTRIBUTE, getFields());
 
                     String jsonResponse = jiraEndpointAsMaster.postWithRestTemplate(PATH_REST_API_SEARCH, APPLICATION_JSON, searchRequest);
-                    storeResponse(jsonResponse);
                     SearchResult searchResult = searchResultParser.parse(new JSONObject(jsonResponse));
                     List<Issue> issuesSearchResult = newArrayList(searchResult.getIssues());
 
