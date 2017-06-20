@@ -69,7 +69,7 @@ public abstract class AbstractUIIntegrationTest {
             while (true) {
                 try {
                     RequestResponse response = RequestBuilder
-                        .url("http://localhost:8080/ws/issues/issue-buffer-state")
+                        .url(getSiteBase() + "/ws/issues/issue-buffer-state")
                         .credentials("foo", "bar").get();
                     
                     if (response.responseCode < 400)
@@ -87,6 +87,10 @@ public abstract class AbstractUIIntegrationTest {
         } catch(TimeoutException ex) {
             throw new IllegalStateException("Server did not come up after " + TIMEOUT_IN_SECONDS + " seconds");
         }
+    }
+
+    public static String getSiteBase(){
+        return "http://localhost:8900/";
     }
 
 }

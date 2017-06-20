@@ -58,7 +58,7 @@ public class MainPage extends AbstractUiPage {
     }
     
     public static AbstractUiPage to(WebDriver webDriver) {
-        webDriver.get(UIConfig.getSiteBase()+"/");
+        webDriver.get(AbstractUIIntegrationTest.getSiteBase()+"/");
         return PageFactory.initElements(webDriver, MainPage.class);
     }
 

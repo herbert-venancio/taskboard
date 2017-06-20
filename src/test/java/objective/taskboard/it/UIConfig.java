@@ -33,10 +33,6 @@ import org.springframework.context.annotation.Bean;
 
 @EnableAutoConfiguration(exclude = FlywayAutoConfiguration.class)
 public class UIConfig {
-    public static String getSiteBase(){
-        return "http://localhost:8080/";
-    }
-    
     @Bean
     public WebDriver getDriver() {
         DesiredCapabilities capabilities = DesiredCapabilities.firefox();

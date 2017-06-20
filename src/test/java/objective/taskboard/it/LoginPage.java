@@ -52,7 +52,7 @@ public class LoginPage {
     }   
 
     public static LoginPage to(WebDriver webDriver) {
-        webDriver.get(UIConfig.getSiteBase()+"/login");
+        webDriver.get(AbstractUIIntegrationTest.getSiteBase()+"/login");
         return PageFactory.initElements(webDriver, LoginPage.class);
     }
 }

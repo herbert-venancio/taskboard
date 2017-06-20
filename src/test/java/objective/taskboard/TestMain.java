@@ -30,6 +30,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class TestMain {
     public static void main(String[] args) {
         JiraMockServer.begin();
-        SpringApplication.run(TestMain.class, args);
+        SpringApplication.run(TestMain.class, new String[]{"--server.port=8900"});
     }    
 }
