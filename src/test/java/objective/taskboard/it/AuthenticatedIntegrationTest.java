@@ -21,24 +21,17 @@ package objective.taskboard.it;
  * [/LICENSE]
  */
 
-import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElement;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
+import org.junit.Before;
 
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedCondition;
+public abstract class AuthenticatedIntegrationTest extends AbstractUIIntegrationTest {
 
-public abstract class AbstractUiPage {
-    protected WebDriver webDriver;
-    public AbstractUiPage(WebDriver driver) {
-        this.webDriver = driver;
-    }
-    public void waitUntil(ExpectedCondition<?> condition) {
-        PageWait.wait(webDriver).until(condition);
+    @Before
+    public void before() {
+        LoginPage loginPage = LoginPage.to(webDriver);
+        loginPage.login("foo", "bar");
         
+        MainPage mainPage = MainPage.produce(webDriver);
+        mainPage.waitUserLabelToBe("foo");
     }
-    protected void waitTextInElement(WebElement element, String expected) {
-        waitUntil(visibilityOf(element));
-        waitUntil(textToBePresentInElement(element, expected));        
-    }
+
 }

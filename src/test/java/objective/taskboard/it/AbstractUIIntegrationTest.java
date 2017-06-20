@@ -56,7 +56,11 @@ public abstract class AbstractUIIntegrationTest {
     
     @After
     public void teardown() {
-        webDriver.close();
+        try {
+            webDriver.close();
+        }catch(Exception e) {
+            e.printStackTrace();
+        }
     }
 
 

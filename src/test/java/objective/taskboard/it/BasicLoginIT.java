@@ -24,7 +24,7 @@ package objective.taskboard.it;
 import org.junit.After;
 import org.junit.Test;
 
-public class BasicLoginIT extends AbstractUIIntegrationTest {
+public class BasicLoginIT extends AuthenticatedIntegrationTest {
     @Test
     public void testLoginSuccessful() {
         LoginPage loginPage = LoginPage.to(webDriver);

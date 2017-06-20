@@ -21,24 +21,13 @@ package objective.taskboard.it;
  * [/LICENSE]
  */
 
-import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElement;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
+import org.junit.Test;
 
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-
-public abstract class AbstractUiPage {
-    protected WebDriver webDriver;
-    public AbstractUiPage(WebDriver driver) {
-        this.webDriver = driver;
-    }
-    public void waitUntil(ExpectedCondition<?> condition) {
-        PageWait.wait(webDriver).until(condition);
-        
-    }
-    protected void waitTextInElement(WebElement element, String expected) {
-        waitUntil(visibilityOf(element));
-        waitUntil(textToBePresentInElement(element, expected));        
+public class HierarchicalFilterIT extends AuthenticatedIntegrationTest {
+    @Test
+    public void whenIssueFilterIsEnabled_OnlyIssueAndChildrenShowUp() {
+        MainPage mainPage = MainPage.produce(webDriver);
+        mainPage.issue("TASKB-637").enableHierarchicalFilter();
+        mainPage.assertVisibleIssues("TASKB-637", "TASKB-680", "TASKB-638", "TASKB-678", "TASKB-679");
     }
 }
