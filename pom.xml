@@ -20,7 +20,7 @@
 		<javax.servlet.version>3.1.0</javax.servlet.version>
 		<npm.version>2.13.0</npm.version>
 		<selenium.version>3.4.0</selenium.version>
-		<jira.api.version>4.0.1-SNAPSHOT</jira.api.version>
+		<jira.api.version>4.0.1-OBJ</jira.api.version>
 	</properties>
 	<prerequisites>
 		<maven>3.1.0</maven>
