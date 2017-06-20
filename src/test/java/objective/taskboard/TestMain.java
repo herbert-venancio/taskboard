@@ -29,6 +29,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 public class TestMain {
     public static void main(String[] args) {
+        System.setProperty("spring.datasource.data", "classpath:/populate_db.sql");
         JiraMockServer.begin();
         SpringApplication.run(TestMain.class, new String[]{"--server.port=8900"});
     }    

@@ -21,31 +21,10 @@ package objective.taskboard.it;
  * [/LICENSE]
  */
 
-import java.util.logging.Level;
-
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
-import org.springframework.context.annotation.Bean;
 
 @EnableAutoConfiguration(exclude = FlywayAutoConfiguration.class)
 public class UIConfig {
-    @Bean
-    public WebDriver getDriver() {
-        DesiredCapabilities capabilities = DesiredCapabilities.firefox();
-        FirefoxOptions options = new FirefoxOptions();
-                    
-        options.addPreference("log", "{level: trace}");
-        options.setLogLevel(Level.ALL);
-                
-        capabilities.setCapability("marionette", true);
-        capabilities.setCapability("moz:firefoxOptions", options);
-                
-        System.setProperty("webdriver.gecko.driver", "/home/takeuchi/bin/geckodriver");
-                    
-        return new FirefoxDriver(options);
-    }
+    
 }
