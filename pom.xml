@@ -100,6 +100,24 @@
 				</dependencies>
 			</plugin>
 			<plugin>
+				<groupId>com.lazerycode.selenium</groupId>
+				<artifactId>driver-binary-downloader-maven-plugin</artifactId>
+				<version>1.0.14</version>
+				<configuration>
+					<rootStandaloneServerDirectory>${project.basedir}/target/selenium_standalone_binaries</rootStandaloneServerDirectory>
+					<downloadedZipFileDirectory>${project.basedir}/target/selenium_standalone_zips</downloadedZipFileDirectory>
+					<onlyGetDriversForHostOperatingSystem>true</onlyGetDriversForHostOperatingSystem>
+					<customRepositoryMap>${project.basedir}/src/test/resources/CustomRepoMap.xml</customRepositoryMap>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>selenium</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
 				<executions>
@@ -129,6 +147,11 @@
 							<goal>integration-test</goal>
 							<goal>verify</goal>
 						</goals>
+						<configuration>
+							<systemProperties>
+								<webdriver.gecko.driver>${webdriver.gecko.driver}</webdriver.gecko.driver>
+							</systemProperties>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
