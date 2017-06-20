@@ -45,7 +45,7 @@ import objective.taskboard.RequestResponse;
 public abstract class AbstractUIIntegrationTest {
     protected WebDriver webDriver;
     private static final ExecutorService service = Executors.newSingleThreadExecutor();
-    private static final long TIMEOUT_IN_SECONDS = 60;
+    private static final long TIMEOUT_IN_SECONDS = 120;
     
     @Before
     public void setup() throws InterruptedException, ExecutionException, TimeoutException {
@@ -57,7 +57,8 @@ public abstract class AbstractUIIntegrationTest {
     @After
     public void teardown() {
         try {
-            webDriver.close();
+            if (webDriver!=null)
+                webDriver.close();
         }catch(Exception e) {
             e.printStackTrace();
         }
