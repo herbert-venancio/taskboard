@@ -1,5 +1,16 @@
 package objective.taskboard.it;
 
+import static org.apache.commons.lang3.StringUtils.join;
+import static org.junit.Assert.assertEquals;
+import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementValue;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import org.openqa.selenium.By;
+
 /*-
  * [LICENSE]
  * Taskboard
@@ -27,22 +38,23 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
-public class MainPage {
+public class MainPage extends AbstractUiPage {
     @FindBy(css=".nameButton.user-account")
     private WebElement userLabelButton;
+    
+    @FindBy(id="searchIssues")
+    private WebElement searchIssuesInput;
 
     
-    private WebDriver webDriver;
-
-    public MainPage(WebDriver driver) {
-        this.webDriver = driver;
+    public MainPage(WebDriver webDriver) {
+        super(webDriver);
     }
     
     public static MainPage produce(WebDriver webDriver) {
         return PageFactory.initElements(webDriver, MainPage.class);
     }
     
-    public static MainPage to(WebDriver webDriver) {
+    public static AbstractUiPage to(WebDriver webDriver) {
         webDriver.get(UIConfig.getSiteBase()+"/");
         return PageFactory.initElements(webDriver, MainPage.class);
     }
@@ -51,9 +63,20 @@ public class MainPage {
         waitTextInElement(userLabelButton, expected);
     }
     
-    
-    private void waitTextInElement(WebElement element, String expected) {
-        PageWait.wait(webDriver).until(ExpectedConditions.visibilityOf(element));
-        PageWait.wait(webDriver).until(ExpectedConditions.textToBePresentInElement(element, expected));        
+    public void typeSearch(String searchValue) {
+        searchIssuesInput.sendKeys(searchValue);
+        waitUntil(textToBePresentInElementValue(searchIssuesInput, searchValue));
+    }
+
+    public void assertVisibleIssues(String ... expectedIssueKeyList) {
+        waitUntil(ExpectedConditions.numberOfElementsToBe(By.cssSelector("paper-material.issue"), expectedIssueKeyList.length));
+        List<WebElement> findElements = webDriver.findElements(By.cssSelector("paper-material.issue"));
+        ArrayList<String> actualIssueKeyList = new ArrayList<String>(); 
+        for (WebElement webElement : findElements) 
+            actualIssueKeyList.add( webElement.findElement(By.cssSelector(".key.issue-item")).getText().trim());
+        Arrays.sort(expectedIssueKeyList);
+        Collections.sort(actualIssueKeyList);
+        
+        assertEquals(join(expectedIssueKeyList,"\n"), join(actualIssueKeyList,"\n"));
     }
 }

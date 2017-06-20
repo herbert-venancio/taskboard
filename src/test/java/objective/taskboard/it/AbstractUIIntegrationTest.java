@@ -1,12 +1,13 @@
 package objective.taskboard.it;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import org.junit.After;
 
 /*-
  * [LICENSE]
@@ -30,12 +31,17 @@ import java.util.concurrent.TimeoutException;
  */
 
 import org.junit.Before;
+import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import objective.taskboard.RequestBuilder;
 import objective.taskboard.RequestResponse;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = {UIConfig.class})
 public abstract class AbstractUIIntegrationTest {
     protected WebDriver webDriver;
     private static final ExecutorService service = Executors.newSingleThreadExecutor();
@@ -47,33 +53,34 @@ public abstract class AbstractUIIntegrationTest {
         
         webDriver = new FirefoxDriver();
     }
+    
+    @After
+    public void teardown() {
+        webDriver.close();
+    }
 
 
     private void waitServerReady() throws InterruptedException, ExecutionException, TimeoutException {
-        final Future<Void> f = service.submit(new Callable<Void>() {
-
-            @Override
-            public Void call() throws Exception {
-                while (true) {
-                    try {
-                        RequestResponse response = RequestBuilder
+        final Future<Void> f = service.submit(() -> {  
+            while (true) {
+                try {
+                    RequestResponse response = RequestBuilder
                         .url("http://localhost:8080/ws/issues/issue-buffer-state")
                         .credentials("foo", "bar").get();
-                        
-                        if (response.responseCode < 400)
-                            if (response.content.equals("ready") || response.content.equals("updating"))
-                                return null;
-                    }catch(Exception e) {
-                        // just assume 'not ready'
-                    }
-                    System.out.println("Integration tests: Server not ready... waiting");
-                    Thread.sleep(1000);
+                    
+                    if (response.responseCode < 400)
+                        if (response.content.equals("ready") || response.content.equals("updating"))
+                            return null;
+                } catch(Exception e) {
+                    // just assume 'not ready'
                 }
+                System.out.println("Integration tests: Server not ready... waiting");
+                Thread.sleep(1000);
             }
         });
         try {
             f.get(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
-        }catch(TimeoutException ex) {
+        } catch(TimeoutException ex) {
             throw new IllegalStateException("Server did not come up after " + TIMEOUT_IN_SECONDS + " seconds");
         }
     }
