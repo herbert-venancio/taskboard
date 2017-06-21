@@ -71,17 +71,20 @@ public abstract class AbstractUIIntegrationTest {
 
     @After
     public void cleanupThread() {
-        if (webDriver != null) {
+        if (webDriver == null) return;
+        try {
             // capture the dom
             capturedDom = webDriver.getPageSource();
-
+    
             // capture a screenshot
             if (webDriver instanceof TakesScreenshot) {
                 capturePage = ((TakesScreenshot) webDriver)
                         .getScreenshotAs(OutputType.BYTES);
             }
-
+    
             webDriver.close();
+        }catch (Exception e) {
+            e.printStackTrace();
         }
     }
     
