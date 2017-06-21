@@ -1,5 +1,7 @@
 package objective.taskboard.controller;
 
+import static objective.taskboard.config.CacheConfiguration.PROJECTS;
+
 /*-
  * [LICENSE]
  * Taskboard
@@ -25,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,6 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.domain.Filter;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.issueBuffer.IssueEvent;
+import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.repository.FilterCachedRepository;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.task.WebhookSchedule;
@@ -59,10 +63,26 @@ public class WebhookController {
     @Autowired
     private ObjectMapper mapper;
 
+    @Autowired
+    private JiraProperties jiraProperties;
+
+    @Autowired
+    private CacheManager cacheManager;
+
     @RequestMapping(value = "{projectKey}/{issueKey}", method = RequestMethod.POST)
     public void webhook(@RequestBody Map<String, Object> body, @PathVariable("projectKey") String projectKey, @PathVariable("issueKey") String issueKey) throws JsonProcessingException {
         String webhookEvent = body.get("webhookEvent").toString().replace("jira:", "");
-        Long issueTypeId = getIssueTypeId(body);
+        Map<String, Object> issueType = toMap(getIssueField(body, "issuetype"));
+        Long issueTypeId = Long.parseLong(issueType.get("id").toString());
+
+        if (!jiraProperties.getCustomfield().getRelease().getId().isEmpty()) {
+            Object release = getIssueField(body, jiraProperties.getCustomfield().getRelease().getId());
+
+            if (release != null) {
+                cacheManager.getCache(PROJECTS).clear();
+                log.debug("REFRESH PROJECTS CACHE");
+            }
+        }
 
         addItemInTheQueue(webhookEvent, projectKey, issueTypeId, issueKey);
         log.debug("WEBHOOK REQUEST BODY: " + mapper.writeValueAsString(body));
@@ -104,11 +124,10 @@ public class WebhookController {
         });
     }
 
-    private Long getIssueTypeId(Map<String, Object> requestBody) {
+    private Object getIssueField(Map<String, Object> requestBody, String field) {
         Map<String, Object> issue = toMap(requestBody.get("issue"));
         Map<String, Object> fields = toMap(issue.get("fields"));
-        Map<String, Object> type = toMap(fields.get("issuetype"));
-        return Long.parseLong(type.get("id").toString());
+        return fields.get(field);
     }
 
     @SuppressWarnings("unchecked")

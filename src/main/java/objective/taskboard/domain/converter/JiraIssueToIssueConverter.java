@@ -105,11 +105,8 @@ public class JiraIssueToIssueConverter {
     }
 
     public objective.taskboard.data.Issue convert(Issue jiraIssue) {
-        IssueMetadata metadata = metadatasByIssueKey.get(jiraIssue.getKey());
-        if (metadata == null) {
-            metadata = new IssueMetadata(jiraIssue, jiraProperties, parentIssueLinks, log);
-            metadatasByIssueKey.put(jiraIssue.getKey(), metadata);
-        }
+        IssueMetadata metadata = new IssueMetadata(jiraIssue, jiraProperties, parentIssueLinks, log);
+        metadatasByIssueKey.put(jiraIssue.getKey(), metadata);
 
         String avatarCoAssignee1 = jiraIssue.getAssignee() != null ? jiraIssue.getAssignee().getAvatarUri("24x24").toString() : "";
         String avatarCoAssignee2 = metadata.getCoAssignees().stream()

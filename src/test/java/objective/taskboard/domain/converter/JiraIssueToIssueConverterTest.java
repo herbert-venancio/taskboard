@@ -70,6 +70,7 @@ public class JiraIssueToIssueConverterTest {
     private static final String ISSUE_KEY = "ISSUE-2";
     private static final String TYPE_ICON_URI = "iconURI";
     private static final String CLASS_OF_SERVICE_EXPEDITE = "Expedite";
+    private static final String CLASS_OF_SERVICE_STANDARD = "Standard";
     private static final String RELEASE = "RELEASE";
 
     private static final String JSON_PARENT = "{key:'%s', fields:{issuetype:{id:1, iconUrl:'%s'}}}";
@@ -233,7 +234,7 @@ public class JiraIssueToIssueConverterTest {
 
     @Test
     public void issueWithParentConvert() throws JSONException {
-        when(classOfServiceDetails.getDefaultValue()).thenReturn("Standard");
+        when(classOfServiceDetails.getDefaultValue()).thenReturn(CLASS_OF_SERVICE_STANDARD);
         mockIssue(parent, PARENT_ISSUE_KEY);
 
         mockIssueField(parent, classOfServiceField, CLASS_OF_SERVICE_ID, format(JSON_CLASS_OF_SERVICE, CLASS_OF_SERVICE_EXPEDITE));
@@ -248,7 +249,7 @@ public class JiraIssueToIssueConverterTest {
                 .findFirst().orElse(null);
         assertIssueWithParent(converted);
         Map<String, Object> customFields = converted.getCustomFields();
-        assertClassOfService(customFields);
+        assertClassOfService(customFields, CLASS_OF_SERVICE_EXPEDITE);
         assertTrue("Release should be in custom fields", customFields.containsKey(RELEASE_ID));
         assertEquals("Release value", RELEASE, ((objective.taskboard.data.CustomField)customFields.get(RELEASE_ID)).getValue());
     }
@@ -267,7 +268,7 @@ public class JiraIssueToIssueConverterTest {
         assertEquals("Issues converted quantity", 1, issuesConverted.size());
         objective.taskboard.data.Issue converted = issuesConverted.get(0);
         assertIssueWithParent(converted);
-        assertClassOfService(converted.getCustomFields());
+        assertClassOfService(converted.getCustomFields(), CLASS_OF_SERVICE_EXPEDITE);
     }
 
     @Test
@@ -280,6 +281,23 @@ public class JiraIssueToIssueConverterTest {
         assertEquals("Issues converted quantity", 1, issuesConverted.size());
         objective.taskboard.data.Issue converted = issuesConverted.get(0);
         assertEquals("Comment", "comment", converted.getComments());
+    }
+
+    @Test
+    public void updateIssueConverted() throws JSONException {
+        mockIssueField(issue, classOfServiceField, CLASS_OF_SERVICE_ID, format(JSON_CLASS_OF_SERVICE, CLASS_OF_SERVICE_EXPEDITE));
+
+        List<objective.taskboard.data.Issue> issuesConverted = subject.convert(asList(issue));
+
+        assertEquals("Issues converted quantity", 1, issuesConverted.size());
+        objective.taskboard.data.Issue converted = issuesConverted.get(0);
+        assertClassOfService(converted.getCustomFields(), CLASS_OF_SERVICE_EXPEDITE);
+
+        mockIssueField(issue, classOfServiceField, CLASS_OF_SERVICE_ID, format(JSON_CLASS_OF_SERVICE, CLASS_OF_SERVICE_STANDARD));
+
+        objective.taskboard.data.Issue issueUpdated = subject.convert(issue);
+        assertNotNull("Issue updated converted", issueUpdated);
+        assertClassOfService(issueUpdated.getCustomFields(), CLASS_OF_SERVICE_STANDARD);
     }
 
     private void mockIssue(Issue issue, String issueKey) {
@@ -305,9 +323,9 @@ public class JiraIssueToIssueConverterTest {
         assertEquals("Parent type icon URI", TYPE_ICON_URI, converted.getParentTypeIconUri());
     }
 
-    private void assertClassOfService(Map<String, Object> customFields) {
+    private void assertClassOfService(Map<String, Object> customFields, String classOfServiceExpected) {
         assertTrue("Class of service should be in custom fields", customFields.containsKey(CLASS_OF_SERVICE_ID));
-        assertEquals("Class of service value", CLASS_OF_SERVICE_EXPEDITE, customFields.get(CLASS_OF_SERVICE_ID));
+        assertEquals("Class of service value", classOfServiceExpected, customFields.get(CLASS_OF_SERVICE_ID));
     }
 
 }
