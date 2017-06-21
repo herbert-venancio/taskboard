@@ -33,6 +33,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -57,7 +58,9 @@ public abstract class AbstractUIIntegrationTest {
     public void setup() throws InterruptedException, ExecutionException, TimeoutException {
         waitServerReady();
         
+        System.setProperty("webdriver.gecko.driver", "drivers/linux/marionette/64bit/geckodriver");
         webDriver = new FirefoxDriver();
+        webDriver.manage().window().setSize(new Dimension(1024,768));
     }
     
     @CaptureFile(extension = "html")
