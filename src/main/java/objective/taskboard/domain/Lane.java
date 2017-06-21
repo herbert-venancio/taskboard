@@ -32,6 +32,9 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import objective.taskboard.domain.converter.BooleanConverter;
@@ -61,9 +64,11 @@ public class Lane extends TaskboardEntity implements Serializable {
     private boolean showParentIconInSynthetic;
 
     @OneToMany(mappedBy = "lane", fetch = FetchType.EAGER)
+    @Fetch(value = FetchMode.SUBSELECT)
     private List<Stage> stages;
 
     @OneToMany(mappedBy = "lane", fetch = FetchType.EAGER)
+    @Fetch(value = FetchMode.SUBSELECT)
     private Collection<Rule> rules;
 
 

@@ -224,6 +224,11 @@ public class IssueController {
     public void reorder(@RequestBody String [] issues) {
         issuePriorityService.reorder(issues);
     }
+    
+    @RequestMapping("issue-buffer-state")
+    public String getState() {
+        return issueBufferService.getState().name();
+    }
 
     private List<AspectItemFilter> getDefaultFieldFilterList() throws InterruptedException, ExecutionException {
         List<AspectItemFilter> defaultFieldFilters = new ArrayList<>();

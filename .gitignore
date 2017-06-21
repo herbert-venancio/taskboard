@@ -11,3 +11,5 @@ target
 src/main/resources/static/bower_components
 /bin/
 taskboard.iml
+drivers
+db2.*

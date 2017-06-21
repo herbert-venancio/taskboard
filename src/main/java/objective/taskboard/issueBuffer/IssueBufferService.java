@@ -53,10 +53,22 @@ public class IssueBufferService {
     @Autowired
     private ProjectService projectService;
     
+    private IssueBufferState state = IssueBufferState.uninitialised;
+    
     private Map<String, Issue> issueBuffer = new LinkedHashMap<>();
+    
+    public IssueBufferState getState() {
+        return state;
+    }
 
-    public void updateIssueBuffer() {
-        setIssues(issueConverter.convert(jiraIssueService.searchAll()));
+    public synchronized void updateIssueBuffer() {
+        try {
+            state = IssueBufferState.updating;
+            setIssues(issueConverter.convert(jiraIssueService.searchAll()));
+            state = IssueBufferState.ready;
+        }catch(Exception e) {
+            state = IssueBufferState.error;
+        }
     }
 
     public Issue updateIssueBuffer(final String key) {

@@ -1,11 +1,11 @@
-package objective.taskboard;
+package objective.taskboard.it;
 
 /*-
  * [LICENSE]
  * Taskboard
- * - - -
- * Copyright (C) 2015 - 2016 Objective Solutions
- * - - -
+ * ---
+ * Copyright (C) 2015 - 2017 Objective Solutions
+ * ---
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -21,14 +21,13 @@ package objective.taskboard;
  * [/LICENSE]
  */
 
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.web.support.SpringBootServletInitializer;
+import org.junit.Test;
 
-public class ServletInitializer extends SpringBootServletInitializer {
-
-	@Override
-	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-		return application.sources(Application.class);
-	}
-
+public class SearchInputIT extends AuthenticatedIntegrationTest {
+    @Test
+    public void whenIssueKeyIsTyped_onlyMatchingIssuesShouldBeFound() {
+        MainPage mainPage = MainPage.produce(webDriver);
+        mainPage.typeSearch("TASKB-61");
+        mainPage.assertVisibleIssues("TASKB-610", "TASKB-611", "TASKB-612", "TASKB-613");
+    }
 }

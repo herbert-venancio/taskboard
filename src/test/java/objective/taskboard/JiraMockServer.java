@@ -76,17 +76,21 @@ public class JiraMockServer {
         });
         
         get("rest/api/latest/user",  (req, res) ->{
-            return loadMockData("user.response.json");
+            String loadMockData = loadMockData("user.response.json");
+            loadMockData = loadMockData.replace("\"displayName\": \"Taskboard\",", "\"displayName\": \"" + username + "\",");
+            return loadMockData;
         });
         
         get("rest/api/latest/serverInfo",  (req, res) ->{
+            String auth = new String(java.util.Base64.getDecoder().decode(req.headers("Authorization").replace("Basic ","").getBytes()));
+            username = auth.split(":")[0];
             return loadMockData("serverInfo.response.json");
         });
         
         post("/rest/api/latest/search", "application/json", (req,res) -> {
             @SuppressWarnings("rawtypes")
             Map searchData = gson.fromJson(req.body(), java.util.Map.class);
-            return makeFakeRequest(Math.round((Double)searchData.get("startAt")));
+            return makeFakeRequest(searchData);
         });
         
         get("/rest/api/latest/issue/:issueKey",  (req, res) ->{
@@ -111,8 +115,17 @@ public class JiraMockServer {
         return string;
     }
     
-    private static String makeFakeRequest(long l) {
-        String result = loadMockData("search"+l+".json");
+    @SuppressWarnings("rawtypes")
+    private static String makeFakeRequest(Map searchData) {
+        long startAt = Math.round((Double)searchData.get("startAt"));        
+        String jql = searchData.get("jql").toString();
+        String datFileName = "search"+startAt+".json";
+        if (jql.contains("key IN ")) { 
+            String issueKey = jql.replaceAll("key IN [(]([^)*])[)]", "$1");
+            datFileName = "searchIssue_" + issueKey + ".json";
+        }
+        
+        String result = loadMockData(datFileName);
         if (result == null)
             return "{\"startAt\":0,\"maxResults\":100,\"total\":605,\"issues\":[]}";
         return result;
@@ -134,6 +147,6 @@ public class JiraMockServer {
         return "objective-jira-teste";
     }
 
-    
+    private static String username;
     private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
 }

@@ -27,6 +27,10 @@ import objective.taskboard.domain.converter.BooleanConverter;
 
 import javax.persistence.*;
 import javax.validation.constraints.Pattern;
+
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -55,6 +59,7 @@ public class Stage extends TaskboardEntity implements Serializable {
     private Lane lane;
 
     @OneToMany(mappedBy = "stage", fetch = FetchType.EAGER)
+    @Fetch(value = FetchMode.SUBSELECT)
     private List<Step> steps;
 
 }

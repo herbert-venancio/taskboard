@@ -1,11 +1,11 @@
-package objective.taskboard;
+package objective.taskboard.it;
 
 /*-
  * [LICENSE]
  * Taskboard
- * - - -
- * Copyright (C) 2015 - 2016 Objective Solutions
- * - - -
+ * ---
+ * Copyright (C) 2015 - 2017 Objective Solutions
+ * ---
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -21,14 +21,17 @@ package objective.taskboard;
  * [/LICENSE]
  */
 
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.web.support.SpringBootServletInitializer;
+import org.junit.Before;
 
-public class ServletInitializer extends SpringBootServletInitializer {
+public abstract class AuthenticatedIntegrationTest extends AbstractUIIntegrationTest {
 
-	@Override
-	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-		return application.sources(Application.class);
-	}
+    @Before
+    public void before() {
+        LoginPage loginPage = LoginPage.to(webDriver);
+        loginPage.login("foo", "bar");
+        
+        MainPage mainPage = MainPage.produce(webDriver);
+        mainPage.waitUserLabelToBe("foo");
+    }
 
 }
