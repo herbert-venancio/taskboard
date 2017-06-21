@@ -25,7 +25,7 @@ import org.junit.Test;
 
 public class SearchInputIT extends AuthenticatedIntegrationTest {
     @Test
-    public void whenIssueKeyIsTyped_onlyOneIssueShouldBeFound() {
+    public void whenIssueKeyIsTyped_onlyMatchingIssuesShouldBeFound() {
         MainPage mainPage = MainPage.produce(webDriver);
         mainPage.typeSearch("TASKB-61");
         mainPage.assertVisibleIssues("TASKB-610", "TASKB-611", "TASKB-612", "TASKB-613");
