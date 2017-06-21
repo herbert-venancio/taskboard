@@ -31,11 +31,17 @@ import org.junit.After;
  */
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.runner.RunWith;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import com.safaribooks.junitattachments.CaptureFile;
+import com.safaribooks.junitattachments.RecordAttachmentRule;
 
 import objective.taskboard.RequestBuilder;
 import objective.taskboard.RequestResponse;
@@ -54,15 +60,30 @@ public abstract class AbstractUIIntegrationTest {
         webDriver = new FirefoxDriver();
     }
     
+    @CaptureFile(extension = "html")
+    public String capturedDom = null;
+
+    @CaptureFile(extension = "png")
+    public byte[] capturePage = null;
+
     @After
-    public void teardown() {
-        try {
-            if (webDriver!=null)
-                webDriver.close();
-        }catch(Exception e) {
-            e.printStackTrace();
+    public void cleanupThread() {
+        if (webDriver != null) {
+            // capture the dom
+            capturedDom = webDriver.getPageSource();
+
+            // capture a screenshot
+            if (webDriver instanceof TakesScreenshot) {
+                capturePage = ((TakesScreenshot) webDriver)
+                        .getScreenshotAs(OutputType.BYTES);
+            }
+
+            webDriver.close();
         }
     }
+    
+    @Rule
+    public RecordAttachmentRule recordArtifactRule = new RecordAttachmentRule(this);
 
 
     private void waitServerReady() throws InterruptedException, ExecutionException, TimeoutException {

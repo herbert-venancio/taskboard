@@ -551,6 +551,12 @@
 			<version>3.4.0</version><!--$NO-MVN-MAN-VER$ -->
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+		    <groupId>com.safaribooks</groupId>
+		    <artifactId>jenkins-helper-java</artifactId>
+		    <version>1.0.0</version>
+		    <scope>test</scope>
+		</dependency>		
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
