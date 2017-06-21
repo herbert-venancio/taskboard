@@ -1,5 +1,6 @@
 package objective.taskboard.it;
 
+import java.io.File;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -46,6 +47,7 @@ import com.safaribooks.junitattachments.RecordAttachmentRule;
 
 import objective.taskboard.RequestBuilder;
 import objective.taskboard.RequestResponse;
+import objective.taskboard.TestMain;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {UIConfig.class})
@@ -58,7 +60,14 @@ public abstract class AbstractUIIntegrationTest {
     public void setup() throws InterruptedException, ExecutionException, TimeoutException {
         waitServerReady();
         
-        System.setProperty("webdriver.gecko.driver", "drivers/linux/marionette/64bit/geckodriver");
+        if (System.getProperty("webdriver.gecko.driver") == null)
+            System.setProperty("webdriver.gecko.driver", "drivers/linux/marionette/64bit/geckodriver");
+        
+        
+        if (!new File("drivers/linux/marionette/64bit/geckodriver").exists()) {
+            throw new IllegalStateException("To run integration tests, you must run 'mvn clean install' at least once to download gecko driver");
+        }
+        
         webDriver = new FirefoxDriver();
         webDriver.manage().window().setSize(new Dimension(1024,768));
     }
@@ -113,7 +122,8 @@ public abstract class AbstractUIIntegrationTest {
         try {
             f.get(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
         } catch(TimeoutException ex) {
-            throw new IllegalStateException("Server did not come up after " + TIMEOUT_IN_SECONDS + " seconds");
+            throw new IllegalStateException("Server did not come up after " + TIMEOUT_IN_SECONDS + " seconds.\n"
+                    + "If you're running from eclipse, make sure to run " + TestMain.class.getName());
         }
     }
 

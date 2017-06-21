@@ -12,6 +12,17 @@ This application **must be run with Java 8** (404 errors on ws may indicate wron
 8. Import format configuration file taskboard-format.xml (`Project > Configuration > Java Code Style > Formatter > Import`).
 
 
+## Integration Tests
+
+The integration tests run every time a mvn install/deploy/release/verify is executed. You must run it at least once before running integration tests from eclipse.
+
+To run integration tests from eclipse:
+
+1. Run TestMain to run the server
+2. Run the tests
+
+The tests require Firefox version 54+ installed in your system. Make sure your version matches at least 54.   
+
 ## Generating a war
 By default, the genarated artifact is a **jar**. Alternatively you can generate a **war** by activating the `packaging-war` maven profile: \
  `mvn package -P packaging-war`
