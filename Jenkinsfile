@@ -39,4 +39,11 @@ node ("general-purpose") {
         handleError("objective-solutions/taskboard", "devops@objective.com.br", "objective-solutions-user")
         throw ex
     }
+    if (params.RELEASE) {
+        stage('Release') {
+            unstash 'working-copy'
+            echo 'Releasing...'
+            sh "mvn --batch-mode release:prepare release:perform"
+        }
+    }
 }
