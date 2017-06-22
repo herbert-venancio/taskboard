@@ -218,7 +218,7 @@ public class FollowUpGenerator {
 
     String generateJiraDataSheet(Map<String, Long> sharedStrings) throws IOException {
         String rowTemplate = getStringFromXML(PATH_ROW_SHEET_TEMPLATE);
-        String rows = "";
+        StringBuilder rows = new StringBuilder();
         int rowNumber = 2;
 
         for (FollowUpData followUpData : provider.getJiraData()) {
@@ -253,13 +253,13 @@ public class FollowUpGenerator {
             rowValues.put("taskBallpark", defaultIfNull(followUpData.taskBallpark, ""));
             rowValues.put("tshirtSize", getOrSetIndexInSharedStrings(sharedStrings, followUpData.tshirtSize));
             rowValues.put("queryType", getOrSetIndexInSharedStrings(sharedStrings, followUpData.queryType));
-            rows += StrSubstitutor.replace(rowTemplate, rowValues);
+            rows.append(StrSubstitutor.replace(rowTemplate, rowValues));
             rowNumber++;
         }
 
         String sheetTemplate = getStringFromXML(PATH_SHEET_7_TEMPLATE);
         Map<String, String> sheetValues = new HashMap<String, String>();
-        sheetValues.put("rows", rows);
+        sheetValues.put("rows", rows.toString());
         return StrSubstitutor.replace(sheetTemplate, sheetValues);
     }
 
@@ -287,19 +287,19 @@ public class FollowUpGenerator {
         List<String> sharedStringsSorted = sharedStrings.keySet().stream()
             .sorted((s1, s2) -> sharedStrings.get(s1).compareTo(sharedStrings.get(s2)))
             .collect(toList());
-        String allSharedStrings = "";
+        StringBuilder allSharedStrings = new StringBuilder();
 
         for (String sharedString : sharedStringsSorted) {
             Map<String, Object> siValues = new HashMap<String, Object>();
             siValues.put("preserve", sharedString.endsWith(" ") ? PROPERTY_XML_SPACE_PRESERVE : "");
             siValues.put("sharedString", StringEscapeUtils.escapeXml(sharedString));
-            allSharedStrings += StrSubstitutor.replace(siSharedStringsTemplate, siValues);
+            allSharedStrings.append(StrSubstitutor.replace(siSharedStringsTemplate, siValues));
         }
 
         String sharedStringsTemplate = getStringFromXML(PATH_SHARED_STRINGS_TEMPLATE);
         Map<String, Object> sharedStringsValues = new HashMap<String, Object>();
         sharedStringsValues.put("sharedStringsSize", sharedStringsSorted.size());
-        sharedStringsValues.put("allSharedStrings", allSharedStrings);
+        sharedStringsValues.put("allSharedStrings", allSharedStrings.toString());
         return StrSubstitutor.replace(sharedStringsTemplate, sharedStringsValues);
     }
 }
