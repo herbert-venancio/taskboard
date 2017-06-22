@@ -20,30 +20,30 @@ node ("general-purpose") {
             junit 'target/failsafe-reports/*.xml'
             stash 'working-copy'
         }
-        if(BRANCH_NAME == 'master') {
-            stage('Deploy Docker') {
-                unstash 'working-copy'
-
-                git clone "https://github.com/objective-solutions/liferay-environment-bootstrap.git"
-                dir('liferay-environment-bootstrap/dockers/taskboard') {
-                    sh "cp ../../../target/taskboard-*-SNAPSHOT.war taskboard.war"
-
-                    docker.withRegistry("http://dockercb:5000") {
-                        def image = docker.build "taskboard-snapshot"
-                        image.push
-                    }
-                }
-            }
-        }
     } catch (ex) {
         handleError("objective-solutions/taskboard", "devops@objective.com.br", "objective-solutions-user")
         throw ex
     }
-    if (params.RELEASE) {
-        stage('Release') {
+    if(BRANCH_NAME == 'master') {
+        stage('Deploy Docker') {
             unstash 'working-copy'
-            echo 'Releasing...'
-            sh "mvn --batch-mode release:prepare release:perform"
+
+            git clone "https://github.com/objective-solutions/liferay-environment-bootstrap.git"
+            dir('liferay-environment-bootstrap/dockers/taskboard') {
+                sh "cp ../../../target/taskboard-*-SNAPSHOT.war taskboard.war"
+
+                docker.withRegistry("http://dockercb:5000") {
+                    def image = docker.build "taskboard-snapshot"
+                    image.push
+                }
+            }
+        }
+        if (params.RELEASE) {
+            stage('Release') {
+                unstash 'working-copy'
+                echo 'Releasing...'
+                sh "mvn --batch-mode release:prepare release:perform"
+            }
         }
     }
 }
