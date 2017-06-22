@@ -106,8 +106,7 @@ public class JiraIssueToIssueConverter {
     }
 
     private objective.taskboard.data.Issue convert(Issue jiraIssue, Map<String, IssueMetadata> issuesMetadataByKey) {
-        IssueMetadata metadata = issuesMetadataByKey.get(jiraIssue.getKey());
-        metadata = new IssueMetadata(jiraIssue, jiraProperties, parentIssueLinks, log);
+        IssueMetadata metadata = new IssueMetadata(jiraIssue, jiraProperties, parentIssueLinks, log);
         issuesMetadataByKey.put(jiraIssue.getKey(), metadata);
 
         String avatarCoAssignee1 = jiraIssue.getAssignee() != null ? jiraIssue.getAssignee().getAvatarUri("24x24").toString() : "";
