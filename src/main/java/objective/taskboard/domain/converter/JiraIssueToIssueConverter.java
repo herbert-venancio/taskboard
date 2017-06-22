@@ -81,9 +81,6 @@ public class JiraIssueToIssueConverter {
 
     private List<String> parentIssueLinks;
 
-    private Map<String, IssueMetadata> taskboardMetadatasByIssueKey = newHashMap();
-    private Map<String, IssueMetadata> allMetadatasByIssueKey = newHashMap();
-
     @PostConstruct
     private void loadParentIssueLinks() {
         parentIssueLinks = parentIssueLinkRepository.findAll().stream()
@@ -91,15 +88,7 @@ public class JiraIssueToIssueConverter {
                                .collect(toList());
     }
     
-    public List<objective.taskboard.data.Issue> convertIntoTaskboadIssuesBuffer(List<Issue> issueList) {
-        return convert(issueList, taskboardMetadatasByIssueKey);
-    }
-    
-    public List<objective.taskboard.data.Issue> convertIntoAllIssuesBuffer(List<Issue> searchAllProjectIssues) {
-        return convert(searchAllProjectIssues, allMetadatasByIssueKey); 
-    }
-
-    private List<objective.taskboard.data.Issue> convert(List<Issue> issueList, Map<String, IssueMetadata> issuesMetadaByKey) {
+    public List<objective.taskboard.data.Issue> convert(List<Issue> issueList, Map<String, IssueMetadata> issuesMetadaByKey) {
         loadParentIssueLinks();
 
         issuesMetadaByKey.putAll(issueList.stream()
@@ -112,8 +101,8 @@ public class JiraIssueToIssueConverter {
         return converted;
     }
     
-    public objective.taskboard.data.Issue convertSingleIssue(Issue jiraIssue) {
-        return convert(jiraIssue, taskboardMetadatasByIssueKey);
+    public objective.taskboard.data.Issue convertSingleIssue(Issue jiraIssue, Map<String, IssueMetadata> issuesMetadaByKey) {
+        return convert(jiraIssue, issuesMetadaByKey);
     }
 
     public objective.taskboard.data.Issue convert(Issue jiraIssue, Map<String, IssueMetadata> issuesMetadaByKey) {

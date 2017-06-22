@@ -55,7 +55,6 @@ import com.google.common.collect.ImmutableList;
 
 import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.auth.CredentialsHolder;
-import objective.taskboard.domain.converter.JiraIssueToIssueConverter;
 import objective.taskboard.jira.endpoint.JiraEndpoint;
 import objective.taskboard.jira.endpoint.JiraEndpoint.Request;
 import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
@@ -80,12 +79,6 @@ public class JiraService {
 
     @Autowired
     private JiraEndpointAsMaster jiraEndpointAsMaster;
-
-    @Autowired
-    private JiraIssueService jiraIssueService;
-
-    @Autowired
-    private JiraIssueToIssueConverter issueConverter;
 
     public void authenticate(String username, String password) {
         log.debug("⬣⬣⬣⬣⬣  authenticate");
@@ -259,11 +252,6 @@ public class JiraService {
     public User getLoggedUser() {
         log.debug("⬣⬣⬣⬣⬣  getLoggedUser");
         return jiraEndpointAsUser.executeRequest(client -> client.getUserClient().getUser(CredentialsHolder.username()));
-    }
-
-    public List<objective.taskboard.data.Issue> getIssueSubTasks(objective.taskboard.data.Issue issue) {
-        List<Issue> subtasksFromJira = jiraIssueService.searchIssueSubTasksAndDemandedByKey(issue.getIssueKey());
-        return issueConverter.convertIntoTaskboadIssuesBuffer(subtasksFromJira);
     }
 
     public void block(String issueKey, String lastBlockReason) {

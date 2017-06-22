@@ -36,7 +36,7 @@ import org.springframework.util.StringUtils;
 
 import objective.taskboard.data.CustomField;
 import objective.taskboard.data.Issue;
-import objective.taskboard.issueBuffer.IssueBufferService;
+import objective.taskboard.issueBuffer.AllIssuesBufferService;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraProperties.BallparkMapping;
 
@@ -46,7 +46,7 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
     private JiraProperties jiraProperties;
     
     @Autowired
-    private IssueBufferService issueBufferService;
+    private AllIssuesBufferService issueBufferService;
     
     private Map<String, Issue> demandsByKey;
     private Map<String, Issue> featuresByKey;

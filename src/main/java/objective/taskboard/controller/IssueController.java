@@ -164,7 +164,7 @@ public class IssueController {
 
     @RequestMapping(path = "subtasks", method = RequestMethod.POST)
     public List<Issue> subtasks(@RequestBody Issue issue) throws SQLException {
-        return jiraBean.getIssueSubTasks(issue);
+        return issueBufferService.getIssueSubTasks(issue);
     }
 
     @RequestMapping(path = "timetracking", method = RequestMethod.POST)

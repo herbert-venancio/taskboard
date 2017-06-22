@@ -51,7 +51,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import objective.taskboard.data.Issue;
-import objective.taskboard.issueBuffer.IssueBufferService;
+import objective.taskboard.issueBuffer.AllIssuesBufferService;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraProperties.BallparkMapping;
 import objective.taskboard.jira.JiraProperties.CustomField;
@@ -71,7 +71,7 @@ public class FollowupDataProviderImplTest {
     private MetadataService metadataService;
     
     @Mock
-    private IssueBufferService issueBufferService;
+    private AllIssuesBufferService issueBufferService;
     
     CustomField propertiesCustomField;
     private TShirtSize tshirtSizeInfo;
