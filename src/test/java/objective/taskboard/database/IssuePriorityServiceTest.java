@@ -23,6 +23,7 @@ package objective.taskboard.database;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.LinkedList;
@@ -37,13 +38,18 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import objective.taskboard.controller.IssuePriorityService;
+import objective.taskboard.data.Issue;
 import objective.taskboard.data.TaskboardIssue;
+import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.repository.TaskboardIssueRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class IssuePriorityServiceTest {
     @Mock
     private TaskboardIssueRepository issueOrderPriority;
+    
+    @Mock
+    private IssueBufferService issueBuffer;
     
     @InjectMocks
     IssuePriorityService subject;
@@ -62,11 +68,15 @@ public class IssuePriorityServiceTest {
                     new TaskboardIssue("P-3", 200)
                     ));
         
-        subject.reorder(new String[]{"P-3", "P-1", "P-2"});
+        Issue p4 = mock(Issue.class);
+        when(p4.getId()).thenReturn(400L);
+        when(issueBuffer.getIssueByKey("P-4")).thenReturn(p4);
+        
+        subject.reorder(new String[]{"P-3", "P-1", "P-2", "P-4"});
         
         ArgumentCaptor<TaskboardIssue> argument = ArgumentCaptor.forClass(TaskboardIssue.class);
 
-        Mockito.verify(issueOrderPriority, Mockito.times(3)).save(argument.capture());
+        Mockito.verify(issueOrderPriority, Mockito.times(4)).save(argument.capture());
         LinkedList<TaskboardIssue> actual = new LinkedList<TaskboardIssue>(argument.getAllValues());
         TaskboardIssue e = actual.poll();
         assertEquals("P-3", e.getProjectKey());
@@ -79,5 +89,9 @@ public class IssuePriorityServiceTest {
         e = actual.poll();
         assertEquals("P-2", e.getProjectKey());
         assertEquals(200L, e.getPriority());
+        
+        e = actual.poll();
+        assertEquals("P-4", e.getProjectKey());
+        assertEquals(400L, e.getPriority());
     }
 }
