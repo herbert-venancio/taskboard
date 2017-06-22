@@ -88,27 +88,27 @@ public class JiraIssueToIssueConverter {
                                .collect(toList());
     }
     
-    public List<objective.taskboard.data.Issue> convert(List<Issue> issueList, Map<String, IssueMetadata> issuesMetadaByKey) {
+    public List<objective.taskboard.data.Issue> convertIssues(List<Issue> issueList, Map<String, IssueMetadata> issuesMetadataByKey) {
         loadParentIssueLinks();
 
-        issuesMetadaByKey.putAll(issueList.stream()
+        issuesMetadataByKey.putAll(issueList.stream()
             .collect(toMap(i -> i.getKey(), i -> new IssueMetadata(i, jiraProperties, parentIssueLinks, log))));
 
         List<objective.taskboard.data.Issue> converted = issueList.stream()
-                                  .map(i -> convert(i, issuesMetadaByKey))
+                                  .map(i -> convert(i, issuesMetadataByKey))
                                   .collect(toList());
         System.out.println(converted.size());
         return converted;
     }
     
-    public objective.taskboard.data.Issue convertSingleIssue(Issue jiraIssue, Map<String, IssueMetadata> issuesMetadaByKey) {
-        return convert(jiraIssue, issuesMetadaByKey);
+    public objective.taskboard.data.Issue convertSingleIssue(Issue jiraIssue, Map<String, IssueMetadata> issuesMetadataByKey) {
+        return convert(jiraIssue, issuesMetadataByKey);
     }
 
-    public objective.taskboard.data.Issue convert(Issue jiraIssue, Map<String, IssueMetadata> issuesMetadaByKey) {
-        IssueMetadata metadata = issuesMetadaByKey.get(jiraIssue.getKey());
+    private objective.taskboard.data.Issue convert(Issue jiraIssue, Map<String, IssueMetadata> issuesMetadataByKey) {
+        IssueMetadata metadata = issuesMetadataByKey.get(jiraIssue.getKey());
         metadata = new IssueMetadata(jiraIssue, jiraProperties, parentIssueLinks, log);
-        issuesMetadaByKey.put(jiraIssue.getKey(), metadata);
+        issuesMetadataByKey.put(jiraIssue.getKey(), metadata);
 
         String avatarCoAssignee1 = jiraIssue.getAssignee() != null ? jiraIssue.getAssignee().getAvatarUri("24x24").toString() : "";
         String avatarCoAssignee2 = metadata.getCoAssignees().stream()
@@ -119,7 +119,7 @@ public class JiraIssueToIssueConverter {
         List<String> issueTeams = newArrayList();
         List<String> usersTeam = newArrayList();
         try {
-            IssueMetadata parentMetadata = getParentMetadata(metadata, issuesMetadaByKey);
+            IssueMetadata parentMetadata = getParentMetadata(metadata, issuesMetadataByKey);
 
             Map<String, List<String>> mapUsersTeams = issueTeamService.getIssueTeams(metadata, parentMetadata);
 
@@ -153,7 +153,7 @@ public class JiraIssueToIssueConverter {
                 getParentTypeId(metadata),
                 getParentTypeIconUri(metadata),
                 metadata.getDependenciesIssuesKey(),
-                issueColorService.getColor(getClassOfServiceId(metadata, issuesMetadaByKey)),
+                issueColorService.getColor(getClassOfServiceId(metadata, issuesMetadataByKey)),
                 String.join(",", getCoAssigneesName(metadata)),
                 jiraIssue.getAssignee() != null ? jiraIssue.getAssignee().getName() : "",
                 String.join(",", usersTeam),
@@ -165,7 +165,7 @@ public class JiraIssueToIssueConverter {
                 getComments(metadata),
                 metadata.getLabels(),
                 metadata.getComponents(),
-                getCustomFields(metadata, issuesMetadaByKey),
+                getCustomFields(metadata, issuesMetadataByKey),
                 priorityOrder,
                 TaskboardTimeTracking.fromJira(jiraIssue.getTimeTracking()),
                 jiraProperties,
@@ -202,29 +202,29 @@ public class JiraIssueToIssueConverter {
         return metadata.getComments().get(0);
     }
 
-    private Map<String, Object> getCustomFields(IssueMetadata metadata, Map<String, IssueMetadata> issuesMetadaByKey) {
+    private Map<String, Object> getCustomFields(IssueMetadata metadata, Map<String, IssueMetadata> issuesMetadataByKey) {
         Map<String, Object> customFields = newHashMap();
-        customFields.put(jiraProperties.getCustomfield().getClassOfService().getId(), getClassOfServiceValue(metadata, issuesMetadaByKey));
+        customFields.put(jiraProperties.getCustomfield().getClassOfService().getId(), getClassOfServiceValue(metadata, issuesMetadataByKey));
         customFields.put(jiraProperties.getCustomfield().getBlocked().getId(), metadata.getBlocked());
         customFields.put(jiraProperties.getCustomfield().getLastBlockReason().getId(), metadata.getLastBlockReason());
         customFields.putAll(metadata.getTShirtSizes());
         customFields.putAll(metadata.getAdditionalEstimatedHours());
-        customFields.putAll(getRelease(metadata, issuesMetadaByKey));
+        customFields.putAll(getRelease(metadata, issuesMetadataByKey));
         return customFields;
     }
 
-    private String getClassOfServiceValue(IssueMetadata metadata, Map<String, IssueMetadata> issuesMetadaByKey) {
+    private String getClassOfServiceValue(IssueMetadata metadata, Map<String, IssueMetadata> issuesMetadataByKey) {
         String defaultClassOfService = jiraProperties.getCustomfield().getClassOfService().getDefaultValue();
-        CustomField classOfService = getClassOfService(metadata, issuesMetadaByKey);
+        CustomField classOfService = getClassOfService(metadata, issuesMetadataByKey);
         return classOfService == null ? defaultClassOfService : (String)classOfService.getValue();
     }
 
-    private Long getClassOfServiceId(IssueMetadata metadata, Map<String, IssueMetadata> issuesMetadaByKey) {
-        CustomField classOfService = getClassOfService(metadata, issuesMetadaByKey);
+    private Long getClassOfServiceId(IssueMetadata metadata, Map<String, IssueMetadata> issuesMetadataByKey) {
+        CustomField classOfService = getClassOfService(metadata, issuesMetadataByKey);
         return classOfService == null ? 0L : classOfService.getOptionId();
     }
 
-    private CustomField getClassOfService(IssueMetadata metadata, Map<String, IssueMetadata> issuesMetadaByKey) {
+    private CustomField getClassOfService(IssueMetadata metadata, Map<String, IssueMetadata> issuesMetadataByKey) {
         String defaultClassOfService = jiraProperties.getCustomfield().getClassOfService().getDefaultValue();
         CustomField classOfService = metadata.getClassOfService();
 
@@ -234,11 +234,11 @@ public class JiraIssueToIssueConverter {
         if (isNotDefaultClassOfService)
             return classOfService;
 
-        IssueMetadata parentMetadata = getParentMetadata(metadata, issuesMetadaByKey);
+        IssueMetadata parentMetadata = getParentMetadata(metadata, issuesMetadataByKey);
         if (parentMetadata == null)
             return classOfService;
 
-        return getClassOfService(parentMetadata, issuesMetadaByKey);
+        return getClassOfService(parentMetadata, issuesMetadataByKey);
     }
 
     private Map<String, CustomField> getRelease(IssueMetadata metadata, Map<String, IssueMetadata> issuesMetadataByKey) {
@@ -254,19 +254,19 @@ public class JiraIssueToIssueConverter {
         return getRelease(parentMetadata, issuesMetadataByKey);
     }
 
-    private IssueMetadata getParentMetadata(IssueMetadata metadata, Map<String, IssueMetadata> issuesMetadaByKey) {
+    private IssueMetadata getParentMetadata(IssueMetadata metadata, Map<String, IssueMetadata> issuesMetadataByKey) {
         String parentKey = metadata.getParentKey();
         if (isNullOrEmpty(parentKey))
             return null;
 
-        IssueMetadata parentMetadata = issuesMetadaByKey.get(parentKey);
+        IssueMetadata parentMetadata = issuesMetadataByKey.get(parentKey);
 
         if (parentMetadata != null)
             return parentMetadata;
 
         Issue parent = jiraService.getIssueByKeyAsMaster(parentKey);
         parentMetadata = new IssueMetadata(parent, jiraProperties, parentIssueLinks, log);
-        issuesMetadaByKey.put(parent.getKey(), parentMetadata);
+        issuesMetadataByKey.put(parent.getKey(), parentMetadata);
         return parentMetadata;
     }
 }

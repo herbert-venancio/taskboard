@@ -45,7 +45,7 @@ public class AllIssuesBufferService {
                 StopWatch stopWatch = new StopWatch();
                 stopWatch.start();
                 log.debug("updateAllIssuesBuffer start");
-                List<Issue> list = issueConverter.convert(jiraIssueService.searchAllProjectIssues(), allMetadatasByIssueKey);
+                List<Issue> list = issueConverter.convertIssues(jiraIssueService.searchAllProjectIssues(), allMetadatasByIssueKey);
                 
                 allIssuesBuffer.clear();
                 for (Issue issue : list) 

@@ -80,7 +80,7 @@ public class IssueBufferService {
             stopWatch.start();
             try {
                 state = IssueBufferState.updating;
-                setIssues(issueConverter.convert(jiraIssueService.searchAll(), taskboardMetadatasByIssueKey));
+                setIssues(issueConverter.convertIssues(jiraIssueService.searchAll(), taskboardMetadatasByIssueKey));
                 state = IssueBufferState.ready;
             }catch(Exception e) {
                 state = IssueBufferState.error;
@@ -151,7 +151,7 @@ public class IssueBufferService {
     
     public List<objective.taskboard.data.Issue> getIssueSubTasks(objective.taskboard.data.Issue issue) {
         List<com.atlassian.jira.rest.client.api.domain.Issue> subtasksFromJira = jiraIssueService.searchIssueSubTasksAndDemandedByKey(issue.getIssueKey());
-        return issueConverter.convert(subtasksFromJira, taskboardMetadatasByIssueKey);
+        return issueConverter.convertIssues(subtasksFromJira, taskboardMetadatasByIssueKey);
     }
 
     private boolean isParentVisible(Issue issue) {
