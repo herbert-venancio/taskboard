@@ -289,7 +289,7 @@ public class JiraIssueToIssueConverterTest {
     public void updateIssueConverted() throws JSONException {
         mockIssueField(issue, classOfServiceField, CLASS_OF_SERVICE_ID, format(JSON_CLASS_OF_SERVICE, CLASS_OF_SERVICE_EXPEDITE));
 
-        List<objective.taskboard.data.Issue> issuesConverted = subject.convert(asList(issue));
+        List<objective.taskboard.data.Issue> issuesConverted = subject.convertIssues(asList(issue), metadatasByIssueKey);
 
         assertEquals("Issues converted quantity", 1, issuesConverted.size());
         objective.taskboard.data.Issue converted = issuesConverted.get(0);
@@ -297,7 +297,7 @@ public class JiraIssueToIssueConverterTest {
 
         mockIssueField(issue, classOfServiceField, CLASS_OF_SERVICE_ID, format(JSON_CLASS_OF_SERVICE, CLASS_OF_SERVICE_STANDARD));
 
-        objective.taskboard.data.Issue issueUpdated = subject.convert(issue);
+        objective.taskboard.data.Issue issueUpdated = subject.convertSingleIssue(issue, metadatasByIssueKey);
         assertNotNull("Issue updated converted", issueUpdated);
         assertClassOfService(issueUpdated.getCustomFields(), CLASS_OF_SERVICE_STANDARD);
     }
