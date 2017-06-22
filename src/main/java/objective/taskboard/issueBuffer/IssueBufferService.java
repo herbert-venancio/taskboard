@@ -64,23 +64,34 @@ public class IssueBufferService {
   
     private boolean isUpdatingAllIssuesBuffer = false;
     
+    private boolean isUpdatingTaskboardIssuesBuffer = false;
+    
     public IssueBufferState getState() {
         return state;
     }
 
     public synchronized void updateIssueBuffer() {
-        StopWatch stopWatch = new StopWatch();
-        stopWatch.start();
-        try {
-            state = IssueBufferState.updating;
-            setIssues(issueConverter.convertWithPriority(jiraIssueService.searchAll()));
-            state = IssueBufferState.ready;
-        }catch(Exception e) {
-            state = IssueBufferState.error;
-        }
-        finally {
-            log.debug("updateIssueBuffer time spent " +stopWatch.getTime());
-        }
+        if (isUpdatingTaskboardIssuesBuffer)
+            return;
+        
+        isUpdatingTaskboardIssuesBuffer = true;
+        Thread thread = new Thread(() -> {
+            StopWatch stopWatch = new StopWatch();
+            stopWatch.start();
+            try {
+                state = IssueBufferState.updating;
+                setIssues(issueConverter.convertIntoTaskboadIssuesBuffer(jiraIssueService.searchAll()));
+                state = IssueBufferState.ready;
+            }catch(Exception e) {
+                state = IssueBufferState.error;
+            }
+            finally {
+                log.debug("updateIssueBuffer time spent " +stopWatch.getTime());
+                isUpdatingTaskboardIssuesBuffer = false;
+            }
+        });
+        thread.setDaemon(true);
+        thread.start();
     }
 
     
@@ -94,7 +105,7 @@ public class IssueBufferService {
                 StopWatch stopWatch = new StopWatch();
                 stopWatch.start();
                 log.debug("updateAllIssuesBuffer start");
-                List<Issue> list = issueConverter.convertWithoutPriority(jiraIssueService.searchAllProjectIssues());
+                List<Issue> list = issueConverter.convertIntoAllIssuesBuffer(jiraIssueService.searchAllProjectIssues());
                 
                 allIssuesBuffer.clear();
                 for (Issue issue : list) 
@@ -122,7 +133,7 @@ public class IssueBufferService {
         if (jiraIssues.isEmpty())
             return issueBuffer.remove(key);
 
-        final Issue issue = issueConverter.convert(jiraIssues.get(0));
+        final Issue issue = issueConverter.convertSingleIssue(jiraIssues.get(0));
         putIssue(issue);
 
         updateSubtasks(issue.getIssueKey());
@@ -134,7 +145,7 @@ public class IssueBufferService {
         List<String> subtasksKeys = getSubtasksKeys(key);
         List<com.atlassian.jira.rest.client.api.domain.Issue> jiraSubtasks = jiraIssueService.searchIssuesByKeys(subtasksKeys);
         for (com.atlassian.jira.rest.client.api.domain.Issue jiraSubtask : jiraSubtasks) {
-            Issue subtaskConverted = issueConverter.convert(jiraSubtask);
+            Issue subtaskConverted = issueConverter.convertSingleIssue(jiraSubtask);
             putIssue(subtaskConverted);
         }
     }
@@ -166,6 +177,10 @@ public class IssueBufferService {
         return allIssuesBuffer.values().stream()
                 .filter(t -> projectService.isProjectVisible(t.getProjectKey()))
                 .collect(toList());
+    }
+    
+    public Issue getIssueByKey(String key) {
+        return issueBuffer.get(key);
     }
 
     private boolean isParentVisible(Issue issue) {

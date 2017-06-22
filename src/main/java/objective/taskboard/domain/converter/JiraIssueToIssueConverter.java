@@ -81,7 +81,8 @@ public class JiraIssueToIssueConverter {
 
     private List<String> parentIssueLinks;
 
-    private Map<String, IssueMetadata> metadatasByIssueKey = newHashMap();
+    private Map<String, IssueMetadata> taskboardMetadatasByIssueKey = newHashMap();
+    private Map<String, IssueMetadata> allMetadatasByIssueKey = newHashMap();
 
     @PostConstruct
     private void loadParentIssueLinks() {
@@ -90,34 +91,35 @@ public class JiraIssueToIssueConverter {
                                .collect(toList());
     }
     
-    public List<objective.taskboard.data.Issue> convertWithPriority(List<Issue> issueList) {
-        return convert(issueList, true);
+    public List<objective.taskboard.data.Issue> convertIntoTaskboadIssuesBuffer(List<Issue> issueList) {
+        return convert(issueList, taskboardMetadatasByIssueKey);
+    }
+    
+    public List<objective.taskboard.data.Issue> convertIntoAllIssuesBuffer(List<Issue> searchAllProjectIssues) {
+        return convert(searchAllProjectIssues, allMetadatasByIssueKey); 
     }
 
-    public List<objective.taskboard.data.Issue> convert(List<Issue> issueList, boolean calculatePriority) {
+    private List<objective.taskboard.data.Issue> convert(List<Issue> issueList, Map<String, IssueMetadata> issuesMetadaByKey) {
         loadParentIssueLinks();
 
-        metadatasByIssueKey = newHashMap();
-        metadatasByIssueKey = issueList.stream()
-            .collect(toMap(i -> i.getKey(), i -> new IssueMetadata(i, jiraProperties, parentIssueLinks, log)));
+        issuesMetadaByKey.putAll(issueList.stream()
+            .collect(toMap(i -> i.getKey(), i -> new IssueMetadata(i, jiraProperties, parentIssueLinks, log))));
 
         List<objective.taskboard.data.Issue> converted = issueList.stream()
-                                  .map(i -> convert(i, calculatePriority))
+                                  .map(i -> convert(i, issuesMetadaByKey))
                                   .collect(toList());
         System.out.println(converted.size());
         return converted;
     }
     
-    public objective.taskboard.data.Issue convert(Issue jiraIssue) {
-        return convert(jiraIssue, true);
+    public objective.taskboard.data.Issue convertSingleIssue(Issue jiraIssue) {
+        return convert(jiraIssue, taskboardMetadatasByIssueKey);
     }
 
-    public objective.taskboard.data.Issue convert(Issue jiraIssue, boolean calculatePriority) {
-        IssueMetadata metadata = metadatasByIssueKey.get(jiraIssue.getKey());
-        if (metadata == null) {
-            metadata = new IssueMetadata(jiraIssue, jiraProperties, parentIssueLinks, log);
-            metadatasByIssueKey.put(jiraIssue.getKey(), metadata);
-        }
+    public objective.taskboard.data.Issue convert(Issue jiraIssue, Map<String, IssueMetadata> issuesMetadaByKey) {
+        IssueMetadata metadata = issuesMetadaByKey.get(jiraIssue.getKey());
+        metadata = new IssueMetadata(jiraIssue, jiraProperties, parentIssueLinks, log);
+        issuesMetadaByKey.put(jiraIssue.getKey(), metadata);
 
         String avatarCoAssignee1 = jiraIssue.getAssignee() != null ? jiraIssue.getAssignee().getAvatarUri("24x24").toString() : "";
         String avatarCoAssignee2 = metadata.getCoAssignees().stream()
@@ -128,7 +130,7 @@ public class JiraIssueToIssueConverter {
         List<String> issueTeams = newArrayList();
         List<String> usersTeam = newArrayList();
         try {
-            IssueMetadata parentMetadata = getParentMetadata(metadata);
+            IssueMetadata parentMetadata = getParentMetadata(metadata, issuesMetadaByKey);
 
             Map<String, List<String>> mapUsersTeams = issueTeamService.getIssueTeams(metadata, parentMetadata);
 
@@ -144,7 +146,7 @@ public class JiraIssueToIssueConverter {
             issueTeams.add(INVALID_TEAM);
             usersTeam.addAll(e.getUsersInInvalidTeam());
         }
-        Long priorityOrder = calculatePriority?priorityService.determinePriority(jiraIssue):0L;
+        Long priorityOrder = priorityService.determinePriority(jiraIssue);
         
         objective.taskboard.data.Issue i = objective.taskboard.data.Issue.from(
                 jiraIssue.getId(),
@@ -162,7 +164,7 @@ public class JiraIssueToIssueConverter {
                 getParentTypeId(metadata),
                 getParentTypeIconUri(metadata),
                 metadata.getDependenciesIssuesKey(),
-                issueColorService.getColor(getClassOfServiceId(metadata)),
+                issueColorService.getColor(getClassOfServiceId(metadata, issuesMetadaByKey)),
                 String.join(",", getCoAssigneesName(metadata)),
                 jiraIssue.getAssignee() != null ? jiraIssue.getAssignee().getName() : "",
                 String.join(",", usersTeam),
@@ -174,7 +176,7 @@ public class JiraIssueToIssueConverter {
                 getComments(metadata),
                 metadata.getLabels(),
                 metadata.getComponents(),
-                getCustomFields(metadata),
+                getCustomFields(metadata, issuesMetadaByKey),
                 priorityOrder,
                 TaskboardTimeTracking.fromJira(jiraIssue.getTimeTracking()),
                 jiraProperties,
@@ -211,29 +213,29 @@ public class JiraIssueToIssueConverter {
         return metadata.getComments().get(0);
     }
 
-    private Map<String, Object> getCustomFields(IssueMetadata metadata) {
+    private Map<String, Object> getCustomFields(IssueMetadata metadata, Map<String, IssueMetadata> issuesMetadaByKey) {
         Map<String, Object> customFields = newHashMap();
-        customFields.put(jiraProperties.getCustomfield().getClassOfService().getId(), getClassOfServiceValue(metadata));
+        customFields.put(jiraProperties.getCustomfield().getClassOfService().getId(), getClassOfServiceValue(metadata, issuesMetadaByKey));
         customFields.put(jiraProperties.getCustomfield().getBlocked().getId(), metadata.getBlocked());
         customFields.put(jiraProperties.getCustomfield().getLastBlockReason().getId(), metadata.getLastBlockReason());
         customFields.putAll(metadata.getTShirtSizes());
         customFields.putAll(metadata.getAdditionalEstimatedHours());
-        customFields.putAll(getRelease(metadata));
+        customFields.putAll(getRelease(metadata, issuesMetadaByKey));
         return customFields;
     }
 
-    private String getClassOfServiceValue(IssueMetadata metadata) {
+    private String getClassOfServiceValue(IssueMetadata metadata, Map<String, IssueMetadata> issuesMetadaByKey) {
         String defaultClassOfService = jiraProperties.getCustomfield().getClassOfService().getDefaultValue();
-        CustomField classOfService = getClassOfService(metadata);
+        CustomField classOfService = getClassOfService(metadata, issuesMetadaByKey);
         return classOfService == null ? defaultClassOfService : (String)classOfService.getValue();
     }
 
-    private Long getClassOfServiceId(IssueMetadata metadata) {
-        CustomField classOfService = getClassOfService(metadata);
+    private Long getClassOfServiceId(IssueMetadata metadata, Map<String, IssueMetadata> issuesMetadaByKey) {
+        CustomField classOfService = getClassOfService(metadata, issuesMetadaByKey);
         return classOfService == null ? 0L : classOfService.getOptionId();
     }
 
-    private CustomField getClassOfService(IssueMetadata metadata) {
+    private CustomField getClassOfService(IssueMetadata metadata, Map<String, IssueMetadata> issuesMetadaByKey) {
         String defaultClassOfService = jiraProperties.getCustomfield().getClassOfService().getDefaultValue();
         CustomField classOfService = metadata.getClassOfService();
 
@@ -243,43 +245,39 @@ public class JiraIssueToIssueConverter {
         if (isNotDefaultClassOfService)
             return classOfService;
 
-        IssueMetadata parentMetadata = getParentMetadata(metadata);
+        IssueMetadata parentMetadata = getParentMetadata(metadata, issuesMetadaByKey);
         if (parentMetadata == null)
             return classOfService;
 
-        return getClassOfService(parentMetadata);
+        return getClassOfService(parentMetadata, issuesMetadaByKey);
     }
 
-    private Map<String, CustomField> getRelease(IssueMetadata metadata) {
+    private Map<String, CustomField> getRelease(IssueMetadata metadata, Map<String, IssueMetadata> issuesMetadataByKey) {
         Map<String, CustomField> release = metadata.getRelease();
 
         if (!release.isEmpty())
             return release;
 
-        IssueMetadata parentMetadata = getParentMetadata(metadata);
+        IssueMetadata parentMetadata = getParentMetadata(metadata, issuesMetadataByKey);
         if (parentMetadata == null)
             return newHashMap();
 
-        return getRelease(parentMetadata);
+        return getRelease(parentMetadata, issuesMetadataByKey);
     }
 
-    private IssueMetadata getParentMetadata(IssueMetadata metadata) {
+    private IssueMetadata getParentMetadata(IssueMetadata metadata, Map<String, IssueMetadata> issuesMetadaByKey) {
         String parentKey = metadata.getParentKey();
         if (isNullOrEmpty(parentKey))
             return null;
 
-        IssueMetadata parentMetadata = metadatasByIssueKey.get(parentKey);
+        IssueMetadata parentMetadata = issuesMetadaByKey.get(parentKey);
 
         if (parentMetadata != null)
             return parentMetadata;
 
         Issue parent = jiraService.getIssueByKeyAsMaster(parentKey);
         parentMetadata = new IssueMetadata(parent, jiraProperties, parentIssueLinks, log);
-        metadatasByIssueKey.put(parent.getKey(), parentMetadata);
+        issuesMetadaByKey.put(parent.getKey(), parentMetadata);
         return parentMetadata;
-    }
-
-    public List<objective.taskboard.data.Issue> convertWithoutPriority(List<com.atlassian.jira.rest.client.api.domain.Issue> searchAllProjectIssues) {
-        return convert(searchAllProjectIssues, false); 
     }
 }

@@ -263,7 +263,7 @@ public class JiraService {
 
     public List<objective.taskboard.data.Issue> getIssueSubTasks(objective.taskboard.data.Issue issue) {
         List<Issue> subtasksFromJira = jiraIssueService.searchIssueSubTasksAndDemandedByKey(issue.getIssueKey());
-        return issueConverter.convertWithPriority(subtasksFromJira);
+        return issueConverter.convertIntoTaskboadIssuesBuffer(subtasksFromJira);
     }
 
     public void block(String issueKey, String lastBlockReason) {
