@@ -89,8 +89,12 @@ public class JiraIssueToIssueConverter {
                                .map(ParentIssueLink::getDescriptionIssueLink)
                                .collect(toList());
     }
+    
+    public List<objective.taskboard.data.Issue> convertWithPriority(List<Issue> issueList) {
+        return convert(issueList, true);
+    }
 
-    public List<objective.taskboard.data.Issue> convert(List<Issue> issueList) {
+    public List<objective.taskboard.data.Issue> convert(List<Issue> issueList, boolean calculatePriority) {
         loadParentIssueLinks();
 
         metadatasByIssueKey = newHashMap();
@@ -98,13 +102,17 @@ public class JiraIssueToIssueConverter {
             .collect(toMap(i -> i.getKey(), i -> new IssueMetadata(i, jiraProperties, parentIssueLinks, log)));
 
         List<objective.taskboard.data.Issue> converted = issueList.stream()
-                                  .map(i -> convert(i))
+                                  .map(i -> convert(i, calculatePriority))
                                   .collect(toList());
         System.out.println(converted.size());
         return converted;
     }
-
+    
     public objective.taskboard.data.Issue convert(Issue jiraIssue) {
+        return convert(jiraIssue, true);
+    }
+
+    public objective.taskboard.data.Issue convert(Issue jiraIssue, boolean calculatePriority) {
         IssueMetadata metadata = metadatasByIssueKey.get(jiraIssue.getKey());
         if (metadata == null) {
             metadata = new IssueMetadata(jiraIssue, jiraProperties, parentIssueLinks, log);
@@ -136,7 +144,8 @@ public class JiraIssueToIssueConverter {
             issueTeams.add(INVALID_TEAM);
             usersTeam.addAll(e.getUsersInInvalidTeam());
         }
-        Long priorityOrder = priorityService.determinePriority(jiraIssue);
+        Long priorityOrder = calculatePriority?priorityService.determinePriority(jiraIssue):0L;
+        
         objective.taskboard.data.Issue i = objective.taskboard.data.Issue.from(
                 jiraIssue.getId(),
                 jiraIssue.getKey(),
@@ -268,5 +277,9 @@ public class JiraIssueToIssueConverter {
         parentMetadata = new IssueMetadata(parent, jiraProperties, parentIssueLinks, log);
         metadatasByIssueKey.put(parent.getKey(), parentMetadata);
         return parentMetadata;
+    }
+
+    public List<objective.taskboard.data.Issue> convertWithoutPriority(List<com.atlassian.jira.rest.client.api.domain.Issue> searchAllProjectIssues) {
+        return convert(searchAllProjectIssues, false); 
     }
 }

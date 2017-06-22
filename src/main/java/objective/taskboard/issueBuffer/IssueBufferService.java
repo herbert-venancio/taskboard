@@ -30,17 +30,20 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
+import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.data.Issue;
-import objective.taskboard.data.TaskboardIssue;
 import objective.taskboard.data.IssuePriorityOrderChanged;
+import objective.taskboard.data.TaskboardIssue;
 import objective.taskboard.domain.converter.JiraIssueToIssueConverter;
 import objective.taskboard.jira.JiraIssueService;
 import objective.taskboard.jira.ProjectService;
 
+@Slf4j
 @Service
 public class IssueBufferService {
 
@@ -57,18 +60,54 @@ public class IssueBufferService {
     
     private Map<String, Issue> issueBuffer = new LinkedHashMap<>();
     
+    private Map<String, Issue> allIssuesBuffer = new LinkedHashMap<>();
+  
+    private boolean isUpdatingAllIssuesBuffer = false;
+    
     public IssueBufferState getState() {
         return state;
     }
 
     public synchronized void updateIssueBuffer() {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
         try {
             state = IssueBufferState.updating;
-            setIssues(issueConverter.convert(jiraIssueService.searchAll()));
+            setIssues(issueConverter.convertWithPriority(jiraIssueService.searchAll()));
             state = IssueBufferState.ready;
         }catch(Exception e) {
             state = IssueBufferState.error;
         }
+        finally {
+            log.debug("updateIssueBuffer time spent " +stopWatch.getTime());
+        }
+    }
+
+    
+    public synchronized void updateAllIssuesBuffer() {
+        if (isUpdatingAllIssuesBuffer)
+            return;
+        
+        isUpdatingAllIssuesBuffer = true;
+        Thread thread = new Thread(() -> {
+            try {
+                StopWatch stopWatch = new StopWatch();
+                stopWatch.start();
+                log.debug("updateAllIssuesBuffer start");
+                List<Issue> list = issueConverter.convertWithoutPriority(jiraIssueService.searchAllProjectIssues());
+                
+                allIssuesBuffer.clear();
+                for (Issue issue : list) 
+                    allIssuesBuffer.put(issue.getIssueKey(), issue);
+                log.debug("All issues count: " + list.size());
+                log.debug("updateAllIssuesBuffer complete");
+                log.debug("updateAllIssuesBuffer time spent " +stopWatch.getTime());
+            }finally {
+                isUpdatingAllIssuesBuffer = false;
+            }
+        });
+        thread.setDaemon(true);
+        thread.start();
     }
 
     public Issue updateIssueBuffer(final String key) {
@@ -90,7 +129,7 @@ public class IssueBufferService {
 
         return issue;
     }
-
+    
     private void updateSubtasks(String key) {
         List<String> subtasksKeys = getSubtasksKeys(key);
         List<com.atlassian.jira.rest.client.api.domain.Issue> jiraSubtasks = jiraIssueService.searchIssuesByKeys(subtasksKeys);
@@ -124,7 +163,7 @@ public class IssueBufferService {
     }
     
     public synchronized List<Issue> getAllIssuesVisibleToUser() {
-        return issueBuffer.values().stream()
+        return allIssuesBuffer.values().stream()
                 .filter(t -> projectService.isProjectVisible(t.getProjectKey()))
                 .collect(toList());
     }

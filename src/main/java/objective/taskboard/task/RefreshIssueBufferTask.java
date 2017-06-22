@@ -45,4 +45,10 @@ public class RefreshIssueBufferTask implements ApplicationListener<ContextRefres
         System.out.println("UPDATING ISSUE BUFFER");
         issueBufferService.updateIssueBuffer();
     }
+    
+    @Scheduled(fixedRate = RATE_MILISECONDS, initialDelay = 0)
+    public void updateAllIssueBuffer() {
+        System.out.println("UPDATING ALL ISSUES BUFFER");
+        issueBufferService.updateAllIssuesBuffer();
+    }
 }
