@@ -164,7 +164,7 @@ public class IssueController {
 
     @RequestMapping(path = "subtasks", method = RequestMethod.POST)
     public List<Issue> subtasks(@RequestBody Issue issue) throws SQLException {
-        return jiraBean.getIssueSubTasks(issue);
+        return issueBufferService.getIssueSubTasks(issue);
     }
 
     @RequestMapping(path = "timetracking", method = RequestMethod.POST)
@@ -223,6 +223,11 @@ public class IssueController {
     @RequestMapping("reorder")
     public void reorder(@RequestBody String [] issues) {
         issuePriorityService.reorder(issues);
+    }
+    
+    @RequestMapping("issue-buffer-state")
+    public String getState() {
+        return issueBufferService.getState().name();
     }
 
     private List<AspectItemFilter> getDefaultFieldFilterList() throws InterruptedException, ExecutionException {

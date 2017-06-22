@@ -22,17 +22,15 @@ package objective.taskboard;
  */
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-@EnableAutoConfiguration
 @EnableScheduling
 @SpringBootApplication
 public class TestMain {
     public static void main(String[] args) {
+        System.setProperty("spring.datasource.data", "classpath:/populate_db.sql");
         JiraMockServer.begin();
-        SpringApplication.run(TestMain.class, args);
-    }
-
+        SpringApplication.run(TestMain.class, new String[]{"--server.port=8900"});
+    }    
 }

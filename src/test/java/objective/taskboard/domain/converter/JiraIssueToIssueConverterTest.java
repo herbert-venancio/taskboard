@@ -143,6 +143,8 @@ public class JiraIssueToIssueConverterTest {
     private IssuePriorityService priorityService;
     @Mock
     private Comment comment;
+    
+    private Map<String, IssueMetadata> metadatasByIssueKey = newHashMap();
 
     @Before
     public void before() {
@@ -196,7 +198,7 @@ public class JiraIssueToIssueConverterTest {
         usersTeam.put("assignee", asList("team"));
         when(issueTeamService.getIssueTeams(any(), any())).thenReturn(usersTeam);
 
-        List<objective.taskboard.data.Issue> issuesConverted = subject.convert(asList(issue));
+        List<objective.taskboard.data.Issue> issuesConverted = subject.convertIssues(asList(issue), metadatasByIssueKey);
 
         assertEquals("Issues converted quantity", 1, issuesConverted.size());
         objective.taskboard.data.Issue converted = issuesConverted.get(0);
@@ -241,7 +243,7 @@ public class JiraIssueToIssueConverterTest {
         mockIssueField(parent, releaseField, RELEASE_ID, format("{name:%s}", RELEASE));
         mockIssueField(issue, parentField, PARENT_ID, format(JSON_PARENT, PARENT_ISSUE_KEY, TYPE_ICON_URI));
 
-        List<objective.taskboard.data.Issue> issuesConverted = subject.convert(asList(parent, issue));
+        List<objective.taskboard.data.Issue> issuesConverted = subject.convertIssues(asList(parent, issue), metadatasByIssueKey);
 
         assertEquals("Issues converted quantity", 2, issuesConverted.size());
         objective.taskboard.data.Issue converted = issuesConverted.stream()
@@ -263,7 +265,7 @@ public class JiraIssueToIssueConverterTest {
         mockIssueField(parent, classOfServiceField, CLASS_OF_SERVICE_ID, format(JSON_CLASS_OF_SERVICE, CLASS_OF_SERVICE_EXPEDITE));
         mockIssueField(issue, parentField, PARENT_ID, format(JSON_PARENT, PARENT_ISSUE_KEY, TYPE_ICON_URI));
 
-        List<objective.taskboard.data.Issue> issuesConverted = subject.convert(asList(issue));
+        List<objective.taskboard.data.Issue> issuesConverted = subject.convertIssues(asList(issue), metadatasByIssueKey);
 
         assertEquals("Issues converted quantity", 1, issuesConverted.size());
         objective.taskboard.data.Issue converted = issuesConverted.get(0);
@@ -276,7 +278,7 @@ public class JiraIssueToIssueConverterTest {
         when(comment.toString()).thenReturn("comment");
         when(issue.getComments()).thenReturn(asList(comment));
 
-        List<objective.taskboard.data.Issue> issuesConverted = subject.convert(asList(issue));
+        List<objective.taskboard.data.Issue> issuesConverted = subject.convertIssues(asList(issue), metadatasByIssueKey);
 
         assertEquals("Issues converted quantity", 1, issuesConverted.size());
         objective.taskboard.data.Issue converted = issuesConverted.get(0);

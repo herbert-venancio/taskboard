@@ -22,6 +22,7 @@ package objective.taskboard.issueBuffer;
  */
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 
@@ -30,17 +31,21 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
+import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.data.Issue;
-import objective.taskboard.data.TaskboardIssue;
 import objective.taskboard.data.IssuePriorityOrderChanged;
+import objective.taskboard.data.TaskboardIssue;
+import objective.taskboard.domain.converter.IssueMetadata;
 import objective.taskboard.domain.converter.JiraIssueToIssueConverter;
 import objective.taskboard.jira.JiraIssueService;
 import objective.taskboard.jira.ProjectService;
 
+@Slf4j
 @Service
 public class IssueBufferService {
 
@@ -53,10 +58,40 @@ public class IssueBufferService {
     @Autowired
     private ProjectService projectService;
     
+    private Map<String, IssueMetadata> taskboardMetadatasByIssueKey = newHashMap();
+    
+    private IssueBufferState state = IssueBufferState.uninitialised;
+    
     private Map<String, Issue> issueBuffer = new LinkedHashMap<>();
+    
+    private boolean isUpdatingTaskboardIssuesBuffer = false;
+    
+    public IssueBufferState getState() {
+        return state;
+    }
 
-    public void updateIssueBuffer() {
-        setIssues(issueConverter.convert(jiraIssueService.searchAll()));
+    public synchronized void updateIssueBuffer() {
+        if (isUpdatingTaskboardIssuesBuffer)
+            return;
+        
+        isUpdatingTaskboardIssuesBuffer = true;
+        Thread thread = new Thread(() -> {
+            StopWatch stopWatch = new StopWatch();
+            stopWatch.start();
+            try {
+                state = IssueBufferState.updating;
+                setIssues(issueConverter.convertIssues(jiraIssueService.searchAll(), taskboardMetadatasByIssueKey));
+                state = IssueBufferState.ready;
+            }catch(Exception e) {
+                state = IssueBufferState.error;
+            }
+            finally {
+                log.debug("updateIssueBuffer time spent " +stopWatch.getTime());
+                isUpdatingTaskboardIssuesBuffer = false;
+            }
+        });
+        thread.setDaemon(true);
+        thread.start();
     }
 
     public Issue updateIssueBuffer(final String key) {
@@ -71,19 +106,19 @@ public class IssueBufferService {
         if (jiraIssues.isEmpty())
             return issueBuffer.remove(key);
 
-        final Issue issue = issueConverter.convert(jiraIssues.get(0));
+        final Issue issue = issueConverter.convertSingleIssue(jiraIssues.get(0), taskboardMetadatasByIssueKey);
         putIssue(issue);
 
         updateSubtasks(issue.getIssueKey());
 
         return issue;
     }
-
+    
     private void updateSubtasks(String key) {
         List<String> subtasksKeys = getSubtasksKeys(key);
         List<com.atlassian.jira.rest.client.api.domain.Issue> jiraSubtasks = jiraIssueService.searchIssuesByKeys(subtasksKeys);
         for (com.atlassian.jira.rest.client.api.domain.Issue jiraSubtask : jiraSubtasks) {
-            Issue subtaskConverted = issueConverter.convert(jiraSubtask);
+            Issue subtaskConverted = issueConverter.convertSingleIssue(jiraSubtask, taskboardMetadatasByIssueKey);
             putIssue(subtaskConverted);
         }
     }
@@ -110,11 +145,13 @@ public class IssueBufferService {
                 .filter(t -> isParentVisible(t))
                 .collect(toList());
     }
+    public synchronized Issue getIssueByKey(String key) {
+        return issueBuffer.get(key);
+    }
     
-    public synchronized List<Issue> getAllIssuesVisibleToUser() {
-        return issueBuffer.values().stream()
-                .filter(t -> projectService.isProjectVisible(t.getProjectKey()))
-                .collect(toList());
+    public List<objective.taskboard.data.Issue> getIssueSubTasks(objective.taskboard.data.Issue issue) {
+        List<com.atlassian.jira.rest.client.api.domain.Issue> subtasksFromJira = jiraIssueService.searchIssueSubTasksAndDemandedByKey(issue.getIssueKey());
+        return issueConverter.convertIssues(subtasksFromJira, taskboardMetadatasByIssueKey);
     }
 
     private boolean isParentVisible(Issue issue) {
