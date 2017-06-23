@@ -197,27 +197,6 @@
 										<ignore />
 									</action>
 								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.codehaus.mojo
-										</groupId>
-										<artifactId>
-											license-maven-plugin
-										</artifactId>
-										<versionRange>
-											[1.9,)
-										</versionRange>
-										<goals>
-											<goal>
-												update-file-header
-											</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore />
-									</action>
-								</pluginExecution>
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>
@@ -299,47 +278,6 @@
 								<goals>
 									<goal>exec</goal>
 								</goals>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>license-maven-plugin</artifactId>
-						<version>1.9</version>
-						<configuration>
-							<licenseName>agpl_v3</licenseName>
-							<inceptionYear>2015</inceptionYear>
-							<organizationName>Objective Solutions</organizationName>
-							<projectName>Taskboard</projectName>
-							<processStartTag>[LICENSE]</processStartTag>
-							<processEndTag>[/LICENSE]</processEndTag>
-							<sectionDelimiter>- - -</sectionDelimiter>
-							<verbose>true</verbose>
-						</configuration>
-						<executions>
-							<execution>
-								<id>update-file-header</id>
-								<goals>
-									<goal>update-file-header</goal>
-								</goals>
-								<phase>process-sources</phase>
-								<configuration>
-									<roots>
-										<root>src/main/java</root>
-										<root>src/main/resources</root>
-										<root>src/test/java</root>
-										<root>src/test/resources</root>
-									</roots>
-									<includes>
-										<include>**/*.java</include>
-										<include>**/*.js</include>
-										<include>**/*.html</include>
-									</includes>
-									<excludes>
-										<exclude>**/bower_components/**</exclude>
-										<exclude>**/*.json</exclude>
-									</excludes>
-								</configuration>
 							</execution>
 						</executions>
 					</plugin>
