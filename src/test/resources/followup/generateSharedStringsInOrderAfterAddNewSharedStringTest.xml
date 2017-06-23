@@ -178,9 +178,6 @@
     <t>3.Doing</t>
   </si>
   <si>
-    <t>5.Open</t>
-  </si>
-  <si>
     <t>Holyday</t>
   </si>
   <si>
@@ -323,9 +320,6 @@
   </si>
   <si>
     <t>SubtaskName</t>
-  </si>
-  <si>
-    <t>4.To Do</t>
   </si>
   <si>
     <t>Release</t>
@@ -571,9 +565,6 @@
     <t>Tech Lead1</t>
   </si>
   <si>
-    <t>Tech Planning | S | 00008 - Expiration Date - Feature Planning</t>
-  </si>
-  <si>
     <t>Sub-Task | XS | 00060 - Update OIDC modules to latest from master</t>
   </si>
   <si>
@@ -667,9 +658,6 @@
     <t>00001 - Enhanced Group Functionality (Site)</t>
   </si>
   <si>
-    <t>Feature | 00006 - Add version</t>
-  </si>
-  <si>
     <t>Feature | 00007 - Add expiration date</t>
   </si>
   <si>
@@ -691,15 +679,6 @@
     <t>Feature | 00023 - Add SCORM support</t>
   </si>
   <si>
-    <t>Feature | 00025 - Notify Google LMS of User activity</t>
-  </si>
-  <si>
-    <t>Feature Review | S | 00089 - Review of Notify Google LMS of User activity</t>
-  </si>
-  <si>
-    <t>Backend Development | S | 00090 - Create mock pages</t>
-  </si>
-  <si>
     <t>00005 - System Architecture</t>
   </si>
   <si>
@@ -712,37 +691,58 @@
     <t>Feature | 00070 - Create Theme</t>
   </si>
   <si>
-    <t>QA | S | 00107 - QA for Add version</t>
-  </si>
-  <si>
-    <t>Feature Review | S | 00108 - Review of Add support for OpenID Connect Single Sign-on</t>
-  </si>
-  <si>
-    <t>UX | S | 00112 - Define logout splash page</t>
-  </si>
-  <si>
     <t>Feature Review | S | 00121 - Review of Create Google Local Environment</t>
   </si>
   <si>
-    <t>Feature Review | S | 00131 - Review of Add sorting capability to Site REST API</t>
+    <t>No release set</t>
   </si>
   <si>
-    <t>2.To Review</t>
+    <t>Feature | 00159 - Feature without assignee GOOGLE</t>
   </si>
   <si>
-    <t>(vazio)</t>
+    <t>Sub-Task | S | 00160 - Sub-task of the feature without assignee</t>
   </si>
   <si>
-    <t>Total Geral</t>
+    <t>Sub-Task | M | 00157 - Research SCORM - 2</t>
   </si>
   <si>
-    <t>(Tudo)</t>
+    <t>QA | S | 00151 - QA for Add sorting capability to Site REST API</t>
   </si>
   <si>
-    <t>R&#243;tulos de Linha</t>
+    <t>Feature | 00056 - Implement Celsus sync job to index Liferay Sites</t>
   </si>
   <si>
-    <t>R&#243;tulos de Coluna</t>
+    <t>Feature Review | S | 00145 - Review of Implement Celsus sync job to index Liferay Sites</t>
+  </si>
+  <si>
+    <t>Backend Development | M | 00136 - Add scheduler to expire sites</t>
+  </si>
+  <si>
+    <t>00002 - User Activity Tracking</t>
+  </si>
+  <si>
+    <t>Tech Planning | S | 00118 - Tech Planning for Implement Celsus sync</t>
+  </si>
+  <si>
+    <t>Feature Planning | S | 00008 - Expiration Date - Feature Planning</t>
+  </si>
+  <si>
+    <t>(blank)</t>
+  </si>
+  <si>
+    <t>#N/A</t>
+  </si>
+  <si>
+    <t>(All)</t>
+  </si>
+  <si>
+    <t>0.Done</t>
+  </si>
+  <si>
+    <t>Row Labels</t>
+  </si>
+  <si>
+    <t>Column Labels</t>
   </si>
   <si>
     <t>PROJECT TEST</t>
