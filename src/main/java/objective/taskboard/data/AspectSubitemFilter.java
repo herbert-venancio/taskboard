@@ -40,14 +40,15 @@ public class AspectSubitemFilter implements Serializable {
     private Object value;
     private boolean selected;
     private boolean visible;
-    private List<String> dependents;
+    private List<String> teams;
+    private List<String> versions;
 
     public static AspectSubitemFilter from(String name, Object value, boolean selected) {
-        return new AspectSubitemFilter(name, value, selected, true, null);
+        return new AspectSubitemFilter(name, value, selected, true, null, null);
     }
 
-    public static AspectSubitemFilter from(String name, Object value, boolean selected, List<String> dependents) {
-        return new AspectSubitemFilter(name, value, selected, true, dependents);
+    public static AspectSubitemFilter from(String name, Object value, boolean selected, List<String> teams, List<String> versions) {
+        return new AspectSubitemFilter(name, value, selected, true, teams, versions);
     }
 
 }

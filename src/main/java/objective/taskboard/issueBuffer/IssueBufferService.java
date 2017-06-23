@@ -95,11 +95,11 @@ public class IssueBufferService {
     }
 
     public Issue updateIssueBuffer(final String key) {
-        return updateIssueBuffer(IssueEvent.ISSUE_UPDATED, key);
+        return updateIssueBuffer(WebhookEvent.ISSUE_UPDATED, key);
     }
     
-    public synchronized Issue updateIssueBuffer(IssueEvent event, final String key) {
-        if (event == IssueEvent.ISSUE_DELETED)
+    public synchronized Issue updateIssueBuffer(WebhookEvent event, final String key) {
+        if (event == WebhookEvent.ISSUE_DELETED)
             return issueBuffer.remove(key);
 
         List<com.atlassian.jira.rest.client.api.domain.Issue> jiraIssues = jiraIssueService.searchIssuesByKeys(asList(key));

@@ -209,7 +209,7 @@
                     <paper-material class="menu-header u-clearfix">
 						<div class="title">Taskboard</div>
                         <div class="search">
-                            <board-search releases="{{releases}}"></board-search>
+                            <board-search></board-search>
                         </div>
                         <div class="visibility">
                             <config-visibility></config-visibility>
@@ -282,11 +282,6 @@
                     errorMessage: {
                         type: String,
                         value: "An unexpected error ocurred. Could not save your preferences on server."
-                    },
-
-                    releases: {
-                        type: Array,
-                        notify: true
                     }
                 },
 
@@ -300,7 +295,6 @@
                         taskboard.setAspectFilters(data);
                         taskboard.applyFilterPreferences();
                         this.aspectsFilter = taskboard.getAspectFilters();
-                        this.retrieveReleases();
                     }, this));
                 },
 
@@ -397,12 +391,6 @@
                         toastError.open();
                     else
                         toastError.close();
-                },
-
-                retrieveReleases: function() {
-                    $.get("/api/versions", $.proxy(function(data) {
-                        this.releases = [""].concat(data);
-                    }, this));
                 },
 
                 downloadFollowup: function() {

@@ -21,11 +21,24 @@ package objective.taskboard.issueBuffer;
  * [/LICENSE]
  */
 
-public enum IssueEvent {
+public enum WebhookEvent {
 
-    ISSUE_CREATED,
-    ISSUE_UPDATED,
-    ISSUE_DELETED,
-    WORKLOG_UPDATED;
+    ISSUE_CREATED("issue"),
+    ISSUE_UPDATED("issue"),
+    ISSUE_DELETED("issue"),
+    WORKLOG_UPDATED("issue"),
+    VERSION_CREATED("version"),
+    VERSION_UPDATED("version"),
+    VERSION_DELETED("version");
+
+    private String type;
+
+    private WebhookEvent(String type) {
+        this.type = type;
+    }
+
+    public boolean isTypeVersion() {
+        return type.equals("version");
+    }
 
 }

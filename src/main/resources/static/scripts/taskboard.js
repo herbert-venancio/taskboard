@@ -226,11 +226,13 @@ function Taskboard() {
 
         var filterTeams = [];
         aspectFilters.forEach(function(item) {
-            if (item.description === 'Project')
-                item.aspectsSubitemFilter.forEach(function(subitem) {
-                    if (filterPreferences[subitem.value] == true || filterPreferences[subitem.value] == undefined)
-                        filterTeams = filterTeams.concat(subitem.dependents);
-                });
+            if (item.description !== 'Project')
+                return;
+
+            item.aspectsSubitemFilter.forEach(function(subitem) {
+                if (filterPreferences[subitem.value] == true || filterPreferences[subitem.value] == null)
+                    filterTeams = filterTeams.concat(subitem.teams);
+            });
         });
 
         aspectFilters.forEach(function(item) {

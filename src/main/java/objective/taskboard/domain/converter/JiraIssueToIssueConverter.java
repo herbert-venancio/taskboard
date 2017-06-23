@@ -97,7 +97,7 @@ public class JiraIssueToIssueConverter {
         List<objective.taskboard.data.Issue> converted = issueList.stream()
                                   .map(i -> convert(i, issuesMetadataByKey))
                                   .collect(toList());
-        System.out.println(converted.size());
+        System.out.println("Issues converted: " + converted.size());
         return converted;
     }
     
