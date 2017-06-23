@@ -33,5 +33,4 @@ public abstract class AuthenticatedIntegrationTest extends AbstractUIIntegration
         MainPage mainPage = MainPage.produce(webDriver);
         mainPage.waitUserLabelToBe("foo");
     }
-
 }

@@ -503,13 +503,7 @@
 			<artifactId>selenium-firefox-driver</artifactId>
 			<scope>test</scope>
 		</dependency>
-
-		<dependency>
-			<groupId>org.seleniumhq.selenium</groupId>
-			<artifactId>selenium-chrome-driver</artifactId>
-			<version>3.4.0</version><!--$NO-MVN-MAN-VER$ -->
-			<scope>test</scope>
-		</dependency>
+		
 		<dependency>
 		    <groupId>com.safaribooks</groupId>
 		    <artifactId>jenkins-helper-java</artifactId>
