@@ -11,13 +11,13 @@ properties([
 
 node ("general-purpose") {
     checkout scm
-    def mavenHome = tool 'maven-3.3.3'
+    def mvnHome = tool 'maven-3.3.3'
     def javaHome = tool '1.8.0_131'
-    withEnv(["PATH+MAVEN=$mavenHome/bin","PATH+JDK=$javaHome/bin"]) {
+    withEnv(["JAVA_HOME=$javaHome", "M2_HOME=$mvnHome", "PATH+MAVEN=$mvnHome/bin", "PATH+JDK=$javaHome/bin"]) {
         try {
             stage('Build') {
-                sh 'which mvn'
-                sh 'mvn --batch-mode -V -U clean deploy -P packaging-war,dev -DaltDeploymentRepository=repo::default::http://repo:8080/archiva/repository/snapshots'
+                sh 'type -a mvn'
+                sh "${mvnHome}/bin/mvn --batch-mode -V -U clean verify -P packaging-war,dev"
                 junit 'target/surefire-reports/*.xml'
                 junit 'target/failsafe-reports/*.xml'
                 stash 'working-copy'
@@ -27,6 +27,11 @@ node ("general-purpose") {
             throw ex
         }
         if (BRANCH_NAME == 'master') {
+            stage('Deploy Maven') {
+                unstash 'working-copy'
+
+                sh "${mvnHome}/bin/mvn --batch-mode -V clean deploy -DskipTests -P packaging-war,dev -DaltDeploymentRepository=repo::default::http://repo:8080/archiva/repository/snapshots"
+            }
             stage('Deploy Docker') {
                 unstash 'working-copy'
 
@@ -44,7 +49,7 @@ node ("general-purpose") {
                 stage('Release') {
                     unstash 'working-copy'
                     echo 'Releasing...'
-                    sh "mvn --batch-mode release:prepare release:perform"
+                    sh "${mvnHome}/bin/mvn --batch-mode release:prepare release:perform"
                 }
             }
         }
