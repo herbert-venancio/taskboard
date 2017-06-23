@@ -16,7 +16,7 @@ node ("general-purpose") {
     withEnv(["JAVA_HOME=$javaHome", "M2_HOME=$mvnHome", "PATH+MAVEN=$mvnHome/bin", "PATH+JDK=$javaHome/bin"]) {
         try {
             stage('Build') {
-                sh 'type -a mvn'
+                sh 'command -V mvn'
                 sh "${mvnHome}/bin/mvn --batch-mode -V -U clean verify -P packaging-war,dev"
                 junit 'target/surefire-reports/*.xml'
                 junit 'target/failsafe-reports/*.xml'
