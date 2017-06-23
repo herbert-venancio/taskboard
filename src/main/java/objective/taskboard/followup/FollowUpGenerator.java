@@ -47,9 +47,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.text.StrSubstitutor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -58,25 +56,40 @@ import org.xml.sax.SAXException;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Component
 public class FollowUpGenerator {
 
     private static final int BUFFER = 2048;
 
     private static final String PROPERTY_XML_SPACE_PRESERVE = " xml:space=\"preserve\"";
     private static final String TAG_T_IN_SHARED_STRINGS = "t";
-    private static final String PATH_SHARED_STRINGS_INITIAL = "followup-template/sharedStrings-initial.xml";
-    private static final String PATH_SHARED_STRINGS_TEMPLATE = "followup-template/sharedStrings-template.xml";
-    private static final String PATH_SI_SHARED_STRINGS_TEMPLATE = "followup-template/sharedStrings-si-template.xml";
-    private static final String PATH_SHEET_7_TEMPLATE = "followup-template/sheet7-template.xml";
-    private static final String PATH_ROW_SHEET_TEMPLATE = "followup-template/sheet7-row-template.xml";
-    private static final String PATH_FOLLOWUP_TEMPLATE_XLSM = "followup-template/Followup-template.xlsm";
 
     private static final String PATH_SHEET7 = "xl/worksheets/sheet7.xml";
     private static final String PATH_SHARED_STRINGS = "xl/sharedStrings.xml";
 
-    @Autowired
     private FollowupDataProvider provider;
+
+    private String pathSharedStringsInitial = "followup-template/sharedStrings-initial.xml";
+    private String pathSharedStringsTemplate = "followup-template/sharedStrings-template.xml";
+    private String pathSISharedStringsTemplate = "followup-template/sharedStrings-si-template.xml";
+    private String pathSheet7Template = "followup-template/sheet7-template.xml";
+    private String pathSheet7RowTemplate = "followup-template/sheet7-row-template.xml";
+    private String pathFollowupTemplateXLSM = "followup-template/Followup-template.xlsm";
+
+    public FollowUpGenerator(FollowupDataProvider provider) {
+        this.provider = provider;
+    }
+
+    public FollowUpGenerator(FollowupDataProvider provider, String pathSharedStringsInitial,
+            String pathSharedStringsTemplate, String pathSISharedStringsTemplate, String pathSheet7Template,
+            String pathSheet7RowTemplate, String pathFollowupTemplateXLSM) {
+        this.provider = provider;
+        this.pathSharedStringsInitial = pathSharedStringsInitial;
+        this.pathSharedStringsTemplate = pathSharedStringsTemplate;
+        this.pathSISharedStringsTemplate = pathSISharedStringsTemplate;
+        this.pathSheet7Template = pathSheet7Template;
+        this.pathSheet7RowTemplate = pathSheet7RowTemplate;
+        this.pathFollowupTemplateXLSM = pathFollowupTemplateXLSM;
+    }
 
     public ByteArrayResource generate() throws Exception {
         File directoryTempFollowup = null;
@@ -113,7 +126,7 @@ public class FollowUpGenerator {
         BufferedOutputStream bufferedOutput = null;
         try {
             InputStream inputStream = getClass().getClassLoader()
-                    .getResourceAsStream(PATH_FOLLOWUP_TEMPLATE_XLSM);
+                    .getResourceAsStream(pathFollowupTemplateXLSM);
             zipInputStream = new ZipInputStream(new BufferedInputStream(inputStream));
 
             ZipEntry entry;
@@ -200,7 +213,7 @@ public class FollowUpGenerator {
     Map<String, Long> getSharedStringsInitial() throws ParserConfigurationException, SAXException, IOException {
         Map<String, Long> sharedStrings = new HashMap<String, Long>();
         InputStream inputStream = getClass().getClassLoader()
-                .getResourceAsStream(PATH_SHARED_STRINGS_INITIAL);
+                .getResourceAsStream(pathSharedStringsInitial);
         DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
         Document doc = docBuilderFactory.newDocumentBuilder().parse(inputStream);
         doc.getDocumentElement().normalize();
@@ -217,7 +230,7 @@ public class FollowUpGenerator {
     }
 
     String generateJiraDataSheet(Map<String, Long> sharedStrings) throws IOException {
-        String rowTemplate = getStringFromXML(PATH_ROW_SHEET_TEMPLATE);
+        String rowTemplate = getStringFromXML(pathSheet7RowTemplate);
         StringBuilder rows = new StringBuilder();
         int rowNumber = 2;
 
@@ -235,7 +248,7 @@ public class FollowUpGenerator {
             rowValues.put("taskNum", getOrSetIndexInSharedStrings(sharedStrings, followUpData.taskNum));
             rowValues.put("taskSummary", getOrSetIndexInSharedStrings(sharedStrings, followUpData.taskSummary));
             rowValues.put("taskDescription", getOrSetIndexInSharedStrings(sharedStrings, followUpData.taskDescription));
-            rowValues.put("taskFullSescription", getOrSetIndexInSharedStrings(sharedStrings, followUpData.taskFullDescription));
+            rowValues.put("taskFullDescription", getOrSetIndexInSharedStrings(sharedStrings, followUpData.taskFullDescription));
             rowValues.put("subtaskType", getOrSetIndexInSharedStrings(sharedStrings, followUpData.subtaskType));
             rowValues.put("subtaskStatus", getOrSetIndexInSharedStrings(sharedStrings, followUpData.subtaskStatus));
             rowValues.put("subtaskNum", getOrSetIndexInSharedStrings(sharedStrings, followUpData.subtaskNum));
@@ -257,7 +270,7 @@ public class FollowUpGenerator {
             rowNumber++;
         }
 
-        String sheetTemplate = getStringFromXML(PATH_SHEET_7_TEMPLATE);
+        String sheetTemplate = getStringFromXML(pathSheet7Template);
         Map<String, String> sheetValues = new HashMap<String, String>();
         sheetValues.put("rows", rows.toString());
         return StrSubstitutor.replace(sheetTemplate, sheetValues);
@@ -283,7 +296,7 @@ public class FollowUpGenerator {
     }
 
     String generateSharedStrings(Map<String, Long> sharedStrings) throws IOException {
-        String siSharedStringsTemplate = getStringFromXML(PATH_SI_SHARED_STRINGS_TEMPLATE);
+        String siSharedStringsTemplate = getStringFromXML(pathSISharedStringsTemplate);
         List<String> sharedStringsSorted = sharedStrings.keySet().stream()
             .sorted((s1, s2) -> sharedStrings.get(s1).compareTo(sharedStrings.get(s2)))
             .collect(toList());
@@ -296,7 +309,7 @@ public class FollowUpGenerator {
             allSharedStrings.append(StrSubstitutor.replace(siSharedStringsTemplate, siValues));
         }
 
-        String sharedStringsTemplate = getStringFromXML(PATH_SHARED_STRINGS_TEMPLATE);
+        String sharedStringsTemplate = getStringFromXML(pathSharedStringsTemplate);
         Map<String, Object> sharedStringsValues = new HashMap<String, Object>();
         sharedStringsValues.put("sharedStringsSize", sharedStringsSorted.size());
         sharedStringsValues.put("allSharedStrings", allSharedStrings.toString());
