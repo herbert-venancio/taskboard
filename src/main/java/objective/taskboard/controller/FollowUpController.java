@@ -31,9 +31,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import objective.taskboard.followup.FollowUpGenerator;
 import objective.taskboard.followup.FollowupDataProvider;
+import objective.taskboard.issueBuffer.IssueBufferState;
 
 @RestController
-@RequestMapping("/api/followup")
+@RequestMapping("/ws/followup")
 public class FollowUpController {
 
     @Autowired
@@ -53,4 +54,8 @@ public class FollowUpController {
         }
     }
 
+    @RequestMapping("state")
+    public IssueBufferState getState() {
+        return provider.getFollowupState();
+    }
 }

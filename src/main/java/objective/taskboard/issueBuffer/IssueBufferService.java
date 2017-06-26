@@ -79,11 +79,11 @@ public class IssueBufferService {
             StopWatch stopWatch = new StopWatch();
             stopWatch.start();
             try {
-                state = IssueBufferState.updating;
+                state = state.start();
                 setIssues(issueConverter.convertIssues(jiraIssueService.searchAll(), taskboardMetadatasByIssueKey));
-                state = IssueBufferState.ready;
+                state = state.done();
             }catch(Exception e) {
-                state = IssueBufferState.error;
+                state = state.error();
             }
             finally {
                 log.debug("updateIssueBuffer time spent " +stopWatch.getTime());

@@ -99,6 +99,11 @@
             text-transform: none;
             color: #eeff41;
         }
+        
+        #toastErrorTop .yellow-button {
+            text-transform: none;
+            color: #eeff41;
+        }        
 
         .menu-header {
         	display: flex;
@@ -193,7 +198,9 @@
                       on-iron-signal-level-visibility-changed="storageLevelsConfig"
                       on-iron-signal-config-visibility-synthetic-changed="updateUserPreferences"
                       on-iron-signal-update-user-preferences="updateUserPreferences"
-                      on-iron-signal-show-error-message="showErrorMessage">
+                      on-iron-signal-show-error-message="showErrorMessage"
+                      on-iron-signal-show-error-message-top="showErrorMessageTop"
+                      >
         </iron-signals>
         <paper-spinner id="spinner" active="{{!done}}" alt="Loading..."></paper-spinner>
 
@@ -206,6 +213,12 @@
                         </span>
                         <paper-button onclick="toastError.toggle()" class="yellow-button">Fechar</paper-button>
                     </paper-toast>
+                    <paper-toast duration="0" id="toastErrorTop" horizontal-align='right' vertical-align='top'>
+                        <iron-icon icon="icons:error"></iron-icon>
+                        <span>{{errorMessage}}
+                        </span>
+                        <paper-button onclick="toastErrorTop.toggle()" class="yellow-button">Fechar</paper-button>
+                    </paper-toast>                    
                     <paper-material class="menu-header u-clearfix">
 						<div class="title">Taskboard</div>
                         <div class="search">
@@ -387,14 +400,44 @@
 
                 showErrorMessage: function(event) {
                     this.errorMessage = event.detail;
-                    if (this.errorMessage.length > 0)
+                    if (this.errorMessage.length > 0) {
                         toastError.open();
+                    }
                     else
                         toastError.close();
                 },
+                
+                showErrorMessageTop: function(event) {
+                    this.errorMessage = event.detail;
+                    if (this.errorMessage.length > 0) {
+                        toastErrorTop.open();
+                    }
+                    else
+                        toastErrorTop.close();
+                },
 
                 downloadFollowup: function() {
-                    window.location = "api/followup";
+                	var self = this;
+                	$.ajax({
+                        url: '/ws/followup/state',
+                        success: function (data) {
+                        	switch(data) {
+	                        	case "uninitialised":
+	                        	case "initialising":
+	                        		self.fire("iron-signal", {name:"show-error-message-top", data:"Followup data not ready... try again in a few minutes" })
+	                        		return;
+	                        	
+	                        	case "initialisationError":
+	                        		self.fire("iron-signal", {name:"show-error-message-top", data:"Followup data failed to initialise. Will retry later" })
+	                        		return;
+                        	}
+                        	window.location = "ws/followup";
+                        },
+                        error: function (jqXhr, textStatus, errorThrown) {
+                            console.error(errorThrown);
+                        },
+                        async: true
+                    });
                 }
             });
         })();

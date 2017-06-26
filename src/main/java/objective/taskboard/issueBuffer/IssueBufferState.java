@@ -23,7 +23,27 @@ package objective.taskboard.issueBuffer;
 
 public enum IssueBufferState {
     uninitialised,
+    initialising,
     updating,
     ready,
-    error
+    updateError,
+    initialisationError;
+    
+    public IssueBufferState start() {
+        if (this == uninitialised || this == initialisationError) 
+            return initialising;
+         
+        return updating;
+    }
+    
+    public IssueBufferState done() {
+        return ready;
+    }
+    
+    public IssueBufferState error() {
+        if (this == updating) 
+            return updateError;
+         
+        return initialisationError;
+    }
 }
