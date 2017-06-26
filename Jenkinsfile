@@ -11,8 +11,11 @@ properties([
 ])
 
 node("general-purpose") {
-    deleteDir()
-    checkout scm
+    // start with a clean workspace
+    stage('Checkout') {
+        deleteDir()
+        checkout scm
+    }
     def mvnHome = tool 'maven-3.3.3'
     def javaHome = tool '1.8.0_131'
     withEnv(["JAVA_HOME=$javaHome", "M2_HOME=$mvnHome", "PATH+MAVEN=$mvnHome/bin", "PATH+JDK=$javaHome/bin"]) {
