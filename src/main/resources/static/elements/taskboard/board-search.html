@@ -118,7 +118,9 @@
                 },
 
                 searchIssue: function () {
-                    clearReleaseButton.hidden = this.releaseSelected ? false : true;
+                    if (this.hasReleases(this.releases))
+                        clearReleaseButton.hidden = this.releaseSelected ? false : true;
+
                     this.fire('iron-signal', {name: 'search-filter-changed',
                                               data: { query: this.query , release: this.releaseSelected }});
                 },
