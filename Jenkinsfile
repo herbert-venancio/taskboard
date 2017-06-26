@@ -21,7 +21,6 @@ node ("general-purpose") {
                 }
                 junit 'target/surefire-reports/*.xml'
                 junit 'target/failsafe-reports/*.xml'
-                stash 'working-copy'
             }
         } catch (ex) {
             handleError('objective-solutions/taskboard', 'devops@objective.com.br', 'objective-solutions-user')
@@ -29,13 +28,9 @@ node ("general-purpose") {
         }
         if (BRANCH_NAME == 'master') {
             stage('Deploy Maven') {
-                unstash 'working-copy'
-
                 sh "${mvnHome}/bin/mvn --batch-mode -V clean deploy -DskipTests -P packaging-war,dev -DaltDeploymentRepository=repo::default::http://repo:8080/archiva/repository/snapshots"
             }
             stage('Deploy Docker') {
-                unstash 'working-copy'
-
                 git clone 'https://github.com/objective-solutions/liferay-environment-bootstrap.git'
                 dir('liferay-environment-bootstrap/dockers/taskboard') {
                     sh 'cp ../../../target/taskboard-*-SNAPSHOT.war taskboard.war'
@@ -48,7 +43,6 @@ node ("general-purpose") {
             }
             if (params.RELEASE) {
                 stage('Release') {
-                    unstash 'working-copy'
                     echo 'Releasing...'
                     sh "${mvnHome}/bin/mvn --batch-mode release:prepare release:perform"
                 }
