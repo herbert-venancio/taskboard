@@ -56,6 +56,13 @@ public class AllIssuesBufferService {
     private Map<String, Issue> allIssuesBuffer = new LinkedHashMap<>();
     
     private boolean isUpdatingAllIssuesBuffer = false;
+    
+    private IssueBufferState state = IssueBufferState.uninitialised;
+    
+    public IssueBufferState getState() {
+        return state;
+    }
+    
     public synchronized void updateAllIssuesBuffer() {
         if (isUpdatingAllIssuesBuffer)
             return;
@@ -65,6 +72,7 @@ public class AllIssuesBufferService {
             try {
                 StopWatch stopWatch = new StopWatch();
                 stopWatch.start();
+                state = state.start();
                 log.debug("updateAllIssuesBuffer start");
                 List<Issue> list = issueConverter.convertIssues(jiraIssueService.searchAllProjectIssues(), allMetadatasByIssueKey);
                 
@@ -74,7 +82,13 @@ public class AllIssuesBufferService {
                 log.debug("All issues count: " + list.size());
                 log.debug("updateAllIssuesBuffer complete");
                 log.debug("updateAllIssuesBuffer time spent " +stopWatch.getTime());
-            }finally {
+                state = state.done();
+            }
+            catch (Exception e) {
+                state = state.error();
+                throw e;
+            }
+            finally {
                 isUpdatingAllIssuesBuffer = false;
             }
         });
