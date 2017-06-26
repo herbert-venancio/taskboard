@@ -54,7 +54,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import lombok.extern.slf4j.Slf4j;
-import objective.taskboard.issueBuffer.IssueBufferState;
 
 @Slf4j
 public class FollowUpGenerator {
@@ -90,11 +89,6 @@ public class FollowUpGenerator {
         this.pathSheet7Template = pathSheet7Template;
         this.pathSheet7RowTemplate = pathSheet7RowTemplate;
         this.pathFollowupTemplateXLSM = pathFollowupTemplateXLSM;
-    }
-
-    
-    public IssueBufferState getFollowupState() {
-        return provider.getFollowupState();
     }
     
     public ByteArrayResource generate() throws Exception {
