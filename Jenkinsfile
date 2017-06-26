@@ -31,7 +31,7 @@ node ("general-purpose") {
                 sh "${mvnHome}/bin/mvn --batch-mode -V clean deploy -DskipTests -P packaging-war,dev -DaltDeploymentRepository=repo::default::http://repo:8080/archiva/repository/snapshots"
             }
             stage('Deploy Docker') {
-                git clone 'https://github.com/objective-solutions/liferay-environment-bootstrap.git'
+                git url: 'https://github.com/objective-solutions/liferay-environment-bootstrap.git'
                 dir('liferay-environment-bootstrap/dockers/taskboard') {
                     sh 'cp ../../../target/taskboard-*-SNAPSHOT.war taskboard.war'
 
