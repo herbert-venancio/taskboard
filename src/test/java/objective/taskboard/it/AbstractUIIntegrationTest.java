@@ -69,7 +69,7 @@ public abstract class AbstractUIIntegrationTest {
         }
         
         webDriver = new FirefoxDriver();
-        webDriver.manage().window().setSize(new Dimension(1024,768));
+        webDriver.manage().window().setSize(new Dimension(1280,1080));
     }
     
     @CaptureFile(extension = "html")
