@@ -36,11 +36,8 @@ node("general-purpose") {
                 sh 'git clone https://github.com/objective-solutions/liferay-environment-bootstrap.git'
                 dir('liferay-environment-bootstrap/dockers/taskboard') {
                     sh 'cp ../../../target/taskboard-*-SNAPSHOT.war ./taskboard.war'
-
-                    docker.withRegistry("http://dockercb:5000") {
-                        def image = docker.build "taskboard-snapshot"
-                        image.push
-                    }
+                    sh 'sudo docker build -t dockercb:5000/taskboard-snapshot .'
+                    sh 'sudo docker push dockercb:5000/taskboard-snapshot'
                 }
             }
             if (params.RELEASE) {
