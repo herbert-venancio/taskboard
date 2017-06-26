@@ -1,4 +1,5 @@
-@Library("liferay-sdlc-jenkins-lib") import static org.liferay.sdlc.SDLCPrUtilities.*
+@Library("liferay-sdlc-jenkins-lib")
+import static org.liferay.sdlc.SDLCPrUtilities.*
 
 properties([
         parameters([
@@ -9,7 +10,8 @@ properties([
         ])
 ])
 
-node ("general-purpose") {
+node("general-purpose") {
+    deleteDir()
     checkout scm
     def mvnHome = tool 'maven-3.3.3'
     def javaHome = tool '1.8.0_131'
@@ -31,9 +33,9 @@ node ("general-purpose") {
                 sh "${mvnHome}/bin/mvn --batch-mode -V clean deploy -DskipTests -P packaging-war,dev -DaltDeploymentRepository=repo::default::http://repo:8080/archiva/repository/snapshots"
             }
             stage('Deploy Docker') {
-                git url: 'https://github.com/objective-solutions/liferay-environment-bootstrap.git'
+                sh 'git clone https://github.com/objective-solutions/liferay-environment-bootstrap.git'
                 dir('liferay-environment-bootstrap/dockers/taskboard') {
-                    sh 'cp ../../../target/taskboard-*-SNAPSHOT.war taskboard.war'
+                    sh 'cp ../../../target/taskboard-*-SNAPSHOT.war ./taskboard.war'
 
                     docker.withRegistry("http://dockercb:5000") {
                         def image = docker.build "taskboard-snapshot"
