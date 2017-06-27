@@ -28,9 +28,9 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 
-public abstract class AbstractUiPage {
+public abstract class AbstractUiFragment {
     protected WebDriver webDriver;
-    public AbstractUiPage(WebDriver driver) {
+    public AbstractUiFragment(WebDriver driver) {
         this.webDriver = driver;
     }
     public void waitUntil(ExpectedCondition<?> condition) {

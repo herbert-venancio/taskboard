@@ -2,6 +2,7 @@ package objective.taskboard.it;
 
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.junit.Assert.assertEquals;
+import static org.openqa.selenium.support.PageFactory.initElements;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementValue;
 
 import java.util.ArrayList;
@@ -38,10 +39,9 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
-public class MainPage extends AbstractUiPage {
+public class MainPage extends AbstractUiFragment {
     @FindBy(css=".nameButton.user-account")
     private WebElement userLabelButton;
     
@@ -54,12 +54,12 @@ public class MainPage extends AbstractUiPage {
     }
     
     public static MainPage produce(WebDriver webDriver) {
-        return PageFactory.initElements(webDriver, MainPage.class);
+        return initElements(webDriver, MainPage.class);
     }
     
-    public static AbstractUiPage to(WebDriver webDriver) {
+    public static AbstractUiFragment to(WebDriver webDriver) {
         webDriver.get(AbstractUIIntegrationTest.getSiteBase()+"/");
-        return PageFactory.initElements(webDriver, MainPage.class);
+        return initElements(webDriver, MainPage.class);
     }
 
     public void waitUserLabelToBe(String expected) {
@@ -101,6 +101,44 @@ public class MainPage extends AbstractUiPage {
             return true;
         }catch (NoSuchElementException e) {
             return false;
+        }
+    }
+    
+    public RefreshToast refreshToast() {
+        return initElements(webDriver, RefreshToast.class);
+    }
+    
+    public static class RefreshToast extends AbstractUiFragment {
+        @FindBy(id="toastIssueUpdated")
+        private WebElement issueToast;
+        
+        @FindBy(id="toggleFilterChangedIssues")
+        private WebElement toggleFilterChangedIssues;
+        
+        @FindBy(id="dismissToast")
+        private WebElement dismissToast;
+        
+        
+        public RefreshToast(WebDriver webDriver) {
+            super(webDriver);
+        }
+        
+        public void assertVisible() {
+            waitUntil(ExpectedConditions.visibilityOf(issueToast));
+        }
+
+        public void toggleShowHide() {
+            waitUntil(ExpectedConditions.visibilityOf(toggleFilterChangedIssues));
+            toggleFilterChangedIssues.click();
+        }
+
+        public void assertNotVisible() {
+            waitUntil(ExpectedConditions.invisibilityOf(issueToast));
+        }
+
+        public void dismiss() {
+            waitUntil(ExpectedConditions.visibilityOf(dismissToast));
+            dismissToast.click();
         }
     }
 

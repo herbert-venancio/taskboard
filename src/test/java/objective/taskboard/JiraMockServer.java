@@ -28,6 +28,9 @@ import static spark.Spark.post;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
@@ -51,6 +54,7 @@ public class JiraMockServer {
     }
     
     public static void defineRoutesAndStart() {
+        loadMap();
         Spark.exception(Exception.class, (ex, req, res) -> {
             ex.printStackTrace();
         });
@@ -119,18 +123,21 @@ public class JiraMockServer {
     private static String makeFakeRequest(Map searchData) {
         long startAt = Math.round((Double)searchData.get("startAt"));        
         String jql = searchData.get("jql").toString();
-        String datFileName = "search"+startAt+".json";
-        if (jql.contains("key IN ")) { 
-            String issueKey = jql.replaceAll("key IN [(]([^)*])[)]", "$1");
-            datFileName = "searchIssue_" + issueKey + ".json";
-        }
-        
-        String result = loadMockData(datFileName);
+        String result = loadSearchFile(startAt, jql);
         if (result == null)
             return "{\"startAt\":0,\"maxResults\":100,\"total\":605,\"issues\":[]}";
         return result;
     }
-    
+
+    private static String loadSearchFile(long startAt, String jql) {
+        String datFileName = "search"+startAt+".json";
+        if (jql.contains("key IN ")) { 
+            String issueKey = jql.replaceAll(".*key IN [(]([^)]*)[)].*", "$1");
+            return gson.toJson(searchIssuesByKey.get(issueKey));
+        }
+        
+        return loadMockData(datFileName);
+    }
 
     private static String loadMockData(String name) {
         InputStream stream = JiraMockServer.class.getResourceAsStream("/" + environment() +"/" + name);
@@ -142,11 +149,37 @@ public class JiraMockServer {
             throw new IllegalStateException(e);
         }
     }
-
+    
     private static String environment() {
         return "objective-jira-teste";
     }
+    
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private static void loadMap() {
+        long startAt = 0;
+        while(true) {
+            String searchData = loadSearchFile(startAt, "");
+            if (searchData == null) break;
+            
+            Map searchMap = gson.fromJson(searchData, java.util.Map.class);
+           
+            List issues = (List) searchMap.get("issues");
+            for (Object issueDataObj  : issues) {
+                Map issueData = (Map) issueDataObj;
+                Map value = gson.fromJson(searchData, java.util.Map.class);
+                ArrayList onlyOneIssue = new ArrayList();
+                onlyOneIssue.add(issueData);
+                value.put("issues", onlyOneIssue);
+                value.put("total", 1);
+                searchIssuesByKey.put(issueData.get("key").toString(), value);
+            }
+            startAt++;
+        }
+        System.out.println("************ DATA LOAD READY ************");
+    }
 
+    @SuppressWarnings("rawtypes")
+    private static Map<String, Map> searchIssuesByKey = new LinkedHashMap<>();
     private static String username;
     private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
 }

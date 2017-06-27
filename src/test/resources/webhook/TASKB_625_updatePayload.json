@@ -1,0 +1,282 @@
+{
+    "changelog": {
+        "id": "4858980",
+        "items": [
+            {
+                "field": "status",
+                "fieldtype": "jira",
+                "from": "10119",
+                "fromString": "Queued for Review",
+                "to": "11818",
+                "toString": "Doing"
+            },
+            {
+                "field": "assignee",
+                "fieldtype": "jira",
+                "from": null,
+                "fromString": null,
+                "to": "marcelo.walter",
+                "toString": "Marcelo Walter"
+            }
+        ]
+    },
+    "issue": {
+        "fields": {
+            "aggregateprogress": {
+                "progress": 0,
+                "total": 0
+            },
+            "aggregatetimeestimate": null,
+            "aggregatetimeoriginalestimate": null,
+            "aggregatetimespent": null,
+            "assignee": {
+                "active": true,
+                "avatarUrls": {
+                    "16x16": "https://issues-uat.liferay.com/secure/useravatar?size=xsmall&ownerId=marcelo.walter&avatarId=24555",
+                    "24x24": "https://issues-uat.liferay.com/secure/useravatar?size=small&ownerId=marcelo.walter&avatarId=24555",
+                    "32x32": "https://issues-uat.liferay.com/secure/useravatar?size=medium&ownerId=marcelo.walter&avatarId=24555",
+                    "48x48": "https://issues-uat.liferay.com/secure/useravatar?ownerId=marcelo.walter&avatarId=24555"
+                },
+                "displayName": "Marcelo Walter",
+                "key": "marcelo.walter",
+                "name": "marcelo.walter",
+                "self": "https://issues-uat.liferay.com/rest/api/2/user?username=marcelo.walter",
+                "timeZone": "America/Chicago"
+            },
+            "attachment": [],
+            "comment": {
+                "comments": [],
+                "maxResults": 0,
+                "startAt": 0,
+                "total": 0
+            },
+            "created": "2017-06-14T19:56:00.000+0000",
+            "creator": {
+                "active": true,
+                "avatarUrls": {
+                    "16x16": "https://issues-uat.liferay.com/secure/useravatar?size=xsmall&ownerId=marcelo.walter&avatarId=24555",
+                    "24x24": "https://issues-uat.liferay.com/secure/useravatar?size=small&ownerId=marcelo.walter&avatarId=24555",
+                    "32x32": "https://issues-uat.liferay.com/secure/useravatar?size=medium&ownerId=marcelo.walter&avatarId=24555",
+                    "48x48": "https://issues-uat.liferay.com/secure/useravatar?ownerId=marcelo.walter&avatarId=24555"
+                },
+                "displayName": "Marcelo Walter",
+                "key": "marcelo.walter",
+                "name": "marcelo.walter",
+                "self": "https://issues-uat.liferay.com/rest/api/2/user?username=marcelo.walter",
+                "timeZone": "America/Chicago"
+            },
+            "customfield_10051": null,
+            "customfield_10190": null,
+            "customfield_10191": null,
+            "customfield_10193": null,
+            "customfield_10194": null,
+            "customfield_10195": null,
+            "customfield_10220": "9223372036854775807",
+            "customfield_10421": null,
+            "customfield_10821": "9223372036854775807",
+            "customfield_11225": null,
+            "customfield_11531": null,
+            "customfield_12020": [
+                "marcelo.walter(marcelo.walter)"
+            ],
+            "customfield_12720": null,
+            "customfield_12820": null,
+            "customfield_12821": null,
+            "customfield_15720": "2|i028rz:",
+            "customfield_16527": null,
+            "customfield_16528": null,
+            "customfield_17720": 0.0,
+            "customfield_17734": null,
+            "customfield_17737": null,
+            "customfield_18020": null,
+            "customfield_18520": {
+                "id": "19311",
+                "self": "https://issues-uat.liferay.com/rest/api/2/customFieldOption/19311",
+                "value": "S"
+            },
+            "customfield_18521": null,
+            "customfield_18522": {
+                "id": "19317",
+                "self": "https://issues-uat.liferay.com/rest/api/2/customFieldOption/19317",
+                "value": "Standard"
+            },
+            "customfield_18523": null,
+            "customfield_18630": null,
+            "customfield_18635": null,
+            "customfield_18642": null,
+            "customfield_19221": {
+                "id": "20235",
+                "self": "https://issues-uat.liferay.com/rest/api/2/customFieldOption/20235",
+                "value": "RFP"
+            },
+            "customfield_19222": null,
+            "customfield_19223": null,
+            "customfield_19224": {
+                "id": "20240",
+                "self": "https://issues-uat.liferay.com/rest/api/2/customFieldOption/20240",
+                "value": "Low"
+            },
+            "customfield_19320": null,
+            "customfield_19321": null,
+            "customfield_19420": null,
+            "customfield_19421": null,
+            "customfield_19422": null,
+            "customfield_19423": null,
+            "customfield_19424": null,
+            "description": null,
+            "duedate": null,
+            "environment": null,
+            "issuelinks": [],
+            "issuetype": {
+                "avatarId": 24442,
+                "description": "Attividade",
+                "iconUrl": "https://issues-uat.liferay.com/secure/viewavatar?size=xsmall&avatarId=24442&avatarType=issuetype",
+                "id": "11",
+                "name": "Alpha Test",
+                "self": "https://issues-uat.liferay.com/rest/api/2/issuetype/11",
+                "subtask": true
+            },
+            "labels": [],
+            "lastViewed": "2017-06-16T18:25:23.715+0000",
+            "parent": {
+                "fields": {
+                    "issuetype": {
+                        "avatarId": 24440,
+                        "description": "Demand",
+                        "iconUrl": "https://issues-uat.liferay.com/secure/viewavatar?size=xsmall&avatarId=24440&avatarType=issuetype",
+                        "id": "10600",
+                        "name": "Demand",
+                        "self": "https://issues-uat.liferay.com/rest/api/2/issuetype/10600",
+                        "subtask": false
+                    },
+                    "priority": {
+                        "iconUrl": "https://issues-uat.liferay.com/images/icons/priorities/minor.svg",
+                        "id": "4",
+                        "name": "Minor",
+                        "self": "https://issues-uat.liferay.com/rest/api/2/priority/4"
+                    },
+                    "status": {
+                        "description": "",
+                        "iconUrl": "https://issues-uat.liferay.com/images/icons/statuses/open.png",
+                        "id": "10119",
+                        "name": "Queued for Review",
+                        "self": "https://issues-uat.liferay.com/rest/api/2/status/10119",
+                        "statusCategory": {
+                            "colorName": "blue-gray",
+                            "id": 2,
+                            "key": "new",
+                            "name": "To Do",
+                            "self": "https://issues-uat.liferay.com/rest/api/2/statuscategory/2"
+                        }
+                    },
+                    "summary": "Demand without assignee BEMISCP"
+                },
+                "id": "396820",
+                "key": "TASKB-624",
+                "self": "https://issues-uat.liferay.com/rest/api/2/issue/396820"
+            },
+            "priority": {
+                "iconUrl": "https://issues-uat.liferay.com/images/icons/priorities/minor.svg",
+                "id": "4",
+                "name": "Minor",
+                "self": "https://issues-uat.liferay.com/rest/api/2/priority/4"
+            },
+            "progress": {
+                "progress": 0,
+                "total": 0
+            },
+            "project": {
+                "avatarUrls": {
+                    "16x16": "https://issues-uat.liferay.com/secure/projectavatar?size=xsmall&pid=16781&avatarId=10011",
+                    "24x24": "https://issues-uat.liferay.com/secure/projectavatar?size=small&pid=16781&avatarId=10011",
+                    "32x32": "https://issues-uat.liferay.com/secure/projectavatar?size=medium&pid=16781&avatarId=10011",
+                    "48x48": "https://issues-uat.liferay.com/secure/projectavatar?pid=16781&avatarId=10011"
+                },
+                "id": "16781",
+                "key": "BEMISCP",
+                "name": "PROJECT - Bemis CP",
+                "projectCategory": {
+                    "description": "",
+                    "id": "10011",
+                    "name": "d) Project",
+                    "self": "https://issues-uat.liferay.com/rest/api/2/projectCategory/10011"
+                },
+                "self": "https://issues-uat.liferay.com/rest/api/2/project/16781"
+            },
+            "reporter": {
+                "active": true,
+                "avatarUrls": {
+                    "16x16": "https://issues-uat.liferay.com/secure/useravatar?size=xsmall&ownerId=marcelo.walter&avatarId=24555",
+                    "24x24": "https://issues-uat.liferay.com/secure/useravatar?size=small&ownerId=marcelo.walter&avatarId=24555",
+                    "32x32": "https://issues-uat.liferay.com/secure/useravatar?size=medium&ownerId=marcelo.walter&avatarId=24555",
+                    "48x48": "https://issues-uat.liferay.com/secure/useravatar?ownerId=marcelo.walter&avatarId=24555"
+                },
+                "displayName": "Marcelo Walter",
+                "key": "marcelo.walter",
+                "name": "marcelo.walter",
+                "self": "https://issues-uat.liferay.com/rest/api/2/user?username=marcelo.walter",
+                "timeZone": "America/Chicago"
+            },
+            "resolution": null,
+            "resolutiondate": "2017-06-14T19:56:00.000+0000",
+            "status": {
+                "description": "INTERNAL - GS Task Board",
+                "iconUrl": "https://issues-uat.liferay.com/images/icons/statuses/generic.png",
+                "id": "11818",
+                "name": "Doing",
+                "self": "https://issues-uat.liferay.com/rest/api/2/status/11818",
+                "statusCategory": {
+                    "colorName": "yellow",
+                    "id": 4,
+                    "key": "indeterminate",
+                    "name": "In Progress",
+                    "self": "https://issues-uat.liferay.com/rest/api/2/statuscategory/4"
+                }
+            },
+            "subtasks": [],
+            "summary": "Alpha Test",
+            "timeestimate": null,
+            "timeoriginalestimate": null,
+            "timespent": null,
+            "timetracking": {},
+            "updated": "2017-06-16T18:25:33.818+0000",
+            "votes": {
+                "hasVoted": false,
+                "self": "https://issues-uat.liferay.com/rest/api/2/issue/TASKB-625/votes",
+                "votes": 0
+            },
+            "watches": {
+                "isWatching": false,
+                "self": "https://issues-uat.liferay.com/rest/api/2/issue/TASKB-625/watchers",
+                "watchCount": 0
+            },
+            "worklog": {
+                "maxResults": 20,
+                "startAt": 0,
+                "total": 0,
+                "worklogs": []
+            },
+            "workratio": -1
+        },
+        "id": "397009",
+        "key": "TASKB-625",
+        "self": "https://issues-uat.liferay.com/rest/api/2/issue/397009"
+    },
+    "issue_event_type_name": "issue_generic",
+    "timestamp": 1497637533821,
+    "user": {
+        "active": true,
+        "avatarUrls": {
+            "16x16": "https://issues-uat.liferay.com/secure/useravatar?size=xsmall&ownerId=marcelo.walter&avatarId=24555",
+            "24x24": "https://issues-uat.liferay.com/secure/useravatar?size=small&ownerId=marcelo.walter&avatarId=24555",
+            "32x32": "https://issues-uat.liferay.com/secure/useravatar?size=medium&ownerId=marcelo.walter&avatarId=24555",
+            "48x48": "https://issues-uat.liferay.com/secure/useravatar?ownerId=marcelo.walter&avatarId=24555"
+        },
+        "displayName": "Marcelo Walter",
+        "key": "marcelo.walter",
+        "name": "marcelo.walter",
+        "self": "https://issues-uat.liferay.com/rest/api/2/user?username=marcelo.walter",
+        "timeZone": "America/Chicago"
+    },
+    "webhookEvent": "jira:issue_updated"
+}

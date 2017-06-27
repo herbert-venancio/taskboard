@@ -85,11 +85,15 @@ public class WebhookController {
     }
 
     private void addItemInTheQueue(String webhookEvent, String projectKey, Long issueTypeId, String issueKey) {
-        if (!belongsToAnyProjectFilter(projectKey))
+        if (!belongsToAnyProjectFilter(projectKey)) {
+            log.debug("WEBHOOK PATH: project=" + projectKey + " issueTypeId=" + issueTypeId + " issue=" + issueKey + " doesn't belog to our projects.");
             return;
+        }
 
-        if (issueTypeId != null && !belongsToAnyIssueTypeFilter(issueTypeId))
+        if (issueTypeId != null && !belongsToAnyIssueTypeFilter(issueTypeId)) {
+            log.debug("WEBHOOK PATH: project=" + projectKey + " issueTypeId=" + issueTypeId + " issue=" + issueKey + " issue type not allowed.");
             return;
+        }
 
         WebhookEvent event = WebhookEvent.valueOf(webhookEvent.toUpperCase());
 
