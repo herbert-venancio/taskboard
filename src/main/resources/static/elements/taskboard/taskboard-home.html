@@ -104,6 +104,14 @@
             text-transform: none;
             color: #eeff41;
         }        
+        
+        #toastIssueUpdated .yellow-button {
+            text-transform: none;
+            color: #ff9800;
+            font-weight: bold;
+            --paper-toast-background-color: #EEEEEE;
+            --paper-toast-color: black;
+        }
 
         .menu-header {
         	display: flex;
@@ -200,6 +208,7 @@
                       on-iron-signal-update-user-preferences="updateUserPreferences"
                       on-iron-signal-show-error-message="showErrorMessage"
                       on-iron-signal-show-error-message-top="showErrorMessageTop"
+                      on-iron-signal-show-issue-updated-message="showIssueUpdatedMessage"
                       >
         </iron-signals>
         <paper-spinner id="spinner" active="{{!done}}" alt="Loading..."></paper-spinner>
@@ -218,6 +227,12 @@
                         <span>{{errorMessage}}
                         </span>
                         <paper-button onclick="toastErrorTop.toggle()" class="yellow-button">Fechar</paper-button>
+                    </paper-toast>
+                    <paper-toast duration="0" id="toastIssueUpdated" horizontal-align='right' vertical-align='bottom'>
+                        <iron-icon icon="icons:info"></iron-icon>
+                        <span>{{infoMessage}}</span>
+                        <paper-button onclick="window.location.reload()" class="yellow-button">REFRESH</paper-button>
+                        <paper-button onclick="toastIssueUpdated.close()" class="yellow-button">DISMISS</paper-button>
                     </paper-toast>                    
                     <paper-material class="menu-header u-clearfix">
 						<div class="title">Taskboard</div>
@@ -300,6 +315,7 @@
 
                 ready: function () {
                     analytics.trackView();
+                    taskboard.connectToWebsocket(this)
                     this.retrieveBoardFeatures();
                 },
 
@@ -409,11 +425,18 @@
                 
                 showErrorMessageTop: function(event) {
                     this.errorMessage = event.detail;
-                    if (this.errorMessage.length > 0) {
+                    if (this.errorMessage.length > 0) 
                         toastErrorTop.open();
-                    }
                     else
                         toastErrorTop.close();
+                },
+                
+                showIssueUpdatedMessage : function(event) {
+                    this.infoMessage = event.detail.message;
+                    if (this.infoMessage.length > 0) 
+                        toastIssueUpdated.open();
+                    else
+                    	toastIssueUpdated.close();
                 },
 
                 downloadFollowup: function() {
@@ -438,6 +461,10 @@
                         },
                         async: true
                     });
+                },
+                
+                refreshBoard: function() {
+                	window.location.reload();
                 }
             });
         })();

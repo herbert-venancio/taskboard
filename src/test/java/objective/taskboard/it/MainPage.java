@@ -103,6 +103,16 @@ public class MainPage extends AbstractUiPage {
             return false;
         }
     }
+    
+    public RefreshToast refreshToast() {
+        return new RefreshToast();
+    }
+    
+    class RefreshToast {
+        public void assertVisible() {
+            waitUntil(ExpectedConditions.visibilityOfElementLocated(By.id("toastIssueUpdated")));
+        }
+    }
 
     class TestIssue {
         private WebElement webElement;

@@ -218,6 +218,14 @@
         .icon-issuetype {
             z-index: 0;
         }
+        
+        .issue-UPDATED {
+        	border: 3px solid #d1d14a
+        }
+        
+        .issue-DELETED {
+        	border: 3px solid #c67575
+        }
     </style>
 
     <template>
@@ -231,7 +239,8 @@
 	                   headers='{"Content-Type": "application/json"}'>
 	        </iron-ajax>
 	        <iron-signals on-iron-signal-hierarchical-filter-changed="forceRefreshHierarchyMatch"></iron-signals>
-	        <paper-material class$="issue {{getClasses(item.hierarchyMatch, item.issueKey)}}" elevation="0" style$="{{getIssueColor(item)}}"
+	        <iron-signals on-iron-signal-issues-updated="updateIssue"></iron-signals>
+	        <paper-material id="issueCard" class$="issue {{getClasses(item.hierarchyMatch, item.issueKey)}} {{highlightClass}}" elevation="0" style$="{{getIssueColor(item)}}"
 	                        on-tap="opendialog" title="Issue details">
 	                        
 	            <template is="dom-if" if="{{issueImpedida(item)}}">
@@ -296,6 +305,9 @@
                     },
                     hidden: {
                         type: Boolean
+                    },
+                    highlightClass: {
+                    	type: String
                     }
                 },
 
@@ -357,6 +369,14 @@
                     this.set('item.hierarchyMatch', !bkp);
                     this.set('item.hierarchyMatch', bkp);
                 },
+                
+                updateIssue: function(event) {
+                	if (event.detail.issueKey !== this.item.issueKey)
+                		return;
+                	
+                	this.set("highlightClass", "issue-" + event.detail.updateType)
+                	flash($(this.$.issueCard), "yellow");
+                },
 
                 getIssueColor: function (issue) {
                     return 'background: ' + issue.color;
@@ -368,7 +388,6 @@
                 },
 
                 opendialog: function () {
-                    //this.$.issuedialog.opendialog();
                     this.fire('iron-signal', {name: 'show-details', data: {item: this.item}});
                 },
 

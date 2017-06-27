@@ -30,10 +30,14 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
+import objective.taskboard.issue.IssueUpdate;
+import objective.taskboard.issue.IssueUpdateType;
+import objective.taskboard.issue.IssuesUpdateEvent;
 import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.issueBuffer.WebhookEvent;
 
@@ -41,15 +45,18 @@ import objective.taskboard.issueBuffer.WebhookEvent;
 @Component
 public class WebhookSchedule {
 
-    private static final long RATE_MILISECONDS = 10 * 1000;
+    private static final long RATE_MILISECONDS = 3 * 1000;
 
     List<Item> list = Collections.synchronizedList(new ArrayList<Item>());
 
     @Autowired
     private IssueBufferService issueBufferService;
-
+    
     @Autowired
     private CacheManager cacheManager;
+    
+    @Autowired
+    public ApplicationEventPublisher eventPublisher;
 
     private class Item {
         private WebhookEvent event;
@@ -77,24 +84,48 @@ public class WebhookSchedule {
     @Scheduled(fixedRate = RATE_MILISECONDS)
     public void processItems() {
         List<Item> toRemove = new ArrayList<Item>();
+        List<IssueUpdate> updatedIssues = new ArrayList<>();
 
-        for (Item item : getItens()) {
+        for (Item item : getItens()) 
             try {
                 if (item.event.isTypeVersion()) {
                     cacheManager.getCache(PROJECTS).clear();
                     if (item.event.equals(VERSION_UPDATED))
                         issueBufferService.updateIssueBuffer();
-                } else
+                } else {
+                    IssueUpdateType updateType = computeEventType(item);
+                    updatedIssues.add(new IssueUpdate(issueBufferService.getIssueByKey(item.issueKey), updateType));
                     issueBufferService.updateIssueBuffer(item.event, item.issueKey);
+                }
 
                 log.warn("WEBHOOK PROCESSED: (" + item.event.toString() +  ") issue=" + item.issueKey);
                 toRemove.add(item);
             } catch (Exception ex) {
                 log.error("WebhookScheduleError:", ex);
             }
-        }
+        
+        if (updatedIssues.size() > 0)
+            eventPublisher.publishEvent(new IssuesUpdateEvent(this, updatedIssues));
 
         removeItens(toRemove);
+    }
+
+    private IssueUpdateType computeEventType(Item item) {
+        IssueUpdateType updateType;
+        switch(item.event){
+            case ISSUE_CREATED:
+                updateType = IssueUpdateType.CREATED;
+                break;
+            case ISSUE_DELETED:
+                updateType = IssueUpdateType.DELETED;
+                break;
+            case ISSUE_UPDATED:
+                updateType = IssueUpdateType.UPDATED;
+                break;
+            default:
+                updateType = IssueUpdateType.UNKNOWN;
+        }
+        return updateType;
     }
 
 }

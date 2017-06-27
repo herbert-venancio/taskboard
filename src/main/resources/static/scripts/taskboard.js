@@ -270,7 +270,42 @@ function Taskboard() {
     this.getOnlyOneSize = function(sizes) {
         return sizes.length != 1 ? null : sizes[0].value;
     };
+    
+    this.connectToWebsocket = function(taskboardHome) {
+        var socket = new SockJS('/taskboard-websocket');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function (frame) {
+            stompClient.subscribe('/issues/updates', function (issues) {
+            	handleIssueUpdate(taskboardHome, issues)
+            });
+        });
+    }
+    
+    function handleIssueUpdate(taskboardHome, response) {
+    	var updateEvents = JSON.parse(response.body)
+        var updatedIssueKeys = []
+        updateEvents.forEach(function(anEvent) {     	
+        	updatedIssueKeys.push(anEvent.target.issueKey)
+        	taskboardHome.fire("iron-signal", {name:"issues-updated", data:{
+            	issueKey: anEvent.target.issueKey,
+            	updateType: anEvent.updateType
+            }})
+        });
+    	
+        taskboardHome.fire("iron-signal", {name:"show-issue-updated-message", data:{
+        	message: "Jira issues have been updated.",
+        	updatedIssueKeys: updatedIssueKeys
+        }})
+    }
+    
+    this.issueGivenKey = function(issueKey) {
+    	return $("paper-material.issue [data-issue-key='"+issueKey+"']").closest("paper-material.issue");
+    }
+}
 
+function flash(el, color) {
+	var original = el.css('backgroundColor');
+	el.animate({backgroundColor:color},300).animate({backgroundColor:original},800)
 }
 
 var taskboard = new Taskboard();
