@@ -21,11 +21,15 @@ node("general-purpose") {
     withEnv(["JAVA_HOME=$javaHome", "M2_HOME=$mvnHome", "PATH+MAVEN=$mvnHome/bin", "PATH+JDK=$javaHome/bin"]) {
         try {
             stage('Build') {
-                wrap([$class: 'Xvnc']) {
-                    sh "${mvnHome}/bin/mvn --batch-mode -V -U clean verify -P packaging-war,dev"
+                try {
+                    wrap([$class: 'Xvnc']) {
+                        sh "${mvnHome}/bin/mvn --batch-mode -V -U clean verify -P packaging-war,dev"
+                    }
+                } finally {
+                    archiveArtifacts artifacts: 'target/test-attachments/**', fingerprint: true
+                    junit testResults: 'target/surefire-reports/*.xml', testDataPublishers: [[$class: 'AttachmentPublisher']]
+                    junit testResults: 'target/failsafe-reports/*.xml', testDataPublishers: [[$class: 'AttachmentPublisher']]
                 }
-                junit 'target/surefire-reports/*.xml'
-                junit 'target/failsafe-reports/*.xml'
             }
         } catch (ex) {
             handleError('objective-solutions/taskboard', 'devops@objective.com.br', 'objective-solutions-user')
