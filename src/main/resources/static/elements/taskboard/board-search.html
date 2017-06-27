@@ -59,6 +59,11 @@
             width: 15px;
             height: 15px;
          }
+
+         paper-dropdown-menu.no-releases {
+            width: 230px;
+            color: gray;
+         }
     </style>
 
     <template>
@@ -67,7 +72,8 @@
         <input id="searchIssues" class="input-search" value="{{query::input}}" type="search"
                placeholder="Search Issues" results="5" autocomplete="off"/>
         <template is="dom-if" if="{{isReleaseConfigured()}}">
-            <paper-dropdown-menu class="releases-dropdown custom" id="searchRelease" label="{{getLabelSearchRelease(releases)}}" no-label-float
+            <paper-dropdown-menu class$="releases-dropdown custom {{getClassNoReleases(releases)}}" id="searchRelease"
+                                 label="{{getLabelSearchRelease(releases)}}" no-label-float
                                  on-value-changed="searchIssue" on-keydown="searchReleaseOnKeyDown">
                 <paper-listbox class="dropdown-content" attr-for-selected="value" selected="{{releaseSelected}}">
                     <template is="dom-repeat" items="{{releases}}" as="itemRelease">
@@ -168,9 +174,19 @@
                 },
 
                 getLabelSearchRelease: function(releases) {
-                    if (releases && releases.length > 0)
+                    if (this.hasReleases(releases))
                         return 'Release';
                     return 'No releases for visible projects';
+                },
+
+                getClassNoReleases: function(releases) {
+                    if (this.hasReleases(releases))
+                        return '';
+                    return 'no-releases';
+                },
+
+                hasReleases: function(releases) {
+                    return releases && releases.length > 0;
                 }
             });
         })();
