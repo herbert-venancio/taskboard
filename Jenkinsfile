@@ -26,7 +26,7 @@ node("general-purpose") {
                         sh "${mvnHome}/bin/mvn --batch-mode -V -U clean verify -P packaging-war,dev"
                     }
                 } finally {
-                    archiveArtifacts artifacts: 'target/test-attachments/**', fingerprint: true
+                    archiveArtifacts artifacts: 'target/test-attachments/**', fingerprint: true, allowEmptyArchive: true
                     junit testResults: 'target/surefire-reports/*.xml', testDataPublishers: [[$class: 'AttachmentPublisher']]
                     junit testResults: 'target/failsafe-reports/*.xml', testDataPublishers: [[$class: 'AttachmentPublisher']]
                 }
@@ -38,6 +38,10 @@ node("general-purpose") {
         if (BRANCH_NAME == 'master') {
             stage('Deploy Maven') {
                 sh "${mvnHome}/bin/mvn --batch-mode -V clean deploy -DskipTests -P packaging-war,dev -DaltDeploymentRepository=repo::default::http://repo:8080/archiva/repository/snapshots"
+                if (!params.RELEASE) {
+                    def downloadUrl = extractDownloadUrlFromLogs()
+                    addDownloadBadge(downloadUrl)
+                }
             }
             stage('Deploy Docker') {
                 sh 'git clone https://github.com/objective-solutions/liferay-environment-bootstrap.git'
@@ -50,9 +54,35 @@ node("general-purpose") {
             if (params.RELEASE) {
                 stage('Release') {
                     echo 'Releasing...'
-                    sh "${mvnHome}/bin/mvn --batch-mode release:prepare release:perform"
+                    sh "${mvnHome}/bin/mvn --batch-mode -Dresume=false release:prepare release:perform -DaltReleaseDeploymentRepository=repo::default::http://repo:8080/archiva/repository/internal -Darguments=\"-DaltDeploymentRepository=internal::default::http://repo:8080/archiva/repository/internal -P packaging-war,dev -DskipTests=true -Dmaven.test.skip=true -Dmaven.javadoc.skip=true\""
+                    def downloadUrl = extractDownloadUrlFromLogs()
+                    addDownloadBadge(downloadUrl)
+                    updateReleaseLinkInDescription(downloadUrl)
                 }
             }
         }
     }
+}
+
+def extractDownloadUrlFromLogs() {
+    def artifactType = "war"
+    def pattern
+    if(params.RELEASE) {
+        pattern = ".*Uploaded: (http://internal.*${artifactType}).*"
+    } else {
+        pattern = /.*Uploaded: (http:.*.${artifactType}).*/
+    }
+    def matcher = manager.getLogMatcher(pattern)
+    return matcher.group(1)
+}
+
+def addDownloadBadge(downloadUrl) {
+    def artifactName = downloadUrl.replaceAll(".*/(.*)", '$1')
+    def summary = manager.createSummary("info.gif")
+    summary.appendText("<a href='${downloadUrl}>Link to deployed war: ${artifactName}</a>", false)
+    manager.addBadge("save.gif", "Click here to download ${artifactName}", downloadUrl)
+}
+
+def updateReleaseLinkInDescription(downloadUrl) {
+    manager.build.project.description = "<a href='${downloadUrl}'>Latest released artifact</a>"
 }
