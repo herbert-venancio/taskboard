@@ -45,7 +45,7 @@ import objective.taskboard.issueBuffer.WebhookEvent;
 @Component
 public class WebhookSchedule {
 
-    private static final long RATE_MILISECONDS = 3 * 1000;
+    private static final long RATE_MILISECONDS = 1 * 1000;
 
     List<Item> list = Collections.synchronizedList(new ArrayList<Item>());
 
