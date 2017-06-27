@@ -26,15 +26,23 @@ import org.junit.Test;
 public class ReleaseFilterIT extends AuthenticatedIntegrationTest {
 
     @Test
-    public void whenNoProjectsWasSelected_noReleasesLabelShowup() {
-        MainPage.produce(webDriver)
-                .assertLabelRelease("Release")
+    public void whenNoProjectsIsSelected_noReleasesLabelShowup() {
+        MainPage mainPage = MainPage.produce(webDriver);
+        MenuFilters menuFilters = mainPage.assertLabelRelease("Release")
                 .openMenuFilters()
-                .openAspectsFilter()
-                .clickCheckAllProjectFilter()
-                .assertLabelRelease("No releases for visible projects")
-                .clickCheckAllProjectFilter()
-                .assertLabelRelease("Release");
+                .getMenuFilters();
+        menuFilters.openAspectsFilter()
+                .clickCheckAllFilter("Project");
+        mainPage.assertLabelRelease("No releases for visible projects");
+        menuFilters.clickCheckAllFilter("Project");
+        mainPage.assertLabelRelease("Release");
+    }
+
+    @Test
+    public void whenFilterByRelease_onlyIssueInTheReleaseShowUp() {
+        MainPage.produce(webDriver)
+                .filterByRelease("TASKB - 1.0")
+                .assertVisibleIssues("TASKB-238");
     }
 
 }

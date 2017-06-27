@@ -54,9 +54,6 @@ public class MainPage extends AbstractUiFragment {
     @FindBy(css = ".menuLink")
     private WebElement menuFiltersButton;
 
-    @FindBy(tagName = "aspects-filter")
-    private WebElement aspectsFilterButton;
-
     public MainPage(WebDriver webDriver) {
         super(webDriver);
     }
@@ -85,21 +82,25 @@ public class MainPage extends AbstractUiFragment {
         return this;
     }
 
-    public MainPage openAspectsFilter() {
-        waitVisibilityOfElement(aspectsFilterButton);
-        aspectsFilterButton.click();
-        return this;
+    public MenuFilters getMenuFilters() {
+        return initElements(webDriver, MenuFilters.class);
     }
 
-    public MainPage clickCheckAllProjectFilter() {
-        WebElement checkAllProject = webDriver
-            .findElements(By.cssSelector(".aspect-item-filter.config-item-title")).stream()
-            .filter(webEl -> webEl.getText().equals("Project"))
-            .map(webEl -> webEl.findElement(By.id("checkAll")))
+    public MainPage filterByRelease(String release) {
+        String releaseNotNull = release == null ? "" : release;
+
+        waitVisibilityOfElement(searchReleaseDropdown);
+        searchReleaseDropdown.click();
+
+        WebElement releaseElement = searchReleaseDropdown.findElements(By.tagName("paper-item")).stream()
+            .filter(paperItem -> releaseNotNull.equals(paperItem.getText()))
             .findFirst().orElse(null);
-        if (checkAllProject == null)
-            throw new IllegalArgumentException("Element \"checkAll\" of project filter not found");
-        checkAllProject.click();
+
+        if (releaseElement == null)
+            throw new IllegalArgumentException("Element \"" + release + "\" of Release filter not found");
+
+        waitVisibilityOfElement(releaseElement);
+        releaseElement.click();
         return this;
     }
 
@@ -161,20 +162,20 @@ public class MainPage extends AbstractUiFragment {
         }
         
         public void assertVisible() {
-            waitUntil(ExpectedConditions.visibilityOf(issueToast));
+            waitVisibilityOfElement(issueToast);
         }
 
         public void toggleShowHide() {
-            waitUntil(ExpectedConditions.visibilityOf(toggleFilterChangedIssues));
+            waitVisibilityOfElement(toggleFilterChangedIssues);
             toggleFilterChangedIssues.click();
         }
 
         public void assertNotVisible() {
-            waitUntil(ExpectedConditions.invisibilityOf(issueToast));
+            waitInvisibilityOfElement(issueToast);
         }
 
         public void dismiss() {
-            waitUntil(ExpectedConditions.visibilityOf(dismissToast));
+            waitVisibilityOfElement(dismissToast);
             dismissToast.click();
         }
     }
@@ -194,7 +195,7 @@ public class MainPage extends AbstractUiFragment {
             Actions builder = new Actions(webDriver);
             builder.moveToElement(webElement).build().perform();
             WebElement applyFilterButton = webElement.findElement(By.cssSelector("[alt='Apply Filter']"));
-            waitUntil(ExpectedConditions.visibilityOf(applyFilterButton));
+            waitVisibilityOfElement(applyFilterButton);
             applyFilterButton.click();;
         }
     }
