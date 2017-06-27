@@ -35,10 +35,13 @@ public abstract class AbstractUiFragment {
     }
     public void waitUntil(ExpectedCondition<?> condition) {
         PageWait.wait(webDriver).until(condition);
-        
     }
     protected void waitTextInElement(WebElement element, String expected) {
+        waitVisibilityOfElement(element);
+        waitUntil(textToBePresentInElement(element, expected));
+    }
+
+    protected void waitVisibilityOfElement(WebElement element) {
         waitUntil(visibilityOf(element));
-        waitUntil(textToBePresentInElement(element, expected));        
     }
 }
