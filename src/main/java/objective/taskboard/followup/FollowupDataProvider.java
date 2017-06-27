@@ -23,6 +23,10 @@ package objective.taskboard.followup;
 
 import java.util.List;
 
+import objective.taskboard.issueBuffer.IssueBufferState;
+
 public interface FollowupDataProvider {
     List<FollowUpData> getJiraData();
+
+    IssueBufferState getFollowupState();
 }

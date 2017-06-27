@@ -48,6 +48,7 @@ import com.safaribooks.junitattachments.RecordAttachmentRule;
 import objective.taskboard.RequestBuilder;
 import objective.taskboard.RequestResponse;
 import objective.taskboard.TestMain;
+import objective.taskboard.issueBuffer.IssueBufferState;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {UIConfig.class})
@@ -69,7 +70,7 @@ public abstract class AbstractUIIntegrationTest {
         }
         
         webDriver = new FirefoxDriver();
-        //webDriver.manage().window().setSize(new Dimension(1024,768));
+        //webDriver.manage().window().setSize(new Dimension(1280,1080));
         webDriver.manage().window().setSize(new Dimension(300,300));
     }
     
@@ -111,7 +112,8 @@ public abstract class AbstractUIIntegrationTest {
                         .credentials("foo", "bar").get();
                     
                     if (response.responseCode < 400)
-                        if (response.content.equals("ready") || response.content.equals("updating"))
+                        if (response.content.equals(IssueBufferState.ready.toString()) || 
+                            response.content.equals(IssueBufferState.updating.toString()))
                             return null;
                 } catch(Exception e) {
                     // just assume 'not ready'

@@ -37,7 +37,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.domain.Filter;
 import objective.taskboard.domain.ProjectFilterConfiguration;
-import objective.taskboard.issueBuffer.IssueEvent;
+import objective.taskboard.issueBuffer.WebhookEvent;
+import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.repository.FilterCachedRepository;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.task.WebhookSchedule;
@@ -59,21 +60,25 @@ public class WebhookController {
     @Autowired
     private ObjectMapper mapper;
 
-    @RequestMapping(value = "{projectKey}/{issueKey}", method = RequestMethod.POST)
-    public void webhook(@RequestBody Map<String, Object> body, @PathVariable("projectKey") String projectKey, @PathVariable("issueKey") String issueKey) throws JsonProcessingException {
+    @Autowired
+    private JiraProperties jiraProperties;
+
+    @RequestMapping(value = "{projectKey}", method = RequestMethod.POST)
+    public void webhook(@RequestBody Map<String, Object> body, @PathVariable("projectKey") String projectKey) throws JsonProcessingException {
+        log.debug("WEBHOOK REQUEST BODY: " + mapper.writeValueAsString(body));
+
         String webhookEvent = body.get("webhookEvent").toString().replace("jira:", "");
-        Long issueTypeId = getIssueTypeId(body);
+        String issueKey = getIssueKeyOrNull(body);
+        Long issueTypeId = getIssueTypeIdOrNull(body);
 
         addItemInTheQueue(webhookEvent, projectKey, issueTypeId, issueKey);
-        log.debug("WEBHOOK REQUEST BODY: " + mapper.writeValueAsString(body));
     }
 
     @RequestMapping(path = "webhook/{webhookEvent}/{projectKey}/{issueTypeId}/{issueKey}", method = RequestMethod.POST)
     public void webhook(@PathVariable("webhookEvent") String webhookEvent,
             @PathVariable("projectKey") String projectKey, @PathVariable("issueTypeId") String issueTypeId,
             @PathVariable("issueKey") String issueKey) throws JsonProcessingException {
-
-        log.info("WEBHOOK PUT IN QUEUE: (" + webhookEvent + ") project=" + projectKey + " issue=" + issueKey);
+        log.debug("WEBHOOK PATH: (" + webhookEvent + ") project=" + projectKey + " issueTypeId=" + issueTypeId + " issue=" + issueKey);
 
         Long issueTypeIdLong = Long.parseLong(issueTypeId);
         addItemInTheQueue(webhookEvent, projectKey, issueTypeIdLong, issueKey);
@@ -83,10 +88,13 @@ public class WebhookController {
         if (!belongsToAnyProjectFilter(projectKey))
             return;
 
-        if (!belongsToAnyIssueTypeFilter(issueTypeId))
+        if (issueTypeId != null && !belongsToAnyIssueTypeFilter(issueTypeId))
             return;
 
-        IssueEvent event = IssueEvent.valueOf(webhookEvent.toUpperCase());
+        WebhookEvent event = WebhookEvent.valueOf(webhookEvent.toUpperCase());
+
+        if (event.isTypeVersion() && !isReleaseConfigured())
+            return;
 
         webhookSchedule.add(event, issueKey);
         log.info("WEBHOOK PUT IN QUEUE: (" + webhookEvent +  ") project=" + projectKey + " issue=" + issueKey);
@@ -99,16 +107,30 @@ public class WebhookController {
 
     private boolean belongsToAnyIssueTypeFilter(Long issueTypeId) {
         List<Filter> filters = filterCachedRepository.getCache();
-        return filters.stream().anyMatch(f -> {
-            return issueTypeId.equals(f.getIssueTypeId());
-        });
+        return filters.stream().anyMatch(f -> issueTypeId.equals(f.getIssueTypeId()));
     }
 
-    private Long getIssueTypeId(Map<String, Object> requestBody) {
+    private boolean isReleaseConfigured() {
+        return !jiraProperties.getCustomfield().getRelease().getId().isEmpty();
+    }
+
+    private String getIssueKeyOrNull(Map<String, Object> body) {
+        Map<String, Object> issue = toMap(body.get("issue"));
+        return issue == null ? null : issue.get("key").toString();
+    }
+
+    private Long getIssueTypeIdOrNull(Map<String, Object> body) {
+        Map<String, Object> issueType = toMap(getIssueFieldOrNull(body, "issuetype"));
+        return issueType == null ? null : Long.parseLong(issueType.get("id").toString());
+    }
+
+    private Object getIssueFieldOrNull(Map<String, Object> requestBody, String field) {
         Map<String, Object> issue = toMap(requestBody.get("issue"));
+        if (issue == null)
+            return null;
+
         Map<String, Object> fields = toMap(issue.get("fields"));
-        Map<String, Object> type = toMap(fields.get("issuetype"));
-        return Long.parseLong(type.get("id").toString());
+        return fields.get(field);
     }
 
     @SuppressWarnings("unchecked")

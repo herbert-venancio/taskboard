@@ -24,10 +24,12 @@ package objective.taskboard.followup;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -35,8 +37,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.core.io.ByteArrayResource;
 import org.xml.sax.SAXException;
@@ -44,43 +44,48 @@ import org.xml.sax.SAXException;
 @RunWith(MockitoJUnitRunner.class)
 public class FollowUpGeneratorTest {
 
+    private static final String PATH_SHARED_STRINGS_INITIAL = "followup/sharedStrings-initial.xml";
+    private static final String PATH_SHARED_STRINGS_TEMPLATE = "followup/sharedStrings-template.xml";
+    private static final String PATH_SHARED_STRINGS_SI_TEMPLATE = "followup/sharedStrings-si-template.xml";
+    private static final String PATH_SHEET7_TEMPLATE = "followup/sheet7-template.xml";
+    private static final String PATH_SHEET7_ROW_TEMPLATE = "followup/sheet7-row-template.xml";
+    private static final String PATH_FOLLOWUP_TEMPLATE = "followup/Followup-template.xlsm";
+
     private static final String MSG_ASSERT_SHARED_STRINGS_SIZE = "Shared strings size";
-
-    @InjectMocks
-    private FollowUpGenerator subject;
-
-    @Mock
-    private FollowupDataProvider provider;
 
     @Test
     public void getSharedStringsInitialTest() throws ParserConfigurationException, SAXException, IOException {
+        FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(null);
         Map<String, Long> sharedStrings = subject.getSharedStringsInitial();
-        assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 248, sharedStrings.size());
+        assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 208, sharedStrings.size());
         assertEquals("First shared string", 0, sharedStrings.get("project").longValue());
         assertEquals("Some special character shared string", 48, sharedStrings.get("Demand Status > Demand > Task Status > Task > Subtask").longValue());
-        assertEquals("Any shared string", 133, sharedStrings.get("Group %").longValue());
-        assertEquals("Last shared string", 247, sharedStrings.get("Rótulos de Coluna").longValue());
+        assertEquals("Any shared string", 130, sharedStrings.get("Group %").longValue());
+        assertEquals("Last shared string", 207, sharedStrings.get("BALLPARK").longValue());
     }
 
     @Test
     public void addNewSharedStringsInTheEndTest() throws ParserConfigurationException, SAXException, IOException {
-        when(provider.getJiraData()).thenReturn(asList(getFollowUpDataDefault()));
+        FollowupDataProvider provider = getFollowupDataProvider(asList(getFollowUpDataDefault()));
+        FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
 
         Map<String, Long> sharedStrings = subject.getSharedStringsInitial();
-        assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 248, sharedStrings.size());
+        assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 208, sharedStrings.size());
         assertEquals("First shared string", 0, sharedStrings.get("project").longValue());
-        assertEquals("Last shared string", 247, sharedStrings.get("Rótulos de Coluna").longValue());
+        assertEquals("Last shared string", 207, sharedStrings.get("BALLPARK").longValue());
 
         subject.generateJiraDataSheet(sharedStrings);
 
-        assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 262, sharedStrings.size());
-        assertEquals("First new shared string", 248, sharedStrings.get("PROJECT TEST").longValue());
-        assertEquals("Any new shared string", 254, sharedStrings.get("Summary Feature").longValue());
-        assertEquals("Last new shared string", 261, sharedStrings.get("Full Description Sub-task").longValue());
+        assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 222, sharedStrings.size());
+        assertEquals("First new shared string", 208, sharedStrings.get("PROJECT TEST").longValue());
+        assertEquals("Any new shared string", 214, sharedStrings.get("Summary Feature").longValue());
+        assertEquals("Last new shared string", 221, sharedStrings.get("Full Description Sub-task").longValue());
     }
 
     @Test
     public void generateSharedStringsInOrderTest() throws ParserConfigurationException, SAXException, IOException {
+        FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(null);
+
         Map<String, Long> sharedStrings = subject.getSharedStringsInitial();
         String sharedStringsGenerated = subject.generateSharedStrings(sharedStrings);
 
@@ -90,13 +95,14 @@ public class FollowUpGeneratorTest {
 
     @Test
     public void generateSharedStringsInOrderAfterAddNewSharedStringTest() throws ParserConfigurationException, SAXException, IOException {
-        when(provider.getJiraData()).thenReturn(asList(getFollowUpDataDefault()));
+        FollowupDataProvider provider = getFollowupDataProvider(asList(getFollowUpDataDefault()));
+        FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
 
         Map<String, Long> sharedStrings = subject.getSharedStringsInitial();
 
-        assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 248, sharedStrings.size());
+        assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 208, sharedStrings.size());
         subject.generateJiraDataSheet(sharedStrings);
-        assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 262, sharedStrings.size());
+        assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 222, sharedStrings.size());
 
         String sharedStringsGenerated = subject.generateSharedStrings(sharedStrings);
 
@@ -106,7 +112,8 @@ public class FollowUpGeneratorTest {
 
     @Test
     public void generateJiraDataSheetTest() throws ParserConfigurationException, SAXException, IOException {
-        when(provider.getJiraData()).thenReturn(asList(getFollowUpDataDefault()));
+        FollowupDataProvider provider = getFollowupDataProvider(asList(getFollowUpDataDefault()));
+        FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
 
         Map<String, Long> sharedStrings = subject.getSharedStringsInitial();
         String jiraDataSheet = subject.generateJiraDataSheet(sharedStrings);
@@ -117,7 +124,8 @@ public class FollowUpGeneratorTest {
 
     @Test
     public void generateJiraDataSheetWithEmptyDataTest() throws ParserConfigurationException, SAXException, IOException {
-        when(provider.getJiraData()).thenReturn(asList());
+        FollowupDataProvider provider = getFollowupDataProvider(asList());
+        FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
 
         Map<String, Long> sharedStrings = subject.getSharedStringsInitial();
         String jiraDataSheet = subject.generateJiraDataSheet(sharedStrings);
@@ -135,7 +143,8 @@ public class FollowUpGeneratorTest {
         followupDefault.subtaskId = null;
         followupDefault.worklog = 0.0;
         followupDefault.wrongWorklog = null;
-        when(provider.getJiraData()).thenReturn(asList(followupDefault));
+        FollowupDataProvider provider = getFollowupDataProvider(asList(followupDefault));
+        FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
 
         Map<String, Long> sharedStrings = subject.getSharedStringsInitial();
         String jiraDataSheet = subject.generateJiraDataSheet(sharedStrings);
@@ -146,9 +155,30 @@ public class FollowUpGeneratorTest {
 
     @Test
     public void generateTest() throws Exception {
-        when(provider.getJiraData()).thenReturn(asList(getFollowUpDataDefault()));
+        FollowupDataProvider provider = getFollowupDataProvider(asList(getFollowUpDataDefault()));
+        FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
         ByteArrayResource resource = subject.generate();
         assertNotNull("Resource shouldn't be null", resource);
+    }
+
+    @Test
+    public void generateUsingDefaultTemplatesTest() throws Exception {
+        FollowupDataProvider provider = getFollowupDataProvider(asList(getFollowUpDataDefault()));
+        FollowUpGenerator subject = new FollowUpGenerator(provider);
+        ByteArrayResource resource = subject.generate();
+        assertNotNull("Resource shouldn't be null", resource);
+    }
+
+    private FollowUpGenerator getFollowUpGeneratorUsingTestTemplates(FollowupDataProvider provider) {
+        return new FollowUpGenerator(provider, PATH_SHARED_STRINGS_INITIAL, PATH_SHARED_STRINGS_TEMPLATE,
+                PATH_SHARED_STRINGS_SI_TEMPLATE, PATH_SHEET7_TEMPLATE, PATH_SHEET7_ROW_TEMPLATE,
+                PATH_FOLLOWUP_TEMPLATE);
+    }
+
+    private FollowupDataProvider getFollowupDataProvider(List<FollowUpData> jiraData) {
+        FollowupDataProvider provider = mock(FollowupDataProvider.class);
+        when(provider.getJiraData()).thenReturn(jiraData);
+        return provider;
     }
 
     private FollowUpData getFollowUpDataDefault() {

@@ -30,17 +30,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import objective.taskboard.followup.FollowUpGenerator;
+import objective.taskboard.followup.FollowupDataProvider;
+import objective.taskboard.issueBuffer.IssueBufferState;
 
 @RestController
-@RequestMapping("/api/followup")
+@RequestMapping("/ws/followup")
 public class FollowUpController {
 
     @Autowired
-    private FollowUpGenerator followupGenerator;
+    private FollowupDataProvider provider;
 
     @RequestMapping
     public ResponseEntity<Object> download() {
         try {
+            FollowUpGenerator followupGenerator = new FollowUpGenerator(provider);
             ByteArrayResource resource = followupGenerator.generate();
             return ResponseEntity.ok()
                   .contentLength(resource.contentLength())
@@ -51,4 +54,8 @@ public class FollowUpController {
         }
     }
 
+    @RequestMapping("state")
+    public IssueBufferState getState() {
+        return provider.getFollowupState();
+    }
 }

@@ -27,6 +27,21 @@ The tests require Firefox version 54+ installed in your system. Make sure your v
 By default, the genarated artifact is a **jar**. Alternatively you can generate a **war** by activating the `packaging-war` maven profile: \
  `mvn package -P packaging-war`
 
+## Updating the Followup Template
+
+To update the followup template:
+
+1. Ensure 'From Jira' tab has no data at all
+2. unzip the template
+3. run the following command:
+  - xmllint --format xl/worksheets/sheet7.xml > sheet7-reformatted.xml
+4. open sheet7-reformatted.xml and copy the contents of tag <row r="1"..></row> over the same row on template src/main/resources/followup-template/sheet7-template.xml
+5. remove xl/worksheets/sheet7.xml and the reformatted file
+6. copy the contents of ./xl/sharedStrings.xml and execute the following command:
+   - xmllint --format sharedStrings.xml > ./src/main/resources/followup-template/sharedStrings-initial.xml
+7. remove sharedStrings.xml
+8. zip the contents again into ./src/main/resources/followup-template/Followup-template.xlsm
+9. And you're done.
 
 ## Running application
 

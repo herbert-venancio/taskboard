@@ -105,6 +105,11 @@ public class JiraIssueService {
     public List<Issue> searchAll() {
         return searchIssues(null);
     }
+    
+    public List<Issue> searchAllProjectIssues() {
+        String projectsJql = projectsJql();
+        return jiraSearchService.searchIssues(projectsJql);
+    }
 
     private List<Issue> searchIssues(String additionalJqlCondition) {
         List<Filter> filters = filterRepository.getCache();

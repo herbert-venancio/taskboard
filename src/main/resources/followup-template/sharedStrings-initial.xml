@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="1170" uniqueCount="248">
+<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="712" uniqueCount="208">
   <si>
     <t>project</t>
   </si>
@@ -175,12 +175,6 @@
     <t>Demand</t>
   </si>
   <si>
-    <t>3.Doing</t>
-  </si>
-  <si>
-    <t>5.Open</t>
-  </si>
-  <si>
     <t>Holyday</t>
   </si>
   <si>
@@ -323,9 +317,6 @@
   </si>
   <si>
     <t>SubtaskName</t>
-  </si>
-  <si>
-    <t>4.To Do</t>
   </si>
   <si>
     <t>Release</t>
@@ -526,39 +517,6 @@
     <t>_Days</t>
   </si>
   <si>
-    <t>Developer2</t>
-  </si>
-  <si>
-    <t>Ballpark - UX</t>
-  </si>
-  <si>
-    <t>Ballpark - Development</t>
-  </si>
-  <si>
-    <t>Ballpark - Feature Review</t>
-  </si>
-  <si>
-    <t>Ballpark - QA Support</t>
-  </si>
-  <si>
-    <t>Ballpark - Feature Planning</t>
-  </si>
-  <si>
-    <t>Ballpark - Tech Planning</t>
-  </si>
-  <si>
-    <t>Ballpark - Developer Support</t>
-  </si>
-  <si>
-    <t>Ballpark - Alpha Test</t>
-  </si>
-  <si>
-    <t>PROJECT - Google LMS</t>
-  </si>
-  <si>
-    <t>POC Delivery</t>
-  </si>
-  <si>
     <t>Tech Lead</t>
   </si>
   <si>
@@ -569,15 +527,6 @@
   </si>
   <si>
     <t>Tech Lead1</t>
-  </si>
-  <si>
-    <t>Tech Planning | S | 00008 - Expiration Date - Feature Planning</t>
-  </si>
-  <si>
-    <t>Sub-Task | XS | 00060 - Update OIDC modules to latest from master</t>
-  </si>
-  <si>
-    <t>Feature Planning | L | 00024 - Add SCORM support - Feature Planning</t>
   </si>
   <si>
     <t>Expected</t>
@@ -643,105 +592,36 @@
     <t>TASK_BALLPARK</t>
   </si>
   <si>
-    <t>1-POC</t>
-  </si>
-  <si>
-    <t>2-Discovery</t>
-  </si>
-  <si>
-    <t>Feature Planning | S | 00071 - Discuss UX</t>
-  </si>
-  <si>
-    <t>Tech Planning | M | 00072 - Discuss UI Architecture</t>
-  </si>
-  <si>
-    <t>Frontend Development | L | 00073 - Implement Theme POC</t>
-  </si>
-  <si>
     <t>BALLPARK - Subtask</t>
   </si>
   <si>
     <t>BALLPARK - Planning</t>
   </si>
   <si>
-    <t>00001 - Enhanced Group Functionality (Site)</t>
+    <t>(blank)</t>
   </si>
   <si>
-    <t>Feature | 00006 - Add version</t>
+    <t>(All)</t>
   </si>
   <si>
-    <t>Feature | 00007 - Add expiration date</t>
+    <t>Row Labels</t>
   </si>
   <si>
-    <t>Tech Planning | S | 00093 - Expiration Date - Tech Planning</t>
+    <t>Column Labels</t>
   </si>
   <si>
-    <t>Feature | 00099 - Add sorting capability to Site REST API</t>
+    <t>PROJECT - Suez</t>
   </si>
   <si>
-    <t xml:space="preserve">00003 - OpenID Connect SSO Support </t>
+    <t>Sprint 1</t>
   </si>
   <si>
-    <t>Feature | 00022 - Add support for OpenID Connect Single Sign-on</t>
+    <t>Sprint 2</t>
   </si>
   <si>
-    <t>00004 - Google LMS Integration</t>
+    <t>BALLPARK - QA Support</t>
   </si>
   <si>
-    <t>Feature | 00023 - Add SCORM support</t>
-  </si>
-  <si>
-    <t>Feature | 00025 - Notify Google LMS of User activity</t>
-  </si>
-  <si>
-    <t>Feature Review | S | 00089 - Review of Notify Google LMS of User activity</t>
-  </si>
-  <si>
-    <t>Backend Development | S | 00090 - Create mock pages</t>
-  </si>
-  <si>
-    <t>00005 - System Architecture</t>
-  </si>
-  <si>
-    <t>Task | 00020 - Create Google Local Environment</t>
-  </si>
-  <si>
-    <t>00069 - UI &amp; Theme</t>
-  </si>
-  <si>
-    <t>Feature | 00070 - Create Theme</t>
-  </si>
-  <si>
-    <t>QA | S | 00107 - QA for Add version</t>
-  </si>
-  <si>
-    <t>Feature Review | S | 00108 - Review of Add support for OpenID Connect Single Sign-on</t>
-  </si>
-  <si>
-    <t>UX | S | 00112 - Define logout splash page</t>
-  </si>
-  <si>
-    <t>Feature Review | S | 00121 - Review of Create Google Local Environment</t>
-  </si>
-  <si>
-    <t>Feature Review | S | 00131 - Review of Add sorting capability to Site REST API</t>
-  </si>
-  <si>
-    <t>2.To Review</t>
-  </si>
-  <si>
-    <t>(vazio)</t>
-  </si>
-  <si>
-    <t>Total Geral</t>
-  </si>
-  <si>
-    <t>(Tudo)</t>
-  </si>
-  <si>
-    <t>Rótulos de Linha</t>
-  </si>
-  <si>
-    <t>Rótulos de Coluna</t>
+    <t>BALLPARK</t>
   </si>
 </sst>

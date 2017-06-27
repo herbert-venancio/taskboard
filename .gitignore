@@ -13,3 +13,8 @@ src/main/resources/static/bower_components
 taskboard.iml
 drivers
 db2.*
+application-dev.yaml
+application-liferay.properties
+application-liferay.yaml
+application-uat.properties
+application-uat.yml

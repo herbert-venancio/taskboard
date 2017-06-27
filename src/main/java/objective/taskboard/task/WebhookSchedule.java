@@ -21,17 +21,21 @@ package objective.taskboard.task;
  * [/LICENSE]
  */
 
+import static objective.taskboard.config.CacheConfiguration.PROJECTS;
+import static objective.taskboard.issueBuffer.WebhookEvent.VERSION_UPDATED;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.issueBuffer.IssueBufferService;
-import objective.taskboard.issueBuffer.IssueEvent;
+import objective.taskboard.issueBuffer.WebhookEvent;
 
 @Slf4j
 @Component
@@ -44,11 +48,14 @@ public class WebhookSchedule {
     @Autowired
     private IssueBufferService issueBufferService;
 
+    @Autowired
+    private CacheManager cacheManager;
+
     private class Item {
-        private IssueEvent event;
+        private WebhookEvent event;
         private String issueKey;
 
-        public Item(IssueEvent event, String issueKey) {
+        public Item(WebhookEvent event, String issueKey) {
             this.event = event;
             this.issueKey = issueKey;
         }
@@ -62,7 +69,7 @@ public class WebhookSchedule {
         this.list.removeAll(list);
     }
 
-    public void add(IssueEvent event, String issueKey) {
+    public void add(WebhookEvent event, String issueKey) {
         Item item = new Item(event, issueKey);
         list.add(item);
     }
@@ -73,11 +80,17 @@ public class WebhookSchedule {
 
         for (Item item : getItens()) {
             try {
-                issueBufferService.updateIssueBuffer(item.event, item.issueKey);
+                if (item.event.isTypeVersion()) {
+                    cacheManager.getCache(PROJECTS).clear();
+                    if (item.event.equals(VERSION_UPDATED))
+                        issueBufferService.updateIssueBuffer();
+                } else
+                    issueBufferService.updateIssueBuffer(item.event, item.issueKey);
+
                 log.warn("WEBHOOK PROCESSED: (" + item.event.toString() +  ") issue=" + item.issueKey);
                 toRemove.add(item);
             } catch (Exception ex) {
-                log.error("WebhookScheduleError", ex);
+                log.error("WebhookScheduleError:", ex);
             }
         }
 

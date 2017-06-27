@@ -50031,6 +50031,13 @@
                     "self": "http://54.68.128.117:8100/rest/api/2/customFieldOption/12391",
                     "value": "N/A"
                 },
+                "customfield_11455": {
+                    "self":"http://54.68.128.117:8100/rest/api/2/version/12550",
+                    "id":"12550",
+                    "name":"1.0",
+                    "archived":false,
+                    "released":false
+                },
                 "description": "Vide Tarefas",
                 "issuelinks": [
                     {

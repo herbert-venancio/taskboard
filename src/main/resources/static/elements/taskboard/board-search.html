@@ -36,8 +36,13 @@
             background: #DDD;
         }
 
+        .clear-release {
+            width: 15px;
+            height: 15px;
+        }
+
         paper-dropdown-menu.custom {
-        	width: 100px;
+            width: 150px;
             margin-left: 10px;
             --paper-input-container-underline: { display: none; };
             --paper-input-container-label: { font-size: 14px; };
@@ -54,21 +59,32 @@
             --paper-item-min-height: 30px;
             font-size: 14px;
          }
+
+         paper-icon-button {
+            float: right;
+            padding: 0;
+            width: 15px;
+            height: 15px;
+         }
     </style>
 
     <template>
-        <iron-signals on-iron-signal-search-filter-reset="searchReset"></iron-signals>
+        <iron-signals on-iron-signal-search-filter-reset="searchReset"
+                      on-iron-signal-refresh-release-filter="retrieveReleases"></iron-signals>
         <input id="searchIssues" class="input-search" value="{{query::input}}" type="search"
                placeholder="Search Issues" results="5" autocomplete="off"/>
         <template is="dom-if" if="{{hasReleases(releases)}}">
             <paper-dropdown-menu class="releases-dropdown custom" id="searchRelease" label="Release" no-label-float
-                                 on-value-changed="searchIssue">
+                                 on-value-changed="searchIssue" on-keydown="searchReleaseOnKeyDown">
                 <paper-listbox class="dropdown-content" attr-for-selected="value" selected="{{releaseSelected}}">
                     <template is="dom-repeat" items="{{releases}}" as="itemRelease">
-                        <paper-item value="{{itemRelease}}">{{itemRelease}}</paper-item>
+                        <paper-item value="{{itemRelease}}">{{getReleaseString(itemRelease)}}</paper-item>
                     </template>
                 </paper-listbox>
             </paper-dropdown-menu>
+            <div class="clear-release">
+                <paper-icon-button id="clearReleaseButton" icon="clear" on-click="clearRelease" hidden></paper-icon-button>
+            </div>
         </template>
     </template>
 
@@ -92,23 +108,70 @@
                     }
                 },
 
+                ready: function() {
+                    this.retrieveReleases();
+                },
+
                 listeners: {
                     'searchIssues.change': 'searchIssue',
                     'query-changed': 'searchIssue'
                 },
 
                 searchIssue: function () {
+                    if (this.hasReleases(this.releases))
+                        clearReleaseButton.hidden = this.releaseSelected ? false : true;
+
                     this.fire('iron-signal', {name: 'search-filter-changed',
                                               data: { query: this.query , release: this.releaseSelected }});
                 },
 
                 searchReset: function() {
                     this.query = "";
-                    this.releaseSelected = "";
+                    this.clearRelease();
                 },
 
                 hasReleases: function(releases) {
                     return CUSTOMFIELD.RELEASE && releases && releases.length > 0;
+                },
+
+                retrieveReleases: function() {
+                    this.clearRelease();
+                    var listReleases = [];
+                    taskboard.getAspectFilters().forEach(function(itemFilter) {
+                        if (itemFilter.description !== 'Project')
+                            return;
+
+                        itemFilter.aspectsSubitemFilter.forEach(function(subitemFilter) {
+                            if (!subitemFilter.visible || !subitemFilter.selected ||
+                                subitemFilter.versions == null)
+                                return;
+
+                            subitemFilter.versions.forEach(function(v) {
+                                listReleases.push({ project: this.value, version: v })
+                            }, subitemFilter);
+                        });
+                    });
+
+                    if (listReleases.length > 0)
+                        listReleases = [null].concat(listReleases);
+
+                    this.releases = listReleases;
+                },
+
+                getReleaseString: function(release) {
+                    if (!release)
+                        return "";
+
+                    return release.project + " - " + release.version;
+                },
+
+                clearRelease: function() {
+                    this.releaseSelected = "";
+                },
+
+                searchReleaseOnKeyDown: function(e) {
+                    if (e.key === 'Escape')
+                        this.clearRelease();
                 }
             });
         })();

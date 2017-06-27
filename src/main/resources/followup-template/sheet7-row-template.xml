@@ -34,7 +34,7 @@
         <v>${taskDescription}</v>
       </c>
       <c r="L${rowNumber}" t="s">
-        <v>${taskFullSescription}</v>
+        <v>${taskFullDescription}</v>
       </c>
       <c r="M${rowNumber}" t="s">
         <v>${subtaskType}</v>

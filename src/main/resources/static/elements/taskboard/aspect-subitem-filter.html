@@ -130,6 +130,7 @@
                     if (this.description === 'Project') {
                         taskboard.applyFilterPreferences();
                         this.fire('iron-signal', {name: 'refresh-filter-teams'});
+                        this.fire('iron-signal', {name: 'refresh-release-filter'});
                     }
                 },
 

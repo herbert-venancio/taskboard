@@ -164,7 +164,7 @@ public class IssueController {
 
     @RequestMapping(path = "subtasks", method = RequestMethod.POST)
     public List<Issue> subtasks(@RequestBody Issue issue) throws SQLException {
-        return jiraBean.getIssueSubTasks(issue);
+        return issueBufferService.getIssueSubTasks(issue);
     }
 
     @RequestMapping(path = "timetracking", method = RequestMethod.POST)
@@ -254,10 +254,12 @@ public class IssueController {
     private List<AspectSubitemFilter> getProjectFilterItems() {
         List<Team> teamsVisibleToUser = teamFilterConfigurationService.getTeamsVisibleToUser();
         return projectService.getVisibleProjects().stream()
-                .map(p -> AspectSubitemFilter.from(p.getName(), p.getKey(), true, teamsVisibleToUser.stream()
-                        .filter(t -> p.getTeamsIds().contains(t.getId()))
-                        .map(t -> t.getName())
-                        .collect(toList())))
+                .map(p -> AspectSubitemFilter.from(p.getName(), p.getKey(), true,
+                                                   teamsVisibleToUser.stream()
+                                                       .filter(t -> p.getTeamsIds().contains(t.getId()))
+                                                       .map(t -> t.getName())
+                                                       .collect(toList()),
+                                                   p.getVersions()))
                 .sorted(this::compareFilter)
                 .collect(toList());
     }
