@@ -18,6 +18,15 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
             .body(body)
             .post();
         
+        mainPage.typeSearch("TASKB-61");
         mainPage.refreshToast().assertVisible();
+        mainPage.refreshToast().toggleShowHide();
+        mainPage.assertVisibleIssues("TASKB-625");
+        mainPage.refreshToast().toggleShowHide();
+        mainPage.assertVisibleIssues("TASKB-610", "TASKB-611", "TASKB-612", "TASKB-613");
+        mainPage.refreshToast().toggleShowHide();
+        mainPage.refreshToast().dismiss();
+        mainPage.refreshToast().assertNotVisible();
+        mainPage.assertVisibleIssues("TASKB-610", "TASKB-611", "TASKB-612", "TASKB-613");
     }
 }

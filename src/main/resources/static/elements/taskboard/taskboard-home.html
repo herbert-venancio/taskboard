@@ -209,6 +209,7 @@
                       on-iron-signal-show-error-message="showErrorMessage"
                       on-iron-signal-show-error-message-top="showErrorMessageTop"
                       on-iron-signal-show-issue-updated-message="showIssueUpdatedMessage"
+                      on-iron-signal-search-filter-changed="searchFilterChanged"
                       >
         </iron-signals>
         <paper-spinner id="spinner" active="{{!done}}" alt="Loading..."></paper-spinner>
@@ -231,8 +232,11 @@
                     <paper-toast duration="0" id="toastIssueUpdated" horizontal-align='right' vertical-align='bottom'>
                         <iron-icon icon="icons:info"></iron-icon>
                         <span>{{infoMessage}}</span>
-                        <paper-button onclick="window.location.reload()" class="yellow-button">REFRESH</paper-button>
-                        <paper-button onclick="toastIssueUpdated.close()" class="yellow-button">DISMISS</paper-button>
+                        <paper-button onclick="document.querySelector('taskboard-home').refreshBoard()" class="yellow-button">REFRESH</paper-button>
+                        <paper-button id='dismissToast' onclick="document.querySelector('taskboard-home').dismiss()" class="yellow-button">DISMISS</paper-button>
+                        <paper-button id='toggleFilterChangedIssues' onclick="document.querySelector('taskboard-home').toggleFilterChangedIssues()" class="yellow-button">
+                        {{refreshText}}
+                        </paper-button>
                     </paper-toast>                    
                     <paper-material class="menu-header u-clearfix">
 						<div class="title">Taskboard</div>
@@ -314,6 +318,7 @@
                 },
 
                 ready: function () {
+                	this.currentQueryData = {query: ''}
                     analytics.trackView();
                     taskboard.connectToWebsocket(this)
                     this.retrieveBoardFeatures();
@@ -415,6 +420,8 @@
                 },
 
                 showErrorMessage: function(event) {
+                	if (this.infoMessage) return;
+                	this.filterByUpdate = false;
                     this.errorMessage = event.detail;
                     if (this.errorMessage.length > 0) {
                         toastError.open();
@@ -432,7 +439,9 @@
                 },
                 
                 showIssueUpdatedMessage : function(event) {
+                	this.refreshText="SHOW ONLY UPDATED"
                     this.infoMessage = event.detail.message;
+                    this.updatedIssueKeys = event.detail.updatedIssueKeys;
                     if (this.infoMessage.length > 0) 
                         toastIssueUpdated.open();
                     else
@@ -463,8 +472,35 @@
                     });
                 },
                 
+                searchFilterChanged: function(event, data) {
+                	if (data.dontSaveQuery)
+                		return;
+                	this.currentQueryData = data;
+                },
+                
                 refreshBoard: function() {
                 	window.location.reload();
+                },
+                
+                dismiss: function() {
+                	toastIssueUpdated.close();
+                	if (this.filterByUpdate)
+                		this.fire('iron-signal', {name: 'search-filter-changed', data: this.currentQueryData});
+                },
+                
+                toggleFilterChangedIssues: function(args) {
+                	if (!this.filterByUpdate) {
+                		this.refreshText = 'SHOW ALL'
+	                	this.fire('iron-signal', {name: 'search-filter-changed',
+	                        data: { query: this.updatedIssueKeys[0] , release: false, dontSaveQuery: true}});
+                	}
+                	else {
+                		this.refreshText="SHOW ONLY UPDATED"
+                		this.fire('iron-signal', {name: 'search-filter-changed', data: this.currentQueryData, dontSaveQuery: true});//{query: ''}
+                	}
+                	
+	                this.filterByUpdate = !this.filterByUpdate;
+                	
                 }
             });
         })();
