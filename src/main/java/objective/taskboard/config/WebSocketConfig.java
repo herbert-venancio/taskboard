@@ -25,7 +25,9 @@ public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/taskboard-websocket").withSockJS();
+        registry.addEndpoint("/taskboard-websocket")
+        .setAllowedOrigins("*")
+        .withSockJS();
     }
     
     @Bean
