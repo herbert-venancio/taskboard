@@ -1,5 +1,6 @@
 package objective.taskboard.it;
 
+import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.junit.Assert.assertEquals;
 import static org.openqa.selenium.support.PageFactory.initElements;
@@ -9,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -44,11 +44,16 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 public class MainPage extends AbstractUiFragment {
     @FindBy(css=".nameButton.user-account")
     private WebElement userLabelButton;
-    
-    @FindBy(id="searchIssues")
+
+    @FindBy(id = "searchIssues")
     private WebElement searchIssuesInput;
 
-    
+    @FindBy(id = "searchRelease")
+    private WebElement searchReleaseDropdown;
+
+    @FindBy(css = ".menuLink")
+    private WebElement menuFiltersButton;
+
     public MainPage(WebDriver webDriver) {
         super(webDriver);
     }
@@ -71,6 +76,39 @@ public class MainPage extends AbstractUiFragment {
         waitUntil(textToBePresentInElementValue(searchIssuesInput, searchValue));
     }
 
+    public MainPage openMenuFilters() {
+        waitVisibilityOfElement(menuFiltersButton);
+        menuFiltersButton.click();
+        return this;
+    }
+
+    public MenuFilters getMenuFilters() {
+        return initElements(webDriver, MenuFilters.class);
+    }
+
+    public MainPage filterByRelease(String release) {
+        String releaseNotNull = release == null ? "" : release;
+
+        waitVisibilityOfElement(searchReleaseDropdown);
+        searchReleaseDropdown.click();
+
+        WebElement releaseElement = searchReleaseDropdown.findElements(By.tagName("paper-item")).stream()
+            .filter(paperItem -> releaseNotNull.equals(paperItem.getText()))
+            .findFirst().orElse(null);
+
+        if (releaseElement == null)
+            throw new IllegalArgumentException("Element \"" + release + "\" of Release filter not found");
+
+        waitVisibilityOfElement(releaseElement);
+        releaseElement.click();
+        return this;
+    }
+
+    public MainPage assertLabelRelease(String expected) {
+        waitTextInElement(searchReleaseDropdown, expected);
+        return this;
+    }
+
     public void assertVisibleIssues(String ... expectedIssueKeyList) {
         waitUntil(ExpectedConditions.numberOfElementsToBe(By.cssSelector("paper-material.issue"), expectedIssueKeyList.length));
         List<WebElement> findElements = webDriver.findElements(By.cssSelector("paper-material.issue"));
@@ -86,7 +124,7 @@ public class MainPage extends AbstractUiFragment {
     public TestIssue issue(String issueKey) {
         List<WebElement> elements = webDriver.findElements(By.cssSelector("paper-material.issue")).stream()
             .filter(webEl -> hasChildThatMatches(webEl, By.cssSelector("[data-issue-key='"+issueKey+"']")))
-            .collect(Collectors.toList());
+            .collect(toList());
         
         if (elements.size() > 1)
             throw new IllegalArgumentException("More than a single match was found");
@@ -124,20 +162,20 @@ public class MainPage extends AbstractUiFragment {
         }
         
         public void assertVisible() {
-            waitUntil(ExpectedConditions.visibilityOf(issueToast));
+            waitVisibilityOfElement(issueToast);
         }
 
         public void toggleShowHide() {
-            waitUntil(ExpectedConditions.visibilityOf(toggleFilterChangedIssues));
+            waitVisibilityOfElement(toggleFilterChangedIssues);
             toggleFilterChangedIssues.click();
         }
 
         public void assertNotVisible() {
-            waitUntil(ExpectedConditions.invisibilityOf(issueToast));
+            waitInvisibilityOfElement(issueToast);
         }
 
         public void dismiss() {
-            waitUntil(ExpectedConditions.visibilityOf(dismissToast));
+            waitVisibilityOfElement(dismissToast);
             dismissToast.click();
         }
     }
@@ -157,7 +195,7 @@ public class MainPage extends AbstractUiFragment {
             Actions builder = new Actions(webDriver);
             builder.moveToElement(webElement).build().perform();
             WebElement applyFilterButton = webElement.findElement(By.cssSelector("[alt='Apply Filter']"));
-            waitUntil(ExpectedConditions.visibilityOf(applyFilterButton));
+            waitVisibilityOfElement(applyFilterButton);
             applyFilterButton.click();;
         }
     }

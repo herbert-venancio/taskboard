@@ -4,26 +4,26 @@ Insert into lane (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,SHOW_LANE_TEAM,SHOW_PARENT_IC
 Insert into lane (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,SHOW_LANE_TEAM,SHOW_PARENT_ICON_SINT) values (3,'Operational',3,1,'F','F','F');
 
 -- Stage
-Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (4,'Open',1,1,'T','#adb5df',1);
-Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (5,'To Do',2,1,'T','#adb5df',1);
-Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (6,'Doing',3,1,'T','#ffaaa5',1);
-Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (7,'To UAT',4,1,'T','#ffaaa5',1);
-Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (8,'UATing',5,1,'T','#ffaaa5',1);
-Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (9,'Done',6,1,'T','#9dd5c0',1);
-Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (10,'Open',1,1,'T','#adb5df',2);
-Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (11,'To Do',2,1,'T','#adb5df',2);
-Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (12,'Doing',3,1,'T','#ffaaa5',2);
-Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (13,'To Feature Review',4,1,'T','#ffaaa5',2);
-Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (14,'Feature Reviewing',5,1,'T','#ffaaa5',2);
-Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (15,'To QA',6,1,'T','#ffaaa5',2);
-Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (16,'QAing',7,1,'T','#ffaaa5',2);
-Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (17,'Done',8,1,'T','#9dd5c0',2);
-Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (18,'Open',1,1,'T','#adb5df',3);
-Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (19,'To Do',2,1,'T','#adb5df',3);
-Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (20,'Doing',3,1,'T','#ffaaa5',3);
-Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (21,'To Review',4,1,'T','#ffaaa5',3);
-Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (22,'Reviewing',5,1,'T','#ffaaa5',3);
-Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (23,'Done',6,1,'T','#9dd5c0',3);
+Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (4,'Open',1,1,'T','#5d70d4',1);
+Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (5,'To Do',2,1,'T','#5d70d4',1);
+Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (6,'Doing',3,1,'T','#a1423c',1);
+Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (7,'To UAT',4,1,'T','#a1423c',1);
+Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (8,'UATing',5,1,'T','#a1423c',1);
+Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (9,'Done',6,1,'T','#68c3a1',1);
+Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (10,'Open',1,1,'T','#5d70d4',2);
+Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (11,'To Do',2,1,'T','#5d70d4',2);
+Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (12,'Doing',3,1,'T','#a1423c',2);
+Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (13,'To Feature Review',4,1,'T','#a1423c',2);
+Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (14,'Feature Reviewing',5,1,'T','#a1423c',2);
+Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (15,'To QA',6,1,'T','#a1423c',2);
+Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (16,'QAing',7,1,'T','#a1423c',2);
+Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (17,'Done',8,1,'T','#68c3a1',2);
+Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (18,'Open',1,1,'T','#5d70d4',3);
+Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (19,'To Do',2,1,'T','#5d70d4',3);
+Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (20,'Doing',3,1,'T','#a1423c',3);
+Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (21,'To Review',4,1,'T','#a1423c',3);
+Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (22,'Reviewing',5,1,'T','#a1423c',3);
+Insert into stage (ID,NAME,ORDEM,WEIGHT,SHOW_HEADER,COLOR,LANE) values (23,'Done',6,1,'T','#68c3a1',3);
 
 -- INSERTING into step
 Insert into step (ID,NAME,ORDEM,SHOW_HEADER,WEIGHT,STAGE) values (24,'Open',1,'F',1,4);
