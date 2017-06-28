@@ -190,5 +190,11 @@ public class IssueBufferService {
     public synchronized void reset() {
         issueBuffer.clear();
         updateIssueBuffer();
+        while (isUpdatingTaskboardIssuesBuffer)
+            try {
+                Thread.sleep(300);
+            } catch (InterruptedException e) {
+                return;
+            }
     }
 }

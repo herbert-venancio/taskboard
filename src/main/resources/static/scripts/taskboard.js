@@ -302,7 +302,7 @@ function Taskboard() {
     this.fireIssueUpdated = function(source, issue) {
     	source.fire("iron-signal", {name:"issues-updated", data:{
         	updateType: "UPDATED",
-        	issue: taskboard.convertIssue(issue),
+        	issue: self.convertIssue(issue),
         	highlight: false
         }})
     }

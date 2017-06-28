@@ -1,15 +1,5 @@
 package objective.taskboard.it;
 
-import java.io.File;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import org.junit.After;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -31,6 +21,15 @@ import org.junit.After;
  * [/LICENSE]
  */
 
+
+import java.io.File;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
@@ -141,6 +140,6 @@ public abstract class AbstractUIIntegrationTest {
     }
     
     private void resetIssueBuffer() {
-        RequestBuilder.url(getSiteBase()+"/resetbuffer").get();
+        RequestBuilder.url(getSiteBase()+"/test/resetbuffer").get();
     }
 }

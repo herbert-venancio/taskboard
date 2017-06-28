@@ -158,21 +158,21 @@ public class JiraMockServer {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private static void setAssignee(Map fields, Entry<String, Object> each) {
-        Map makeAssignee = makeAssignee("");
+        Map makeAssignee = createEmptyAssignee();
         makeAssignee.putAll((Map) each.getValue());
         fields.put(each.getKey(), makeAssignee);
     }
     
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private static Map makeAssignee(String name) {
+    private static Map createEmptyAssignee() {
         Map assigneeMap = new LinkedHashMap();
         assigneeMap.put("active", "true");
         
         assigneeMap.put("avatarUrls", makeAvatarUrls());
         
-        assigneeMap.put("displayName", "Gabriel Takeuchi");
-        assigneeMap.put("key", "gtakeuchi");
-        assigneeMap.put("name", "gtakeuchi");
+        assigneeMap.put("displayName", "Foo");
+        assigneeMap.put("key", "foo");
+        assigneeMap.put("name", "foo");
         assigneeMap.put("self", "http://54.68.128.117:8100/rest/api/2/user?username=gtakeuchi");
         assigneeMap.put("timeZone", "America/Sao_Paulo");
         return assigneeMap;
