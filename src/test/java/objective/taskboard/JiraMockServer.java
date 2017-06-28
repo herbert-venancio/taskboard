@@ -24,17 +24,17 @@ package objective.taskboard;
 
 import static spark.Spark.get;
 import static spark.Spark.post;
+import static spark.Spark.put;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -53,10 +53,16 @@ public class JiraMockServer {
         thread.start();
     }
     
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static void defineRoutesAndStart() {
         loadMap();
         Spark.exception(Exception.class, (ex, req, res) -> {
             ex.printStackTrace();
+        });
+        
+        post("/reset", (req, res) ->{
+            dirtySearchIssuesByKey.clear();
+            return "";
         });
         
         get("/rest/api/latest/project",  (req, res) ->{
@@ -92,7 +98,6 @@ public class JiraMockServer {
         });
         
         post("/rest/api/latest/search", "application/json", (req,res) -> {
-            @SuppressWarnings("rawtypes")
             Map searchData = gson.fromJson(req.body(), java.util.Map.class);
             return makeFakeRequest(searchData);
         });
@@ -105,6 +110,82 @@ public class JiraMockServer {
             }
             return loadMockData;
         });
+        
+        put("/rest/api/latest/issue/:issueKey",  (req, res) ->{
+            Map reqData = gson.fromJson(req.body(), java.util.Map.class);
+            String issueKey = req.params(":issueKey");
+            
+            Map issueSearchData = dirtySearchIssuesByKey.get(issueKey);
+            if (issueSearchData == null) {
+                issueSearchData = gson.fromJson(gson.toJson(searchIssuesByKey.get(issueKey)), Map.class);
+                dirtySearchIssuesByKey.put(issueKey, issueSearchData);
+            }
+            
+            List issues = (List) issueSearchData.get("issues");
+            
+            Map anIssue = (Map)issues.get(0);
+            Map fields = (Map) anIssue.get("fields");
+            Map<String, Object> reqFields = (Map) reqData.get("fields");
+            for (Entry<String, Object> each: reqFields.entrySet()) {
+                switch(each.getKey()) {
+                    case "assignee":
+                        setAssignee(fields, each);
+                        break;
+                    case "customfield_11456":
+                        setCoassignee(fields, each);
+                        break;
+                    default:
+                        throw new IllegalStateException("Unsupported Field in Mock : " + each.getKey());
+                }
+            }
+            res.status(204);
+            return "";
+        });
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private static void setCoassignee(Map fields, Entry<String, Object> each) {
+        List coassignees = (List) each.getValue();
+        List result = new ArrayList();
+        for (Object object : coassignees) {
+            Map coassignee = (Map) object;
+            
+            coassignee.put("avatarUrls", makeAvatarUrls());
+            result.add(coassignee);
+        }
+        fields.put(each.getKey(), result);
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private static void setAssignee(Map fields, Entry<String, Object> each) {
+        Map makeAssignee = makeAssignee("");
+        makeAssignee.putAll((Map) each.getValue());
+        fields.put(each.getKey(), makeAssignee);
+    }
+    
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private static Map makeAssignee(String name) {
+        Map assigneeMap = new LinkedHashMap();
+        assigneeMap.put("active", "true");
+        
+        assigneeMap.put("avatarUrls", makeAvatarUrls());
+        
+        assigneeMap.put("displayName", "Gabriel Takeuchi");
+        assigneeMap.put("key", "gtakeuchi");
+        assigneeMap.put("name", "gtakeuchi");
+        assigneeMap.put("self", "http://54.68.128.117:8100/rest/api/2/user?username=gtakeuchi");
+        assigneeMap.put("timeZone", "America/Sao_Paulo");
+        return assigneeMap;
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private static Map makeAvatarUrls() {
+        Map avatarUrls= new LinkedHashMap();
+        avatarUrls.put("16x16", "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=16");
+        avatarUrls.put("24x24", "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=24");
+        avatarUrls.put("32x32", "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=32");
+        avatarUrls.put("48x48", "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=48");
+        return avatarUrls;
     }
     
     private static String retryFromRealServer(String issueKey) {
@@ -133,21 +214,21 @@ public class JiraMockServer {
         String datFileName = "search"+startAt+".json";
         if (jql.contains("key IN ")) { 
             String issueKey = jql.replaceAll(".*key IN [(]([^)]*)[)].*", "$1");
-            return gson.toJson(searchIssuesByKey.get(issueKey));
+            String hardcoded = loadMockData("search_" + issueKey + ".json");
+            if (hardcoded != null)
+                return hardcoded;
+            @SuppressWarnings("rawtypes")
+            Map issueData = dirtySearchIssuesByKey.get(issueKey);
+            if (issueData == null)
+                issueData = searchIssuesByKey.get(issueKey);
+            return gson.toJson(issueData);
         }
         
         return loadMockData(datFileName);
     }
 
     private static String loadMockData(String name) {
-        InputStream stream = JiraMockServer.class.getResourceAsStream("/" + environment() +"/" + name);
-        if (stream == null) 
-            return null;
-        try {
-            return IOUtils.toString(stream, "UTF-8");
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
+        return TestUtils.loadResource(JiraMockServer.class, "/" + environment() +"/" + name);
     }
     
     private static String environment() {
@@ -161,12 +242,12 @@ public class JiraMockServer {
             String searchData = loadSearchFile(startAt, "");
             if (searchData == null) break;
             
-            Map searchMap = gson.fromJson(searchData, java.util.Map.class);
+            Map searchMap = gson.fromJson(searchData, Map.class);
            
             List issues = (List) searchMap.get("issues");
             for (Object issueDataObj  : issues) {
                 Map issueData = (Map) issueDataObj;
-                Map value = gson.fromJson(searchData, java.util.Map.class);
+                Map value = gson.fromJson(searchData, Map.class);
                 ArrayList onlyOneIssue = new ArrayList();
                 onlyOneIssue.add(issueData);
                 value.put("issues", onlyOneIssue);
@@ -180,6 +261,8 @@ public class JiraMockServer {
 
     @SuppressWarnings("rawtypes")
     private static Map<String, Map> searchIssuesByKey = new LinkedHashMap<>();
+    @SuppressWarnings("rawtypes")
+    private static Map<String, Map> dirtySearchIssuesByKey = new LinkedHashMap<>();
     private static String username;
     private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
 }

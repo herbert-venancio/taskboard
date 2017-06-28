@@ -70,8 +70,8 @@ function Taskboard() {
 
             this.filteredIssues[step.id] = issuesByStep;
         }
-    },
-
+    };
+    
     this.getIssuesByStep = function(stepId) {
         if (this.filteredIssues)
             return this.filteredIssues[stepId];
@@ -287,8 +287,9 @@ function Taskboard() {
         updateEvents.forEach(function(anEvent) {     	
         	updatedIssueKeys.push(anEvent.target.issueKey)
         	taskboardHome.fire("iron-signal", {name:"issues-updated", data:{
-            	issueKey: anEvent.target.issueKey,
-            	updateType: anEvent.updateType
+            	updateType: anEvent.updateType,
+            	issue: self.convertIssue(anEvent.target),
+            	highlight: true
             }})
         });
     	
@@ -298,8 +299,38 @@ function Taskboard() {
         }})
     }
     
+    this.fireIssueUpdated = function(source, issue) {
+    	source.fire("iron-signal", {name:"issues-updated", data:{
+        	updateType: "UPDATED",
+        	issue: taskboard.convertIssue(issue),
+        	highlight: false
+        }})
+    }
+    
     this.issueGivenKey = function(issueKey) {
     	return $("paper-material.issue [data-issue-key='"+issueKey+"']").closest("paper-material.issue");
+    }
+    
+    this.convertIssue = function(issue) {
+    	var startDateStep = new Date(issue.startDateStepMillis);
+        issue.cycletime = cycleTime.getCycleTime(startDateStep, new Date()).toFixed(2);
+
+        var listSizes = [];
+        CUSTOMFIELD.SIZES.forEach(function(sizeId) {
+            if (issue[sizeId])
+                listSizes.push(issue[sizeId]);
+        });
+
+        issue.customfields = {
+            sizes: listSizes,
+            classeDeServico: issue[CUSTOMFIELD.CLASSE_DE_SERVICO],
+            impedido: issue[CUSTOMFIELD.IMPEDIDO],
+            lastBlockReason: issue[CUSTOMFIELD.LAST_BLOCK_REASON],
+            additionalEstimatedHours: issue[CUSTOMFIELD.ADDITIONAL_ESTIMATED_HOURS],
+            release: issue[CUSTOMFIELD.RELEASE]
+        };
+        
+        return issue;
     }
 }
 

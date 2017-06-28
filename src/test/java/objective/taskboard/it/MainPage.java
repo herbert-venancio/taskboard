@@ -146,40 +146,6 @@ public class MainPage extends AbstractUiFragment {
         return initElements(webDriver, RefreshToast.class);
     }
     
-    public static class RefreshToast extends AbstractUiFragment {
-        @FindBy(id="toastIssueUpdated")
-        private WebElement issueToast;
-        
-        @FindBy(id="toggleFilterChangedIssues")
-        private WebElement toggleFilterChangedIssues;
-        
-        @FindBy(id="dismissToast")
-        private WebElement dismissToast;
-        
-        
-        public RefreshToast(WebDriver webDriver) {
-            super(webDriver);
-        }
-        
-        public void assertVisible() {
-            waitVisibilityOfElement(issueToast);
-        }
-
-        public void toggleShowHide() {
-            waitVisibilityOfElement(toggleFilterChangedIssues);
-            toggleFilterChangedIssues.click();
-        }
-
-        public void assertNotVisible() {
-            waitInvisibilityOfElement(issueToast);
-        }
-
-        public void dismiss() {
-            waitVisibilityOfElement(dismissToast);
-            dismissToast.click();
-        }
-    }
-
     class TestIssue {
         private WebElement webElement;
 
@@ -187,8 +153,9 @@ public class MainPage extends AbstractUiFragment {
             this.webElement = webElement;
         }
         
-        public void click() {
+        public TestIssue click() {
             webElement.click();
+            return this;
         }
 
         public void enableHierarchicalFilter() {
@@ -198,5 +165,31 @@ public class MainPage extends AbstractUiFragment {
             waitVisibilityOfElement(applyFilterButton);
             applyFilterButton.click();;
         }
+        
+        public TestDetails testDetails() {
+            return new TestDetails();
+        }
+
+        public void assertHasFirstAssignee() {
+            WebElement assignee1 = webElement.findElement(By.id("assignee1"));
+            waitVisibilityOfElement(assignee1);
+        }
+    }
+    
+    class TestDetails {
+        WebElement webElement;
+        public TestDetails() {
+            webElement = webDriver.findElement(By.id("issuedialog"));
+        }
+        
+        public void assignToMe() {
+            waitVisibilityOfElement(webElement);
+            WebElement assignButton = webElement.findElement(By.id("assignButton"));
+            waitVisibilityOfElement(assignButton);
+            assignButton.click();
+        }
+        public void isHidden() {
+            //waitInvisibilityOfElement(webElement);
+        }        
     }
 }

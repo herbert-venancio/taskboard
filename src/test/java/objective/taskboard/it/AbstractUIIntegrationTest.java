@@ -65,9 +65,11 @@ public abstract class AbstractUIIntegrationTest {
             System.setProperty("webdriver.gecko.driver", "drivers/linux/marionette/64bit/geckodriver");
         
         
-        if (!new File("drivers/linux/marionette/64bit/geckodriver").exists()) {
+        if (!new File("drivers/linux/marionette/64bit/geckodriver").exists()) 
             throw new IllegalStateException("To run integration tests, you must run 'mvn clean install' at least once to download gecko driver");
-        }
+        
+        resetJiraMock();
+        resetIssueBuffer();
         
         webDriver = new FirefoxDriver();
         webDriver.manage().window().setSize(new Dimension(1280,1080));
@@ -93,6 +95,7 @@ public abstract class AbstractUIIntegrationTest {
             }
     
             webDriver.close();
+            
         }catch (Exception e) {
             e.printStackTrace();
         }
@@ -133,4 +136,11 @@ public abstract class AbstractUIIntegrationTest {
         return "http://localhost:8900/";
     }
 
+    private void resetJiraMock() {
+        RequestBuilder.url("http://localhost:4567/reset").post();
+    }
+    
+    private void resetIssueBuffer() {
+        RequestBuilder.url(getSiteBase()+"/resetbuffer").get();
+    }
 }

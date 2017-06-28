@@ -29,23 +29,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 import objective.taskboard.followup.FollowUpData;
 import objective.taskboard.followup.FollowupDataProvider;
+import objective.taskboard.issueBuffer.IssueBufferService;
 
 @RestController
 @RequestMapping("/test")
 public class TestExtraControllers {
 
     @Autowired
-    private FollowupDataProvider followupProvider;
+    private IssueBufferService issueBuffer;
 
-    @RequestMapping("followup")
-    public String followup() {
-        List<FollowUpData> jiraData = followupProvider.getJiraData();
-        
-        StringBuilder sb = new StringBuilder();
-        for (FollowUpData followUpData : jiraData) {
-            sb.append(followUpData);
-        }
-        return sb.toString();
+    @RequestMapping("resetbuffer")
+    public void resetbuffer() {
+        issueBuffer.reset();
     }
-    
 }
