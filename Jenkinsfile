@@ -27,8 +27,8 @@ node("general-purpose") {
                     }
                 } finally {
                     archiveArtifacts artifacts: 'target/test-attachments/**', fingerprint: true, allowEmptyArchive: true
-                    junit testResults: 'target/surefire-reports/*.xml', testDataPublishers: [[$class: 'AttachmentPublisher']]
-                    junit testResults: 'target/failsafe-reports/*.xml', testDataPublishers: [[$class: 'AttachmentPublisher']]
+                    junit testResults: 'target/surefire-reports/*.xml', testDataPublishers: [[$class: 'AttachmentPublisher']], allowEmptyResults: true
+                    junit testResults: 'target/failsafe-reports/*.xml', testDataPublishers: [[$class: 'AttachmentPublisher']], allowEmptyResults: true
                 }
             }
         } catch (ex) {
@@ -54,6 +54,7 @@ node("general-purpose") {
             if (params.RELEASE) {
                 stage('Release') {
                     echo 'Releasing...'
+                    sh 'git checkout master'
                     sh "${mvnHome}/bin/mvn --batch-mode -Dresume=false release:prepare release:perform -DaltReleaseDeploymentRepository=repo::default::http://repo:8080/archiva/repository/internal -Darguments=\"-DaltDeploymentRepository=internal::default::http://repo:8080/archiva/repository/internal -P packaging-war,dev -DskipTests=true -Dmaven.test.skip=true -Dmaven.javadoc.skip=true\""
                     def downloadUrl = extractDownloadUrlFromLogs()
                     addDownloadBadge(downloadUrl)
@@ -68,7 +69,7 @@ def extractDownloadUrlFromLogs() {
     def artifactType = "war"
     def pattern
     if(params.RELEASE) {
-        pattern = ".*Uploaded: (http://internal.*${artifactType}).*"
+        pattern = /.*Uploaded: (http:.*internal.*${artifactType}).*/
     } else {
         pattern = /.*Uploaded: (http:.*.${artifactType}).*/
     }
