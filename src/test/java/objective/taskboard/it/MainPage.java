@@ -166,8 +166,8 @@ public class MainPage extends AbstractUiFragment {
             applyFilterButton.click();;
         }
         
-        public TestDetails testDetails() {
-            return new TestDetails();
+        public IssueDetails issueDetails() {
+            return new IssueDetails();
         }
 
         public void assertHasFirstAssignee() {
@@ -176,10 +176,10 @@ public class MainPage extends AbstractUiFragment {
         }
     }
     
-    class TestDetails {
+    class IssueDetails {
         WebElement webElement;
-        public TestDetails() {
-            webElement = webDriver.findElement(By.id("issuedialog"));
+        public IssueDetails() {
+            webElement = webDriver.findElement(By.cssSelector("paper-card.issue-detail"));
         }
         
         public void assignToMe() {
@@ -188,8 +188,9 @@ public class MainPage extends AbstractUiFragment {
             waitVisibilityOfElement(assignButton);
             assignButton.click();
         }
+        
         public void isHidden() {
-            //waitInvisibilityOfElement(webElement);
+            waitInvisibilityOfElement(webElement);
         }        
     }
 }

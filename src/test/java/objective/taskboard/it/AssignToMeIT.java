@@ -9,9 +9,9 @@ public class AssignToMeIT extends AuthenticatedIntegrationTest {
         MainPage mainPage = MainPage.produce(webDriver);
         mainPage.issue("TASKB-625")
             .click()
-            .testDetails()
+            .issueDetails()
             .assignToMe();
-        mainPage.issue("TASKB-625").testDetails().isHidden();
+        mainPage.issue("TASKB-625").issueDetails().isHidden();
         mainPage.issue("TASKB-625").assertHasFirstAssignee();
     }
 }
