@@ -48,6 +48,15 @@ Insert into step (ID,NAME,ORDEM,SHOW_HEADER,WEIGHT,STAGE) values (42,'Reviewing'
 Insert into step (ID,NAME,ORDEM,SHOW_HEADER,WEIGHT,STAGE) values (43,'Done',1,'F',1,23);
 
 Insert into project_filter_configuration (ID,PROJECT_KEY) values (158,'TASKB');
+Insert into project_filter_configuration (ID,PROJECT_KEY) values (159,'PROJ1');
+Insert into project_filter_configuration (ID,PROJECT_KEY) values (160,'PROJ2');
+Insert into project_filter_configuration (ID,PROJECT_KEY) values (161,'PROJ3');
+Insert into project_filter_configuration (ID,PROJECT_KEY) values (162,'PROJ4');
+Insert into project_filter_configuration (ID,PROJECT_KEY) values (163,'PROJ5');
+Insert into project_filter_configuration (ID,PROJECT_KEY) values (164,'PROJ6');
+Insert into project_filter_configuration (ID,PROJECT_KEY) values (165,'PROJ7');
+Insert into project_filter_configuration (ID,PROJECT_KEY) values (166,'PROJ8');
+
 
 -- INSERTING into team_filter_configuration
 Insert into team_filter_configuration (ID,TEAM_ID) values (174,521);

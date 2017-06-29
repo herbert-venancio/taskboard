@@ -21,6 +21,7 @@ package objective.taskboard.controller;
  * [/LICENSE]
  */
 
+import static java.util.stream.Collectors.toList;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -41,6 +42,7 @@ import objective.taskboard.data.Team;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.domain.ProjectTeam;
 import objective.taskboard.domain.TeamFilterConfiguration;
+import objective.taskboard.jira.ProjectService;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.repository.ProjectTeamRepository;
 import objective.taskboard.repository.TeamCachedRepository;
@@ -62,9 +64,14 @@ public class ProjectController {
     @Autowired
     TeamFilterConfigurationCachedRepository teamFilterConfigurationRepository;
     
+    @Autowired
+    private ProjectService projectService;
+    
     @RequestMapping
     public List<ProjectData> get() {
-        List<ProjectTeam> projects = projectTeamRepo.findAll();
+        List<ProjectTeam> projects = projectTeamRepo.findAll().stream()
+                .filter(t -> projectService.isProjectVisible(t.getProjectKey()))
+                .collect(toList());
                 
         List<ProjectData> response = new ArrayList<>();
         Map<String, ProjectData> projectXData = new LinkedHashMap<>();

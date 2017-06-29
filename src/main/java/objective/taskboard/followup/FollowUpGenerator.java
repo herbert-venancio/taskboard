@@ -91,7 +91,7 @@ public class FollowUpGenerator {
         this.pathFollowupTemplateXLSM = pathFollowupTemplateXLSM;
     }
     
-    public ByteArrayResource generate() throws Exception {
+    public ByteArrayResource generate(String [] includedProjects) throws Exception {
         File directoryTempFollowup = null;
         Path pathFollowupXLSM = null;
         try {
@@ -100,7 +100,7 @@ public class FollowUpGenerator {
             Map<String, Long> sharedStrings = getSharedStringsInitial();
 
             File fileSheet7 = new File(directoryTempFollowup, PATH_SHEET7);
-            writeXML(fileSheet7, generateJiraDataSheet(sharedStrings));
+            writeXML(fileSheet7, generateJiraDataSheet(sharedStrings, includedProjects));
             File fileSharedStrings = new File(directoryTempFollowup, PATH_SHARED_STRINGS);
             writeXML(fileSharedStrings, generateSharedStrings(sharedStrings));
 
@@ -229,12 +229,12 @@ public class FollowUpGenerator {
         return sharedStrings;
     }
 
-    String generateJiraDataSheet(Map<String, Long> sharedStrings) throws IOException {
+    String generateJiraDataSheet(Map<String, Long> sharedStrings, String [] includedProjects) throws IOException {
         String rowTemplate = getStringFromXML(pathSheet7RowTemplate);
         StringBuilder rows = new StringBuilder();
         int rowNumber = 2;
 
-        for (FollowUpData followUpData : provider.getJiraData()) {
+        for (FollowUpData followUpData : provider.getJiraData(includedProjects)) {
             Map<String, Object> rowValues = new HashMap<String, Object>();
             rowValues.put("rowNumber", rowNumber);
             rowValues.put("project", getOrSetIndexInSharedStrings(sharedStrings, followUpData.project));

@@ -1,4 +1,4 @@
-package objective.taskboard.followup;
+package objective.taskboard.it;
 
 /*-
  * [LICENSE]
@@ -21,12 +21,16 @@ package objective.taskboard.followup;
  * [/LICENSE]
  */
 
-import java.util.List;
+import org.junit.Test;
 
-import objective.taskboard.issueBuffer.IssueBufferState;
-
-public interface FollowupDataProvider {
-    List<FollowUpData> getJiraData(String[] includeProjects);
-
-    IssueBufferState getFollowupState();
+public class FollowupGeneratorUiIT extends AuthenticatedIntegrationTest {
+    @Test
+    public void whenIssueFilterIsEnabled_OnlyIssueAndChildrenShowUp() {
+        MainPage mainPage = MainPage.produce(webDriver);
+        mainPage.
+            openFollowUp().
+            toggleCheckAll().
+            assertAllChecked();
+        
+    }
 }

@@ -25,10 +25,13 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +58,7 @@ public class JiraSearchService {
     private static final String START_AT_ATTRIBUTE = "startAt";
     private static final String FIELDS_ATTRIBUTE = "fields";
 
-    private static final Set<String> EXPAND = newHashSet("schema", "names", "changelog");
+    private static final Set<String> EXPAND = newHashSet("schema", "names", "changelog", "transitions");
     private static final int MAX_RESULTS = 100;
 
     private static final String PATH_REST_API_SEARCH = "/rest/api/latest/search";
@@ -84,6 +87,7 @@ public class JiraSearchService {
                                  .put(FIELDS_ATTRIBUTE, getFields());
 
                     String jsonResponse = jiraEndpointAsMaster.postWithRestTemplate(PATH_REST_API_SEARCH, APPLICATION_JSON, searchRequest);
+                    //storeResponse(jsonResponse);
                     SearchResult searchResult = searchResultParser.parse(new JSONObject(jsonResponse));
                     log.debug("⬣⬣⬣⬣⬣  searchIssues... ongoing..." + (searchResult.getStartIndex() + searchResult.getMaxResults())+ "/" + searchResult.getTotal());
                     
@@ -109,6 +113,16 @@ public class JiraSearchService {
             throw e;
         }
     }
+    
+    @SuppressWarnings("unused")
+    private void storeResponse(String jsonResponse) {
+        try {
+            FileUtils.write(new File("/tmp/req_" + seq++), jsonResponse, "UTF-8");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     private Set<String> getFields() {
         Set<String> fields = newHashSet(
