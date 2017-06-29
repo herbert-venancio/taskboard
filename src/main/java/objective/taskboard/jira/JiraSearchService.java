@@ -25,13 +25,10 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.io.FileUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,7 +84,6 @@ public class JiraSearchService {
                                  .put(FIELDS_ATTRIBUTE, getFields());
 
                     String jsonResponse = jiraEndpointAsMaster.postWithRestTemplate(PATH_REST_API_SEARCH, APPLICATION_JSON, searchRequest);
-                    //storeResponse(jsonResponse);
                     SearchResult searchResult = searchResultParser.parse(new JSONObject(jsonResponse));
                     log.debug("⬣⬣⬣⬣⬣  searchIssues... ongoing..." + (searchResult.getStartIndex() + searchResult.getMaxResults())+ "/" + searchResult.getTotal());
                     
@@ -114,16 +110,6 @@ public class JiraSearchService {
         }
     }
     
-    @SuppressWarnings("unused")
-    private void storeResponse(String jsonResponse) {
-        try {
-            FileUtils.write(new File("/tmp/req_" + seq++), jsonResponse, "UTF-8");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
     private Set<String> getFields() {
         Set<String> fields = newHashSet(
             "parent", "project", "status", "created", "updated", "issuelinks",
