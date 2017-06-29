@@ -276,10 +276,10 @@
 	                         title$="- {{item.issueKey}}&#010;- {{getIssueTypeName(item.type)}}&#010;- {{getStatusName(item.status)}}"
 	                         src$="{{getIssueTypeImage(item)}}"/>
 	                    <template is="dom-if" if="{{item.subresponsavel1}}">
-	                        <img class="icon-small" src$="{{item.subresponsavel1}}"/>
+	                        <img id="assignee1" class="icon-small" src$="{{item.subresponsavel1}}"/>
 	                    </template>
 	                    <template is="dom-if" if="{{subResponsavelNotEquals(item)}}">
-	                        <img class="icon-small" src$="{{item.subresponsavel2}}"/>
+	                        <img id="assignee2" class="icon-small" src$="{{item.subresponsavel2}}"/>
 	                    </template>
 	                </div>
 	            </div>
@@ -371,10 +371,12 @@
                 },
                 
                 updateIssue: function(event) {
-                	if (event.detail.issueKey !== this.item.issueKey)
+                	if (event.detail.issue.issueKey !== this.item.issueKey)
                 		return;
-                	
-                	this.set("highlightClass", "issue-" + event.detail.updateType)
+                	this.item = event.detail.issue;
+                	if (event.detail.highlight) 
+                		this.set("highlightClass", "issue-" + event.detail.updateType)
+                		
                 	flash($(this.$.issueCard), "yellow");
                 },
 

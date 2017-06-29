@@ -43,7 +43,9 @@
                       on-iron-signal-config-visibility-synthetic-changed="preferencesUpdated"
                       on-iron-signal-search-filter-changed="searchFilterChanged"
                       on-iron-signal-level-config-changed="preferencesUpdated"
-                      on-iron-signal-hierarchical-filter-changed="preferencesUpdated"></iron-signals>
+                      on-iron-signal-hierarchical-filter-changed="preferencesUpdated"
+                      on-iron-signal-issues-updated="handleUpdatedIssues"
+                      ></iron-signals>
         <div id="board-step-{{parentLaneId}}-{{stepMetadata.id}}-{{team}}" class="wrap layout horizontal sortable-board-step" style="width: 100%">
 
             <!-- Issue Counter -->
@@ -315,8 +317,15 @@
                 searchFilterChanged: function(event, data) {
                     this.search = data;
                     this.preferencesUpdated();
+                },
+                
+                handleUpdatedIssues: function(event, data) {
+                    if (this.issues.length === 0) return;
+                    this.issues.forEach(function(anIssue, index, array) {
+                 	    if (anIssue.issueKey == data.issue.issueKey)
+                 	        array[index] = data.issue;
+                    })
                 }
-
             });
         })();
     </script>

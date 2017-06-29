@@ -186,4 +186,15 @@ public class IssueBufferService {
         TaskboardIssue entity = event.getTarget();
         issueBuffer.get(entity.getProjectKey()).setPriorityOrder(entity.getPriority());
     }
+
+    public synchronized void reset() {
+        issueBuffer.clear();
+        updateIssueBuffer();
+        while (isUpdatingTaskboardIssuesBuffer)
+            try {
+                Thread.sleep(300);
+            } catch (InterruptedException e) {
+                return;
+            }
+    }
 }
