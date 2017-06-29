@@ -10,7 +10,7 @@ properties([
         ])
 ])
 
-node("general-purpose") {
+node("heavy-memory") {
     // start with a clean workspace
     stage('Checkout') {
         deleteDir()
