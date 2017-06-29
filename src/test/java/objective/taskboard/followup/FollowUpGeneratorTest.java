@@ -28,18 +28,18 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.core.io.ByteArrayResource;
 import org.xml.sax.SAXException;
+
+import objective.taskboard.TestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FollowUpGeneratorTest {
@@ -168,6 +168,14 @@ public class FollowUpGeneratorTest {
         ByteArrayResource resource = subject.generate(emptyArray());
         assertNotNull("Resource shouldn't be null", resource);
     }
+    
+    @Test
+    public void generateTable7Test() {
+        FollowupDataProvider provider = getFollowupDataProvider(asList(getFollowUpDataDefault()));
+        FollowUpGenerator subject = new FollowUpGenerator(provider);
+        String table7 = subject.generateTable7(3042);
+        assertEquals(getStringExpected("followup/expectedTable7.xml"), table7);
+    }
 
     private FollowUpGenerator getFollowUpGeneratorUsingTestTemplates(FollowupDataProvider provider) {
         return new FollowUpGenerator(provider, PATH_SHARED_STRINGS_INITIAL, PATH_SHARED_STRINGS_TEMPLATE,
@@ -215,10 +223,8 @@ public class FollowUpGeneratorTest {
         return followUpData;
     }
 
-    private String getStringExpected(String pathResource) throws IOException {
-        InputStream inputStream = getClass().getClassLoader()
-                .getResourceAsStream(pathResource);
-        return IOUtils.toString(inputStream, "UTF-8");
+    private String getStringExpected(String pathResource) {
+        return TestUtils.loadResource(getClass(), "/"+pathResource);
     }
     
     private String[] emptyArray() {
