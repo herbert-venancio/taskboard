@@ -96,7 +96,7 @@ public class JiraSearchService {
 
                 } catch (JSONException e) {
                     log.error(jqlNotNull);
-                    e.printStackTrace();
+                    throw new IllegalStateException(e);
                 }
             }
             log.debug("⬣⬣⬣⬣⬣  searchIssues complete");

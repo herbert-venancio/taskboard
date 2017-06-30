@@ -31,6 +31,5 @@ public class FollowupGeneratorUiIT extends AuthenticatedIntegrationTest {
             openFollowUp().
             toggleCheckAll().
             assertAllChecked();
-        
     }
 }
