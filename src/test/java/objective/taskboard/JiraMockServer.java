@@ -154,6 +154,39 @@ public class JiraMockServer {
             res.status(204);
             return "";
         });
+        
+        post("/rest/api/latest/issue/:issueId/transitions", (req, res)-> {
+            String issueKey = issueKeyByIssueId.get(req.params("issueId"));
+            JSONObject issueSearchData = getIssueDataForKey(issueKey);
+            JSONObject issue = issueSearchData.getJSONArray("issues").getJSONObject(0);
+            JSONArray transitions = issue.getJSONArray("transitions");
+            
+            JSONObject transitionParam = new JSONObject(req.body());
+            int transitionId = transitionParam.getJSONObject("transition").getInt("id");
+            
+            JSONObject status = null;
+            for (int i = 0; i < transitions.length(); i++) {
+                JSONObject transition = transitions.getJSONObject(0);
+                if (transition.getInt("id") == transitionId) {
+                    status = clone(transition.getJSONObject("to"));
+                    break;
+                }
+            }
+            if (status == null)
+                throw new IllegalStateException("Invalid transition attempted");
+            
+            issue.getJSONObject("fields").put("status", status);
+            
+            return "";
+        });
+    }
+
+    private static JSONObject clone(JSONObject jsonObject) {
+        try {
+            return new JSONObject(jsonObject.toString());
+        } catch (JSONException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     private static JSONObject getIssueDataForKey(String issueKey) throws JSONException {
