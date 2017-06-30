@@ -54,8 +54,6 @@ public abstract class AbstractUIIntegrationTest {
     
     @Before
     public void setup() throws InterruptedException, ExecutionException, TimeoutException {
-        waitServerReady();
-        
         if (System.getProperty("webdriver.gecko.driver") == null)
             System.setProperty("webdriver.gecko.driver", "drivers/linux/marionette/64bit/geckodriver");
         
@@ -63,6 +61,7 @@ public abstract class AbstractUIIntegrationTest {
         if (!new File("drivers/linux/marionette/64bit/geckodriver").exists()) 
             throw new IllegalStateException("To run integration tests, you must run 'mvn clean install' at least once to download gecko driver");
         
+        waitServerReady();
         resetJiraMock();
         resetIssueBuffer();
         
@@ -89,8 +88,7 @@ public abstract class AbstractUIIntegrationTest {
                         .getScreenshotAs(OutputType.BYTES);
             }
     
-            webDriver.close();
-            
+            webDriver.quit();
         }catch (Exception e) {
             e.printStackTrace();
         }
