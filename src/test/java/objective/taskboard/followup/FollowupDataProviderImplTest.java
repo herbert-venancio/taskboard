@@ -847,7 +847,7 @@ public class FollowupDataProviderImplTest {
         );
         
         try {
-            subject.getJiraData();
+            subject.getJiraData(defaultProjects());
             fail("Should fail when trying to generate ballbark without mapping for given issue type");
         } catch(IllegalStateException e) {
             assertEquals("Ballpark mapping for issue type 'Task' (id 12) missing in configuration", e.getMessage());
@@ -1170,7 +1170,7 @@ public class FollowupDataProviderImplTest {
                 .issueStatus(statusOpen)
         );
         
-        subject.getJiraData();
+        subject.getJiraData(defaultProjects());
     }
     
     @Test
@@ -1191,7 +1191,7 @@ public class FollowupDataProviderImplTest {
             demand().id(2).key("PROJ-2").summary("Smry 2").timeSpentInHours(0).originalEstimateInHours(null)
         );
         
-        subject.getJiraData();
+        subject.getJiraData(defaultProjects());
     }
     
     @Test
@@ -1241,6 +1241,47 @@ public class FollowupDataProviderImplTest {
                 " queryType              : FEATURE BALLPARK");
     }
     
+    @Test
+    public void issuesOfDifferentProjects_ShouldOnlyIncludeOfSelectectedProjects() {
+        issues( 
+                demand().id(1).key("PROJ-1").summary("Smry 1").originalEstimateInHours(1).timeSpentInHours(10),
+                demand().id(2).project("ANOTHER").key("ANOTHER-1").summary("Smry 2").originalEstimateInHours(1).timeSpentInHours(10)
+            );
+            
+            assertFollowupsForIssuesEquals(
+                " planningType           : Ballpark\n" + 
+                " project                : A Project\n" + 
+                " demandType             : Demand\n" + 
+                " demandStatus           : To Do\n" + 
+                " demandId               : 1\n" + 
+                " demandNum              : PROJ-1\n" + 
+                " demandSummary          : Smry 1\n" + 
+                " demandDescription      : M | 00001 - Smry 1\n" + 
+                " taskType               : BALLPARK - Demand\n" + 
+                " taskStatus             : To Do\n" + 
+                " taskId                 : 0\n" + 
+                " taskNum                : PROJ-1\n" + 
+                " taskSummary            : Dummy Feature\n" + 
+                " taskDescription        : 00000 - Smry 1\n" + 
+                " taskFullDescription    : BALLPARK - Demand | M | 00000 - Smry 1\n" + 
+                " taskRelease            : No release set\n" + 
+                " subtaskType            : BALLPARK - Demand\n" + 
+                " subtaskStatus          : To Do\n" + 
+                " subtaskId              : 0\n" + 
+                " subtaskNum             : PROJ-0\n" + 
+                " subtaskSummary         : Smry 1\n" + 
+                " subtaskDescription     : M | 00000 - Smry 1\n" + 
+                " subtaskFullDescription : BALLPARK - Demand | M | 00000 - Smry 1\n" + 
+                " tshirtSize             : M\n" + 
+                " worklog                : 0.0\n" + 
+                " wrongWorklog           : 10.0\n" + 
+                " demandBallpark         : 1.0\n" + 
+                " taskBallpark           : 0.0\n" + 
+                " queryType              : DEMAND BALLPARK"
+            );
+    }
+    
+    
     private void configureBallparkMappings(String string) {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         Map<Long, List<BallparkMapping>> ballparkMappings;
@@ -1263,7 +1304,7 @@ public class FollowupDataProviderImplTest {
     }
     
     private void assertFollowupsForIssuesEquals(String expectedFollowupList) {
-        List<FollowUpData> actual = sortJiraDataByIssuesKeys(subject.getJiraData());
+        List<FollowUpData> actual = sortJiraDataByIssuesKeys(subject.getJiraData(defaultProjects()));
 
         assertEquals(
             expectedFollowupList,
@@ -1294,13 +1335,16 @@ public class FollowupDataProviderImplTest {
         return "A Project";
     }
 
-    private static String getProjectKey() {
+    private static String getProjectKey(String project) {
+        if (project != null)
+            return project;
         return "PROJ";
     }
     
     private class IssueBuilder {
         private long issueType;
         private Long id; 
+        private String project;
         private String key; 
         private String summary; 
         private Long status = statusToDo;
@@ -1311,6 +1355,11 @@ public class FollowupDataProviderImplTest {
         
         public IssueBuilder id(int id) {
             this.id = (long) id;
+            return this;
+        }
+
+        public IssueBuilder project(String p) {
+            this.project=p;
             return this;
         }
 
@@ -1369,7 +1418,7 @@ public class FollowupDataProviderImplTest {
                 timeTracking = null;
             return Issue.from(id, 
                 key, 
-                getProjectKey(), 
+                getProjectKey(project), 
                 getProjectName(), 
                 issueType, 
                 null, //typeIconUri
@@ -1400,5 +1449,9 @@ public class FollowupDataProviderImplTest {
                 jiraProperties,
                 metadataService);
         }
+    }
+    
+    private String[] defaultProjects() {
+        return new String[]{"PROJ"};
     }
 }

@@ -55,7 +55,7 @@ public class JiraSearchService {
     private static final String START_AT_ATTRIBUTE = "startAt";
     private static final String FIELDS_ATTRIBUTE = "fields";
 
-    private static final Set<String> EXPAND = newHashSet("schema", "names", "changelog");
+    private static final Set<String> EXPAND = newHashSet("schema", "names", "changelog", "transitions");
     private static final int MAX_RESULTS = 100;
 
     private static final String PATH_REST_API_SEARCH = "/rest/api/latest/search";
@@ -96,7 +96,7 @@ public class JiraSearchService {
 
                 } catch (JSONException e) {
                     log.error(jqlNotNull);
-                    e.printStackTrace();
+                    throw new IllegalStateException(e);
                 }
             }
             log.debug("⬣⬣⬣⬣⬣  searchIssues complete");
@@ -109,7 +109,7 @@ public class JiraSearchService {
             throw e;
         }
     }
-
+    
     private Set<String> getFields() {
         Set<String> fields = newHashSet(
             "parent", "project", "status", "created", "updated", "issuelinks",

@@ -28,13 +28,14 @@ import static spark.Spark.put;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.commons.io.FileUtils;
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -53,7 +54,7 @@ public class JiraMockServer {
         thread.start();
     }
     
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({ "rawtypes" })
     public static void defineRoutesAndStart() {
         loadMap();
         Spark.exception(Exception.class, (ex, req, res) -> {
@@ -112,60 +113,55 @@ public class JiraMockServer {
         });
         
         put("/rest/api/latest/issue/:issueKey",  (req, res) ->{
-            Map reqData = gson.fromJson(req.body(), java.util.Map.class);
+            JSONObject reqData = new JSONObject(req.body());
             String issueKey = req.params(":issueKey");
             
-            Map issueSearchData = dirtySearchIssuesByKey.get(issueKey);
+            JSONObject issueSearchData = dirtySearchIssuesByKey.get(issueKey);
             if (issueSearchData == null) {
-                issueSearchData = gson.fromJson(gson.toJson(searchIssuesByKey.get(issueKey)), Map.class);
+                issueSearchData = new JSONObject(searchIssuesByKey.get(issueKey).toString()); 
                 dirtySearchIssuesByKey.put(issueKey, issueSearchData);
             }
             
-            List issues = (List) issueSearchData.get("issues");
-            
-            Map anIssue = (Map)issues.get(0);
-            Map fields = (Map) anIssue.get("fields");
-            Map<String, Object> reqFields = (Map) reqData.get("fields");
-            for (Entry<String, Object> each: reqFields.entrySet()) {
-                switch(each.getKey()) {
+            JSONArray issues = issueSearchData.getJSONArray("issues");
+            JSONObject fields = issues.getJSONObject(0).getJSONObject("fields");
+            JSONObject reqFields = reqData.getJSONObject("fields");
+            Iterator keys = reqFields.keys();
+            while(keys.hasNext()) {
+                String aKey = keys.next().toString();
+                
+                switch(aKey) {
                     case "assignee":
-                        setAssignee(fields, each);
+                        setAssignee(fields, reqFields.getJSONObject(aKey));
                         break;
                     case "customfield_11456":
-                        setCoassignee(fields, each);
+                        setCoassignee(fields, aKey, reqFields.getJSONArray(aKey));
                         break;
                     default:
-                        throw new IllegalStateException("Unsupported Field in Mock : " + each.getKey());
+                        throw new IllegalStateException("Unsupported Field in Mock : " + aKey);
                 }
+                
             }
             res.status(204);
             return "";
         });
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private static void setCoassignee(Map fields, Entry<String, Object> each) {
-        List coassignees = (List) each.getValue();
-        List result = new ArrayList();
-        for (Object object : coassignees) {
-            Map coassignee = (Map) object;
-            
+    private static void setCoassignee(JSONObject coassigneeField, String aKey, JSONArray coassignees) throws JSONException {
+        for (int i = 0; i < coassignees.length(); i++) {
+            JSONObject coassignee = coassignees.getJSONObject(i);
             coassignee.put("avatarUrls", makeAvatarUrls());
-            result.add(coassignee);
         }
-        fields.put(each.getKey(), result);
+        coassigneeField.put(aKey, coassignees);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private static void setAssignee(Map fields, Entry<String, Object> each) {
-        Map makeAssignee = createEmptyAssignee();
-        makeAssignee.putAll((Map) each.getValue());
-        fields.put(each.getKey(), makeAssignee);
+    private static void setAssignee(JSONObject fields, JSONObject each) throws JSONException {
+        JSONObject makeAssignee = createEmptyAssignee();
+        makeAssignee.put("name", each.get("name"));
+        fields.put("assignee", makeAssignee);
     }
     
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private static Map createEmptyAssignee() {
-        Map assigneeMap = new LinkedHashMap();
+    private static JSONObject createEmptyAssignee() throws JSONException {
+        JSONObject assigneeMap = new JSONObject();
         assigneeMap.put("active", "true");
         
         assigneeMap.put("avatarUrls", makeAvatarUrls());
@@ -178,9 +174,8 @@ public class JiraMockServer {
         return assigneeMap;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static Map makeAvatarUrls() {
-        Map avatarUrls= new LinkedHashMap();
+    private static JSONObject makeAvatarUrls() throws JSONException {
+        JSONObject avatarUrls= new JSONObject();
         avatarUrls.put("16x16", "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=16");
         avatarUrls.put("24x24", "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=24");
         avatarUrls.put("32x32", "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=32");
@@ -217,11 +212,11 @@ public class JiraMockServer {
             String hardcoded = loadMockData("search_" + issueKey + ".json");
             if (hardcoded != null)
                 return hardcoded;
-            @SuppressWarnings("rawtypes")
-            Map issueData = dirtySearchIssuesByKey.get(issueKey);
+            
+            JSONObject issueData = dirtySearchIssuesByKey.get(issueKey);
             if (issueData == null)
                 issueData = searchIssuesByKey.get(issueKey);
-            return gson.toJson(issueData);
+            return issueData.toString();
         }
         
         return loadMockData(datFileName);
@@ -235,34 +230,42 @@ public class JiraMockServer {
         return "objective-jira-teste";
     }
     
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     private static void loadMap() {
         long startAt = 0;
         while(true) {
-            String searchData = loadSearchFile(startAt, "");
-            if (searchData == null) break;
-            
-            Map searchMap = gson.fromJson(searchData, Map.class);
-           
-            List issues = (List) searchMap.get("issues");
-            for (Object issueDataObj  : issues) {
-                Map issueData = (Map) issueDataObj;
-                Map value = gson.fromJson(searchData, Map.class);
-                ArrayList onlyOneIssue = new ArrayList();
-                onlyOneIssue.add(issueData);
-                value.put("issues", onlyOneIssue);
-                value.put("total", 1);
-                searchIssuesByKey.put(issueData.get("key").toString(), value);
-            }
-            startAt++;
+            try {
+                String searchData = loadSearchFile(startAt, "");
+                if (searchData == null) break;
+                
+                JSONObject single = new JSONObject(searchData);
+                single.put("total", 1);
+                single.put("startAt", 0);
+               
+                JSONObject jsonObject = new JSONObject(searchData);
+               
+                JSONArray jsonArray = jsonObject.getJSONArray("issues");
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject issueData = jsonArray.getJSONObject(i);
+                    if (issueData.getString("key").equals("TASKB-625"))
+                        System.out.println();
+                    
+                    JSONArray arrayOfIssues = new JSONArray();
+                    arrayOfIssues.put(issueData);
+                    single.put("issues", arrayOfIssues);
+                    
+                    searchIssuesByKey.put(issueData.getString("key"), new JSONObject(single.toString()) );
+                }
+                startAt++;
+            } catch (JSONException e) {
+                throw new IllegalStateException(e);
+            } 
+
         }
         System.out.println("************ DATA LOAD READY ************");
     }
 
-    @SuppressWarnings("rawtypes")
-    private static Map<String, Map> searchIssuesByKey = new LinkedHashMap<>();
-    @SuppressWarnings("rawtypes")
-    private static Map<String, Map> dirtySearchIssuesByKey = new LinkedHashMap<>();
+    private static Map<String, JSONObject> searchIssuesByKey = new LinkedHashMap<>();
+    private static Map<String, JSONObject> dirtySearchIssuesByKey = new LinkedHashMap<>();
     private static String username;
     private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
 }

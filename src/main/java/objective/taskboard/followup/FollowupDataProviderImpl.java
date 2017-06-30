@@ -23,6 +23,7 @@ package objective.taskboard.followup;
 
 import static org.apache.commons.lang.ObjectUtils.defaultIfNull;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -59,9 +60,11 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
     }
     
     @Override
-    public List<FollowUpData> getJiraData() {
+    public List<FollowUpData> getJiraData(String[] includeProjects) {
+        List<String> i = Arrays.asList(includeProjects);
         List<Issue> issuesVisibleToUser = issueBufferService.getAllIssuesVisibleToUser().stream()
                 .filter(issue -> isAllowedStatus(issue.getStatus()))
+                .filter(issue -> i.contains(issue.getProjectKey()))
                 .collect(Collectors.toList());
         
         LinkedList<Issue> issues = new LinkedList<>(issuesVisibleToUser);
