@@ -173,7 +173,7 @@ public class FollowUpGeneratorTest {
     @Test
     public void generateTable7Test() {
         FollowupDataProvider provider = getFollowupDataProvider(asList(getFollowUpDataDefault()));
-        FollowUpGenerator subject = new FollowUpGenerator(provider);
+        FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
         String table7 = subject.generateTable7(3042);
         assertEquals(getStringExpected("followup/expectedTable7.xml"), table7);
     }
