@@ -29,17 +29,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
-import org.junit.runner.RunWith;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.safaribooks.junitattachments.CaptureFile;
 import com.safaribooks.junitattachments.RecordAttachmentRule;
@@ -49,8 +47,6 @@ import objective.taskboard.RequestResponse;
 import objective.taskboard.TestMain;
 import objective.taskboard.issueBuffer.IssueBufferState;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {UIConfig.class})
 public abstract class AbstractUIIntegrationTest {
     protected WebDriver webDriver;
     private static final ExecutorService service = Executors.newSingleThreadExecutor();
