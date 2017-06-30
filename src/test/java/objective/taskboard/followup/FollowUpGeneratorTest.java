@@ -50,6 +50,7 @@ public class FollowUpGeneratorTest {
     private static final String PATH_SHEET7_TEMPLATE = "followup/sheet7-template.xml";
     private static final String PATH_SHEET7_ROW_TEMPLATE = "followup/sheet7-row-template.xml";
     private static final String PATH_FOLLOWUP_TEMPLATE = "followup/Followup-template.xlsm";
+    private static final String PATH_TABLE7_TEMPLATE = "followup/table7-template.xml";
 
     private static final String MSG_ASSERT_SHARED_STRINGS_SIZE = "Shared strings size";
 
@@ -180,7 +181,7 @@ public class FollowUpGeneratorTest {
     private FollowUpGenerator getFollowUpGeneratorUsingTestTemplates(FollowupDataProvider provider) {
         return new FollowUpGenerator(provider, PATH_SHARED_STRINGS_INITIAL, PATH_SHARED_STRINGS_TEMPLATE,
                 PATH_SHARED_STRINGS_SI_TEMPLATE, PATH_SHEET7_TEMPLATE, PATH_SHEET7_ROW_TEMPLATE,
-                PATH_FOLLOWUP_TEMPLATE);
+                PATH_FOLLOWUP_TEMPLATE,PATH_TABLE7_TEMPLATE);
     }
 
     private FollowupDataProvider getFollowupDataProvider(List<FollowUpData> jiraData) {

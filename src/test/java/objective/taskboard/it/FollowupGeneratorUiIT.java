@@ -25,7 +25,7 @@ import org.junit.Test;
 
 public class FollowupGeneratorUiIT extends AuthenticatedIntegrationTest {
     @Test
-    public void whenIssueFilterIsEnabled_OnlyIssueAndChildrenShowUp() {
+    public void whenFollowupGeneratorButtonIsClicked_OpenDialogAndTestCheckboxToggleWorks() {
         MainPage mainPage = MainPage.produce(webDriver);
         mainPage.
             openFollowUp().

@@ -242,11 +242,11 @@
                 },
                 
                 toggleSelectAll: function(e) {
-                    var self = this;
                     this.projects.forEach(function(p, index, array) {
                         p.checked = e.target.checked;
                     })
-                    self.projects = JSON.parse(JSON.stringify(self.projects))
+                    // force polymer to recognize the model change
+                    this.projects = JSON.parse(JSON.stringify(this.projects))
                 },
                 
                 downloadFollowup: function() {
@@ -283,7 +283,7 @@
                         	window.location = "ws/followup?"+projectQuery;
                         },
                         error: function (jqXhr, textStatus, errorThrown) {
-                            console.error(errorThrown);
+                            self.errorMessage = errorThrown;
                         },
                         async: true
                     });

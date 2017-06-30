@@ -83,7 +83,8 @@ public class FollowUpGenerator {
 
     public FollowUpGenerator(FollowupDataProvider provider, String pathSharedStringsInitial,
             String pathSharedStringsTemplate, String pathSISharedStringsTemplate, String pathSheet7Template,
-            String pathSheet7RowTemplate, String pathFollowupTemplateXLSM) {
+            String pathSheet7RowTemplate, String pathFollowupTemplateXLSM,
+            String pathTable7Template) {
         this.provider = provider;
         this.pathSharedStringsInitial = pathSharedStringsInitial;
         this.pathSharedStringsTemplate = pathSharedStringsTemplate;
@@ -91,6 +92,7 @@ public class FollowUpGenerator {
         this.pathSheet7Template = pathSheet7Template;
         this.pathSheet7RowTemplate = pathSheet7RowTemplate;
         this.pathFollowupTemplateXLSM = pathFollowupTemplateXLSM;
+        this.pathTable7Template = pathTable7Template;
     }
     
     public ByteArrayResource generate(String [] includedProjects) throws Exception {
@@ -235,12 +237,12 @@ public class FollowUpGenerator {
         }
         return sharedStrings;
     }
-    String generateJiraDataSheet(Map<String, Long> sharedStrings, String [] includedProjects) throws IOException {
+    String generateJiraDataSheet(Map<String, Long> sharedStrings, String [] includedProjects) {
         List<FollowUpData> jiraData = provider.getJiraData(includedProjects);
         return generateJiraDataSheet(sharedStrings, includedProjects, jiraData);
     }
 
-    String generateJiraDataSheet(Map<String, Long> sharedStrings, String [] includedProjects, List<FollowUpData> jiraData) throws IOException {
+    String generateJiraDataSheet(Map<String, Long> sharedStrings, String [] includedProjects, List<FollowUpData> jiraData) {
         String rowTemplate = getStringFromXML(pathSheet7RowTemplate);
         StringBuilder rows = new StringBuilder();
         int rowNumber = 2;

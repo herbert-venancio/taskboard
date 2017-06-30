@@ -54,7 +54,7 @@ public class JiraMockServer {
         thread.start();
     }
     
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({ "rawtypes" })
     public static void defineRoutesAndStart() {
         loadMap();
         Spark.exception(Exception.class, (ex, req, res) -> {
