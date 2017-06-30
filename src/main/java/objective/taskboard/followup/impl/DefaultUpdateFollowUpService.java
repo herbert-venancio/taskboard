@@ -82,13 +82,14 @@ public class DefaultUpdateFollowUpService implements UpdateFollowUpService {
         URL original = DefaultUpdateFollowUpService.class.getResource("/followup-template/sheet7-template.xml");
         IOUtils.copy(original.openStream(), new FileOutputStream(fromJiraTemplate.toFile()));
         String newRowContent = getRowContent(decompressed);
-        FileUtils.readFileToString(fromJiraTemplate.toFile(), "UTF-8").replace("${headerRow}", newRowContent);
+        String updatedXml = FileUtils.readFileToString(fromJiraTemplate.toFile(), "UTF-8").replace("${headerRow}", newRowContent);
+        FileUtils.write(fromJiraTemplate.toFile(), updatedXml, "UTF-8");
     }
 
     private String getRowContent(Path decompressed) {
         Path sheetXml = getFromJiraSheet(decompressed);
         try {
-            return XmlUtils.asString(XmlUtils.xpath(sheetXml.toFile(), "//sheetData/row[@r=0]"));
+            return XmlUtils.asString(XmlUtils.xpath(sheetXml.toFile(), "//sheetData/row[@r=1]"));
         } catch (TransformerException e) {
             throw new InvalidTemplateException(e);
         }
