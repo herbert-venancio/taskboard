@@ -5,6 +5,7 @@ import objective.taskboard.utils.XmlUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.text.StrSubstitutor;
+import org.springframework.stereotype.Service;
 import org.w3c.dom.NodeList;
 
 import javax.xml.transform.TransformerException;
@@ -21,6 +22,7 @@ import java.util.zip.ZipOutputStream;
 /**
  * Created by herbert on 30/06/17.
  */
+@Service
 public class DefaultUpdateFollowUpService implements UpdateFollowUpService {
 
     @Override

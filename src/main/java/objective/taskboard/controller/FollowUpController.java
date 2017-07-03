@@ -27,14 +27,13 @@ import objective.taskboard.followup.FollowUpFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import objective.taskboard.followup.FollowUpGenerator;
 import objective.taskboard.issueBuffer.IssueBufferState;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/ws/followup")
@@ -57,8 +56,8 @@ public class FollowUpController {
         }
     }
 
-    @RequestMapping(method = RequestMethod.POST)
-    public void upload(@RequestParam("file") MultipartFile file) {
+    @RequestMapping(method = RequestMethod.POST, consumes="multipart/form-data")
+    public void upload(@RequestParam("file") MultipartFile file) throws IOException {
         followUpFacade.updateTemplate(file);
     }
 

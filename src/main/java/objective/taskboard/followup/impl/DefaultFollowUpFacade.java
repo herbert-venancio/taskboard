@@ -37,35 +37,34 @@ public class DefaultFollowUpFacade implements FollowUpFacade {
     }
 
     @Override
-    public void updateTemplate(MultipartFile file) {
+    public void updateTemplate(MultipartFile file) throws IOException {
+        Path followUpTemplateCandidate = updateFollowUpService.decompressTemplate(file.getInputStream());
+        Path jiraTab = Files.createTempFile("sheet-template", ".xml");
+        Path sharedStrings = Files.createTempFile("shared-strings", ".xml");
+        Path pathFollowupXLSM = Files.createTempFile("Followup", ".xlsm");
         try {
-            Path followUpTemplateCandidate = updateFollowUpService.decompressTemplate(file.getInputStream());
-            try {
-                updateFollowUpService.validateTemplate(followUpTemplateCandidate);
-                Path jiraTab = Files.createTempFile("sheet-template", ".xml");
-                updateFollowUpService.updateFromJiraTemplate(followUpTemplateCandidate, jiraTab);
-                Path sharedStrings = Files.createTempFile("shared-strings", ".xml");
-                updateFollowUpService.updateSharedStrings(followUpTemplateCandidate, sharedStrings);
-                updateFollowUpService.deleteFilesThatAreGenerated(followUpTemplateCandidate);
-                Path pathFollowupXLSM = Files.createTempFile("Followup", ".xlsm");
-                updateFollowUpService.compressTemplate(followUpTemplateCandidate, pathFollowupXLSM);
+            updateFollowUpService.validateTemplate(followUpTemplateCandidate);
+            updateFollowUpService.updateFromJiraTemplate(followUpTemplateCandidate, jiraTab);
+            updateFollowUpService.updateSharedStrings(followUpTemplateCandidate, sharedStrings);
+            updateFollowUpService.deleteFilesThatAreGenerated(followUpTemplateCandidate);
+            updateFollowUpService.compressTemplate(followUpTemplateCandidate, pathFollowupXLSM);
 
-                FollowUpTemplate defaultTemplate = followUpTemplateStorage.getDefaultTemplate();
-                FollowUpTemplate template = new FollowUpTemplate(
-                        defaultTemplate.getPathSharedStringsInitial()
-                        , sharedStrings.toString()
-                        , defaultTemplate.getPathSISharedStringsTemplate()
-                        , jiraTab.toString()
-                        , defaultTemplate.getPathSheet7RowTemplate()
-                        , pathFollowupXLSM.toString()
-                );
-                followUpTemplateStorage.updateTemplate(template);
-            } catch (Exception e) {
-                FileUtils.deleteQuietly(followUpTemplateCandidate.toFile());
-                throw e;
-            }
+            FollowUpTemplate defaultTemplate = followUpTemplateStorage.getDefaultTemplate();
+            FollowUpTemplate template = new FollowUpTemplate(
+                    defaultTemplate.getPathSharedStringsInitial()
+                    , sharedStrings.toString()
+                    , defaultTemplate.getPathSISharedStringsTemplate()
+                    , jiraTab.toString()
+                    , defaultTemplate.getPathSheet7RowTemplate()
+                    , pathFollowupXLSM.toString()
+            );
+            followUpTemplateStorage.updateTemplate(template);
         } catch (IOException e) {
-            e.printStackTrace();
+            FileUtils.deleteQuietly(jiraTab.toFile());
+            FileUtils.deleteQuietly(sharedStrings.toFile());
+            FileUtils.deleteQuietly(pathFollowupXLSM.toFile());
+        } finally {
+            FileUtils.deleteQuietly(followUpTemplateCandidate.toFile());
         }
     }
 }

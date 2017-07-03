@@ -15,12 +15,12 @@ public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
     @Override
     public FollowUpTemplate getDefaultTemplate() {
         return new FollowUpTemplate(
-            "followup-template/sharedStrings-initial.xml"
-            , "followup-template/sharedStrings-template.xml"
-            , "followup-template/sharedStrings-si-template.xml"
-            , "followup-template/sheet7-template.xml"
-            , "followup-template/sheet7-row-template.xml"
-            , "followup-template/Followup-template.xlsm"
+            resolve("followup-template/sharedStrings-initial.xml")
+            , resolve("followup-template/sharedStrings-template.xml")
+            , resolve("followup-template/sharedStrings-si-template.xml")
+            , resolve("followup-template/sheet7-template.xml")
+            , resolve("followup-template/sheet7-row-template.xml")
+            , resolve("followup-template/Followup-template.xlsm")
         );
     }
 
@@ -32,5 +32,11 @@ public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
     @Override
     public void updateTemplate(FollowUpTemplate template) {
         this.template = template;
+    }
+
+    // ---
+
+    private static String resolve(String resourceName) {
+        return DefaultFollowUpTemplateStorage.class.getClassLoader().getResource(resourceName).getFile();
     }
 }
