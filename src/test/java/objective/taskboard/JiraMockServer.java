@@ -106,21 +106,31 @@ public class JiraMockServer {
         get("/rest/api/latest/issue/:issueKey",  (req, res) ->{
             String issueKey = req.params(":issueKey");
             String loadMockData = loadMockData(issueKey+".json");
-            if (loadMockData == null) {
+            
+            if (loadMockData == null) 
                 return retryFromRealServer(issueKey);
-            }
-            return loadMockData;
+            
+            JSONObject issueData = new JSONObject(loadMockData);
+            String self = issueData.getString("self").replace("54.68.128.117:8100", "localhost:4567");
+            issueData.put("self", self);
+            return issueData.toString();
+        });
+        
+        get("/rest/api/latest/issue/:issueId/transitions", (req,res) ->{
+            String issueKey = issueKeyByIssueId.get(req.params("issueId"));
+            JSONObject issueSearchData = getIssueDataForKey(issueKey);
+            JSONArray issues = issueSearchData.getJSONArray("issues");
+            JSONObject result = new JSONObject();
+            result.put("expand", "transitions");
+            result.put("transitions", issues.getJSONObject(0).getJSONArray("transitions"));
+            return result.toString(); 
         });
         
         put("/rest/api/latest/issue/:issueKey",  (req, res) ->{
             JSONObject reqData = new JSONObject(req.body());
             String issueKey = req.params(":issueKey");
             
-            JSONObject issueSearchData = dirtySearchIssuesByKey.get(issueKey);
-            if (issueSearchData == null) {
-                issueSearchData = new JSONObject(searchIssuesByKey.get(issueKey).toString()); 
-                dirtySearchIssuesByKey.put(issueKey, issueSearchData);
-            }
+            JSONObject issueSearchData = getIssueDataForKey(issueKey);
             
             JSONArray issues = issueSearchData.getJSONArray("issues");
             JSONObject fields = issues.getJSONObject(0).getJSONObject("fields");
@@ -144,6 +154,48 @@ public class JiraMockServer {
             res.status(204);
             return "";
         });
+        
+        post("/rest/api/latest/issue/:issueId/transitions", (req, res)-> {
+            String issueKey = issueKeyByIssueId.get(req.params("issueId"));
+            JSONObject issueSearchData = getIssueDataForKey(issueKey);
+            JSONObject issue = issueSearchData.getJSONArray("issues").getJSONObject(0);
+            JSONArray transitions = issue.getJSONArray("transitions");
+            
+            JSONObject transitionParam = new JSONObject(req.body());
+            int transitionId = transitionParam.getJSONObject("transition").getInt("id");
+            
+            JSONObject status = null;
+            for (int i = 0; i < transitions.length(); i++) {
+                JSONObject transition = transitions.getJSONObject(0);
+                if (transition.getInt("id") == transitionId) {
+                    status = clone(transition.getJSONObject("to"));
+                    break;
+                }
+            }
+            if (status == null)
+                throw new IllegalStateException("Invalid transition attempted");
+            
+            issue.getJSONObject("fields").put("status", status);
+            
+            return "";
+        });
+    }
+
+    private static JSONObject clone(JSONObject jsonObject) {
+        try {
+            return new JSONObject(jsonObject.toString());
+        } catch (JSONException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private static JSONObject getIssueDataForKey(String issueKey) throws JSONException {
+        JSONObject issueSearchData = dirtySearchIssuesByKey.get(issueKey);
+        if (issueSearchData == null) {
+            issueSearchData = new JSONObject(searchIssuesByKey.get(issueKey).toString()); 
+            dirtySearchIssuesByKey.put(issueKey, issueSearchData);
+        }
+        return issueSearchData;
     }
 
     private static void setCoassignee(JSONObject coassigneeField, String aKey, JSONArray coassignees) throws JSONException {
@@ -246,26 +298,34 @@ public class JiraMockServer {
                 JSONArray jsonArray = jsonObject.getJSONArray("issues");
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject issueData = jsonArray.getJSONObject(i);
-                    if (issueData.getString("key").equals("TASKB-625"))
-                        System.out.println();
+                    String self = issueData.getString("self").replace("54.68.128.117:8100", "localhost:4567");
+                    issueData.put("self", self);
+                    
+                    JSONArray transitionsArray = issueData.getJSONArray("transitions");
+                    for (int j = 0; j < transitionsArray.length(); j++) {
+                        JSONObject aTransition = transitionsArray.getJSONObject(j);
+                        aTransition.put("fields", new JSONObject());
+                    }
                     
                     JSONArray arrayOfIssues = new JSONArray();
                     arrayOfIssues.put(issueData);
                     single.put("issues", arrayOfIssues);
                     
                     searchIssuesByKey.put(issueData.getString("key"), new JSONObject(single.toString()) );
+                    issueKeyByIssueId.put(issueData.getString("id"), issueData.getString("key"));
                 }
                 startAt++;
             } catch (JSONException e) {
                 throw new IllegalStateException(e);
             } 
-
         }
         System.out.println("************ DATA LOAD READY ************");
     }
 
+    private static Map<String, String> issueKeyByIssueId = new LinkedHashMap<String, String>();
     private static Map<String, JSONObject> searchIssuesByKey = new LinkedHashMap<>();
     private static Map<String, JSONObject> dirtySearchIssuesByKey = new LinkedHashMap<>();
     private static String username;
     private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
 }
+
