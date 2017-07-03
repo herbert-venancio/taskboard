@@ -32,14 +32,11 @@ import java.util.zip.ZipInputStream;
  */
 public class DefaultUpdateFollowUpService implements UpdateFollowUpService {
 
-    private static final int BUFFER = 2048;
-
     @Override
     public Path decompressTemplate(File template) throws IOException {
         Path pathFollowup = Files.createTempDirectory("Followup");
 
         ZipInputStream zipInputStream = null;
-        BufferedOutputStream bufferedOutput = null;
         try {
             zipInputStream = new ZipInputStream(new FileInputStream(template));
 
@@ -52,18 +49,11 @@ public class DefaultUpdateFollowUpService implements UpdateFollowUpService {
                 } else {
                     Files.createDirectories(entryPath.getParent());
                 }
-
-                FileOutputStream fos = new FileOutputStream(entryPath.toFile());
-                bufferedOutput = new BufferedOutputStream(fos, BUFFER);
-                IOUtils.copy(zipInputStream, bufferedOutput);
-                bufferedOutput.flush();
-                bufferedOutput.close();
+                Files.copy(zipInputStream, entryPath);
             }
 
             return pathFollowup;
         } finally {
-            if (bufferedOutput != null)
-                IOUtils.closeQuietly(bufferedOutput);
             if (zipInputStream != null)
                 IOUtils.closeQuietly(zipInputStream);
         }
@@ -71,7 +61,7 @@ public class DefaultUpdateFollowUpService implements UpdateFollowUpService {
 
     @Override
     public void validateTemplate(Path decompressed) throws InvalidTemplateException {
-        Path sheetXml = getFromJiraSheet(decompressed);
+        Path sheetXml = searchFromJiraSheet(decompressed);
         if(!isEmpty(XmlUtils.xpath(sheetXml.toFile(), "//sheetData/row[@r>1]/c/v/text()"))) {
             throw new InvalidTemplateException();
         }
@@ -80,14 +70,25 @@ public class DefaultUpdateFollowUpService implements UpdateFollowUpService {
     @Override
     public void updateFromJiraTemplate(Path decompressed, Path fromJiraTemplate) throws IOException {
         URL original = DefaultUpdateFollowUpService.class.getResource("/followup-template/sheet7-template.xml");
-        IOUtils.copy(original.openStream(), new FileOutputStream(fromJiraTemplate.toFile()));
         String newRowContent = getRowContent(decompressed);
-        String updatedXml = FileUtils.readFileToString(fromJiraTemplate.toFile(), "UTF-8").replace("${headerRow}", newRowContent);
+        String updatedXml = IOUtils.toString(original, "UTF-8").replace("${headerRow}", newRowContent);
         FileUtils.write(fromJiraTemplate.toFile(), updatedXml, "UTF-8");
     }
 
+    @Override
+    public void updateSharedStrings(Path decompressed, Path sharedStringsTemplate) throws IOException {
+        Path source = decompressed.resolve("xl/sharedStrings.xml");
+        XmlUtils.format(source.toFile(), sharedStringsTemplate.toFile());
+    }
+
+    @Override
+    public void deleteFilesThatAreGenerated(Path decompressed) throws IOException {
+        Files.delete(searchFromJiraSheet(decompressed));
+        Files.delete(decompressed.resolve("xl/sharedStrings.xml"));
+    }
+
     private String getRowContent(Path decompressed) {
-        Path sheetXml = getFromJiraSheet(decompressed);
+        Path sheetXml = searchFromJiraSheet(decompressed);
         try {
             return XmlUtils.asString(XmlUtils.xpath(sheetXml.toFile(), "//sheetData/row[@r=1]"));
         } catch (TransformerException e) {
@@ -101,7 +102,7 @@ public class DefaultUpdateFollowUpService implements UpdateFollowUpService {
         return nodeList.getLength() == 0;
     }
 
-    private static Path getFromJiraSheet(Path decompressed) {
+    private static Path searchFromJiraSheet(Path decompressed) {
         try {
             Path wbXml = decompressed.resolve("xl/workbook.xml");
             String relId = XmlUtils.asString(XmlUtils.xpath(wbXml.toFile(), "//sheet[@name='From Jira']/@id"));

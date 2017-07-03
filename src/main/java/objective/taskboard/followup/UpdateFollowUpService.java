@@ -16,6 +16,10 @@ public interface UpdateFollowUpService {
 
     void updateFromJiraTemplate(Path decompressed, Path fromJiraTemplate) throws IOException;
 
+    void updateSharedStrings(Path decompressed, Path sharedStringsTemplate) throws IOException;
+
+    void deleteFilesThatAreGenerated(Path decompressed) throws IOException;
+
     class InvalidTemplateException extends RuntimeException {
         public InvalidTemplateException() {
         }
