@@ -36,12 +36,9 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.core.io.ByteArrayResource;
 import org.xml.sax.SAXException;
 
-@RunWith(MockitoJUnitRunner.class)
 public class FollowUpGeneratorTest {
 
     private static final String PATH_SHARED_STRINGS_INITIAL = "followup/sharedStrings-initial.xml";

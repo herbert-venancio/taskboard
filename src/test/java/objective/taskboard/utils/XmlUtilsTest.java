@@ -22,7 +22,7 @@ public class XmlUtilsTest {
 
     @Test
     public void xpathToAttributes() throws URISyntaxException {
-        File xmlFile = new File(XmlUtils.class.getResource("file.xml").toURI());
+        File xmlFile = new File(XmlUtilsTest.class.getResource("file.xml").toURI());
         String locator = "//element/@attribute";
 
         NodeList nodeList = XmlUtils.xpath(xmlFile, locator);
@@ -33,7 +33,7 @@ public class XmlUtilsTest {
 
     @Test
     public void xpathToNode() throws URISyntaxException {
-        File xmlFile = new File(XmlUtils.class.getResource("file.xml").toURI());
+        File xmlFile = new File(XmlUtilsTest.class.getResource("file.xml").toURI());
         String locator = "//element[@attribute='value0']";
 
         NodeList nodeList = XmlUtils.xpath(xmlFile, locator);
@@ -45,8 +45,8 @@ public class XmlUtilsTest {
     public void formatXml() throws URISyntaxException, IOException, TransformerException {
         File outputXmlFile = Files.createTempFile("formatted", "xml").toFile();
         try {
-            File inputXmlFile = new File(XmlUtils.class.getResource("unformattedFile.xml").toURI());
-            File expectedResult = new File(XmlUtils.class.getResource("file.xml").toURI());
+            File inputXmlFile = new File(XmlUtilsTest.class.getResource("unformattedFile.xml").toURI());
+            File expectedResult = new File(XmlUtilsTest.class.getResource("file.xml").toURI());
 
             XmlUtils.format(inputXmlFile, outputXmlFile);
 
@@ -61,7 +61,7 @@ public class XmlUtilsTest {
 
     @Test
     public void asStringAttribute() throws URISyntaxException, TransformerException {
-        File xmlFile = new File(XmlUtils.class.getResource("file.xml").toURI());
+        File xmlFile = new File(XmlUtilsTest.class.getResource("file.xml").toURI());
         String locator = "//element[@attribute='value0']/@attribute";
 
         assertThat(
@@ -71,7 +71,7 @@ public class XmlUtilsTest {
 
     @Test
     public void asStringAttributes() throws URISyntaxException, TransformerException {
-        File xmlFile = new File(XmlUtils.class.getResource("file.xml").toURI());
+        File xmlFile = new File(XmlUtilsTest.class.getResource("file.xml").toURI());
         String locator = "//element/@attribute";
 
         assertThat(
@@ -81,7 +81,7 @@ public class XmlUtilsTest {
 
     @Test
     public void asStringNode() throws URISyntaxException, TransformerException {
-        File xmlFile = new File(XmlUtils.class.getResource("file.xml").toURI());
+        File xmlFile = new File(XmlUtilsTest.class.getResource("file.xml").toURI());
         String locator = "//element[@attribute='value0']";
 
         assertThat(
@@ -91,7 +91,7 @@ public class XmlUtilsTest {
 
     @Test
     public void asStringNodes() throws URISyntaxException, TransformerException {
-        File xmlFile = new File(XmlUtils.class.getResource("file.xml").toURI());
+        File xmlFile = new File(XmlUtilsTest.class.getResource("file.xml").toURI());
         String locator = "//element";
 
         assertThat(
@@ -101,7 +101,7 @@ public class XmlUtilsTest {
 
     @Test
     public void asStringText() throws URISyntaxException, TransformerException {
-        File xmlFile = new File(XmlUtils.class.getResource("file.xml").toURI());
+        File xmlFile = new File(XmlUtilsTest.class.getResource("file.xml").toURI());
         String locator = "//element[@attribute='value1']/text()";
 
         assertThat(

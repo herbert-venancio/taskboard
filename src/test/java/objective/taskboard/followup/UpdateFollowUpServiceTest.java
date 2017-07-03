@@ -99,6 +99,19 @@ public class UpdateFollowUpServiceTest {
         }
     }
 
+    @Test
+    public void decompressCompress() throws IOException, URISyntaxException {
+        Path decompressed = decompressOkTemplate();
+        Path pathFollowupXLSM = Files.createTempFile("Followup", ".xlsm");
+        try {
+            updateFollowUpService.compressTemplate(decompressed, pathFollowupXLSM);
+            assertThat(Files.size(pathFollowupXLSM), greaterThan(0l));
+        } finally {
+            FileUtils.deleteQuietly(pathFollowupXLSM.toFile());
+            FileUtils.deleteQuietly(decompressed.toFile());
+        }
+    }
+
     // ---
 
     private Path decompressOkTemplate() throws URISyntaxException, IOException {

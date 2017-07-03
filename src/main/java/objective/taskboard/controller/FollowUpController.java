@@ -23,27 +23,30 @@ package objective.taskboard.controller;
 
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
+import objective.taskboard.followup.FollowUpFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import objective.taskboard.followup.FollowUpGenerator;
-import objective.taskboard.followup.FollowupDataProvider;
 import objective.taskboard.issueBuffer.IssueBufferState;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/ws/followup")
 public class FollowUpController {
 
     @Autowired
-    private FollowupDataProvider provider;
+    private FollowUpFacade followUpFacade;
 
-    @RequestMapping
+    @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<Object> download() {
         try {
-            FollowUpGenerator followupGenerator = new FollowUpGenerator(provider);
+            FollowUpGenerator followupGenerator = followUpFacade.getGenerator();
             ByteArrayResource resource = followupGenerator.generate();
             return ResponseEntity.ok()
                   .contentLength(resource.contentLength())
@@ -54,8 +57,13 @@ public class FollowUpController {
         }
     }
 
+    @RequestMapping(method = RequestMethod.POST)
+    public void upload(@RequestParam("file") MultipartFile file) {
+        followUpFacade.updateTemplate(file);
+    }
+
     @RequestMapping("state")
     public IssueBufferState getState() {
-        return provider.getFollowupState();
+        return followUpFacade.getFollowupState();
     }
 }

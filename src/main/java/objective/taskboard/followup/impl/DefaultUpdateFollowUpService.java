@@ -4,6 +4,7 @@ import objective.taskboard.followup.UpdateFollowUpService;
 import objective.taskboard.utils.XmlUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.text.StrSubstitutor;
 import org.w3c.dom.NodeList;
 
 import javax.xml.transform.TransformerException;
@@ -11,34 +12,29 @@ import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 /**
- *
- * 1. Ensure 'From Jira' tab has no data at all
- * 2. unzip the template
- * 3. run the following command:
- *   - xmllint --format xl/worksheets/sheet7.xml > sheet7-reformatted.xml
- * 4. open sheet7-reformatted.xml and copy the contents of tag <row r="1"..></row> over the same row on template src/main/resources/followup-template/sheet7-template.xml
- * 5. remove xl/worksheets/sheet7.xml and the reformatted file
- * 6. copy the contents of ./xl/sharedStrings.xml and execute the following command:
- *   - xmllint --format sharedStrings.xml > ./src/main/resources/followup-template/sharedStrings-initial.xml
- * 7. remove sharedStrings.xml
- * 8. zip the contents again into ./src/main/resources/followup-template/Followup-template.xlsm
- * 9. And you're done.
- *
  * Created by herbert on 30/06/17.
  */
 public class DefaultUpdateFollowUpService implements UpdateFollowUpService {
 
     @Override
     public Path decompressTemplate(File template) throws IOException {
+        return decompressTemplate(new FileInputStream(template));
+    }
+
+    @Override
+    public Path decompressTemplate(InputStream stream) throws IOException {
         Path pathFollowup = Files.createTempDirectory("Followup");
 
         ZipInputStream zipInputStream = null;
         try {
-            zipInputStream = new ZipInputStream(new FileInputStream(template));
+            zipInputStream = new ZipInputStream(stream);
 
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
@@ -71,7 +67,9 @@ public class DefaultUpdateFollowUpService implements UpdateFollowUpService {
     public void updateFromJiraTemplate(Path decompressed, Path fromJiraTemplate) throws IOException {
         URL original = DefaultUpdateFollowUpService.class.getResource("/followup-template/sheet7-template.xml");
         String newRowContent = getRowContent(decompressed);
-        String updatedXml = IOUtils.toString(original, "UTF-8").replace("${headerRow}", newRowContent);
+        Map<String, Object> map = new HashMap<>();
+        map.put("headerRow", newRowContent);
+        String updatedXml = StrSubstitutor.replace(IOUtils.toString(original, "UTF-8"), map);
         FileUtils.write(fromJiraTemplate.toFile(), updatedXml, "UTF-8");
     }
 
@@ -87,6 +85,23 @@ public class DefaultUpdateFollowUpService implements UpdateFollowUpService {
         Files.delete(decompressed.resolve("xl/sharedStrings.xml"));
     }
 
+    @Override
+    public Path compressTemplate(Path decompressed, Path pathFollowupXLSM) throws IOException {
+        ZipOutputStream zipOutputStream = null;
+        try {
+            zipOutputStream = new ZipOutputStream(new BufferedOutputStream(Files.newOutputStream(pathFollowupXLSM)));
+            Iterable<Path> it = Files.walk(decompressed)::iterator;
+            for (Path fileInFollowup : it)
+                compressFile(fileInFollowup, decompressed.relativize(fileInFollowup).toString(), zipOutputStream);
+            return pathFollowupXLSM;
+        } finally {
+            if (zipOutputStream != null)
+                zipOutputStream.close();
+        }
+    }
+
+    // ---
+
     private String getRowContent(Path decompressed) {
         Path sheetXml = searchFromJiraSheet(decompressed);
         try {
@@ -95,8 +110,6 @@ public class DefaultUpdateFollowUpService implements UpdateFollowUpService {
             throw new InvalidTemplateException(e);
         }
     }
-
-    // ---
 
     private static boolean isEmpty(NodeList nodeList) {
         return nodeList.getLength() == 0;
@@ -112,5 +125,14 @@ public class DefaultUpdateFollowUpService implements UpdateFollowUpService {
         } catch (TransformerException e) {
             throw new InvalidTemplateException(e);
         }
+    }
+
+    private void compressFile(Path path, String zipEntryName, ZipOutputStream zipOutputStream) throws IOException {
+        if (Files.isDirectory(path))
+            return;
+
+        ZipEntry entry = new ZipEntry(zipEntryName);
+        zipOutputStream.putNextEntry(entry);
+        Files.copy(path, zipOutputStream);
     }
 }
