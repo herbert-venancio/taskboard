@@ -112,8 +112,7 @@ public class IssueController {
     
     @RequestMapping(path = "assign", method = RequestMethod.POST)
     public Issue assign(@RequestBody Issue issue) throws JSONException {
-        jiraBean.toggleAssignAndSubresponsavelToUser(issue.getIssueKey());
-        return issueBufferService.updateIssueBuffer(issue.getIssueKey());
+        return issueBufferService.toggleAssignAndSubresponsavelToUser(issue.getIssueKey());
     }
 
     @SuppressWarnings("deprecation")
@@ -142,9 +141,7 @@ public class IssueController {
 
     @RequestMapping(path = "transition", method = RequestMethod.POST)
     public Issue transition(@RequestBody TransitionDTO params) throws JSONException {
-        jiraBean.doTransitionByName(params.issue, params.transition, params.resolution);
-        issueBufferService.updateIssueBuffer(params.issue.getIssueKey());
-        return issueBufferService.getIssueByKey(params.issue.getIssueKey());
+        return issueBufferService.doTransitionByName(params.issue, params.transition, params.resolution);
     }
 
     @RequestMapping(path = "transitions", method = RequestMethod.POST)

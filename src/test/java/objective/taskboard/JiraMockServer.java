@@ -28,6 +28,9 @@ import static spark.Spark.put;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -202,8 +205,13 @@ public class JiraMockServer {
         JSONObject makeAssignee = createEmptyAssignee();
         makeAssignee.put("name", each.get("name"));
         fields.put("assignee", makeAssignee);
+        fields.put("updated", nowIso8601());
     }
     
+    private static String nowIso8601() {
+        return DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").withZone(ZoneOffset.UTC).format(Instant.now());
+    }
+
     private static JSONObject createEmptyAssignee() throws JSONException {
         JSONObject assigneeMap = new JSONObject();
         assigneeMap.put("active", "true");

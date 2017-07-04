@@ -300,15 +300,34 @@ function Taskboard() {
     function handleIssueUpdate(taskboardHome, response) {
     	var updateEvents = JSON.parse(response.body)
         var updatedIssueKeys = []
-        updateEvents.forEach(function(anEvent) {     	
+        updateEvents.forEach(function(anEvent) {
+            var previousInstance = getPreviousIssueInstance(anEvent.target.issueKey);
+            if (previousInstance !== null && previousInstance.issue.updatedDate === anEvent.target.updatedDate)
+                return;
+            var converted = self.convertIssue(anEvent.target);
+            if (previousInstance === null)
+                self.issues.push(converted)
+            else
+                self.issues[previousInstance.index] = converted; 
         	updatedIssueKeys.push(anEvent.target.issueKey)
         	self.fireIssueUpdated('server', taskboardHome, anEvent.target, anEvent.updateType);
         }); 
+    	if (updatedIssueKeys.length === 0)
+    	    return;
     	
         taskboardHome.fire("iron-signal", {name:"show-issue-updated-message", data:{
         	message: "Jira issues have been updated.",
         	updatedIssueKeys: updatedIssueKeys
         }})
+    }
+    
+    function getPreviousIssueInstance(key) {
+        var previousInstance = null;
+        self.issues.forEach(function(anIssue, index) {
+            if (anIssue.issueKey === key)
+                previousInstance = {issue: anIssue, index: index};
+        })
+        return previousInstance;
     }
     
     this.fireIssueUpdated = function(source, triggerSource, issue, updateType) {

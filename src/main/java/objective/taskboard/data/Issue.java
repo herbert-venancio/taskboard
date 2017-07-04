@@ -97,6 +97,9 @@ public class Issue implements Serializable {
 
     @JsonDeserialize(using = DateDeserializer.class)
     private Date dueDate;
+    
+    @JsonDeserialize(using = DateDeserializer.class)
+    private Date updatedDate;
 
     private long created;
 
@@ -143,12 +146,13 @@ public class Issue implements Serializable {
             long priority, 
             Date dueDate, 
             long created, 
+            Date updatedDate, 
             String description, 
             List<String> teams, 
-            String comments, 
-            List<String> labels,
+            String comments,
+            List<String> labels, 
             List<String> components, 
-            Map<String, Object> customFields, 
+            Map<String, Object> customFields,
             Long priorityOrder,
             TaskboardTimeTracking timeTracking,
             JiraProperties jiraProperties,
@@ -188,7 +192,8 @@ public class Issue implements Serializable {
                 priorityOrder,
                 timeTracking,
                 jiraProperties,
-                metaDataService);
+                metaDataService,
+                updatedDate);
     }
     
     public static class TaskboardTimeTracking {
@@ -245,6 +250,7 @@ public class Issue implements Serializable {
 
     public Issue(){
         jiraProperties = SpringContextBridge.getBean(JiraProperties.class);
+        metaDataService = SpringContextBridge.getBean(MetadataService.class);
     }
 
     private Issue(Long id, String issueKey, String projectKey, String project, long type, String typeIconUri,
@@ -254,7 +260,9 @@ public class Issue implements Serializable {
             long priority, Date dueDate, long created, String description, List<String> teams, String comments,
             List<String> labels, List<String> components, Map<String, Object> customFields, Long priorityOrder, 
             TaskboardTimeTracking timeTracking,
-            JiraProperties properties, MetadataService metaDataService) {
+            JiraProperties properties, 
+            MetadataService metaDataService, 
+            Date updatedDate) {
         this.id = id;
         this.issueKey = issueKey;
         this.projectKey = projectKey;
@@ -280,6 +288,7 @@ public class Issue implements Serializable {
         this.priority = priority;
         this.dueDate = dueDate;
         this.created = created;
+        this.updatedDate = updatedDate;
         this.description = description;
         this.teams = teams;
         this.comments = comments;
