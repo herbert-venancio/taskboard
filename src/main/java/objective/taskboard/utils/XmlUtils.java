@@ -20,9 +20,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 
-/**
- * Created by herbert on 30/06/17.
- */
 public class XmlUtils {
 
     public static NodeList xpath(File xmlFile, String locator) {

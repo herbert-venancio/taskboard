@@ -27,10 +27,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
-/**
- * Created by herbert on 03/07/17.
- */
-public class UploadTemplateIT {
+public class UploadTemplateIT extends AbstractIntegrationTest {
 
     private HttpClient client;
     private Header[] session;

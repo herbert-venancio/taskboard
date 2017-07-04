@@ -19,9 +19,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-/**
- * Created by herbert on 30/06/17.
- */
 @Service
 public class DefaultUpdateFollowUpService implements UpdateFollowUpService {
 
@@ -82,7 +79,7 @@ public class DefaultUpdateFollowUpService implements UpdateFollowUpService {
     }
 
     @Override
-    public void deleteFilesThatAreGenerated(Path decompressed) throws IOException {
+    public void deleteGeneratedFiles(Path decompressed) throws IOException {
         Files.delete(searchFromJiraSheet(decompressed));
         Files.delete(decompressed.resolve("xl/sharedStrings.xml"));
     }

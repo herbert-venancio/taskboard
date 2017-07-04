@@ -17,9 +17,6 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.*;
 
-/**
- * Created by herbert on 30/06/17.
- */
 public class UpdateFollowUpServiceTest {
 
     private UpdateFollowUpService updateFollowUpService;
@@ -90,7 +87,7 @@ public class UpdateFollowUpServiceTest {
         try {
             assertTrue(Files.exists(sheet7File));
             assertTrue(Files.exists(sharedStringsFile));
-            updateFollowUpService.deleteFilesThatAreGenerated(decompressed);
+            updateFollowUpService.deleteGeneratedFiles(decompressed);
             assertFalse(Files.exists(sheet7File));
             assertFalse(Files.exists(sharedStringsFile));
         }

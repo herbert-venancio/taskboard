@@ -11,9 +11,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-/**
- * Created by herbert on 03/07/17.
- */
 @Service
 public class DefaultFollowUpFacade implements FollowUpFacade {
 
@@ -46,7 +43,7 @@ public class DefaultFollowUpFacade implements FollowUpFacade {
             updateFollowUpService.validateTemplate(followUpTemplateCandidate);
             updateFollowUpService.updateFromJiraTemplate(followUpTemplateCandidate, jiraTab);
             updateFollowUpService.updateSharedStrings(followUpTemplateCandidate, sharedStrings);
-            updateFollowUpService.deleteFilesThatAreGenerated(followUpTemplateCandidate);
+            updateFollowUpService.deleteGeneratedFiles(followUpTemplateCandidate);
             updateFollowUpService.compressTemplate(followUpTemplateCandidate, pathFollowupXLSM);
 
             FollowUpTemplate defaultTemplate = followUpTemplateStorage.getDefaultTemplate();

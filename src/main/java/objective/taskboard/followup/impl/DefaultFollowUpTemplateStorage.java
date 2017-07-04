@@ -4,9 +4,6 @@ import objective.taskboard.followup.FollowUpTemplate;
 import objective.taskboard.followup.FollowUpTemplateStorage;
 import org.springframework.stereotype.Service;
 
-/**
- * Created by herbert on 03/07/17.
- */
 @Service
 public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
 

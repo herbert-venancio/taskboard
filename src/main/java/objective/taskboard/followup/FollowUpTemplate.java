@@ -2,9 +2,6 @@ package objective.taskboard.followup;
 
 import lombok.Getter;
 
-/**
- * Created by herbert on 03/07/17.
- */
 @Getter
 public class FollowUpTemplate {
 

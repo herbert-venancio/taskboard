@@ -15,9 +15,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
-/**
- * Created by herbert on 30/06/17.
- */
 public class XmlUtilsTest {
 
     @Test
