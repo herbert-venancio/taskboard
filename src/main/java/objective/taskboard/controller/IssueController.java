@@ -116,6 +116,7 @@ public class IssueController {
         return issueBufferService.updateIssueBuffer(issue.getIssueKey());
     }
 
+    @SuppressWarnings("deprecation")
     @RequestMapping(path = "create-issue", method = RequestMethod.POST)
     public Issue createIssue(@RequestBody Issue issue) throws JSONException {
         com.atlassian.jira.rest.client.api.domain.Issue parent = jiraBean.getIssueByKey(issue.getParent());

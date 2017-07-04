@@ -62,8 +62,6 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
-import objective.taskboard.it.MainPage.IssueDetails;
-
 public class MainPage extends AbstractUiFragment {
     @FindBy(css=".nameButton.user-account")
     private WebElement userLabelButton;

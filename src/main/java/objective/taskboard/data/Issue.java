@@ -227,7 +227,10 @@ public class Issue implements Serializable {
 
     /**
      * Subtasks only need to show their key and summary.
+     * 
+     * DON'T USE. Will be terminated
      */
+    @Deprecated
     public static Issue from(String issueKey, String summary) {
         Issue issue = new Issue();
         issue.setIssueKey(issueKey);
