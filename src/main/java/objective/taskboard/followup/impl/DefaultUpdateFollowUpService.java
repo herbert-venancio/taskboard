@@ -67,7 +67,7 @@ public class DefaultUpdateFollowUpService implements UpdateFollowUpService {
 
     @Override
     public void updateFromJiraTemplate(Path decompressed, Path fromJiraTemplate) throws IOException {
-        URL original = DefaultUpdateFollowUpService.class.getResource("/followup-template/sheet7-template.xml");
+        URL original = DefaultUpdateFollowUpService.class.getResource("/followup-template/sheet7-template-raw.xml");
         String newRowContent = getRowContent(decompressed);
         Map<String, Object> map = new HashMap<>();
         map.put("headerRow", newRowContent);
