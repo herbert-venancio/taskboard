@@ -65,6 +65,7 @@ public class FollowUpGenerator {
 
     private static final String PATH_SHEET7 = "xl/worksheets/sheet7.xml";
     private static final String PATH_SHARED_STRINGS = "xl/sharedStrings.xml";
+    private static final String PATH_TABLE7 = "xl/tables/table7.xml";
 
     private FollowupDataProvider provider;
 
@@ -74,6 +75,7 @@ public class FollowUpGenerator {
     private String pathSheet7Template = "followup-template/sheet7-template.xml";
     private String pathSheet7RowTemplate = "followup-template/sheet7-row-template.xml";
     private String pathFollowupTemplateXLSM = "followup-template/Followup-template.xlsm";
+    private String pathTable7Template = "followup-template/table7-template.xml";
 
     public FollowUpGenerator(FollowupDataProvider provider) {
         this.provider = provider;
@@ -81,7 +83,8 @@ public class FollowUpGenerator {
 
     public FollowUpGenerator(FollowupDataProvider provider, String pathSharedStringsInitial,
             String pathSharedStringsTemplate, String pathSISharedStringsTemplate, String pathSheet7Template,
-            String pathSheet7RowTemplate, String pathFollowupTemplateXLSM) {
+            String pathSheet7RowTemplate, String pathFollowupTemplateXLSM,
+            String pathTable7Template) {
         this.provider = provider;
         this.pathSharedStringsInitial = pathSharedStringsInitial;
         this.pathSharedStringsTemplate = pathSharedStringsTemplate;
@@ -89,9 +92,10 @@ public class FollowUpGenerator {
         this.pathSheet7Template = pathSheet7Template;
         this.pathSheet7RowTemplate = pathSheet7RowTemplate;
         this.pathFollowupTemplateXLSM = pathFollowupTemplateXLSM;
+        this.pathTable7Template = pathTable7Template;
     }
     
-    public ByteArrayResource generate() throws Exception {
+    public ByteArrayResource generate(String [] includedProjects) throws Exception {
         File directoryTempFollowup = null;
         Path pathFollowupXLSM = null;
         try {
@@ -100,9 +104,14 @@ public class FollowUpGenerator {
             Map<String, Long> sharedStrings = getSharedStringsInitial();
 
             File fileSheet7 = new File(directoryTempFollowup, PATH_SHEET7);
-            writeXML(fileSheet7, generateJiraDataSheet(sharedStrings));
+            
+            
+            List<FollowUpData> jiraData = provider.getJiraData(includedProjects);
+            writeXML(fileSheet7, generateJiraDataSheet(sharedStrings, includedProjects, jiraData));
             File fileSharedStrings = new File(directoryTempFollowup, PATH_SHARED_STRINGS);
             writeXML(fileSharedStrings, generateSharedStrings(sharedStrings));
+            File table7 = new File(directoryTempFollowup, PATH_TABLE7);
+            writeXML(table7, generateTable7(jiraData.size()));
 
             pathFollowupXLSM = compressXLSM(directoryTempFollowup);
             ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(pathFollowupXLSM));
@@ -228,13 +237,17 @@ public class FollowUpGenerator {
         }
         return sharedStrings;
     }
+    String generateJiraDataSheet(Map<String, Long> sharedStrings, String [] includedProjects) {
+        List<FollowUpData> jiraData = provider.getJiraData(includedProjects);
+        return generateJiraDataSheet(sharedStrings, includedProjects, jiraData);
+    }
 
-    String generateJiraDataSheet(Map<String, Long> sharedStrings) throws IOException {
+    String generateJiraDataSheet(Map<String, Long> sharedStrings, String [] includedProjects, List<FollowUpData> jiraData) {
         String rowTemplate = getStringFromXML(pathSheet7RowTemplate);
         StringBuilder rows = new StringBuilder();
         int rowNumber = 2;
 
-        for (FollowUpData followUpData : provider.getJiraData()) {
+        for (FollowUpData followUpData : jiraData) {
             Map<String, Object> rowValues = new HashMap<String, Object>();
             rowValues.put("rowNumber", rowNumber);
             rowValues.put("project", getOrSetIndexInSharedStrings(sharedStrings, followUpData.project));
@@ -276,10 +289,14 @@ public class FollowUpGenerator {
         return StrSubstitutor.replace(sheetTemplate, sheetValues);
     }
 
-    private String getStringFromXML(String pathXML) throws IOException {
+    private String getStringFromXML(String pathXML) {
         InputStream inputStream = getClass().getClassLoader()
                 .getResourceAsStream(pathXML);
-        return IOUtils.toString(inputStream, "UTF-8");
+        try {
+            return IOUtils.toString(inputStream, "UTF-8");
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     private Object getOrSetIndexInSharedStrings(Map<String, Long> sharedStrings, String followUpDataAttrValue) {
@@ -314,5 +331,12 @@ public class FollowUpGenerator {
         sharedStringsValues.put("sharedStringsSize", sharedStringsSorted.size());
         sharedStringsValues.put("allSharedStrings", allSharedStrings.toString());
         return StrSubstitutor.replace(sharedStringsTemplate, sharedStringsValues);
+    }
+    
+    String generateTable7(int lineCount) {
+        String template = getStringFromXML(pathTable7Template);
+        Map<String, Object> values = new HashMap<String, Object>();
+        values.put("LINE_COUNT", lineCount+1);
+        return StrSubstitutor.replace(template, values);
     }
 }

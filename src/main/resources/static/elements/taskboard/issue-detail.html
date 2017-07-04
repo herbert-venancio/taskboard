@@ -781,9 +781,10 @@
                             'Content-Type': 'application/json'
                         },
                         data: JSON.stringify(this.item),
-                        success: function () {
-                            location.reload(true);
-                        },
+                        success: function (issue) {
+                            taskboard.fireIssueUpdated(self, issue);
+                            self.$.modal.close();
+                        },		
                         error: function (jqXhr, textStatus, errorThrown) {
                             console.error(errorThrown);
                             self.errorMessage = jqXhr.responseJSON.message;

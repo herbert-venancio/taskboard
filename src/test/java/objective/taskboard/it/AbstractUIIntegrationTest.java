@@ -1,15 +1,5 @@
 package objective.taskboard.it;
 
-import java.io.File;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import org.junit.After;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -31,16 +21,23 @@ import org.junit.After;
  * [/LICENSE]
  */
 
+
+import java.io.File;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
-import org.junit.runner.RunWith;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.safaribooks.junitattachments.CaptureFile;
 import com.safaribooks.junitattachments.RecordAttachmentRule;
@@ -50,8 +47,6 @@ import objective.taskboard.RequestResponse;
 import objective.taskboard.TestMain;
 import objective.taskboard.issueBuffer.IssueBufferState;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {UIConfig.class})
 public abstract class AbstractUIIntegrationTest {
     protected WebDriver webDriver;
     private static final ExecutorService service = Executors.newSingleThreadExecutor();
@@ -59,15 +54,16 @@ public abstract class AbstractUIIntegrationTest {
     
     @Before
     public void setup() throws InterruptedException, ExecutionException, TimeoutException {
-        waitServerReady();
-        
         if (System.getProperty("webdriver.gecko.driver") == null)
             System.setProperty("webdriver.gecko.driver", "drivers/linux/marionette/64bit/geckodriver");
         
         
-        if (!new File("drivers/linux/marionette/64bit/geckodriver").exists()) {
+        if (!new File("drivers/linux/marionette/64bit/geckodriver").exists()) 
             throw new IllegalStateException("To run integration tests, you must run 'mvn clean install' at least once to download gecko driver");
-        }
+        
+        waitServerReady();
+        resetJiraMock();
+        resetIssueBuffer();
         
         webDriver = new FirefoxDriver();
         webDriver.manage().window().setSize(new Dimension(1280,1080));
@@ -92,7 +88,7 @@ public abstract class AbstractUIIntegrationTest {
                         .getScreenshotAs(OutputType.BYTES);
             }
     
-            webDriver.close();
+            webDriver.quit();
         }catch (Exception e) {
             e.printStackTrace();
         }
@@ -133,4 +129,11 @@ public abstract class AbstractUIIntegrationTest {
         return "http://localhost:8900/";
     }
 
+    private void resetJiraMock() {
+        RequestBuilder.url("http://localhost:4567/reset").post();
+    }
+    
+    private void resetIssueBuffer() {
+        RequestBuilder.url(getSiteBase()+"/test/resetbuffer").get();
+    }
 }

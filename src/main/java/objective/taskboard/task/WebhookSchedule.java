@@ -35,6 +35,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
+import objective.taskboard.data.Issue;
 import objective.taskboard.issue.IssueUpdate;
 import objective.taskboard.issue.IssueUpdateType;
 import objective.taskboard.issue.IssuesUpdateEvent;
@@ -94,8 +95,16 @@ public class WebhookSchedule {
                         issueBufferService.updateIssueBuffer();
                 } else {
                     IssueUpdateType updateType = computeEventType(item);
-                    updatedIssues.add(new IssueUpdate(issueBufferService.getIssueByKey(item.issueKey), updateType));
+                    
+                    Issue issueToUpdate = issueBufferService.getIssueByKey(item.issueKey);
+                    
                     issueBufferService.updateIssueBuffer(item.event, item.issueKey);
+                    
+                    Issue updatedIssue = issueBufferService.getIssueByKey(item.issueKey);
+                    if (updatedIssue == null) // just in case the issue was removed
+                        updatedIssue = issueToUpdate;
+                    
+                    updatedIssues.add(new IssueUpdate(updatedIssue, updateType));
                 }
 
                 log.warn("WEBHOOK PROCESSED: (" + item.event.toString() +  ") issue=" + item.issueKey);

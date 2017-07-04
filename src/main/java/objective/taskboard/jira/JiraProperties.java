@@ -78,9 +78,6 @@ public class JiraProperties {
     private Resolutions resolutions;
     
     @NotNull
-    private String schema;
-   
-    @NotNull
     private Followup followup;
     
     @Data 

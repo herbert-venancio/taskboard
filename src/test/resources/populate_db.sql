@@ -48,6 +48,15 @@ Insert into step (ID,NAME,ORDEM,SHOW_HEADER,WEIGHT,STAGE) values (42,'Reviewing'
 Insert into step (ID,NAME,ORDEM,SHOW_HEADER,WEIGHT,STAGE) values (43,'Done',1,'F',1,23);
 
 Insert into project_filter_configuration (ID,PROJECT_KEY) values (158,'TASKB');
+Insert into project_filter_configuration (ID,PROJECT_KEY) values (159,'PROJ1');
+Insert into project_filter_configuration (ID,PROJECT_KEY) values (160,'PROJ2');
+Insert into project_filter_configuration (ID,PROJECT_KEY) values (161,'PROJ3');
+Insert into project_filter_configuration (ID,PROJECT_KEY) values (162,'PROJ4');
+Insert into project_filter_configuration (ID,PROJECT_KEY) values (163,'PROJ5');
+Insert into project_filter_configuration (ID,PROJECT_KEY) values (164,'PROJ6');
+Insert into project_filter_configuration (ID,PROJECT_KEY) values (165,'PROJ7');
+Insert into project_filter_configuration (ID,PROJECT_KEY) values (166,'PROJ8');
+
 
 -- INSERTING into team_filter_configuration
 Insert into team_filter_configuration (ID,TEAM_ID) values (174,521);
@@ -640,6 +649,10 @@ Insert into user_team (ID,CREATED_AT,END_DATE,IS_ESPECIFICADOR,TEAM,UPDATED_AT,U
 Insert into user_team (ID,CREATED_AT,END_DATE,IS_ESPECIFICADOR,TEAM,UPDATED_AT,USER_NAME) values (3200,PARSEDATETIME('17-02-17','DD-MM-yy'),null,0,'ARQ',PARSEDATETIME('20-02-17','DD-MM-yy'),'eduardo.vasques');
 Insert into user_team (ID,CREATED_AT,END_DATE,IS_ESPECIFICADOR,TEAM,UPDATED_AT,USER_NAME) values (3244,PARSEDATETIME('16-09-15','DD-MM-yy'),null,0,'TASKBOARD 2',PARSEDATETIME('27-10-16','DD-MM-yy'),'jean.takano');
 Insert into user_team (ID,CREATED_AT,END_DATE,IS_ESPECIFICADOR,TEAM,UPDATED_AT,USER_NAME) values (3245,PARSEDATETIME('16-09-15','DD-MM-yy'),null,0,'TASKBOARD 1',PARSEDATETIME('27-10-16','DD-MM-yy'),'taskboard');
+Insert into user_team (ID,CREATED_AT,END_DATE,IS_ESPECIFICADOR,TEAM,UPDATED_AT,USER_NAME) values (3246,PARSEDATETIME('16-09-15','DD-MM-yy'),null,0,'TASKBOARD 2',PARSEDATETIME('27-10-16','DD-MM-yy'),'gtakeuchi');
+Insert into user_team (ID,CREATED_AT,END_DATE,IS_ESPECIFICADOR,TEAM,UPDATED_AT,USER_NAME) values (3247,PARSEDATETIME('16-09-15','DD-MM-yy'),null,0,'TASKBOARD 2',PARSEDATETIME('27-10-16','DD-MM-yy'),'jhony.gomes');
+Insert into user_team (ID,CREATED_AT,END_DATE,IS_ESPECIFICADOR,TEAM,UPDATED_AT,USER_NAME) values (3248,PARSEDATETIME('16-09-15','DD-MM-yy'),null,0,'TASKBOARD 2',PARSEDATETIME('27-10-16','DD-MM-yy'),'nazar');
+Insert into user_team (ID,CREATED_AT,END_DATE,IS_ESPECIFICADOR,TEAM,UPDATED_AT,USER_NAME) values (3249,PARSEDATETIME('16-09-15','DD-MM-yy'),null,0,'TASKBOARD 2',PARSEDATETIME('27-10-16','DD-MM-yy'),'foo');
 
 -- INSERTING into holiday
 -- delete from holiday;
