@@ -38,6 +38,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.DateDeserializers.DateDeserializer;
 
 import lombok.Data;
+import objective.taskboard.config.SpringContextBridge;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraProperties.BallparkMapping;
 import objective.taskboard.jira.MetadataService;
@@ -239,7 +240,9 @@ public class Issue implements Serializable {
         return customFields;
     }
 
-    public Issue(){}
+    public Issue(){
+        jiraProperties = SpringContextBridge.getBean(JiraProperties.class);
+    }
 
     private Issue(Long id, String issueKey, String projectKey, String project, long type, String typeIconUri,
             String summary, long status, long startDateStepMillis, String subresponsavel1, String subresponsavel2,
