@@ -46,7 +46,7 @@
                       on-iron-signal-hierarchical-filter-changed="preferencesUpdated"
                       on-iron-signal-issues-updated="handleUpdatedIssues"
                       ></iron-signals>
-        <div id="board-step-{{parentLaneId}}-{{stepMetadata.id}}-{{team}}" class="wrap layout horizontal sortable-board-step" style="width: 100%">
+        <div id="boardStep" class="wrap layout horizontal sortable-board-step" style="width: 100%">
 
             <!-- Issue Counter -->
             <template is="dom-if" if="{{showTeamCount(issues, lastPreferenceUpdate)}}">
@@ -182,11 +182,7 @@
                 },
                 
                 stepItem: function() {
-                	var t = "";
-                	if (typeof this.team !== 'undefined')
-                		t = this.team
-                	t = t.replace(/ /,"\\ ")
-                	return $("#board-step-"+this.parentLaneId+"-"+this.stepMetadata.id+"-"+t);
+                	return $(this.$.boardStep);
                 },
 
                 showParentIconInSynthetic: function() {
