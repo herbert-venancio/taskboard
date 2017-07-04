@@ -1443,8 +1443,9 @@ public class FollowupDataProviderImplTest {
                 null, //comments
                 null, //labels
                 null, //components
-                customFields, //customFields
-                0L,   //priorityOrder
+                null, //customFields
+                customFields,   //priorityOrder
+                0L,
                 timeTracking,
                 jiraProperties,
                 metadataService);

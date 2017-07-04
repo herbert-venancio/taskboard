@@ -198,24 +198,50 @@ public class MainPage extends AbstractUiFragment {
     }
     
     class IssueDetails {
-        WebElement webElement;
+        WebElement issueDetailRoot;
         public IssueDetails() {
-            webElement = webDriver.findElement(By.cssSelector("paper-card.issue-detail"));
+            issueDetailRoot = webDriver.findElement(By.cssSelector("paper-card.issue-detail"));
         }
         
         public void assignToMe() {
-            waitVisibilityOfElement(webElement);
-            WebElement assignButton = webElement.findElement(By.id("assignButton"));
+            waitVisibilityOfElement(issueDetailRoot);
+            WebElement assignButton = issueDetailRoot.findElement(By.id("assignButton"));
             waitVisibilityOfElement(assignButton);
             assignButton.click();
         }
         
-        public void isHidden() {
-            waitInvisibilityOfElement(webElement);
+        public void assertIsHidden() {
+            waitInvisibilityOfElement(issueDetailRoot);
+        }
+
+        public IssueDetails transitionClick(String transitionName) {
+            waitVisibilityOfElement(issueDetailRoot);
+            WebElement transitionButton = issueDetailRoot.findElement(By.cssSelector("[data-transition-name='"+transitionName+"']"));
+            waitVisibilityOfElement(transitionButton);
+            transitionButton.click();
+            
+            return this;
         }        
+        
+        public IssueDetails confirm() {
+            WebElement confirmationModal = webDriver.findElement(By.id("confirmModal"));
+            waitVisibilityOfElement(confirmationModal);
+            WebElement confirmButton = confirmationModal.findElement(By.id("confirm"));
+            waitVisibilityOfElement(confirmButton);
+            confirmButton.click();
+            return this;
+        }
     }
 
     public FollowupDialog openFollowUp() {
         return FollowupDialog.open(webDriver);
+    }
+
+    public LaneFragment lane(String laneName) {
+        return LaneFragment.laneName(webDriver, laneName);
+    }
+
+    public IssueDetails issueDetails() {
+        return new IssueDetails();
     }
 }

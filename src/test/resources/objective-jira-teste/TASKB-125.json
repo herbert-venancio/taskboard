@@ -1,1 +1,1173 @@
-{"expand":"renderedFields,names,schema,transitions,operations,editmeta,changelog,versionedRepresentations","id":"214856","self":"http://54.68.128.117:8100/rest/api/2/issue/214856","key":"TASKB-125","fields":{"customfield_11041":null,"customfield_11042":null,"customfield_11043":null,"customfield_10350":null,"customfield_11441":{"self":"http://54.68.128.117:8100/rest/api/2/customFieldOption/12611","value":"S","id":"12611"},"customfield_11044":null,"customfield_11045":[{"self":"http://54.68.128.117:8100/rest/api/2/customFieldOption/11789","value":"Sim","id":"11789"}],"customfield_11440":{"self":"http://54.68.128.117:8100/rest/api/2/customFieldOption/12606","value":"Standard","id":"12606"},"customfield_11443":{"self":"http://54.68.128.117:8100/rest/api/2/customFieldOption/12621","value":"S","id":"12621"},"customfield_11442":{"self":"http://54.68.128.117:8100/rest/api/2/customFieldOption/12616","value":"S","id":"12616"},"resolution":null,"customfield_11445":{"self":"http://54.68.128.117:8100/rest/api/2/customFieldOption/12631","value":"S","id":"12631"},"customfield_11444":{"self":"http://54.68.128.117:8100/rest/api/2/customFieldOption/12626","value":"S","id":"12626"},"lastViewed":null,"customfield_10062":null,"customfield_11551":null,"customfield_11550":null,"priority":{"self":"http://54.68.128.117:8100/rest/api/2/priority/9","iconUrl":"http://54.68.128.117:8100/images/icons/priorities/minor.svg","name":"Média","id":"9"},"customfield_10740":{"self":"http://54.68.128.117:8100/rest/api/2/customFieldOption/11181","value":"Standard","id":"11181"},"labels":["onda6"],"customfield_11546":null,"customfield_11545":null,"customfield_11548":null,"customfield_11547":null,"aggregatetimeoriginalestimate":100800,"timeestimate":null,"issuelinks":[{"id":"143715","self":"http://54.68.128.117:8100/rest/api/2/issueLink/143715","type":{"id":"10150","name":"Demanda","inward":"é demandado por","outward":"demandou","self":"http://54.68.128.117:8100/rest/api/2/issueLinkType/10150"},"inwardIssue":{"id":"214712","key":"TASKB-604","self":"http://54.68.128.117:8100/rest/api/2/issue/214712","fields":{"summary":"Onda 6 - Pacote 5","status":{"self":"http://54.68.128.117:8100/rest/api/2/status/10652","description":"Taskboard","iconUrl":"http://54.68.128.117:8100/images/icons/statuses/generic.png","name":"Doing","id":"10652","statusCategory":{"self":"http://54.68.128.117:8100/rest/api/2/statuscategory/4","id":4,"key":"indeterminate","colorName":"yellow","name":"In Progress"}},"priority":{"self":"http://54.68.128.117:8100/rest/api/2/priority/9","iconUrl":"http://54.68.128.117:8100/images/icons/priorities/minor.svg","name":"Média","id":"9"},"issuetype":{"self":"http://54.68.128.117:8100/rest/api/2/issuetype/10600","id":"10600","description":"Taskboard","iconUrl":"http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12250&avatarType=issuetype","name":"Demand","subtask":false,"avatarId":12250}}}}],"assignee":{"self":"http://54.68.128.117:8100/rest/api/2/user?username=taskboard","name":"taskboard","key":"taskboard","avatarUrls":{"48x48":"http://54.68.128.117:8100/secure/useravatar?avatarId=11670","24x24":"http://54.68.128.117:8100/secure/useravatar?size=small&avatarId=11670","16x16":"http://54.68.128.117:8100/secure/useravatar?size=xsmall&avatarId=11670","32x32":"http://54.68.128.117:8100/secure/useravatar?size=medium&avatarId=11670"},"displayName":"Taskboard","active":true,"timeZone":"America/Sao_Paulo"},"status":{"self":"http://54.68.128.117:8100/rest/api/2/status/10652","description":"Taskboard","iconUrl":"http://54.68.128.117:8100/images/icons/statuses/generic.png","name":"Doing","id":"10652","statusCategory":{"self":"http://54.68.128.117:8100/rest/api/2/statuscategory/4","id":4,"key":"indeterminate","colorName":"yellow","name":"In Progress"}},"customfield_11540":null,"customfield_10450":{"self":"http://54.68.128.117:8100/rest/api/2/customFieldOption/10812","value":"P","id":"10812"},"customfield_10330":null,"customfield_11542":null,"customfield_11544":null,"customfield_11543":null,"customfield_10841":null,"aggregatetimeestimate":48600,"creator":{"self":"http://54.68.128.117:8100/rest/api/2/user?username=elizabeth","name":"elizabeth","key":"elizabeth","avatarUrls":{"48x48":"http://54.68.128.117:8100/secure/useravatar?ownerId=elizabeth&avatarId=11257","24x24":"http://54.68.128.117:8100/secure/useravatar?size=small&ownerId=elizabeth&avatarId=11257","16x16":"http://54.68.128.117:8100/secure/useravatar?size=xsmall&ownerId=elizabeth&avatarId=11257","32x32":"http://54.68.128.117:8100/secure/useravatar?size=medium&ownerId=elizabeth&avatarId=11257"},"displayName":"Elizabeth do Nascimento","active":true,"timeZone":"America/Sao_Paulo"},"subtasks":[{"id":"221943","key":"TASKB-408","self":"http://54.68.128.117:8100/rest/api/2/issue/221943","fields":{"summary":"Análise e Especificação","status":{"self":"http://54.68.128.117:8100/rest/api/2/status/10053","description":"","iconUrl":"http://54.68.128.117:8100/images/icons/statuses/closed.png","name":"Done","id":"10053","statusCategory":{"self":"http://54.68.128.117:8100/rest/api/2/statuscategory/3","id":3,"key":"done","colorName":"green","name":"Done"}},"priority":{"self":"http://54.68.128.117:8100/rest/api/2/priority/9","iconUrl":"http://54.68.128.117:8100/images/icons/priorities/minor.svg","name":"Média","id":"9"},"issuetype":{"self":"http://54.68.128.117:8100/rest/api/2/issuetype/10607","id":"10607","description":"Taskboard","iconUrl":"http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12257&avatarType=issuetype","name":"Tech Planning","subtask":true,"avatarId":12257}}},{"id":"224330","key":"TASKB-535","self":"http://54.68.128.117:8100/rest/api/2/issue/224330","fields":{"summary":"Desenvolvimento","status":{"self":"http://54.68.128.117:8100/rest/api/2/status/10465","description":"","iconUrl":"http://54.68.128.117:8100/images/icons/statuses/generic.png","name":"To Review","id":"10465","statusCategory":{"self":"http://54.68.128.117:8100/rest/api/2/statuscategory/4","id":4,"key":"indeterminate","colorName":"yellow","name":"In Progress"}},"priority":{"self":"http://54.68.128.117:8100/rest/api/2/priority/9","iconUrl":"http://54.68.128.117:8100/images/icons/priorities/minor.svg","name":"Média","id":"9"},"issuetype":{"self":"http://54.68.128.117:8100/rest/api/2/issuetype/10610","id":"10610","description":"Taskboard","iconUrl":"http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12261&avatarType=issuetype","name":"Backend Development","subtask":true,"avatarId":12261}}},{"id":"224919","key":"TASKB-315","self":"http://54.68.128.117:8100/rest/api/2/issue/224919","fields":{"summary":"Alfa - P5 - C665900R - Rel. Reembolso por Mês de Faturamento","status":{"self":"http://54.68.128.117:8100/rest/api/2/status/10053","description":"","iconUrl":"http://54.68.128.117:8100/images/icons/statuses/closed.png","name":"Done","id":"10053","statusCategory":{"self":"http://54.68.128.117:8100/rest/api/2/statuscategory/3","id":3,"key":"done","colorName":"green","name":"Done"}},"priority":{"self":"http://54.68.128.117:8100/rest/api/2/priority/9","iconUrl":"http://54.68.128.117:8100/images/icons/priorities/minor.svg","name":"Média","id":"9"},"issuetype":{"self":"http://54.68.128.117:8100/rest/api/2/issuetype/10603","id":"10603","description":"Taskboard","iconUrl":"http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12253&avatarType=issuetype","name":"Alpha Test","subtask":true,"avatarId":12253}}},{"id":"225039","key":"TASKB-261","self":"http://54.68.128.117:8100/rest/api/2/issue/225039","fields":{"summary":"Bug - Alfa - P5 - C665900R - Rel. Reembolso por Mês de Faturamento","status":{"self":"http://54.68.128.117:8100/rest/api/2/status/10656","description":"Taskboard","iconUrl":"http://54.68.128.117:8100/images/icons/statuses/generic.png","name":"Cancelled","id":"10656","statusCategory":{"self":"http://54.68.128.117:8100/rest/api/2/statuscategory/3","id":3,"key":"done","colorName":"green","name":"Done"}},"priority":{"self":"http://54.68.128.117:8100/rest/api/2/priority/9","iconUrl":"http://54.68.128.117:8100/images/icons/priorities/minor.svg","name":"Média","id":"9"},"issuetype":{"self":"http://54.68.128.117:8100/rest/api/2/issuetype/10602","id":"10602","description":"Taskboard","iconUrl":"http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12252&avatarType=issuetype","name":"Alpha Bug","subtask":true,"avatarId":12252}}}],"reporter":{"self":"http://54.68.128.117:8100/rest/api/2/user?username=elizabeth","name":"elizabeth","key":"elizabeth","avatarUrls":{"48x48":"http://54.68.128.117:8100/secure/useravatar?ownerId=elizabeth&avatarId=11257","24x24":"http://54.68.128.117:8100/secure/useravatar?size=small&ownerId=elizabeth&avatarId=11257","16x16":"http://54.68.128.117:8100/secure/useravatar?size=xsmall&ownerId=elizabeth&avatarId=11257","32x32":"http://54.68.128.117:8100/secure/useravatar?size=medium&ownerId=elizabeth&avatarId=11257"},"displayName":"Elizabeth do Nascimento","active":true,"timeZone":"America/Sao_Paulo"},"aggregateprogress":{"progress":178200,"total":226800,"percent":78},"customfield_10200":null,"customfield_10201":null,"customfield_10202":null,"progress":{"progress":0,"total":0},"votes":{"self":"http://54.68.128.117:8100/rest/api/2/issue/TASKB-125/votes","votes":0,"hasVoted":false},"worklog":{"startAt":0,"maxResults":20,"total":0,"worklogs":[]},"issuetype":{"self":"http://54.68.128.117:8100/rest/api/2/issuetype/10601","id":"10601","description":"Taskboard","iconUrl":"http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype","name":"Feature","subtask":false,"avatarId":12251},"timespent":null,"customfield_10272":null,"customfield_10273":null,"customfield_11241":null,"project":{"self":"http://54.68.128.117:8100/rest/api/2/project/11315","id":"11315","key":"TASKB","name":"Taskboard","avatarUrls":{"48x48":"http://54.68.128.117:8100/secure/projectavatar?avatarId=11653","24x24":"http://54.68.128.117:8100/secure/projectavatar?size=small&avatarId=11653","16x16":"http://54.68.128.117:8100/secure/projectavatar?size=xsmall&avatarId=11653","32x32":"http://54.68.128.117:8100/secure/projectavatar?size=medium&avatarId=11653"},"projectCategory":{"self":"http://54.68.128.117:8100/rest/api/2/projectCategory/10001","id":"10001","name":"Externo"}},"customfield_11242":null,"customfield_11243":null,"customfield_11244":{"self":"http://54.68.128.117:8100/rest/api/2/customFieldOption/12323","value":"P","id":"12323"},"aggregatetimespent":178200,"customfield_11640":null,"customfield_11245":{"self":"http://54.68.128.117:8100/rest/api/2/customFieldOption/12328","value":"P","id":"12328"},"customfield_11246":{"self":"http://54.68.128.117:8100/rest/api/2/customFieldOption/12333","value":"P","id":"12333"},"customfield_11247":{"self":"http://54.68.128.117:8100/rest/api/2/customFieldOption/12338","value":"P","id":"12338"},"customfield_10940":null,"customfield_10302":null,"customfield_10303":null,"resolutiondate":null,"workratio":-1,"watches":{"self":"http://54.68.128.117:8100/rest/api/2/issue/TASKB-125/watchers","watchCount":1,"isWatching":false},"created":"2016-10-03T17:12:50.000+0000","customfield_10260":null,"customfield_10540":null,"customfield_10301":null,"updated":"2017-04-04T13:41:15.000+0000","customfield_10092":null,"customfield_10093":null,"customfield_10370":null,"timeoriginalestimate":null,"customfield_11340":{"self":"http://54.68.128.117:8100/rest/api/2/customFieldOption/12390","value":"N/A","id":"12390"},"description":"Vide Tarefas","customfield_11341":{"self":"http://54.68.128.117:8100/rest/api/2/customFieldOption/12391","value":"N/A","id":"12391"},"customfield_10650":"0|i0yfcz:","customfield_10013":null,"timetracking":{},"customfield_10644":"9223372036854775807","customfield_10645":null,"customfield_10647":null,"attachment":[{"self":"http://54.68.128.117:8100/rest/api/2/attachment/132997","id":"132997","filename":"C665900R.rdf","author":{"self":"http://54.68.128.117:8100/rest/api/2/user?username=sergio","name":"sergio","key":"sergio","avatarUrls":{"48x48":"http://www.gravatar.com/avatar/73687445b7ecdb4f226e4470c2b2529d?d=mm&s=48","24x24":"http://www.gravatar.com/avatar/73687445b7ecdb4f226e4470c2b2529d?d=mm&s=24","16x16":"http://www.gravatar.com/avatar/73687445b7ecdb4f226e4470c2b2529d?d=mm&s=16","32x32":"http://www.gravatar.com/avatar/73687445b7ecdb4f226e4470c2b2529d?d=mm&s=32"},"displayName":"Sergio Egashira","active":true,"timeZone":"America/Sao_Paulo"},"created":"2016-12-30T08:35:38.000+0000","size":258048,"mimeType":"application/rdf+xml","content":"http://54.68.128.117:8100/secure/attachment/132997/C665900R.rdf"},{"self":"http://54.68.128.117:8100/rest/api/2/attachment/132996","id":"132996","filename":"screenshot-1.png","author":{"self":"http://54.68.128.117:8100/rest/api/2/user?username=sergio","name":"sergio","key":"sergio","avatarUrls":{"48x48":"http://www.gravatar.com/avatar/73687445b7ecdb4f226e4470c2b2529d?d=mm&s=48","24x24":"http://www.gravatar.com/avatar/73687445b7ecdb4f226e4470c2b2529d?d=mm&s=24","16x16":"http://www.gravatar.com/avatar/73687445b7ecdb4f226e4470c2b2529d?d=mm&s=16","32x32":"http://www.gravatar.com/avatar/73687445b7ecdb4f226e4470c2b2529d?d=mm&s=32"},"displayName":"Sergio Egashira","active":true,"timeZone":"America/Sao_Paulo"},"created":"2016-12-30T08:35:27.000+0000","size":171369,"mimeType":"image/png","content":"http://54.68.128.117:8100/secure/attachment/132996/screenshot-1.png","thumbnail":"http://54.68.128.117:8100/secure/thumbnail/132996/_thumb_132996.png"}],"summary":"P5 - C665900R - Rel. Reembolso por Mês de Faturamento","customfield_11450":null,"customfield_11452":null,"customfield_11451":null,"customfield_11454":null,"customfield_10640":null,"customfield_11453":null,"customfield_10641":null,"customfield_11456":null,"customfield_11455":null,"customfield_11447":{"self":"http://54.68.128.117:8100/rest/api/2/customFieldOption/12641","value":"S","id":"12641"},"customfield_11446":{"self":"http://54.68.128.117:8100/rest/api/2/customFieldOption/12636","value":"S","id":"12636"},"environment":null,"customfield_11449":{"self":"http://54.68.128.117:8100/rest/api/2/customFieldOption/12651","value":"S","id":"12651"},"duedate":null,"comment":{"startAt":0,"maxResults":0,"total":0,"comments":[]}},"names":{"customfield_11041":"Where","customfield_11042":"Why","customfield_11043":"How","customfield_10350":"Complexidade","customfield_11441":"Alpha Test TSize","customfield_11044":"How to Measure","customfield_11045":"Baseline","customfield_11440":"Class of Service","customfield_11443":"QA Support TSize","customfield_11442":"Feature Review TSize","resolution":"Resolution","customfield_11445":"Tech Planning TSize","customfield_11444":"Feature Planning TSize","lastViewed":"Last Viewed","customfield_10062":"Build de Integração","customfield_11551":"Data Autorização NF","customfield_11550":"Horas","priority":"Priority","customfield_10740":"Classe de Serviço","labels":"Labels","customfield_11546":"Data Emissão NF","customfield_11545":"Nota Fiscal Número","customfield_11548":"Data Pagto NF","customfield_11547":"Data Vecto NF","aggregatetimeoriginalestimate":"Σ Original Estimate","timeestimate":"Remaining Estimate","issuelinks":"Linked Issues","assignee":"Assignee","status":"Status","customfield_11540":"Valor","customfield_10450":"Tamanho","customfield_10330":"Projeto Solicitante","customfield_11542":"Ordem de Compra","customfield_11544":"Nota Fiscal Detalhes","customfield_11543":"Data Ordem de Compra","customfield_10841":"Demanda de Origem","aggregatetimeestimate":"Σ Remaining Estimate","creator":"Creator","subtasks":"Sub-Tasks","reporter":"Reporter","aggregateprogress":"Σ Progress","customfield_10200":"Desenvolvedores","customfield_10201":"Especificador","customfield_10202":"Branch","progress":"Progress","votes":"Votes","worklog":"Log Work","issuetype":"Issue Type","timespent":"Time Spent","customfield_10272":"Severidade","customfield_10273":"PrioridadeCarga","customfield_11241":"Data Final (SLA)","project":"Project","customfield_11242":"Skill","customfield_11243":"Último Motivo Impedimento","customfield_11244":"Planejamento Tamanho","aggregatetimespent":"Σ Time Spent","customfield_11640":"PriorityOrder","customfield_11245":"Desenvolvimento Tamanho","customfield_11246":"Alfa Tamanho","customfield_11247":"Acompanhamento Tamanho","customfield_10940":"Impedido","customfield_10302":"Timesheet End Date","customfield_10303":"Timesheet Aggregation","resolutiondate":"Resolved","workratio":"Work Ratio","watches":"Watchers","created":"Created","customfield_10260":"Prioridade Manual","customfield_10540":"issueFunction","customfield_10301":"Timesheet Start Date","updated":"Updated","customfield_10092":"Modo de Execução","customfield_10093":"Patch","customfield_10370":"Sub-Responsáveis","timeoriginalestimate":"Original Estimate","customfield_11340":"Beta Tamanho","description":"Description","customfield_11341":"UX Tamanho","customfield_10650":"Rank","customfield_10013":"Ambiente Cliente","timetracking":"Time Tracking","customfield_10644":"GreenHopper Ranking","customfield_10645":"Sprint","customfield_10647":"Epic Link","attachment":"Attachment","summary":"Summary","customfield_11450":"Additional Estimated Hours","customfield_11452":"Last Block Reason","customfield_11451":"Blocked","customfield_11454":"Subject Matter Expert","customfield_10640":"Flagged","customfield_11453":"Acceptance Criteria","customfield_10641":"Epic/Theme","customfield_11456":"Co-Assignees","customfield_11455":"Release","customfield_11447":"Development TSize","customfield_11446":"UX TSize","environment":"Environment","customfield_11449":"Dev Support TSize","duedate":"Due Date","comment":"Comment"},"schema":{"customfield_11041":{"type":"string","custom":"com.atlassian.jira.plugin.system.customfieldtypes:textfield","customId":11041},"customfield_11042":{"type":"string","custom":"com.atlassian.jira.plugin.system.customfieldtypes:textarea","customId":11042},"customfield_11043":{"type":"string","custom":"com.atlassian.jira.plugin.system.customfieldtypes:textarea","customId":11043},"customfield_10350":{"type":"option","custom":"com.atlassian.jira.plugin.system.customfieldtypes:select","customId":10350},"customfield_11441":{"type":"option","custom":"com.atlassian.jira.plugin.system.customfieldtypes:select","customId":11441},"customfield_11044":{"type":"string","custom":"com.atlassian.jira.plugin.system.customfieldtypes:textarea","customId":11044},"customfield_11045":{"type":"array","items":"option","custom":"com.atlassian.jira.plugin.system.customfieldtypes:multicheckboxes","customId":11045},"customfield_11440":{"type":"option","custom":"com.atlassian.jira.plugin.system.customfieldtypes:select","customId":11440},"customfield_11443":{"type":"option","custom":"com.atlassian.jira.plugin.system.customfieldtypes:select","customId":11443},"customfield_11442":{"type":"option","custom":"com.atlassian.jira.plugin.system.customfieldtypes:select","customId":11442},"resolution":{"type":"resolution","system":"resolution"},"customfield_11445":{"type":"option","custom":"com.atlassian.jira.plugin.system.customfieldtypes:select","customId":11445},"customfield_11444":{"type":"option","custom":"com.atlassian.jira.plugin.system.customfieldtypes:select","customId":11444},"lastViewed":{"type":"datetime","system":"lastViewed"},"customfield_10062":{"type":"string","custom":"com.atlassian.jira.plugin.system.customfieldtypes:textfield","customId":10062},"customfield_11551":{"type":"date","custom":"com.atlassian.jira.plugin.system.customfieldtypes:datepicker","customId":11551},"customfield_11550":{"type":"string","custom":"com.atlassian.jira.plugin.system.customfieldtypes:textfield","customId":11550},"priority":{"type":"priority","system":"priority"},"customfield_10740":{"type":"option","custom":"com.atlassian.jira.plugin.system.customfieldtypes:select","customId":10740},"labels":{"type":"array","items":"string","system":"labels"},"customfield_11546":{"type":"date","custom":"com.atlassian.jira.plugin.system.customfieldtypes:datepicker","customId":11546},"customfield_11545":{"type":"string","custom":"com.atlassian.jira.plugin.system.customfieldtypes:textfield","customId":11545},"customfield_11548":{"type":"date","custom":"com.atlassian.jira.plugin.system.customfieldtypes:datepicker","customId":11548},"customfield_11547":{"type":"date","custom":"com.atlassian.jira.plugin.system.customfieldtypes:datepicker","customId":11547},"aggregatetimeoriginalestimate":{"type":"number","system":"aggregatetimeoriginalestimate"},"timeestimate":{"type":"number","system":"timeestimate"},"issuelinks":{"type":"array","items":"issuelinks","system":"issuelinks"},"assignee":{"type":"user","system":"assignee"},"status":{"type":"status","system":"status"},"customfield_11540":{"type":"string","custom":"com.atlassian.jira.plugin.system.customfieldtypes:textfield","customId":11540},"customfield_10450":{"type":"option","custom":"com.atlassian.jira.plugin.system.customfieldtypes:select","customId":10450},"customfield_10330":{"type":"project","custom":"com.atlassian.jira.plugin.system.customfieldtypes:project","customId":10330},"customfield_11542":{"type":"string","custom":"com.atlassian.jira.plugin.system.customfieldtypes:textfield","customId":11542},"customfield_11544":{"type":"string","custom":"com.atlassian.jira.plugin.system.customfieldtypes:textarea","customId":11544},"customfield_11543":{"type":"date","custom":"com.atlassian.jira.plugin.system.customfieldtypes:datepicker","customId":11543},"customfield_10841":{"type":"string","custom":"com.atlassian.jira.plugin.system.customfieldtypes:textfield","customId":10841},"aggregatetimeestimate":{"type":"number","system":"aggregatetimeestimate"},"creator":{"type":"user","system":"creator"},"subtasks":{"type":"array","items":"issuelinks","system":"subtasks"},"reporter":{"type":"user","system":"reporter"},"aggregateprogress":{"type":"progress","system":"aggregateprogress"},"customfield_10200":{"type":"array","items":"user","custom":"com.atlassian.jira.plugin.system.customfieldtypes:multiuserpicker","customId":10200},"customfield_10201":{"type":"user","custom":"com.atlassian.jira.plugin.system.customfieldtypes:userpicker","customId":10201},"customfield_10202":{"type":"string","custom":"com.atlassian.jira.plugin.system.customfieldtypes:textfield","customId":10202},"progress":{"type":"progress","system":"progress"},"votes":{"type":"votes","system":"votes"},"worklog":{"type":"array","items":"worklog","system":"worklog"},"issuetype":{"type":"issuetype","system":"issuetype"},"timespent":{"type":"number","system":"timespent"},"customfield_10272":{"type":"option","custom":"com.atlassian.jira.plugin.system.customfieldtypes:select","customId":10272},"customfield_10273":{"type":"number","custom":"com.atlassian.jira.plugin.system.customfieldtypes:float","customId":10273},"customfield_11241":{"type":"datetime","custom":"objective.jira.unlogged-fields:unlogged-datetime","customId":11241},"project":{"type":"project","system":"project"},"customfield_11242":{"type":"option-with-child","custom":"com.atlassian.jira.plugin.system.customfieldtypes:cascadingselect","customId":11242},"customfield_11243":{"type":"string","custom":"com.atlassian.jira.plugin.system.customfieldtypes:textarea","customId":11243},"customfield_11244":{"type":"option","custom":"com.atlassian.jira.plugin.system.customfieldtypes:select","customId":11244},"aggregatetimespent":{"type":"number","system":"aggregatetimespent"},"customfield_11640":{"type":"number","custom":"com.atlassian.jira.plugin.system.customfieldtypes:float","customId":11640},"customfield_11245":{"type":"option","custom":"com.atlassian.jira.plugin.system.customfieldtypes:select","customId":11245},"customfield_11246":{"type":"option","custom":"com.atlassian.jira.plugin.system.customfieldtypes:select","customId":11246},"customfield_11247":{"type":"option","custom":"com.atlassian.jira.plugin.system.customfieldtypes:select","customId":11247},"customfield_10940":{"type":"array","items":"option","custom":"com.atlassian.jira.plugin.system.customfieldtypes:multicheckboxes","customId":10940},"customfield_10302":{"type":"date","custom":"com.atlassian.jira.plugin.system.customfieldtypes:datepicker","customId":10302},"customfield_10303":{"type":"string","custom":"com.atlassian.jira.plugin.system.customfieldtypes:textfield","customId":10303},"resolutiondate":{"type":"datetime","system":"resolutiondate"},"workratio":{"type":"number","system":"workratio"},"watches":{"type":"watches","system":"watches"},"created":{"type":"datetime","system":"created"},"customfield_10260":{"type":"number","custom":"com.atlassian.jira.plugin.system.customfieldtypes:float","customId":10260},"customfield_10540":{"type":"any","custom":"com.onresolve.jira.groovy.groovyrunner:jqlFunctionsCustomFieldType","customId":10540},"customfield_10301":{"type":"date","custom":"com.atlassian.jira.plugin.system.customfieldtypes:datepicker","customId":10301},"updated":{"type":"datetime","system":"updated"},"customfield_10092":{"type":"array","items":"option","custom":"com.atlassian.jira.plugin.system.customfieldtypes:multiselect","customId":10092},"customfield_10093":{"type":"number","custom":"com.atlassian.jira.plugin.system.customfieldtypes:float","customId":10093},"customfield_10370":{"type":"array","items":"user","custom":"com.atlassian.jira.plugin.system.customfieldtypes:multiuserpicker","customId":10370},"timeoriginalestimate":{"type":"number","system":"timeoriginalestimate"},"customfield_11340":{"type":"option","custom":"com.atlassian.jira.plugin.system.customfieldtypes:select","customId":11340},"description":{"type":"string","system":"description"},"customfield_11341":{"type":"option","custom":"com.atlassian.jira.plugin.system.customfieldtypes:select","customId":11341},"customfield_10650":{"type":"any","custom":"com.pyxis.greenhopper.jira:gh-lexo-rank","customId":10650},"customfield_10013":{"type":"option","custom":"com.atlassian.jira.plugin.system.customfieldtypes:select","customId":10013},"timetracking":{"type":"timetracking","system":"timetracking"},"customfield_10644":{"type":"any","custom":"com.pyxis.greenhopper.jira:gh-global-rank","customId":10644},"customfield_10645":{"type":"array","items":"string","custom":"com.pyxis.greenhopper.jira:gh-sprint","customId":10645},"customfield_10647":{"type":"any","custom":"com.pyxis.greenhopper.jira:gh-epic-link","customId":10647},"attachment":{"type":"array","items":"attachment","system":"attachment"},"summary":{"type":"string","system":"summary"},"customfield_11450":{"type":"number","custom":"com.atlassian.jira.plugin.system.customfieldtypes:float","customId":11450},"customfield_11452":{"type":"string","custom":"com.atlassian.jira.plugin.system.customfieldtypes:textarea","customId":11452},"customfield_11451":{"type":"array","items":"option","custom":"com.atlassian.jira.plugin.system.customfieldtypes:multicheckboxes","customId":11451},"customfield_11454":{"type":"user","custom":"com.atlassian.jira.plugin.system.customfieldtypes:userpicker","customId":11454},"customfield_10640":{"type":"array","items":"option","custom":"com.atlassian.jira.plugin.system.customfieldtypes:multicheckboxes","customId":10640},"customfield_11453":{"type":"string","custom":"com.atlassian.jira.plugin.system.customfieldtypes:textarea","customId":11453},"customfield_10641":{"type":"array","items":"string","custom":"com.atlassian.jira.plugin.system.customfieldtypes:labels","customId":10641},"customfield_11456":{"type":"array","items":"user","custom":"com.atlassian.jira.plugin.system.customfieldtypes:multiuserpicker","customId":11456},"customfield_11455":{"type":"version","custom":"com.atlassian.jira.plugin.system.customfieldtypes:version","customId":11455},"customfield_11447":{"type":"option","custom":"com.atlassian.jira.plugin.system.customfieldtypes:select","customId":11447},"customfield_11446":{"type":"option","custom":"com.atlassian.jira.plugin.system.customfieldtypes:select","customId":11446},"environment":{"type":"string","system":"environment"},"customfield_11449":{"type":"option","custom":"com.atlassian.jira.plugin.system.customfieldtypes:select","customId":11449},"duedate":{"type":"date","system":"duedate"},"comment":{"type":"comments-page","system":"comment"}},"transitions":[{"id":"51","name":"Back to 'To Do'","to":{"self":"http://54.68.128.117:8100/rest/api/2/status/10052","description":"","iconUrl":"http://54.68.128.117:8100/images/icons/statuses/open.png","name":"To Do","id":"10052","statusCategory":{"self":"http://54.68.128.117:8100/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To Do"}}},{"id":"111","name":"Deferred","to":{"self":"http://54.68.128.117:8100/rest/api/2/status/10655","description":"Taskboard","iconUrl":"http://54.68.128.117:8100/images/icons/statuses/generic.png","name":"Deferred","id":"10655","statusCategory":{"self":"http://54.68.128.117:8100/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To Do"}}}]}
+{
+    "expand": "renderedFields,names,schema,transitions,operations,editmeta,changelog,versionedRepresentations",
+    "fields": {
+        "aggregateprogress": {
+            "percent": 78,
+            "progress": 178200,
+            "total": 226800
+        },
+        "aggregatetimeestimate": 48600,
+        "aggregatetimeoriginalestimate": 100800,
+        "aggregatetimespent": 178200,
+        "assignee": {
+            "active": true,
+            "avatarUrls": {
+                "16x16": "http://54.68.128.117:8100/secure/useravatar?size=xsmall&avatarId=11670",
+                "24x24": "http://54.68.128.117:8100/secure/useravatar?size=small&avatarId=11670",
+                "32x32": "http://54.68.128.117:8100/secure/useravatar?size=medium&avatarId=11670",
+                "48x48": "http://54.68.128.117:8100/secure/useravatar?avatarId=11670"
+            },
+            "displayName": "Taskboard",
+            "key": "taskboard",
+            "name": "taskboard",
+            "self": "http://54.68.128.117:8100/rest/api/latest/user?username=taskboard",
+            "timeZone": "America/Sao_Paulo"
+        },
+        "attachment": [
+            {
+                "author": {
+                    "active": true,
+                    "avatarUrls": {
+                        "16x16": "http://www.gravatar.com/avatar/73687445b7ecdb4f226e4470c2b2529d?d=mm&s=16",
+                        "24x24": "http://www.gravatar.com/avatar/73687445b7ecdb4f226e4470c2b2529d?d=mm&s=24",
+                        "32x32": "http://www.gravatar.com/avatar/73687445b7ecdb4f226e4470c2b2529d?d=mm&s=32",
+                        "48x48": "http://www.gravatar.com/avatar/73687445b7ecdb4f226e4470c2b2529d?d=mm&s=48"
+                    },
+                    "displayName": "Sergio Egashira",
+                    "key": "sergio",
+                    "name": "sergio",
+                    "self": "http://54.68.128.117:8100/rest/api/latest/user?username=sergio",
+                    "timeZone": "America/Sao_Paulo"
+                },
+                "content": "http://54.68.128.117:8100/secure/attachment/132997/C665900R.rdf",
+                "created": "2016-12-30T08:35:38.000+0000",
+                "filename": "C665900R.rdf",
+                "id": "132997",
+                "mimeType": "application/rdf+xml",
+                "self": "http://54.68.128.117:8100/rest/api/latest/attachment/132997",
+                "size": 258048
+            },
+            {
+                "author": {
+                    "active": true,
+                    "avatarUrls": {
+                        "16x16": "http://www.gravatar.com/avatar/73687445b7ecdb4f226e4470c2b2529d?d=mm&s=16",
+                        "24x24": "http://www.gravatar.com/avatar/73687445b7ecdb4f226e4470c2b2529d?d=mm&s=24",
+                        "32x32": "http://www.gravatar.com/avatar/73687445b7ecdb4f226e4470c2b2529d?d=mm&s=32",
+                        "48x48": "http://www.gravatar.com/avatar/73687445b7ecdb4f226e4470c2b2529d?d=mm&s=48"
+                    },
+                    "displayName": "Sergio Egashira",
+                    "key": "sergio",
+                    "name": "sergio",
+                    "self": "http://54.68.128.117:8100/rest/api/latest/user?username=sergio",
+                    "timeZone": "America/Sao_Paulo"
+                },
+                "content": "http://54.68.128.117:8100/secure/attachment/132996/screenshot-1.png",
+                "created": "2016-12-30T08:35:27.000+0000",
+                "filename": "screenshot-1.png",
+                "id": "132996",
+                "mimeType": "image/png",
+                "self": "http://54.68.128.117:8100/rest/api/latest/attachment/132996",
+                "size": 171369,
+                "thumbnail": "http://54.68.128.117:8100/secure/thumbnail/132996/_thumb_132996.png"
+            }
+        ],
+        "comment": {
+            "comments": [],
+            "maxResults": 0,
+            "startAt": 0,
+            "total": 0
+        },
+        "created": "2016-10-03T17:12:50.000+0000",
+        "creator": {
+            "active": true,
+            "avatarUrls": {
+                "16x16": "http://54.68.128.117:8100/secure/useravatar?size=xsmall&ownerId=elizabeth&avatarId=11257",
+                "24x24": "http://54.68.128.117:8100/secure/useravatar?size=small&ownerId=elizabeth&avatarId=11257",
+                "32x32": "http://54.68.128.117:8100/secure/useravatar?size=medium&ownerId=elizabeth&avatarId=11257",
+                "48x48": "http://54.68.128.117:8100/secure/useravatar?ownerId=elizabeth&avatarId=11257"
+            },
+            "displayName": "Elizabeth do Nascimento",
+            "key": "elizabeth",
+            "name": "elizabeth",
+            "self": "http://54.68.128.117:8100/rest/api/latest/user?username=elizabeth",
+            "timeZone": "America/Sao_Paulo"
+        },
+        "customfield_10013": null,
+        "customfield_10062": null,
+        "customfield_10092": null,
+        "customfield_10093": null,
+        "customfield_10200": null,
+        "customfield_10201": null,
+        "customfield_10202": null,
+        "customfield_10260": null,
+        "customfield_10272": null,
+        "customfield_10273": null,
+        "customfield_10301": null,
+        "customfield_10302": null,
+        "customfield_10303": null,
+        "customfield_10330": null,
+        "customfield_10350": null,
+        "customfield_10370": null,
+        "customfield_10450": {
+            "id": "10812",
+            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/10812",
+            "value": "P"
+        },
+        "customfield_10540": null,
+        "customfield_10640": null,
+        "customfield_10641": null,
+        "customfield_10644": "9223372036854775807",
+        "customfield_10645": null,
+        "customfield_10647": null,
+        "customfield_10650": "0|i0yfcz:",
+        "customfield_10740": {
+            "id": "11181",
+            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/11181",
+            "value": "Standard"
+        },
+        "customfield_10841": null,
+        "customfield_10940": null,
+        "customfield_11041": null,
+        "customfield_11042": null,
+        "customfield_11043": null,
+        "customfield_11044": null,
+        "customfield_11045": [
+            {
+                "id": "11789",
+                "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/11789",
+                "value": "Sim"
+            }
+        ],
+        "customfield_11241": null,
+        "customfield_11242": null,
+        "customfield_11243": null,
+        "customfield_11244": {
+            "id": "12323",
+            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12323",
+            "value": "P"
+        },
+        "customfield_11245": {
+            "id": "12328",
+            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12328",
+            "value": "P"
+        },
+        "customfield_11246": {
+            "id": "12333",
+            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12333",
+            "value": "P"
+        },
+        "customfield_11247": {
+            "id": "12338",
+            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12338",
+            "value": "P"
+        },
+        "customfield_11340": {
+            "id": "12390",
+            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12390",
+            "value": "N/A"
+        },
+        "customfield_11341": {
+            "id": "12391",
+            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12391",
+            "value": "N/A"
+        },
+        "customfield_11440": {
+            "id": "12606",
+            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12606",
+            "value": "Standard"
+        },
+        "customfield_11441": {
+            "id": "12611",
+            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12611",
+            "value": "S"
+        },
+        "customfield_11442": {
+            "id": "12616",
+            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12616",
+            "value": "S"
+        },
+        "customfield_11443": {
+            "id": "12621",
+            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12621",
+            "value": "S"
+        },
+        "customfield_11444": {
+            "id": "12626",
+            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12626",
+            "value": "S"
+        },
+        "customfield_11445": {
+            "id": "12631",
+            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12631",
+            "value": "S"
+        },
+        "customfield_11446": {
+            "id": "12636",
+            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12636",
+            "value": "S"
+        },
+        "customfield_11447": {
+            "id": "12641",
+            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12641",
+            "value": "S"
+        },
+        "customfield_11449": {
+            "id": "12651",
+            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12651",
+            "value": "S"
+        },
+        "customfield_11450": null,
+        "customfield_11451": null,
+        "customfield_11452": null,
+        "customfield_11453": null,
+        "customfield_11454": null,
+        "customfield_11455": null,
+        "customfield_11456": null,
+        "customfield_11540": null,
+        "customfield_11542": null,
+        "customfield_11543": null,
+        "customfield_11544": null,
+        "customfield_11545": null,
+        "customfield_11546": null,
+        "customfield_11547": null,
+        "customfield_11548": null,
+        "customfield_11550": null,
+        "customfield_11551": null,
+        "customfield_11640": null,
+        "description": "Vide Tarefas",
+        "duedate": null,
+        "environment": null,
+        "issuelinks": [
+            {
+                "id": "143715",
+                "inwardIssue": {
+                    "fields": {
+                        "issuetype": {
+                            "avatarId": 12250,
+                            "description": "Taskboard",
+                            "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12250&avatarType=issuetype",
+                            "id": "10600",
+                            "name": "Demand",
+                            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10600",
+                            "subtask": false
+                        },
+                        "priority": {
+                            "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
+                            "id": "9",
+                            "name": "M\u00e9dia",
+                            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                        },
+                        "status": {
+                            "description": "Taskboard",
+                            "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
+                            "id": "10652",
+                            "name": "Doing",
+                            "self": "http://54.68.128.117:8100/rest/api/latest/status/10652",
+                            "statusCategory": {
+                                "colorName": "yellow",
+                                "id": 4,
+                                "key": "indeterminate",
+                                "name": "In Progress",
+                                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/4"
+                            }
+                        },
+                        "summary": "Onda 6 - Pacote 5"
+                    },
+                    "id": "214712",
+                    "key": "TASKB-604",
+                    "self": "http://54.68.128.117:8100/rest/api/latest/issue/214712"
+                },
+                "self": "http://54.68.128.117:8100/rest/api/latest/issueLink/143715",
+                "type": {
+                    "id": "10150",
+                    "inward": "\u00e9 demandado por",
+                    "name": "Demanda",
+                    "outward": "demandou",
+                    "self": "http://54.68.128.117:8100/rest/api/latest/issueLinkType/10150"
+                }
+            }
+        ],
+        "issuetype": {
+            "avatarId": 12251,
+            "description": "Taskboard",
+            "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
+            "id": "10601",
+            "name": "Feature",
+            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10601",
+            "subtask": false
+        },
+        "labels": [
+            "onda6"
+        ],
+        "lastViewed": null,
+        "priority": {
+            "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
+            "id": "9",
+            "name": "M\u00e9dia",
+            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+        },
+        "progress": {
+            "progress": 0,
+            "total": 0
+        },
+        "project": {
+            "avatarUrls": {
+                "16x16": "http://54.68.128.117:8100/secure/projectavatar?size=xsmall&avatarId=11653",
+                "24x24": "http://54.68.128.117:8100/secure/projectavatar?size=small&avatarId=11653",
+                "32x32": "http://54.68.128.117:8100/secure/projectavatar?size=medium&avatarId=11653",
+                "48x48": "http://54.68.128.117:8100/secure/projectavatar?avatarId=11653"
+            },
+            "id": "11315",
+            "key": "TASKB",
+            "name": "Taskboard",
+            "projectCategory": {
+                "id": "10001",
+                "name": "Externo",
+                "self": "http://54.68.128.117:8100/rest/api/latest/projectCategory/10001"
+            },
+            "self": "http://54.68.128.117:8100/rest/api/latest/project/11315"
+        },
+        "reporter": {
+            "active": true,
+            "avatarUrls": {
+                "16x16": "http://54.68.128.117:8100/secure/useravatar?size=xsmall&ownerId=elizabeth&avatarId=11257",
+                "24x24": "http://54.68.128.117:8100/secure/useravatar?size=small&ownerId=elizabeth&avatarId=11257",
+                "32x32": "http://54.68.128.117:8100/secure/useravatar?size=medium&ownerId=elizabeth&avatarId=11257",
+                "48x48": "http://54.68.128.117:8100/secure/useravatar?ownerId=elizabeth&avatarId=11257"
+            },
+            "displayName": "Elizabeth do Nascimento",
+            "key": "elizabeth",
+            "name": "elizabeth",
+            "self": "http://54.68.128.117:8100/rest/api/latest/user?username=elizabeth",
+            "timeZone": "America/Sao_Paulo"
+        },
+        "resolution": null,
+        "resolutiondate": null,
+        "status": {
+            "description": "Taskboard",
+            "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
+            "id": "10652",
+            "name": "Doing",
+            "self": "http://54.68.128.117:8100/rest/api/latest/status/10652",
+            "statusCategory": {
+                "colorName": "yellow",
+                "id": 4,
+                "key": "indeterminate",
+                "name": "In Progress",
+                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/4"
+            }
+        },
+        "subtasks": [
+            {
+                "fields": {
+                    "issuetype": {
+                        "avatarId": 12257,
+                        "description": "Taskboard",
+                        "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12257&avatarType=issuetype",
+                        "id": "10607",
+                        "name": "Tech Planning",
+                        "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10607",
+                        "subtask": true
+                    },
+                    "priority": {
+                        "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
+                        "id": "9",
+                        "name": "M\u00e9dia",
+                        "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                    },
+                    "status": {
+                        "description": "",
+                        "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/closed.png",
+                        "id": "10053",
+                        "name": "Done",
+                        "self": "http://54.68.128.117:8100/rest/api/latest/status/10053",
+                        "statusCategory": {
+                            "colorName": "green",
+                            "id": 3,
+                            "key": "done",
+                            "name": "Done",
+                            "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/3"
+                        }
+                    },
+                    "summary": "An\u00e1lise e Especifica\u00e7\u00e3o"
+                },
+                "id": "221943",
+                "key": "TASKB-408",
+                "self": "http://54.68.128.117:8100/rest/api/latest/issue/221943"
+            },
+            {
+                "fields": {
+                    "issuetype": {
+                        "avatarId": 12261,
+                        "description": "Taskboard",
+                        "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12261&avatarType=issuetype",
+                        "id": "10610",
+                        "name": "Backend Development",
+                        "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10610",
+                        "subtask": true
+                    },
+                    "priority": {
+                        "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
+                        "id": "9",
+                        "name": "M\u00e9dia",
+                        "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                    },
+                    "status": {
+                        "description": "",
+                        "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
+                        "id": "10465",
+                        "name": "To Review",
+                        "self": "http://54.68.128.117:8100/rest/api/latest/status/10465",
+                        "statusCategory": {
+                            "colorName": "yellow",
+                            "id": 4,
+                            "key": "indeterminate",
+                            "name": "In Progress",
+                            "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/4"
+                        }
+                    },
+                    "summary": "Desenvolvimento"
+                },
+                "id": "224330",
+                "key": "TASKB-535",
+                "self": "http://54.68.128.117:8100/rest/api/latest/issue/224330"
+            },
+            {
+                "fields": {
+                    "issuetype": {
+                        "avatarId": 12253,
+                        "description": "Taskboard",
+                        "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12253&avatarType=issuetype",
+                        "id": "10603",
+                        "name": "Alpha Test",
+                        "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10603",
+                        "subtask": true
+                    },
+                    "priority": {
+                        "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
+                        "id": "9",
+                        "name": "M\u00e9dia",
+                        "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                    },
+                    "status": {
+                        "description": "",
+                        "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/closed.png",
+                        "id": "10053",
+                        "name": "Done",
+                        "self": "http://54.68.128.117:8100/rest/api/latest/status/10053",
+                        "statusCategory": {
+                            "colorName": "green",
+                            "id": 3,
+                            "key": "done",
+                            "name": "Done",
+                            "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/3"
+                        }
+                    },
+                    "summary": "Alfa - P5 - C665900R - Rel. Reembolso por M\u00eas de Faturamento"
+                },
+                "id": "224919",
+                "key": "TASKB-315",
+                "self": "http://54.68.128.117:8100/rest/api/latest/issue/224919"
+            },
+            {
+                "fields": {
+                    "issuetype": {
+                        "avatarId": 12252,
+                        "description": "Taskboard",
+                        "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12252&avatarType=issuetype",
+                        "id": "10602",
+                        "name": "Alpha Bug",
+                        "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10602",
+                        "subtask": true
+                    },
+                    "priority": {
+                        "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
+                        "id": "9",
+                        "name": "M\u00e9dia",
+                        "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                    },
+                    "status": {
+                        "description": "Taskboard",
+                        "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
+                        "id": "10656",
+                        "name": "Cancelled",
+                        "self": "http://54.68.128.117:8100/rest/api/latest/status/10656",
+                        "statusCategory": {
+                            "colorName": "green",
+                            "id": 3,
+                            "key": "done",
+                            "name": "Done",
+                            "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/3"
+                        }
+                    },
+                    "summary": "Bug - Alfa - P5 - C665900R - Rel. Reembolso por M\u00eas de Faturamento"
+                },
+                "id": "225039",
+                "key": "TASKB-261",
+                "self": "http://54.68.128.117:8100/rest/api/latest/issue/225039"
+            }
+        ],
+        "summary": "P5 - C665900R - Rel. Reembolso por M\u00eas de Faturamento",
+        "timeestimate": null,
+        "timeoriginalestimate": null,
+        "timespent": null,
+        "timetracking": {},
+        "updated": "2017-04-04T13:41:15.000+0000",
+        "votes": {
+            "hasVoted": false,
+            "self": "http://54.68.128.117:8100/rest/api/latest/issue/TASKB-125/votes",
+            "votes": 0
+        },
+        "watches": {
+            "isWatching": false,
+            "self": "http://54.68.128.117:8100/rest/api/latest/issue/TASKB-125/watchers",
+            "watchCount": 1
+        },
+        "worklog": {
+            "maxResults": 20,
+            "startAt": 0,
+            "total": 0,
+            "worklogs": []
+        },
+        "workratio": -1
+    },
+    "id": "214856",
+    "key": "TASKB-125",
+    "names": {
+        "aggregateprogress": "\u03a3 Progress",
+        "aggregatetimeestimate": "\u03a3 Remaining Estimate",
+        "aggregatetimeoriginalestimate": "\u03a3 Original Estimate",
+        "aggregatetimespent": "\u03a3 Time Spent",
+        "assignee": "Assignee",
+        "attachment": "Attachment",
+        "comment": "Comment",
+        "created": "Created",
+        "creator": "Creator",
+        "customfield_10013": "Ambiente Cliente",
+        "customfield_10062": "Build de Integra\u00e7\u00e3o",
+        "customfield_10092": "Modo de Execu\u00e7\u00e3o",
+        "customfield_10093": "Patch",
+        "customfield_10200": "Desenvolvedores",
+        "customfield_10201": "Especificador",
+        "customfield_10202": "Branch",
+        "customfield_10260": "Prioridade Manual",
+        "customfield_10272": "Severidade",
+        "customfield_10273": "PrioridadeCarga",
+        "customfield_10301": "Timesheet Start Date",
+        "customfield_10302": "Timesheet End Date",
+        "customfield_10303": "Timesheet Aggregation",
+        "customfield_10330": "Projeto Solicitante",
+        "customfield_10350": "Complexidade",
+        "customfield_10370": "Sub-Respons\u00e1veis",
+        "customfield_10450": "Tamanho",
+        "customfield_10540": "issueFunction",
+        "customfield_10640": "Flagged",
+        "customfield_10641": "Epic/Theme",
+        "customfield_10644": "GreenHopper Ranking",
+        "customfield_10645": "Sprint",
+        "customfield_10647": "Epic Link",
+        "customfield_10650": "Rank",
+        "customfield_10740": "Classe de Servi\u00e7o",
+        "customfield_10841": "Demanda de Origem",
+        "customfield_10940": "Impedido",
+        "customfield_11041": "Where",
+        "customfield_11042": "Why",
+        "customfield_11043": "How",
+        "customfield_11044": "How to Measure",
+        "customfield_11045": "Baseline",
+        "customfield_11241": "Data Final (SLA)",
+        "customfield_11242": "Skill",
+        "customfield_11243": "\u00daltimo Motivo Impedimento",
+        "customfield_11244": "Planejamento Tamanho",
+        "customfield_11245": "Desenvolvimento Tamanho",
+        "customfield_11246": "Alfa Tamanho",
+        "customfield_11247": "Acompanhamento Tamanho",
+        "customfield_11340": "Beta Tamanho",
+        "customfield_11341": "UX Tamanho",
+        "customfield_11440": "Class of Service",
+        "customfield_11441": "Alpha Test TSize",
+        "customfield_11442": "Feature Review TSize",
+        "customfield_11443": "QA Support TSize",
+        "customfield_11444": "Feature Planning TSize",
+        "customfield_11445": "Tech Planning TSize",
+        "customfield_11446": "UX TSize",
+        "customfield_11447": "Development TSize",
+        "customfield_11449": "Dev Support TSize",
+        "customfield_11450": "Additional Estimated Hours",
+        "customfield_11451": "Blocked",
+        "customfield_11452": "Last Block Reason",
+        "customfield_11453": "Acceptance Criteria",
+        "customfield_11454": "Subject Matter Expert",
+        "customfield_11455": "Release",
+        "customfield_11456": "Co-Assignees",
+        "customfield_11540": "Valor",
+        "customfield_11542": "Ordem de Compra",
+        "customfield_11543": "Data Ordem de Compra",
+        "customfield_11544": "Nota Fiscal Detalhes",
+        "customfield_11545": "Nota Fiscal N\u00famero",
+        "customfield_11546": "Data Emiss\u00e3o NF",
+        "customfield_11547": "Data Vecto NF",
+        "customfield_11548": "Data Pagto NF",
+        "customfield_11550": "Horas",
+        "customfield_11551": "Data Autoriza\u00e7\u00e3o NF",
+        "customfield_11640": "PriorityOrder",
+        "description": "Description",
+        "duedate": "Due Date",
+        "environment": "Environment",
+        "issuelinks": "Linked Issues",
+        "issuetype": "Issue Type",
+        "labels": "Labels",
+        "lastViewed": "Last Viewed",
+        "priority": "Priority",
+        "progress": "Progress",
+        "project": "Project",
+        "reporter": "Reporter",
+        "resolution": "Resolution",
+        "resolutiondate": "Resolved",
+        "status": "Status",
+        "subtasks": "Sub-Tasks",
+        "summary": "Summary",
+        "timeestimate": "Remaining Estimate",
+        "timeoriginalestimate": "Original Estimate",
+        "timespent": "Time Spent",
+        "timetracking": "Time Tracking",
+        "updated": "Updated",
+        "votes": "Votes",
+        "watches": "Watchers",
+        "worklog": "Log Work",
+        "workratio": "Work Ratio"
+    },
+    "schema": {
+        "aggregateprogress": {
+            "system": "aggregateprogress",
+            "type": "progress"
+        },
+        "aggregatetimeestimate": {
+            "system": "aggregatetimeestimate",
+            "type": "number"
+        },
+        "aggregatetimeoriginalestimate": {
+            "system": "aggregatetimeoriginalestimate",
+            "type": "number"
+        },
+        "aggregatetimespent": {
+            "system": "aggregatetimespent",
+            "type": "number"
+        },
+        "assignee": {
+            "system": "assignee",
+            "type": "user"
+        },
+        "attachment": {
+            "items": "attachment",
+            "system": "attachment",
+            "type": "array"
+        },
+        "comment": {
+            "system": "comment",
+            "type": "comments-page"
+        },
+        "created": {
+            "system": "created",
+            "type": "datetime"
+        },
+        "creator": {
+            "system": "creator",
+            "type": "user"
+        },
+        "customfield_10013": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:select",
+            "customId": 10013,
+            "type": "option"
+        },
+        "customfield_10062": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 10062,
+            "type": "string"
+        },
+        "customfield_10092": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:multiselect",
+            "customId": 10092,
+            "items": "option",
+            "type": "array"
+        },
+        "customfield_10093": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:float",
+            "customId": 10093,
+            "type": "number"
+        },
+        "customfield_10200": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:multiuserpicker",
+            "customId": 10200,
+            "items": "user",
+            "type": "array"
+        },
+        "customfield_10201": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:userpicker",
+            "customId": 10201,
+            "type": "user"
+        },
+        "customfield_10202": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 10202,
+            "type": "string"
+        },
+        "customfield_10260": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:float",
+            "customId": 10260,
+            "type": "number"
+        },
+        "customfield_10272": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:select",
+            "customId": 10272,
+            "type": "option"
+        },
+        "customfield_10273": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:float",
+            "customId": 10273,
+            "type": "number"
+        },
+        "customfield_10301": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:datepicker",
+            "customId": 10301,
+            "type": "date"
+        },
+        "customfield_10302": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:datepicker",
+            "customId": 10302,
+            "type": "date"
+        },
+        "customfield_10303": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 10303,
+            "type": "string"
+        },
+        "customfield_10330": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:project",
+            "customId": 10330,
+            "type": "project"
+        },
+        "customfield_10350": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:select",
+            "customId": 10350,
+            "type": "option"
+        },
+        "customfield_10370": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:multiuserpicker",
+            "customId": 10370,
+            "items": "user",
+            "type": "array"
+        },
+        "customfield_10450": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:select",
+            "customId": 10450,
+            "type": "option"
+        },
+        "customfield_10540": {
+            "custom": "com.onresolve.jira.groovy.groovyrunner:jqlFunctionsCustomFieldType",
+            "customId": 10540,
+            "type": "any"
+        },
+        "customfield_10640": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:multicheckboxes",
+            "customId": 10640,
+            "items": "option",
+            "type": "array"
+        },
+        "customfield_10641": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:labels",
+            "customId": 10641,
+            "items": "string",
+            "type": "array"
+        },
+        "customfield_10644": {
+            "custom": "com.pyxis.greenhopper.jira:gh-global-rank",
+            "customId": 10644,
+            "type": "any"
+        },
+        "customfield_10645": {
+            "custom": "com.pyxis.greenhopper.jira:gh-sprint",
+            "customId": 10645,
+            "items": "string",
+            "type": "array"
+        },
+        "customfield_10647": {
+            "custom": "com.pyxis.greenhopper.jira:gh-epic-link",
+            "customId": 10647,
+            "type": "any"
+        },
+        "customfield_10650": {
+            "custom": "com.pyxis.greenhopper.jira:gh-lexo-rank",
+            "customId": 10650,
+            "type": "any"
+        },
+        "customfield_10740": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:select",
+            "customId": 10740,
+            "type": "option"
+        },
+        "customfield_10841": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 10841,
+            "type": "string"
+        },
+        "customfield_10940": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:multicheckboxes",
+            "customId": 10940,
+            "items": "option",
+            "type": "array"
+        },
+        "customfield_11041": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11041,
+            "type": "string"
+        },
+        "customfield_11042": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textarea",
+            "customId": 11042,
+            "type": "string"
+        },
+        "customfield_11043": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textarea",
+            "customId": 11043,
+            "type": "string"
+        },
+        "customfield_11044": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textarea",
+            "customId": 11044,
+            "type": "string"
+        },
+        "customfield_11045": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:multicheckboxes",
+            "customId": 11045,
+            "items": "option",
+            "type": "array"
+        },
+        "customfield_11241": {
+            "custom": "objective.jira.unlogged-fields:unlogged-datetime",
+            "customId": 11241,
+            "type": "datetime"
+        },
+        "customfield_11242": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:cascadingselect",
+            "customId": 11242,
+            "type": "option-with-child"
+        },
+        "customfield_11243": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textarea",
+            "customId": 11243,
+            "type": "string"
+        },
+        "customfield_11244": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:select",
+            "customId": 11244,
+            "type": "option"
+        },
+        "customfield_11245": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:select",
+            "customId": 11245,
+            "type": "option"
+        },
+        "customfield_11246": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:select",
+            "customId": 11246,
+            "type": "option"
+        },
+        "customfield_11247": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:select",
+            "customId": 11247,
+            "type": "option"
+        },
+        "customfield_11340": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:select",
+            "customId": 11340,
+            "type": "option"
+        },
+        "customfield_11341": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:select",
+            "customId": 11341,
+            "type": "option"
+        },
+        "customfield_11440": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:select",
+            "customId": 11440,
+            "type": "option"
+        },
+        "customfield_11441": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:select",
+            "customId": 11441,
+            "type": "option"
+        },
+        "customfield_11442": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:select",
+            "customId": 11442,
+            "type": "option"
+        },
+        "customfield_11443": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:select",
+            "customId": 11443,
+            "type": "option"
+        },
+        "customfield_11444": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:select",
+            "customId": 11444,
+            "type": "option"
+        },
+        "customfield_11445": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:select",
+            "customId": 11445,
+            "type": "option"
+        },
+        "customfield_11446": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:select",
+            "customId": 11446,
+            "type": "option"
+        },
+        "customfield_11447": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:select",
+            "customId": 11447,
+            "type": "option"
+        },
+        "customfield_11449": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:select",
+            "customId": 11449,
+            "type": "option"
+        },
+        "customfield_11450": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:float",
+            "customId": 11450,
+            "type": "number"
+        },
+        "customfield_11451": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:multicheckboxes",
+            "customId": 11451,
+            "items": "option",
+            "type": "array"
+        },
+        "customfield_11452": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textarea",
+            "customId": 11452,
+            "type": "string"
+        },
+        "customfield_11453": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textarea",
+            "customId": 11453,
+            "type": "string"
+        },
+        "customfield_11454": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:userpicker",
+            "customId": 11454,
+            "type": "user"
+        },
+        "customfield_11455": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:version",
+            "customId": 11455,
+            "type": "version"
+        },
+        "customfield_11456": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:multiuserpicker",
+            "customId": 11456,
+            "items": "user",
+            "type": "array"
+        },
+        "customfield_11540": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11540,
+            "type": "string"
+        },
+        "customfield_11542": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11542,
+            "type": "string"
+        },
+        "customfield_11543": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:datepicker",
+            "customId": 11543,
+            "type": "date"
+        },
+        "customfield_11544": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textarea",
+            "customId": 11544,
+            "type": "string"
+        },
+        "customfield_11545": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11545,
+            "type": "string"
+        },
+        "customfield_11546": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:datepicker",
+            "customId": 11546,
+            "type": "date"
+        },
+        "customfield_11547": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:datepicker",
+            "customId": 11547,
+            "type": "date"
+        },
+        "customfield_11548": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:datepicker",
+            "customId": 11548,
+            "type": "date"
+        },
+        "customfield_11550": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11550,
+            "type": "string"
+        },
+        "customfield_11551": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:datepicker",
+            "customId": 11551,
+            "type": "date"
+        },
+        "customfield_11640": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:float",
+            "customId": 11640,
+            "type": "number"
+        },
+        "description": {
+            "system": "description",
+            "type": "string"
+        },
+        "duedate": {
+            "system": "duedate",
+            "type": "date"
+        },
+        "environment": {
+            "system": "environment",
+            "type": "string"
+        },
+        "issuelinks": {
+            "items": "issuelinks",
+            "system": "issuelinks",
+            "type": "array"
+        },
+        "issuetype": {
+            "system": "issuetype",
+            "type": "issuetype"
+        },
+        "labels": {
+            "items": "string",
+            "system": "labels",
+            "type": "array"
+        },
+        "lastViewed": {
+            "system": "lastViewed",
+            "type": "datetime"
+        },
+        "priority": {
+            "system": "priority",
+            "type": "priority"
+        },
+        "progress": {
+            "system": "progress",
+            "type": "progress"
+        },
+        "project": {
+            "system": "project",
+            "type": "project"
+        },
+        "reporter": {
+            "system": "reporter",
+            "type": "user"
+        },
+        "resolution": {
+            "system": "resolution",
+            "type": "resolution"
+        },
+        "resolutiondate": {
+            "system": "resolutiondate",
+            "type": "datetime"
+        },
+        "status": {
+            "system": "status",
+            "type": "status"
+        },
+        "subtasks": {
+            "items": "issuelinks",
+            "system": "subtasks",
+            "type": "array"
+        },
+        "summary": {
+            "system": "summary",
+            "type": "string"
+        },
+        "timeestimate": {
+            "system": "timeestimate",
+            "type": "number"
+        },
+        "timeoriginalestimate": {
+            "system": "timeoriginalestimate",
+            "type": "number"
+        },
+        "timespent": {
+            "system": "timespent",
+            "type": "number"
+        },
+        "timetracking": {
+            "system": "timetracking",
+            "type": "timetracking"
+        },
+        "updated": {
+            "system": "updated",
+            "type": "datetime"
+        },
+        "votes": {
+            "system": "votes",
+            "type": "votes"
+        },
+        "watches": {
+            "system": "watches",
+            "type": "watches"
+        },
+        "worklog": {
+            "items": "worklog",
+            "system": "worklog",
+            "type": "array"
+        },
+        "workratio": {
+            "system": "workratio",
+            "type": "number"
+        }
+    },
+    "self": "http://54.68.128.117:8100/rest/api/latest/issue/214856",
+    "transitions": [
+        {
+            "id": "51",
+            "name": "Back to 'To Do'",
+            "to": {
+                "description": "",
+                "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/open.png",
+                "id": "10052",
+                "name": "To Do",
+                "self": "http://54.68.128.117:8100/rest/api/latest/status/10052",
+                "statusCategory": {
+                    "colorName": "blue-gray",
+                    "id": 2,
+                    "key": "new",
+                    "name": "To Do",
+                    "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                }
+            }
+        },
+        {
+            "id": "111",
+            "name": "Deferred",
+            "to": {
+                "description": "Taskboard",
+                "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
+                "id": "10655",
+                "name": "Deferred",
+                "self": "http://54.68.128.117:8100/rest/api/latest/status/10655",
+                "statusCategory": {
+                    "colorName": "blue-gray",
+                    "id": 2,
+                    "key": "new",
+                    "name": "To Do",
+                    "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                }
+            }
+        }
+    ]
+}

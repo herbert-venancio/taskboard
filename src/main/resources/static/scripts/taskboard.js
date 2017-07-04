@@ -72,6 +72,22 @@ function Taskboard() {
         }
     };
     
+    this.getIssueStep = function(issue) {
+        var steps = self.getAllSteps()
+        for (s in steps) {
+            var step = steps[s]
+            var filters = step.issuesConfiguration
+
+            for (f in filters) {
+                var filter = filters[f]
+
+                if (filter.issueType == issue.type && filter.status == issue.status)
+                    return step;
+            }
+        }
+        return null;
+    };
+    
     this.getIssuesByStep = function(stepId) {
         if (this.filteredIssues)
             return this.filteredIssues[stepId];
@@ -284,14 +300,20 @@ function Taskboard() {
     function handleIssueUpdate(taskboardHome, response) {
     	var updateEvents = JSON.parse(response.body)
         var updatedIssueKeys = []
-        updateEvents.forEach(function(anEvent) {     	
+        updateEvents.forEach(function(anEvent) {
+            var previousInstance = getPreviousIssueInstance(anEvent.target.issueKey);
+            if (previousInstance !== null && previousInstance.issue.updatedDate === anEvent.target.updatedDate)
+                return;
+            var converted = self.convertIssue(anEvent.target);
+            if (previousInstance === null)
+                self.issues.push(converted)
+            else
+                self.issues[previousInstance.index] = converted; 
         	updatedIssueKeys.push(anEvent.target.issueKey)
-        	taskboardHome.fire("iron-signal", {name:"issues-updated", data:{
-            	updateType: anEvent.updateType,
-            	issue: self.convertIssue(anEvent.target),
-            	highlight: true
-            }})
-        });
+        	self.fireIssueUpdated('server', taskboardHome, anEvent.target, anEvent.updateType);
+        }); 
+    	if (updatedIssueKeys.length === 0)
+    	    return;
     	
         taskboardHome.fire("iron-signal", {name:"show-issue-updated-message", data:{
         	message: "Jira issues have been updated.",
@@ -299,11 +321,21 @@ function Taskboard() {
         }})
     }
     
-    this.fireIssueUpdated = function(source, issue) {
-    	source.fire("iron-signal", {name:"issues-updated", data:{
-        	updateType: "UPDATED",
-        	issue: self.convertIssue(issue),
-        	highlight: false
+    function getPreviousIssueInstance(key) {
+        var previousInstance = null;
+        self.issues.forEach(function(anIssue, index) {
+            if (anIssue.issueKey === key)
+                previousInstance = {issue: anIssue, index: index};
+        })
+        return previousInstance;
+    }
+    
+    this.fireIssueUpdated = function(source, triggerSource, issue, updateType) {
+        var converted = self.convertIssue(issue);
+        converted.__eventInfo = {source: source, type: updateType}
+        triggerSource.fire("iron-signal", {name:"issues-updated", data:{
+        	eventType: updateType,
+        	issue: converted
         }})
     }
     

@@ -126,7 +126,7 @@ public abstract class AbstractUIIntegrationTest {
     }
 
     public static String getSiteBase(){
-        return "http://localhost:8900/";
+        return "http://localhost:8900";
     }
 
     private void resetJiraMock() {
@@ -134,6 +134,6 @@ public abstract class AbstractUIIntegrationTest {
     }
     
     private void resetIssueBuffer() {
-        RequestBuilder.url(getSiteBase()+"/test/resetbuffer").get();
+        RequestBuilder.url(getSiteBase()+"/test/resetbuffer").credentials("foo", "bar").get();
     }
 }
