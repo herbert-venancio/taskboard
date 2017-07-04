@@ -23,11 +23,14 @@ package objective.taskboard.controller;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+
+import objective.taskboard.followup.FollowUpFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -44,6 +47,9 @@ public class FollowUpController {
 
     @Autowired
     private FollowupDataProvider provider;
+
+    @Autowired
+    private FollowUpFacade followUpFacade;
 
     @RequestMapping
     public ResponseEntity<Object> download(@RequestParam("projects") String projects) {
