@@ -59,7 +59,7 @@ public class DefaultFollowUpFacade implements FollowUpFacade {
                     , pathFollowupXLSM.toString()
             );
             followUpTemplateStorage.updateTemplate(template);
-        } catch (IOException e) {
+        } catch (Exception e) {
             FileUtils.deleteQuietly(jiraTab.toFile());
             FileUtils.deleteQuietly(sharedStrings.toFile());
             FileUtils.deleteQuietly(pathFollowupXLSM.toFile());

@@ -35,7 +35,7 @@ public class XmlUtils {
             // create Document
             Document doc = asDocument(xmlFile);
 
-            // searches Document using XPath and prints to stdout
+            // searches Document using XPath
             return (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
         } catch (Exception e) {
             throw new InvalidXPathOperationException(e);
@@ -93,18 +93,22 @@ public class XmlUtils {
     }
 
     public static class InvalidXPathOperationException extends RuntimeException {
+        private static final String MESSAGE = "Invalid XPath Operation";
         public InvalidXPathOperationException() {
+            super(MESSAGE);
         }
         public InvalidXPathOperationException(Exception e) {
-            super(e);
+            super(MESSAGE, e);
         }
     }
 
     public static class InvalidXmlException extends RuntimeException {
+        private static final String MESSAGE = "Invalid Xml";
         public InvalidXmlException() {
+            super(MESSAGE);
         }
         public InvalidXmlException(Exception e) {
-            super(e);
+            super(MESSAGE, e);
         }
     }
 }
