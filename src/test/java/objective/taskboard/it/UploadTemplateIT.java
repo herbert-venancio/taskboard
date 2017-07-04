@@ -1,5 +1,6 @@
 package objective.taskboard.it;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.http.*;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -10,6 +11,7 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -19,8 +21,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -34,8 +38,17 @@ public class UploadTemplateIT {
     @Before
     public void login() throws IOException, URISyntaxException {
         client = HttpClientBuilder.create().build();
-
         session = doLogin(client);
+    }
+
+    @AfterClass
+    public static void cleanupTemplates() {
+        File tempDir = FileUtils.getTempDirectory();
+        final Pattern tempFilePattern = Pattern.compile("(sheet-template.*\\.xml|shared-strings.*\\.xml|Followup.*\\.xlsm)");
+        String[] tempFiles = tempDir.list((dir, name) -> tempFilePattern.matcher(name).matches());
+        for(String tempFile : tempFiles) {
+            FileUtils.deleteQuietly(new File(tempDir, tempFile));
+        }
     }
 
     @Test
@@ -47,7 +60,7 @@ public class UploadTemplateIT {
     @Test
     public void uploadNotOkTemplate() throws URISyntaxException, IOException {
         HttpResponse response = uploadTemplate(notOkTemplate());
-        assertThat(response.getStatusLine().getStatusCode(), is(200));
+        assertThat(response.getStatusLine().getStatusCode(), not(200));
     }
 
     // ---
