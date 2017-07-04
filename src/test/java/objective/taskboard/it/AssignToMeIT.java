@@ -11,7 +11,7 @@ public class AssignToMeIT extends AuthenticatedIntegrationTest {
             .click()
             .issueDetails()
             .assignToMe();
-        mainPage.issue("TASKB-625").issueDetails().isHidden();
+        mainPage.issue("TASKB-625").issueDetails().assertIsHidden();
         mainPage.issue("TASKB-625").assertHasFirstAssignee();
     }
 }

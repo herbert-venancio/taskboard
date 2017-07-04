@@ -233,7 +233,7 @@ public class JiraMockServer {
                 .credentials("lousa", "objective").get().content;
         try {
             System.out.println("Writing data for issueKey: " + issueKey);
-            FileUtils.writeStringToFile(new File("/tmp/" + issueKey + ".json"), issueJsonString, "UTF-8");
+            FileUtils.writeStringToFile(new File("src/test/resources/objective-jira-teste", issueKey + ".json"), issueJsonString, "UTF-8");
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
@@ -261,6 +261,7 @@ public class JiraMockServer {
             JSONObject issueData = dirtySearchIssuesByKey.get(issueKey);
             if (issueData == null)
                 issueData = searchIssuesByKey.get(issueKey);
+
             return issueData.toString();
         }
         

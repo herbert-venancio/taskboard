@@ -140,10 +140,10 @@ public class IssueController {
     }
 
     @RequestMapping(path = "transition", method = RequestMethod.POST)
-    public Map<String, Object> transition(@RequestBody TransitionDTO params) throws JSONException {
+    public Issue transition(@RequestBody TransitionDTO params) throws JSONException {
         jiraBean.doTransitionByName(params.issue, params.transition, params.resolution);
         issueBufferService.updateIssueBuffer(params.issue.getIssueKey());
-        return new HashMap<>();
+        return issueBufferService.getIssueByKey(params.issue.getIssueKey());
     }
 
     @RequestMapping(path = "transitions", method = RequestMethod.POST)

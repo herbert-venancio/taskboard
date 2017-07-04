@@ -90,6 +90,7 @@ public class IssueBufferService {
                 isUpdatingTaskboardIssuesBuffer = false;
             }
         });
+        thread.setName("IssueBufferService.updateIssueBuffer()");
         thread.setDaemon(true);
         thread.start();
     }
@@ -187,8 +188,7 @@ public class IssueBufferService {
         issueBuffer.get(entity.getProjectKey()).setPriorityOrder(entity.getPriority());
     }
 
-    public synchronized void reset() {
-        issueBuffer.clear();
+    public void reset() {
         updateIssueBuffer();
         while (isUpdatingTaskboardIssuesBuffer)
             try {
