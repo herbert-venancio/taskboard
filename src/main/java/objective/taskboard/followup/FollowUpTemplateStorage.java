@@ -21,12 +21,27 @@ package objective.taskboard.followup;
  * [/LICENSE]
  */
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+
 public interface FollowUpTemplateStorage {
 
     FollowUpTemplate getDefaultTemplate();
 
-    FollowUpTemplate getTemplate();
+    /**
+     * Uses a path returned by {@link #storeTemplate} to retrieve it
+     * @param template
+     * @return
+     */
+    FollowUpTemplate getTemplate(String template);
 
-    void updateTemplate(FollowUpTemplate template);
-
+    /**
+     * Stores a template and returns a unique relative path where it's stored
+     * @param template
+     * @return
+     * @throws IOException
+     */
+    String storeTemplate(File template, FollowUpTemplateValidator validator) throws IOException;
+    String storeTemplate(InputStream input, FollowUpTemplateValidator validator) throws IOException;
 }

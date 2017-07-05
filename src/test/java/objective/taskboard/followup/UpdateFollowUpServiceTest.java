@@ -21,7 +21,7 @@ package objective.taskboard.followup;
  * [/LICENSE]
  */
 
-import objective.taskboard.followup.UpdateFollowUpService.InvalidTemplateException;
+import objective.taskboard.followup.FollowUpTemplateValidator.InvalidTemplateException;
 import objective.taskboard.followup.impl.DefaultUpdateFollowUpService;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;

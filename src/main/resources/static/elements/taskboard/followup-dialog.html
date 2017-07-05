@@ -160,8 +160,7 @@
             max-height: 150px;
             width: 100%;
             background-color: white;
-        }        
-
+        }
     </style>
 
     <template>
@@ -170,9 +169,14 @@
                    url="/api/projects"
                    content-type='application/json'
                    last-response="{{projects}}"></iron-ajax>
+        <iron-ajax id="ajaxTemplates"
+                   method="GET"
+                   url="/api/templates"
+                   content-type='application/json'
+                   last-response="{{allTemplates}}"></iron-ajax>
         <paper-dialog id="modal" entry-animation="scale-up-animation" exit-animation="fade-out-animation" with-backdrop modal>
                 <paper-card class="card-custom">
-            
+
                 <div class="card-header-custom">
                     <div class="card-header-info">
                         <div class="card-header-breadcrumb">
@@ -187,9 +191,9 @@
                         </paper-button>
                     </div>
                 </div>
-                
+
                 <div class="content-box">
-                    <div class="sub-header">                    
+                    <div class="sub-header">
                         Select the projects to include in the report:
                     </div>
                     <div class="content-row">
@@ -198,25 +202,35 @@
                     <div class="content-row">
                         <div class="scroll" id="listOfProjects">
                             <template is="dom-repeat" items="{{projects}}">
-                                <paper-checkbox checked="{{item.checked}}">{{item.projectKey}}</paper-checkbox><br>
+                                <paper-checkbox checked="{{item.checked}}" on-change='filterTemplates'>{{item.projectKey}}</paper-checkbox><br>
                             </template>
-                        </div>                        
+                        </div>
                     </div>
-                    
+                    <div class="content-row">
+                        <paper-dropdown-menu class="templates-followup-dropdown" id="templateType" name="template" label="Template Type"
+                                             selected-item="{{template}}">
+                            <paper-menu class="dropdown-content" selected="{{selectedItem}}">
+                                <template is="dom-repeat" id="templates" items="{{availableTemplates}}">
+                                    <paper-item value="{{item.name}}">{{item.name}}</paper-item>
+                                </template>
+                            </paper-menu>
+                        </paper-dropdown-menu>
+                    </div>
+
                     <div class="error-message" hidden$="{{!errorMessage}}">{{errorMessage}}</div>
                 </div>
-                
+
                 <div class="custom-footer">
-                                            
+
                     <div class="custom-footer-buttons">
-                        
+
                         <paper-button id="generate" raised class="colorful" on-tap="downloadFollowup" title="Generate Report">
                             Generate Report
                         </paper-button>
-                        
+
                     </div>
                 </div>
-            </paper-card>                      
+            </paper-card>
         </paper-dialog>
     </template>
     <script>
@@ -227,13 +241,24 @@
                 properties: {
                     projects: {
                         type: Array
+                    },
+                    allTemplates: {
+                        type: Array
+                    },
+                    availableTemplates: {
+                        type: Array
+                    },
+                    template: {
+                        type: String
                     }
                 },
                 
                 opendialog: function () {
                     toggleAll.checked = false;
                     this.projects = [];
-                	this.$.ajaxProjects.generateRequest();
+                    this.$.ajaxProjects.generateRequest();
+                    this.templates = [];
+                	this.$.ajaxTemplates.generateRequest();
                     this.$.modal.open();
                 },
                 
@@ -248,23 +273,52 @@
                     // force polymer to recognize the model change
                     this.projects = JSON.parse(JSON.stringify(this.projects))
                 },
+
+                filterTemplates: function(e) {
+                    var selectedProjects = this.filterSelectedProjects();
+                    var templates = [];
+                    var oldSelection = this.template;
+
+                    this.allTemplates.forEach(function(t, index) {
+                        // perfect match only
+                        if( t.projects && t.projects.length == selectedProjects.length
+                            && _.every(t.projects, function(proj) { return _.contains(selectedProjects, proj); } ) )
+                            templates.push(t);
+                    });
+
+                    this.availableTemplates = templates;
+                    // update combo selection if old selection became invalid
+                    if ( oldSelection && ! _.contains(templates, oldSelection.value) ) {
+                        this.selectedItem = -1;
+                    }
+                },
+
+                filterSelectedProjects: function() {
+                    var selectedKeys = [];
+                    this.projects.forEach(function(p, index) {
+                	    if (p.checked)
+                        	selectedKeys.push(p.projectKey);
+                    });
+                    return selectedKeys;
+                },
                 
                 downloadFollowup: function() {
                 	var self = this;
                     self.errorMessage = "";
-                	var selectedKeys = [];
-                	
-                	this.projects.forEach(function(p, index) {
-                	    if (p.checked)
-                        	selectedKeys.push(p.projectKey);
-                    })
+                	var selectedKeys = this.filterSelectedProjects();
                 	
                 	if (selectedKeys.length == 0) {
                 	    this.errorMessage = "Please, selected at least one project"
                 	    return;
                 	}
+
+                	if (!this.template) {
+                	    this.errorMessage = "Template not selected";
+                	    return;
+                	}
                 	
                 	var projectQuery = "projects="+selectedKeys.join(",")
+                	var templateQuery = "template=" + this.template.value;
                 	
                 	$.ajax({
                         url: '/ws/followup/state',
@@ -280,7 +334,7 @@
 	                        		return;
                         	}
                         	self.close();
-                        	window.location = "ws/followup?"+projectQuery;
+                        	window.location = "ws/followup?"+projectQuery + "&" + templateQuery;
                         },
                         error: function (jqXhr, textStatus, errorThrown) {
                             self.errorMessage = errorThrown;

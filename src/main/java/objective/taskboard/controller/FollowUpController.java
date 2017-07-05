@@ -52,13 +52,15 @@ public class FollowUpController {
     private FollowUpFacade followUpFacade;
 
     @RequestMapping
-    public ResponseEntity<Object> download(@RequestParam("projects") String projects) {
+    public ResponseEntity<Object> download(@RequestParam("projects") String projects, @RequestParam("template") String template) {
         if (ObjectUtils.isEmpty(projects))
             return new ResponseEntity<>("You must provide a list of projects separated by comma", BAD_REQUEST);
+        if (ObjectUtils.isEmpty(template))
+            return new ResponseEntity<>("Template not selected", BAD_REQUEST);
 
         String [] includedProjects = projects.split(",");
         try {
-            FollowUpGenerator followupGenerator = new FollowUpGenerator(provider);
+            FollowUpGenerator followupGenerator = followUpFacade.getGenerator();
             ByteArrayResource resource = followupGenerator.generate(includedProjects);
             return ResponseEntity.ok()
                   .contentLength(resource.contentLength())
@@ -67,11 +69,6 @@ public class FollowUpController {
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), INTERNAL_SERVER_ERROR);
         }
-    }
-
-    @RequestMapping(method = RequestMethod.POST, consumes="multipart/form-data")
-    public void upload(@RequestParam("file") MultipartFile file) throws IOException {
-        followUpFacade.updateTemplate(file);
     }
 
     @RequestMapping("state")

@@ -23,38 +23,93 @@ package objective.taskboard.followup.impl;
 
 import objective.taskboard.followup.FollowUpTemplate;
 import objective.taskboard.followup.FollowUpTemplateStorage;
+import objective.taskboard.followup.FollowUpTemplateValidator;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Service;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 @Service
 public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
 
-    private FollowUpTemplate template;
+    private Path templateRoot = Paths.get("followup-templates");
 
     @Override
     public FollowUpTemplate getDefaultTemplate() {
         return new FollowUpTemplate(
-            resolve("followup-template/sharedStrings-initial.xml")
-            , resolve("followup-template/sharedStrings-template.xml")
-            , resolve("followup-template/sharedStrings-si-template.xml")
-            , resolve("followup-template/sheet7-template.xml")
-            , resolve("followup-template/sheet7-row-template.xml")
-            , resolve("followup-template/Followup-template.xlsm")
+                resolve("followup-template/sharedStrings-initial.xml")
+                , resolve("followup-template/sharedStrings-template.xml")
+                , resolve("followup-template/sharedStrings-si-template.xml")
+                , resolve("followup-template/sheet7-template.xml")
+                , resolve("followup-template/sheet7-row-template.xml")
+                , resolve("followup-template/Followup-template.xlsm")
+                , resolve("followup-template/table7-template.xml")
         );
     }
 
     @Override
-    public FollowUpTemplate getTemplate() {
-        return template;
+    public FollowUpTemplate getTemplate(String path) {
+        return null;
     }
 
     @Override
-    public void updateTemplate(FollowUpTemplate template) {
-        this.template = template;
+    public String storeTemplate(File template, FollowUpTemplateValidator validator){
+        return null;
+    }
+
+    @Override
+    public String storeTemplate(InputStream stream, FollowUpTemplateValidator validator) throws IOException {
+        if(!Files.exists(templateRoot))
+            Files.createDirectory(templateRoot);
+        Path pathFollowup = Files.createTempDirectory(templateRoot, "Followup");
+        Path tempFolder = decompressTemplate(pathFollowup, stream);
+        try {
+            validator.validate(tempFolder);
+        } catch (Exception e) {
+            FileUtils.deleteQuietly(pathFollowup.toFile());
+            throw e;
+        }
+        return templateRoot.relativize(pathFollowup).toString();
     }
 
     // ---
 
-    private static String resolve(String resourceName) {
-        return DefaultFollowUpTemplateStorage.class.getClassLoader().getResource(resourceName).getFile();
+    private static URL resolve(String resourceName) {
+        return DefaultFollowUpTemplateStorage.class.getClassLoader().getResource(resourceName);
+    }
+
+    private Path decompressTemplate(Path pathFollowup, InputStream stream) throws IOException {
+        Path temp = pathFollowup.resolve("temp");
+
+        ZipInputStream zipInputStream = null;
+        try {
+            zipInputStream = new ZipInputStream(stream);
+
+            ZipEntry entry;
+            while ((entry = zipInputStream.getNextEntry()) != null) {
+                Path entryPath = temp.resolve(entry.getName());
+                if (entry.isDirectory()) {
+                    Files.createDirectories(entryPath);
+                    continue;
+                } else {
+                    Files.createDirectories(entryPath.getParent());
+                }
+                Files.copy(zipInputStream, entryPath);
+            }
+
+            return temp;
+        } finally {
+            if (zipInputStream != null)
+                IOUtils.closeQuietly(zipInputStream);
+        }
     }
 }
