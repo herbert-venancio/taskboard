@@ -314,7 +314,6 @@
                 },
                 
                 handleUpdatedIssues: function(event, data) {
-                    if (this.issues.length === 0) return;
                 	var issueBoardStep = taskboard.getIssueStep(data.issue)
                 	var belongsToThisStep = this.stepMetadata.id === issueBoardStep.id;
                 	
@@ -354,7 +353,7 @@
                             $(this).find("#issueCard").animate({
                                 top:     deltaY,
                                 left:    deltaX
-                            }, 800);
+                            }, 800, 'easeOutExpo');
                             previous = $(this);
                         });
                         
