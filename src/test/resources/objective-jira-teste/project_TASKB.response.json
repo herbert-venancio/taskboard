@@ -5,7 +5,7 @@
   "key": "TASKB",
   "description": "",
   "lead": {
-    "self": "http://54.68.128.117:8100/rest/api/2/user?username=mlwalter",
+    "self": "http://54.68.128.117:8100/rest/api/latest/user?username=mlwalter",
     "key": "mlwalter",
     "name": "mlwalter",
     "avatarUrls": {
@@ -19,7 +19,7 @@
   },
   "components": [
     {
-      "self": "http://54.68.128.117:8100/rest/api/2/component/11380",
+      "self": "http://54.68.128.117:8100/rest/api/latest/component/11380",
       "id": "11380",
       "name": "ComponentTakano",
       "isAssigneeTypeValid": false
