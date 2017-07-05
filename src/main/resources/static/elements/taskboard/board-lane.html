@@ -137,7 +137,9 @@
         <iron-signals on-iron-signal-update-user-preferences="preferencesUpdated"
                       on-iron-signal-level-visibility-changed="preferencesUpdated"
                       on-iron-signal-hierarchical-filter-changed="preferencesUpdated"
-                      on-iron-signal-search-filter-changed="preferencesUpdated"></iron-signals>
+                      on-iron-signal-search-filter-changed="preferencesUpdated"
+                      on-iron-signal-issue-count-changed="preferencesUpdated"
+                      ></iron-signals>
 
         <!-- Lane Header -->
         <div class="paper-header header header-lane">
@@ -145,7 +147,7 @@
         </div>
 
         <!-- Lane Body -->
-        <div class="table-wrapper" style$="height:{{getWrapperHeight(weight, issues, lastPreferenceUpdate)}}px">
+        <div data-lane-name$='{{metadata.level}}' class="table-wrapper" style$="height:{{getWrapperHeight(weight, issues, lastPreferenceUpdate)}}px">
             <table class="lane-body">
 
                 <!-- Headers -->
@@ -186,7 +188,7 @@
                     <template is="dom-repeat" items="{{metadata.stages}}" as="stage">
                         <template is="dom-repeat" items="{{stage.steps}}" as="step">
                             <th class="label label-stage" style$="{{getStepStyle(stage, step, issues)}}">
-                                <inline-badge class="counter" value="{{getIssueCountByStep(step.id, issues, lastPreferenceUpdate)}}"></inline-badge>
+                                <inline-badge data-step-count-name$ ="{{step.step}}" class="counter" value="{{getIssueCountByStep(step.id, issues, lastPreferenceUpdate)}}"></inline-badge>
                                 {{step.step}}
                             </th>
                         </template>
@@ -229,6 +231,7 @@
                             <template is="dom-repeat" items="{{stage.steps}}" as="step">
                                 <td class="cell step-cell">
                                     <board-step parent-lane-id="{{metadata.id}}" parent-lane-config="{{metadata}}"
+                                        data-board-step$="board-step-{{step.step}}"
                                         class$="step-{{step.id}}" step-metadata="{{step}}" issues="{{getIssuesByStep(step.id, issues)}}"></board-step>
                                 </td>
                             </template>

@@ -159,6 +159,7 @@ public class JiraIssueToIssueConverter {
                 jiraIssue.getPriority() != null ? jiraIssue.getPriority().getId() : 0l,
                 jiraIssue.getDueDate() != null ? jiraIssue.getDueDate().toDate() : null,
                 jiraIssue.getCreationDate().getMillis(),
+                jiraIssue.getUpdateDate() == null? null : jiraIssue.getUpdateDate().toDate(),
                 coalesce(jiraIssue.getDescription(), ""),
                 issueTeams,
                 getComments(metadata),

@@ -31,6 +31,12 @@ import objective.taskboard.TestUtils;
 public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
     @Test
     public void whenUpdateHappensViaWebHook_RefreshToastShouldShowUP() throws IOException {
+        // emulate a remote change
+        RequestBuilder
+            .url("http://localhost:4567/rest/api/latest/issue/TASKB-625")
+            .body("{\"fields\":{\"assignee\":{\"name\":\"foo\"}},\"properties\":[]}")
+            .put();
+        
         MainPage mainPage = MainPage.produce(webDriver);
         String body = TestUtils.loadResource(getClass(), "/webhook/TASKB_625_updatePayload.json");
         RequestBuilder

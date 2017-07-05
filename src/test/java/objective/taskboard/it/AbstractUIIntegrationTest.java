@@ -86,5 +86,4 @@ public abstract class AbstractUIIntegrationTest extends AbstractIntegrationTest 
     
     @Rule
     public RecordAttachmentRule recordArtifactRule = new RecordAttachmentRule(this);
-
 }

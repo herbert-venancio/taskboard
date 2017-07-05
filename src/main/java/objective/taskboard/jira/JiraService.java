@@ -109,7 +109,7 @@ public class JiraService {
         }
     }
 
-    public void doTransitionByName(objective.taskboard.data.Issue issue, String transitionName, String resolution) throws JSONException {
+    public void doTransitionByName(objective.taskboard.data.Issue issue, String transitionName, String resolution) {
         String issueKey = issue.getIssueKey();
         Issue issueByJira = getIssueByKey(issueKey);
         Transition transitionByName = getTransitionByName(issueByJira, transitionName);
@@ -119,7 +119,7 @@ public class JiraService {
         assignSubResponsavel(issueByJira.getKey());
     }
 
-    private void assignSubResponsavel(String issueKey) throws JSONException {
+    private void assignSubResponsavel(String issueKey) {
         log.debug("⬣⬣⬣⬣⬣  assignSubResponsavel");
         final Set<String> subResponsaveis = getSubResponsaveis(issueKey);
         final String jiraUser = CredentialsHolder.username();
@@ -197,7 +197,7 @@ public class JiraService {
                 .orElse(null);
     }
 
-    public void toggleAssignAndSubresponsavelToUser(String key) throws JSONException {
+    public void toggleAssignAndSubresponsavelToUser(String key) {
         final Set<String> subResponsaveis = getSubResponsaveis(key);
         String jiraUser = CredentialsHolder.username();
         String assignee = "";
@@ -222,19 +222,24 @@ public class JiraService {
     }
 
 
-    private Set<String> getSubResponsaveis(String key) throws JSONException {
-        Set<String> subResponsaveis = new HashSet<>();
-        final IssueField fieldSubResponsaveis = getIssueByKey(key).getField(properties.getCustomfield().getCoAssignees().getId());
+    private Set<String> getSubResponsaveis(String key) {
+        try {
+            Set<String> subResponsaveis = new HashSet<>();
+            final IssueField fieldSubResponsaveis = getIssueByKey(key)
+                    .getField(properties.getCustomfield().getCoAssignees().getId());
 
-        if (fieldSubResponsaveis != null && fieldSubResponsaveis.getValue() != null) {
-            final JSONArray subResponsaveisJson = (JSONArray) fieldSubResponsaveis.getValue();
+            if (fieldSubResponsaveis != null && fieldSubResponsaveis.getValue() != null) {
+                final JSONArray subResponsaveisJson = (JSONArray) fieldSubResponsaveis.getValue();
 
-            for (int i = 0; i < subResponsaveisJson.length(); i++) {
-                subResponsaveis.add(subResponsaveisJson.getJSONObject(i).getString("name"));
+                for (int i = 0; i < subResponsaveisJson.length(); i++) {
+                    subResponsaveis.add(subResponsaveisJson.getJSONObject(i).getString("name"));
+                }
             }
-        }
 
-        return subResponsaveis;
+            return subResponsaveis;
+        } catch (JSONException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     public List<Transition> getTransitionsByIssueKey(String issueKey) {
