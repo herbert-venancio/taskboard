@@ -1,5 +1,26 @@
 package objective.taskboard.it;
 
+/*-
+ * [LICENSE]
+ * Taskboard
+ * ---
+ * Copyright (C) 2015 - 2017 Objective Solutions
+ * ---
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * [/LICENSE]
+ */
+
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.junit.Assert.assertEquals;
@@ -53,7 +74,7 @@ public class MainPage extends AbstractUiFragment {
 
     @FindBy(css = ".menuLink")
     private WebElement menuFiltersButton;
-
+    
     public MainPage(WebDriver webDriver) {
         super(webDriver);
     }
@@ -146,40 +167,6 @@ public class MainPage extends AbstractUiFragment {
         return initElements(webDriver, RefreshToast.class);
     }
     
-    public static class RefreshToast extends AbstractUiFragment {
-        @FindBy(id="toastIssueUpdated")
-        private WebElement issueToast;
-        
-        @FindBy(id="toggleFilterChangedIssues")
-        private WebElement toggleFilterChangedIssues;
-        
-        @FindBy(id="dismissToast")
-        private WebElement dismissToast;
-        
-        
-        public RefreshToast(WebDriver webDriver) {
-            super(webDriver);
-        }
-        
-        public void assertVisible() {
-            waitVisibilityOfElement(issueToast);
-        }
-
-        public void toggleShowHide() {
-            waitVisibilityOfElement(toggleFilterChangedIssues);
-            toggleFilterChangedIssues.click();
-        }
-
-        public void assertNotVisible() {
-            waitInvisibilityOfElement(issueToast);
-        }
-
-        public void dismiss() {
-            waitVisibilityOfElement(dismissToast);
-            dismissToast.click();
-        }
-    }
-
     class TestIssue {
         private WebElement webElement;
 
@@ -187,8 +174,9 @@ public class MainPage extends AbstractUiFragment {
             this.webElement = webElement;
         }
         
-        public void click() {
+        public TestIssue click() {
             webElement.click();
+            return this;
         }
 
         public void enableHierarchicalFilter() {
@@ -198,5 +186,62 @@ public class MainPage extends AbstractUiFragment {
             waitVisibilityOfElement(applyFilterButton);
             applyFilterButton.click();;
         }
+        
+        public IssueDetails issueDetails() {
+            return new IssueDetails();
+        }
+
+        public void assertHasFirstAssignee() {
+            WebElement assignee1 = webElement.findElement(By.id("assignee1"));
+            waitVisibilityOfElement(assignee1);
+        }
+    }
+    
+    class IssueDetails {
+        WebElement issueDetailRoot;
+        public IssueDetails() {
+            issueDetailRoot = webDriver.findElement(By.cssSelector("paper-card.issue-detail"));
+        }
+        
+        public void assignToMe() {
+            waitVisibilityOfElement(issueDetailRoot);
+            WebElement assignButton = issueDetailRoot.findElement(By.id("assignButton"));
+            waitVisibilityOfElement(assignButton);
+            assignButton.click();
+        }
+        
+        public void assertIsHidden() {
+            waitInvisibilityOfElement(issueDetailRoot);
+        }
+
+        public IssueDetails transitionClick(String transitionName) {
+            waitVisibilityOfElement(issueDetailRoot);
+            WebElement transitionButton = issueDetailRoot.findElement(By.cssSelector("[data-transition-name='"+transitionName+"']"));
+            waitVisibilityOfElement(transitionButton);
+            transitionButton.click();
+            
+            return this;
+        }        
+        
+        public IssueDetails confirm() {
+            WebElement confirmationModal = webDriver.findElement(By.id("confirmModal"));
+            waitVisibilityOfElement(confirmationModal);
+            WebElement confirmButton = confirmationModal.findElement(By.id("confirm"));
+            waitVisibilityOfElement(confirmButton);
+            confirmButton.click();
+            return this;
+        }
+    }
+
+    public FollowupDialog openFollowUp() {
+        return FollowupDialog.open(webDriver);
+    }
+
+    public LaneFragment lane(String laneName) {
+        return LaneFragment.laneName(webDriver, laneName);
+    }
+
+    public IssueDetails issueDetails() {
+        return new IssueDetails();
     }
 }

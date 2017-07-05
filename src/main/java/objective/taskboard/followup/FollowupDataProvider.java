@@ -26,7 +26,7 @@ import java.util.List;
 import objective.taskboard.issueBuffer.IssueBufferState;
 
 public interface FollowupDataProvider {
-    List<FollowUpData> getJiraData();
+    List<FollowUpData> getJiraData(String[] includeProjects);
 
     IssueBufferState getFollowupState();
 }

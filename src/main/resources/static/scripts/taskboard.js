@@ -70,8 +70,24 @@ function Taskboard() {
 
             this.filteredIssues[step.id] = issuesByStep;
         }
-    },
+    };
+    
+    this.getIssueStep = function(issue) {
+        var steps = self.getAllSteps()
+        for (s in steps) {
+            var step = steps[s]
+            var filters = step.issuesConfiguration
 
+            for (f in filters) {
+                var filter = filters[f]
+
+                if (filter.issueType == issue.type && filter.status == issue.status)
+                    return step;
+            }
+        }
+        return null;
+    };
+    
     this.getIssuesByStep = function(stepId) {
         if (this.filteredIssues)
             return this.filteredIssues[stepId];
@@ -284,13 +300,20 @@ function Taskboard() {
     function handleIssueUpdate(taskboardHome, response) {
     	var updateEvents = JSON.parse(response.body)
         var updatedIssueKeys = []
-        updateEvents.forEach(function(anEvent) {     	
+        updateEvents.forEach(function(anEvent) {
+            var previousInstance = getPreviousIssueInstance(anEvent.target.issueKey);
+            if (previousInstance !== null && previousInstance.issue.updatedDate === anEvent.target.updatedDate)
+                return;
+            var converted = self.convertIssue(anEvent.target);
+            if (previousInstance === null)
+                self.issues.push(converted)
+            else
+                self.issues[previousInstance.index] = converted; 
         	updatedIssueKeys.push(anEvent.target.issueKey)
-        	taskboardHome.fire("iron-signal", {name:"issues-updated", data:{
-            	issueKey: anEvent.target.issueKey,
-            	updateType: anEvent.updateType
-            }})
-        });
+        	self.fireIssueUpdated('server', taskboardHome, anEvent.target, anEvent.updateType);
+        }); 
+    	if (updatedIssueKeys.length === 0)
+    	    return;
     	
         taskboardHome.fire("iron-signal", {name:"show-issue-updated-message", data:{
         	message: "Jira issues have been updated.",
@@ -298,8 +321,48 @@ function Taskboard() {
         }})
     }
     
+    function getPreviousIssueInstance(key) {
+        var previousInstance = null;
+        self.issues.forEach(function(anIssue, index) {
+            if (anIssue.issueKey === key)
+                previousInstance = {issue: anIssue, index: index};
+        })
+        return previousInstance;
+    }
+    
+    this.fireIssueUpdated = function(source, triggerSource, issue, updateType) {
+        var converted = self.convertIssue(issue);
+        converted.__eventInfo = {source: source, type: updateType}
+        triggerSource.fire("iron-signal", {name:"issues-updated", data:{
+        	eventType: updateType,
+        	issue: converted
+        }})
+    }
+    
     this.issueGivenKey = function(issueKey) {
     	return $("paper-material.issue [data-issue-key='"+issueKey+"']").closest("paper-material.issue");
+    }
+    
+    this.convertIssue = function(issue) {
+    	var startDateStep = new Date(issue.startDateStepMillis);
+        issue.cycletime = cycleTime.getCycleTime(startDateStep, new Date()).toFixed(2);
+
+        var listSizes = [];
+        CUSTOMFIELD.SIZES.forEach(function(sizeId) {
+            if (issue[sizeId])
+                listSizes.push(issue[sizeId]);
+        });
+
+        issue.customfields = {
+            sizes: listSizes,
+            classeDeServico: issue[CUSTOMFIELD.CLASSE_DE_SERVICO],
+            impedido: issue[CUSTOMFIELD.IMPEDIDO],
+            lastBlockReason: issue[CUSTOMFIELD.LAST_BLOCK_REASON],
+            additionalEstimatedHours: issue[CUSTOMFIELD.ADDITIONAL_ESTIMATED_HOURS],
+            release: issue[CUSTOMFIELD.RELEASE]
+        };
+        
+        return issue;
     }
 }
 

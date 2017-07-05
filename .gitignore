@@ -18,3 +18,4 @@ application-liferay.properties
 application-liferay.yaml
 application-uat.properties
 application-uat.yml
+testbed

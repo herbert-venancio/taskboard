@@ -43,7 +43,9 @@
                       on-iron-signal-config-visibility-synthetic-changed="preferencesUpdated"
                       on-iron-signal-search-filter-changed="searchFilterChanged"
                       on-iron-signal-level-config-changed="preferencesUpdated"
-                      on-iron-signal-hierarchical-filter-changed="preferencesUpdated"></iron-signals>
+                      on-iron-signal-hierarchical-filter-changed="preferencesUpdated"
+                      on-iron-signal-issues-updated="handleUpdatedIssues"
+                      ></iron-signals>
         <div id="board-step-{{parentLaneId}}-{{stepMetadata.id}}-{{team}}" class="wrap layout horizontal sortable-board-step" style="width: 100%">
 
             <!-- Issue Counter -->
@@ -55,7 +57,7 @@
 
             <!-- Issues -->
             <template is="dom-repeat" items="{{filteredIssues}}" as="issue" sort="{{getSorter()}}">
-                <issue-item item="{{issue}}" style$="{{getOptimalIssueWidth(columns, issue)}}" hidden="{{showSynthetic(lastPreferenceUpdate)}}"></issue-item>
+                <issue-item id='{{issue.issueKey}}' item="{{issue}}" boardstepid="{{stepMetadata.id}}" style$="{{getOptimalIssueWidth(columns, issue)}}" hidden="{{showSynthetic(lastPreferenceUpdate)}}"></issue-item>
                 <issue-item-synthetic item="{{issue}}" parent-type-icon="{{showParentIconInSynthetic(parentLaneConfig)}}" hidden="{{!showSynthetic(lastPreferenceUpdate)}}"></issue-item-synthetic>
             </template>
         </div>
@@ -129,10 +131,6 @@
 
                 listeners: {
                     'iron-resize': 'refit'
-                },
-                
-                ready: function() {
-                   
                 },
                 
                 attached: function() {
@@ -315,8 +313,56 @@
                 searchFilterChanged: function(event, data) {
                     this.search = data;
                     this.preferencesUpdated();
+                },
+                
+                handleUpdatedIssues: function(event, data) {
+                    if (this.issues.length === 0) return;
+                	var issueBoardStep = taskboard.getIssueStep(data.issue)
+                	var belongsToThisStep = this.stepMetadata.id === issueBoardStep.id;
+                	
+                	var issueIndex = -1
+                    this.issues.forEach(function(anIssue, index, array) {
+                 	    if (anIssue.issueKey == data.issue.issueKey) {
+                 	       issueIndex = index;
+                 	        if (belongsToThisStep)
+                 	        	array[index] = data.issue;
+                 	    }
+                    })
+                    if (belongsToThisStep && issueIndex == -1) {
+                        // issue added to this board step
+                        data.issue.__eventInfo.type = 'ADDED'
+                        data.issue.boardstep = issueBoardStep.id;
+                        this.issues.push(data.issue)
+                        
+                        var self = this;
+                        this.async(function() {
+                            self.filter();
+                            this.fire("iron-signal", {name:"issue-count-changed"});
+                        })
+                        
+                        return;
+                    }
+                    
+                    if (!belongsToThisStep && issueIndex > -1) {
+                        // issue removed from this board step
+                        var self = this;
+                        var issueToRemoveDom = Polymer.dom(this.root).querySelector("#"+data.issue.issueKey);
+                        
+                        $(issueToRemoveDom).fadeOut(
+                            500,
+                            function() {
+                                self.issues.splice(issueIndex,1);
+                                this.async(function() {
+                                    $(issueToRemoveDom).fadeIn(0);
+                                    self.filter();
+                                    // make sure the header counters are updated to reflect the correct count
+                                    this.fire("iron-signal", {name:"issue-count-changed"});
+                                })
+                            }
+                        )
+                        return;
+                    }
                 }
-
             });
         })();
     </script>

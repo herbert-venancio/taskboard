@@ -28,20 +28,19 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.core.io.ByteArrayResource;
 import org.xml.sax.SAXException;
 
-@RunWith(MockitoJUnitRunner.class)
+import objective.taskboard.TestUtils;
+
 public class FollowUpGeneratorTest {
 
     private static final String PATH_SHARED_STRINGS_INITIAL = "followup/sharedStrings-initial.xml";
@@ -50,6 +49,7 @@ public class FollowUpGeneratorTest {
     private static final String PATH_SHEET7_TEMPLATE = "followup/sheet7-template.xml";
     private static final String PATH_SHEET7_ROW_TEMPLATE = "followup/sheet7-row-template.xml";
     private static final String PATH_FOLLOWUP_TEMPLATE = "followup/Followup-template.xlsm";
+    private static final String PATH_TABLE7_TEMPLATE = "followup/table7-template.xml";
 
     private static final String MSG_ASSERT_SHARED_STRINGS_SIZE = "Shared strings size";
 
@@ -74,7 +74,7 @@ public class FollowUpGeneratorTest {
         assertEquals("First shared string", 0, sharedStrings.get("project").longValue());
         assertEquals("Last shared string", 207, sharedStrings.get("BALLPARK").longValue());
 
-        subject.generateJiraDataSheet(sharedStrings);
+        subject.generateJiraDataSheet(sharedStrings, emptyArray());
 
         assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 222, sharedStrings.size());
         assertEquals("First new shared string", 208, sharedStrings.get("PROJECT TEST").longValue());
@@ -101,7 +101,7 @@ public class FollowUpGeneratorTest {
         Map<String, Long> sharedStrings = subject.getSharedStringsInitial();
 
         assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 208, sharedStrings.size());
-        subject.generateJiraDataSheet(sharedStrings);
+        subject.generateJiraDataSheet(sharedStrings, emptyArray());
         assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 222, sharedStrings.size());
 
         String sharedStringsGenerated = subject.generateSharedStrings(sharedStrings);
@@ -116,7 +116,7 @@ public class FollowUpGeneratorTest {
         FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
 
         Map<String, Long> sharedStrings = subject.getSharedStringsInitial();
-        String jiraDataSheet = subject.generateJiraDataSheet(sharedStrings);
+        String jiraDataSheet = subject.generateJiraDataSheet(sharedStrings, emptyArray());
 
         String jiraDataSheetExpected = getStringExpected("followup/generateJiraDataSheetTest.xml");
         assertEquals("Jira data sheet", jiraDataSheetExpected, jiraDataSheet);
@@ -128,7 +128,7 @@ public class FollowUpGeneratorTest {
         FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
 
         Map<String, Long> sharedStrings = subject.getSharedStringsInitial();
-        String jiraDataSheet = subject.generateJiraDataSheet(sharedStrings);
+        String jiraDataSheet = subject.generateJiraDataSheet(sharedStrings, emptyArray());
 
         String jiraDataSheetExpected = getStringExpected("followup/generateJiraDataSheetWithEmptyDataTest.xml");
         assertEquals("Jira data sheet", jiraDataSheetExpected, jiraDataSheet);
@@ -147,7 +147,7 @@ public class FollowUpGeneratorTest {
         FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
 
         Map<String, Long> sharedStrings = subject.getSharedStringsInitial();
-        String jiraDataSheet = subject.generateJiraDataSheet(sharedStrings);
+        String jiraDataSheet = subject.generateJiraDataSheet(sharedStrings, emptyArray());
 
         String jiraDataSheetExpected = getStringExpected("followup/generateJiraDataSheetWithSomeEmptyAndNullAttributesJiraDataTest.xml");
         assertEquals("Jira data sheet", jiraDataSheetExpected, jiraDataSheet);
@@ -157,7 +157,7 @@ public class FollowUpGeneratorTest {
     public void generateTest() throws Exception {
         FollowupDataProvider provider = getFollowupDataProvider(asList(getFollowUpDataDefault()));
         FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
-        ByteArrayResource resource = subject.generate();
+        ByteArrayResource resource = subject.generate(emptyArray());
         assertNotNull("Resource shouldn't be null", resource);
     }
 
@@ -165,19 +165,27 @@ public class FollowUpGeneratorTest {
     public void generateUsingDefaultTemplatesTest() throws Exception {
         FollowupDataProvider provider = getFollowupDataProvider(asList(getFollowUpDataDefault()));
         FollowUpGenerator subject = new FollowUpGenerator(provider);
-        ByteArrayResource resource = subject.generate();
+        ByteArrayResource resource = subject.generate(emptyArray());
         assertNotNull("Resource shouldn't be null", resource);
+    }
+
+    @Test
+    public void generateTable7Test() {
+        FollowupDataProvider provider = getFollowupDataProvider(asList(getFollowUpDataDefault()));
+        FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
+        String table7 = subject.generateTable7(3042);
+        assertEquals(getStringExpected("followup/expectedTable7.xml"), table7);
     }
 
     private FollowUpGenerator getFollowUpGeneratorUsingTestTemplates(FollowupDataProvider provider) {
         return new FollowUpGenerator(provider, PATH_SHARED_STRINGS_INITIAL, PATH_SHARED_STRINGS_TEMPLATE,
                 PATH_SHARED_STRINGS_SI_TEMPLATE, PATH_SHEET7_TEMPLATE, PATH_SHEET7_ROW_TEMPLATE,
-                PATH_FOLLOWUP_TEMPLATE);
+                PATH_FOLLOWUP_TEMPLATE,PATH_TABLE7_TEMPLATE);
     }
 
     private FollowupDataProvider getFollowupDataProvider(List<FollowUpData> jiraData) {
         FollowupDataProvider provider = mock(FollowupDataProvider.class);
-        when(provider.getJiraData()).thenReturn(jiraData);
+        when(provider.getJiraData(emptyArray())).thenReturn(jiraData);
         return provider;
     }
 
@@ -215,9 +223,11 @@ public class FollowUpGeneratorTest {
         return followUpData;
     }
 
-    private String getStringExpected(String pathResource) throws IOException {
-        InputStream inputStream = getClass().getClassLoader()
-                .getResourceAsStream(pathResource);
-        return IOUtils.toString(inputStream, "UTF-8");
+    private String getStringExpected(String pathResource) {
+        return TestUtils.loadResource(getClass(), "/"+pathResource);
+    }
+
+    private String[] emptyArray() {
+        return new String[0];
     }
 }

@@ -238,8 +238,8 @@
 	                   body="{{item}}"
 	                   headers='{"Content-Type": "application/json"}'>
 	        </iron-ajax>
-	        <iron-signals on-iron-signal-hierarchical-filter-changed="forceRefreshHierarchyMatch"></iron-signals>
-	        <iron-signals on-iron-signal-issues-updated="updateIssue"></iron-signals>
+            <iron-signals on-iron-signal-hierarchical-filter-changed="forceRefreshHierarchyMatch" 
+                          on-iron-signal-issues-updated="updateIssue"></iron-signals>
 	        <paper-material id="issueCard" class$="issue {{getClasses(item.hierarchyMatch, item.issueKey)}} {{highlightClass}}" elevation="0" style$="{{getIssueColor(item)}}"
 	                        on-tap="opendialog" title="Issue details">
 	                        
@@ -276,10 +276,10 @@
 	                         title$="- {{item.issueKey}}&#010;- {{getIssueTypeName(item.type)}}&#010;- {{getStatusName(item.status)}}"
 	                         src$="{{getIssueTypeImage(item)}}"/>
 	                    <template is="dom-if" if="{{item.subresponsavel1}}">
-	                        <img class="icon-small" src$="{{item.subresponsavel1}}"/>
+	                        <img id="assignee1" class="icon-small" src$="{{item.subresponsavel1}}"/>
 	                    </template>
 	                    <template is="dom-if" if="{{subResponsavelNotEquals(item)}}">
-	                        <img class="icon-small" src$="{{item.subresponsavel2}}"/>
+	                        <img id="assignee2" class="icon-small" src$="{{item.subresponsavel2}}"/>
 	                    </template>
 	                </div>
 	            </div>
@@ -301,14 +301,63 @@
                 properties: {
                     item: {
                         type: Object,
-                        notify: true
+                        notify: true,
+                        observer: 'itemChanged'
                     },
                     hidden: {
                         type: Boolean
                     },
                     highlightClass: {
                     	type: String
+                    },
+                    boardstepid: {
+                        type: String
                     }
+                },
+                
+                attached: function() {
+                   	var self = this; 
+                   
+                   	this.async(function() {
+                   	    if (typeof self.item === 'undefined')
+                   	        return;
+                   	 	if (typeof this.item.__eventInfo === 'undefined') 
+                    		return;
+                        
+                        self.highlightChangedIssue();
+                   	})
+                },
+                
+                itemChanged: function() {
+                    if (typeof this.item.__eventInfo === 'undefined')
+                        return;
+                    
+                    var belongsToThisStep = this.boardstepid == taskboard.getIssueStep(this.item).id;
+                    if (!belongsToThisStep)
+                        return;
+                    
+                    this.highlightChangedIssue();
+                },
+                
+                highlightChangedIssue: function() {
+                    var self = this;
+                    var eventInfo = this.item.__eventInfo;
+                    delete this.item.__eventInfo;
+                    var parent = $(self.$.issueCard.closest(".board-lane.table-wrapper"));
+                    
+                    if (eventInfo.source === 'server') {
+                        // when an issue update comes from server, we just make sure the user can identify them easily
+                        this.set("highlightClass", "issue-UPDATED")
+                    }
+                    else {
+                        // when an issue update comes from client, it means it is the result of user's action.
+                        // in this case, we make sure to scroll and make the issue visible
+                     	parent.animate({scrollTop: 
+                      	   $(self.$.issueCard).offset().top - $(parent).offset().top - (calcViewportHeight($(parent)) - $(self.$.issueCard).height())/2
+                      	})
+                    }
+                    
+                    flash($(this.$.issueCard), "yellow");
                 },
 
                 getClasses: function(hierarchyMatch, issueKey) {
@@ -371,11 +420,10 @@
                 },
                 
                 updateIssue: function(event) {
-                	if (event.detail.issueKey !== this.item.issueKey)
+                	if (event.detail.issue.issueKey !== this.item.issueKey)
                 		return;
                 	
-                	this.set("highlightClass", "issue-" + event.detail.updateType)
-                	flash($(this.$.issueCard), "yellow");
+                	this.item = event.detail.issue;
                 },
 
                 getIssueColor: function (issue) {
@@ -411,6 +459,13 @@
                     return taskboard.getStatusName(statusId);
                 }
             });
+            
+            function calcViewportHeight($el) {
+                var elH = $el.outerHeight(),
+                    H   = $(window).height(),
+                    r   = $el[0].getBoundingClientRect(), t=r.top, b=r.bottom;
+                return Math.max(0, t>0? Math.min(elH, H-t) : (b<H?b:H));
+            }
 
             function onSingleOrDoubleClick(el, onsingle, ondouble) {
                 if (el.getAttribute("data-dblclick") == null) {

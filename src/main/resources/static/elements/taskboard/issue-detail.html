@@ -586,8 +586,8 @@
 						</paper-button>
 						
 						<template is="dom-if" if="{{hasRecords(transitions)}}">
-							<template is="dom-repeat" items="{{transitions}}" as="transition">
-						    	<paper-button raised class="colorful" on-tap="requestTransition" data-args={{transition.name}}>
+							<template id="issueTransitions" is="dom-repeat" items="{{transitions}}" as="transition">
+						    	<paper-button data-transition-name$='{{transition.name}}' raised class="colorful" on-tap="requestTransition" data-args={{transition.name}}>
 						    		{{transition.name}}
 						        </paper-button>
 							</template>
@@ -606,15 +606,6 @@
 						</template>
 						
 						<paper-spinner id="loadTransitions" active alt="Loading..."></paper-spinner>
-						    
-						<!--
-							<template is="dom-if" if="{{shouldShowNewSubtask(item)}}">
-							    <paper-button id="buttonNewSubTask" raised class="colorful" style='float: right'
-							                  on-tap="openDialogNewTask"> Nova Sub-Task
-							    </paper-button>
-							</template>
-						-->
-						                                                        
                     </div>
                     
 				</div>
@@ -781,9 +772,10 @@
                             'Content-Type': 'application/json'
                         },
                         data: JSON.stringify(this.item),
-                        success: function () {
-                            location.reload(true);
-                        },
+                        success: function (issue) {
+                            taskboard.fireIssueUpdated('client', self, issue, 'UPDATED');
+                            self.close();
+                        },		
                         error: function (jqXhr, textStatus, errorThrown) {
                             console.error(errorThrown);
                             self.errorMessage = jqXhr.responseJSON.message;
@@ -929,8 +921,9 @@
                             'Content-Type': 'application/json'
                         },
                         data: JSON.stringify(params),
-                        success: function (data, textStatus, jQxhr) {
-                            location.reload();
+                        success: function (issue, textStatus, jQxhr) {
+                            taskboard.fireIssueUpdated('client', self, issue, 'TRANSITION');
+                            self.close();
                         },
                         error: function (jqXhr, textStatus, errorThrown) {
                             self.clearProperties();
@@ -1027,6 +1020,10 @@
 
                 openDialogNewTask: function () {
                     this.$.dialogNewTask.opendialog(this.item);
+                    this.close();
+                },
+                
+                close: function() {
                     this.$.modal.close();
                 },
 

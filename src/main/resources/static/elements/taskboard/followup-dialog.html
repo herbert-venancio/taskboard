@@ -1,0 +1,295 @@
+<!--
+  [LICENSE]
+  Taskboard
+  - - -
+  Copyright (C) 2015 - 2016 Objective Solutions
+  - - -
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  [/LICENSE]
+  -->
+<dom-module id="followup-dialog">
+
+    <style>
+        :host {
+        }
+
+        .card-custom {
+        	background: transparent;
+			width: 100%;
+			min-height: 360px;
+			padding: 20px;
+			margin: 0;
+        }
+
+        .half-column {
+        }
+
+        .card-header-custom {
+            width: 100%;
+            margin-bottom: 30px;
+            font-size: 24px;
+            display: flex;
+        }
+        
+        .card-header-info {
+        	flex: 1;
+        }
+
+        .card-header-breadcrumb {
+        	margin-bottom: 10px;
+        	font-size: 15px;
+        }
+        
+        
+        .sub-header {
+        	line-height: normal;
+        	margin-bottom: 5px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .content-row {
+            display: flex;
+            margin-top: 10px;
+        }
+        
+        .content-row:first-child {
+        	margin-top: 0;
+        }
+        
+        paper-button {
+            margin-bottom: 12px;
+        }
+
+        .card-header-buttons {
+        	padding: 0;
+            margin-left: auto;
+        }
+        
+        paper-material, paper-button {
+        	box-shadow: none !important;
+        }
+
+        paper-button.colorful {
+            color: #4285f4;
+        }
+
+        paper-button[raised].colorful {
+            background: #4285f4;
+            color: #fff;
+        }
+
+        paper-button[toggles] {
+            transition: all 0.3s;
+        }
+
+        paper-button[toggles][active] {
+            background-color: rgba(0, 0, 0, 0.25);
+        }
+
+        paper-button[toggles][active].colorful {
+            background-color: rgba(66, 133, 244, 0.25);
+        }
+
+        paper-button[toggles][active][raised].colorful {
+            background-color: rgba(66, 133, 244, 0.75);
+        }
+
+        #modal {
+		    background: white;
+		    min-width: 300px;
+		    min-height: 360px;
+		    margin: 0;
+		    display: block;
+		    font-family: inherit;
+        }
+
+        .error-message {
+            white-space: pre;
+            margin-left: 10px;
+            color: red;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .buttonClose {
+        	min-width: auto;
+            display: inline;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .custom-footer {
+        	position: absolute;
+            bottom: 20px;
+        }
+        
+        .custom-footer-buttons {
+        	display: flex;
+        	margin-left: -5px;
+        	margin-right: -5px;
+        }
+        
+        .custom-footer-buttons paper-button {
+        	padding: 5px 10px;
+        	margin: 0 5px;
+        	text-transform: none;
+        	text-align: center;
+        }
+        
+		paper-spinner[aria-hidden=true] {
+		    display: none;
+		}
+        
+        .scroll {
+            padding: 10px;
+            overflow: auto;
+            overflow-x: hidden;
+            max-height: 150px;
+            width: 100%;
+            background-color: white;
+        }        
+
+    </style>
+
+    <template>
+    	<iron-ajax id="ajaxProjects"
+                   method="GET"
+                   url="/api/projects"
+                   content-type='application/json'
+                   last-response="{{projects}}"></iron-ajax>
+        <paper-dialog id="modal" entry-animation="scale-up-animation" exit-animation="fade-out-animation" with-backdrop modal>
+                <paper-card class="card-custom">
+            
+                <div class="card-header-custom">
+                    <div class="card-header-info">
+                        <div class="card-header-breadcrumb">
+                            <span class="project-title">
+                                Followup report generation
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-header-buttons">
+                        <paper-button class="buttonClose" on-tap="close" dialog-confirm autofocus>
+                            <iron-icon icon="clear"></iron-icon>
+                        </paper-button>
+                    </div>
+                </div>
+                
+                <div class="content-box">
+                    <div class="sub-header">                    
+                        Select the projects to include in the report:
+                    </div>
+                    <div class="content-row">
+                        <paper-checkbox id='toggleAll' on-change='toggleSelectAll'>Select/Deselect all</paper-checkbox>
+                    </div>
+                    <div class="content-row">
+                        <div class="scroll" id="listOfProjects">
+                            <template is="dom-repeat" items="{{projects}}">
+                                <paper-checkbox checked="{{item.checked}}">{{item.projectKey}}</paper-checkbox><br>
+                            </template>
+                        </div>                        
+                    </div>
+                    
+                    <div class="error-message" hidden$="{{!errorMessage}}">{{errorMessage}}</div>
+                </div>
+                
+                <div class="custom-footer">
+                                            
+                    <div class="custom-footer-buttons">
+                        
+                        <paper-button id="generate" raised class="colorful" on-tap="downloadFollowup" title="Generate Report">
+                            Generate Report
+                        </paper-button>
+                        
+                    </div>
+                </div>
+            </paper-card>                      
+        </paper-dialog>
+    </template>
+    <script>
+        (function () {
+            Polymer({
+                is: 'followup-dialog',
+
+                properties: {
+                    projects: {
+                        type: Array
+                    }
+                },
+                
+                opendialog: function () {
+                    toggleAll.checked = false;
+                    this.projects = [];
+                	this.$.ajaxProjects.generateRequest();
+                    this.$.modal.open();
+                },
+                
+                close: function() {
+                    this.$.modal.close();
+                },
+                
+                toggleSelectAll: function(e) {
+                    this.projects.forEach(function(p, index, array) {
+                        p.checked = e.target.checked;
+                    })
+                    // force polymer to recognize the model change
+                    this.projects = JSON.parse(JSON.stringify(this.projects))
+                },
+                
+                downloadFollowup: function() {
+                	var self = this;
+                    self.errorMessage = "";
+                	var selectedKeys = [];
+                	
+                	this.projects.forEach(function(p, index) {
+                	    if (p.checked)
+                        	selectedKeys.push(p.projectKey);
+                    })
+                	
+                	if (selectedKeys.length == 0) {
+                	    this.errorMessage = "Please, selected at least one project"
+                	    return;
+                	}
+                	
+                	var projectQuery = "projects="+selectedKeys.join(",")
+                	
+                	$.ajax({
+                        url: '/ws/followup/state',
+                        success: function (data) {
+                        	switch(data) {
+	                        	case "uninitialised":
+	                        	case "initialising":
+	                        		self.errorMessage = "Followup data not ready... try again in a few minutes"
+	                        		return;
+	                        	
+	                        	case "initialisationError":
+	                        	    self.errorMessage = "Followup data failed to initialise. Will retry later"
+	                        		return;
+                        	}
+                        	self.close();
+                        	window.location = "ws/followup?"+projectQuery;
+                        },
+                        error: function (jqXhr, textStatus, errorThrown) {
+                            self.errorMessage = errorThrown;
+                        },
+                        async: true
+                    });
+                }
+            });
+        })();
+    </script>
+
+</dom-module>
