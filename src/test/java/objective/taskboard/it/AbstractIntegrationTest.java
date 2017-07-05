@@ -69,7 +69,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     public static String getSiteBase(){
-        return "http://localhost:8900/";
+        return "http://localhost:8900";
     }
 
     protected void resetJiraMock() {
@@ -77,6 +77,6 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected void resetIssueBuffer() {
-        RequestBuilder.url(getSiteBase()+"/test/resetbuffer").get();
+        RequestBuilder.url(getSiteBase()+"/test/resetbuffer").credentials("foo", "bar").get();
     }
 }
