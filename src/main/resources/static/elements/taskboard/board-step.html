@@ -56,10 +56,12 @@
             </template>
 
             <!-- Issues -->
+            <div id="boardStepIssues" class="wrap layout horizontal sortable-board-step" style="width: 100%">
             <template is="dom-repeat" items="{{filteredIssues}}" as="issue" sort="{{getSorter()}}">
-                <issue-item id='{{issue.issueKey}}' item="{{issue}}" boardstepid="{{stepMetadata.id}}" style$="{{getOptimalIssueWidth(columns, issue)}}" hidden="{{showSynthetic(lastPreferenceUpdate)}}"></issue-item>
+                <issue-item data-id$="{{issue.issueKey}}" id='{{issue.issueKey}}' item="{{issue}}" boardstepid="{{stepMetadata.id}}" style$="{{getOptimalIssueWidth(columns, issue)}}" hidden="{{showSynthetic(lastPreferenceUpdate)}}"></issue-item>
                 <issue-item-synthetic item="{{issue}}" parent-type-icon="{{showParentIconInSynthetic(parentLaneConfig)}}" hidden="{{!showSynthetic(lastPreferenceUpdate)}}"></issue-item-synthetic>
             </template>
+            </div>
         </div>
     </template>
 
@@ -182,7 +184,7 @@
                 },
                 
                 stepItem: function() {
-                	return $(this.$.boardStep);
+                	return $(this.$.boardStepIssues);
                 },
 
                 showParentIconInSynthetic: function() {
@@ -344,8 +346,20 @@
                         var self = this;
                         var issueToRemoveDom = Polymer.dom(this.root).querySelector("#"+data.issue.issueKey);
                         
+                        var previous = $(issueToRemoveDom);
+                        previous.nextAll("issue-item").each(function(){
+                            var deltaY = previous.offset().top - $(this).offset().top;
+                            var deltaX = previous.offset().left - $(this).offset().left;
+                            $(this).find("#issueCard").css("border","1px solid black")
+                            $(this).find("#issueCard").animate({
+                                top:     deltaY,
+                                left:    deltaX
+                            }, 800);
+                            previous = $(this);
+                        });
+                        
                         $(issueToRemoveDom).fadeOut(
-                            500,
+                            800,
                             function() {
                                 self.issues.splice(issueIndex,1);
                                 this.async(function() {
