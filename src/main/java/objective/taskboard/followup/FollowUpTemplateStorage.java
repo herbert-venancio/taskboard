@@ -1,4 +1,4 @@
-package objective.taskboard;
+package objective.taskboard.followup;
 
 /*-
  * [LICENSE]
@@ -21,20 +21,12 @@ package objective.taskboard;
  * [/LICENSE]
  */
 
-import java.io.IOException;
-import java.io.InputStream;
+public interface FollowUpTemplateStorage {
 
-import org.apache.commons.io.IOUtils;
+    FollowUpTemplate getDefaultTemplate();
 
-public class TestUtils {
-    public static String loadResource(Class<?> klass, String path){
-        try {
-            InputStream stream = klass.getResourceAsStream(path);
-            if (stream == null)
-                return null;
-            return IOUtils.toString(stream, "UTF-8");
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-    }
+    FollowUpTemplate getTemplate();
+
+    void updateTemplate(FollowUpTemplate template);
+
 }
