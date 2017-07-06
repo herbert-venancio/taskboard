@@ -39,7 +39,7 @@ public class TestMain {
     public DataSource targetDataSource() throws SQLException {
         TransactionAwareDataSourceProxy transactionAwareDataSourceProxy = new TransactionAwareDataSourceProxy();
         SingleConnectionDataSource singleConn = new SingleConnectionDataSource();
-        singleConn.setUrl("jdbc:h2-no-commit:file:./db2;trace_level_file=3");
+        singleConn.setUrl("jdbc:h2-no-commit:file:./db2");//add ;trace_level_file=3 to enable driver debug to output
         singleConn.setDriverClassName(H2DriverNoCommit.class.getName());
         singleConn.setPassword("");
         singleConn.setUsername("sa");
