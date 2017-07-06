@@ -1,4 +1,4 @@
-package objective.taskboard;
+package objective.taskboard.followup;
 
 /*-
  * [LICENSE]
@@ -21,20 +21,16 @@ package objective.taskboard;
  * [/LICENSE]
  */
 
+import objective.taskboard.issueBuffer.IssueBufferState;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
-import java.io.InputStream;
 
-import org.apache.commons.io.IOUtils;
+public interface FollowUpFacade {
 
-public class TestUtils {
-    public static String loadResource(Class<?> klass, String path){
-        try {
-            InputStream stream = klass.getResourceAsStream(path);
-            if (stream == null)
-                return null;
-            return IOUtils.toString(stream, "UTF-8");
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-    }
+    FollowUpGenerator getGenerator();
+
+    void updateTemplate(MultipartFile file) throws IOException;
+
+    IssueBufferState getFollowupState();
 }

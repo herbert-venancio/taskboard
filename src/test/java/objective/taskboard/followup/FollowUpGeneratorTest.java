@@ -41,7 +41,6 @@ import org.xml.sax.SAXException;
 
 import objective.taskboard.TestUtils;
 
-@RunWith(MockitoJUnitRunner.class)
 public class FollowUpGeneratorTest {
 
     private static final String PATH_SHARED_STRINGS_INITIAL = "followup/sharedStrings-initial.xml";
@@ -169,7 +168,7 @@ public class FollowUpGeneratorTest {
         ByteArrayResource resource = subject.generate(emptyArray());
         assertNotNull("Resource shouldn't be null", resource);
     }
-    
+
     @Test
     public void generateTable7Test() {
         FollowupDataProvider provider = getFollowupDataProvider(asList(getFollowUpDataDefault()));
@@ -227,7 +226,7 @@ public class FollowUpGeneratorTest {
     private String getStringExpected(String pathResource) {
         return TestUtils.loadResource(getClass(), "/"+pathResource);
     }
-    
+
     private String[] emptyArray() {
         return new String[0];
     }
