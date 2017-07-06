@@ -1,5 +1,3 @@
-package objective.taskboard;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,14 +18,35 @@ package objective.taskboard;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard;
+
+import java.sql.SQLException;
+import javax.sql.DataSource;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
+import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.scheduling.annotation.EnableScheduling;
+
+import objective.taskboard.driver.H2DriverNoCommit;
 
 @EnableScheduling
 @SpringBootApplication
 public class TestMain {
+    @Bean
+    public DataSource targetDataSource() throws SQLException {
+        TransactionAwareDataSourceProxy transactionAwareDataSourceProxy = new TransactionAwareDataSourceProxy();
+        SingleConnectionDataSource singleConn = new SingleConnectionDataSource();
+        singleConn.setUrl("jdbc:h2-no-commit:file:./db2;trace_level_file=3");
+        singleConn.setDriverClassName(H2DriverNoCommit.class.getName());
+        singleConn.setPassword("");
+        singleConn.setUsername("sa");
+        transactionAwareDataSourceProxy.setTargetDataSource(singleConn);
+        return transactionAwareDataSourceProxy;
+    }
+    
     public static void main(String[] args) {
         System.setProperty("spring.datasource.data", "classpath:/populate_db.sql");
         JiraMockServer.begin();

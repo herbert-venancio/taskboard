@@ -343,6 +343,14 @@ function Taskboard() {
     	return $("paper-material.issue [data-issue-key='"+issueKey+"']").closest("paper-material.issue");
     }
     
+    this.convertIssues = function(issues) {
+        var converted = []
+        issues.forEach(function(issue) {
+            converted.push(self.convertIssue(issue));
+        })
+        return converted;
+    }
+    
     this.convertIssue = function(issue) {
     	var startDateStep = new Date(issue.startDateStepMillis);
         issue.cycletime = cycleTime.getCycleTime(startDateStep, new Date()).toFixed(2);

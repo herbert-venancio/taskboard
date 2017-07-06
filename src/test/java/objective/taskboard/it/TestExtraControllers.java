@@ -1,5 +1,3 @@
-package objective.taskboard.it;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,11 +18,20 @@ package objective.taskboard.it;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.it;
 
+import java.sql.SQLException;
+import java.sql.Savepoint;
+
+import javax.persistence.EntityManager;
+
+import org.hibernate.internal.SessionImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import objective.taskboard.controller.CacheRefreshController;
+import objective.taskboard.controller.IssuePriorityService;
 import objective.taskboard.issueBuffer.IssueBufferService;
 
 @RestController
@@ -33,9 +40,45 @@ public class TestExtraControllers {
 
     @Autowired
     private IssueBufferService issueBuffer;
+    
+    @Autowired
+    EntityManager entityManager;
+    
+    @Autowired
+    CacheRefreshController cacheRefreshController;
+    
+    @Autowired
+    private IssuePriorityService prioService;
 
+    private Savepoint _savepoint;
+    
     @RequestMapping("resetbuffer")
     public void resetbuffer() {
+        rollback();
+        cacheRefreshController.configuration();
+        prioService.reset();
         issueBuffer.reset();
+        savepoint();
+    }
+    
+    @RequestMapping("savepoint")
+    public void savepoint() {
+        try {
+            _savepoint = ((SessionImpl) entityManager.getDelegate()).connection().setSavepoint();
+        } catch (SQLException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+    
+    @RequestMapping("rollback")
+    public void rollback() {
+        if (_savepoint == null)
+            return;
+        try {
+            ((SessionImpl) entityManager.getDelegate()).connection().rollback(_savepoint);
+            _savepoint = null;
+        } catch (SQLException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }
