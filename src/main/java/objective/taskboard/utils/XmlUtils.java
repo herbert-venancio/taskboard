@@ -41,6 +41,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 
+@SuppressWarnings("deprecation")
 public class XmlUtils {
 
     public static NodeList xpath(File xmlFile, String locator) {
@@ -111,7 +112,10 @@ public class XmlUtils {
     }
 
     public static class InvalidXPathOperationException extends RuntimeException {
-        private static final String MESSAGE = "Invalid XPath Operation";
+
+    	private static final long serialVersionUID = 1L;
+		
+    	private static final String MESSAGE = "Invalid XPath Operation";
         public InvalidXPathOperationException() {
             super(MESSAGE);
         }
@@ -121,7 +125,10 @@ public class XmlUtils {
     }
 
     public static class InvalidXmlException extends RuntimeException {
-        private static final String MESSAGE = "Invalid Xml";
+
+    	private static final long serialVersionUID = 1L;
+		
+    	private static final String MESSAGE = "Invalid Xml";
         public InvalidXmlException() {
             super(MESSAGE);
         }
