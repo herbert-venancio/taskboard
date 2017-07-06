@@ -50,9 +50,6 @@ public class DefaultFollowUpFacade implements FollowUpFacade {
     private FollowupDataProvider provider;
 
     @Autowired
-    private UpdateFollowUpService updateFollowUpService;
-
-    @Autowired
     private TemplateRepository templateRepository;
 
     @Autowired
@@ -77,40 +74,6 @@ public class DefaultFollowUpFacade implements FollowUpFacade {
     @Override
     public IssueBufferState getFollowupState() {
         return provider.getFollowupState();
-    }
-
-    @Override
-    public void updateTemplate(MultipartFile file) throws IOException {
-//        Path followUpTemplateCandidate = updateFollowUpService.decompressTemplate(file.getInputStream());
-//        Path jiraTab = Files.createTempFile("sheet-template", ".xml");
-//        Path sharedStrings = Files.createTempFile("shared-strings", ".xml");
-//        Path pathFollowupXLSM = Files.createTempFile("Followup", ".xlsm");
-//        try {
-//            updateFollowUpService.validateTemplate(followUpTemplateCandidate);
-//            updateFollowUpService.updateFromJiraTemplate(followUpTemplateCandidate, jiraTab);
-//            updateFollowUpService.updateSharedStrings(followUpTemplateCandidate, sharedStrings);
-//            updateFollowUpService.deleteGeneratedFiles(followUpTemplateCandidate);
-//            updateFollowUpService.compressTemplate(followUpTemplateCandidate, pathFollowupXLSM);
-//
-//            FollowUpTemplate defaultTemplate = followUpTemplateStorage.getDefaultTemplate();
-//            FollowUpTemplate template = new FollowUpTemplate(
-//                    defaultTemplate.getPathSharedStringsInitial()
-//                    , sharedStrings.toUri().toURL()
-//                    , defaultTemplate.getPathSISharedStringsTemplate()
-//                    , jiraTab.toUri().toURL()
-//                    , defaultTemplate.getPathSheet7RowTemplate()
-//                    , pathFollowupXLSM.toUri().toURL()
-//                    , defaultTemplate.getPathTable7Template()
-//            );
-//            followUpTemplateStorage.updateTemplate(template);
-//        } catch (Exception e) {
-//            FileUtils.deleteQuietly(jiraTab.toFile());
-//            FileUtils.deleteQuietly(sharedStrings.toFile());
-//            FileUtils.deleteQuietly(pathFollowupXLSM.toFile());
-//            throw e;
-//        } finally {
-//            FileUtils.deleteQuietly(followUpTemplateCandidate.toFile());
-//        }
     }
 
     @Override

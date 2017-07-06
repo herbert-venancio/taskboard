@@ -51,8 +51,10 @@ public class FollowUpFacadeTest {
     private FollowUpFacade followUpFacade = new DefaultFollowUpFacade();
 
     @Test
-    public void upload() throws IOException {
+    public void create() throws IOException {
+        String templateName = "OkFollowupTemplate.xlsm";
+        String projects = "TASKB,PROJ1";
         MultipartFile file = new MockMultipartFile("file", FollowUpFacadeTest.class.getResourceAsStream("OkFollowupTemplate.xlsm"));
-        followUpFacade.updateTemplate(file);
+        followUpFacade.createTemplate(templateName, projects, file);
     }
 }

@@ -29,7 +29,10 @@ import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.*;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
@@ -41,6 +44,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 
+@SuppressWarnings("deprecation")
 public class XmlUtils {
 
     public static NodeList xpath(File xmlFile, String locator) {
@@ -93,7 +97,7 @@ public class XmlUtils {
         return "";
     }
 
-    public static void format(File inputXmlFile, File outputXmlFile)  {
+	public static void format(File inputXmlFile, File outputXmlFile) {
         try {
             final Document document = asDocument(inputXmlFile);
 
@@ -111,7 +115,10 @@ public class XmlUtils {
     }
 
     public static class InvalidXPathOperationException extends RuntimeException {
-        private static final String MESSAGE = "Invalid XPath Operation";
+    	
+		private static final long serialVersionUID = 1L;
+		
+		private static final String MESSAGE = "Invalid XPath Operation";
         public InvalidXPathOperationException() {
             super(MESSAGE);
         }
@@ -121,7 +128,10 @@ public class XmlUtils {
     }
 
     public static class InvalidXmlException extends RuntimeException {
-        private static final String MESSAGE = "Invalid Xml";
+
+    	private static final long serialVersionUID = 1L;
+		
+    	private static final String MESSAGE = "Invalid Xml";
         public InvalidXmlException() {
             super(MESSAGE);
         }

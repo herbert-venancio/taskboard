@@ -10,6 +10,13 @@ then
   exit 0
 fi
 
+function cleanup() {
+  #9. And you're done.
+  rm -rf "$TEMP_DIR"
+  rm xpath.js
+}
+trap cleanup EXIT
+
 wget -nv -nc http://gitlab/devops/xpath/raw/master/script/xpath.js
 chmod +x xpath.js
 
@@ -63,7 +70,3 @@ rm ./sharedStrings.xml
 cd "$TEMP_DIR"
 zip -FS -r ../src/main/resources/followup-template/Followup-template.xlsm .
 cd ..
-
-#9. And you're done.
-rm -rf "$TEMP_DIR"
-rm xpath.js

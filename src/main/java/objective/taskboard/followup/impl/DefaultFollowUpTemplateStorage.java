@@ -28,9 +28,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -62,8 +60,8 @@ public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
     }
 
     @Override
-    public String storeTemplate(File template, FollowUpTemplateValidator validator){
-        return null;
+    public String storeTemplate(File template, FollowUpTemplateValidator validator) throws IOException {
+        return storeTemplate(new FileInputStream(template), validator);
     }
 
     @Override

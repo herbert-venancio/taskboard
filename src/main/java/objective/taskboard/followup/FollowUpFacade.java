@@ -32,8 +32,6 @@ public interface FollowUpFacade {
 
     FollowUpGenerator getGenerator();
 
-    void updateTemplate(MultipartFile file) throws IOException;
-
     FollowUpGenerator getGenerator(String templateName);
 
     IssueBufferState getFollowupState();

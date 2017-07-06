@@ -24,14 +24,8 @@ package objective.taskboard.it;
 
 import java.io.File;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.OutputType;
@@ -45,7 +39,7 @@ import com.safaribooks.junitattachments.RecordAttachmentRule;
 public abstract class AbstractUIIntegrationTest extends AbstractIntegrationTest {
     protected WebDriver webDriver;
 
-    public void setup() throws InterruptedException, ExecutionException, TimeoutException {
+    public void setup() throws InterruptedException, ExecutionException {
         if (System.getProperty("webdriver.gecko.driver") == null)
             System.setProperty("webdriver.gecko.driver", "drivers/linux/marionette/64bit/geckodriver");
         

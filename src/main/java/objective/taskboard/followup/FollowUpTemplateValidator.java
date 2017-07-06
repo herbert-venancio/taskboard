@@ -34,7 +34,10 @@ public class FollowUpTemplateValidator {
     }
 
     public static class InvalidTemplateException extends RuntimeException {
-        private static final String MESSAGE = "Invalid Template";
+
+    	private static final long serialVersionUID = 1L;
+		
+    	private static final String MESSAGE = "Invalid Template";
         public InvalidTemplateException() {
             super(MESSAGE);
         }
