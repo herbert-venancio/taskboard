@@ -50,10 +50,7 @@ public class DefaultFollowUpFacade implements FollowUpFacade {
     private FollowupDataProvider provider;
 
     @Autowired
-    private TemplateRepository templateRepository;
-
-    @Autowired
-    private ProjectFilterConfigurationCachedRepository projectRepository;
+    private TemplateService templateService;
 
     @Autowired
     private ProjectService projectService;
@@ -83,7 +80,7 @@ public class DefaultFollowUpFacade implements FollowUpFacade {
                 .map(Project::getKey)
                 .collect(Collectors.toList());
 
-        List<Template> templates = templateRepository.findTemplatesForProjectKeys(projectKeys);
+        List<Template> templates = templateService.findTemplatesForProjectKeys(projectKeys);
 
         return templates
                 .stream()
@@ -92,22 +89,12 @@ public class DefaultFollowUpFacade implements FollowUpFacade {
     }
 
     @Override
-    public void createTemplate(String templateName, String projects, MultipartFile file) throws IOException {
-        String path = followUpTemplateStorage.storeTemplate(file.getInputStream(), new FollowUpTemplateValidator());
-
-        Template template = new Template();
-        template.setName(templateName);
-        template.setPath(path);
-        List<String> projectKeys = Arrays.asList(projects.split(","));
-        List<ProjectFilterConfiguration> associatedProjects =
-                projectRepository.getProjects()
-                        .stream()
-                        .filter(proj -> projectKeys.contains(proj.getProjectKey()))
-                        .collect(Collectors.toList());
-        template.setProjects(associatedProjects);
-
-        templateRepository.save(template);
-        System.out.println(templateRepository.count());
+    public void createTemplate(String templateName, String projects,
+                               MultipartFile file) throws IOException {
+        String path = followUpTemplateStorage
+                .storeTemplate(file.getInputStream(),
+                        new FollowUpTemplateValidator());
+        templateService.saveTemplate(templateName, projects, path);
     }
 
 

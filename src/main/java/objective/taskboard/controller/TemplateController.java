@@ -70,7 +70,7 @@ public class TemplateController {
     public void upload(@RequestParam("file") MultipartFile file
             , @RequestParam("name") String templateName
             , @RequestParam("projects") String projects) throws IOException {
-        //followUpFacade.updateTemplate(file);
+
         followUpFacade.createTemplate(templateName, projects, file);
     }
 }
