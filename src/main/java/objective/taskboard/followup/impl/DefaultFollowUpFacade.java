@@ -21,13 +21,17 @@ package objective.taskboard.followup.impl;
  * [/LICENSE]
  */
 
+import objective.taskboard.controller.TemplateData;
+import objective.taskboard.domain.Project;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.*;
 import objective.taskboard.followup.data.Template;
 import objective.taskboard.issueBuffer.IssueBufferState;
+import objective.taskboard.jira.ProjectService;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.repository.TemplateRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -53,6 +57,12 @@ public class DefaultFollowUpFacade implements FollowUpFacade {
 
     @Autowired
     private ProjectFilterConfigurationCachedRepository projectRepository;
+
+    @Autowired
+    private ProjectService projectService;
+
+    @Autowired
+    private Converter<Template, TemplateData> templateConverter;
 
     @Override
     public FollowUpGenerator getGenerator() {
@@ -104,6 +114,21 @@ public class DefaultFollowUpFacade implements FollowUpFacade {
     }
 
     @Override
+    public List<TemplateData> getTemplatesForCurrentUser() {
+        List<String> projectKeys = projectService.getVisibleProjects()
+                .stream()
+                .map(Project::getKey)
+                .collect(Collectors.toList());
+
+        List<Template> templates = templateRepository.findTemplatesForProjectKeys(projectKeys);
+
+        return templates
+                .stream()
+                .map(t -> templateConverter.convert(t))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public void createTemplate(String templateName, String projects, MultipartFile file) throws IOException {
         String path = followUpTemplateStorage.storeTemplate(file.getInputStream(), new FollowUpTemplateValidator());
 
@@ -121,4 +146,6 @@ public class DefaultFollowUpFacade implements FollowUpFacade {
         templateRepository.save(template);
         System.out.println(templateRepository.count());
     }
+
+
 }

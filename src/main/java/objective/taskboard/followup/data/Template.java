@@ -9,6 +9,8 @@ import java.util.List;
 @Data
 @Entity
 @Table(name="TEMPLATE")
+@NamedQuery(name = "Template.findTemplatesForProjectKeys"
+        , query = "SELECT t FROM Template t JOIN t.projects p WHERE p.projectKey IN (?1)")
 public class Template {
 
     @GeneratedValue(strategy = GenerationType.AUTO)

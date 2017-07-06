@@ -13,10 +13,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by herbert on 04/07/17.
- */
-
 @RestController
 @RequestMapping("/api/templates")
 public class TemplateController {
@@ -26,7 +22,7 @@ public class TemplateController {
 
     @RequestMapping
     public List<TemplateData> get() {
-        List<TemplateData> list = new ArrayList();
+        List<TemplateData> list = new ArrayList<>();
         {
             TemplateData item1 = new TemplateData();
             item1.name = "template1";
@@ -45,6 +41,7 @@ public class TemplateController {
             item3.projects = Lists.newArrayList("TASKB", "PROJ1");
             list.add(item3);
         }
+        list.addAll(followUpFacade.getTemplatesForCurrentUser());
         return list;
     }
 
