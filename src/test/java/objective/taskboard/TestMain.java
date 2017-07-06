@@ -43,6 +43,8 @@ public class TestMain {
         singleConn.setDriverClassName(H2DriverNoCommit.class.getName());
         singleConn.setPassword("");
         singleConn.setUsername("sa");
+        singleConn.setAutoCommit(false);
+        singleConn.setSuppressClose(true);
         transactionAwareDataSourceProxy.setTargetDataSource(singleConn);
         return transactionAwareDataSourceProxy;
     }

@@ -54,9 +54,10 @@ public class H2DriverNoCommit extends Driver {
                 @Override
                 public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                     if (method.getName().equals("commit")) {
-                        System.out.println("=========== skipping commit to preserve savepoint ===============");
+                        System.out.println("=========== skipping commit() to preserve savepoint ===============");
                         return null;
                     }
+                    
                     return method.invoke(delegate, args);
                 }});
         } catch (Exception e) {
