@@ -1,5 +1,3 @@
-package objective.taskboard.followup;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,6 +18,7 @@ package objective.taskboard.followup;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.followup;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
@@ -37,7 +36,7 @@ import org.junit.Test;
 import org.springframework.core.io.ByteArrayResource;
 import org.xml.sax.SAXException;
 
-import objective.taskboard.TestUtils;
+import objective.taskboard.utils.IOUtilities;
 
 public class FollowUpGeneratorTest {
 
@@ -168,11 +167,21 @@ public class FollowUpGeneratorTest {
     }
 
     @Test
-    public void generateTable7Test() {
+    public void whenLineCountHigherThanOriginalTable7_generateWithNewLineCount() {
         FollowupDataProvider provider = getFollowupDataProvider(asList(getFollowUpDataDefault()));
         FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
-        String table7 = subject.generateTable7(3042);
+        String originalTable7 = getStringExpected("followup/original-table7.xml");
+        String table7 = subject.generateTable7(originalTable7, 3042);
         assertEquals(getStringExpected("followup/expectedTable7.xml"), table7);
+    }
+    
+    @Test
+    public void whenLineCountSmallerThanOriginalTable7_generateWithOldLineCount() {
+        FollowupDataProvider provider = getFollowupDataProvider(asList(getFollowUpDataDefault()));
+        FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
+        String originalTable7 = getStringExpected("followup/original-table7.xml");
+        String table7 = subject.generateTable7(originalTable7, 100);
+        assertEquals(originalTable7, table7);
     }
 
     private FollowUpGenerator getFollowUpGeneratorUsingTestTemplates(FollowupDataProvider provider) {
@@ -222,7 +231,7 @@ public class FollowUpGeneratorTest {
     }
 
     private String getStringExpected(String pathResource) {
-        return TestUtils.loadResource(getClass(), "/"+pathResource);
+        return IOUtilities.resourceToString(pathResource);
     }
 
     private String[] emptyArray() {

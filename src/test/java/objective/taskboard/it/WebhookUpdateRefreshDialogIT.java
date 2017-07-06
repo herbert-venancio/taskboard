@@ -26,7 +26,7 @@ import java.io.IOException;
 import org.junit.Test;
 
 import objective.taskboard.RequestBuilder;
-import objective.taskboard.TestUtils;
+import objective.taskboard.utils.IOUtilities;
 
 public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
     @Test
@@ -38,7 +38,7 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
             .put();
         
         MainPage mainPage = MainPage.produce(webDriver);
-        String body = TestUtils.loadResource(getClass(), "/webhook/TASKB_625_updatePayload.json");
+        String body = IOUtilities.resourceToString("webhook/TASKB_625_updatePayload.json");
         RequestBuilder
             .url(getSiteBase()+"/webhook/TASKB")
             .header("Content-Type", "application/json")

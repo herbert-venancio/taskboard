@@ -43,6 +43,7 @@ import org.codehaus.jettison.json.JSONObject;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import objective.taskboard.utils.IOUtilities;
 import spark.Spark;
 
 
@@ -277,7 +278,7 @@ public class JiraMockServer {
     }
 
     private static String loadMockData(String name) {
-        return TestUtils.loadResource(JiraMockServer.class, "/" + environment() +"/" + name);
+        return IOUtilities.resourceToString(JiraMockServer.class,"/"+environment() +"/" + name);
     }
     
     private static String environment() {
