@@ -23,6 +23,7 @@ package objective.taskboard.followup;
 
 import objective.taskboard.followup.FollowUpTemplateValidator.InvalidTemplateException;
 import objective.taskboard.followup.impl.DefaultUpdateFollowUpService;
+import objective.taskboard.utils.XmlUtils;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -77,7 +78,7 @@ public class UpdateFollowUpServiceTest {
         try {
             updateFollowUpService.updateFromJiraTemplate(decompressed, temp);
             assertThat(temp.toFile().length(), greaterThan(0L));
-            assertThat(FileUtils.readFileToString(temp.toFile(), "UTF-8"), not(containsString("${headerRow}")));
+            assertThatPlaceholderWasReplacedWithActualContent(temp);
         } finally {
             FileUtils.deleteQuietly(temp.toFile());
             FileUtils.deleteQuietly(decompressed.toFile());
@@ -128,6 +129,13 @@ public class UpdateFollowUpServiceTest {
             FileUtils.deleteQuietly(pathFollowupXLSM.toFile());
             FileUtils.deleteQuietly(decompressed.toFile());
         }
+    }
+
+    // ---
+
+    private void assertThatPlaceholderWasReplacedWithActualContent(Path temp) throws IOException {
+        assertThat(FileUtils.readFileToString(temp.toFile(), "UTF-8"), not(containsString("${headerRow}")));
+        assertThat(XmlUtils.xpath(temp.toFile(), "//sheetData/row/c").getLength(), greaterThan(0));
     }
 
     // ---
