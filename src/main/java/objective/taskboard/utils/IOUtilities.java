@@ -11,7 +11,9 @@ public class IOUtilities {
     }
     
     public static String resourceToString(Class<?> clazz, String path) {
-        InputStream inputStream = clazz.getClassLoader().getResourceAsStream(path);
+        InputStream inputStream = clazz.getResourceAsStream(path);
+        if (inputStream == null)
+            return null;
         try {
             return IOUtils.toString(inputStream, "UTF-8");
         } catch (IOException e) {

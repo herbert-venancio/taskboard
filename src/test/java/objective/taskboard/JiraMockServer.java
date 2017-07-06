@@ -278,7 +278,7 @@ public class JiraMockServer {
     }
 
     private static String loadMockData(String name) {
-        return IOUtilities.resourceToString(environment() +"/" + name);
+        return IOUtilities.resourceToString(JiraMockServer.class,"/"+environment() +"/" + name);
     }
     
     private static String environment() {

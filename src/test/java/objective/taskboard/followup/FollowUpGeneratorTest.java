@@ -231,7 +231,7 @@ public class FollowUpGeneratorTest {
     }
 
     private String getStringExpected(String pathResource) {
-        return IOUtilities.resourceToString(getClass(), pathResource);
+        return IOUtilities.resourceToString(pathResource);
     }
 
     private String[] emptyArray() {

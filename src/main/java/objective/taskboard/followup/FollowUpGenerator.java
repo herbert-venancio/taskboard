@@ -245,7 +245,7 @@ public class FollowUpGenerator {
     }
 
     String generateJiraDataSheet(Map<String, Long> sharedStrings, String [] includedProjects, List<FollowUpData> jiraData) {
-        String rowTemplate = IOUtilities.resourceToString(getClass(), pathSheet7RowTemplate);
+        String rowTemplate = IOUtilities.resourceToString(pathSheet7RowTemplate);
         StringBuilder rows = new StringBuilder();
         int rowNumber = 2;
 
@@ -285,7 +285,7 @@ public class FollowUpGenerator {
             rowNumber++;
         }
 
-        String sheetTemplate = IOUtilities.resourceToString(getClass(), pathSheet7Template);
+        String sheetTemplate = IOUtilities.resourceToString(pathSheet7Template);
         Map<String, String> sheetValues = new HashMap<String, String>();
         sheetValues.put("rows", rows.toString());
         return StrSubstitutor.replace(sheetTemplate, sheetValues);
@@ -305,7 +305,7 @@ public class FollowUpGenerator {
     }
 
     String generateSharedStrings(Map<String, Long> sharedStrings) throws IOException {
-        String siSharedStringsTemplate = IOUtilities.resourceToString(getClass(), pathSISharedStringsTemplate);
+        String siSharedStringsTemplate = IOUtilities.resourceToString(pathSISharedStringsTemplate);
         List<String> sharedStringsSorted = sharedStrings.keySet().stream()
             .sorted((s1, s2) -> sharedStrings.get(s1).compareTo(sharedStrings.get(s2)))
             .collect(toList());
@@ -318,7 +318,7 @@ public class FollowUpGenerator {
             allSharedStrings.append(StrSubstitutor.replace(siSharedStringsTemplate, siValues));
         }
 
-        String sharedStringsTemplate = IOUtilities.resourceToString(getClass(), pathSharedStringsTemplate);
+        String sharedStringsTemplate = IOUtilities.resourceToString(pathSharedStringsTemplate);
         Map<String, Object> sharedStringsValues = new HashMap<String, Object>();
         sharedStringsValues.put("sharedStringsSize", sharedStringsSorted.size());
         sharedStringsValues.put("allSharedStrings", allSharedStrings.toString());
@@ -327,7 +327,7 @@ public class FollowUpGenerator {
     
     String generateTable7(String originalTable7, int lineCount) {
         int newLineCount = computeLineCount(originalTable7, lineCount);
-        String template = IOUtilities.resourceToString(getClass(), pathTable7Template);
+        String template = IOUtilities.resourceToString(pathTable7Template);
         Map<String, Object> values = new HashMap<String, Object>();
         values.put("LINE_COUNT", newLineCount+1);
         return StrSubstitutor.replace(template, values);
