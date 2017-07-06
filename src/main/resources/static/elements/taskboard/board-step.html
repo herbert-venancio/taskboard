@@ -46,7 +46,7 @@
                       on-iron-signal-hierarchical-filter-changed="preferencesUpdated"
                       on-iron-signal-issues-updated="handleUpdatedIssues"
                       ></iron-signals>
-        <div id="board-step-{{parentLaneId}}-{{stepMetadata.id}}-{{team}}" class="wrap layout horizontal sortable-board-step" style="width: 100%">
+        <div id="boardStep" class="wrap layout horizontal sortable-board-step" style="width: 100%">
 
             <!-- Issue Counter -->
             <template is="dom-if" if="{{showTeamCount(issues, lastPreferenceUpdate)}}">
@@ -56,10 +56,12 @@
             </template>
 
             <!-- Issues -->
+            <div id="boardStepIssues" class="wrap layout horizontal sortable-board-step" style="width: 100%">
             <template is="dom-repeat" items="{{filteredIssues}}" as="issue" sort="{{getSorter()}}">
-                <issue-item id='{{issue.issueKey}}' item="{{issue}}" boardstepid="{{stepMetadata.id}}" style$="{{getOptimalIssueWidth(columns, issue)}}" hidden="{{showSynthetic(lastPreferenceUpdate)}}"></issue-item>
+                <issue-item data-id$="{{issue.issueKey}}" id='{{issue.issueKey}}' item="{{issue}}" boardstepid="{{stepMetadata.id}}" style$="{{getOptimalIssueWidth(columns, issue)}}" hidden="{{showSynthetic(lastPreferenceUpdate)}}"></issue-item>
                 <issue-item-synthetic item="{{issue}}" parent-type-icon="{{showParentIconInSynthetic(parentLaneConfig)}}" hidden="{{!showSynthetic(lastPreferenceUpdate)}}"></issue-item-synthetic>
             </template>
+            </div>
         </div>
     </template>
 
@@ -182,11 +184,7 @@
                 },
                 
                 stepItem: function() {
-                	var t = "";
-                	if (typeof this.team !== 'undefined')
-                		t = this.team
-                	t = t.replace(/ /,"\\ ")
-                	return $("#board-step-"+this.parentLaneId+"-"+this.stepMetadata.id+"-"+t);
+                	return $(this.$.boardStepIssues);
                 },
 
                 showParentIconInSynthetic: function() {
@@ -316,7 +314,6 @@
                 },
                 
                 handleUpdatedIssues: function(event, data) {
-                    if (this.issues.length === 0) return;
                 	var issueBoardStep = taskboard.getIssueStep(data.issue)
                 	var belongsToThisStep = this.stepMetadata.id === issueBoardStep.id;
                 	
@@ -348,8 +345,20 @@
                         var self = this;
                         var issueToRemoveDom = Polymer.dom(this.root).querySelector("#"+data.issue.issueKey);
                         
+                        var previous = $(issueToRemoveDom);
+                        previous.nextAll("issue-item").each(function(){
+                            var deltaY = previous.offset().top - $(this).offset().top;
+                            var deltaX = previous.offset().left - $(this).offset().left;
+                            $(this).find("#issueCard").css("border","1px solid black")
+                            $(this).find("#issueCard").animate({
+                                top:     deltaY,
+                                left:    deltaX
+                            }, 800, 'easeOutExpo');
+                            previous = $(this);
+                        });
+                        
                         $(issueToRemoveDom).fadeOut(
-                            500,
+                            800,
                             function() {
                                 self.issues.splice(issueIndex,1);
                                 this.async(function() {
