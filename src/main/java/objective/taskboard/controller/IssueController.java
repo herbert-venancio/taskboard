@@ -1,5 +1,3 @@
-package objective.taskboard.controller;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,12 +18,14 @@ package objective.taskboard.controller;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.controller;
 
 import static java.util.stream.Collectors.toList;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -219,8 +219,13 @@ public class IssueController {
     }
     
     @RequestMapping("reorder")
-    public void reorder(@RequestBody String [] issues) {
+    public List<Issue> reorder(@RequestBody String [] issues) {
         issuePriorityService.reorder(issues);
+        List<Issue> updatedIssues = new LinkedList<Issue>();
+        for (String issue : issues) 
+            updatedIssues.add(issueBufferService.getIssueByKey(issue));
+        
+        return updatedIssues;
     }
     
     @RequestMapping("issue-buffer-state")

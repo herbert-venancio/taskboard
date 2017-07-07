@@ -1,5 +1,3 @@
-package objective.taskboard.utils;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,12 +18,13 @@ package objective.taskboard.utils;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.utils;
 
-import org.apache.xml.serialize.OutputFormat;
-import org.apache.xml.serialize.XMLSerializer;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.StringWriter;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -39,15 +38,25 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.StringWriter;
+
+import org.apache.xml.serialize.OutputFormat;
+import org.apache.xml.serialize.XMLSerializer;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 @SuppressWarnings("deprecation")
 public class XmlUtils {
 
     public static NodeList xpath(File xmlFile, String locator) {
+        return xpath(asDocument(xmlFile), locator);
+    }
+
+    public static NodeList xpath(String xmlString, String locator) {
+        return xpath(asDocument(xmlString), locator);
+    }
+
+    private static NodeList xpath(Document doc, String locator) {
         try {
             // create XPath
             XPathFactory xPathfactory = XPathFactory.newInstance();
@@ -55,12 +64,20 @@ public class XmlUtils {
             XPathExpression expr = xpath.compile(locator);
 
             // create Document
-            Document doc = asDocument(xmlFile);
-
             // searches Document using XPath
-            return (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
+            return (NodeList) expr.evaluate(doc , XPathConstants.NODESET);
         } catch (Exception e) {
             throw new InvalidXPathOperationException(e);
+        }
+    }
+
+    public static Document asDocument(String xmlString) {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            return builder.parse(new ByteArrayInputStream(xmlString.getBytes("UTF-8")));
+        } catch (Exception e) {
+            throw new InvalidXmlException(e);
         }
     }
 
@@ -115,10 +132,10 @@ public class XmlUtils {
     }
 
     public static class InvalidXPathOperationException extends RuntimeException {
-    	
-		private static final long serialVersionUID = 1L;
-		
-		private static final String MESSAGE = "Invalid XPath Operation";
+
+        private static final long serialVersionUID = 1L;
+
+        private static final String MESSAGE = "Invalid XPath Operation";
         public InvalidXPathOperationException() {
             super(MESSAGE);
         }
@@ -130,7 +147,7 @@ public class XmlUtils {
     public static class InvalidXmlException extends RuntimeException {
 
     	private static final long serialVersionUID = 1L;
-		
+
     	private static final String MESSAGE = "Invalid Xml";
         public InvalidXmlException() {
             super(MESSAGE);

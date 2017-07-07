@@ -21,9 +21,31 @@ package objective.taskboard.followup;
  * [/LICENSE]
  */
 
+import static java.util.stream.Collectors.toList;
+import static org.apache.commons.lang.ObjectUtils.defaultIfNull;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.springframework.core.io.ByteArrayResource;
@@ -47,6 +69,8 @@ import java.util.zip.ZipOutputStream;
 
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang.ObjectUtils.defaultIfNull;
+import objective.taskboard.utils.IOUtilities;
+import objective.taskboard.utils.XmlUtils;
 
 @Slf4j
 public class FollowUpGenerator {
@@ -84,7 +108,7 @@ public class FollowUpGenerator {
             File fileSharedStrings = new File(directoryTempFollowup, PATH_SHARED_STRINGS);
             writeXML(fileSharedStrings, generateSharedStrings(sharedStrings));
             File table7 = new File(directoryTempFollowup, PATH_TABLE7);
-            writeXML(table7, generateTable7(jiraData.size()));
+            writeXML(table7, generateTable7(FileUtils.readFileToString(table7, "UTF-8"), jiraData.size()));
 
             pathFollowupXLSM = compressXLSM(directoryTempFollowup);
             ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(pathFollowupXLSM));
@@ -304,8 +328,28 @@ public class FollowUpGenerator {
     
     String generateTable7(int lineCount) {
         String template = getStringFromXML(this.template.getPathTable7Template());
+    String generateTable7(String originalTable7, int lineCount) {
+        int newLineCount = computeLineCount(originalTable7, lineCount);
+        String template = IOUtilities.resourceToString(pathTable7Template);
         Map<String, Object> values = new HashMap<String, Object>();
-        values.put("LINE_COUNT", lineCount+1);
+        values.put("LINE_COUNT", newLineCount+1);
         return StrSubstitutor.replace(template, values);
+    }
+
+    private int computeLineCount(String originalTable7, int lineCount) {
+        String ref = parseLineCountFromXmlString(originalTable7);
+        int oldLineCount = Integer.parseInt(ref);
+        if (oldLineCount > lineCount)
+            lineCount = oldLineCount-1;
+        return lineCount;
+    }
+
+    private String parseLineCountFromXmlString(String originalTable7) {
+        try {
+            NodeList nodeList = XmlUtils.xpath(originalTable7, "/table/autoFilter/@ref");
+            return XmlUtils.asString(nodeList).replace("A1:AW", "");
+        } catch (TransformerException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }

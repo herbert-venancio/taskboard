@@ -150,6 +150,7 @@ public class IssueBufferService {
                 .filter(t -> isParentVisible(t))
                 .collect(toList());
     }
+    
     public synchronized Issue getIssueByKey(String key) {
         return issueBuffer.get(key);
     }
@@ -170,6 +171,14 @@ public class IssueBufferService {
         return getIssueByKey(issue.getIssueKey());
     }
 
+
+    public synchronized void updateIssuesPriorities(List<TaskboardIssue> issuesPriorities) {
+        for (TaskboardIssue taskboardIssue : issuesPriorities) { 
+            Issue issue = issueBuffer.get(taskboardIssue.getProjectKey());
+            issue.setPriorityOrder(taskboardIssue.getPriority());
+        }
+    }
+    
     private boolean isParentVisible(Issue issue) {
     	
     	boolean visible = false;

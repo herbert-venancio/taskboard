@@ -59,6 +59,7 @@ public class IssuePriorityService  {
     @PostConstruct
     public void loadCache() {
         log.debug("Loading IssuePriorityService");
+        cache.clear();
         List<TaskboardIssue> all = repo.findAll();
         for (TaskboardIssue taskboardIssue : all) 
             cache.put(taskboardIssue.getProjectKey(), taskboardIssue);
@@ -73,8 +74,17 @@ public class IssuePriorityService  {
         return priorityOrder.getPriority();
     }
 
-    @Transactional
     public synchronized void reorder(String[] issueKeys) {
+        List<TaskboardIssue> issues = reorderAndSave(issueKeys);
+        
+        for (TaskboardIssue taskboardIssue : issues) 
+            cache.put(taskboardIssue.getProjectKey(), taskboardIssue);
+        
+        issueBufferService.updateIssuesPriorities(issues);
+    }
+    
+    @Transactional
+    private List<TaskboardIssue> reorderAndSave(String[] issueKeys) {
         List<TaskboardIssue> issues =new ArrayList<>(repo.findByIssueKeyIn(Arrays.asList(issueKeys)));
         Map<String, TaskboardIssue> issueByKey = issues.stream().collect(Collectors.toMap(TaskboardIssue::getProjectKey, Function.identity()));
         
@@ -90,13 +100,14 @@ public class IssuePriorityService  {
         Collections.sort(priorities);
         
         for (String pkey : issueKeys) {
-            issueByKey.get(pkey).setPriority(priorities.poll());
-            save(issueByKey.get(pkey));
+            TaskboardIssue taskboardIssue = issueByKey.get(pkey);
+            taskboardIssue.setPriority(priorities.poll());
+            repo.save(taskboardIssue);
         }
+        return issues;
     }
     
-    private void save(TaskboardIssue taskboardIssue) {
-        repo.save(taskboardIssue);
-        cache.put(taskboardIssue.getProjectKey(), taskboardIssue);
+    public synchronized void reset() {
+        loadCache();
     }
 }
