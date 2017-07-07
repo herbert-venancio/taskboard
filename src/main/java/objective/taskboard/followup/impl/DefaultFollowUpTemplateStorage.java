@@ -92,7 +92,7 @@ public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
         Path tempFolder = decompressTemplate(pathFollowup, stream);
         try {
             validator.validate(tempFolder);
-            updateFollowUpService.updateFromJiraTemplate(tempFolder, pathFollowup.resolve("sheet7-template.xlm"));
+            updateFollowUpService.updateFromJiraTemplate(tempFolder, pathFollowup.resolve("sheet7-template.xml"));
             updateFollowUpService.updateSharedStrings(tempFolder, pathFollowup.resolve("sharedStrings-template.xml"));
             updateFollowUpService.deleteGeneratedFiles(tempFolder);
             updateFollowUpService.compressTemplate(tempFolder, pathFollowup.resolve("Followup-template.xlsm"));
