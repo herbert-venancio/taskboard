@@ -92,6 +92,7 @@ public class AllIssuesBufferService {
                 isUpdatingAllIssuesBuffer = false;
             }
         });
+        thread.setName("AllIssuesBufferService.updateIssueBuffer()");
         thread.setDaemon(true);
         thread.start();
     }

@@ -28,6 +28,9 @@ import static spark.Spark.put;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -40,6 +43,7 @@ import org.codehaus.jettison.json.JSONObject;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import objective.taskboard.utils.IOUtilities;
 import spark.Spark;
 
 
@@ -108,7 +112,7 @@ public class JiraMockServer {
             String loadMockData = loadMockData(issueKey+".json");
             
             if (loadMockData == null) 
-                return retryFromRealServer(issueKey);
+                loadMockData = retryFromRealServer(issueKey);
             
             JSONObject issueData = new JSONObject(loadMockData);
             String self = issueData.getString("self").replace("54.68.128.117:8100", "localhost:4567");
@@ -166,7 +170,7 @@ public class JiraMockServer {
             
             JSONObject status = null;
             for (int i = 0; i < transitions.length(); i++) {
-                JSONObject transition = transitions.getJSONObject(0);
+                JSONObject transition = transitions.getJSONObject(i);
                 if (transition.getInt("id") == transitionId) {
                     status = clone(transition.getJSONObject("to"));
                     break;
@@ -181,18 +185,10 @@ public class JiraMockServer {
         });
     }
 
-    private static JSONObject clone(JSONObject jsonObject) {
-        try {
-            return new JSONObject(jsonObject.toString());
-        } catch (JSONException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
     private static JSONObject getIssueDataForKey(String issueKey) throws JSONException {
         JSONObject issueSearchData = dirtySearchIssuesByKey.get(issueKey);
         if (issueSearchData == null) {
-            issueSearchData = new JSONObject(searchIssuesByKey.get(issueKey).toString()); 
+            issueSearchData = clone(searchIssuesByKey.get(issueKey)); 
             dirtySearchIssuesByKey.put(issueKey, issueSearchData);
         }
         return issueSearchData;
@@ -210,8 +206,13 @@ public class JiraMockServer {
         JSONObject makeAssignee = createEmptyAssignee();
         makeAssignee.put("name", each.get("name"));
         fields.put("assignee", makeAssignee);
+        fields.put("updated", nowIso8601());
     }
     
+    private static String nowIso8601() {
+        return DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").withZone(ZoneOffset.UTC).format(Instant.now());
+    }
+
     private static JSONObject createEmptyAssignee() throws JSONException {
         JSONObject assigneeMap = new JSONObject();
         assigneeMap.put("active", "true");
@@ -221,7 +222,7 @@ public class JiraMockServer {
         assigneeMap.put("displayName", "Foo");
         assigneeMap.put("key", "foo");
         assigneeMap.put("name", "foo");
-        assigneeMap.put("self", "http://54.68.128.117:8100/rest/api/2/user?username=gtakeuchi");
+        assigneeMap.put("self", "http://localhost:4567/rest/api/latest/user?username=foo");
         assigneeMap.put("timeZone", "America/Sao_Paulo");
         return assigneeMap;
     }
@@ -236,15 +237,16 @@ public class JiraMockServer {
     }
     
     private static String retryFromRealServer(String issueKey) {
-        String string = RequestBuilder
-                .url("http://54.68.128.117:8100/rest/api/2/issue/" + issueKey + "?expand=schema,names,transitions")
+        String issueJsonString = RequestBuilder
+                .url("http://54.68.128.117:8100/rest/api/latest/issue/" + issueKey + "?expand=schema,names,transitions")
                 .credentials("lousa", "objective").get().content;
         try {
-            FileUtils.writeStringToFile(new File("/tmp/" + issueKey + ".json"), string, "UTF-8");
+            System.out.println("Writing data for issueKey: " + issueKey);
+            FileUtils.writeStringToFile(new File("src/test/resources/objective-jira-teste", issueKey + ".json"), issueJsonString, "UTF-8");
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
-        return string;
+        return issueJsonString;
     }
     
     @SuppressWarnings("rawtypes")
@@ -268,6 +270,7 @@ public class JiraMockServer {
             JSONObject issueData = dirtySearchIssuesByKey.get(issueKey);
             if (issueData == null)
                 issueData = searchIssuesByKey.get(issueKey);
+
             return issueData.toString();
         }
         
@@ -275,7 +278,7 @@ public class JiraMockServer {
     }
 
     private static String loadMockData(String name) {
-        return TestUtils.loadResource(JiraMockServer.class, "/" + environment() +"/" + name);
+        return IOUtilities.resourceToString(JiraMockServer.class,"/"+environment() +"/" + name);
     }
     
     private static String environment() {
@@ -311,7 +314,7 @@ public class JiraMockServer {
                     arrayOfIssues.put(issueData);
                     single.put("issues", arrayOfIssues);
                     
-                    searchIssuesByKey.put(issueData.getString("key"), new JSONObject(single.toString()) );
+                    searchIssuesByKey.put(issueData.getString("key"), clone(single));
                     issueKeyByIssueId.put(issueData.getString("id"), issueData.getString("key"));
                 }
                 startAt++;
@@ -320,6 +323,14 @@ public class JiraMockServer {
             } 
         }
         System.out.println("************ DATA LOAD READY ************");
+    }
+    
+    private static JSONObject clone(JSONObject jsonObject) {
+        try {
+            return new JSONObject(jsonObject.toString());
+        } catch (JSONException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     private static Map<String, String> issueKeyByIssueId = new LinkedHashMap<String, String>();

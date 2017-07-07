@@ -1,5 +1,3 @@
-package objective.taskboard.it;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,18 +18,13 @@ package objective.taskboard.it;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
-
+package objective.taskboard.it;
 
 import java.io.File;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.OutputType;
@@ -42,17 +35,9 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import com.safaribooks.junitattachments.CaptureFile;
 import com.safaribooks.junitattachments.RecordAttachmentRule;
 
-import objective.taskboard.RequestBuilder;
-import objective.taskboard.RequestResponse;
-import objective.taskboard.TestMain;
-import objective.taskboard.issueBuffer.IssueBufferState;
-
-public abstract class AbstractUIIntegrationTest {
+public abstract class AbstractUIIntegrationTest extends AbstractIntegrationTest {
     protected WebDriver webDriver;
-    private static final ExecutorService service = Executors.newSingleThreadExecutor();
-    private static final long TIMEOUT_IN_SECONDS = 120;
-    
-    @Before
+
     public void setup() throws InterruptedException, ExecutionException, TimeoutException {
         if (System.getProperty("webdriver.gecko.driver") == null)
             System.setProperty("webdriver.gecko.driver", "drivers/linux/marionette/64bit/geckodriver");
@@ -61,9 +46,7 @@ public abstract class AbstractUIIntegrationTest {
         if (!new File("drivers/linux/marionette/64bit/geckodriver").exists()) 
             throw new IllegalStateException("To run integration tests, you must run 'mvn clean install' at least once to download gecko driver");
         
-        waitServerReady();
-        resetJiraMock();
-        resetIssueBuffer();
+        super.setup();
         
         webDriver = new FirefoxDriver();
         webDriver.manage().window().setSize(new Dimension(1280,1080));
@@ -97,43 +80,4 @@ public abstract class AbstractUIIntegrationTest {
     @Rule
     public RecordAttachmentRule recordArtifactRule = new RecordAttachmentRule(this);
 
-
-    private void waitServerReady() throws InterruptedException, ExecutionException, TimeoutException {
-        final Future<Void> f = service.submit(() -> {  
-            while (true) {
-                try {
-                    RequestResponse response = RequestBuilder
-                        .url(getSiteBase() + "/ws/issues/issue-buffer-state")
-                        .credentials("foo", "bar").get();
-                    
-                    if (response.responseCode < 400)
-                        if (response.content.equals(IssueBufferState.ready.toString()) || 
-                            response.content.equals(IssueBufferState.updating.toString()))
-                            return null;
-                } catch(Exception e) {
-                    // just assume 'not ready'
-                }
-                System.out.println("Integration tests: Server not ready... waiting");
-                Thread.sleep(1000);
-            }
-        });
-        try {
-            f.get(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
-        } catch(TimeoutException ex) {
-            throw new IllegalStateException("Server did not come up after " + TIMEOUT_IN_SECONDS + " seconds.\n"
-                    + "If you're running from eclipse, make sure to run " + TestMain.class.getName());
-        }
-    }
-
-    public static String getSiteBase(){
-        return "http://localhost:8900/";
-    }
-
-    private void resetJiraMock() {
-        RequestBuilder.url("http://localhost:4567/reset").post();
-    }
-    
-    private void resetIssueBuffer() {
-        RequestBuilder.url(getSiteBase()+"/test/resetbuffer").get();
-    }
 }

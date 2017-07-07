@@ -42,9 +42,9 @@ import java.util.zip.ZipOutputStream;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.springframework.core.io.ByteArrayResource;
@@ -54,6 +54,8 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import lombok.extern.slf4j.Slf4j;
+import objective.taskboard.utils.IOUtilities;
+import objective.taskboard.utils.XmlUtils;
 
 @Slf4j
 public class FollowUpGenerator {
@@ -111,7 +113,7 @@ public class FollowUpGenerator {
             File fileSharedStrings = new File(directoryTempFollowup, PATH_SHARED_STRINGS);
             writeXML(fileSharedStrings, generateSharedStrings(sharedStrings));
             File table7 = new File(directoryTempFollowup, PATH_TABLE7);
-            writeXML(table7, generateTable7(jiraData.size()));
+            writeXML(table7, generateTable7(FileUtils.readFileToString(table7, "UTF-8"), jiraData.size()));
 
             pathFollowupXLSM = compressXLSM(directoryTempFollowup);
             ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(pathFollowupXLSM));
@@ -243,7 +245,7 @@ public class FollowUpGenerator {
     }
 
     String generateJiraDataSheet(Map<String, Long> sharedStrings, String [] includedProjects, List<FollowUpData> jiraData) {
-        String rowTemplate = getStringFromXML(pathSheet7RowTemplate);
+        String rowTemplate = IOUtilities.resourceToString(pathSheet7RowTemplate);
         StringBuilder rows = new StringBuilder();
         int rowNumber = 2;
 
@@ -283,20 +285,10 @@ public class FollowUpGenerator {
             rowNumber++;
         }
 
-        String sheetTemplate = getStringFromXML(pathSheet7Template);
+        String sheetTemplate = IOUtilities.resourceToString(pathSheet7Template);
         Map<String, String> sheetValues = new HashMap<String, String>();
         sheetValues.put("rows", rows.toString());
         return StrSubstitutor.replace(sheetTemplate, sheetValues);
-    }
-
-    private String getStringFromXML(String pathXML) {
-        InputStream inputStream = getClass().getClassLoader()
-                .getResourceAsStream(pathXML);
-        try {
-            return IOUtils.toString(inputStream, "UTF-8");
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
     }
 
     private Object getOrSetIndexInSharedStrings(Map<String, Long> sharedStrings, String followUpDataAttrValue) {
@@ -313,7 +305,7 @@ public class FollowUpGenerator {
     }
 
     String generateSharedStrings(Map<String, Long> sharedStrings) throws IOException {
-        String siSharedStringsTemplate = getStringFromXML(pathSISharedStringsTemplate);
+        String siSharedStringsTemplate = IOUtilities.resourceToString(pathSISharedStringsTemplate);
         List<String> sharedStringsSorted = sharedStrings.keySet().stream()
             .sorted((s1, s2) -> sharedStrings.get(s1).compareTo(sharedStrings.get(s2)))
             .collect(toList());
@@ -326,17 +318,35 @@ public class FollowUpGenerator {
             allSharedStrings.append(StrSubstitutor.replace(siSharedStringsTemplate, siValues));
         }
 
-        String sharedStringsTemplate = getStringFromXML(pathSharedStringsTemplate);
+        String sharedStringsTemplate = IOUtilities.resourceToString(pathSharedStringsTemplate);
         Map<String, Object> sharedStringsValues = new HashMap<String, Object>();
         sharedStringsValues.put("sharedStringsSize", sharedStringsSorted.size());
         sharedStringsValues.put("allSharedStrings", allSharedStrings.toString());
         return StrSubstitutor.replace(sharedStringsTemplate, sharedStringsValues);
     }
     
-    String generateTable7(int lineCount) {
-        String template = getStringFromXML(pathTable7Template);
+    String generateTable7(String originalTable7, int lineCount) {
+        int newLineCount = computeLineCount(originalTable7, lineCount);
+        String template = IOUtilities.resourceToString(pathTable7Template);
         Map<String, Object> values = new HashMap<String, Object>();
-        values.put("LINE_COUNT", lineCount+1);
+        values.put("LINE_COUNT", newLineCount+1);
         return StrSubstitutor.replace(template, values);
+    }
+
+    private int computeLineCount(String originalTable7, int lineCount) {
+        String ref = parseLineCountFromXmlString(originalTable7);
+        int oldLineCount = Integer.parseInt(ref);
+        if (oldLineCount > lineCount)
+            lineCount = oldLineCount-1;
+        return lineCount;
+    }
+
+    private String parseLineCountFromXmlString(String originalTable7) {
+        try {
+            NodeList nodeList = XmlUtils.xpath(originalTable7, "/table/autoFilter/@ref");
+            return XmlUtils.asString(nodeList).replace("A1:AW", "");
+        } catch (TransformerException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }

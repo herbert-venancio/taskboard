@@ -43,6 +43,7 @@ import objective.taskboard.data.TaskboardIssue;
 import objective.taskboard.domain.converter.IssueMetadata;
 import objective.taskboard.domain.converter.JiraIssueToIssueConverter;
 import objective.taskboard.jira.JiraIssueService;
+import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.ProjectService;
 
 @Slf4j
@@ -57,6 +58,9 @@ public class IssueBufferService {
 
     @Autowired
     private ProjectService projectService;
+    
+    @Autowired
+    private JiraService jiraBean;
     
     private Map<String, IssueMetadata> taskboardMetadatasByIssueKey = newHashMap();
     
@@ -90,6 +94,7 @@ public class IssueBufferService {
                 isUpdatingTaskboardIssuesBuffer = false;
             }
         });
+        thread.setName("IssueBufferService.updateIssueBuffer()");
         thread.setDaemon(true);
         thread.start();
     }
@@ -145,6 +150,7 @@ public class IssueBufferService {
                 .filter(t -> isParentVisible(t))
                 .collect(toList());
     }
+    
     public synchronized Issue getIssueByKey(String key) {
         return issueBuffer.get(key);
     }
@@ -153,7 +159,26 @@ public class IssueBufferService {
         List<com.atlassian.jira.rest.client.api.domain.Issue> subtasksFromJira = jiraIssueService.searchIssueSubTasksAndDemandedByKey(issue.getIssueKey());
         return issueConverter.convertIssues(subtasksFromJira, taskboardMetadatasByIssueKey);
     }
+    
+    public synchronized Issue toggleAssignAndSubresponsavelToUser(String issueKey) {
+        jiraBean.toggleAssignAndSubresponsavelToUser(issueKey);
+        return updateIssueBuffer(issueKey);
+    }
+    
+    public synchronized Issue doTransitionByName(Issue issue, String transition, String resolution) {
+        jiraBean.doTransitionByName(issue, transition, resolution);
+        updateIssueBuffer(issue.getIssueKey());
+        return getIssueByKey(issue.getIssueKey());
+    }
 
+
+    public synchronized void updateIssuesPriorities(List<TaskboardIssue> issuesPriorities) {
+        for (TaskboardIssue taskboardIssue : issuesPriorities) { 
+            Issue issue = issueBuffer.get(taskboardIssue.getProjectKey());
+            issue.setPriorityOrder(taskboardIssue.getPriority());
+        }
+    }
+    
     private boolean isParentVisible(Issue issue) {
     	
     	boolean visible = false;
@@ -187,8 +212,7 @@ public class IssueBufferService {
         issueBuffer.get(entity.getProjectKey()).setPriorityOrder(entity.getPriority());
     }
 
-    public synchronized void reset() {
-        issueBuffer.clear();
+    public void reset() {
         updateIssueBuffer();
         while (isUpdatingTaskboardIssuesBuffer)
             try {

@@ -46,7 +46,7 @@
                       on-iron-signal-hierarchical-filter-changed="preferencesUpdated"
                       on-iron-signal-issues-updated="handleUpdatedIssues"
                       ></iron-signals>
-        <div id="board-step-{{parentLaneId}}-{{stepMetadata.id}}-{{team}}" class="wrap layout horizontal sortable-board-step" style="width: 100%">
+        <div id="boardStep" class="wrap layout horizontal sortable-board-step" style="width: 100%">
 
             <!-- Issue Counter -->
             <template is="dom-if" if="{{showTeamCount(issues, lastPreferenceUpdate)}}">
@@ -56,10 +56,12 @@
             </template>
 
             <!-- Issues -->
+            <div id="boardStepIssues" class="wrap layout horizontal sortable-board-step" style="width: 100%">
             <template is="dom-repeat" items="{{filteredIssues}}" as="issue" sort="{{getSorter()}}">
-                <issue-item item="{{issue}}" style$="{{getOptimalIssueWidth(columns, issue)}}" hidden="{{showSynthetic(lastPreferenceUpdate)}}"></issue-item>
+                <issue-item data-id$="{{issue.issueKey}}" id='{{issue.issueKey}}' item="{{issue}}" boardstepid="{{stepMetadata.id}}" style$="{{getOptimalIssueWidth(columns, issue)}}" hidden="{{showSynthetic(lastPreferenceUpdate)}}"></issue-item>
                 <issue-item-synthetic item="{{issue}}" parent-type-icon="{{showParentIconInSynthetic(parentLaneConfig)}}" hidden="{{!showSynthetic(lastPreferenceUpdate)}}"></issue-item-synthetic>
             </template>
+            </div>
         </div>
     </template>
 
@@ -133,10 +135,6 @@
                     'iron-resize': 'refit'
                 },
                 
-                ready: function() {
-                   
-                },
-                
                 attached: function() {
                 	if (this.stepItem().length == 0) {
                 		throw "Failed to enable prioritization because the step item could not be found";
@@ -162,6 +160,16 @@
                              type: 'post',
                              contentType: 'application/json',
                              data: JSON.stringify(issueKeys),
+                             success: function(updatedIssueList) {
+                                 var converted = taskboard.convertIssues(updatedIssueList);
+                                 var issueByKey = []
+                                 converted.forEach(function(issue) {
+                                     issueByKey[issue.issueKey] = issue;
+                                 })
+                                 self.issues.forEach(function(issue, index) {
+                                     self.issues[index] = issueByKey[issue.issueKey]; 
+                                 })
+                             },
                              error: function (jqXhr, textStatus, errorThrown) {
                             	 self.fire("iron-signal", {name:"show-error-message", data:"Repriorization failed. Reason: status ("+jqXhr.status+") " + textStatus	})
                             	 si.sortable("cancel");
@@ -186,11 +194,7 @@
                 },
                 
                 stepItem: function() {
-                	var t = "";
-                	if (typeof this.team !== 'undefined')
-                		t = this.team
-                	t = t.replace(/ /,"\\ ")
-                	return $("#board-step-"+this.parentLaneId+"-"+this.stepMetadata.id+"-"+t);
+                	return $(this.$.boardStepIssues);
                 },
 
                 showParentIconInSynthetic: function() {
@@ -320,11 +324,63 @@
                 },
                 
                 handleUpdatedIssues: function(event, data) {
-                    if (this.issues.length === 0) return;
+                	var issueBoardStep = taskboard.getIssueStep(data.issue)
+                	var belongsToThisStep = this.stepMetadata.id === issueBoardStep.id;
+                	
+                	var issueIndex = -1
                     this.issues.forEach(function(anIssue, index, array) {
-                 	    if (anIssue.issueKey == data.issue.issueKey)
-                 	        array[index] = data.issue;
+                 	    if (anIssue.issueKey == data.issue.issueKey) {
+                 	       issueIndex = index;
+                 	        if (belongsToThisStep)
+                 	        	array[index] = data.issue;
+                 	    }
                     })
+                    if (belongsToThisStep && issueIndex == -1) {
+                        // issue added to this board step
+                        data.issue.__eventInfo.type = 'ADDED'
+                        data.issue.boardstep = issueBoardStep.id;
+                        this.issues.push(data.issue)
+                        
+                        var self = this;
+                        this.async(function() {
+                            self.filter();
+                            this.fire("iron-signal", {name:"issue-count-changed"});
+                        })
+                        
+                        return;
+                    }
+                    
+                    if (!belongsToThisStep && issueIndex > -1) {
+                        // issue removed from this board step
+                        var self = this;
+                        var issueToRemoveDom = Polymer.dom(this.root).querySelector("#"+data.issue.issueKey);
+                        
+                        var previous = $(issueToRemoveDom);
+                        previous.nextAll("issue-item").each(function(){
+                            var deltaY = previous.offset().top - $(this).offset().top;
+                            var deltaX = previous.offset().left - $(this).offset().left;
+                            $(this).find("#issueCard").css("border","1px solid black")
+                            $(this).find("#issueCard").animate({
+                                top:     deltaY,
+                                left:    deltaX
+                            }, 800, 'easeOutExpo');
+                            previous = $(this);
+                        });
+                        
+                        $(issueToRemoveDom).fadeOut(
+                            800,
+                            function() {
+                                self.issues.splice(issueIndex,1);
+                                this.async(function() {
+                                    $(issueToRemoveDom).fadeIn(0);
+                                    self.filter();
+                                    // make sure the header counters are updated to reflect the correct count
+                                    this.fire("iron-signal", {name:"issue-count-changed"});
+                                })
+                            }
+                        )
+                        return;
+                    }
                 }
             });
         })();
