@@ -35,11 +35,15 @@ public class DefaultTemplateService implements TemplateService{
         template.setProjects(associatedProjects);
 
         templateRepository.save(template);
-        System.out.println(templateRepository.count());
     }
 
     @Override
     public List<Template> findTemplatesForProjectKeys(List<String> projectKeys) {
-        return templateRepository.findTemplatesForProjectKeys(projectKeys);
+        return templateRepository.findTemplatesForProjectKeys(projectKeys)
+                .stream()
+                .filter(template -> template.getProjects()
+                        .stream()
+                        .allMatch(project -> projectKeys.contains(project.getProjectKey())))
+                .collect(Collectors.toList());
     }
 }

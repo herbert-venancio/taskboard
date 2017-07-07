@@ -23,20 +23,16 @@ package objective.taskboard.followup.impl;
 
 import objective.taskboard.controller.TemplateData;
 import objective.taskboard.domain.Project;
-import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.*;
 import objective.taskboard.followup.data.Template;
 import objective.taskboard.issueBuffer.IssueBufferState;
 import objective.taskboard.jira.ProjectService;
-import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
-import objective.taskboard.repository.TemplateRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 

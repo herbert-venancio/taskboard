@@ -32,7 +32,7 @@ import java.util.List;
 @Table(name="TEMPLATE"
     , uniqueConstraints = @UniqueConstraint(name="unique_template_name", columnNames = {"name"}))
 @NamedQuery(name = "Template.findTemplatesForProjectKeys"
-        , query = "SELECT t FROM Template t JOIN t.projects p WHERE p.projectKey IN (?1)")
+        , query = "SELECT distinct t FROM Template t JOIN t.projects p WHERE p.projectKey IN (?1)")
 public class Template {
 
     @GeneratedValue(strategy = GenerationType.AUTO)
