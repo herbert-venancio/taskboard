@@ -20,11 +20,16 @@
  */
 package objective.taskboard.utils;
 
-import java.io.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -34,12 +39,14 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
-
-import org.apache.xml.serialize.OutputFormat;
-import org.apache.xml.serialize.XMLSerializer;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 @SuppressWarnings("deprecation")
 public class XmlUtils {
@@ -59,9 +66,8 @@ public class XmlUtils {
             XPath xpath = xPathfactory.newXPath();
             XPathExpression expr = xpath.compile(locator);
 
-            // create Document
             // searches Document using XPath
-            return (NodeList) expr.evaluate(doc , XPathConstants.NODESET);
+            return (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
         } catch (Exception e) {
             throw new InvalidXPathOperationException(e);
         }
@@ -69,10 +75,8 @@ public class XmlUtils {
 
     public static Document asDocument(String xmlString) {
         try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            return builder.parse(new ByteArrayInputStream(xmlString.getBytes("UTF-8")));
-        } catch (Exception e) {
+            return asDocument(new ByteArrayInputStream(xmlString.getBytes("UTF-8")));
+        } catch (UnsupportedEncodingException e) {
             throw new InvalidXmlException(e);
         }
     }
@@ -88,10 +92,22 @@ public class XmlUtils {
     }
 
     public static Document asDocument(InputStream stream) {
+        return asDocument(new InputSource(stream));
+    }
+
+    public static Document asDocument(Path path) {
+        try {
+            return asDocument(Files.newInputStream(path));
+        } catch (IOException e) {
+            throw new InvalidXmlException(e);
+        }
+    }
+
+    public static Document asDocument(InputSource source) {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
-            return builder.parse(stream);
+            return builder.parse(source);
         } catch (Exception e) {
             throw new InvalidXmlException(e);
         }
@@ -120,19 +136,19 @@ public class XmlUtils {
         return "";
     }
 
-	public static void format(File inputXmlFile, File outputXmlFile) {
+    public static void format(File inputXmlFile, File outputXmlFile) {
         try {
-            final Document document = asDocument(inputXmlFile);
-
-            OutputFormat format = new OutputFormat(document);
-            format.setLineWidth(0);
-            format.setIndenting(true);
-            format.setIndent(2);
-            format.setOmitXMLDeclaration(true);
-            FileWriter out = new FileWriter(outputXmlFile);
-            XMLSerializer serializer = new XMLSerializer(out, format);
-            serializer.serialize(document);
-        } catch (IOException e) {
+            Document document = asDocument(inputXmlFile);
+            TransformerFactory transFactory = TransformerFactory.newInstance();
+            Transformer idTransform = transFactory.newTransformer();
+            idTransform.setOutputProperty(OutputKeys.METHOD, "xml");
+            idTransform.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+            idTransform.setOutputProperty(OutputKeys.INDENT, "yes");
+            idTransform.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+            Source input = new DOMSource(document);
+            Result output = new StreamResult(outputXmlFile);
+            idTransform.transform(input, output);
+        } catch (TransformerException e) {
             throw new RuntimeException(e);
         }
     }

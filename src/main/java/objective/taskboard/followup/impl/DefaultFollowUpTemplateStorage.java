@@ -1,5 +1,3 @@
-package objective.taskboard.followup.impl;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -21,6 +19,8 @@ package objective.taskboard.followup.impl;
  * [/LICENSE]
  */
 
+package objective.taskboard.followup.impl;
+
 import objective.taskboard.followup.FollowUpTemplate;
 import objective.taskboard.followup.FollowUpTemplateStorage;
 import objective.taskboard.followup.FollowUpTemplateValidator;
@@ -31,8 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -60,23 +59,18 @@ public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
         );
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public FollowUpTemplate getTemplate(String path) {
         Path templatePath = templateRoot.resolve(path);
-        try {
-            return new FollowUpTemplate(
-                    resolve("followup-template/sharedStrings-initial.xml")
-                    , templatePath.resolve("sharedStrings-template.xml").toFile().toURL()
-                    , resolve("followup-template/sharedStrings-si-template.xml")
-                    , templatePath.resolve("sheet7-template.xml").toFile().toURL()
-                    , resolve("followup-template/sheet7-row-template.xml")
-                    , templatePath.resolve("Followup-template.xlsm").toFile().toURL()
-                    , resolve("followup-template/table7-template.xml")
-            );
-        } catch (MalformedURLException e) {
-            throw new FollowUpTemplateValidator.InvalidTemplateException(e);
-        }
+        return new FollowUpTemplate(
+                resolve("followup-template/sharedStrings-initial.xml")
+                , templatePath.resolve("sharedStrings-template.xml")
+                , resolve("followup-template/sharedStrings-si-template.xml")
+                , templatePath.resolve("sheet7-template.xml")
+                , resolve("followup-template/sheet7-row-template.xml")
+                , templatePath.resolve("Followup-template.xlsm")
+                , resolve("followup-template/table7-template.xml")
+        );
     }
 
     @Override
@@ -106,8 +100,12 @@ public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
 
     // ---
 
-    private static URL resolve(String resourceName) {
-        return DefaultFollowUpTemplateStorage.class.getClassLoader().getResource(resourceName);
+    private static Path resolve(String resourceName) {
+        try {
+            return Paths.get(DefaultFollowUpTemplateStorage.class.getClassLoader().getResource(resourceName).toURI());
+        } catch (URISyntaxException e) {
+            throw new FollowUpTemplateValidator.InvalidTemplateException(e);
+        }
     }
 
     private Path decompressTemplate(Path pathFollowup, InputStream stream) throws IOException {
