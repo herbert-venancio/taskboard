@@ -118,6 +118,8 @@ public class FollowUpGenerator {
                 if (entry.isDirectory()) {
                     Files.createDirectories(entryPath);
                     continue;
+                } else {
+                    Files.createDirectories(entryPath.getParent());
                 }
     
                 int count;
@@ -195,9 +197,7 @@ public class FollowUpGenerator {
 
     Map<String, Long> getSharedStringsInitial() throws ParserConfigurationException, SAXException, IOException {
         Map<String, Long> sharedStrings = new HashMap<>();
-        InputStream inputStream = template.getPathSharedStringsInitial().openStream();
-        DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
-        Document doc = docBuilderFactory.newDocumentBuilder().parse(inputStream);
+        Document doc = XmlUtils.asDocument(template.getPathSharedStringsInitial().openStream());
         doc.getDocumentElement().normalize();
         NodeList nodes = doc.getElementsByTagName(TAG_T_IN_SHARED_STRINGS);
 

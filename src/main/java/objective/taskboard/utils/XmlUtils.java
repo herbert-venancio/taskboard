@@ -20,11 +20,7 @@
  */
 package objective.taskboard.utils;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.StringWriter;
+import java.io.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -86,6 +82,16 @@ public class XmlUtils {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
             return builder.parse(xmlFile);
+        } catch (Exception e) {
+            throw new InvalidXmlException(e);
+        }
+    }
+
+    public static Document asDocument(InputStream stream) {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            return builder.parse(stream);
         } catch (Exception e) {
             throw new InvalidXmlException(e);
         }
