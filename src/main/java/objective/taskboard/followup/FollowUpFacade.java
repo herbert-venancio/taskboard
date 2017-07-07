@@ -21,16 +21,22 @@ package objective.taskboard.followup;
  * [/LICENSE]
  */
 
+import objective.taskboard.controller.TemplateData;
 import objective.taskboard.issueBuffer.IssueBufferState;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 public interface FollowUpFacade {
 
     FollowUpGenerator getGenerator();
 
-    void updateTemplate(MultipartFile file) throws IOException;
+    FollowUpGenerator getGenerator(String templateName);
 
     IssueBufferState getFollowupState();
+
+    void createTemplate(String templateName, String projects, MultipartFile file) throws IOException;
+
+    List<TemplateData> getTemplatesForCurrentUser();
 }

@@ -35,13 +35,13 @@ public abstract class AbstractIntegrationTest {
     private static final long TIMEOUT_IN_SECONDS = 120;
 
     @Before
-    public void setup() throws InterruptedException, ExecutionException, TimeoutException {
+    public void setup() throws InterruptedException, ExecutionException {
         waitServerReady();
         resetJiraMock();
         resetIssueBuffer();
     }
 
-    protected void waitServerReady() throws InterruptedException, ExecutionException, TimeoutException {
+    protected void waitServerReady() throws InterruptedException, ExecutionException {
         final Future<Void> f = service.submit(() -> {
             while (true) {
                 try {

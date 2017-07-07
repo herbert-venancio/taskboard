@@ -24,22 +24,18 @@ package objective.taskboard.controller;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
-import objective.taskboard.followup.FollowUpFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import objective.taskboard.followup.FollowUpFacade;
 import objective.taskboard.followup.FollowUpGenerator;
 import objective.taskboard.followup.FollowupDataProvider;
 import objective.taskboard.issueBuffer.IssueBufferState;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 
 @RestController
 @RequestMapping("/ws/followup")
@@ -52,13 +48,15 @@ public class FollowUpController {
     private FollowUpFacade followUpFacade;
 
     @RequestMapping
-    public ResponseEntity<Object> download(@RequestParam("projects") String projects) {
+    public ResponseEntity<Object> download(@RequestParam("projects") String projects, @RequestParam("template") String template) {
         if (ObjectUtils.isEmpty(projects))
             return new ResponseEntity<>("You must provide a list of projects separated by comma", BAD_REQUEST);
+        if (ObjectUtils.isEmpty(template))
+            return new ResponseEntity<>("Template not selected", BAD_REQUEST);
 
         String [] includedProjects = projects.split(",");
         try {
-            FollowUpGenerator followupGenerator = new FollowUpGenerator(provider);
+            FollowUpGenerator followupGenerator = followUpFacade.getGenerator(template);
             ByteArrayResource resource = followupGenerator.generate(includedProjects);
             return ResponseEntity.ok()
                   .contentLength(resource.contentLength())
@@ -67,11 +65,6 @@ public class FollowUpController {
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), INTERNAL_SERVER_ERROR);
         }
-    }
-
-    @RequestMapping(method = RequestMethod.POST, consumes="multipart/form-data")
-    public void upload(@RequestParam("file") MultipartFile file) throws IOException {
-        followUpFacade.updateTemplate(file);
     }
 
     @RequestMapping("state")

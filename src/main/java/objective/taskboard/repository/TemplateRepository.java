@@ -1,4 +1,4 @@
-package objective.taskboard.followup;
+package objective.taskboard.repository;
 
 /*-
  * [LICENSE]
@@ -21,27 +21,15 @@ package objective.taskboard.followup;
  * [/LICENSE]
  */
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import objective.taskboard.followup.data.Template;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface FollowUpTemplateStorage {
+import java.util.List;
 
-    FollowUpTemplate getDefaultTemplate();
+public interface TemplateRepository extends JpaRepository<Template, Long>{
 
-    /**
-     * Uses a path returned by {@link #storeTemplate} to retrieve it
-     * @param template
-     * @return
-     */
-    FollowUpTemplate getTemplate(String template);
+    List<Template> findTemplatesForProjectKeys(List<String> projectKeys);
 
-    /**
-     * Stores a template and returns a unique relative path where it's stored
-     * @param template
-     * @return
-     * @throws IOException
-     */
-    String storeTemplate(File template, FollowUpTemplateValidator validator) throws IOException;
-    String storeTemplate(InputStream input, FollowUpTemplateValidator validator) throws IOException;
+    Template findByName(String templateName);
+
 }

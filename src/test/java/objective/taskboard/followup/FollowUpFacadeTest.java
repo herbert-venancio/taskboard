@@ -26,33 +26,43 @@ import objective.taskboard.followup.impl.DefaultFollowUpTemplateStorage;
 import objective.taskboard.followup.impl.DefaultUpdateFollowUpService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
+import org.mockito.*;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.only;
+import static org.mockito.Mockito.verify;
+
 @RunWith(MockitoJUnitRunner.class)
 public class FollowUpFacadeTest {
 
-    @Spy
-    private DefaultFollowUpTemplateStorage followUpTemplateStorage;
+    @Mock
+    private TemplateService templateService;
 
     @Mock
     private FollowupDataProvider provider;
 
     @Spy
-    private UpdateFollowUpService updateFollowUpService = new DefaultUpdateFollowUpService();
+    private DefaultUpdateFollowUpService updateFollowUpService = new DefaultUpdateFollowUpService();
+
+    @Spy
+    @InjectMocks
+    private DefaultFollowUpTemplateStorage followUpTemplateStorage = new DefaultFollowUpTemplateStorage();
 
     @InjectMocks
-    private FollowUpFacade followUpFacade = new DefaultFollowUpFacade();
+    private DefaultFollowUpFacade followUpFacade = new DefaultFollowUpFacade();
 
     @Test
-    public void upload() throws IOException {
+    public void create() throws IOException {
+        String templateName = "OkFollowupTemplate.xlsm";
+        String projects = "TASKB,PROJ1";
         MultipartFile file = new MockMultipartFile("file", FollowUpFacadeTest.class.getResourceAsStream("OkFollowupTemplate.xlsm"));
-        followUpFacade.updateTemplate(file);
+        followUpFacade.createTemplate(templateName, projects, file);
+
+        verify(templateService, only()).saveTemplate(any(), any(), any());
     }
 }

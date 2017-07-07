@@ -21,6 +21,7 @@ package objective.taskboard.followup.impl;
  * [/LICENSE]
  */
 
+import objective.taskboard.followup.FollowUpTemplateValidator;
 import objective.taskboard.followup.UpdateFollowUpService;
 import objective.taskboard.utils.XmlUtils;
 import org.apache.commons.io.FileUtils;
@@ -76,10 +77,10 @@ public class DefaultUpdateFollowUpService implements UpdateFollowUpService {
     }
 
     @Override
-    public void validateTemplate(Path decompressed) throws InvalidTemplateException {
+    public void validateTemplate(Path decompressed) throws FollowUpTemplateValidator.InvalidTemplateException {
         Path sheetXml = searchFromJiraSheet(decompressed);
         if(!isEmpty(XmlUtils.xpath(sheetXml.toFile(), "//sheetData/row[@r>1]/c/v/text()"))) {
-            throw new InvalidTemplateException();
+            throw new FollowUpTemplateValidator.InvalidTemplateException();
         }
     }
 
@@ -127,7 +128,7 @@ public class DefaultUpdateFollowUpService implements UpdateFollowUpService {
         try {
             return XmlUtils.asString(XmlUtils.xpath(sheetXml.toFile(), "//sheetData/row[@r=1]"));
         } catch (TransformerException e) {
-            throw new InvalidTemplateException(e);
+            throw new FollowUpTemplateValidator.InvalidTemplateException(e);
         }
     }
 
@@ -143,7 +144,7 @@ public class DefaultUpdateFollowUpService implements UpdateFollowUpService {
             String sheetId = XmlUtils.asString(XmlUtils.xpath(wbRelXml.toFile(), "//Relationship[@Id='" + relId + "']/@Target"));
             return decompressed.resolve("xl/" + sheetId);
         } catch (TransformerException e) {
-            throw new InvalidTemplateException(e);
+            throw new FollowUpTemplateValidator.InvalidTemplateException(e);
         }
     }
 

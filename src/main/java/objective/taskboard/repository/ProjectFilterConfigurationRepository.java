@@ -24,6 +24,6 @@ package objective.taskboard.repository;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-interface ProjectFilterConfigurationRepository extends JpaRepository<ProjectFilterConfiguration, Long> {
+public interface ProjectFilterConfigurationRepository extends JpaRepository<ProjectFilterConfiguration, Long> {
 
 }

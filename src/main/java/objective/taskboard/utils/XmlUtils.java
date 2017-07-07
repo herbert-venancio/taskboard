@@ -20,11 +20,7 @@
  */
 package objective.taskboard.utils;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.StringWriter;
+import java.io.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -51,11 +47,11 @@ public class XmlUtils {
     public static NodeList xpath(File xmlFile, String locator) {
         return xpath(asDocument(xmlFile), locator);
     }
-    
+
     public static NodeList xpath(String xmlString, String locator) {
         return xpath(asDocument(xmlString), locator);
     }
-    
+
     private static NodeList xpath(Document doc, String locator) {
         try {
             // create XPath
@@ -70,7 +66,7 @@ public class XmlUtils {
             throw new InvalidXPathOperationException(e);
         }
     }
-    
+
     public static Document asDocument(String xmlString) {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -78,7 +74,7 @@ public class XmlUtils {
             return builder.parse(new ByteArrayInputStream(xmlString.getBytes("UTF-8")));
         } catch (Exception e) {
             throw new InvalidXmlException(e);
-        }        
+        }
     }
 
     public static Document asDocument(File xmlFile) {
@@ -86,6 +82,16 @@ public class XmlUtils {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
             return builder.parse(xmlFile);
+        } catch (Exception e) {
+            throw new InvalidXmlException(e);
+        }
+    }
+
+    public static Document asDocument(InputStream stream) {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            return builder.parse(stream);
         } catch (Exception e) {
             throw new InvalidXmlException(e);
         }
@@ -114,7 +120,7 @@ public class XmlUtils {
         return "";
     }
 
-    public static void format(File inputXmlFile, File outputXmlFile)  {
+	public static void format(File inputXmlFile, File outputXmlFile) {
         try {
             final Document document = asDocument(inputXmlFile);
 
@@ -133,9 +139,9 @@ public class XmlUtils {
 
     public static class InvalidXPathOperationException extends RuntimeException {
 
-    	private static final long serialVersionUID = 1L;
-		
-    	private static final String MESSAGE = "Invalid XPath Operation";
+        private static final long serialVersionUID = 1L;
+
+        private static final String MESSAGE = "Invalid XPath Operation";
         public InvalidXPathOperationException() {
             super(MESSAGE);
         }
@@ -147,7 +153,7 @@ public class XmlUtils {
     public static class InvalidXmlException extends RuntimeException {
 
     	private static final long serialVersionUID = 1L;
-		
+
     	private static final String MESSAGE = "Invalid Xml";
         public InvalidXmlException() {
             super(MESSAGE);

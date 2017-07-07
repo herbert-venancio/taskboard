@@ -73,7 +73,7 @@ public class XmlUtilsTest {
                     FileUtils.readFileToString(outputXmlFile, "utf-8")
             );
         } finally {
-            outputXmlFile.delete();
+            FileUtils.deleteQuietly(outputXmlFile);
         }
     }
 
