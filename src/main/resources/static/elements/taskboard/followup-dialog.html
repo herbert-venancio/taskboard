@@ -116,12 +116,11 @@
         }
 
         .error-message {
-            white-space: pre;
-            margin-left: 10px;
             color: red;
             font-weight: bold;
             width: 100%;
-            margin-top: 10px;
+            margin-top: -15px;
+            margin-bottom: 15px;
         }
 
         .buttonClose {
@@ -132,7 +131,6 @@
         }
         
         .custom-footer {
-        	position: absolute;
             bottom: 20px;
         }
         
@@ -260,6 +258,7 @@
                     this.templates = [];
                 	this.$.ajaxTemplates.generateRequest();
                     this.$.modal.open();
+                    this.filterTemplates();
                 },
                 
                 close: function() {
@@ -309,11 +308,13 @@
                 	
                 	if (selectedKeys.length == 0) {
                 	    this.errorMessage = "Please, selected at least one project"
+                	    $(".error-message").show().delay(2000).fadeOut();
                 	    return;
                 	}
 
                 	if (!this.template) {
                 	    this.errorMessage = "Template not selected";
+                	    $(".error-message").show().delay(2000).fadeOut();
                 	    return;
                 	}
                 	
