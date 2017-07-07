@@ -24,7 +24,6 @@ package objective.taskboard.followup;
 import objective.taskboard.followup.impl.DefaultFollowUpFacade;
 import objective.taskboard.followup.impl.DefaultFollowUpTemplateStorage;
 import objective.taskboard.followup.impl.DefaultUpdateFollowUpService;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.*;
