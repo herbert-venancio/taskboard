@@ -30,6 +30,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.junit.AfterClass;
@@ -99,14 +100,18 @@ public class UploadTemplateIT extends AbstractIntegrationTest {
     }
 
     private HttpResponse uploadTemplate(File file) throws URISyntaxException, IOException {
-        HttpPost post = new HttpPost();
-        post.setURI(new URI("http://localhost:8900/ws/followup"));
         FileBody fileBody = new FileBody(file, ContentType.DEFAULT_BINARY);
         MultipartEntityBuilder builder = MultipartEntityBuilder.create();
         builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+        StringBody templateName = new StringBody(file.getName(), ContentType.MULTIPART_FORM_DATA);
+        StringBody projects = new StringBody("PROJ1", ContentType.MULTIPART_FORM_DATA);
         builder.addPart("file", fileBody);
+        builder.addPart("name", templateName);
+        builder.addPart("projects", projects);
         HttpEntity entity = builder.build();
 
+        HttpPost post = new HttpPost();
+        post.setURI(new URI("http://localhost:8900/api/templates"));
         post.setHeaders(session);
         post.setEntity(entity);
 

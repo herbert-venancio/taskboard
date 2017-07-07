@@ -21,7 +21,7 @@ package objective.taskboard.followup;
  * [/LICENSE]
  */
 
-import objective.taskboard.followup.UpdateFollowUpService.InvalidTemplateException;
+import objective.taskboard.followup.FollowUpTemplateValidator.InvalidTemplateException;
 import objective.taskboard.followup.impl.DefaultUpdateFollowUpService;
 import objective.taskboard.utils.XmlUtils;
 import org.apache.commons.io.FileUtils;
@@ -77,7 +77,7 @@ public class UpdateFollowUpServiceTest {
         Path decompressed = decompressOkTemplate();
         try {
             updateFollowUpService.updateFromJiraTemplate(decompressed, temp);
-            assertThat(temp.toFile().length(), greaterThan(0l));
+            assertThat(temp.toFile().length(), greaterThan(0L));
             assertThatPlaceholderWasReplacedWithActualContent(temp);
         } finally {
             FileUtils.deleteQuietly(temp.toFile());
@@ -91,7 +91,7 @@ public class UpdateFollowUpServiceTest {
         Path decompressed = decompressOkTemplate();
         try {
             updateFollowUpService.updateSharedStrings(decompressed, temp);
-            assertThat(temp.toFile().length(), greaterThan(0l));
+            assertThat(temp.toFile().length(), greaterThan(0L));
             String content = FileUtils.readFileToString(temp.toFile(), "UTF-8");
             assertThat(content, containsString("project"));
             assertThat(content, containsString("Effort"));
@@ -124,7 +124,7 @@ public class UpdateFollowUpServiceTest {
         Path pathFollowupXLSM = Files.createTempFile("Followup", ".xlsm");
         try {
             updateFollowUpService.compressTemplate(decompressed, pathFollowupXLSM);
-            assertThat(Files.size(pathFollowupXLSM), greaterThan(0l));
+            assertThat(Files.size(pathFollowupXLSM), greaterThan(0L));
         } finally {
             FileUtils.deleteQuietly(pathFollowupXLSM.toFile());
             FileUtils.deleteQuietly(decompressed.toFile());

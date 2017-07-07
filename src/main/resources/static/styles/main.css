@@ -81,3 +81,28 @@ paper-listbox {
     min-height: 22px;
     display: block;
 }
+
+/*
+    Template Follow Up Dropdown
+*/
+.templates-followup-dropdown {
+    width: 100%;
+}
+
+.templates-followup-dropdown paper-input-container {
+    border-radius: 3px !important;
+    margin-bottom: 15px;
+}
+
+.templates-followup-dropdown label, .templates-followup-dropdown input {
+    color: inherit !important;
+}
+
+.templates-followup-dropdown paper-item {
+    min-height: 36px;
+    cursor: pointer;
+}
+
+.templates-followup-dropdown paper-item:hover {
+    background: #DDD;
+}

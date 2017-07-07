@@ -27,11 +27,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import objective.taskboard.followup.impl.DefaultFollowUpTemplateStorage;
 import org.junit.Test;
 import org.springframework.core.io.ByteArrayResource;
 import org.xml.sax.SAXException;
@@ -161,7 +163,7 @@ public class FollowUpGeneratorTest {
     @Test
     public void generateUsingDefaultTemplatesTest() throws Exception {
         FollowupDataProvider provider = getFollowupDataProvider(asList(getFollowUpDataDefault()));
-        FollowUpGenerator subject = new FollowUpGenerator(provider);
+        FollowUpGenerator subject = getDefaultFollowUpGenerator(provider);
         ByteArrayResource resource = subject.generate(emptyArray());
         assertNotNull("Resource shouldn't be null", resource);
     }
@@ -184,10 +186,27 @@ public class FollowUpGeneratorTest {
         assertEquals(originalTable7, table7);
     }
 
+    private FollowUpGenerator getDefaultFollowUpGenerator(FollowupDataProvider provider) {
+        return new FollowUpGenerator(provider, new FollowUpTemplate(
+                resolve("followup-template/sharedStrings-initial.xml")
+                , resolve("followup-template/sharedStrings-template.xml")
+                , resolve("followup-template/sharedStrings-si-template.xml")
+                , resolve("followup-template/sheet7-template.xml")
+                , resolve("followup-template/sheet7-row-template.xml")
+                , resolve("followup-template/Followup-template.xlsm")
+                , resolve("followup-template/table7-template.xml")
+        ));
+    }
+
     private FollowUpGenerator getFollowUpGeneratorUsingTestTemplates(FollowupDataProvider provider) {
-        return new FollowUpGenerator(provider, PATH_SHARED_STRINGS_INITIAL, PATH_SHARED_STRINGS_TEMPLATE,
-                PATH_SHARED_STRINGS_SI_TEMPLATE, PATH_SHEET7_TEMPLATE, PATH_SHEET7_ROW_TEMPLATE,
-                PATH_FOLLOWUP_TEMPLATE,PATH_TABLE7_TEMPLATE);
+        return new FollowUpGenerator(provider, new FollowUpTemplate(
+                resolve(PATH_SHARED_STRINGS_INITIAL)
+                , resolve(PATH_SHARED_STRINGS_TEMPLATE)
+                , resolve(PATH_SHARED_STRINGS_SI_TEMPLATE)
+                , resolve(PATH_SHEET7_TEMPLATE)
+                , resolve(PATH_SHEET7_ROW_TEMPLATE)
+                , resolve(PATH_FOLLOWUP_TEMPLATE)
+                , resolve(PATH_TABLE7_TEMPLATE)));
     }
 
     private FollowupDataProvider getFollowupDataProvider(List<FollowUpData> jiraData) {
@@ -236,5 +255,9 @@ public class FollowUpGeneratorTest {
 
     private String[] emptyArray() {
         return new String[0];
+    }
+
+    private static URL resolve(String resourceName) {
+        return DefaultFollowUpTemplateStorage.class.getClassLoader().getResource(resourceName);
     }
 }

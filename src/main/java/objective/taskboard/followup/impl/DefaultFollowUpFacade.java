@@ -21,16 +21,20 @@ package objective.taskboard.followup.impl;
  * [/LICENSE]
  */
 
+import objective.taskboard.controller.TemplateData;
+import objective.taskboard.domain.Project;
 import objective.taskboard.followup.*;
+import objective.taskboard.followup.data.Template;
 import objective.taskboard.issueBuffer.IssueBufferState;
-import org.apache.commons.io.FileUtils;
+import objective.taskboard.jira.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class DefaultFollowUpFacade implements FollowUpFacade {
@@ -42,11 +46,24 @@ public class DefaultFollowUpFacade implements FollowUpFacade {
     private FollowupDataProvider provider;
 
     @Autowired
-    private UpdateFollowUpService updateFollowUpService;
+    private TemplateService templateService;
+
+    @Autowired
+    private ProjectService projectService;
+
+    @Autowired
+    private Converter<Template, TemplateData> templateConverter;
 
     @Override
     public FollowUpGenerator getGenerator() {
-        return new FollowUpGenerator(provider);
+        return new FollowUpGenerator(provider, followUpTemplateStorage.getDefaultTemplate());
+    }
+
+    @Override
+    public FollowUpGenerator getGenerator(String templateName) {
+        Template template = templateService.getTemplate(templateName);
+        String path = template.getPath();
+        return new FollowUpGenerator(provider, followUpTemplateStorage.getTemplate(path));
     }
 
     @Override
@@ -55,35 +72,26 @@ public class DefaultFollowUpFacade implements FollowUpFacade {
     }
 
     @Override
-    public void updateTemplate(MultipartFile file) throws IOException {
-        Path followUpTemplateCandidate = updateFollowUpService.decompressTemplate(file.getInputStream());
-        Path jiraTab = Files.createTempFile("sheet-template", ".xml");
-        Path sharedStrings = Files.createTempFile("shared-strings", ".xml");
-        Path pathFollowupXLSM = Files.createTempFile("Followup", ".xlsm");
-        try {
-            updateFollowUpService.validateTemplate(followUpTemplateCandidate);
-            updateFollowUpService.updateFromJiraTemplate(followUpTemplateCandidate, jiraTab);
-            updateFollowUpService.updateSharedStrings(followUpTemplateCandidate, sharedStrings);
-            updateFollowUpService.deleteGeneratedFiles(followUpTemplateCandidate);
-            updateFollowUpService.compressTemplate(followUpTemplateCandidate, pathFollowupXLSM);
+    public List<TemplateData> getTemplatesForCurrentUser() {
+        List<String> projectKeys = projectService.getVisibleProjects()
+                .stream()
+                .map(Project::getKey)
+                .collect(Collectors.toList());
 
-            FollowUpTemplate defaultTemplate = followUpTemplateStorage.getDefaultTemplate();
-            FollowUpTemplate template = new FollowUpTemplate(
-                    defaultTemplate.getPathSharedStringsInitial()
-                    , sharedStrings.toString()
-                    , defaultTemplate.getPathSISharedStringsTemplate()
-                    , jiraTab.toString()
-                    , defaultTemplate.getPathSheet7RowTemplate()
-                    , pathFollowupXLSM.toString()
-            );
-            followUpTemplateStorage.updateTemplate(template);
-        } catch (Exception e) {
-            FileUtils.deleteQuietly(jiraTab.toFile());
-            FileUtils.deleteQuietly(sharedStrings.toFile());
-            FileUtils.deleteQuietly(pathFollowupXLSM.toFile());
-            throw e;
-        } finally {
-            FileUtils.deleteQuietly(followUpTemplateCandidate.toFile());
-        }
+        List<Template> templates = templateService.findTemplatesForProjectKeys(projectKeys);
+
+        return templates
+                .stream()
+                .map(t -> templateConverter.convert(t))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void createTemplate(String templateName, String projects,
+                               MultipartFile file) throws IOException {
+        String path = followUpTemplateStorage
+                .storeTemplate(file.getInputStream(),
+                        new FollowUpTemplateValidator());
+        templateService.saveTemplate(templateName, projects, path);
     }
 }

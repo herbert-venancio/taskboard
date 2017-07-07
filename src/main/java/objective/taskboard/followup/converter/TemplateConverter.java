@@ -1,4 +1,4 @@
-package objective.taskboard.followup;
+package objective.taskboard.followup.converter;
 
 /*-
  * [LICENSE]
@@ -21,27 +21,22 @@ package objective.taskboard.followup;
  * [/LICENSE]
  */
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import objective.taskboard.controller.TemplateData;
+import objective.taskboard.domain.ProjectFilterConfiguration;
+import objective.taskboard.followup.data.Template;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.stereotype.Component;
 
-public interface FollowUpTemplateStorage {
+import java.util.stream.Collectors;
 
-    FollowUpTemplate getDefaultTemplate();
+@Component
+public class TemplateConverter implements Converter<Template, TemplateData> {
 
-    /**
-     * Uses a path returned by {@link #storeTemplate} to retrieve it
-     * @param template
-     * @return
-     */
-    FollowUpTemplate getTemplate(String template);
-
-    /**
-     * Stores a template and returns a unique relative path where it's stored
-     * @param template
-     * @return
-     * @throws IOException
-     */
-    String storeTemplate(File template, FollowUpTemplateValidator validator) throws IOException;
-    String storeTemplate(InputStream input, FollowUpTemplateValidator validator) throws IOException;
+    @Override
+    public TemplateData convert(Template source) {
+        TemplateData target = new TemplateData();
+        target.name = source.getName();
+        target.projects = source.getProjects().stream().map(ProjectFilterConfiguration::getProjectKey).collect(Collectors.toList());
+        return target;
+    }
 }
