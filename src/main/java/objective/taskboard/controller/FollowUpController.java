@@ -56,7 +56,7 @@ public class FollowUpController {
 
         String [] includedProjects = projects.split(",");
         try {
-            FollowUpGenerator followupGenerator = followUpFacade.getGenerator();
+            FollowUpGenerator followupGenerator = followUpFacade.getGenerator(template);
             ByteArrayResource resource = followupGenerator.generate(includedProjects);
             return ResponseEntity.ok()
                   .contentLength(resource.contentLength())

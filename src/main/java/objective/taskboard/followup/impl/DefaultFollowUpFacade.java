@@ -61,7 +61,9 @@ public class DefaultFollowUpFacade implements FollowUpFacade {
 
     @Override
     public FollowUpGenerator getGenerator(String templateName) {
-        return new FollowUpGenerator(provider, followUpTemplateStorage.getTemplate(templateName));
+        Template template = templateService.getTemplate(templateName);
+        String path = template.getPath();
+        return new FollowUpGenerator(provider, followUpTemplateStorage.getTemplate(path));
     }
 
     @Override
@@ -92,6 +94,4 @@ public class DefaultFollowUpFacade implements FollowUpFacade {
                         new FollowUpTemplateValidator());
         templateService.saveTemplate(templateName, projects, path);
     }
-
-
 }

@@ -46,4 +46,9 @@ public class DefaultTemplateService implements TemplateService{
                         .allMatch(project -> projectKeys.contains(project.getProjectKey())))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public Template getTemplate(String templateName) {
+        return templateRepository.findByName(templateName);
+    }
 }

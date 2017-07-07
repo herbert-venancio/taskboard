@@ -24,11 +24,14 @@ package objective.taskboard.followup.impl;
 import objective.taskboard.followup.FollowUpTemplate;
 import objective.taskboard.followup.FollowUpTemplateStorage;
 import objective.taskboard.followup.FollowUpTemplateValidator;
+import objective.taskboard.followup.UpdateFollowUpService;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -40,6 +43,9 @@ import java.util.zip.ZipInputStream;
 public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
 
     private Path templateRoot = Paths.get("uploaded-templates");
+
+    @Autowired
+    private UpdateFollowUpService updateFollowUpService;
 
     @Override
     public FollowUpTemplate getDefaultTemplate() {
@@ -54,9 +60,23 @@ public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
         );
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public FollowUpTemplate getTemplate(String path) {
-        return null;
+        Path templatePath = templateRoot.resolve(path);
+        try {
+            return new FollowUpTemplate(
+                    resolve("followup-template/sharedStrings-initial.xml")
+                    , templatePath.resolve("sharedStrings-template.xml").toFile().toURL()
+                    , resolve("followup-template/sharedStrings-si-template.xml")
+                    , templatePath.resolve("sheet7-template.xml").toFile().toURL()
+                    , resolve("followup-template/sheet7-row-template.xml")
+                    , templatePath.resolve("Followup-template.xlsm").toFile().toURL()
+                    , resolve("followup-template/table7-template.xml")
+            );
+        } catch (MalformedURLException e) {
+            throw new FollowUpTemplateValidator.InvalidTemplateException(e);
+        }
     }
 
     @Override
@@ -72,6 +92,11 @@ public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
         Path tempFolder = decompressTemplate(pathFollowup, stream);
         try {
             validator.validate(tempFolder);
+            updateFollowUpService.updateFromJiraTemplate(tempFolder, pathFollowup.resolve("sheet7-template.xlm"));
+            updateFollowUpService.updateSharedStrings(tempFolder, pathFollowup.resolve("sharedStrings-template.xml"));
+            updateFollowUpService.deleteGeneratedFiles(tempFolder);
+            updateFollowUpService.compressTemplate(tempFolder, pathFollowup.resolve("Followup-template.xlsm"));
+            FileUtils.deleteQuietly(tempFolder.toFile());
         } catch (Exception e) {
             FileUtils.deleteQuietly(pathFollowup.toFile());
             throw e;
