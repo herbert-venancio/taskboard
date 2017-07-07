@@ -43,27 +43,7 @@ public class TemplateController {
 
     @RequestMapping
     public List<TemplateData> get() {
-        List<TemplateData> list = new ArrayList<>();
-        {
-            TemplateData item1 = new TemplateData();
-            item1.name = "template1";
-            item1.projects = Lists.newArrayList("TASKB");
-            list.add(item1);
-        }
-        {
-            TemplateData item2 = new TemplateData();
-            item2.name = "template2";
-            item2.projects = Lists.newArrayList("PROJ1");
-            list.add(item2);
-        }
-        {
-            TemplateData item3 = new TemplateData();
-            item3.name = "template3";
-            item3.projects = Lists.newArrayList("TASKB", "PROJ1");
-            list.add(item3);
-        }
-        list.addAll(followUpFacade.getTemplatesForCurrentUser());
-        return list;
+        return followUpFacade.getTemplatesForCurrentUser();
     }
 
     @RequestMapping(method = RequestMethod.POST, consumes="multipart/form-data")
