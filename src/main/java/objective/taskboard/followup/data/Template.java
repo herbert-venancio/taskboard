@@ -29,7 +29,8 @@ import java.util.List;
 
 @Data
 @Entity
-@Table(name="TEMPLATE")
+@Table(name="TEMPLATE"
+    , uniqueConstraints = @UniqueConstraint(name="unique_template_name", columnNames = {"name"}))
 @NamedQuery(name = "Template.findTemplatesForProjectKeys"
         , query = "SELECT t FROM Template t JOIN t.projects p WHERE p.projectKey IN (?1)")
 public class Template {
@@ -37,7 +38,6 @@ public class Template {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Id
     private Long id;
-
     private String name;
     private String path;
 
