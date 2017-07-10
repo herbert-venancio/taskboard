@@ -311,7 +311,7 @@ function Taskboard() {
                 self.issues[previousInstance.index] = converted; 
         	updatedIssueKeys.push(anEvent.target.issueKey)
         	self.fireIssueUpdated('server', taskboardHome, anEvent.target, anEvent.updateType);
-        }); 
+        });
     	if (updatedIssueKeys.length === 0)
     	    return;
     	
@@ -331,7 +331,7 @@ function Taskboard() {
     }
     
     this.fireIssueUpdated = function(source, triggerSource, issue, updateType) {
-        var converted = self.convertIssue(issue);
+        var converted = self.convertAndRegisterIssue(issue);
         converted.__eventInfo = {source: source, type: updateType}
         triggerSource.fire("iron-signal", {name:"issues-updated", data:{
         	eventType: updateType,
@@ -343,11 +343,21 @@ function Taskboard() {
     	return $("paper-material.issue [data-issue-key='"+issueKey+"']").closest("paper-material.issue");
     }
     
-    this.convertIssues = function(issues) {
+    this.convertAndRegisterIssues = function(issues) {
         var converted = []
         issues.forEach(function(issue) {
-            converted.push(self.convertIssue(issue));
+            converted.push(self.convertAndRegisterIssue(issue));
         })
+        return converted;
+    }
+    
+    this.convertAndRegisterIssue = function(issue) {
+        var converted = self.convertIssue(issue);
+        var previousInstance = getPreviousIssueInstance(issue.issueKey);
+        if (previousInstance === null)
+            self.issues.push(converted)
+        else
+            self.issues[previousInstance.index] = converted;
         return converted;
     }
     

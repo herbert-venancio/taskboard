@@ -180,6 +180,7 @@ public class JiraMockServer {
                 throw new IllegalStateException("Invalid transition attempted");
             
             issue.getJSONObject("fields").put("status", status);
+            issue.getJSONObject("fields").put("updated", nowIso8601());
             
             return "";
         });

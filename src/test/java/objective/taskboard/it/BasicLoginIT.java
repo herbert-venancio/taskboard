@@ -1,5 +1,3 @@
-package objective.taskboard.it;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,8 +18,8 @@ package objective.taskboard.it;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.it;
 
-import org.junit.After;
 import org.junit.Test;
 
 public class BasicLoginIT extends AbstractUIIntegrationTest {
@@ -32,11 +30,5 @@ public class BasicLoginIT extends AbstractUIIntegrationTest {
         
         MainPage mainPage = MainPage.produce(webDriver);
         mainPage.waitUserLabelToBe("foo");
-    }
-    
-    @After
-    public void tearDown() {
-        if (webDriver == null) return;
-        webDriver.close();
     }
 }
