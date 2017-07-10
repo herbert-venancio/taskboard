@@ -48,7 +48,6 @@ import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-@SuppressWarnings("deprecation")
 public class XmlUtils {
 
     public static NodeList xpath(File xmlFile, String locator) {
