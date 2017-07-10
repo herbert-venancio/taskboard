@@ -343,10 +343,10 @@ function Taskboard() {
     	return $("paper-material.issue [data-issue-key='"+issueKey+"']").closest("paper-material.issue");
     }
     
-    this.convertIssues = function(issues) {
+    this.convertAndRegisterIssues = function(issues) {
         var converted = []
         issues.forEach(function(issue) {
-            converted.push(self.convertIssue(issue));
+            converted.push(self.convertAndRegisterIssue(issue));
         })
         return converted;
     }
