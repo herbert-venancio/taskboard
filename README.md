@@ -1,4 +1,4 @@
-[![Quality Gate](http://localhost:9000/api/badges/gate?key=br.com.objective:taskboard)](http://localhost:9000/dashboard/index/br.com.objective:taskboard)
+[![Quality Gate](http://10.44.1.250:9000/api/badges/gate?key=br.com.objective:taskboard)](http://10.44.1.250:9000/dashboard/index/br.com.objective:taskboard)
 
 This application **must be run with Java 8** (404 errors on ws may indicate wrong JRE version).
 
