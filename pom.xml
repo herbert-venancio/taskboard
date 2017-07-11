@@ -124,14 +124,12 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<argLine>${jacoco.agent.ut.arg}</argLine>
-					<!-- Specific to generate mapping between tests and covered code -->
 					<properties>
 						<property>
 							<name>listener</name>
 							<value>org.sonar.java.jacoco.JUnitListener</value>
 						</property>
 					</properties>
-					<!-- test failure ignore -->
 					<testFailureIgnore>true</testFailureIgnore>
 					<excludes>
 						<exclude>**/**IT.java</exclude>
@@ -172,7 +170,6 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.6.0</version>
 				<executions>
 					<execution>
 						<phase>pre-integration-test</phase>
@@ -205,14 +202,13 @@
 							<systemProperties>
 								<webdriver.gecko.driver>${webdriver.gecko.driver}</webdriver.gecko.driver>
 							</systemProperties>
-							<argLine>-Xmx1024m -XX:MaxPermSize=256m ${jacoco.agent.it.arg}</argLine>
+							<argLine>${jacoco.agent.it.arg}</argLine>
 							<properties>
 								<property>
 									<name>listener</name>
 									<value>org.sonar.java.jacoco.JUnitListener</value>
 								</property>
 							</properties>
-							<reportsDirectory>${project.build.directory}/failsafe-reports</reportsDirectory>
 						</configuration>
 					</execution>
 				</executions>
@@ -266,23 +262,6 @@
 			</plugins>
 		</pluginManagement>
 	</build>
-	<reporting>
-		<plugins>
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.7.9</version>
-				<reportSets>
-					<reportSet>
-						<reports>
-							<!-- select non-aggregate reports -->
-							<report>report</report>
-						</reports>
-					</reportSet>
-				</reportSets>
-			</plugin>
-		</plugins>
-	</reporting>
 	<profiles>
 		<profile>
 			<id>packaging-jar</id>
