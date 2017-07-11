@@ -4,7 +4,7 @@ CREATE TABLE `template` (
     `path` varchar(255) NOT NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY `template_name_unique` (`name`)
-)
+);
 
 CREATE TABLE `template_project` (
     `TemplateId` bigint(20) NOT NULL,
@@ -13,4 +13,4 @@ CREATE TABLE `template_project` (
     KEY `projectId_fk` (`ProjectId`),
     CONSTRAINT `templateId_fk` FOREIGN KEY (`TemplateId`) REFERENCES `template` (`id`),
     CONSTRAINT `projectId_fk` FOREIGN KEY (`ProjectId`) REFERENCES `project_filter_configuration` (`project_key`)
-)
+);
