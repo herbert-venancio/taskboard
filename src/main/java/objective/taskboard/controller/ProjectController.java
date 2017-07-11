@@ -85,7 +85,11 @@ public class ProjectController {
             p.teams.add(getProjectTeamName(projectTeam));
         }
         
-        List<ProjectFilterConfiguration> projectFilter = projectRepository.getProjects();
+        List<ProjectFilterConfiguration> projectFilter = projectRepository.
+                getProjects().stream()
+                .filter(t -> projectService.isProjectVisible(t.getProjectKey()))
+                .collect(toList());
+        
         for (ProjectFilterConfiguration projectFilterConfiguration : projectFilter) {
             if (!projectXData.containsKey(projectFilterConfiguration.getProjectKey())) {
                 ProjectData value = new ProjectData();
