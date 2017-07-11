@@ -19,8 +19,9 @@
 		<npm.version>2.13.0</npm.version>
 		<selenium.version>3.4.0</selenium.version>
 		<jira.api.version>4.0.1-OBJ</jira.api.version>
-		<sonar.exclusions>src/main/resources/static/bower_components/**</sonar.exclusions>
+		<sonar.host.url>http://10.44.1.250:9000</sonar.host.url>
 		<sonar.sources>src/main/java,src/main/resources/static</sonar.sources>
+		<sonar.exclusions>src/main/resources/static/bower_components/**</sonar.exclusions>
 		<sonar.junit.reportsPath>${project.build.directory}/combined-reports</sonar.junit.reportsPath>
 		<sonar.jacoco.reportPath>${project.build.directory}/jacoco-ut.exec</sonar.jacoco.reportPath>
 		<sonar.jacoco.reportPaths>${project.build.directory}/jacoco-ut.exec</sonar.jacoco.reportPaths>
@@ -45,13 +46,13 @@
 		</repository>
 	</repositories>
 
-	<url>https://github.com/herbert-venancio/taskboard</url>
+	<url>https://github.com/objective-solutions/taskboard</url>
 	<description>Liferay Taskboard Issue Manager</description>
 
 	<scm>
-		<url>https://github.com/herbert-venancio/taskboard</url>
-		<connection>scm:git:git@github.com/herbert-venancio/taskboard.git</connection>
-		<developerConnection>scm:git:git@github.com:herbert-venancio/taskboard.git</developerConnection>
+		<url>https://github.com/objective-solutions/taskboard</url>
+		<connection>scm:git:git@github.com/objective-solutions/taskboard.git</connection>
+		<developerConnection>scm:git:git@github.com:objective-solutions/taskboard.git</developerConnection>
 		<tag>HEAD</tag>
 	</scm>
 	<build>
