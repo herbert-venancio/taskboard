@@ -31,6 +31,14 @@ node("heavy-memory") {
                     junit testResults: 'target/failsafe-reports/*.xml', testDataPublishers: [[$class: 'AttachmentPublisher']], allowEmptyResults: true
                 }
             }
+            stage('Sonar') {
+                sh """
+                    mkdir target/combined-reports
+                    cp target/surefire-reports/*.xml target/combined-reports/
+                    cp target/failsafe-reports/*.xml target/combined-reports/
+                """
+                sh "${mvnHome}/bin/mvn --batch-mode -V sonar:sonar"
+            }
         } catch (ex) {
             handleError('objective-solutions/taskboard', 'devops@objective.com.br', 'objective-solutions-user')
             throw ex

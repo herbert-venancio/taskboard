@@ -19,6 +19,13 @@
 		<npm.version>2.13.0</npm.version>
 		<selenium.version>3.4.0</selenium.version>
 		<jira.api.version>4.0.1-OBJ</jira.api.version>
+		<sonar.exclusions>src/main/resources/static/bower_components/**</sonar.exclusions>
+		<sonar.sources>src/main/java,src/main/resources/static</sonar.sources>
+		<sonar.junit.reportsPath>${project.build.directory}/combined-reports</sonar.junit.reportsPath>
+		<sonar.jacoco.reportPath>${project.build.directory}/jacoco-ut.exec</sonar.jacoco.reportPath>
+		<sonar.jacoco.reportPaths>${project.build.directory}/jacoco-ut.exec</sonar.jacoco.reportPaths>
+		<sonar.jacoco.itReportPath>${project.build.directory}/jacoco-it.exec</sonar.jacoco.itReportPath>
+		<sonar.jacoco.itReportPaths>${project.build.directory}/jacoco-it.exec</sonar.jacoco.itReportPaths>
 	</properties>
 	<prerequisites>
 		<maven>3.1.0</maven>
@@ -38,10 +45,13 @@
 		</repository>
 	</repositories>
 
+	<url>https://github.com/herbert-venancio/taskboard</url>
+	<description>Liferay Taskboard Issue Manager</description>
+
 	<scm>
-		<url>https://github.com/objective-solutions/taskboard</url>
-		<connection>scm:git:git@github.com/objective-solutions/taskboard.git</connection>
-		<developerConnection>scm:git:git@github.com:objective-solutions/taskboard.git</developerConnection>
+		<url>https://github.com/herbert-venancio/taskboard</url>
+		<connection>scm:git:git@github.com/herbert-venancio/taskboard.git</connection>
+		<developerConnection>scm:git:git@github.com:herbert-venancio/taskboard.git</developerConnection>
 		<tag>HEAD</tag>
 	</scm>
 	<build>
@@ -78,9 +88,50 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.7.9</version>
+				<executions>
+					<execution>
+						<id>prepare-ut-agent</id>
+						<phase>process-test-classes</phase>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+						<configuration>
+							<destFile>${sonar.jacoco.reportPaths}</destFile>
+							<propertyName>jacoco.agent.ut.arg</propertyName>
+							<append>true</append>
+						</configuration>
+					</execution>
+					<execution>
+						<id>prepare-it-agent</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+						<configuration>
+							<destFile>${sonar.jacoco.itReportPaths}</destFile>
+							<propertyName>jacoco.agent.it.arg</propertyName>
+							<append>true</append>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
+					<argLine>${jacoco.agent.ut.arg}</argLine>
+					<!-- Specific to generate mapping between tests and covered code -->
+					<properties>
+						<property>
+							<name>listener</name>
+							<value>org.sonar.java.jacoco.JUnitListener</value>
+						</property>
+					</properties>
+					<!-- test failure ignore -->
+					<testFailureIgnore>true</testFailureIgnore>
 					<excludes>
 						<exclude>**/**IT.java</exclude>
 					</excludes>
@@ -120,6 +171,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.6.0</version>
 				<executions>
 					<execution>
 						<phase>pre-integration-test</phase>
@@ -133,6 +185,7 @@
 							<arguments>
 								<argument>-classpath</argument>
 								<classpath />
+								<argument>${jacoco.agent.it.arg}</argument>
 								<argument>objective.taskboard.TestMain</argument>
 							</arguments>
 						</configuration>
@@ -151,6 +204,14 @@
 							<systemProperties>
 								<webdriver.gecko.driver>${webdriver.gecko.driver}</webdriver.gecko.driver>
 							</systemProperties>
+							<argLine>-Xmx1024m -XX:MaxPermSize=256m ${jacoco.agent.it.arg}</argLine>
+							<properties>
+								<property>
+									<name>listener</name>
+									<value>org.sonar.java.jacoco.JUnitListener</value>
+								</property>
+							</properties>
+							<reportsDirectory>${project.build.directory}/failsafe-reports</reportsDirectory>
 						</configuration>
 					</execution>
 				</executions>
@@ -204,6 +265,23 @@
 			</plugins>
 		</pluginManagement>
 	</build>
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.7.9</version>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<!-- select non-aggregate reports -->
+							<report>report</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+		</plugins>
+	</reporting>
 	<profiles>
 		<profile>
 			<id>packaging-jar</id>
@@ -452,7 +530,7 @@
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
 		</dependency>
-		<!-- dependency> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-devtools</artifactId> 
+		<!-- dependency> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-devtools</artifactId>
 			<optional>true</optional> </dependency -->
 		<dependency>
 			<groupId>commons-io</groupId>
@@ -536,6 +614,12 @@
 			<groupId>xerces</groupId>
 			<artifactId>xercesImpl</artifactId>
 			<version>2.9.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.sonar-plugins.java</groupId>
+			<artifactId>sonar-jacoco-listeners</artifactId>
+			<version>3.2</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 	<dependencyManagement>
