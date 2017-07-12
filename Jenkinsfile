@@ -25,12 +25,14 @@ node("heavy-memory") {
             stage('Build') {
                 try {
                     wrap([$class: 'Xvnc']) {
+                        killTestMain()
                         sh "${mvnHome}/bin/mvn --batch-mode -V -U clean verify -P packaging-war,dev"
                     }
                 } finally {
                     archiveArtifacts artifacts: 'target/test-attachments/**', fingerprint: true, allowEmptyArchive: true
                     junit testResults: 'target/surefire-reports/*.xml', testDataPublishers: [[$class: 'AttachmentPublisher']], allowEmptyResults: true
                     junit testResults: 'target/failsafe-reports/*.xml', testDataPublishers: [[$class: 'AttachmentPublisher']], allowEmptyResults: true
+                    killTestMain()
                 }
             }
             stage('Sonar') {
@@ -110,4 +112,8 @@ def addDownloadBadge(downloadUrl) {
 
 def updateReleaseLinkInDescription(downloadUrl) {
     manager.build.project.description = "<a href='${downloadUrl}'>Latest released artifact</a>"
+}
+
+def killTestMain() {
+
 }
