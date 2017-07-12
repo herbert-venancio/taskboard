@@ -24,6 +24,7 @@ package objective.taskboard.controller;
 import java.util.List;
 
 public class TemplateData {
+    public Long id;
     public String name;
     public List<String> projects;
 

@@ -29,10 +29,13 @@ import java.util.List;
 
 @Data
 @Entity
-@Table(name="TEMPLATE"
-    , uniqueConstraints = @UniqueConstraint(name="unique_template_name", columnNames = {"name"}))
-@NamedQuery(name = "Template.findTemplatesForProjectKeys"
-        , query = "SELECT distinct t FROM Template t JOIN t.projects p WHERE p.projectKey IN (?1)")
+@Table(name="TEMPLATE", uniqueConstraints = @UniqueConstraint(name="unique_template_name", columnNames = {"name"}))
+@NamedQueries({
+        @NamedQuery(name = "Template.findTemplatesForProjectKeys", 
+                    query = "SELECT distinct t FROM Template t JOIN t.projects p WHERE p.projectKey IN (?1)"),
+        @NamedQuery(name = "Template.findTemplatesWithProjectKey", 
+                    query = "SELECT distinct t FROM Template t JOIN t.projects p WHERE p.projectKey = ?1")
+})
 public class Template {
 
     @GeneratedValue(strategy = GenerationType.AUTO)

@@ -44,32 +44,89 @@ public class DefaultTemplateService implements TemplateService{
 
     @Override
     public void saveTemplate(String templateName, String projects, String path) {
+        List<String> projectKeys = Arrays.asList(projects.split(","));
+        List<ProjectFilterConfiguration> associatedProjects = findAssociatedProjects(projectKeys);
+        
         Template template = new Template();
         template.setName(templateName);
         template.setPath(path);
-        List<String> projectKeys = Arrays.asList(projects.split(","));
-        List<ProjectFilterConfiguration> associatedProjects =
-                projectRepository.getProjects()
-                        .stream()
-                        .filter(proj -> projectKeys.contains(proj.getProjectKey()))
-                        .collect(Collectors.toList());
         template.setProjects(associatedProjects);
 
+        if (getTemplate(template.getName()) != null)
+            throw new RuntimeException("This template name is already in use");
+        
+        if (findATemplateOnlyMatchedWithThisProjectKey(projectKeys) != null)
+            throw new RuntimeException("This match of projects is already used by other template");
+        
         templateRepository.save(template);
+    }
+    
+    public void updateTemplate(Long id, String templateName, String projects, String path) {
+        List<String> projectKeys = Arrays.asList(projects.split(","));
+        List<ProjectFilterConfiguration> associatedProjects = findAssociatedProjects(projectKeys);
+        
+        Template template = new Template();
+        template.setId(id);
+        template.setName(templateName);
+        template.setProjects(associatedProjects);
+        
+        if (path != null)
+            template.setPath(path);
+
+        Template templateWithSameName = getTemplate(template.getName());
+        if (templateWithSameName != null && templateWithSameName.getId() != template.getId())
+            throw new RuntimeException("This template name is already in use");
+        
+        Template templateWithTheSameProjectKey = findATemplateOnlyMatchedWithThisProjectKey(projectKeys);
+        if (templateWithTheSameProjectKey != null && templateWithTheSameProjectKey.getId() != template.getId())
+            throw new RuntimeException("This match of projects is already used by other template");
+        
+        templateRepository.save(template);
+    }
+    
+    public void deleteTemplate(Long id) {
+        Template template = new Template();
+        template.setId(id);
+        templateRepository.delete(template);
     }
 
     @Override
     public List<Template> findTemplatesForProjectKeys(List<String> projectKeys) {
         return templateRepository.findTemplatesForProjectKeys(projectKeys)
+            .stream()
+            .filter(template -> template.getProjects()
                 .stream()
-                .filter(template -> template.getProjects()
-                        .stream()
-                        .allMatch(project -> projectKeys.contains(project.getProjectKey())))
-                .collect(Collectors.toList());
+                .allMatch(project -> projectKeys.contains(project.getProjectKey())))
+            .collect(Collectors.toList());
     }
 
     @Override
     public Template getTemplate(String templateName) {
         return templateRepository.findByName(templateName);
     }
+    
+    private Template findATemplateOnlyMatchedWithThisProjectKey(List<String> projectKeys) {
+        if (projectKeys.size() != 1)
+            return null;
+        
+        String projectKey = projectKeys.get(0);
+        List<Template> templates = templateRepository.findTemplatesWithProjectKey(projectKey)
+                .stream()
+                .filter(template -> template.getProjects().size() == 1)
+                .collect(Collectors.toList());
+        
+        if (templates.size() > 0) {
+            return templates.get(0);
+        } else {
+            return null;
+        }
+    }
+    
+    private List<ProjectFilterConfiguration> findAssociatedProjects(List<String> projectKeys) {
+        return projectRepository.getProjects()
+            .stream()
+            .filter(proj -> projectKeys.contains(proj.getProjectKey()))
+            .collect(Collectors.toList());
+    }
+    
 }

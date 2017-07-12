@@ -35,6 +35,7 @@ public class TemplateConverter implements Converter<Template, TemplateData> {
     @Override
     public TemplateData convert(Template source) {
         TemplateData target = new TemplateData();
+        target.id = source.getId();
         target.name = source.getName();
         target.projects = source.getProjects().stream().map(ProjectFilterConfiguration::getProjectKey).collect(Collectors.toList());
         return target;

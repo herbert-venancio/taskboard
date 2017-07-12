@@ -34,6 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -93,5 +94,20 @@ public class DefaultFollowUpFacade implements FollowUpFacade {
                 .storeTemplate(file.getInputStream(),
                         new FollowUpTemplateValidator());
         templateService.saveTemplate(templateName, projects, path);
+    }
+    
+    public void deleteTemplate(Long id) throws IOException {
+        templateService.deleteTemplate(id);
+    }
+    
+    public void updateTemplate(Long id, String templateName, String projects,
+                               Optional<MultipartFile> file) throws IOException {
+        String path = null;
+        if (file.isPresent())    
+            path = followUpTemplateStorage
+                    .storeTemplate(file.get().getInputStream(),
+                            new FollowUpTemplateValidator());
+        
+        templateService.updateTemplate(id, templateName, projects, path);
     }
 }

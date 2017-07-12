@@ -3,7 +3,6 @@
         #modal {
             background: white;
             min-width: 300px;
-            min-height: 360px;
             margin: 0;
             display: block;
             font-family: inherit;
@@ -12,7 +11,7 @@
         .card-custom {
             background: transparent;
             width: 100%;
-            min-height: 360px;
+            min-height: 150px;
             padding: 20px;
             margin: 0;
         }
@@ -51,32 +50,48 @@
         }
         
         ::content .modal-footer {
-            position: absolute;
-            bottom: 20px;
             display: flex;
-            margin-left: -5px;
-            margin-right: -5px;
+            float: right;
+            margin-top: 20px;
         }
         
-        :host ::content paper-material, paper-button {
-            box-shadow: none !important;
+        ::content input {
+            border-bottom: 1px solid black !important;
+            color: #252525 !important;
         }
         
-        :host ::content .modal-footer paper-button.colorful {
+        ::content label {
+            color: #4285f4 !important;
+            cursor: pointer;
+        }
+        
+        ::content .modal-content {
+            margin-top: -35px;
+            display: flex;
+        }
+        
+        ::content paper-button.colorful {
             color: #4285f4;
         }
-
-        :host ::content .modal-footer paper-button[raised].colorful {
+        
+        ::content .modal-footer paper-button[raised].colorful {
             background: #4285f4;
             color: #fff;
         }
         
-        :host ::content .modal-footer paper-button {
+        ::content .modal-footer paper-button {
             margin: 0 5px;
             text-align: center;
             padding: 5px 10px;
             text-transform: none;
         }
+        
+        ::content .scroll {
+            overflow: auto;
+            overflow-x: hidden;
+            width: 100%;
+            background-color: white;
+        }    
         
     </style>
     <template>
@@ -85,7 +100,7 @@
                 <div class="card-header-custom">
                     <div class="card-header-info">
                         <div class="card-header-breadcrumb">
-                            {{title}}
+                            [[title]]
                         </div>
                     </div>
                     <div class="card-header-buttons">

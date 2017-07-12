@@ -18,7 +18,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
   [/LICENSE]
   -->
-<dom-module id="confirm-modal">
+<dom-module id="alert-modal">
 
     <style>
         paper-dialog {
@@ -41,7 +41,7 @@
             color: #fff;
         }
 
-        .confirmText {
+        .text {
             padding: 18px;
             margin-bottom: 20px;
         }
@@ -57,17 +57,16 @@
     </style>
 
     <template>
-        <paper-dialog id="confirmModal">
+        <paper-dialog id="alertModal">
             <h2>[[title]]</h2>
-            <div class="confirmText">[[text]]</div>
-            <paper-button id="confirm" class="colorful" on-tap="confirmed" raised>Confirm</paper-button>
-            <paper-button class="colorful" on-tap="closeDialog">Cancel</paper-button>
+            <div class="text">[[text]]</div>
+            <paper-button id="ok" class="colorful" on-tap="close" raised>Ok</paper-button>
         </paper-dialog>
     </template>
     <script>
         (function () {
             Polymer({
-                is: 'confirm-modal',
+                is: 'alert-modal',
 
                 properties: {
                     title: {
@@ -78,27 +77,17 @@
                     text: {
                         type: String,
                         notify: true
-                    },
-                    
-                    callback: {
-                        type: Object
                     }
                 },
 
-                confirmed: function () {
-                    this.callback();
-                    this.closeDialog();
+                close: function () {
+                	this.$.alertModal.toggle();
                 },
-
-                closeDialog: function () {
-                    this.$.confirmModal.close();
-                },
-
-                openDialog: function (title, text, callback) {
+                
+                open: function (title, text) {
                     this.title = title;
                     this.text = text;
-                    this.callback = callback;
-                    this.$.confirmModal.toggle();
+                    this.$.alertModal.toggle();
                 }
 
             });

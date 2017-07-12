@@ -27,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 public interface FollowUpFacade {
 
@@ -37,6 +38,8 @@ public interface FollowUpFacade {
     IssueBufferState getFollowupState();
 
     void createTemplate(String templateName, String projects, MultipartFile file) throws IOException;
+    void updateTemplate(Long id, String templateName, String projects, Optional<MultipartFile> file) throws IOException;
+    void deleteTemplate(Long id) throws IOException;
 
     List<TemplateData> getTemplatesForCurrentUser();
 }

@@ -151,6 +151,13 @@
 		    display: none;
 		}
         
+        .warn-box {
+            background-color: #fff8c4;
+            padding: 10px;
+            margin: 20px 0;
+            color: #904506;
+        }
+        
         .scroll {
             padding: 10px;
             overflow: auto;
@@ -205,17 +212,25 @@
                         </div>
                     </div>
                     <div class="content-row">
-                        <paper-dropdown-menu class="templates-followup-dropdown" id="templateType" name="template" label="Template Type"
-                                             selected-item="{{template}}">
-                            <paper-menu class="dropdown-content" selected="{{selectedItem}}">
-                                <template is="dom-repeat" id="templates" items="{{availableTemplates}}">
-                                    <paper-item value="{{item.name}}">{{item.name}}</paper-item>
-                                </template>
-                            </paper-menu>
-                        </paper-dropdown-menu>
+                        <template is="dom-if" if="{{areTemplatesAvailable}}">
+                            <paper-dropdown-menu class="templates-followup-dropdown" name="template" label="Template Type"
+                                                 selected-item="{{template}}">
+                                <paper-menu id="templateType" class="dropdown-content" selected="{{selectedItem}}">
+                                    <template is="dom-repeat" id="templates" items="{{availableTemplates}}">
+                                        <paper-item value="{{item.name}}">{{item.name}}</paper-item>
+                                    </template>
+                                </paper-menu>
+                            </paper-dropdown-menu>
+                        </template>
                     </div>
 
                     <div class="error-message" hidden$="{{!errorMessage}}">{{errorMessage}}</div>
+
+                </div>
+                
+                <div class="warn-box" hidden$={{!showNoTemplatesFoundWarning}}>
+                    No templates found <br />
+                    <small>Upload a template selecting those projects</small>
                 </div>
 
                 <div class="custom-footer">
@@ -248,6 +263,12 @@
                     },
                     template: {
                         type: String
+                    },
+                    areTemplatesAvailable: {
+                    	type: Boolean
+                    },
+                    showNoTemplatesFoundWarning: {
+                    	type: Boolean
                     }
                 },
                 
@@ -258,7 +279,8 @@
                     this.templates = [];
                 	this.$.ajaxTemplates.generateRequest();
                     this.$.modal.open();
-                    this.filterTemplates();
+                    this.areTemplatesAvailable = false;
+                    this.showNoTemplatesFoundWarning = false;
                 },
                 
                 close: function() {
@@ -271,8 +293,9 @@
                     })
                     // force polymer to recognize the model change
                     this.projects = JSON.parse(JSON.stringify(this.projects))
+                    this.filterTemplates();
                 },
-
+                
                 filterTemplates: function(e) {
                     var selectedProjects = this.filterSelectedProjects();
                     var templates = [];
@@ -286,13 +309,20 @@
                     });
 
                     this.availableTemplates = templates;
+                    this.areTemplatesAvailable = this.availableTemplates.length != 0;
+                    this.showNoTemplatesFoundWarning = !this.areTemplatesAvailable && selectedProjects.length > 0;
+                    
+                    if (this.areTemplatesAvailable) 
+                    	this.selectedItem = 0;
+                    
                     // update combo selection if old selection became invalid
-                    if ( oldSelection && ! _.contains(templates, oldSelection.value) ) {
+                    if ( oldSelection && ! _.contains(templates, oldSelection.value) )
                         this.selectedItem = -1;
-                    }
                 },
-
+                
                 filterSelectedProjects: function() {
+                	if (!this.projects) return;
+                	
                     var selectedKeys = [];
                     this.projects.forEach(function(p, index) {
                 	    if (p.checked)

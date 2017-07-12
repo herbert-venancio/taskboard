@@ -27,6 +27,8 @@ import java.util.List;
 
 public interface TemplateService {
     void saveTemplate(String templateName, String projects, String path);
+    void updateTemplate(Long id, String templateName, String projects, String path);
+    void deleteTemplate(Long id);
 
     List<Template> findTemplatesForProjectKeys(List<String> projectKeys);
 
