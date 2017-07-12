@@ -259,6 +259,9 @@ public class JiraProperties {
         
         private List<Long> statusExcludedFromFollowup = new LinkedList<Long>();
         
+        @NotNull
+        private Long ballparkDefaultStatus;
+        
         public List<Long> getStatusExcludedFromFollowup() {
             return statusExcludedFromFollowup;
         }
