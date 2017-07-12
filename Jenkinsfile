@@ -40,17 +40,18 @@ node("heavy-memory") {
                     cp target/failsafe-reports/*.xml target/combined-reports/
                 """
 
+                def SONAR_URL = env.SONARQUBE_URL
                 if (BRANCH_NAME == 'master') {
-                    sh "${mvnHome}/bin/mvn --batch-mode -V sonar:sonar"
+                    sh "${mvnHome}/bin/mvn --batch-mode -V sonar:sonar -Dsonar.host.url=${SONAR_URL}"
                 } else if (isPullRequest()) {
-                    withCredentials([string(credentialsId: 'TASKBOARD_SDLC_SONAR', variable: 'GithubOauth')]) {
+                    withCredentials([string(credentialsId: 'TASKBOARD_SDLC_SONAR', variable: 'GITHUB_OAUTH')]) {
                         def PR_ID = env.CHANGE_ID
-                        def gitRepository = REPO_GIT
-                        sh "${mvnHome}/bin/mvn --batch-mode -V \
+                        def GIT_REPO = 'objective-solutions/taskboard'
+                        sh "${mvnHome}/bin/mvn --batch-mode -V sonar:sonar -Dsonar.host.url=${SONAR_URL} \
                         -Dsonar.analysis.mode=preview \
                         -Dsonar.github.pullRequest=${PR_ID} \
-                        -Dsonar.github.oauth=${GithubOauth} \
-                        -Dsonar.github.repository=${gitRepository}"
+                        -Dsonar.github.oauth=${GITHUB_OAUTH} \
+                        -Dsonar.github.repository=${GIT_REPO}"
                     }
                 }
             }
