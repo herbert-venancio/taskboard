@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -67,6 +68,18 @@ public class JiraMockServer {
         
         post("/reset", (req, res) ->{
             dirtySearchIssuesByKey.clear();
+            username = null;
+            searchFailureEnabled = false;
+            return "";
+        });
+        
+        post("/force-search-failure", (req, res) ->{
+            searchFailureEnabled = true;
+            return "";
+        });
+        
+        post("/fix-search-failure", (req, res) ->{
+            searchFailureEnabled = false;
             return "";
         });
         
@@ -97,12 +110,14 @@ public class JiraMockServer {
         });
         
         get("rest/api/latest/serverInfo",  (req, res) ->{
-            String auth = new String(java.util.Base64.getDecoder().decode(req.headers("Authorization").replace("Basic ","").getBytes()));
+            String auth = new String(Base64.getDecoder().decode(req.headers("Authorization").replace("Basic ","").getBytes()));
             username = auth.split(":")[0];
             return loadMockData("serverInfo.response.json");
         });
         
         post("/rest/api/latest/search", "application/json", (req,res) -> {
+            if (searchFailureEnabled)
+                throw new IllegalStateException("Emulated error");
             Map searchData = gson.fromJson(req.body(), java.util.Map.class);
             return makeFakeRequest(searchData);
         });
@@ -147,7 +162,7 @@ public class JiraMockServer {
                     case "assignee":
                         setAssignee(fields, reqFields.getJSONObject(aKey));
                         break;
-                    case "customfield_11456":
+                    case "customfield_11456"://co-assignee
                         setCoassignee(fields, aKey, reqFields.getJSONArray(aKey));
                         break;
                     default:
@@ -338,6 +353,7 @@ public class JiraMockServer {
     private static Map<String, JSONObject> searchIssuesByKey = new LinkedHashMap<>();
     private static Map<String, JSONObject> dirtySearchIssuesByKey = new LinkedHashMap<>();
     private static String username;
+    private static boolean searchFailureEnabled = false;
     private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
 }
 

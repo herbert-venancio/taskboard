@@ -33,6 +33,7 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
@@ -49,6 +50,8 @@ import objective.taskboard.jira.ProjectService;
 @Slf4j
 @Service
 public class IssueBufferService {
+    @Autowired
+    public ApplicationEventPublisher eventPublisher;
 
     @Autowired
     private JiraIssueToIssueConverter issueConverter;
@@ -83,11 +86,11 @@ public class IssueBufferService {
             StopWatch stopWatch = new StopWatch();
             stopWatch.start();
             try {
-                state = state.start();
+                updateState(state.start());
                 setIssues(issueConverter.convertIssues(jiraIssueService.searchAll(), taskboardMetadatasByIssueKey));
-                state = state.done();
+                updateState(state.done());
             }catch(Exception e) {
-                state = state.error();
+                updateState(state.error());
             }
             finally {
                 log.debug("updateIssueBuffer time spent " +stopWatch.getTime());
@@ -97,6 +100,11 @@ public class IssueBufferService {
         thread.setName("IssueBufferService.updateIssueBuffer()");
         thread.setDaemon(true);
         thread.start();
+    }
+    
+    private void updateState(IssueBufferState state) {
+        this.state = state;
+        eventPublisher.publishEvent(new IssueCacheUpdateEvent(this, state));
     }
 
     public Issue updateIssueBuffer(final String key) {
@@ -213,6 +221,7 @@ public class IssueBufferService {
     }
 
     public void reset() {
+        state = IssueBufferState.uninitialised;
         updateIssueBuffer();
         while (isUpdatingTaskboardIssuesBuffer)
             try {

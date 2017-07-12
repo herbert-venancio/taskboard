@@ -56,6 +56,7 @@ import objective.taskboard.database.TaskboardDatabaseService;
 import objective.taskboard.filterConfiguration.TeamFilterConfigurationService;
 import objective.taskboard.filterPreferences.UserPreferencesService;
 import objective.taskboard.issueBuffer.IssueBufferService;
+import objective.taskboard.issueBuffer.IssueBufferState;
 import objective.taskboard.issueTypeVisibility.IssueTypeVisibilityService;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraService;
@@ -154,7 +155,6 @@ public class IssueController {
         }
     }
 
-
     @RequestMapping(path = "resolutions/{transition}", method = RequestMethod.GET)
     public String resolutions(@PathVariable String transition) {
         return jiraBean.getResolutions(transition);
@@ -184,7 +184,12 @@ public class IssueController {
 
         return new TimeTracking(timeEstimateMinutes, null, timeSpentMinutes);
     }
-
+    
+    @RequestMapping(path = "cacheState")
+    public IssueBufferState issueCacheState() {
+        return issueBufferService.getState();
+    }
+    
     @RequestMapping("configuration")
     public Map<String, Object> configuration() throws SQLException, InterruptedException, ExecutionException {
         Map<String, Object> map = new HashMap<>();
