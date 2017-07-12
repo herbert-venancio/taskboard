@@ -1,3 +1,5 @@
+#!/usr/bin/env groovy
+
 @Library("liferay-sdlc-jenkins-lib")
 import static org.liferay.sdlc.SDLCPrUtilities.*
 
@@ -37,7 +39,20 @@ node("heavy-memory") {
                     cp target/surefire-reports/*.xml target/combined-reports/
                     cp target/failsafe-reports/*.xml target/combined-reports/
                 """
-                sh "${mvnHome}/bin/mvn --batch-mode -V sonar:sonar"
+
+                if (BRANCH_NAME == 'master') {
+                    sh "${mvnHome}/bin/mvn --batch-mode -V sonar:sonar"
+                } else if (isPullRequest()) {
+                    withCredentials([string(credentialsId: 'TASKBOARD_SDLC_SONAR', variable: 'GithubOauth')]) {
+                        def PR_ID = env.CHANGE_ID
+                        def gitRepository = REPO_GIT
+                        sh "${mvnHome}/bin/mvn --batch-mode -V \
+                        -Dsonar.analysis.mode=preview \
+                        -Dsonar.github.pullRequest=${PR_ID} \
+                        -Dsonar.github.oauth=${GithubOauth} \
+                        -Dsonar.github.repository=${gitRepository}"
+                    }
+                }
             }
         } catch (ex) {
             handleError('objective-solutions/taskboard', 'devops@objective.com.br', 'objective-solutions-user')
