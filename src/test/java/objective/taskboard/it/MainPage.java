@@ -62,6 +62,11 @@ public class MainPage extends AbstractUiFragment {
         webDriver.get(AbstractUIIntegrationTest.getSiteBase()+"/");
         return initElements(webDriver, MainPage.class);
     }
+    
+    public void reload() {
+        webDriver.navigate().refresh();
+        waitUserLabelToBe("foo");
+    }
 
     public void waitUserLabelToBe(String expected) {
         waitTextInElement(userLabelButton, expected);
@@ -135,5 +140,13 @@ public class MainPage extends AbstractUiFragment {
 
     public IssueDetails issueDetails() {
         return new IssueDetails(webDriver);
+    }
+
+    public void assertOkIcon() {
+        waitVisibilityOfElement(webDriver.findElement(By.className("issue-state-ready")));
+    }
+
+    public void assertStatusIconIsInitialisationError() {
+        waitVisibilityOfElement(webDriver.findElement(By.className("issue-state-initialisationError")));
     }
 }
