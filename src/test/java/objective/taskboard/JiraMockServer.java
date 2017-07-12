@@ -74,8 +74,8 @@ public class JiraMockServer {
             return loadMockData("project.response.json");
         });
         
-        get("/rest/api/latest/project/TASKB", (req, res) ->{
-            return loadMockData("project_TASKB.response.json");
+        get("/rest/api/latest/project/:projectkey", (req, res) ->{
+            return loadMockData("project_" + req.params(":projectkey") + ".response.json");
         });
         
         get("rest/api/latest/status",  (req, res) ->{
@@ -180,6 +180,7 @@ public class JiraMockServer {
                 throw new IllegalStateException("Invalid transition attempted");
             
             issue.getJSONObject("fields").put("status", status);
+            issue.getJSONObject("fields").put("updated", nowIso8601());
             
             return "";
         });

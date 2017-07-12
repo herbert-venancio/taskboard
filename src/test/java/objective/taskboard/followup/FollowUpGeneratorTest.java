@@ -27,7 +27,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.net.URL;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -257,7 +259,11 @@ public class FollowUpGeneratorTest {
         return new String[0];
     }
 
-    private static URL resolve(String resourceName) {
-        return DefaultFollowUpTemplateStorage.class.getClassLoader().getResource(resourceName);
+    private static Path resolve(String resourceName) {
+        try {
+            return Paths.get(DefaultFollowUpTemplateStorage.class.getClassLoader().getResource(resourceName).toURI());
+        } catch (URISyntaxException e) {
+            throw new FollowUpTemplateValidator.InvalidTemplateException(e);
+        }
     }
 }

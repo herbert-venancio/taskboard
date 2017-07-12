@@ -29,6 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,11 +42,15 @@ import objective.taskboard.issueBuffer.AllIssuesBufferService;
 import objective.taskboard.issueBuffer.IssueBufferState;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraProperties.BallparkMapping;
+import objective.taskboard.jira.MetadataService;
 
 @Service
 public class FollowupDataProviderImpl implements FollowupDataProvider {
     @Autowired
     private JiraProperties jiraProperties;
+    
+    @Autowired
+    private MetadataService metadataService;
     
     @Autowired
     private AllIssuesBufferService issueBufferService;
@@ -182,7 +187,7 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
         followUpData.demandDescription = issueDescription("M", demand);
         
         followUpData.taskType = "BALLPARK - Demand";
-        followUpData.taskStatus = followUpData.demandStatus;
+        followUpData.taskStatus = getBallparkStatus();
         followUpData.taskId = 0L;
         followUpData.taskNum = followUpData.demandNum;
         followUpData.taskSummary="Dummy Feature";
@@ -248,7 +253,7 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
         followUpData.taskRelease = coalesce(getRelease(task), getRelease(demand) ,"No release set");
         
         followUpData.subtaskType = ballparkMapping.getIssueType();
-        followUpData.subtaskStatus = task.getStatusName();
+        followUpData.subtaskStatus = getBallparkStatus();
         followUpData.subtaskId = 0L;
         followUpData.subtaskNum = task.getProjectKey()+"-0";
         followUpData.subtaskSummary = ballparkMapping.getIssueType();
@@ -263,6 +268,14 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
         return followUpData;
     }
     
+    private String getBallparkStatus() {
+        try {
+            return metadataService.getStatusesMetadata().get(jiraProperties.getFollowup().getBallparkDefaultStatus()).getName();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     private FollowUpData createSubTaskFollowup(Issue demand, Issue task, Issue subtask) {
         FollowUpData followUpData = new FollowUpData();
         followUpData.planningType = "Plan";

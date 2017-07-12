@@ -161,7 +161,7 @@
                              contentType: 'application/json',
                              data: JSON.stringify(issueKeys),
                              success: function(updatedIssueList) {
-                                 var converted = taskboard.convertIssues(updatedIssueList);
+                                 var converted = taskboard.convertAndRegisterIssues(updatedIssueList);
                                  var issueByKey = []
                                  converted.forEach(function(issue) {
                                      issueByKey[issue.issueKey] = issue;

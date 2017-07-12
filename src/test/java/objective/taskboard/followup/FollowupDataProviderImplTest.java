@@ -125,13 +125,13 @@ public class FollowupDataProviderImplTest {
         JiraProperties.IssueType issueType = new JiraProperties.IssueType();
         issueType.setFeatures(Arrays.asList(new IssueTypeDetails(taskIssueType)));
         issueType.setDemand(new IssueTypeDetails(demandIssueType));
-        
         when(jiraProperties.getIssuetype()).thenReturn(issueType);
+        
+        followup.setBallparkDefaultStatus(statusOpen);
         when(jiraProperties.getFollowup()).thenReturn(followup);
         propertiesCustomField.setRelease(new CustomFieldDetails("RELEASE_CF_ID"));
         when(jiraProperties.isDemand(Matchers.any())).thenCallRealMethod();
         when(jiraProperties.isFeature(Matchers.any())).thenCallRealMethod();
-
     }
     
     @Test
@@ -150,7 +150,7 @@ public class FollowupDataProviderImplTest {
             " demandSummary          : Smry 1\n" + 
             " demandDescription      : M | 00001 - Smry 1\n" + 
             " taskType               : BALLPARK - Demand\n" + 
-            " taskStatus             : To Do\n" + 
+            " taskStatus             : Open\n" + 
             " taskId                 : 0\n" + 
             " taskNum                : PROJ-1\n" + 
             " taskSummary            : Dummy Feature\n" + 
@@ -189,7 +189,7 @@ public class FollowupDataProviderImplTest {
             " demandSummary          : Smry 1\n" + 
             " demandDescription      : M | 00001 - Smry 1\n" + 
             " taskType               : BALLPARK - Demand\n" + 
-            " taskStatus             : To Do\n" + 
+            " taskStatus             : Open\n" + 
             " taskId                 : 0\n" + 
             " taskNum                : PROJ-1\n" + 
             " taskSummary            : Dummy Feature\n" + 
@@ -238,7 +238,7 @@ public class FollowupDataProviderImplTest {
             " demandSummary          : Smry 1\n" + 
             " demandDescription      : M | 00001 - Smry 1\n" + 
             " taskType               : BALLPARK - Demand\n" + 
-            " taskStatus             : To Do\n" + 
+            " taskStatus             : Open\n" + 
             " taskId                 : 0\n" + 
             " taskNum                : PROJ-1\n" + 
             " taskSummary            : Dummy Feature\n" + 
@@ -334,7 +334,7 @@ public class FollowupDataProviderImplTest {
             " taskFullDescription    : Task | 00003 - Smry 3\n" + 
             " taskRelease            : No release set\n" + 
             " subtaskType            : BALLPARK - Development\n" + 
-            " subtaskStatus          : To Do\n" + 
+            " subtaskStatus          : Open\n" + 
             " subtaskId              : 0\n" + 
             " subtaskNum             : PROJ-0\n" + 
             " subtaskSummary         : BALLPARK - Development\n" + 
@@ -366,7 +366,7 @@ public class FollowupDataProviderImplTest {
             " taskFullDescription    : Task | 00003 - Smry 3\n" + 
             " taskRelease            : No release set\n" + 
             " subtaskType            : BALLPARK - Alpha\n" + 
-            " subtaskStatus          : To Do\n" + 
+            " subtaskStatus          : Open\n" + 
             " subtaskId              : 0\n" + 
             " subtaskNum             : PROJ-0\n" + 
             " subtaskSummary         : BALLPARK - Alpha\n" + 
@@ -438,7 +438,7 @@ public class FollowupDataProviderImplTest {
             " taskFullDescription    : Task | 00003 - Smry 3\n" + 
             " taskRelease            : No release set\n" + 
             " subtaskType            : BALLPARK - Alpha\n" + 
-            " subtaskStatus          : To Do\n" + 
+            " subtaskStatus          : Open\n" + 
             " subtaskId              : 0\n" + 
             " subtaskNum             : PROJ-0\n" + 
             " subtaskSummary         : BALLPARK - Alpha\n" + 
@@ -613,7 +613,7 @@ public class FollowupDataProviderImplTest {
             " taskFullDescription    : Task | 00003 - Smry 3\n" + 
             " taskRelease            : release 66\n" + 
             " subtaskType            : BALLPARK - Development\n" + 
-            " subtaskStatus          : To Do\n" + 
+            " subtaskStatus          : Open\n" + 
             " subtaskId              : 0\n" + 
             " subtaskNum             : PROJ-0\n" + 
             " subtaskSummary         : BALLPARK - Development\n" + 
@@ -793,7 +793,7 @@ public class FollowupDataProviderImplTest {
             " taskFullDescription    : Task | 00003 - Smry 3\n" + 
             " taskRelease            : No release set\n" + 
             " subtaskType            : BALLPARK - Development\n" + 
-            " subtaskStatus          : To Do\n" + 
+            " subtaskStatus          : Open\n" + 
             " subtaskId              : 0\n" + 
             " subtaskNum             : PROJ-0\n" + 
             " subtaskSummary         : BALLPARK - Development\n" + 
@@ -890,7 +890,7 @@ public class FollowupDataProviderImplTest {
             " taskFullDescription    : Task | 00003 - Smry 3\n" + 
             " taskRelease            : release 88\n" + 
             " subtaskType            : BALLPARK - Development\n" + 
-            " subtaskStatus          : To Do\n" + 
+            " subtaskStatus          : Open\n" + 
             " subtaskId              : 0\n" + 
             " subtaskNum             : PROJ-0\n" + 
             " subtaskSummary         : BALLPARK - Development\n" + 
@@ -941,7 +941,7 @@ public class FollowupDataProviderImplTest {
             " taskFullDescription    : Task | 00003 - Smry 3\n" + 
             " taskRelease            : release 66\n" + 
             " subtaskType            : BALLPARK - Development\n" + 
-            " subtaskStatus          : To Do\n" + 
+            " subtaskStatus          : Open\n" + 
             " subtaskId              : 0\n" + 
             " subtaskNum             : PROJ-0\n" + 
             " subtaskSummary         : BALLPARK - Development\n" + 
@@ -1227,7 +1227,7 @@ public class FollowupDataProviderImplTest {
                 " taskFullDescription    : Task | 00003 - Smry 3\n" + 
                 " taskRelease            : No release set\n" + 
                 " subtaskType            : BALLPARK - Development\n" + 
-                " subtaskStatus          : To Do\n" + 
+                " subtaskStatus          : Open\n" + 
                 " subtaskId              : 0\n" + 
                 " subtaskNum             : PROJ-0\n" + 
                 " subtaskSummary         : BALLPARK - Development\n" + 
@@ -1258,7 +1258,7 @@ public class FollowupDataProviderImplTest {
                 " demandSummary          : Smry 1\n" + 
                 " demandDescription      : M | 00001 - Smry 1\n" + 
                 " taskType               : BALLPARK - Demand\n" + 
-                " taskStatus             : To Do\n" + 
+                " taskStatus             : Open\n" + 
                 " taskId                 : 0\n" + 
                 " taskNum                : PROJ-1\n" + 
                 " taskSummary            : Dummy Feature\n" + 

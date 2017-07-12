@@ -23,26 +23,26 @@ package objective.taskboard.followup;
 
 import lombok.Getter;
 
-import java.net.URL;
+import java.nio.file.Path;
 
 @Getter
 public class FollowUpTemplate {
 
-    private URL pathSharedStringsInitial;
-    private URL pathSharedStringsTemplate;
-    private URL pathSISharedStringsTemplate;
-    private URL pathSheet7Template;
-    private URL pathSheet7RowTemplate;
-    private URL pathFollowupTemplateXLSM;
-    private URL pathTable7Template;
+    private Path pathSharedStringsInitial;
+    private Path pathSharedStringsTemplate;
+    private Path pathSISharedStringsTemplate;
+    private Path pathSheet7Template;
+    private Path pathSheet7RowTemplate;
+    private Path pathFollowupTemplateXLSM;
+    private Path pathTable7Template;
 
-    public FollowUpTemplate(URL pathSharedStringsInitial
-            , URL pathSharedStringsTemplate
-            , URL pathSISharedStringsTemplate
-            , URL pathSheet7Template
-            , URL pathSheet7RowTemplate
-            , URL pathFollowupTemplateXLSM
-            , URL pathTable7Template) {
+    public FollowUpTemplate(Path pathSharedStringsInitial
+            , Path pathSharedStringsTemplate
+            , Path pathSISharedStringsTemplate
+            , Path pathSheet7Template
+            , Path pathSheet7RowTemplate
+            , Path pathFollowupTemplateXLSM
+            , Path pathTable7Template) {
         this.pathSharedStringsInitial = pathSharedStringsInitial;
         this.pathSharedStringsTemplate = pathSharedStringsTemplate;
         this.pathSISharedStringsTemplate = pathSISharedStringsTemplate;
