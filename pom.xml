@@ -180,9 +180,9 @@
 							<classpathScope>test</classpathScope>
 							<executable>${java.home}/bin/java</executable>
 							<arguments>
+								<argument>${jacoco.agent.it.arg}</argument>
 								<argument>-classpath</argument>
 								<classpath />
-								<argument>${jacoco.agent.it.arg}</argument>
 								<argument>objective.taskboard.TestMain</argument>
 							</arguments>
 						</configuration>

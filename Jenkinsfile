@@ -25,14 +25,13 @@ node("heavy-memory") {
             stage('Build') {
                 try {
                     wrap([$class: 'Xvnc']) {
-                        killTestMain()
                         sh "${mvnHome}/bin/mvn --batch-mode -V -U clean verify -P packaging-war,dev"
                     }
                 } finally {
                     archiveArtifacts artifacts: 'target/test-attachments/**', fingerprint: true, allowEmptyArchive: true
                     junit testResults: 'target/surefire-reports/*.xml', testDataPublishers: [[$class: 'AttachmentPublisher']], allowEmptyResults: true
                     junit testResults: 'target/failsafe-reports/*.xml', testDataPublishers: [[$class: 'AttachmentPublisher']], allowEmptyResults: true
-                    killTestMain()
+                    killLeakedProcesses()
                 }
             }
             stage('Sonar') {
@@ -114,6 +113,13 @@ def updateReleaseLinkInDescription(downloadUrl) {
     manager.build.project.description = "<a href='${downloadUrl}'>Latest released artifact</a>"
 }
 
-def killTestMain() {
-
+def killLeakedProcesses() {
+    def TestMainPID = sh ( script: "ps eaux | grep objective.taskboard.TestMain | grep BUILD_URL=${env.BUILD_URL} | awk '{print \$2}'", returnStdout: true)
+    if (TestMainPID) {
+        sh "kill -9 ${TestMainPID}"
+    }
+    def FirefoxPID = sh ( script: "ps aux | grep firefox | grep ${env.WORKSPACE} | awk '{print \$2}')", returnStdout: true)
+    if (FirefoxPID) {
+        sh "kill -9 ${FirefoxPID}"
+    }
 }
