@@ -1,3 +1,5 @@
+#!/usr/bin/env groovy
+
 @Library("liferay-sdlc-jenkins-lib")
 import static org.liferay.sdlc.SDLCPrUtilities.*
 
@@ -29,6 +31,28 @@ node("heavy-memory") {
                     archiveArtifacts artifacts: 'target/test-attachments/**', fingerprint: true, allowEmptyArchive: true
                     junit testResults: 'target/surefire-reports/*.xml', testDataPublishers: [[$class: 'AttachmentPublisher']], allowEmptyResults: true
                     junit testResults: 'target/failsafe-reports/*.xml', testDataPublishers: [[$class: 'AttachmentPublisher']], allowEmptyResults: true
+                }
+            }
+            stage('Sonar') {
+                sh """
+                    mkdir target/combined-reports
+                    cp target/surefire-reports/*.xml target/combined-reports/
+                    cp target/failsafe-reports/*.xml target/combined-reports/
+                """
+
+                def SONAR_URL = env.SONARQUBE_URL
+                if (BRANCH_NAME == 'master') {
+                    sh "${mvnHome}/bin/mvn --batch-mode -V sonar:sonar -Dsonar.host.url=${SONAR_URL}"
+                } else if (isPullRequest()) {
+                    withCredentials([string(credentialsId: 'TASKBOARD_SDLC_SONAR', variable: 'GITHUB_OAUTH')]) {
+                        def PR_ID = env.CHANGE_ID
+                        def GIT_REPO = 'objective-solutions/taskboard'
+                        sh "${mvnHome}/bin/mvn --batch-mode -V sonar:sonar -Dsonar.host.url=${SONAR_URL} \
+                        -Dsonar.analysis.mode=preview \
+                        -Dsonar.github.pullRequest=${PR_ID} \
+                        -Dsonar.github.oauth=${GITHUB_OAUTH} \
+                        -Dsonar.github.repository=${GIT_REPO}"
+                    }
                 }
             }
         } catch (ex) {
