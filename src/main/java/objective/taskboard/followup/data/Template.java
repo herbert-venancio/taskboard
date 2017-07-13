@@ -42,7 +42,7 @@ public class Template {
     private String path;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "TEMPLATE_PROJETO",
+    @JoinTable(name = "TEMPLATE_PROJECT",
                 joinColumns = { @JoinColumn(name = "TemplateId",
                         nullable = false, updatable = false) },
                 inverseJoinColumns = { @JoinColumn(name = "ProjectId",
