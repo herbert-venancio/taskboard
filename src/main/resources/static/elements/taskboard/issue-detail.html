@@ -613,7 +613,7 @@
             </paper-card>
         </paper-dialog>
         <transition-required-modal id="transitionRequiredDialog"></transition-required-modal>
-        <confirm-modal id="confirmDialog"></confirm-modal>
+        <confirm-modal id="confirmModal"></confirm-modal>
         <fields-required-modal id="fieldsRequiredDialog"></fields-required-modal>
         <issue-new-task id="dialogNewTask" item="{{item}}"></issue-new-task>
     </template>
@@ -863,7 +863,7 @@
 					if(self.showFieldsRequiredDialog)
 						self.$.transitionRequiredDialog.openDialog(fieldsTransitions, transitionName, issue, callback);
 					else
-						self.$.confirmDialog.openDialog("Confirmation", text, callback);
+						self.$.confirmModal.openDialog("Confirmation", text, callback);
                     self.showFieldsRequiredDialog = false;
                 },
 

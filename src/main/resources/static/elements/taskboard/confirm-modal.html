@@ -57,7 +57,7 @@
     </style>
 
     <template>
-        <paper-dialog id="confirmModal">
+        <paper-dialog id="confirmPaperDialog">
             <h2>[[title]]</h2>
             <div class="confirmText">[[text]]</div>
             <paper-button id="confirm" class="colorful" on-tap="confirmed" raised>Confirm</paper-button>
@@ -91,14 +91,14 @@
                 },
 
                 closeDialog: function () {
-                    this.$.confirmModal.close();
+                    this.$.confirmPaperDialog.close();
                 },
 
                 openDialog: function (title, text, callback) {
                     this.title = title;
                     this.text = text;
                     this.callback = callback;
-                    this.$.confirmModal.toggle();
+                    this.$.confirmPaperDialog.toggle();
                 }
 
             });

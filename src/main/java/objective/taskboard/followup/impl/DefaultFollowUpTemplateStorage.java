@@ -41,7 +41,7 @@ import java.util.zip.ZipInputStream;
 @Service
 public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
 
-    private Path templateRoot = Paths.get("uploaded-templates");
+    private Path templateRoot = Paths.get("data/uploaded-templates");
 
     @Autowired
     private UpdateFollowUpService updateFollowUpService;

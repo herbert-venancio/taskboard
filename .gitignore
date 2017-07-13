@@ -19,4 +19,4 @@ application-liferay.yaml
 application-uat.properties
 application-uat.yml
 testbed
-uploaded-templates
+data/uploaded-templates

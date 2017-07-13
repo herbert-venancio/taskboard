@@ -53,30 +53,33 @@
                    url="/api/templates"
                    content-type='application/json'
                    last-response="{{templates}}"></iron-ajax>
-        <confirm-modal id="confirmModal"></confirm-modal>
-        <alert-modal id="alertModal"></alert-modal>
+        <confirm-modal id="confirmationModal"></confirm-modal>
+        <alert-modal id="alertModalTemplate"></alert-modal>
         <wrap-modal id="modal" title="Upload followup template">
             <div class="modal-content">
                 <paper-listbox id="templates" class="template-list scroll" selected="0">
-                    <paper-item on-tap="selectNewTemplate"><iron-icon icon="add"></iron-icon> New Template</paper-item>
+                    <paper-item id="newTemplateItem" on-tap="selectNewTemplate">
+                        <iron-icon icon="add"></iron-icon> New Template
+                    </paper-item>
                     <template is="dom-repeat" items="{{templates}}">
-                        <paper-item on-tap="selectTemplate" role="option">{{item.name}}</paper-item>
+                        <paper-item class="template-item" on-tap="selectTemplate" role="option">{{item.name}}</paper-item>
                     </template>
                 </paper-listbox>
                 <div class="template-form">
                     <form>
-                        <paper-input label="Template name:" value="{{templateSelected.name}}"></paper-input>
+                        <paper-input id="templateNameInputl" label="Template name:" value="{{templateSelected.name}}">
+                        </paper-input>
                         <div class="projects-list scroll" id="listOfProjects">
                             <template is="dom-repeat" items="{{templateSelected.projects}}">
                                 <paper-checkbox checked="{{item.checked}}">{{item.projectKey}}</paper-checkbox><br>
                             </template>
                         </div>     
                         <div class='input-wrap'>
-                            <label for="input-template">
+                            <label for="inputTemplate">
                                 <iron-icon icon="file-upload"></iron-icon>
                                 Browse Template
                             </label>
-                            <input on-change="_onFileSelected" id="input-template" type="file" accept=".xlsm" />
+                            <input on-change="_onFileSelected" id="inputTemplate" type="file" accept=".xlsm" />
                             <span>{{fileName}}</span>
                         </div>
                     </form>
@@ -85,15 +88,15 @@
             <div class="modal-footer">
                 <paper-spinner active hidden$="{{!showLoadingSpinner}}">...</paper-spinner>
                 <template is="dom-if" if="{{isNewTemplateSelected}}">
-                    <paper-button id="generate" raised class="colorful" title="Generate Report" on-tap="createTemplate">
+                    <paper-button id="createTemplate" raised class="colorful" title="Create Template" on-tap="createTemplate">
                         Create
                     </paper-button>
                 </template>
                 <template is="dom-if" if="{{!isNewTemplateSelected}}">
-                    <paper-button id="generate" raised title="Generate Report" on-tap="deleteTemplate">
+                    <paper-button id="deleteTemplate" raised title="Delete Template" on-tap="deleteTemplate">
                         Delete
                     </paper-button>
-                    <paper-button id="generate" raised class="colorful" title="Generate Report" on-tap="updateTemplate">
+                    <paper-button id="updateTemplate" raised class="colorful" title="Update Template" on-tap="updateTemplate">
                         Update
                     </paper-button>
                 </template>
@@ -164,7 +167,7 @@
                         });
                 	}
                 	var text = "Do you want to delete this Template?"
-                	this.$.confirmModal.openDialog("Confirmation", text, callback);
+                	this.$.confirmationModal.openDialog("Confirmation", text, callback);
                 },
                 
                 updateTemplate: function() {
@@ -173,7 +176,7 @@
                 		return;
                 	
                 	var text = "Do you want to update this Template?"
-                	this.$.confirmModal.openDialog("Confirmation", text, function() {
+                	this.$.confirmationModal.openDialog("Confirmation", text, function() {
                 		self.showLoading(true);
                 		$.ajax({
                             url: 'api/templates/' + self.templateSelected.id,
@@ -239,13 +242,12 @@
                 },
                 
                 isValid: function() {
+                	var projectsChecked = this.templateSelected.projects.filter(function(p){return p.checked});
                 	var fileWasNotUploadedIfIsANewTemplate = this.isNewTemplateSelected ? !this.fileData : false;
-                	if (fileWasNotUploadedIfIsANewTemplate || 
-                		!this.templateSelected.name || 
-                		!this.templateSelected.projects ||
-                		this.templateSelected.projects.length == 0) {
-                		this.$.alertModal.open("Template not ok!",
-                		"Make sure the name is not empty, at least one project has been selected, and that the template file has been uploaded.");
+                	if (fileWasNotUploadedIfIsANewTemplate || projectsChecked.length == 0 ||!this.templateSelected.name) {
+                		this.$.alertModalTemplate.open("Template not ok!",
+                		"Make sure the name is not empty, at least one project has been selected, "+
+                		"and that the template file has been uploaded.");
                 		return false;
                 	}
                 	
@@ -272,9 +274,9 @@
                 	self.showLoading(false);
                 	if  (jqXHR && jqXHR.responseText) {
                 		var responseError = JSON.parse(jqXHR.responseText);
-                		self.$.alertModal.open("Error", responseError.message);
+                		self.$.alertModalTemplate.open("Error", responseError.message);
                 	} else {
-                    	self.$.alertModal.open("Error", "The request has failed");
+                    	self.$.alertModalTemplate.open("Error", "The request has failed");
                 	}
                 },
                 
@@ -286,7 +288,7 @@
                 	
                 	this.fileName = fileName;
                 	this.fileData = event.target.files[0];
-                	$("#input-template").val('');
+                	$("#inputTemplate").val('');
                 },
                 
                 _handleProjectsResponse: function() {
@@ -318,6 +320,8 @@
                 open: function () {
                 	this.newTemplate = {};
                 	this.projects = [];
+                	this.fileData = null;
+                	this.fileName = '';
                 	this.showLoading(true);
                 	this.$.ajaxProjects.generateRequest();
                     this.$.modal.open();

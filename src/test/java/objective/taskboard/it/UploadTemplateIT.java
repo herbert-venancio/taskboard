@@ -82,8 +82,6 @@ public class UploadTemplateIT extends AbstractIntegrationTest {
         assertThat(response.getStatusLine().getStatusCode(), not(200));
     }
 
-    // ---
-
     private static Header[] doLogin(HttpClient client) throws URISyntaxException, IOException {
         HttpPost post = new HttpPost();
         post.setURI(new URI("http://localhost:8900/login"));
