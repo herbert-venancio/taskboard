@@ -138,12 +138,6 @@
             margin: 0;
         }
 
-        .line-clamp {
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-        }
-
         .issue-size {
             text-align: left;
             font-size: 15px;
@@ -258,7 +252,7 @@
 	            </template>
 	
 	            <div class="top">
-	                <div class="module line-clamp"><p>{{item.summary}}</p></div>
+                    <div class="module"><p>{{getEllipsis(item.summary)}}</p></div>
 	            </div>
 	
 	            <div class="bottom">
@@ -325,7 +319,7 @@
                     		return;
                         
                         self.highlightChangedIssue();
-                   	})
+                    });
                 },
                 
                 itemChanged: function() {
@@ -377,10 +371,6 @@
                     return issue.typeIconUri.replace('xsmall', 'medium');
                 },
 
-                openJira: function (event) {
-                    event.stopPropagation();
-                    window.open(window.urlJira + '/browse/' + this.item.issueKey, '_blank');
-                },
                 openJira: function (event) {
                 	event.stopPropagation();
                 	var issueKey = event.target.getAttribute('data-issue-key');
@@ -457,6 +447,10 @@
 
                 getStatusName: function(statusId) {
                     return taskboard.getStatusName(statusId);
+                },
+
+                getEllipsis: function(string) {
+                    return string.length > 60 ? string.substring(0, 60) + "..." : string;
                 }
             });
             
