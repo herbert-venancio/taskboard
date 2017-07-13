@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,6 +85,8 @@ public class JiraService {
         log.debug("⬣⬣⬣⬣⬣  authenticate");
         try {
             Request<ServerInfo> request = client -> client.getMetadataClient().getServerInfo();
+            if (StringUtils.isEmpty(password))
+                throw new AccessDeniedException("The password can't be empty");
             ServerInfo info = jiraEndpoint.executeRequest(username, password, request);
             if (info == null)
                 throw new RuntimeException("The server did not respond");
