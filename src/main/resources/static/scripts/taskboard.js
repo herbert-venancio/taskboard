@@ -294,6 +294,11 @@ function Taskboard() {
             stompClient.subscribe('/issues/updates', function (issues) {
             	handleIssueUpdate(taskboardHome, issues)
             });
+            stompClient.subscribe('/cache-state/updates', function (response) {
+                taskboardHome.fire("iron-signal", {name:"issue-cache-state-updated", data:{
+                    newstate: JSON.parse(response.body)
+                }})
+            });
         });
     }
     

@@ -31,6 +31,11 @@ node("heavy-memory") {
                     archiveArtifacts artifacts: 'target/test-attachments/**', fingerprint: true, allowEmptyArchive: true
                     junit testResults: 'target/surefire-reports/*.xml', testDataPublishers: [[$class: 'AttachmentPublisher']], allowEmptyResults: true
                     junit testResults: 'target/failsafe-reports/*.xml', testDataPublishers: [[$class: 'AttachmentPublisher']], allowEmptyResults: true
+                    try {
+                        killLeakedProcesses()
+                    } catch(e) {
+                        // ignore kill errors
+                    }
                 }
             }
             stage('Sonar') {
@@ -110,4 +115,15 @@ def addDownloadBadge(downloadUrl) {
 
 def updateReleaseLinkInDescription(downloadUrl) {
     manager.build.project.description = "<a href='${downloadUrl}'>Latest released artifact</a>"
+}
+
+def killLeakedProcesses() {
+    def TestMainPID = sh ( script: "ps eaux | grep objective.taskboard.TestMain | grep BUILD_URL=${env.BUILD_URL} | awk '{print \$2}'", returnStdout: true)
+    if (TestMainPID) {
+        sh "kill -9 ${TestMainPID} || true"
+    }
+    def FirefoxPID = sh ( script: "ps aux | grep firefox | grep ${env.WORKSPACE} | awk '{print \$2}')", returnStdout: true)
+    if (FirefoxPID) {
+        sh "kill -9 ${FirefoxPID} || true"
+    }
 }

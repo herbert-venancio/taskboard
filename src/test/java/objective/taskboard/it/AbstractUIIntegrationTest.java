@@ -21,7 +21,6 @@
 package objective.taskboard.it;
 
 import java.io.File;
-import java.util.concurrent.ExecutionException;
 
 import org.junit.After;
 import org.junit.Rule;
@@ -37,7 +36,7 @@ import com.safaribooks.junitattachments.RecordAttachmentRule;
 public abstract class AbstractUIIntegrationTest extends AbstractIntegrationTest {
     protected WebDriver webDriver;
 
-    public void setup() throws InterruptedException, ExecutionException {
+    public void setup() {
         if (System.getProperty("webdriver.gecko.driver") == null)
             System.setProperty("webdriver.gecko.driver", "drivers/linux/marionette/64bit/geckodriver");
         
