@@ -31,7 +31,11 @@ node("heavy-memory") {
                     archiveArtifacts artifacts: 'target/test-attachments/**', fingerprint: true, allowEmptyArchive: true
                     junit testResults: 'target/surefire-reports/*.xml', testDataPublishers: [[$class: 'AttachmentPublisher']], allowEmptyResults: true
                     junit testResults: 'target/failsafe-reports/*.xml', testDataPublishers: [[$class: 'AttachmentPublisher']], allowEmptyResults: true
-                    killLeakedProcesses()
+                    try {
+                        killLeakedProcesses()
+                    } catch(e) {
+                        // ignore kill errors
+                    }
                 }
             }
             stage('Sonar') {
