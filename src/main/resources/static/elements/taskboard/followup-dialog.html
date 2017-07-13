@@ -166,6 +166,11 @@
             width: 100%;
             background-color: white;
         }
+        
+        .set-template-link {
+            text-decoration: underline;
+            cursor: pointer;
+        }
     </style>
 
     <template>
@@ -227,8 +232,11 @@
                 </div>
                 
                 <div class="warn-box" hidden$={{!showNoTemplatesFoundWarning}}>
-                    No templates found <br />
-                    <small>Upload a template selecting those projects</small>
+                    Set a template<br />
+                    <small>
+                        <span class="set-template-link" on-tap="openTemplateFollowupDialog">Click here</span> 
+                        and set a template <br /> with this match of projects
+                    </small>
                 </div>
 
                 <div class="custom-footer">
@@ -292,6 +300,11 @@
                     // force polymer to recognize the model change
                     this.projects = JSON.parse(JSON.stringify(this.projects))
                     this.filterTemplates();
+                },
+                
+                openTemplateFollowupDialog: function() {
+                	this.close();
+                	this.fire('iron-signal', {name: 'open-template-followup-modal'})
                 },
                 
                 filterTemplates: function() {
