@@ -116,10 +116,10 @@ def updateReleaseLinkInDescription(downloadUrl) {
 def killLeakedProcesses() {
     def TestMainPID = sh ( script: "ps eaux | grep objective.taskboard.TestMain | grep BUILD_URL=${env.BUILD_URL} | awk '{print \$2}'", returnStdout: true)
     if (TestMainPID) {
-        sh "kill -9 ${TestMainPID} | true"
+        sh "kill -9 ${TestMainPID} || true"
     }
     def FirefoxPID = sh ( script: "ps aux | grep firefox | grep ${env.WORKSPACE} | awk '{print \$2}')", returnStdout: true)
     if (FirefoxPID) {
-        sh "kill -9 ${FirefoxPID} | true"
+        sh "kill -9 ${FirefoxPID} || true"
     }
 }
