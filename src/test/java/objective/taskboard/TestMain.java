@@ -40,7 +40,7 @@ public class TestMain {
         TransactionAwareDataSourceProxy transactionAwareDataSourceProxy = new TransactionAwareDataSourceProxy();
         SingleConnectionDataSource singleConn = new SingleConnectionDataSource();
         if (System.getProperty("taskboard.TestMain.traceH2Driver", "false").equals("true"))
-            singleConn.setUrl("jdbc:h2-no-commit:file:./db2;trace_level_file=3")
+            singleConn.setUrl("jdbc:h2-no-commit:file:./db2;trace_level_file=3");
         else
             singleConn.setUrl("jdbc:h2-no-commit:file:./db2");
         singleConn.setDriverClassName(H2DriverNoCommit.class.getName());
