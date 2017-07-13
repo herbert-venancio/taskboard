@@ -105,6 +105,11 @@ public class DefaultTemplateService implements TemplateService{
         return templateRepository.findByName(templateName);
     }
     
+    @Override
+    public Template getTemplate(Long id) {
+        return templateRepository.findById(id);
+    }
+    
     private Template findATemplateOnlyMatchedWithThisProjectKey(List<String> projectKeys) {
         if (projectKeys.size() != 1)
             return null;

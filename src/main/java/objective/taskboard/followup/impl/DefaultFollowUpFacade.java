@@ -97,6 +97,8 @@ public class DefaultFollowUpFacade implements FollowUpFacade {
     }
     
     public void deleteTemplate(Long id) throws IOException {
+        Template template = templateService.getTemplate(id);
+        followUpTemplateStorage.deleteFile(template.getPath());
         templateService.deleteTemplate(id);
     }
     

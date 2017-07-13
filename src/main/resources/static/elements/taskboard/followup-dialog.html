@@ -212,16 +212,14 @@
                         </div>
                     </div>
                     <div class="content-row">
-                        <template is="dom-if" if="{{areTemplatesAvailable}}">
-                            <paper-dropdown-menu class="templates-followup-dropdown" name="template" label="Template Type"
-                                                 selected-item="{{template}}">
-                                <paper-menu id="templateType" class="dropdown-content" selected="{{selectedItem}}">
-                                    <template is="dom-repeat" id="templates" items="{{availableTemplates}}">
-                                        <paper-item value="{{item.name}}">{{item.name}}</paper-item>
-                                    </template>
-                                </paper-menu>
-                            </paper-dropdown-menu>
-                        </template>
+                        <paper-dropdown-menu class="templates-followup-dropdown" hidden$={{!showTemplatesCombo}}
+                            name="template" always-float-label label="Template" selected-item="{{template}}">
+                            <paper-menu id="templateType" class="dropdown-content" selected="{{selectedItem}}">
+                                <template is="dom-repeat" id="templates" items="{{availableTemplates}}">
+                                    <paper-item value="{{item.name}}">{{item.name}}</paper-item>
+                                </template>
+                            </paper-menu>
+                        </paper-dropdown-menu>
                     </div>
 
                     <div class="error-message" hidden$="{{!errorMessage}}">{{errorMessage}}</div>
@@ -264,7 +262,7 @@
                     template: {
                         type: String
                     },
-                    areTemplatesAvailable: {
+                    showTemplatesCombo: {
                     	type: Boolean
                     },
                     showNoTemplatesFoundWarning: {
@@ -279,7 +277,7 @@
                     this.templates = [];
                 	this.$.ajaxTemplates.generateRequest();
                     this.$.modal.open();
-                    this.areTemplatesAvailable = false;
+                    this.showTemplatesCombo = false;
                     this.showNoTemplatesFoundWarning = false;
                 },
                 
@@ -307,12 +305,13 @@
                             && _.every(t.projects, function(proj) { return _.contains(selectedProjects, proj); } ) )
                             templates.push(t);
                     });
-
+					
                     this.availableTemplates = templates;
-                    this.areTemplatesAvailable = this.availableTemplates.length != 0;
-                    this.showNoTemplatesFoundWarning = !this.areTemplatesAvailable && selectedProjects.length > 0;
+                    var areTemplatesAvailable = this.availableTemplates && this.availableTemplates.length != 0;
+                    this.showTemplatesCombo = this.availableTemplates.length > 1;
+                    this.showNoTemplatesFoundWarning = !areTemplatesAvailable && selectedProjects.length > 0;
                     
-                    if (this.areTemplatesAvailable) 
+                    if (areTemplatesAvailable) 
                     	this.selectedItem = 0;
                     
                     // update combo selection if old selection became invalid

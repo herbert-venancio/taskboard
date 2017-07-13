@@ -31,5 +31,6 @@ public interface TemplateRepository extends JpaRepository<Template, Long>{
     List<Template> findTemplatesForProjectKeys(List<String> projectKeys);
     List<Template> findTemplatesWithProjectKey(String projectKeys);
     Template findByName(String templateName);
+    Template findById(Long id);
 
 }

@@ -55,7 +55,7 @@
                    last-response="{{templates}}"></iron-ajax>
         <confirm-modal id="confirmationModal"></confirm-modal>
         <alert-modal id="alertModalTemplate"></alert-modal>
-        <wrap-modal id="modal" title="Upload followup template">
+        <wrap-modal id="modal" title="Followup Template">
             <div class="modal-content">
                 <paper-listbox id="templates" class="template-list scroll" selected="0">
                     <paper-item id="newTemplateItem" on-tap="selectNewTemplate">
@@ -67,7 +67,7 @@
                 </paper-listbox>
                 <div class="template-form">
                     <form>
-                        <paper-input id="templateNameInputl" label="Template name:" value="{{templateSelected.name}}">
+                        <paper-input id="templateNameInputl" always-float-label label="Template name" value="{{templateSelected.name}}">
                         </paper-input>
                         <div class="projects-list scroll" id="listOfProjects">
                             <template is="dom-repeat" items="{{templateSelected.projects}}">

@@ -33,4 +33,5 @@ public interface TemplateService {
     List<Template> findTemplatesForProjectKeys(List<String> projectKeys);
 
     Template getTemplate(String templateName);
+    Template getTemplate(Long id);
 }
