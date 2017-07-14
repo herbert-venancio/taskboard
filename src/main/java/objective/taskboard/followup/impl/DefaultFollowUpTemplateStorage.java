@@ -81,7 +81,8 @@ public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
     @Override
     public String storeTemplate(InputStream stream, FollowUpTemplateValidator validator) throws IOException {
         if(!Files.exists(templateRoot))
-            Files.createDirectory(templateRoot);
+            Files.createDirectories(templateRoot);
+        
         Path pathFollowup = Files.createTempDirectory(templateRoot, "Followup");
         Path tempFolder = decompressTemplate(pathFollowup, stream);
         try {
