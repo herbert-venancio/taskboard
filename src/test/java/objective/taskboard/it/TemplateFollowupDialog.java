@@ -44,7 +44,7 @@ public class TemplateFollowupDialog extends AbstractUiFragment {
     private final String DEFAUT_ERROR_MESSAGE = "Make sure the name is not empty, at least one project has been selected, " + 
             "and that the template file has been uploaded.";
     
-    @FindBy(id="template-followup-button")
+    @FindBy(css=".template-followup-button")
     private WebElement teplateFollowupButton;
     
     @FindBy(id="followupCrudModal")
@@ -65,7 +65,7 @@ public class TemplateFollowupDialog extends AbstractUiFragment {
         return this;
     }
     
-    private TemplateFollowupDialog close() {
+    public TemplateFollowupDialog close() {
         dialog.findElement(By.cssSelector(".button-close")).click();
         return this;
     }
@@ -103,7 +103,7 @@ public class TemplateFollowupDialog extends AbstractUiFragment {
         return this;
     }
     
-    public TemplateFollowupDialog createATemplate() {
+    public TemplateFollowupDialog createATemplate(Integer projectIndex) {
         String templateName = "Template Success Test";
         File file = null;
         
@@ -117,7 +117,7 @@ public class TemplateFollowupDialog extends AbstractUiFragment {
         open();
         newTemplateItem.click();
         templateNameInput.sendKeys(templateName);
-        projectsCheckbox.get(1).click();
+        projectsCheckbox.get(projectIndex).click();
         templateFileInput.sendKeys(file.toString());
         createButton.click();
         

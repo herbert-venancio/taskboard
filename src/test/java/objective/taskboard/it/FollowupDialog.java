@@ -24,6 +24,7 @@ package objective.taskboard.it;
 import static org.openqa.selenium.support.PageFactory.initElements;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -33,7 +34,7 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class FollowupDialog extends AbstractUiFragment {
-    private WebElement toggleCheckbox;
+    private WebElement generateButton;
     
     @FindBy(css=".followup-button")
     private WebElement followupButton;
@@ -49,7 +50,38 @@ public class FollowupDialog extends AbstractUiFragment {
     private FollowupDialog open() {
         followupButton.click();
         waitVisibilityOfElement(dialog);
-        toggleCheckbox = dialog.findElement(By.id("toggleAll"));
+        generateButton = dialog.findElement(By.id("generate"));
+        return this;
+    }
+    
+    public FollowupDialog selectAProject(int projectIndex) {
+        List<WebElement> projectsCheckbox = dialog.findElements(By.cssSelector("paper-checkbox"));
+        projectsCheckbox.get(projectIndex).click();
+        return this;
+    }
+    
+    public FollowupDialog assertGenerateButtonIsDisabled() {
+        waitUntil(new ExpectedCondition<Boolean>() {
+            @Override
+            public Boolean apply(WebDriver input) {
+                return generateButton.getAttribute("disabled") != null; 
+            }
+        });
+        return this;
+    }
+    
+    public FollowupDialog assertGenerateButtonIsEnabled() {
+        waitUntil(new ExpectedCondition<Boolean>() {
+            @Override
+            public Boolean apply(WebDriver input) {
+                return generateButton.getAttribute("disabled") == null; 
+            }
+        });
+        return this;
+    }
+    
+    public FollowupDialog close() {
+        dialog.findElement(By.cssSelector(".buttonClose")).click();
         return this;
     }
 
@@ -57,23 +89,5 @@ public class FollowupDialog extends AbstractUiFragment {
         super(driver);
     }
 
-    public FollowupDialog toggleCheckAll() {
-        toggleCheckbox.click();
-        waitUntil(ExpectedConditions.attributeToBe(toggleCheckbox, "checked", "true"));
-        return this;
-    }
-
-    public FollowupDialog assertAllChecked() {
-        final WebElement listOfProjects = dialog.findElement(By.cssSelector(".followup-dialog #listOfProjects"));
-        waitUntil(new ExpectedCondition<Boolean>() {
-            @Override
-            public Boolean apply(WebDriver input) {
-                List<WebElement> projectCheckBoxes = listOfProjects.findElements(By.cssSelector("paper-checkbox"));
-                List<WebElement> checkedProjects = listOfProjects.findElements(By.cssSelector("paper-checkbox[aria-checked='true']"));
-                return projectCheckBoxes.size() == checkedProjects.size(); 
-            }
-        });
-        return this;
-    }
 
 }

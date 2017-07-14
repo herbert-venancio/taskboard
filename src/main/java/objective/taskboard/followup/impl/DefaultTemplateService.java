@@ -43,8 +43,7 @@ public class DefaultTemplateService implements TemplateService{
     private TemplateRepository templateRepository;
 
     @Override
-    public void saveTemplate(String templateName, String projects, String path) {
-        List<String> projectKeys = Arrays.asList(projects.split(","));
+    public void saveTemplate(String templateName, List<String> projectKeys, String path) {
         List<ProjectFilterConfiguration> associatedProjects = findAssociatedProjects(projectKeys);
         
         Template template = new Template();
@@ -52,12 +51,6 @@ public class DefaultTemplateService implements TemplateService{
         template.setPath(path);
         template.setProjects(associatedProjects);
 
-        if (getTemplate(template.getName()) != null)
-            throw new RuntimeException("This template name is already in use");
-        
-        if (findATemplateOnlyMatchedWithThisProjectKey(projectKeys) != null)
-            throw new RuntimeException("This match of projects is already used by other template");
-        
         templateRepository.save(template);
     }
     
@@ -110,7 +103,7 @@ public class DefaultTemplateService implements TemplateService{
         return templateRepository.findById(id);
     }
     
-    private Template findATemplateOnlyMatchedWithThisProjectKey(List<String> projectKeys) {
+    public Template findATemplateOnlyMatchedWithThisProjectKey(List<String> projectKeys) {
         if (projectKeys.size() != 1)
             return null;
         

@@ -45,7 +45,7 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
                 "TASKB-686"
                 );
         
-        mainPage.issue("TASKB-643").dragToPlaceAfter("TASKB-625");
+        mainPage.issue("TASKB-643").dragOver("TASKB-627");
         
         operational.boardStep("To Do").assertIssueList(
                 "TASKB-625",

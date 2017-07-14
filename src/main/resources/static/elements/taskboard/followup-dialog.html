@@ -81,11 +81,7 @@
         	box-shadow: none !important;
         }
 
-        paper-button.colorful {
-            color: #4285f4;
-        }
-
-        paper-button[raised].colorful {
+        paper-button {
             background: #4285f4;
             color: #fff;
         }
@@ -124,6 +120,8 @@
         }
 
         .buttonClose {
+            background: #fff;
+            color: #000;
         	min-width: auto;
             display: inline;
             padding: 0;
@@ -156,6 +154,7 @@
             padding: 10px;
             margin: 20px 0;
             color: #904506;
+            max-width: 250px;
         }
         
         .scroll {
@@ -207,9 +206,6 @@
                         Select the projects to include in the report:
                     </div>
                     <div class="content-row">
-                        <paper-checkbox id='toggleAll' on-change='toggleSelectAll'>Select/Deselect all</paper-checkbox>
-                    </div>
-                    <div class="content-row">
                         <div class="scroll" id="listOfProjects">
                             <template is="dom-repeat" items="{{projects}}">
                                 <paper-checkbox checked="{{item.checked}}" on-change='filterTemplates'>{{item.projectKey}}</paper-checkbox><br>
@@ -232,10 +228,11 @@
                 </div>
                 
                 <div class="warn-box" hidden$={{!showNoTemplatesFoundWarning}}>
-                    Set a template<br />
+                    No matching template<br />
                     <small>
+                        Could not find a template for the selected set of projects.
                         <span class="set-template-link" on-tap="openTemplateFollowupDialog">Click here</span> 
-                        and set a template <br /> with this match of projects
+                        to create a template
                     </small>
                 </div>
 
@@ -243,7 +240,8 @@
 
                     <div class="custom-footer-buttons">
 
-                        <paper-button id="generate" raised class="colorful" on-tap="downloadFollowup" title="Generate Report">
+                        <paper-button id="generate" raised class="colorful" disabled="{{disableGenerateButton}}"
+                            on-tap="downloadFollowup" title="Generate Report">
                             Generate Report
                         </paper-button>
 
@@ -275,11 +273,13 @@
                     },
                     showNoTemplatesFoundWarning: {
                     	type: Boolean
+                    },
+                    disableGenerateButton: {
+                    	type: Boolean
                     }
                 },
                 
                 opendialog: function () {
-                    toggleAll.checked = false;
                     this.projects = [];
                     this.$.ajaxProjects.generateRequest();
                     this.templates = [];
@@ -287,19 +287,11 @@
                     this.$.modal.open();
                     this.showTemplatesCombo = false;
                     this.showNoTemplatesFoundWarning = false;
+                    this.disableGenerateButton = true;
                 },
                 
                 close: function() {
                     this.$.modal.close();
-                },
-                
-                toggleSelectAll: function(e) {
-                    this.projects.forEach(function(p, index, array) {
-                        p.checked = e.target.checked;
-                    })
-                    // force polymer to recognize the model change
-                    this.projects = JSON.parse(JSON.stringify(this.projects))
-                    this.filterTemplates();
                 },
                 
                 openTemplateFollowupDialog: function() {
@@ -330,6 +322,8 @@
                     // update combo selection if old selection became invalid
                     if ( oldSelection && ! _.contains(templates, oldSelection.value) )
                         this.selectedItem = -1;
+                    
+                    this.disableGenerateButton = !areTemplatesAvailable || this.selectedItem == -1;
                 },
                 
                 filterSelectedProjects: function() {

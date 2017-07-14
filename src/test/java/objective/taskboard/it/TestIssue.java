@@ -74,10 +74,10 @@ class TestIssue extends AbstractUiFragment {
         waitVisibilityOfElement(assignee1);
     }
 
-    public void dragToPlaceAfter(String targetKey) {
+    public void dragOver(String targetKey) {
         waitVisibilityOfElement(issueElement);
         Actions actions = new Actions(webDriver);
-        WebElement targetIssue = TestIssue.forKey(webDriver, targetKey).issueElement;
+        WebElement targetIssue = TestIssue.forKey(webDriver, targetKey).issueElement.findElement(By.className("module"));
         waitVisibilityOfElement(targetIssue);
         actions
             .clickAndHold(issueElement)
