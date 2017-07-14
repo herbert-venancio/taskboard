@@ -24,8 +24,10 @@ node("heavy-memory") {
         try {
             stage('Build') {
                 try {
-                    wrap([$class: 'Xvnc']) {
-                        sh "${mvnHome}/bin/mvn --batch-mode -V -U clean verify -P packaging-war,dev"
+                    timeout(time: 10, unit: TimeUnit.MINUTES) {
+                        wrap([$class: 'Xvnc']) {
+                            sh "${mvnHome}/bin/mvn --batch-mode -V -U clean verify -P packaging-war,dev"
+                        }
                     }
                 } finally {
                     archiveArtifacts artifacts: 'target/test-attachments/**', fingerprint: true, allowEmptyArchive: true
