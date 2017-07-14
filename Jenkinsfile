@@ -47,7 +47,7 @@ node("heavy-memory") {
 
                 def SONAR_URL = env.SONARQUBE_URL
                 if (BRANCH_NAME == 'master') {
-                    sh "${mvnHome}/bin/mvn --batch-mode -V sonar:sonar -Dsonar.host.url=${SONAR_URL}"
+                    sh "${mvnHome}/bin/mvn --batch-mode -V sonar:sonar -Dsonar.host.url=${SONAR_URL} -Dsonar.buildbreaker.skip=true"
                 } else if (isPullRequest()) {
                     withCredentials([string(credentialsId: 'TASKBOARD_SDLC_SONAR', variable: 'GITHUB_OAUTH')]) {
                         def PR_ID = env.CHANGE_ID
