@@ -23,12 +23,17 @@ package objective.taskboard.followup;
 
 import objective.taskboard.followup.data.Template;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface TemplateService {
-    void saveTemplate(String templateName, String projects, String path);
+    void saveTemplate(String templateName, List<String> projectKeys, String path) throws IOException;
+    void updateTemplate(Long id, String templateName, String projects, String path);
+    void deleteTemplate(Long id);
 
     List<Template> findTemplatesForProjectKeys(List<String> projectKeys);
 
     Template getTemplate(String templateName);
+    Template getTemplate(Long id);
+    Template findATemplateOnlyMatchedWithThisProjectKey(List<String> projectKeys);
 }

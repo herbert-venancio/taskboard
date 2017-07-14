@@ -133,6 +133,10 @@ public class MainPage extends AbstractUiFragment {
     public FollowupDialog openFollowUp() {
         return FollowupDialog.open(webDriver);
     }
+    
+    public TemplateFollowupDialog openTemplateFollowUpDialog() {
+        return TemplateFollowupDialog.open(webDriver);
+    }
 
     public LaneFragment lane(String laneName) {
         return LaneFragment.laneName(webDriver, laneName);

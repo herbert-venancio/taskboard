@@ -33,7 +33,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -89,9 +91,34 @@ public class DefaultFollowUpFacade implements FollowUpFacade {
     @Override
     public void createTemplate(String templateName, String projects,
                                MultipartFile file) throws IOException {
+        List<String> projectKeys = Arrays.asList(projects.split(","));
+        
+        if (templateService.getTemplate(templateName) != null)
+            throw new RuntimeException("This template name is already in use");
+        
+        if (templateService.findATemplateOnlyMatchedWithThisProjectKey(projectKeys) != null)
+            throw new RuntimeException("This match of projects is already used by other template");
+        
         String path = followUpTemplateStorage
-                .storeTemplate(file.getInputStream(),
-                        new FollowUpTemplateValidator());
-        templateService.saveTemplate(templateName, projects, path);
+                .storeTemplate(file.getInputStream(), new FollowUpTemplateValidator());
+        
+        templateService.saveTemplate(templateName, projectKeys, path);
+    }
+    
+    public void deleteTemplate(Long id) throws IOException {
+        Template template = templateService.getTemplate(id);
+        followUpTemplateStorage.deleteFile(template.getPath());
+        templateService.deleteTemplate(id);
+    }
+    
+    public void updateTemplate(Long id, String templateName, String projects,
+                               Optional<MultipartFile> file) throws IOException {
+        String path = null;
+        if (file.isPresent())    
+            path = followUpTemplateStorage
+                    .storeTemplate(file.get().getInputStream(),
+                            new FollowUpTemplateValidator());
+        
+        templateService.updateTemplate(id, templateName, projects, path);
     }
 }

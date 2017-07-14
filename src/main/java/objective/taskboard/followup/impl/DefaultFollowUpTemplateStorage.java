@@ -41,7 +41,7 @@ import java.util.zip.ZipInputStream;
 @Service
 public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
 
-    private Path templateRoot = Paths.get("uploaded-templates");
+    private Path templateRoot = Paths.get("data/followup-templates");
 
     @Autowired
     private UpdateFollowUpService updateFollowUpService;
@@ -81,7 +81,8 @@ public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
     @Override
     public String storeTemplate(InputStream stream, FollowUpTemplateValidator validator) throws IOException {
         if(!Files.exists(templateRoot))
-            Files.createDirectory(templateRoot);
+            Files.createDirectories(templateRoot);
+        
         Path pathFollowup = Files.createTempDirectory(templateRoot, "Followup");
         Path tempFolder = decompressTemplate(pathFollowup, stream);
         try {
@@ -97,8 +98,11 @@ public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
         }
         return templateRoot.relativize(pathFollowup).toString();
     }
-
-    // ---
+    
+    public void deleteFile(String templatePath) throws IOException {
+        Path template = templateRoot.resolve(templatePath);
+        FileUtils.deleteQuietly(template.toFile());
+    }
 
     private static Path resolve(String resourceName) {
         try {

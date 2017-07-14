@@ -34,7 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.only;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -63,6 +63,6 @@ public class FollowUpFacadeTest {
         MultipartFile file = new MockMultipartFile("file", FollowUpFacadeTest.class.getResourceAsStream("OkFollowupTemplate.xlsm"));
         followUpFacade.createTemplate(templateName, projects, file);
 
-        verify(templateService, only()).saveTemplate(any(), any(), any());
+        verify(templateService, atLeastOnce()).saveTemplate(any(), any(), any());
     }
 }

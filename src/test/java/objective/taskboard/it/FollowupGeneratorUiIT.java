@@ -25,11 +25,24 @@ import org.junit.Test;
 
 public class FollowupGeneratorUiIT extends AuthenticatedIntegrationTest {
     @Test
-    public void whenFollowupGeneratorButtonIsClicked_OpenDialogAndTestCheckboxToggleWorks() {
+    public void whenFollowupGeneratorButtonIsClicked_OpenDialogAndTestFollowupGeneratorWorks() {
+        Integer projectIndex = 0;
         MainPage mainPage = MainPage.produce(webDriver);
-        mainPage.
-            openFollowUp().
-            toggleCheckAll().
-            assertAllChecked();
+        mainPage
+            .openFollowUp()
+            .assertGenerateButtonIsDisabled()
+            .selectAProject(projectIndex)
+            .assertGenerateButtonIsDisabled()
+            .close();
+        
+        mainPage
+            .openTemplateFollowUpDialog()
+            .createATemplate(projectIndex)
+            .close();
+        
+        mainPage
+            .openFollowUp()
+            .selectAProject(projectIndex)
+            .assertGenerateButtonIsEnabled();
     }
 }

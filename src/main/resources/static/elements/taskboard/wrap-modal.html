@@ -1,0 +1,131 @@
+<dom-module id="wrap-modal">
+    <style>
+        #modal {
+            background: white;
+            min-width: 300px;
+            margin: 0;
+            display: block;
+            font-family: inherit;
+        }
+        
+        .card-custom {
+            background: transparent;
+            width: 100%;
+            min-height: 150px;
+            padding: 20px;
+            margin: 0;
+        }
+        
+        .card-header-custom {
+            width: 100%;
+            margin-bottom: 30px;
+            font-size: 24px;
+            display: flex;
+        }
+        
+        .card-header-info {
+            flex: 1;
+        }
+        
+        .card-header-breadcrumb {
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+        
+        .button-close {
+            min-width: auto;
+            display: inline;
+            padding: 0;
+            margin: 0;
+            margin-left: auto;
+        }
+        
+        ::content paper-material, ::content paper-button {
+            box-shadow: none !important;
+        }
+        
+
+        ::content paper-spinner[aria-hidden=true] {
+            display: none;
+        }
+        
+        ::content .modal-footer {
+            display: flex;
+            float: right;
+            margin-top: 20px;
+        }
+        
+        ::content label {
+            cursor: pointer;
+        }
+        
+        ::content .modal-content {
+            margin-top: -35px;
+            display: flex;
+        }
+        
+        ::content paper-button.colorful {
+            color: #4285f4;
+        }
+        
+        ::content .modal-footer paper-button[raised].colorful {
+            background: #4285f4;
+            color: #fff;
+        }
+        
+        ::content .modal-footer paper-button {
+            margin: 0 5px;
+            text-align: center;
+            padding: 5px 10px;
+            text-transform: none;
+        }
+        
+        ::content .scroll {
+            overflow: auto;
+            overflow-x: hidden;
+            width: 100%;
+            background-color: white;
+        }    
+        
+    </style>
+    <template>
+        <paper-dialog id="modal" entry-animation="scale-up-animation" exit-animation="fade-out-animation" with-backdrop modal>
+            <paper-card class="card-custom">
+                <div class="card-header-custom">
+                    <div class="card-header-info">
+                        <div class="card-header-breadcrumb">
+                            [[title]]
+                        </div>
+                    </div>
+                    <div class="card-header-buttons">
+                        <paper-button class="button-close" on-tap="close" dialog-confirm autofocus>
+                            <iron-icon icon="clear"></iron-icon>
+                        </paper-button>
+                    </div>
+                </div>
+                <content></content>
+            </paper-card>
+        </paper-dialog>
+    </template>
+    <script>
+        (function () {
+            Polymer({
+                is: 'wrap-modal',
+                
+                properties: {
+                    title: {
+                        type: String
+                    }
+                },
+                
+                open: function () {
+                    this.$.modal.open();
+                },
+                
+                close: function() {
+                    this.$.modal.close();
+                }
+            });
+        })();
+    </script>
+</dom-module>

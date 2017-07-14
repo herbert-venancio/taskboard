@@ -81,11 +81,7 @@
         	box-shadow: none !important;
         }
 
-        paper-button.colorful {
-            color: #4285f4;
-        }
-
-        paper-button[raised].colorful {
+        paper-button {
             background: #4285f4;
             color: #fff;
         }
@@ -119,11 +115,13 @@
             color: red;
             font-weight: bold;
             width: 100%;
-            margin-top: -15px;
+            margin-top: 5px;
             margin-bottom: 15px;
         }
 
         .buttonClose {
+            background: #fff;
+            color: #000;
         	min-width: auto;
             display: inline;
             padding: 0;
@@ -151,6 +149,14 @@
 		    display: none;
 		}
         
+        .warn-box {
+            background-color: #fff8c4;
+            padding: 10px;
+            margin: 20px 0;
+            color: #904506;
+            max-width: 250px;
+        }
+        
         .scroll {
             padding: 10px;
             overflow: auto;
@@ -158,6 +164,11 @@
             max-height: 150px;
             width: 100%;
             background-color: white;
+        }
+        
+        .set-template-link {
+            text-decoration: underline;
+            cursor: pointer;
         }
     </style>
 
@@ -195,9 +206,6 @@
                         Select the projects to include in the report:
                     </div>
                     <div class="content-row">
-                        <paper-checkbox id='toggleAll' on-change='toggleSelectAll'>Select/Deselect all</paper-checkbox>
-                    </div>
-                    <div class="content-row">
                         <div class="scroll" id="listOfProjects">
                             <template is="dom-repeat" items="{{projects}}">
                                 <paper-checkbox checked="{{item.checked}}" on-change='filterTemplates'>{{item.projectKey}}</paper-checkbox><br>
@@ -205,9 +213,9 @@
                         </div>
                     </div>
                     <div class="content-row">
-                        <paper-dropdown-menu class="templates-followup-dropdown" id="templateType" name="template" label="Template Type"
-                                             selected-item="{{template}}">
-                            <paper-menu class="dropdown-content" selected="{{selectedItem}}">
+                        <paper-dropdown-menu class="templates-followup-dropdown" hidden$={{!showTemplatesCombo}}
+                            name="template" always-float-label label="Template" selected-item="{{template}}">
+                            <paper-menu id="templateType" class="dropdown-content" selected="{{selectedItem}}">
                                 <template is="dom-repeat" id="templates" items="{{availableTemplates}}">
                                     <paper-item value="{{item.name}}">{{item.name}}</paper-item>
                                 </template>
@@ -216,13 +224,24 @@
                     </div>
 
                     <div class="error-message" hidden$="{{!errorMessage}}">{{errorMessage}}</div>
+
+                </div>
+                
+                <div class="warn-box" hidden$={{!showNoTemplatesFoundWarning}}>
+                    No matching template<br />
+                    <small>
+                        Could not find a template for the selected set of projects.
+                        <span class="set-template-link" on-tap="openTemplateFollowupDialog">Click here</span> 
+                        to create a template
+                    </small>
                 </div>
 
                 <div class="custom-footer">
 
                     <div class="custom-footer-buttons">
 
-                        <paper-button id="generate" raised class="colorful" on-tap="downloadFollowup" title="Generate Report">
+                        <paper-button id="generate" raised class="colorful" disabled="{{disableGenerateButton}}"
+                            on-tap="downloadFollowup" title="Generate Report">
                             Generate Report
                         </paper-button>
 
@@ -248,32 +267,39 @@
                     },
                     template: {
                         type: String
+                    },
+                    showTemplatesCombo: {
+                    	type: Boolean
+                    },
+                    showNoTemplatesFoundWarning: {
+                    	type: Boolean
+                    },
+                    disableGenerateButton: {
+                    	type: Boolean
                     }
                 },
                 
                 opendialog: function () {
-                    toggleAll.checked = false;
                     this.projects = [];
                     this.$.ajaxProjects.generateRequest();
                     this.templates = [];
                 	this.$.ajaxTemplates.generateRequest();
                     this.$.modal.open();
-                    this.filterTemplates();
+                    this.showTemplatesCombo = false;
+                    this.showNoTemplatesFoundWarning = false;
+                    this.disableGenerateButton = true;
                 },
                 
                 close: function() {
                     this.$.modal.close();
                 },
                 
-                toggleSelectAll: function(e) {
-                    this.projects.forEach(function(p, index, array) {
-                        p.checked = e.target.checked;
-                    })
-                    // force polymer to recognize the model change
-                    this.projects = JSON.parse(JSON.stringify(this.projects))
+                openTemplateFollowupDialog: function() {
+                	this.close();
+                	this.fire('iron-signal', {name: 'open-template-followup-modal'})
                 },
-
-                filterTemplates: function(e) {
+                
+                filterTemplates: function() {
                     var selectedProjects = this.filterSelectedProjects();
                     var templates = [];
                     var oldSelection = this.template;
@@ -284,15 +310,25 @@
                             && _.every(t.projects, function(proj) { return _.contains(selectedProjects, proj); } ) )
                             templates.push(t);
                     });
-
+					
                     this.availableTemplates = templates;
+                    var areTemplatesAvailable = this.availableTemplates && this.availableTemplates.length != 0;
+                    this.showTemplatesCombo = this.availableTemplates.length > 1;
+                    this.showNoTemplatesFoundWarning = !areTemplatesAvailable && selectedProjects.length > 0;
+                    
+                    if (areTemplatesAvailable) 
+                    	this.selectedItem = 0;
+                    
                     // update combo selection if old selection became invalid
-                    if ( oldSelection && ! _.contains(templates, oldSelection.value) ) {
+                    if ( oldSelection && ! _.contains(templates, oldSelection.value) )
                         this.selectedItem = -1;
-                    }
+                    
+                    this.disableGenerateButton = !areTemplatesAvailable || this.selectedItem == -1;
                 },
-
+                
                 filterSelectedProjects: function() {
+                	if (!this.projects) return;
+                	
                     var selectedKeys = [];
                     this.projects.forEach(function(p, index) {
                 	    if (p.checked)

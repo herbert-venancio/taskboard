@@ -39,6 +39,7 @@ import org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -141,13 +142,13 @@ public class TemplateServiceTest {
         assertThat(result, hasSize(1));
     }
 
-    // ---
-
     private void repositoryHasTemplateAssociatedWith(String... projectKeys) {
         String templateName = "Test Template";
         String templatePath = "test-path";
-
-        String commaSeparatedProjectKeys = String.join(",", projectKeys);
-        templateService.saveTemplate(templateName, commaSeparatedProjectKeys, templatePath);
+        try {
+            templateService.saveTemplate(templateName, Arrays.asList(projectKeys), templatePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
