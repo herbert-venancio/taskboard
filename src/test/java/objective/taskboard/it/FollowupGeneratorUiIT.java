@@ -25,8 +25,8 @@ import org.junit.Test;
 
 public class FollowupGeneratorUiIT extends AuthenticatedIntegrationTest {
     @Test
-    public void whenFollowupGeneratorButtonIsClicked_OpenDialogAndTestCheckboxToggleWorks() {
-        Integer projectIndex = 1;
+    public void whenFollowupGeneratorButtonIsClicked_OpenDialogAndTestFollowupGeneratorWorks() {
+        Integer projectIndex = 0;
         MainPage mainPage = MainPage.produce(webDriver);
         mainPage
             .openFollowUp()
