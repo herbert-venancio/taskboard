@@ -7,8 +7,8 @@ CREATE TABLE template (
 );
 
 CREATE TABLE template_project (
-    TemplateId NUMBER NOT NULL,
-    ProjectId VARCHAR2(255) NOT NULL,
-    CONSTRAINT templateId_fk FOREIGN KEY (TemplateId) REFERENCES template (id),
-    CONSTRAINT projectId_fk FOREIGN KEY (ProjectId) REFERENCES project_filter_configuration (project_key)
+    template_id NUMBER NOT NULL,
+    project_key VARCHAR2(255) NOT NULL,
+    CONSTRAINT tp_template_fk FOREIGN KEY (template_id) REFERENCES template (id),
+    CONSTRAINT tp_project_fk FOREIGN KEY (project_key) REFERENCES project_filter_configuration (project_key)
 );

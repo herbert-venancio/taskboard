@@ -43,9 +43,9 @@ public class Template {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "TEMPLATE_PROJECT",
-                joinColumns = { @JoinColumn(name = "TemplateId",
+                joinColumns = { @JoinColumn(name = "template_id", referencedColumnName = "id",
                         nullable = false, updatable = false) },
-                inverseJoinColumns = { @JoinColumn(name = "ProjectId",
+                inverseJoinColumns = { @JoinColumn(name = "project_key", referencedColumnName = "projectKey",
                         nullable = false, updatable = false) })
     private List<ProjectFilterConfiguration> projects;
 
