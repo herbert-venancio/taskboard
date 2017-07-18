@@ -25,13 +25,13 @@ import objective.taskboard.followup.FollowUpTemplate;
 import objective.taskboard.followup.FollowUpTemplateStorage;
 import objective.taskboard.followup.FollowUpTemplateValidator;
 import objective.taskboard.followup.UpdateFollowUpService;
+import objective.taskboard.utils.IOUtilities;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -105,11 +105,7 @@ public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
     }
 
     private static Path resolve(String resourceName) {
-        try {
-            return Paths.get(DefaultFollowUpTemplateStorage.class.getClassLoader().getResource(resourceName).toURI());
-        } catch (URISyntaxException e) {
-            throw new FollowUpTemplateValidator.InvalidTemplateException(e);
-        }
+        return IOUtilities.asPath(DefaultFollowUpTemplateStorage.class.getClassLoader().getResource(resourceName));
     }
 
     private Path decompressTemplate(Path pathFollowup, InputStream stream) throws IOException {

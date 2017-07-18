@@ -21,8 +21,18 @@ package objective.taskboard.utils;
  * [/LICENSE]
  */
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collections;
 
 import org.apache.commons.io.IOUtils;
 
@@ -40,5 +50,46 @@ public class IOUtilities {
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    public static Path asPath(URL url) {
+        try {
+            return asPath(url.toURI());
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    public static Path asPath(URI uri) {
+        String scheme = uri.getScheme();
+        if (scheme.equals("file")) {
+            return Paths.get(uri);
+        }
+
+        if (!scheme.equals("jar")) {
+            throw new IllegalArgumentException("Cannot convert to Path: " + uri);
+        }
+
+        String s = uri.toString();
+        int separator = s.indexOf("!/");
+        String entryName = s.substring(separator + 2).replace("!/", "/");
+        URI fileURI = URI.create(s.substring(0, separator));
+
+        try {
+            FileSystem fs;
+            try {
+                fs = FileSystems.getFileSystem(fileURI);
+            } catch (FileSystemNotFoundException e) {
+                fs = FileSystems.newFileSystem(fileURI, Collections.emptyMap());
+            }
+            return fs.getPath(entryName);
+        } catch (IOException e) {
+            throw new IllegalArgumentException(e);
+        }
+
+    }
+
+    public static Path asPath(File file) {
+        return file.toPath();
     }
 }
