@@ -20,6 +20,9 @@
  */
 package objective.taskboard.utils;
 
+import org.apache.xalan.processor.TransformerFactoryImpl;
+import org.apache.xerces.jaxp.DocumentBuilderFactoryImpl;
+import org.apache.xpath.jaxp.XPathFactoryImpl;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -61,7 +64,7 @@ public class XmlUtils {
     private static NodeList xpath(Document doc, String locator) {
         try {
             // create XPath
-            XPathFactory xPathfactory = XPathFactory.newInstance();
+            XPathFactory xPathfactory = new XPathFactoryImpl();
             XPath xpath = xPathfactory.newXPath();
             XPathExpression expr = xpath.compile(locator);
 
@@ -82,7 +85,7 @@ public class XmlUtils {
 
     public static Document asDocument(File xmlFile) {
         try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilderFactory factory = new DocumentBuilderFactoryImpl();
             DocumentBuilder builder = factory.newDocumentBuilder();
             return builder.parse(xmlFile);
         } catch (Exception e) {
@@ -104,7 +107,7 @@ public class XmlUtils {
 
     public static Document asDocument(InputSource source) {
         try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilderFactory factory = new DocumentBuilderFactoryImpl();
             DocumentBuilder builder = factory.newDocumentBuilder();
             return builder.parse(source);
         } catch (Exception e) {
@@ -125,7 +128,8 @@ public class XmlUtils {
                         writer.append(node.getNodeValue());
                         break;
                     default:
-                        Transformer transformer = TransformerFactory.newInstance().newTransformer();
+                        TransformerFactoryImpl factory = new TransformerFactoryImpl();
+                        Transformer transformer = factory.newTransformer();
                         transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
                         transformer.transform(new DOMSource(node), new StreamResult(writer));
                 }
