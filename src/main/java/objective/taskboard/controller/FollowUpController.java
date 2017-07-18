@@ -63,7 +63,8 @@ public class FollowUpController {
                   .header("Content-Disposition","attachment; filename=Followup.xlsm")
                   .body(resource);
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), INTERNAL_SERVER_ERROR);
+            e.printStackTrace();
+            return new ResponseEntity<>(e.getMessage() == null ? e.toString() : e.getMessage(), INTERNAL_SERVER_ERROR);
         }
     }
 
