@@ -27,9 +27,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -37,7 +34,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import objective.taskboard.followup.impl.DefaultFollowUpTemplateStorage;
 import org.junit.Test;
-import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.xml.sax.SAXException;
 
 import objective.taskboard.utils.IOUtilities;
@@ -158,7 +155,7 @@ public class FollowUpGeneratorTest {
     public void generateTest() throws Exception {
         FollowupDataProvider provider = getFollowupDataProvider(asList(getFollowUpDataDefault()));
         FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
-        ByteArrayResource resource = subject.generate(emptyArray());
+        Resource resource = subject.generate(emptyArray());
         assertNotNull("Resource shouldn't be null", resource);
     }
 
@@ -166,7 +163,7 @@ public class FollowUpGeneratorTest {
     public void generateUsingDefaultTemplatesTest() throws Exception {
         FollowupDataProvider provider = getFollowupDataProvider(asList(getFollowUpDataDefault()));
         FollowUpGenerator subject = getDefaultFollowUpGenerator(provider);
-        ByteArrayResource resource = subject.generate(emptyArray());
+        Resource resource = subject.generate(emptyArray());
         assertNotNull("Resource shouldn't be null", resource);
     }
 
@@ -259,11 +256,7 @@ public class FollowUpGeneratorTest {
         return new String[0];
     }
 
-    private static Path resolve(String resourceName) {
-        try {
-            return Paths.get(DefaultFollowUpTemplateStorage.class.getClassLoader().getResource(resourceName).toURI());
-        } catch (URISyntaxException e) {
-            throw new FollowUpTemplateValidator.InvalidTemplateException(e);
-        }
+    private static Resource resolve(String resourceName) {
+        return IOUtilities.asResource(DefaultFollowUpTemplateStorage.class.getClassLoader().getResource(resourceName));
     }
 }

@@ -29,6 +29,7 @@ import objective.taskboard.utils.IOUtilities;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -64,11 +65,11 @@ public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
         Path templatePath = templateRoot.resolve(path);
         return new FollowUpTemplate(
                 resolve("followup-template/sharedStrings-initial.xml")
-                , templatePath.resolve("sharedStrings-template.xml")
+                , resolve(templatePath, "sharedStrings-template.xml")
                 , resolve("followup-template/sharedStrings-si-template.xml")
-                , templatePath.resolve("sheet7-template.xml")
+                , resolve(templatePath, "sheet7-template.xml")
                 , resolve("followup-template/sheet7-row-template.xml")
-                , templatePath.resolve("Followup-template.xlsm")
+                , resolve(templatePath, "Followup-template.xlsm")
                 , resolve("followup-template/table7-template.xml")
         );
     }
@@ -82,7 +83,7 @@ public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
     public String storeTemplate(InputStream stream, FollowUpTemplateValidator validator) throws IOException {
         if(!Files.exists(templateRoot))
             Files.createDirectories(templateRoot);
-        
+
         Path pathFollowup = Files.createTempDirectory(templateRoot, "Followup");
         Path tempFolder = decompressTemplate(pathFollowup, stream);
         try {
@@ -98,14 +99,18 @@ public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
         }
         return templateRoot.relativize(pathFollowup).toString();
     }
-    
+
     public void deleteFile(String templatePath) throws IOException {
         Path template = templateRoot.resolve(templatePath);
         FileUtils.deleteQuietly(template.toFile());
     }
 
-    private static Path resolve(String resourceName) {
-        return IOUtilities.asPath(DefaultFollowUpTemplateStorage.class.getClassLoader().getResource(resourceName));
+    private static Resource resolve(String resourceName) {
+        return IOUtilities.asResource(DefaultFollowUpTemplateStorage.class.getClassLoader().getResource(resourceName));
+    }
+
+    private Resource resolve(Path templatePath, String relativePath) {
+        return IOUtilities.asResource(templatePath.resolve(relativePath));
     }
 
     private Path decompressTemplate(Path pathFollowup, InputStream stream) throws IOException {
