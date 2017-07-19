@@ -1,5 +1,3 @@
-package objective.taskboard.followup;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,14 +18,13 @@ package objective.taskboard.followup;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.followup;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
 public interface FollowUpTemplateStorage {
-
-    FollowUpTemplate getDefaultTemplate();
 
     /**
      * Uses a path returned by {@link #storeTemplate} to retrieve it
@@ -44,5 +41,5 @@ public interface FollowUpTemplateStorage {
      */
     String storeTemplate(File template, FollowUpTemplateValidator validator) throws IOException;
     String storeTemplate(InputStream input, FollowUpTemplateValidator validator) throws IOException;
-    public void deleteFile(String templatePath) throws IOException;
+    void deleteFile(String templatePath) throws IOException;
 }

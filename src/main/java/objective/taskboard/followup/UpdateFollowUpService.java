@@ -1,5 +1,3 @@
-package objective.taskboard.followup;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,6 +18,7 @@ package objective.taskboard.followup;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.followup;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,7 +56,7 @@ public interface UpdateFollowUpService {
      * @param sharedStringsTemplate
      * @throws IOException
      */
-    void updateSharedStrings(Path decompressed, Path sharedStringsTemplate) throws IOException;
+    void updateSharedStringsInitial(Path decompressed, Path sharedStringsTemplate) throws IOException;
 
     /**
      * Delete unused files since they are generated with data from jira/taskboard/follow-up.

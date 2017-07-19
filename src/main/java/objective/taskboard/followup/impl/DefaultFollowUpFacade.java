@@ -1,5 +1,3 @@
-package objective.taskboard.followup.impl;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,6 +18,7 @@ package objective.taskboard.followup.impl;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.followup.impl;
 
 import objective.taskboard.controller.TemplateData;
 import objective.taskboard.domain.Project;
@@ -55,11 +54,6 @@ public class DefaultFollowUpFacade implements FollowUpFacade {
 
     @Autowired
     private Converter<Template, TemplateData> templateConverter;
-
-    @Override
-    public FollowUpGenerator getGenerator() {
-        return new FollowUpGenerator(provider, followUpTemplateStorage.getDefaultTemplate());
-    }
 
     @Override
     public FollowUpGenerator getGenerator(String templateName) {

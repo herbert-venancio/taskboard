@@ -48,24 +48,11 @@ public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
     private UpdateFollowUpService updateFollowUpService;
 
     @Override
-    public FollowUpTemplate getDefaultTemplate() {
-        return new FollowUpTemplate(
-                resolve("followup-template/sharedStrings-initial.xml")
-                , resolve("followup-template/sharedStrings-template.xml")
-                , resolve("followup-template/sharedStrings-si-template.xml")
-                , resolve("followup-template/sheet7-template.xml")
-                , resolve("followup-template/sheet7-row-template.xml")
-                , resolve("followup-template/Followup-template.xlsm")
-                , resolve("followup-template/table7-template.xml")
-        );
-    }
-
-    @Override
     public FollowUpTemplate getTemplate(String path) {
         Path templatePath = templateRoot.resolve(path);
         return new FollowUpTemplate(
-                resolve("followup-template/sharedStrings-initial.xml")
-                , resolve(templatePath, "sharedStrings-template.xml")
+                resolve(templatePath, "sharedStrings-initial.xml")
+                , resolve("followup-template/sharedStrings-template.xml")
                 , resolve("followup-template/sharedStrings-si-template.xml")
                 , resolve(templatePath, "sheet7-template.xml")
                 , resolve("followup-template/sheet7-row-template.xml")
@@ -89,7 +76,7 @@ public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
         try {
             validator.validate(tempFolder);
             updateFollowUpService.updateFromJiraTemplate(tempFolder, pathFollowup.resolve("sheet7-template.xml"));
-            updateFollowUpService.updateSharedStrings(tempFolder, pathFollowup.resolve("sharedStrings-template.xml"));
+            updateFollowUpService.updateSharedStringsInitial(tempFolder, pathFollowup.resolve("sharedStrings-initial.xml"));
             updateFollowUpService.deleteGeneratedFiles(tempFolder);
             updateFollowUpService.compressTemplate(tempFolder, pathFollowup.resolve("Followup-template.xlsm"));
             FileUtils.deleteQuietly(tempFolder.toFile());
