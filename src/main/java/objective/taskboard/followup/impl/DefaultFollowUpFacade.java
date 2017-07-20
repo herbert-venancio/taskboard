@@ -116,16 +116,15 @@ public class DefaultFollowUpFacade implements FollowUpFacade {
                             new FollowUpTemplateValidator());
         }
 
-        boolean deleteOld = false;
         try {
             templateService.updateTemplate(id, templateName, projects, path);
-            deleteOld = oldPath != null;
         } catch(Throwable t) {
             if(path != null) {
                 followUpTemplateStorage.deleteFile(path);
             }
+            throw t;
         }
-        if(deleteOld) {
+        if(oldPath != null) {
             followUpTemplateStorage.deleteFile(oldPath);
         }
     }
