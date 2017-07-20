@@ -118,7 +118,7 @@ public class DefaultFollowUpFacade implements FollowUpFacade {
 
         try {
             templateService.updateTemplate(id, templateName, projects, path);
-        } catch(Throwable t) {
+        } catch(Exception t) {
             if(path != null) {
                 followUpTemplateStorage.deleteFile(path);
             }
