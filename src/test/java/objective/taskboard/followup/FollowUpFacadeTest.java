@@ -24,10 +24,12 @@ import objective.taskboard.followup.data.Template;
 import objective.taskboard.followup.impl.DefaultFollowUpFacade;
 import objective.taskboard.followup.impl.DefaultFollowUpTemplateStorage;
 import objective.taskboard.followup.impl.DefaultUpdateFollowUpService;
+import objective.taskboard.rules.CleanupDataFolderRule;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.SpreadsheetMLPackage;
 import org.docx4j.openpackaging.parts.SpreadsheetML.WorksheetPart;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.*;
@@ -41,6 +43,7 @@ import org.xlsx4j.sml.Cell;
 import org.xlsx4j.sml.Row;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 
@@ -51,6 +54,9 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FollowUpFacadeTest {
+
+    @Rule
+    public CleanupDataFolderRule clean = new CleanupDataFolderRule(Paths.get("data/followup-templates"));
 
     private static final String FORMULA = "someFormula";
 
