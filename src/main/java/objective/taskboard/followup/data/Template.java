@@ -41,7 +41,9 @@ public class Template {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Id
     private Long id;
+    @Column(nullable = false)
     private String name;
+    @Column(nullable = false)
     private String path;
 
     @ManyToMany(fetch = FetchType.EAGER)

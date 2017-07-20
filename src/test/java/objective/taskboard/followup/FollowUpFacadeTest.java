@@ -44,8 +44,6 @@ import org.xlsx4j.sml.Row;
 
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.List;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.mockito.BDDMockito.given;

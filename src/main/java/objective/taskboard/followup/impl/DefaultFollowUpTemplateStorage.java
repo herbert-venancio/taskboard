@@ -87,7 +87,8 @@ public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
         return templateRoot.relativize(pathFollowup).toString();
     }
 
-    public void deleteFile(String templatePath) throws IOException {
+    @Override
+    public void deleteFile(String templatePath) {
         Path template = templateRoot.resolve(templatePath);
         FileUtils.deleteQuietly(template.toFile());
     }

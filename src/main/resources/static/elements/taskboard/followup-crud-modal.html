@@ -236,7 +236,8 @@
                 	var formData = new FormData();
                     formData.append("name", this.templateSelected.name);
                 	formData.append("projects", projectsStr);
-            		formData.append("file", this.fileData ? this.fileData : {}, this.fileName);
+                	if(this.fileData)
+            		    formData.append("file", this.fileData, this.fileName);
                     
                     return formData;
                 },
