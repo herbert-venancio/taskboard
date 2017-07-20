@@ -53,10 +53,10 @@ public interface UpdateFollowUpService {
     /**
      * Update 'sharedStrings.xml' with data from template
      * @param decompressed
-     * @param sharedStringsTemplate
+     * @param sharedStringsInitial
      * @throws IOException
      */
-    void updateSharedStringsInitial(Path decompressed, Path sharedStringsTemplate) throws IOException;
+    void updateSharedStringsInitial(Path decompressed, Path sharedStringsInitial) throws IOException;
 
     /**
      * Delete unused files since they are generated with data from jira/taskboard/follow-up.
