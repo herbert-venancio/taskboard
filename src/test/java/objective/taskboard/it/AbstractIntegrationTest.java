@@ -1,13 +1,3 @@
-package objective.taskboard.it;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import org.junit.Before;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -28,13 +18,28 @@ import org.junit.Before;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.it;
+
+import java.nio.file.Paths;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import objective.taskboard.rules.CleanupDataFolderRule;
+import org.junit.Before;
 
 import objective.taskboard.RequestBuilder;
 import objective.taskboard.RequestResponse;
 import objective.taskboard.TestMain;
 import objective.taskboard.issueBuffer.IssueBufferState;
+import org.junit.Rule;
 
 public abstract class AbstractIntegrationTest {
+
+    @Rule
+    public CleanupDataFolderRule clean = new CleanupDataFolderRule(Paths.get("data/followup-templates"));
 
     private static final ExecutorService service = Executors.newSingleThreadExecutor();
     private static final long TIMEOUT_IN_SECONDS = 120;

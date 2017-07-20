@@ -1,5 +1,3 @@
-package objective.taskboard.followup.impl;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,6 +18,7 @@ package objective.taskboard.followup.impl;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.followup.impl;
 
 import objective.taskboard.followup.FollowUpTemplateValidator;
 import objective.taskboard.followup.UpdateFollowUpService;
@@ -95,9 +94,9 @@ public class DefaultUpdateFollowUpService implements UpdateFollowUpService {
     }
 
     @Override
-    public void updateSharedStrings(Path decompressed, Path sharedStringsTemplate) throws IOException {
+    public void updateSharedStringsInitial(Path decompressed, Path sharedStringsInitial) throws IOException {
         Path source = decompressed.resolve("xl/sharedStrings.xml");
-        XmlUtils.format(source.toFile(), sharedStringsTemplate.toFile());
+        XmlUtils.format(source.toFile(), sharedStringsInitial.toFile());
     }
 
     @Override

@@ -25,7 +25,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -57,7 +57,7 @@ public class FollowUpController {
         String [] includedProjects = projects.split(",");
         try {
             FollowUpGenerator followupGenerator = followUpFacade.getGenerator(template);
-            ByteArrayResource resource = followupGenerator.generate(includedProjects);
+            Resource resource = followupGenerator.generate(includedProjects);
             return ResponseEntity.ok()
                   .contentLength(resource.contentLength())
                   .header("Content-Disposition","attachment; filename=Followup.xlsm")

@@ -22,12 +22,13 @@
 package objective.taskboard.followup;
 
 import lombok.extern.slf4j.Slf4j;
+import objective.taskboard.utils.IOUtilities;
 import objective.taskboard.utils.XmlUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.text.StrSubstitutor;
-import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -74,7 +75,7 @@ public class FollowUpGenerator {
         this.template = template;
     }
 
-    public ByteArrayResource generate(String [] includedProjects) throws Exception {
+    public Resource generate(String [] includedProjects) throws Exception {
         File directoryTempFollowup = null;
         Path pathFollowupXLSM = null;
         try {
@@ -93,9 +94,7 @@ public class FollowUpGenerator {
             writeXML(table7, generateTable7(FileUtils.readFileToString(table7, "UTF-8"), jiraData.size()));
 
             pathFollowupXLSM = compressXLSM(directoryTempFollowup);
-            ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(pathFollowupXLSM));
-
-            return resource;
+            return IOUtilities.asResource(Files.readAllBytes(pathFollowupXLSM));
         } catch (Exception e) {
             log.error(e.getMessage() == null ? e.toString() : e.getMessage());
             throw e;
@@ -113,7 +112,7 @@ public class FollowUpGenerator {
         ZipInputStream zipInputStream = null;
         BufferedOutputStream bufferedOutput = null;
         try {
-            InputStream inputStream = Files.newInputStream(template.getPathFollowupTemplateXLSM());
+            InputStream inputStream = template.getPathFollowupTemplateXLSM().getInputStream();
             zipInputStream = new ZipInputStream(new BufferedInputStream(inputStream));
 
             ZipEntry entry;
@@ -201,7 +200,7 @@ public class FollowUpGenerator {
 
     Map<String, Long> getSharedStringsInitial() throws ParserConfigurationException, SAXException, IOException {
         Map<String, Long> sharedStrings = new HashMap<>();
-        Document doc = XmlUtils.asDocument(template.getPathSharedStringsInitial());
+        Document doc = XmlUtils.asDocument(template.getPathSharedStringsInitial().getInputStream());
         doc.getDocumentElement().normalize();
         NodeList nodes = doc.getElementsByTagName(TAG_T_IN_SHARED_STRINGS);
 
@@ -266,9 +265,9 @@ public class FollowUpGenerator {
         return StrSubstitutor.replace(sheetTemplate, sheetValues);
     }
 
-    private String getStringFromXML(Path pathXML) {
+    private String getStringFromXML(Resource pathXML) {
         try {
-            return IOUtils.toString(Files.newInputStream(pathXML), "UTF-8");
+            return IOUtils.toString(pathXML.getInputStream(), "UTF-8");
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }

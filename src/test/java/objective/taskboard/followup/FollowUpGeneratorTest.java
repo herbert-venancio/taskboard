@@ -27,9 +27,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -37,7 +35,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import objective.taskboard.followup.impl.DefaultFollowUpTemplateStorage;
 import org.junit.Test;
-import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.xml.sax.SAXException;
 
 import objective.taskboard.utils.IOUtilities;
@@ -67,7 +65,7 @@ public class FollowUpGeneratorTest {
 
     @Test
     public void addNewSharedStringsInTheEndTest() throws ParserConfigurationException, SAXException, IOException {
-        FollowupDataProvider provider = getFollowupDataProvider(asList(getFollowUpDataDefault()));
+        FollowupDataProvider provider = getFollowupDataProvider(FollowUpHelper.getFollowUpDataDefaultList());
         FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
 
         Map<String, Long> sharedStrings = subject.getSharedStringsInitial();
@@ -96,7 +94,7 @@ public class FollowUpGeneratorTest {
 
     @Test
     public void generateSharedStringsInOrderAfterAddNewSharedStringTest() throws ParserConfigurationException, SAXException, IOException {
-        FollowupDataProvider provider = getFollowupDataProvider(asList(getFollowUpDataDefault()));
+        FollowupDataProvider provider = getFollowupDataProvider(FollowUpHelper.getFollowUpDataDefaultList());
         FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
 
         Map<String, Long> sharedStrings = subject.getSharedStringsInitial();
@@ -113,7 +111,7 @@ public class FollowUpGeneratorTest {
 
     @Test
     public void generateJiraDataSheetTest() throws ParserConfigurationException, SAXException, IOException {
-        FollowupDataProvider provider = getFollowupDataProvider(asList(getFollowUpDataDefault()));
+        FollowupDataProvider provider = getFollowupDataProvider(FollowUpHelper.getFollowUpDataDefaultList());
         FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
 
         Map<String, Long> sharedStrings = subject.getSharedStringsInitial();
@@ -125,7 +123,7 @@ public class FollowUpGeneratorTest {
 
     @Test
     public void generateJiraDataSheetWithEmptyDataTest() throws ParserConfigurationException, SAXException, IOException {
-        FollowupDataProvider provider = getFollowupDataProvider(asList());
+        FollowupDataProvider provider = getFollowupDataProvider(Collections.emptyList());
         FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
 
         Map<String, Long> sharedStrings = subject.getSharedStringsInitial();
@@ -137,7 +135,7 @@ public class FollowUpGeneratorTest {
 
     @Test
     public void generateJiraDataSheetWithSomeEmptyAndNullAttributesJiraDataTest() throws ParserConfigurationException, SAXException, IOException {
-        FollowUpData followupDefault = getFollowUpDataDefault();
+        FollowUpData followupDefault = FollowUpHelper.getFollowUpDataDefault();
         followupDefault.project = "";
         followupDefault.demandType = null;
         followupDefault.taskId = 0L;
@@ -156,23 +154,23 @@ public class FollowUpGeneratorTest {
 
     @Test
     public void generateTest() throws Exception {
-        FollowupDataProvider provider = getFollowupDataProvider(asList(getFollowUpDataDefault()));
+        FollowupDataProvider provider = getFollowupDataProvider(FollowUpHelper.getFollowUpDataDefaultList());
         FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
-        ByteArrayResource resource = subject.generate(emptyArray());
+        Resource resource = subject.generate(emptyArray());
         assertNotNull("Resource shouldn't be null", resource);
     }
 
     @Test
     public void generateUsingDefaultTemplatesTest() throws Exception {
-        FollowupDataProvider provider = getFollowupDataProvider(asList(getFollowUpDataDefault()));
+        FollowupDataProvider provider = getFollowupDataProvider(FollowUpHelper.getFollowUpDataDefaultList());
         FollowUpGenerator subject = getDefaultFollowUpGenerator(provider);
-        ByteArrayResource resource = subject.generate(emptyArray());
+        Resource resource = subject.generate(emptyArray());
         assertNotNull("Resource shouldn't be null", resource);
     }
 
     @Test
     public void whenLineCountHigherThanOriginalTable7_generateWithNewLineCount() {
-        FollowupDataProvider provider = getFollowupDataProvider(asList(getFollowUpDataDefault()));
+        FollowupDataProvider provider = getFollowupDataProvider(FollowUpHelper.getFollowUpDataDefaultList());
         FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
         String originalTable7 = getStringExpected("followup/original-table7.xml");
         String table7 = subject.generateTable7(originalTable7, 3042);
@@ -181,7 +179,7 @@ public class FollowUpGeneratorTest {
     
     @Test
     public void whenLineCountSmallerThanOriginalTable7_generateWithOldLineCount() {
-        FollowupDataProvider provider = getFollowupDataProvider(asList(getFollowUpDataDefault()));
+        FollowupDataProvider provider = getFollowupDataProvider(FollowUpHelper.getFollowUpDataDefaultList());
         FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
         String originalTable7 = getStringExpected("followup/original-table7.xml");
         String table7 = subject.generateTable7(originalTable7, 100);
@@ -217,40 +215,6 @@ public class FollowUpGeneratorTest {
         return provider;
     }
 
-    private FollowUpData getFollowUpDataDefault() {
-        FollowUpData followUpData = new FollowUpData();
-        followUpData.planningType = "Ballpark";
-        followUpData.project = "PROJECT TEST";
-        followUpData.demandType = "Demand";
-        followUpData.demandStatus = "Doing";
-        followUpData.demandId = 1L;
-        followUpData.demandNum = "I-1";
-        followUpData.demandSummary = "Summary Demand";
-        followUpData.demandDescription = "Description Demand";
-        followUpData.taskType = "Feature";
-        followUpData.taskStatus = "Doing";
-        followUpData.taskId = 2L;
-        followUpData.taskNum = "I-2";
-        followUpData.taskSummary = "Summary Feature";
-        followUpData.taskDescription = "Description Feature";
-        followUpData.taskFullDescription = "Full Description Feature";
-        followUpData.taskRelease = "Release";
-        followUpData.subtaskType = "Sub-task";
-        followUpData.subtaskStatus = "Doing";
-        followUpData.subtaskId = 3L;
-        followUpData.subtaskNum = "I-3";
-        followUpData.subtaskSummary = "Summary Sub-task";
-        followUpData.subtaskDescription = "Description Sub-task";
-        followUpData.subtaskFullDescription = "Full Description Sub-task";
-        followUpData.tshirtSize = "M";
-        followUpData.worklog = 1D;
-        followUpData.wrongWorklog = 1D;
-        followUpData.demandBallpark = 1D;
-        followUpData.taskBallpark = 1D;
-        followUpData.queryType = "Type";
-        return followUpData;
-    }
-
     private String getStringExpected(String pathResource) {
         return IOUtilities.resourceToString(pathResource);
     }
@@ -259,11 +223,7 @@ public class FollowUpGeneratorTest {
         return new String[0];
     }
 
-    private static Path resolve(String resourceName) {
-        try {
-            return Paths.get(DefaultFollowUpTemplateStorage.class.getClassLoader().getResource(resourceName).toURI());
-        } catch (URISyntaxException e) {
-            throw new FollowUpTemplateValidator.InvalidTemplateException(e);
-        }
+    private static Resource resolve(String resourceName) {
+        return IOUtilities.asResource(DefaultFollowUpTemplateStorage.class.getClassLoader().getResource(resourceName));
     }
 }

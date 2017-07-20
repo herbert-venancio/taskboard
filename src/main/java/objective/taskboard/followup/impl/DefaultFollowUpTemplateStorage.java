@@ -25,13 +25,14 @@ import objective.taskboard.followup.FollowUpTemplate;
 import objective.taskboard.followup.FollowUpTemplateStorage;
 import objective.taskboard.followup.FollowUpTemplateValidator;
 import objective.taskboard.followup.UpdateFollowUpService;
+import objective.taskboard.utils.IOUtilities;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -47,28 +48,15 @@ public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
     private UpdateFollowUpService updateFollowUpService;
 
     @Override
-    public FollowUpTemplate getDefaultTemplate() {
-        return new FollowUpTemplate(
-                resolve("followup-template/sharedStrings-initial.xml")
-                , resolve("followup-template/sharedStrings-template.xml")
-                , resolve("followup-template/sharedStrings-si-template.xml")
-                , resolve("followup-template/sheet7-template.xml")
-                , resolve("followup-template/sheet7-row-template.xml")
-                , resolve("followup-template/Followup-template.xlsm")
-                , resolve("followup-template/table7-template.xml")
-        );
-    }
-
-    @Override
     public FollowUpTemplate getTemplate(String path) {
         Path templatePath = templateRoot.resolve(path);
         return new FollowUpTemplate(
-                resolve("followup-template/sharedStrings-initial.xml")
-                , templatePath.resolve("sharedStrings-template.xml")
+                resolve(templatePath, "sharedStrings-initial.xml")
+                , resolve("followup-template/sharedStrings-template.xml")
                 , resolve("followup-template/sharedStrings-si-template.xml")
-                , templatePath.resolve("sheet7-template.xml")
+                , resolve(templatePath, "sheet7-template.xml")
                 , resolve("followup-template/sheet7-row-template.xml")
-                , templatePath.resolve("Followup-template.xlsm")
+                , resolve(templatePath, "Followup-template.xlsm")
                 , resolve("followup-template/table7-template.xml")
         );
     }
@@ -82,13 +70,13 @@ public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
     public String storeTemplate(InputStream stream, FollowUpTemplateValidator validator) throws IOException {
         if(!Files.exists(templateRoot))
             Files.createDirectories(templateRoot);
-        
+
         Path pathFollowup = Files.createTempDirectory(templateRoot, "Followup");
         Path tempFolder = decompressTemplate(pathFollowup, stream);
         try {
             validator.validate(tempFolder);
             updateFollowUpService.updateFromJiraTemplate(tempFolder, pathFollowup.resolve("sheet7-template.xml"));
-            updateFollowUpService.updateSharedStrings(tempFolder, pathFollowup.resolve("sharedStrings-template.xml"));
+            updateFollowUpService.updateSharedStringsInitial(tempFolder, pathFollowup.resolve("sharedStrings-initial.xml"));
             updateFollowUpService.deleteGeneratedFiles(tempFolder);
             updateFollowUpService.compressTemplate(tempFolder, pathFollowup.resolve("Followup-template.xlsm"));
             FileUtils.deleteQuietly(tempFolder.toFile());
@@ -98,18 +86,18 @@ public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
         }
         return templateRoot.relativize(pathFollowup).toString();
     }
-    
+
     public void deleteFile(String templatePath) throws IOException {
         Path template = templateRoot.resolve(templatePath);
         FileUtils.deleteQuietly(template.toFile());
     }
 
-    private static Path resolve(String resourceName) {
-        try {
-            return Paths.get(DefaultFollowUpTemplateStorage.class.getClassLoader().getResource(resourceName).toURI());
-        } catch (URISyntaxException e) {
-            throw new FollowUpTemplateValidator.InvalidTemplateException(e);
-        }
+    private static Resource resolve(String resourceName) {
+        return IOUtilities.asResource(DefaultFollowUpTemplateStorage.class.getClassLoader().getResource(resourceName));
+    }
+
+    private Resource resolve(Path templatePath, String relativePath) {
+        return IOUtilities.asResource(templatePath.resolve(relativePath));
     }
 
     private Path decompressTemplate(Path pathFollowup, InputStream stream) throws IOException {

@@ -1,5 +1,3 @@
-package objective.taskboard.followup;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,6 +18,7 @@ package objective.taskboard.followup;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.followup;
 
 import objective.taskboard.controller.TemplateData;
 import objective.taskboard.issueBuffer.IssueBufferState;
@@ -30,8 +29,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface FollowUpFacade {
-
-    FollowUpGenerator getGenerator();
 
     FollowUpGenerator getGenerator(String templateName);
 

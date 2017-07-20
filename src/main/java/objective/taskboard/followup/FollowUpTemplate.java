@@ -22,27 +22,26 @@ package objective.taskboard.followup;
  */
 
 import lombok.Getter;
-
-import java.nio.file.Path;
+import org.springframework.core.io.Resource;
 
 @Getter
 public class FollowUpTemplate {
 
-    private Path pathSharedStringsInitial;
-    private Path pathSharedStringsTemplate;
-    private Path pathSISharedStringsTemplate;
-    private Path pathSheet7Template;
-    private Path pathSheet7RowTemplate;
-    private Path pathFollowupTemplateXLSM;
-    private Path pathTable7Template;
+    private Resource pathSharedStringsInitial;
+    private Resource pathSharedStringsTemplate;
+    private Resource pathSISharedStringsTemplate;
+    private Resource pathSheet7Template;
+    private Resource pathSheet7RowTemplate;
+    private Resource pathFollowupTemplateXLSM;
+    private Resource pathTable7Template;
 
-    public FollowUpTemplate(Path pathSharedStringsInitial
-            , Path pathSharedStringsTemplate
-            , Path pathSISharedStringsTemplate
-            , Path pathSheet7Template
-            , Path pathSheet7RowTemplate
-            , Path pathFollowupTemplateXLSM
-            , Path pathTable7Template) {
+    public FollowUpTemplate(Resource pathSharedStringsInitial
+            , Resource pathSharedStringsTemplate
+            , Resource pathSISharedStringsTemplate
+            , Resource pathSheet7Template
+            , Resource pathSheet7RowTemplate
+            , Resource pathFollowupTemplateXLSM
+            , Resource pathTable7Template) {
         this.pathSharedStringsInitial = pathSharedStringsInitial;
         this.pathSharedStringsTemplate = pathSharedStringsTemplate;
         this.pathSISharedStringsTemplate = pathSISharedStringsTemplate;

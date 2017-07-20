@@ -1,5 +1,3 @@
-package objective.taskboard.utils;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -21,10 +19,20 @@ package objective.taskboard.utils;
  * [/LICENSE]
  */
 
-import java.io.IOException;
-import java.io.InputStream;
+package objective.taskboard.utils;
 
 import org.apache.commons.io.IOUtils;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.PathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.Path;
 
 public class IOUtilities {
     public static String resourceToString(String path) {
@@ -40,5 +48,21 @@ public class IOUtilities {
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    public static Resource asResource(URL url) {
+        return new UrlResource(url);
+    }
+
+    public static Resource asResource(File file) {
+        return new FileSystemResource(file);
+    }
+
+    public static Resource asResource(Path path) {
+        return new PathResource(path);
+    }
+
+    public static Resource asResource(byte[] bytes) {
+        return new ByteArrayResource(bytes);
     }
 }

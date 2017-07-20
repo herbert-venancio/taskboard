@@ -1,5 +1,3 @@
-package objective.taskboard.followup;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,6 +18,7 @@ package objective.taskboard.followup;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.followup;
 
 import objective.taskboard.followup.FollowUpTemplateValidator.InvalidTemplateException;
 import objective.taskboard.followup.impl.DefaultUpdateFollowUpService;
@@ -90,7 +89,7 @@ public class UpdateFollowUpServiceTest {
         Path temp = Files.createTempFile("shared-strings", ".xml");
         Path decompressed = decompressOkTemplate();
         try {
-            updateFollowUpService.updateSharedStrings(decompressed, temp);
+            updateFollowUpService.updateSharedStringsInitial(decompressed, temp);
             assertThat(temp.toFile().length(), greaterThan(0L));
             String content = FileUtils.readFileToString(temp.toFile(), "UTF-8");
             assertThat(content, containsString("project"));
