@@ -58,8 +58,7 @@ public class DefaultTemplateService implements TemplateService{
         List<String> projectKeys = Arrays.asList(projects.split(","));
         List<ProjectFilterConfiguration> associatedProjects = findAssociatedProjects(projectKeys);
         
-        Template template = new Template();
-        template.setId(id);
+        Template template = templateRepository.findById(id);
         template.setName(templateName);
         template.setProjects(associatedProjects);
         

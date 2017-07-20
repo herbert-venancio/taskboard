@@ -41,5 +41,5 @@ public interface FollowUpTemplateStorage {
      */
     String storeTemplate(File template, FollowUpTemplateValidator validator) throws IOException;
     String storeTemplate(InputStream input, FollowUpTemplateValidator validator) throws IOException;
-    void deleteFile(String templatePath) throws IOException;
+    void deleteFile(String templatePath);
 }

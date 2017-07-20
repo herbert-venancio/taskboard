@@ -316,14 +316,18 @@
                     this.showTemplatesCombo = this.availableTemplates.length > 1;
                     this.showNoTemplatesFoundWarning = !areTemplatesAvailable && selectedProjects.length > 0;
                     
-                    if (areTemplatesAvailable) 
-                    	this.selectedItem = 0;
-                    
                     // update combo selection if old selection became invalid
-                    if ( oldSelection && ! _.contains(templates, oldSelection.value) )
+                    if ( oldSelection && ! _.contains(templates, oldSelection.value) ) 
                         this.selectedItem = -1;
-                    
-                    this.disableGenerateButton = !areTemplatesAvailable || this.selectedItem == -1;
+
+                    var self = this;
+                    this.async(function() {
+                        // select first option, if available
+                        if (areTemplatesAvailable) 
+                            self.selectedItem = 0;
+
+                        self.disableGenerateButton = !areTemplatesAvailable || self.selectedItem == -1;
+                    });
                 },
                 
                 filterSelectedProjects: function() {

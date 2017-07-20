@@ -108,11 +108,25 @@ public class DefaultFollowUpFacade implements FollowUpFacade {
     public void updateTemplate(Long id, String templateName, String projects,
                                Optional<MultipartFile> file) throws IOException {
         String path = null;
-        if (file.isPresent())    
+        String oldPath = null;
+        if (file.isPresent()) {
+            oldPath = templateService.getTemplate(id).getPath();
             path = followUpTemplateStorage
                     .storeTemplate(file.get().getInputStream(),
                             new FollowUpTemplateValidator());
-        
-        templateService.updateTemplate(id, templateName, projects, path);
+        }
+
+        boolean deleteOld = false;
+        try {
+            templateService.updateTemplate(id, templateName, projects, path);
+            deleteOld = oldPath != null;
+        } catch(Throwable t) {
+            if(path != null) {
+                followUpTemplateStorage.deleteFile(path);
+            }
+        }
+        if(deleteOld) {
+            followUpTemplateStorage.deleteFile(oldPath);
+        }
     }
 }
