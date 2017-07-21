@@ -300,14 +300,14 @@ public class JiraService {
 
     @SuppressWarnings("serial")
     public static class PermissaoNegadaException extends RuntimeException {
-        public PermissaoNegadaException(RestClientException e) {
+        public PermissaoNegadaException(Exception e) {
             super(e);
         }
     }
 
     @SuppressWarnings("serial")
     public static class ParametrosDePesquisaInvalidosException extends RuntimeException {
-        public ParametrosDePesquisaInvalidosException(RestClientException e) {
+        public ParametrosDePesquisaInvalidosException(Exception e) {
             super(e);
         }
     }
