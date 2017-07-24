@@ -1,5 +1,7 @@
 #!/usr/bin/env groovy
 
+import java.util.concurrent.TimeUnit
+
 @Library("liferay-sdlc-jenkins-lib")
 import static org.liferay.sdlc.SDLCPrUtilities.*
 
@@ -12,7 +14,7 @@ properties([
         ])
 ])
 
-node("heavy-memory") {
+node("general-purpose") {
     // start with a clean workspace
     stage('Checkout') {
         deleteDir()
@@ -24,8 +26,10 @@ node("heavy-memory") {
         try {
             stage('Build') {
                 try {
-                    wrap([$class: 'Xvnc']) {
-                        sh "${mvnHome}/bin/mvn --batch-mode -V -U clean verify -P packaging-war,dev"
+                    timeout(time: 10, unit: TimeUnit.MINUTES) {
+                        wrap([$class: 'Xvnc']) {
+                            sh "${mvnHome}/bin/mvn --batch-mode -V -U clean verify -P packaging-war,dev"
+                        }
                     }
                 } finally {
                     archiveArtifacts artifacts: 'target/test-attachments/**', fingerprint: true, allowEmptyArchive: true
