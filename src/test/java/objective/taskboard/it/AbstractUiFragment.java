@@ -1,5 +1,8 @@
 package objective.taskboard.it;
 
+import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
+import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOf;
+
 /*-
  * [LICENSE]
  * Taskboard
@@ -23,30 +26,75 @@ package objective.taskboard.it;
 
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElement;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
-import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOf;
 
+import java.util.List;
+
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 
 public abstract class AbstractUiFragment {
     protected WebDriver webDriver;
+    
     public AbstractUiFragment(WebDriver driver) {
         this.webDriver = driver;
     }
+    
     public void waitUntil(ExpectedCondition<?> condition) {
         PageWait.wait(webDriver).until(condition);
     }
+    
     protected void waitTextInElement(WebElement element, String expected) {
         waitVisibilityOfElement(element);
         waitUntil(textToBePresentInElement(element, expected));
+    }
+    
+    protected void waitAttributeValueInElement(WebElement element, String attribute, String expected) {
+        waitVisibilityOfElement(element);
+        waitUntil(attributeToBe(element, attribute, expected));
     }
 
     protected void waitVisibilityOfElement(WebElement element) {
         waitUntil(visibilityOf(element));
     }
+    
+    protected void waitVisibilityOfElements(WebElement... elements) {
+    	for (int i = 0; i < elements.length; ++i) {
+    		waitVisibilityOfElement(elements[i]);
+    	}  
+    }
 
     protected void waitInvisibilityOfElement(WebElement element) {
         waitUntil(invisibilityOf(element));
     }
+    
+    protected void waitUntilElementExists(By by) {
+        waitUntil(new ExpectedCondition<Boolean>() {
+            @Override
+            public Boolean apply(WebDriver input) {
+            	return input.findElements(by).size() > 0;
+            }
+        });
+    }
+    
+    protected void waitUntilElementNotExists(By by) {
+        waitUntil(new ExpectedCondition<Boolean>() {
+            @Override
+            public Boolean apply(WebDriver input) {
+            	return input.findElements(by).size() == 0;
+            }
+        });
+    }
+    
+    protected WebElement getElementWhenItExists(By by) {
+    	waitUntilElementExists(by);
+    	return webDriver.findElement(by);
+    }
+    
+    protected List<WebElement> getElementsWhenTheyExists(By by) {
+    	waitUntilElementExists(by);
+    	return webDriver.findElements(by);
+    }
+    
 }

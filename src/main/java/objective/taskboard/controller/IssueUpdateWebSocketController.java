@@ -39,6 +39,6 @@ public class IssueUpdateWebSocketController {
     
     @EventListener
     public void handleUpdates(IssuesUpdateEvent event) {
-        template.convertAndSend("/issues/updates", event.updates);
+        template.convertAndSend("/topic/issues/updates", event.updates);
     }
 }

@@ -291,10 +291,15 @@ function Taskboard() {
         var socket = new SockJS('/taskboard-websocket');
         stompClient = Stomp.over(socket);
         stompClient.connect({}, function (frame) {
-            stompClient.subscribe('/issues/updates', function (issues) {
+            stompClient.subscribe('/topic/issues/updates', function (issues) {
             	handleIssueUpdate(taskboardHome, issues)
             });
-            stompClient.subscribe('/cache-state/updates', function (response) {
+
+			stompClient.subscribe('/user/topic/sizing-import/status', function(status) {
+				handleSizingImportStatus(taskboardHome, status);
+			});
+
+            stompClient.subscribe('/topic/cache-state/updates', function (response) {
                 taskboardHome.fire("iron-signal", {name:"issue-cache-state-updated", data:{
                     newstate: JSON.parse(response.body)
                 }})
@@ -324,6 +329,13 @@ function Taskboard() {
         	message: "Jira issues have been updated.",
         	updatedIssueKeys: updatedIssueKeys
         }})
+    }
+
+    function handleSizingImportStatus(taskboardHome, response) {
+    	var status = JSON.parse(response.body);
+    	taskboardHome.fire("iron-signal", {name:"sizing-import-status", data:{
+        	status: status
+        }});
     }
     
     function getPreviousIssueInstance(key) {

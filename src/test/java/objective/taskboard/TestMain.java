@@ -29,8 +29,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.scheduling.annotation.EnableScheduling;
-
 import objective.taskboard.driver.H2DriverNoCommit;
+import objective.taskboard.testUtils.JiraMockServer;
 
 @EnableScheduling
 @SpringBootApplication

@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import objective.taskboard.cycletime.CycleTimeProperties;
 import objective.taskboard.cycletime.HolidayService;
 import objective.taskboard.data.User;
+import objective.taskboard.google.GoogleApiConfig;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraService;
 
@@ -51,6 +52,9 @@ public class HomeController {
 
     @Autowired
     private CycleTimeProperties cycleTimePropeties;
+    
+    @Autowired
+    private GoogleApiConfig googleApiConfig;
 
     @RequestMapping("/")
     public String home(Model model) {
@@ -65,6 +69,7 @@ public class HomeController {
         model.addAttribute("cycleTimeEndBusinessHours", serialize(cycleTimePropeties.getEndBusinessHours()));
         model.addAttribute("holidays", serialize(holidayService.getHolidays()));
         model.addAttribute("invalidTeam", INVALID_TEAM);
+        model.addAttribute("googleClientId", googleApiConfig.getClientId());
         return "index";
     }
 
