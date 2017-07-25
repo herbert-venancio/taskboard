@@ -26,7 +26,7 @@ node("general-purpose") {
         try {
             stage('Build') {
                 try {
-                    timeout(time: 10, unit: TimeUnit.MINUTES) {
+                    timeout(time: 15, unit: TimeUnit.MINUTES) {
                         wrap([$class: 'Xvnc']) {
                             sh "${mvnHome}/bin/mvn --batch-mode -V -U clean verify -P packaging-war,dev"
                         }
