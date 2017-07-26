@@ -72,4 +72,18 @@ public class FollowUpController {
     public IssueBufferState getState() {
         return provider.getFollowupState();
     }
+
+    @RequestMapping("generic-template")
+    public ResponseEntity<Object> genericTemplate() {
+        try {
+            Resource resource = followUpFacade.getGenericTemplate();
+            return ResponseEntity.ok()
+                  .contentLength(resource.contentLength())
+                  .header("Content-Disposition","attachment; filename=generic-followup-template.xlsm")
+                  .body(resource);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(e.getMessage() == null ? e.toString() : e.getMessage(), INTERNAL_SERVER_ERROR);
+        }
+    }
 }

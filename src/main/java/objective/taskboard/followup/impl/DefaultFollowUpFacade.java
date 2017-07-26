@@ -26,8 +26,10 @@ import objective.taskboard.followup.*;
 import objective.taskboard.followup.data.Template;
 import objective.taskboard.issueBuffer.IssueBufferState;
 import objective.taskboard.jira.ProjectService;
+import objective.taskboard.utils.IOUtilities;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -127,5 +129,10 @@ public class DefaultFollowUpFacade implements FollowUpFacade {
         if(oldPath != null) {
             followUpTemplateStorage.deleteFile(oldPath);
         }
+    }
+
+    @Override
+    public Resource getGenericTemplate() {
+        return IOUtilities.asResource(DefaultFollowUpFacade.class.getResource("/followup-template/generic-followup-template.xlsm"));
     }
 }

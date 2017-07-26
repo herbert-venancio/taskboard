@@ -38,6 +38,10 @@
         paper-listbox {
             background: #f5f5f5 !important;
         }
+
+        paper-button {
+            text-transform: none;
+        }
         
     </style>
     <template>
@@ -84,6 +88,13 @@
                         </div>
                     </form>
                 </div>
+            </div>
+            <div>
+                <paper-button title="Download Sample Followup Spreadsheet Template"
+                                   on-tap="downloadGenericTemplate">
+                    <iron-icon icon="file-download"></iron-icon>
+                    Sample Template
+                </paper-button>
             </div>
             <div class="modal-footer">
                 <paper-spinner active hidden$="{{!showLoadingSpinner}}">...</paper-spinner>
@@ -330,6 +341,10 @@
                 
                 close: function() {
                     this.$.modal.close();
+                },
+
+                downloadGenericTemplate: function() {
+                    window.location = "ws/followup/generic-template";
                 }
             });
         })();
