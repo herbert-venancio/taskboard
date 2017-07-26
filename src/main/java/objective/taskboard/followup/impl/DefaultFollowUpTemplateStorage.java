@@ -26,8 +26,8 @@ import objective.taskboard.followup.FollowUpTemplateStorage;
 import objective.taskboard.followup.FollowUpTemplateValidator;
 import objective.taskboard.followup.UpdateFollowUpService;
 import objective.taskboard.utils.IOUtilities;
+import objective.taskboard.utils.ZipUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -36,8 +36,6 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 @Service
 public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
@@ -103,27 +101,7 @@ public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
 
     private Path decompressTemplate(Path pathFollowup, InputStream stream) throws IOException {
         Path temp = pathFollowup.resolve("temp");
-
-        ZipInputStream zipInputStream = null;
-        try {
-            zipInputStream = new ZipInputStream(stream);
-
-            ZipEntry entry;
-            while ((entry = zipInputStream.getNextEntry()) != null) {
-                Path entryPath = temp.resolve(entry.getName());
-                if (entry.isDirectory()) {
-                    Files.createDirectories(entryPath);
-                    continue;
-                } else {
-                    Files.createDirectories(entryPath.getParent());
-                }
-                Files.copy(zipInputStream, entryPath);
-            }
-
-            return temp;
-        } finally {
-            if (zipInputStream != null)
-                IOUtils.closeQuietly(zipInputStream);
-        }
+        ZipUtils.unzip(stream, temp);
+        return temp;
     }
 }
