@@ -14,6 +14,6 @@ public class IssueCacheStateUpdateWebSocketController {
     
     @EventListener
     public void handleUpdates(IssueCacheUpdateEvent event) {
-        template.convertAndSend("/cache-state/updates", event.getState());
+        template.convertAndSend("/topic/cache-state/updates", event.getState());
     }
 }

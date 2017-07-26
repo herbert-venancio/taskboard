@@ -198,6 +198,10 @@ public class JiraProperties {
         private IssueTypeDetails demand;
         
         @NotNull
+        @Valid
+        private IssueTypeDetails defaultFeature;
+        
+        @NotNull
         private List<IssueTypeDetails> features; 
         
         @Data
