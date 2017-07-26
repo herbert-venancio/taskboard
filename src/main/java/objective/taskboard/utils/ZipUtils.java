@@ -78,7 +78,7 @@ public class ZipUtils {
     }
 
     public static void unzip(Stream<ZipStreamEntry> stream, Path output) {
-        if (Files.isRegularFile(output))
+        if (output.toFile().isFile())
             throw new RuntimeException("Output must be a directory");
 
         try {
@@ -105,7 +105,7 @@ public class ZipUtils {
         try (Stream<Path> stream = Files.walk(input)) {
             try (ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(output))) {
                 stream
-                        .filter(path -> !Files.isDirectory(path))
+                        .filter(path -> path.toFile().isFile())
                         .forEach(path -> {
                             try {
                                 ZipEntry entry = new ZipEntry(input.relativize(path).toString());
@@ -122,7 +122,7 @@ public class ZipUtils {
     }
 
     public static void zip(Stream<ZipStreamEntry> stream, Path output) {
-        if (Files.isDirectory(output))
+        if (output.toFile().isDirectory())
             throw new RuntimeException("Output must be a file");
 
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(output))) {

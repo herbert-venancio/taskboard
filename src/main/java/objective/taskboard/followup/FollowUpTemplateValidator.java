@@ -33,7 +33,7 @@ import java.util.Locale;
 public class FollowUpTemplateValidator {
 
     public void validate(Path path) {
-        if(!Files.exists(path))
+        if(!path.toFile().exists())
             throw new InvalidTemplateException();
         // The following files must exist
         resolve(path, "xl/sharedStrings.xml");
@@ -57,7 +57,7 @@ public class FollowUpTemplateValidator {
 
     private static Path resolve(Path base, String other) {
         Path path = base.resolve(other);
-        if(Files.notExists(path))
+        if(!path.toFile().exists())
             throw new InvalidTemplateException(MessageKey.PATH_NOT_FOUND, other);
         return path;
     }

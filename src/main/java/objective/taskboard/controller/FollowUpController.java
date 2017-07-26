@@ -1,5 +1,3 @@
-package objective.taskboard.controller;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,10 +18,12 @@ package objective.taskboard.controller;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.controller;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +37,7 @@ import objective.taskboard.followup.FollowUpGenerator;
 import objective.taskboard.followup.FollowupDataProvider;
 import objective.taskboard.issueBuffer.IssueBufferState;
 
+@Slf4j
 @RestController
 @RequestMapping("/ws/followup")
 public class FollowUpController {
@@ -63,7 +64,7 @@ public class FollowUpController {
                   .header("Content-Disposition","attachment; filename=Followup.xlsm")
                   .body(resource);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.warn("Error generating followup spreadsheet", e);
             return new ResponseEntity<>(e.getMessage() == null ? e.toString() : e.getMessage(), INTERNAL_SERVER_ERROR);
         }
     }
@@ -82,7 +83,7 @@ public class FollowUpController {
                   .header("Content-Disposition","attachment; filename=generic-followup-template.xlsm")
                   .body(resource);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.warn("Error while serving genericTemplate", e);
             return new ResponseEntity<>(e.getMessage() == null ? e.toString() : e.getMessage(), INTERNAL_SERVER_ERROR);
         }
     }
