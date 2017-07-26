@@ -1,4 +1,4 @@
-package objective.taskboard;
+package objective.taskboard.testUtils;
 
 /*-
  * [LICENSE]
@@ -44,7 +44,9 @@ import org.codehaus.jettison.json.JSONObject;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import objective.taskboard.RequestBuilder;
 import objective.taskboard.utils.IOUtilities;
+
 import spark.Spark;
 
 
@@ -65,7 +67,7 @@ public class JiraMockServer {
         Spark.exception(Exception.class, (ex, req, res) -> {
             ex.printStackTrace();
         });
-        
+
         post("/reset", (req, res) ->{
             dirtySearchIssuesByKey.clear();
             username = null;
@@ -99,10 +101,29 @@ public class JiraMockServer {
             return loadMockData("priority.response.json");
         });
         
+        get("/rest/api/latest/issue/createmeta",  (req, res) ->{
+            return loadMockData("createmeta.response.json");
+        });
+
+        post("/rest/api/latest/issue",  (req, res) ->{
+            countIssueCreated++;
+            String loadMockData = loadMockData("createissue.response.json");
+            loadMockData = loadMockData.replace("[ISSUE-KEY]","TASK-"+countIssueCreated);
+            return loadMockData;
+        });
+
+        post("/rest/api/latest/issueLink",  (req, res) ->{
+            return "";
+        });
+
         get("rest/api/latest/issuetype",  (req, res) ->{
             return loadMockData("issuetype.response.json");
         });
-        
+
+        get("rest/api/latest/mypermissions",  (req, res) ->{
+            return loadMockData("mypermissions.response.json");
+        });
+
         get("rest/api/latest/user",  (req, res) ->{
             String loadMockData = loadMockData("user.response.json");
             loadMockData = loadMockData.replace("\"displayName\": \"Taskboard\",", "\"displayName\": \"" + username + "\",");
@@ -173,7 +194,7 @@ public class JiraMockServer {
             res.status(204);
             return "";
         });
-        
+
         post("/rest/api/latest/issue/:issueId/transitions", (req, res)-> {
             String issueKey = issueKeyByIssueId.get(req.params("issueId"));
             JSONObject issueSearchData = getIssueDataForKey(issueKey);
@@ -199,6 +220,13 @@ public class JiraMockServer {
             
             return "";
         });
+
+        get("*", (req, res) -> {
+            res.type("application/json");
+            res.status(404);
+            return "{errorMessages: [\"Jira endpoint '" + req.pathInfo() + "' not found in the mock server. "
+                    + "See JiraMockServer.java to configure a new rote.\"]}";
+        });
     }
 
     private static JSONObject getIssueDataForKey(String issueKey) throws JSONException {
@@ -209,6 +237,8 @@ public class JiraMockServer {
         }
         return issueSearchData;
     }
+
+    private static int countIssueCreated;
 
     private static void setCoassignee(JSONObject coassigneeField, String aKey, JSONArray coassignees) throws JSONException {
         for (int i = 0; i < coassignees.length(); i++) {

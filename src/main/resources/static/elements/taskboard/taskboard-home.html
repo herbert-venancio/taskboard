@@ -250,8 +250,12 @@
                       on-iron-signal-issue-cache-state-updated="cacheStateUpdated"
                       >
         </iron-signals>
+
         <followup-dialog id="followupdialog"></followup-dialog>
         <followup-crud-modal id="followupCrudModal"></followup-crud-modal>
+		
+        <sizing-import id="sizingimport"></sizing-import>
+
         <paper-spinner id="spinner" active="{{!done}}" alt="Loading..."></paper-spinner>
 
         <paper-drawer-panel disable-swipe right-drawer force-narrow drawer-width="350px">
@@ -302,6 +306,10 @@
                             <paper-icon-button icon="file-upload" title="Followup Template"
                                                class="template-followup-button" on-tap="openFollowupCrudModal"></paper-icon-button>
                         </div>
+						<div>
+                            <paper-icon-button icon="save" title="Import Sizing Spreadsheet"
+                                               class="sizing-button" on-tap="openSizingImport"></paper-icon-button>
+						</div>
                     </paper-material>
                     <board-table id="table" conf={{conf}} aspects-filter="{{aspectsFilter}}"></board-table>
                 </div>
@@ -506,7 +514,11 @@
                 openFollowupDialog : function() {
                 	this.$.followupdialog.opendialog();
                 },
-                
+
+                openSizingImport: function() {
+                	this.$.sizingimport.opendialog();
+                },
+
                 openFollowupCrudModal: function() {
                 	this.$.followupCrudModal.open();
                 },
