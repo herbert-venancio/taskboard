@@ -7,10 +7,11 @@ import static org.liferay.sdlc.SDLCPrUtilities.*
 
 properties([
         parameters([
-                booleanParam(
-                        defaultValue: false
-                        , description: 'Runs release step'
-                        , name: 'RELEASE')
+            disableConcurrentBuilds(),
+            booleanParam(
+                defaultValue: false
+                , description: 'Runs release step'
+                , name: 'RELEASE')
         ])
 ])
 
