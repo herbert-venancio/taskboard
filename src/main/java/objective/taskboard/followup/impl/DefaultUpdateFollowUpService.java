@@ -23,6 +23,7 @@ package objective.taskboard.followup.impl;
 import objective.taskboard.followup.FollowUpTemplateValidator;
 import objective.taskboard.followup.UpdateFollowUpService;
 import objective.taskboard.utils.XmlUtils;
+import objective.taskboard.utils.ZipUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.text.StrSubstitutor;
@@ -36,9 +37,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
 
 @Service
 public class DefaultUpdateFollowUpService implements UpdateFollowUpService {
@@ -51,28 +49,8 @@ public class DefaultUpdateFollowUpService implements UpdateFollowUpService {
     @Override
     public Path decompressTemplate(InputStream stream) throws IOException {
         Path pathFollowup = Files.createTempDirectory("Followup");
-
-        ZipInputStream zipInputStream = null;
-        try {
-            zipInputStream = new ZipInputStream(stream);
-
-            ZipEntry entry;
-            while ((entry = zipInputStream.getNextEntry()) != null) {
-                Path entryPath = pathFollowup.resolve(entry.getName());
-                if (entry.isDirectory()) {
-                    Files.createDirectories(entryPath);
-                    continue;
-                } else {
-                    Files.createDirectories(entryPath.getParent());
-                }
-                Files.copy(zipInputStream, entryPath);
-            }
-
-            return pathFollowup;
-        } finally {
-            if (zipInputStream != null)
-                IOUtils.closeQuietly(zipInputStream);
-        }
+        ZipUtils.unzip(stream, pathFollowup);
+        return pathFollowup;
     }
 
     @Override
@@ -107,17 +85,8 @@ public class DefaultUpdateFollowUpService implements UpdateFollowUpService {
 
     @Override
     public Path compressTemplate(Path decompressed, Path pathFollowupXLSM) throws IOException {
-        ZipOutputStream zipOutputStream = null;
-        try {
-            zipOutputStream = new ZipOutputStream(new BufferedOutputStream(Files.newOutputStream(pathFollowupXLSM)));
-            Iterable<Path> it = Files.walk(decompressed)::iterator;
-            for (Path fileInFollowup : it)
-                compressFile(fileInFollowup, decompressed.relativize(fileInFollowup).toString(), zipOutputStream);
-            return pathFollowupXLSM;
-        } finally {
-            if (zipOutputStream != null)
-                zipOutputStream.close();
-        }
+        ZipUtils.zip(decompressed, pathFollowupXLSM);
+        return pathFollowupXLSM;
     }
 
     // ---
@@ -145,14 +114,5 @@ public class DefaultUpdateFollowUpService implements UpdateFollowUpService {
         } catch (TransformerException e) {
             throw new FollowUpTemplateValidator.InvalidTemplateException(e);
         }
-    }
-
-    private void compressFile(Path path, String zipEntryName, ZipOutputStream zipOutputStream) throws IOException {
-        if (Files.isDirectory(path))
-            return;
-
-        ZipEntry entry = new ZipEntry(zipEntryName);
-        zipOutputStream.putNextEntry(entry);
-        Files.copy(path, zipOutputStream);
     }
 }

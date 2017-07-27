@@ -1,5 +1,3 @@
-package objective.taskboard.it;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,6 +18,7 @@ package objective.taskboard.it;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.it;
 
 import static org.openqa.selenium.support.PageFactory.initElements;
 
@@ -108,7 +107,7 @@ public class TemplateFollowupDialog extends AbstractUiFragment {
         File file = null;
         
         try {
-            file = new File(UploadTemplateIT.class.getResource("/objective/taskboard/followup/OkFollowupTemplate.xlsm").toURI());
+            file = new File(TemplateFollowupDialog.class.getResource("/objective/taskboard/followup/OkFollowupTemplate.xlsm").toURI());
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }

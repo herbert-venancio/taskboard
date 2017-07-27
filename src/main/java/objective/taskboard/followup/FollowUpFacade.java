@@ -22,6 +22,7 @@ package objective.taskboard.followup;
 
 import objective.taskboard.controller.TemplateData;
 import objective.taskboard.issueBuffer.IssueBufferState;
+import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -39,4 +40,6 @@ public interface FollowUpFacade {
     void deleteTemplate(Long id) throws IOException;
 
     List<TemplateData> getTemplatesForCurrentUser();
+
+    Resource getGenericTemplate();
 }

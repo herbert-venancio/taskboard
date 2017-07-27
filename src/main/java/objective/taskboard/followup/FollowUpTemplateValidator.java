@@ -1,5 +1,3 @@
-package objective.taskboard.followup;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,20 +18,35 @@ package objective.taskboard.followup;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.followup;
 
 import objective.taskboard.utils.XmlUtils;
+import org.springframework.context.MessageSource;
+import org.springframework.context.support.StaticMessageSource;
 import org.w3c.dom.NodeList;
 
 import javax.xml.transform.TransformerException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Locale;
 
 public class FollowUpTemplateValidator {
 
     public void validate(Path path) {
-        Path sheetXml = searchFromJiraSheet(path);
-        if(!isEmpty(XmlUtils.xpath(sheetXml.toFile(), "//sheetData/row[@r>1]/c/v/text()"))) {
+        if(!path.toFile().exists())
             throw new InvalidTemplateException();
-        }
+        // The following files must exist
+        resolve(path, "xl/sharedStrings.xml");
+        resolve(path, "xl/tables/table7.xml");
+        Path wbXml = resolve(path, "xl/workbook.xml");
+        Path wbRelXml = resolve(path, "xl/_rels/workbook.xml.rels");
+
+        // Must exist a worksheet with name "From Jira"
+        String relId = xpath(wbXml, "//sheet[@name='From Jira']/@id", MessageKey.WORKSHEET_NOT_FOUND, "From Jira");
+        String sheetId = xpath(wbRelXml, "//Relationship[@Id='" + relId + "']/@Target", MessageKey.CORRUPTED_FILE);
+        Path sheetXml = resolve(path, "xl/" + sheetId);
+        // "From Jira" must be empty
+        xpathEmpty(sheetXml, "//sheetData/row[@r>1]/c/v/text()");
     }
 
     // ---
@@ -42,15 +55,41 @@ public class FollowUpTemplateValidator {
         return nodeList.getLength() == 0;
     }
 
-    private static Path searchFromJiraSheet(Path decompressed) {
+    private static Path resolve(Path base, String other) {
+        Path path = base.resolve(other);
+        if(!path.toFile().exists())
+            throw new InvalidTemplateException(MessageKey.PATH_NOT_FOUND, other);
+        return path;
+    }
+
+    private static String xpath(Path xmlFile, String locator, MessageKey key, Object... args) {
+        NodeList content = XmlUtils.xpath(xmlFile.toFile(), locator);
+        if(isEmpty(content))
+            throw new InvalidTemplateException(key, args);
         try {
-            Path wbXml = decompressed.resolve("xl/workbook.xml");
-            String relId = XmlUtils.asString(XmlUtils.xpath(wbXml.toFile(), "//sheet[@name='From Jira']/@id"));
-            Path wbRelXml = decompressed.resolve("xl/_rels/workbook.xml.rels");
-            String sheetId = XmlUtils.asString(XmlUtils.xpath(wbRelXml.toFile(), "//Relationship[@Id='" + relId + "']/@Target"));
-            return decompressed.resolve("xl/" + sheetId);
+            return XmlUtils.asString(content);
         } catch (TransformerException e) {
-            throw new InvalidTemplateException(e);
+            throw new InvalidTemplateException(e, key, args);
+        }
+    }
+
+    private static void xpathEmpty(Path sheetXml, String locator) {
+        NodeList content = XmlUtils.xpath(sheetXml.toFile(), locator);
+        if(!isEmpty(content)) {
+            throw new InvalidTemplateException(MessageKey.WORKSHEET_NOT_EMPTY, "From Jira");
+        }
+    }
+
+    public enum MessageKey {
+        CORRUPTED_FILE("invalid.template.corrupted")
+        , PATH_NOT_FOUND("invalid.template.path-not-found")
+        , WORKSHEET_NOT_FOUND("invalid.template.worksheet-not-found")
+        , WORKSHEET_NOT_EMPTY("invalid.template.worksheet-not-empty");
+
+        private final String code;
+
+        MessageKey(String key) {
+            this.code = key;
         }
     }
 
@@ -58,12 +97,29 @@ public class FollowUpTemplateValidator {
 
     	private static final long serialVersionUID = 1L;
 		
-    	private static final String MESSAGE = "Invalid Template";
+    	public static final String DEFAULT_MESSAGE = "Invalid file, cannot be used as template";
+        private static final MessageSource MESSAGES;
+
+        static {
+            StaticMessageSource source = new StaticMessageSource();
+            source.addMessage(MessageKey.CORRUPTED_FILE.code, Locale.ENGLISH, "Invalid file, seems to be corrupted");
+            source.addMessage(MessageKey.PATH_NOT_FOUND.code, Locale.ENGLISH, "Invalid file, could not find path \"{0}\" within template");
+            source.addMessage(MessageKey.WORKSHEET_NOT_FOUND.code, Locale.ENGLISH, "Invalid template, Worksheet \"{0}\" could not be found");
+            source.addMessage(MessageKey.WORKSHEET_NOT_EMPTY.code, Locale.ENGLISH, "Invalid template, Worksheet \"{0}\" should be empty");
+            MESSAGES = source;
+        }
+
         public InvalidTemplateException() {
-            super(MESSAGE);
+            super(DEFAULT_MESSAGE);
         }
         public InvalidTemplateException(Exception e) {
-            super(MESSAGE, e);
+            super(DEFAULT_MESSAGE, e);
+        }
+        public InvalidTemplateException(MessageKey key, Object... args) {
+            super(MESSAGES.getMessage(key.code, args, DEFAULT_MESSAGE, Locale.ENGLISH));
+        }
+        public InvalidTemplateException(Throwable cause, MessageKey key, Object... args) {
+            super(MESSAGES.getMessage(key.code, args, DEFAULT_MESSAGE, Locale.ENGLISH), cause);
         }
     }
 }
