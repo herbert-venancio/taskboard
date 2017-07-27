@@ -92,13 +92,10 @@ public class JiraIssueService {
     }
 
     public List<Issue> searchIssueSubTasksAndDemandedByKey(String key) {
-    	String jql = "parent = " + key;
-    	String linkeTypes = properties.getIssuelink().getDemand().getName();
-    	if (!StringUtils.isEmpty(linkeTypes)) {
-    		for (String linkType : Arrays.asList(linkeTypes.split("\\s*,\\s*"))) {
-    			jql += " OR issuefunction in linkedIssuesOf('key = " + key + "', '" + linkType + "')";
-    		}
-    	}
+    	String linkeType = properties.getIssuelink().getDemand().getName();
+    	String jql = "parent = " + key +  " OR" + 
+    	        " (issuefunction in linkedIssuesOf('key = " + key + "') AND issueFunction in hasLinkType('" + linkeType + "'))";
+
         return searchIssues(jql);
     }
 
