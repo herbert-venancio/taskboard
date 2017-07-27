@@ -6,8 +6,8 @@ import java.util.concurrent.TimeUnit
 import static org.liferay.sdlc.SDLCPrUtilities.*
 
 properties([
+        disableConcurrentBuilds(),
         parameters([
-            disableConcurrentBuilds(),
             booleanParam(
                 defaultValue: false
                 , description: 'Runs release step'
