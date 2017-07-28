@@ -95,7 +95,7 @@ public class JiraIssueService {
     }
 
     public List<Issue> searchIssueSubTasksAndDemandedByKey(String key) {
-        IssuelinksType demandLink = metadataService.getIssueLinksMetadata().get(properties.getIssuelink().getDemandId());
+        IssuelinksType demandLink = metadataService.getIssueLinksMetadata().get(properties.getIssuelink().getDemandId().toString());
     	String jql = "parent = " + key +  " OR" + 
     	        " issuefunction in linkedIssuesOf('key = " + key + "', '" + demandLink.getOutward() + "')";
 

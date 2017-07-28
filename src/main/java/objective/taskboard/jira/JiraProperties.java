@@ -174,7 +174,8 @@ public class JiraProperties {
         private List<String> dependencies;
         
         @NotNull
-        private String demandId;
+        @DecimalMin("1")
+        private Integer demandId;
         
     }
     

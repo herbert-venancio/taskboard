@@ -49,7 +49,7 @@ class JiraUtils {
     }
 
     public IssuelinksType getDemandLink() {
-        return metadataService.getIssueLinksMetadata().get(jiraProperties.getIssuelink().getDemandId());
+        return metadataService.getIssueLinksMetadata().get(jiraProperties.getIssuelink().getDemandId().toString());
     }
 
     public CimIssueType getFeatureMetadata(String projectKey) {
