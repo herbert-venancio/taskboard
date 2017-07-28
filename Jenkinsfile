@@ -15,7 +15,7 @@ properties([
         ])
 ])
 
-node("general-purpose") {
+node("single-executor") {
     // start with a clean workspace
     stage('Checkout') {
         deleteDir()
