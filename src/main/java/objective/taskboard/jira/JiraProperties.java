@@ -174,21 +174,8 @@ public class JiraProperties {
         private List<String> dependencies;
         
         @NotNull
-        @Valid
-        private LinkDetails demand;
+        private String demandId;
         
-        public IssueLink(){}
-        public IssueLink(LinkDetails details){this.demand=details;}
-        
-        @Data
-        public static class LinkDetails {
-            @NotNull
-            @NotEmpty
-            private String name;
-            
-            public LinkDetails(){}
-            public LinkDetails(String name){this.name=name;}
-        }
     }
     
     @Data

@@ -209,9 +209,8 @@ class SizingImporter {
     }
 
     private Optional<String> findDemandKeyOfFeature(String featureIssueKey) {
-        Issue featureIssue = jiraUtils.getIssue(featureIssueKey);
-        String demandIssueLinkName = jiraProperties.getIssuelink().getDemand().getName();
-       
+        Issue featureIssue = jiraUtils.getIssue(featureIssueKey);        
+        String demandIssueLinkName = jiraUtils.getDemandLink().getName();
         return streamOf(featureIssue.getIssueLinks())
                 .filter(link -> link.getIssueLinkType().getName().equals(demandIssueLinkName))
                 .map(IssueLink::getTargetIssueKey)

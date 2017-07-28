@@ -12,6 +12,7 @@ import com.atlassian.jira.rest.client.api.domain.CimIssueType;
 import com.atlassian.jira.rest.client.api.domain.CimProject;
 import com.atlassian.jira.rest.client.api.domain.CustomFieldOption;
 import com.atlassian.jira.rest.client.api.domain.Issue;
+import com.atlassian.jira.rest.client.api.domain.IssuelinksType;
 import com.atlassian.jira.rest.client.api.domain.Permissions;
 import com.atlassian.jira.rest.client.api.domain.Project;
 import com.atlassian.jira.rest.client.api.domain.Version;
@@ -21,6 +22,7 @@ import com.atlassian.jira.rest.client.api.domain.input.MyPermissionsInput;
 import com.atlassian.jira.rest.client.api.domain.input.VersionInput;
 
 import objective.taskboard.jira.JiraProperties;
+import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
 
 @Component
@@ -28,11 +30,13 @@ class JiraUtils {
 
     private final JiraEndpointAsLoggedInUser jiraEndpoint;
     private final JiraProperties jiraProperties;
+    private final MetadataService metadataService;
     
     @Autowired
-    public JiraUtils(JiraEndpointAsLoggedInUser jiraEndpoint, JiraProperties jiraProperties) {
+    public JiraUtils(JiraEndpointAsLoggedInUser jiraEndpoint, JiraProperties jiraProperties, MetadataService metadataService) {
         this.jiraEndpoint = jiraEndpoint;
         this.jiraProperties = jiraProperties;
+        this.metadataService = metadataService;
     }
 
     public BasicIssue createIssue(IssueInputBuilder featureBuilder) {
@@ -40,8 +44,12 @@ class JiraUtils {
     }
 
     public void linkToDemand(String demandKey, String issueKey) {
-        String demandLinkName = jiraProperties.getIssuelink().getDemand().getName();
-        jiraEndpoint.executeRequest(client -> client.getIssueClient().linkIssue(new LinkIssuesInput(demandKey, issueKey, demandLinkName)));
+        IssuelinksType demandLink = getDemandLink();
+        jiraEndpoint.executeRequest(client -> client.getIssueClient().linkIssue(new LinkIssuesInput(demandKey, issueKey, demandLink.getName())));
+    }
+
+    public IssuelinksType getDemandLink() {
+        return metadataService.getIssueLinksMetadata().get(jiraProperties.getIssuelink().getDemandId());
     }
 
     public CimIssueType getFeatureMetadata(String projectKey) {
@@ -74,7 +82,7 @@ class JiraUtils {
     }
 
     public Version createVersion(String projectKey, String name) {
-        VersionInput versionInput = new VersionInput(projectKey, name, null, null, false, true);
+        VersionInput versionInput = new VersionInput(projectKey, name, null, null, false, false);
         return jiraEndpoint.executeRequest(client -> client.getVersionRestClient().createVersion(versionInput));
     }
 

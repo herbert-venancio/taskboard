@@ -58,7 +58,6 @@ import objective.taskboard.jira.JiraProperties.CustomField;
 import objective.taskboard.jira.JiraProperties.CustomField.CustomFieldDetails;
 import objective.taskboard.jira.JiraProperties.CustomField.TShirtSize;
 import objective.taskboard.jira.JiraProperties.IssueLink;
-import objective.taskboard.jira.JiraProperties.IssueLink.LinkDetails;
 import objective.taskboard.jira.JiraProperties.IssueType.IssueTypeDetails;
 import objective.taskboard.jira.MetadataService;
 
@@ -119,7 +118,7 @@ public class FollowupDataProviderImplTest {
         propertiesCustomField.setTShirtSize(tshirtSizeInfo);
         when(jiraProperties.getCustomfield()).thenReturn(propertiesCustomField);
         
-        IssueLink issueLink = new IssueLink(new LinkDetails("Demand"));
+        IssueLink issueLink = new IssueLink();
         when(jiraProperties.getIssuelink()).thenReturn(issueLink);
         
         JiraProperties.IssueType issueType = new JiraProperties.IssueType();
