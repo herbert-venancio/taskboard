@@ -11,6 +11,6 @@ public class TemplateFollowupCrudUiIt extends AuthenticatedIntegrationTest {
             .tryToCreateATemplateWithoutName()
             .tryToCreateATemplateWithoutSelectAProject()
             .tryToCreateATemplateWithoutSelectAFile()
-            .createATemplate(1);
+            .createATemplate("Template Success Test", 1);
     }
 }

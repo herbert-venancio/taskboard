@@ -23,6 +23,8 @@ package objective.taskboard.controller;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
+import java.util.Optional;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -34,7 +36,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import objective.taskboard.followup.FollowUpFacade;
 import objective.taskboard.followup.FollowUpGenerator;
-import objective.taskboard.followup.FollowupDataProvider;
 import objective.taskboard.issueBuffer.IssueBufferState;
 
 @Slf4j
@@ -43,13 +44,11 @@ import objective.taskboard.issueBuffer.IssueBufferState;
 public class FollowUpController {
 
     @Autowired
-    private FollowupDataProvider provider;
-
-    @Autowired
     private FollowUpFacade followUpFacade;
 
     @RequestMapping
-    public ResponseEntity<Object> download(@RequestParam("projects") String projects, @RequestParam("template") String template) {
+    public ResponseEntity<Object> download(@RequestParam("projects") String projects, @RequestParam("template") String template,
+            @RequestParam("date") Optional<String> date) {
         if (ObjectUtils.isEmpty(projects))
             return new ResponseEntity<>("You must provide a list of projects separated by comma", BAD_REQUEST);
         if (ObjectUtils.isEmpty(template))
@@ -57,7 +56,7 @@ public class FollowUpController {
 
         String [] includedProjects = projects.split(",");
         try {
-            FollowUpGenerator followupGenerator = followUpFacade.getGenerator(template);
+            FollowUpGenerator followupGenerator = followUpFacade.getGenerator(template, date);
             Resource resource = followupGenerator.generate(includedProjects);
             return ResponseEntity.ok()
                   .contentLength(resource.contentLength())
@@ -70,8 +69,8 @@ public class FollowUpController {
     }
 
     @RequestMapping("state")
-    public IssueBufferState getState() {
-        return provider.getFollowupState();
+    public IssueBufferState getState(@RequestParam("date") Optional<String> date) {
+        return followUpFacade.getFollowUpState(date);
     }
 
     @RequestMapping("generic-template")

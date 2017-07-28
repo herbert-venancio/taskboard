@@ -62,6 +62,7 @@
         .content-row {
             display: flex;
             margin-top: 10px;
+            align-items: center;
         }
         
         .content-row:first-child {
@@ -170,6 +171,11 @@
             text-decoration: underline;
             cursor: pointer;
         }
+
+        .date-warning {
+            width: 17px;
+            color: #ff9800;
+        }
     </style>
 
     <template>
@@ -208,7 +214,7 @@
                     <div class="content-row">
                         <div class="scroll" id="listOfProjects">
                             <template is="dom-repeat" items="{{projects}}">
-                                <paper-checkbox checked="{{item.checked}}" on-change='filterTemplates'>{{item.projectKey}}</paper-checkbox><br>
+                                <paper-checkbox checked="{{item.checked}}" on-change='filter'>{{item.projectKey}}</paper-checkbox><br>
                             </template>
                         </div>
                     </div>
@@ -221,6 +227,23 @@
                                 </template>
                             </paper-menu>
                         </paper-dropdown-menu>
+                    </div>
+                    <div class="content-row">
+                        <paper-dropdown-menu class="templates-followup-dropdown" hidden$={{!showDateCombo}}
+                            name="date" always-float-label label="Date" selected-item="{{selectedItemDate}}"
+                            disabled$={{disableDateCombo}} on-value-changed="dateOnChange" on-keydown="dateOnKeyDown">
+                            <paper-menu id="dateMenu" class="dropdown-content" selected="{{selectedIndexDate}}">
+                                <template is="dom-repeat" id="datesRepeat" items="{{availableDates}}" as="itemDate">
+                                    <paper-item value="{{itemDate}}">{{getLocaleDate(itemDate)}}</paper-item>
+                                </template>
+                            </paper-menu>
+                        </paper-dropdown-menu>
+                        <div class="clear-button">
+                            <paper-icon-button icon="clear" on-click="clearSelectedDate" hidden$={{!showClearDate}}>
+                            </paper-icon-button>
+                        </div>
+                        <iron-icon class="date-warning" icon="icons:warning" hidden$={{!disableDateCombo}}
+                            title="Multiple projects are not supported in past followup reports"></iron-icon>
                     </div>
 
                     <div class="error-message" hidden$="{{!errorMessage}}">{{errorMessage}}</div>
@@ -266,7 +289,7 @@
                         type: Array
                     },
                     template: {
-                        type: String
+                        type: Object
                     },
                     showTemplatesCombo: {
                     	type: Boolean
@@ -276,6 +299,24 @@
                     },
                     disableGenerateButton: {
                     	type: Boolean
+                    },
+                    showDateCombo: {
+                        type: Boolean
+                    },
+                    disableDateCombo: {
+                        type: Boolean
+                    },
+                    availableDates: {
+                        type: Array
+                    },
+                    selectedItemDate: {
+                        type: Object
+                    },
+                    selectedIndexDate: {
+                        type: Number
+                    },
+                    showClearDate: {
+                        type: Boolean
                     }
                 },
                 
@@ -288,6 +329,9 @@
                     this.showTemplatesCombo = false;
                     this.showNoTemplatesFoundWarning = false;
                     this.disableGenerateButton = true;
+                    this.showDateCombo = false;
+                    this.disableDateCombo = false;
+                    this.showClearDate = false;
                 },
                 
                 close: function() {
@@ -298,9 +342,14 @@
                 	this.close();
                 	this.fire('iron-signal', {name: 'open-template-followup-modal'})
                 },
-                
+
+                filter: function() {
+                    this.filterTemplates();
+                    this.filterDates();
+                },
+
                 filterTemplates: function() {
-                    var selectedProjects = this.filterSelectedProjects();
+                    var selectedProjects = this.filterSelectedProjectKeys();
                     var templates = [];
                     var oldSelection = this.template;
 
@@ -329,22 +378,57 @@
                         self.disableGenerateButton = !areTemplatesAvailable || self.selectedItem == -1;
                     });
                 },
-                
-                filterSelectedProjects: function() {
-                	if (!this.projects) return;
-                	
-                    var selectedKeys = [];
-                    this.projects.forEach(function(p, index) {
-                	    if (p.checked)
-                        	selectedKeys.push(p.projectKey);
+
+                filterDates: function() {
+                    var selectedProjects = this.filterSelectedProjects();
+
+                    var dates = [];
+                    selectedProjects.forEach(function(p) {
+                        dates = dates.concat(p.followUpDataHistory);
                     });
-                    return selectedKeys;
+                    this.availableDates = _.uniq(dates.sort(), true);
+                    this.showDateCombo = !this.showNoTemplatesFoundWarning && this.availableDates.length > 0;
+                    this.clearSelectedDate();
+
+                    this.disableDateCombo = this.showDateCombo && selectedProjects.length > 1;
                 },
-                
+
+                filterSelectedProjects: function() {
+                    if (!this.projects) return;
+                    return _.filter(this.projects, function(p) { return p.checked; });
+                },
+
+                filterSelectedProjectKeys: function() {
+                    return _.map(this.filterSelectedProjects(), function(p) { return p.projectKey; });
+                },
+
+                clearSelectedDate: function() {
+                    this.selectedItemDate = null;
+                    this.selectedIndexDate = null;
+                },
+
+                dateOnChange: function() {
+                    this.showClearDate = this.selectedItemDate ? true : false;
+                },
+
+                dateOnKeyDown: function(e) {
+                    if (e.key === 'Escape')
+                        this.clearSelectedDate();
+                },
+
+                getLocaleDate: function(item) {
+                    if (!item || item.length != 8)
+                        return item + " (invalid date format)";
+                    var year = item.substr(0, 4);
+                    var month = item.substr(4, 2) - 1;
+                    var day = item.substr(6, 2);
+                    return new Date(year, month, day).toLocaleDateString();
+                },
+
                 downloadFollowup: function() {
                 	var self = this;
                     self.errorMessage = "";
-                	var selectedKeys = this.filterSelectedProjects();
+                	var selectedKeys = this.filterSelectedProjectKeys();
                 	
                 	if (selectedKeys.length == 0) {
                 	    this.errorMessage = "Please, selected at least one project"
@@ -360,9 +444,10 @@
                 	
                 	var projectQuery = "projects="+selectedKeys.join(",")
                 	var templateQuery = "template=" + this.template.value;
+                    var dateQuery = "date=" + (this.selectedItemDate ? this.selectedItemDate.value : "");
                 	
                 	$.ajax({
-                        url: '/ws/followup/state',
+                        url: '/ws/followup/state?' + dateQuery,
                         success: function (data) {
                         	switch(data) {
 	                        	case "uninitialised":
@@ -375,7 +460,7 @@
 	                        		return;
                         	}
                         	self.close();
-                        	window.location = "ws/followup?"+projectQuery + "&" + templateQuery;
+                            window.location = "ws/followup?"+projectQuery + "&" + templateQuery + "&" + dateQuery;
                         },
                         error: function (jqXhr, textStatus, errorThrown) {
                             self.errorMessage = errorThrown;

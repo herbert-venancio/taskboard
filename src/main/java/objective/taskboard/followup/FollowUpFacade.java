@@ -31,9 +31,11 @@ import java.util.Optional;
 
 public interface FollowUpFacade {
 
-    FollowUpGenerator getGenerator(String templateName);
+    FollowUpGenerator getGenerator(String templateName, Optional<String> date);
 
-    IssueBufferState getFollowupState();
+    FollowupDataProvider getProvider(Optional<String> date);
+
+    IssueBufferState getFollowUpState(Optional<String> date);
 
     void createTemplate(String templateName, String projects, MultipartFile file) throws IOException;
     void updateTemplate(Long id, String templateName, String projects, Optional<MultipartFile> file) throws IOException;

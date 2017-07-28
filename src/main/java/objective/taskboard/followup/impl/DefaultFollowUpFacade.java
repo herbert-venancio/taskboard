@@ -46,7 +46,7 @@ public class DefaultFollowUpFacade implements FollowUpFacade {
     private FollowUpTemplateStorage followUpTemplateStorage;
 
     @Autowired
-    private FollowupDataProvider provider;
+    private FollowUpDataProviderFromCurrentState providerFromCurrentState;
 
     @Autowired
     private TemplateService templateService;
@@ -58,15 +58,22 @@ public class DefaultFollowUpFacade implements FollowUpFacade {
     private Converter<Template, TemplateData> templateConverter;
 
     @Override
-    public FollowUpGenerator getGenerator(String templateName) {
+    public FollowUpGenerator getGenerator(String templateName, Optional<String> date) {
         Template template = templateService.getTemplate(templateName);
         String path = template.getPath();
-        return new FollowUpGenerator(provider, followUpTemplateStorage.getTemplate(path));
+        return new FollowUpGenerator(getProvider(date), followUpTemplateStorage.getTemplate(path));
     }
 
     @Override
-    public IssueBufferState getFollowupState() {
-        return provider.getFollowupState();
+    public FollowupDataProvider getProvider(Optional<String> date) {
+        if (!date.isPresent() || date.get().isEmpty())
+            return providerFromCurrentState;
+        return new FollowUpDataProviderFromHistory(date.get());
+    }
+
+    @Override
+    public IssueBufferState getFollowUpState(Optional<String> date) {
+        return getProvider(date).getFollowupState();
     }
 
     @Override

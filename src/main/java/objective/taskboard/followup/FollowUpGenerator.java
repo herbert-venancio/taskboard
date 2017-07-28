@@ -24,6 +24,7 @@ package objective.taskboard.followup;
 import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.utils.IOUtilities;
 import objective.taskboard.utils.XmlUtils;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -36,29 +37,22 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
 
 import static java.util.stream.Collectors.toList;
+import static objective.taskboard.utils.IOUtilities.write;
+import static objective.taskboard.utils.ZipUtils.unzip;
+import static objective.taskboard.utils.ZipUtils.zip;
 import static org.apache.commons.lang.ObjectUtils.defaultIfNull;
 
 @Slf4j
 public class FollowUpGenerator {
-
-    private static final int BUFFER = 2048;
 
     private static final String PROPERTY_XML_SPACE_PRESERVE = " xml:space=\"preserve\"";
     private static final String TAG_T_IN_SHARED_STRINGS = "t";
@@ -66,9 +60,9 @@ public class FollowUpGenerator {
     private static final String PATH_SHEET7 = "xl/worksheets/sheet7.xml";
     private static final String PATH_SHARED_STRINGS = "xl/sharedStrings.xml";
     private static final String PATH_TABLE7 = "xl/tables/table7.xml";
-    private final FollowUpTemplate template;
 
-    private FollowupDataProvider provider;
+    private final FollowUpTemplate template;
+    private final FollowupDataProvider provider;
 
     public FollowUpGenerator(FollowupDataProvider provider, FollowUpTemplate template) {
         this.provider = provider;
@@ -79,21 +73,19 @@ public class FollowUpGenerator {
         File directoryTempFollowup = null;
         Path pathFollowupXLSM = null;
         try {
-            directoryTempFollowup = decompressTemplate();
+            directoryTempFollowup = decompressTemplate().toFile();
 
             Map<String, Long> sharedStrings = getSharedStringsInitial();
 
             File fileSheet7 = new File(directoryTempFollowup, PATH_SHEET7);
-            
-            
             List<FollowUpData> jiraData = provider.getJiraData(includedProjects);
-            writeXML(fileSheet7, generateJiraDataSheet(sharedStrings, includedProjects, jiraData));
+            write(fileSheet7, generateJiraDataSheet(sharedStrings, jiraData));
             File fileSharedStrings = new File(directoryTempFollowup, PATH_SHARED_STRINGS);
-            writeXML(fileSharedStrings, generateSharedStrings(sharedStrings));
+            write(fileSharedStrings, generateSharedStrings(sharedStrings));
             File table7 = new File(directoryTempFollowup, PATH_TABLE7);
-            writeXML(table7, generateTable7(FileUtils.readFileToString(table7, "UTF-8"), jiraData.size()));
+            write(table7, generateTable7(FileUtils.readFileToString(table7, "UTF-8"), jiraData.size()));
 
-            pathFollowupXLSM = compressXLSM(directoryTempFollowup);
+            pathFollowupXLSM = compress(directoryTempFollowup.toPath());
             return IOUtilities.asResource(Files.readAllBytes(pathFollowupXLSM));
         } catch (Exception e) {
             log.error(e.getMessage() == null ? e.toString() : e.getMessage());
@@ -106,96 +98,16 @@ public class FollowUpGenerator {
         }
     }
 
-    private File decompressTemplate() throws Exception {
+    private Path decompressTemplate() throws Exception {
         Path pathFollowup = Files.createTempDirectory("Followup");
-
-        ZipInputStream zipInputStream = null;
-        BufferedOutputStream bufferedOutput = null;
-        try {
-            InputStream inputStream = template.getPathFollowupTemplateXLSM().getInputStream();
-            zipInputStream = new ZipInputStream(new BufferedInputStream(inputStream));
-
-            ZipEntry entry;
-            while ((entry = zipInputStream.getNextEntry()) != null) {
-                Path entryPath = pathFollowup.resolve(entry.getName());
-                if (entry.isDirectory()) {
-                    Files.createDirectories(entryPath);
-                    continue;
-                } else {
-                    Files.createDirectories(entryPath.getParent());
-                }
-    
-                int count;
-                byte data[] = new byte[BUFFER];
-                FileOutputStream fos = new FileOutputStream(entryPath.toFile());
-                bufferedOutput = new BufferedOutputStream(fos, BUFFER);
-                while ((count = zipInputStream.read(data, 0, BUFFER)) != -1)
-                    bufferedOutput.write(data, 0, count);
-                bufferedOutput.flush();
-                bufferedOutput.close();
-            }
-
-            return pathFollowup.toFile();
-        } finally {
-            if (bufferedOutput != null)
-                bufferedOutput.close();
-            if (zipInputStream != null)
-                zipInputStream.close();
-        }
+        unzip(template.getPathFollowupTemplateXLSM().getInputStream(), pathFollowup);
+        return pathFollowup;
     }
 
-    private void writeXML(File file, String xml) throws Exception {
-        FileOutputStream output = null;
-        try {
-            output = new FileOutputStream(file);
-            output.write(xml.getBytes("UTF-8"));
-        } finally {
-            if (output != null)
-                output.close();
-        }
-    }
-
-    private Path compressXLSM(File directoryFollowup) throws Exception {
+    private Path compress(Path directoryFollowup) throws Exception {
         Path pathFollowupXLSM = Files.createTempFile("Followup", ".xlsm");
-        ZipOutputStream zipOutputStream = null;
-        try {
-            FileOutputStream fileOutputStream = new FileOutputStream(pathFollowupXLSM.toFile());
-            zipOutputStream = new ZipOutputStream(new BufferedOutputStream(fileOutputStream));
-            for (File fileInFollowup : directoryFollowup.listFiles())
-                compressFile(fileInFollowup, null, zipOutputStream);
-            return pathFollowupXLSM;
-        } finally {
-            if (zipOutputStream != null)
-                zipOutputStream.close();
-        }
-    }
-
-    private void compressFile(File file, String parentDirectory, ZipOutputStream zipOutputStream) throws Exception {
-        if (file == null || !file.exists())
-            return;
-
-        String zipEntryName = parentDirectory == null ? file.getName() : parentDirectory + "/" + file.getName();
-
-        if (file.isDirectory()) {
-            for (File f : file.listFiles())
-                compressFile(f, zipEntryName, zipOutputStream);
-            return;
-        }
-
-        zipOutputStream.putNextEntry(new ZipEntry(zipEntryName));
-
-        BufferedInputStream bufferedInput = null;
-        try {
-            FileInputStream fis = new FileInputStream(file);
-            bufferedInput = new BufferedInputStream(fis, BUFFER);
-            int count;
-            byte data[] = new byte[BUFFER];
-            while((count = bufferedInput.read(data, 0, BUFFER)) != -1)
-                zipOutputStream.write(data, 0, count);
-        } finally {
-            if (bufferedInput != null)
-                bufferedInput.close();
-        }
+        zip(directoryFollowup, pathFollowupXLSM);
+        return pathFollowupXLSM;
     }
 
     Map<String, Long> getSharedStringsInitial() throws ParserConfigurationException, SAXException, IOException {
@@ -213,12 +125,13 @@ public class FollowUpGenerator {
         }
         return sharedStrings;
     }
+
     String generateJiraDataSheet(Map<String, Long> sharedStrings, String [] includedProjects) {
         List<FollowUpData> jiraData = provider.getJiraData(includedProjects);
-        return generateJiraDataSheet(sharedStrings, includedProjects, jiraData);
+        return generateJiraDataSheet(sharedStrings, jiraData);
     }
 
-    String generateJiraDataSheet(Map<String, Long> sharedStrings, String [] includedProjects, List<FollowUpData> jiraData) {
+    String generateJiraDataSheet(Map<String, Long> sharedStrings, List<FollowUpData> jiraData) {
         String rowTemplate = getStringFromXML(template.getPathSheet7RowTemplate());
         StringBuilder rows = new StringBuilder();
         int rowNumber = 2;

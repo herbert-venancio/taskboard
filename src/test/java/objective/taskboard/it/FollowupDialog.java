@@ -25,6 +25,7 @@ import static org.openqa.selenium.support.PageFactory.initElements;
 
 import java.util.List;
 
+import org.apache.commons.lang.ObjectUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -33,13 +34,17 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 
 public class FollowupDialog extends AbstractUiFragment {
     private WebElement generateButton;
-    
+    private WebElement dateDropdown;
+    private WebElement clearDateButton;
+    private WebElement dateWarning;
+    private WebElement noMatchingTemplateWarning;
+    private WebElement setTemplateLink;
+
     @FindBy(css=".followup-button")
     private WebElement followupButton;
     
     @FindBy(id="followupdialog")
     private WebElement dialog;
-    
     
     public static FollowupDialog open(WebDriver webDriver) {
         return initElements(webDriver, FollowupDialog.class).open();
@@ -49,6 +54,11 @@ public class FollowupDialog extends AbstractUiFragment {
         followupButton.click();
         waitVisibilityOfElement(dialog);
         generateButton = dialog.findElement(By.id("generate"));
+        dateDropdown = dialog.findElement(By.name("date"));
+        clearDateButton = dialog.findElement(By.cssSelector(".clear-button paper-icon-button"));
+        dateWarning = dialog.findElement(By.className("date-warning"));
+        noMatchingTemplateWarning = dialog.findElement(By.className("warn-box"));
+        setTemplateLink = dialog.findElement(By.className("set-template-link"));
         return this;
     }
     
@@ -57,7 +67,35 @@ public class FollowupDialog extends AbstractUiFragment {
         projectsCheckbox.get(projectIndex).click();
         return this;
     }
-    
+
+    public FollowupDialog selectADate(String date) {
+        waitVisibilityOfElement(dateDropdown);
+        dateDropdown.click();
+
+        WebElement dateElement = dateDropdown.findElements(By.tagName("paper-item")).stream()
+            .filter(dateItem -> ObjectUtils.equals(date, dateItem.getAttribute("value")))
+            .findFirst().orElse(null);
+
+        if (dateElement == null)
+            throw new IllegalArgumentException("Element \"" + date + "\" not found");
+
+        waitVisibilityOfElement(dateElement);
+        dateElement.click();
+        return this;
+    }
+
+    public FollowupDialog clickClearDate() {
+        waitVisibilityOfElement(clearDateButton);
+        clearDateButton.click();
+        return this;
+    }
+
+    public TemplateFollowupDialog clickSetTemplateLink() {
+        waitVisibilityOfElement(setTemplateLink);
+        setTemplateLink.click();
+        return TemplateFollowupDialog.produce(webDriver);
+    }
+
     public FollowupDialog assertGenerateButtonIsDisabled() {
         waitUntil(new ExpectedCondition<Boolean>() {
             @Override
@@ -77,7 +115,42 @@ public class FollowupDialog extends AbstractUiFragment {
         });
         return this;
     }
-    
+
+    public FollowupDialog assertDateIsClear() {
+        waitAttributeValueInElement(dateDropdown, "value", "");
+        return this;
+    }
+
+    public FollowupDialog assertDateDropdownIsInvisible() {
+        waitInvisibilityOfElement(dateDropdown);
+        return this;
+    }
+
+    public FollowupDialog assertDateDropdownIsDisabled() {
+        waitAttributeValueInElement(dateDropdown, "disabled", "true");
+        return this;
+    }
+
+    public FollowupDialog assertDateWarningIsInvisible() {
+        waitInvisibilityOfElement(dateWarning);
+        return this;
+    }
+
+    public FollowupDialog assertDateWarningIsVisible() {
+        waitVisibilityOfElement(dateWarning);
+        return this;
+    }
+
+    public FollowupDialog assertNoMatchingTemplateWarningIsInvisible() {
+        waitInvisibilityOfElement(noMatchingTemplateWarning);
+        return this;
+    }
+
+    public FollowupDialog assertNoMatchingTemplateWarningIsVisible() {
+        waitVisibilityOfElement(noMatchingTemplateWarning);
+        return this;
+    }
+
     public FollowupDialog close() {
         dialog.findElement(By.cssSelector(".buttonClose")).click();
         return this;

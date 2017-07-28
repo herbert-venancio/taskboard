@@ -37,14 +37,10 @@ import objective.taskboard.data.Issue;
 import objective.taskboard.domain.converter.IssueMetadata;
 import objective.taskboard.domain.converter.JiraIssueToIssueConverter;
 import objective.taskboard.jira.JiraIssueService;
-import objective.taskboard.jira.ProjectService;
 
 @Slf4j
 @Service
 public class AllIssuesBufferService {
-    @Autowired
-    private ProjectService projectService;
-    
     @Autowired
     private JiraIssueToIssueConverter issueConverter;
     
@@ -97,9 +93,8 @@ public class AllIssuesBufferService {
         thread.start();
     }
     
-    public synchronized List<Issue> getAllIssuesVisibleToUser() {
+    public synchronized List<Issue> getAllIssues() {
         return allIssuesBuffer.values().stream()
-                .filter(t -> projectService.isProjectVisible(t.getProjectKey()))
                 .collect(toList());
     }
 }

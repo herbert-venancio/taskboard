@@ -31,6 +31,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static objective.taskboard.utils.IOUtilities.ENCODE_UTF_8;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
@@ -40,7 +41,7 @@ public class IOUtilitiesTest {
     public void asResource_fromURL() throws IOException {
         URL jar = IOUtilitiesTest.class.getResource("test.jar");
         Resource resource = IOUtilities.asResource(new URL("jar:" + jar.toString() + "!/test/res/file1.txt"));
-        String content = IOUtils.toString(resource.getInputStream(), "UTF-8");
+        String content = IOUtils.toString(resource.getInputStream(), ENCODE_UTF_8);
         assertThat(content, is("File 1 content"));
     }
 
@@ -48,7 +49,7 @@ public class IOUtilitiesTest {
     public void asResource_fromFile() throws IOException {
         File file = new File("target/test-classes/objective/taskboard/utils/file2.txt");
         Resource resource = IOUtilities.asResource(file);
-        String content = IOUtils.toString(resource.getInputStream(), "UTF-8");
+        String content = IOUtils.toString(resource.getInputStream(), ENCODE_UTF_8);
         assertThat(content, is("File 2 content"));
     }
 
@@ -56,7 +57,7 @@ public class IOUtilitiesTest {
     public void asResource_fromPath() throws IOException {
         Path path = Paths.get("target/test-classes/objective/taskboard/utils/file1.txt");
         Resource resource = IOUtilities.asResource(path);
-        String content = IOUtils.toString(resource.getInputStream(), "UTF-8");
+        String content = IOUtils.toString(resource.getInputStream(), ENCODE_UTF_8);
         assertThat(content, is("File 1 content"));
     }
 }
