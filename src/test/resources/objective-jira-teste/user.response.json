@@ -1,5 +1,5 @@
 {
-  "self": "http://54.68.128.117:8100/rest/api/latest/user?username=taskboard",
+  "self": "http://localhost:4567/rest/api/latest/user?username=taskboard",
   "key": "taskboard",
   "name": "taskboard",
   "avatarUrls": {
@@ -17,7 +17,7 @@
     "items": [
       {
         "name": "jira-users",
-        "self": "http://54.68.128.117:8100/rest/api/latest/group?groupname=jira-users"
+        "self": "http://localhost:4567/rest/api/latest/group?groupname=jira-users"
       }
     ]
   },

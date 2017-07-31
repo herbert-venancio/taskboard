@@ -19,7 +19,7 @@
             "displayName": "Taskboard",
             "key": "taskboard",
             "name": "taskboard",
-            "self": "http://54.68.128.117:8100/rest/api/latest/user?username=taskboard",
+            "self": "http://localhost:4567/rest/api/latest/user?username=taskboard",
             "timeZone": "America/Sao_Paulo"
         },
         "attachment": [],
@@ -41,7 +41,7 @@
             "displayName": "Lousa Virtual",
             "key": "lousa",
             "name": "lousa",
-            "self": "http://54.68.128.117:8100/rest/api/latest/user?username=lousa",
+            "self": "http://localhost:4567/rest/api/latest/user?username=lousa",
             "timeZone": "America/Sao_Paulo"
         },
         "customfield_10013": null,
@@ -70,7 +70,7 @@
         "customfield_10650": "0|i1093n:",
         "customfield_10740": {
             "id": "11181",
-            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/11181",
+            "self": "http://localhost:4567/rest/api/latest/customFieldOption/11181",
             "value": "Standard"
         },
         "customfield_10841": null,
@@ -91,7 +91,7 @@
         "customfield_11341": null,
         "customfield_11440": {
             "id": "12606",
-            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12606",
+            "self": "http://localhost:4567/rest/api/latest/customFieldOption/12606",
             "value": "Standard"
         },
         "customfield_11451": null,
@@ -125,42 +125,42 @@
                             "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
                             "id": "10601",
                             "name": "Feature",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10601",
+                            "self": "http://localhost:4567/rest/api/latest/issuetype/10601",
                             "subtask": false
                         },
                         "priority": {
                             "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                             "id": "9",
                             "name": "M\u00e9dia",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                            "self": "http://localhost:4567/rest/api/latest/priority/9"
                         },
                         "status": {
                             "description": "Taskboard",
                             "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                             "id": "10651",
                             "name": "Open",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/status/10651",
+                            "self": "http://localhost:4567/rest/api/latest/status/10651",
                             "statusCategory": {
                                 "colorName": "blue-gray",
                                 "id": 2,
                                 "key": "new",
                                 "name": "To Do",
-                                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                                "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                             }
                         },
                         "summary": "Feature 1 que ficar\u00e1 como deferred"
                     },
                     "id": "225884",
                     "key": "TASKB-629",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issue/225884"
+                    "self": "http://localhost:4567/rest/api/latest/issue/225884"
                 },
-                "self": "http://54.68.128.117:8100/rest/api/latest/issueLink/151626",
+                "self": "http://localhost:4567/rest/api/latest/issueLink/151626",
                 "type": {
                     "id": "10350",
                     "inward": "is demanded by",
                     "name": "Demand",
                     "outward": "demands",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issueLinkType/10350"
+                    "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                 }
             },
             {
@@ -173,42 +173,42 @@
                             "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
                             "id": "10601",
                             "name": "Feature",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10601",
+                            "self": "http://localhost:4567/rest/api/latest/issuetype/10601",
                             "subtask": false
                         },
                         "priority": {
                             "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                             "id": "9",
                             "name": "M\u00e9dia",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                            "self": "http://localhost:4567/rest/api/latest/priority/9"
                         },
                         "status": {
                             "description": "Taskboard",
                             "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                             "id": "10651",
                             "name": "Open",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/status/10651",
+                            "self": "http://localhost:4567/rest/api/latest/status/10651",
                             "statusCategory": {
                                 "colorName": "blue-gray",
                                 "id": 2,
                                 "key": "new",
                                 "name": "To Do",
-                                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                                "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                             }
                         },
                         "summary": "Feature 2 que ficar\u00e1 como deferred"
                     },
                     "id": "225885",
                     "key": "TASKB-630",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issue/225885"
+                    "self": "http://localhost:4567/rest/api/latest/issue/225885"
                 },
-                "self": "http://54.68.128.117:8100/rest/api/latest/issueLink/151627",
+                "self": "http://localhost:4567/rest/api/latest/issueLink/151627",
                 "type": {
                     "id": "10350",
                     "inward": "is demanded by",
                     "name": "Demand",
                     "outward": "demands",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issueLinkType/10350"
+                    "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                 }
             }
         ],
@@ -218,7 +218,7 @@
             "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12250&avatarType=issuetype",
             "id": "10600",
             "name": "Demand",
-            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10600",
+            "self": "http://localhost:4567/rest/api/latest/issuetype/10600",
             "subtask": false
         },
         "labels": [],
@@ -227,7 +227,7 @@
             "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
             "id": "9",
             "name": "M\u00e9dia",
-            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+            "self": "http://localhost:4567/rest/api/latest/priority/9"
         },
         "progress": {
             "progress": 0,
@@ -246,9 +246,9 @@
             "projectCategory": {
                 "id": "10001",
                 "name": "Externo",
-                "self": "http://54.68.128.117:8100/rest/api/latest/projectCategory/10001"
+                "self": "http://localhost:4567/rest/api/latest/projectCategory/10001"
             },
-            "self": "http://54.68.128.117:8100/rest/api/latest/project/11315"
+            "self": "http://localhost:4567/rest/api/latest/project/11315"
         },
         "reporter": {
             "active": true,
@@ -261,7 +261,7 @@
             "displayName": "Jhony Gomes",
             "key": "jhony.gomes",
             "name": "jhony.gomes",
-            "self": "http://54.68.128.117:8100/rest/api/latest/user?username=jhony.gomes",
+            "self": "http://localhost:4567/rest/api/latest/user?username=jhony.gomes",
             "timeZone": "America/Sao_Paulo"
         },
         "resolution": null,
@@ -271,13 +271,13 @@
             "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
             "id": "10655",
             "name": "Deferred",
-            "self": "http://54.68.128.117:8100/rest/api/latest/status/10655",
+            "self": "http://localhost:4567/rest/api/latest/status/10655",
             "statusCategory": {
                 "colorName": "blue-gray",
                 "id": 2,
                 "key": "new",
                 "name": "To Do",
-                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
             }
         },
         "subtasks": [
@@ -289,34 +289,34 @@
                         "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12258&avatarType=issuetype",
                         "id": "10608",
                         "name": "UAT",
-                        "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10608",
+                        "self": "http://localhost:4567/rest/api/latest/issuetype/10608",
                         "subtask": true
                     },
                     "priority": {
                         "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                         "id": "9",
                         "name": "M\u00e9dia",
-                        "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                        "self": "http://localhost:4567/rest/api/latest/priority/9"
                     },
                     "status": {
                         "description": "Taskboard",
                         "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                         "id": "10651",
                         "name": "Open",
-                        "self": "http://54.68.128.117:8100/rest/api/latest/status/10651",
+                        "self": "http://localhost:4567/rest/api/latest/status/10651",
                         "statusCategory": {
                             "colorName": "blue-gray",
                             "id": 2,
                             "key": "new",
                             "name": "To Do",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                            "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                         }
                     },
                     "summary": "Subtask 1 Demanda Deferred"
                 },
                 "id": "225890",
                 "key": "TASKB-635",
-                "self": "http://54.68.128.117:8100/rest/api/latest/issue/225890"
+                "self": "http://localhost:4567/rest/api/latest/issue/225890"
             },
             {
                 "fields": {
@@ -326,34 +326,34 @@
                         "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12258&avatarType=issuetype",
                         "id": "10608",
                         "name": "UAT",
-                        "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10608",
+                        "self": "http://localhost:4567/rest/api/latest/issuetype/10608",
                         "subtask": true
                     },
                     "priority": {
                         "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                         "id": "9",
                         "name": "M\u00e9dia",
-                        "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                        "self": "http://localhost:4567/rest/api/latest/priority/9"
                     },
                     "status": {
                         "description": "Taskboard",
                         "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                         "id": "10651",
                         "name": "Open",
-                        "self": "http://54.68.128.117:8100/rest/api/latest/status/10651",
+                        "self": "http://localhost:4567/rest/api/latest/status/10651",
                         "statusCategory": {
                             "colorName": "blue-gray",
                             "id": 2,
                             "key": "new",
                             "name": "To Do",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                            "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                         }
                     },
                     "summary": "Subtask 2 Demanda Deferred"
                 },
                 "id": "225891",
                 "key": "TASKB-636",
-                "self": "http://54.68.128.117:8100/rest/api/latest/issue/225891"
+                "self": "http://localhost:4567/rest/api/latest/issue/225891"
             }
         ],
         "summary": "Demanda que ficar\u00e1 como deferred",
@@ -364,12 +364,12 @@
         "updated": "2017-05-31T00:39:35.000+0000",
         "votes": {
             "hasVoted": false,
-            "self": "http://54.68.128.117:8100/rest/api/latest/issue/TASKB-628/votes",
+            "self": "http://localhost:4567/rest/api/latest/issue/TASKB-628/votes",
             "votes": 0
         },
         "watches": {
             "isWatching": true,
-            "self": "http://54.68.128.117:8100/rest/api/latest/issue/TASKB-628/watchers",
+            "self": "http://localhost:4567/rest/api/latest/issue/TASKB-628/watchers",
             "watchCount": 1
         },
         "worklog": {
@@ -925,7 +925,7 @@
             "type": "number"
         }
     },
-    "self": "http://54.68.128.117:8100/rest/api/latest/issue/225883",
+    "self": "http://localhost:4567/rest/api/latest/issue/225883",
     "transitions": [
         {
             "id": "121",
@@ -935,13 +935,13 @@
                 "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                 "id": "10651",
                 "name": "Open",
-                "self": "http://54.68.128.117:8100/rest/api/latest/status/10651",
+                "self": "http://localhost:4567/rest/api/latest/status/10651",
                 "statusCategory": {
                     "colorName": "blue-gray",
                     "id": 2,
                     "key": "new",
                     "name": "To Do",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                    "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                 }
             }
         },
@@ -953,13 +953,13 @@
                 "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/open.png",
                 "id": "10052",
                 "name": "To Do",
-                "self": "http://54.68.128.117:8100/rest/api/latest/status/10052",
+                "self": "http://localhost:4567/rest/api/latest/status/10052",
                 "statusCategory": {
                     "colorName": "blue-gray",
                     "id": 2,
                     "key": "new",
                     "name": "To Do",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                    "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                 }
             }
         }
