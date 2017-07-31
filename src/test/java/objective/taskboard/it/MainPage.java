@@ -149,6 +149,10 @@ public class MainPage extends AbstractUiFragment {
     public void assertOkIcon() {
         waitVisibilityOfElement(webDriver.findElement(By.className("issue-state-ready")));
     }
+    
+    public SizingImportUi openSizingImport() {
+        return SizingImportUi.open(webDriver);
+    }
 
     public void assertStatusIconIsInitialisationError() {
         waitVisibilityOfElement(webDriver.findElement(By.className("issue-state-initialisationError")));

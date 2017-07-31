@@ -86,7 +86,7 @@ class JiraUtils {
         return jiraEndpoint.executeRequest(client -> client.getVersionRestClient().createVersion(versionInput));
     }
 
-    public boolean hasPermitionToCreateVersion(String project) {
+    public boolean isAdminOfProject(String project) {
         Permissions permissions = jiraEndpoint.executeRequest(client -> 
             client.getMyPermissionsRestClient().getMyPermissions(MyPermissionsInput.withProject(project)));
 

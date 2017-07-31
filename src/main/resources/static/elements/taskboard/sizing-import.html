@@ -672,9 +672,15 @@
                     this.spreadsheetId = '';
                     this.errorMessage = null;
                     
-                    $.when(this.loadInitialData(), this.initGoogleAuth())
-                        .fail(function() { self.errorMessage = 'Failed to load initial data.' })
-                        .always(function() { self.showStepOne() });
+                    this.loadInitialData().then(function() {
+                    	if (self.needsGoogleAuthorizarion)
+                    		return self.initGoogleAuth();
+                    	})
+                    	.fail(function() {
+                    		self.errorMessage = 'Failed to load initial data.' })
+                    	.always(function() {
+                    		self.showStepOne()
+                    	});
                 },
                 
                 loadInitialData: function() {
@@ -904,6 +910,7 @@
                         error: function (jqXhr, textStatus, errorThrown) {
                             self.errorMessage = 'Failed to import';
                             self.statusMessage = '';
+                            this.isImportationCompleted = true;
                         }
                     });
                 	
@@ -995,6 +1002,9 @@
                 },
                 
                 onInputColumnValue: function(e) {
+                	console.log(e);
+                	if (e.key == "Backspace" || e.key == "Delete")
+                		return;
                 	var newValue = e.target.value + e.key.toUpperCase();
                 	var index = e.target.dataset.index;
                 	if (this.letterToColumn(newValue) <= this.letterToColumn(this.lastColumn)) {

@@ -86,7 +86,7 @@ public class SizingImportController {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (Exception ex) {
             log.error(null, ex);
-            return new ResponseEntity<>("Internarl Error", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("Internal Error", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -102,7 +102,7 @@ public class SizingImportController {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (Exception ex) {
             log.error(null, ex);
-            return new ResponseEntity<>("Internarl Error", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("Internal Error", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -125,7 +125,7 @@ public class SizingImportController {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (Exception ex) {
             log.error(null, ex);
-            return new ResponseEntity<>("Internarl Error", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("Internal Error", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

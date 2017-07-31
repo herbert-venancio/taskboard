@@ -50,7 +50,7 @@ public class SizingImportService {
     }
 
     public SpreadsheetValidationResult validateSpreadsheet(String project, String spreadsheetId) {
-        if (!jiraUtils.hasPermitionToCreateVersion(project))
+        if (!jiraUtils.isAdminOfProject(project))
             return SpreadsheetValidationResult.fail("You should have permission to admin this project in Jira.");
  
         SpreadsheetsManager spreadsheetsManager = googleApiService.buildSpreadsheetsManager();
