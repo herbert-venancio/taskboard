@@ -21,11 +21,11 @@
 		<jira.api.version>4.0.1-OBJ</jira.api.version>
 		<sonar.sources>src/main/java,src/main/resources/static</sonar.sources>
 		<sonar.exclusions>src/main/resources/static/bower_components/**</sonar.exclusions>
-		<sonar.junit.reportsPath>${project.build.directory}/combined-reports</sonar.junit.reportsPath>
-		<sonar.jacoco.reportPath>${project.build.directory}/jacoco-ut.exec</sonar.jacoco.reportPath>
-		<sonar.jacoco.reportPaths>${project.build.directory}/jacoco-ut.exec</sonar.jacoco.reportPaths>
-		<sonar.jacoco.itReportPath>${project.build.directory}/jacoco-it.exec</sonar.jacoco.itReportPath>
-		<sonar.jacoco.itReportPaths>${project.build.directory}/jacoco-it.exec</sonar.jacoco.itReportPaths>
+		<sonar.junit.reportsPaths>${project.build.directory}/combined-reports</sonar.junit.reportsPaths>
+		<jacoco.reportPath>${project.build.directory}/jacoco-ut.exec</jacoco.reportPath>
+		<jacoco.itReportPath>${project.build.directory}/jacoco-it.exec</jacoco.itReportPath>
+		<sonar.jacoco.reportPaths>${jacoco.reportPath}, ${jacoco.itReportPath}</sonar.jacoco.reportPaths>
+		<sonar.javascript.lcov.reportPaths>${project.build.directory}/istanbul-reports/lcov.info</sonar.javascript.lcov.reportPaths>
 	</properties>
 	<prerequisites>
 		<maven>3.1.0</maven>
@@ -99,7 +99,7 @@
 							<goal>prepare-agent</goal>
 						</goals>
 						<configuration>
-							<destFile>${sonar.jacoco.reportPaths}</destFile>
+							<destFile>${jacoco.reportPath}</destFile>
 							<propertyName>jacoco.agent.ut.arg</propertyName>
 							<append>true</append>
 						</configuration>
@@ -111,7 +111,7 @@
 							<goal>prepare-agent</goal>
 						</goals>
 						<configuration>
-							<destFile>${sonar.jacoco.itReportPaths}</destFile>
+							<destFile>${jacoco.itReportPath}</destFile>
 							<propertyName>jacoco.agent.it.arg</propertyName>
 							<append>true</append>
 						</configuration>
@@ -335,6 +335,38 @@
 								<goals>
 									<goal>exec</goal>
 								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>instrument-javascript</id>
+								<phase>pre-integration-test</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<executable>node</executable>
+									<arguments>
+										<argument>src/test/js/instrument.js</argument>
+									</arguments>
+								</configuration>
+							</execution>
+							<execution>
+								<id>javascript-coverage-report</id>
+								<phase>post-integration-test</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<executable>node</executable>
+									<arguments>
+										<argument>src/test/js/report.js</argument>
+									</arguments>
+								</configuration>
 							</execution>
 						</executions>
 					</plugin>
