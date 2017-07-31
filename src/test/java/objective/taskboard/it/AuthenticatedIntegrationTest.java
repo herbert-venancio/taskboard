@@ -23,7 +23,7 @@ package objective.taskboard.it;
 
 import org.junit.Before;
 
-public abstract class AuthenticatedIntegrationTest extends AbstractUIIntegrationTest {
+public abstract class AuthenticatedIntegrationTest extends AbstractUIWithCoverageIntegrationTest {
 
     @Before
     public void before() {
