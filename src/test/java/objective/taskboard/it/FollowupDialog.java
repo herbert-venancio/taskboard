@@ -36,7 +36,7 @@ public class FollowupDialog extends AbstractUiFragment {
     private WebElement generateButton;
     private WebElement dateDropdown;
     private WebElement clearDateButton;
-    private WebElement dateWarning;
+    private WebElement multipleProjectsWarning;
     private WebElement noMatchingTemplateWarning;
     private WebElement setTemplateLink;
 
@@ -56,8 +56,8 @@ public class FollowupDialog extends AbstractUiFragment {
         generateButton = dialog.findElement(By.id("generate"));
         dateDropdown = dialog.findElement(By.name("date"));
         clearDateButton = dialog.findElement(By.cssSelector(".clear-button paper-icon-button"));
-        dateWarning = dialog.findElement(By.className("date-warning"));
-        noMatchingTemplateWarning = dialog.findElement(By.className("warn-box"));
+        multipleProjectsWarning = dialog.findElement(By.id("multipleProjectsWarning"));
+        noMatchingTemplateWarning = dialog.findElement(By.id("noTemplateWarning"));
         setTemplateLink = dialog.findElement(By.className("set-template-link"));
         return this;
     }
@@ -116,8 +116,8 @@ public class FollowupDialog extends AbstractUiFragment {
         return this;
     }
 
-    public FollowupDialog assertDateIsClear() {
-        waitAttributeValueInElement(dateDropdown, "value", "");
+    public FollowupDialog assertDateIsToday() {
+        waitAttributeValueInElement(dateDropdown, "value", "Today");
         return this;
     }
 
@@ -126,18 +126,13 @@ public class FollowupDialog extends AbstractUiFragment {
         return this;
     }
 
-    public FollowupDialog assertDateDropdownIsDisabled() {
-        waitAttributeValueInElement(dateDropdown, "disabled", "true");
+    public FollowupDialog assertMultipleProjectsWarningIsInvisible() {
+        waitInvisibilityOfElement(multipleProjectsWarning);
         return this;
     }
 
-    public FollowupDialog assertDateWarningIsInvisible() {
-        waitInvisibilityOfElement(dateWarning);
-        return this;
-    }
-
-    public FollowupDialog assertDateWarningIsVisible() {
-        waitVisibilityOfElement(dateWarning);
+    public FollowupDialog assertMultipleProjectsWarningIsVisible() {
+        waitVisibilityOfElement(multipleProjectsWarning);
         return this;
     }
 
