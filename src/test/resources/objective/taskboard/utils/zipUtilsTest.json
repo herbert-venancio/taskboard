@@ -1,0 +1,33 @@
+[
+  {
+    "planningType": "Ballpark",
+    "project": "PROJECT TEST",
+    "demandType": "Demand",
+    "demandStatus": "Doing",
+    "demandId": 1,
+    "demandNum": "I-1",
+    "demandSummary": "Summary Demand",
+    "demandDescription": "Description Demand",
+    "taskType": "Feature",
+    "taskStatus": "Doing",
+    "taskId": 2,
+    "taskNum": "I-2",
+    "taskSummary": "Summary Feature",
+    "taskDescription": "Description Feature",
+    "taskFullDescription": "Full Description Feature",
+    "taskRelease": "Release",
+    "subtaskType": "Sub-task",
+    "subtaskStatus": "Doing",
+    "subtaskId": 3,
+    "subtaskNum": "I-3",
+    "subtaskSummary": "Summary Sub-task",
+    "subtaskDescription": "Description Sub-task",
+    "subtaskFullDescription": "Full Description Sub-task",
+    "tshirtSize": "M",
+    "worklog": 1.0,
+    "wrongWorklog": 1.0,
+    "demandBallpark": 1.0,
+    "taskBallpark": 1.0,
+    "queryType": "Type"
+  }
+]

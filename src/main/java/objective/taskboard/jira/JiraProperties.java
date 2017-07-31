@@ -47,6 +47,7 @@ public class JiraProperties {
     @NotEmpty
     private String url;
     @NotNull
+    @Valid
     private Lousa lousa;
     @NotNull
     @Valid
@@ -78,6 +79,7 @@ public class JiraProperties {
     private Resolutions resolutions;
     
     @NotNull
+    @Valid
     private Followup followup;
     
     @Data 
@@ -239,6 +241,13 @@ public class JiraProperties {
     }
     
     @Data
+    public static class ExecutionDataHistoryGenerator {
+        @NotEmpty
+        private String cron;
+        private String timezone;
+    }
+    
+    @Data
     public static class Followup {
         @NotNull
         private Map<Long, List<BallparkMapping>> ballparkMappings = new LinkedHashMap<Long, List<BallparkMapping>>();
@@ -247,12 +256,16 @@ public class JiraProperties {
         private List<Long> featureStatusThatDontGenerateBallpark = new LinkedList<>();
         
         @NotNull
-        private List<Long> subtaskStatusThatDontPreventBallparkGeneration = new LinkedList<>();;
+        private List<Long> subtaskStatusThatDontPreventBallparkGeneration = new LinkedList<>();
         
         private List<Long> statusExcludedFromFollowup = new LinkedList<Long>();
         
         @NotNull
         private Long ballparkDefaultStatus;
+        
+        @NotNull
+        @Valid
+        private ExecutionDataHistoryGenerator executionDataHistoryGenerator;
         
         public List<Long> getStatusExcludedFromFollowup() {
             return statusExcludedFromFollowup;

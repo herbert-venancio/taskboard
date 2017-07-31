@@ -20,6 +20,8 @@
  */
 package objective.taskboard.followup;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -61,5 +63,38 @@ public class FollowUpHelper {
 
     public static List<FollowUpData> getFollowUpDataDefaultList() {
         return Collections.singletonList(getFollowUpDataDefault());
+    }
+
+    public static void assertFollowUpDataDefault(FollowUpData actual) {
+        FollowUpData expected = getFollowUpDataDefault();
+        assertEquals("planningType", expected.planningType, actual.planningType);
+        assertEquals("project", expected.project, actual.project);
+        assertEquals("demandType", expected.demandType, actual.demandType);
+        assertEquals("demandStatus", expected.demandStatus, actual.demandStatus);
+        assertEquals("demandId", expected.demandId, actual.demandId);
+        assertEquals("demandNum", expected.demandNum, actual.demandNum);
+        assertEquals("demandSummary", expected.demandSummary, actual.demandSummary);
+        assertEquals("demandDescription", expected.demandDescription, actual.demandDescription);
+        assertEquals("taskType", expected.taskType, actual.taskType);
+        assertEquals("taskStatus", expected.taskStatus, actual.taskStatus);
+        assertEquals("taskId", expected.taskId, actual.taskId);
+        assertEquals("taskNum", expected.taskNum, actual.taskNum);
+        assertEquals("taskSummary", expected.taskSummary, actual.taskSummary);
+        assertEquals("taskDescription", expected.taskDescription, actual.taskDescription);
+        assertEquals("taskFullDescription", expected.taskFullDescription, actual.taskFullDescription);
+        assertEquals("taskRelease", expected.taskRelease, actual.taskRelease);
+        assertEquals("subtaskType", expected.subtaskType, actual.subtaskType);
+        assertEquals("subtaskStatus", expected.subtaskStatus, actual.subtaskStatus);
+        assertEquals("subtaskId", expected.subtaskId, actual.subtaskId);
+        assertEquals("subtaskNum", expected.subtaskNum, actual.subtaskNum);
+        assertEquals("subtaskSummary", expected.subtaskSummary, actual.subtaskSummary);
+        assertEquals("subtaskDescription", expected.subtaskDescription, actual.subtaskDescription);
+        assertEquals("subtaskFullDescription", expected.subtaskFullDescription, actual.subtaskFullDescription);
+        assertEquals("tshirtSize", expected.tshirtSize, actual.tshirtSize);
+        assertEquals("worklog", expected.worklog, actual.worklog);
+        assertEquals("wrongWorklog", expected.wrongWorklog, actual.wrongWorklog);
+        assertEquals("demandBallpark", expected.demandBallpark, actual.demandBallpark);
+        assertEquals("taskBallpark", expected.taskBallpark, actual.taskBallpark);
+        assertEquals("queryType", expected.queryType, actual.queryType);
     }
 }

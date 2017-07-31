@@ -21,6 +21,19 @@ package objective.taskboard.it;
  * [/LICENSE]
  */
 
+import static java.nio.file.Files.createDirectories;
+import static java.nio.file.Files.createFile;
+import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.EXTENSION_JSON;
+import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.EXTENSION_ZIP;
+import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.FILE_NAME_FORMAT;
+import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.PATH_FOLLOWUP_HISTORY;
+import static org.apache.commons.io.FileUtils.deleteQuietly;
+
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import org.joda.time.DateTime;
 import org.junit.Test;
 
 public class FollowupGeneratorUiIT extends AuthenticatedIntegrationTest {
@@ -30,19 +43,65 @@ public class FollowupGeneratorUiIT extends AuthenticatedIntegrationTest {
         MainPage mainPage = MainPage.produce(webDriver);
         mainPage
             .openFollowUp()
+            .assertDateDropdownIsInvisible()
+            .assertNoMatchingTemplateWarningIsInvisible()
             .assertGenerateButtonIsDisabled()
             .selectAProject(projectIndex)
+            .assertDateDropdownIsInvisible()
+            .assertNoMatchingTemplateWarningIsVisible()
             .assertGenerateButtonIsDisabled()
+            .clickSetTemplateLink()
+            .createATemplate("Template Success Test", projectIndex)
             .close();
-        
-        mainPage
-            .openTemplateFollowUpDialog()
-            .createATemplate(projectIndex)
-            .close();
-        
+
         mainPage
             .openFollowUp()
             .selectAProject(projectIndex)
+            .assertDateDropdownIsInvisible()
+            .assertNoMatchingTemplateWarningIsInvisible()
             .assertGenerateButtonIsEnabled();
+    }
+
+    @Test
+    public void givenAProjectWithHistory_whenSelectThisProject_thenTheDateFieldAppears() throws IOException {
+        Path pathZip = null;
+        try {
+            Path pathProject = Paths.get(PATH_FOLLOWUP_HISTORY, "TASKB");
+            createDirectories(pathProject);
+
+            DateTime yesterday = DateTime.now().minusDays(1);
+            String yesterdayString = yesterday.toString(FILE_NAME_FORMAT);
+            pathZip = pathProject.resolve(yesterdayString + EXTENSION_JSON + EXTENSION_ZIP);
+            if (!pathZip.toFile().exists())
+                createFile(pathZip);
+
+            Integer projectTASKBIndex = 0;
+            Integer projectPROJ1Index = 1;
+            MainPage mainPage = MainPage.produce(webDriver);
+
+            mainPage
+                .openTemplateFollowUpDialog()
+                .createATemplate("Template Success Test", projectTASKBIndex)
+                .createATemplate("Template Success Test 2", projectTASKBIndex, projectPROJ1Index)
+                .close();
+
+            mainPage
+                .openFollowUp()
+                .selectAProject(projectTASKBIndex)
+                .selectADate(yesterdayString)
+                .assertGenerateButtonIsEnabled()
+                .clickClearDate()
+                .assertDateIsClear()
+                .assertDateWarningIsInvisible()
+                .assertGenerateButtonIsEnabled()
+                .selectAProject(projectPROJ1Index)
+                .assertDateDropdownIsDisabled()
+                .assertDateWarningIsVisible()
+                .assertGenerateButtonIsEnabled()
+                .close();
+        } finally {
+            if (pathZip != null)
+                deleteQuietly(pathZip.toFile());
+        }
     }
 }

@@ -1,4 +1,4 @@
-package objective.taskboard.followup;
+package objective.taskboard.followup.impl;
 
 /*-
  * [LICENSE]
@@ -51,6 +51,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import objective.taskboard.data.Issue;
+import objective.taskboard.followup.FollowUpData;
+import objective.taskboard.followup.impl.FollowUpDataProviderFromCurrentState;
 import objective.taskboard.issueBuffer.AllIssuesBufferService;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraProperties.BallparkMapping;
@@ -62,7 +64,7 @@ import objective.taskboard.jira.JiraProperties.IssueType.IssueTypeDetails;
 import objective.taskboard.jira.MetadataService;
 
 @RunWith(MockitoJUnitRunner.class)
-public class FollowupDataProviderImplTest {
+public class FollowUpDataProviderFromCurrentStateTest {
     @Mock
     private JiraProperties jiraProperties;
     
@@ -78,7 +80,7 @@ public class FollowupDataProviderImplTest {
     private JiraProperties.Followup followup = new JiraProperties.Followup();
     
     @InjectMocks
-    FollowupDataProviderImpl subject;
+    FollowUpDataProviderFromCurrentState subject;
     
     private static final long demandIssueType  = 13;
     private static final long taskIssueType    = 12; 
@@ -1314,7 +1316,7 @@ public class FollowupDataProviderImplTest {
         List<Issue> issueList = new ArrayList<>();
         for(IssueBuilder b : builders)
             issueList.add(b.build());
-        when(issueBufferService.getAllIssuesVisibleToUser()).thenReturn(issueList); 
+        when(issueBufferService.getAllIssues()).thenReturn(issueList);
     }
     
     private IssueBuilder demand() {

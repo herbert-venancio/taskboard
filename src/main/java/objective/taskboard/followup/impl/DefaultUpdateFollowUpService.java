@@ -20,10 +20,11 @@
  */
 package objective.taskboard.followup.impl;
 
+import static java.nio.file.Files.delete;
+
 import objective.taskboard.followup.FollowUpTemplateValidator;
 import objective.taskboard.followup.UpdateFollowUpService;
 import objective.taskboard.utils.XmlUtils;
-import objective.taskboard.utils.ZipUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.text.StrSubstitutor;
@@ -31,27 +32,15 @@ import org.springframework.stereotype.Service;
 import org.w3c.dom.NodeList;
 
 import javax.xml.transform.TransformerException;
+
 import java.io.*;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
 @Service
 public class DefaultUpdateFollowUpService implements UpdateFollowUpService {
-
-    @Override
-    public Path decompressTemplate(File template) throws IOException {
-        return decompressTemplate(new FileInputStream(template));
-    }
-
-    @Override
-    public Path decompressTemplate(InputStream stream) throws IOException {
-        Path pathFollowup = Files.createTempDirectory("Followup");
-        ZipUtils.unzip(stream, pathFollowup);
-        return pathFollowup;
-    }
 
     @Override
     public void validateTemplate(Path decompressed) throws FollowUpTemplateValidator.InvalidTemplateException {
@@ -79,14 +68,8 @@ public class DefaultUpdateFollowUpService implements UpdateFollowUpService {
 
     @Override
     public void deleteGeneratedFiles(Path decompressed) throws IOException {
-        Files.delete(searchFromJiraSheet(decompressed));
-        Files.delete(decompressed.resolve("xl/sharedStrings.xml"));
-    }
-
-    @Override
-    public Path compressTemplate(Path decompressed, Path pathFollowupXLSM) throws IOException {
-        ZipUtils.zip(decompressed, pathFollowupXLSM);
-        return pathFollowupXLSM;
+        delete(searchFromJiraSheet(decompressed));
+        delete(decompressed.resolve("xl/sharedStrings.xml"));
     }
 
     // ---
@@ -115,4 +98,5 @@ public class DefaultUpdateFollowUpService implements UpdateFollowUpService {
             throw new FollowUpTemplateValidator.InvalidTemplateException(e);
         }
     }
+
 }

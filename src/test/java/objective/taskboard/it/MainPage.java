@@ -98,7 +98,7 @@ public class MainPage extends AbstractUiFragment {
             .findFirst().orElse(null);
 
         if (releaseElement == null)
-            throw new IllegalArgumentException("Element \"" + release + "\" of Release filter not found");
+            throw new IllegalArgumentException("Element \"" + releaseNotNull + "\" of Release filter not found");
 
         waitVisibilityOfElement(releaseElement);
         releaseElement.click();

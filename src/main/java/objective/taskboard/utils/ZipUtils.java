@@ -18,7 +18,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+
 package objective.taskboard.utils;
+
+import static java.nio.file.Files.copy;
+import static java.nio.file.Files.createDirectories;
+import static java.nio.file.Files.walk;
+import static org.apache.commons.io.IOUtils.closeQuietly;
 
 import org.apache.commons.io.IOUtils;
 
@@ -46,7 +52,7 @@ public class ZipUtils {
         try {
             final InputStream inputStream = Files.newInputStream(path);
             return stream(inputStream)
-                    .onClose(() -> IOUtils.closeQuietly(inputStream));
+                    .onClose(() -> closeQuietly(inputStream));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -56,7 +62,7 @@ public class ZipUtils {
         try {
             final FileInputStream fileStream = new FileInputStream(file);
             return stream(fileStream)
-                    .onClose(() -> IOUtils.closeQuietly(fileStream));
+                    .onClose(() -> closeQuietly(fileStream));
         } catch (FileNotFoundException e) {
             throw new UncheckedIOException(e);
         }
@@ -69,6 +75,10 @@ public class ZipUtils {
                         it
                         , Spliterator.ORDERED | Spliterator.NONNULL)
                 , false);
+    }
+
+    public static void unzip(File source, Path destiny) throws IOException {
+        unzip(new FileInputStream(source), destiny);
     }
 
     public static void unzip(InputStream inputStream, Path output) {
@@ -86,10 +96,10 @@ public class ZipUtils {
                         Path entryPath = output.resolve(ze.getName());
                         try {
                             if (ze.isDirectory()) {
-                                Files.createDirectories(entryPath);
+                                createDirectories(entryPath);
                             } else {
-                                Files.createDirectories(entryPath.getParent());
-                                Files.copy(ze.getInputStream(), entryPath);
+                                createDirectories(entryPath.getParent());
+                                copy(ze.getInputStream(), entryPath);
                             }
                         } catch (IOException e) {
                             throw new UncheckedIOException(e);
@@ -102,15 +112,19 @@ public class ZipUtils {
     }
 
     public static void zip(Path input, Path output) {
-        try (Stream<Path> stream = Files.walk(input)) {
+        try (Stream<Path> stream = walk(input)) {
+            File outputParent = output.toFile().getParentFile();
+            if (outputParent != null && !outputParent.exists())
+                createDirectories(outputParent.toPath());
             try (ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(output))) {
                 stream
                         .filter(path -> path.toFile().isFile())
                         .forEach(path -> {
                             try {
-                                ZipEntry entry = new ZipEntry(input.relativize(path).toString());
+                                Path inputDirectory = input.toFile().isDirectory() ? input : input.getParent();
+                                ZipEntry entry = new ZipEntry(inputDirectory.relativize(path).toString());
                                 zipOutputStream.putNextEntry(entry);
-                                Files.copy(path, zipOutputStream);
+                                copy(path, zipOutputStream);
                             } catch (IOException e) {
                                 throw new UncheckedIOException(e);
                             }
@@ -200,4 +214,5 @@ public class ZipUtils {
             return e == null ? null : new ZipStreamEntry(stream, e);
         }
     }
+
 }

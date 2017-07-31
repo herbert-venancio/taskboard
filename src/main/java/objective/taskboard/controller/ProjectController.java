@@ -22,6 +22,7 @@ package objective.taskboard.controller;
  */
 
 import static java.util.stream.Collectors.toList;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -42,6 +43,7 @@ import objective.taskboard.data.Team;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.domain.ProjectTeam;
 import objective.taskboard.domain.TeamFilterConfiguration;
+import objective.taskboard.followup.FollowUpDataHistoryGenerator;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.repository.ProjectTeamRepository;
@@ -66,7 +68,10 @@ public class ProjectController {
     
     @Autowired
     private ProjectService projectService;
-    
+
+    @Autowired
+    private FollowUpDataHistoryGenerator followUpDataHistoryGenerator;
+
     @RequestMapping
     public List<ProjectData> get() {
         List<ProjectTeam> projects = projectTeamRepo.findAll().stream()
@@ -98,7 +103,12 @@ public class ProjectController {
                 projectXData.put(value.projectKey, value);
             }
         }
-        
+
+        for (ProjectData projectData : response) {
+            String projectKey = projectData.projectKey;
+            projectData.followUpDataHistory = followUpDataHistoryGenerator.getHistoryByProject(projectKey);
+        }
+
         return response;
     }
     
