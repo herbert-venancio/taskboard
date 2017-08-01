@@ -1,0 +1,1109 @@
+<!--
+  [LICENSE]
+  Taskboard
+  - - -
+  Copyright (C) 2015 - 2016 Objective Solutions
+  - - -
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  [/LICENSE]
+  -->
+<dom-module id="sizing-import">
+
+    <style>
+        :host {
+        	display: block;
+        }
+        
+        .sizingimport-modal {
+        	width: 700px;
+        }
+        
+        #modal {
+		    background: white;
+		    min-width: 300px;
+		    min-height: 360px;
+		    max-height: calc(100% - 20px);
+		    overflow-y: auto;
+		    margin: 0;
+		    display: block;
+		    font-family: inherit;
+        }
+
+        .card-custom {
+        	background: transparent;
+			width: 100%;
+			min-height: 360px;
+			padding: 20px;
+			margin: 0;
+        }
+
+        .half-column {
+        }
+
+        .card-header-custom {
+            width: 100%;
+            margin-bottom: 20px;
+            font-size: 24px;
+            display: flex;
+        }
+        
+        .card-header-info {
+        	flex: 1;
+        }
+
+        .card-header-breadcrumb {
+        	font-size: 15px;
+        }
+        
+        
+        .sub-header {
+        	line-height: normal;
+        	margin-bottom: 5px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .content-row {
+            display: flex;
+            margin-top: 10px;
+        }
+        
+        .content-row:first-child {
+        	margin-top: 0;
+        }
+        
+        paper-button {
+            margin-bottom: 12px;
+        }
+        
+        paper-button paper-icon-button {
+        	width: 25px;
+        	height: 25px;
+        	padding: 0;
+        	margin: 0 5px 0 0;
+        }
+
+        .card-header-buttons {
+        	padding: 0;
+            margin-left: auto;
+        }
+        
+        paper-material, paper-button {
+        	box-shadow: none !important;
+        }
+
+        paper-button[toggles] {
+            transition: all 0.3s;
+        }
+
+        paper-button[toggles][active] {
+            background-color: rgba(0, 0, 0, 0.25);
+        }
+
+        paper-button[toggles][active].colorful {
+            background-color: rgba(66, 133, 244, 0.25);
+        }
+
+        paper-button[toggles][active][raised].colorful {
+            background-color: rgba(66, 133, 244, 0.75);
+        }
+        
+        .error-message {
+            white-space: pre;
+            color: red;
+            font-weight: bold;
+            margin-top: 30px;
+        }
+
+        .buttonClose {
+        	min-width: auto;
+            display: inline;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .custom-footer {
+        	position: absolute;
+            bottom: 20px;
+        }
+        
+        .custom-footer-buttons {
+        	display: flex;
+        	margin-left: -5px;
+        	margin-right: -5px;
+        }
+        
+        .custom-footer-buttons paper-button {
+        	padding: 5px 10px;
+        	margin: 0 5px;
+        	text-transform: none;
+        	text-align: center;
+        }
+        
+		paper-spinner[aria-hidden=true] {
+		    display: none;
+		}
+        
+        .scroll {
+            padding: 10px;
+            overflow: auto;
+            overflow-x: hidden;
+            max-height: 150px;
+            width: 100%;
+            background-color: white;
+        }
+        
+        .modal-title {
+        	font-size: 25px;
+        }
+
+		.steps {
+		}
+		
+		.steps__numbers {
+			display: flex;
+			justify-content: space-around;
+			
+			margin-bottom: 30px;
+			position: relative;
+		}
+		
+		.steps__numbers:before {
+		    content: "";
+		    display: block;
+		    
+		    border-radius: 10px;
+		    background: #CCC;
+		    width: 100%;
+		    height: 2px;
+		    top: 50%;
+		    margin-top: -1px;
+		    left: 0;
+		    position: absolute;
+		    z-index: -1;
+	    }
+		
+		.steps__number {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			
+			border-radius: 50%;
+			background: #999;
+			width: 40px;
+			height: 40px;
+			font-size: 20px;
+			color: #FFF;
+		}
+		
+		.steps__number.active {
+			background: #000;
+		}
+		
+		.steps__content {
+		}
+		
+		.step {
+			display: none;
+		}
+		
+		.step.active {
+			display: block;
+		}
+		
+		.step__title {
+			margin: 0 0 20px 0;
+		}
+		
+		.step__text {
+			margin-bottom: 30px;
+		}
+		
+		.step__content {
+			display: flex;
+		    flex-direction: column;
+		    justify-content: center;
+		    
+			min-height: 130px;
+		}
+		
+		.step__buttons {
+			display: flex;
+			
+			margin-top: 30px;
+		}
+		
+		.step__content paper-button {
+			margin: 0 0 0 20px
+		}
+		
+		.step__content paper-button:first-child {
+			margin-left: 0;
+		}
+		
+		.step__buttons paper-button {
+			margin: 0 0 0 20px
+		}
+		
+		.step__buttons paper-button:first-child {
+			margin-left: 0;
+		}
+		
+		.step__buttons-left {
+		}
+		
+		.step__buttons-right {
+			margin-left: auto;
+		}
+		
+		.step__buttons-left + .step__buttons-right {
+			padding-left: 30px;
+		}
+		
+		.sizing__confirmation-wrapper {
+			width: 100%;
+			overflow-x: auto;
+		}
+		
+		.sizing__confirmation th, .sizing__confirmation td {
+			min-width: 80px;
+			max-width: 150px;
+		}
+		
+        paper-button.colorful {
+            color: #4285f4;
+        }
+
+        paper-button[raised].colorful {
+            background: #4285f4;
+            color: #fff;
+        }
+
+        paper-button[raised] {
+            background: #CCC;
+            color: #000;
+        }
+		
+		#loading {
+			display: flex;
+		    align-items: center;
+		    justify-content: center;
+		    
+			background: rgba(0,0,0,0.6);
+			width: 0;
+			height: 0;
+			margin: 0;
+			left: 0;
+			top: 0;
+			position: absolute;
+			z-index: 1000;
+			opacity: 0;
+			overflow: hidden;
+			
+			-webkit-transition: opacity 0.4s ease-in-out;
+		    -moz-transition: opacity 0.4s ease-in-out;
+		    -ms-transition: opacity 0.4s ease-in-out;
+		    -o-transition: opacity 0.4s ease-in-out;
+		    transition: opacity 0.4s ease-in-out;
+		}
+		
+		#loading.active {
+			width: 100%;
+			height: 100%;
+			
+			opacity: 1;
+		}
+
+    </style>
+
+    <template>
+        <iron-signals on-iron-signal-sizing-authorization-response="responseOfStepOne"></iron-signals>
+        <iron-signals on-iron-signal-sizing-import-status="statusOfStepFour"></iron-signals>
+        <paper-dialog class="sizingimport-modal" id="modal" entry-animation="scale-up-animation" exit-animation="fade-out-animation" with-backdrop modal>
+        	<paper-card class="card-custom">
+            
+                <div class="card-header-custom">
+                    <div class="card-header-info">
+                        <div class="card-header-breadcrumb">
+                            <span class="modal-title">
+                                Import Sizing
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="content-box">
+                
+                	<div class="steps">
+                	
+                		<div id="stepsNumbers" class="steps__numbers">
+                			<a data-step="1" class="steps__number">1</a>
+                			<a data-step="2" class="steps__number">2</a>
+                			<a data-step="3" class="steps__number">3</a>
+                			<a data-step="4" class="steps__number">4</a>
+                		</div><!-- .steps__numbers -->
+                		
+                		<div class="steps__content">
+                		
+                			<div data-step="1" class="step sizing__step">
+                			
+                				<h3 class="step__title">
+                					Checking authorization
+                				</h3>
+                				
+                				<div class="tb-text step__text">
+                					<p>We need to know what project you want to use. Besides that, we will request your authorization to access your Google Spreadsheet</p>
+                				</div>
+                				
+                				<form class="tb-form">
+                				
+                					<div class="step__content">
+                						<div class="tb-form__row">
+		                					<label for="projectkey">Select the project:</label>
+						    				<select id="projectkey" name="projectkey" value="{{projectKey::input}}">
+					    						<template is="dom-repeat" items="{{projects}}" as="project">
+					    							<option value="{{project.key}}">
+					    								{{project.name}}
+					    							</option>
+					    						</template>
+						    				</select>
+                						</div>
+                						<div class="tb-form__row">
+		                					<label for="spreadsheetUrl">Insert the URL of your Google Spreadsheet:</label>
+		                					<input placeholder="ex.: https://docs.google.com/spreadsheets/d/abcdegfhijklmnop/" type="url" id="spreadsheetUrl" name="spreadsheetUrl" value="{{spreadsheetUrl::input}}" />
+	                					</div>
+	                				</div><!-- .step__content -->
+	                				
+	                				<div class="step__buttons">
+	                					<div class="step__buttons-left">
+					                        <paper-button class="sizing__cancel" raised on-tap="cancelImportation" title="Cancel importation">
+					                            Cancel
+					                        </paper-button>
+				                        </div>
+				                        <div class="step__buttons-right">
+					                        <paper-button class="sizing__submit colorful" raised on-tap="submitStepOne" title="Next">
+					                            Next
+					                        </paper-button>
+				                        </div>
+	                				</div><!-- .step__buttons -->
+                				
+                				</form><!-- .tb-form -->
+                			
+                			</div><!-- .step -->
+                			
+                			<div data-step="2" class="step sizing__step">
+                			
+                				<h3 class="step__title">
+                					Google Spreadsheet Mapping
+                				</h3>
+                				
+                				<div class="tb-text step__text">
+                					<p>
+	                					If you didn't modify the Sizing Spreadsheet, skip this step clicking the "Ok" button.<br>
+	                					Otherwise, click on "Advanced Mapping".
+                					</p>
+                				</div>
+                				
+                				<div class="step__content">
+                				
+                					<div class="tb-accordion">
+                				
+							            <a class="tb-accordion__button sizing__open-advanced-mapping" on-tap="collapseCustomFieldsMappingTap">
+						                	<iron-icon id="collapseCustomFieldsMappingToggleIcon" class="tb-accordion__button-icon icon-small" icon="chevron-right"></iron-icon>
+						                    <span class="tb-accordion__button-text">Advanced Mapping</span>
+							            </a>
+							            
+							            <iron-collapse class="tb-accordion__collapse" id="collapseCustomFieldsMapping">
+							            
+			                				<div class="tb-text step__text">
+			                					<p>
+			                						Please, associate the task types with the columns of the spreadsheet.
+			                						{{ fixedFieldsFormattedText }}
+			                					</p>
+			                				</div>
+	
+			                				<form class="tb-form sizing__advanced-mapping">
+			                					
+												<table class="tb-table tb-table--scroll">
+												    <thead class="tb-table__header">
+												    	<tr>
+													    	<th class="tb-table__column tb-table__column--index"></th>
+													        <th class="tb-table__column tb-table__column--field tb-table__column--header">Task type</th>
+													        <th class="tb-table__column tb-table__column--column tb-table__column--header">Column</th>
+												        </tr>
+												    </thead><!-- .tb-table__header -->
+												    <tbody id="jira-issuefields" class="tb-table__content">
+												    	<template is="dom-repeat" items="{{customFields}}" as="field" index-as="fieldIndex">
+												    		<tr class="jira-issuefield">
+												    			<td class="tb-table__column tb-table__column--index">
+												    				# {{displayIndex(fieldIndex)}}
+												    			</td>
+												    			<td class="tb-table__column tb-table__column--field">
+												    				<input class$="{{getCustomFieldClass(field)}}"
+												    					value="{{field.name}} {{getTextIfIsRequired(field)}}"
+												    					type="text" readonly />
+												    			</td>
+												    			<td class="step__mapp tb-table__column tb-table__column--column">
+												    				<input class$="tb-text--align-center sizing__mapping-column {{getCustomFieldClass(field)}}"
+													    				value="{{field.columnLetter::input}}"
+													    				data-index$="{{fieldIndex}}"
+													    				placeholder="Not used"
+													    				on-keypress="onInputColumnValue" type="text" />
+												    			</td>
+												    		</tr>
+												    	</template>
+												    </tbody><!-- .tb-table__content -->
+												</table><!-- .tb-table -->
+			                				
+			                				</form><!-- .tb-form -->
+	
+							            </iron-collapse>
+						            
+						            </div><!-- .tb-accordion -->
+						            
+								</div><!-- .step__content -->
+								
+                				<div class="step__buttons">
+                					<div class="step__buttons-left">
+				                        <paper-button class="sizing__cancel" raised on-tap="cancelImportation" title="Cancel importation">
+				                            Cancel
+				                        </paper-button>
+				                        <paper-button class="sizing__back" raised on-tap="previousStep" title="Previous step">
+				                            Back
+				                        </paper-button>
+			                        </div>
+			                        <div class="step__buttons-right">
+				                        <paper-button class="sizing__submit colorful" raised on-tap="submitStepTwo" title="Next">
+				                            Next
+				                        </paper-button>
+			                        </div>
+                				</div><!-- .step__buttons -->
+                				
+                			</div><!-- .step -->
+                			
+                			<div data-step="3" class="step sizing__step">
+                			
+                				<h3 class="step__title">
+                					Confirmation
+                				</h3>
+                				
+                				<div class="tb-text step__text">
+                					<p>These are a sample data of the spreadsheet for each column you have selected. You can step back to some adjustments. Click on the "Confirm" button to start the importation.</p>
+                				</div>
+                			
+                				<form class="tb-form">
+                				
+                					<div class="step__content">
+                					
+		                				<div class="tb-text step__text">
+		                					<h4>
+		                						Total: {{spreadsheetDataTotalLines}} features found on the spreadsheet.
+		                					</h4>
+		                				</div>
+		                				
+		                				<div class="sizing__confirmation-wrapper">
+                					
+											<table class="tb-table sizing__confirmation">
+											    <thead class="tb-table__header">
+											    	<tr>
+											    		<template is="dom-repeat" items="{{spreadsheetDataHeader}}" as="header">
+												        	<th class="tb-table__column tb-table__column--header sizing__confirmation-header-value">{{removeFromString(header, " TSize")}}</th>
+												        </template>
+											        </tr>
+											    </thead>
+											    <tbody id="jira-issuefields" class="tb-table__content">
+											    	<template  is="dom-repeat" items="{{spreadsheetDataRows}}" as="row">
+											    		<tr class="sizing__confirmation-row">
+											    			<template is="dom-repeat" items="{{row}}" as="rowItem">
+												    			<td class="tb-table__column tb-truncate sizing__confirmation-row-value">
+												    				{{rowItem}}
+												    			</td>
+											    			</template>
+											    		</tr>
+											    	</template>
+											    </tbody><!-- .tb-table__content -->
+											</table><!-- .tb-table -->
+										
+										</div><!-- .sizing__confirmation-wrapper -->
+										
+	                				</div><!-- .step__content -->
+	                				
+	                				<div class="step__buttons">
+	                					<div class="step__buttons-left">
+					                        <paper-button class="sizing__cancel" raised on-tap="cancelImportation" title="Cancel importation">
+					                            Cancel
+					                        </paper-button>
+					                        <paper-button class="sizing__back" raised on-tap="previousStep" title="Previous step">
+					                            Back
+					                        </paper-button>
+				                        </div>
+				                        <div class="step__buttons-right">
+					                        <paper-button class="sizing__submit colorful" raised on-tap="submitStepThree" title="Confirm">
+					                            Confirm and start to import
+					                        </paper-button>
+				                        </div>
+	                				</div><!-- .step__buttons -->
+                				
+                				</form><!-- .tb-form -->
+                				
+                			</div><!-- .step -->
+                			
+                			<div data-step="4" class="step sizing__step">
+                			
+            					<div class="step__content">
+            						<progress-bar class="importation-progress" percent="{{statusPercent}}" message="{{statusMessage}}"></progress-bar>
+                				</div><!-- .step__content -->		
+
+        						<template is="dom-if" if="{{isImportationCompleted}}">
+	                				<div class="step__buttons">
+	                					<div class="step__buttons-left">
+				                        </div>
+				                        <div class="step__buttons-right">
+					                        <paper-button class="sizing__return-to-taskboard" raised on-tap="cancelImportation" title="Back to Taskboard">
+					                            Close
+					                        </paper-button>
+					                        <paper-button class="sizing__open-spreadsheet colorful" raised on-tap="openGoogleSpreadsheet" title="Check the Google Spreadsheet">
+					                            Check the Spreadsheet
+					                        </paper-button>
+				                        </div>
+	                				</div><!-- .step__buttons -->
+        						</template>
+			
+                			</div><!-- .step -->
+                		
+                		</div><!-- .steps__content -->	
+                	
+                	</div><!-- .steps -->
+   
+                    <template is="dom-if" if="{{errorMessage}}">
+                    	<div id="errorMessage" class="error-message">{{errorMessage}}</div>
+                    </template>
+                    
+                </div><!-- .content-box -->
+                
+            </paper-card>
+            <div id="loading">
+            	<paper-spinner active alt="Loading..."></paper-spinner>
+            </div>
+        </paper-dialog>
+    </template>
+    <script>
+        (function () {
+            Polymer({
+                is: 'sizing-import',
+
+                properties: {
+                    projects: {
+                        type: Array
+                    },
+                    projectKey: {
+                    	type: String
+                    },
+                    needsGoogleAuthorizarion: {
+                    	type: Boolean
+                    },
+                    spreadsheetUrl: {
+                    	type: String
+                    },
+                    spreadsheetId: {
+                    	type: String
+                    },
+                    stepNumber: {
+                    	type: Number
+                    },
+                    customFields: {
+                    	type: Array
+                    },
+                    fixedFields: {
+                    	type: Array
+                    },
+                    fixedFieldsFormattedText: {
+                    	type: String
+                    },
+                    lastColumn: {
+                    	type: String
+                    },
+                    spreadsheetDataRows: {
+                    	type: Array
+                    },
+                    spreadsheetDataHeader: {
+                    	type: Array
+                    },
+                    spreadsheetDataTotalLines: {
+                    	type: Number
+                    },
+                    statusPercent: {
+                    	type: Number,
+                    	value: 0
+                    },
+                    statusMessage: {
+                    	type: String
+                    },
+                    isImportationCompleted: {
+                    	type: Boolean
+                    }
+                },
+
+                opendialog: function () {
+                    this.initStepOne();
+                },
+                
+                initStepOne: function() {
+                    var self = this;
+                    
+                    this.loadingEnable();
+                    
+                    this.stepNumber = 1;
+                    this.projects = [];
+                    this.projectKey = null;
+
+                    this.spreadsheetUrl = '';
+                    this.spreadsheetId = '';
+                    this.errorMessage = null;
+                    
+                    $.when(this.loadInitialData(), this.initGoogleAuth())
+                        .fail(function() { self.errorMessage = 'Failed to load initial data.' })
+                        .always(function() { self.showStepOne() });
+                },
+                
+                loadInitialData: function() {
+                    var self = this;
+                    
+                    return $.getJSON('ws/sizing-import/initial-data/')
+                        .done(function(data) { 
+                            self.needsGoogleAuthorizarion = data.needsGoogleAuthorizarion;
+                            self.projects = data.projects;
+                            self.projectKey = self.projects[0] ? self.projects[0].key : null;
+                        });
+                },
+                
+                initGoogleAuth: function() {
+                    var result = $.Deferred();
+                    
+                    gapi.load('client:auth2', function() {
+                        gapi.client
+                            .init({
+                                'discoveryDocs': ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
+                                'clientId': GOOGLE_CLIENT_ID,
+                                'scope': 'https://www.googleapis.com/auth/spreadsheets'
+                            })
+                            .then(result.resolve, result.reject);
+                    });
+                    
+                    return result.promise();
+                },
+                
+                showStepOne: function() {
+                    this.$.modal.open();
+                	this.goToStep(1);
+                	this.loadingDisable();
+                },
+
+                submitStepOne: function() {
+                                                           
+                    this.errorMessage = "";
+                    
+                    if (!this.spreadsheetUrl) {
+                        this.errorMessage = "Please, inform the Google Spreadsheet URL to import.";
+                        return;
+                    }
+                    
+                    this.spreadsheetId = this.getGoogleIdFromUrl(this.spreadsheetUrl);
+                    if (!this.spreadsheetId) {
+                        this.errorMessage = "Invalid Google Spreadsheet URL. Please, try another.";
+                        return;
+                    }
+                                        
+                    this.loadingEnable();
+                    
+                    if (this.needsGoogleAuthorizarion) {
+                        this.requestGoogleAuthorization();
+                    } else {
+                        this.validateStepOne();                        
+                    }
+                },
+                
+                validateStepOne: function() {
+                    var self = this;
+                    
+                    $.ajax({
+                        url: 'ws/sizing-import/validation/' + self.projectKey + '/' + self.spreadsheetId,
+                        success: function (data) {
+                            if (data.success) {
+                                self.initStepTwo();
+
+                            } else {
+                                self.errorMessage = data.errorMessage;
+                                self.loadingDisable();
+                            }
+                        },
+                        error: function () {
+                            self.errorMessage = 'Internal server error';
+                            self.loadingDisable();
+                        }
+                    });
+                },
+                
+                requestGoogleAuthorization: function() {
+                    var self = this;
+                    
+                    gapi.auth2.getAuthInstance().grantOfflineAccess({prompt: 'consent'})
+                        .then(function(authResult) {
+                            $.ajax({
+                                    url: 'ws/sizing-import/google-authorization/', 
+                                    type: 'POST',
+                                    contentType: 'application/octet-stream; charset=utf-8',
+                                    data: authResult.code
+                                })
+                                .done(function() {
+                                    self.needsGoogleAuthorizarion = false;
+                                    self.validateStepOne();
+                                });
+                        }, function() {
+                            self.errorMessage = 'Google authorization failed.';
+                            self.loadingDisable();
+                        });
+                },
+                
+                responseOfStepOne: function(event) {
+                	authorizationObject = event.detail.authorizationObject;
+                	if (authorizationObject.hasAuthorization) {
+                		this.initStepTwo();
+                	}
+                	else {
+                		this.errorMessage = authorizationObject.errorMsg;
+                		this.loadingDisable();
+                	}
+                },
+                
+                initStepTwo: function() {
+                    var self = this;
+                    
+                	$.getJSON('ws/sizing-import/spreadsheet-details/' + this.projectKey + '/' + this.spreadsheetId + '/')
+                		.done(function(data) {
+                			self.showStepTwo(data);
+                		})
+                		.fail(function() {
+                			self.errorMessage = 'Internal server error';
+                        	self.loadingDisable();
+                		});   
+                },
+                
+                showStepTwo: function(response) {
+                	this.lastColumn = response.lastColumn;
+                	
+					var customFields = response.dynamicColumns
+						.map( columnsMapping => {
+							return {					
+								fieldId: columnsMapping.fieldId,
+								name: columnsMapping.name.replace(" TSize", ""),
+								required: columnsMapping.required,
+								columnLetter: columnsMapping.defaultColumnLetter
+							}
+						});
+					
+					this.customFields = _(customFields).chain()
+						.sortBy('name')
+						.reverse()
+						.sortBy('required')
+						.reverse()
+						.value();
+					
+					this.fixedFields = response.staticColumns;
+					this.fixedFieldsFormattedText = this.fixedFieldsTextFormatter();
+                	this.goToStep(2);
+                	this.loadingDisable();
+                },
+                
+				submitStepTwo: function() {
+					
+					var self = this;
+					                
+					this.errorMessage = "";
+                	
+					if (this.hasRequiredCustomFieldsWithoutColumn()) {
+						this.errorMessage = "All required fields must have columns associated.";
+						return;
+					}
+					
+					if (this.hasRepeatedColumnLetter()) {
+						this.errorMessage = "Column repeated.";
+						return;
+					}
+					              	
+					this.loadingEnable();
+
+                	var data = this.getNoBlankCustomFields();
+                	
+                	$.ajax({
+                        url: 'ws/sizing-import/confirmation/' + self.projectKey + '/' + self.spreadsheetId,
+                        type: 'POST',
+                        data: JSON.stringify(data),
+                        dataType: 'json',
+                        contentType: 'application/json',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        success: function (data) {
+                        	self.showStepThree(data);
+                        },
+                        error: function (jqXhr, textStatus, errorThrown) {
+                            self.errorMessage = errorThrown;
+                            self.loadingDisable();
+                        },
+                        async: true
+                    });
+                },
+                
+                showStepThree: function(response) {
+                	this.spreadsheetDataHeader = response.headers;
+                	this.spreadsheetDataRows = response.rows;
+                	this.spreadsheetDataTotalLines = response.totalLinesCount;
+                	this.errorMessage = "";
+                	this.goToStep(3);
+                	this.loadingDisable();
+                },
+                
+                getFieldNameById: function(fieldId) {
+					var customField = this.customFields.find( field => fieldId == field.fieldId );                	
+					return customField.name;
+                },
+                
+                submitStepThree: function() {
+                	var self = this;
+
+                	var data = this.customFields
+	            		.filter( c => {
+	            			return !self.isInvalidValue(c.columnLetter)
+	            		})
+	            		.map( c => { 
+	            			return {
+	            				fieldId: c.fieldId,
+	            				columnLetter: c.columnLetter
+	            			} 
+	            		});
+                	
+                	$.ajax({
+                        url: 'ws/sizing-import/import/' + self.projectKey + '/' + self.spreadsheetId,
+                        type: 'POST',
+                        data: JSON.stringify(data),
+                        contentType: 'application/json',
+                        success: function () {},
+                        error: function (jqXhr, textStatus, errorThrown) {
+                            self.errorMessage = 'Failed to import';
+                            self.statusMessage = '';
+                        }
+                    });
+                	
+                	//Show step 4 while the import is in progress. Status is updated via websocket.
+                	self.showStepFour();
+                },
+                
+                showStepFour: function() {
+                	this.isImportationCompleted = false;
+                	this.statusPercent = 0;
+                	this.statusMessage = "Starting to import...";
+                	this.errorMessage = "";
+
+                	this.goToStep(4);
+                },
+                
+                statusOfStepFour: function(event) {
+                	var status = event.detail.status;
+					var totalImported = status.importedLines + status.failedLines;
+					var completed = totalImported == status.totalLines;
+
+                	this.isImportationCompleted = completed;
+            		this.statusPercent = status.totalLines == 0 ? 100 : Math.round((totalImported / status.totalLines) * 100);
+            		this.statusMessage = completed 
+            					? "Importation completed." 
+            					: "Importing " + status.totalLines + " " + (status.totalLines == 1 ? "line" : "lines") + "...";
+            		
+            		if (completed && status.failedLines > 0) {
+            			var lines = status.failedLines > 1 ? "lines" : "line";
+            			this.statusMessage = "Failed to import " + status.failedLines + " " + lines + ". Please fix the errors and import the spreadsheet again.";
+            		}
+                },
+                
+                getNoBlankCustomFields: function() {
+                	return this.customFields
+            		.filter( c => {
+            			return !this.isInvalidValue(c.columnLetter)
+            		})
+            		.map( c => { 
+            			return {
+            				fieldId: c.fieldId,
+            				columnLetter: c.columnLetter
+            			} 
+            		});
+                },
+                
+                openGoogleSpreadsheet: function() {
+                	event.stopPropagation();
+                    var win = window.open(this.spreadsheetUrl);
+                    this.close();
+                },
+                
+                collapseCustomFieldsMappingTap: function (e) {
+                    this.$.collapseCustomFieldsMapping.toggle();
+
+                    if (this.$.collapseCustomFieldsMapping.opened) {
+                        this.$.collapseCustomFieldsMappingToggleIcon.icon = 'expand-more';
+                    } else {
+                        this.$.collapseCustomFieldsMappingToggleIcon.icon = 'chevron-right';
+                    }
+                },
+                
+                getCustomFieldClass: function(field) {
+                	return field.required ? "is-required" : "";
+                },
+                
+                getTextIfIsRequired: function(field) {
+                	return field.required ? " (required)" : "";
+                },
+                
+                fixedFieldsTextFormatter: function() {
+                	var fieldsText = "";
+                	var firstIndex = 0;
+                	if (this.fixedFields) {
+	                	var lastIndex = this.fixedFields.length - 1;
+	                	for (var i = 0; i < this.fixedFields.length; i++) {
+	                		if (i > firstIndex && i < lastIndex)
+	                			fieldsText += ', ';
+	                		else if (i == lastIndex)
+	                			fieldsText += ', and ';
+	                		fieldsText += this.fixedFields[i].name + ' (' + this.fixedFields[i].columnLetter + ')';
+	                	}
+                	}
+                	return "It's not allowed to change columns of " + fieldsText + ".";
+                },
+                
+                removeFromString: function(originalString, stringToRemove) {
+                	return originalString.replace(stringToRemove, "");
+                },
+                
+                onInputColumnValue: function(e) {
+                	var newValue = e.target.value + e.key.toUpperCase();
+                	var index = e.target.dataset.index;
+                	if (this.letterToColumn(newValue) <= this.letterToColumn(this.lastColumn)) {
+                		e.target.value = newValue;
+                		this.customFields[index].columnLetter = newValue;
+                	}
+		            e.preventDefault();
+		            e.stopPropagation();
+                },
+                
+                hasRequiredCustomFieldsWithoutColumn: function() {
+                	for (var i = 0; i < this.customFields.length; i++) {
+                		if (this.customFields[i].required && this.isInvalidValue(this.customFields[i].columnLetter))
+                			return true;
+                	}
+                	return false;
+                },
+                
+                hasRepeatedFieldName: function() {
+                 	var ids = _.map(this.customFields, "fieldId");
+                	return ids.length != _.uniq(ids).length;
+                },
+                
+                hasRepeatedColumnLetter: function() {
+                	var fixedColumnLetters = _.map(this.fixedFields, "columnLetter");
+					var noBlankCustomFields = _.map(this.getNoBlankCustomFields(), "columnLetter");
+					var allColumnLetters = fixedColumnLetters.concat(noBlankCustomFields);
+                	return allColumnLetters.length != _.uniq(allColumnLetters).length;
+                },
+                
+                isInvalidValue: function(value) {
+                	return value === null || value == "" || value === undefined;
+                },
+                
+                loadingEnable: function() {
+                	var loadingBox = this.$.loading;
+                	loadingBox.classList.add('active');
+                },
+                
+                loadingDisable: function() {
+                	var loadingBox = this.$.loading;
+                	loadingBox.classList.remove('active');
+                },
+                
+                cancelImportation: function() {
+                	this.close();
+                },
+                
+                close: function() {
+                    this.$.modal.close();
+                },
+                
+				columnToLetter: function(column) {
+					var temp;
+					var letter = '';
+					while (column > 0) {
+				    	temp = (column - 1) % 26;
+				    	letter = String.fromCharCode(temp + 65) + letter;
+				    	column = (column - temp - 1) / 26;
+					}
+					return letter;
+				},
+				
+				letterToColumn: function(letter) {
+					var column = 0;
+					var length = letter.length;
+					for (var i = 0; i < length; i++) {
+						column += (letter.charCodeAt(i) - 64) * Math.pow(26, length - i - 1);
+					}
+					return column;
+				},
+                
+                getGoogleIdFromUrl: function (url) {
+                	var idFromUrl = url.match(/[-\w]{25,}/);
+                	if (idFromUrl)
+                		return idFromUrl[0];
+                	else
+                		return null;
+                },
+                
+                displayIndex: function(index) {
+                	return index + 1;
+                },
+                
+                previousStep: function() {
+                	this.errorMessage = "";
+                	this.stepNumber--;
+                	this.goToStep(this.stepNumber);
+                },
+                
+                nextStep: function() {
+                	this.stepNumber++;
+                	this.goToStep(this.stepNumber);
+                },
+                
+                goToStep: function(stepNumber) {
+                	this.stepNumber = stepNumber;
+                	var stepItemsToDesactive = this.querySelectorAll('[data-step].active');
+                	stepItemsToDesactive.forEach(function(step) {
+                		step.classList.remove('active');
+                	});
+                	var stepItemsToActive = this.querySelectorAll('[data-step="' + this.stepNumber + '"]');
+                	stepItemsToActive.forEach(function(step) {
+                		step.classList.add('active');
+                	});
+                	this.$.modal.notifyResize();
+                }
+            });
+        })();
+    </script>
+
+</dom-module>

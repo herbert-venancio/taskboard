@@ -19,7 +19,7 @@
             "displayName": "Taskboard",
             "key": "taskboard",
             "name": "taskboard",
-            "self": "http://54.68.128.117:8100/rest/api/latest/user?username=taskboard",
+            "self": "http://localhost:4567/rest/api/latest/user?username=taskboard",
             "timeZone": "America/Sao_Paulo"
         },
         "attachment": [],
@@ -41,7 +41,7 @@
             "displayName": "Elizabeth do Nascimento",
             "key": "elizabeth",
             "name": "elizabeth",
-            "self": "http://54.68.128.117:8100/rest/api/latest/user?username=elizabeth",
+            "self": "http://localhost:4567/rest/api/latest/user?username=elizabeth",
             "timeZone": "America/Sao_Paulo"
         },
         "customfield_10013": null,
@@ -70,7 +70,7 @@
         "customfield_10650": "0|i0yehf:",
         "customfield_10740": {
             "id": "11181",
-            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/11181",
+            "self": "http://localhost:4567/rest/api/latest/customFieldOption/11181",
             "value": "Standard"
         },
         "customfield_10841": null,
@@ -91,7 +91,7 @@
         "customfield_11341": null,
         "customfield_11440": {
             "id": "12606",
-            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12606",
+            "self": "http://localhost:4567/rest/api/latest/customFieldOption/12606",
             "value": "Standard"
         },
         "customfield_11451": null,
@@ -133,42 +133,42 @@
                             "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=11957&avatarType=issuetype",
                             "id": "5",
                             "name": "OS",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/5",
+                            "self": "http://localhost:4567/rest/api/latest/issuetype/5",
                             "subtask": false
                         },
                         "priority": {
                             "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                             "id": "9",
                             "name": "M\u00e9dia",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                            "self": "http://localhost:4567/rest/api/latest/priority/9"
                         },
                         "status": {
                             "description": "",
                             "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/trash.png",
                             "id": "10004",
                             "name": "Cancelado",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/status/10004",
+                            "self": "http://localhost:4567/rest/api/latest/status/10004",
                             "statusCategory": {
                                 "colorName": "green",
                                 "id": 3,
                                 "key": "done",
                                 "name": "Done",
-                                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/3"
+                                "self": "http://localhost:4567/rest/api/latest/statuscategory/3"
                             }
                         },
                         "summary": "P7 - C510101F - An\u00e1lise Divergencia Alert Superv(Cartao)"
                     },
                     "id": "214909",
                     "key": "SDXMIGO6-22",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issue/214909"
+                    "self": "http://localhost:4567/rest/api/latest/issue/214909"
                 },
-                "self": "http://54.68.128.117:8100/rest/api/latest/issueLink/143767",
+                "self": "http://localhost:4567/rest/api/latest/issueLink/143767",
                 "type": {
                     "id": "10150",
                     "inward": "\u00e9 demandado por",
                     "name": "Demanda",
                     "outward": "demandou",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issueLinkType/10150"
+                    "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
                 }
             },
             {
@@ -181,42 +181,42 @@
                             "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=11957&avatarType=issuetype",
                             "id": "5",
                             "name": "OS",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/5",
+                            "self": "http://localhost:4567/rest/api/latest/issuetype/5",
                             "subtask": false
                         },
                         "priority": {
                             "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                             "id": "9",
                             "name": "M\u00e9dia",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                            "self": "http://localhost:4567/rest/api/latest/priority/9"
                         },
                         "status": {
                             "description": "",
                             "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/trash.png",
                             "id": "10004",
                             "name": "Cancelado",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/status/10004",
+                            "self": "http://localhost:4567/rest/api/latest/status/10004",
                             "statusCategory": {
                                 "colorName": "green",
                                 "id": 3,
                                 "key": "done",
                                 "name": "Done",
-                                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/3"
+                                "self": "http://localhost:4567/rest/api/latest/statuscategory/3"
                             }
                         },
                         "summary": "P7 - C510100F - An\u00e1lise Diverg\u00eancia Alert ( Cart\u00e3o )"
                     },
                     "id": "214908",
                     "key": "SDXMIGO6-130",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issue/214908"
+                    "self": "http://localhost:4567/rest/api/latest/issue/214908"
                 },
-                "self": "http://54.68.128.117:8100/rest/api/latest/issueLink/143766",
+                "self": "http://localhost:4567/rest/api/latest/issueLink/143766",
                 "type": {
                     "id": "10150",
                     "inward": "\u00e9 demandado por",
                     "name": "Demanda",
                     "outward": "demandou",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issueLinkType/10150"
+                    "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
                 }
             },
             {
@@ -229,42 +229,42 @@
                             "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=11957&avatarType=issuetype",
                             "id": "5",
                             "name": "OS",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/5",
+                            "self": "http://localhost:4567/rest/api/latest/issuetype/5",
                             "subtask": false
                         },
                         "priority": {
                             "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                             "id": "9",
                             "name": "M\u00e9dia",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                            "self": "http://localhost:4567/rest/api/latest/priority/9"
                         },
                         "status": {
                             "description": "",
                             "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/trash.png",
                             "id": "10004",
                             "name": "Cancelado",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/status/10004",
+                            "self": "http://localhost:4567/rest/api/latest/status/10004",
                             "statusCategory": {
                                 "colorName": "green",
                                 "id": 3,
                                 "key": "done",
                                 "name": "Done",
-                                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/3"
+                                "self": "http://localhost:4567/rest/api/latest/statuscategory/3"
                             }
                         },
                         "summary": "P7 - C611820F - Monitoramento Presentes e Ausentes"
                     },
                     "id": "214912",
                     "key": "SDXMIGO6-131",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issue/214912"
+                    "self": "http://localhost:4567/rest/api/latest/issue/214912"
                 },
-                "self": "http://54.68.128.117:8100/rest/api/latest/issueLink/143770",
+                "self": "http://localhost:4567/rest/api/latest/issueLink/143770",
                 "type": {
                     "id": "10150",
                     "inward": "\u00e9 demandado por",
                     "name": "Demanda",
                     "outward": "demandou",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issueLinkType/10150"
+                    "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
                 }
             },
             {
@@ -277,42 +277,42 @@
                             "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
                             "id": "10601",
                             "name": "Feature",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10601",
+                            "self": "http://localhost:4567/rest/api/latest/issuetype/10601",
                             "subtask": false
                         },
                         "priority": {
                             "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                             "id": "9",
                             "name": "M\u00e9dia",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                            "self": "http://localhost:4567/rest/api/latest/priority/9"
                         },
                         "status": {
                             "description": "Taskboard",
                             "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                             "id": "10651",
                             "name": "Open",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/status/10651",
+                            "self": "http://localhost:4567/rest/api/latest/status/10651",
                             "statusCategory": {
                                 "colorName": "blue-gray",
                                 "id": 2,
                                 "key": "new",
                                 "name": "To Do",
-                                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                                "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                             }
                         },
                         "summary": "P7 - C314000F - Par\u00e2metros para a recep\u00e7\u00e3o de Guia Eletr\u00f4nica"
                     },
                     "id": "214900",
                     "key": "TASKB-74",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issue/214900"
+                    "self": "http://localhost:4567/rest/api/latest/issue/214900"
                 },
-                "self": "http://54.68.128.117:8100/rest/api/latest/issueLink/143758",
+                "self": "http://localhost:4567/rest/api/latest/issueLink/143758",
                 "type": {
                     "id": "10150",
                     "inward": "\u00e9 demandado por",
                     "name": "Demanda",
                     "outward": "demandou",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issueLinkType/10150"
+                    "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
                 }
             },
             {
@@ -325,42 +325,42 @@
                             "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
                             "id": "10601",
                             "name": "Feature",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10601",
+                            "self": "http://localhost:4567/rest/api/latest/issuetype/10601",
                             "subtask": false
                         },
                         "priority": {
                             "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                             "id": "9",
                             "name": "M\u00e9dia",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                            "self": "http://localhost:4567/rest/api/latest/priority/9"
                         },
                         "status": {
                             "description": "Taskboard",
                             "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                             "id": "10651",
                             "name": "Open",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/status/10651",
+                            "self": "http://localhost:4567/rest/api/latest/status/10651",
                             "statusCategory": {
                                 "colorName": "blue-gray",
                                 "id": 2,
                                 "key": "new",
                                 "name": "To Do",
-                                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                                "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                             }
                         },
                         "summary": "P7 - C314200F - Recep\u00e7\u00e3o de Guia Eletr\u00f4nica"
                     },
                     "id": "214902",
                     "key": "TASKB-77",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issue/214902"
+                    "self": "http://localhost:4567/rest/api/latest/issue/214902"
                 },
-                "self": "http://54.68.128.117:8100/rest/api/latest/issueLink/143760",
+                "self": "http://localhost:4567/rest/api/latest/issueLink/143760",
                 "type": {
                     "id": "10150",
                     "inward": "\u00e9 demandado por",
                     "name": "Demanda",
                     "outward": "demandou",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issueLinkType/10150"
+                    "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
                 }
             },
             {
@@ -373,42 +373,42 @@
                             "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
                             "id": "10601",
                             "name": "Feature",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10601",
+                            "self": "http://localhost:4567/rest/api/latest/issuetype/10601",
                             "subtask": false
                         },
                         "priority": {
                             "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                             "id": "9",
                             "name": "M\u00e9dia",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                            "self": "http://localhost:4567/rest/api/latest/priority/9"
                         },
                         "status": {
                             "description": "Taskboard",
                             "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                             "id": "10651",
                             "name": "Open",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/status/10651",
+                            "self": "http://localhost:4567/rest/api/latest/status/10651",
                             "statusCategory": {
                                 "colorName": "blue-gray",
                                 "id": 2,
                                 "key": "new",
                                 "name": "To Do",
-                                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                                "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                             }
                         },
                         "summary": "P7 - C216000F - Cancelar Master Cheque por Intervalo"
                     },
                     "id": "214897",
                     "key": "TASKB-95",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issue/214897"
+                    "self": "http://localhost:4567/rest/api/latest/issue/214897"
                 },
-                "self": "http://54.68.128.117:8100/rest/api/latest/issueLink/143755",
+                "self": "http://localhost:4567/rest/api/latest/issueLink/143755",
                 "type": {
                     "id": "10150",
                     "inward": "\u00e9 demandado por",
                     "name": "Demanda",
                     "outward": "demandou",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issueLinkType/10150"
+                    "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
                 }
             },
             {
@@ -421,42 +421,42 @@
                             "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
                             "id": "10601",
                             "name": "Feature",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10601",
+                            "self": "http://localhost:4567/rest/api/latest/issuetype/10601",
                             "subtask": false
                         },
                         "priority": {
                             "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                             "id": "9",
                             "name": "M\u00e9dia",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                            "self": "http://localhost:4567/rest/api/latest/priority/9"
                         },
                         "status": {
                             "description": "Taskboard",
                             "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                             "id": "10651",
                             "name": "Open",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/status/10651",
+                            "self": "http://localhost:4567/rest/api/latest/status/10651",
                             "statusCategory": {
                                 "colorName": "blue-gray",
                                 "id": 2,
                                 "key": "new",
                                 "name": "To Do",
-                                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                                "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                             }
                         },
                         "summary": "P7 - C510000F - An\u00e1lise Diverg. Alert ( AT\u00c9 DEZ/1999)"
                     },
                     "id": "214903",
                     "key": "TASKB-102",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issue/214903"
+                    "self": "http://localhost:4567/rest/api/latest/issue/214903"
                 },
-                "self": "http://54.68.128.117:8100/rest/api/latest/issueLink/143761",
+                "self": "http://localhost:4567/rest/api/latest/issueLink/143761",
                 "type": {
                     "id": "10150",
                     "inward": "\u00e9 demandado por",
                     "name": "Demanda",
                     "outward": "demandou",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issueLinkType/10150"
+                    "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
                 }
             },
             {
@@ -469,42 +469,42 @@
                             "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
                             "id": "10601",
                             "name": "Feature",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10601",
+                            "self": "http://localhost:4567/rest/api/latest/issuetype/10601",
                             "subtask": false
                         },
                         "priority": {
                             "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                             "id": "9",
                             "name": "M\u00e9dia",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                            "self": "http://localhost:4567/rest/api/latest/priority/9"
                         },
                         "status": {
                             "description": "Taskboard",
                             "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                             "id": "10651",
                             "name": "Open",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/status/10651",
+                            "self": "http://localhost:4567/rest/api/latest/status/10651",
                             "statusCategory": {
                                 "colorName": "blue-gray",
                                 "id": 2,
                                 "key": "new",
                                 "name": "To Do",
-                                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                                "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                             }
                         },
                         "summary": "P7 - C513000F \u2013 Consultar Contrato Afiliado"
                     },
                     "id": "214906",
                     "key": "TASKB-104",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issue/214906"
+                    "self": "http://localhost:4567/rest/api/latest/issue/214906"
                 },
-                "self": "http://54.68.128.117:8100/rest/api/latest/issueLink/143764",
+                "self": "http://localhost:4567/rest/api/latest/issueLink/143764",
                 "type": {
                     "id": "10150",
                     "inward": "\u00e9 demandado por",
                     "name": "Demanda",
                     "outward": "demandou",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issueLinkType/10150"
+                    "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
                 }
             },
             {
@@ -517,42 +517,42 @@
                             "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
                             "id": "10601",
                             "name": "Feature",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10601",
+                            "self": "http://localhost:4567/rest/api/latest/issuetype/10601",
                             "subtask": false
                         },
                         "priority": {
                             "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                             "id": "9",
                             "name": "M\u00e9dia",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                            "self": "http://localhost:4567/rest/api/latest/priority/9"
                         },
                         "status": {
                             "description": "Taskboard",
                             "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                             "id": "10651",
                             "name": "Open",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/status/10651",
+                            "self": "http://localhost:4567/rest/api/latest/status/10651",
                             "statusCategory": {
                                 "colorName": "blue-gray",
                                 "id": 2,
                                 "key": "new",
                                 "name": "To Do",
-                                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                                "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                             }
                         },
                         "summary": "P7 - C312000F - Recepcionar Guia Sem Master Cheque"
                     },
                     "id": "214898",
                     "key": "TASKB-137",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issue/214898"
+                    "self": "http://localhost:4567/rest/api/latest/issue/214898"
                 },
-                "self": "http://54.68.128.117:8100/rest/api/latest/issueLink/143756",
+                "self": "http://localhost:4567/rest/api/latest/issueLink/143756",
                 "type": {
                     "id": "10150",
                     "inward": "\u00e9 demandado por",
                     "name": "Demanda",
                     "outward": "demandou",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issueLinkType/10150"
+                    "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
                 }
             },
             {
@@ -565,42 +565,42 @@
                             "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
                             "id": "10601",
                             "name": "Feature",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10601",
+                            "self": "http://localhost:4567/rest/api/latest/issuetype/10601",
                             "subtask": false
                         },
                         "priority": {
                             "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                             "id": "9",
                             "name": "M\u00e9dia",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                            "self": "http://localhost:4567/rest/api/latest/priority/9"
                         },
                         "status": {
                             "description": "Taskboard",
                             "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                             "id": "10651",
                             "name": "Open",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/status/10651",
+                            "self": "http://localhost:4567/rest/api/latest/status/10651",
                             "statusCategory": {
                                 "colorName": "blue-gray",
                                 "id": 2,
                                 "key": "new",
                                 "name": "To Do",
-                                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                                "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                             }
                         },
                         "summary": "P7 - B320500F - Cancelamento de Cobrancas deTaxas Afl"
                     },
                     "id": "214888",
                     "key": "TASKB-141",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issue/214888"
+                    "self": "http://localhost:4567/rest/api/latest/issue/214888"
                 },
-                "self": "http://54.68.128.117:8100/rest/api/latest/issueLink/143747",
+                "self": "http://localhost:4567/rest/api/latest/issueLink/143747",
                 "type": {
                     "id": "10150",
                     "inward": "\u00e9 demandado por",
                     "name": "Demanda",
                     "outward": "demandou",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issueLinkType/10150"
+                    "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
                 }
             },
             {
@@ -613,42 +613,42 @@
                             "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
                             "id": "10601",
                             "name": "Feature",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10601",
+                            "self": "http://localhost:4567/rest/api/latest/issuetype/10601",
                             "subtask": false
                         },
                         "priority": {
                             "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                             "id": "9",
                             "name": "M\u00e9dia",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                            "self": "http://localhost:4567/rest/api/latest/priority/9"
                         },
                         "status": {
                             "description": "Taskboard",
                             "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                             "id": "10651",
                             "name": "Open",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/status/10651",
+                            "self": "http://localhost:4567/rest/api/latest/status/10651",
                             "statusCategory": {
                                 "colorName": "blue-gray",
                                 "id": 2,
                                 "key": "new",
                                 "name": "To Do",
-                                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                                "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                             }
                         },
                         "summary": "P7 - C214000F - Cancelar Master Cheque"
                     },
                     "id": "214896",
                     "key": "TASKB-143",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issue/214896"
+                    "self": "http://localhost:4567/rest/api/latest/issue/214896"
                 },
-                "self": "http://54.68.128.117:8100/rest/api/latest/issueLink/143754",
+                "self": "http://localhost:4567/rest/api/latest/issueLink/143754",
                 "type": {
                     "id": "10150",
                     "inward": "\u00e9 demandado por",
                     "name": "Demanda",
                     "outward": "demandou",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issueLinkType/10150"
+                    "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
                 }
             },
             {
@@ -661,42 +661,42 @@
                             "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
                             "id": "10601",
                             "name": "Feature",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10601",
+                            "self": "http://localhost:4567/rest/api/latest/issuetype/10601",
                             "subtask": false
                         },
                         "priority": {
                             "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                             "id": "9",
                             "name": "M\u00e9dia",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                            "self": "http://localhost:4567/rest/api/latest/priority/9"
                         },
                         "status": {
                             "description": "Taskboard",
                             "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                             "id": "10651",
                             "name": "Open",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/status/10651",
+                            "self": "http://localhost:4567/rest/api/latest/status/10651",
                             "statusCategory": {
                                 "colorName": "blue-gray",
                                 "id": 2,
                                 "key": "new",
                                 "name": "To Do",
-                                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                                "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                             }
                         },
                         "summary": "P7 - C213100F - Master Cheque"
                     },
                     "id": "214893",
                     "key": "TASKB-152",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issue/214893"
+                    "self": "http://localhost:4567/rest/api/latest/issue/214893"
                 },
-                "self": "http://54.68.128.117:8100/rest/api/latest/issueLink/143751",
+                "self": "http://localhost:4567/rest/api/latest/issueLink/143751",
                 "type": {
                     "id": "10150",
                     "inward": "\u00e9 demandado por",
                     "name": "Demanda",
                     "outward": "demandou",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issueLinkType/10150"
+                    "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
                 }
             },
             {
@@ -709,42 +709,42 @@
                             "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
                             "id": "10601",
                             "name": "Feature",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10601",
+                            "self": "http://localhost:4567/rest/api/latest/issuetype/10601",
                             "subtask": false
                         },
                         "priority": {
                             "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                             "id": "9",
                             "name": "M\u00e9dia",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                            "self": "http://localhost:4567/rest/api/latest/priority/9"
                         },
                         "status": {
                             "description": "Taskboard",
                             "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                             "id": "10651",
                             "name": "Open",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/status/10651",
+                            "self": "http://localhost:4567/rest/api/latest/status/10651",
                             "statusCategory": {
                                 "colorName": "blue-gray",
                                 "id": 2,
                                 "key": "new",
                                 "name": "To Do",
-                                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                                "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                             }
                         },
                         "summary": "P7 - C213200F - Estoque Master Cheque"
                     },
                     "id": "214894",
                     "key": "TASKB-153",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issue/214894"
+                    "self": "http://localhost:4567/rest/api/latest/issue/214894"
                 },
-                "self": "http://54.68.128.117:8100/rest/api/latest/issueLink/143752",
+                "self": "http://localhost:4567/rest/api/latest/issueLink/143752",
                 "type": {
                     "id": "10150",
                     "inward": "\u00e9 demandado por",
                     "name": "Demanda",
                     "outward": "demandou",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issueLinkType/10150"
+                    "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
                 }
             },
             {
@@ -757,42 +757,42 @@
                             "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
                             "id": "10601",
                             "name": "Feature",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10601",
+                            "self": "http://localhost:4567/rest/api/latest/issuetype/10601",
                             "subtask": false
                         },
                         "priority": {
                             "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                             "id": "9",
                             "name": "M\u00e9dia",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                            "self": "http://localhost:4567/rest/api/latest/priority/9"
                         },
                         "status": {
                             "description": "Taskboard",
                             "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                             "id": "10651",
                             "name": "Open",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/status/10651",
+                            "self": "http://localhost:4567/rest/api/latest/status/10651",
                             "statusCategory": {
                                 "colorName": "blue-gray",
                                 "id": 2,
                                 "key": "new",
                                 "name": "To Do",
-                                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                                "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                             }
                         },
                         "summary": "P7 - C212000F - Reemitir Master Cheque"
                     },
                     "id": "214891",
                     "key": "TASKB-173",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issue/214891"
+                    "self": "http://localhost:4567/rest/api/latest/issue/214891"
                 },
-                "self": "http://54.68.128.117:8100/rest/api/latest/issueLink/143750",
+                "self": "http://localhost:4567/rest/api/latest/issueLink/143750",
                 "type": {
                     "id": "10150",
                     "inward": "\u00e9 demandado por",
                     "name": "Demanda",
                     "outward": "demandou",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issueLinkType/10150"
+                    "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
                 }
             },
             {
@@ -805,42 +805,42 @@
                             "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
                             "id": "10601",
                             "name": "Feature",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10601",
+                            "self": "http://localhost:4567/rest/api/latest/issuetype/10601",
                             "subtask": false
                         },
                         "priority": {
                             "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                             "id": "9",
                             "name": "M\u00e9dia",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                            "self": "http://localhost:4567/rest/api/latest/priority/9"
                         },
                         "status": {
                             "description": "Taskboard",
                             "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                             "id": "10651",
                             "name": "Open",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/status/10651",
+                            "self": "http://localhost:4567/rest/api/latest/status/10651",
                             "statusCategory": {
                                 "colorName": "blue-gray",
                                 "id": 2,
                                 "key": "new",
                                 "name": "To Do",
-                                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                                "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                             }
                         },
                         "summary": "P7 - C511000F \u2013 Consultar Afiliado"
                     },
                     "id": "214904",
                     "key": "TASKB-180",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issue/214904"
+                    "self": "http://localhost:4567/rest/api/latest/issue/214904"
                 },
-                "self": "http://54.68.128.117:8100/rest/api/latest/issueLink/143762",
+                "self": "http://localhost:4567/rest/api/latest/issueLink/143762",
                 "type": {
                     "id": "10150",
                     "inward": "\u00e9 demandado por",
                     "name": "Demanda",
                     "outward": "demandou",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issueLinkType/10150"
+                    "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
                 }
             },
             {
@@ -853,42 +853,42 @@
                             "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
                             "id": "10601",
                             "name": "Feature",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10601",
+                            "self": "http://localhost:4567/rest/api/latest/issuetype/10601",
                             "subtask": false
                         },
                         "priority": {
                             "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                             "id": "9",
                             "name": "M\u00e9dia",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                            "self": "http://localhost:4567/rest/api/latest/priority/9"
                         },
                         "status": {
                             "description": "Taskboard",
                             "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                             "id": "10651",
                             "name": "Open",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/status/10651",
+                            "self": "http://localhost:4567/rest/api/latest/status/10651",
                             "statusCategory": {
                                 "colorName": "blue-gray",
                                 "id": 2,
                                 "key": "new",
                                 "name": "To Do",
-                                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                                "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                             }
                         },
                         "summary": "P7 - C512000F \u2013 Consultar Remessa Anterior"
                     },
                     "id": "214905",
                     "key": "TASKB-201",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issue/214905"
+                    "self": "http://localhost:4567/rest/api/latest/issue/214905"
                 },
-                "self": "http://54.68.128.117:8100/rest/api/latest/issueLink/143763",
+                "self": "http://localhost:4567/rest/api/latest/issueLink/143763",
                 "type": {
                     "id": "10150",
                     "inward": "\u00e9 demandado por",
                     "name": "Demanda",
                     "outward": "demandou",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issueLinkType/10150"
+                    "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
                 }
             },
             {
@@ -901,42 +901,42 @@
                             "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
                             "id": "10601",
                             "name": "Feature",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10601",
+                            "self": "http://localhost:4567/rest/api/latest/issuetype/10601",
                             "subtask": false
                         },
                         "priority": {
                             "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                             "id": "9",
                             "name": "M\u00e9dia",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                            "self": "http://localhost:4567/rest/api/latest/priority/9"
                         },
                         "status": {
                             "description": "Taskboard",
                             "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                             "id": "10651",
                             "name": "Open",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/status/10651",
+                            "self": "http://localhost:4567/rest/api/latest/status/10651",
                             "statusCategory": {
                                 "colorName": "blue-gray",
                                 "id": 2,
                                 "key": "new",
                                 "name": "To Do",
-                                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                                "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                             }
                         },
                         "summary": "P7 - C313100F - Associar Master Cheque"
                     },
                     "id": "214899",
                     "key": "TASKB-209",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issue/214899"
+                    "self": "http://localhost:4567/rest/api/latest/issue/214899"
                 },
-                "self": "http://54.68.128.117:8100/rest/api/latest/issueLink/143757",
+                "self": "http://localhost:4567/rest/api/latest/issueLink/143757",
                 "type": {
                     "id": "10150",
                     "inward": "\u00e9 demandado por",
                     "name": "Demanda",
                     "outward": "demandou",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issueLinkType/10150"
+                    "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
                 }
             },
             {
@@ -949,42 +949,42 @@
                             "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
                             "id": "10601",
                             "name": "Feature",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10601",
+                            "self": "http://localhost:4567/rest/api/latest/issuetype/10601",
                             "subtask": false
                         },
                         "priority": {
                             "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                             "id": "9",
                             "name": "M\u00e9dia",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                            "self": "http://localhost:4567/rest/api/latest/priority/9"
                         },
                         "status": {
                             "description": "Taskboard",
                             "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                             "id": "10651",
                             "name": "Open",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/status/10651",
+                            "self": "http://localhost:4567/rest/api/latest/status/10651",
                             "statusCategory": {
                                 "colorName": "blue-gray",
                                 "id": 2,
                                 "key": "new",
                                 "name": "To Do",
-                                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                                "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                             }
                         },
                         "summary": "P7 - C530000F - An\u00e1lise Remessa p/Adm. Empresa Servi\u00e7o"
                     },
                     "id": "214911",
                     "key": "TASKB-211",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issue/214911"
+                    "self": "http://localhost:4567/rest/api/latest/issue/214911"
                 },
-                "self": "http://54.68.128.117:8100/rest/api/latest/issueLink/143769",
+                "self": "http://localhost:4567/rest/api/latest/issueLink/143769",
                 "type": {
                     "id": "10150",
                     "inward": "\u00e9 demandado por",
                     "name": "Demanda",
                     "outward": "demandou",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issueLinkType/10150"
+                    "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
                 }
             },
             {
@@ -997,42 +997,42 @@
                             "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
                             "id": "10601",
                             "name": "Feature",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10601",
+                            "self": "http://localhost:4567/rest/api/latest/issuetype/10601",
                             "subtask": false
                         },
                         "priority": {
                             "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                             "id": "9",
                             "name": "M\u00e9dia",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                            "self": "http://localhost:4567/rest/api/latest/priority/9"
                         },
                         "status": {
                             "description": "Taskboard",
                             "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                             "id": "10651",
                             "name": "Open",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/status/10651",
+                            "self": "http://localhost:4567/rest/api/latest/status/10651",
                             "statusCategory": {
                                 "colorName": "blue-gray",
                                 "id": 2,
                                 "key": "new",
                                 "name": "To Do",
-                                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                                "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                             }
                         },
                         "summary": "P7 - C520000F - Consultar An\u00e1lise Diverg\u00eancia n\u00e3o Confor"
                     },
                     "id": "214910",
                     "key": "TASKB-220",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issue/214910"
+                    "self": "http://localhost:4567/rest/api/latest/issue/214910"
                 },
-                "self": "http://54.68.128.117:8100/rest/api/latest/issueLink/143768",
+                "self": "http://localhost:4567/rest/api/latest/issueLink/143768",
                 "type": {
                     "id": "10150",
                     "inward": "\u00e9 demandado por",
                     "name": "Demanda",
                     "outward": "demandou",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issueLinkType/10150"
+                    "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
                 }
             },
             {
@@ -1045,42 +1045,42 @@
                             "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
                             "id": "10601",
                             "name": "Feature",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10601",
+                            "self": "http://localhost:4567/rest/api/latest/issuetype/10601",
                             "subtask": false
                         },
                         "priority": {
                             "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                             "id": "9",
                             "name": "M\u00e9dia",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                            "self": "http://localhost:4567/rest/api/latest/priority/9"
                         },
                         "status": {
                             "description": "Taskboard",
                             "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                             "id": "10651",
                             "name": "Open",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/status/10651",
+                            "self": "http://localhost:4567/rest/api/latest/status/10651",
                             "statusCategory": {
                                 "colorName": "blue-gray",
                                 "id": 2,
                                 "key": "new",
                                 "name": "To Do",
-                                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                                "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                             }
                         },
                         "summary": "P7 - C211000F - Emitir Master Cheque"
                     },
                     "id": "214890",
                     "key": "TASKB-221",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issue/214890"
+                    "self": "http://localhost:4567/rest/api/latest/issue/214890"
                 },
-                "self": "http://54.68.128.117:8100/rest/api/latest/issueLink/143749",
+                "self": "http://localhost:4567/rest/api/latest/issueLink/143749",
                 "type": {
                     "id": "10150",
                     "inward": "\u00e9 demandado por",
                     "name": "Demanda",
                     "outward": "demandou",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issueLinkType/10150"
+                    "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
                 }
             },
             {
@@ -1093,42 +1093,42 @@
                             "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
                             "id": "10601",
                             "name": "Feature",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10601",
+                            "self": "http://localhost:4567/rest/api/latest/issuetype/10601",
                             "subtask": false
                         },
                         "priority": {
                             "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                             "id": "9",
                             "name": "M\u00e9dia",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                            "self": "http://localhost:4567/rest/api/latest/priority/9"
                         },
                         "status": {
                             "description": "Taskboard",
                             "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                             "id": "10651",
                             "name": "Open",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/status/10651",
+                            "self": "http://localhost:4567/rest/api/latest/status/10651",
                             "statusCategory": {
                                 "colorName": "blue-gray",
                                 "id": 2,
                                 "key": "new",
                                 "name": "To Do",
-                                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                                "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                             }
                         },
                         "summary": "P7 - C213300F - Emiss\u00e3o Master Cheque"
                     },
                     "id": "214895",
                     "key": "TASKB-224",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issue/214895"
+                    "self": "http://localhost:4567/rest/api/latest/issue/214895"
                 },
-                "self": "http://54.68.128.117:8100/rest/api/latest/issueLink/143753",
+                "self": "http://localhost:4567/rest/api/latest/issueLink/143753",
                 "type": {
                     "id": "10150",
                     "inward": "\u00e9 demandado por",
                     "name": "Demanda",
                     "outward": "demandou",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issueLinkType/10150"
+                    "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
                 }
             },
             {
@@ -1141,42 +1141,42 @@
                             "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
                             "id": "10601",
                             "name": "Feature",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10601",
+                            "self": "http://localhost:4567/rest/api/latest/issuetype/10601",
                             "subtask": false
                         },
                         "priority": {
                             "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                             "id": "9",
                             "name": "M\u00e9dia",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                            "self": "http://localhost:4567/rest/api/latest/priority/9"
                         },
                         "status": {
                             "description": "Taskboard",
                             "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                             "id": "10651",
                             "name": "Open",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/status/10651",
+                            "self": "http://localhost:4567/rest/api/latest/status/10651",
                             "statusCategory": {
                                 "colorName": "blue-gray",
                                 "id": 2,
                                 "key": "new",
                                 "name": "To Do",
-                                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                                "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                             }
                         },
                         "summary": "P7 - C338000F \u2013 Ocorr\u00eancia de Chequinho n\u00e3o Lido"
                     },
                     "id": "214907",
                     "key": "TASKB-227",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issue/214907"
+                    "self": "http://localhost:4567/rest/api/latest/issue/214907"
                 },
-                "self": "http://54.68.128.117:8100/rest/api/latest/issueLink/143765",
+                "self": "http://localhost:4567/rest/api/latest/issueLink/143765",
                 "type": {
                     "id": "10150",
                     "inward": "\u00e9 demandado por",
                     "name": "Demanda",
                     "outward": "demandou",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issueLinkType/10150"
+                    "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
                 }
             },
             {
@@ -1189,42 +1189,42 @@
                             "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
                             "id": "10601",
                             "name": "Feature",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10601",
+                            "self": "http://localhost:4567/rest/api/latest/issuetype/10601",
                             "subtask": false
                         },
                         "priority": {
                             "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                             "id": "9",
                             "name": "M\u00e9dia",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                            "self": "http://localhost:4567/rest/api/latest/priority/9"
                         },
                         "status": {
                             "description": "Taskboard",
                             "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                             "id": "10651",
                             "name": "Open",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/status/10651",
+                            "self": "http://localhost:4567/rest/api/latest/status/10651",
                             "statusCategory": {
                                 "colorName": "blue-gray",
                                 "id": 2,
                                 "key": "new",
                                 "name": "To Do",
-                                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                                "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                             }
                         },
                         "summary": "P7 - B340000F - Encerramento de Contrato"
                     },
                     "id": "214889",
                     "key": "TASKB-233",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issue/214889"
+                    "self": "http://localhost:4567/rest/api/latest/issue/214889"
                 },
-                "self": "http://54.68.128.117:8100/rest/api/latest/issueLink/143748",
+                "self": "http://localhost:4567/rest/api/latest/issueLink/143748",
                 "type": {
                     "id": "10150",
                     "inward": "\u00e9 demandado por",
                     "name": "Demanda",
                     "outward": "demandou",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issueLinkType/10150"
+                    "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
                 }
             },
             {
@@ -1237,42 +1237,42 @@
                             "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
                             "id": "10601",
                             "name": "Feature",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10601",
+                            "self": "http://localhost:4567/rest/api/latest/issuetype/10601",
                             "subtask": false
                         },
                         "priority": {
                             "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                             "id": "9",
                             "name": "M\u00e9dia",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                            "self": "http://localhost:4567/rest/api/latest/priority/9"
                         },
                         "status": {
                             "description": "Taskboard",
                             "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                             "id": "10651",
                             "name": "Open",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/status/10651",
+                            "self": "http://localhost:4567/rest/api/latest/status/10651",
                             "statusCategory": {
                                 "colorName": "blue-gray",
                                 "id": 2,
                                 "key": "new",
                                 "name": "To Do",
-                                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                                "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                             }
                         },
                         "summary": "P7 - C314100F - Recep\u00e7\u00e3o de Guia Eletr\u00f4nica"
                     },
                     "id": "214901",
                     "key": "TASKB-236",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issue/214901"
+                    "self": "http://localhost:4567/rest/api/latest/issue/214901"
                 },
-                "self": "http://54.68.128.117:8100/rest/api/latest/issueLink/143759",
+                "self": "http://localhost:4567/rest/api/latest/issueLink/143759",
                 "type": {
                     "id": "10150",
                     "inward": "\u00e9 demandado por",
                     "name": "Demanda",
                     "outward": "demandou",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issueLinkType/10150"
+                    "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
                 }
             }
         ],
@@ -1282,7 +1282,7 @@
             "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12250&avatarType=issuetype",
             "id": "10600",
             "name": "Demand",
-            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10600",
+            "self": "http://localhost:4567/rest/api/latest/issuetype/10600",
             "subtask": false
         },
         "labels": [
@@ -1293,7 +1293,7 @@
             "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
             "id": "9",
             "name": "M\u00e9dia",
-            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+            "self": "http://localhost:4567/rest/api/latest/priority/9"
         },
         "progress": {
             "progress": 0,
@@ -1312,9 +1312,9 @@
             "projectCategory": {
                 "id": "10001",
                 "name": "Externo",
-                "self": "http://54.68.128.117:8100/rest/api/latest/projectCategory/10001"
+                "self": "http://localhost:4567/rest/api/latest/projectCategory/10001"
             },
-            "self": "http://54.68.128.117:8100/rest/api/latest/project/11315"
+            "self": "http://localhost:4567/rest/api/latest/project/11315"
         },
         "reporter": {
             "active": true,
@@ -1327,7 +1327,7 @@
             "displayName": "Elizabeth do Nascimento",
             "key": "elizabeth",
             "name": "elizabeth",
-            "self": "http://54.68.128.117:8100/rest/api/latest/user?username=elizabeth",
+            "self": "http://localhost:4567/rest/api/latest/user?username=elizabeth",
             "timeZone": "America/Sao_Paulo"
         },
         "resolution": null,
@@ -1337,13 +1337,13 @@
             "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
             "id": "10652",
             "name": "Doing",
-            "self": "http://54.68.128.117:8100/rest/api/latest/status/10652",
+            "self": "http://localhost:4567/rest/api/latest/status/10652",
             "statusCategory": {
                 "colorName": "yellow",
                 "id": 4,
                 "key": "indeterminate",
                 "name": "In Progress",
-                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/4"
+                "self": "http://localhost:4567/rest/api/latest/statuscategory/4"
             }
         },
         "subtasks": [],
@@ -1355,12 +1355,12 @@
         "updated": "2017-04-04T14:15:39.000+0000",
         "votes": {
             "hasVoted": false,
-            "self": "http://54.68.128.117:8100/rest/api/latest/issue/TASKB-609/votes",
+            "self": "http://localhost:4567/rest/api/latest/issue/TASKB-609/votes",
             "votes": 0
         },
         "watches": {
             "isWatching": false,
-            "self": "http://54.68.128.117:8100/rest/api/latest/issue/TASKB-609/watchers",
+            "self": "http://localhost:4567/rest/api/latest/issue/TASKB-609/watchers",
             "watchCount": 1
         },
         "worklog": {
@@ -1966,7 +1966,7 @@
             "type": "number"
         }
     },
-    "self": "http://54.68.128.117:8100/rest/api/latest/issue/214714",
+    "self": "http://localhost:4567/rest/api/latest/issue/214714",
     "transitions": [
         {
             "id": "41",
@@ -1976,13 +1976,13 @@
                 "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                 "id": "10653",
                 "name": "To UAT",
-                "self": "http://54.68.128.117:8100/rest/api/latest/status/10653",
+                "self": "http://localhost:4567/rest/api/latest/status/10653",
                 "statusCategory": {
                     "colorName": "yellow",
                     "id": 4,
                     "key": "indeterminate",
                     "name": "In Progress",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/4"
+                    "self": "http://localhost:4567/rest/api/latest/statuscategory/4"
                 }
             }
         },
@@ -1994,13 +1994,13 @@
                 "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/open.png",
                 "id": "10052",
                 "name": "To Do",
-                "self": "http://54.68.128.117:8100/rest/api/latest/status/10052",
+                "self": "http://localhost:4567/rest/api/latest/status/10052",
                 "statusCategory": {
                     "colorName": "blue-gray",
                     "id": 2,
                     "key": "new",
                     "name": "To Do",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                    "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                 }
             }
         },
@@ -2012,13 +2012,13 @@
                 "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                 "id": "10655",
                 "name": "Deferred",
-                "self": "http://54.68.128.117:8100/rest/api/latest/status/10655",
+                "self": "http://localhost:4567/rest/api/latest/status/10655",
                 "statusCategory": {
                     "colorName": "blue-gray",
                     "id": 2,
                     "key": "new",
                     "name": "To Do",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                    "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                 }
             }
         },
@@ -2030,13 +2030,13 @@
                 "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                 "id": "10656",
                 "name": "Cancelled",
-                "self": "http://54.68.128.117:8100/rest/api/latest/status/10656",
+                "self": "http://localhost:4567/rest/api/latest/status/10656",
                 "statusCategory": {
                     "colorName": "green",
                     "id": 3,
                     "key": "done",
                     "name": "Done",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/3"
+                    "self": "http://localhost:4567/rest/api/latest/statuscategory/3"
                 }
             }
         }

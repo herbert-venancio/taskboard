@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +29,7 @@ import org.springframework.stereotype.Service;
  */
 
 import com.atlassian.jira.rest.client.api.domain.Issue;
+import com.atlassian.jira.rest.client.api.domain.IssuelinksType;
 
 import objective.taskboard.data.IssuesConfiguration;
 import objective.taskboard.domain.Filter;
@@ -42,6 +42,9 @@ public class JiraIssueService {
 
     @Autowired
     private JiraSearchService jiraSearchService;
+    
+    @Autowired
+    private MetadataService metadataService;
 
     @Autowired
     private ProjectFilterConfigurationCachedRepository projectRepository;
@@ -92,13 +95,10 @@ public class JiraIssueService {
     }
 
     public List<Issue> searchIssueSubTasksAndDemandedByKey(String key) {
-    	String jql = "parent = " + key;
-    	String linkeTypes = properties.getIssuelink().getDemand().getName();
-    	if (!StringUtils.isEmpty(linkeTypes)) {
-    		for (String linkType : Arrays.asList(linkeTypes.split("\\s*,\\s*"))) {
-    			jql += " OR issuefunction in linkedIssuesOf('key = " + key + "', '" + linkType + "')";
-    		}
-    	}
+        IssuelinksType demandLink = metadataService.getIssueLinksMetadata().get(properties.getIssuelink().getDemandId().toString());
+    	String jql = "parent = " + key +  " OR" + 
+    	        " issuefunction in linkedIssuesOf('key = " + key + "', '" + demandLink.getOutward() + "')";
+
         return searchIssues(jql);
     }
 

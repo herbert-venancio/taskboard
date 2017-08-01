@@ -40,15 +40,15 @@ public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/issues", "/cache-state");
+        config.enableSimpleBroker("/topic");
         config.setApplicationDestinationPrefixes("/taskboard");
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/taskboard-websocket")
-        .setAllowedOrigins("*")
-        .withSockJS();
+            .setAllowedOrigins("*")
+            .withSockJS();
     }
     
     @Bean
@@ -58,10 +58,9 @@ public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
                 tomcatContextCustomizer()
         }));
         return factory;
-
     }
 
-    @Bean 
+    @Bean
     public TomcatContextCustomizer tomcatContextCustomizer() {
         return new TomcatContextCustomizer() {
             @Override

@@ -22,6 +22,7 @@ package objective.taskboard.followup;
 
 import objective.taskboard.controller.TemplateData;
 import objective.taskboard.issueBuffer.IssueBufferState;
+import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -30,13 +31,17 @@ import java.util.Optional;
 
 public interface FollowUpFacade {
 
-    FollowUpGenerator getGenerator(String templateName);
+    FollowUpGenerator getGenerator(String templateName, Optional<String> date);
 
-    IssueBufferState getFollowupState();
+    FollowupDataProvider getProvider(Optional<String> date);
+
+    IssueBufferState getFollowUpState(Optional<String> date);
 
     void createTemplate(String templateName, String projects, MultipartFile file) throws IOException;
     void updateTemplate(Long id, String templateName, String projects, Optional<MultipartFile> file) throws IOException;
     void deleteTemplate(Long id) throws IOException;
 
     List<TemplateData> getTemplatesForCurrentUser();
+
+    Resource getGenericTemplate();
 }

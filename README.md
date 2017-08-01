@@ -25,6 +25,24 @@ To run integration tests from eclipse:
 
 The tests require Firefox version 54+ installed in your system. Make sure your version matches at least 54.   
 
+## How to run the integration tests without losing computer control
+
+Wanna run the tests from maven and still keep using your computer? Here's how:
+
+1. Run the following command in the terminal (you might have to install Xvfb first):
+
+`Xvfb :1 &` 
+
+2. Now, run your tests with the following commands:
+
+```
+export DISPLAY=:1
+mvn clean verify
+```
+
+That's all!
+ 
+
 ## Generating a war
 By default, the genarated artifact is a **jar**. Alternatively you can generate a **war** by activating the `packaging-war` maven profile: \
  `mvn package -P packaging-war`

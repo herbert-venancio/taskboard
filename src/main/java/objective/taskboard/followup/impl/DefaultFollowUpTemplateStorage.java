@@ -21,13 +21,15 @@
 
 package objective.taskboard.followup.impl;
 
+import static objective.taskboard.utils.ZipUtils.unzip;
+import static objective.taskboard.utils.ZipUtils.zip;
+import static org.apache.commons.io.FileUtils.deleteQuietly;
+
 import objective.taskboard.followup.FollowUpTemplate;
 import objective.taskboard.followup.FollowUpTemplateStorage;
 import objective.taskboard.followup.FollowUpTemplateValidator;
 import objective.taskboard.followup.UpdateFollowUpService;
 import objective.taskboard.utils.IOUtilities;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -36,8 +38,6 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 @Service
 public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
@@ -72,16 +72,17 @@ public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
             Files.createDirectories(templateRoot);
 
         Path pathFollowup = Files.createTempDirectory(templateRoot, "Followup");
-        Path tempFolder = decompressTemplate(pathFollowup, stream);
+        Path tempFolder = pathFollowup.resolve("temp");
+        unzip(stream, tempFolder);
         try {
             validator.validate(tempFolder);
             updateFollowUpService.updateFromJiraTemplate(tempFolder, pathFollowup.resolve("sheet7-template.xml"));
             updateFollowUpService.updateSharedStringsInitial(tempFolder, pathFollowup.resolve("sharedStrings-initial.xml"));
             updateFollowUpService.deleteGeneratedFiles(tempFolder);
-            updateFollowUpService.compressTemplate(tempFolder, pathFollowup.resolve("Followup-template.xlsm"));
-            FileUtils.deleteQuietly(tempFolder.toFile());
+            zip(tempFolder, pathFollowup.resolve("Followup-template.xlsm"));
+            deleteQuietly(tempFolder.toFile());
         } catch (Exception e) {
-            FileUtils.deleteQuietly(pathFollowup.toFile());
+            deleteQuietly(pathFollowup.toFile());
             throw e;
         }
         return templateRoot.relativize(pathFollowup).toString();
@@ -90,7 +91,7 @@ public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
     @Override
     public void deleteFile(String templatePath) {
         Path template = templateRoot.resolve(templatePath);
-        FileUtils.deleteQuietly(template.toFile());
+        deleteQuietly(template.toFile());
     }
 
     private static Resource resolve(String resourceName) {
@@ -101,29 +102,4 @@ public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
         return IOUtilities.asResource(templatePath.resolve(relativePath));
     }
 
-    private Path decompressTemplate(Path pathFollowup, InputStream stream) throws IOException {
-        Path temp = pathFollowup.resolve("temp");
-
-        ZipInputStream zipInputStream = null;
-        try {
-            zipInputStream = new ZipInputStream(stream);
-
-            ZipEntry entry;
-            while ((entry = zipInputStream.getNextEntry()) != null) {
-                Path entryPath = temp.resolve(entry.getName());
-                if (entry.isDirectory()) {
-                    Files.createDirectories(entryPath);
-                    continue;
-                } else {
-                    Files.createDirectories(entryPath.getParent());
-                }
-                Files.copy(zipInputStream, entryPath);
-            }
-
-            return temp;
-        } finally {
-            if (zipInputStream != null)
-                IOUtils.closeQuietly(zipInputStream);
-        }
-    }
 }

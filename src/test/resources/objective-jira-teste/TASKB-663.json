@@ -19,7 +19,7 @@
             "displayName": "Gabriel Takeuchi",
             "key": "gtakeuchi",
             "name": "gtakeuchi",
-            "self": "http://54.68.128.117:8100/rest/api/latest/user?username=gtakeuchi",
+            "self": "http://localhost:4567/rest/api/latest/user?username=gtakeuchi",
             "timeZone": "America/Sao_Paulo"
         },
         "attachment": [],
@@ -41,7 +41,7 @@
             "displayName": "Jean Takano",
             "key": "jean.takano",
             "name": "jean.takano",
-            "self": "http://54.68.128.117:8100/rest/api/latest/user?username=jean.takano",
+            "self": "http://localhost:4567/rest/api/latest/user?username=jean.takano",
             "timeZone": "America/Sao_Paulo"
         },
         "customfield_10013": null,
@@ -86,7 +86,7 @@
         "customfield_11341": null,
         "customfield_11440": {
             "id": "12606",
-            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12606",
+            "self": "http://localhost:4567/rest/api/latest/customFieldOption/12606",
             "value": "Standard"
         },
         "customfield_11451": null,
@@ -106,13 +106,13 @@
                 "displayName": "Gabriel Takeuchi",
                 "key": "gtakeuchi",
                 "name": "gtakeuchi",
-                "self": "http://54.68.128.117:8100/rest/api/latest/user?username=gtakeuchi",
+                "self": "http://localhost:4567/rest/api/latest/user?username=gtakeuchi",
                 "timeZone": "America/Sao_Paulo"
             }
         ],
         "customfield_11457": {
             "id": "12657",
-            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12657",
+            "self": "http://localhost:4567/rest/api/latest/customFieldOption/12657",
             "value": "S"
         },
         "customfield_11540": null,
@@ -144,7 +144,7 @@
             "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12259&avatarType=issuetype",
             "id": "10609",
             "name": "UX",
-            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10609",
+            "self": "http://localhost:4567/rest/api/latest/issuetype/10609",
             "subtask": true
         },
         "labels": [],
@@ -157,40 +157,40 @@
                     "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12262&avatarType=issuetype",
                     "id": "11",
                     "name": "Task",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/11",
+                    "self": "http://localhost:4567/rest/api/latest/issuetype/11",
                     "subtask": false
                 },
                 "priority": {
                     "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                     "id": "9",
                     "name": "M\u00e9dia",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                    "self": "http://localhost:4567/rest/api/latest/priority/9"
                 },
                 "status": {
                     "description": "Taskboard",
                     "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                     "id": "10652",
                     "name": "Doing",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/status/10652",
+                    "self": "http://localhost:4567/rest/api/latest/status/10652",
                     "statusCategory": {
                         "colorName": "yellow",
                         "id": 4,
                         "key": "indeterminate",
                         "name": "In Progress",
-                        "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/4"
+                        "self": "http://localhost:4567/rest/api/latest/statuscategory/4"
                     }
                 },
                 "summary": "teste"
             },
             "id": "225971",
             "key": "TASKB-641",
-            "self": "http://54.68.128.117:8100/rest/api/latest/issue/225971"
+            "self": "http://localhost:4567/rest/api/latest/issue/225971"
         },
         "priority": {
             "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
             "id": "9",
             "name": "M\u00e9dia",
-            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+            "self": "http://localhost:4567/rest/api/latest/priority/9"
         },
         "progress": {
             "progress": 0,
@@ -209,9 +209,9 @@
             "projectCategory": {
                 "id": "10001",
                 "name": "Externo",
-                "self": "http://54.68.128.117:8100/rest/api/latest/projectCategory/10001"
+                "self": "http://localhost:4567/rest/api/latest/projectCategory/10001"
             },
-            "self": "http://54.68.128.117:8100/rest/api/latest/project/11315"
+            "self": "http://localhost:4567/rest/api/latest/project/11315"
         },
         "reporter": {
             "active": true,
@@ -224,7 +224,7 @@
             "displayName": "Igor Fabiano Nazar",
             "key": "nazar",
             "name": "nazar",
-            "self": "http://54.68.128.117:8100/rest/api/latest/user?username=nazar",
+            "self": "http://localhost:4567/rest/api/latest/user?username=nazar",
             "timeZone": "America/Sao_Paulo"
         },
         "resolution": null,
@@ -234,13 +234,13 @@
             "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/open.png",
             "id": "10052",
             "name": "To Do",
-            "self": "http://54.68.128.117:8100/rest/api/latest/status/10052",
+            "self": "http://localhost:4567/rest/api/latest/status/10052",
             "statusCategory": {
                 "colorName": "blue-gray",
                 "id": 2,
                 "key": "new",
                 "name": "To Do",
-                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
             }
         },
         "subtasks": [],
@@ -253,12 +253,12 @@
         "versions": [],
         "votes": {
             "hasVoted": false,
-            "self": "http://54.68.128.117:8100/rest/api/latest/issue/TASKB-663/votes",
+            "self": "http://localhost:4567/rest/api/latest/issue/TASKB-663/votes",
             "votes": 0
         },
         "watches": {
             "isWatching": false,
-            "self": "http://54.68.128.117:8100/rest/api/latest/issue/TASKB-663/watchers",
+            "self": "http://localhost:4567/rest/api/latest/issue/TASKB-663/watchers",
             "watchCount": 1
         },
         "worklog": {
@@ -875,7 +875,7 @@
             "type": "number"
         }
     },
-    "self": "http://54.68.128.117:8100/rest/api/latest/issue/225993",
+    "self": "http://localhost:4567/rest/api/latest/issue/225993",
     "transitions": [
         {
             "id": "21",
@@ -885,13 +885,13 @@
                 "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                 "id": "10652",
                 "name": "Doing",
-                "self": "http://54.68.128.117:8100/rest/api/latest/status/10652",
+                "self": "http://localhost:4567/rest/api/latest/status/10652",
                 "statusCategory": {
                     "colorName": "yellow",
                     "id": 4,
                     "key": "indeterminate",
                     "name": "In Progress",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/4"
+                    "self": "http://localhost:4567/rest/api/latest/statuscategory/4"
                 }
             }
         },
@@ -903,13 +903,13 @@
                 "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                 "id": "10651",
                 "name": "Open",
-                "self": "http://54.68.128.117:8100/rest/api/latest/status/10651",
+                "self": "http://localhost:4567/rest/api/latest/status/10651",
                 "statusCategory": {
                     "colorName": "blue-gray",
                     "id": 2,
                     "key": "new",
                     "name": "To Do",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                    "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                 }
             }
         },
@@ -921,13 +921,13 @@
                 "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                 "id": "10655",
                 "name": "Deferred",
-                "self": "http://54.68.128.117:8100/rest/api/latest/status/10655",
+                "self": "http://localhost:4567/rest/api/latest/status/10655",
                 "statusCategory": {
                     "colorName": "blue-gray",
                     "id": 2,
                     "key": "new",
                     "name": "To Do",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                    "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                 }
             }
         },
@@ -939,13 +939,13 @@
                 "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                 "id": "10656",
                 "name": "Cancelled",
-                "self": "http://54.68.128.117:8100/rest/api/latest/status/10656",
+                "self": "http://localhost:4567/rest/api/latest/status/10656",
                 "statusCategory": {
                     "colorName": "green",
                     "id": 3,
                     "key": "done",
                     "name": "Done",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/3"
+                    "self": "http://localhost:4567/rest/api/latest/statuscategory/3"
                 }
             }
         }

@@ -1,5 +1,3 @@
-package objective.taskboard.it;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,6 +18,7 @@ package objective.taskboard.it;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.it;
 
 import static org.openqa.selenium.support.PageFactory.initElements;
 
@@ -49,9 +48,13 @@ public class TemplateFollowupDialog extends AbstractUiFragment {
     
     @FindBy(id="followupCrudModal")
     private WebElement dialog;
-    
+
+    public static TemplateFollowupDialog produce(WebDriver webDriver) {
+        return initElements(webDriver, TemplateFollowupDialog.class);
+    }
+
     public static TemplateFollowupDialog open(WebDriver webDriver) {
-        return initElements(webDriver, TemplateFollowupDialog.class).open();
+        return produce(webDriver).open();
     }
     
     private TemplateFollowupDialog open() {
@@ -103,12 +106,11 @@ public class TemplateFollowupDialog extends AbstractUiFragment {
         return this;
     }
     
-    public TemplateFollowupDialog createATemplate(Integer projectIndex) {
-        String templateName = "Template Success Test";
+    public TemplateFollowupDialog createATemplate(String templateName, Integer... projectsIndex) {
         File file = null;
         
         try {
-            file = new File(UploadTemplateIT.class.getResource("/objective/taskboard/followup/OkFollowupTemplate.xlsm").toURI());
+            file = new File(TemplateFollowupDialog.class.getResource("/objective/taskboard/followup/OkFollowupTemplate.xlsm").toURI());
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
@@ -117,7 +119,8 @@ public class TemplateFollowupDialog extends AbstractUiFragment {
         open();
         newTemplateItem.click();
         templateNameInput.sendKeys(templateName);
-        projectsCheckbox.get(projectIndex).click();
+        for (Integer projectIndex : projectsIndex)
+            projectsCheckbox.get(projectIndex).click();
         templateFileInput.sendKeys(file.toString());
         createButton.click();
         

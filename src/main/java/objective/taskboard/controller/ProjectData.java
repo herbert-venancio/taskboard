@@ -21,7 +21,9 @@ package objective.taskboard.controller;
  * [/LICENSE]
  */
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import objective.taskboard.domain.ProjectTeam;
@@ -29,6 +31,7 @@ import objective.taskboard.domain.ProjectTeam;
 public class ProjectData {
     public String projectKey;
     public Set<String> teams = new HashSet<>();
+    public List<String> followUpDataHistory = new ArrayList<String>();
     
     public ProjectData() {}
     public ProjectData(ProjectTeam project) {

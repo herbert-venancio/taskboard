@@ -26,8 +26,10 @@ import objective.taskboard.followup.*;
 import objective.taskboard.followup.data.Template;
 import objective.taskboard.issueBuffer.IssueBufferState;
 import objective.taskboard.jira.ProjectService;
+import objective.taskboard.utils.IOUtilities;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -44,7 +46,7 @@ public class DefaultFollowUpFacade implements FollowUpFacade {
     private FollowUpTemplateStorage followUpTemplateStorage;
 
     @Autowired
-    private FollowupDataProvider provider;
+    private FollowUpDataProviderFromCurrentState providerFromCurrentState;
 
     @Autowired
     private TemplateService templateService;
@@ -56,15 +58,22 @@ public class DefaultFollowUpFacade implements FollowUpFacade {
     private Converter<Template, TemplateData> templateConverter;
 
     @Override
-    public FollowUpGenerator getGenerator(String templateName) {
+    public FollowUpGenerator getGenerator(String templateName, Optional<String> date) {
         Template template = templateService.getTemplate(templateName);
         String path = template.getPath();
-        return new FollowUpGenerator(provider, followUpTemplateStorage.getTemplate(path));
+        return new FollowUpGenerator(getProvider(date), followUpTemplateStorage.getTemplate(path));
     }
 
     @Override
-    public IssueBufferState getFollowupState() {
-        return provider.getFollowupState();
+    public FollowupDataProvider getProvider(Optional<String> date) {
+        if (!date.isPresent() || date.get().isEmpty())
+            return providerFromCurrentState;
+        return new FollowUpDataProviderFromHistory(date.get());
+    }
+
+    @Override
+    public IssueBufferState getFollowUpState(Optional<String> date) {
+        return getProvider(date).getFollowupState();
     }
 
     @Override
@@ -127,5 +136,10 @@ public class DefaultFollowUpFacade implements FollowUpFacade {
         if(oldPath != null) {
             followUpTemplateStorage.deleteFile(oldPath);
         }
+    }
+
+    @Override
+    public Resource getGenericTemplate() {
+        return IOUtilities.asResource(DefaultFollowUpFacade.class.getResource("/followup-template/generic-followup-template.xlsm"));
     }
 }

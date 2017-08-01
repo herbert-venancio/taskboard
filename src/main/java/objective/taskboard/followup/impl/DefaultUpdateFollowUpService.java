@@ -20,6 +20,8 @@
  */
 package objective.taskboard.followup.impl;
 
+import static java.nio.file.Files.delete;
+
 import objective.taskboard.followup.FollowUpTemplateValidator;
 import objective.taskboard.followup.UpdateFollowUpService;
 import objective.taskboard.utils.XmlUtils;
@@ -30,50 +32,15 @@ import org.springframework.stereotype.Service;
 import org.w3c.dom.NodeList;
 
 import javax.xml.transform.TransformerException;
+
 import java.io.*;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
 
 @Service
 public class DefaultUpdateFollowUpService implements UpdateFollowUpService {
-
-    @Override
-    public Path decompressTemplate(File template) throws IOException {
-        return decompressTemplate(new FileInputStream(template));
-    }
-
-    @Override
-    public Path decompressTemplate(InputStream stream) throws IOException {
-        Path pathFollowup = Files.createTempDirectory("Followup");
-
-        ZipInputStream zipInputStream = null;
-        try {
-            zipInputStream = new ZipInputStream(stream);
-
-            ZipEntry entry;
-            while ((entry = zipInputStream.getNextEntry()) != null) {
-                Path entryPath = pathFollowup.resolve(entry.getName());
-                if (entry.isDirectory()) {
-                    Files.createDirectories(entryPath);
-                    continue;
-                } else {
-                    Files.createDirectories(entryPath.getParent());
-                }
-                Files.copy(zipInputStream, entryPath);
-            }
-
-            return pathFollowup;
-        } finally {
-            if (zipInputStream != null)
-                IOUtils.closeQuietly(zipInputStream);
-        }
-    }
 
     @Override
     public void validateTemplate(Path decompressed) throws FollowUpTemplateValidator.InvalidTemplateException {
@@ -101,23 +68,8 @@ public class DefaultUpdateFollowUpService implements UpdateFollowUpService {
 
     @Override
     public void deleteGeneratedFiles(Path decompressed) throws IOException {
-        Files.delete(searchFromJiraSheet(decompressed));
-        Files.delete(decompressed.resolve("xl/sharedStrings.xml"));
-    }
-
-    @Override
-    public Path compressTemplate(Path decompressed, Path pathFollowupXLSM) throws IOException {
-        ZipOutputStream zipOutputStream = null;
-        try {
-            zipOutputStream = new ZipOutputStream(new BufferedOutputStream(Files.newOutputStream(pathFollowupXLSM)));
-            Iterable<Path> it = Files.walk(decompressed)::iterator;
-            for (Path fileInFollowup : it)
-                compressFile(fileInFollowup, decompressed.relativize(fileInFollowup).toString(), zipOutputStream);
-            return pathFollowupXLSM;
-        } finally {
-            if (zipOutputStream != null)
-                zipOutputStream.close();
-        }
+        delete(searchFromJiraSheet(decompressed));
+        delete(decompressed.resolve("xl/sharedStrings.xml"));
     }
 
     // ---
@@ -147,12 +99,4 @@ public class DefaultUpdateFollowUpService implements UpdateFollowUpService {
         }
     }
 
-    private void compressFile(Path path, String zipEntryName, ZipOutputStream zipOutputStream) throws IOException {
-        if (Files.isDirectory(path))
-            return;
-
-        ZipEntry entry = new ZipEntry(zipEntryName);
-        zipOutputStream.putNextEntry(entry);
-        Files.copy(path, zipOutputStream);
-    }
 }

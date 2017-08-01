@@ -1,4 +1,4 @@
-package objective.taskboard.followup;
+package objective.taskboard.followup.impl;
 
 /*-
  * [LICENSE]
@@ -38,6 +38,8 @@ import org.springframework.util.StringUtils;
 
 import objective.taskboard.data.CustomField;
 import objective.taskboard.data.Issue;
+import objective.taskboard.followup.FollowUpData;
+import objective.taskboard.followup.FollowupDataProvider;
 import objective.taskboard.issueBuffer.AllIssuesBufferService;
 import objective.taskboard.issueBuffer.IssueBufferState;
 import objective.taskboard.jira.JiraProperties;
@@ -45,7 +47,7 @@ import objective.taskboard.jira.JiraProperties.BallparkMapping;
 import objective.taskboard.jira.MetadataService;
 
 @Service
-public class FollowupDataProviderImpl implements FollowupDataProvider {
+public class FollowUpDataProviderFromCurrentState implements FollowupDataProvider {
     @Autowired
     private JiraProperties jiraProperties;
     
@@ -67,7 +69,7 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
     @Override
     public List<FollowUpData> getJiraData(String[] includeProjects) {
         List<String> i = Arrays.asList(includeProjects);
-        List<Issue> issuesVisibleToUser = issueBufferService.getAllIssuesVisibleToUser().stream()
+        List<Issue> issuesVisibleToUser = issueBufferService.getAllIssues().stream()
                 .filter(issue -> isAllowedStatus(issue.getStatus()))
                 .filter(issue -> i.contains(issue.getProjectKey()))
                 .collect(Collectors.toList());
@@ -363,5 +365,3 @@ public class FollowupDataProviderImpl implements FollowupDataProvider {
         return null;
     }
 }
-
-
