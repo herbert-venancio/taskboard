@@ -40,35 +40,34 @@
                 background-color: white;
                 z-index: 100
             };
-
             --paper-drawer-panel-scrim: {
                 z-index: 99;
             };
         }
-        
+
         .issue-state {
             margin-top: -2px;
             margin-left: 5px;
             width: 16px;
             display: inline-block
         }
-        
+
         .issue-state-ready {
             color: #3da83d;
         }
-        
+
         .issue-state-updating {
             color: #3da83d;
         }        
-        
+
         .issue-state-initializing {
             color: #3da83d;
         }
-        
+
         .issue-state-updateError {
             color: #ff9800;
         }
-        
+
         .issue-state-initialisationError {
             color: #fe6565;
         }
@@ -126,12 +125,12 @@
             text-transform: none;
             color: #eeff41;
         }
-        
+
         #toastErrorTop .yellow-button {
             text-transform: none;
             color: #eeff41;
         }        
-        
+
         #toastIssueUpdated .yellow-button {
             text-transform: none;
             color: #ff9800;
@@ -141,11 +140,10 @@
         }
 
         .menu-header {
-        	display: flex;
-        	align-items: center;
-        	
-        	height: 40px;
-        	padding: 0 20px;
+            display: flex;
+            align-items: center;
+            height: 40px;
+            padding: 0 20px;
             position: relative;
             z-index: 10;
             background-color: #EFEFEF;
@@ -157,28 +155,29 @@
         }
 
         .visibility {
-        	margin-left: 10px;
+            margin-left: 10px;
         }
 
         .title {
-        	width: 150px;
+            width: 150px;
+            top: 50%;
             left: 50%;
-            margin-left: -75px;
-            position: relative;
+            position: absolute;
+            transform: translate(-50%, -50%);
             font-size: x-large;
             text-align: center;
         }
 
         .user {
-        	margin-left: auto;
+            margin-left: auto;
         }
 
         .openMenu {
-        	margin-left: 10px;
+            margin-left: 10px;
         }
 
         .menuLink {
-        	background: transparent;
+            background: transparent;
             font-size: 15px;
             font-weight: bold;
             color: inherit;
@@ -231,6 +230,7 @@
     </style>
 
     <template>
+
         <iron-ajax id="ajaxState"
                auto
                method="GET"
@@ -239,7 +239,7 @@
                handle-as="plain/text"
                on-response="onCacheStateResponse"
                last-response="{{cacheState}}"></iron-ajax>
-                   
+
         <iron-signals on-iron-signal-level-config-changed="storageLevelsConfig"
                       on-iron-signal-open-template-followup-modal="openFollowupCrudModal"
                       on-iron-signal-level-weight-changed="storageLevelsConfig"
@@ -257,7 +257,7 @@
 
         <followup-dialog id="followupdialog"></followup-dialog>
         <followup-crud-modal id="followupCrudModal"></followup-crud-modal>
-		
+
         <sizing-import id="sizingimport"></sizing-import>
 
         <paper-spinner id="spinner" active="{{!done}}" alt="Loading..."></paper-spinner>
@@ -287,7 +287,7 @@
                         </paper-button>
                     </paper-toast>                    
                     <paper-material class="menu-header u-clearfix">
-						<div class="title">Taskboard<iron-icon class$="issue-state issue-state-{{cacheState}}" icon="{{stateIcon}}" title$="{{stateTooltip}}"></iron-icon></div>
+                        <div class="title">Taskboard<iron-icon class$="issue-state issue-state-{{cacheState}}" icon="{{stateIcon}}" title$="{{stateTooltip}}"></iron-icon></div>
                         <div class="search">
                             <board-search></board-search>
                         </div>
@@ -310,10 +310,10 @@
                             <paper-icon-button icon="file-upload" title="Followup Template"
                                                class="template-followup-button" on-tap="openFollowupCrudModal"></paper-icon-button>
                         </div>
-						<div>
+                        <div>
                             <paper-icon-button icon="save" title="Import Sizing Spreadsheet"
                                                class="sizing-button" on-tap="openSizingImport"></paper-icon-button>
-						</div>
+                        </div>
                     </paper-material>
                     <board-table id="table" conf={{conf}} aspects-filter="{{aspectsFilter}}"></board-table>
                 </div>
@@ -386,7 +386,7 @@
                 },
 
                 ready: function () {
-                	this.currentQueryData = {query: ''}
+                    this.currentQueryData = {query: ''}
                     analytics.trackView();
                     taskboard.connectToWebsocket(this)
                     this.retrieveBoardFeatures();
@@ -450,9 +450,9 @@
                             localStorage.setItem("statuses", JSON.stringify(data.statuses));
 
                             try {
-                            	userPreferences.setPreferences(JSON.parse(data.userPreferences));
+                                userPreferences.setPreferences(JSON.parse(data.userPreferences));
                             }catch(e) {
-                            	console.error(e)
+                                console.error(e)
                             }
                             
                             self.retrieveFilters();
@@ -487,8 +487,8 @@
                 },
 
                 showErrorMessage: function(event) {
-                	if (this.infoMessage) return;
-                	this.filterByUpdate = false;
+                    if (this.infoMessage) return;
+                    this.filterByUpdate = false;
                     this.errorMessage = event.detail;
                     if (this.errorMessage.length > 0) {
                         toastError.open();
@@ -496,7 +496,7 @@
                     else
                         toastError.close();
                 },
-                
+
                 showErrorMessageTop: function(event) {
                     this.errorMessage = event.detail;
                     if (this.errorMessage.length > 0) 
@@ -504,80 +504,80 @@
                     else
                         toastErrorTop.close();
                 },
-                
+
                 showIssueUpdatedMessage : function(event) {
-                	this.refreshText="SHOW ONLY UPDATED"
+                    this.refreshText="SHOW ONLY UPDATED"
                     this.infoMessage = event.detail.message;
                     this.updatedIssueKeys = event.detail.updatedIssueKeys;
                     if (this.infoMessage.length > 0) 
                         toastIssueUpdated.open();
                     else
-                    	toastIssueUpdated.close();
+                        toastIssueUpdated.close();
                 },
-                
+
                 openFollowupDialog : function() {
-                	this.$.followupdialog.opendialog();
+                    this.$.followupdialog.opendialog();
                 },
 
                 openSizingImport: function() {
-                	this.$.sizingimport.opendialog();
+                    this.$.sizingimport.opendialog();
                 },
 
                 openFollowupCrudModal: function() {
-                	this.$.followupCrudModal.open();
+                    this.$.followupCrudModal.open();
                 },
-                
+
                 searchFilterChanged: function(event, data) {
-                	if (data.dontSaveQuery)
-                		return;
-                	this.currentQueryData = data;
+                    if (data.dontSaveQuery)
+                        return;
+                    this.currentQueryData = data;
                 },
-                
+
                 refreshBoard: function() {
-                	window.location.reload();
+                    window.location.reload();
                 },
                 
                 dismiss: function() {
-                	toastIssueUpdated.close();
-                	if (this.filterByUpdate)
-                		this.fire('iron-signal', {name: 'search-filter-changed', data: this.currentQueryData});
+                    toastIssueUpdated.close();
+                    if (this.filterByUpdate)
+                        this.fire('iron-signal', {name: 'search-filter-changed', data: this.currentQueryData});
                 },
-                
+
                 toggleFilterChangedIssues: function(args) {
-                	if (!this.filterByUpdate) {
-                		this.refreshText = 'SHOW ALL'
-	                	this.fire('iron-signal', {name: 'search-filter-changed',
-	                        data: { query: this.updatedIssueKeys[0] , release: false, dontSaveQuery: true}});
-                	}
-                	else {
-                		this.refreshText="SHOW ONLY UPDATED"
-                		this.fire('iron-signal', {name: 'search-filter-changed', data: this.currentQueryData, dontSaveQuery: true});//{query: ''}
-                	}
-                	
-	                this.filterByUpdate = !this.filterByUpdate;
-                	
+                    if (!this.filterByUpdate) {
+                        this.refreshText = 'SHOW ALL'
+                        this.fire('iron-signal', {name: 'search-filter-changed',
+                            data: { query: this.updatedIssueKeys[0] , release: false, dontSaveQuery: true}});
+                    }
+                    else {
+                        this.refreshText="SHOW ONLY UPDATED"
+                        this.fire('iron-signal', {name: 'search-filter-changed', data: this.currentQueryData, dontSaveQuery: true});//{query: ''}
+                    }
+
+                    this.filterByUpdate = !this.filterByUpdate;
+
                 },
-                
+
                 cacheStateUpdated: function(data) {
                     this.async(function() {
                         this.set('cacheState', data.detail.newstate);
                         this.setCacheState(data.detail.newstate);
                     })
                 },
-                
+
                 onCacheStateResponse: function(data) {
                     this.setCacheState(data.detail.response);
                 },
-                
+
                 setCacheState: function(cacheState) {
                     var state = {
-                            uninitialised       : {icon: "notification:do-not-disturb", tooltip: "No issue data yet. Initialising"},
-                            initialising        : {icon: "av:av-timer", tooltip: "No issue data yet. Initialising"},
-                            updating            : {icon: "icons:refresh", tooltip: "Refreshing data"},
-                            ready               : {icon: "icons:check-circle", tooltip: "Data ready, no errors"},
-                            updateError         : {icon: "icons:warning", tooltip: "Error synching data from jira. Issues might be outdated"},
-                            initialisationError : {icon: "icons:error", tooltip: "Failure fetching data from jira. No issues available"},
-                            }
+                        uninitialised       : {icon: "notification:do-not-disturb", tooltip: "No issue data yet. Initialising"},
+                        initialising        : {icon: "av:av-timer", tooltip: "No issue data yet. Initialising"},
+                        updating            : {icon: "icons:refresh", tooltip: "Refreshing data"},
+                        ready               : {icon: "icons:check-circle", tooltip: "Data ready, no errors"},
+                        updateError         : {icon: "icons:warning", tooltip: "Error synching data from jira. Issues might be outdated"},
+                        initialisationError : {icon: "icons:error", tooltip: "Failure fetching data from jira. No issues available"},
+                    }
                     this.set('stateIcon'   ,state[cacheState].icon)
                     this.set('stateTooltip',state[cacheState].tooltip);
                 }
