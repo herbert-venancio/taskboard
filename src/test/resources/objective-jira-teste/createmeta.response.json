@@ -8409,7 +8409,7 @@
                             "operations": [
                                 "set"
                             ],
-                            "required": true,
+                            "required": false,
                             "schema": {
                                 "custom": "com.atlassian.jira.plugin.system.customfieldtypes:select",
                                 "customId": 11442,

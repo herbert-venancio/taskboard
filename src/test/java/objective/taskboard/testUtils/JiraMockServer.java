@@ -46,7 +46,6 @@ import com.google.gson.GsonBuilder;
 
 import objective.taskboard.RequestBuilder;
 import objective.taskboard.utils.IOUtilities;
-
 import spark.Spark;
 
 
@@ -119,7 +118,11 @@ public class JiraMockServer {
         get("rest/api/latest/issuetype",  (req, res) ->{
             return loadMockData("issuetype.response.json");
         });
-
+        
+        get("rest/api/latest/issueLinkType",  (req, res) ->{
+            return loadMockData("issuelinktype.response.json");
+        });
+        
         get("rest/api/latest/mypermissions",  (req, res) ->{
             return loadMockData("mypermissions.response.json");
         });
@@ -219,6 +222,10 @@ public class JiraMockServer {
             issue.getJSONObject("fields").put("updated", nowIso8601());
             
             return "";
+        });
+        
+        post("/rest/api/latest/version", "application/json", (req,res) -> {
+            return loadMockData("createversion.response.json");
         });
 
         get("*", (req, res) -> {

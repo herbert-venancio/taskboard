@@ -38,7 +38,7 @@ public class SpreadsheetsManager {
         }
     }
 
-    public int getColumnCount(String spreadsheetId) {
+    private int getColumnCount(String spreadsheetId) {
         try {
             Spreadsheet execute = spreadsheets.get(spreadsheetId).execute();
             Sheet sheet = execute.getSheets().get(0);
@@ -65,25 +65,10 @@ public class SpreadsheetsManager {
         Integer lastColumn = getColumnCount(spreadsheetId);
         return SpreadsheetUtils.columnIndexToLetter(lastColumn - 1);
     }
-
-    public void updateValue(String spreadsheetId, String range, String value) {
-        try {
-            ValueRange vr = new ValueRange().setValues(Arrays.asList(Arrays.asList(value)));
-            
-            spreadsheets.values()
-            	.update(spreadsheetId, range, vr)
-            	.setValueInputOption("RAW")
-            	.execute();
-
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
-    }
     
-    public BatchUpdateSpreadsheetResponse batchUpdate(String spreadsheetId, BatchUpdateSpreadsheetRequest content) {
-        
+    public void batchUpdate(String spreadsheetId, BatchUpdateSpreadsheetRequest content) {
         try {
-            return spreadsheets.batchUpdate(spreadsheetId, content).execute();
+            spreadsheets.batchUpdate(spreadsheetId, content).execute();
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
