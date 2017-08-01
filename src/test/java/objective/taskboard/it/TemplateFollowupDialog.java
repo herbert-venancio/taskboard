@@ -48,9 +48,13 @@ public class TemplateFollowupDialog extends AbstractUiFragment {
     
     @FindBy(id="followupCrudModal")
     private WebElement dialog;
-    
+
+    public static TemplateFollowupDialog produce(WebDriver webDriver) {
+        return initElements(webDriver, TemplateFollowupDialog.class);
+    }
+
     public static TemplateFollowupDialog open(WebDriver webDriver) {
-        return initElements(webDriver, TemplateFollowupDialog.class).open();
+        return produce(webDriver).open();
     }
     
     private TemplateFollowupDialog open() {
@@ -102,8 +106,7 @@ public class TemplateFollowupDialog extends AbstractUiFragment {
         return this;
     }
     
-    public TemplateFollowupDialog createATemplate(Integer projectIndex) {
-        String templateName = "Template Success Test";
+    public TemplateFollowupDialog createATemplate(String templateName, Integer... projectsIndex) {
         File file = null;
         
         try {
@@ -116,7 +119,8 @@ public class TemplateFollowupDialog extends AbstractUiFragment {
         open();
         newTemplateItem.click();
         templateNameInput.sendKeys(templateName);
-        projectsCheckbox.get(projectIndex).click();
+        for (Integer projectIndex : projectsIndex)
+            projectsCheckbox.get(projectIndex).click();
         templateFileInput.sendKeys(file.toString());
         createButton.click();
         

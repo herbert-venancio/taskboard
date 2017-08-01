@@ -20,21 +20,10 @@
  */
 package objective.taskboard.followup;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Path;
 
 public interface UpdateFollowUpService {
-
-    /**
-     * Decompress a .xlsx or .xlsm file to a temporary folder
-     * @param template
-     * @return
-     * @throws IOException
-     */
-    Path decompressTemplate(File template) throws IOException;
-    Path decompressTemplate(InputStream input) throws IOException;
 
     /**
      * Validates that template can be used as Follow-up Spreadsheet template
@@ -64,13 +53,5 @@ public interface UpdateFollowUpService {
      * @throws IOException
      */
     void deleteGeneratedFiles(Path decompressed) throws IOException;
-
-    /**
-     * Compressed files to Follow-up template xlsm file
-     * @param decompressed
-     * @param pathFollowupXLSM
-     * @return
-     */
-    Path compressTemplate(Path decompressed, Path pathFollowupXLSM) throws IOException;
 
 }

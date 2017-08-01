@@ -20,7 +20,7 @@
             "displayName": "Taskboard",
             "key": "taskboard",
             "name": "taskboard",
-            "self": "http://54.68.128.117:8100/rest/api/latest/user?username=taskboard",
+            "self": "http://localhost:4567/rest/api/latest/user?username=taskboard",
             "timeZone": "America/Sao_Paulo"
         },
         "attachment": [
@@ -36,7 +36,7 @@
                     "displayName": "Reginaldo Marcelo Romano Rapussi",
                     "key": "reginaldo",
                     "name": "reginaldo",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/user?username=reginaldo",
+                    "self": "http://localhost:4567/rest/api/latest/user?username=reginaldo",
                     "timeZone": "America/Sao_Paulo"
                 },
                 "content": "http://54.68.128.117:8100/secure/attachment/133084/C611810F_fmb-Edited.xml",
@@ -44,7 +44,7 @@
                 "filename": "C611810F_fmb-Edited.xml",
                 "id": "133084",
                 "mimeType": "text/xml",
-                "self": "http://54.68.128.117:8100/rest/api/latest/attachment/133084",
+                "self": "http://localhost:4567/rest/api/latest/attachment/133084",
                 "size": 242369
             },
             {
@@ -59,7 +59,7 @@
                     "displayName": "Julia Nakashima",
                     "key": "julia.nakashima",
                     "name": "julia.nakashima",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/user?username=julia.nakashima",
+                    "self": "http://localhost:4567/rest/api/latest/user?username=julia.nakashima",
                     "timeZone": "America/Sao_Paulo"
                 },
                 "content": "http://54.68.128.117:8100/secure/attachment/134848/MANTIS_12513_C611810F_AnteciparPagamento_RETORNO_SODEXO_1_DEVOLVIDO.docx",
@@ -67,7 +67,7 @@
                 "filename": "MANTIS_12513_C611810F_AnteciparPagamento_RETORNO_SODEXO_1_DEVOLVIDO.docx",
                 "id": "134848",
                 "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                "self": "http://54.68.128.117:8100/rest/api/latest/attachment/134848",
+                "self": "http://localhost:4567/rest/api/latest/attachment/134848",
                 "size": 1638298
             }
         ],
@@ -85,13 +85,13 @@
                         "displayName": "Reginaldo Marcelo Romano Rapussi",
                         "key": "reginaldo",
                         "name": "reginaldo",
-                        "self": "http://54.68.128.117:8100/rest/api/latest/user?username=reginaldo",
+                        "self": "http://localhost:4567/rest/api/latest/user?username=reginaldo",
                         "timeZone": "America/Sao_Paulo"
                     },
                     "body": "Ata da Reuni\u00e3o:\r\nhttps://drive.google.com/open?id=0B-GHzGfnMr39WlB5eHdHeEFTbFU\r\nhttps://drive.google.com/open?id=0B6migIcE7G8Xd2o4bFdKVEdBck0",
                     "created": "2016-12-12T12:15:15.000+0000",
                     "id": "320432",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issue/214817/comment/320432",
+                    "self": "http://localhost:4567/rest/api/latest/issue/214817/comment/320432",
                     "updateAuthor": {
                         "active": true,
                         "avatarUrls": {
@@ -103,7 +103,7 @@
                         "displayName": "Reginaldo Marcelo Romano Rapussi",
                         "key": "reginaldo",
                         "name": "reginaldo",
-                        "self": "http://54.68.128.117:8100/rest/api/latest/user?username=reginaldo",
+                        "self": "http://localhost:4567/rest/api/latest/user?username=reginaldo",
                         "timeZone": "America/Sao_Paulo"
                     },
                     "updated": "2016-12-26T18:31:11.000+0000"
@@ -120,13 +120,13 @@
                         "displayName": "Julia Nakashima",
                         "key": "julia.nakashima",
                         "name": "julia.nakashima",
-                        "self": "http://54.68.128.117:8100/rest/api/latest/user?username=julia.nakashima",
+                        "self": "http://localhost:4567/rest/api/latest/user?username=julia.nakashima",
                         "timeZone": "America/Sao_Paulo"
                     },
                     "body": "Especifica\u00e7\u00e3o\r\nhttps://docs.google.com/document/d/1_4guX07QzFK0FRW33DfNkeHBFYk7G2f2QDC-iXQ1QCc/edit",
                     "created": "2017-01-16T16:07:44.000+0000",
                     "id": "323911",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issue/214817/comment/323911",
+                    "self": "http://localhost:4567/rest/api/latest/issue/214817/comment/323911",
                     "updateAuthor": {
                         "active": true,
                         "avatarUrls": {
@@ -138,7 +138,7 @@
                         "displayName": "Julia Nakashima",
                         "key": "julia.nakashima",
                         "name": "julia.nakashima",
-                        "self": "http://54.68.128.117:8100/rest/api/latest/user?username=julia.nakashima",
+                        "self": "http://localhost:4567/rest/api/latest/user?username=julia.nakashima",
                         "timeZone": "America/Sao_Paulo"
                     },
                     "updated": "2017-01-16T16:07:44.000+0000"
@@ -160,7 +160,7 @@
             "displayName": "Elizabeth do Nascimento",
             "key": "elizabeth",
             "name": "elizabeth",
-            "self": "http://54.68.128.117:8100/rest/api/latest/user?username=elizabeth",
+            "self": "http://localhost:4567/rest/api/latest/user?username=elizabeth",
             "timeZone": "America/Sao_Paulo"
         },
         "customfield_10013": null,
@@ -181,7 +181,7 @@
         "customfield_10370": null,
         "customfield_10450": {
             "id": "10814",
-            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/10814",
+            "self": "http://localhost:4567/rest/api/latest/customFieldOption/10814",
             "value": "G"
         },
         "customfield_10540": null,
@@ -193,7 +193,7 @@
         "customfield_10650": "0|i0yf4b:",
         "customfield_10740": {
             "id": "11181",
-            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/11181",
+            "self": "http://localhost:4567/rest/api/latest/customFieldOption/11181",
             "value": "Standard"
         },
         "customfield_10841": null,
@@ -205,7 +205,7 @@
         "customfield_11045": [
             {
                 "id": "11789",
-                "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/11789",
+                "self": "http://localhost:4567/rest/api/latest/customFieldOption/11789",
                 "value": "Sim"
             }
         ],
@@ -214,77 +214,77 @@
         "customfield_11243": null,
         "customfield_11244": {
             "id": "12325",
-            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12325",
+            "self": "http://localhost:4567/rest/api/latest/customFieldOption/12325",
             "value": "G"
         },
         "customfield_11245": {
             "id": "12330",
-            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12330",
+            "self": "http://localhost:4567/rest/api/latest/customFieldOption/12330",
             "value": "G"
         },
         "customfield_11246": {
             "id": "12335",
-            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12335",
+            "self": "http://localhost:4567/rest/api/latest/customFieldOption/12335",
             "value": "G"
         },
         "customfield_11247": {
             "id": "12340",
-            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12340",
+            "self": "http://localhost:4567/rest/api/latest/customFieldOption/12340",
             "value": "G"
         },
         "customfield_11340": {
             "id": "12390",
-            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12390",
+            "self": "http://localhost:4567/rest/api/latest/customFieldOption/12390",
             "value": "N/A"
         },
         "customfield_11341": {
             "id": "12391",
-            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12391",
+            "self": "http://localhost:4567/rest/api/latest/customFieldOption/12391",
             "value": "N/A"
         },
         "customfield_11440": {
             "id": "12606",
-            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12606",
+            "self": "http://localhost:4567/rest/api/latest/customFieldOption/12606",
             "value": "Standard"
         },
         "customfield_11441": {
             "id": "12611",
-            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12611",
+            "self": "http://localhost:4567/rest/api/latest/customFieldOption/12611",
             "value": "S"
         },
         "customfield_11442": {
             "id": "12616",
-            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12616",
+            "self": "http://localhost:4567/rest/api/latest/customFieldOption/12616",
             "value": "S"
         },
         "customfield_11443": {
             "id": "12621",
-            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12621",
+            "self": "http://localhost:4567/rest/api/latest/customFieldOption/12621",
             "value": "S"
         },
         "customfield_11444": {
             "id": "12626",
-            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12626",
+            "self": "http://localhost:4567/rest/api/latest/customFieldOption/12626",
             "value": "S"
         },
         "customfield_11445": {
             "id": "12631",
-            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12631",
+            "self": "http://localhost:4567/rest/api/latest/customFieldOption/12631",
             "value": "S"
         },
         "customfield_11446": {
             "id": "12636",
-            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12636",
+            "self": "http://localhost:4567/rest/api/latest/customFieldOption/12636",
             "value": "S"
         },
         "customfield_11447": {
             "id": "12641",
-            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12641",
+            "self": "http://localhost:4567/rest/api/latest/customFieldOption/12641",
             "value": "S"
         },
         "customfield_11449": {
             "id": "12651",
-            "self": "http://54.68.128.117:8100/rest/api/latest/customFieldOption/12651",
+            "self": "http://localhost:4567/rest/api/latest/customFieldOption/12651",
             "value": "S"
         },
         "customfield_11450": null,
@@ -319,42 +319,42 @@
                             "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12250&avatarType=issuetype",
                             "id": "10600",
                             "name": "Demand",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10600",
+                            "self": "http://localhost:4567/rest/api/latest/issuetype/10600",
                             "subtask": false
                         },
                         "priority": {
                             "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                             "id": "9",
                             "name": "M\u00e9dia",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                            "self": "http://localhost:4567/rest/api/latest/priority/9"
                         },
                         "status": {
                             "description": "Taskboard",
                             "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                             "id": "10652",
                             "name": "Doing",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/status/10652",
+                            "self": "http://localhost:4567/rest/api/latest/status/10652",
                             "statusCategory": {
                                 "colorName": "yellow",
                                 "id": 4,
                                 "key": "indeterminate",
                                 "name": "In Progress",
-                                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/4"
+                                "self": "http://localhost:4567/rest/api/latest/statuscategory/4"
                             }
                         },
                         "summary": "Onda 6 - Pacote 3"
                     },
                     "id": "214710",
                     "key": "TASKB-606",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issue/214710"
+                    "self": "http://localhost:4567/rest/api/latest/issue/214710"
                 },
-                "self": "http://54.68.128.117:8100/rest/api/latest/issueLink/143679",
+                "self": "http://localhost:4567/rest/api/latest/issueLink/143679",
                 "type": {
                     "id": "10150",
                     "inward": "\u00e9 demandado por",
                     "name": "Demanda",
                     "outward": "demandou",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/issueLinkType/10150"
+                    "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
                 }
             }
         ],
@@ -364,7 +364,7 @@
             "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
             "id": "10601",
             "name": "Feature",
-            "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10601",
+            "self": "http://localhost:4567/rest/api/latest/issuetype/10601",
             "subtask": false
         },
         "labels": [
@@ -375,7 +375,7 @@
             "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
             "id": "9",
             "name": "M\u00e9dia",
-            "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+            "self": "http://localhost:4567/rest/api/latest/priority/9"
         },
         "progress": {
             "progress": 0,
@@ -394,9 +394,9 @@
             "projectCategory": {
                 "id": "10001",
                 "name": "Externo",
-                "self": "http://54.68.128.117:8100/rest/api/latest/projectCategory/10001"
+                "self": "http://localhost:4567/rest/api/latest/projectCategory/10001"
             },
-            "self": "http://54.68.128.117:8100/rest/api/latest/project/11315"
+            "self": "http://localhost:4567/rest/api/latest/project/11315"
         },
         "reporter": {
             "active": true,
@@ -409,7 +409,7 @@
             "displayName": "Elizabeth do Nascimento",
             "key": "elizabeth",
             "name": "elizabeth",
-            "self": "http://54.68.128.117:8100/rest/api/latest/user?username=elizabeth",
+            "self": "http://localhost:4567/rest/api/latest/user?username=elizabeth",
             "timeZone": "America/Sao_Paulo"
         },
         "resolution": null,
@@ -419,13 +419,13 @@
             "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
             "id": "10652",
             "name": "Doing",
-            "self": "http://54.68.128.117:8100/rest/api/latest/status/10652",
+            "self": "http://localhost:4567/rest/api/latest/status/10652",
             "statusCategory": {
                 "colorName": "yellow",
                 "id": 4,
                 "key": "indeterminate",
                 "name": "In Progress",
-                "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/4"
+                "self": "http://localhost:4567/rest/api/latest/statuscategory/4"
             }
         },
         "subtasks": [
@@ -437,34 +437,34 @@
                         "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12257&avatarType=issuetype",
                         "id": "10607",
                         "name": "Tech Planning",
-                        "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10607",
+                        "self": "http://localhost:4567/rest/api/latest/issuetype/10607",
                         "subtask": true
                     },
                     "priority": {
                         "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                         "id": "9",
                         "name": "M\u00e9dia",
-                        "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                        "self": "http://localhost:4567/rest/api/latest/priority/9"
                     },
                     "status": {
                         "description": "",
                         "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/closed.png",
                         "id": "10053",
                         "name": "Done",
-                        "self": "http://54.68.128.117:8100/rest/api/latest/status/10053",
+                        "self": "http://localhost:4567/rest/api/latest/status/10053",
                         "statusCategory": {
                             "colorName": "green",
                             "id": 3,
                             "key": "done",
                             "name": "Done",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/3"
+                            "self": "http://localhost:4567/rest/api/latest/statuscategory/3"
                         }
                     },
                     "summary": "An\u00e1lise e Especifica\u00e7\u00e3o"
                 },
                 "id": "221497",
                 "key": "TASKB-428",
-                "self": "http://54.68.128.117:8100/rest/api/latest/issue/221497"
+                "self": "http://localhost:4567/rest/api/latest/issue/221497"
             },
             {
                 "fields": {
@@ -474,34 +474,34 @@
                         "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12261&avatarType=issuetype",
                         "id": "10610",
                         "name": "Backend Development",
-                        "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10610",
+                        "self": "http://localhost:4567/rest/api/latest/issuetype/10610",
                         "subtask": true
                     },
                     "priority": {
                         "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                         "id": "9",
                         "name": "M\u00e9dia",
-                        "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                        "self": "http://localhost:4567/rest/api/latest/priority/9"
                     },
                     "status": {
                         "description": "",
                         "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/closed.png",
                         "id": "10053",
                         "name": "Done",
-                        "self": "http://54.68.128.117:8100/rest/api/latest/status/10053",
+                        "self": "http://localhost:4567/rest/api/latest/status/10053",
                         "statusCategory": {
                             "colorName": "green",
                             "id": 3,
                             "key": "done",
                             "name": "Done",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/3"
+                            "self": "http://localhost:4567/rest/api/latest/statuscategory/3"
                         }
                     },
                     "summary": "Desenvolvimento"
                 },
                 "id": "221983",
                 "key": "TASKB-550",
-                "self": "http://54.68.128.117:8100/rest/api/latest/issue/221983"
+                "self": "http://localhost:4567/rest/api/latest/issue/221983"
             },
             {
                 "fields": {
@@ -511,34 +511,34 @@
                         "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=11958&avatarType=issuetype",
                         "id": "12",
                         "name": "Sub-task",
-                        "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/12",
+                        "self": "http://localhost:4567/rest/api/latest/issuetype/12",
                         "subtask": true
                     },
                     "priority": {
                         "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                         "id": "9",
                         "name": "M\u00e9dia",
-                        "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                        "self": "http://localhost:4567/rest/api/latest/priority/9"
                     },
                     "status": {
                         "description": "",
                         "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/closed.png",
                         "id": "10053",
                         "name": "Done",
-                        "self": "http://54.68.128.117:8100/rest/api/latest/status/10053",
+                        "self": "http://localhost:4567/rest/api/latest/status/10053",
                         "statusCategory": {
                             "colorName": "green",
                             "id": 3,
                             "key": "done",
                             "name": "Done",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/3"
+                            "self": "http://localhost:4567/rest/api/latest/statuscategory/3"
                         }
                     },
                     "summary": "Acompanhamento de Desenvolvimento"
                 },
                 "id": "222690",
                 "key": "TASKB-286",
-                "self": "http://54.68.128.117:8100/rest/api/latest/issue/222690"
+                "self": "http://localhost:4567/rest/api/latest/issue/222690"
             },
             {
                 "fields": {
@@ -548,34 +548,34 @@
                         "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12253&avatarType=issuetype",
                         "id": "10603",
                         "name": "Alpha Test",
-                        "self": "http://54.68.128.117:8100/rest/api/latest/issuetype/10603",
+                        "self": "http://localhost:4567/rest/api/latest/issuetype/10603",
                         "subtask": true
                     },
                     "priority": {
                         "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                         "id": "9",
                         "name": "M\u00e9dia",
-                        "self": "http://54.68.128.117:8100/rest/api/latest/priority/9"
+                        "self": "http://localhost:4567/rest/api/latest/priority/9"
                     },
                     "status": {
                         "description": "",
                         "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/open.png",
                         "id": "10052",
                         "name": "To Do",
-                        "self": "http://54.68.128.117:8100/rest/api/latest/status/10052",
+                        "self": "http://localhost:4567/rest/api/latest/status/10052",
                         "statusCategory": {
                             "colorName": "blue-gray",
                             "id": 2,
                             "key": "new",
                             "name": "To Do",
-                            "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                            "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                         }
                     },
                     "summary": "Alfa"
                 },
                 "id": "225239",
                 "key": "TASKB-323",
-                "self": "http://54.68.128.117:8100/rest/api/latest/issue/225239"
+                "self": "http://localhost:4567/rest/api/latest/issue/225239"
             }
         ],
         "summary": "P3 - C611810F - Antecipar Pagamento",
@@ -586,12 +586,12 @@
         "updated": "2017-04-04T13:59:16.000+0000",
         "votes": {
             "hasVoted": false,
-            "self": "http://54.68.128.117:8100/rest/api/latest/issue/TASKB-150/votes",
+            "self": "http://localhost:4567/rest/api/latest/issue/TASKB-150/votes",
             "votes": 0
         },
         "watches": {
             "isWatching": false,
-            "self": "http://54.68.128.117:8100/rest/api/latest/issue/TASKB-150/watchers",
+            "self": "http://localhost:4567/rest/api/latest/issue/TASKB-150/watchers",
             "watchCount": 3
         },
         "worklog": {
@@ -1201,7 +1201,7 @@
             "type": "number"
         }
     },
-    "self": "http://54.68.128.117:8100/rest/api/latest/issue/214817",
+    "self": "http://localhost:4567/rest/api/latest/issue/214817",
     "transitions": [
         {
             "id": "181",
@@ -1211,13 +1211,13 @@
                 "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                 "id": "10659",
                 "name": "To Alpha Test",
-                "self": "http://54.68.128.117:8100/rest/api/latest/status/10659",
+                "self": "http://localhost:4567/rest/api/latest/status/10659",
                 "statusCategory": {
                     "colorName": "yellow",
                     "id": 4,
                     "key": "indeterminate",
                     "name": "In Progress",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/4"
+                    "self": "http://localhost:4567/rest/api/latest/statuscategory/4"
                 }
             }
         },
@@ -1229,13 +1229,13 @@
                 "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/open.png",
                 "id": "10052",
                 "name": "To Do",
-                "self": "http://54.68.128.117:8100/rest/api/latest/status/10052",
+                "self": "http://localhost:4567/rest/api/latest/status/10052",
                 "statusCategory": {
                     "colorName": "blue-gray",
                     "id": 2,
                     "key": "new",
                     "name": "To Do",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                    "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                 }
             }
         },
@@ -1247,13 +1247,13 @@
                 "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                 "id": "10655",
                 "name": "Deferred",
-                "self": "http://54.68.128.117:8100/rest/api/latest/status/10655",
+                "self": "http://localhost:4567/rest/api/latest/status/10655",
                 "statusCategory": {
                     "colorName": "blue-gray",
                     "id": 2,
                     "key": "new",
                     "name": "To Do",
-                    "self": "http://54.68.128.117:8100/rest/api/latest/statuscategory/2"
+                    "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
                 }
             }
         }

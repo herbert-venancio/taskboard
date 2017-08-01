@@ -23,6 +23,7 @@ package objective.taskboard.followup;
 import objective.taskboard.followup.FollowUpTemplateValidator.InvalidTemplateException;
 import objective.taskboard.followup.impl.DefaultUpdateFollowUpService;
 import objective.taskboard.utils.XmlUtils;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,12 +34,17 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static java.nio.file.Files.createTempDirectory;
+import static objective.taskboard.utils.ZipUtils.unzip;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.*;
 
 public class UpdateFollowUpServiceTest {
+
+    private static final String OK_FOLLOWUP_TEMPLATE_XLSM = "OkFollowupTemplate.xlsm";
+    private static final String NOT_OK_FOLLOWUP_TEMPLATE_XLSM = "NotOkFollowupTemplate.xlsm";
 
     private UpdateFollowUpService updateFollowUpService;
 
@@ -49,7 +55,7 @@ public class UpdateFollowUpServiceTest {
 
     @Test
     public void validateReceivedFile_okFilePass() throws URISyntaxException, IOException {
-        Path decompressed = decompressOkTemplate();
+        Path decompressed = decompressTemplate(OK_FOLLOWUP_TEMPLATE_XLSM);
         try {
             updateFollowUpService.validateTemplate(decompressed);
         } finally {
@@ -59,7 +65,7 @@ public class UpdateFollowUpServiceTest {
 
     @Test
     public void validateReceivedFile_nonBlankFileFail() throws URISyntaxException, IOException {
-        Path decompressed = decompressNotOkTemplate();
+        Path decompressed = decompressTemplate(NOT_OK_FOLLOWUP_TEMPLATE_XLSM);
         try {
             updateFollowUpService.validateTemplate(decompressed);
             fail("Should have thrown InvalidTemplateException");
@@ -73,7 +79,7 @@ public class UpdateFollowUpServiceTest {
     @Test
     public void updateFromJiraTemplate() throws IOException, URISyntaxException {
         Path temp = Files.createTempFile("sheet-template", ".xml");
-        Path decompressed = decompressOkTemplate();
+        Path decompressed = decompressTemplate(OK_FOLLOWUP_TEMPLATE_XLSM);
         try {
             updateFollowUpService.updateFromJiraTemplate(decompressed, temp);
             assertThat(temp.toFile().length(), greaterThan(0L));
@@ -87,7 +93,7 @@ public class UpdateFollowUpServiceTest {
     @Test
     public void updateSharedStrings() throws IOException, URISyntaxException {
         Path temp = Files.createTempFile("shared-strings", ".xml");
-        Path decompressed = decompressOkTemplate();
+        Path decompressed = decompressTemplate(OK_FOLLOWUP_TEMPLATE_XLSM);
         try {
             updateFollowUpService.updateSharedStringsInitial(decompressed, temp);
             assertThat(temp.toFile().length(), greaterThan(0L));
@@ -102,7 +108,7 @@ public class UpdateFollowUpServiceTest {
 
     @Test
     public void deleteSheet7AndSharedStrings() throws IOException, URISyntaxException {
-        Path decompressed = decompressOkTemplate();
+        Path decompressed = decompressTemplate(OK_FOLLOWUP_TEMPLATE_XLSM);
         Path sheet7File = decompressed.resolve("xl/worksheets/sheet7.xml");
         Path sharedStringsFile = decompressed.resolve("xl/sharedStrings.xml");
         try {
@@ -117,19 +123,6 @@ public class UpdateFollowUpServiceTest {
         }
     }
 
-    @Test
-    public void decompressCompress() throws IOException, URISyntaxException {
-        Path decompressed = decompressOkTemplate();
-        Path pathFollowupXLSM = Files.createTempFile("Followup", ".xlsm");
-        try {
-            updateFollowUpService.compressTemplate(decompressed, pathFollowupXLSM);
-            assertThat(Files.size(pathFollowupXLSM), greaterThan(0L));
-        } finally {
-            FileUtils.deleteQuietly(pathFollowupXLSM.toFile());
-            FileUtils.deleteQuietly(decompressed.toFile());
-        }
-    }
-
     // ---
 
     private void assertThatPlaceholderWasReplacedWithActualContent(Path temp) throws IOException {
@@ -139,13 +132,11 @@ public class UpdateFollowUpServiceTest {
 
     // ---
 
-    private Path decompressOkTemplate() throws URISyntaxException, IOException {
-        File okFollowupTemplate = new File(UpdateFollowUpServiceTest.class.getResource("OkFollowupTemplate.xlsm").toURI());
-        return updateFollowUpService.decompressTemplate(okFollowupTemplate);
+    private Path decompressTemplate(String templateFile) throws URISyntaxException, IOException {
+        File followupTemplate = new File(UpdateFollowUpServiceTest.class.getResource(templateFile).toURI());
+        Path pathFollowup = createTempDirectory("Followup");
+        unzip(followupTemplate, pathFollowup);
+        return pathFollowup;
     }
 
-    private Path decompressNotOkTemplate() throws URISyntaxException, IOException {
-        File notOkFollowupTemplate = new File(UpdateFollowUpServiceTest.class.getResource("NotOkFollowupTemplate.xlsm").toURI());
-        return updateFollowUpService.decompressTemplate(notOkFollowupTemplate);
-    }
 }

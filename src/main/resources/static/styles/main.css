@@ -342,3 +342,17 @@ paper-dialog {
     background: #DDD;
 }
 
+/*
+    Clear button
+*/
+.clear-button {
+    width: 17px;
+    height: 17px;
+}
+
+.clear-button paper-icon-button {
+    float: right;
+    padding: 0;
+    width: 17px;
+    height: 17px;
+}

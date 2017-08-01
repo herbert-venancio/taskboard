@@ -32,9 +32,11 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.atlassian.jira.rest.client.api.domain.IssueType;
+import com.atlassian.jira.rest.client.api.domain.IssuelinksType;
 import com.atlassian.jira.rest.client.api.domain.Priority;
 import com.atlassian.jira.rest.client.api.domain.Status;
 
+import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
 
 @Service
@@ -57,6 +59,11 @@ public class MetadataService {
     public Map<Long, Status> getStatusesMetadata() throws InterruptedException, ExecutionException {
         return loadStatuses();
     }
+    
+    @Cacheable(CacheConfiguration.ISSUE_LINKS_METADATA)
+    public Map<String, IssuelinksType> getIssueLinksMetadata() {
+        return loadIssueLinks();
+    }
 
     private Map<Long, IssueType> loadIssueTypes() throws InterruptedException, ExecutionException {
         Iterable<IssueType> issueTypes = jiraEndpointAsMaster.executeRequest(client -> client.getMetadataClient().getIssueTypes());
@@ -71,6 +78,11 @@ public class MetadataService {
     private Map<Long, Status> loadStatuses() throws InterruptedException, ExecutionException {
         Iterable<Status> statuses = jiraEndpointAsMaster.executeRequest(client -> client.getMetadataClient().getStatuses());
         return newArrayList(statuses).stream().collect(Collectors.toMap(Status::getId, t -> t));
+    }
+    
+    private Map<String, IssuelinksType> loadIssueLinks() {
+        Iterable<IssuelinksType> links = jiraEndpointAsMaster.executeRequest(client -> client.getMetadataClient().getIssueLinkTypes());
+        return newArrayList(links).stream().collect(Collectors.toMap(IssuelinksType::getId, l -> l));
     }
 
 }

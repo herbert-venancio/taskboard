@@ -6,15 +6,16 @@ import java.util.concurrent.TimeUnit
 import static org.liferay.sdlc.SDLCPrUtilities.*
 
 properties([
+        disableConcurrentBuilds(),
         parameters([
-                booleanParam(
-                        defaultValue: false
-                        , description: 'Runs release step'
-                        , name: 'RELEASE')
+            booleanParam(
+                defaultValue: false
+                , description: 'Runs release step'
+                , name: 'RELEASE')
         ])
 ])
 
-node("general-purpose") {
+node("single-executor") {
     // start with a clean workspace
     stage('Checkout') {
         deleteDir()

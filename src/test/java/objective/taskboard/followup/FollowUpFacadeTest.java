@@ -24,6 +24,7 @@ import objective.taskboard.followup.data.Template;
 import objective.taskboard.followup.impl.DefaultFollowUpFacade;
 import objective.taskboard.followup.impl.DefaultFollowUpTemplateStorage;
 import objective.taskboard.followup.impl.DefaultUpdateFollowUpService;
+import objective.taskboard.followup.impl.FollowUpDataProviderFromCurrentState;
 import objective.taskboard.rules.CleanupDataFolderRule;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.SpreadsheetMLPackage;
@@ -44,6 +45,7 @@ import org.xlsx4j.sml.Row;
 
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.mockito.BDDMockito.given;
@@ -62,7 +64,7 @@ public class FollowUpFacadeTest {
     private TemplateService templateService;
 
     @Mock
-    private FollowupDataProvider provider;
+    private FollowUpDataProviderFromCurrentState provider;
 
     @Spy
     private DefaultUpdateFollowUpService updateFollowUpService = new DefaultUpdateFollowUpService();
@@ -96,7 +98,7 @@ public class FollowUpFacadeTest {
         given(templateService.getTemplate(TEMPLATE_NAME)).willReturn(template);
         given(provider.getJiraData(INCLUDED_PROJECTS)).willReturn(FollowUpHelper.getFollowUpDataDefaultList());
 
-        FollowUpGenerator followupGenerator = followUpFacade.getGenerator(TEMPLATE_NAME);
+        FollowUpGenerator followupGenerator = followUpFacade.getGenerator(TEMPLATE_NAME, Optional.empty());
         Resource resource = followupGenerator.generate(INCLUDED_PROJECTS);
 
         String[] actualRowContent = formattedContentOfFirstRowOfFromJiraWorksheet(resource);

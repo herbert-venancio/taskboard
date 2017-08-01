@@ -29,12 +29,15 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
 
 public class IOUtilities {
+    public static final String ENCODE_UTF_8 = "UTF-8";
+
     public static String resourceToString(String path) {
         return resourceToString(IOUtilities.class, "/"+ path);
     }
@@ -44,7 +47,7 @@ public class IOUtilities {
         if (inputStream == null)
             return null;
         try {
-            return IOUtils.toString(inputStream, "UTF-8");
+            return IOUtils.toString(inputStream, ENCODE_UTF_8);
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
@@ -64,5 +67,16 @@ public class IOUtilities {
 
     public static Resource asResource(byte[] bytes) {
         return new ByteArrayResource(bytes);
+    }
+
+    public static void write(File file, String data) throws IOException {
+        FileOutputStream output = null;
+        try {
+            output = new FileOutputStream(file);
+            output.write(data.getBytes(ENCODE_UTF_8));
+        } finally {
+            if (output != null)
+                output.close();
+        }
     }
 }
