@@ -171,11 +171,6 @@
             text-decoration: underline;
             cursor: pointer;
         }
-
-        .date-warning {
-            width: 17px;
-            color: #ff9800;
-        }
     </style>
 
     <template>
@@ -231,8 +226,9 @@
                     <div class="content-row">
                         <paper-dropdown-menu class="templates-followup-dropdown" hidden$={{!showDateCombo}}
                             name="date" always-float-label label="Date" selected-item="{{selectedItemDate}}"
-                            disabled$={{disableDateCombo}} on-value-changed="dateOnChange" on-keydown="dateOnKeyDown">
+                            on-value-changed="dateOnChange" on-keydown="dateOnKeyDown">
                             <paper-menu id="dateMenu" class="dropdown-content" selected="{{selectedIndexDate}}">
+                                <paper-item value="">Today</paper-item>
                                 <template is="dom-repeat" id="datesRepeat" items="{{availableDates}}" as="itemDate">
                                     <paper-item value="{{itemDate}}">{{getLocaleDate(itemDate)}}</paper-item>
                                 </template>
@@ -242,21 +238,23 @@
                             <paper-icon-button icon="clear" on-click="clearSelectedDate" hidden$={{!showClearDate}}>
                             </paper-icon-button>
                         </div>
-                        <iron-icon class="date-warning" icon="icons:warning" hidden$={{!disableDateCombo}}
-                            title="Multiple projects are not supported in past followup reports"></iron-icon>
                     </div>
 
                     <div class="error-message" hidden$="{{!errorMessage}}">{{errorMessage}}</div>
 
                 </div>
                 
-                <div class="warn-box" hidden$={{!showNoTemplatesFoundWarning}}>
+                <div id="noTemplateWarning" class="warn-box" hidden$={{!showNoTemplatesFoundWarning}}>
                     No matching template<br />
                     <small>
                         Could not find a template for the selected set of projects.
                         <span class="set-template-link" on-tap="openTemplateFollowupDialog">Click here</span> 
                         to create a template
                     </small>
+                </div>
+
+                <div id="multipleProjectsWarning" class="warn-box" hidden$={{!showMultipleProjectsWarning}}>
+                    Multiple projects are not supported in past followup reports
                 </div>
 
                 <div class="custom-footer">
@@ -303,7 +301,7 @@
                     showDateCombo: {
                         type: Boolean
                     },
-                    disableDateCombo: {
+                    showMultipleProjectsWarning: {
                         type: Boolean
                     },
                     availableDates: {
@@ -313,7 +311,8 @@
                         type: Object
                     },
                     selectedIndexDate: {
-                        type: Number
+                        type: Number,
+                        value: 0
                     },
                     showClearDate: {
                         type: Boolean
@@ -330,7 +329,7 @@
                     this.showNoTemplatesFoundWarning = false;
                     this.disableGenerateButton = true;
                     this.showDateCombo = false;
-                    this.disableDateCombo = false;
+                    this.showMultipleProjectsWarning = false;
                     this.showClearDate = false;
                 },
                 
@@ -386,11 +385,12 @@
                     selectedProjects.forEach(function(p) {
                         dates = dates.concat(p.followUpDataHistory);
                     });
-                    this.availableDates = _.uniq(dates.sort(), true);
-                    this.showDateCombo = !this.showNoTemplatesFoundWarning && this.availableDates.length > 0;
-                    this.clearSelectedDate();
+                    this.availableDates = _.uniq(dates.sort().reverse(), true);
 
-                    this.disableDateCombo = this.showDateCombo && selectedProjects.length > 1;
+                    var hasTemplateAndAvailableDate = !this.showNoTemplatesFoundWarning && this.availableDates.length > 0;
+                    this.showDateCombo = hasTemplateAndAvailableDate && selectedProjects.length === 1;
+                    this.showMultipleProjectsWarning = hasTemplateAndAvailableDate && selectedProjects.length > 1;
+                    this.clearSelectedDate();
                 },
 
                 filterSelectedProjects: function() {
@@ -403,12 +403,11 @@
                 },
 
                 clearSelectedDate: function() {
-                    this.selectedItemDate = null;
-                    this.selectedIndexDate = null;
+                    this.selectedIndexDate = 0;
                 },
 
                 dateOnChange: function() {
-                    this.showClearDate = this.selectedItemDate ? true : false;
+                    this.showClearDate = this.selectedIndexDate > 0 ? true : false;
                 },
 
                 dateOnKeyDown: function(e) {
@@ -444,7 +443,7 @@
                 	
                 	var projectQuery = "projects="+selectedKeys.join(",")
                 	var templateQuery = "template=" + this.template.value;
-                    var dateQuery = "date=" + (this.selectedItemDate ? this.selectedItemDate.value : "");
+                    var dateQuery = "date=" + (this.selectedIndexDate > 0 ? this.selectedItemDate.value : "");
                 	
                 	$.ajax({
                         url: '/ws/followup/state?' + dateQuery,

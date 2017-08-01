@@ -91,12 +91,12 @@ public class FollowupGeneratorUiIT extends AuthenticatedIntegrationTest {
                 .selectADate(yesterdayString)
                 .assertGenerateButtonIsEnabled()
                 .clickClearDate()
-                .assertDateIsClear()
-                .assertDateWarningIsInvisible()
+                .assertDateIsToday()
+                .assertMultipleProjectsWarningIsInvisible()
                 .assertGenerateButtonIsEnabled()
                 .selectAProject(projectPROJ1Index)
-                .assertDateDropdownIsDisabled()
-                .assertDateWarningIsVisible()
+                .assertDateDropdownIsInvisible()
+                .assertMultipleProjectsWarningIsVisible()
                 .assertGenerateButtonIsEnabled()
                 .close();
         } finally {
