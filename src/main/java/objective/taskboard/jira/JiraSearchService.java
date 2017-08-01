@@ -34,6 +34,7 @@ import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
 import com.atlassian.jira.rest.client.api.RestClientException;
 import com.atlassian.jira.rest.client.api.domain.Issue;
@@ -55,7 +56,7 @@ public class JiraSearchService {
     private static final String START_AT_ATTRIBUTE = "startAt";
     private static final String FIELDS_ATTRIBUTE = "fields";
 
-    private static final Set<String> EXPAND = newHashSet("schema", "names", "changelog", "transitions");
+    private static final Set<String> EXPAND = newHashSet("schema", "names", "changelog");
     private static final int MAX_RESULTS = 100;
 
     private static final String PATH_REST_API_SEARCH = "/rest/api/latest/search";
@@ -106,6 +107,13 @@ public class JiraSearchService {
                 throw new PermissaoNegadaException(e);
             if (HttpStatus.BAD_REQUEST.value() == e.getStatusCode().or(0))
                 throw new ParametrosDePesquisaInvalidosException(e);
+            throw e;
+        }
+        catch(HttpClientErrorException e) {
+            if (HttpStatus.BAD_REQUEST == e.getStatusCode()) {
+                log.error(e.getMessage());
+                throw new ParametrosDePesquisaInvalidosException(e);
+            }
             throw e;
         }
     }
