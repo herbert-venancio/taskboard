@@ -63,10 +63,8 @@ class GoogleApiServiceHttp implements GoogleApiService {
                 credential.refreshToken();
 
             } catch (TokenResponseException e) {
-                if (e.getStatusCode() == HttpStatus.SC_BAD_REQUEST) {
-                    removeCredential();
-                    return false;
-                }
+                removeCredential();
+                return false;
             }
         }
         

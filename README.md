@@ -45,6 +45,14 @@ To update the followup template:
 8. zip the contents again into ./src/main/resources/followup-template/Followup-template.xlsm
 9. And you're done.
 
+## Configuring Sizing Import
+
+1. Follow the [Step 1 of this tutorial](https://developers.google.com/sheets/api/quickstart/js) to create a credential and to use the Google Sheets API. Then, export the JSON file of your key.
+2. Configure the "google-api.client-secrets-file" property on `src/main/resources/application-[environment].properties`.\
+`google-api.client-secrets-file=[path to googleapps-credentials.json]`
+3. Create a folder named "credentials" and configure the "google-api.credential-store" property on `src/main/resources/application-[environment].properties`.\
+`google-api.credential-store-dir=[path to /credentials]`
+
 ## Running application
 
 #### Development Mode
