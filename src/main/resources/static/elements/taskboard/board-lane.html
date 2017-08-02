@@ -88,7 +88,7 @@
             vertical-align: middle;
             font-weight: inherit;
         }
-        
+
         .name {
         	
         }
@@ -126,7 +126,7 @@
         .step-cell {
             border-left: 1px solid #666;
         }
-        
+
         .issue-item {
         	border-bottom: 5px;
         }
@@ -152,106 +152,96 @@
 
                 <!-- Headers -->
                 <thead>
+                    <!-- Stage Headers -->
+                    <template is="dom-if" if="{{metadata.showHeader}}">
+                        <tr>
+                            <!-- Empty Team Label -->
+                            <template is="dom-if" if="{{metadata.showLaneTeam}}">
+                                <th class="label label-stage team-col" rowspan="2">
+                                    <div class="team-header"></div>
+                                </th>
+                            </template>
 
-                <!-- Stage Headers -->
-                <template is="dom-if" if="{{metadata.showHeader}}">
+                            <!-- Stage Labels -->
+                            <template is="dom-repeat" items="{{metadata.stages}}" as="stage">
+                                <th class="label label-stage" colspan$="{{getColspan(stage)}}" style$="background-color:{{stage.color}}">
+                                    <inline-badge class="counter" value="{{getStageIssueCount(stage, issues, lastPreferenceUpdate)}}"></inline-badge>
+                                    <span class="name">
+                                        {{stage.stage}}
+                                    </span>
+                                </th>
+                            </template>
+                        </tr>
+                    </template>
+
+                    <!-- Step Headers -->
                     <tr>
-                        <!-- Empty Team Label -->
-                        <template is="dom-if" if="{{metadata.showLaneTeam}}">
-                            <th class="label label-stage team-col" rowspan="2">
+                        <!-- If no stage headers are present, the empty team label must be rendered here -->
+                        <template is="dom-if" if="{{showTeamHeaderInStepRow(metadata.showLaneTeam, metadata.showHeader)}}">
+                            <th class="label label-stage team-col">
                                 <div class="team-header"></div>
                             </th>
                         </template>
 
-                        <!-- Stage Labels -->
+                        <!-- Step Labels -->
                         <template is="dom-repeat" items="{{metadata.stages}}" as="stage">
-                            <th class="label label-stage" colspan$="{{getColspan(stage)}}" style$="background-color:{{stage.color}}">
-                                <inline-badge class="counter" value="{{getStageIssueCount(stage, issues, lastPreferenceUpdate)}}"></inline-badge>
-                                <span class="name">
-                                	{{stage.stage}}
-                                </span>
-                            </th>
+                            <template is="dom-repeat" items="{{stage.steps}}" as="step">
+                                <th class="label label-stage" style$="{{getStepStyle(stage, step, issues)}}">
+                                    <inline-badge data-step-count-name$ ="{{step.step}}" class="counter" value="{{getIssueCountByStep(step.id, issues, lastPreferenceUpdate)}}"></inline-badge>
+                                    {{step.step}}
+                                </th>
+                            </template>
                         </template>
                     </tr>
-                </template>
-
-                <!-- Step Headers -->
-                <tr>
-                    <!-- If no stage headers are present, the empty team label must be rendered here -->
-                    <template is="dom-if" if="{{showTeamHeaderInStepRow(metadata.showLaneTeam, metadata.showHeader)}}">
-                        <th class="label label-stage team-col">
-                            <div class="team-header"></div>
-                        </th>
-                    </template>
-
-                    <!-- Step Labels -->
-                    <template is="dom-repeat" items="{{metadata.stages}}" as="stage">
-                        <template is="dom-repeat" items="{{stage.steps}}" as="step">
-                            <th class="label label-stage" style$="{{getStepStyle(stage, step, issues)}}">
-                                <inline-badge data-step-count-name$ ="{{step.step}}" class="counter" value="{{getIssueCountByStep(step.id, issues, lastPreferenceUpdate)}}"></inline-badge>
-                                {{step.step}}
-                            </th>
-                        </template>
-                    </template>
-                </tr>
                 </thead>
 
                 <!-- Table Body -->
                 <tbody class="table-body">
 
-                <!-- If segregated by teams -->
-                <template is="dom-if" if="{{metadata.showLaneTeam}}">
-                    <template is="dom-repeat" items="{{getTeams(lastPreferenceUpdate)}}" as="team">
-                        <template is="dom-if" if="{{isTeamVisible(team, lastPreferenceUpdate)}}">
-                            <tr>
-                                <!-- Team Cell -->
-                                <td class="team-col cell team-cell" style$="width:{{teamColumnWidth}}">
-                                    {{prettify(team.name)}}
-                                </td>
+                    <!-- If segregated by teams -->
+                    <template is="dom-if" if="{{metadata.showLaneTeam}}">
+                        <template is="dom-repeat" items="{{getTeams(lastPreferenceUpdate)}}" as="team">
+                            <template is="dom-if" if="{{isTeamVisible(team, lastPreferenceUpdate)}}">
+                                <tr>
+                                    <!-- Team Cell -->
+                                    <td class="team-col cell team-cell" style$="width:{{teamColumnWidth}}">
+                                        {{prettify(team.name)}}
+                                    </td>
 
-                                <!-- Step Cells -->
-                                <template is="dom-repeat" items="{{metadata.stages}}" as="stage">
-                                    <template is="dom-repeat" items="{{stage.steps}}" as="step">
-                                        <td class="cell step-cell">
-                                            <board-step parent-lane-id="{{metadata.id}}" parent-lane-config="{{metadata}}"
-                                                class$="step-{{step.id}}" step-metadata="{{step}}" issues="{{getIssuesByStep(step.id, issues)}}" team="{{team.name}}"></board-step>
-                                        </td>
+                                    <!-- Step Cells -->
+                                    <template is="dom-repeat" items="{{metadata.stages}}" as="stage">
+                                        <template is="dom-repeat" items="{{stage.steps}}" as="step">
+                                            <td class="cell step-cell">
+                                                <board-step parent-lane-id="{{metadata.id}}" parent-lane-config="{{metadata}}"
+                                                    class$="step-{{step.id}}" step-metadata="{{step}}" issues="{{getIssuesByStep(step.id, issues)}}" team="{{team.name}}"></board-step>
+                                            </td>
+                                        </template>
                                     </template>
-                                </template>
-                            </tr>
-                        </template>
-                    </template>
-                </template>
-
-                <!-- If not segregated by teams -->
-                <template is="dom-if" if="{{!metadata.showLaneTeam}}">
-                    <tr>
-                        <!-- Step Cells -->
-                        <template is="dom-repeat" items="{{metadata.stages}}" as="stage">
-                            <template is="dom-repeat" items="{{stage.steps}}" as="step">
-                                <td class="cell step-cell">
-                                    <board-step parent-lane-id="{{metadata.id}}" parent-lane-config="{{metadata}}"
-                                        data-board-step$="board-step-{{step.step}}"
-                                        class$="step-{{step.id}}" step-metadata="{{step}}" issues="{{getIssuesByStep(step.id, issues)}}"></board-step>
-                                </td>
+                                </tr>
                             </template>
                         </template>
-                    </tr>
-                </template>
+                    </template>
+
+                    <!-- If not segregated by teams -->
+                    <template is="dom-if" if="{{!metadata.showLaneTeam}}">
+                        <tr>
+                            <!-- Step Cells -->
+                            <template is="dom-repeat" items="{{metadata.stages}}" as="stage">
+                                <template is="dom-repeat" items="{{stage.steps}}" as="step">
+                                    <td class="cell step-cell">
+                                        <board-step parent-lane-id="{{metadata.id}}" parent-lane-config="{{metadata}}"
+                                            data-board-step$="board-step-{{step.step}}"
+                                            class$="step-{{step.id}}" step-metadata="{{step}}" issues="{{getIssuesByStep(step.id, issues)}}"></board-step>
+                                    </td>
+                                </template>
+                            </template>
+                        </tr>
+                    </template>
 
                 </tbody>
 
             </table>
         </div>
-
-        <script>
-            $('table.lane-body').floatThead({
-                position: 'absolute',
-                scrollContainer: true,
-                floatContainerClass: 'board-lane wrapper',
-                zIndex: 2
-            });
-        </script>
 
     </template>
 
@@ -291,6 +281,15 @@
 
                     this.addEventListener('dom-change', function() {
                         taskboard.refitSteps();
+                    });
+                },
+
+                attached: function() {
+                    $('table.lane-body').floatThead({
+                        position: 'absolute',
+                        scrollContainer: true,
+                        floatContainerClass: 'board-lane wrapper',
+                        zIndex: 2
                     });
                 },
 
