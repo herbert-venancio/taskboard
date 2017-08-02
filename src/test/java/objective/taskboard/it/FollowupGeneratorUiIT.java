@@ -63,17 +63,13 @@ public class FollowupGeneratorUiIT extends AuthenticatedIntegrationTest {
     }
 
     @Test
-    public void givenAProjectWithHistory_whenSelectThisProject_thenTheDateFieldAppears() throws IOException {
-        Path pathZip = null;
+    public void givenProjectsWithHistory_whenSelectTheseProjects_thenTheDateFieldAppears() throws IOException {
+        Path pathZipTASKB = null;
+        Path pathZipPROJ1 = null;
         try {
-            Path pathProject = Paths.get(PATH_FOLLOWUP_HISTORY, "TASKB");
-            createDirectories(pathProject);
-
             DateTime yesterday = DateTime.now().minusDays(1);
             String yesterdayString = yesterday.toString(FILE_NAME_FORMAT);
-            pathZip = pathProject.resolve(yesterdayString + EXTENSION_JSON + EXTENSION_ZIP);
-            if (!pathZip.toFile().exists())
-                createFile(pathZip);
+            pathZipTASKB = createProjectZip("TASKB", yesterdayString);
 
             Integer projectTASKBIndex = 0;
             Integer projectPROJ1Index = 1;
@@ -92,16 +88,37 @@ public class FollowupGeneratorUiIT extends AuthenticatedIntegrationTest {
                 .assertGenerateButtonIsEnabled()
                 .clickClearDate()
                 .assertDateIsToday()
-                .assertMultipleProjectsWarningIsInvisible()
                 .assertGenerateButtonIsEnabled()
                 .selectAProject(projectPROJ1Index)
                 .assertDateDropdownIsInvisible()
-                .assertMultipleProjectsWarningIsVisible()
+                .assertGenerateButtonIsEnabled()
+                .close();
+
+            pathZipPROJ1 = createProjectZip("PROJ1", yesterdayString);
+
+            mainPage
+                .reload()
+                .openFollowUp()
+                .selectAProject(projectTASKBIndex)
+                .selectAProject(projectPROJ1Index)
+                .selectADate(yesterdayString)
                 .assertGenerateButtonIsEnabled()
                 .close();
         } finally {
-            if (pathZip != null)
-                deleteQuietly(pathZip.toFile());
+            if (pathZipTASKB != null)
+                deleteQuietly(pathZipTASKB.toFile());
+            if (pathZipPROJ1 != null)
+                deleteQuietly(pathZipPROJ1.toFile());
         }
+    }
+
+    private Path createProjectZip(String project, String yesterdayString) throws IOException {
+        Path pathProject = Paths.get(PATH_FOLLOWUP_HISTORY, project);
+        createDirectories(pathProject);
+
+        Path pathZipTASKB = pathProject.resolve(yesterdayString + EXTENSION_JSON + EXTENSION_ZIP);
+        if (!pathZipTASKB.toFile().exists())
+            createFile(pathZipTASKB);
+        return pathZipTASKB;
     }
 }

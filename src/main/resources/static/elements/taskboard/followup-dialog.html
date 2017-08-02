@@ -32,9 +32,6 @@
 			margin: 0;
         }
 
-        .half-column {
-        }
-
         .card-header-custom {
             width: 100%;
             margin-bottom: 30px;
@@ -68,10 +65,6 @@
         .content-row:first-child {
         	margin-top: 0;
         }
-        
-        paper-button {
-            margin-bottom: 12px;
-        }
 
         .card-header-buttons {
         	padding: 0;
@@ -85,6 +78,7 @@
         paper-button {
             background: #4285f4;
             color: #fff;
+            margin-bottom: 12px;
         }
 
         paper-button[toggles] {
@@ -214,7 +208,7 @@
                         </div>
                     </div>
                     <div class="content-row">
-                        <paper-dropdown-menu class="templates-followup-dropdown" hidden$={{!showTemplatesCombo}}
+                        <paper-dropdown-menu class="followup-dropdown" hidden$={{!showTemplatesCombo}}
                             name="template" always-float-label label="Template" selected-item="{{template}}">
                             <paper-menu id="templateType" class="dropdown-content" selected="{{selectedItem}}">
                                 <template is="dom-repeat" id="templates" items="{{availableTemplates}}">
@@ -224,7 +218,7 @@
                         </paper-dropdown-menu>
                     </div>
                     <div class="content-row">
-                        <paper-dropdown-menu class="templates-followup-dropdown" hidden$={{!showDateCombo}}
+                        <paper-dropdown-menu class="followup-dropdown" hidden$={{!showDateCombo}}
                             name="date" always-float-label label="Date" selected-item="{{selectedItemDate}}"
                             on-value-changed="dateOnChange" on-keydown="dateOnKeyDown">
                             <paper-menu id="dateMenu" class="dropdown-content" selected="{{selectedIndexDate}}">
@@ -251,10 +245,6 @@
                         <span class="set-template-link" on-tap="openTemplateFollowupDialog">Click here</span> 
                         to create a template
                     </small>
-                </div>
-
-                <div id="multipleProjectsWarning" class="warn-box" hidden$={{!showMultipleProjectsWarning}}>
-                    Multiple projects are not supported in past followup reports
                 </div>
 
                 <div class="custom-footer">
@@ -301,9 +291,6 @@
                     showDateCombo: {
                         type: Boolean
                     },
-                    showMultipleProjectsWarning: {
-                        type: Boolean
-                    },
                     availableDates: {
                         type: Array
                     },
@@ -329,7 +316,6 @@
                     this.showNoTemplatesFoundWarning = false;
                     this.disableGenerateButton = true;
                     this.showDateCombo = false;
-                    this.showMultipleProjectsWarning = false;
                     this.showClearDate = false;
                 },
                 
@@ -382,14 +368,15 @@
                     var selectedProjects = this.filterSelectedProjects();
 
                     var dates = [];
-                    selectedProjects.forEach(function(p) {
-                        dates = dates.concat(p.followUpDataHistory);
-                    });
-                    this.availableDates = _.uniq(dates.sort().reverse(), true);
+                    if (selectedProjects.length > 0) {
+                        dates = selectedProjects[0].followUpDataHistory;
+                        selectedProjects.forEach(function(p) {
+                            dates = _.intersection(dates, p.followUpDataHistory);
+                        });
+                    }
+                    this.availableDates = dates.sort().reverse();
 
-                    var hasTemplateAndAvailableDate = !this.showNoTemplatesFoundWarning && this.availableDates.length > 0;
-                    this.showDateCombo = hasTemplateAndAvailableDate && selectedProjects.length === 1;
-                    this.showMultipleProjectsWarning = hasTemplateAndAvailableDate && selectedProjects.length > 1;
+                    this.showDateCombo = !this.showNoTemplatesFoundWarning && this.availableDates.length > 0;
                     this.clearSelectedDate();
                 },
 

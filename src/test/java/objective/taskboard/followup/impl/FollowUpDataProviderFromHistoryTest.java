@@ -52,6 +52,7 @@ import objective.taskboard.followup.FollowUpData;
 public class FollowUpDataProviderFromHistoryTest {
 
     private static final String PROJECT_TEST = "PROJECT TEST";
+    private static final String PROJECT_TEST_2 = "PROJECT TEST 2";
     private static final String TODAY = DateTime.now().toString(FILE_NAME_FORMAT);
 
     private FollowUpDataProviderFromHistory subject;
@@ -65,15 +66,7 @@ public class FollowUpDataProviderFromHistoryTest {
     public void whenHasDataHistory_ShouldReturnSomeData() throws IOException, InterruptedException, URISyntaxException {
         Path pathProject = null;
         try {
-            pathProject = Paths.get(PATH_FOLLOWUP_HISTORY, PROJECT_TEST);
-            createDirectories(pathProject);
-
-            Path pathInputJSON = Paths.get(getClass().getResource("followUpDataHistoryExpected.json").toURI());
-            Path pathOutputJSON = pathProject.resolve(TODAY + EXTENSION_JSON);
-            copy(pathInputJSON, pathOutputJSON);
-
-            Path zipFile = Paths.get(pathOutputJSON.toString() + EXTENSION_ZIP);
-            zip(pathOutputJSON, zipFile);
+            pathProject = createProjectZip(PROJECT_TEST);
 
             List<FollowUpData> jiraData = subject.getJiraData(PROJECT_TEST.split(","));
 
@@ -111,6 +104,42 @@ public class FollowUpDataProviderFromHistoryTest {
             if (zipFile != null)
                 deleteQuietly(zipFile.getParent().toFile());
         }
+    }
+
+    @Test
+    public void whenTwoProjectsHasDataHistory_ShouldReturnSomeData() throws IOException, InterruptedException, URISyntaxException {
+        Path pathProject = null;
+        Path pathProject2 = null;
+        try {
+            pathProject = createProjectZip(PROJECT_TEST);
+            pathProject2 = createProjectZip(PROJECT_TEST_2);
+
+            String projects = PROJECT_TEST + "," + PROJECT_TEST_2;
+            List<FollowUpData> jiraData = subject.getJiraData(projects.split(","));
+
+            assertEquals("Jira data size", jiraData.size(), 2);
+            assertFollowUpDataDefault(jiraData.get(0));
+            assertFollowUpDataDefault(jiraData.get(1));
+        } finally {
+            if (pathProject != null)
+                deleteQuietly(pathProject.toFile());
+            if (pathProject2 != null)
+                deleteQuietly(pathProject2.toFile());
+        }
+    }
+
+    private Path createProjectZip(String project) throws IOException, URISyntaxException {
+        Path pathProject;
+        pathProject = Paths.get(PATH_FOLLOWUP_HISTORY, project);
+        createDirectories(pathProject);
+
+        Path pathInputJSON = Paths.get(getClass().getResource("followUpDataHistoryExpected.json").toURI());
+        Path pathOutputJSON = pathProject.resolve(TODAY + EXTENSION_JSON);
+        copy(pathInputJSON, pathOutputJSON);
+
+        Path zipFile = Paths.get(pathOutputJSON.toString() + EXTENSION_ZIP);
+        zip(pathOutputJSON, zipFile);
+        return pathProject;
     }
 
 }

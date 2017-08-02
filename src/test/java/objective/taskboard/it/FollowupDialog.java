@@ -36,7 +36,6 @@ public class FollowupDialog extends AbstractUiFragment {
     private WebElement generateButton;
     private WebElement dateDropdown;
     private WebElement clearDateButton;
-    private WebElement multipleProjectsWarning;
     private WebElement noMatchingTemplateWarning;
     private WebElement setTemplateLink;
 
@@ -56,7 +55,6 @@ public class FollowupDialog extends AbstractUiFragment {
         generateButton = dialog.findElement(By.id("generate"));
         dateDropdown = dialog.findElement(By.name("date"));
         clearDateButton = dialog.findElement(By.cssSelector(".clear-button paper-icon-button"));
-        multipleProjectsWarning = dialog.findElement(By.id("multipleProjectsWarning"));
         noMatchingTemplateWarning = dialog.findElement(By.id("noTemplateWarning"));
         setTemplateLink = dialog.findElement(By.className("set-template-link"));
         return this;
@@ -123,16 +121,6 @@ public class FollowupDialog extends AbstractUiFragment {
 
     public FollowupDialog assertDateDropdownIsInvisible() {
         waitInvisibilityOfElement(dateDropdown);
-        return this;
-    }
-
-    public FollowupDialog assertMultipleProjectsWarningIsInvisible() {
-        waitInvisibilityOfElement(multipleProjectsWarning);
-        return this;
-    }
-
-    public FollowupDialog assertMultipleProjectsWarningIsVisible() {
-        waitVisibilityOfElement(multipleProjectsWarning);
         return this;
     }
 
