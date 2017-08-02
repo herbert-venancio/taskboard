@@ -22,7 +22,7 @@ package objective.taskboard.it;
 
 import org.junit.Test;
 
-public class BasicLoginIT extends AbstractUIIntegrationTest {
+public class BasicLoginIT extends AbstractUIWithCoverageIntegrationTest {
     @Test
     public void testLoginSuccessful() {
         LoginPage loginPage = LoginPage.to(webDriver);
