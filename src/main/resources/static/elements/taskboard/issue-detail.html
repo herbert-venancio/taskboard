@@ -56,6 +56,7 @@
         }
 
         paper-button.headerLink {
+            min-width: initial;
             margin: 0px;
             padding: 0px;
             font-weight: normal;
@@ -369,8 +370,9 @@
                    last-response="{{timetracking}}"
                    on-response="timetrackingCallback"
                    on-error="hideTimetracking"></iron-ajax>
-        <paper-dialog id="modal" entry-animation="scale-up-animation" exit-animation="fade-out-animation" with-backdrop
-                      modal>
+        <paper-dialog id="modal" with-backdrop modal
+                      entry-animation="scale-up-animation" exit-animation="fade-out-animation"
+                      on-iron-overlay-closed="clearProperties">
             <paper-card class="card-custom">
 
                 <div class="card-header-custom">
@@ -395,7 +397,7 @@
                         </div>
                     </div>
                     <div class="card-header-buttons">
-                        <paper-button class="buttonClose" on-tap="clearProperties" dialog-confirm autofocus>
+                        <paper-button class="buttonClose" dialog-confirm autofocus>
                             <iron-icon icon="clear"></iron-icon>
                         </paper-button>
                     </div>
@@ -526,9 +528,8 @@
                             </div>
                         </div>
                     </template>
- 
-                     <template is="dom-if" if="{{shouldShowSubtasks}}">
 
+                    <template is="dom-if" if="{{shouldShowSubtasks}}">
                         <div class="content-row">
 
                             <div class="column-block">
@@ -549,7 +550,6 @@
                             </div>
 
                         </div>
-
                     </template>
 
                     <template is="dom-if" if="{{shouldShowTimetracking}}">
@@ -617,6 +617,7 @@
         <fields-required-modal id="fieldsRequiredDialog"></fields-required-modal>
         <issue-new-task id="dialogNewTask" item="{{item}}"></issue-new-task>
     </template>
+
     <script>
         (function () {
             Polymer({
@@ -1038,10 +1039,22 @@
                     this.transitions = [];
                     this.subtasks = null;
                     this.resolution = null;
-                    this.shouldShowTimetracking = false;
-                    this.shouldShowSubtasks = false;
                     this.errorMessage = null;
                     this.showFieldsRequiredDialog = false;
+                    this.timetracking = null;
+
+                    this.shouldShowTimetracking = true;
+                    this.shouldShowSubtasks = true;
+
+                    if (this.$$('#loadSubtasks'))
+                        this.$$('#loadSubtasks').active = true;
+
+                    if (this.$$('#loadTransitions'))
+                        this.$$('#loadTransitions').active = true;
+
+                    if (this.$$('#loadTimetracking'))
+                        this.$$('#loadTimetracking').active = true;
+
                 },
 
                 issueFechada: function (item) {
