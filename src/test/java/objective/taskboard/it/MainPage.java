@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -58,7 +59,7 @@ public class MainPage extends AbstractUiFragment {
         return initElements(webDriver, MainPage.class);
     }
     
-    public static AbstractUiFragment to(WebDriver webDriver) {
+    public static MainPage to(WebDriver webDriver) {
         webDriver.get(AbstractUIIntegrationTest.getSiteBase()+"/");
         return initElements(webDriver, MainPage.class);
     }
@@ -73,8 +74,16 @@ public class MainPage extends AbstractUiFragment {
     }
     
     public void typeSearch(String searchValue) {
+        searchIssuesInput.sendKeys(Keys.CONTROL,"a");
+        searchIssuesInput.sendKeys(Keys.DELETE);
         searchIssuesInput.sendKeys(searchValue);
         waitUntil(textToBePresentInElementValue(searchIssuesInput, searchValue));
+    }
+    
+    public void clearSearch() {
+        searchIssuesInput.sendKeys(Keys.CONTROL,"a");
+        searchIssuesInput.sendKeys(Keys.DELETE);
+        waitUntil(textToBePresentInElementValue(searchIssuesInput, ""));        
     }
 
     public MainPage openMenuFilters() {

@@ -27,6 +27,7 @@ import static com.google.common.collect.Maps.newHashMap;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -38,9 +39,9 @@ import org.springframework.stereotype.Service;
 import com.atlassian.jira.rest.client.api.domain.Issue;
 
 import lombok.extern.slf4j.Slf4j;
-import objective.taskboard.controller.IssuePriorityService;
 import objective.taskboard.data.CustomField;
 import objective.taskboard.data.Issue.TaskboardTimeTracking;
+import objective.taskboard.database.IssuePriorityService;
 import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.domain.ParentIssueLink;
 import objective.taskboard.domain.converter.IssueTeamService.InvalidTeamException;
@@ -136,6 +137,12 @@ public class JiraIssueToIssueConverter {
         }
         Long priorityOrder = priorityService.determinePriority(jiraIssue);
         
+        Date issueUpdatedDate = jiraIssue.getUpdateDate() == null? null : jiraIssue.getUpdateDate().toDate();
+        Date priorityUpdateDate = priorityService.priorityUpdateDate(jiraIssue);
+        if (priorityUpdateDate != null) {
+            if (issueUpdatedDate == null || priorityUpdateDate.after(issueUpdatedDate))
+                issueUpdatedDate = priorityUpdateDate;
+        }
         objective.taskboard.data.Issue i = objective.taskboard.data.Issue.from(
                 jiraIssue.getId(),
                 jiraIssue.getKey(),
@@ -159,7 +166,7 @@ public class JiraIssueToIssueConverter {
                 jiraIssue.getPriority() != null ? jiraIssue.getPriority().getId() : 0l,
                 jiraIssue.getDueDate() != null ? jiraIssue.getDueDate().toDate() : null,
                 jiraIssue.getCreationDate().getMillis(),
-                jiraIssue.getUpdateDate() == null? null : jiraIssue.getUpdateDate().toDate(),
+                issueUpdatedDate,
                 coalesce(jiraIssue.getDescription(), ""),
                 issueTeams,
                 getComments(metadata),

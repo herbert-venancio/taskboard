@@ -20,7 +20,11 @@
  */
 package objective.taskboard.it;
 
+import java.util.ArrayList;
+
 import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 
 public class ReprioritizationIT extends AuthenticatedIntegrationTest {
     @Test
@@ -44,9 +48,9 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
                 "TASKB-684",
                 "TASKB-686"
                 );
-        
+
         mainPage.issue("TASKB-643").dragOver("TASKB-627");
-        
+
         operational.boardStep("To Do").assertIssueList(
                 "TASKB-625",
                 "TASKB-643",
@@ -63,5 +67,79 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
                 "TASKB-684",
                 "TASKB-686"
                 );
+    }
+
+    @Test
+    public void whenIssueIsPriorityOrderIsChanged_ShouldShowNotificationInAnotherBrowserAndUpdateTheOrder() {
+        webDriver.findElement(By.cssSelector("body")).sendKeys(Keys.CONTROL +"t");
+        ArrayList<String> tabs = new ArrayList<>(webDriver.getWindowHandles());
+
+        webDriver.switchTo().window(tabs.get(1));
+        MainPage secondTabPage = MainPage.to(webDriver);
+        secondTabPage.waitUserLabelToBe("foo");
+        
+        LaneFragment operationalInSecondTab = secondTabPage.lane("Operational");
+        secondTabPage.issue("TASKB-643").dragOver("TASKB-627");
+        operationalInSecondTab.boardStep("To Do").assertIssueList(
+                "TASKB-625",
+                "TASKB-643",
+                "TASKB-627",
+                "TASKB-644",
+                "TASKB-659",
+                "TASKB-661",
+                "TASKB-663",
+                "TASKB-664",
+                "TASKB-680",
+                "TASKB-681",
+                "TASKB-682",
+                "TASKB-683",
+                "TASKB-684",
+                "TASKB-686"
+                );
+        
+        // switch back to first tab
+        webDriver.findElement(By.cssSelector("body")).sendKeys(Keys.CONTROL +"\t");
+        webDriver.switchTo().window(tabs.get(0));
+        
+        MainPage mainPage = MainPage.produce(webDriver);
+        mainPage.refreshToast().assertVisible();
+        LaneFragment operational = mainPage.lane("Operational");
+        operational.boardStep("To Do").assertIssueList(
+                "TASKB-625",
+                "TASKB-643",
+                "TASKB-627",
+                "TASKB-644",
+                "TASKB-659",
+                "TASKB-661",
+                "TASKB-663",
+                "TASKB-664",
+                "TASKB-680",
+                "TASKB-681",
+                "TASKB-682",
+                "TASKB-683",
+                "TASKB-684",
+                "TASKB-686"
+                );
+        
+        mainPage.refreshToast().dismiss();
+        // makes sure the model is correctly updated
+        mainPage.typeSearch("TASKB-625");
+        mainPage.clearSearch();
+        operational.boardStep("To Do").assertIssueList(
+                "TASKB-625",
+                "TASKB-643",
+                "TASKB-627",
+                "TASKB-644",
+                "TASKB-659",
+                "TASKB-661",
+                "TASKB-663",
+                "TASKB-664",
+                "TASKB-680",
+                "TASKB-681",
+                "TASKB-682",
+                "TASKB-683",
+                "TASKB-684",
+                "TASKB-686"
+                );        
     }
 }

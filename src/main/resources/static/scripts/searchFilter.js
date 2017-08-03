@@ -23,9 +23,18 @@ function SearchFilter() {
     this.match = function(issue, search) {
         if (!issue || !search)
             return true;
+        
+        var matches = false;
+        if (typeof search.query === 'object') {
+            for(var index=0; index < search.query.length; index++) {
+                matches = matchByString(issue, search.query[index]);
+                if (matches) break;
+            }
+        }
+        else
+            matches = matchByString(issue, search.query);
 
-        return matchByString(issue, search.query) &&
-               filterByRelease(issue, search.release);
+        return matches && filterByRelease(issue, search.release);
     };
 
     var matchByString = function(issue, searchString) {

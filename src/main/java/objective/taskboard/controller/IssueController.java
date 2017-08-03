@@ -25,7 +25,6 @@ import static java.util.stream.Collectors.toList;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -88,9 +87,6 @@ public class IssueController {
     @Autowired
     private IssueBufferService issueBufferService;
     
-    @Autowired
-    private IssuePriorityService issuePriorityService;
-
     @Autowired
     private ProjectService projectService;
 
@@ -225,12 +221,7 @@ public class IssueController {
     
     @RequestMapping("reorder")
     public List<Issue> reorder(@RequestBody String [] issues) {
-        issuePriorityService.reorder(issues);
-        List<Issue> updatedIssues = new LinkedList<Issue>();
-        for (String issue : issues) 
-            updatedIssues.add(issueBufferService.getIssueByKey(issue));
-        
-        return updatedIssues;
+        return issueBufferService.reorder(issues);
     }
     
     @RequestMapping("issue-buffer-state")
