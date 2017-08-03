@@ -72,7 +72,7 @@ public class IssueEventProcessScheduler {
         this.list.removeAll(list);
     }
 
-    public void add(WebhookEvent event, String issueKey) {
+    public synchronized void add(WebhookEvent event, String issueKey) {
         Item item = new Item(event, issueKey);
         list.add(item);
     }
@@ -84,14 +84,8 @@ public class IssueEventProcessScheduler {
         issueBufferService.startBatchUpdate();
         for (Item item : getItens()) 
             try {
-                if (item.event.isTypeVersion()) {
-                    cacheManager.getCache(PROJECTS).clear();
-                    if (item.event.equals(VERSION_UPDATED))
-                        issueBufferService.updateIssueBuffer();
-                } else 
-                    issueBufferService.updateByEvent(item.event, item.issueKey);
+                processEvent(item);
 
-                log.warn("WEBHOOK PROCESSED: (" + item.event.toString() +  ") issue=" + item.issueKey);
                 toRemove.add(item);
             }
             catch(JiraServiceUnavailable ex) {
@@ -106,5 +100,16 @@ public class IssueEventProcessScheduler {
 
         issueBufferService.finishBatchUpdate();
         removeItens(toRemove);
+    }
+
+    private void processEvent(Item item) {
+        if (item.event.isTypeVersion()) {
+            cacheManager.getCache(PROJECTS).clear();
+            if (item.event.equals(VERSION_UPDATED))
+                issueBufferService.updateIssueBuffer();
+            return;
+        }
+        
+        issueBufferService.updateByEvent(item.event, item.issueKey);
     }
 }
