@@ -52,7 +52,6 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import objective.taskboard.data.Issue;
 import objective.taskboard.followup.FollowUpData;
-import objective.taskboard.followup.impl.FollowUpDataProviderFromCurrentState;
 import objective.taskboard.issueBuffer.AllIssuesBufferService;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraProperties.BallparkMapping;
@@ -133,6 +132,16 @@ public class FollowUpDataProviderFromCurrentStateTest {
         propertiesCustomField.setRelease(new CustomFieldDetails("RELEASE_CF_ID"));
         when(jiraProperties.isDemand(Matchers.any())).thenCallRealMethod();
         when(jiraProperties.isFeature(Matchers.any())).thenCallRealMethod();
+
+        String[] demandsOrder = new String[] { "Done", "UATing", "To UAT", "Doing", "To Do", "Open", "Cancelled" };
+        String[] subtaskOrder = new String[] { "Done", "Reviewing", "To Review", "Doing", "To Do", "Open","Cancelled" };
+        String[] tasksOrder = new String[] { "Done", "QAing", "To QA", "Feature Reviewing", "To Feature Review",
+                "Alpha Testing", "To Alpha Test", "Doing", "To Do", "To Do", "Open", "Cancelled" };
+        JiraProperties.StatusPriorityOrder statusOrder = new JiraProperties.StatusPriorityOrder();
+        statusOrder.setDemands(demandsOrder);
+        statusOrder.setTasks(tasksOrder);
+        statusOrder.setSubtasks(subtaskOrder);
+        when(jiraProperties.getStatusPriorityOrder()).thenReturn(statusOrder);
     }
     
     @Test
@@ -1105,6 +1114,144 @@ public class FollowUpDataProviderFromCurrentStateTest {
     }
     
     @Test
+    public void verifyDemandsOrder_ShouldBeOrderedByStatusAndPriority() {
+        Long hightPriority = 1l;
+        Long lowPriority = 2l;
+        issues(demand().id(1).key("PROJ-1").summary("Smry 1").issueStatus(statusOpen).priorityOrder(hightPriority),
+                demand().id(2).key("PROJ-2").summary("Smry 2").issueStatus(statusToDo).priorityOrder(lowPriority),
+                demand().id(3).key("PROJ-3").summary("Smry 3").issueStatus(statusDone).priorityOrder(hightPriority),
+                demand().id(4).key("PROJ-4").summary("Smry 4").issueStatus(statusToDo).priorityOrder(hightPriority));
+
+        assertFollowupsForIssuesEqualsOrdered(
+                " planningType           : Ballpark\n" +
+                " project                : A Project\n" +
+                " demandType             : Demand\n" +
+                " demandStatus           : Done\n" +
+                " demandId               : 3\n" +
+                " demandNum              : PROJ-3\n" +
+                " demandSummary          : Smry 3\n" +
+                " demandDescription      : M | 00003 - Smry 3\n" +
+                " taskType               : BALLPARK - Demand\n" +
+                " taskStatus             : Open\n" +
+                " taskId                 : 0\n" +
+                " taskNum                : PROJ-3\n" +
+                " taskSummary            : Dummy Feature\n" +
+                " taskDescription        : 00000 - Smry 3\n" +
+                " taskFullDescription    : BALLPARK - Demand | M | 00000 - Smry 3\n" +
+                " taskRelease            : No release set\n" +
+                " subtaskType            : BALLPARK - Demand\n" +
+                " subtaskStatus          : Done\n" +
+                " subtaskId              : 0\n" +
+                " subtaskNum             : PROJ-0\n" +
+                " subtaskSummary         : Smry 3\n" +
+                " subtaskDescription     : M | 00000 - Smry 3\n" +
+                " subtaskFullDescription : BALLPARK - Demand | M | 00000 - Smry 3\n" +
+                " tshirtSize             : M\n" +
+                " worklog                : 0.0\n" +
+                " wrongWorklog           : 0.0\n" +
+                " demandBallpark         : 0.0\n" +
+                " taskBallpark           : 0.0\n" +
+                " queryType              : DEMAND BALLPARK" +
+
+                "\n\n" +
+
+                " planningType           : Ballpark\n" +
+                " project                : A Project\n" +
+                " demandType             : Demand\n" +
+                " demandStatus           : To Do\n" +
+                " demandId               : 4\n" +
+                " demandNum              : PROJ-4\n" +
+                " demandSummary          : Smry 4\n" +
+                " demandDescription      : M | 00004 - Smry 4\n" +
+                " taskType               : BALLPARK - Demand\n" +
+                " taskStatus             : Open\n" +
+                " taskId                 : 0\n" +
+                " taskNum                : PROJ-4\n" +
+                " taskSummary            : Dummy Feature\n" +
+                " taskDescription        : 00000 - Smry 4\n" +
+                " taskFullDescription    : BALLPARK - Demand | M | 00000 - Smry 4\n" +
+                " taskRelease            : No release set\n" +
+                " subtaskType            : BALLPARK - Demand\n" +
+                " subtaskStatus          : To Do\n" +
+                " subtaskId              : 0\n" +
+                " subtaskNum             : PROJ-0\n" +
+                " subtaskSummary         : Smry 4\n" +
+                " subtaskDescription     : M | 00000 - Smry 4\n" +
+                " subtaskFullDescription : BALLPARK - Demand | M | 00000 - Smry 4\n" +
+                " tshirtSize             : M\n" +
+                " worklog                : 0.0\n" +
+                " wrongWorklog           : 0.0\n" +
+                " demandBallpark         : 0.0\n" +
+                " taskBallpark           : 0.0\n" +
+                " queryType              : DEMAND BALLPARK" +
+
+                "\n\n" +
+
+                " planningType           : Ballpark\n" +
+                " project                : A Project\n" +
+                " demandType             : Demand\n" +
+                " demandStatus           : To Do\n" +
+                " demandId               : 2\n" +
+                " demandNum              : PROJ-2\n" +
+                " demandSummary          : Smry 2\n" +
+                " demandDescription      : M | 00002 - Smry 2\n" +
+                " taskType               : BALLPARK - Demand\n" +
+                " taskStatus             : Open\n" +
+                " taskId                 : 0\n" +
+                " taskNum                : PROJ-2\n" +
+                " taskSummary            : Dummy Feature\n" +
+                " taskDescription        : 00000 - Smry 2\n" +
+                " taskFullDescription    : BALLPARK - Demand | M | 00000 - Smry 2\n" +
+                " taskRelease            : No release set\n" +
+                " subtaskType            : BALLPARK - Demand\n" +
+                " subtaskStatus          : To Do\n" +
+                " subtaskId              : 0\n" +
+                " subtaskNum             : PROJ-0\n" +
+                " subtaskSummary         : Smry 2\n" +
+                " subtaskDescription     : M | 00000 - Smry 2\n" +
+                " subtaskFullDescription : BALLPARK - Demand | M | 00000 - Smry 2\n" +
+                " tshirtSize             : M\n" +
+                " worklog                : 0.0\n" +
+                " wrongWorklog           : 0.0\n" +
+                " demandBallpark         : 0.0\n" +
+                " taskBallpark           : 0.0\n" +
+                " queryType              : DEMAND BALLPARK" +
+
+                "\n\n" +
+
+                " planningType           : Ballpark\n" +
+                " project                : A Project\n" +
+                " demandType             : Demand\n" +
+                " demandStatus           : Open\n" +
+                " demandId               : 1\n" +
+                " demandNum              : PROJ-1\n" +
+                " demandSummary          : Smry 1\n" +
+                " demandDescription      : M | 00001 - Smry 1\n" +
+                " taskType               : BALLPARK - Demand\n" +
+                " taskStatus             : Open\n" +
+                " taskId                 : 0\n" +
+                " taskNum                : PROJ-1\n" +
+                " taskSummary            : Dummy Feature\n" +
+                " taskDescription        : 00000 - Smry 1\n" +
+                " taskFullDescription    : BALLPARK - Demand | M | 00000 - Smry 1\n" +
+                " taskRelease            : No release set\n" +
+                " subtaskType            : BALLPARK - Demand\n" +
+                " subtaskStatus          : Open\n" +
+                " subtaskId              : 0\n" +
+                " subtaskNum             : PROJ-0\n" +
+                " subtaskSummary         : Smry 1\n" +
+                " subtaskDescription     : M | 00000 - Smry 1\n" +
+                " subtaskFullDescription : BALLPARK - Demand | M | 00000 - Smry 1\n" +
+                " tshirtSize             : M\n" +
+                " worklog                : 0.0\n" +
+                " wrongWorklog           : 0.0\n" +
+                " demandBallpark         : 0.0\n" +
+                " taskBallpark           : 0.0\n" +
+                " queryType              : DEMAND BALLPARK"
+            );
+    }
+
+    @Test
     public void issuesInCertainStatus_shouldNotShowUpAtAll() {
         configureBallparkMappings(
                 taskIssueType + " : \n" +
@@ -1241,7 +1388,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
                 " taskBallpark           : 2.0\n" + 
                 " queryType              : FEATURE BALLPARK");
     }
-    
+
     @Test
     public void issuesOfDifferentProjects_ShouldOnlyIncludeOfSelectectedProjects() {
         issues( 
@@ -1303,7 +1450,12 @@ public class FollowUpDataProviderFromCurrentStateTest {
         });
         return actual;
     }
-    
+
+    private void assertFollowupsForIssuesEqualsOrdered(String expectedFollowupList) {
+        List<FollowUpData> actual = subject.getJiraData(defaultProjects());
+        assertEquals(expectedFollowupList, StringUtils.join(actual, "\n\n"));
+    }
+
     private void assertFollowupsForIssuesEquals(String expectedFollowupList) {
         List<FollowUpData> actual = sortJiraDataByIssuesKeys(subject.getJiraData(defaultProjects()));
 
@@ -1353,6 +1505,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
         private Integer timeSpentMinutes;
         private String parent;
         private Map<String, Object> customFields = new LinkedHashMap<>();
+        private Long priorityOrder;
         
         public IssueBuilder id(int id) {
             this.id = (long) id;
@@ -1409,6 +1562,11 @@ public class FollowUpDataProviderFromCurrentStateTest {
             return this;
         }
         
+        public IssueBuilder priorityOrder(Long priorityOrder) {
+            this.priorityOrder = priorityOrder;
+            return this;
+        }
+
         private IssueBuilder tshirtSize(String tShirtSize) {
             return tshirt(tshirtSizeInfo.getMainTShirtSizeFieldId(), tShirtSize);
         }
@@ -1445,8 +1603,8 @@ public class FollowUpDataProviderFromCurrentStateTest {
                 null, //labels
                 null, //components
                 null, //customFields
-                customFields,   //priorityOrder
-                0L,
+                customFields,
+                priorityOrder,
                 timeTracking,
                 jiraProperties,
                 metadataService);

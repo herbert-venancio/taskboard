@@ -300,12 +300,27 @@ public class Issue implements Serializable {
         this.jiraProperties = properties;
         this.metaDataService = metaDataService;
     }
-    
+
+    @JsonIgnore
+    public boolean isDemand() {
+        return jiraProperties.isDemand(this);
+    }
+
+    @JsonIgnore
+    public boolean isFeature() {
+        return jiraProperties.isFeature(this);
+    }
+
+    @JsonIgnore
+    public boolean isSubTask() {
+        return !isDemand() && !isFeature();
+    }
+
     @JsonIgnore
     public Integer getIssueKeyNum() {
         return Integer.parseInt(issueKey.replace(projectKey+"-", ""));
     }
-    
+
     @JsonIgnore
     public String getTShirtSize() {
         String mainTShirtSizeFieldId = jiraProperties.getCustomfield().getTShirtSize().getMainTShirtSizeFieldId();
@@ -317,7 +332,7 @@ public class Issue implements Serializable {
             return null;
         return customField.getValue().toString();
     }
-    
+
     @JsonIgnore
     public void setTShirtSize(String value) {
         String mainTShirtSizeFieldId = jiraProperties.getCustomfield().getTShirtSize().getMainTShirtSizeFieldId();
@@ -368,5 +383,26 @@ public class Issue implements Serializable {
         } catch (InterruptedException | ExecutionException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    @JsonIgnore
+    public Integer getStatusPriority() {
+        String[] statusOrder = null;
+        if (this.isDemand()) {
+            statusOrder = jiraProperties.getStatusPriorityOrder().getDemands();
+        } else if (this.isFeature()) {
+            statusOrder = jiraProperties.getStatusPriorityOrder().getTasks();
+        } else if (this.isSubTask()) {
+            statusOrder = jiraProperties.getStatusPriorityOrder().getSubtasks();
+        }
+
+        if(statusOrder == null)
+            throw new RuntimeException("The property with status priority order was not found");
+
+        for(int i = 0; i < statusOrder.length; i++)
+            if (statusOrder[i].equals(this.getStatusName()))
+                return i;
+
+        return -1;
     }
 }

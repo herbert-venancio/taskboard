@@ -23,7 +23,10 @@ package objective.taskboard.followup.impl;
 
 import static org.apache.commons.lang.ObjectUtils.defaultIfNull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -70,11 +73,11 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
     public List<FollowUpData> getJiraData(String[] includeProjects) {
         List<String> i = Arrays.asList(includeProjects);
         List<Issue> issuesVisibleToUser = issueBufferService.getAllIssues().stream()
-                .filter(issue -> isAllowedStatus(issue.getStatus()))
-                .filter(issue -> i.contains(issue.getProjectKey()))
-                .collect(Collectors.toList());
-        
-        LinkedList<Issue> issues = new LinkedList<>(issuesVisibleToUser);
+	         .filter(issue -> isAllowedStatus(issue.getStatus()))
+	         .filter(issue -> i.contains(issue.getProjectKey()))
+	         .collect(Collectors.toList());
+
+        LinkedList<Issue> issues = new LinkedList<>(sortIssues(issuesVisibleToUser));
         
         followUpBallparks = new LinkedHashMap<String, FollowUpData>();
         
@@ -213,6 +216,46 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         return followUpData;
     }
     
+    private List<Issue> sortIssues(List<Issue> actual) {
+        List<Issue> actualDemands = new ArrayList<>();
+        List<Issue> actualFeatures = new ArrayList<>();
+        List<Issue> actualSubtasks = new ArrayList<>();
+        List<Issue> issuesOrdered = new ArrayList<>();
+
+        for (Issue issue : actual) {
+            if (issue.isDemand())
+                actualDemands.add(issue);
+
+            if (issue.isFeature())
+                actualFeatures.add(issue);
+
+            if (issue.isSubTask())
+                actualSubtasks.add(issue);
+        }
+
+        actualDemands = sortIssuesByStatusAndPriorityOrder(actualDemands);
+        actualFeatures = sortIssuesByStatusAndPriorityOrder(actualFeatures);
+        actualSubtasks = sortIssuesByStatusAndPriorityOrder(actualSubtasks);
+
+        issuesOrdered.addAll(actualDemands);
+        issuesOrdered.addAll(actualFeatures);
+        issuesOrdered.addAll(actualSubtasks);
+
+        return issuesOrdered;
+    }
+
+    private List<Issue> sortIssuesByStatusAndPriorityOrder(List<Issue> actual) {
+        Collections.sort(actual, new Comparator<Issue>() {
+            @Override
+            public int compare(Issue o1, Issue o2) {
+                String o1PriorityOrder = o1.getPriorityOrder() != null ? o1.getPriorityOrder().toString() : "";
+                String o2PriorityOrder = o2.getPriorityOrder() != null ? o2.getPriorityOrder().toString() : "";
+                return (o1.getStatusPriority() + o1PriorityOrder).compareTo(o2.getStatusPriority() + o2PriorityOrder);
+            }
+        });
+        return actual;
+    }
+
     private Double timeSpentInHour(Issue issue) {
         if (issue.getTimeTracking() == null)
             return 0.0;

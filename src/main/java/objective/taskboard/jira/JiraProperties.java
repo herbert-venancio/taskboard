@@ -77,10 +77,36 @@ public class JiraProperties {
     @NotNull
     @Valid
     private Resolutions resolutions;
-    
     @NotNull
     @Valid
     private Followup followup;
+    @NotNull
+    @Valid
+    private StatusPriorityOrder statusPriorityOrder;
+
+    public static class StatusPriorityOrder {
+        private String[] demands;
+        private String[] tasks;
+        private String[] subtasks;
+        public String[] getDemands() {
+            return demands;
+        }
+        public void setDemands(String[] demands) {
+            this.demands = demands;
+        }
+        public String[] getTasks() {
+            return tasks;
+        }
+        public void setTasks(String[] tasks) {
+            this.tasks = tasks;
+        }
+        public String[] getSubtasks() {
+            return subtasks;
+        }
+        public void setSubtasks(String[] subtasks) {
+            this.subtasks = subtasks;
+        }
+    }
     
     @Data 
     public static class Lousa {
@@ -278,5 +304,9 @@ public class JiraProperties {
     
     public boolean isFeature(Issue i) {
         return getIssuetype().getFeatures().stream().anyMatch(ft -> ft.id == i.getType());
+    }
+
+    public StatusPriorityOrder getStatusPriorityOrder() {
+        return statusPriorityOrder;
     }
 }
