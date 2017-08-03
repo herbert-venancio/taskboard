@@ -387,22 +387,12 @@ public class Issue implements Serializable {
 
     @JsonIgnore
     public Integer getStatusPriority() {
-        String[] statusOrder = null;
-        if (this.isDemand()) {
-            statusOrder = jiraProperties.getStatusPriorityOrder().getDemands();
-        } else if (this.isFeature()) {
-            statusOrder = jiraProperties.getStatusPriorityOrder().getTasks();
-        } else if (this.isSubTask()) {
-            statusOrder = jiraProperties.getStatusPriorityOrder().getSubtasks();
-        }
+        if (this.isDemand())
+            return jiraProperties.getStatusPriorityOrder().getDemandPriorityByStatus(this.getStatusName());
 
-        if(statusOrder == null)
-            throw new RuntimeException("The property with status priority order was not found");
+        if (this.isFeature())
+            return jiraProperties.getStatusPriorityOrder().getTaskPriorityByStatus(this.getStatusName());
 
-        for(int i = 0; i < statusOrder.length; i++)
-            if (statusOrder[i].equals(this.getStatusName()))
-                return i;
-
-        return -1;
+        return jiraProperties.getStatusPriorityOrder().getSubtaskPriorityByStatus(this.getStatusName());
     }
 }
