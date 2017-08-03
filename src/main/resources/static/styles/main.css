@@ -318,28 +318,32 @@ paper-dialog {
 }
 
 /*
-    Template Follow Up Dropdown
+    Follow Up Dropdown
 */
-.templates-followup-dropdown {
+.followup-dropdown {
     width: 100%;
 }
 
-.templates-followup-dropdown paper-input-container {
+.followup-dropdown paper-input-container {
     border-radius: 3px !important;
     margin-bottom: 15px;
 }
 
-.templates-followup-dropdown label, .templates-followup-dropdown input {
+.followup-dropdown label, .followup-dropdown input {
     color: inherit !important;
 }
 
-.templates-followup-dropdown paper-item {
+.followup-dropdown paper-item {
     min-height: 36px;
     cursor: pointer;
 }
 
-.templates-followup-dropdown paper-item:hover {
+.followup-dropdown paper-item:hover {
     background: #DDD;
+}
+
+.followup-dropdown paper-menu {
+    min-width: 105px;
 }
 
 /*
