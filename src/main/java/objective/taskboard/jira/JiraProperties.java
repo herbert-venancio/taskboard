@@ -38,7 +38,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import objective.taskboard.data.Issue;
 
 @Data
 @ConfigurationProperties(prefix = "jira")
@@ -296,14 +295,6 @@ public class JiraProperties {
         public List<Long> getStatusExcludedFromFollowup() {
             return statusExcludedFromFollowup;
         }
-    }
-    
-    public boolean isDemand(Issue i) {
-        return getIssuetype().getDemand().id == i.getType();
-    }
-    
-    public boolean isFeature(Issue i) {
-        return getIssuetype().getFeatures().stream().anyMatch(ft -> ft.id == i.getType());
     }
 
     public StatusPriorityOrder getStatusPriorityOrder() {

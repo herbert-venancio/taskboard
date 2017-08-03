@@ -101,7 +101,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         Iterator<Issue> it = issues.iterator();
         while(it.hasNext()) {
             Issue issue = it.next();
-            if (jiraProperties.isDemand(issue)) {
+            if (issue.isDemand()) {
                 followUpBallparks.put(issue.getIssueKey(), createBallparkDemand(issue));
                 demands.put(issue.getIssueKey(), issue);
                 it.remove();
@@ -116,7 +116,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         Iterator<Issue> it = issues.iterator();
         while(it.hasNext()) {
             Issue feature = it.next();
-            if (!jiraProperties.isFeature(feature)) 
+            if (!feature.isFeature()) 
                 continue;
             it.remove();
             
@@ -362,8 +362,8 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
     }
 
     private String getTshirtSize(Issue i) {
-        if (jiraProperties.isFeature(i)) return "";
-        if (jiraProperties.isDemand(i)) return "M";
+        if (i.isFeature()) return "";
+        if (i.isDemand()) return "M";
         return i.getTShirtSize();
     }
     

@@ -303,12 +303,12 @@ public class Issue implements Serializable {
 
     @JsonIgnore
     public boolean isDemand() {
-        return jiraProperties.isDemand(this);
+        return jiraProperties.getIssuetype().getDemand().getId() == this.getType();
     }
 
     @JsonIgnore
     public boolean isFeature() {
-        return jiraProperties.isFeature(this);
+        return jiraProperties.getIssuetype().getFeatures().stream().anyMatch(ft -> ft.getId() == this.getType());
     }
 
     @JsonIgnore

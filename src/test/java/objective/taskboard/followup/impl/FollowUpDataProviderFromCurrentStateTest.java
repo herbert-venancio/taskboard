@@ -40,7 +40,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -130,8 +129,6 @@ public class FollowUpDataProviderFromCurrentStateTest {
         followup.setBallparkDefaultStatus(statusOpen);
         when(jiraProperties.getFollowup()).thenReturn(followup);
         propertiesCustomField.setRelease(new CustomFieldDetails("RELEASE_CF_ID"));
-        when(jiraProperties.isDemand(Matchers.any())).thenCallRealMethod();
-        when(jiraProperties.isFeature(Matchers.any())).thenCallRealMethod();
 
         String[] demandsOrder = new String[] { "Done", "UATing", "To UAT", "Doing", "To Do", "Open", "Cancelled" };
         String[] subtaskOrder = new String[] { "Done", "Reviewing", "To Review", "Doing", "To Do", "Open","Cancelled" };
