@@ -30,6 +30,7 @@ import static java.util.stream.Collectors.toMap;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 
@@ -138,10 +139,10 @@ public class JiraIssueToIssueConverter {
         Long priorityOrder = priorityService.determinePriority(jiraIssue);
         
         Date issueUpdatedDate = jiraIssue.getUpdateDate() == null? null : jiraIssue.getUpdateDate().toDate();
-        Date priorityUpdateDate = priorityService.priorityUpdateDate(jiraIssue);
-        if (priorityUpdateDate != null) {
-            if (issueUpdatedDate == null || priorityUpdateDate.after(issueUpdatedDate))
-                issueUpdatedDate = priorityUpdateDate;
+        Optional<Date> priorityUpdateDate = priorityService.priorityUpdateDate(jiraIssue);
+        if (priorityUpdateDate.isPresent()) {
+            if (issueUpdatedDate == null || priorityUpdateDate.get().after(issueUpdatedDate))
+                issueUpdatedDate = priorityUpdateDate.get();
         }
         objective.taskboard.data.Issue i = objective.taskboard.data.Issue.from(
                 jiraIssue.getId(),

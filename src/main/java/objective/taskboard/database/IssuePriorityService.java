@@ -30,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -75,11 +76,11 @@ public class IssuePriorityService  {
         return priorityOrder.getPriority();
     }
 
-    public Date priorityUpdateDate(Issue e) {
+    public Optional<Date> priorityUpdateDate(Issue e) {
         TaskboardIssue priorityOrder = cache.get(e.getKey());
         if (priorityOrder == null)
-            return null;
-        return priorityOrder.getUpdated();
+            return Optional.empty();
+        return Optional.of(priorityOrder.getUpdated());
     }
 
     public synchronized List<TaskboardIssue> reorder(String[] issueKeys) {

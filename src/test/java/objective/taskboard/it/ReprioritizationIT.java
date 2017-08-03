@@ -20,11 +20,7 @@
  */
 package objective.taskboard.it;
 
-import java.util.ArrayList;
-
 import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 
 public class ReprioritizationIT extends AuthenticatedIntegrationTest {
     @Test
@@ -71,10 +67,8 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
 
     @Test
     public void whenIssueIsPriorityOrderIsChanged_ShouldShowNotificationInAnotherBrowserAndUpdateTheOrder() {
-        webDriver.findElement(By.cssSelector("body")).sendKeys(Keys.CONTROL +"t");
-        ArrayList<String> tabs = new ArrayList<>(webDriver.getWindowHandles());
-
-        webDriver.switchTo().window(tabs.get(1));
+        createAndSwitchToNewTab();
+        
         MainPage secondTabPage = MainPage.to(webDriver);
         secondTabPage.waitUserLabelToBe("foo");
         
@@ -97,9 +91,7 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
                 "TASKB-686"
                 );
         
-        // switch back to first tab
-        webDriver.findElement(By.cssSelector("body")).sendKeys(Keys.CONTROL +"\t");
-        webDriver.switchTo().window(tabs.get(0));
+        switchToFirstTab();
         
         MainPage mainPage = MainPage.produce(webDriver);
         mainPage.refreshToast().assertVisible();
