@@ -24,13 +24,18 @@ package objective.taskboard.domain.converter;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.when;
 
 import java.net.URI;
 import java.sql.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -51,16 +56,16 @@ import com.atlassian.jira.rest.client.api.domain.IssueType;
 import com.atlassian.jira.rest.client.api.domain.Status;
 import com.atlassian.jira.rest.client.api.domain.User;
 
-import objective.taskboard.controller.IssuePriorityService;
+import objective.taskboard.database.IssuePriorityService;
 import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.domain.converter.IssueTeamService.InvalidTeamException;
 import objective.taskboard.jira.JiraProperties;
-import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.JiraProperties.CustomField;
 import objective.taskboard.jira.JiraProperties.CustomField.Blocked;
 import objective.taskboard.jira.JiraProperties.CustomField.ClassOfServiceDetails;
 import objective.taskboard.jira.JiraProperties.CustomField.CustomFieldDetails;
 import objective.taskboard.jira.JiraProperties.CustomField.TShirtSize;
+import objective.taskboard.jira.JiraService;
 import objective.taskboard.repository.ParentIssueLinkRepository;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -177,6 +182,8 @@ public class JiraIssueToIssueConverterTest {
         mockIssue(issue, ISSUE_KEY);
 
         when(priorityService.determinePriority(any())).thenReturn(0L);
+        
+        when(priorityService.priorityUpdateDate(any())).thenReturn(Optional.empty());
     }
 
     @Test

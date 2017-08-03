@@ -34,17 +34,13 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
-import objective.taskboard.data.Issue;
-import objective.taskboard.issue.IssueUpdate;
-import objective.taskboard.issue.IssueUpdateType;
-import objective.taskboard.issue.IssuesUpdateEvent;
 import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.issueBuffer.WebhookEvent;
 import objective.taskboard.jira.JiraServiceUnavailable;
 
 @Slf4j
 @Component
-public class WebhookSchedule {
+public class IssueEventProcessScheduler {
     @Autowired
     private IssueBufferService issueBufferService;
     
@@ -76,7 +72,7 @@ public class WebhookSchedule {
         this.list.removeAll(list);
     }
 
-    public void add(WebhookEvent event, String issueKey) {
+    public synchronized void add(WebhookEvent event, String issueKey) {
         Item item = new Item(event, issueKey);
         list.add(item);
     }
@@ -84,29 +80,12 @@ public class WebhookSchedule {
     @Scheduled(fixedRate = RATE_MILISECONDS)
     public void processItems() {
         List<Item> toRemove = new ArrayList<Item>();
-        List<IssueUpdate> updatedIssues = new ArrayList<>();
 
+        issueBufferService.startBatchUpdate();
         for (Item item : getItens()) 
             try {
-                if (item.event.isTypeVersion()) {
-                    cacheManager.getCache(PROJECTS).clear();
-                    if (item.event.equals(VERSION_UPDATED))
-                        issueBufferService.updateIssueBuffer();
-                } else {
-                    IssueUpdateType updateType = computeEventType(item);
-                    
-                    Issue issueToUpdate = issueBufferService.getIssueByKey(item.issueKey);
-                    
-                    issueBufferService.updateIssueBuffer(item.event, item.issueKey);
-                    
-                    Issue updatedIssue = issueBufferService.getIssueByKey(item.issueKey);
-                    if (updatedIssue == null) // just in case the issue was removed
-                        updatedIssue = issueToUpdate;
-                    
-                    updatedIssues.add(new IssueUpdate(updatedIssue, updateType));
-                }
+                processEvent(item);
 
-                log.warn("WEBHOOK PROCESSED: (" + item.event.toString() +  ") issue=" + item.issueKey);
                 toRemove.add(item);
             }
             catch(JiraServiceUnavailable ex) {
@@ -118,29 +97,19 @@ public class WebhookSchedule {
                 log.error("WebhookScheduleError, unrecoverable error. Event will be discarded:", ex);
                 toRemove.add(item);
             }
-        
-        if (updatedIssues.size() > 0)
-            eventPublisher.publishEvent(new IssuesUpdateEvent(this, updatedIssues));
 
+        issueBufferService.finishBatchUpdate();
         removeItens(toRemove);
     }
 
-    private IssueUpdateType computeEventType(Item item) {
-        IssueUpdateType updateType;
-        switch(item.event){
-            case ISSUE_CREATED:
-                updateType = IssueUpdateType.CREATED;
-                break;
-            case ISSUE_DELETED:
-                updateType = IssueUpdateType.DELETED;
-                break;
-            case ISSUE_UPDATED:
-                updateType = IssueUpdateType.UPDATED;
-                break;
-            default:
-                updateType = IssueUpdateType.UNKNOWN;
+    private void processEvent(Item item) {
+        if (item.event.isTypeVersion()) {
+            cacheManager.getCache(PROJECTS).clear();
+            if (item.event.equals(VERSION_UPDATED))
+                issueBufferService.updateIssueBuffer();
+            return;
         }
-        return updateType;
+        
+        issueBufferService.updateByEvent(item.event, item.issueKey);
     }
-
 }

@@ -1,26 +1,5 @@
 package objective.taskboard.database;
 
-/*-
- * [LICENSE]
- * Taskboard
- * ---
- * Copyright (C) 2015 - 2017 Objective Solutions
- * ---
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * [/LICENSE]
- */
-
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -35,9 +14,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
-import objective.taskboard.controller.IssuePriorityService;
 import objective.taskboard.data.Issue;
 import objective.taskboard.data.TaskboardIssue;
 import objective.taskboard.issueBuffer.IssueBufferService;
@@ -60,13 +40,20 @@ public class IssuePriorityServiceTest {
     
     @SuppressWarnings("unchecked")
     @Test
-    public void reorderTest() {
+    public void reorderTest_onlyUpdatedIssuesShouldBeReturned() {
         when(issueOrderPriority.findByIssueKeyIn(Mockito.anyList()))
             .thenReturn(asList(
                     new TaskboardIssue("P-1", 100), 
                     new TaskboardIssue("P-2", 150),
                     new TaskboardIssue("P-3", 200)
                     ));
+        
+        when(issueOrderPriority.save((TaskboardIssue)Mockito.anyObject())).thenAnswer(new Answer<TaskboardIssue>() {
+            @Override
+            public TaskboardIssue answer(InvocationOnMock invocation) throws Throwable {
+                return (TaskboardIssue) invocation.getArguments()[0];
+            }
+        });
         
         Issue p4 = mock(Issue.class);
         when(p4.getId()).thenReturn(400L);
@@ -76,7 +63,7 @@ public class IssuePriorityServiceTest {
         
         ArgumentCaptor<TaskboardIssue> argument = ArgumentCaptor.forClass(TaskboardIssue.class);
 
-        Mockito.verify(issueOrderPriority, Mockito.times(4)).save(argument.capture());
+        Mockito.verify(issueOrderPriority, Mockito.times(3)).save(argument.capture());
         LinkedList<TaskboardIssue> actual = new LinkedList<TaskboardIssue>(argument.getAllValues());
         TaskboardIssue e = actual.poll();
         assertEquals("P-3", e.getProjectKey());
@@ -89,9 +76,5 @@ public class IssuePriorityServiceTest {
         e = actual.poll();
         assertEquals("P-2", e.getProjectKey());
         assertEquals(200L, e.getPriority());
-        
-        e = actual.poll();
-        assertEquals("P-4", e.getProjectKey());
-        assertEquals(400L, e.getPriority());
     }
 }

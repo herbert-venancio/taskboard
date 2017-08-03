@@ -26,7 +26,9 @@ import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -41,11 +43,16 @@ import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.data.Issue;
 import objective.taskboard.data.IssuePriorityOrderChanged;
 import objective.taskboard.data.TaskboardIssue;
+import objective.taskboard.database.IssuePriorityService;
 import objective.taskboard.domain.converter.IssueMetadata;
 import objective.taskboard.domain.converter.JiraIssueToIssueConverter;
+import objective.taskboard.issue.IssueUpdate;
+import objective.taskboard.issue.IssueUpdateType;
+import objective.taskboard.issue.IssuesUpdateEvent;
 import objective.taskboard.jira.JiraIssueService;
 import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.ProjectService;
+import objective.taskboard.task.IssueEventProcessScheduler;
 
 @Slf4j
 @Service
@@ -65,6 +72,12 @@ public class IssueBufferService {
     @Autowired
     private JiraService jiraBean;
     
+    @Autowired
+    private IssuePriorityService issuePriorityService;
+
+    @Autowired
+    private IssueEventProcessScheduler issueEvents;
+
     private Map<String, IssueMetadata> taskboardMetadatasByIssueKey = newHashMap();
     
     private IssueBufferState state = IssueBufferState.uninitialised;
@@ -73,6 +86,8 @@ public class IssueBufferService {
     
     private boolean isUpdatingTaskboardIssuesBuffer = false;
     
+    private List<IssueUpdate> issuesUpdatedByEvent = new ArrayList<>();
+
     public IssueBufferState getState() {
         return state;
     }
@@ -108,15 +123,8 @@ public class IssueBufferService {
     }
 
     public Issue updateIssueBuffer(final String key) {
-        return updateIssueBuffer(WebhookEvent.ISSUE_UPDATED, key);
-    }
-    
-    public synchronized Issue updateIssueBuffer(WebhookEvent event, final String key) {
-        if (event == WebhookEvent.ISSUE_DELETED)
-            return issueBuffer.remove(key);
-
         List<com.atlassian.jira.rest.client.api.domain.Issue> jiraIssues = jiraIssueService.searchIssuesByKeys(asList(key));
-        if (jiraIssues.isEmpty())
+        if (jiraIssues.isEmpty()) 
             return issueBuffer.remove(key);
 
         final Issue issue = issueConverter.convertSingleIssue(jiraIssues.get(0), taskboardMetadatasByIssueKey);
@@ -127,6 +135,37 @@ public class IssueBufferService {
         return issue;
     }
     
+    public synchronized Issue updateByEvent(WebhookEvent event, final String key) {
+        if (event == WebhookEvent.ISSUE_DELETED) {
+            issuesUpdatedByEvent.add(new IssueUpdate(issueBuffer.get(key), IssueUpdateType.DELETED));
+            return issueBuffer.remove(key);
+        }
+
+        Issue updated = updateIssueBuffer(key);
+        if (issueBuffer.get(key) == null) {
+            issuesUpdatedByEvent.add(new IssueUpdate(updated, IssueUpdateType.DELETED));
+            return updated;
+        }
+
+        IssueUpdateType updateType = IssueUpdateType.UPDATED;
+        if (event == WebhookEvent.ISSUE_CREATED)
+            updateType = IssueUpdateType.CREATED;
+
+        issuesUpdatedByEvent.add(new IssueUpdate(updated, updateType));
+
+        return updated;
+    }
+
+    public synchronized void startBatchUpdate() {
+        issuesUpdatedByEvent.clear();
+    }
+
+    public synchronized void finishBatchUpdate() {
+        if (issuesUpdatedByEvent.size() > 0)
+            eventPublisher.publishEvent(new IssuesUpdateEvent(this, issuesUpdatedByEvent));
+        issuesUpdatedByEvent.clear();
+    }
+
     private void updateSubtasks(String key) {
         List<String> subtasksKeys = getSubtasksKeys(key);
         List<com.atlassian.jira.rest.client.api.domain.Issue> jiraSubtasks = jiraIssueService.searchIssuesByKeys(subtasksKeys);
@@ -184,6 +223,8 @@ public class IssueBufferService {
         for (TaskboardIssue taskboardIssue : issuesPriorities) { 
             Issue issue = issueBuffer.get(taskboardIssue.getProjectKey());
             issue.setPriorityOrder(taskboardIssue.getPriority());
+            issue.setUpdatedDate(taskboardIssue.getUpdated());
+            issueEvents.add(WebhookEvent.ISSUE_UPDATED, issue.getIssueKey());
         }
     }
     
@@ -229,5 +270,16 @@ public class IssueBufferService {
             } catch (InterruptedException e) {
                 return;
             }
+    }
+
+    public synchronized List<Issue> reorder(String[] issues) {
+        List<TaskboardIssue> updated = issuePriorityService.reorder(issues);
+        updateIssuesPriorities(updated);
+        
+        List<Issue> updatedIssues = new LinkedList<Issue>();
+        for (String issue : issues) 
+            updatedIssues.add(this.getIssueByKey(issue));
+        
+        return updatedIssues;
     }
 }

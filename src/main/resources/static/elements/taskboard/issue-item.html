@@ -214,7 +214,7 @@
         }
         
         .issue-UPDATED {
-        	border: 3px solid #d1d14a
+        	box-shadow: inset 0 0 10px #acac00
         }
         
         .issue-DELETED {
@@ -233,7 +233,9 @@
 	                   headers='{"Content-Type": "application/json"}'>
 	        </iron-ajax>
             <iron-signals on-iron-signal-hierarchical-filter-changed="forceRefreshHierarchyMatch" 
-                          on-iron-signal-issues-updated="updateIssue"></iron-signals>
+                          on-iron-signal-issues-updated="updateIssue"
+                          on-iron-signal-clear-highlight="clearHighlight"
+                          ></iron-signals>
 	        <paper-material id="issueCard" class$="issue {{getClasses(item.hierarchyMatch, item.issueKey)}} {{highlightClass}}" elevation="0" style$="{{getIssueColor(item)}}"
 	                        on-tap="opendialog" title="Issue details">
 	                        
@@ -352,6 +354,10 @@
                     }
                     
                     flash($(this.$.issueCard), "yellow");
+                },
+                
+                clearHighlight: function() {
+                    this.set("highlightClass", "")
                 },
 
                 getClasses: function(hierarchyMatch, issueKey) {

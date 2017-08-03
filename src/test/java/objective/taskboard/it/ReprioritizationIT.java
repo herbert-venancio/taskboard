@@ -44,9 +44,9 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
                 "TASKB-684",
                 "TASKB-686"
                 );
-        
+
         mainPage.issue("TASKB-643").dragOver("TASKB-627");
-        
+
         operational.boardStep("To Do").assertIssueList(
                 "TASKB-625",
                 "TASKB-643",
@@ -63,5 +63,75 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
                 "TASKB-684",
                 "TASKB-686"
                 );
+    }
+
+    @Test
+    public void whenIssueIsPriorityOrderIsChanged_ShouldShowNotificationInAnotherBrowserAndUpdateTheOrder() {
+        createAndSwitchToNewTab();
+        
+        MainPage secondTabPage = MainPage.to(webDriver);
+        secondTabPage.waitUserLabelToBe("foo");
+        
+        LaneFragment operationalInSecondTab = secondTabPage.lane("Operational");
+        secondTabPage.issue("TASKB-643").dragOver("TASKB-627");
+        operationalInSecondTab.boardStep("To Do").assertIssueList(
+                "TASKB-625",
+                "TASKB-643",
+                "TASKB-627",
+                "TASKB-644",
+                "TASKB-659",
+                "TASKB-661",
+                "TASKB-663",
+                "TASKB-664",
+                "TASKB-680",
+                "TASKB-681",
+                "TASKB-682",
+                "TASKB-683",
+                "TASKB-684",
+                "TASKB-686"
+                );
+        
+        switchToFirstTab();
+        
+        MainPage mainPage = MainPage.produce(webDriver);
+        mainPage.refreshToast().assertVisible();
+        LaneFragment operational = mainPage.lane("Operational");
+        operational.boardStep("To Do").assertIssueList(
+                "TASKB-625",
+                "TASKB-643",
+                "TASKB-627",
+                "TASKB-644",
+                "TASKB-659",
+                "TASKB-661",
+                "TASKB-663",
+                "TASKB-664",
+                "TASKB-680",
+                "TASKB-681",
+                "TASKB-682",
+                "TASKB-683",
+                "TASKB-684",
+                "TASKB-686"
+                );
+        
+        mainPage.refreshToast().dismiss();
+        // makes sure the model is correctly updated
+        mainPage.typeSearch("TASKB-625");
+        mainPage.clearSearch();
+        operational.boardStep("To Do").assertIssueList(
+                "TASKB-625",
+                "TASKB-643",
+                "TASKB-627",
+                "TASKB-644",
+                "TASKB-659",
+                "TASKB-661",
+                "TASKB-663",
+                "TASKB-664",
+                "TASKB-680",
+                "TASKB-681",
+                "TASKB-682",
+                "TASKB-683",
+                "TASKB-684",
+                "TASKB-686"
+                );        
     }
 }

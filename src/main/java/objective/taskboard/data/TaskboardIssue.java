@@ -22,30 +22,43 @@ package objective.taskboard.data;
  */
 
 import java.io.Serializable;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Id;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 @Entity
 @EntityListeners(IssuePersistenceListener.class)
 public class TaskboardIssue implements Serializable {
     private static final long serialVersionUID = -1772950366555561419L;
-
-    public TaskboardIssue(String issueKey, long priority) {
-        this.issueKey = issueKey;
-        this.priority = priority;
-    }
     
-    public TaskboardIssue(){
-    }
 
     @Id
     private String issueKey;
     
     @Column
     private long priority;
+    
+    @Column(updatable=false)
+    @CreationTimestamp
+    private Date created;
+    
+    @Column
+    @UpdateTimestamp
+    private Date updated;
+
+    public TaskboardIssue(String issueKey, long priority) {
+        this.issueKey = issueKey;
+        this.priority = priority;
+    }
+    
+    public TaskboardIssue(){ }
+
     
     public long getPriority() {
         return priority;
@@ -61,5 +74,9 @@ public class TaskboardIssue implements Serializable {
     
     public void setProjectKey(String projectKey) {
         this.issueKey = projectKey;
+    }
+    
+    public Date getUpdated() {
+        return updated;
     }
 }

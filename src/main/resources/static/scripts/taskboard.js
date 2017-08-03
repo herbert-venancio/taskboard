@@ -310,6 +310,7 @@ function Taskboard() {
     function handleIssueUpdate(taskboardHome, response) {
     	var updateEvents = JSON.parse(response.body)
         var updatedIssueKeys = []
+        var updateByStep = {};
         updateEvents.forEach(function(anEvent) {
             var previousInstance = getPreviousIssueInstance(anEvent.target.issueKey);
             if (previousInstance !== null && previousInstance.issue.updatedDate === anEvent.target.updatedDate)
@@ -319,11 +320,25 @@ function Taskboard() {
                 self.issues.push(converted)
             else
                 self.issues[previousInstance.index] = converted; 
-        	updatedIssueKeys.push(anEvent.target.issueKey)
+            updatedIssueKeys.push(anEvent.target.issueKey)
+            var stepId = self.getIssueStep(converted).id;
+            if (Object.keys(updateByStep).indexOf(stepId) === -1)
+                updateByStep[stepId] = [];
+        	
+            updateByStep[stepId].push(anEvent.target);
+        	
         	self.fireIssueUpdated('server', taskboardHome, anEvent.target, anEvent.updateType);
         });
+        
     	if (updatedIssueKeys.length === 0)
     	    return;
+
+        Object.keys(updateByStep).forEach(function(step) {
+            taskboardHome.fire("iron-signal", {name:"step-update", data:{
+                issues: updateByStep[step],
+                stepId: step
+            }})
+        })
     	
         taskboardHome.fire("iron-signal", {name:"show-issue-updated-message", data:{
         	message: "Jira issues have been updated.",
