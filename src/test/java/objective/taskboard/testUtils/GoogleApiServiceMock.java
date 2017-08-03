@@ -44,7 +44,7 @@ public class GoogleApiServiceMock implements GoogleApiService {
         
         when(spreadsheetsManager.readRange(anyString(), anyString())).thenReturn(rows);
 
-        when(spreadsheetsManager.getLastColumnLetter(anyString())).thenReturn(lastColumnLetter);
+        when(spreadsheetsManager.getLastColumnLetter(anyString(), anyInt())).thenReturn(lastColumnLetter);
         
         when(spreadsheetsManager.getSheetId(anyString(), anyInt())).thenReturn(1);
         
