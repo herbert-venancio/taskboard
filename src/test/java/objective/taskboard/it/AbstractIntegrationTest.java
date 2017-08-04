@@ -39,7 +39,7 @@ import org.junit.Rule;
 public abstract class AbstractIntegrationTest {
 
     @Rule
-    public CleanupDataFolderRule clean = new CleanupDataFolderRule(Paths.get("data/followup-templates"));
+    public CleanupDataFolderRule clean = new CleanupDataFolderRule(Paths.get("rootDataTest/data/followup-templates"));
 
     private static final ExecutorService service = Executors.newSingleThreadExecutor();
     private static final long TIMEOUT_IN_SECONDS = 120;

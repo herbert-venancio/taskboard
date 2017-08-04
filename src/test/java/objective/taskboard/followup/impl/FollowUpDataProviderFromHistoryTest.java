@@ -23,16 +23,18 @@ package objective.taskboard.followup.impl;
 
 import static java.nio.file.Files.copy;
 import static java.nio.file.Files.createDirectories;
+import static java.nio.file.Files.createTempDirectory;
 import static objective.taskboard.followup.FollowUpHelper.assertFollowUpDataDefault;
 import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.EXTENSION_JSON;
 import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.EXTENSION_ZIP;
 import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.FILE_NAME_FORMAT;
-import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.PATH_FOLLOWUP_HISTORY;
 import static objective.taskboard.utils.ZipUtils.zip;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -41,11 +43,14 @@ import java.nio.file.Paths;
 import java.util.List;
 
 import org.joda.time.DateTime;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import objective.taskboard.database.directory.DataBaseDirectory;
 import objective.taskboard.followup.FollowUpData;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -53,29 +58,28 @@ public class FollowUpDataProviderFromHistoryTest {
 
     private static final String PROJECT_TEST = "PROJECT TEST";
     private static final String PROJECT_TEST_2 = "PROJECT TEST 2";
-    private static final String TODAY = DateTime.now().toString(FILE_NAME_FORMAT);
+    private static final String YESTERDAY = DateTime.now().minusDays(1).toString(FILE_NAME_FORMAT);
 
     private FollowUpDataProviderFromHistory subject;
 
+    @Mock
+    private DataBaseDirectory dataBaseDirectory;
+
     @Before
-    public void before() {
-        subject = new FollowUpDataProviderFromHistory(TODAY);
+    public void before() throws IOException {
+        Path pathHistoryTemp = createTempDirectory(getClass().getSimpleName());
+        when(dataBaseDirectory.path(anyString())).thenReturn(pathHistoryTemp);
+        subject = new FollowUpDataProviderFromHistory(YESTERDAY, dataBaseDirectory);
     }
 
     @Test
-    public void whenHasDataHistory_ShouldReturnSomeData() throws IOException, InterruptedException, URISyntaxException {
-        Path pathProject = null;
-        try {
-            pathProject = createProjectZip(PROJECT_TEST);
+    public void whenHasDataHistory_ShouldReturnSomeData() throws IOException, URISyntaxException {
+        createProjectZip(PROJECT_TEST);
 
-            List<FollowUpData> jiraData = subject.getJiraData(PROJECT_TEST.split(","));
+        List<FollowUpData> jiraData = subject.getJiraData(PROJECT_TEST.split(","));
 
-            assertEquals("Jira data size", jiraData.size(), 1);
-            assertFollowUpDataDefault(jiraData.get(0));
-        } finally {
-            if (pathProject != null)
-                deleteQuietly(pathProject.toFile());
-        }
+        assertEquals("Jira data size", jiraData.size(), 1);
+        assertFollowUpDataDefault(jiraData.get(0));
     }
 
     @Test
@@ -89,52 +93,43 @@ public class FollowUpDataProviderFromHistoryTest {
     }
 
     @Test
-    public void whenHasInvalidDataHistory_ShouldThrowAnIllegalStateException() throws IOException, URISyntaxException {
-        Path zipFile = null;
+    public void whenHasInvalidDataHistory_ShouldThrowAnIllegalStateException() throws URISyntaxException {
         try {
             Path pathJSON = Paths.get(getClass().getResource("followUpDataHistoryExpected.json").toURI());
-            zipFile = Paths.get(PATH_FOLLOWUP_HISTORY, PROJECT_TEST, TODAY + EXTENSION_JSON + EXTENSION_ZIP);
+            Path zipFile = dataBaseDirectory.path(anyString()).resolve(PROJECT_TEST).resolve(YESTERDAY + EXTENSION_JSON + EXTENSION_ZIP);
             zip(pathJSON, zipFile);
 
             subject.getJiraData(PROJECT_TEST.split(","));
             fail("Should have thrown IllegalStateException");
         } catch (IllegalStateException e) {
             assertNotNull("IllegalStateException shouldn't be null", e);
-        } finally {
-            if (zipFile != null)
-                deleteQuietly(zipFile.getParent().toFile());
         }
     }
 
     @Test
-    public void whenTwoProjectsHasDataHistory_ShouldReturnSomeData() throws IOException, InterruptedException, URISyntaxException {
-        Path pathProject = null;
-        Path pathProject2 = null;
-        try {
-            pathProject = createProjectZip(PROJECT_TEST);
-            pathProject2 = createProjectZip(PROJECT_TEST_2);
+    public void whenTwoProjectsHasDataHistory_ShouldReturnSomeData() throws IOException,  URISyntaxException {
+        createProjectZip(PROJECT_TEST);
+        createProjectZip(PROJECT_TEST_2);
 
-            String projects = PROJECT_TEST + "," + PROJECT_TEST_2;
-            List<FollowUpData> jiraData = subject.getJiraData(projects.split(","));
+        String projects = PROJECT_TEST + "," + PROJECT_TEST_2;
+        List<FollowUpData> jiraData = subject.getJiraData(projects.split(","));
 
-            assertEquals("Jira data size", jiraData.size(), 2);
-            assertFollowUpDataDefault(jiraData.get(0));
-            assertFollowUpDataDefault(jiraData.get(1));
-        } finally {
-            if (pathProject != null)
-                deleteQuietly(pathProject.toFile());
-            if (pathProject2 != null)
-                deleteQuietly(pathProject2.toFile());
-        }
+        assertEquals("Jira data size", jiraData.size(), 2);
+        assertFollowUpDataDefault(jiraData.get(0));
+        assertFollowUpDataDefault(jiraData.get(1));
+    }
+
+    @After
+    public void after() {
+        deleteQuietly(dataBaseDirectory.path(anyString()).toFile());
     }
 
     private Path createProjectZip(String project) throws IOException, URISyntaxException {
-        Path pathProject;
-        pathProject = Paths.get(PATH_FOLLOWUP_HISTORY, project);
+        Path pathProject = dataBaseDirectory.path(anyString()).resolve(project);
         createDirectories(pathProject);
 
         Path pathInputJSON = Paths.get(getClass().getResource("followUpDataHistoryExpected.json").toURI());
-        Path pathOutputJSON = pathProject.resolve(TODAY + EXTENSION_JSON);
+        Path pathOutputJSON = pathProject.resolve(YESTERDAY + EXTENSION_JSON);
         copy(pathInputJSON, pathOutputJSON);
 
         Path zipFile = Paths.get(pathOutputJSON.toString() + EXTENSION_ZIP);

@@ -25,6 +25,7 @@ import static objective.taskboard.utils.ZipUtils.unzip;
 import static objective.taskboard.utils.ZipUtils.zip;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
 
+import objective.taskboard.database.directory.DataBaseDirectory;
 import objective.taskboard.followup.FollowUpTemplate;
 import objective.taskboard.followup.FollowUpTemplateStorage;
 import objective.taskboard.followup.FollowUpTemplateValidator;
@@ -37,19 +38,19 @@ import org.springframework.stereotype.Service;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 @Service
 public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
 
-    private Path templateRoot = Paths.get("data/followup-templates");
-
     @Autowired
     private UpdateFollowUpService updateFollowUpService;
 
+    @Autowired
+    private DataBaseDirectory dataBaseDirectory;
+
     @Override
     public FollowUpTemplate getTemplate(String path) {
-        Path templatePath = templateRoot.resolve(path);
+        Path templatePath = getTemplateRoot().resolve(path);
         return new FollowUpTemplate(
                 resolve(templatePath, "sharedStrings-initial.xml")
                 , resolve("followup-template/sharedStrings-template.xml")
@@ -68,10 +69,10 @@ public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
 
     @Override
     public String storeTemplate(InputStream stream, FollowUpTemplateValidator validator) throws IOException {
-        if(!Files.exists(templateRoot))
-            Files.createDirectories(templateRoot);
+        if(!Files.exists(getTemplateRoot()))
+            Files.createDirectories(getTemplateRoot());
 
-        Path pathFollowup = Files.createTempDirectory(templateRoot, "Followup");
+        Path pathFollowup = Files.createTempDirectory(getTemplateRoot(), "Followup");
         Path tempFolder = pathFollowup.resolve("temp");
         unzip(stream, tempFolder);
         try {
@@ -85,13 +86,17 @@ public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
             deleteQuietly(pathFollowup.toFile());
             throw e;
         }
-        return templateRoot.relativize(pathFollowup).toString();
+        return getTemplateRoot().relativize(pathFollowup).toString();
     }
 
     @Override
     public void deleteFile(String templatePath) {
-        Path template = templateRoot.resolve(templatePath);
+        Path template = getTemplateRoot().resolve(templatePath);
         deleteQuietly(template.toFile());
+    }
+
+    private Path getTemplateRoot() {
+        return dataBaseDirectory.path("followup-templates");
     }
 
     private static Resource resolve(String resourceName) {
