@@ -456,8 +456,8 @@
                                                                     <input class$="tb-text--align-center sizing__mapping-column {{getCustomFieldClass(field)}}"
                                                                         value="{{field.columnLetter::input}}"
                                                                         data-index$="{{fieldIndex}}"
-                                                                        placeholder="Not used"
-                                                                        on-keypress="onInputColumnValue" type="text" />
+                                                                        placeholder="Not used" type="text"
+                                                                        on-keydown="onInputColumnValue" on-focus="onFocusColumnValue" on-click="onFocusColumnValue" />
                                                                 </td>
                                                             </tr>
                                                         </template>
@@ -994,18 +994,29 @@
                     return originalString.replace(stringToRemove, "");
                 },
 
+                onFocusColumnValue: function(e) {
+                    setTimeout(function(){ e.target.selectionStart = e.target.selectionEnd = e.target.value.length; }, 0);
+                },
+
                 onInputColumnValue: function(e) {
-                    console.log(e);
-                    if (e.key == "Backspace" || e.key == "Delete")
-                        return;
-                    var newValue = e.target.value + e.key.toUpperCase();
                     var index = e.target.dataset.index;
-                    if (this.letterToColumn(newValue) <= this.letterToColumn(this.lastColumn)) {
+                    var newValue = e.target.value + e.key.toUpperCase();
+                    if (e.key == "Tab") {
+                        return
+                    } else if (e.key == "Backspace") {
+                        newValue = this.customFields[index].columnLetter.slice(0, -1);
+                        this.customFields[index].columnLetter = newValue;
+                        e.target.value = newValue;
+                    } else if ( this.isLetter(e.key) && this.letterToColumn(newValue) <= this.letterToColumn(this.lastColumn)) {
                         e.target.value = newValue;
                         this.customFields[index].columnLetter = newValue;
                     }
                     e.preventDefault();
                     e.stopPropagation();
+                },
+
+                isLetter: function(value) {
+                    return /^[a-zA-Z]*$/g.test(value);
                 },
 
                 hasRequiredCustomFieldsWithoutColumn: function() {
