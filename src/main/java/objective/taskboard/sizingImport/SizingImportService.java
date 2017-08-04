@@ -66,7 +66,7 @@ public class SizingImportService {
     
     public SheetDefinition getSheetDefinition(String projectKey, String spreadsheetId) {
         SpreadsheetsManager spreadsheetsManager = googleApiService.buildSpreadsheetsManager();
-        String lastColumn = spreadsheetsManager.getLastColumnLetter(spreadsheetId);
+        String lastColumn = spreadsheetsManager.getLastColumnLetter(spreadsheetId, SizingImportConfig.SHEET_INDEX);
         
         List<SheetStaticColumn> staticColumns = sheetStaticColumns.get();
         List<SheetColumnDefinition> dynamicColumns = buildDynamicColumnsDefinition(projectKey);

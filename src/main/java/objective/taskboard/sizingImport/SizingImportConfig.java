@@ -14,6 +14,8 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties("sizing-import")
 @Validated
 public class SizingImportConfig {
+    
+    public static final int SHEET_INDEX = 0;
 
     @NotNull
     private Integer dataStartingRowNumber;

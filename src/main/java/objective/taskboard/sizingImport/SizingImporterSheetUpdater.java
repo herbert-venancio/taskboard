@@ -42,7 +42,7 @@ class SizingImporterSheetUpdater implements SizingImporterListener {
         
         this.issueKeyIndex = columnLetterToIndex(importConfig.getSheetMap().getIssueKey());
         this.dataStartRowIndex = importConfig.getDataStartingRowIndex();
-        this.sheetId = spreadsheetsManager.getSheetId(spreadsheetId, 0);
+        this.sheetId = spreadsheetsManager.getSheetId(spreadsheetId, SizingImportConfig.SHEET_INDEX);
     }
 
     @Override
