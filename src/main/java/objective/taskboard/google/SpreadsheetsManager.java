@@ -1,7 +1,5 @@
 package objective.taskboard.google;
 
-import static java.util.stream.Collectors.toList;
-
 import java.io.IOException;
 import java.util.List;
 
@@ -10,6 +8,8 @@ import com.google.api.services.sheets.v4.Sheets.Spreadsheets;
 import com.google.api.services.sheets.v4.model.BatchUpdateSpreadsheetRequest;
 import com.google.api.services.sheets.v4.model.GridProperties;
 import com.google.api.services.sheets.v4.model.Sheet;
+import com.google.api.services.sheets.v4.model.SheetProperties;
+import com.google.api.services.sheets.v4.model.Spreadsheet;
 import com.google.api.services.sheets.v4.model.ValueRange;
 
 public class SpreadsheetsManager {
@@ -36,10 +36,12 @@ public class SpreadsheetsManager {
         }
     }
 
-    private int getColumnCount(String spreadsheetId, int sheetIndex) {
+    private int getColumnCount(String spreadsheetId) {
         try {
-            Sheet sheet = getSheet(spreadsheetId, sheetIndex);
-            GridProperties gridProperties = sheet.getProperties().getGridProperties();
+            Spreadsheet execute = spreadsheets.get(spreadsheetId).execute();
+            Sheet sheet = execute.getSheets().get(0);
+            SheetProperties properties = sheet.getProperties();
+            GridProperties gridProperties = properties.getGridProperties();
             return gridProperties.getColumnCount();
         } catch (IOException ex) {
             throw new RuntimeException(ex);
@@ -48,25 +50,17 @@ public class SpreadsheetsManager {
     
     public int getSheetId(String spreadsheetId, int sheetIndex) {
         try {
-            Sheet sheet = getSheet(spreadsheetId, sheetIndex);
+            List<Sheet> sheets = spreadsheets.get(spreadsheetId).execute().getSheets();
+            Sheet sheet = sheets.get(sheetIndex);
             return sheet.getProperties().getSheetId();
             
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
     }
-
-    private Sheet getSheet(String spreadsheetId, int sheetIndex) throws IOException {
-        List<Sheet> sheets = spreadsheets.get(spreadsheetId).execute().getSheets();
-        List<Sheet> visibleSheets = sheets.stream()
-                .filter(s -> s.getProperties().getHidden() == null || !s.getProperties().getHidden())
-                .collect(toList());
-
-        return visibleSheets.get(sheetIndex);
-    }
     
-    public String getLastColumnLetter(String spreadsheetId, int sheetIndex) {
-        Integer lastColumn = getColumnCount(spreadsheetId, sheetIndex);
+    public String getLastColumnLetter(String spreadsheetId) {
+        Integer lastColumn = getColumnCount(spreadsheetId);
         return SpreadsheetUtils.columnIndexToLetter(lastColumn - 1);
     }
     

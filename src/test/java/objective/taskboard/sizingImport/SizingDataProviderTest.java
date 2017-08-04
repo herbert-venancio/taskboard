@@ -13,7 +13,7 @@ import org.junit.Test;
 
 import objective.taskboard.sizingImport.SizingSheetParser.SheetColumnMapping;
 
-public class SizingSheetParserTest {
+public class SizingDataProviderTest {
 
     private SizingImportConfig importConfig = new SizingImportConfig();
     private SizingSheetParser subject = new SizingSheetParser(importConfig);
@@ -83,22 +83,8 @@ public class SizingSheetParserTest {
     }
 
     @Test
-    public void getSpreedsheetData_empty() throws IOException {
+    public void getSpreedsheetData_Empty() throws IOException {
         List<List<Object>> rows = emptyList();
-        List<SheetColumnMapping> dynamicColumnsMapping = emptyList();
-
-        List<SizingImportLine> result = subject.getSpreedsheetData(rows, dynamicColumnsMapping);
-        assertEquals(0, result.size());
-    }
-    
-    @Test
-    public void getSpreedsheetData_onlyHeaders() throws IOException {
-        importConfig.setDataStartingRowNumber(3);
-
-        List<List<Object>> rows = asList(
-                asList("Sizing Import"),
-                asList("Phase",  "Demand", "Feature", "Key", "Include", "V1", "V2"));
-        
         List<SheetColumnMapping> dynamicColumnsMapping = emptyList();
 
         List<SizingImportLine> result = subject.getSpreedsheetData(rows, dynamicColumnsMapping);
