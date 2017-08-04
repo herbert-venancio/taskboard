@@ -13,7 +13,7 @@ import org.junit.Test;
 
 import objective.taskboard.sizingImport.SizingSheetParser.SheetColumnMapping;
 
-public class SizingDataProviderTest {
+public class SizingSheetParserTest {
 
     private SizingImportConfig importConfig = new SizingImportConfig();
     private SizingSheetParser subject = new SizingSheetParser(importConfig);
