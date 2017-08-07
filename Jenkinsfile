@@ -140,8 +140,7 @@ def createPostBuildBranch(project) {
         git checkout -b $pbBranch $tagName
         mvn release:update-versions -DdevelopmentVersion=$pbVersion
         git add pom.xml
-        git commit -m "[jenkins-pipeline] prepare post-build branch $pbBranch"
-        git push origin $pbBranch
+        mvn scm:checkin -Dmessage="[jenkins-pipeline] prepare post-build branch $pbBranch"
     """
 }
 
