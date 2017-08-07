@@ -89,10 +89,12 @@ node("single-executor") {
                 stage('Release') {
                     echo 'Releasing...'
                     sh 'git checkout master'
+                    def project = readMavenPom file: ''
                     sh "${mvnHome}/bin/mvn --batch-mode -Dresume=false release:prepare release:perform -DaltReleaseDeploymentRepository=repo::default::http://repo:8080/archiva/repository/internal -Darguments=\"-DaltDeploymentRepository=internal::default::http://repo:8080/archiva/repository/internal -P packaging-war,dev -DskipTests=true -Dmaven.test.skip=true -Dmaven.javadoc.skip=true\""
                     def downloadUrl = extractDownloadUrlFromLogs()
                     addDownloadBadge(downloadUrl)
-                    updateReleaseLinkInDescription(downloadUrl)
+                    updateJobDescription(downloadUrl)
+                    createPostBuildBranch(project)
                 }
             }
         }
@@ -118,8 +120,29 @@ def addDownloadBadge(downloadUrl) {
     manager.addBadge("save.gif", "Click here to download ${artifactName}", downloadUrl)
 }
 
-def updateReleaseLinkInDescription(downloadUrl) {
-    manager.build.project.description = "<a href='${downloadUrl}'>Latest released artifact</a>"
+def updateJobDescription(downloadUrl) {
+    def latestReleaseLink = "<a href='${downloadUrl}'>Latest released artifact</a>"
+    def makePostReleaseBranch = """
+        <form action="/job/taskboard_sdlc/job/master/buildWithParameters" method="POST">
+          <input type="hidden" name="RELEASE" value="true">
+          <input type="submit" value="New Release">
+        </form>
+    """
+    manager.build.project.description = latestReleaseLink + "<br/>" + makePostReleaseBranch
+}
+
+def createPostBuildBranch(project) {
+    def tagVersion = project.version.replace('-SNAPSHOT', '')
+    def tagName = "${project.artifactId}-${tagVersion}"
+    def pbVersion = project.version.replace('-SNAPSHOT', '.1-SNAPSHOT')
+    def pbBranch = tagVersion + ".X"
+    sh """
+        git checkout -b $pbBranch $tagName
+        mvn release:update-versions -DdevelopmentVersion=$pbVersion
+        git add pom.xml
+        git commit -m "[jenkins-pipeline] prepare post-build branch $pbBranch"
+        git push origin $pbBranch
+    """
 }
 
 def killLeakedProcesses() {
