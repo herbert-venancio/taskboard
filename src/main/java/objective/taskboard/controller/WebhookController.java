@@ -41,7 +41,7 @@ import objective.taskboard.issueBuffer.WebhookEvent;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.repository.FilterCachedRepository;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
-import objective.taskboard.task.WebhookSchedule;
+import objective.taskboard.task.IssueEventProcessScheduler;
 
 @Slf4j
 @RestController
@@ -49,7 +49,7 @@ import objective.taskboard.task.WebhookSchedule;
 public class WebhookController {
 
     @Autowired
-    private WebhookSchedule webhookSchedule;
+    private IssueEventProcessScheduler webhookSchedule;
 
     @Autowired
     private FilterCachedRepository filterCachedRepository;

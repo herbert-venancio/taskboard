@@ -1,7 +1,12 @@
 package objective.taskboard.google;
 
+import java.util.Comparator;
+
 public class SpreadsheetUtils {
 	private static String COLUMN_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+	public static final Comparator<String> COLUMN_LETTER_COMPARATOR = 
+	        (l1, l2) -> Integer.compare(columnLetterToIndex(l1), columnLetterToIndex(l2));
 
     public static int columnLetterToIndex(String column) {
         int columnNumber = 0;

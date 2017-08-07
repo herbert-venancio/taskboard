@@ -390,6 +390,7 @@
                     analytics.trackView();
                     taskboard.connectToWebsocket(this)
                     this.retrieveBoardFeatures();
+                    this.updatedIssueKeys = [];
                 },
 
                 retrieveFilters: function () {
@@ -508,7 +509,7 @@
                 showIssueUpdatedMessage : function(event) {
                     this.refreshText="SHOW ONLY UPDATED"
                     this.infoMessage = event.detail.message;
-                    this.updatedIssueKeys = event.detail.updatedIssueKeys;
+                    this.updatedIssueKeys = this.updatedIssueKeys.concat(event.detail.updatedIssueKeys);
                     if (this.infoMessage.length > 0) 
                         toastIssueUpdated.open();
                     else
@@ -538,24 +539,25 @@
                 },
                 
                 dismiss: function() {
-                    toastIssueUpdated.close();
-                    if (this.filterByUpdate)
-                        this.fire('iron-signal', {name: 'search-filter-changed', data: this.currentQueryData});
+                    this.updatedIssueKeys = [];
+                	toastIssueUpdated.close();
+                	if (this.filterByUpdate)
+                		this.fire('iron-signal', {name: 'search-filter-changed', data: this.currentQueryData});
+                	this.fire('iron-signal', {name: 'clear-highlight'});
                 },
 
                 toggleFilterChangedIssues: function(args) {
                     if (!this.filterByUpdate) {
                         this.refreshText = 'SHOW ALL'
                         this.fire('iron-signal', {name: 'search-filter-changed',
-                            data: { query: this.updatedIssueKeys[0] , release: false, dontSaveQuery: true}});
-                    }
+	                        data: { query: this.updatedIssueKeys , release: false, dontSaveQuery: true}});
+                	}
                     else {
-                        this.refreshText="SHOW ONLY UPDATED"
-                        this.fire('iron-signal', {name: 'search-filter-changed', data: this.currentQueryData, dontSaveQuery: true});//{query: ''}
+                        this.refreshText="SHOW ONLY UPDATED";
+                        this.fire('iron-signal', {name: 'search-filter-changed', data: this.currentQueryData, dontSaveQuery: true});
                     }
-
+                	
                     this.filterByUpdate = !this.filterByUpdate;
-
                 },
 
                 cacheStateUpdated: function(data) {

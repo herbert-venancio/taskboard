@@ -1,4 +1,4 @@
-package objective.taskboard.controller;
+package objective.taskboard.database;
 
 
 /*-
@@ -25,10 +25,12 @@ package objective.taskboard.controller;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -74,18 +76,26 @@ public class IssuePriorityService  {
         return priorityOrder.getPriority();
     }
 
-    public synchronized void reorder(String[] issueKeys) {
+    public Optional<Date> priorityUpdateDate(Issue e) {
+        TaskboardIssue priorityOrder = cache.get(e.getKey());
+        if (priorityOrder == null)
+            return Optional.empty();
+        return Optional.of(priorityOrder.getUpdated());
+    }
+
+    public synchronized List<TaskboardIssue> reorder(String[] issueKeys) {
         List<TaskboardIssue> issues = reorderAndSave(issueKeys);
         
         for (TaskboardIssue taskboardIssue : issues) 
             cache.put(taskboardIssue.getProjectKey(), taskboardIssue);
         
-        issueBufferService.updateIssuesPriorities(issues);
+        return issues;
     }
     
     @Transactional
     private List<TaskboardIssue> reorderAndSave(String[] issueKeys) {
         List<TaskboardIssue> issues =new ArrayList<>(repo.findByIssueKeyIn(Arrays.asList(issueKeys)));
+        List<TaskboardIssue> updatedIssues = new ArrayList<>(); 
         Map<String, TaskboardIssue> issueByKey = issues.stream().collect(Collectors.toMap(TaskboardIssue::getProjectKey, Function.identity()));
         
         for (String ti : issueKeys) {
@@ -101,10 +111,14 @@ public class IssuePriorityService  {
         
         for (String pkey : issueKeys) {
             TaskboardIssue taskboardIssue = issueByKey.get(pkey);
-            taskboardIssue.setPriority(priorities.poll());
-            repo.save(taskboardIssue);
+            Long previousPriority = taskboardIssue.getPriority(); 
+            Long newPriority = priorities.poll();
+            if (previousPriority.equals(newPriority))
+                continue;
+            taskboardIssue.setPriority(newPriority);
+            updatedIssues.add(repo.save(taskboardIssue));
         }
-        return issues;
+        return updatedIssues;
     }
     
     public synchronized void reset() {

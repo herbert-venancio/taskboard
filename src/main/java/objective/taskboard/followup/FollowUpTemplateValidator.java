@@ -20,14 +20,17 @@
  */
 package objective.taskboard.followup;
 
-import objective.taskboard.utils.XmlUtils;
+import java.nio.file.Path;
+import java.util.Locale;
+
+import javax.xml.transform.TransformerException;
+
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.StaticMessageSource;
 import org.w3c.dom.NodeList;
 
-import javax.xml.transform.TransformerException;
-import java.nio.file.Path;
-import java.util.Locale;
+import objective.taskboard.utils.XmlUtils;
+
 
 public class FollowUpTemplateValidator {
 

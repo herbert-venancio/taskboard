@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import objective.taskboard.controller.CacheRefreshController;
-import objective.taskboard.controller.IssuePriorityService;
+import objective.taskboard.database.IssuePriorityService;
 import objective.taskboard.issueBuffer.IssueBufferService;
 
 @RestController

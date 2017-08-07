@@ -91,7 +91,7 @@ class SizingSheetParser {
         
         public SheetColumnMapping(String fieldId, String columnLetter) {
             this.fieldId = fieldId;
-            this.columnLetter = columnLetter;
+            this.columnLetter = columnLetter.toUpperCase();
         }
         
         public String getFieldId() {
