@@ -1,5 +1,8 @@
 package objective.taskboard.controller;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 /*-
  * [LICENSE]
  * Taskboard
@@ -35,6 +38,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
+import objective.taskboard.controller.WebhookController.WebhookBody.Changelog;
 import objective.taskboard.domain.Filter;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.issueBuffer.WebhookEvent;
@@ -64,27 +68,17 @@ public class WebhookController {
     private JiraProperties jiraProperties;
 
     @RequestMapping(value = "{projectKey}", method = RequestMethod.POST)
-    public void webhook(@RequestBody Map<String, Object> body, @PathVariable("projectKey") String projectKey) throws JsonProcessingException {
+    public void webhook(@RequestBody WebhookBody body, @PathVariable("projectKey") String projectKey) throws JsonProcessingException {
         log.debug("WEBHOOK REQUEST BODY: " + mapper.writeValueAsString(body));
 
-        String webhookEvent = body.get("webhookEvent").toString().replace("jira:", "");
+        String webhookEvent = body.webhookEvent.replace("jira:", "");
         String issueKey = getIssueKeyOrNull(body);
         Long issueTypeId = getIssueTypeIdOrNull(body);
 
-        addItemInTheQueue(webhookEvent, projectKey, issueTypeId, issueKey);
+        addItemInTheQueue(webhookEvent, projectKey, issueTypeId, issueKey, body.changelog);
     }
 
-    @RequestMapping(path = "webhook/{webhookEvent}/{projectKey}/{issueTypeId}/{issueKey}", method = RequestMethod.POST)
-    public void webhook(@PathVariable("webhookEvent") String webhookEvent,
-            @PathVariable("projectKey") String projectKey, @PathVariable("issueTypeId") String issueTypeId,
-            @PathVariable("issueKey") String issueKey) throws JsonProcessingException {
-        log.debug("WEBHOOK PATH: (" + webhookEvent + ") project=" + projectKey + " issueTypeId=" + issueTypeId + " issue=" + issueKey);
-
-        Long issueTypeIdLong = Long.parseLong(issueTypeId);
-        addItemInTheQueue(webhookEvent, projectKey, issueTypeIdLong, issueKey);
-    }
-
-    private void addItemInTheQueue(String webhookEvent, String projectKey, Long issueTypeId, String issueKey) {
+    private void addItemInTheQueue(String webhookEvent, String projectKey, Long issueTypeId, String issueKey, Changelog changelog) {
         if (!belongsToAnyProjectFilter(projectKey)) {
             log.debug("WEBHOOK PATH: project=" + projectKey + " issueTypeId=" + issueTypeId + " issue=" + issueKey + " doesn't belog to our projects.");
             return;
@@ -100,7 +94,7 @@ public class WebhookController {
         if (event.isTypeVersion() && !isReleaseConfigured())
             return;
 
-        webhookSchedule.add(event, issueKey);
+        webhookSchedule.add(event, issueKey, changelog);
         log.info("WEBHOOK PUT IN QUEUE: (" + webhookEvent +  ") project=" + projectKey + " issue=" + issueKey);
     }
 
@@ -118,28 +112,37 @@ public class WebhookController {
         return !jiraProperties.getCustomfield().getRelease().getId().isEmpty();
     }
 
-    private String getIssueKeyOrNull(Map<String, Object> body) {
-        Map<String, Object> issue = toMap(body.get("issue"));
-        return issue == null ? null : issue.get("key").toString();
+    private String getIssueKeyOrNull(WebhookBody body) {
+        return (String) body.issue.get("key");
     }
 
-    private Long getIssueTypeIdOrNull(Map<String, Object> body) {
+    private Long getIssueTypeIdOrNull(WebhookBody body) {
         Map<String, Object> issueType = toMap(getIssueFieldOrNull(body, "issuetype"));
         return issueType == null ? null : Long.parseLong(issueType.get("id").toString());
     }
 
-    private Object getIssueFieldOrNull(Map<String, Object> requestBody, String field) {
-        Map<String, Object> issue = toMap(requestBody.get("issue"));
-        if (issue == null)
+    private Object getIssueFieldOrNull(WebhookBody body, String field) {
+        if (body.issue.get("fields") == null)
             return null;
 
-        Map<String, Object> fields = toMap(issue.get("fields"));
+        Map<String, Object> fields = toMap(body.issue.get("fields"));
         return fields.get(field);
     }
 
     @SuppressWarnings("unchecked")
     private Map<String, Object> toMap(Object obj) {
         return (Map<String, Object>) obj;
+    }
+    
+    public static class WebhookBody {
+        public Long timestamp;
+        public String webhookEvent;
+        public Map<String, Object> user = new HashMap<>();
+        public Map<String, Object> issue = new HashMap<>();
+        public Changelog changelog = new Changelog();
+        public static class Changelog {
+            public List<Map<String, Object>> items = new ArrayList<>();
+        }
     }
 
 }

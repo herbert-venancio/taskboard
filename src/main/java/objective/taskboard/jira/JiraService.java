@@ -153,6 +153,12 @@ public class JiraService {
         }
         jiraEndpointAsUser.executeRequest(client -> client.getIssueClient().transition(issueByJira, transitionInput));
     }
+    
+    public void doTransitionAsMaster(Issue issue, int transitionId) {
+        log.debug("⬣⬣⬣⬣⬣  doTransition (master)");
+        TransitionInput transitionInput = new TransitionInput(transitionId);
+        jiraEndpointAsMaster.executeRequest(client -> client.getIssueClient().transition(issue, transitionInput));
+    }
 
     public String getResolutions(String transitionName) {
         log.debug("⬣⬣⬣⬣⬣  getResolutions");
@@ -189,6 +195,12 @@ public class JiraService {
     public String createIssue(IssueInput issueInput) {
         log.debug("⬣⬣⬣⬣⬣  createIssue");
         BasicIssue issue = jiraEndpointAsUser.executeRequest(client -> client.getIssueClient().createIssue(issueInput));
+        return issue.getKey();
+    }
+    
+    public String createIssueAsMaster(IssueInput issueInput) {
+        log.debug("⬣⬣⬣⬣⬣  createIssue (master)");
+        BasicIssue issue = jiraEndpointAsMaster.executeRequest(client -> client.getIssueClient().createIssue(issueInput));
         return issue.getKey();
     }
 

@@ -23,7 +23,6 @@ package objective.taskboard.issueBuffer;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
-import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
@@ -123,11 +122,14 @@ public class IssueBufferService {
     }
 
     public Issue updateIssueBuffer(final String key) {
-        List<com.atlassian.jira.rest.client.api.domain.Issue> jiraIssues = jiraIssueService.searchIssuesByKeys(asList(key));
-        if (jiraIssues.isEmpty()) 
+        com.atlassian.jira.rest.client.api.domain.Issue jiraIssue = jiraIssueService.searchIssueByKey(key);
+        if (jiraIssue == null) 
             return issueBuffer.remove(key);
+       return updateIssueBuffer(jiraIssue);
+    }
 
-        final Issue issue = issueConverter.convertSingleIssue(jiraIssues.get(0), taskboardMetadatasByIssueKey);
+    public synchronized Issue updateIssueBuffer(final com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
+        final Issue issue = issueConverter.convertSingleIssue(jiraIssue, taskboardMetadatasByIssueKey);
         putIssue(issue);
 
         updateSubtasks(issue.getIssueKey());
@@ -135,17 +137,13 @@ public class IssueBufferService {
         return issue;
     }
     
-    public synchronized Issue updateByEvent(WebhookEvent event, final String key) {
-        if (event == WebhookEvent.ISSUE_DELETED) {
+    public synchronized Issue updateByEvent(WebhookEvent event, final String key, com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
+        if (event == WebhookEvent.ISSUE_DELETED || jiraIssue == null) {
             issuesUpdatedByEvent.add(new IssueUpdate(issueBuffer.get(key), IssueUpdateType.DELETED));
             return issueBuffer.remove(key);
         }
 
-        Issue updated = updateIssueBuffer(key);
-        if (issueBuffer.get(key) == null) {
-            issuesUpdatedByEvent.add(new IssueUpdate(updated, IssueUpdateType.DELETED));
-            return updated;
-        }
+        Issue updated = updateIssueBuffer(jiraIssue);
 
         IssueUpdateType updateType = IssueUpdateType.UPDATED;
         if (event == WebhookEvent.ISSUE_CREATED)
@@ -224,7 +222,7 @@ public class IssueBufferService {
             Issue issue = issueBuffer.get(taskboardIssue.getProjectKey());
             issue.setPriorityOrder(taskboardIssue.getPriority());
             issue.setUpdatedDate(taskboardIssue.getUpdated());
-            issueEvents.add(WebhookEvent.ISSUE_UPDATED, issue.getIssueKey());
+            issueEvents.add(WebhookEvent.ISSUE_UPDATED, issue.getIssueKey(), null);
         }
     }
     
