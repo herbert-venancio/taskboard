@@ -28,8 +28,10 @@ import javax.persistence.EntityManager;
 import org.hibernate.internal.SessionImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import objective.taskboard.TaskboardProperties;
 import objective.taskboard.controller.CacheRefreshController;
 import objective.taskboard.database.IssuePriorityService;
 import objective.taskboard.issueBuffer.IssueBufferService;
@@ -49,6 +51,9 @@ public class TestExtraControllers {
     
     @Autowired
     private IssuePriorityService prioService;
+
+    @Autowired
+    private TaskboardProperties taskboardProperties;
 
     private Savepoint _savepoint;
     
@@ -80,5 +85,10 @@ public class TestExtraControllers {
         } catch (SQLException e) {
             throw new IllegalStateException(e);
         }
+    }
+    
+    @RequestMapping("set-root-data-directory")
+    public void setRootDataDirectory(@RequestParam("root") String root) {
+        taskboardProperties.setRootDataDirectory(root);
     }
 }

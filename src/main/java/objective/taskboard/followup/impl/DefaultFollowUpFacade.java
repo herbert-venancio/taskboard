@@ -21,6 +21,7 @@
 package objective.taskboard.followup.impl;
 
 import objective.taskboard.controller.TemplateData;
+import objective.taskboard.database.directory.DataBaseDirectory;
 import objective.taskboard.domain.Project;
 import objective.taskboard.followup.*;
 import objective.taskboard.followup.data.Template;
@@ -57,6 +58,9 @@ public class DefaultFollowUpFacade implements FollowUpFacade {
     @Autowired
     private Converter<Template, TemplateData> templateConverter;
 
+    @Autowired
+    private DataBaseDirectory dataBaseDirectory;
+
     @Override
     public FollowUpGenerator getGenerator(String templateName, Optional<String> date) {
         Template template = templateService.getTemplate(templateName);
@@ -68,7 +72,7 @@ public class DefaultFollowUpFacade implements FollowUpFacade {
     public FollowupDataProvider getProvider(Optional<String> date) {
         if (!date.isPresent() || date.get().isEmpty())
             return providerFromCurrentState;
-        return new FollowUpDataProviderFromHistory(date.get());
+        return new FollowUpDataProviderFromHistory(date.get(), dataBaseDirectory);
     }
 
     @Override

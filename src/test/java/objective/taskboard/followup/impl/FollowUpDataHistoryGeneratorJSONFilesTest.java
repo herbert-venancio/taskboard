@@ -31,7 +31,7 @@ import static objective.taskboard.followup.FollowUpHelper.getFollowUpDataDefault
 import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.EXTENSION_JSON;
 import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.EXTENSION_ZIP;
 import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.FILE_NAME_FORMAT;
-import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.PATH_FOLLOWUP_HISTORY;
+import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.TODAY;
 import static objective.taskboard.issueBuffer.IssueBufferState.ready;
 import static objective.taskboard.utils.IOUtilities.ENCODE_UTF_8;
 import static objective.taskboard.utils.IOUtilities.asResource;
@@ -43,11 +43,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -61,6 +61,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import objective.taskboard.database.directory.DataBaseDirectory;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 
@@ -69,7 +70,6 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
 
     private static final String PROJECT_TEST = "PROJECT TEST";
     private static final String PROJECT_TEST_2 = "PROJECT TEST 2";
-    private static final String TODAY = DateTime.now().toString(FILE_NAME_FORMAT);
     private static final String YESTERDAY = DateTime.now().minusDays(1).toString(FILE_NAME_FORMAT);
 
     @InjectMocks
@@ -87,11 +87,16 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
     @Mock
     private ProjectFilterConfiguration projectFilter2;
 
+    @Mock
+    private DataBaseDirectory dataBaseDirectory;
+
     @Before
-    public void before() {
+    public void before() throws IOException {
         when(providerFromCurrentState.getFollowupState()).thenReturn(ready);
         when(projectFilter.getProjectKey()).thenReturn(PROJECT_TEST);
         when(projectFilter2.getProjectKey()).thenReturn(PROJECT_TEST_2);
+        Path pathHistoryTemp = createTempDirectory(getClass().getSimpleName());
+        when(dataBaseDirectory.path(anyString())).thenReturn(pathHistoryTemp);
     }
 
     @Test
@@ -135,7 +140,7 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
 
     @Test
     public void givenProjectWithTodaysHistory_whenGetHistoryByProject_thenReturnNoData() throws IOException {
-        Path pathProject = Paths.get(PATH_FOLLOWUP_HISTORY, PROJECT_TEST);
+        Path pathProject = dataBaseDirectory.path(anyString()).resolve(PROJECT_TEST);
         createDirectories(pathProject);
         Path pathZip = pathProject.resolve(TODAY + EXTENSION_JSON + EXTENSION_ZIP);
         createFile(pathZip);
@@ -147,7 +152,7 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
 
     @Test
     public void givenProjectWithYesterdaysHistory_whenGetHistoryByProject_thenReturnData() throws IOException {
-        Path pathProject = Paths.get(PATH_FOLLOWUP_HISTORY, PROJECT_TEST);
+        Path pathProject = dataBaseDirectory.path(anyString()).resolve(PROJECT_TEST);
         createDirectories(pathProject);
         Path pathZip = pathProject.resolve(YESTERDAY + EXTENSION_JSON + EXTENSION_ZIP);
         createFile(pathZip);
@@ -160,17 +165,16 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
 
     @After
     public void after() {
-        deleteQuietly(Paths.get(PATH_FOLLOWUP_HISTORY, PROJECT_TEST).toFile());
-        deleteQuietly(Paths.get(PATH_FOLLOWUP_HISTORY, PROJECT_TEST_2).toFile());
+        deleteQuietly(dataBaseDirectory.path(anyString()).toFile());
     }
 
     private void assertGeneratedFile(String project, String dataHistoryExpected) throws IOException {
-        Path source = Paths.get(PATH_FOLLOWUP_HISTORY, project, TODAY + EXTENSION_JSON + EXTENSION_ZIP);
+        Path source = dataBaseDirectory.path(anyString()).resolve(project).resolve(TODAY + EXTENSION_JSON + EXTENSION_ZIP);
 
         assertTrue("File should be exist", exists(source));
         assertThat(size(source), greaterThan(0L));
 
-        Path destiny = createTempDirectory("FollowUpDataHistory");
+        Path destiny = createTempDirectory("FollowUpDataHistoryAssertTest");
         try {
             unzip(source.toFile(), destiny);
             Path pathJSON = destiny.resolve(TODAY + EXTENSION_JSON);
@@ -178,7 +182,6 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
 
             assertEquals("Follow Up data history", dataHistoryExpected, actual);
         } finally {
-            deleteQuietly(source.toFile());
             deleteQuietly(destiny.toFile());
         }
     }
