@@ -1,5 +1,6 @@
 package objective.taskboard.jira;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 
@@ -39,7 +40,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import objective.taskboard.data.Issue;
 
 @Data
 @ConfigurationProperties(prefix = "jira")
@@ -79,10 +79,57 @@ public class JiraProperties {
     @NotNull
     @Valid
     private Resolutions resolutions;
-    
     @NotNull
     @Valid
     private Followup followup;
+    @NotNull
+    @Valid
+    private StatusPriorityOrder statusPriorityOrder;
+
+    public static class StatusPriorityOrder {
+        private String[] demands;
+        private String[] tasks;
+        private String[] subtasks;
+        private Map<String, Integer> demandPriorityByStatus;
+        private Map<String, Integer> taskPriorityByStatus;
+        private Map<String, Integer> subtaskPriorityByStatus;
+
+        private Map<String, Integer> initMap(String[] statusInOrder) {
+            Map<String, Integer> map = new HashMap<>();
+            for(int i = 0; i < statusInOrder.length; i++) {
+                map.put(statusInOrder[i], i);
+            }
+            return map;
+        }
+
+        public Integer getDemandPriorityByStatus(String status) {
+            if (demandPriorityByStatus == null)
+                demandPriorityByStatus = initMap(demands);
+
+            return demandPriorityByStatus.get(status);
+        }
+        public Integer getTaskPriorityByStatus(String status) {
+            if (taskPriorityByStatus == null)
+                taskPriorityByStatus = initMap(tasks);
+
+            return taskPriorityByStatus.get(status);
+        }
+        public Integer getSubtaskPriorityByStatus(String status) {
+            if (subtaskPriorityByStatus == null)
+                subtaskPriorityByStatus = initMap(subtasks);
+
+            return subtaskPriorityByStatus.get(status);
+        }
+        public void setDemands(String[] demands) {
+            this.demands = demands;
+        }
+        public void setTasks(String[] tasks) {
+            this.tasks = tasks;
+        }
+        public void setSubtasks(String[] subtasks) {
+            this.subtasks = subtasks;
+        }
+    }
     
     @Data 
     public static class Lousa {
@@ -273,12 +320,8 @@ public class JiraProperties {
             return statusExcludedFromFollowup;
         }
     }
-    
-    public boolean isDemand(Issue i) {
-        return getIssuetype().getDemand().id == i.getType();
-    }
-    
-    public boolean isFeature(Issue i) {
-        return getIssuetype().getFeatures().stream().anyMatch(ft -> ft.id == i.getType());
+
+    public StatusPriorityOrder getStatusPriorityOrder() {
+        return statusPriorityOrder;
     }
 }

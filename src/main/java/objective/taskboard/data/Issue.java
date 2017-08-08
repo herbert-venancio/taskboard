@@ -300,12 +300,27 @@ public class Issue implements Serializable {
         this.jiraProperties = properties;
         this.metaDataService = metaDataService;
     }
-    
+
+    @JsonIgnore
+    public boolean isDemand() {
+        return jiraProperties.getIssuetype().getDemand().getId() == this.getType();
+    }
+
+    @JsonIgnore
+    public boolean isFeature() {
+        return jiraProperties.getIssuetype().getFeatures().stream().anyMatch(ft -> ft.getId() == this.getType());
+    }
+
+    @JsonIgnore
+    public boolean isSubTask() {
+        return !isDemand() && !isFeature();
+    }
+
     @JsonIgnore
     public Integer getIssueKeyNum() {
         return Integer.parseInt(issueKey.replace(projectKey+"-", ""));
     }
-    
+
     @JsonIgnore
     public String getTShirtSize() {
         String mainTShirtSizeFieldId = jiraProperties.getCustomfield().getTShirtSize().getMainTShirtSizeFieldId();
@@ -317,7 +332,7 @@ public class Issue implements Serializable {
             return null;
         return customField.getValue().toString();
     }
-    
+
     @JsonIgnore
     public void setTShirtSize(String value) {
         String mainTShirtSizeFieldId = jiraProperties.getCustomfield().getTShirtSize().getMainTShirtSizeFieldId();
@@ -368,5 +383,16 @@ public class Issue implements Serializable {
         } catch (InterruptedException | ExecutionException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    @JsonIgnore
+    public Integer getStatusPriority() {
+        if (this.isDemand())
+            return jiraProperties.getStatusPriorityOrder().getDemandPriorityByStatus(this.getStatusName());
+
+        if (this.isFeature())
+            return jiraProperties.getStatusPriorityOrder().getTaskPriorityByStatus(this.getStatusName());
+
+        return jiraProperties.getStatusPriorityOrder().getSubtaskPriorityByStatus(this.getStatusName());
     }
 }
