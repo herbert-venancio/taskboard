@@ -476,7 +476,7 @@
                         <div class="column-block">
                             <div class="sub-header">Description</div>
                             <div>
-                                {{item.description}}
+                                {{getDescription(item)}}
                             </div>
                         </div>
                     </div>
@@ -1006,6 +1006,10 @@
                     }
 
                     return responsaveisArray;
+                },
+
+                getDescription: function (issue) {
+                    return issue.description ? issue.description : 'N/A';
                 },
 
                 hasRecords: function (records) {
