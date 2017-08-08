@@ -20,6 +20,7 @@
  */
 package objective.taskboard.followup;
 
+import objective.taskboard.database.directory.DataBaseDirectory;
 import objective.taskboard.followup.data.Template;
 import objective.taskboard.followup.impl.DefaultFollowUpFacade;
 import objective.taskboard.followup.impl.DefaultFollowUpTemplateStorage;
@@ -66,6 +67,9 @@ public class FollowUpFacadeTest {
     @Mock
     private FollowUpDataProviderFromCurrentState provider;
 
+    @Mock
+    private DataBaseDirectory dataBaseDirectory;
+
     @Spy
     private DefaultUpdateFollowUpService updateFollowUpService = new DefaultUpdateFollowUpService();
 
@@ -83,6 +87,8 @@ public class FollowUpFacadeTest {
 
     @Before
     public void setup() throws IOException {
+        when(dataBaseDirectory.path(anyString())).thenReturn(Paths.get("data/followup-templates"));
+
         MultipartFile file = new MockMultipartFile("file", FollowUpFacadeTest.class.getResourceAsStream("OkFollowupTemplate.xlsm"));
         followUpFacade.createTemplate(TEMPLATE_NAME, PROJECTS, file);
 

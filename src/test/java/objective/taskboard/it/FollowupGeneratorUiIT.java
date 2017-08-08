@@ -23,6 +23,7 @@ package objective.taskboard.it;
 
 import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.createFile;
+import static java.nio.file.Files.createTempDirectory;
 import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.EXTENSION_JSON;
 import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.EXTENSION_ZIP;
 import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.FILE_NAME_FORMAT;
@@ -34,11 +35,19 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.joda.time.DateTime;
+import org.junit.After;
 import org.junit.Test;
 
+import objective.taskboard.RequestBuilder;
+
 public class FollowupGeneratorUiIT extends AuthenticatedIntegrationTest {
+
+    private Path pathTempRootDataDirectory = Paths.get(getClass().getSimpleName());
+
     @Test
-    public void whenFollowupGeneratorButtonIsClicked_OpenDialogAndTestFollowupGeneratorWorks() {
+    public void whenFollowupGeneratorButtonIsClicked_OpenDialogAndTestFollowupGeneratorWorks() throws IOException {
+        createTempAndSetRootDataDirectory();
+
         Integer projectIndex = 0;
         MainPage mainPage = MainPage.produce(webDriver);
         mainPage
@@ -64,61 +73,65 @@ public class FollowupGeneratorUiIT extends AuthenticatedIntegrationTest {
 
     @Test
     public void givenProjectsWithHistory_whenSelectTheseProjects_thenTheDateFieldAppears() throws IOException {
-        Path pathZipTASKB = null;
-        Path pathZipPROJ1 = null;
-        try {
-            DateTime yesterday = DateTime.now().minusDays(1);
-            String yesterdayString = yesterday.toString(FILE_NAME_FORMAT);
-            pathZipTASKB = createProjectZip("TASKB", yesterdayString);
+        createTempAndSetRootDataDirectory();
 
-            Integer projectTASKBIndex = 0;
-            Integer projectPROJ1Index = 1;
-            MainPage mainPage = MainPage.produce(webDriver);
+        DateTime yesterday = DateTime.now().minusDays(1);
+        String yesterdayString = yesterday.toString(FILE_NAME_FORMAT);
+        createProjectZip("TASKB", yesterdayString);
 
-            mainPage
-                .openTemplateFollowUpDialog()
-                .createATemplate("Template Success Test", projectTASKBIndex)
-                .createATemplate("Template Success Test 2", projectTASKBIndex, projectPROJ1Index)
-                .close();
+        Integer projectTASKBIndex = 0;
+        Integer projectPROJ1Index = 1;
+        MainPage mainPage = MainPage.produce(webDriver);
 
-            mainPage
-                .openFollowUp()
-                .selectAProject(projectTASKBIndex)
-                .selectADate(yesterdayString)
-                .assertGenerateButtonIsEnabled()
-                .clickClearDate()
-                .assertDateIsToday()
-                .assertGenerateButtonIsEnabled()
-                .selectAProject(projectPROJ1Index)
-                .assertDateDropdownIsInvisible()
-                .assertGenerateButtonIsEnabled()
-                .close();
+        mainPage
+            .openTemplateFollowUpDialog()
+            .createATemplate("Template Success Test", projectTASKBIndex)
+            .createATemplate("Template Success Test 2", projectTASKBIndex, projectPROJ1Index)
+            .close();
 
-            pathZipPROJ1 = createProjectZip("PROJ1", yesterdayString);
+        mainPage
+            .openFollowUp()
+            .selectAProject(projectTASKBIndex)
+            .selectADate(yesterdayString)
+            .assertGenerateButtonIsEnabled()
+            .clickClearDate()
+            .assertDateIsToday()
+            .assertGenerateButtonIsEnabled()
+            .selectAProject(projectPROJ1Index)
+            .assertDateDropdownIsInvisible()
+            .assertGenerateButtonIsEnabled()
+            .close();
 
-            mainPage
-                .reload()
-                .openFollowUp()
-                .selectAProject(projectTASKBIndex)
-                .selectAProject(projectPROJ1Index)
-                .selectADate(yesterdayString)
-                .assertGenerateButtonIsEnabled()
-                .close();
-        } finally {
-            if (pathZipTASKB != null)
-                deleteQuietly(pathZipTASKB.toFile());
-            if (pathZipPROJ1 != null)
-                deleteQuietly(pathZipPROJ1.toFile());
-        }
+        createProjectZip("PROJ1", yesterdayString);
+
+        mainPage
+            .openFollowUp()
+            .selectAProject(projectTASKBIndex)
+            .selectAProject(projectPROJ1Index)
+            .selectADate(yesterdayString)
+            .assertGenerateButtonIsEnabled();
     }
 
-    private Path createProjectZip(String project, String yesterdayString) throws IOException {
-        Path pathProject = Paths.get(PATH_FOLLOWUP_HISTORY, project);
-        createDirectories(pathProject);
+    @After
+    public void after() {
+        deleteQuietly(pathTempRootDataDirectory.toFile());
+        setRootDataDirectory("rootDataTest");
+    }
 
-        Path pathZipTASKB = pathProject.resolve(yesterdayString + EXTENSION_JSON + EXTENSION_ZIP);
-        if (!pathZipTASKB.toFile().exists())
-            createFile(pathZipTASKB);
-        return pathZipTASKB;
+    private void createTempAndSetRootDataDirectory() throws IOException {
+        pathTempRootDataDirectory = createTempDirectory(pathTempRootDataDirectory.toString());
+        setRootDataDirectory(pathTempRootDataDirectory.toString());
+    }
+
+    private void setRootDataDirectory(String root) {
+        RequestBuilder.url(getSiteBase() + "/test/set-root-data-directory?root=" + root)
+            .credentials("foo", "bar").get();
+    }
+
+    private void createProjectZip(String project, String zipFileName) throws IOException {
+        Path pathProject = pathTempRootDataDirectory.resolve("data").resolve(PATH_FOLLOWUP_HISTORY).resolve(project);
+        createDirectories(pathProject);
+        Path pathZipTASKB = pathProject.resolve(zipFileName + EXTENSION_JSON + EXTENSION_ZIP);
+        createFile(pathZipTASKB);
     }
 }

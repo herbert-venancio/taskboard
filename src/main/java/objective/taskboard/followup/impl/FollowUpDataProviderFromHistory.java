@@ -36,7 +36,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +45,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import objective.taskboard.database.directory.DataBaseDirectory;
 import objective.taskboard.followup.FollowUpData;
 import objective.taskboard.followup.FollowupDataProvider;
 import objective.taskboard.issueBuffer.IssueBufferState;
@@ -55,9 +55,11 @@ public class FollowUpDataProviderFromHistory implements FollowupDataProvider {
     private Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     private final String date;
+    private final DataBaseDirectory dataBaseDirectory;
 
-    public FollowUpDataProviderFromHistory(String date) {
+    public FollowUpDataProviderFromHistory(String date, DataBaseDirectory dataBaseDirectory) {
         this.date = date;
+        this.dataBaseDirectory = dataBaseDirectory;
     }
 
     @SuppressWarnings("serial")
@@ -67,17 +69,20 @@ public class FollowUpDataProviderFromHistory implements FollowupDataProvider {
 
         List<FollowUpData> data = new ArrayList<FollowUpData>();
         for (String project : projects) {
-            File fileZip = Paths.get(PATH_FOLLOWUP_HISTORY, project, date + EXTENSION_JSON + EXTENSION_ZIP).toFile();
+            String fileZipName = date + EXTENSION_JSON + EXTENSION_ZIP;
+            File fileZip = dataBaseDirectory.path(PATH_FOLLOWUP_HISTORY).resolve(project).resolve(fileZipName).toFile();
             if (!fileZip.exists())
                 throw new IllegalStateException(fileZip.toString() + " not found");
 
             Path temp = null;
             try {
-                temp = createTempDirectory("FollowUpDataByDate");
+                temp = createTempDirectory(getClass().getSimpleName());
                 unzip(fileZip, temp);
+
                 File fileJSON = temp.resolve(date + EXTENSION_JSON).toFile();
                 if (!fileJSON.exists())
                     throw new IllegalStateException(fileJSON.toString() + " not found");
+
                 String json = IOUtils.toString(asResource(fileJSON).getInputStream(), ENCODE_UTF_8);
                 Type type = new TypeToken<List<FollowUpData>>(){}.getType();
                 data.addAll(gson.fromJson(json, type));
