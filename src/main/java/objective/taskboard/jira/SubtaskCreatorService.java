@@ -1,5 +1,7 @@
 package objective.taskboard.jira;
 
+import java.util.List;
+
 /*- 
  * [LICENSE] 
  * Taskboard 
@@ -32,6 +34,7 @@ import org.springframework.stereotype.Service;
 import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.IssueField;
 import com.atlassian.jira.rest.client.api.domain.Subtask;
+import com.atlassian.jira.rest.client.api.domain.Transition;
 import com.atlassian.jira.rest.client.api.domain.input.ComplexIssueInputFieldValue;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInput;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder;
@@ -53,24 +56,24 @@ public class SubtaskCreatorService {
 
     public void create(Issue parent, SubtaskCreation creationProperties) {
         Long typeId = creationProperties.getIssueTypeId();
-        
-        if (subtaskAlreadyExists(parent, typeId)) {
+
+        String subtaskKey = subtaskOfType(parent, typeId);        
+        if (subtaskKey == null) {
+            subtaskKey = create(parent, creationProperties, typeId);
+        } else {
             log.debug("Subtask already exists. Creation will be skipped");
-            return;
         }
-        
-        String subtaskKey = create(parent, creationProperties, typeId);
-        
+
         Optional<Integer> transitionId = creationProperties.getTransitionId();
         if (transitionId.isPresent())
-            executeTransition(transitionId.get(), subtaskKey);     
+            executeTransitionIfAvailable(transitionId.get(), subtaskKey);
     }
 
-    private boolean subtaskAlreadyExists(Issue parent, Long typeId) {
+    private String subtaskOfType(Issue parent, Long typeId) {
         for (Subtask sub : parent.getSubtasks())
             if (sub.getIssueType().getId().equals(typeId))
-                return true;
-        return false;
+                return sub.getIssueKey();
+        return null;
     }
 
     private String create(Issue parent, SubtaskCreation creationProperties, Long typeId) {
@@ -128,16 +131,29 @@ public class SubtaskCreatorService {
         }
     }
 
-    private void executeTransition(Integer transitionId, String issueKey) {
+    private void executeTransitionIfAvailable(Integer transitionId, String issueKey) {
         Issue issue = jiraService.getIssueByKeyAsMaster(issueKey);
         
-        log.debug("Executing transition of subtask " + issueKey + ". Transition id: " + transitionId);
+        Optional<Transition> transition = findTransition(transitionId, issue);
+        if (!transition.isPresent()) {
+            log.debug("Transition " + transitionId + " is not available for issue " + issueKey);
+            return;
+        }
+
+        log.debug("Executing transition of subtask " + issue.getKey() + ". Transition id: " + transitionId);
         
         try {
             jiraService.doTransitionAsMaster(issue, transitionId);
         } catch (JiraServiceException e) {
-            log.error("Error executing transition '" + transitionId + "' on issue '" + issueKey + "'", e);
+            log.error("Error executing transition '" + transitionId + "' on issue '" + issue.getKey() + "'", e);
         }
+    }
+
+    private Optional<Transition> findTransition(Integer transitionId, Issue issue) {
+        List<Transition> transitions = jiraService.getTransitionsAsMaster(issue);
+        return transitions.stream()
+                .filter(t -> transitionId.equals(t.getId()))
+                .findFirst();
     }
 
 }

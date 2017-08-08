@@ -176,6 +176,12 @@ public class JiraService {
         return null;
     }
 
+    public List<Transition> getTransitionsAsMaster(Issue issue) {
+        log.debug("⬣⬣⬣⬣⬣  getTransitions (master)");
+        Iterable<Transition> response = jiraEndpointAsMaster.executeRequest(client -> client.getIssueClient().getTransitions(issue));
+        return ImmutableList.copyOf(response);
+    }
+
     public List<Transition> getTransitions(Issue issue) {
         log.debug("⬣⬣⬣⬣⬣  getTransitions");
         Iterable<Transition> response = jiraEndpointAsUser.executeRequest(client -> client.getIssueClient().getTransitions(issue));

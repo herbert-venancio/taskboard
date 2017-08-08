@@ -23,6 +23,7 @@ package objective.taskboard.jira;
 
 import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -51,6 +52,7 @@ import com.atlassian.jira.rest.client.api.domain.IssueType;
 import com.atlassian.jira.rest.client.api.domain.Priority;
 import com.atlassian.jira.rest.client.api.domain.Project;
 import com.atlassian.jira.rest.client.api.domain.Subtask;
+import com.atlassian.jira.rest.client.api.domain.Transition;
 import com.atlassian.jira.rest.client.api.domain.User;
 import com.atlassian.jira.rest.client.api.domain.input.ComplexIssueInputFieldValue;
 import com.atlassian.jira.rest.client.api.domain.input.FieldInput;
@@ -64,7 +66,6 @@ public class SubtaskCreatorServiceTest {
     private final String TSHIRT_PARENT_ID = "customfield_11111";
     private final String TSHIRT_SUBTASK_ID = "customfield_22222";
     private final String CLASSOFSERVICE_ID = "customfield_33333";
-    
     
     @Mock
     private Issue parent;
@@ -104,8 +105,8 @@ public class SubtaskCreatorServiceTest {
     }
     
     @Test
-    public void dontCreateSubtask_ifThereIsAlreadyASubtaskOfTheSameType() {
-        List<Subtask> subtasks = asList(subtask(222), subtask(ISSUE_TYPE), subtask(333));
+    public void ifThereIsAlreadyASubtaskOfTheSameType_dontCreateSubtask() {
+        List<Subtask> subtasks = asList(subtask(222, "TASK-201"), subtask(ISSUE_TYPE, "TASK-202"), subtask(333, "TASK-203"));
         when(parent.getSubtasks()).thenReturn(subtasks);
         
         service.create(parent, properties);
@@ -171,6 +172,7 @@ public class SubtaskCreatorServiceTest {
     @Test
     public void whenTransitionIsConfigured_executeTransition() {
         properties.setTransitionId(Optional.of(57));
+        configureSubtaskTransitions(1, 57, 3);
         
         service.create(parent, properties);
         
@@ -187,7 +189,36 @@ public class SubtaskCreatorServiceTest {
         );
         
         verify(jiraService).getIssueByKeyAsMaster("TASK-101");
+        verify(jiraService).getTransitionsAsMaster(subtask);
         verify(jiraService).doTransitionAsMaster(subtask, 57);
+    }
+    
+    @Test
+    public void whenSubtaskAlreadyExistsAndTransitionIsConfigured_onlyExecuteTransition() {
+        properties.setTransitionId(Optional.of(57));
+        configureSubtaskTransitions(1, 57, 3);
+        
+        List<Subtask> subtasks = asList(subtask(ISSUE_TYPE, "TASK-101"));
+        when(parent.getSubtasks()).thenReturn(subtasks);
+        
+        service.create(parent, properties);
+        
+        verify(jiraService, never()).createIssueAsMaster(Mockito.any());
+        verify(jiraService).getIssueByKeyAsMaster("TASK-101");
+        verify(jiraService).getTransitionsAsMaster(subtask);
+        verify(jiraService).doTransitionAsMaster(subtask, 57);
+    }
+    
+    @Test
+    public void whenTransitionIsNotAvailable_dontTryToExecuteTransition() {
+        properties.setTransitionId(Optional.of(57));
+        configureSubtaskTransitions(1, 2, 3);
+        
+        service.create(parent, properties);
+        
+        verify(jiraService).createIssueAsMaster(Mockito.any(IssueInput.class));
+        verify(jiraService).getIssueByKeyAsMaster("TASK-101");
+        verify(jiraService).getTransitionsAsMaster(subtask);
     }
     
     private void assertIssueInput(IssueInput input, String... expecteds) {
@@ -244,17 +275,28 @@ public class SubtaskCreatorServiceTest {
         when(parentProject.getKey()).thenReturn("TASK");
         when(parentPriority.getId()).thenReturn(PRIORITY_ID);
         
-        List<Subtask> subtasks = asList(subtask(222), subtask(333));
+        List<Subtask> subtasks = asList(subtask(222, "TASK-201"), subtask(333, "TASK-202"));
         when(parent.getSubtasks()).thenReturn(subtasks);
     }
 
-    private Subtask subtask(long typeId) {
+    private Subtask subtask(long typeId, String key) {
         IssueType type = mock(IssueType.class);
         when(type.getId()).thenReturn((long)typeId);
 
         Subtask subtask = mock(Subtask.class);
         when(subtask.getIssueType()).thenReturn(type);
+        when(subtask.getIssueKey()).thenReturn(key);
         return subtask;
+    }
+    
+    private void configureSubtaskTransitions(int... transitionsId) {
+        List<Transition> transitions = new ArrayList<>();
+        for (int id : transitionsId) {
+            Transition transition = mock(Transition.class);
+            when(transition.getId()).thenReturn(id);
+            transitions.add(transition);
+        }
+        when(jiraService.getTransitionsAsMaster(subtask)).thenReturn(transitions);
     }
 
 }
