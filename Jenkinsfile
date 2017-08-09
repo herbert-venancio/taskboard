@@ -15,7 +15,7 @@ properties([
         ])
 ])
 
-node("single-executor") {
+node("jenkinsaws06-general") {
     // start with a clean workspace
     stage('Checkout') {
         deleteDir()
