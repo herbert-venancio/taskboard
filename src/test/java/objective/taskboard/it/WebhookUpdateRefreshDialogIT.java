@@ -31,18 +31,7 @@ import objective.taskboard.utils.IOUtilities;
 public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
     @Test
     public void whenUpdateHappensViaWebHook_RefreshToastShouldShowUP() throws IOException {
-        // emulate a remote change
-        RequestBuilder
-            .url("http://localhost:4567/rest/api/latest/issue/TASKB-625")
-            .body("{\"fields\":{\"assignee\":{\"name\":\"foo\"}},\"properties\":[]}")
-            .put();
-        
-        String body = IOUtilities.resourceToString("webhook/TASKB_625_updatePayload.json");
-        RequestBuilder
-            .url(getSiteBase()+"/webhook/TASKB")
-            .header("Content-Type", "application/json")
-            .body(body)
-            .post();
+        emulateAssignToFoo();
         
         MainPage mainPage = MainPage.produce(webDriver);
         mainPage.typeSearch("TASKB-61");
@@ -56,9 +45,25 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
         mainPage.refreshToast().assertNotVisible();
         mainPage.assertVisibleIssues("TASKB-610", "TASKB-611", "TASKB-612", "TASKB-613");
     }
+
+    @Test
+    public void whenUpdateHappensViaWebHookAndUpdatedIssueIsOpen_ShouldWarnUser() throws IOException {
+        
+        MainPage mainPage = MainPage.produce(webDriver);
+        IssueDetails issueDetails = mainPage
+            .issue("TASKB-625")
+            .click()
+            .issueDetails();
+        
+        emulateAssignToFoo();
+        
+        issueDetails
+            .assertRefreshWarnIsOpen()
+            .clickOnWarning()
+            .assertAssigneeIs("foo");
+    }
     
-    public static void main(String[] args) {
-     // emulate a remote change
+    private static void emulateAssignToFoo() {
         RequestBuilder
             .url("http://localhost:4567/rest/api/latest/issue/TASKB-625")
             .body("{\"fields\":{\"assignee\":{\"name\":\"foo\"}},\"properties\":[]}")
@@ -70,5 +75,10 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
             .header("Content-Type", "application/json")
             .body(body)
             .post();
+    }
+    
+    
+    public static void main(String[] args) {
+        emulateAssignToFoo();
     }
 }

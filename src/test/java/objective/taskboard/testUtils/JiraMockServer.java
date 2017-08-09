@@ -150,8 +150,10 @@ public class JiraMockServer {
             String issueKey = req.params(":issueKey");
             String loadMockData = loadMockData(issueKey+".json");
             
-            if (loadMockData == null) 
+            if (loadMockData == null) {
+                if (System.getProperty("JiraMockServer.tryFromRealServer") != null)
                 loadMockData = retryFromRealServer(issueKey);
+            }
             
             JSONObject issueData = new JSONObject(loadMockData);
             String self = issueData.getString("self").replace("54.68.128.117:8100", "localhost:4567");

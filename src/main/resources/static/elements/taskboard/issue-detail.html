@@ -163,7 +163,7 @@
         paper-button[toggles][active][raised].colorful {
             background-color: rgba(66, 133, 244, 0.75);
         }
-
+        
         paper-button.parentLink {
             font-size: 15px;
             font-weight: 600;
@@ -341,6 +341,34 @@
             background: #DDD;
             color: #555;
         }
+        
+        .glasspane {
+            position: absolute;
+            left: 0px;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(197, 202, 233, 0.72);
+            z-index: 1000;
+            visibility: hidden;
+            margin: 0;
+            padding: 0;
+            cursor: pointer;
+        }
+        
+        .glasspane span {
+            font-size: 24px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            text-align: center;
+            line-height: 30px;
+        }
+        
+        .visible-glasspane {
+            visibility: visible !important;
+        }
 
     </style>
 
@@ -370,9 +398,16 @@
                    last-response="{{timetracking}}"
                    on-response="timetrackingCallback"
                    on-error="hideTimetracking"></iron-ajax>
+                   
+        <iron-signals on-iron-signal-issues-updated="updateIssue"></iron-signals>                   
         <paper-dialog id="modal" with-backdrop modal
                       entry-animation="scale-up-animation" exit-animation="fade-out-animation"
                       on-iron-overlay-closed="clearProperties">
+                                  
+                <div class$="glasspane {{issueChangeStateClass}}" on-tap="refreshIfUpdated">
+                    <span>This issue has been updated. <br>Click to refresh its contents.</span>
+                </div>                      
+            
             <paper-card class="card-custom">
 
                 <div class="card-header-custom">
@@ -465,7 +500,7 @@
                             <div class="sub-header">Assignees</div>
                             <div class="sub-content flex horizontal layout wrap">
                                 <template is="dom-repeat" items="{{listaResponsaveis(item)}}" as="responsavel">
-                                    <paper-material class="highlightPanel">{{responsavel}}</paper-material>
+                                    <paper-material class="assignee highlightPanel">{{responsavel}}</paper-material>
                                 </template>
                             </div>
                         </div>
@@ -698,6 +733,16 @@
                         type: Boolean,
                         value: false,
                         notify: true
+                    },
+                    
+                    updatedIssue: {
+                        type: Object,
+                        value: null
+                    },
+                    
+                    issueChangeStateClass: {
+                        type: String,
+                        value: ''
                     }
 
                 },
@@ -708,6 +753,24 @@
 
                 computeTimeTrackingLabel: function () {
                     this.timetrackingLabel = this.parseMinutesToHours(this.timetracking.timeSpentMinutes) + '/' + this.parseMinutesToHours(this.timetracking.originalEstimateMinutes);
+                },
+                
+                attached: function() {
+                    var self = this;
+                    self.isObserving = false;
+                    new MutationObserver(function(mutations) {
+                        if (!self.isObserving)
+                            return;
+                        mutations.forEach(function(mutation) {
+                           console.log(mutation.target);
+                           if (mutation.type == 'characterData') {
+                               flash($(mutation.target.parentElement), 'yellow')
+                           }
+                           else
+                               flash($(mutation.target), 'yellow')
+                        });
+                        self.isObserving = false;
+                    }).observe(Polymer.dom(this).node, {subtree: true, childList: true, characterData: true})
                 },
 
                 parseMinutesToHours: function (minutes) {
@@ -721,26 +784,22 @@
                 },
 
                 subtasksCallback: function () {
-                    this.$.modal.refit();
                     this.shouldShowSubtasks = this.hasRecords(this.subtasks);
                     if (this.$$('#loadSubtasks'))
                         this.$$('#loadSubtasks').active = false;
                 },
 
                 showSpinnerTransitions: function () {
-                    this.$.modal.refit();
                     if (this.$$('#loadTransitions'))
                         this.$$('#loadTransitions').active = true;
                 },
 
                 hideSpinnerTransitions: function () {
-                    this.$.modal.refit();
                     if (this.$$('#loadTransitions'))
                         this.$$('#loadTransitions').active = false;
                 },
 
                 timetrackingCallback: function (timetracking) {
-                    this.$.modal.refit();
                     if (this.$$('#loadTimetracking'))
                         this.$$('#loadTimetracking').active = false;
                     this.timetracking = timetracking.detail.response;
@@ -757,7 +816,6 @@
                 },
 
                 hideTimetracking: function () {
-                    this.$.modal.refit();
                     this.shouldShowTimetracking = false;
                 },
 
@@ -781,7 +839,7 @@
                         data: JSON.stringify(this.item),
                         success: function (issue) {
                             taskboard.fireIssueUpdated('client', self, issue, 'UPDATED');
-                            self.close();
+                            self.setCard(taskboard.convertIssue(issue))
                         },
                         error: function (jqXhr, textStatus, errorThrown) {
                             console.error(errorThrown);
@@ -968,14 +1026,23 @@
                 },
 
                 opendialog: function (item) {
+                    this.setCard(item);
+                    this.$.modal.open();
+                },
+                
+                setCard: function(item) {
                     this.item = item;
                     $(this.$.modal).css('background-color', this.item.color);
+                    
+                    this.showSpinnerTransitions();
                     this.$.ajaxTimetracking.generateRequest();
                     this.$.ajaxTransitions.generateRequest();
                     this.$.ajaxSubtasks.generateRequest();
-                    this.$.modal.toggle();
+                    
                     this.canBlock = !this.issueBlocked(item) && !this.issueFechada(item);
                     this.canUnblock = this.issueBlocked(item) && !this.issueFechada(item);
+                    this.issueChangeStateClass = '';
+                    this.updatedIssue = null;
                 },
 
                 listaResponsaveis: function (item) {
@@ -1036,6 +1103,7 @@
 
                 close: function() {
                     this.$.modal.close();
+                    this.isObserving = false;
                 },
 
                 openJira: function (event) {
@@ -1089,8 +1157,23 @@
 
                 getStatusName: function(statusId) {
                     return taskboard.getStatusName(statusId);
+                },
+                
+                updateIssue: function(event) {
+                    if (event.detail.source === 'client')
+                        return;
+                    if (this.item !== null && event.detail.issue.issueKey !== this.item.issueKey)
+                        return;
+                    
+                    this.isObserving = true;
+                    this.set('updatedIssue', taskboard.convertIssue(event.detail.issue));
+                    this.set('issueChangeStateClass', 'visible-glasspane');
+                },
+                
+                refreshIfUpdated: function() {
+                    if (this.updatedIssue) 
+                        this.setCard(this.updatedIssue);
                 }
-
             });
 
         })();

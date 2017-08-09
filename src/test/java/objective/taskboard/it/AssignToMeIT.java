@@ -1,5 +1,3 @@
-package objective.taskboard.it;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,6 +18,7 @@ package objective.taskboard.it;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.it;
 
 import org.junit.Test;
 
@@ -31,7 +30,10 @@ public class AssignToMeIT extends AuthenticatedIntegrationTest {
         mainPage.issue("TASKB-625")
             .click()
             .issueDetails()
-            .assignToMe();
+            .assignToMe()
+            .assertAssigneeIs("foo")
+            .closeDialog();
+        
         mainPage.issue("TASKB-625").issueDetails().assertIsHidden();
         mainPage.issue("TASKB-625").assertHasFirstAssignee();
     }

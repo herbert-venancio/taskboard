@@ -366,8 +366,9 @@ function Taskboard() {
         var converted = self.convertAndRegisterIssue(issue);
         converted.__eventInfo = {source: source, type: updateType}
         triggerSource.fire("iron-signal", {name:"issues-updated", data:{
-        	eventType: updateType,
-        	issue: converted
+            source: source,
+            eventType: updateType,
+            issue: converted
         }})
     }
     
