@@ -340,7 +340,7 @@
         "customfield_11550": null,
         "customfield_11551": null,
         "customfield_11640": null,
-        "description": "Vide Tarefas",
+        "description": "List\r\n* item 0\r\n* item 1\r\n** item 1.0\r\n** item 1.1\r\n\r\n{code}\r\n  function helloWorld() {\r\n    console.log(\"Hello World!\")\r\n  }\r\n{code}",
         "duedate": null,
         "environment": null,
         "issuelinks": [
