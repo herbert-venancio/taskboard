@@ -1,5 +1,7 @@
 package objective.taskboard.controller;
 
+import java.util.ArrayList;
+
 /*-
  * [LICENSE]
  * Taskboard
@@ -24,4 +26,5 @@ package objective.taskboard.controller;
 public class ProjectCreationData {
     public String projectKey;
     public String teamLeader;
+    public ArrayList<String> teamMembers;
 }

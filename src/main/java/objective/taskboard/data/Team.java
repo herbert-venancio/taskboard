@@ -26,6 +26,7 @@ import java.sql.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -36,19 +37,18 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "TEAM")
 public class Team implements Serializable {
     private static final long serialVersionUID = 1794216649849732935L;
-    
-    @GeneratedValue(strategy = GenerationType.AUTO)
+
     @Id
+    @Column(name="ID")
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     private String name;
@@ -68,8 +68,97 @@ public class Team implements Serializable {
     private String jiraEquipe;
 
     private String jiraSubequipe;
-    
+
     @OneToMany(fetch=FetchType.EAGER, cascade=CascadeType.ALL)
     @JoinColumn(name="team", referencedColumnName="name")
     private List<UserTeam> members;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getCoach() {
+        return coach;
+    }
+
+    public void setCoach(String coach) {
+        this.coach = coach;
+    }
+
+    public String getManager() {
+        return manager;
+    }
+
+    public void setManager(String manager) {
+        this.manager = manager;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public String getNickName() {
+        return nickName;
+    }
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
+    }
+
+    public String getCoachUserName() {
+        return coachUserName;
+    }
+
+    public void setCoachUserName(String coachUserName) {
+        this.coachUserName = coachUserName;
+    }
+
+    public String getJiraEquipe() {
+        return jiraEquipe;
+    }
+
+    public void setJiraEquipe(String jiraEquipe) {
+        this.jiraEquipe = jiraEquipe;
+    }
+
+    public String getJiraSubequipe() {
+        return jiraSubequipe;
+    }
+
+    public void setJiraSubequipe(String jiraSubequipe) {
+        this.jiraSubequipe = jiraSubequipe;
+    }
+
+    public List<UserTeam> getMembers() {
+        return members;
+    }
+
+    public void setMembers(List<UserTeam> members) {
+        this.members = members;
+    }
+
 }

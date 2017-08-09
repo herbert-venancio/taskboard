@@ -1,5 +1,7 @@
 package objective.taskboard.domain;
 
+import java.io.Serializable;
+
 /*-
  * [LICENSE]
  * Taskboard
@@ -24,30 +26,40 @@ package objective.taskboard.domain;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import lombok.Data;
-import lombok.Getter;
-
-@Data
 @Entity
 @Table(name = "project_filter_configuration")
-public class ProjectFilterConfiguration {
-    private Long id;
-    
+public class ProjectFilterConfiguration implements Serializable {
+    private static final long serialVersionUID = 765599368694090438L;
+
     @Id
-    @Getter
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Integer id;
+
+    @Column
     private String projectKey;
 
+    public String getProjectKey() {
+        return projectKey;
+    }
+
+    public void setProjectKey(String projectKey) {
+        this.projectKey = projectKey;
+    }
+
     @OneToMany(fetch=FetchType.EAGER)
-    @JoinColumn(name="projectKey")
+    @JoinColumn(name="projectKey", referencedColumnName="projectKey")
     private List<ProjectTeam> projectTeams;
-    
+
     public List<Long> getTeamsIds() {
         return projectTeams.stream().map(el->el.getTeamId()).collect(Collectors.toList());
     }

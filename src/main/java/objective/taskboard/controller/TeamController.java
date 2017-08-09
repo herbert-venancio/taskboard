@@ -69,9 +69,9 @@ public class TeamController {
     
     @RequestMapping(method = RequestMethod.PATCH, consumes="application/json")
     public ResponseEntity<Void> updateTeamMembers(@RequestBody TeamControllerData [] data) {
-        for (TeamControllerData teamData : data) 
+        for (TeamControllerData teamData : data)
             updateTeamMembers(teamData.teamName, teamData);
-        
+
         return ResponseEntity.ok().build();
     }
     
