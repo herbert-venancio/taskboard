@@ -106,6 +106,7 @@ public class IssueBufferService {
                 updateState(state.done());
             }catch(Exception e) {
                 updateState(state.error());
+                log.error("objective.taskboard.issueBuffer.IssueBufferService.updateIssueBuffer - Failed to bring issues", e);
             }
             finally {
                 log.debug("updateIssueBuffer time spent " +stopWatch.getTime());
