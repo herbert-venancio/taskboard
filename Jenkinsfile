@@ -133,7 +133,7 @@ def addDownloadBadge(downloadUrl) {
 def updateJobDescription(downloadUrl) {
     def latestReleaseLink = "<a href='${downloadUrl}'>Latest released artifact</a>"
     def makePostReleaseBranch = """
-        <form action="/job/sdlc/taskboard/job/${env.BRANCH_NAME}/buildWithParameters" method="POST">
+        <form action="/job/sdlc/job/taskboard/job/${env.BRANCH_NAME}/buildWithParameters" method="POST">
           <input type="hidden" name="RELEASE" value="true">
           <input type="submit" value="New Release">
         </form>
