@@ -34,9 +34,12 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
+import objective.taskboard.controller.WebhookController.WebhookBody.Changelog;
 import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.issueBuffer.WebhookEvent;
+import objective.taskboard.jira.JiraIssueService;
 import objective.taskboard.jira.JiraServiceUnavailable;
+import objective.taskboard.jira.WebhookSubtaskCreatorService;
 
 @Slf4j
 @Component
@@ -49,6 +52,12 @@ public class IssueEventProcessScheduler {
     
     @Autowired
     public ApplicationEventPublisher eventPublisher;
+    
+    @Autowired 
+    private JiraIssueService jiraIssueService;
+     
+    @Autowired 
+    private WebhookSubtaskCreatorService webhookSubtaskCreatorService;
 
     private static final long RATE_MILISECONDS = 1 * 1000;
     
@@ -57,10 +66,12 @@ public class IssueEventProcessScheduler {
     private class Item {
         private WebhookEvent event;
         private String issueKey;
+        private Changelog changelog;
 
-        public Item(WebhookEvent event, String issueKey) {
+        public Item(WebhookEvent event, String issueKey, Changelog changelog) {
             this.event = event;
             this.issueKey = issueKey;
+            this.changelog = changelog;
         }
     }
 
@@ -72,8 +83,8 @@ public class IssueEventProcessScheduler {
         this.list.removeAll(list);
     }
 
-    public synchronized void add(WebhookEvent event, String issueKey) {
-        Item item = new Item(event, issueKey);
+    public synchronized void add(WebhookEvent event, String issueKey, Changelog changelog) {
+        Item item = new Item(event, issueKey, changelog);
         list.add(item);
     }
 
@@ -110,6 +121,15 @@ public class IssueEventProcessScheduler {
             return;
         }
         
-        issueBufferService.updateByEvent(item.event, item.issueKey);
+        com.atlassian.jira.rest.client.api.domain.Issue jiraIssue = fetchIssue(item);
+        webhookSubtaskCreatorService.createSubtaskOnTransition(jiraIssue, item.changelog);
+        issueBufferService.updateByEvent(item.event, item.issueKey, jiraIssue);
     }
+    
+    private com.atlassian.jira.rest.client.api.domain.Issue fetchIssue(Item item) {
+        if (item.event == WebhookEvent.ISSUE_DELETED)
+            return null;
+        return jiraIssueService.searchIssueByKey(item.issueKey);
+    }
+
 }

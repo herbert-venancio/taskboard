@@ -1,5 +1,6 @@
 package objective.taskboard.jira;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -27,6 +28,7 @@ import java.util.LinkedList;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.validation.Valid;
 import javax.validation.constraints.DecimalMin;
@@ -40,6 +42,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import objective.taskboard.data.Issue;
 
 @Data
 @ConfigurationProperties(prefix = "jira")
@@ -53,7 +56,7 @@ public class JiraProperties {
     private Lousa lousa;
     @NotNull
     @Valid
-    private CustomField customfield;
+    private CustomField customfield = new CustomField();
     @NotNull
     @Valid
     private IssueLink issuelink;
@@ -131,6 +134,9 @@ public class JiraProperties {
         }
     }
     
+    @Valid
+    private List<SubtaskCreation> subtaskCreation = new ArrayList<>();
+    
     @Data 
     public static class Lousa {
         @NotNull
@@ -148,7 +154,7 @@ public class JiraProperties {
         private TShirtSize tShirtSize; 
         @NotNull
         @Valid
-        private ClassOfServiceDetails classOfService;
+        private ClassOfServiceDetails classOfService = new ClassOfServiceDetails();
         @NotNull
         @Valid
         private Blocked blocked;
@@ -320,8 +326,33 @@ public class JiraProperties {
             return statusExcludedFromFollowup;
         }
     }
-
+    
+    @Data
+    public static class SubtaskCreation {
+        @NotNull
+        private Long statusIdFrom;
+        @NotNull
+        private Long statusIdTo;
+        @NotNull
+        private Long issueTypeParentId;
+        @NotNull
+        private Long issueTypeId;
+        @NotNull
+        private String summaryPrefix;
+        @NotNull
+        private String tShirtSizeParentId;
+        @NotNull
+        private String tShirtSizeSubtaskId;
+        @NotNull
+        private String tShirtSizeDefaultValue = "M";
+        private Optional<Integer> transitionId;
+    }
+    
     public StatusPriorityOrder getStatusPriorityOrder() {
         return statusPriorityOrder;
+    }
+    
+    public boolean isDemand(Issue i) {
+        return getIssuetype().getDemand().id == i.getType();
     }
 }

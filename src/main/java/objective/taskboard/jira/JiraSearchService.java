@@ -22,6 +22,7 @@ package objective.taskboard.jira;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
+import static java.util.Arrays.asList;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 import java.util.ArrayList;
@@ -68,9 +69,15 @@ public class JiraSearchService {
     private JiraEndpointAsMaster jiraEndpointAsMaster;
 
     static int seq = 0;
-    public List<Issue> searchIssues(String jql) {
+
+    public List<Issue> searchIssues(String jql, String... additionalFields) {
+
         Validate.notNull(jql);
         log.debug("⬣⬣⬣⬣⬣  searchIssues");
+
+        Set<String> fields = getFields();
+        fields.addAll(asList(additionalFields));
+        
         try {
             SearchResultJsonParser searchResultParser = new SearchResultJsonParser();
             List<Issue> listIssues = new ArrayList<>();
@@ -81,7 +88,7 @@ public class JiraSearchService {
                              .put(EXPAND_ATTRIBUTE, EXPAND)
                              .put(MAX_RESULTS_ATTRIBUTE, MAX_RESULTS)
                              .put(START_AT_ATTRIBUTE, i * MAX_RESULTS)
-                             .put(FIELDS_ATTRIBUTE, getFields());
+                             .put(FIELDS_ATTRIBUTE, fields);
 
                 String jsonResponse = jiraEndpointAsMaster.postWithRestTemplate(PATH_REST_API_SEARCH, APPLICATION_JSON, searchRequest);
                 SearchResult searchResult = searchResultParser.parse(new JSONObject(jsonResponse));
