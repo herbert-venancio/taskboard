@@ -30,18 +30,20 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "PROJECT_TEAM")
-public class ProjectTeam {
+public class ProjectTeam implements Serializable {
+    private static final long serialVersionUID = 3762652852081959715L;
+
     @EmbeddedId
     ProjectTeamId id;
-    
+
     public ProjectTeam() {
         id = new ProjectTeamId();
     }
-    
+
     public String getProjectKey() {
         return id.projectKey;
     }
-    
+
     public void setProjectKey(String key) {
         id.projectKey = key;
     }
@@ -49,18 +51,18 @@ public class ProjectTeam {
     public Long getTeamId() { 
         return id.teamId; 
     }
-    
+
     public void setTeamId(Long teamId) {
         id.teamId = teamId;
     }
 
 }
-    
+
 @Embeddable
 class ProjectTeamId implements Serializable {
     private static final long serialVersionUID = -7879137502491962905L;
 
     String projectKey;
-    
+
     Long teamId;
 }
