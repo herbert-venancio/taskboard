@@ -46,6 +46,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import lombok.extern.slf4j.Slf4j;
+import objective.taskboard.database.directory.DataBaseDirectory;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.FollowUpData;
 import objective.taskboard.followup.FollowUpDataHistoryGenerator;
@@ -55,19 +56,23 @@ import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository
 @Component
 public class FollowUpDataHistoryGeneratorJSONFiles implements FollowUpDataHistoryGenerator {
 
-    public static final String PATH_FOLLOWUP_HISTORY = "data/followup-history/";
+    public static final String PATH_FOLLOWUP_HISTORY = "followup-history";
     public static final String FILE_NAME_FORMAT = "yyyyMMdd";
     public static final String EXTENSION_JSON = ".json";
     public static final String EXTENSION_ZIP = ".zip";
+    public static final String TODAY = DateTime.now().toString(FILE_NAME_FORMAT);
 
     private static final long MINUTE = 60 * 1000l;
     private static final long SLEEP_TIME_IN_MINUTES = 5l;
 
     @Autowired
     private ProjectFilterConfigurationCachedRepository projectFilterCacheRepo;
-    
+
     @Autowired
     private FollowUpDataProviderFromCurrentState providerFromCurrentState;
+
+    @Autowired
+    private DataBaseDirectory dataBaseDirectory;
 
     private Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
@@ -105,16 +110,15 @@ public class FollowUpDataHistoryGeneratorJSONFiles implements FollowUpDataHistor
             Thread.sleep(SLEEP_TIME_IN_MINUTES * MINUTE);
         }
 
-        log.info("FollowUpDataHistoryGeneratorJSONFiles start");
+        log.info(getClass().getSimpleName() + " start");
         for (ProjectFilterConfiguration pf : projectFilterCacheRepo.getProjects()) {
             String projectKey = pf.getProjectKey();
 
-            Path pathProject = Paths.get(PATH_FOLLOWUP_HISTORY, projectKey);
+            Path pathProject = dataBaseDirectory.path(PATH_FOLLOWUP_HISTORY).resolve(projectKey);
             if (!pathProject.toFile().exists())
                 createDirectories(pathProject);
 
-            String todayString = DateTime.now().toString(FILE_NAME_FORMAT);
-            Path pathJSON = pathProject.resolve(todayString + EXTENSION_JSON);
+            Path pathJSON = pathProject.resolve(TODAY + EXTENSION_JSON);
 
             try {
                 List<FollowUpData> jiraData = providerFromCurrentState.getJiraData(projectKey.split(","));
@@ -127,14 +131,14 @@ public class FollowUpDataHistoryGeneratorJSONFiles implements FollowUpDataHistor
                 deleteQuietly(pathJSON.toFile());
             }
         }
-        log.info("FollowUpDataHistoryGeneratorJSONFiles complete");
+        log.info(getClass().getSimpleName() + " complete");
     }
 
     @Override
     public List<String> getHistoryByProject(String project) {
         List<String> history = new ArrayList<String>();
 
-        Path pathProject = Paths.get(PATH_FOLLOWUP_HISTORY, project);
+        Path pathProject = dataBaseDirectory.path(PATH_FOLLOWUP_HISTORY).resolve(project);
         if (!pathProject.toFile().exists())
             return history;
 
@@ -145,8 +149,7 @@ public class FollowUpDataHistoryGeneratorJSONFiles implements FollowUpDataHistor
                     continue;
 
                 String fileName = path.toFile().getName().replace(EXTENSION_JSON + EXTENSION_ZIP, "");
-                String todayString = DateTime.now().toString(FILE_NAME_FORMAT);
-                if (todayString.equals(fileName))
+                if (TODAY.equals(fileName))
                     continue;
 
                 history.add(fileName);

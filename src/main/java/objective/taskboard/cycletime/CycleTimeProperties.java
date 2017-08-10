@@ -27,6 +27,7 @@ import javax.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -35,6 +36,7 @@ import lombok.Data;
 @Data
 @Component
 @ConfigurationProperties("cycletime")
+@Validated
 public class CycleTimeProperties {
     @Valid
     private Time startBusinessHours = new Time(9, 0, "am");

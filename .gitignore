@@ -20,3 +20,4 @@ application-uat.properties
 application-uat.yml
 testbed
 data
+rootDataTest
