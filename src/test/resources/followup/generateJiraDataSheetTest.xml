@@ -381,22 +381,10 @@
       <c r="AQ2" s="4">
         <f>IF(AllIssues[[#This Row],[SUBTASK_STATUS]]="Done", AllIssues[[#This Row],[EffortDone]],0)</f>
       </c>
-      <c r="AR2" s="4" t="str">
-        <f>IF(AllIssues[demand_description]="","",VLOOKUP(AllIssues[demand_status],'Ordered Status'!A:B,2, FALSE))</f>
-      </c>
-      <c r="AS2" s="4" t="str">
-        <f>IF(AllIssues[TASK_DESCRIPTION]="","",VLOOKUP(AllIssues[TASK_STATUS],'Ordered Status'!C:D,2, FALSE))</f>
-      </c>
-      <c r="AT2" s="4" t="str">
-        <f>IF(AllIssues[SUBTASK_DESCRIPTION]="","",VLOOKUP(AllIssues[SUBTASK_STATUS],'Ordered Status'!E:F,2, FALSE))</f>
-      </c>
-      <c r="AU2" s="4" t="str">
-        <f>CONCATENATE(AllIssues[SubtaskOrderedStatus]," &gt; ",AllIssues[SUBTASK_FULL_DESCRIPTION])</f>
-      </c>
-      <c r="AV2" s="4">
+      <c r="AR2" s="4">
         <f>IF(AllIssues[TASK_TYPE]="Bug",AllIssues[EffortEstimate], 0)</f>
       </c>
-      <c r="AW2" s="4">
+      <c r="AS2" s="4">
         <f>IF(AllIssues[TASK_TYPE]="Bug",AllIssues[worklog],0)</f>
       </c>
     </row>

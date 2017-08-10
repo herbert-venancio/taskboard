@@ -239,7 +239,7 @@ public class FollowUpGenerator {
     private String parseLineCountFromXmlString(String originalTable7) {
         try {
             NodeList nodeList = XmlUtils.xpath(originalTable7, "/table/autoFilter/@ref");
-            return XmlUtils.asString(nodeList).replace("A1:AW", "");
+            return XmlUtils.asString(nodeList).replace("A1:AS", "");
         } catch (TransformerException e) {
             throw new IllegalStateException(e);
         }
