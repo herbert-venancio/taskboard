@@ -15,6 +15,9 @@ properties([
         ])
 ])
 
+final String RELEASE_URL = "http://repo:8080/archiva/repository/internal"
+final String SNAPSHOT_URL = "http://repo:8080/archiva/repository/snapshots"
+
 node("single-executor") {
     // start with a clean workspace
     stage('Checkout') {
@@ -70,10 +73,11 @@ node("single-executor") {
             throw ex
         }
         if (isMasterBranch() || isPostBuildBranch()) {
+            def project = readMavenPom file: ''
             stage('Deploy Maven') {
-                sh "${mvnHome}/bin/mvn --batch-mode -V clean deploy -DskipTests -P packaging-war,dev -DaltDeploymentRepository=repo::default::http://repo:8080/archiva/repository/snapshots"
+                sh "${mvnHome}/bin/mvn --batch-mode -V clean deploy -DskipTests -P packaging-war,dev -DaltDeploymentRepository=repo::default::$SNAPSHOT_URL"
                 if (!params.RELEASE) {
-                    def downloadUrl = extractDownloadUrlFromLogs()
+                    def downloadUrl = extractDownloadUrl(project)
                     addDownloadBadge(downloadUrl)
                 }
             }
@@ -90,9 +94,8 @@ node("single-executor") {
                 stage('Release') {
                     echo 'Releasing...'
                     sh "git checkout ${env.BRANCH_NAME}"
-                    def project = readMavenPom file: ''
-                    sh "${mvnHome}/bin/mvn --batch-mode -Dresume=false release:prepare release:perform -DaltReleaseDeploymentRepository=repo::default::http://repo:8080/archiva/repository/internal -Darguments=\"-DaltDeploymentRepository=internal::default::http://repo:8080/archiva/repository/internal -P packaging-war,dev -DskipTests=true -Dmaven.test.skip=true -Dmaven.javadoc.skip=true\""
-                    def downloadUrl = extractDownloadUrlFromLogs()
+                    sh "${mvnHome}/bin/mvn --batch-mode -Dresume=false release:prepare release:perform -DaltReleaseDeploymentRepository=repo::default::$RELEASE_URL -Darguments=\"-DaltDeploymentRepository=internal::default::$RELEASE_URL -P packaging-war,dev -DskipTests=true -Dmaven.test.skip=true -Dmaven.javadoc.skip=true\""
+                    def downloadUrl = extractDownloadUrl(project)
                     addDownloadBadge(downloadUrl)
                     updateJobDescription(downloadUrl)
                     if(isMasterBranch())
@@ -111,19 +114,22 @@ def isPostBuildBranch() {
     return env.BRANCH_NAME ==~ /^\d+(\.[0-9]+)*\.X$/
 }
 
-def extractDownloadUrlFromLogs() {
+def extractDownloadUrl(project) {
     def artifactType = "war"
-    def pattern
     if(params.RELEASE) {
-        pattern = /.*Uploaded: (http:.*internal.*${artifactType}).*/
+        def version = project.version.replace('-SNAPSHOT', '')
+        return "$RELEASE_URL/${project.groupId.replace(".", "/")}/$project.artifactId/$version/$project.artifactId-$version.$artifactType"
     } else {
-        pattern = /.*Uploaded: (http:.*.${artifactType}).*/
+        def pattern = /.*Uploaded: (http:.*.${artifactType}).*/
+        def matcher = manager.getLogMatcher(pattern)
+        return matcher != null ? matcher.group(1) : null
     }
-    def matcher = manager.getLogMatcher(pattern)
-    return matcher.group(1)
 }
 
 def addDownloadBadge(downloadUrl) {
+    if(downloadUrl == null)
+        return
+
     def artifactName = downloadUrl.replaceAll(".*/(.*)", '$1')
     def summary = manager.createSummary("info.gif")
     summary.appendText("<a href='${downloadUrl}>Link to deployed war: ${artifactName}</a>", false)
@@ -131,6 +137,9 @@ def addDownloadBadge(downloadUrl) {
 }
 
 def updateJobDescription(downloadUrl) {
+    if(downloadUrl == null)
+        return
+
     def latestReleaseLink = "<a href='${downloadUrl}'>Latest released artifact</a>"
     def makePostReleaseBranch = """
         <form action="/job/sdlc/job/taskboard/job/${env.BRANCH_NAME}/buildWithParameters" method="POST">
