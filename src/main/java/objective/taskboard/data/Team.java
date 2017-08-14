@@ -23,7 +23,10 @@ package objective.taskboard.data;
 
 import java.io.Serializable;
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -72,6 +75,21 @@ public class Team implements Serializable {
     @OneToMany(fetch=FetchType.EAGER, cascade=CascadeType.ALL)
     @JoinColumn(name="team", referencedColumnName="name")
     private List<UserTeam> members;
+
+    public Team(String name, String manager, String coach, ArrayList<String> members) {
+        this.name = name;
+        this.manager = manager;
+        this.coach = coach;
+        this.members = stringListToUserTeamList(members);
+    }
+
+    private List<UserTeam> stringListToUserTeamList(ArrayList<String> members) {
+        return members.stream()
+                .filter(Objects::nonNull)
+                .distinct()
+                .map(teamMember -> new UserTeam(teamMember, getName()))
+                .collect(Collectors.toList());
+    }
 
     public Long getId() {
         return id;

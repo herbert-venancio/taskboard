@@ -28,9 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +40,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import objective.taskboard.data.Team;
-import objective.taskboard.data.UserTeam;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.domain.ProjectTeam;
 import objective.taskboard.domain.TeamFilterConfiguration;
@@ -155,7 +152,7 @@ public class ProjectController {
         
         return ResponseEntity.ok("");
     }
-    
+
     @RequestMapping(value="{projectKey}", method = RequestMethod.GET)
     public ResponseEntity<Void> get(@PathVariable("projectKey") String projectKey) {
         List<ProjectFilterConfiguration> projects = projectRepository.getProjects();
@@ -168,37 +165,53 @@ public class ProjectController {
 
     @RequestMapping(method = RequestMethod.POST, consumes="application/json")
     public void create(@RequestBody ProjectCreationData data) {
-        final List<ProjectFilterConfiguration> projects = projectRepository.getProjects();
+        if (projectExists(data.projectKey))
+            return;
+        createProjectFilterConfiguration(data.projectKey);
+        data.teams.forEach(team -> {
+            createTeamAndConfigurations(data.projectKey, team.name, data.teamLeader, data.teamLeader, team.members);
+        });
+    }
 
-        for (ProjectFilterConfiguration projectFilterConfiguration : projects) {
-            if (projectFilterConfiguration.getProjectKey().equals(data.projectKey))
-                return;
-        }
-
+    private void createProjectFilterConfiguration(String projectKey) {
         final ProjectFilterConfiguration configuration = new ProjectFilterConfiguration();
-        configuration.setProjectKey(data.projectKey);
+        configuration.setProjectKey(projectKey);
         projectRepository.save(configuration);
+    }
 
-        final Team team = new Team();
-        team.setName(data.projectKey+"_TEAM");
-        team.setManager(data.teamLeader);
-        team.setCoach(data.teamLeader);
-        List<UserTeam> teamMembers = data.teamMembers.stream()
-                .filter(Objects::nonNull)
-                .distinct()
-                .map(teamMember -> new UserTeam(teamMember, team.getName()))
-                .collect(Collectors.toList());
-        team.setMembers(teamMembers);
+    private void createTeamAndConfigurations(String projectKey, String teamName, String manager, String coach, ArrayList<String> members) {
+        Team team = createTeam(teamName, manager, coach, members);
+        TeamFilterConfiguration teamFilterConfiguration = createTeamFilterConfiguration(team);
+        createProjectTeam(projectKey, teamFilterConfiguration);
+    }
+
+    private Team createTeam(String name, String manager, String coach, ArrayList<String> members) {
+        final Team team = new Team(name, manager, coach, members);
         Team persistedTeam = teamRepository.save(team);
+        return persistedTeam;
+    }
 
+    private TeamFilterConfiguration createTeamFilterConfiguration(Team team) {
         final TeamFilterConfiguration teamFilterConfiguration = new TeamFilterConfiguration();
-        teamFilterConfiguration.setTeamId(persistedTeam.getId());
+        teamFilterConfiguration.setTeamId(team.getId());
         TeamFilterConfiguration persistedTeamFilter = teamFilterConfigurationRepository.save(teamFilterConfiguration);
+        return persistedTeamFilter;
+    }
 
+    private void createProjectTeam(String projectKey, TeamFilterConfiguration teamFilterConfiguration) {
         final ProjectTeam projectTeam = new ProjectTeam();
-        projectTeam.setProjectKey(data.projectKey);
-        projectTeam.setTeamId(persistedTeamFilter.getTeamId());
+        projectTeam.setProjectKey(projectKey);
+        projectTeam.setTeamId(teamFilterConfiguration.getTeamId());
         projectTeamRepo.save(projectTeam);
+    }
+
+    private Boolean projectExists(String projectKey) {
+        final List<ProjectFilterConfiguration> projects = projectRepository.getProjects();
+        for (ProjectFilterConfiguration projectFilterConfiguration : projects) {
+            if (projectFilterConfiguration.getProjectKey().equals(projectKey))
+                return true;
+        }
+        return false;
     }
 
     private String getProjectTeamName(ProjectTeam projectTeam) {

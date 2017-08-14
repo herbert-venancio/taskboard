@@ -26,5 +26,9 @@ import java.util.ArrayList;
 public class ProjectCreationData {
     public String projectKey;
     public String teamLeader;
-    public ArrayList<String> teamMembers;
+    public ArrayList<ProjectCreationDataTeam> teams;
+    public static class ProjectCreationDataTeam {
+        public String name;
+        public ArrayList<String> members;
+    }
 }
