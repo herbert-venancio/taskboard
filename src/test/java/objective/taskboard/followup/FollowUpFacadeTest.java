@@ -89,7 +89,7 @@ public class FollowUpFacadeTest {
     public void setup() throws IOException {
         when(dataBaseDirectory.path(anyString())).thenReturn(Paths.get("data/followup-templates"));
 
-        MultipartFile file = new MockMultipartFile("file", FollowUpFacadeTest.class.getResourceAsStream("OkFollowupTemplate.xlsm"));
+        MultipartFile file = new MockMultipartFile("file", FollowUpFacadeTest.class.getResourceAsStream(TEMPLATE_NAME));
         followUpFacade.createTemplate(TEMPLATE_NAME, PROJECTS, file);
 
         ArgumentCaptor<String> argCaptor = ArgumentCaptor.forClass(String.class);
@@ -121,7 +121,7 @@ public class FollowUpFacadeTest {
                 , "1", "2", "3", "Ballpark", "Release", "1", "1", "1", "1", "M", "Type"
                 , FORMULA, FORMULA, FORMULA, FORMULA, FORMULA, FORMULA, FORMULA
                 , FORMULA, FORMULA, FORMULA, FORMULA, FORMULA, FORMULA, FORMULA
-                , FORMULA, FORMULA, FORMULA, FORMULA, FORMULA, FORMULA};
+                , FORMULA, FORMULA};
     }
 
     private String[] formattedContentOfFirstRowOfFromJiraWorksheet(Resource resource) throws Docx4JException, IOException, Xlsx4jException {
