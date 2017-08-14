@@ -15,6 +15,9 @@ properties([
         ])
 ])
 
+final String RELEASE_URL = "http://repo:8080/archiva/repository/internal"
+final String SNAPSHOT_URL = "http://repo:8080/archiva/repository/snapshots"
+
 node("single-executor") {
     // start with a clean workspace
     stage('Checkout') {
@@ -51,7 +54,7 @@ node("single-executor") {
                 """
 
                 def SONAR_URL = env.SONARQUBE_URL
-                if (BRANCH_NAME == 'master') {
+                if (isMasterBranch()) {
                     sh "${mvnHome}/bin/mvn --batch-mode -V sonar:sonar -Dsonar.host.url=${SONAR_URL} -Dsonar.buildbreaker.skip=true"
                 } else if (isPullRequest()) {
                     withCredentials([string(credentialsId: 'TASKBOARD_SDLC_SONAR', variable: 'GITHUB_OAUTH')]) {
@@ -69,51 +72,64 @@ node("single-executor") {
             handleError('objective-solutions/taskboard', 'devops@objective.com.br', 'objective-solutions-user')
             throw ex
         }
-        if (BRANCH_NAME == 'master') {
+        if (isMasterBranch() || isPostBuildBranch()) {
+            def project = readMavenPom file: ''
             stage('Deploy Maven') {
-                sh "${mvnHome}/bin/mvn --batch-mode -V clean deploy -DskipTests -P packaging-war,dev -DaltDeploymentRepository=repo::default::http://repo:8080/archiva/repository/snapshots"
+                sh "${mvnHome}/bin/mvn --batch-mode -V clean deploy -DskipTests -P packaging-war,dev -DaltDeploymentRepository=repo::default::$SNAPSHOT_URL"
                 if (!params.RELEASE) {
-                    def downloadUrl = extractDownloadUrlFromLogs()
+                    def downloadUrl = extractDownloadUrl(project)
                     addDownloadBadge(downloadUrl)
                 }
             }
             stage('Deploy Docker') {
+                def tag = isMasterBranch() ? 'latest' : env.BRANCH_NAME
                 sh 'git clone https://github.com/objective-solutions/liferay-environment-bootstrap.git'
                 dir('liferay-environment-bootstrap/dockers/taskboard') {
                     sh 'cp ../../../target/taskboard-*-SNAPSHOT.war ./taskboard.war'
-                    sh 'sudo docker build -t dockercb:5000/taskboard-snapshot .'
-                    sh 'sudo docker push dockercb:5000/taskboard-snapshot'
+                    sh "sudo docker build -t dockercb:5000/taskboard-snapshot:$tag ."
+                    sh "sudo docker push dockercb:5000/taskboard-snapshot:$tag"
                 }
             }
             if (params.RELEASE) {
                 stage('Release') {
                     echo 'Releasing...'
-                    sh 'git checkout master'
-                    def project = readMavenPom file: ''
-                    sh "${mvnHome}/bin/mvn --batch-mode -Dresume=false release:prepare release:perform -DaltReleaseDeploymentRepository=repo::default::http://repo:8080/archiva/repository/internal -Darguments=\"-DaltDeploymentRepository=internal::default::http://repo:8080/archiva/repository/internal -P packaging-war,dev -DskipTests=true -Dmaven.test.skip=true -Dmaven.javadoc.skip=true\""
-                    def downloadUrl = extractDownloadUrlFromLogs()
+                    sh "git checkout ${env.BRANCH_NAME}"
+                    sh "${mvnHome}/bin/mvn --batch-mode -Dresume=false release:prepare release:perform -DaltReleaseDeploymentRepository=repo::default::$RELEASE_URL -Darguments=\"-DaltDeploymentRepository=internal::default::$RELEASE_URL -P packaging-war,dev -DskipTests=true -Dmaven.test.skip=true -Dmaven.javadoc.skip=true\""
+                    def downloadUrl = extractDownloadUrl(project)
                     addDownloadBadge(downloadUrl)
                     updateJobDescription(downloadUrl)
-                    createPostBuildBranch(project)
+                    if(isMasterBranch())
+                        createPostBuildBranch(project)
                 }
             }
         }
     }
 }
 
-def extractDownloadUrlFromLogs() {
+def isMasterBranch() {
+    return env.BRANCH_NAME == 'master'
+}
+
+def isPostBuildBranch() {
+    return env.BRANCH_NAME ==~ /^\d+(\.[0-9]+)*\.X$/
+}
+
+def extractDownloadUrl(project) {
     def artifactType = "war"
-    def pattern
     if(params.RELEASE) {
-        pattern = /.*Uploaded: (http:.*internal.*${artifactType}).*/
+        def version = project.version.replace('-SNAPSHOT', '')
+        return "$RELEASE_URL/${project.groupId.replace(".", "/")}/$project.artifactId/$version/$project.artifactId-$version.$artifactType"
     } else {
-        pattern = /.*Uploaded: (http:.*.${artifactType}).*/
+        def pattern = /.*Uploaded: (http:.*.${artifactType}).*/
+        def matcher = manager.getLogMatcher(pattern)
+        return matcher != null ? matcher.group(1) : null
     }
-    def matcher = manager.getLogMatcher(pattern)
-    return matcher.group(1)
 }
 
 def addDownloadBadge(downloadUrl) {
+    if(downloadUrl == null)
+        return
+
     def artifactName = downloadUrl.replaceAll(".*/(.*)", '$1')
     def summary = manager.createSummary("info.gif")
     summary.appendText("<a href='${downloadUrl}>Link to deployed war: ${artifactName}</a>", false)
@@ -121,9 +137,12 @@ def addDownloadBadge(downloadUrl) {
 }
 
 def updateJobDescription(downloadUrl) {
+    if(downloadUrl == null)
+        return
+
     def latestReleaseLink = "<a href='${downloadUrl}'>Latest released artifact</a>"
     def makePostReleaseBranch = """
-        <form action="/job/taskboard_sdlc/job/master/buildWithParameters" method="POST">
+        <form action="/job/sdlc/job/taskboard/job/${env.BRANCH_NAME}/buildWithParameters" method="POST">
           <input type="hidden" name="RELEASE" value="true">
           <input type="submit" value="New Release">
         </form>

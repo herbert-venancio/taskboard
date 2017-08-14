@@ -1,5 +1,7 @@
 package objective.taskboard.jira;
 
+import static java.util.Arrays.asList;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -91,7 +93,14 @@ public class JiraIssueService {
     public List<Issue> searchIssuesByKeys(final List<String> keys) {
         if (keys.isEmpty())
             return Arrays.asList();
-        return searchIssues("key IN (" + String.join(",", keys) + ")");
+        return searchIssues("key IN (" + String.join(",", keys) + ")", "subtasks");
+    }
+
+    public Issue searchIssueByKey(final String key) {
+        List<Issue> jiraIssues = searchIssuesByKeys(asList(key));
+        if (jiraIssues.isEmpty())
+            return null;
+        return jiraIssues.get(0);
     }
 
     public List<Issue> searchIssueSubTasksAndDemandedByKey(String key) {
@@ -111,7 +120,7 @@ public class JiraIssueService {
         return jiraSearchService.searchIssues(projectsJql);
     }
 
-    private List<Issue> searchIssues(String additionalJqlCondition) {
+    private List<Issue> searchIssues(String additionalJqlCondition, String... additionalFields) {
         List<Filter> filters = filterRepository.getCache();
         List<IssuesConfiguration> configs = filters.stream().map(x -> IssuesConfiguration.fromFilter(x)).collect(Collectors.toList());
 
@@ -119,7 +128,7 @@ public class JiraIssueService {
         if (additionalJqlCondition != null)
             jql = "(" + additionalJqlCondition + ") AND " + jql;
 
-        return jiraSearchService.searchIssues(jql);
+        return jiraSearchService.searchIssues(jql, additionalFields);
     }
 
 }

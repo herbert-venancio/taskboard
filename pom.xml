@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>br.com.objective</groupId>
 	<artifactId>taskboard</artifactId>
-	<version>0.0.21-SNAPSHOT</version>
+	<version>0.0.22-SNAPSHOT</version>
 	<packaging>${packaging.type}</packaging>
 
 	<properties>
@@ -20,7 +20,7 @@
 		<selenium.version>3.4.0</selenium.version>
 		<jira.api.version>4.0.1-OBJ</jira.api.version>
 		<sonar.sources>src/main/java,src/main/resources/static</sonar.sources>
-		<sonar.exclusions>src/main/resources/static/bower_components/**</sonar.exclusions>
+		<sonar.exclusions>src/main/resources/static/bower_components/**,src/main/resources/static/3rd/**</sonar.exclusions>
 		<sonar.junit.reportsPaths>${project.build.directory}/combined-reports</sonar.junit.reportsPaths>
 		<jacoco.reportPath>${project.build.directory}/jacoco-ut.exec</jacoco.reportPath>
 		<jacoco.itReportPath>${project.build.directory}/jacoco-it.exec</jacoco.itReportPath>

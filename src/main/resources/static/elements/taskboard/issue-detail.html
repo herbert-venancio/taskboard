@@ -404,7 +404,6 @@
                 </div>
 
                 <div class="content-box">
-
                     <div class="content-row">
 
                         <div class="column-block issue-type">
@@ -471,6 +470,13 @@
                             </div>
                         </div>
 
+                    </div>
+
+                    <div class="content-row">
+                        <div class="column-block">
+                            <div class="sub-header">Description</div>
+                            <marked-element markdown="{{getDescription(item)}}"></marked-element>
+                        </div>
                     </div>
 
                     <template is="dom-if" if="{{item.customfields.sizes.length}}">
@@ -998,6 +1004,10 @@
                     }
 
                     return responsaveisArray;
+                },
+
+                getDescription: function (issue) {
+                    return issue.description ? jira2md.to_markdown(issue.description) : 'N/A';
                 },
 
                 hasRecords: function (records) {
