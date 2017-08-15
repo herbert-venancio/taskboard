@@ -102,155 +102,144 @@
     <col min="98" max="98" width="14.7109375" bestFit="1" customWidth="1"/>
   </cols>
   <sheetData>
-    <row r="1" spans="1:49" x14ac:dyDescent="0.25">
-      <c r="A1" s="6" t="s">
+    <row r="1" spans="1:45" x14ac:dyDescent="0.25">
+     <c r="A1" s="6" t="s">
         <v>0</v>
-      </c>
-      <c r="B1" t="s">
+     </c>
+     <c r="B1" t="s">
+        <v>11</v>
+     </c>
+     <c r="C1" t="s">
+        <v>12</v>
+     </c>
+     <c r="D1" t="s">
+        <v>13</v>
+     </c>
+     <c r="E1" t="s">
+        <v>160</v>
+     </c>
+     <c r="F1" t="s">
         <v>14</v>
-      </c>
-      <c r="C1" t="s">
-        <v>15</v>
-      </c>
-      <c r="D1" t="s">
-        <v>16</v>
-      </c>
-      <c r="E1" t="s">
-        <v>181</v>
-      </c>
-      <c r="F1" t="s">
-        <v>17</v>
-      </c>
-      <c r="G1" t="s">
-        <v>182</v>
-      </c>
-      <c r="H1" t="s">
-        <v>183</v>
-      </c>
-      <c r="I1" t="s">
-        <v>185</v>
-      </c>
-      <c r="J1" t="s">
-        <v>186</v>
-      </c>
-      <c r="K1" t="s">
-        <v>187</v>
-      </c>
-      <c r="L1" t="s">
-        <v>188</v>
-      </c>
-      <c r="M1" t="s">
-        <v>189</v>
-      </c>
-      <c r="N1" t="s">
-        <v>190</v>
-      </c>
-      <c r="O1" t="s">
-        <v>192</v>
-      </c>
-      <c r="P1" t="s">
-        <v>193</v>
-      </c>
-      <c r="Q1" t="s">
-        <v>194</v>
-      </c>
-      <c r="R1" t="s">
-        <v>195</v>
-      </c>
-      <c r="S1" s="6" t="s">
-        <v>180</v>
-      </c>
-      <c r="T1" s="6" t="s">
-        <v>184</v>
-      </c>
-      <c r="U1" s="6" t="s">
-        <v>191</v>
-      </c>
-      <c r="V1" s="6" t="s">
-        <v>77</v>
-      </c>
-      <c r="W1" s="6" t="s">
+     </c>
+     <c r="G1" t="s">
+        <v>161</v>
+     </c>
+     <c r="H1" t="s">
+        <v>162</v>
+     </c>
+     <c r="I1" t="s">
+        <v>164</v>
+     </c>
+     <c r="J1" t="s">
+        <v>165</v>
+     </c>
+     <c r="K1" t="s">
+        <v>166</v>
+     </c>
+     <c r="L1" t="s">
+        <v>167</v>
+     </c>
+     <c r="M1" t="s">
+        <v>168</v>
+     </c>
+     <c r="N1" t="s">
+        <v>169</v>
+     </c>
+     <c r="O1" t="s">
+        <v>171</v>
+     </c>
+     <c r="P1" t="s">
+        <v>172</v>
+     </c>
+     <c r="Q1" t="s">
+        <v>173</v>
+     </c>
+     <c r="R1" t="s">
+        <v>174</v>
+     </c>
+     <c r="S1" s="6" t="s">
+        <v>159</v>
+     </c>
+     <c r="T1" s="6" t="s">
+        <v>163</v>
+     </c>
+     <c r="U1" s="6" t="s">
+        <v>170</v>
+     </c>
+     <c r="V1" s="6" t="s">
+        <v>61</v>
+     </c>
+     <c r="W1" s="6" t="s">
+        <v>62</v>
+     </c>
+     <c r="X1" s="6" t="s">
+        <v>63</v>
+     </c>
+     <c r="Y1" s="6" t="s">
+        <v>73</v>
+     </c>
+     <c r="Z1" s="6" t="s">
         <v>78</v>
-      </c>
-      <c r="X1" s="6" t="s">
+     </c>
+     <c r="AA1" s="6" t="s">
+        <v>175</v>
+     </c>
+     <c r="AB1" s="6" t="s">
         <v>79</v>
-      </c>
-      <c r="Y1" s="6" t="s">
-        <v>89</v>
-      </c>
-      <c r="Z1" s="6" t="s">
-        <v>94</v>
-      </c>
-      <c r="AA1" s="6" t="s">
-        <v>196</v>
-      </c>
-      <c r="AB1" s="6" t="s">
-        <v>95</v>
-      </c>
-      <c r="AC1" s="6" t="s">
-        <v>124</v>
-      </c>
-      <c r="AD1" s="6" t="s">
-        <v>135</v>
-      </c>
-      <c r="AE1" s="6" t="s">
-        <v>137</v>
-      </c>
-      <c r="AF1" s="6" t="s">
+     </c>
+     <c r="AC1" s="6" t="s">
+        <v>105</v>
+     </c>
+     <c r="AD1" s="6" t="s">
+        <v>114</v>
+     </c>
+     <c r="AE1" s="6" t="s">
+        <v>116</v>
+     </c>
+     <c r="AF1" s="6" t="s">
+        <v>112</v>
+     </c>
+     <c r="AG1" s="6" t="s">
+        <v>113</v>
+     </c>
+     <c r="AH1" s="6" t="s">
+        <v>118</v>
+     </c>
+     <c r="AI1" s="6" t="s">
+        <v>119</v>
+     </c>
+     <c r="AJ1" t="s">
+        <v>72</v>
+     </c>
+     <c r="AK1" t="s">
+        <v>115</v>
+     </c>
+     <c r="AL1" t="s">
         <v>133</v>
-      </c>
-      <c r="AG1" s="6" t="s">
+     </c>
+     <c r="AM1" t="s">
         <v>134</v>
-      </c>
-      <c r="AH1" s="6" t="s">
-        <v>139</v>
-      </c>
-      <c r="AI1" s="6" t="s">
-        <v>140</v>
-      </c>
-      <c r="AJ1" t="s">
-        <v>88</v>
-      </c>
-      <c r="AK1" t="s">
-        <v>136</v>
-      </c>
-      <c r="AL1" t="s">
-        <v>154</v>
-      </c>
-      <c r="AM1" t="s">
-        <v>155</v>
-      </c>
-      <c r="AN1" t="s">
-        <v>34</v>
-      </c>
-      <c r="AO1" t="s">
-        <v>33</v>
-      </c>
-      <c r="AP1" t="s">
+     </c>
+     <c r="AN1" t="s">
+        <v>28</v>
+     </c>
+     <c r="AO1" t="s">
+        <v>27</v>
+     </c>
+     <c r="AP1" t="s">
+        <v>29</v>
+     </c>
+     <c r="AQ1" t="s">
+        <v>26</v>
+     </c>
+     <c r="AR1" t="s">
         <v>36</v>
-      </c>
-      <c r="AQ1" t="s">
-        <v>32</v>
-      </c>
-      <c r="AR1" t="s">
-        <v>44</v>
-      </c>
-      <c r="AS1" t="s">
-        <v>45</v>
-      </c>
-      <c r="AT1" t="s">
-        <v>46</v>
-      </c>
-      <c r="AU1" t="s">
-        <v>47</v>
-      </c>
-      <c r="AV1" t="s">
-        <v>52</v>
-      </c>
-      <c r="AW1" t="s">
-        <v>53</v>
-      </c>
+     </c>
+     <c r="AS1" t="s">
+        <v>37</v>
+     </c>
     </row>
+    
     <row r="2" spans="1:49" x14ac:dyDescent="0.25">
       <c r="A2" t="s">
         <v></v>
@@ -262,49 +251,49 @@
         <v>5</v>
       </c>
       <c r="D2" t="s">
-        <v>208</v>
+        <v>204</v>
       </c>
       <c r="E2" t="s">
-        <v>209</v>
+        <v>205</v>
       </c>
       <c r="F2" t="s">
-        <v>210</v>
+        <v>206</v>
       </c>
       <c r="G2" t="s">
-        <v>211</v>
+        <v>207</v>
       </c>
       <c r="H2" t="s">
         <v>5</v>
       </c>
       <c r="I2" t="s">
-        <v>212</v>
+        <v>208</v>
       </c>
       <c r="J2" t="s">
-        <v>213</v>
+        <v>209</v>
       </c>
       <c r="K2" t="s">
-        <v>214</v>
+        <v>210</v>
       </c>
       <c r="L2" t="s">
-        <v>215</v>
+        <v>211</v>
       </c>
       <c r="M2" t="s">
-        <v>216</v>
+        <v>212</v>
       </c>
       <c r="N2" t="s">
         <v>5</v>
       </c>
       <c r="O2" t="s">
-        <v>217</v>
+        <v>213</v>
       </c>
       <c r="P2" t="s">
-        <v>218</v>
+        <v>214</v>
       </c>
       <c r="Q2" t="s">
-        <v>219</v>
+        <v>215</v>
       </c>
       <c r="R2" t="s">
-        <v>220</v>
+        <v>216</v>
       </c>
       <c r="S2">
         <v>1</v>
@@ -316,10 +305,10 @@
         <v></v>
       </c>
       <c r="V2" t="s">
-        <v>49</v>
+        <v>45</v>
       </c>
       <c r="W2" t="s">
-        <v>106</v>
+        <v>102</v>
       </c>
       <c r="X2">
         <v>0.0</v>
@@ -381,22 +370,10 @@
       <c r="AQ2" s="4">
         <f>IF(AllIssues[[#This Row],[SUBTASK_STATUS]]="Done", AllIssues[[#This Row],[EffortDone]],0)</f>
       </c>
-      <c r="AR2" s="4" t="str">
-        <f>IF(AllIssues[demand_description]="","",VLOOKUP(AllIssues[demand_status],'Ordered Status'!A:B,2, FALSE))</f>
-      </c>
-      <c r="AS2" s="4" t="str">
-        <f>IF(AllIssues[TASK_DESCRIPTION]="","",VLOOKUP(AllIssues[TASK_STATUS],'Ordered Status'!C:D,2, FALSE))</f>
-      </c>
-      <c r="AT2" s="4" t="str">
-        <f>IF(AllIssues[SUBTASK_DESCRIPTION]="","",VLOOKUP(AllIssues[SUBTASK_STATUS],'Ordered Status'!E:F,2, FALSE))</f>
-      </c>
-      <c r="AU2" s="4" t="str">
-        <f>CONCATENATE(AllIssues[SubtaskOrderedStatus]," &gt; ",AllIssues[SUBTASK_FULL_DESCRIPTION])</f>
-      </c>
-      <c r="AV2" s="4">
+      <c r="AR2" s="4">
         <f>IF(AllIssues[TASK_TYPE]="Bug",AllIssues[EffortEstimate], 0)</f>
       </c>
-      <c r="AW2" s="4">
+      <c r="AS2" s="4">
         <f>IF(AllIssues[TASK_TYPE]="Bug",AllIssues[worklog],0)</f>
       </c>
     </row>

@@ -56,11 +56,11 @@ public class FollowUpGeneratorTest {
     public void getSharedStringsInitialTest() throws ParserConfigurationException, SAXException, IOException {
         FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(null);
         Map<String, Long> sharedStrings = subject.getSharedStringsInitial();
-        assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 208, sharedStrings.size());
+        assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 204, sharedStrings.size());
         assertEquals("First shared string", 0, sharedStrings.get("project").longValue());
-        assertEquals("Some special character shared string", 48, sharedStrings.get("Demand Status > Demand > Task Status > Task > Subtask").longValue());
-        assertEquals("Any shared string", 130, sharedStrings.get("Group %").longValue());
-        assertEquals("Last shared string", 207, sharedStrings.get("BALLPARK").longValue());
+        assertEquals("Some special character shared string", 44, sharedStrings.get("Demand Status > Demand > Task Status > Task > Subtask").longValue());
+        assertEquals("Any shared string", 126, sharedStrings.get("Group %").longValue());
+        assertEquals("Last shared string", 203, sharedStrings.get("BALLPARK").longValue());
     }
 
     @Test
@@ -69,16 +69,16 @@ public class FollowUpGeneratorTest {
         FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
 
         Map<String, Long> sharedStrings = subject.getSharedStringsInitial();
-        assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 208, sharedStrings.size());
+        assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 204, sharedStrings.size());
         assertEquals("First shared string", 0, sharedStrings.get("project").longValue());
-        assertEquals("Last shared string", 207, sharedStrings.get("BALLPARK").longValue());
+        assertEquals("Last shared string", 203, sharedStrings.get("BALLPARK").longValue());
 
         subject.generateJiraDataSheet(sharedStrings, emptyArray());
 
-        assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 222, sharedStrings.size());
-        assertEquals("First new shared string", 208, sharedStrings.get("PROJECT TEST").longValue());
-        assertEquals("Any new shared string", 214, sharedStrings.get("Summary Feature").longValue());
-        assertEquals("Last new shared string", 221, sharedStrings.get("Full Description Sub-task").longValue());
+        assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 218, sharedStrings.size());
+        assertEquals("First new shared string", 204, sharedStrings.get("PROJECT TEST").longValue());
+        assertEquals("Any new shared string", 210, sharedStrings.get("Summary Feature").longValue());
+        assertEquals("Last new shared string", 217, sharedStrings.get("Full Description Sub-task").longValue());
     }
 
     @Test
@@ -99,9 +99,9 @@ public class FollowUpGeneratorTest {
 
         Map<String, Long> sharedStrings = subject.getSharedStringsInitial();
 
-        assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 208, sharedStrings.size());
+        assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 204, sharedStrings.size());
         subject.generateJiraDataSheet(sharedStrings, emptyArray());
-        assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 222, sharedStrings.size());
+        assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 218, sharedStrings.size());
 
         String sharedStringsGenerated = subject.generateSharedStrings(sharedStrings);
 

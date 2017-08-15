@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="1170" uniqueCount="208">
+<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="1170" uniqueCount="204">
   <si>
     <t>project</t>
   </si>
@@ -131,18 +131,6 @@
   </si>
   <si>
     <t>Reviewing</t>
-  </si>
-  <si>
-    <t>DemandOrderedStatus</t>
-  </si>
-  <si>
-    <t>TaskOrderedStatus</t>
-  </si>
-  <si>
-    <t>SubtaskOrderedStatus</t>
-  </si>
-  <si>
-    <t>SubtaskOrderedFullDescription</t>
   </si>
   <si>
     <t>Demand Status &gt; Demand &gt; Task Status &gt; Task &gt; Subtask</t>
@@ -394,7 +382,7 @@
     <t>Group %</t>
   </si>
   <si>
-    <t>Count of SubtaskOrderedFullDescription</t>
+    <t>Count of SubtaskFullDescription</t>
   </si>
   <si>
     <t>BALLPARK - Demand</t>

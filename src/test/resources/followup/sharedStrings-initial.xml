@@ -133,18 +133,6 @@
     <t>Reviewing</t>
   </si>
   <si>
-    <t>DemandOrderedStatus</t>
-  </si>
-  <si>
-    <t>TaskOrderedStatus</t>
-  </si>
-  <si>
-    <t>SubtaskOrderedStatus</t>
-  </si>
-  <si>
-    <t>SubtaskOrderedFullDescription</t>
-  </si>
-  <si>
     <t>Demand Status &gt; Demand &gt; Task Status &gt; Task &gt; Subtask</t>
   </si>
   <si>
@@ -394,7 +382,7 @@
     <t>Group %</t>
   </si>
   <si>
-    <t>Count of SubtaskOrderedFullDescription</t>
+    <t>Count of SubtaskFullDescription</t>
   </si>
   <si>
     <t>BALLPARK - Demand</t>
