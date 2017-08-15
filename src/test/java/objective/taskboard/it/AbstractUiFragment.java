@@ -89,8 +89,8 @@ public abstract class AbstractUiFragment {
     protected void waitUntilElementExists(By by) {
         waitUntil(new ExpectedCondition<Boolean>() {
             @Override
-            public Boolean apply(WebDriver input) {
-                return input.findElements(by).size() > 0;
+            public Boolean apply(WebDriver element) {
+                return element.findElements(by).size() > 0;
             }
         });
     }

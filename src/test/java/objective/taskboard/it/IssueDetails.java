@@ -31,11 +31,19 @@ class IssueDetails extends AbstractUiFragment {
         issueDetailRoot = webDriver.findElement(By.cssSelector("paper-card.issue-detail"));
     }
     
-    public void assignToMe() {
+    public IssueDetails assignToMe() {
         waitVisibilityOfElement(issueDetailRoot);
         WebElement assignButton = issueDetailRoot.findElement(By.id("assignButton"));
         waitVisibilityOfElement(assignButton);
         assignButton.click();
+        return this;
+    }
+    
+    public IssueDetails assertAssigneeIs(String name) {
+        waitUntilElementExists(By.className("assignee"));
+        WebElement assigneeElement = issueDetailRoot.findElement(By.className("assignee"));
+        waitTextInElement(assigneeElement, name);
+        return this;
     }
     
     public void assertIsHidden() {
@@ -44,6 +52,7 @@ class IssueDetails extends AbstractUiFragment {
 
     public IssueDetails transitionClick(String transitionName) {
         waitVisibilityOfElement(issueDetailRoot);
+        waitUntilElementExists(By.cssSelector("[data-transition-name='"+transitionName+"']"));
         WebElement transitionButton = issueDetailRoot.findElement(By.cssSelector("[data-transition-name='"+transitionName+"']"));
         waitVisibilityOfElement(transitionButton);
         transitionButton.click();
@@ -57,6 +66,22 @@ class IssueDetails extends AbstractUiFragment {
         WebElement confirmButton = confirmationModal.findElement(By.id("confirm"));
         waitVisibilityOfElement(confirmButton);
         confirmButton.click();
+        return this;
+    }
+
+    public void closeDialog() {
+        issueDetailRoot.findElement(By.className("buttonClose")).click();
+    }
+
+    public IssueDetails assertRefreshWarnIsOpen() {
+        waitUntilElementExists(By.className("glasspane"));
+        return this;
+    }
+
+    public IssueDetails clickOnWarning() {
+        WebElement glasspane = webDriver.findElement(By.className("glasspane"));
+        waitVisibilityOfElement(glasspane);
+        glasspane.click();
         return this;
     }
 }

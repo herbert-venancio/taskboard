@@ -37,6 +37,10 @@ public abstract class AbstractUIWithCoverageIntegrationTest extends AbstractUIIn
 
     @After
     public void saveCoverage() {
+        if (webDriver == null) {
+            System.err.println("Can't save javascript coverage because webdriver is null");
+            return;
+        }
         String coverageReport = (String) ((JavascriptExecutor)webDriver).executeScript("return JSON.stringify(window.__coverage__);");
         File f = new File("target/istanbul-reports/" + testName.getMethodName() + ".json");
         try {
