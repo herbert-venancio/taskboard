@@ -100,3 +100,20 @@ aspectsFilter | Located on sidebar menu, load filter itens from server.
 aspectItemFilter | Itens on aspectFilter (issueType, team, project).
 aspectSubitemFilter | Itens on aspectItemFilter
 filtersPreferences | User defined preferences, aspectSubitensFilter configuration.
+
+
+## Create subtask on transition
+
+It's possible to create a subtask on specific transitions (multiple configurations are supported). Example:
+
+```properties
+jira.subtask-creation[0].issue-type-parent-id=10601                # issue type from the issue being transitioned
+jira.subtask-creation[0].status-id-from=10651                      # transition source status  
+jira.subtask-creation[0].status-id-to=10052                        # transition target status
+jira.subtask-creation[0].issue-type-id=12                          # subtask issue type
+jira.subtask-creation[0].summary-prefix=SUB -                      # prefix for subtask summary
+jira.subtask-creation[0].t-shirt-size-parent-id=customfield_11441  # t-shirt-size customfield used to extract the subtask t-shirt-size
+jira.subtask-creation[0].t-shirt-size-subtask-id=customfield_11457 # t-shirt-size customfield that will be set on subtask
+jira.subtask-creation[0].t-shirt-size-default-value=M              # default t-shirt-size for subtask, if not available on parent (optional)
+jira.subtask-creation[0].transition-id=11                          # transition executed on the subtask (optional)
+```
