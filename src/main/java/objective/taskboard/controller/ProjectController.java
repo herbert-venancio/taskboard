@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import objective.taskboard.controller.ProjectCreationData.ProjectCreationDataTeam;
 import objective.taskboard.data.Team;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.domain.ProjectTeam;
@@ -165,12 +166,25 @@ public class ProjectController {
 
     @RequestMapping(method = RequestMethod.POST, consumes="application/json")
     public void create(@RequestBody ProjectCreationData data) {
-        if (projectExists(data.projectKey))
+        Boolean hasTeamsOnData = data.teams != null && data.teams.size() > 0;
+        if (hasTeamsOnData)
+            validateTeamsDontExist(data.teams);
+        if (projectRepository.exists(data.projectKey))
             return;
         createProjectFilterConfiguration(data.projectKey);
+        if (!hasTeamsOnData)
+            return;
         data.teams.forEach(team -> {
             createTeamAndConfigurations(data.projectKey, team.name, data.teamLeader, data.teamLeader, team.members);
         });
+    }
+
+    private void validateTeamsDontExist(ArrayList<ProjectCreationDataTeam> pcdTeams) {
+        for (ProjectCreationDataTeam pcdTeam : pcdTeams) {
+            Team team = teamRepository.findByName(pcdTeam.name);
+            if (team != null)
+                throw new IllegalArgumentException("Team " + team.getName() + " already exists.");
+        }
     }
 
     private void createProjectFilterConfiguration(String projectKey) {
@@ -187,31 +201,20 @@ public class ProjectController {
 
     private Team createTeam(String name, String manager, String coach, ArrayList<String> members) {
         final Team team = new Team(name, manager, coach, members);
-        Team persistedTeam = teamRepository.save(team);
-        return persistedTeam;
+        return teamRepository.save(team);
     }
 
     private TeamFilterConfiguration createTeamFilterConfiguration(Team team) {
         final TeamFilterConfiguration teamFilterConfiguration = new TeamFilterConfiguration();
         teamFilterConfiguration.setTeamId(team.getId());
-        TeamFilterConfiguration persistedTeamFilter = teamFilterConfigurationRepository.save(teamFilterConfiguration);
-        return persistedTeamFilter;
+        return teamFilterConfigurationRepository.save(teamFilterConfiguration);
     }
 
-    private void createProjectTeam(String projectKey, TeamFilterConfiguration teamFilterConfiguration) {
+    private ProjectTeam createProjectTeam(String projectKey, TeamFilterConfiguration teamFilterConfiguration) {
         final ProjectTeam projectTeam = new ProjectTeam();
         projectTeam.setProjectKey(projectKey);
         projectTeam.setTeamId(teamFilterConfiguration.getTeamId());
-        projectTeamRepo.save(projectTeam);
-    }
-
-    private Boolean projectExists(String projectKey) {
-        final List<ProjectFilterConfiguration> projects = projectRepository.getProjects();
-        for (ProjectFilterConfiguration projectFilterConfiguration : projects) {
-            if (projectFilterConfiguration.getProjectKey().equals(projectKey))
-                return true;
-        }
-        return false;
+        return projectTeamRepo.save(projectTeam);
     }
 
     private String getProjectTeamName(ProjectTeam projectTeam) {

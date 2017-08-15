@@ -39,12 +39,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-
 @Entity
-@NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "TEAM")
 public class Team implements Serializable {
     private static final long serialVersionUID = 1794216649849732935L;
@@ -75,6 +70,25 @@ public class Team implements Serializable {
     @OneToMany(fetch=FetchType.EAGER, cascade=CascadeType.ALL)
     @JoinColumn(name="team", referencedColumnName="name")
     private List<UserTeam> members;
+
+    public Team() {
+    }
+
+    public Team(Long id, String name, String coach, String manager, Date createdAt, Date updatedAt, String nickName,
+            String coachUserName, String jiraEquipe, String jiraSubequipe, List<UserTeam> members) {
+        super();
+        this.id = id;
+        this.name = name;
+        this.coach = coach;
+        this.manager = manager;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.nickName = nickName;
+        this.coachUserName = coachUserName;
+        this.jiraEquipe = jiraEquipe;
+        this.jiraSubequipe = jiraSubequipe;
+        this.members = members;
+    }
 
     public Team(String name, String manager, String coach, ArrayList<String> members) {
         this.name = name;
