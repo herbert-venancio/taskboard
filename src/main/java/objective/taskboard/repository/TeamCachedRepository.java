@@ -26,15 +26,17 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.data.Team;
 
-@Slf4j
 @Service
 public class TeamCachedRepository {
+
+    private static final Logger log = LoggerFactory.getLogger(TeamCachedRepository.class);
 
     @Autowired
     private TeamRepository teamRepository;
@@ -49,7 +51,7 @@ public class TeamCachedRepository {
     public List<Team> getCache() {
         return cache;
     }
-    
+
     public Team findByName(String teamName) {
         for (Team team : cache) {
             if (team.getName().equals(teamName))
@@ -57,13 +59,19 @@ public class TeamCachedRepository {
         }
         return null;
     }
-    
+
     public Team findById(Long teamId) {
         for (Team team : cache) {
             if (team.getId().equals(teamId))
                 return team;
         }
         return null;
+    }
+
+    public Boolean existis(String teamName) {
+        if (findByName(teamName) != null)
+            return true;
+        return false;
     }
 
     public void loadCache() {

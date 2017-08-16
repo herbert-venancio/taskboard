@@ -25,18 +25,20 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
-import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 
-@Slf4j
 @Service
 public class ProjectFilterConfigurationCachedRepository {
+
+    private static final Logger log = LoggerFactory.getLogger(ProjectFilterConfigurationCachedRepository.class);
 
     @Autowired
     private ProjectFilterConfigurationRepository projectFilterRepository;
@@ -50,6 +52,14 @@ public class ProjectFilterConfigurationCachedRepository {
 
     public List<ProjectFilterConfiguration> getProjects() {
         return ImmutableList.copyOf(cache);
+    }
+
+    public Boolean exists(String projectKey) {
+        for (ProjectFilterConfiguration projectFilterConfiguration : cache) {
+            if (projectFilterConfiguration.getProjectKey().equals(projectKey))
+                return true;
+        }
+        return false;
     }
 
     public void loadCache() {
