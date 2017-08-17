@@ -33,6 +33,17 @@ public class MetadataService {
         return cache.getIssueLinksMetadata();
     }
 
+    public IssueType getIssueTypeById(Long id) {
+        try {
+            IssueType issueType = getIssueTypeMetadata().get(id);
+            if (issueType == null)
+                throw new IllegalArgumentException("There's no Issue Type with given ID: " + id);
+            return issueType;
+        } catch (InterruptedException | ExecutionException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     public Status getStatusById(Long id) {
         try {
             Status status = getStatusesMetadata().get(id);

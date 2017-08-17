@@ -23,6 +23,7 @@ package objective.taskboard.followup.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -103,6 +104,8 @@ public class FollowUpDataProviderFromCurrentStateTest {
         statusMap.put(statusCancelled,  new Status(null, statusCancelled,  "Cancelled", null, null));
         statusMap.put(statusDone,       new Status(null, statusDone,       "Done", null, null));
         when(metadataService.getStatusesMetadata()).thenReturn(statusMap );
+        when(metadataService.getStatusById(anyLong())).thenCallRealMethod();
+        when(metadataService.getIssueTypeById(anyLong())).thenCallRealMethod();
         
         Map<Long, IssueType> issueTypeMap = new LinkedHashMap<>();
         issueTypeMap.put(demandIssueType, new IssueType(null, demandIssueType, "Demand", false, null,null));

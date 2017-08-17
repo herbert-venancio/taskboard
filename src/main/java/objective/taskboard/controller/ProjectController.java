@@ -207,7 +207,7 @@ public class ProjectController {
         for (ProjectCreationDataWip newWipConfig : team.wipConfigurations) {
             String statusName = metadataService.getStatusById(newWipConfig.statusId).getName();
             for (WipConfiguration wipConfiguration : wipConfigurations) {
-                if (wipConfiguration.getStatus().equals(statusName));
+                if (wipConfiguration.getStatus().equals(statusName))
                     throw new IllegalArgumentException("WIP Configuration status '"
                             + statusName + " (" + newWipConfig.statusId + ")'"
                             + " for Team '" + team.name + "' already exists.");

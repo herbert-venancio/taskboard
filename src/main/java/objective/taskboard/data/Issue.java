@@ -25,7 +25,6 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import com.atlassian.jira.rest.client.api.domain.TimeTracking;
@@ -369,11 +368,7 @@ public class Issue implements Serializable {
     
     @JsonIgnore
     public String getIssueTypeName() {
-        try {
-            return metaDataService.getIssueTypeMetadata().get(type).getName();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new IllegalStateException(e);
-        }
+        return metaDataService.getIssueTypeById(type).getName();
     }
     
     @JsonIgnore
