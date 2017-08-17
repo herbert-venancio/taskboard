@@ -22,18 +22,19 @@
 
     <style is="custom-style">
         :host {
-        	margin-top: 5px;
-			display: flex;
+            margin-top: 5px;
+            display: flex;
         }
 
-		.sortable-issue-item {
-			width: calc(100% - 6px);
-			margin-right: 3px;
-			margin-left: 3px;
-		}
+        .sortable-issue-item {
+            width: calc(100% - 6px);
+            margin-right: 3px;
+            margin-left: 3px;
+        }
+
         .issue {
-        	height: 100%;
-        	padding: 8px;
+            height: 100%;
+            padding: 8px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -55,7 +56,7 @@
         }
 
         .top {
-        	margin-bottom: 5px;
+            margin-bottom: 5px;
             display: flex;
             flex-direction: row;
             flex-wrap: wrap;
@@ -75,7 +76,7 @@
         }
 
         .filterButton paper-icon-button {
-			opacity: 0.7;
+            opacity: 0.7;
         }
 
         .filterButton:hover {
@@ -89,7 +90,7 @@
         }
 
         .bottom {
-        	margin-top: auto;
+            margin-top: auto;
             display: flex;
             justify-content: flex-start;
         }
@@ -176,10 +177,10 @@
             width: 25px;
             height: 25px;
             display: block;
-		    position: absolute;
-		    top: 50%;
-		    left: 50%;
-		    transform: translate(-50%, -50%);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
 
         paper-spinner {
@@ -212,81 +213,81 @@
         .icon-issuetype {
             z-index: 0;
         }
-        
+
         .issue-UPDATED {
-        	box-shadow: inset 0 0 10px #acac00
+            box-shadow: inset 0 0 10px #acac00
         }
-        
+
         .issue-DELETED {
-        	border: 3px solid #c67575
+            border: 3px solid #c67575
         }
     </style>
 
     <template>
-	    <div class="sortable-issue-item">
-	    	<input type="hidden" name="issueKey" value="{{item.issueKey}}" />
-	        <iron-ajax id="ajax"
-	                   method="POST"
-	                   url="/ws/issues/assign"
-	                   content-type='application/json'
-	                   body="{{item}}"
-	                   headers='{"Content-Type": "application/json"}'>
-	        </iron-ajax>
+        <div class="sortable-issue-item">
+            <input type="hidden" name="issueKey" value="{{item.issueKey}}" />
+            <iron-ajax id="ajax"
+                       method="POST"
+                       url="/ws/issues/assign"
+                       content-type='application/json'
+                       body="{{item}}"
+                       headers='{"Content-Type": "application/json"}'>
+            </iron-ajax>
             <iron-signals on-iron-signal-hierarchical-filter-changed="forceRefreshHierarchyMatch" 
                           on-iron-signal-issues-updated="updateIssue"
                           on-iron-signal-clear-highlight="clearHighlight"
                           ></iron-signals>
-	        <paper-material id="issueCard" class$="issue {{getClasses(item.hierarchyMatch, item.issueKey)}} {{highlightClass}}" elevation="0" style$="{{getIssueColor(item)}}"
-	                        on-tap="opendialog" title="Issue details">
-	                        
-	            <template is="dom-if" if="{{issueImpedida(item)}}">
-	                <div class="impedida">
-	                    <iron-icon id="issueImpedidaIcon" class="iconImpedidaCancelada" icon="av:not-interested"
-	                               title="Blocked issue. Last Block Reason: {{item.customfields.lastBlockReason}}"></iron-icon>
-	                </div>
-	            </template>
-	
-	            <template is="dom-if" if="{{issueCancelada(item)}}">
-	                <div class="cancelada">
-	                    <iron-icon id="issueCanceladaIcon" class="iconImpedidaCancelada" icon="warning"
-	                               title="Canceled issue"></iron-icon>
-	                </div>
-	            </template>
-	
-	            <div class="top">
+            <paper-material id="issueCard" class$="issue {{getClasses(item.hierarchyMatch, item.issueKey)}} {{highlightClass}}" elevation="0" style$="{{getIssueColor(item)}}"
+                            on-tap="opendialog" title="Issue details">
+
+                <template is="dom-if" if="{{issueImpedida(item)}}">
+                    <div class="impedida">
+                        <iron-icon id="issueImpedidaIcon" class="iconImpedidaCancelada" icon="av:not-interested"
+                                   title="Blocked issue. Last Block Reason: {{item.customfields.lastBlockReason}}"></iron-icon>
+                    </div>
+                </template>
+
+                <template is="dom-if" if="{{issueCancelada(item)}}">
+                    <div class="cancelada">
+                        <iron-icon id="issueCanceladaIcon" class="iconImpedidaCancelada" icon="warning"
+                                   title="Canceled issue"></iron-icon>
+                    </div>
+                </template>
+
+                <div class="top">
                     <div class="module"><p>{{getEllipsis(item.summary)}}</p></div>
-	            </div>
-	
-	            <div class="bottom">
-	                <div class="info-issue">
-	                    <template is="dom-if" if="{{getOnlyOneSize(item.customfields.sizes)}}">
-	                        <div class="size">
-	                            <span class="issue-size">{{getOnlyOneSize(item.customfields.sizes)}}</span>
-	                        </div>
-	                    </template>
-	
-	                    <div class="key" on-tap="openJira" data-issue-key$="{{item.issueKey}}" title="Open in jira">{{item.issueKey}}</div>
-	                </div>
-	                <div class="icons">
-	                    <img id="issueTypeIcon" class="icon-small icon-issuetype"
-	                         title$="- {{item.issueKey}}&#010;- {{getIssueTypeName(item.type)}}&#010;- {{getStatusName(item.status)}}"
-	                         src$="{{getIssueTypeImage(item)}}"/>
-	                    <template is="dom-if" if="{{item.subresponsavel1}}">
-	                        <img id="assignee1" class="icon-small" src$="{{item.subresponsavel1}}"/>
-	                    </template>
-	                    <template is="dom-if" if="{{subResponsavelNotEquals(item)}}">
-	                        <img id="assignee2" class="icon-small" src$="{{item.subresponsavel2}}"/>
-	                    </template>
-	                </div>
-	            </div>
-	
-	            <div class="filterButton">
-	                <paper-icon-button id="filterButton" alt="Apply Filter" class="filterIcon" icon="taskboard-icons:filter"
-	                                   on-tap="hierarchyFilterClick" title="Apply hierarchical filter"></paper-icon-button>
-	            </div>
-	
-	        </paper-material>
-	    </div>
+                </div>
+
+                <div class="bottom">
+                    <div class="info-issue">
+                        <template is="dom-if" if="{{getOnlyOneSize(item.customfields.sizes)}}">
+                            <div class="size">
+                                <span class="issue-size">{{getOnlyOneSize(item.customfields.sizes)}}</span>
+                            </div>
+                        </template>
+
+                        <div class="key" on-tap="openJira" data-issue-key$="{{item.issueKey}}" title="Open in jira">{{item.issueKey}}</div>
+                    </div>
+                    <div class="icons">
+                        <img id="issueTypeIcon" class="icon-small icon-issuetype"
+                             title$="- {{item.issueKey}}&#010;- {{getIssueTypeName(item.type)}}&#010;- {{getStatusName(item.status)}}"
+                             src$="{{getIssueTypeImage(item)}}"/>
+                        <template is="dom-if" if="{{item.subresponsavel1}}">
+                            <img id="assignee1" class="icon-small" src$="{{item.subresponsavel1}}"/>
+                        </template>
+                        <template is="dom-if" if="{{subResponsavelNotEquals(item)}}">
+                            <img id="assignee2" class="icon-small" src$="{{item.subresponsavel2}}"/>
+                        </template>
+                    </div>
+                </div>
+
+                <div class="filterButton">
+                    <paper-icon-button id="filterButton" alt="Apply Filter" class="filterIcon" icon="taskboard-icons:filter"
+                                       on-tap="hierarchyFilterClick" title="Apply hierarchical filter"></paper-icon-button>
+                </div>
+
+            </paper-material>
+        </div>
     </template>
 
     <script>
@@ -304,37 +305,36 @@
                         type: Boolean
                     },
                     highlightClass: {
-                    	type: String
+                        type: String
                     },
                     boardstepid: {
                         type: String
                     }
                 },
-                
+
                 attached: function() {
-                   	var self = this; 
-                   
-                   	this.async(function() {
-                   	    if (typeof self.item === 'undefined')
-                   	        return;
-                   	 	if (typeof this.item.__eventInfo === 'undefined') 
-                    		return;
-                        
+                       var self = this;
+                       this.async(function() {
+                           if (typeof self.item === 'undefined')
+                               return;
+                           if (typeof this.item.__eventInfo === 'undefined')
+                               return;
+
                         self.highlightChangedIssue();
                     });
                 },
-                
+
                 itemChanged: function() {
                     if (typeof this.item.__eventInfo === 'undefined')
                         return;
-                    
+
                     var belongsToThisStep = this.boardstepid == taskboard.getIssueStep(this.item).id;
                     if (!belongsToThisStep)
                         return;
-                    
+
                     this.highlightChangedIssue();
                 },
-                
+
                 highlightChangedIssue: function() {
                     var self = this;
                     var eventInfo = this.item.__eventInfo;
@@ -348,14 +348,14 @@
                     else {
                         // when an issue update comes from client, it means it is the result of user's action.
                         // in this case, we make sure to scroll and make the issue visible
-                     	parent.animate({scrollTop: 
-                      	   $(self.$.issueCard).offset().top - $(parent).offset().top - (calcViewportHeight($(parent)) - $(self.$.issueCard).height())/2
-                      	})
+                        parent.animate({scrollTop:
+                                $(self.$.issueCard).offset().top - $(parent).offset().top - (calcViewportHeight($(parent)) - $(self.$.issueCard).height()) / 2
+                            })
                     }
                     
                     flash($(this.$.issueCard), "yellow");
                 },
-                
+
                 clearHighlight: function() {
                     this.set("highlightClass", "")
                 },
@@ -369,8 +369,7 @@
                 },
 
                 getUriImage: function (issue) {
-                    return 'images/projetos/logo_' + issue.project.toLowerCase()
-                            + '.png';
+                    return 'images/projetos/logo_' + issue.project.toLowerCase() + '.png';
                 },
 
                 getIssueTypeImage: function (issue) {
@@ -378,8 +377,8 @@
                 },
 
                 openJira: function (event) {
-                	event.stopPropagation();
-                	var issueKey = event.target.getAttribute('data-issue-key');
+                    event.stopPropagation();
+                    var issueKey = event.target.getAttribute('data-issue-key');
                     var win = window.open(window.urlJira + '/browse/' + issueKey, '_blank');
                 },
 
@@ -414,12 +413,12 @@
                     this.set('item.hierarchyMatch', !bkp);
                     this.set('item.hierarchyMatch', bkp);
                 },
-                
+
                 updateIssue: function(event) {
-                	if (event.detail.issue.issueKey !== this.item.issueKey)
-                		return;
-                	
-                	this.item = event.detail.issue;
+                    if (event.detail.issue.issueKey !== this.item.issueKey)
+                        return;
+
+                    this.item = event.detail.issue;
                 },
 
                 getIssueColor: function (issue) {
@@ -459,7 +458,7 @@
                     return string.length > 60 ? string.substring(0, 60) + "..." : string;
                 }
             });
-            
+
             function calcViewportHeight($el) {
                 var elH = $el.outerHeight(),
                     H   = $(window).height(),
