@@ -110,15 +110,15 @@ public class Issue implements Serializable {
     private List<String> components;
 
     @JsonProperty(access = Access.WRITE_ONLY)
-    private Map<String, Object> customFields;
+    private Map<String, Serializable> customFields;
 
     private Long priorityOrder;
 
     private TaskboardTimeTracking timeTracking;
 
-    private JiraProperties jiraProperties;
-
-    private MetadataService metaDataService;
+    private transient JiraProperties jiraProperties;
+    
+    private transient MetadataService metaDataService;
 
     public static Issue from(Long id,
             String issueKey,
@@ -147,8 +147,8 @@ public class Issue implements Serializable {
             List<String> teams,
             String comments,
             List<String> labels,
-            List<String> components,
-            Map<String, Object> customFields,
+            List<String> components, 
+            Map<String, Serializable> customFields,
             Long priorityOrder,
             TaskboardTimeTracking timeTracking,
             JiraProperties jiraProperties,
@@ -191,8 +191,9 @@ public class Issue implements Serializable {
                 metaDataService,
                 updatedDate);
     }
-
-    public static class TaskboardTimeTracking {
+    
+    public static class TaskboardTimeTracking implements Serializable {
+        private static final long serialVersionUID = 6559922928445540685L;
         private Integer originalEstimateMinutes;
         private Integer timeSpentMinutes;
 
@@ -240,7 +241,7 @@ public class Issue implements Serializable {
     }
 
     @JsonAnyGetter
-    public Map<String, Object> getCustomFields() {
+    public Map<String, Serializable> getCustomFields() {
         return customFields;
     }
 
@@ -254,7 +255,7 @@ public class Issue implements Serializable {
             String parent, long parentType, String parentTypeIconUri, List<String> dependencies, boolean render,
             boolean favorite, boolean hidden, String color, String subResponsaveis, String assignee, String usersTeam,
             long priority, Date dueDate, long created, String description, List<String> teams, String comments,
-            List<String> labels, List<String> components, Map<String, Object> customFields, Long priorityOrder,
+            List<String> labels, List<String> components, Map<String, Serializable> customFields, Long priorityOrder, 
             TaskboardTimeTracking timeTracking,
             JiraProperties properties,
             MetadataService metaDataService,
@@ -653,7 +654,7 @@ public class Issue implements Serializable {
         this.components = components;
     }
 
-    public void setCustomFields(final Map<String, Object> customFields) {
+    public void setCustomFields(final Map<String, Serializable> customFields) {
         this.customFields = customFields;
     }
 

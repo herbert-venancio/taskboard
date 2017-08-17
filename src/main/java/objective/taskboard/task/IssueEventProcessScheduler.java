@@ -58,8 +58,8 @@ public class IssueEventProcessScheduler {
     @Autowired
     private WebhookSubtaskCreatorService webhookSubtaskCreatorService;
 
-    private static final long RATE_MILISECONDS = 1 * 1000;
-
+    private static final long RATE_MILISECONDS = 1000l;
+    
     List<Item> list = Collections.synchronizedList(new ArrayList<Item>());
 
     private class Item {
