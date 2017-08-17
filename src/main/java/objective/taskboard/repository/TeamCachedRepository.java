@@ -68,7 +68,7 @@ public class TeamCachedRepository {
         return null;
     }
 
-    public Boolean existis(String teamName) {
+    public Boolean exists(String teamName) {
         if (findByName(teamName) != null)
             return true;
         return false;

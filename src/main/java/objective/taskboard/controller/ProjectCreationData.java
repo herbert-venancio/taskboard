@@ -27,8 +27,15 @@ public class ProjectCreationData {
     public String projectKey;
     public String teamLeader;
     public ArrayList<ProjectCreationDataTeam> teams;
+
     public static class ProjectCreationDataTeam {
         public String name;
         public ArrayList<String> members;
+        public ArrayList<ProjectCreationDataWip> wipConfigurations;
+    }
+
+    public static class ProjectCreationDataWip {
+        public Long statusId;
+        public Integer wip;
     }
 }

@@ -32,7 +32,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -314,11 +313,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
     }
     
     private String getBallparkStatus() {
-        try {
-            return metadataService.getStatusesMetadata().get(jiraProperties.getFollowup().getBallparkDefaultStatus()).getName();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new IllegalStateException(e);
-        }
+        return metadataService.getStatusById(jiraProperties.getFollowup().getBallparkDefaultStatus()).getName();
     }
 
     private FollowUpData createSubTaskFollowup(Issue demand, Issue task, Issue subtask) {

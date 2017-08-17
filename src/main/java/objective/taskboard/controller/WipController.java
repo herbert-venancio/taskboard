@@ -80,7 +80,6 @@ public class WipController {
         for (WipUpdateData wipUpdateData : update) {
             updateWip(wipUpdateData.team, wipUpdateData);
         }
-    
         return ResponseEntity.ok().build();
     }
     
@@ -95,10 +94,7 @@ public class WipController {
         }
         // create non existing status
         for (Entry<String, Integer> newWip : update.statusWip.entrySet()) {
-            WipConfiguration wipConfiguration = new WipConfiguration();
-            wipConfiguration.setTeam(teamName);
-            wipConfiguration.setStatus(newWip.getKey());
-            wipConfiguration.setWip(newWip.getValue());
+            WipConfiguration wipConfiguration = new WipConfiguration(teamName, newWip.getKey(), newWip.getValue());
             wipConfigRepo.save(wipConfiguration);
         }
     }

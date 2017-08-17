@@ -26,23 +26,43 @@ import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import lombok.Getter;
-import lombok.Setter;
-
 @Entity
 @Table(name = "wip_config")
 public class WipConfiguration extends TaskboardEntity implements Serializable {
+
     private static final long serialVersionUID = -7054505295750531721L;
 
-    @Setter
-    @Getter
     protected String team;
-    
-    @Setter
-    @Getter
     protected String status;
-    
-    @Setter
-    @Getter
     protected Integer wip;
+
+    public WipConfiguration() {
+    }
+
+    public WipConfiguration(String team, String status, Integer wip) {
+        super();
+        this.team = team;
+        this.status = status;
+        this.wip = wip;
+    }
+
+    public String getTeam() {
+        return team;
+    }
+    public void setTeam(String team) {
+        this.team = team;
+    }
+    public String getStatus() {
+        return status;
+    }
+    public void setStatus(String status) {
+        this.status = status;
+    }
+    public Integer getWip() {
+        return wip;
+    }
+    public void setWip(Integer wip) {
+        this.wip = wip;
+    }
+
 }

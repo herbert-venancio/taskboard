@@ -378,11 +378,7 @@ public class Issue implements Serializable {
     
     @JsonIgnore
     public String getStatusName() {
-        try {
-            return metaDataService.getStatusesMetadata().get(status).getName();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new IllegalStateException(e);
-        }
+        return metaDataService.getStatusById(status).getName();
     }
 
     @JsonIgnore
