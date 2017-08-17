@@ -36,7 +36,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 
 import com.safaribooks.junitattachments.CaptureFile;
 import com.safaribooks.junitattachments.RecordAttachmentRule;
-import org.openqa.selenium.firefox.FirefoxProfile;
+import org.openqa.selenium.firefox.FirefoxOptions;
 
 public abstract class AbstractUIIntegrationTest extends AbstractIntegrationTest {
     protected WebDriver webDriver;
@@ -51,9 +51,11 @@ public abstract class AbstractUIIntegrationTest extends AbstractIntegrationTest 
         
         super.setup();
 
-        FirefoxProfile profile = new FirefoxProfile();
-        profile.setPreference("dom.file.createInChild", true);
-        webDriver = new FirefoxDriver(profile);
+        FirefoxOptions options = new FirefoxOptions();
+        options.addPreference("dom.file.createInChild", true);
+        options.addPreference("browser.link.open_newwindow", 3);
+        options.addPreference("browser.link.open_newwindow.restriction", 2);
+        webDriver = new FirefoxDriver(options);
         webDriver.manage().window().setSize(new Dimension(1280,1080));
     }
     
