@@ -189,7 +189,7 @@ public class ProjectController {
         });
     }
 
-    private void validateTeamsAndWipConfigurations(ArrayList<ProjectCreationDataTeam> pcdTeams) {
+    private void validateTeamsAndWipConfigurations(List<ProjectCreationDataTeam> pcdTeams) {
         for (ProjectCreationDataTeam pcdTeam : pcdTeams) {
             validateTeamDontExist(pcdTeam.name);
             if(pcdTeam.wipConfigurations != null && !pcdTeam.wipConfigurations.isEmpty())
@@ -207,7 +207,7 @@ public class ProjectController {
         for (ProjectCreationDataWip newWipConfig : team.wipConfigurations) {
             String statusName = metadataService.getStatusById(newWipConfig.statusId).getName();
             for (WipConfiguration wipConfiguration : wipConfigurations) {
-                if (wipConfiguration.getStatus() == statusName);
+                if (wipConfiguration.getStatus().equals(statusName));
                     throw new IllegalArgumentException("WIP Configuration status '"
                             + statusName + " (" + newWipConfig.statusId + ")'"
                             + " for Team '" + team.name + "' already exists.");
@@ -221,7 +221,7 @@ public class ProjectController {
         projectRepository.save(configuration);
     }
 
-    private void createTeamAndConfigurations(String projectKey, String teamName, String manager, String coach, ArrayList<String> members, ArrayList<ProjectCreationDataWip> wipConfigurations) {
+    private void createTeamAndConfigurations(String projectKey, String teamName, String manager, String coach, List<String> members, List<ProjectCreationDataWip> wipConfigurations) {
         Team team = createTeam(teamName, manager, coach, members);
         TeamFilterConfiguration teamFilterConfiguration = createTeamFilterConfiguration(team);
         createProjectTeam(projectKey, teamFilterConfiguration);
@@ -229,7 +229,7 @@ public class ProjectController {
             createTeamWipConfigurations(team, wipConfigurations);
     }
 
-    private Team createTeam(String name, String manager, String coach, ArrayList<String> members) {
+    private Team createTeam(String name, String manager, String coach, List<String> members) {
         final Team team = new Team(name, manager, coach, members);
         return teamRepository.save(team);
     }
@@ -247,7 +247,7 @@ public class ProjectController {
         return projectTeamRepo.save(projectTeam);
     }
 
-    private void createTeamWipConfigurations(Team team, ArrayList<ProjectCreationDataWip> wipConfigurations) {
+    private void createTeamWipConfigurations(Team team, List<ProjectCreationDataWip> wipConfigurations) {
         for (ProjectCreationDataWip newWipConfiguration : wipConfigurations) {
             String statusName = metadataService.getStatusById(newWipConfiguration.statusId).getName();
             WipConfiguration wipConfiguration = new WipConfiguration(team.getName(), statusName, newWipConfiguration.wip);

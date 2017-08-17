@@ -23,7 +23,6 @@ package objective.taskboard.data;
 
 import java.io.Serializable;
 import java.sql.Date;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -90,14 +89,14 @@ public class Team implements Serializable {
         this.members = members;
     }
 
-    public Team(String name, String manager, String coach, ArrayList<String> members) {
+    public Team(String name, String manager, String coach, List<String> members) {
         this.name = name;
         this.manager = manager;
         this.coach = coach;
         this.members = stringListToUserTeamList(members);
     }
 
-    private List<UserTeam> stringListToUserTeamList(ArrayList<String> members) {
+    private List<UserTeam> stringListToUserTeamList(List<String> members) {
         return members.stream()
                 .filter(Objects::nonNull)
                 .distinct()

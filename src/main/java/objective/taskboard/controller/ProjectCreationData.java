@@ -1,6 +1,6 @@
 package objective.taskboard.controller;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /*-
  * [LICENSE]
@@ -26,12 +26,12 @@ import java.util.ArrayList;
 public class ProjectCreationData {
     public String projectKey;
     public String teamLeader;
-    public ArrayList<ProjectCreationDataTeam> teams;
+    public List<ProjectCreationDataTeam> teams;
 
     public static class ProjectCreationDataTeam {
         public String name;
-        public ArrayList<String> members;
-        public ArrayList<ProjectCreationDataWip> wipConfigurations;
+        public List<String> members;
+        public List<ProjectCreationDataWip> wipConfigurations;
     }
 
     public static class ProjectCreationDataWip {
