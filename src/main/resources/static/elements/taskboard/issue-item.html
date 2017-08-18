@@ -40,11 +40,13 @@
             overflow: hidden;
             cursor: pointer;
             border-radius: 3px;
+            transition: all 0.3s ease;
         }
 
         .issue:hover {
             -webkit-filter: brightness(90%);
             -moz-filter: brightness(90%);
+            transition: all 0.3s ease;
         }
 
         .issue.dependency {
@@ -52,7 +54,8 @@
         }
 
         .issue.root {
-            border: 2px solid black;
+            outline: 2px solid #000;
+            transition: all 0.3s ease;
         }
 
         .top {
@@ -73,14 +76,27 @@
             top: 2px;
             right: 2px;
             border-radius: 5px;
+            transition: all 0.3s ease;
         }
 
-        .filterButton paper-icon-button {
+        .issue:hover .filterButton {
+            opacity: 1;
+            transition: all 0.3s ease;
+        }
+
+        .issue.root .filterButton {
             opacity: 0.7;
+            background: #000;
+            transition: all 0.3s ease;
+        }
+
+        .issue.root .filterIcon {
+            color: #FFF;
         }
 
         .filterButton:hover {
             background: rgba(0, 0, 0, 0.18);
+            transition: all 0.3s ease;
         }
 
         .filterIcon {
@@ -107,10 +123,12 @@
         .key {
             font-size: 11px;
             font-weight: bold;
+            transition: all 0.3s ease;
         }
 
         .key:hover {
             background: rgba(0, 0, 0, 0.18);
+            transition: all 0.3s ease;
         }
 
         .icons {
