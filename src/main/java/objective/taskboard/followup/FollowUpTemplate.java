@@ -1,5 +1,3 @@
-package objective.taskboard.followup;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,11 +18,10 @@ package objective.taskboard.followup;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.followup;
 
-import lombok.Getter;
 import org.springframework.core.io.Resource;
 
-@Getter
 public class FollowUpTemplate {
 
     private Resource pathSharedStringsInitial;
@@ -49,5 +46,33 @@ public class FollowUpTemplate {
         this.pathSheet7RowTemplate = pathSheet7RowTemplate;
         this.pathFollowupTemplateXLSM = pathFollowupTemplateXLSM;
         this.pathTable7Template = pathTable7Template;
+    }
+
+    public Resource getPathSharedStringsInitial() {
+        return this.pathSharedStringsInitial;
+    }
+
+    public Resource getPathSharedStringsTemplate() {
+        return this.pathSharedStringsTemplate;
+    }
+
+    public Resource getPathSISharedStringsTemplate() {
+        return this.pathSISharedStringsTemplate;
+    }
+
+    public Resource getPathSheet7Template() {
+        return this.pathSheet7Template;
+    }
+
+    public Resource getPathSheet7RowTemplate() {
+        return this.pathSheet7RowTemplate;
+    }
+
+    public Resource getPathFollowupTemplateXLSM() {
+        return this.pathFollowupTemplateXLSM;
+    }
+
+    public Resource getPathTable7Template() {
+        return this.pathTable7Template;
     }
 }

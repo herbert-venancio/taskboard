@@ -18,12 +18,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
-
 package objective.taskboard.followup;
 
-import lombok.extern.slf4j.Slf4j;
-import objective.taskboard.utils.IOUtilities;
-import objective.taskboard.utils.XmlUtils;
+import static java.util.stream.Collectors.toList;
+import static objective.taskboard.utils.IOUtilities.write;
+import static objective.taskboard.utils.ZipUtils.unzip;
+import static objective.taskboard.utils.ZipUtils.zip;
+import static org.apache.commons.lang.ObjectUtils.defaultIfNull;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -35,24 +47,11 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import objective.taskboard.utils.IOUtilities;
+import objective.taskboard.utils.XmlUtils;
 
-import static java.util.stream.Collectors.toList;
-import static objective.taskboard.utils.IOUtilities.write;
-import static objective.taskboard.utils.ZipUtils.unzip;
-import static objective.taskboard.utils.ZipUtils.zip;
-import static org.apache.commons.lang.ObjectUtils.defaultIfNull;
-
-@Slf4j
 public class FollowUpGenerator {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FollowUpGenerator.class);
 
     private static final String PROPERTY_XML_SPACE_PRESERVE = " xml:space=\"preserve\"";
     private static final String TAG_T_IN_SHARED_STRINGS = "t";

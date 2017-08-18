@@ -1,5 +1,3 @@
-package objective.taskboard.domain.serializer;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,25 +18,20 @@ package objective.taskboard.domain.serializer;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
-
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+package objective.taskboard.domain.serializer;
 
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-@NoArgsConstructor
-@AllArgsConstructor
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+
 public class DateDeserializer extends JsonDeserializer<Date> {
 
-    @Setter
     private SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
 
     @Override
@@ -50,4 +43,15 @@ public class DateDeserializer extends JsonDeserializer<Date> {
         }
     }
 
+    public DateDeserializer() {
+    }
+
+    @java.beans.ConstructorProperties({"format"})
+    public DateDeserializer(final SimpleDateFormat format) {
+        this.format = format;
+    }
+
+    public void setFormat(final SimpleDateFormat format) {
+        this.format = format;
+    }
 }

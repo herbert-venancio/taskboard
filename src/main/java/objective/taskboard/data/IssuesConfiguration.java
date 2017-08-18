@@ -1,5 +1,3 @@
-package objective.taskboard.data;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,13 +18,10 @@ package objective.taskboard.data;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.data;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import objective.taskboard.domain.Filter;
 
-@Data
-@NoArgsConstructor
 public class IssuesConfiguration {
 
     private long issueType;
@@ -64,4 +59,59 @@ public class IssuesConfiguration {
         return issue.getType() == getIssueType() && issue.getStatus() == getStatus();
     }
 
+    public long getIssueType() {
+        return this.issueType;
+    }
+
+    public long getStatus() {
+        return this.status;
+    }
+
+    public String getLimitInDays() {
+        return this.limitInDays;
+    }
+
+    public void setIssueType(final long issueType) {
+        this.issueType = issueType;
+    }
+
+    public void setStatus(final long status) {
+        this.status = status;
+    }
+
+    public void setLimitInDays(final String limitInDays) {
+        this.limitInDays = limitInDays;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IssuesConfiguration that = (IssuesConfiguration) o;
+
+        if (issueType != that.issueType) return false;
+        if (status != that.status) return false;
+        return limitInDays != null ? limitInDays.equals(that.limitInDays) : that.limitInDays == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (issueType ^ (issueType >>> 32));
+        result = 31 * result + (int) (status ^ (status >>> 32));
+        result = 31 * result + (limitInDays != null ? limitInDays.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "IssuesConfiguration{" +
+                "issueType=" + issueType +
+                ", status=" + status +
+                ", limitInDays='" + limitInDays + '\'' +
+                '}';
+    }
+
+    public IssuesConfiguration() {
+    }
 }

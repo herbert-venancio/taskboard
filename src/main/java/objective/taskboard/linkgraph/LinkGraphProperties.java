@@ -1,5 +1,3 @@
-package objective.taskboard.linkgraph;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,16 +18,44 @@ package objective.taskboard.linkgraph;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.linkgraph;
 
-import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-@Data
 @Component
 @ConfigurationProperties("linkgraph")
 public class LinkGraphProperties {
 
     private String url;
 
+    public String getUrl() {
+        return this.url;
+    }
+
+    public void setUrl(final String url) {
+        this.url = url;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        LinkGraphProperties that = (LinkGraphProperties) o;
+
+        return url != null ? url.equals(that.url) : that.url == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return url != null ? url.hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        return "LinkGraphProperties{" +
+                "url='" + url + '\'' +
+                '}';
+    }
 }

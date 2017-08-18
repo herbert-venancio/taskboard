@@ -521,13 +521,6 @@
 			<version>v4-rev464-1.22.0</version>
 		</dependency>
 
-		<!-- LOMBOK -->
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<!-- version>1.16.4</version -->
-			<scope>provided</scope>
-		</dependency>
 		<!-- ORACLE -->
 		<dependency>
 			<groupId>com.oracle</groupId>

@@ -1,5 +1,3 @@
-package objective.taskboard.database;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,14 +18,25 @@ package objective.taskboard.database;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.database;
 
-import lombok.NoArgsConstructor;
-import objective.taskboard.data.*;
-import objective.taskboard.domain.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 
-import java.util.*;
+import objective.taskboard.data.IssuesConfiguration;
+import objective.taskboard.data.LaneConfiguration;
+import objective.taskboard.data.RuleConfiguration;
+import objective.taskboard.data.StageConfiguration;
+import objective.taskboard.data.StepConfiguration;
+import objective.taskboard.domain.Filter;
+import objective.taskboard.domain.Lane;
+import objective.taskboard.domain.Rule;
+import objective.taskboard.domain.Stage;
+import objective.taskboard.domain.Step;
 
-@NoArgsConstructor
 public class TaskboardConfigToLaneConfigurationTransformer {
 
     public static final TaskboardConfigToLaneConfigurationTransformer getInstance() {

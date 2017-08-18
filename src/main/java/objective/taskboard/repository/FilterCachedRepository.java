@@ -1,12 +1,3 @@
-package objective.taskboard.repository;
-
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -27,17 +18,23 @@ import org.springframework.stereotype.Service;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.repository;
+
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
-import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.domain.Filter;
 
-@Slf4j
 @Service
 public class FilterCachedRepository {
-
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FilterCachedRepository.class);
     @Autowired
     private FilterRepository filterRepository;
 

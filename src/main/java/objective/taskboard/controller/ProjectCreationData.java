@@ -1,7 +1,3 @@
-package objective.taskboard.controller;
-
-import java.util.List;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -22,6 +18,9 @@ import java.util.List;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.controller;
+
+import java.util.List;
 
 public class ProjectCreationData {
     public String projectKey;

@@ -9,9 +9,8 @@ This application **must be run with Java 8** (404 errors on ws may indicate wron
 3. Install Bower: `npm install -g gulp bower` 
 4. Clone project and execute `mvn clean install` to assure dependencies are ok. (In case of error downloading from repository "git://github.com/PolymerElements/neon-elements.git" execute `git config --global url."https://".insteadOf git://`)
 5. Download [Eclipse](http://www.eclipse.org/downloads/) 
-6. Download [Lombok](https://projectlombok.org/download.html) and follow instructions to install it on eclipse
-7. Import the project on eclipse
-8. Import format configuration file taskboard-format.xml (`Project > Configuration > Java Code Style > Formatter > Import`).
+6. Import the project on eclipse
+7. Import format configuration file taskboard-format.xml (`Project > Configuration > Java Code Style > Formatter > Import`).
 
 
 ## Integration Tests

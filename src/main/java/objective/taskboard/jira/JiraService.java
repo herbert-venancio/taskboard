@@ -1,5 +1,3 @@
-package objective.taskboard.jira;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,6 +18,7 @@ package objective.taskboard.jira;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.jira;
 
 import static com.google.common.collect.Lists.newArrayList;
 
@@ -54,18 +53,16 @@ import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder;
 import com.atlassian.jira.rest.client.api.domain.input.TransitionInput;
 import com.google.common.collect.ImmutableList;
 
-import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.auth.CredentialsHolder;
 import objective.taskboard.jira.endpoint.JiraEndpoint;
 import objective.taskboard.jira.endpoint.JiraEndpoint.Request;
 import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
 import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
 
-@Slf4j
 @Service
 @EnableConfigurationProperties(JiraProperties.class)
 public class JiraService {
-
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JiraService.class);
     private static String MSG_UNAUTHORIZED = "Incorrect user or password";
     private static String MSG_FORBIDDEN = "The jira account is locked";
 
@@ -153,7 +150,7 @@ public class JiraService {
         }
         jiraEndpointAsUser.executeRequest(client -> client.getIssueClient().transition(issueByJira, transitionInput));
     }
-    
+
     public void doTransitionAsMaster(Issue issue, int transitionId) {
         log.debug("⬣⬣⬣⬣⬣  doTransition (master)");
         TransitionInput transitionInput = new TransitionInput(transitionId);
@@ -197,13 +194,13 @@ public class JiraService {
         log.debug("⬣⬣⬣⬣⬣  getIssueByKeyAsMaster");
         return jiraEndpointAsMaster.executeRequest(client -> client.getIssueClient().getIssue(key));
     }
-    
+
     public String createIssue(IssueInput issueInput) {
         log.debug("⬣⬣⬣⬣⬣  createIssue");
         BasicIssue issue = jiraEndpointAsUser.executeRequest(client -> client.getIssueClient().createIssue(issueInput));
         return issue.getKey();
     }
-    
+
     public String createIssueAsMaster(IssueInput issueInput) {
         log.debug("⬣⬣⬣⬣⬣  createIssue (master)");
         BasicIssue issue = jiraEndpointAsMaster.executeRequest(client -> client.getIssueClient().createIssue(issueInput));

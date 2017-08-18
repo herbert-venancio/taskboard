@@ -18,7 +18,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
-
 package objective.taskboard.followup.impl;
 
 import static java.nio.file.Files.createDirectories;
@@ -45,25 +44,23 @@ import org.springframework.stereotype.Component;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.database.directory.DataBaseDirectory;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.FollowUpData;
 import objective.taskboard.followup.FollowUpDataHistoryGenerator;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 
-@Slf4j
 @Component
 public class FollowUpDataHistoryGeneratorJSONFiles implements FollowUpDataHistoryGenerator {
-
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FollowUpDataHistoryGeneratorJSONFiles.class);
     public static final String PATH_FOLLOWUP_HISTORY = "followup-history";
     public static final String FILE_NAME_FORMAT = "yyyyMMdd";
     public static final String EXTENSION_JSON = ".json";
     public static final String EXTENSION_ZIP = ".zip";
     public static final String TODAY = DateTime.now().toString(FILE_NAME_FORMAT);
 
-    private static final long MINUTE = 60 * 1000l;
-    private static final long SLEEP_TIME_IN_MINUTES = 5l;
+    private static final long MINUTE = 60 * 1000L;
+    private static final long SLEEP_TIME_IN_MINUTES = 5L;
 
     @Autowired
     private ProjectFilterConfigurationCachedRepository projectFilterCacheRepo;

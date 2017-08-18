@@ -1,5 +1,3 @@
-package objective.taskboard.domain;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,17 +18,14 @@ package objective.taskboard.domain;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 
-@Data
 @Entity
 @Table(name = "user_preferences")
-@EqualsAndHashCode(callSuper = true)
 public class UserPreferences extends TaskboardEntity {
 
     private String jiraUser;
@@ -38,4 +33,47 @@ public class UserPreferences extends TaskboardEntity {
     @Column(length = 2000)
     private String preferences;
 
+    public String getJiraUser() {
+        return this.jiraUser;
+    }
+
+    public String getPreferences() {
+        return this.preferences;
+    }
+
+    public void setJiraUser(final String jiraUser) {
+        this.jiraUser = jiraUser;
+    }
+
+    public void setPreferences(final String preferences) {
+        this.preferences = preferences;
+    }
+
+    @Override
+    public String toString() {
+        return "UserPreferences{" +
+                "jiraUser='" + jiraUser + '\'' +
+                ", preferences='" + preferences + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        UserPreferences that = (UserPreferences) o;
+
+        if (jiraUser != null ? !jiraUser.equals(that.jiraUser) : that.jiraUser != null) return false;
+        return preferences != null ? preferences.equals(that.preferences) : that.preferences == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (jiraUser != null ? jiraUser.hashCode() : 0);
+        result = 31 * result + (preferences != null ? preferences.hashCode() : 0);
+        return result;
+    }
 }

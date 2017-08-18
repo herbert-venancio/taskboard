@@ -1,5 +1,3 @@
-package objective.taskboard.domain;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,17 +18,13 @@ package objective.taskboard.domain;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.domain;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@NoArgsConstructor
 public class Project {
 
     private String key;
@@ -55,4 +49,67 @@ public class Project {
         return project;
     }
 
+    public String getKey() {
+        return this.key;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public List<Long> getTeamsIds() {
+        return this.teamsIds;
+    }
+
+    public List<String> getVersions() {
+        return this.versions;
+    }
+
+    public void setKey(final String key) {
+        this.key = key;
+    }
+
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    public void setTeamsIds(final List<Long> teamsIds) {
+        this.teamsIds = teamsIds;
+    }
+
+    public void setVersions(final List<String> versions) {
+        this.versions = versions;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Project project = (Project) o;
+
+        if (key != null ? !key.equals(project.key) : project.key != null) return false;
+        if (name != null ? !name.equals(project.name) : project.name != null) return false;
+        if (teamsIds != null ? !teamsIds.equals(project.teamsIds) : project.teamsIds != null) return false;
+        return versions != null ? versions.equals(project.versions) : project.versions == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = key != null ? key.hashCode() : 0;
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (teamsIds != null ? teamsIds.hashCode() : 0);
+        result = 31 * result + (versions != null ? versions.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Project{" +
+                "key='" + key + '\'' +
+                ", name='" + name + '\'' +
+                ", teamsIds=" + teamsIds +
+                ", versions=" + versions +
+                '}';
+    }
 }

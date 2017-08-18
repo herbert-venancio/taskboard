@@ -1,7 +1,3 @@
-package objective.taskboard.domain;
-
-import lombok.Data;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -22,21 +18,52 @@ import lombok.Data;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.domain;
 
-import lombok.Getter;
+import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
 
-import javax.persistence.*;
-
-//import static javax.persistence.GenerationType.SEQUENCE;
-
-@Data
 @MappedSuperclass
 public abstract class TaskboardEntity {
 
     @Id
-    @Getter
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.AUTO)
     protected Long id;
 
+    public TaskboardEntity() {
+    }
+
+    public void setId(final Long id) {
+        this.id = id;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TaskboardEntity that = (TaskboardEntity) o;
+
+        return id != null ? id.equals(that.id) : that.id == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        return "TaskboardEntity{" +
+                "id=" + id +
+                '}';
+    }
+
+    public Long getId() {
+        return this.id;
+    }
 }
