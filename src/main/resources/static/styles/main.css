@@ -8,9 +8,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 */
 
 *, *:after, *:before {
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 body {
@@ -21,19 +21,19 @@ body {
 }
 
 .u-clearfix:after {
-		visibility:hidden;
-		display:block;
-		content:"";
-		clear:both;
-		height:0;
+    visibility:hidden;
+    display:block;
+    content:"";
+    clear:both;
+    height:0;
 }
 
 * html .u-clearfix, *:first-child+html .u-clearfix {
-	zoom:1;
+    zoom:1;
 }
 
 /*
-	Default
+    Default
 */
 
 paper-listbox {
@@ -42,23 +42,24 @@ paper-listbox {
 }
 
 paper-dialog {
-	max-height: calc(100% - 20px);
-	overflow-y: overlay;
+    max-height: calc(100% - 20px);
+    overflow-y: auto;
+    overflow-y: overlay;
 }
 
 /*
-	Releases dropdown
+    Releases dropdown
 */
 
 .releases-dropdown paper-input-container {
-	background: #DDD !important;
-	padding: 0 !important;
-	border-radius: 3px !important;
-	height: 30px !important;
+    background: #DDD !important;
+    padding: 0 !important;
+    border-radius: 3px !important;
+    height: 30px !important;
 }
 
 .releases-dropdown .input-content {
-	height: 30px !important;
+    height: 30px !important;
 }
 
 .releases-dropdown label, .releases-dropdown input {
@@ -67,15 +68,15 @@ paper-dialog {
 }
 
 .releases-dropdown iron-dropdown {
-	top: 35px !important;
+    top: 35px !important;
 }
 
 .releases-dropdown .underline {
-	display: none;
+    display: none;
 }
 
 .releases-dropdown paper-listbox {
-	padding: 10px 0;
+    padding: 10px 0;
 }
 
 .releases-dropdown paper-item {
@@ -88,35 +89,35 @@ paper-dialog {
 }
 
 /*
-	Form
+    Form
 */
 .tb-form {
 }
 
 .tb-form__row {
-	margin-top: 20px;
+    margin-top: 20px;
 }
 
 .tb-form__row:first-child {
-	margin-top: 0;
+    margin-top: 0;
 }
 
 .tb-form label {
-	margin-bottom: 5px;
-	display: block;
+    margin-bottom: 5px;
+    display: block;
 }
 
 .tb-form input[type="text"], 
 .tb-form input[type="url"] {
-	border: 1px solid rgb(169, 169, 169);
-	width: 100%;
-	height: 30px;
-	padding: 0px 10px;
-	display: block;
+    border: 1px solid rgb(169, 169, 169);
+    width: 100%;
+    height: 30px;
+    padding: 0px 10px;
+    display: block;
 }
 
 .tb-form input[readonly] {
-	background: #EFEFEF;
+    background: #EFEFEF;
 }
 
 .tb-form input:-webkit-autofill,
@@ -129,147 +130,147 @@ paper-dialog {
 .tb-form select:-webkit-autofill,
 .tb-form select:-webkit-autofill:hover,
 .tb-form select:-webkit-autofill:focus {
-  border: 1px solid rgb(169, 169, 169);
-  -webkit-text-fill-color: #333;
-  -webkit-box-shadow: 0 0 0px 1000px #FFF inset;
-  transition: background-color 5000s ease-in-out 0s;
+    border: 1px solid rgb(169, 169, 169);
+    -webkit-text-fill-color: #333;
+    -webkit-box-shadow: 0 0 0px 1000px #FFF inset;
+    transition: background-color 5000s ease-in-out 0s;
 }
 
 .tb-form select {
-	width: 100%;
-	height: 30px;
-	padding: 0px 10px;
-	display: block;
+    width: 100%;
+    height: 30px;
+    padding: 0px 10px;
+    display: block;
 }
 
 .tb-form select[readonly] {
-	pointer-events:none;
-	touch-action: none;
+    pointer-events:none;
+    touch-action: none;
 }
 
 /*
-	Table
+    Table
 */
 .tb-table {
-	width: 100%;
+    width: 100%;
 }
 
 .tb-table thead tr:first-child th {
-	margin-top: 0;
-	padding-top: 0;
+    margin-top: 0;
+    padding-top: 0;
 }
 
 .tb-table__column {
-	padding: 5px;
-	text-align: center;
+    padding: 5px;
+    text-align: center;
 }
 
 .tb-table__column:first-child {
-	margin-left: 0;
+    margin-left: 0;
 }
 
 .tb-table__column:last-child {
-	margin-right: 0;
+    margin-right: 0;
 }
 
 .tb-table__column--header {
-	vertical-align: bottom;
+    vertical-align: bottom;
 }
 
 .tb-table__column--header:after {
-	content: "";
-	display: block;
-	background: rgba(0,0,0,0.4);
-	width: 100%;
-	height: 1px;
-	margin-top: 5px;
+    content: "";
+    display: block;
+    background: rgba(0,0,0,0.4);
+    width: 100%;
+    height: 1px;
+    margin-top: 5px;
 }
       
 .tb-table__column:first-child {
-	padding-left: 0;
-	padding-right: 0;
+    padding-left: 0;
+    padding-right: 0;
 }
 
 .tb-table__column:last-child {
-	padding-right: 0;
+    padding-right: 0;
 }
 
 .tb-table__column--index {
-	width: 30px;
+    width: 30px;
 }
 
       
 .tb-table .button {
-	padding: 0;
-	color: #4285f4;
+    padding: 0;
+    color: #4285f4;
 }
 
 .tb-table__column--buttons .button {
-	width: 24px;
-	height: 24px;
+    width: 24px;
+    height: 24px;
 }
 
 .tb-table__column--buttons .button--disabled {
-	opacity: 0.4;
+    opacity: 0.4;
 }
 
 .tb-table__footer-buttons {
-	margin-top: 10px;
-	text-align: right;
+    margin-top: 10px;
+    text-align: right;
 }
 
 .tb-table--scroll {
-	display: block;
+    display: block;
 }
 
 .tb-table--scroll thead,
 .tb-table--scroll tbody,
 .tb-table--scroll tfoot {
-	display: block;
+    display: block;
 }
 
 .tb-table--scroll tbody {
-	width: calc(100% + 10px);
-	max-height: 260px;
-	overflow-y: auto;
-   	overflow-y: overlay;
+    width: calc(100% + 10px);
+    max-height: 260px;
+    overflow-y: auto;
+    overflow-y: overlay;
     padding-right: 10px;
 }
 
 .tb-table--scroll tr {
-	display: flex;
+    display: flex;
 }
 
 .tb-table--scroll th,
 .tb-table--scroll td {
-	display: block;
-	flex: 1;
-	overflow-x: hidden;
+    display: block;
+    flex: 1;
+    overflow-x: hidden;
 }
 
 .tb-table--scroll th {
-	align-self: flex-end;
+    align-self: flex-end;
 }
 
 .tb-table--scroll td {
-	align-self: center;
+    align-self: center;
 }
 
 .tb-table--scroll .tb-table__column--index,
 .tb-table--scroll .tb-table__column--buttons {
-	flex: 0 0 auto;
+    flex: 0 0 auto;
 }
 
 .tb-table--scroll .tb-table__column--field {
-	flex: 3;
+    flex: 3;
 }
 
 /*
-	Text
+    Text
 */
 
 .tb-text {
-	margin-top: -20px;
+    margin-top: -20px;
 }
 
 .tb-text p,
@@ -279,23 +280,23 @@ paper-dialog {
 .tb-text h4,
 .tb-text h5,
 .tb-text h6 {
-	padding: 20px 0 0 0;
-	margin: 0;
+    padding: 20px 0 0 0;
+    margin: 0;
 }
 
 .tb-text--align-center {
-	text-align: center;
+    text-align: center;
 }
 
 .tb-truncate {
-	max-width: 100%;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /*
-	Accordion
+    Accordion
 */
 .tb-accordion {
 }
@@ -314,7 +315,7 @@ paper-dialog {
 }
 
 .tb-accordion__collapse {
-	padding-top: 10px;
+    padding-top: 10px;
 }
 
 /*
