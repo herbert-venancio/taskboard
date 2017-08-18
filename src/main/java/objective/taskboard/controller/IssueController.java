@@ -46,7 +46,6 @@ import com.atlassian.jira.rest.client.api.domain.input.ComplexIssueInputFieldVal
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder;
 import com.google.common.collect.Lists;
 
-import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.data.AspectItemFilter;
 import objective.taskboard.data.AspectSubitemFilter;
 import objective.taskboard.data.Issue;
@@ -64,11 +63,10 @@ import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.linkgraph.LinkGraphProperties;
 
-@Slf4j
 @RestController
 @RequestMapping("/ws/issues")
 public class IssueController {
-
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(IssueController.class);
     @Autowired
     private TaskboardDatabaseService taskService;
 
@@ -86,7 +84,7 @@ public class IssueController {
 
     @Autowired
     private IssueBufferService issueBufferService;
-    
+
     @Autowired
     private ProjectService projectService;
 
@@ -101,12 +99,12 @@ public class IssueController {
 
     @Autowired
     private LinkGraphProperties linkGraphProperties;
-    
+
     @RequestMapping(path = "/", method = RequestMethod.POST)
     public List<Issue> issues() {
         return issueBufferService.getIssues();
     }
-    
+
     @RequestMapping(path = "assign", method = RequestMethod.POST)
     public Issue assign(@RequestBody Issue issue) throws JSONException {
         return issueBufferService.toggleAssignAndSubresponsavelToUser(issue.getIssueKey());

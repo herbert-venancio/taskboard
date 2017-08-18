@@ -1,5 +1,3 @@
-package objective.taskboard.data;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,18 +18,14 @@ package objective.taskboard.data;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
-
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import objective.taskboard.domain.Stage;
+package objective.taskboard.data;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+import objective.taskboard.domain.Stage;
+
 public class StageConfiguration implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -53,4 +47,86 @@ public class StageConfiguration implements Serializable {
         steps.add(step);
     }
 
+    public long getId() {
+        return this.id;
+    }
+
+    public int getOrder() {
+        return this.order;
+    }
+
+    public String getStage() {
+        return this.stage;
+    }
+
+    public String getColor() {
+        return this.color;
+    }
+
+    public double getWeight() {
+        return this.weight;
+    }
+
+    public boolean isShowHeader() {
+        return this.showHeader;
+    }
+
+    public List<StepConfiguration> getSteps() {
+        return this.steps;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        StageConfiguration that = (StageConfiguration) o;
+
+        if (id != that.id) return false;
+        if (order != that.order) return false;
+        if (Double.compare(that.weight, weight) != 0) return false;
+        if (showHeader != that.showHeader) return false;
+        if (stage != null ? !stage.equals(that.stage) : that.stage != null) return false;
+        if (color != null ? !color.equals(that.color) : that.color != null) return false;
+        return steps != null ? steps.equals(that.steps) : that.steps == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result;
+        long temp;
+        result = (int) (id ^ (id >>> 32));
+        result = 31 * result + order;
+        result = 31 * result + (stage != null ? stage.hashCode() : 0);
+        result = 31 * result + (color != null ? color.hashCode() : 0);
+        temp = Double.doubleToLongBits(weight);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        result = 31 * result + (showHeader ? 1 : 0);
+        result = 31 * result + (steps != null ? steps.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "StageConfiguration{" +
+                "id=" + id +
+                ", order=" + order +
+                ", stage='" + stage + '\'' +
+                ", color='" + color + '\'' +
+                ", weight=" + weight +
+                ", showHeader=" + showHeader +
+                ", steps=" + steps +
+                '}';
+    }
+
+    @java.beans.ConstructorProperties({"id", "order", "stage", "color", "weight", "showHeader", "steps"})
+    private StageConfiguration(final long id, final int order, final String stage, final String color, final double weight, final boolean showHeader, final List<StepConfiguration> steps) {
+        this.id = id;
+        this.order = order;
+        this.stage = stage;
+        this.color = color;
+        this.weight = weight;
+        this.showHeader = showHeader;
+        this.steps = steps;
+    }
 }

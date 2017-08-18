@@ -1,5 +1,3 @@
-package objective.taskboard.issueBuffer;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,6 +18,7 @@ package objective.taskboard.issueBuffer;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.issueBuffer;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.stream.Collectors.toList;
@@ -33,33 +32,33 @@ import org.apache.commons.lang.time.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.data.Issue;
 import objective.taskboard.domain.converter.IssueMetadata;
 import objective.taskboard.domain.converter.JiraIssueToIssueConverter;
 import objective.taskboard.jira.JiraIssueService;
 
-@Slf4j
 @Service
 public class AllIssuesBufferService {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AllIssuesBufferService.class);
+
     @Autowired
     private JiraIssueToIssueConverter issueConverter;
-    
+
     @Autowired
     private JiraIssueService jiraIssueService;
-    
+
     private Map<String, IssueMetadata> allMetadatasByIssueKey = newHashMap();
-    
+
     private Map<String, Issue> allIssuesBuffer = new LinkedHashMap<>();
-    
+
     private boolean isUpdatingAllIssuesBuffer = false;
-    
+
     private IssueBufferState state = IssueBufferState.uninitialised;
-    
+
     public IssueBufferState getState() {
         return state;
     }
-    
+
     public synchronized void updateAllIssuesBuffer() {
         if (isUpdatingAllIssuesBuffer)
             return;
@@ -97,7 +96,7 @@ public class AllIssuesBufferService {
         thread.setDaemon(true);
         thread.start();
     }
-    
+
     public synchronized List<Issue> getAllIssues() {
         return allIssuesBuffer.values().stream()
                 .collect(toList());

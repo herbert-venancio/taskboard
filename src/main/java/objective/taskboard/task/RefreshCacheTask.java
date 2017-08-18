@@ -1,5 +1,3 @@
-package objective.taskboard.task;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,8 +18,16 @@ package objective.taskboard.task;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.task;
 
-import lombok.extern.slf4j.Slf4j;
+import static java.lang.String.format;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
 import objective.taskboard.data.Team;
 import objective.taskboard.data.UserTeam;
 import objective.taskboard.domain.Filter;
@@ -29,19 +35,17 @@ import objective.taskboard.domain.IssueTypeConfiguration;
 import objective.taskboard.domain.Lane;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.domain.TeamFilterConfiguration;
-import objective.taskboard.repository.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
+import objective.taskboard.repository.FilterCachedRepository;
+import objective.taskboard.repository.IssueTypeConfigurationCachedRepository;
+import objective.taskboard.repository.LaneCachedRepository;
+import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
+import objective.taskboard.repository.TeamCachedRepository;
+import objective.taskboard.repository.TeamFilterConfigurationCachedRepository;
+import objective.taskboard.repository.UserTeamCachedRepository;
 
-import java.util.List;
-
-import static java.lang.String.format;
-
-@Slf4j
 @Component
 public class RefreshCacheTask {
-
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RefreshCacheTask.class);
     @Autowired
     private UserTeamCachedRepository userTeamRepository;
 

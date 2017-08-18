@@ -1,5 +1,3 @@
-package objective.taskboard.repository;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,6 +18,7 @@ package objective.taskboard.repository;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.repository;
 
 import java.util.List;
 import java.util.Objects;
@@ -32,13 +31,11 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.ImmutableList;
 
-import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.data.UserTeam;
 
-@Slf4j
 @Service
 public class UserTeamCachedRepository {
-
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserTeamCachedRepository.class);
     @Autowired
     private UserTeamRepository userTeamRepository;
 

@@ -1,5 +1,3 @@
-package objective.taskboard.domain;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,23 +18,49 @@ package objective.taskboard.domain;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-
-@Data
-@EqualsAndHashCode(callSuper = true)
 @Entity
-@NoArgsConstructor
 @Table(name = "PARENT_LINK_CONFIG")
 public class ParentIssueLink extends TaskboardEntity {
 
     @Column(name = "DESCRIPTION_ISSUE_LINK")
     public String descriptionIssueLink;
 
+    public String getDescriptionIssueLink() {
+        return this.descriptionIssueLink;
+    }
+
+    public void setDescriptionIssueLink(final String descriptionIssueLink) {
+        this.descriptionIssueLink = descriptionIssueLink;
+    }
+
+    @Override
+    public String toString() {
+        return "ParentIssueLink{" +
+                "descriptionIssueLink='" + descriptionIssueLink + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        ParentIssueLink that = (ParentIssueLink) o;
+
+        return descriptionIssueLink != null ? descriptionIssueLink.equals(that.descriptionIssueLink) : that.descriptionIssueLink == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (descriptionIssueLink != null ? descriptionIssueLink.hashCode() : 0);
+        return result;
+    }
 }

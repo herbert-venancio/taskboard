@@ -42,15 +42,13 @@ import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.SearchResult;
 import com.atlassian.jira.rest.client.internal.json.SearchResultJsonParser;
 
-import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.jira.JiraService.ParametrosDePesquisaInvalidosException;
 import objective.taskboard.jira.JiraService.PermissaoNegadaException;
 import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
 
-@Slf4j
 @Service
 public class JiraSearchService {
-
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JiraSearchService.class);
     private static final String JQL_ATTRIBUTE = "jql";
     private static final String EXPAND_ATTRIBUTE = "expand";
     private static final String MAX_RESULTS_ATTRIBUTE = "maxResults";
@@ -61,7 +59,7 @@ public class JiraSearchService {
     private static final int MAX_RESULTS = 100;
 
     private static final String PATH_REST_API_SEARCH = "/rest/api/latest/search";
-    
+
     @Autowired
     private JiraProperties properties;
 
@@ -125,7 +123,7 @@ public class JiraSearchService {
             throw new IllegalStateException(e);
         }
     }
-    
+
     private long extractStatusCode(Exception e) {
         if (e instanceof RestClientException)
             return ((RestClientException) e).getStatusCode().or(0);

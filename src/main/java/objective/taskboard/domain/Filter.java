@@ -1,5 +1,3 @@
-package objective.taskboard.domain;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,20 +18,17 @@ package objective.taskboard.domain;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.domain;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import java.io.Serializable;
 
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import java.io.Serializable;
 
-@Data
 @Entity
 @Table(name = "filtro")
-@EqualsAndHashCode(callSuper = true)
 public class Filter extends TaskboardEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -48,4 +43,69 @@ public class Filter extends TaskboardEntity implements Serializable {
 
     private String limitInDays;
 
+    public Step getStep() {
+        return this.step;
+    }
+
+    public long getIssueTypeId() {
+        return this.issueTypeId;
+    }
+
+    public long getStatusId() {
+        return this.statusId;
+    }
+
+    public String getLimitInDays() {
+        return this.limitInDays;
+    }
+
+    public void setStep(final Step step) {
+        this.step = step;
+    }
+
+    public void setIssueTypeId(final long issueTypeId) {
+        this.issueTypeId = issueTypeId;
+    }
+
+    public void setStatusId(final long statusId) {
+        this.statusId = statusId;
+    }
+
+    public void setLimitInDays(final String limitInDays) {
+        this.limitInDays = limitInDays;
+    }
+
+    @Override
+    public String toString() {
+        return "Filter{" +
+                "step=" + step +
+                ", issueTypeId=" + issueTypeId +
+                ", statusId=" + statusId +
+                ", limitInDays='" + limitInDays + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        Filter filter = (Filter) o;
+
+        if (issueTypeId != filter.issueTypeId) return false;
+        if (statusId != filter.statusId) return false;
+        if (step != null ? !step.equals(filter.step) : filter.step != null) return false;
+        return limitInDays != null ? limitInDays.equals(filter.limitInDays) : filter.limitInDays == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (step != null ? step.hashCode() : 0);
+        result = 31 * result + (int) (issueTypeId ^ (issueTypeId >>> 32));
+        result = 31 * result + (int) (statusId ^ (statusId >>> 32));
+        result = 31 * result + (limitInDays != null ? limitInDays.hashCode() : 0);
+        return result;
+    }
 }

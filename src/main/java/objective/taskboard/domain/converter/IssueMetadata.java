@@ -1,5 +1,3 @@
-package objective.taskboard.domain.converter;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,6 +18,7 @@ package objective.taskboard.domain.converter;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.domain.converter;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Lists.newArrayList;
@@ -41,11 +40,9 @@ import com.atlassian.jira.rest.client.api.domain.IssueField;
 import com.atlassian.jira.rest.client.api.domain.IssueLink;
 import com.atlassian.jira.rest.client.api.domain.IssueLinkType.Direction;
 
-import lombok.Data;
 import objective.taskboard.data.CustomField;
 import objective.taskboard.jira.JiraProperties;
 
-@Data
 public class IssueMetadata {
 
     private final JiraProperties jiraProperties;
@@ -323,7 +320,6 @@ public class IssueMetadata {
         return "";
     }
 
-    @Data
     static class IssueParent {
         private final String key;
         private final long typeId;
@@ -334,9 +330,46 @@ public class IssueMetadata {
             this.typeId = issueTypeId;
             this.typeIconUrl = issueTypeIconUrl;
         }
+
+        public String getKey() {
+            return this.key;
+        }
+
+        public long getTypeId() {
+            return this.typeId;
+        }
+
+        public String getTypeIconUrl() {
+            return this.typeIconUrl;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            IssueParent that = (IssueParent) o;
+
+            if (typeId != that.typeId) return false;
+            if (key != null ? !key.equals(that.key) : that.key != null) return false;
+            return typeIconUrl != null ? typeIconUrl.equals(that.typeIconUrl) : that.typeIconUrl == null;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = key != null ? key.hashCode() : 0;
+            result = 31 * result + (int) (typeId ^ (typeId >>> 32));
+            result = 31 * result + (typeIconUrl != null ? typeIconUrl.hashCode() : 0);
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            return "IssueMetadata.IssueParent(key=" + this.getKey() + ", typeId=" + this.getTypeId() + ", typeIconUrl=" + this.getTypeIconUrl() + ")";
+        }
     }
 
-    @Data
+
     static class IssueCoAssignee {
         private final String name;
         private final String avatarUrl;
@@ -345,6 +378,191 @@ public class IssueMetadata {
             this.name = name;
             this.avatarUrl = avatarUrl;
         }
+
+        public String getName() {
+            return this.name;
+        }
+
+        public String getAvatarUrl() {
+            return this.avatarUrl;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            IssueCoAssignee that = (IssueCoAssignee) o;
+
+            if (name != null ? !name.equals(that.name) : that.name != null) return false;
+            return avatarUrl != null ? avatarUrl.equals(that.avatarUrl) : that.avatarUrl == null;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = name != null ? name.hashCode() : 0;
+            result = 31 * result + (avatarUrl != null ? avatarUrl.hashCode() : 0);
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            return "IssueMetadata.IssueCoAssignee(name=" + this.getName() + ", avatarUrl=" + this.getAvatarUrl() + ")";
+        }
     }
 
+    public JiraProperties getJiraProperties() {
+        return this.jiraProperties;
+    }
+
+    public Logger getLog() {
+        return this.log;
+    }
+
+    public String getProjectKey() {
+        return projectKey;
+    }
+
+    public String getAssignee() {
+        return assignee;
+    }
+
+    public String getReporter() {
+        return reporter;
+    }
+
+    public Map<String, CustomField> gettShirtSizes() {
+        return tShirtSizes;
+    }
+
+    public IssueParent getRealParent() {
+        return this.realParent;
+    }
+
+    public List<IssueCoAssignee> getCoAssignees() {
+        return this.coAssignees;
+    }
+
+    public CustomField getClassOfService() {
+        return this.classOfService;
+    }
+
+    public String getBlocked() {
+        return this.blocked;
+    }
+
+    public String getLastBlockReason() {
+        return this.lastBlockReason;
+    }
+
+    public Map<String, CustomField> getTShirtSizes() {
+        return this.tShirtSizes;
+    }
+
+    public List<String> getComments() {
+        return this.comments;
+    }
+
+    public List<String> getDependenciesIssuesKey() {
+        return this.dependenciesIssuesKey;
+    }
+
+    public String getLinkedParentKey() {
+        return this.linkedParentKey;
+    }
+
+    public Map<String, CustomField> getAdditionalEstimatedHours() {
+        return this.additionalEstimatedHours;
+    }
+
+    public Map<String, CustomField> getRelease() {
+        return this.release;
+    }
+
+    public List<String> getLabels() {
+        return this.labels;
+    }
+
+    public List<String> getComponents() {
+        return this.components;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IssueMetadata that = (IssueMetadata) o;
+
+        if (jiraProperties != null ? !jiraProperties.equals(that.jiraProperties) : that.jiraProperties != null)
+            return false;
+        if (log != null ? !log.equals(that.log) : that.log != null) return false;
+        if (projectKey != null ? !projectKey.equals(that.projectKey) : that.projectKey != null) return false;
+        if (assignee != null ? !assignee.equals(that.assignee) : that.assignee != null) return false;
+        if (reporter != null ? !reporter.equals(that.reporter) : that.reporter != null) return false;
+        if (realParent != null ? !realParent.equals(that.realParent) : that.realParent != null) return false;
+        if (coAssignees != null ? !coAssignees.equals(that.coAssignees) : that.coAssignees != null) return false;
+        if (classOfService != null ? !classOfService.equals(that.classOfService) : that.classOfService != null)
+            return false;
+        if (blocked != null ? !blocked.equals(that.blocked) : that.blocked != null) return false;
+        if (lastBlockReason != null ? !lastBlockReason.equals(that.lastBlockReason) : that.lastBlockReason != null)
+            return false;
+        if (tShirtSizes != null ? !tShirtSizes.equals(that.tShirtSizes) : that.tShirtSizes != null) return false;
+        if (comments != null ? !comments.equals(that.comments) : that.comments != null) return false;
+        if (dependenciesIssuesKey != null ? !dependenciesIssuesKey.equals(that.dependenciesIssuesKey) : that.dependenciesIssuesKey != null)
+            return false;
+        if (linkedParentKey != null ? !linkedParentKey.equals(that.linkedParentKey) : that.linkedParentKey != null)
+            return false;
+        if (additionalEstimatedHours != null ? !additionalEstimatedHours.equals(that.additionalEstimatedHours) : that.additionalEstimatedHours != null)
+            return false;
+        if (release != null ? !release.equals(that.release) : that.release != null) return false;
+        if (labels != null ? !labels.equals(that.labels) : that.labels != null) return false;
+        return components != null ? components.equals(that.components) : that.components == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = jiraProperties != null ? jiraProperties.hashCode() : 0;
+        result = 31 * result + (log != null ? log.hashCode() : 0);
+        result = 31 * result + (projectKey != null ? projectKey.hashCode() : 0);
+        result = 31 * result + (assignee != null ? assignee.hashCode() : 0);
+        result = 31 * result + (reporter != null ? reporter.hashCode() : 0);
+        result = 31 * result + (realParent != null ? realParent.hashCode() : 0);
+        result = 31 * result + (coAssignees != null ? coAssignees.hashCode() : 0);
+        result = 31 * result + (classOfService != null ? classOfService.hashCode() : 0);
+        result = 31 * result + (blocked != null ? blocked.hashCode() : 0);
+        result = 31 * result + (lastBlockReason != null ? lastBlockReason.hashCode() : 0);
+        result = 31 * result + (tShirtSizes != null ? tShirtSizes.hashCode() : 0);
+        result = 31 * result + (comments != null ? comments.hashCode() : 0);
+        result = 31 * result + (dependenciesIssuesKey != null ? dependenciesIssuesKey.hashCode() : 0);
+        result = 31 * result + (linkedParentKey != null ? linkedParentKey.hashCode() : 0);
+        result = 31 * result + (additionalEstimatedHours != null ? additionalEstimatedHours.hashCode() : 0);
+        result = 31 * result + (release != null ? release.hashCode() : 0);
+        result = 31 * result + (labels != null ? labels.hashCode() : 0);
+        result = 31 * result + (components != null ? components.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "IssueMetadata{" +
+                "jiraProperties=" + jiraProperties +
+                ", projectKey='" + projectKey + '\'' +
+                ", assignee='" + assignee + '\'' +
+                ", reporter='" + reporter + '\'' +
+                ", realParent=" + realParent +
+                ", coAssignees=" + coAssignees +
+                ", classOfService=" + classOfService +
+                ", blocked='" + blocked + '\'' +
+                ", lastBlockReason='" + lastBlockReason + '\'' +
+                ", tShirtSizes=" + tShirtSizes +
+                ", comments=" + comments +
+                ", dependenciesIssuesKey=" + dependenciesIssuesKey +
+                ", linkedParentKey='" + linkedParentKey + '\'' +
+                ", additionalEstimatedHours=" + additionalEstimatedHours +
+                ", release=" + release +
+                ", labels=" + labels +
+                ", components=" + components +
+                '}';
+    }
 }

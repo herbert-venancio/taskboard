@@ -33,7 +33,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.controller.WebhookController.WebhookBody.Changelog;
 import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.issueBuffer.WebhookEvent;
@@ -41,28 +40,28 @@ import objective.taskboard.jira.JiraIssueService;
 import objective.taskboard.jira.JiraServiceUnavailable;
 import objective.taskboard.jira.WebhookSubtaskCreatorService;
 
-@Slf4j
 @Component
 public class IssueEventProcessScheduler {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(IssueEventProcessScheduler.class);
     @Autowired
     private IssueBufferService issueBufferService;
-    
+
     @Autowired
     private CacheManager cacheManager;
-    
+
     @Autowired
     public ApplicationEventPublisher eventPublisher;
-    
-    @Autowired 
+
+    @Autowired
     private JiraIssueService jiraIssueService;
-     
-    @Autowired 
+
+    @Autowired
     private WebhookSubtaskCreatorService webhookSubtaskCreatorService;
 
     private static final long RATE_MILISECONDS = 1 * 1000;
-    
+
     List<Item> list = Collections.synchronizedList(new ArrayList<Item>());
-    
+
     private class Item {
         private WebhookEvent event;
         private String issueKey;
@@ -125,7 +124,7 @@ public class IssueEventProcessScheduler {
         webhookSubtaskCreatorService.createSubtaskOnTransition(jiraIssue, item.changelog);
         issueBufferService.updateByEvent(item.event, item.issueKey, jiraIssue);
     }
-    
+
     private com.atlassian.jira.rest.client.api.domain.Issue fetchIssue(Item item) {
         if (item.event == WebhookEvent.ISSUE_DELETED)
             return null;

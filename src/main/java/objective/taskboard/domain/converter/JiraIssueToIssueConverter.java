@@ -1,5 +1,3 @@
-package objective.taskboard.domain.converter;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,6 +18,7 @@ package objective.taskboard.domain.converter;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.domain.converter;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Lists.newArrayList;
@@ -40,7 +39,6 @@ import org.springframework.stereotype.Service;
 
 import com.atlassian.jira.rest.client.api.domain.Issue;
 
-import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.data.CustomField;
 import objective.taskboard.data.Issue.TaskboardTimeTracking;
 import objective.taskboard.database.IssuePriorityService;
@@ -52,10 +50,9 @@ import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.repository.ParentIssueLinkRepository;
 
-@Slf4j
 @Service
 public class JiraIssueToIssueConverter {
-
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JiraIssueToIssueConverter.class);
     public static final String INVALID_TEAM = "INVALID_TEAM";
 
     @Autowired
@@ -75,10 +72,10 @@ public class JiraIssueToIssueConverter {
 
     @Autowired
     private StartDateStepService startDateStepService;
-    
+
     @Autowired
     private IssuePriorityService priorityService;
-    
+
     @Autowired
     private MetadataService metadataService;
 
@@ -90,7 +87,7 @@ public class JiraIssueToIssueConverter {
                                .map(ParentIssueLink::getDescriptionIssueLink)
                                .collect(toList());
     }
-    
+
     public List<objective.taskboard.data.Issue> convertIssues(List<Issue> issueList, Map<String, IssueMetadata> issuesMetadataByKey) {
         loadParentIssueLinks();
 
@@ -106,7 +103,7 @@ public class JiraIssueToIssueConverter {
         System.out.println("Converted issues: " + converted.size());
         return converted;
     }
-    
+
     public objective.taskboard.data.Issue convertSingleIssue(Issue jiraIssue, Map<String, IssueMetadata> issuesMetadataByKey) {
         issuesMetadataByKey.put(jiraIssue.getKey(), new IssueMetadata(jiraIssue, jiraProperties, parentIssueLinks, log));
         return convert(jiraIssue, issuesMetadataByKey);
@@ -185,7 +182,7 @@ public class JiraIssueToIssueConverter {
         );
         return i;
     }
-    
+
     private <T> T coalesce(T value, T def) {
         return value == null? def: value;
     }

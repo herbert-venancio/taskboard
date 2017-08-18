@@ -1,8 +1,3 @@
-package objective.taskboard.controller;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -23,7 +18,10 @@ import java.util.HashMap;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.controller;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,7 +35,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.controller.WebhookController.WebhookBody.Changelog;
 import objective.taskboard.domain.Filter;
 import objective.taskboard.domain.ProjectFilterConfiguration;
@@ -47,11 +44,10 @@ import objective.taskboard.repository.FilterCachedRepository;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.task.IssueEventProcessScheduler;
 
-@Slf4j
 @RestController
 @RequestMapping("webhook")
 public class WebhookController {
-
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(WebhookController.class);
     @Autowired
     private IssueEventProcessScheduler webhookSchedule;
 

@@ -1,5 +1,3 @@
-package objective.taskboard.data;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,22 +18,17 @@ package objective.taskboard.data;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
-
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import objective.taskboard.domain.Rule;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
+package objective.taskboard.data;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
+
+import objective.taskboard.domain.Rule;
+
 public class RuleConfiguration implements Serializable {
 
     private static final long serialVersionUID = 142384677393751503L;
@@ -59,4 +52,54 @@ public class RuleConfiguration implements Serializable {
         return ruleConfiguration;
     }
 
+    public String getChave() {
+        return this.chave;
+    }
+
+    public String getValor() {
+        return this.valor;
+    }
+
+    public void setChave(final String chave) {
+        this.chave = chave;
+    }
+
+    public void setValor(final String valor) {
+        this.valor = valor;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        RuleConfiguration that = (RuleConfiguration) o;
+
+        if (chave != null ? !chave.equals(that.chave) : that.chave != null) return false;
+        return valor != null ? valor.equals(that.valor) : that.valor == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = chave != null ? chave.hashCode() : 0;
+        result = 31 * result + (valor != null ? valor.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "RuleConfiguration{" +
+                "chave='" + chave + '\'' +
+                ", valor='" + valor + '\'' +
+                '}';
+    }
+
+    public RuleConfiguration() {
+    }
+
+    @java.beans.ConstructorProperties({"chave", "valor"})
+    private RuleConfiguration(final String chave, final String valor) {
+        this.chave = chave;
+        this.valor = valor;
+    }
 }

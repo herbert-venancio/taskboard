@@ -1,5 +1,3 @@
-package objective.taskboard.data;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,18 +18,11 @@ package objective.taskboard.data;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
-
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+package objective.taskboard.data;
 
 import java.io.Serializable;
 import java.util.List;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class AspectItemFilter implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -44,4 +35,66 @@ public class AspectItemFilter implements Serializable {
         return new AspectItemFilter(description, field, aspectsSubitemFilter);
     }
 
+    public String getDescription() {
+        return this.description;
+    }
+
+    public String getField() {
+        return this.field;
+    }
+
+    public List<AspectSubitemFilter> getAspectsSubitemFilter() {
+        return this.aspectsSubitemFilter;
+    }
+
+    public void setDescription(final String description) {
+        this.description = description;
+    }
+
+    public void setField(final String field) {
+        this.field = field;
+    }
+
+    public void setAspectsSubitemFilter(final List<AspectSubitemFilter> aspectsSubitemFilter) {
+        this.aspectsSubitemFilter = aspectsSubitemFilter;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        AspectItemFilter that = (AspectItemFilter) o;
+
+        if (description != null ? !description.equals(that.description) : that.description != null) return false;
+        if (field != null ? !field.equals(that.field) : that.field != null) return false;
+        return aspectsSubitemFilter != null ? aspectsSubitemFilter.equals(that.aspectsSubitemFilter) : that.aspectsSubitemFilter == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = description != null ? description.hashCode() : 0;
+        result = 31 * result + (field != null ? field.hashCode() : 0);
+        result = 31 * result + (aspectsSubitemFilter != null ? aspectsSubitemFilter.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "AspectItemFilter{" +
+                "description='" + description + '\'' +
+                ", field='" + field + '\'' +
+                ", aspectsSubitemFilter=" + aspectsSubitemFilter +
+                '}';
+    }
+
+    public AspectItemFilter() {
+    }
+
+    @java.beans.ConstructorProperties({"description", "field", "aspectsSubitemFilter"})
+    private AspectItemFilter(final String description, final String field, final List<AspectSubitemFilter> aspectsSubitemFilter) {
+        this.description = description;
+        this.field = field;
+        this.aspectsSubitemFilter = aspectsSubitemFilter;
+    }
 }

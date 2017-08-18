@@ -1,5 +1,3 @@
-package objective.taskboard.domain;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,22 +18,15 @@ package objective.taskboard.domain;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import java.io.Serializable;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.io.Serializable;
 
-@Data
 @Entity
-@NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "issue_type_visibility")
-@EqualsAndHashCode(callSuper = true)
 public class IssueTypeConfiguration extends TaskboardEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -44,4 +35,56 @@ public class IssueTypeConfiguration extends TaskboardEntity implements Serializa
 
     private long parentIssueTypeId;
 
+    public long getIssueTypeId() {
+        return this.issueTypeId;
+    }
+
+    public long getParentIssueTypeId() {
+        return this.parentIssueTypeId;
+    }
+
+    public void setIssueTypeId(final long issueTypeId) {
+        this.issueTypeId = issueTypeId;
+    }
+
+    public void setParentIssueTypeId(final long parentIssueTypeId) {
+        this.parentIssueTypeId = parentIssueTypeId;
+    }
+
+    @Override
+    public String toString() {
+        return "IssueTypeConfiguration{" +
+                "issueTypeId=" + issueTypeId +
+                ", parentIssueTypeId=" + parentIssueTypeId +
+                '}';
+    }
+
+    public IssueTypeConfiguration() {
+    }
+
+    @java.beans.ConstructorProperties({"issueTypeId", "parentIssueTypeId"})
+    public IssueTypeConfiguration(final long issueTypeId, final long parentIssueTypeId) {
+        this.issueTypeId = issueTypeId;
+        this.parentIssueTypeId = parentIssueTypeId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        IssueTypeConfiguration that = (IssueTypeConfiguration) o;
+
+        if (issueTypeId != that.issueTypeId) return false;
+        return parentIssueTypeId == that.parentIssueTypeId;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (int) (issueTypeId ^ (issueTypeId >>> 32));
+        result = 31 * result + (int) (parentIssueTypeId ^ (parentIssueTypeId >>> 32));
+        return result;
+    }
 }

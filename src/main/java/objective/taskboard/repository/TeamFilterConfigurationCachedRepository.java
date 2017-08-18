@@ -1,5 +1,3 @@
-package objective.taskboard.repository;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,6 +18,7 @@ package objective.taskboard.repository;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.repository;
 
 import java.util.List;
 
@@ -31,13 +30,11 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
-import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.domain.TeamFilterConfiguration;
 
-@Slf4j
 @Service
 public class TeamFilterConfigurationCachedRepository {
-
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TeamFilterConfigurationCachedRepository.class);
     @Autowired
     private TeamFilterConfigurationRepository repository;
 
@@ -51,7 +48,7 @@ public class TeamFilterConfigurationCachedRepository {
     public List<TeamFilterConfiguration> getCache() {
         return ImmutableList.copyOf(cache);
     }
-    
+
     public TeamFilterConfiguration findByTeamId(Long teamId) {
         for (TeamFilterConfiguration teamFilterConfiguration : cache) {
             if (teamFilterConfiguration.getTeamId() == teamId)

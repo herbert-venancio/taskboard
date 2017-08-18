@@ -1,5 +1,3 @@
-package objective.taskboard.domain;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,22 +18,18 @@ package objective.taskboard.domain;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.domain;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
+import java.io.Serializable;
 
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import java.io.Serializable;
 
-@Data
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+
 @Entity
-@NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
 public class Rule extends TaskboardEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -53,4 +47,61 @@ public class Rule extends TaskboardEntity implements Serializable {
         this.valor = json.getString("valor");
     }
 
+    public String getChave() {
+        return this.chave;
+    }
+
+    public String getValor() {
+        return this.valor;
+    }
+
+    public Lane getLane() {
+        return this.lane;
+    }
+
+    public void setChave(final String chave) {
+        this.chave = chave;
+    }
+
+    public void setValor(final String valor) {
+        this.valor = valor;
+    }
+
+    public void setLane(final Lane lane) {
+        this.lane = lane;
+    }
+
+    @Override
+    public String toString() {
+        return "Rule{" +
+                "chave='" + chave + '\'' +
+                ", valor='" + valor + '\'' +
+                ", lane=" + lane +
+                '}';
+    }
+
+    public Rule() {
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        Rule rule = (Rule) o;
+
+        if (chave != null ? !chave.equals(rule.chave) : rule.chave != null) return false;
+        if (valor != null ? !valor.equals(rule.valor) : rule.valor != null) return false;
+        return lane != null ? lane.equals(rule.lane) : rule.lane == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (chave != null ? chave.hashCode() : 0);
+        result = 31 * result + (valor != null ? valor.hashCode() : 0);
+        result = 31 * result + (lane != null ? lane.hashCode() : 0);
+        return result;
+    }
 }

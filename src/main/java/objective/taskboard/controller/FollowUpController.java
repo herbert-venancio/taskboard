@@ -25,7 +25,6 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 import java.util.Optional;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
@@ -38,11 +37,10 @@ import objective.taskboard.followup.FollowUpFacade;
 import objective.taskboard.followup.FollowUpGenerator;
 import objective.taskboard.issueBuffer.IssueBufferState;
 
-@Slf4j
 @RestController
 @RequestMapping("/ws/followup")
 public class FollowUpController {
-
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FollowUpController.class);
     @Autowired
     private FollowUpFacade followUpFacade;
 

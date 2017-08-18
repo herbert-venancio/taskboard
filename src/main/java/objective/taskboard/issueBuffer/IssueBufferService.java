@@ -1,5 +1,3 @@
-package objective.taskboard.issueBuffer;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,6 +18,7 @@ package objective.taskboard.issueBuffer;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.issueBuffer;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
@@ -38,7 +37,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
-import lombok.extern.slf4j.Slf4j;
 import objective.taskboard.data.Issue;
 import objective.taskboard.data.IssuePriorityOrderChanged;
 import objective.taskboard.data.TaskboardIssue;
@@ -53,9 +51,10 @@ import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.task.IssueEventProcessScheduler;
 
-@Slf4j
 @Service
 public class IssueBufferService {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(IssueBufferService.class);
+
     @Autowired
     public ApplicationEventPublisher eventPublisher;
 
@@ -67,10 +66,10 @@ public class IssueBufferService {
 
     @Autowired
     private ProjectService projectService;
-    
+
     @Autowired
     private JiraService jiraBean;
-    
+
     @Autowired
     private IssuePriorityService issuePriorityService;
 
@@ -78,13 +77,13 @@ public class IssueBufferService {
     private IssueEventProcessScheduler issueEvents;
 
     private Map<String, IssueMetadata> taskboardMetadatasByIssueKey = newHashMap();
-    
+
     private IssueBufferState state = IssueBufferState.uninitialised;
-    
+
     private Map<String, Issue> issueBuffer = new LinkedHashMap<>();
-    
+
     private boolean isUpdatingTaskboardIssuesBuffer = false;
-    
+
     private List<IssueUpdate> issuesUpdatedByEvent = new ArrayList<>();
 
     public IssueBufferState getState() {
@@ -116,7 +115,7 @@ public class IssueBufferService {
         thread.setDaemon(true);
         thread.start();
     }
-    
+
     private void updateState(IssueBufferState state) {
         this.state = state;
         eventPublisher.publishEvent(new IssueCacheUpdateEvent(this, state));
@@ -137,7 +136,7 @@ public class IssueBufferService {
 
         return issue;
     }
-    
+
     public synchronized Issue updateByEvent(WebhookEvent event, final String key, com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
         if (event == WebhookEvent.ISSUE_DELETED || jiraIssue == null) {
             issuesUpdatedByEvent.add(new IssueUpdate(issueBuffer.get(key), IssueUpdateType.DELETED));
@@ -196,27 +195,26 @@ public class IssueBufferService {
                 .filter(t -> isParentVisible(t))
                 .collect(toList());
     }
-    
+
     public synchronized Issue getIssueByKey(String key) {
         return issueBuffer.get(key);
     }
-    
+
     public List<objective.taskboard.data.Issue> getIssueSubTasks(objective.taskboard.data.Issue issue) {
         List<com.atlassian.jira.rest.client.api.domain.Issue> subtasksFromJira = jiraIssueService.searchIssueSubTasksAndDemandedByKey(issue.getIssueKey());
         return issueConverter.convertIssues(subtasksFromJira, taskboardMetadatasByIssueKey);
     }
-    
+
     public synchronized Issue toggleAssignAndSubresponsavelToUser(String issueKey) {
         jiraBean.toggleAssignAndSubresponsavelToUser(issueKey);
         return updateIssueBuffer(issueKey);
     }
-    
+
     public synchronized Issue doTransitionByName(Issue issue, String transition, String resolution) {
         jiraBean.doTransitionByName(issue, transition, resolution);
         updateIssueBuffer(issue.getIssueKey());
         return getIssueByKey(issue.getIssueKey());
     }
-
 
     public synchronized void updateIssuesPriorities(List<TaskboardIssue> issuesPriorities) {
         for (TaskboardIssue taskboardIssue : issuesPriorities) { 
@@ -226,7 +224,7 @@ public class IssueBufferService {
             issueEvents.add(WebhookEvent.ISSUE_UPDATED, issue.getIssueKey(), null);
         }
     }
-    
+
     private boolean isParentVisible(Issue issue) {
     	
     	boolean visible = false;

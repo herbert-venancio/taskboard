@@ -1,5 +1,3 @@
-package objective.taskboard.data;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,16 +18,11 @@ package objective.taskboard.data;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
-
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+package objective.taskboard.data;
 
 import java.io.Serializable;
 import java.net.URI;
 
-@Data
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class User implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -41,5 +34,61 @@ public class User implements Serializable {
 
     public static User from(String user, String name, String mail, URI avatar) throws Exception {
         return new User(user, name, mail, avatar);
+    }
+
+    public String getUser() {
+        return this.user;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public String getMail() {
+        return this.mail;
+    }
+
+    public URI getAvatar() {
+        return this.avatar;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        User user1 = (User) o;
+
+        if (user != null ? !user.equals(user1.user) : user1.user != null) return false;
+        if (name != null ? !name.equals(user1.name) : user1.name != null) return false;
+        if (mail != null ? !mail.equals(user1.mail) : user1.mail != null) return false;
+        return avatar != null ? avatar.equals(user1.avatar) : user1.avatar == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = user != null ? user.hashCode() : 0;
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (mail != null ? mail.hashCode() : 0);
+        result = 31 * result + (avatar != null ? avatar.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "user='" + user + '\'' +
+                ", name='" + name + '\'' +
+                ", mail='" + mail + '\'' +
+                ", avatar=" + avatar +
+                '}';
+    }
+
+    @java.beans.ConstructorProperties({"user", "name", "mail", "avatar"})
+    private User(final String user, final String name, final String mail, final URI avatar) {
+        this.user = user;
+        this.name = name;
+        this.mail = mail;
+        this.avatar = avatar;
     }
 }

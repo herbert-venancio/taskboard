@@ -1,5 +1,3 @@
-package objective.taskboard.domain;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,24 +18,58 @@ package objective.taskboard.domain;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.io.Serializable;
 
-@Data
 @Entity
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
 @Table(name = "team_filter_configuration")
 public class TeamFilterConfiguration extends TaskboardEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private long teamId;
+
+    public long getTeamId() {
+        return this.teamId;
+    }
+
+    public void setTeamId(final long teamId) {
+        this.teamId = teamId;
+    }
+
+    @Override
+    public String toString() {
+        return "TeamFilterConfiguration{" +
+                "teamId=" + teamId +
+                '}';
+    }
+
+    public TeamFilterConfiguration() {
+    }
+
+    @java.beans.ConstructorProperties({"teamId"})
+    public TeamFilterConfiguration(final long teamId) {
+        this.teamId = teamId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        TeamFilterConfiguration that = (TeamFilterConfiguration) o;
+
+        return teamId == that.teamId;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (int) (teamId ^ (teamId >>> 32));
+        return result;
+    }
 }
