@@ -185,6 +185,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
     }
 
     private FollowUpData createBallparkDemand(Issue demand) {
+        String demandPriorityOrder = demand.getPriorityOrder() != null ? demand.getPriorityOrder().toString() : "";
         FollowUpData followUpData = new FollowUpData();
         followUpData.planningType = "Ballpark";
         followUpData.project = demand.getProject();
@@ -195,6 +196,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         followUpData.demandNum = demand.getIssueKey();
         followUpData.demandSummary = demand.getSummary();
         followUpData.demandDescription = issueDescription("M", demand);
+        followUpData.demandOrder = demand.getStatusPriority() + demandPriorityOrder;
         
         followUpData.taskType = "BALLPARK - Demand";
         followUpData.taskStatus = getBallparkStatus();
@@ -245,12 +247,14 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         followUpData.project = task.getProject();
         
         if (demand != null) {
+            String demandPriorityOrder = demand.getPriorityOrder() != null ? demand.getPriorityOrder().toString() : "";
             followUpData.demandType = demand.getIssueTypeName();
             followUpData.demandStatus= demand.getStatusOrderedName();
             followUpData.demandId = demand.getId();
             followUpData.demandNum = demand.getIssueKey();
             followUpData.demandSummary = demand.getSummary();
             followUpData.demandDescription = issueDescription("", demand);
+            followUpData.demandOrder = demand.getStatusPriority() + demandPriorityOrder;
         }
         
         followUpData.taskType = task.getIssueTypeName();
@@ -363,7 +367,8 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
     }
     
     private String issueFullDescription(Issue issue) {
-        return issue.getIssueTypeName() + " | " +issueDescription(getTshirtSize(issue), issue.getIssueKeyNum(), issue.getSummary());
+        return issue.getStatusName() + " > " + issue.getIssueTypeName() +
+                " | " + issueDescription(getTshirtSize(issue), issue.getIssueKeyNum(), issue.getSummary());
     }
     
     private String issueFullDescription(String issueType, String size, Integer issueNum, String description) {
