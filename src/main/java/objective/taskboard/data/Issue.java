@@ -374,6 +374,11 @@ public class Issue implements Serializable {
     }
 
     @JsonIgnore
+    public String getStatusOrderedName() {
+        return getStatusPriority() + "." + getStatusName();
+    }
+
+    @JsonIgnore
     public Integer getStatusPriority() {
         if (this.isDemand())
             return jiraProperties.getStatusPriorityOrder().getDemandPriorityByStatus(this.getStatusName());

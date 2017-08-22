@@ -154,7 +154,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " planningType           : Ballpark\n" + 
             " project                : A Project\n" + 
             " demandType             : Demand\n" + 
-            " demandStatus           : To Do\n" + 
+            " demandStatus           : 4.To Do\n" + 
             " demandId               : 1\n" + 
             " demandNum              : PROJ-1\n" + 
             " demandSummary          : Smry 1\n" + 
@@ -168,7 +168,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " taskFullDescription    : BALLPARK - Demand | M | 00000 - Smry 1\n" + 
             " taskRelease            : No release set\n" + 
             " subtaskType            : BALLPARK - Demand\n" + 
-            " subtaskStatus          : To Do\n" + 
+            " subtaskStatus          : 4.To Do\n" + 
             " subtaskId              : 0\n" + 
             " subtaskNum             : PROJ-0\n" + 
             " subtaskSummary         : Smry 1\n" + 
@@ -193,7 +193,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " planningType           : Ballpark\n" + 
             " project                : A Project\n" + 
             " demandType             : Demand\n" + 
-            " demandStatus           : To Do\n" + 
+            " demandStatus           : 4.To Do\n" + 
             " demandId               : 1\n" + 
             " demandNum              : PROJ-1\n" + 
             " demandSummary          : Smry 1\n" + 
@@ -207,7 +207,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " taskFullDescription    : BALLPARK - Demand | M | 00000 - Smry 1\n" + 
             " taskRelease            : Release 42\n" + 
             " subtaskType            : BALLPARK - Demand\n" + 
-            " subtaskStatus          : To Do\n" + 
+            " subtaskStatus          : 4.To Do\n" + 
             " subtaskId              : 0\n" + 
             " subtaskNum             : PROJ-0\n" + 
             " subtaskSummary         : Smry 1\n" + 
@@ -242,7 +242,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " planningType           : Ballpark\n" + 
             " project                : A Project\n" + 
             " demandType             : Demand\n" + 
-            " demandStatus           : To Do\n" + 
+            " demandStatus           : 4.To Do\n" + 
             " demandId               : 1\n" + 
             " demandNum              : PROJ-1\n" + 
             " demandSummary          : Smry 1\n" + 
@@ -256,7 +256,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " taskFullDescription    : BALLPARK - Demand | M | 00000 - Smry 1\n" + 
             " taskRelease            : No release set\n" + 
             " subtaskType            : BALLPARK - Demand\n" + 
-            " subtaskStatus          : To Do\n" + 
+            " subtaskStatus          : 4.To Do\n" + 
             " subtaskId              : 0\n" + 
             " subtaskNum             : PROJ-0\n" + 
             " subtaskSummary         : Smry 1\n" + 
@@ -274,26 +274,26 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " planningType           : Plan\n" + 
             " project                : A Project\n" + 
             " demandType             : Demand\n" + 
-            " demandStatus           : To Do\n" + 
+            " demandStatus           : 4.To Do\n" + 
             " demandId               : 2\n" + 
             " demandNum              : PROJ-2\n" + 
             " demandSummary          : Smry 2\n" + 
             " demandDescription      : 00002 - Smry 2\n" + 
             " taskType               : Task\n" + 
-            " taskStatus             : To Do\n" + 
+            " taskStatus             : 9.To Do\n" + 
             " taskId                 : 3\n" + 
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
             " taskRelease            : No release set\n" + 
             " subtaskType            : Dev\n" + 
-            " subtaskStatus          : To Do\n" + 
+            " subtaskStatus          : 4.To Do\n" + 
             " subtaskId              : 4\n" + 
             " subtaskNum             : PROJ-4\n" + 
             " subtaskSummary         : Smry 4\n" + 
             " subtaskDescription     : XL | 00004 - Smry 4\n" + 
-            " subtaskFullDescription : Dev | XL | 00004 - Smry 4\n" + 
+            " subtaskFullDescription : To Do > Dev | XL | 00004 - Smry 4\n" + 
             " tshirtSize             : XL\n" + 
             " worklog                : 5.0\n" + 
             " wrongWorklog           : 0.0\n" + 
@@ -330,18 +330,18 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " planningType           : Ballpark\n" + 
             " project                : A Project\n" + 
             " demandType             : Demand\n" + 
-            " demandStatus           : To Do\n" + 
+            " demandStatus           : 4.To Do\n" + 
             " demandId               : 2\n" + 
             " demandNum              : PROJ-2\n" + 
             " demandSummary          : Smry 2\n" + 
             " demandDescription      : 00002 - Smry 2\n" + 
             " taskType               : Task\n" + 
-            " taskStatus             : To Do\n" + 
+            " taskStatus             : 9.To Do\n" + 
             " taskId                 : 3\n" + 
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
             " taskRelease            : No release set\n" + 
             " subtaskType            : BALLPARK - Development\n" + 
             " subtaskStatus          : Open\n" + 
@@ -362,18 +362,18 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " planningType           : Ballpark\n" + 
             " project                : A Project\n" + 
             " demandType             : Demand\n" + 
-            " demandStatus           : To Do\n" + 
+            " demandStatus           : 4.To Do\n" + 
             " demandId               : 2\n" + 
             " demandNum              : PROJ-2\n" + 
             " demandSummary          : Smry 2\n" + 
             " demandDescription      : 00002 - Smry 2\n" + 
             " taskType               : Task\n" + 
-            " taskStatus             : To Do\n" + 
+            " taskStatus             : 9.To Do\n" + 
             " taskId                 : 3\n" + 
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
             " taskRelease            : No release set\n" + 
             " subtaskType            : BALLPARK - Alpha\n" + 
             " subtaskStatus          : Open\n" + 
@@ -434,18 +434,18 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " planningType           : Ballpark\n" + 
             " project                : A Project\n" + 
             " demandType             : Demand\n" + 
-            " demandStatus           : To Do\n" + 
+            " demandStatus           : 4.To Do\n" + 
             " demandId               : 2\n" + 
             " demandNum              : PROJ-2\n" + 
             " demandSummary          : Smry 2\n" + 
             " demandDescription      : 00002 - Smry 2\n" + 
             " taskType               : Task\n" + 
-            " taskStatus             : To Do\n" + 
+            " taskStatus             : 9.To Do\n" + 
             " taskId                 : 3\n" + 
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
             " taskRelease            : No release set\n" + 
             " subtaskType            : BALLPARK - Alpha\n" + 
             " subtaskStatus          : Open\n" + 
@@ -466,26 +466,26 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " planningType           : Plan\n" + 
             " project                : A Project\n" + 
             " demandType             : Demand\n" + 
-            " demandStatus           : To Do\n" + 
+            " demandStatus           : 4.To Do\n" + 
             " demandId               : 2\n" + 
             " demandNum              : PROJ-2\n" + 
             " demandSummary          : Smry 2\n" + 
             " demandDescription      : 00002 - Smry 2\n" + 
             " taskType               : Task\n" + 
-            " taskStatus             : To Do\n" + 
+            " taskStatus             : 9.To Do\n" + 
             " taskId                 : 3\n" + 
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
             " taskRelease            : No release set\n" + 
             " subtaskType            : Dev\n" + 
-            " subtaskStatus          : To Do\n" + 
+            " subtaskStatus          : 4.To Do\n" + 
             " subtaskId              : 4\n" + 
             " subtaskNum             : PROJ-4\n" + 
             " subtaskSummary         : Smry 4\n" + 
             " subtaskDescription     : XL | 00004 - Smry 4\n" + 
-            " subtaskFullDescription : Dev | XL | 00004 - Smry 4\n" + 
+            " subtaskFullDescription : To Do > Dev | XL | 00004 - Smry 4\n" + 
             " tshirtSize             : XL\n" + 
             " worklog                : 5.0\n" + 
             " wrongWorklog           : 0.0\n" + 
@@ -527,26 +527,26 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " planningType           : Plan\n" + 
             " project                : A Project\n" + 
             " demandType             : Demand\n" + 
-            " demandStatus           : To Do\n" + 
+            " demandStatus           : 4.To Do\n" + 
             " demandId               : 2\n" + 
             " demandNum              : PROJ-2\n" + 
             " demandSummary          : Smry 2\n" + 
             " demandDescription      : 00002 - Smry 2\n" + 
             " taskType               : Task\n" + 
-            " taskStatus             : To Do\n" + 
+            " taskStatus             : 9.To Do\n" + 
             " taskId                 : 3\n" + 
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
             " taskRelease            : No release set\n" + 
             " subtaskType            : Dev\n" + 
-            " subtaskStatus          : To Do\n" + 
+            " subtaskStatus          : 4.To Do\n" + 
             " subtaskId              : 4\n" + 
             " subtaskNum             : PROJ-4\n" + 
             " subtaskSummary         : Smry 4\n" + 
             " subtaskDescription     : XL | 00004 - Smry 4\n" + 
-            " subtaskFullDescription : Dev | XL | 00004 - Smry 4\n" + 
+            " subtaskFullDescription : To Do > Dev | XL | 00004 - Smry 4\n" + 
             " tshirtSize             : XL\n" + 
             " worklog                : 5.0\n" + 
             " wrongWorklog           : 0.0\n" + 
@@ -559,26 +559,26 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " planningType           : Plan\n" + 
             " project                : A Project\n" + 
             " demandType             : Demand\n" + 
-            " demandStatus           : To Do\n" + 
+            " demandStatus           : 4.To Do\n" + 
             " demandId               : 2\n" + 
             " demandNum              : PROJ-2\n" + 
             " demandSummary          : Smry 2\n" + 
             " demandDescription      : 00002 - Smry 2\n" + 
             " taskType               : Task\n" + 
-            " taskStatus             : To Do\n" + 
+            " taskStatus             : 9.To Do\n" + 
             " taskId                 : 3\n" + 
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
             " taskRelease            : No release set\n" + 
             " subtaskType            : Alpha\n" + 
-            " subtaskStatus          : To Do\n" + 
+            " subtaskStatus          : 4.To Do\n" + 
             " subtaskId              : 5\n" + 
             " subtaskNum             : PROJ-5\n" + 
             " subtaskSummary         : Smry 5\n" + 
             " subtaskDescription     : L | 00005 - Smry 5\n" + 
-            " subtaskFullDescription : Alpha | L | 00005 - Smry 5\n" + 
+            " subtaskFullDescription : To Do > Alpha | L | 00005 - Smry 5\n" + 
             " tshirtSize             : L\n" + 
             " worklog                : 15.0\n" + 
             " wrongWorklog           : 0.0\n" + 
@@ -609,18 +609,18 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " planningType           : Ballpark\n" + 
             " project                : A Project\n" + 
             " demandType             : Demand\n" + 
-            " demandStatus           : To Do\n" + 
+            " demandStatus           : 4.To Do\n" + 
             " demandId               : 2\n" + 
             " demandNum              : PROJ-2\n" + 
             " demandSummary          : Smry 2\n" + 
             " demandDescription      : 00002 - Smry 2\n" + 
             " taskType               : Task\n" + 
-            " taskStatus             : To Do\n" + 
+            " taskStatus             : 9.To Do\n" + 
             " taskId                 : 3\n" + 
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
             " taskRelease            : release 66\n" + 
             " subtaskType            : BALLPARK - Development\n" + 
             " subtaskStatus          : Open\n" + 
@@ -663,26 +663,26 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " planningType           : Plan\n" + 
             " project                : A Project\n" + 
             " demandType             : Demand\n" + 
-            " demandStatus           : To Do\n" + 
+            " demandStatus           : 4.To Do\n" + 
             " demandId               : 2\n" + 
             " demandNum              : PROJ-2\n" + 
             " demandSummary          : Smry 2\n" + 
             " demandDescription      : 00002 - Smry 2\n" + 
             " taskType               : Task\n" + 
-            " taskStatus             : To Do\n" + 
+            " taskStatus             : 9.To Do\n" + 
             " taskId                 : 3\n" + 
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
             " taskRelease            : release 66\n" + 
             " subtaskType            : Dev\n" + 
-            " subtaskStatus          : To Do\n" + 
+            " subtaskStatus          : 4.To Do\n" + 
             " subtaskId              : 4\n" + 
             " subtaskNum             : PROJ-4\n" + 
             " subtaskSummary         : Smry 4\n" + 
             " subtaskDescription     : XL | 00004 - Smry 4\n" + 
-            " subtaskFullDescription : Dev | XL | 00004 - Smry 4\n" + 
+            " subtaskFullDescription : To Do > Dev | XL | 00004 - Smry 4\n" + 
             " tshirtSize             : XL\n" + 
             " worklog                : 5.0\n" + 
             " wrongWorklog           : 0.0\n" + 
@@ -716,20 +716,20 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " demandSummary          : \n" + 
             " demandDescription      : \n" + 
             " taskType               : Task\n" + 
-            " taskStatus             : To Do\n" + 
+            " taskStatus             : 9.To Do\n" + 
             " taskId                 : 3\n" + 
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
             " taskRelease            : No release set\n" + 
             " subtaskType            : Dev\n" + 
-            " subtaskStatus          : To Do\n" + 
+            " subtaskStatus          : 4.To Do\n" + 
             " subtaskId              : 4\n" + 
             " subtaskNum             : PROJ-4\n" + 
             " subtaskSummary         : Smry 4\n" + 
             " subtaskDescription     : XL | 00004 - Smry 4\n" + 
-            " subtaskFullDescription : Dev | XL | 00004 - Smry 4\n" + 
+            " subtaskFullDescription : To Do > Dev | XL | 00004 - Smry 4\n" + 
             " tshirtSize             : XL\n" + 
             " worklog                : 5.0\n" + 
             " wrongWorklog           : 0.0\n" + 
@@ -789,18 +789,18 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " planningType           : Ballpark\n" + 
             " project                : A Project\n" + 
             " demandType             : Demand\n" + 
-            " demandStatus           : To Do\n" + 
+            " demandStatus           : 4.To Do\n" + 
             " demandId               : 2\n" + 
             " demandNum              : PROJ-2\n" + 
             " demandSummary          : Smry 2\n" + 
             " demandDescription      : 00002 - Smry 2\n" + 
             " taskType               : Task\n" + 
-            " taskStatus             : To Do\n" + 
+            " taskStatus             : 9.To Do\n" + 
             " taskId                 : 3\n" + 
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
             " taskRelease            : No release set\n" + 
             " subtaskType            : BALLPARK - Development\n" + 
             " subtaskStatus          : Open\n" + 
@@ -821,26 +821,26 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " planningType           : Plan\n" + 
             " project                : A Project\n" + 
             " demandType             : Demand\n" + 
-            " demandStatus           : To Do\n" + 
+            " demandStatus           : 4.To Do\n" + 
             " demandId               : 2\n" + 
             " demandNum              : PROJ-2\n" + 
             " demandSummary          : Smry 2\n" + 
             " demandDescription      : 00002 - Smry 2\n" + 
             " taskType               : Task\n" + 
-            " taskStatus             : To Do\n" + 
+            " taskStatus             : 9.To Do\n" + 
             " taskId                 : 3\n" + 
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
             " taskRelease            : No release set\n" + 
             " subtaskType            : Dev\n" + 
-            " subtaskStatus          : Cancelled\n" + 
+            " subtaskStatus          : 6.Cancelled\n" + 
             " subtaskId              : 4\n" + 
             " subtaskNum             : PROJ-4\n" + 
             " subtaskSummary         : Smry 4\n" + 
             " subtaskDescription     : XL | 00004 - Smry 4\n" + 
-            " subtaskFullDescription : Dev | XL | 00004 - Smry 4\n" + 
+            " subtaskFullDescription : Cancelled > Dev | XL | 00004 - Smry 4\n" + 
             " tshirtSize             : XL\n" + 
             " worklog                : 5.0\n" + 
             " wrongWorklog           : 0.0\n" + 
@@ -886,18 +886,18 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " planningType           : Ballpark\n" + 
             " project                : A Project\n" + 
             " demandType             : Demand\n" + 
-            " demandStatus           : To Do\n" + 
+            " demandStatus           : 4.To Do\n" + 
             " demandId               : 2\n" + 
             " demandNum              : PROJ-2\n" + 
             " demandSummary          : Smry 2\n" + 
             " demandDescription      : 00002 - Smry 2\n" + 
             " taskType               : Task\n" + 
-            " taskStatus             : To Do\n" + 
+            " taskStatus             : 9.To Do\n" + 
             " taskId                 : 3\n" + 
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
             " taskRelease            : release 88\n" + 
             " subtaskType            : BALLPARK - Development\n" + 
             " subtaskStatus          : Open\n" + 
@@ -937,18 +937,18 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " planningType           : Ballpark\n" + 
             " project                : A Project\n" + 
             " demandType             : Demand\n" + 
-            " demandStatus           : To Do\n" + 
+            " demandStatus           : 4.To Do\n" + 
             " demandId               : 2\n" + 
             " demandNum              : PROJ-2\n" + 
             " demandSummary          : Smry 2\n" + 
             " demandDescription      : 00002 - Smry 2\n" + 
             " taskType               : Task\n" + 
-            " taskStatus             : To Do\n" + 
+            " taskStatus             : 9.To Do\n" + 
             " taskId                 : 3\n" + 
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
             " taskRelease            : release 66\n" + 
             " subtaskType            : BALLPARK - Development\n" + 
             " subtaskStatus          : Open\n" + 
@@ -997,26 +997,26 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " planningType           : Plan\n" + 
             " project                : A Project\n" + 
             " demandType             : Demand\n" + 
-            " demandStatus           : To Do\n" + 
+            " demandStatus           : 4.To Do\n" + 
             " demandId               : 2\n" + 
             " demandNum              : PROJ-2\n" + 
             " demandSummary          : Smry 2\n" + 
             " demandDescription      : 00002 - Smry 2\n" + 
             " taskType               : Task\n" + 
-            " taskStatus             : To Do\n" + 
+            " taskStatus             : 9.To Do\n" + 
             " taskId                 : 3\n" + 
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
             " taskRelease            : Sub Task Release #3\n" + 
             " subtaskType            : Dev\n" + 
-            " subtaskStatus          : To Do\n" + 
+            " subtaskStatus          : 4.To Do\n" + 
             " subtaskId              : 4\n" + 
             " subtaskNum             : PROJ-4\n" + 
             " subtaskSummary         : Smry 4\n" + 
             " subtaskDescription     : XL | 00004 - Smry 4\n" + 
-            " subtaskFullDescription : Dev | XL | 00004 - Smry 4\n" + 
+            " subtaskFullDescription : To Do > Dev | XL | 00004 - Smry 4\n" + 
             " tshirtSize             : XL\n" + 
             " worklog                : 5.0\n" + 
             " wrongWorklog           : 0.0\n" + 
@@ -1029,26 +1029,26 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " planningType           : Plan\n" + 
             " project                : A Project\n" + 
             " demandType             : Demand\n" + 
-            " demandStatus           : To Do\n" + 
+            " demandStatus           : 4.To Do\n" + 
             " demandId               : 2\n" + 
             " demandNum              : PROJ-2\n" + 
             " demandSummary          : Smry 2\n" + 
             " demandDescription      : 00002 - Smry 2\n" + 
             " taskType               : Task\n" + 
-            " taskStatus             : To Do\n" + 
+            " taskStatus             : 9.To Do\n" + 
             " taskId                 : 3\n" + 
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
             " taskRelease            : Sub Task Release #4\n" + 
             " subtaskType            : Dev\n" + 
-            " subtaskStatus          : To Do\n" + 
+            " subtaskStatus          : 4.To Do\n" + 
             " subtaskId              : 5\n" + 
             " subtaskNum             : PROJ-5\n" + 
             " subtaskSummary         : Smry 5\n" + 
             " subtaskDescription     : XL | 00005 - Smry 5\n" + 
-            " subtaskFullDescription : Dev | XL | 00005 - Smry 5\n" + 
+            " subtaskFullDescription : To Do > Dev | XL | 00005 - Smry 5\n" + 
             " tshirtSize             : XL\n" + 
             " worklog                : 5.0\n" + 
             " wrongWorklog           : 0.0\n" + 
@@ -1084,26 +1084,26 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " planningType           : Plan\n" + 
             " project                : A Project\n" + 
             " demandType             : Demand\n" + 
-            " demandStatus           : To Do\n" + 
+            " demandStatus           : 4.To Do\n" + 
             " demandId               : 2\n" + 
             " demandNum              : PROJ-2\n" + 
             " demandSummary          : Smry 2\n" + 
             " demandDescription      : 00002 - Smry 2\n" + 
             " taskType               : Task\n" + 
-            " taskStatus             : To Do\n" + 
+            " taskStatus             : 9.To Do\n" + 
             " taskId                 : 3\n" + 
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
             " taskRelease            : Demand Release #1\n" + 
             " subtaskType            : Dev\n" + 
-            " subtaskStatus          : To Do\n" + 
+            " subtaskStatus          : 4.To Do\n" + 
             " subtaskId              : 4\n" + 
             " subtaskNum             : PROJ-4\n" + 
             " subtaskSummary         : Smry 4\n" + 
             " subtaskDescription     : XL | 00004 - Smry 4\n" + 
-            " subtaskFullDescription : Dev | XL | 00004 - Smry 4\n" + 
+            " subtaskFullDescription : To Do > Dev | XL | 00004 - Smry 4\n" + 
             " tshirtSize             : XL\n" + 
             " worklog                : 5.0\n" + 
             " wrongWorklog           : 0.0\n" + 
@@ -1126,7 +1126,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
                 " planningType           : Ballpark\n" +
                 " project                : A Project\n" +
                 " demandType             : Demand\n" +
-                " demandStatus           : Done\n" +
+                " demandStatus           : 0.Done\n" +
                 " demandId               : 3\n" +
                 " demandNum              : PROJ-3\n" +
                 " demandSummary          : Smry 3\n" +
@@ -1140,7 +1140,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
                 " taskFullDescription    : BALLPARK - Demand | M | 00000 - Smry 3\n" +
                 " taskRelease            : No release set\n" +
                 " subtaskType            : BALLPARK - Demand\n" +
-                " subtaskStatus          : Done\n" +
+                " subtaskStatus          : 0.Done\n" +
                 " subtaskId              : 0\n" +
                 " subtaskNum             : PROJ-0\n" +
                 " subtaskSummary         : Smry 3\n" +
@@ -1158,7 +1158,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
                 " planningType           : Ballpark\n" +
                 " project                : A Project\n" +
                 " demandType             : Demand\n" +
-                " demandStatus           : To Do\n" +
+                " demandStatus           : 4.To Do\n" +
                 " demandId               : 4\n" +
                 " demandNum              : PROJ-4\n" +
                 " demandSummary          : Smry 4\n" +
@@ -1172,7 +1172,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
                 " taskFullDescription    : BALLPARK - Demand | M | 00000 - Smry 4\n" +
                 " taskRelease            : No release set\n" +
                 " subtaskType            : BALLPARK - Demand\n" +
-                " subtaskStatus          : To Do\n" +
+                " subtaskStatus          : 4.To Do\n" +
                 " subtaskId              : 0\n" +
                 " subtaskNum             : PROJ-0\n" +
                 " subtaskSummary         : Smry 4\n" +
@@ -1190,7 +1190,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
                 " planningType           : Ballpark\n" +
                 " project                : A Project\n" +
                 " demandType             : Demand\n" +
-                " demandStatus           : To Do\n" +
+                " demandStatus           : 4.To Do\n" +
                 " demandId               : 2\n" +
                 " demandNum              : PROJ-2\n" +
                 " demandSummary          : Smry 2\n" +
@@ -1204,7 +1204,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
                 " taskFullDescription    : BALLPARK - Demand | M | 00000 - Smry 2\n" +
                 " taskRelease            : No release set\n" +
                 " subtaskType            : BALLPARK - Demand\n" +
-                " subtaskStatus          : To Do\n" +
+                " subtaskStatus          : 4.To Do\n" +
                 " subtaskId              : 0\n" +
                 " subtaskNum             : PROJ-0\n" +
                 " subtaskSummary         : Smry 2\n" +
@@ -1222,7 +1222,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
                 " planningType           : Ballpark\n" +
                 " project                : A Project\n" +
                 " demandType             : Demand\n" +
-                " demandStatus           : Open\n" +
+                " demandStatus           : 5.Open\n" +
                 " demandId               : 1\n" +
                 " demandNum              : PROJ-1\n" +
                 " demandSummary          : Smry 1\n" +
@@ -1236,7 +1236,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
                 " taskFullDescription    : BALLPARK - Demand | M | 00000 - Smry 1\n" +
                 " taskRelease            : No release set\n" +
                 " subtaskType            : BALLPARK - Demand\n" +
-                " subtaskStatus          : Open\n" +
+                " subtaskStatus          : 5.Open\n" +
                 " subtaskId              : 0\n" +
                 " subtaskNum             : PROJ-0\n" +
                 " subtaskSummary         : Smry 1\n" +
@@ -1367,12 +1367,12 @@ public class FollowUpDataProviderFromCurrentStateTest {
                 " demandSummary          : \n" + 
                 " demandDescription      : \n" + 
                 " taskType               : Task\n" + 
-                " taskStatus             : To Do\n" + 
+                " taskStatus             : 9.To Do\n" + 
                 " taskId                 : 3\n" + 
                 " taskNum                : PROJ-3\n" + 
                 " taskSummary            : Smry 3\n" + 
                 " taskDescription        : 00003 - Smry 3\n" + 
-                " taskFullDescription    : Task | 00003 - Smry 3\n" + 
+                " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
                 " taskRelease            : No release set\n" + 
                 " subtaskType            : BALLPARK - Development\n" + 
                 " subtaskStatus          : Open\n" + 
@@ -1400,7 +1400,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
                 " planningType           : Ballpark\n" + 
                 " project                : A Project\n" + 
                 " demandType             : Demand\n" + 
-                " demandStatus           : To Do\n" + 
+                " demandStatus           : 4.To Do\n" + 
                 " demandId               : 1\n" + 
                 " demandNum              : PROJ-1\n" + 
                 " demandSummary          : Smry 1\n" + 
@@ -1414,7 +1414,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
                 " taskFullDescription    : BALLPARK - Demand | M | 00000 - Smry 1\n" + 
                 " taskRelease            : No release set\n" + 
                 " subtaskType            : BALLPARK - Demand\n" + 
-                " subtaskStatus          : To Do\n" + 
+                " subtaskStatus          : 4.To Do\n" + 
                 " subtaskId              : 0\n" + 
                 " subtaskNum             : PROJ-0\n" + 
                 " subtaskSummary         : Smry 1\n" + 

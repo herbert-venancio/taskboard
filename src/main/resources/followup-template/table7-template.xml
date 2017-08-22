@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <table xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" id="1" name="AllIssues" displayName="AllIssues" ref="A1:AS${LINE_COUNT}" tableType="queryTable" totalsRowShown="0">
   <autoFilter ref="A1:AS${LINE_COUNT}"/>
-  <sortState ref="A2:AS119">
-    <sortCondition ref="W2:W119"/>
-    <sortCondition ref="D2:D119"/>
-    <sortCondition ref="I2:I119"/>
-    <sortCondition ref="O2:O119"/>
-  </sortState>
   <tableColumns count="45">
     <tableColumn id="1" uniqueName="1" name="project" queryTableFieldId="1"/>
     <tableColumn id="2" uniqueName="2" name="demand_type" queryTableFieldId="2"/>

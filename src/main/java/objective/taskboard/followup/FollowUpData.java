@@ -32,6 +32,7 @@ public class FollowUpData {
     public String demandNum = "";
     public String demandSummary = "";
     public String demandDescription = "";
+    public String demandOrder = "";
 
     public String taskType = "";
     public String taskStatus = "";
@@ -41,6 +42,7 @@ public class FollowUpData {
     public String taskDescription = "";
     public String taskFullDescription = "";
     public String taskRelease = "";
+    public String taskOrder = "";
 
     public String subtaskType;
     public String subtaskStatus;
@@ -50,6 +52,7 @@ public class FollowUpData {
     public String subtaskDescription;
     public String subtaskFullDescription;
     public String tshirtSize;
+    public String subtaskOrder = "";
     
     public Double worklog;
     public Double wrongWorklog;
