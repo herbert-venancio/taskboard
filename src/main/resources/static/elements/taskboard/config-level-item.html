@@ -21,9 +21,10 @@
 <dom-module id="config-level-item">
 
     <style>
-    	.config-item-title {
-    		padding: 0 5px;
-    	}
+        .config-item-title {
+            padding: 0 5px;
+        }
+
         .level-configuration {
             padding-left: 20px;
         }
@@ -59,9 +60,10 @@
     </style>
 
     <template>
+
         <paper-material class="paper-margin" elevation="0">
             <span class="level-title">
-            	<paper-icon-button id="visibilityButton" on-tap="toggleVisibility"></paper-icon-button>[[level.level]]
+                <paper-icon-button id="visibilityButton" on-tap="toggleVisibility"></paper-icon-button>[[level.level]]
             </span>
             <paper-material class="level-configuration" elevation="0">
                 <div class="sub-title">
@@ -70,6 +72,7 @@
 
             </paper-material>
         </paper-material>
+
     </template>
 
     <script>

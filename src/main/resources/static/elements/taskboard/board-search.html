@@ -21,12 +21,11 @@
 <dom-module id="board-search">
 
     <style is="custom-style">
-    
-    	:host {
-    		display: flex;
-			align-items: center;
-    	}
-    
+        :host {
+            display: flex;
+            align-items: center;
+        }
+
         .input-search {
             border-radius: 3px;
             height: 30px;
@@ -57,6 +56,7 @@
     <template>
         <iron-signals on-iron-signal-search-filter-reset="searchReset"
                       on-iron-signal-refresh-release-filter="retrieveReleases"></iron-signals>
+
         <input id="searchIssues" class="input-search" value="{{query::input}}" type="search"
                placeholder="Search Issues" results="5" autocomplete="off"/>
         <template is="dom-if" if="{{isReleaseConfigured()}}">
@@ -73,6 +73,7 @@
                 <paper-icon-button id="clearReleaseButton" icon="clear" on-click="clearRelease" hidden></paper-icon-button>
             </div>
         </template>
+
     </template>
 
     <script>

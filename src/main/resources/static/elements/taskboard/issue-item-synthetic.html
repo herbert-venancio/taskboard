@@ -27,7 +27,7 @@
         }
         
         paper-material {
-        	cursor: pointer;
+            cursor: pointer;
         }
 
         .icons_s {
@@ -96,10 +96,10 @@
             width: 25px;
             height: 25px;
             display: block;
-		    position: absolute;
-		    top: 50%;
-		    left: 50%;
-		    transform: translate(-50%, -50%);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
 
         .image {
@@ -117,7 +117,7 @@
             -moz-mask-repeat: no-repeat;
             -ms-mask-repeat: no-repeat;
             mask-repeat: no-repeat;
-            
+
             display: block;
             text-indent: -9000px;
             overflow: hidden;
@@ -127,6 +127,7 @@
 
 
     <template>
+
         <paper-material on-tap="opendialog" elevation="0">
             <div>
                 <img id$="[[item.issueKey]]"
@@ -149,8 +150,8 @@
                                title="Canceled issue"></iron-icon>
                 </div>
             </template>
-
         </paper-material>
+
     </template>
 
     <script>

@@ -22,9 +22,9 @@
 
     <style>
         .customViews {
-        	display: flex;
+            display: flex;
         }
-        
+
         .customViews-icon {
             width: 30px;
             height: 30px;
@@ -32,22 +32,22 @@
             margin-left: 5px;
             display: block;
         }
-        
+
         .customViews-icon:first-child {
-        	margin-left: 0px;
+            margin-left: 0px;
         }
-        
+
         .customViews-icon:hover {
-        	background: #CCC;
+            background: #CCC;
             opacity: 0.8;
             
             -webkit-transition: all .5s;
             -moz-transition: all .5s;
             transition: all .5s;
         }
-        
+
         .customViews-icon.active {
-        	background: #CCC;
+            background: #CCC;
         }
 
         .iconsAnalytics {
@@ -67,17 +67,16 @@
         
         .iconsSynthetic.active {
         }
-
     </style>
 
     <template>
+
         <div class="customViews">
-        
             <paper-icon-button class$="customViews-icon iconsSynthetic {{getStyleSynthetic(visibilityConfiguration.showSynthetic)}}"
                                icon="image:grain" title="Synthetic View"
                                on-tap="toggleVisibility"></paper-icon-button>
-                               
         </div>
+
     </template>
 
     <script>

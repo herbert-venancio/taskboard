@@ -21,25 +21,25 @@
 
 <dom-module id="board-step">
     <style>
-    	
-    	.step-count-wrapper {
-    		width: 100%;
-    	}
-		
-		.step-count {
-			background: #777;
-			display: inline-block;
-			padding: 3px 10px;
-			color: #FFF;
-			border-radius: 3px;
-			margin: 3px;
-			font-size: 13px;
-		}
-        
+
+        .step-count-wrapper {
+            width: 100%;
+        }
+
+        .step-count {
+            background: #777;
+            display: inline-block;
+            padding: 3px 10px;
+            color: #FFF;
+            border-radius: 3px;
+            margin: 3px;
+            font-size: 13px;
+        }
+
         .issue-transition-state {
             box-shadow: inset 0 0 1px !important
         }
-		
+
     </style>
 
     <template>
@@ -51,23 +51,26 @@
                       on-iron-signal-issues-updated="handleUpdatedIssues"
                       on-iron-signal-step-update="handleStepUpdate"
                       ></iron-signals>
+
         <div id="boardStep" class="wrap layout horizontal sortable-board-step" style="width: 100%">
 
             <!-- Issue Counter -->
             <template is="dom-if" if="{{showTeamCount(issues, lastPreferenceUpdate)}}">
                 <div style="width:100%" class="step-count-wrapper layout horizontal">
-					<inline-badge class="step-count" value="{{getIssueCount(issues, lastPreferenceUpdate)}}"></inline-badge>
+                    <inline-badge class="step-count" value="{{getIssueCount(issues, lastPreferenceUpdate)}}"></inline-badge>
                 </div>
             </template>
 
             <!-- Issues -->
             <div id="boardStepIssues" class="wrap layout horizontal sortable-board-step" style="width: 100%">
-            <template is="dom-repeat" items="{{filteredIssues}}" as="issue">
-                <issue-item data-id$="{{issue.issueKey}}" id='{{issue.issueKey}}' item="{{issue}}" boardstepid="{{stepMetadata.id}}" style$="{{getOptimalIssueWidth(columns, issue)}}" hidden="{{showSynthetic(lastPreferenceUpdate)}}"></issue-item>
-                <issue-item-synthetic item="{{issue}}" parent-type-icon="{{showParentIconInSynthetic(parentLaneConfig)}}" hidden="{{!showSynthetic(lastPreferenceUpdate)}}"></issue-item-synthetic>
-            </template>
+                <template is="dom-repeat" items="{{filteredIssues}}" as="issue">
+                    <issue-item data-id$="{{issue.issueKey}}" id='{{issue.issueKey}}' item="{{issue}}" boardstepid="{{stepMetadata.id}}" style$="{{getOptimalIssueWidth(columns, issue)}}" hidden="{{showSynthetic(lastPreferenceUpdate)}}"></issue-item>
+                    <issue-item-synthetic item="{{issue}}" parent-type-icon="{{showParentIconInSynthetic(parentLaneConfig)}}" hidden="{{!showSynthetic(lastPreferenceUpdate)}}"></issue-item-synthetic>
+                </template>
             </div>
+
         </div>
+
     </template>
 
     <script>
@@ -132,28 +135,28 @@
                 listeners: {
                     'iron-resize': 'refit'
                 },
-                
+
                 attached: function() {
-                	if (this.stepItem().length == 0) {
-                		throw "Failed to enable prioritization because the step item could not be found";
-                	}
-                	this.makeStepSortable();
+                    if (this.stepItem().length == 0) {
+                        throw "Failed to enable prioritization because the step item could not be found";
+                    }
+                    this.makeStepSortable();
                 },
-                
+
                 makeStepSortable: function() {
-                	var handle = function(e,ui) {
-            			var si = this.stepItem();
-            			var issueKeysEl = si.find("input[type='hidden']").map(function(i,e) { 
-            				return e.value;
-            			})
-            			var issueKeys = [];
-            			for (i in issueKeysEl) {
-            				if ($.isNumeric(i)) {
-            					issueKeys.push(issueKeysEl[i])
-            				}
-            			}
-            			var self = this;
-            			$.ajax({
+                    var handle = function(e,ui) {
+                        var si = this.stepItem();
+                        var issueKeysEl = si.find("input[type='hidden']").map(function(i,e) { 
+                            return e.value;
+                        })
+                        var issueKeys = [];
+                        for (i in issueKeysEl) {
+                            if ($.isNumeric(i)) {
+                                issueKeys.push(issueKeysEl[i])
+                            }
+                        }
+                        var self = this;
+                        $.ajax({
                              url: '/ws/issues/reorder',
                              type: 'post',
                              contentType: 'application/json',
@@ -169,30 +172,30 @@
                                  })
                              },
                              error: function (jqXhr, textStatus, errorThrown) {
-                            	 self.fire("iron-signal", {name:"show-error-message", data:"Repriorization failed. Reason: status ("+jqXhr.status+") " + textStatus	})
-                            	 si.sortable("cancel");
-                            	 var card = ui.item.find(".issue")
-                            	 var original = card.css('backgroundColor');
-                            	 card.animate({backgroundColor:"red"},300).animate({backgroundColor:original},800)
-                            	 var parent = ui.item.closest(".board-lane.table-wrapper");
-                            	 parent.animate({scrollTop: 
-                            		 ui.item.offset().top - parent.offset().top
-                            	 })
+                                 self.fire("iron-signal", {name:"show-error-message", data:"Repriorization failed. Reason: status ("+jqXhr.status+") " + textStatus    })
+                                 si.sortable("cancel");
+                                 var card = ui.item.find(".issue")
+                                 var original = card.css('backgroundColor');
+                                 card.animate({backgroundColor:"red"},300).animate({backgroundColor:original},800)
+                                 var parent = ui.item.closest(".board-lane.table-wrapper");
+                                 parent.animate({scrollTop: 
+                                     ui.item.offset().top - parent.offset().top
+                                 })
                              }
                          });
-            		}.bind(this);
-            		this.stepItem().sortable({
-                		items: 'issue-item',
-                		opacity: 0.7,
-                		animation: 150,
-                		forceHelperSize: true,
-                		forcePlaceholderSize: true,
-                		stop: handle
-                	});
+                    }.bind(this);
+                    this.stepItem().sortable({
+                        items: 'issue-item',
+                        opacity: 0.7,
+                        animation: 150,
+                        forceHelperSize: true,
+                        forcePlaceholderSize: true,
+                        stop: handle
+                    });
                 },
-                
+
                 stepItem: function() {
-                	return $(this.$.boardStepIssues);
+                    return $(this.$.boardStepIssues);
                 },
 
                 showParentIconInSynthetic: function() {
@@ -317,34 +320,33 @@
                     this.search = data;
                     this.preferencesUpdated();
                 },
-                
+
                 handleUpdatedIssues: function(event, data) {
                     var issueBoardStep = taskboard.getIssueStep(data.issue)
                     var belongsToThisStep = this.stepMetadata.id === issueBoardStep.id;
                     var self = this;
                     var issueIndex = -1
                     this.issues.forEach(function(anIssue, index, array) {
-                 	    if (anIssue.issueKey == data.issue.issueKey) {
-                 	       issueIndex = index;
-                 	        if (belongsToThisStep)
-                 	        	array[index] = data.issue;
-                 	    }
+                         if (anIssue.issueKey == data.issue.issueKey) {
+                             issueIndex = index;
+                             if (belongsToThisStep)
+                                 array[index] = data.issue;
+                         }
                     })
                     if (belongsToThisStep && issueIndex == -1) {
                         // issue added to this board step
                         data.issue.__eventInfo.type = 'ADDED'
                         data.issue.boardstep = issueBoardStep.id;
                         this.issues.push(data.issue)
-                        
-                        
+
                         this.async(function() {
                             self.filter();
                             this.fire("iron-signal", {name:"issue-count-changed"});
                         })
-                        
+
                         return;
                     }
-                    
+
                     if (!belongsToThisStep && issueIndex > -1) {
                         // issue removed from this board step
                         var issueToRemoveDom = Polymer.dom(this.root).querySelector("#"+data.issue.issueKey);
@@ -360,7 +362,7 @@
                             }, 800, 'easeOutExpo');
                             previous = $(this);
                         });
-                        
+
                         $(issueToRemoveDom).fadeOut(
                             800,
                             function() {
@@ -376,7 +378,7 @@
                         return;
                     }
                 },
-                
+
                 handleStepUpdate: function(event, data) {
                     if (this.stepMetadata.id != data.stepId)
                         return;
@@ -394,7 +396,7 @@
                     if (this.updateQueue.length == 1)
                         this.updateQueue[0]();
                 },
-                
+
                 performUpdate: function(updateComplete) {
                     var self = this;
                     var domCards = $(Polymer.dom(this.root).querySelectorAll("issue-item"));
@@ -402,10 +404,10 @@
                     domCards.each(function(card) {
                         domXissueKey[this.getAttribute("data-id")] = this;
                     });
-                    
+
                     var issueOrderBeforeUpdate = this.filteredIssues; 
                     var issueOrderAfterUpdate  = this.filterIssues(this.issues);
-                    
+
                     var transitions = [];
                     issueOrderBeforeUpdate.forEach(function(issue, index) {
                         if (issueOrderAfterUpdate[index].issueKey == issue.issueKey) return;
@@ -435,8 +437,8 @@
                         'easeOutExpo',
                         function() {
                             transitionsToGo--;
-                            if (transitionsToGo) return;
-                            
+                            if (transitionsToGo)
+                                return;
                             self.async(function() {
                                 transitions.forEach(function(transition) {
                                     transition.target.removeClass("issue-transition-state")

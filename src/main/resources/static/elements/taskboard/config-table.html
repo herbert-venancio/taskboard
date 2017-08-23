@@ -28,25 +28,27 @@
         paper-toolbar ::shadow #topBar {
             height: 40px;
         }
+
         .config-item {
-		    display: flex;
-		    align-items: center;
+            display: flex;
+            align-items: center;
         }
-        
-		.config-icon {
-        	flex: 0 0 auto;
+
+        .config-icon {
+            flex: 0 0 auto;
         }
-        
+
         .config-title {
-        	flex: 1;
+            flex: 1;
         }
     </style>
 
     <template>
+
         <paper-material>
             <paper-toolbar on-tap="collapseMenuTap">
                 <paper-material class="config-item flex layout horizontal" elevation=0>
-                	<iron-icon id="toggleIcon" class="config-icon icon-small" icon="chevron-right"></iron-icon>
+                    <iron-icon id="toggleIcon" class="config-icon icon-small" icon="chevron-right"></iron-icon>
                     <paper-material class="config-title" elevation=0>Board Features</paper-material>
                 </paper-material>
             </paper-toolbar>
@@ -55,6 +57,7 @@
                 <config-lane-team levels="{{config}}"></config-lane-team>
             </iron-collapse>
         </paper-material>
+
     </template>
 
     <script>

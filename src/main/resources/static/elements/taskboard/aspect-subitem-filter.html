@@ -73,6 +73,7 @@
     </style>
 
     <template>
+
         <paper-button elevation="0" on-tap="toggle">
           <template is="dom-if" if="{{isUrl(aspectSubitemFilter)}}">
               <paper-icon-button src="{{getIconImage(aspectSubitemFilter)}}"></paper-icon-button>
@@ -82,6 +83,7 @@
           </template>
             <span>{{aspectSubitemFilter.name}}</span>
         </paper-button>
+
     </template>
 
     <script>

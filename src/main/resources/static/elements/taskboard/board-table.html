@@ -40,6 +40,7 @@
                       on-iron-signal-update-user-preferences="checkIssuesInvalidTeam"
                       on-iron-signal-level-config-changed="checkIssuesInvalidTeam"
                       on-iron-signal-search-filter-changed="checkIssuesInvalidTeam"></iron-signals>
+
         <div id="lane-container" class="fit layout vertical board">
             <template id="levels" is="dom-repeat" items="{{conf}}" as="level">
                 <template is="dom-if" if="{{showLevel(level.showLevel, lastLaneUpdate)}}">
@@ -51,6 +52,7 @@
             </template>
         </div>
         <issue-detail id="issuedialog"></issue-detail>
+
     </template>
 
     <script>
