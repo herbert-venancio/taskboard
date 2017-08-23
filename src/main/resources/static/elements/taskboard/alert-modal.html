@@ -45,7 +45,7 @@
             padding: 18px;
             margin-bottom: 20px;
         }
-        
+
         paper-button {
             margin: 0 5px;
             text-align: center;
@@ -57,12 +57,15 @@
     </style>
 
     <template>
+
         <paper-dialog id="alertModal">
             <h2>[[title]]</h2>
             <div class="text">[[text]]</div>
             <paper-button id="ok" class="colorful" on-tap="close" raised>Ok</paper-button>
         </paper-dialog>
+
     </template>
+
     <script>
         (function () {
             Polymer({

@@ -21,11 +21,12 @@
 <dom-module id="config-lane-team">
 
     <style>
-    	.config-item-title {
-    		padding: 0 5px;
+        .config-item-title {
+            padding: 0 5px;
             font-size: 15px;
             font-weight: bold;
-    	}
+        }
+
         .config-item-title:hover {
             -webkit-transition: all .5s;
             -moz-transition: all .5s;
@@ -74,6 +75,7 @@
                 </template>
             </paper-material>
         </iron-collapse>
+
     </template>
 
     <script>
@@ -91,9 +93,11 @@
                 collapseLevelConfig: function (e) {
                     this.$.collapseLevelConfig.toggle();
                 },
+
                 laneConfiguration: function () {
                     return userPreferences.getLanes();
                 },
+
                 changeConfig: function () {
                     this.fire('iron-signal', {
                         name: 'level-config-changed',

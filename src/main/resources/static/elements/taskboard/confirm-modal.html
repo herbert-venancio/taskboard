@@ -45,7 +45,7 @@
             padding: 18px;
             margin-bottom: 20px;
         }
-        
+
         paper-button {
             margin: 0 5px;
             text-align: center;
@@ -57,13 +57,16 @@
     </style>
 
     <template>
+
         <paper-dialog id="confirmPaperDialog">
             <h2>[[title]]</h2>
             <div class="confirmText">[[text]]</div>
             <paper-button id="confirm" class="colorful" on-tap="confirmed" raised>Confirm</paper-button>
             <paper-button class="colorful" on-tap="closeDialog">Cancel</paper-button>
         </paper-dialog>
+
     </template>
+
     <script>
         (function () {
             Polymer({
