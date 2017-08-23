@@ -377,7 +377,7 @@ public class Issue implements Serializable {
     public String getStatusOrderedName() {
         return getStatusPriority() + "." + getStatusName();
     }
-
+    
     @JsonIgnore
     public Integer getStatusPriority() {
         if (this.isDemand())

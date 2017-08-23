@@ -86,14 +86,13 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
 
         result.addAll(followUpBallparks.values());
         
-        result.sort(new Comparator<FollowUpData>() {
-            public int compare(FollowUpData o1, FollowUpData o2) {
-                String o1Order = o1.demandOrder + o1.taskOrder + o1.subtaskOrder;
-                String o2Order = o2.demandOrder + o2.taskOrder + o2.subtaskOrder;
-                return (o1Order).compareTo(o2Order);
-            }
-        });
-        
+        result.sort(Comparator.comparingInt((FollowUpData f) -> f.demandStatusPriority)
+                .thenComparingLong(f -> f.demandPriorityOrder)
+                .thenComparingInt(f -> f.taskStatusPriority)
+                .thenComparingLong(f -> f.taskPriorityOrder)
+                .thenComparingInt(f -> f.subtaskStatusPriority)
+                .thenComparingLong(f -> f.subtaskPriorityOrder));
+
         return result;
     }
     
@@ -185,7 +184,6 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
     }
 
     private FollowUpData createBallparkDemand(Issue demand) {
-        String demandPriorityOrder = demand.getPriorityOrder() != null ? demand.getPriorityOrder().toString() : "";
         FollowUpData followUpData = new FollowUpData();
         followUpData.planningType = "Ballpark";
         followUpData.project = demand.getProject();
@@ -196,7 +194,8 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         followUpData.demandNum = demand.getIssueKey();
         followUpData.demandSummary = demand.getSummary();
         followUpData.demandDescription = issueDescription("M", demand);
-        followUpData.demandOrder = demand.getStatusPriority() + demandPriorityOrder;
+        followUpData.demandStatusPriority = demand.getStatusPriority();
+        followUpData.demandPriorityOrder = demand.getPriorityOrder();
         
         followUpData.taskType = "BALLPARK - Demand";
         followUpData.taskStatus = getBallparkStatus();
@@ -247,14 +246,14 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         followUpData.project = task.getProject();
         
         if (demand != null) {
-            String demandPriorityOrder = demand.getPriorityOrder() != null ? demand.getPriorityOrder().toString() : "";
             followUpData.demandType = demand.getIssueTypeName();
             followUpData.demandStatus= demand.getStatusOrderedName();
             followUpData.demandId = demand.getId();
             followUpData.demandNum = demand.getIssueKey();
             followUpData.demandSummary = demand.getSummary();
             followUpData.demandDescription = issueDescription("", demand);
-            followUpData.demandOrder = demand.getStatusPriority() + demandPriorityOrder;
+            followUpData.demandStatusPriority = demand.getStatusPriority();
+            followUpData.demandPriorityOrder = demand.getPriorityOrder();
         }
         
         followUpData.taskType = task.getIssueTypeName();
@@ -265,6 +264,8 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         followUpData.taskDescription = issueDescription(task);
         followUpData.taskFullDescription = issueFullDescription(task);
         followUpData.taskRelease = coalesce(getRelease(task), getRelease(demand) ,"No release set");
+        followUpData.taskStatusPriority = task.getStatusPriority();
+        followUpData.taskPriorityOrder = task.getPriorityOrder();
         
         followUpData.subtaskType = ballparkMapping.getIssueType();
         followUpData.subtaskStatus = getBallparkStatus();
@@ -287,14 +288,11 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
     }
 
     private FollowUpData createSubTaskFollowup(Issue demand, Issue task, Issue subtask) {
-        String taskPriorityOrder = task.getPriorityOrder() != null ? task.getPriorityOrder().toString() : "";
-        String subtaskPriorityOrder = subtask.getPriorityOrder() != null ? subtask.getPriorityOrder().toString() : "";
         FollowUpData followUpData = new FollowUpData();
         followUpData.planningType = "Plan";
         followUpData.project = task.getProject();
         
         if (demand != null) {
-            String demandPriorityOrder = demand.getPriorityOrder() != null ? demand.getPriorityOrder().toString() : "";
             followUpData.demandId = demand.getId();
             followUpData.demandType = demand.getIssueTypeName();
             followUpData.demandStatus= demand.getStatusOrderedName();
@@ -302,7 +300,8 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
             followUpData.demandSummary = demand.getSummary();
             followUpData.demandDescription = issueDescription("",demand);
             followUpData.demandBallpark = originalEstimateInHour(demand);
-            followUpData.demandOrder = demand.getStatusPriority() + demandPriorityOrder;
+            followUpData.demandStatusPriority = demand.getStatusPriority();
+            followUpData.demandPriorityOrder = demand.getPriorityOrder();
         }
         
         followUpData.taskType = task.getIssueTypeName();
@@ -313,17 +312,19 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         followUpData.taskDescription = issueDescription(task);
         followUpData.taskFullDescription = issueFullDescription(task);
         followUpData.taskRelease = coalesce(getRelease(subtask), getRelease(task), getRelease(demand), "No release set");
-        followUpData.taskOrder = task.getStatusPriority() + taskPriorityOrder;
+        followUpData.taskStatusPriority = task.getStatusPriority();
+        followUpData.taskPriorityOrder = task.getPriorityOrder();
         
         followUpData.subtaskType = subtask.getIssueTypeName();
         followUpData.subtaskStatus = subtask.getStatusOrderedName();
         followUpData.subtaskId = subtask.getId();
         followUpData.subtaskNum = subtask.getIssueKey();
         followUpData.subtaskSummary = subtask.getSummary();
-        followUpData.subtaskOrder = task.getStatusPriority() + subtaskPriorityOrder;
+        followUpData.subtaskStatusPriority = subtask.getStatusPriority();
+        followUpData.subtaskPriorityOrder = subtask.getPriorityOrder();
         
         followUpData.subtaskDescription = issueDescription(subtask);
-        followUpData.subtaskFullDescription = issueFullDescription(subtask);
+        followUpData.subtaskFullDescription = subtask.getStatusName() + " > " + issueFullDescription(subtask);
         followUpData.tshirtSize = subtask.getTShirtSize();
         followUpData.worklog = timeSpentInHour(subtask);
         followUpData.wrongWorklog = 0.0; 
@@ -367,7 +368,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
     }
     
     private String issueFullDescription(Issue issue) {
-        return issue.getStatusName() + " > " + issue.getIssueTypeName() +
+        return issue.getIssueTypeName() +
                 " | " + issueDescription(getTshirtSize(issue), issue.getIssueKeyNum(), issue.getSummary());
     }
     

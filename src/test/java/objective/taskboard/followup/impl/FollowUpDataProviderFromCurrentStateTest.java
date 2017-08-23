@@ -232,10 +232,10 @@ public class FollowUpDataProviderFromCurrentStateTest {
                 "      - " + devIssueType + "\n"
                 );
         issues( 
-                demand().id(1).key("PROJ-1").summary("Smry 1").originalEstimateInHours(1).timeSpentInHours(10),
-                demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1),
-                task().id(3).key("PROJ-3").summary("Smry 3").originalEstimateInHours(2).parent("PROJ-2"),
-                subtask().id(4).key("PROJ-4").summary("Smry 4").timeSpentInHours(5).parent("PROJ-3").issueType(devIssueType).tshirtSize("XL")
+                demand().id(1).key("PROJ-1").summary("Smry 1").originalEstimateInHours(1).timeSpentInHours(10).priorityOrder(1l),
+                demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1).priorityOrder(1l),
+                task().id(3).key("PROJ-3").summary("Smry 3").originalEstimateInHours(2).parent("PROJ-2").priorityOrder(1l),
+                subtask().id(4).key("PROJ-4").summary("Smry 4").timeSpentInHours(5).parent("PROJ-3").issueType(devIssueType).tshirtSize("XL").priorityOrder(1l)
         );
         
         assertFollowupsForIssuesEquals(
@@ -285,7 +285,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
             " taskRelease            : No release set\n" + 
             " subtaskType            : Dev\n" + 
             " subtaskStatus          : 4.To Do\n" + 
@@ -319,11 +319,12 @@ public class FollowUpDataProviderFromCurrentStateTest {
         tshirtSizeInfo.setIds(Arrays.asList("Dev_Tshirt","Alpha_TestTshirt"));
         
         issues( 
-            demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1),
+            demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1).priorityOrder(1l),
             
             task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2).timeSpentInHours(1)
                 .tshirt("Dev_Tshirt","L")
                 .tshirt("Alpha_TestTshirt","S")
+                .priorityOrder(1l)
         );
         
         assertFollowupsForIssuesEquals(
@@ -341,7 +342,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
             " taskRelease            : No release set\n" + 
             " subtaskType            : BALLPARK - Development\n" + 
             " subtaskStatus          : Open\n" + 
@@ -373,7 +374,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
             " taskRelease            : No release set\n" + 
             " subtaskType            : BALLPARK - Alpha\n" + 
             " subtaskStatus          : Open\n" + 
@@ -421,13 +422,14 @@ public class FollowUpDataProviderFromCurrentStateTest {
         tshirtSizeInfo.setIds(Arrays.asList("Dev_Tshirt","Alpha_TestTshirt","Review_Tshirt"));
         
         issues( 
-            demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1),
+            demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1).priorityOrder(1l),
             
             task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2).timeSpentInHours(1)
                     .tshirt("Dev_Tshirt", "L")
-                    .tshirt("Alpha_TestTshirt", "S"),
+                    .tshirt("Alpha_TestTshirt", "S")
+                    .priorityOrder(1l),
                     
-            subtask().id(4).key("PROJ-4").summary("Smry 4").timeSpentInHours(5).parent("PROJ-3").issueType(devIssueType).tshirtSize("XL")
+            subtask().id(4).key("PROJ-4").summary("Smry 4").timeSpentInHours(5).parent("PROJ-3").issueType(devIssueType).tshirtSize("XL").priorityOrder(1l)
         );
         
         assertFollowupsForIssuesEquals(
@@ -445,7 +447,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
             " taskRelease            : No release set\n" + 
             " subtaskType            : BALLPARK - Alpha\n" + 
             " subtaskStatus          : Open\n" + 
@@ -477,7 +479,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
             " taskRelease            : No release set\n" + 
             " subtaskType            : Dev\n" + 
             " subtaskStatus          : 4.To Do\n" + 
@@ -512,15 +514,16 @@ public class FollowUpDataProviderFromCurrentStateTest {
         tshirtSizeInfo.setIds(Arrays.asList("Dev_Tshirt","Alpha_TestTshirt","Review_Tshirt"));
         
         issues( 
-            demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1),
+            demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1).priorityOrder(1l),
             
             task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2).timeSpentInHours(1)
                     .tshirt("Dev_Tshirt", "L")
-                    .tshirt("Alpha_TestTshirt", "S"),
+                    .tshirt("Alpha_TestTshirt", "S")
+                    .priorityOrder(1l),
                     
-            subtask().id(4).key("PROJ-4").summary("Smry 4").timeSpentInHours(5).parent("PROJ-3").issueType(devIssueType).tshirtSize("XL"),
+            subtask().id(4).key("PROJ-4").summary("Smry 4").timeSpentInHours(5).parent("PROJ-3").issueType(devIssueType).tshirtSize("XL").priorityOrder(1l),
             
-            subtask().id(5).key("PROJ-5").summary("Smry 5").timeSpentInHours(15).parent("PROJ-3").issueType(alphaIssueType).tshirtSize("L")
+            subtask().id(5).key("PROJ-5").summary("Smry 5").timeSpentInHours(15).parent("PROJ-3").issueType(alphaIssueType).tshirtSize("L").priorityOrder(1l)
         );
         
         assertFollowupsForIssuesEquals(
@@ -538,7 +541,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
             " taskRelease            : No release set\n" + 
             " subtaskType            : Dev\n" + 
             " subtaskStatus          : 4.To Do\n" + 
@@ -570,7 +573,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
             " taskRelease            : No release set\n" + 
             " subtaskType            : Alpha\n" + 
             " subtaskStatus          : 4.To Do\n" + 
@@ -620,7 +623,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
             " taskRelease            : release 66\n" + 
             " subtaskType            : BALLPARK - Development\n" + 
             " subtaskStatus          : Open\n" + 
@@ -674,7 +677,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
             " taskRelease            : release 66\n" + 
             " subtaskType            : Dev\n" + 
             " subtaskStatus          : 4.To Do\n" + 
@@ -721,7 +724,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
             " taskRelease            : No release set\n" + 
             " subtaskType            : Dev\n" + 
             " subtaskStatus          : 4.To Do\n" + 
@@ -776,13 +779,13 @@ public class FollowUpDataProviderFromCurrentStateTest {
         followup.setSubtaskStatusThatDontPreventBallparkGeneration(Arrays.asList(statusCancelled));
         
         issues( 
-            demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1),
+            demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1).priorityOrder(1l),
             
             task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2).timeSpentInHours(1)
-                    .tshirt("Dev_Tshirt", "L"),
+                    .tshirt("Dev_Tshirt", "L").priorityOrder(1l),
                     
             subtask().id(4).key("PROJ-4").summary("Smry 4").timeSpentInHours(5).parent("PROJ-3").issueType(devIssueType).tshirtSize("XL")
-                .issueStatus(statusCancelled)
+                .issueStatus(statusCancelled).priorityOrder(1l)
         );
         
         assertFollowupsForIssuesEquals(
@@ -800,7 +803,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
             " taskRelease            : No release set\n" + 
             " subtaskType            : BALLPARK - Development\n" + 
             " subtaskStatus          : Open\n" + 
@@ -832,7 +835,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
             " taskRelease            : No release set\n" + 
             " subtaskType            : Dev\n" + 
             " subtaskStatus          : 6.Cancelled\n" + 
@@ -897,7 +900,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
             " taskRelease            : release 88\n" + 
             " subtaskType            : BALLPARK - Development\n" + 
             " subtaskStatus          : Open\n" + 
@@ -948,7 +951,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
             " taskRelease            : release 66\n" + 
             " subtaskType            : BALLPARK - Development\n" + 
             " subtaskStatus          : Open\n" + 
@@ -979,18 +982,19 @@ public class FollowUpDataProviderFromCurrentStateTest {
         tshirtSizeInfo.setIds(Arrays.asList("Dev_Tshirt","Alpha_TestTshirt","Review_Tshirt"));
         
         issues( 
-            demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1).release("Demand Release #1"),
+            demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1).release("Demand Release #1").priorityOrder(1l),
             
             task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2).timeSpentInHours(1)
                     .tshirt("Dev_Tshirt", "L")
                     .tshirt("Alpha_TestTshirt", "S")
+                    .priorityOrder(1l)
                     .release("Feature Release #2"),
                     
             subtask().id(4).key("PROJ-4").summary("Smry 4").timeSpentInHours(5).parent("PROJ-3").issueType(devIssueType).tshirtSize("XL")
-                    .release("Sub Task Release #3"),
+                    .release("Sub Task Release #3").priorityOrder(1l),
                     
             subtask().id(5).key("PROJ-5").summary("Smry 5").timeSpentInHours(5).parent("PROJ-3").issueType(devIssueType).tshirtSize("XL")
-                    .release("Sub Task Release #4")                    
+                    .release("Sub Task Release #4").priorityOrder(1l)                  
         );
         
         assertFollowupsForIssuesEquals(
@@ -1008,7 +1012,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
             " taskRelease            : Sub Task Release #3\n" + 
             " subtaskType            : Dev\n" + 
             " subtaskStatus          : 4.To Do\n" + 
@@ -1040,7 +1044,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
             " taskRelease            : Sub Task Release #4\n" + 
             " subtaskType            : Dev\n" + 
             " subtaskStatus          : 4.To Do\n" + 
@@ -1095,7 +1099,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " taskNum                : PROJ-3\n" + 
             " taskSummary            : Smry 3\n" + 
             " taskDescription        : 00003 - Smry 3\n" + 
-            " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
+            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
             " taskRelease            : Demand Release #1\n" + 
             " subtaskType            : Dev\n" + 
             " subtaskStatus          : 4.To Do\n" + 
@@ -1372,7 +1376,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
                 " taskNum                : PROJ-3\n" + 
                 " taskSummary            : Smry 3\n" + 
                 " taskDescription        : 00003 - Smry 3\n" + 
-                " taskFullDescription    : To Do > Task | 00003 - Smry 3\n" + 
+                " taskFullDescription    : Task | 00003 - Smry 3\n" + 
                 " taskRelease            : No release set\n" + 
                 " subtaskType            : BALLPARK - Development\n" + 
                 " subtaskStatus          : Open\n" + 

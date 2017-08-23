@@ -42,6 +42,19 @@
         paper-button {
             text-transform: none;
         }
+
+        .clean-cache-msg {
+            color: #717171;
+		    font-size: 13px;
+		    margin: 15px 0;
+		    background-color: #fff8db;
+		    padding: 20px;
+        }
+
+        .clean-cache-msg span {
+            display: block;
+            margin-top: 10px;
+        }
         
     </style>
     <template>
@@ -77,7 +90,20 @@
                             <template is="dom-repeat" items="{{templateSelected.projects}}">
                                 <paper-checkbox checked="{{item.checked}}">{{item.projectKey}}</paper-checkbox><br>
                             </template>
-                        </div>     
+                        </div>
+                        <div class="clean-cache-msg">
+                            <strong>Before uploading the template, make sure you clean up the pivot tables cache</strong>
+                            <paper-button hidden$="{{showCacheInstructions}}" title="Show instructions" on-tap="howDoICleanTheCache">
+		                        How do I clean up the cache?
+		                    </paper-button>
+                            <template is="dom-if" if="{{showCacheInstructions}}">
+	                            <span>1. With a cell selected within your pivot table, select the Options tab on the ribbon.</span>
+	                            <span>2. In the PivotTable group, select Options.</span>
+	                            <span>3. In the dialog box, select the Data tab.</span>
+	                            <span>4. For "Number of items to retain per field", select None, and click OK.</span>
+	                            <span>5. In the Options tab on the ribbon and in the Data group, click on Refresh.</span>
+                            </template>
+                        </div>
                         <div class='input-wrap'>
                             <label for="inputTemplate">
                                 <iron-icon icon="file-upload"></iron-icon>
@@ -130,6 +156,9 @@
                     	type: Boolean
                     },
                     showLoadingSpinner: {
+                    	type: Boolean
+                    },
+                    showCacheInstructions: {
                     	type: Boolean
                     },
                     newTemplate: {
@@ -282,6 +311,10 @@
                 	this.showLoadingSpinner = show;
                 },
                 
+                howDoICleanTheCache: function() {
+                	this.showCacheInstructions = true;
+                },
+                
                 showError: function(jqXHR, self) {
                 	self.showLoading(false);
                 	if  (jqXHR && jqXHR.responseText) {
@@ -335,6 +368,7 @@
                 	this.fileData = null;
                 	this.fileName = '';
                 	this.showLoading(true);
+                	this.showCleanUpCacheInstructions = false;
                 	this.$.ajaxProjects.generateRequest();
                     this.$.modal.open();
                 },
