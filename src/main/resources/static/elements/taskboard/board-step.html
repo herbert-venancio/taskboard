@@ -74,8 +74,6 @@
     </template>
 
     <script>
-        var checkingInvalidTeam = false;
-
         var sortIssue = function (a, b) {
             return a.priorityOrder-b.priorityOrder;
         };
@@ -232,13 +230,6 @@
                     return filteredIssues.sort(sortIssue);
                 },
 
-                filterIssuesInvalidTeam: function(issues) {
-                    checkingInvalidTeam = true;
-                    var issuesInvalidTeam = this.filterIssues(issues);
-                    checkingInvalidTeam = false;
-                    return issuesInvalidTeam;
-                },
-
                 filterIssuesDisabledTeam: function(issues) {
                     var bkpTeam = this.team;
                     this.team = null;
@@ -255,16 +246,7 @@
                 },
 
                 doFiltersAllow: function(issue) {
-                    if (checkingInvalidTeam)
-                        return true;
-
-                    if (taskboard.isInvalidTeam(issue.teams))
-                        return false;
-
-                    if (!this.team || issue.teams.indexOf(this.team) !== -1)
-                        return true;
-
-                    return false;
+                    return !this.team || issue.teams.indexOf(this.team) !== -1;
                 },
 
                 doPreferencesAllow: function(issue) {
@@ -272,9 +254,6 @@
                         var field = taskboard.getAspectFilters()[i].field;
                         var value = issue[field]
                         var filters = userPreferences.getFilters()
-
-                        if (checkingInvalidTeam && field == 'teams')
-                            continue;
 
                         if (!this.checkPreference(value,  filters))
                             return false;

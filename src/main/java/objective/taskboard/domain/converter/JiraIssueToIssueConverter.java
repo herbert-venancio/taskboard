@@ -54,7 +54,7 @@ import objective.taskboard.repository.ParentIssueLinkRepository;
 @Service
 public class JiraIssueToIssueConverter {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JiraIssueToIssueConverter.class);
-    public static final String INVALID_TEAM = "INVALID_TEAM";
+    public static final String INVALID_TEAM = "NO PROJECT TEAM";
 
     @Autowired
     private ParentIssueLinkRepository parentIssueLinkRepository;
