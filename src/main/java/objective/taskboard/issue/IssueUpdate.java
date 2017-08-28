@@ -1,5 +1,3 @@
-package objective.taskboard.issue;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,10 +18,15 @@ package objective.taskboard.issue;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.issue;
+
+import java.io.Serializable;
 
 import objective.taskboard.data.Issue;
 
-public class IssueUpdate {
+public class IssueUpdate implements Serializable {
+    private static final long serialVersionUID = -4585168887857725892L;
+    
     public final Issue target;
     public final IssueUpdateType updateType;
     public IssueUpdate(Issue target, IssueUpdateType updateType) {

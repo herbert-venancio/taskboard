@@ -97,6 +97,9 @@ public class JiraService {
     private void checkAuthenticationError(RuntimeException ex, String username) {
         if (ex instanceof JiraServiceException) {
             JiraServiceException jse = (JiraServiceException) ex;
+            if (!jse.getStatusCode().isPresent())
+                throw new IllegalStateException("Jira return an unrecognized error during authentication.");
+            
             HttpStatus httpStatus = jse.getStatusCode().get();
             log.error("Authentication error " + httpStatus.value() + " for user " + username);
 

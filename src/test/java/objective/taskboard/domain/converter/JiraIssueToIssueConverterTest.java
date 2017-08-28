@@ -32,6 +32,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.sql.Date;
 import java.util.List;
@@ -234,7 +235,7 @@ public class JiraIssueToIssueConverterTest {
         assertEquals("Teams", 1, converted.getTeams().size());
         assertEquals("Team name", "team", converted.getTeams().get(0));
         assertEquals("Comments", "", converted.getComments());
-        Map<String, Object> customFields = converted.getCustomFields();
+        Map<String, Serializable> customFields = converted.getCustomFields();
         assertTrue("Class of service should be in custom fields", customFields.containsKey(CLASS_OF_SERVICE_ID));
         assertTrue("Blocked should be in custom fields", customFields.containsKey(BLOCKED_ID));
         assertTrue("Last block reason should be in custom fields", customFields.containsKey(LAST_BLOCK_REASON_ID));
@@ -258,7 +259,7 @@ public class JiraIssueToIssueConverterTest {
                 .filter(i -> i.getIssueKey().equals(ISSUE_KEY))
                 .findFirst().orElse(null);
         assertIssueWithParent(converted);
-        Map<String, Object> customFields = converted.getCustomFields();
+        Map<String, Serializable> customFields = converted.getCustomFields();
         assertClassOfService(customFields, CLASS_OF_SERVICE_EXPEDITE);
         assertTrue("Release should be in custom fields", customFields.containsKey(RELEASE_ID));
         assertEquals("Release value", RELEASE, ((objective.taskboard.data.CustomField)customFields.get(RELEASE_ID)).getValue());
@@ -333,7 +334,7 @@ public class JiraIssueToIssueConverterTest {
         assertEquals("Parent type icon URI", TYPE_ICON_URI, converted.getParentTypeIconUri());
     }
 
-    private void assertClassOfService(Map<String, Object> customFields, String classOfServiceExpected) {
+    private void assertClassOfService(Map<String, Serializable> customFields, String classOfServiceExpected) {
         assertTrue("Class of service should be in custom fields", customFields.containsKey(CLASS_OF_SERVICE_ID));
         assertEquals("Class of service value", classOfServiceExpected, customFields.get(CLASS_OF_SERVICE_ID));
     }

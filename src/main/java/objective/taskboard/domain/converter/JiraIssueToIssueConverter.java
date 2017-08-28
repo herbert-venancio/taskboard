@@ -26,6 +26,7 @@ import static com.google.common.collect.Maps.newHashMap;
 import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -211,8 +212,8 @@ public class JiraIssueToIssueConverter {
         return metadata.getComments().get(0);
     }
 
-    private Map<String, Object> getCustomFields(IssueMetadata metadata, Map<String, IssueMetadata> issuesMetadataByKey) {
-        Map<String, Object> customFields = newHashMap();
+    private Map<String, Serializable> getCustomFields(IssueMetadata metadata, Map<String, IssueMetadata> issuesMetadataByKey) {
+        Map<String, Serializable> customFields = newHashMap();
         customFields.put(jiraProperties.getCustomfield().getClassOfService().getId(), getClassOfServiceValue(metadata, issuesMetadataByKey));
         customFields.put(jiraProperties.getCustomfield().getBlocked().getId(), metadata.getBlocked());
         customFields.put(jiraProperties.getCustomfield().getLastBlockReason().getId(), metadata.getLastBlockReason());

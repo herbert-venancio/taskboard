@@ -27,6 +27,7 @@ import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1508,7 +1509,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
         private Integer originalEstimateMinutes;
         private Integer timeSpentMinutes;
         private String parent;
-        private Map<String, Object> customFields = new LinkedHashMap<>();
+        private Map<String, Serializable> customFields = new LinkedHashMap<>();
         private Long priorityOrder;
         
         public IssueBuilder id(int id) {
