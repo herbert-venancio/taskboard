@@ -32,7 +32,7 @@ node("single-executor") {
                 try {
                     timeout(time: 15, unit: TimeUnit.MINUTES) {
                         wrap([$class: 'Xvnc']) {
-                            sh "${mvnHome}/bin/mvn --batch-mode -V -U clean verify -P packaging-war,dev"
+                            sh "${mvnHome}/bin/mvn --batch-mode -V -U -Dmaven.test.failure.ignore=true clean verify -P packaging-war,dev"
                         }
                     }
                 } finally {
@@ -46,6 +46,10 @@ node("single-executor") {
                     }
                 }
             }
+
+            if (currentBuild.result == 'UNSTABLE')
+                return;
+
             stage('Sonar') {
                 sh """
                     mkdir target/combined-reports

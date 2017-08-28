@@ -180,6 +180,8 @@
 							<classpathScope>test</classpathScope>
 							<executable>${java.home}/bin/java</executable>
 							<arguments>
+								<argument>-server</argument>
+								<argument>-Xmx300m</argument>
 								<argument>${jacoco.agent.it.arg}</argument>
 								<argument>-classpath</argument>
 								<classpath />
@@ -201,7 +203,7 @@
 							<systemProperties>
 								<webdriver.gecko.driver>${webdriver.gecko.driver}</webdriver.gecko.driver>
 							</systemProperties>
-							<argLine>${jacoco.agent.it.arg}</argLine>
+							<argLine>-Xmx80M ${jacoco.agent.it.arg}</argLine>
 							<properties>
 								<property>
 									<name>listener</name>
