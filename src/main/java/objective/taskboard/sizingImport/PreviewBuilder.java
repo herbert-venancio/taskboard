@@ -47,6 +47,7 @@ class PreviewBuilder {
         headers.add(SheetStaticColumns.PHASE_NAME);
         headers.add(SheetStaticColumns.DEMAND_NAME);
         headers.add(SheetStaticColumns.FEATURE_NAME);
+        headers.add(SheetStaticColumns.ACCEPTANCE_CRITERIA);
 
         headers.addAll(sortedDynamicColumnsMapping.stream()
                 .map(m -> dynamicColumnsNameByFieldId.get(m.getFieldId()))
@@ -59,6 +60,7 @@ class PreviewBuilder {
                     linePreview.add(line.getPhase());
                     linePreview.add(line.getDemand());
                     linePreview.add(line.getFeature());
+                    linePreview.add(line.getAcceptanceCriteria());
                     
                     linePreview.addAll(sortedDynamicColumnsMapping.stream()
                             .map(cm -> line.getFieldValue(cm.getFieldId()).orElse(""))
