@@ -194,6 +194,8 @@ class SizingImporter {
             builder.setFieldValue(field.getId(), option);
         }
         
+        builder.setFieldValue(jiraProperties.getCustomfield().getAcceptanceCriteria().getId(), line.getAcceptanceCriteria());
+
         BasicIssue issue = jiraUtils.createIssue(builder);
         jiraUtils.linkToDemand(demandKey, issue.getKey());
         

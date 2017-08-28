@@ -27,23 +27,24 @@ public class SizingSheetParserTest {
         importConfig.getSheetMap().setIssueDemand("B");
         importConfig.getSheetMap().setIssueFeature("C");
         importConfig.getSheetMap().setIssueKey("D");
-        importConfig.getSheetMap().setInclude("E");
+        importConfig.getSheetMap().setIssueAcceptanceCriteria("E");
+        importConfig.getSheetMap().setInclude("F");
     }
 
     @Test
     public void getSpreedsheetData() throws IOException {
         List<List<Object>> rows = asList(
-                //     A                B                 C                  D              E           F           G 
-                asList("Phase",         "Demand",         "Feature",         "Key",         "Include",  "V1",       "V2"),
-                asList("VALUE_A_PHASE", "VALUE_A_DEMAND", "VALUE_A_FEATURE", "",            "TRUE",     "VALUE_A1", "VALUE_A2"),
-                asList("VALUE_B_PHASE", "VALUE_B_DEMAND", "VALUE_B_FEATURE", "VALUE_B_KEY", "TRUE",     "VALUE_B1", "VALUE_B2"),
-                asList("VALUE_E_PHASE", "VALUE_E_DEMAND", "VALUE_E_FEATURE", "",            "FALSE",    "VALUE_E1", "VALUE_E2"),
-                asList("VALUE_F_PHASE", "VALUE_F_DEMAND", "VALUE_F_FEATURE", "",            "TRUE",     "VALUE_F1", "VALUE_F2"),
+                //     A                B                 C                  D              E                       F           G           H
+                asList("Phase",         "Demand",         "Feature",         "Key",         "Acceptance Criteria",  "Include",  "V1",       "V2"),
+                asList("VALUE_A_PHASE", "VALUE_A_DEMAND", "VALUE_A_FEATURE", "",            "VALUE_A_ACCEPCRITER",  "TRUE",     "VALUE_A1", "VALUE_A2"),
+                asList("VALUE_B_PHASE", "VALUE_B_DEMAND", "VALUE_B_FEATURE", "VALUE_B_KEY", "VALUE_B_ACCEPCRITER",  "TRUE",     "VALUE_B1", "VALUE_B2"),
+                asList("VALUE_E_PHASE", "VALUE_E_DEMAND", "VALUE_E_FEATURE", "",            "VALUE_E_ACCEPCRITER",  "FALSE",    "VALUE_E1", "VALUE_E2"),
+                asList("VALUE_F_PHASE", "VALUE_F_DEMAND", "VALUE_F_FEATURE", "",            "VALUE_F_ACCEPCRITER",  "TRUE",     "VALUE_F1", "VALUE_F2"),
                 emptyList());
 
         List<SheetColumnMapping> dynamicColumnsMapping = asList(
-                new SheetColumnMapping("FIELD_1", "F"), 
-                new SheetColumnMapping("FIELD_2", "G"));
+                new SheetColumnMapping("FIELD_1", "G"), 
+                new SheetColumnMapping("FIELD_2", "H"));
 
         List<SizingImportLine> result = subject.getSpreedsheetData(rows, dynamicColumnsMapping);
         Assert.assertEquals(3, result.size());
@@ -53,6 +54,7 @@ public class SizingSheetParserTest {
         assertEquals("VALUE_A_DEMAND", line.getDemand());
         assertEquals("VALUE_A_FEATURE", line.getFeature());
         assertEquals("", line.getJiraKey());
+        assertEquals("VALUE_A_ACCEPCRITER", line.getAcceptanceCriteria());
         assertEquals(2, line.getFields().size());
         assertEquals("FIELD_1", line.getFields().get(0).getId());
         assertEquals("VALUE_A1", line.getFields().get(0).getValue());
@@ -65,6 +67,7 @@ public class SizingSheetParserTest {
         assertEquals("VALUE_B_FEATURE", line.getFeature());
         assertEquals("VALUE_B_KEY", line.getJiraKey());
         assertEquals(2, line.getFields().size());
+        assertEquals("VALUE_B_ACCEPCRITER", line.getAcceptanceCriteria());
         assertEquals("FIELD_1", line.getFields().get(0).getId());
         assertEquals("VALUE_B1", line.getFields().get(0).getValue());
         assertEquals("FIELD_2", line.getFields().get(1).getId());
@@ -75,6 +78,7 @@ public class SizingSheetParserTest {
         assertEquals("VALUE_F_DEMAND", line.getDemand());
         assertEquals("VALUE_F_FEATURE", line.getFeature());
         assertEquals("", line.getJiraKey());
+        assertEquals("VALUE_F_ACCEPCRITER", line.getAcceptanceCriteria());
         assertEquals(2, line.getFields().size());
         assertEquals("FIELD_1", line.getFields().get(0).getId());
         assertEquals("VALUE_F1", line.getFields().get(0).getValue());

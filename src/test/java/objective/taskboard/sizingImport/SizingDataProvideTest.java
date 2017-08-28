@@ -39,7 +39,7 @@ public class SizingDataProvideTest {
         
         List<SheetColumnMapping> dynamicColumnsMapping = asList(
                 new SheetColumnMapping("cf_1", "D"),
-                new SheetColumnMapping("cf_2", "E"));
+                new SheetColumnMapping("cf_2", "H"));
 
         subject.getData(spreadsheetsManager, "123", dynamicColumnsMapping);
         
@@ -52,7 +52,8 @@ public class SizingDataProvideTest {
         importConfig.getSheetMap().setIssueDemand("B");
         importConfig.getSheetMap().setIssueFeature("C");
         importConfig.getSheetMap().setIssueKey("D");
-        importConfig.getSheetMap().setInclude("E");
+        importConfig.getSheetMap().setIssueAcceptanceCriteria("F");
+        importConfig.getSheetMap().setInclude("H");
 
         return importConfig;
     }

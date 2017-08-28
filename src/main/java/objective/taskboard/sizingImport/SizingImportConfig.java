@@ -67,6 +67,9 @@ public class SizingImportConfig {
         private String issueFeature;
         
         @NotNull
+        private String issueAcceptanceCriteria;
+        
+        @NotNull
         private String include;
 
         @Valid
@@ -102,6 +105,14 @@ public class SizingImportConfig {
 
         public void setIssueFeature(String issueFeature) {
             this.issueFeature = issueFeature;
+        }
+        
+        public String getIssueAcceptanceCriteria() {
+            return issueAcceptanceCriteria;
+        }
+
+        public void setIssueAcceptanceCriteria(String issueAcceptanceCriteria) {
+            this.issueAcceptanceCriteria = issueAcceptanceCriteria;
         }
 
         public String getInclude() {

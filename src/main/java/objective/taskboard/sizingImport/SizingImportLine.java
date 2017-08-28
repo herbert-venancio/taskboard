@@ -13,6 +13,7 @@ class SizingImportLine {
     private String phase;
     private String demand;
     private String feature;
+    private String acceptanceCriteria;
     private boolean include;
     private List<JiraField> fields = new ArrayList<>();
 
@@ -77,6 +78,14 @@ class SizingImportLine {
     
     public String getFeature() {
         return feature;
+    }
+    
+    public void setAcceptanceCriteria(String acceptanceCriteria) {
+        this.acceptanceCriteria = acceptanceCriteria;
+    }
+    
+    public String getAcceptanceCriteria() {
+        return acceptanceCriteria;
     }
     
     public void setFeature(String feature) {

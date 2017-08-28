@@ -69,8 +69,8 @@
             overflow: hidden;
         }
 
-        .tb-progress__percent:after:not([data-percent="100"]) {
-            animation: move 2s linear infinite;
+        .tb-progress__percent:not([data-percent="100"]):after {
+            animation: progress-bar-animation 2s linear infinite;
         }
 
         .tb-progress__number {
@@ -91,7 +91,7 @@
             text-align: center;
         }
 
-        @keyframes move {
+        @keyframes progress-bar-animation {
             0% {
                 background-position: 0 0;
             }

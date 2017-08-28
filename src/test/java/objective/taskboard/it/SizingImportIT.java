@@ -60,7 +60,7 @@ public class SizingImportIT extends AuthenticatedIntegrationTest {
         sizing.assertWithShowingError(true);
         sizing.assertShowingCorrectStep(1);
     }
-	
+
     @Test
     public void whenInputtingColumnValues_CheckIfTheValuesAreCorrect() {
         MainPage mainPage = MainPage.produce(webDriver);

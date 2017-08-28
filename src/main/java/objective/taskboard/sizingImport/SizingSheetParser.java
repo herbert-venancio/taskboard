@@ -54,6 +54,7 @@ class SizingSheetParser {
         line.setPhase(getValue(row, properties.getSheetMap().getIssuePhase()));
         line.setDemand(getValue(row, properties.getSheetMap().getIssueDemand()));
         line.setFeature(getValue(row, properties.getSheetMap().getIssueFeature()));
+        line.setAcceptanceCriteria(getValue(row, properties.getSheetMap().getIssueAcceptanceCriteria()));
         line.setJiraKey(getValue(row, properties.getSheetMap().getIssueKey()));
         line.setInclude("true".equalsIgnoreCase(getValue(row, includeColumn)));
         

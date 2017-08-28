@@ -204,6 +204,7 @@ public class JiraProperties {
 
         private CustomFieldDetails additionalEstimatedHours = new CustomFieldDetails("");
 
+        private CustomFieldDetails acceptanceCriteria = new CustomFieldDetails("");
 
         public static class CustomFieldDetails {
             @NotNull
@@ -519,6 +520,14 @@ public class JiraProperties {
 
         public void setAdditionalEstimatedHours(final CustomFieldDetails additionalEstimatedHours) {
             this.additionalEstimatedHours = additionalEstimatedHours;
+        }
+
+        public CustomFieldDetails getAcceptanceCriteria() {
+            return this.acceptanceCriteria;
+        }
+
+        public void setAcceptanceCriteria(final CustomFieldDetails acceptanceCriteria) {
+            this.acceptanceCriteria = acceptanceCriteria;
         }
 
         @Override
