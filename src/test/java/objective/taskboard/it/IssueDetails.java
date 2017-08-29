@@ -84,4 +84,15 @@ class IssueDetails extends AbstractUiFragment {
         glasspane.click();
         return this;
     }
+
+    public IssueDetails assertInvalidTeamWarnIsVisible() {
+        WebElement icon = issueDetailRoot.findElement(By.cssSelector(".assignee .icon"));
+        waitVisibilityOfElement(icon);
+        return this;
+    }
+
+    public IssueDetails assertInvalidTeamWarnIsInvisible() {
+        waitUntilElementNotExists(By.cssSelector(".assignee .icon"));
+        return this;
+    }
 }
