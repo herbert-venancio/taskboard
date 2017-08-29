@@ -70,6 +70,10 @@ To update the followup template:
 3. Create a folder named "credentials" and configure the "google-api.credential-store" property on `src/main/resources/application-[environment].properties`.\
 `google-api.credential-store-dir=[path to /credentials]`
 
+## How to solve when javascript code is "encrypted" in browser
+
+Execute `mvn clean package` or delete the folder `target/test-classes/static/`
+
 ## Running application
 
 #### Development Mode

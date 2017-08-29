@@ -43,6 +43,16 @@ function Taskboard() {
         return teamFilter.aspectsSubitemFilter;
     };
 
+    this.getTeamsOfProject = function(projectKey) {
+        var projectFilter = _.find(this.getAspectFilters(), function(filter) {
+            return filter.description == "Project";
+        });
+        var projectSubitemFilter = _.find(projectFilter.aspectsSubitemFilter, function(subitem) {
+            return subitem.value == projectKey;
+        });
+        return projectSubitemFilter ? projectSubitemFilter.teams : [];
+    };
+
     this.setIssues = function(issues) {
         this.issues = issues;
         this.setFilteredIssues(issues)
