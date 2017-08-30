@@ -118,7 +118,7 @@
 
                     this.fire("iron-signal", {name:"show-error-message",
                                               data:issuesInvalidTeam.length > 0 ?
-                                                       "Assignee must be on team of project: " +
+                                                       "Some users are assigned to tasks that are not in their project teams: " +
                                                        issuesInvalidTeam.slice(0, 5).join("; ") +
                                                        (issuesInvalidTeam.length > 5 ? " ..." : ";") +
                                                        " Total: " + issuesInvalidTeam.length

@@ -27,7 +27,7 @@ public class InvalidTeamIT extends AuthenticatedIntegrationTest {
 
     private static final String ISSUE_KEY_INVALID_TEAM = "TASKB-20";
     private static final String ISSUE_KEY_VALID_TEAM = "TASKB-611";
-    private static final String ERROR_MESSAGE_INVALID_TEAM = "Assignee must be on team of project: TASKB-20: diego.prandini; Total: 1";
+    private static final String ERROR_MESSAGE_INVALID_TEAM = "Some users are assigned to tasks that are not in their project teams: TASKB-20: diego.prandini; Total: 1";
     private static final String FILTER_ISSUE_TYPE = "Issue Type";
     private static final String FILTER_PROJECT = "Project";
     private static final String FILTER_TEAM = "Team";
