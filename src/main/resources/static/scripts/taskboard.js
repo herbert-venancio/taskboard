@@ -277,18 +277,18 @@ function Taskboard() {
     this.getOnlyOneSize = function(sizes) {
         return sizes.length != 1 ? null : sizes[0].value;
     };
-    
+
     this.connectToWebsocket = function(taskboardHome) {
         var socket = new SockJS('/taskboard-websocket');
         stompClient = Stomp.over(socket);
         stompClient.connect({}, function (frame) {
             stompClient.subscribe('/topic/issues/updates', function (issues) {
-            	handleIssueUpdate(taskboardHome, issues)
+                handleIssueUpdate(taskboardHome, issues)
             });
 
-			stompClient.subscribe('/user/topic/sizing-import/status', function(status) {
-				handleSizingImportStatus(taskboardHome, status);
-			});
+            stompClient.subscribe('/user/topic/sizing-import/status', function(status) {
+                handleSizingImportStatus(taskboardHome, status);
+            });
 
             stompClient.subscribe('/topic/cache-state/updates', function (response) {
                 taskboardHome.fire("iron-signal", {name:"issue-cache-state-updated", data:{
@@ -297,9 +297,9 @@ function Taskboard() {
             });
         });
     }
-    
+
     function handleIssueUpdate(taskboardHome, response) {
-    	var updateEvents = JSON.parse(response.body)
+        var updateEvents = JSON.parse(response.body)
         var updatedIssueKeys = []
         var updateByStep = {};
         updateEvents.forEach(function(anEvent) {
@@ -315,14 +315,14 @@ function Taskboard() {
             var stepId = self.getIssueStep(converted).id;
             if (Object.keys(updateByStep).indexOf(stepId) === -1)
                 updateByStep[stepId] = [];
-        	
+
             updateByStep[stepId].push(anEvent.target);
-        	
-        	self.fireIssueUpdated('server', taskboardHome, anEvent.target, anEvent.updateType);
+
+            self.fireIssueUpdated('server', taskboardHome, anEvent.target, anEvent.updateType);
         });
-        
-    	if (updatedIssueKeys.length === 0)
-    	    return;
+
+        if (updatedIssueKeys.length === 0)
+            return;
 
         Object.keys(updateByStep).forEach(function(step) {
             taskboardHome.fire("iron-signal", {name:"step-update", data:{
@@ -330,17 +330,17 @@ function Taskboard() {
                 stepId: step
             }})
         })
-    	
+
         taskboardHome.fire("iron-signal", {name:"show-issue-updated-message", data:{
-        	message: "Jira issues have been updated.",
-        	updatedIssueKeys: updatedIssueKeys
+            message: "Jira issues have been updated.",
+            updatedIssueKeys: updatedIssueKeys
         }})
     }
 
     function handleSizingImportStatus(taskboardHome, response) {
-    	var status = JSON.parse(response.body);
-    	taskboardHome.fire("iron-signal", {name:"sizing-import-status", data:{
-        	status: status
+        var status = JSON.parse(response.body);
+        taskboardHome.fire("iron-signal", {name:"sizing-import-status", data:{
+            status: status
         }});
     }
     
@@ -352,7 +352,7 @@ function Taskboard() {
         })
         return previousInstance;
     }
-    
+
     this.fireIssueUpdated = function(source, triggerSource, issue, updateType) {
         var converted = self.convertAndRegisterIssue(issue);
         converted.__eventInfo = {source: source, type: updateType}
@@ -362,11 +362,11 @@ function Taskboard() {
             issue: converted
         }})
     }
-    
+
     this.issueGivenKey = function(issueKey) {
-    	return $("paper-material.issue [data-issue-key='"+issueKey+"']").closest("paper-material.issue");
+        return $("paper-material.issue [data-issue-key='"+issueKey+"']").closest("paper-material.issue");
     }
-    
+
     this.convertAndRegisterIssues = function(issues) {
         var converted = []
         issues.forEach(function(issue) {
@@ -374,7 +374,7 @@ function Taskboard() {
         })
         return converted;
     }
-    
+
     this.convertAndRegisterIssue = function(issue) {
         var converted = self.convertIssue(issue);
         var previousInstance = getPreviousIssueInstance(issue.issueKey);
@@ -384,9 +384,9 @@ function Taskboard() {
             self.issues[previousInstance.index] = converted;
         return converted;
     }
-    
+
     this.convertIssue = function(issue) {
-    	var startDateStep = new Date(issue.startDateStepMillis);
+        var startDateStep = new Date(issue.startDateStepMillis);
         issue.cycletime = cycleTime.getCycleTime(startDateStep, new Date()).toFixed(2);
 
         var listSizes = [];
@@ -409,8 +409,8 @@ function Taskboard() {
 }
 
 function flash(el, color) {
-	var original = el.css('backgroundColor');
-	el.animate({backgroundColor:color},300).animate({backgroundColor:original},800)
+    var original = el.css('backgroundColor');
+    el.animate({backgroundColor:color},300).animate({backgroundColor:original},800)
 }
 
 var taskboard = new Taskboard();
