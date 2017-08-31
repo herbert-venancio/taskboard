@@ -27,7 +27,7 @@ public class SizingDataProvideTest {
 
         subject.getData(spreadsheetsManager, "123", dynamicColumnsMapping);
         
-        verify(spreadsheetsManager).readRange("123", "A:AB");
+        verify(spreadsheetsManager).readRange("123", "'Scope'!A:AB");
     }
     
     @Test
@@ -43,7 +43,7 @@ public class SizingDataProvideTest {
 
         subject.getData(spreadsheetsManager, "123", dynamicColumnsMapping);
         
-        verify(spreadsheetsManager).readRange("123", "A:Z");
+        verify(spreadsheetsManager).readRange("123", "'Scope'!A:Z");
     }
 
     private static SizingImportConfig defaultConfig() {

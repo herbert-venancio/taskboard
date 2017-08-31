@@ -1,6 +1,5 @@
 package objective.taskboard.testUtils;
 
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
@@ -44,9 +43,9 @@ public class GoogleApiServiceMock implements GoogleApiService {
         
         when(spreadsheetsManager.readRange(anyString(), anyString())).thenReturn(rows);
 
-        when(spreadsheetsManager.getLastColumnLetter(anyString())).thenReturn(lastColumnLetter);
+        when(spreadsheetsManager.getLastColumnLetter(anyString(), anyString())).thenReturn(lastColumnLetter);
         
-        when(spreadsheetsManager.getSheetId(anyString(), anyInt())).thenReturn(1);
+        when(spreadsheetsManager.getSheetId(anyString(), anyString())).thenReturn(1);
         
         doNothing().when(spreadsheetsManager).batchUpdate(anyString(), anyObject());
         

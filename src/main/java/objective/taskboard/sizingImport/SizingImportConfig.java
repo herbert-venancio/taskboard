@@ -15,6 +15,8 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class SizingImportConfig {
 
+    public static final String SHEET_TITLE = "Scope";
+
     @NotNull
     private Integer dataStartingRowNumber;
 

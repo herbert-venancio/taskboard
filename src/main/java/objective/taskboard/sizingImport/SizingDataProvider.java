@@ -1,5 +1,7 @@
 package objective.taskboard.sizingImport;
 
+import static objective.taskboard.sizingImport.SizingImportConfig.SHEET_TITLE;
+
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -29,7 +31,7 @@ class SizingDataProvider {
             List<SheetColumnMapping> dynamicColumnsMapping) {
         
         String endColumn = maxColumn(dynamicColumnsMapping);
-        String range = "A:" + endColumn;
+        String range = "'" + SHEET_TITLE + "'!A:" + endColumn;
         
         List<List<Object>> rows = spreadsheetsManager.readRange(spreadsheetId, range);
         return parser.getSpreedsheetData(rows, dynamicColumnsMapping);
