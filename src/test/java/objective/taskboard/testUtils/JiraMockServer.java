@@ -163,6 +163,8 @@ public class JiraMockServer {
         
         get("/rest/api/latest/issue/:issueId/transitions", (req,res) ->{
             String issueKey = issueKeyByIssueId.get(req.params("issueId"));
+            if (issueKey == null)
+                throw new IllegalArgumentException("Issue id " + req.params("issueId") + " not found");
             JSONObject issueSearchData = getIssueDataForKey(issueKey);
             JSONArray issues = issueSearchData.getJSONArray("issues");
             JSONObject result = new JSONObject();
@@ -316,8 +318,15 @@ public class JiraMockServer {
 
     private static String loadSearchFile(long startAt, String jql) {
         String datFileName = "search"+startAt+".json";
-        if (jql.contains("key IN ")) { 
-            String issueKey = jql.replaceAll(".*key IN [(]([^)]*)[)].*", "$1");
+        
+        if (jql.toLowerCase().trim().matches("project in [(][^)]*[)]"))
+            datFileName = "search_all"+startAt+".json";
+        
+        if (jql.toLowerCase().contains("key in")) { 
+            String issueKey = jql.replaceAll("(?i).*key in [(]([^)]*)[)].*", "$1");
+            if (issueKey.equals("TASKB-673,TASKB-665,TASKB-648,TASKB-628,TASKB-619,TASKB-621,TASKB-616,TASKB-6,TASKB-206,TASKB-186,TASKB-142,TASKB-136,TASKB-135,TASKB-130,TASKB-125,TASKB-123,TASKB-122,TASKB-99,TASKB-71,TASKB-171,TASKB-225,TASKB-194,TASKB-182,TASKB-179,TASKB-158,TASKB-150,TASKB-96,TASKB-68"))
+                issueKey = "missing_parents";
+            
             String hardcoded = loadMockData("search_" + issueKey + ".json");
             if (hardcoded != null)
                 return hardcoded;
@@ -344,8 +353,9 @@ public class JiraMockServer {
         long startAt = 0;
         while(true) {
             try {
-                String searchData = loadSearchFile(startAt, "");
-                if (searchData == null) break;
+                String searchData = loadSearchFile(startAt*100, "project in (TASKB)");
+                if (searchData == null) 
+                    break;
                 
                 JSONObject single = new JSONObject(searchData);
                 single.put("total", 1);
@@ -382,6 +392,9 @@ public class JiraMockServer {
     
     private static JSONObject clone(JSONObject jsonObject) {
         try {
+            if (jsonObject == null) {
+                System.out.println();
+            }
             return new JSONObject(jsonObject.toString());
         } catch (JSONException e) {
             throw new IllegalStateException(e);
