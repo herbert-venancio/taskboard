@@ -1,5 +1,7 @@
 package objective.taskboard.google;
 
+import static java.util.stream.Collectors.toList;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -21,19 +23,8 @@ public class SpreadsheetsManager {
 	}
 
 	public List<List<Object>> readRange(String spreadsheetId, String range) throws SpreadsheeNotFoundException {
-	    try {
-            ValueRange valueRange = spreadsheets.values().get(spreadsheetId, range).execute();
-            return valueRange.getValues();
-
-	    } catch (GoogleJsonResponseException ex) {
-	        if (ex.getStatusCode() == 404)
-                throw new SpreadsheeNotFoundException(spreadsheetId);
-	        
-	        throw new RuntimeException(ex);
-
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
+	    ValueRange valueRange = handleException(spreadsheetId, () -> spreadsheets.values().get(spreadsheetId, range).execute());
+	    return valueRange.getValues();
     }
 
     public int getSheetId(String spreadsheetId, String sheetTitle) {
@@ -57,13 +48,13 @@ public class SpreadsheetsManager {
         }
     }
 
+    public List<String> getSheetsTitles(String spreadsheetId) {
+        Spreadsheet spreadsheet = getSpreadsheet(spreadsheetId);
+        return spreadsheet.getSheets().stream().map(s -> s.getProperties().getTitle()).collect(toList());
+    }
+
     private Sheet getSheet(String spreadsheetId, String sheetTitle) {
-        Spreadsheet spreadsheet;
-        try {
-            spreadsheet = spreadsheets.get(spreadsheetId).execute();
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
+        Spreadsheet spreadsheet = getSpreadsheet(spreadsheetId);
 
         Optional<Sheet> sheet = spreadsheet.getSheets().stream()
                 .filter(s -> s.getProperties().getTitle().equals(sheetTitle))
@@ -73,6 +64,29 @@ public class SpreadsheetsManager {
             throw new IllegalArgumentException("Cannot find a sheet with title '" + sheetTitle + "'");
 
         return sheet.get();
+    }
+
+    private Spreadsheet getSpreadsheet(String spreadsheetId) {
+        return handleException(spreadsheetId, () -> spreadsheets.get(spreadsheetId).execute());
+    }
+    
+    private <T> T handleException(String spreadsheetId, SpreadsheetsRequest<T> request) {
+        try {
+            return request.execute();
+
+        } catch (GoogleJsonResponseException ex) {
+            if (ex.getStatusCode() == 404)
+                throw new SpreadsheeNotFoundException(spreadsheetId);
+            
+            throw new RuntimeException(ex);
+
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+    
+    private interface SpreadsheetsRequest<T> {
+        T execute() throws IOException;
     }
     
     public static class SpreadsheeNotFoundException extends RuntimeException {

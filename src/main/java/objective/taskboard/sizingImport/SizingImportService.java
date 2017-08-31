@@ -2,7 +2,6 @@ package objective.taskboard.sizingImport;
 
 import static objective.taskboard.sizingImport.SizingImportConfig.SHEET_TITLE;
 
-import java.util.Collection;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,13 +9,14 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
 import com.atlassian.jira.rest.client.api.domain.CimFieldInfo;
+import com.atlassian.jira.rest.client.api.domain.CimIssueType;
 
 import objective.taskboard.google.GoogleApiService;
 import objective.taskboard.google.SpreadsheetsManager;
-import objective.taskboard.google.SpreadsheetsManager.SpreadsheeNotFoundException;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.sizingImport.SheetDefinition.SheetColumnDefinition;
 import objective.taskboard.sizingImport.SheetDefinition.SheetStaticColumn;
+import objective.taskboard.sizingImport.SizingImportValidator.ValidationResult;
 import objective.taskboard.sizingImport.SizingSheetParser.SheetColumnMapping;
 
 @Component
@@ -30,6 +30,7 @@ public class SizingImportService {
     private final JiraUtils jiraUtils;
     private final SizingDataProvider dataProvider;
     private final SheetStaticColumns sheetStaticColumns;
+    private final SizingImportValidator importValidator;
     private final SimpMessagingTemplate messagingTemplate;
     
     @Autowired
@@ -40,6 +41,7 @@ public class SizingImportService {
             JiraUtils jiraUtils, 
             SizingDataProvider dataProvider,
             SheetStaticColumns sheetStaticColumns,
+            SizingImportValidator importValidator,
             SimpMessagingTemplate messagingTemplate){
 
         this.importConfig = importConfig;
@@ -48,22 +50,12 @@ public class SizingImportService {
         this.jiraUtils = jiraUtils;
         this.dataProvider = dataProvider;
         this.sheetStaticColumns = sheetStaticColumns;
+        this.importValidator = importValidator;
         this.messagingTemplate = messagingTemplate;
     }
 
-    public SpreadsheetValidationResult validateSpreadsheet(String project, String spreadsheetId) {
-        if (!jiraUtils.isAdminOfProject(project))
-            return SpreadsheetValidationResult.fail("You should have permission to admin this project in Jira.");
- 
-        SpreadsheetsManager spreadsheetsManager = googleApiService.buildSpreadsheetsManager();
-        
-        try {
-            spreadsheetsManager.readRange(spreadsheetId, "'" + SHEET_TITLE + "'!A1:A1");
-        } catch (SpreadsheeNotFoundException ex) {
-            return SpreadsheetValidationResult.fail("Spreadsheet not found");
-        }
-        
-        return SpreadsheetValidationResult.success();
+    public ValidationResult validateSpreadsheet(String projectKey, String spreadsheetId) {
+        return importValidator.validate(projectKey, spreadsheetId);
     }
     
     public SheetDefinition getSheetDefinition(String projectKey, String spreadsheetId) {
@@ -104,33 +96,15 @@ public class SizingImportService {
     }
 
     private List<SheetColumnDefinition> buildDynamicColumnsDefinition(String projectKey) {
-        List<String> configuredTShirtSizeFieldsId = jiraProperties.getCustomfield().getTShirtSize().getIds();
-        Collection<CimFieldInfo> featureIssueFields = jiraUtils.getFeatureMetadata(projectKey).getFields().values();
+        CimIssueType featureCreateIssueMetadata = jiraUtils.requestFeatureCreateIssueMetadata(projectKey);
+        List<CimFieldInfo> tShirtFields = jiraUtils.getSizingFields(featureCreateIssueMetadata);
 
-        return new DynamicColumnsDefinitionBuilder(configuredTShirtSizeFieldsId, featureIssueFields)
+        return new DynamicColumnsDefinitionBuilder(tShirtFields)
                 .setDefaultColumns(importConfig.getSheetMap().getDefaultColumns())
                 .build();
     }
 
-    static class SpreadsheetValidationResult {
-        public final boolean success;
-        public final String errorMessage;
-
-        private SpreadsheetValidationResult(String errorMessage) {
-            this.success = errorMessage == null;
-            this.errorMessage = errorMessage;
-        }
-        
-        public static SpreadsheetValidationResult success() {
-            return new SpreadsheetValidationResult(null);
-        }
-        
-        public static SpreadsheetValidationResult fail(String errorMessage) {
-            return new SpreadsheetValidationResult(errorMessage);
-        }
-    }
-    
-    static class ImportPreview {
+    public static class ImportPreview {
         private final List<String> headers;
         private final List<List<String>> rows;
         private final int totalLinesCount;
