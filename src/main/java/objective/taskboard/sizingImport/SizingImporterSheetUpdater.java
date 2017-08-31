@@ -4,6 +4,7 @@ import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.joining;
 import static objective.taskboard.google.SpreadsheetUtils.columnLetterToIndex;
+import static objective.taskboard.sizingImport.SizingImportConfig.SHEET_TITLE;
 
 import java.util.List;
 
@@ -42,7 +43,7 @@ class SizingImporterSheetUpdater implements SizingImporterListener {
         
         this.issueKeyIndex = columnLetterToIndex(importConfig.getSheetMap().getIssueKey());
         this.dataStartRowIndex = importConfig.getDataStartingRowIndex();
-        this.sheetId = spreadsheetsManager.getSheetId(spreadsheetId, 0);
+        this.sheetId = spreadsheetsManager.getSheetId(spreadsheetId, SHEET_TITLE);
     }
 
     @Override

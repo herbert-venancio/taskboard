@@ -1,5 +1,7 @@
 package objective.taskboard.sizingImport;
 
+import static objective.taskboard.sizingImport.SizingImportConfig.SHEET_TITLE;
+
 import java.util.Collection;
 import java.util.List;
 
@@ -56,7 +58,7 @@ public class SizingImportService {
         SpreadsheetsManager spreadsheetsManager = googleApiService.buildSpreadsheetsManager();
         
         try {
-            spreadsheetsManager.readRange(spreadsheetId, "A1:A1");
+            spreadsheetsManager.readRange(spreadsheetId, "'" + SHEET_TITLE + "'!A1:A1");
         } catch (SpreadsheeNotFoundException ex) {
             return SpreadsheetValidationResult.fail("Spreadsheet not found");
         }
@@ -66,7 +68,7 @@ public class SizingImportService {
     
     public SheetDefinition getSheetDefinition(String projectKey, String spreadsheetId) {
         SpreadsheetsManager spreadsheetsManager = googleApiService.buildSpreadsheetsManager();
-        String lastColumn = spreadsheetsManager.getLastColumnLetter(spreadsheetId);
+        String lastColumn = spreadsheetsManager.getLastColumnLetter(spreadsheetId, SHEET_TITLE);
         
         List<SheetStaticColumn> staticColumns = sheetStaticColumns.get();
         List<SheetColumnDefinition> dynamicColumns = buildDynamicColumnsDefinition(projectKey);
@@ -94,6 +96,7 @@ public class SizingImportService {
                dynamicColumnsMapping);
 
         SizingImporter importer = new SizingImporter(jiraProperties, jiraUtils);
+        
         importer.addListener(new SizingImporterSheetUpdater(spreadsheetId, spreadsheetsManager, importConfig, jiraProperties));
         importer.addListener(new SizingImporterSocketStatusEmmiter(messagingTemplate));
         

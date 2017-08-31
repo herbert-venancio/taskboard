@@ -2,13 +2,13 @@ package objective.taskboard.google;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.sheets.v4.Sheets.Spreadsheets;
 import com.google.api.services.sheets.v4.model.BatchUpdateSpreadsheetRequest;
 import com.google.api.services.sheets.v4.model.GridProperties;
 import com.google.api.services.sheets.v4.model.Sheet;
-import com.google.api.services.sheets.v4.model.SheetProperties;
 import com.google.api.services.sheets.v4.model.Spreadsheet;
 import com.google.api.services.sheets.v4.model.ValueRange;
 
@@ -36,40 +36,43 @@ public class SpreadsheetsManager {
         }
     }
 
-    private int getColumnCount(String spreadsheetId) {
-        try {
-            Spreadsheet execute = spreadsheets.get(spreadsheetId).execute();
-            Sheet sheet = execute.getSheets().get(0);
-            SheetProperties properties = sheet.getProperties();
-            GridProperties gridProperties = properties.getGridProperties();
-            return gridProperties.getColumnCount();
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
+    public int getSheetId(String spreadsheetId, String sheetTitle) {
+        Sheet sheet = getSheet(spreadsheetId, sheetTitle);
+        return sheet.getProperties().getSheetId();
     }
     
-    public int getSheetId(String spreadsheetId, int sheetIndex) {
-        try {
-            List<Sheet> sheets = spreadsheets.get(spreadsheetId).execute().getSheets();
-            Sheet sheet = sheets.get(sheetIndex);
-            return sheet.getProperties().getSheetId();
-            
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
+    public String getLastColumnLetter(String spreadsheetId, String sheetTitle) {
+        Sheet sheet = getSheet(spreadsheetId, sheetTitle);
+        GridProperties gridProperties = sheet.getProperties().getGridProperties();
+        Integer lastColumn = gridProperties.getColumnCount() - 1;
+
+        return SpreadsheetUtils.columnIndexToLetter(lastColumn);
     }
-    
-    public String getLastColumnLetter(String spreadsheetId) {
-        Integer lastColumn = getColumnCount(spreadsheetId);
-        return SpreadsheetUtils.columnIndexToLetter(lastColumn - 1);
-    }
-    
+
     public void batchUpdate(String spreadsheetId, BatchUpdateSpreadsheetRequest content) {
         try {
             spreadsheets.batchUpdate(spreadsheetId, content).execute();
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    private Sheet getSheet(String spreadsheetId, String sheetTitle) {
+        Spreadsheet spreadsheet;
+        try {
+            spreadsheet = spreadsheets.get(spreadsheetId).execute();
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+
+        Optional<Sheet> sheet = spreadsheet.getSheets().stream()
+                .filter(s -> s.getProperties().getTitle().equals(sheetTitle))
+                .findFirst();
+
+        if (!sheet.isPresent())
+            throw new IllegalArgumentException("Cannot find a sheet with title '" + sheetTitle + "'");
+
+        return sheet.get();
     }
     
     public static class SpreadsheeNotFoundException extends RuntimeException {
