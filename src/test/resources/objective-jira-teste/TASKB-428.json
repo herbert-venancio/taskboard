@@ -2,25 +2,25 @@
     "expand": "renderedFields,names,schema,transitions,operations,editmeta,changelog,versionedRepresentations",
     "fields": {
         "aggregateprogress": {
-            "percent": 100,
-            "progress": 19800,
-            "total": 19800
+            "percent": 50,
+            "progress": 57600,
+            "total": 115200
         },
-        "aggregatetimeestimate": 0,
-        "aggregatetimeoriginalestimate": 18000,
-        "aggregatetimespent": 19800,
+        "aggregatetimeestimate": 57600,
+        "aggregatetimeoriginalestimate": 115200,
+        "aggregatetimespent": 57600,
         "assignee": {
             "active": true,
             "avatarUrls": {
-                "16x16": "http://localhost:4567/secure/useravatar?size=xsmall&avatarId=11670",
-                "24x24": "http://localhost:4567/secure/useravatar?size=small&avatarId=11670",
-                "32x32": "http://localhost:4567/secure/useravatar?size=medium&avatarId=11670",
-                "48x48": "http://localhost:4567/secure/useravatar?avatarId=11670"
+                "16x16": "http://54.68.128.117:8100/secure/useravatar?size=xsmall&avatarId=11670",
+                "24x24": "http://54.68.128.117:8100/secure/useravatar?size=small&avatarId=11670",
+                "32x32": "http://54.68.128.117:8100/secure/useravatar?size=medium&avatarId=11670",
+                "48x48": "http://54.68.128.117:8100/secure/useravatar?avatarId=11670"
             },
             "displayName": "Taskboard",
             "key": "taskboard",
             "name": "taskboard",
-            "self": "http://localhost:4567/rest/api/latest/user?username=taskboard",
+            "self": "http://54.68.128.117:8100/rest/api/2/user?username=taskboard",
             "timeZone": "America/Sao_Paulo"
         },
         "attachment": [],
@@ -30,19 +30,19 @@
             "startAt": 0,
             "total": 0
         },
-        "created": "2016-12-05T09:13:04.000+0000",
+        "created": "2016-12-23T16:37:04.000+0000",
         "creator": {
             "active": true,
             "avatarUrls": {
-                "16x16": "http://www.gravatar.com/avatar/73687445b7ecdb4f226e4470c2b2529d?d=mm&s=16",
-                "24x24": "http://www.gravatar.com/avatar/73687445b7ecdb4f226e4470c2b2529d?d=mm&s=24",
-                "32x32": "http://www.gravatar.com/avatar/73687445b7ecdb4f226e4470c2b2529d?d=mm&s=32",
-                "48x48": "http://www.gravatar.com/avatar/73687445b7ecdb4f226e4470c2b2529d?d=mm&s=48"
+                "16x16": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=16",
+                "24x24": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=24",
+                "32x32": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=32",
+                "48x48": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=48"
             },
-            "displayName": "Sergio Egashira",
-            "key": "sergio",
-            "name": "sergio",
-            "self": "http://localhost:4567/rest/api/latest/user?username=sergio",
+            "displayName": "Reginaldo Marcelo Romano Rapussi",
+            "key": "reginaldo",
+            "name": "reginaldo",
+            "self": "http://54.68.128.117:8100/rest/api/2/user?username=reginaldo",
             "timeZone": "America/Sao_Paulo"
         },
         "customfield_10013": null,
@@ -61,9 +61,9 @@
         "customfield_10330": null,
         "customfield_10350": null,
         "customfield_10450": {
-            "id": "10812",
-            "self": "http://localhost:4567/rest/api/latest/customFieldOption/10812",
-            "value": "P"
+            "id": "10814",
+            "self": "http://54.68.128.117:8100/rest/api/2/customFieldOption/10814",
+            "value": "G"
         },
         "customfield_10540": null,
         "customfield_10640": null,
@@ -71,10 +71,10 @@
         "customfield_10644": "9223372036854775807",
         "customfield_10645": null,
         "customfield_10647": null,
-        "customfield_10650": "0|i0zak3:",
+        "customfield_10650": "0|i0zk0b:",
         "customfield_10740": {
             "id": "11181",
-            "self": "http://localhost:4567/rest/api/latest/customFieldOption/11181",
+            "self": "http://54.68.128.117:8100/rest/api/2/customFieldOption/11181",
             "value": "Standard"
         },
         "customfield_10841": null,
@@ -95,7 +95,7 @@
         "customfield_11341": null,
         "customfield_11440": {
             "id": "12606",
-            "self": "http://localhost:4567/rest/api/latest/customFieldOption/12606",
+            "self": "http://54.68.128.117:8100/rest/api/2/customFieldOption/12606",
             "value": "Standard"
         },
         "customfield_11451": null,
@@ -106,7 +106,7 @@
         "customfield_11456": null,
         "customfield_11457": {
             "id": "12657",
-            "self": "http://localhost:4567/rest/api/latest/customFieldOption/12657",
+            "self": "http://54.68.128.117:8100/rest/api/2/customFieldOption/12657",
             "value": "S"
         },
         "customfield_11540": null,
@@ -128,6 +128,60 @@
         "customfield_11745": null,
         "customfield_11746": null,
         "customfield_11747": null,
+        "customfield_11749": null,
+        "customfield_11750": null,
+        "customfield_11751": null,
+        "customfield_11752": null,
+        "customfield_11753": null,
+        "customfield_11754": null,
+        "customfield_11755": null,
+        "customfield_11756": null,
+        "customfield_11757": null,
+        "customfield_11758": null,
+        "customfield_11759": null,
+        "customfield_11760": null,
+        "customfield_11764": null,
+        "customfield_11765": null,
+        "customfield_11766": null,
+        "customfield_11767": null,
+        "customfield_11768": null,
+        "customfield_11769": null,
+        "customfield_11770": null,
+        "customfield_11771": null,
+        "customfield_11772": null,
+        "customfield_11774": null,
+        "customfield_11775": null,
+        "customfield_11776": null,
+        "customfield_11777": null,
+        "customfield_11778": null,
+        "customfield_11779": null,
+        "customfield_11780": null,
+        "customfield_11781": null,
+        "customfield_11782": null,
+        "customfield_11783": null,
+        "customfield_11784": null,
+        "customfield_11785": null,
+        "customfield_11786": null,
+        "customfield_11787": null,
+        "customfield_11788": null,
+        "customfield_11789": null,
+        "customfield_11790": null,
+        "customfield_11791": null,
+        "customfield_11792": null,
+        "customfield_11793": null,
+        "customfield_11794": null,
+        "customfield_11795": null,
+        "customfield_11796": null,
+        "customfield_11797": null,
+        "customfield_11798": null,
+        "customfield_11802": null,
+        "customfield_11803": null,
+        "customfield_11804": null,
+        "customfield_11805": null,
+        "customfield_11806": null,
+        "customfield_11807": null,
+        "customfield_11808": null,
+        "customfield_11809": null,
         "description": null,
         "duedate": null,
         "environment": null,
@@ -135,10 +189,10 @@
         "issuetype": {
             "avatarId": 12257,
             "description": "Taskboard",
-            "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12257&avatarType=issuetype",
+            "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12257&avatarType=issuetype",
             "id": "10607",
             "name": "Tech Planning",
-            "self": "http://localhost:4567/rest/api/latest/issuetype/10607",
+            "self": "http://54.68.128.117:8100/rest/api/2/issuetype/10607",
             "subtask": true
         },
         "labels": [],
@@ -148,55 +202,55 @@
                 "issuetype": {
                     "avatarId": 12251,
                     "description": "Taskboard",
-                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
+                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
                     "id": "10601",
                     "name": "Feature",
-                    "self": "http://localhost:4567/rest/api/latest/issuetype/10601",
+                    "self": "http://54.68.128.117:8100/rest/api/2/issuetype/10601",
                     "subtask": false
                 },
                 "priority": {
-                    "iconUrl": "http://localhost:4567/images/icons/priorities/minor.svg",
+                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
                     "id": "9",
                     "name": "M\u00e9dia",
-                    "self": "http://localhost:4567/rest/api/latest/priority/9"
+                    "self": "http://54.68.128.117:8100/rest/api/2/priority/9"
                 },
                 "status": {
                     "description": "Taskboard",
-                    "iconUrl": "http://localhost:4567/images/icons/statuses/generic.png",
+                    "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                     "id": "10652",
                     "name": "Doing",
-                    "self": "http://localhost:4567/rest/api/latest/status/10652",
+                    "self": "http://54.68.128.117:8100/rest/api/2/status/10652",
                     "statusCategory": {
                         "colorName": "yellow",
                         "id": 4,
                         "key": "indeterminate",
                         "name": "In Progress",
-                        "self": "http://localhost:4567/rest/api/latest/statuscategory/4"
+                        "self": "http://54.68.128.117:8100/rest/api/2/statuscategory/4"
                     }
                 },
-                "summary": "P3 - A1H0020F - Consulta habilita\u00e7\u00e3o afiliado clientes"
+                "summary": "P3 - C611810F - Antecipar Pagamento"
             },
-            "id": "214792",
-            "key": "TASKB-235",
-            "self": "http://localhost:4567/rest/api/latest/issue/214792"
+            "id": "214817",
+            "key": "TASKB-150",
+            "self": "http://54.68.128.117:8100/rest/api/2/issue/214817"
         },
         "priority": {
-            "iconUrl": "http://localhost:4567/images/icons/priorities/minor.svg",
+            "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
             "id": "9",
             "name": "M\u00e9dia",
-            "self": "http://localhost:4567/rest/api/latest/priority/9"
+            "self": "http://54.68.128.117:8100/rest/api/2/priority/9"
         },
         "progress": {
-            "percent": 100,
-            "progress": 19800,
-            "total": 19800
+            "percent": 50,
+            "progress": 57600,
+            "total": 115200
         },
         "project": {
             "avatarUrls": {
-                "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
-                "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
-                "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653",
-                "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653"
+                "16x16": "http://54.68.128.117:8100/secure/projectavatar?size=xsmall&avatarId=11653",
+                "24x24": "http://54.68.128.117:8100/secure/projectavatar?size=small&avatarId=11653",
+                "32x32": "http://54.68.128.117:8100/secure/projectavatar?size=medium&avatarId=11653",
+                "48x48": "http://54.68.128.117:8100/secure/projectavatar?avatarId=11653"
             },
             "id": "11315",
             "key": "TASKB",
@@ -204,112 +258,112 @@
             "projectCategory": {
                 "id": "10001",
                 "name": "Externo",
-                "self": "http://localhost:4567/rest/api/latest/projectCategory/10001"
+                "self": "http://54.68.128.117:8100/rest/api/2/projectCategory/10001"
             },
-            "self": "http://localhost:4567/rest/api/latest/project/11315"
+            "self": "http://54.68.128.117:8100/rest/api/2/project/11315"
         },
         "reporter": {
             "active": true,
             "avatarUrls": {
-                "16x16": "http://www.gravatar.com/avatar/73687445b7ecdb4f226e4470c2b2529d?d=mm&s=16",
-                "24x24": "http://www.gravatar.com/avatar/73687445b7ecdb4f226e4470c2b2529d?d=mm&s=24",
-                "32x32": "http://www.gravatar.com/avatar/73687445b7ecdb4f226e4470c2b2529d?d=mm&s=32",
-                "48x48": "http://www.gravatar.com/avatar/73687445b7ecdb4f226e4470c2b2529d?d=mm&s=48"
+                "16x16": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=16",
+                "24x24": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=24",
+                "32x32": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=32",
+                "48x48": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=48"
             },
-            "displayName": "Sergio Egashira",
-            "key": "sergio",
-            "name": "sergio",
-            "self": "http://localhost:4567/rest/api/latest/user?username=sergio",
+            "displayName": "Reginaldo Marcelo Romano Rapussi",
+            "key": "reginaldo",
+            "name": "reginaldo",
+            "self": "http://54.68.128.117:8100/rest/api/2/user?username=reginaldo",
             "timeZone": "America/Sao_Paulo"
         },
         "resolution": {
             "description": "Work has been completed on this issue.",
             "id": "10000",
             "name": "Done",
-            "self": "http://localhost:4567/rest/api/latest/resolution/10000"
+            "self": "http://54.68.128.117:8100/rest/api/2/resolution/10000"
         },
-        "resolutiondate": "2017-01-13T17:10:54.000+0000",
+        "resolutiondate": "2017-01-12T16:12:23.000+0000",
         "status": {
             "description": "",
-            "iconUrl": "http://localhost:4567/images/icons/statuses/closed.png",
+            "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/closed.png",
             "id": "10053",
             "name": "Done",
-            "self": "http://localhost:4567/rest/api/latest/status/10053",
+            "self": "http://54.68.128.117:8100/rest/api/2/status/10053",
             "statusCategory": {
                 "colorName": "green",
                 "id": 3,
                 "key": "done",
                 "name": "Done",
-                "self": "http://localhost:4567/rest/api/latest/statuscategory/3"
+                "self": "http://54.68.128.117:8100/rest/api/2/statuscategory/3"
             }
         },
         "subtasks": [],
         "summary": "An\u00e1lise e Especifica\u00e7\u00e3o",
-        "timeestimate": 0,
-        "timeoriginalestimate": 18000,
-        "timespent": 19800,
+        "timeestimate": 57600,
+        "timeoriginalestimate": 115200,
+        "timespent": 57600,
         "timetracking": {
-            "originalEstimate": "5h",
-            "originalEstimateSeconds": 18000,
-            "remainingEstimate": "0m",
-            "remainingEstimateSeconds": 0,
-            "timeSpent": "5h 30m",
-            "timeSpentSeconds": 19800
+            "originalEstimate": "4d",
+            "originalEstimateSeconds": 115200,
+            "remainingEstimate": "2d",
+            "remainingEstimateSeconds": 57600,
+            "timeSpent": "2d",
+            "timeSpentSeconds": 57600
         },
-        "updated": "2017-04-04T14:16:34.000+0000",
+        "updated": "2017-04-04T14:01:20.000+0000",
         "versions": [],
         "votes": {
             "hasVoted": false,
-            "self": "http://localhost:4567/rest/api/latest/issue/TASKB-491/votes",
+            "self": "http://54.68.128.117:8100/rest/api/2/issue/TASKB-428/votes",
             "votes": 0
         },
         "watches": {
             "isWatching": false,
-            "self": "http://localhost:4567/rest/api/latest/issue/TASKB-491/watchers",
+            "self": "http://54.68.128.117:8100/rest/api/2/issue/TASKB-428/watchers",
             "watchCount": 1
         },
         "worklog": {
             "maxResults": 20,
             "startAt": 0,
-            "total": 2,
+            "total": 5,
             "worklogs": [
                 {
                     "author": {
                         "active": true,
                         "avatarUrls": {
-                            "16x16": "http://www.gravatar.com/avatar/73687445b7ecdb4f226e4470c2b2529d?d=mm&s=16",
-                            "24x24": "http://www.gravatar.com/avatar/73687445b7ecdb4f226e4470c2b2529d?d=mm&s=24",
-                            "32x32": "http://www.gravatar.com/avatar/73687445b7ecdb4f226e4470c2b2529d?d=mm&s=32",
-                            "48x48": "http://www.gravatar.com/avatar/73687445b7ecdb4f226e4470c2b2529d?d=mm&s=48"
+                            "16x16": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=16",
+                            "24x24": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=24",
+                            "32x32": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=32",
+                            "48x48": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=48"
                         },
-                        "displayName": "Sergio Egashira",
-                        "key": "sergio",
-                        "name": "sergio",
-                        "self": "http://localhost:4567/rest/api/latest/user?username=sergio",
+                        "displayName": "Reginaldo Marcelo Romano Rapussi",
+                        "key": "reginaldo",
+                        "name": "reginaldo",
+                        "self": "http://54.68.128.117:8100/rest/api/2/user?username=reginaldo",
                         "timeZone": "America/Sao_Paulo"
                     },
-                    "created": "2016-12-05T09:13:30.000+0000",
-                    "id": "498376",
-                    "issueId": "219954",
-                    "self": "http://localhost:4567/rest/api/latest/issue/219954/worklog/498376",
-                    "started": "2016-12-05T09:13:00.000+0000",
+                    "created": "2017-01-02T12:30:51.000+0000",
+                    "id": "503195",
+                    "issueId": "221497",
+                    "self": "http://54.68.128.117:8100/rest/api/2/issue/221497/worklog/503195",
+                    "started": "2016-12-28T12:30:00.000+0000",
                     "timeSpent": "4h",
                     "timeSpentSeconds": 14400,
                     "updateAuthor": {
                         "active": true,
                         "avatarUrls": {
-                            "16x16": "http://www.gravatar.com/avatar/73687445b7ecdb4f226e4470c2b2529d?d=mm&s=16",
-                            "24x24": "http://www.gravatar.com/avatar/73687445b7ecdb4f226e4470c2b2529d?d=mm&s=24",
-                            "32x32": "http://www.gravatar.com/avatar/73687445b7ecdb4f226e4470c2b2529d?d=mm&s=32",
-                            "48x48": "http://www.gravatar.com/avatar/73687445b7ecdb4f226e4470c2b2529d?d=mm&s=48"
+                            "16x16": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=16",
+                            "24x24": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=24",
+                            "32x32": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=32",
+                            "48x48": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=48"
                         },
-                        "displayName": "Sergio Egashira",
-                        "key": "sergio",
-                        "name": "sergio",
-                        "self": "http://localhost:4567/rest/api/latest/user?username=sergio",
+                        "displayName": "Reginaldo Marcelo Romano Rapussi",
+                        "key": "reginaldo",
+                        "name": "reginaldo",
+                        "self": "http://54.68.128.117:8100/rest/api/2/user?username=reginaldo",
                         "timeZone": "America/Sao_Paulo"
                     },
-                    "updated": "2016-12-05T09:13:30.000+0000"
+                    "updated": "2017-01-02T12:30:51.000+0000"
                 },
                 {
                     "author": {
@@ -323,15 +377,90 @@
                         "displayName": "Reginaldo Marcelo Romano Rapussi",
                         "key": "reginaldo",
                         "name": "reginaldo",
-                        "self": "http://localhost:4567/rest/api/latest/user?username=reginaldo",
+                        "self": "http://54.68.128.117:8100/rest/api/2/user?username=reginaldo",
                         "timeZone": "America/Sao_Paulo"
                     },
-                    "comment": "Revis\u00e3o e complementa\u00e7\u00e3o da especifica\u00e7\u00e3o dadas as documenta\u00e7\u00f5es posteriormente anexadas.",
-                    "created": "2017-01-18T18:45:36.000+0000",
-                    "id": "506049",
-                    "issueId": "219954",
-                    "self": "http://localhost:4567/rest/api/latest/issue/219954/worklog/506049",
-                    "started": "2017-01-19T18:43:00.000+0000",
+                    "created": "2017-01-02T12:32:03.000+0000",
+                    "id": "503196",
+                    "issueId": "221497",
+                    "self": "http://54.68.128.117:8100/rest/api/2/issue/221497/worklog/503196",
+                    "started": "2016-12-28T11:32:00.000+0000",
+                    "timeSpent": "1h",
+                    "timeSpentSeconds": 3600,
+                    "updateAuthor": {
+                        "active": true,
+                        "avatarUrls": {
+                            "16x16": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=16",
+                            "24x24": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=24",
+                            "32x32": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=32",
+                            "48x48": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=48"
+                        },
+                        "displayName": "Reginaldo Marcelo Romano Rapussi",
+                        "key": "reginaldo",
+                        "name": "reginaldo",
+                        "self": "http://54.68.128.117:8100/rest/api/2/user?username=reginaldo",
+                        "timeZone": "America/Sao_Paulo"
+                    },
+                    "updated": "2017-01-02T12:32:03.000+0000"
+                },
+                {
+                    "author": {
+                        "active": true,
+                        "avatarUrls": {
+                            "16x16": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=16",
+                            "24x24": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=24",
+                            "32x32": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=32",
+                            "48x48": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=48"
+                        },
+                        "displayName": "Reginaldo Marcelo Romano Rapussi",
+                        "key": "reginaldo",
+                        "name": "reginaldo",
+                        "self": "http://54.68.128.117:8100/rest/api/2/user?username=reginaldo",
+                        "timeZone": "America/Sao_Paulo"
+                    },
+                    "created": "2017-01-02T12:32:10.000+0000",
+                    "id": "503197",
+                    "issueId": "221497",
+                    "self": "http://54.68.128.117:8100/rest/api/2/issue/221497/worklog/503197",
+                    "started": "2016-12-27T06:32:00.000+0000",
+                    "timeSpent": "6h",
+                    "timeSpentSeconds": 21600,
+                    "updateAuthor": {
+                        "active": true,
+                        "avatarUrls": {
+                            "16x16": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=16",
+                            "24x24": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=24",
+                            "32x32": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=32",
+                            "48x48": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=48"
+                        },
+                        "displayName": "Reginaldo Marcelo Romano Rapussi",
+                        "key": "reginaldo",
+                        "name": "reginaldo",
+                        "self": "http://54.68.128.117:8100/rest/api/2/user?username=reginaldo",
+                        "timeZone": "America/Sao_Paulo"
+                    },
+                    "updated": "2017-01-02T12:32:10.000+0000"
+                },
+                {
+                    "author": {
+                        "active": true,
+                        "avatarUrls": {
+                            "16x16": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=16",
+                            "24x24": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=24",
+                            "32x32": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=32",
+                            "48x48": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=48"
+                        },
+                        "displayName": "Reginaldo Marcelo Romano Rapussi",
+                        "key": "reginaldo",
+                        "name": "reginaldo",
+                        "self": "http://54.68.128.117:8100/rest/api/2/user?username=reginaldo",
+                        "timeZone": "America/Sao_Paulo"
+                    },
+                    "created": "2017-01-02T12:32:28.000+0000",
+                    "id": "503198",
+                    "issueId": "221497",
+                    "self": "http://54.68.128.117:8100/rest/api/2/issue/221497/worklog/503198",
+                    "started": "2016-12-29T11:03:00.000+0000",
                     "timeSpent": "1h 30m",
                     "timeSpentSeconds": 5400,
                     "updateAuthor": {
@@ -345,17 +474,55 @@
                         "displayName": "Reginaldo Marcelo Romano Rapussi",
                         "key": "reginaldo",
                         "name": "reginaldo",
-                        "self": "http://localhost:4567/rest/api/latest/user?username=reginaldo",
+                        "self": "http://54.68.128.117:8100/rest/api/2/user?username=reginaldo",
                         "timeZone": "America/Sao_Paulo"
                     },
-                    "updated": "2017-01-18T18:45:36.000+0000"
+                    "updated": "2017-01-02T12:32:28.000+0000"
+                },
+                {
+                    "author": {
+                        "active": true,
+                        "avatarUrls": {
+                            "16x16": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=16",
+                            "24x24": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=24",
+                            "32x32": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=32",
+                            "48x48": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=48"
+                        },
+                        "displayName": "Reginaldo Marcelo Romano Rapussi",
+                        "key": "reginaldo",
+                        "name": "reginaldo",
+                        "self": "http://54.68.128.117:8100/rest/api/2/user?username=reginaldo",
+                        "timeZone": "America/Sao_Paulo"
+                    },
+                    "created": "2017-01-02T12:32:50.000+0000",
+                    "id": "503199",
+                    "issueId": "221497",
+                    "self": "http://54.68.128.117:8100/rest/api/2/issue/221497/worklog/503199",
+                    "started": "2016-12-26T09:03:00.000+0000",
+                    "timeSpent": "3h 30m",
+                    "timeSpentSeconds": 12600,
+                    "updateAuthor": {
+                        "active": true,
+                        "avatarUrls": {
+                            "16x16": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=16",
+                            "24x24": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=24",
+                            "32x32": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=32",
+                            "48x48": "http://www.gravatar.com/avatar/2c105e55c24196600f63db7cfb2a4842?d=mm&s=48"
+                        },
+                        "displayName": "Reginaldo Marcelo Romano Rapussi",
+                        "key": "reginaldo",
+                        "name": "reginaldo",
+                        "self": "http://54.68.128.117:8100/rest/api/2/user?username=reginaldo",
+                        "timeZone": "America/Sao_Paulo"
+                    },
+                    "updated": "2017-01-02T12:32:50.000+0000"
                 }
             ]
         },
-        "workratio": 110
+        "workratio": 50
     },
-    "id": "219954",
-    "key": "TASKB-491",
+    "id": "221497",
+    "key": "TASKB-428",
     "names": {
         "aggregateprogress": "\u03a3 Progress",
         "aggregatetimeestimate": "\u03a3 Remaining Estimate",
@@ -433,6 +600,60 @@
         "customfield_11745": "Check OUT",
         "customfield_11746": "Reembols\u00e1vel pelo Cliente",
         "customfield_11747": "Viagem DESTINO",
+        "customfield_11749": "Doc Tipo (1)",
+        "customfield_11750": "Doc N\u00famero (1)",
+        "customfield_11751": "Doc N\u00famero (2)",
+        "customfield_11752": "Doc N\u00famero (3)",
+        "customfield_11753": "Data Nascimento (1)",
+        "customfield_11754": "Data Nascimento (2)",
+        "customfield_11755": "Data Nascimento (3)",
+        "customfield_11756": "Fidelidade (1)",
+        "customfield_11757": "Fidelidade (2)",
+        "customfield_11758": "Fidelidade (3)",
+        "customfield_11759": "Doc Tipo (2)",
+        "customfield_11760": "Doc Tipo (3)",
+        "customfield_11764": "Viagem Tipo (1)",
+        "customfield_11765": "Origem (1)",
+        "customfield_11766": "Destino (1)",
+        "customfield_11767": "Origem (2)",
+        "customfield_11768": "Origem (3)",
+        "customfield_11769": "Viagem Tipo (2)",
+        "customfield_11770": "Viagem Tipo (3)",
+        "customfield_11771": "Destino (2)",
+        "customfield_11772": "Destino (3)",
+        "customfield_11774": "Hospedagem (1)",
+        "customfield_11775": "Hospedagem (2)",
+        "customfield_11776": "Hospedagem (3)",
+        "customfield_11777": "Hor\u00e1rio Ida (1)",
+        "customfield_11778": "Hor\u00e1rio Ida (2)",
+        "customfield_11779": "Hor\u00e1rio Ida (3)",
+        "customfield_11780": "Data Ida (1)",
+        "customfield_11781": "Data Ida (2)",
+        "customfield_11782": "Data Ida (3)",
+        "customfield_11783": "Data Volta (1)",
+        "customfield_11784": "Data Volta (2)",
+        "customfield_11785": "Data Volta (3)",
+        "customfield_11786": "Horario Volta (1)",
+        "customfield_11787": "Hor\u00e1rio Volta (2)",
+        "customfield_11788": "Hor\u00e1rio Volta (3)",
+        "customfield_11789": "Passageiro (A)",
+        "customfield_11790": "Passageiro (B)",
+        "customfield_11791": "Passageiro (C)",
+        "customfield_11792": "Bagagem a Despachar (1)",
+        "customfield_11793": "Cia A\u00e9rea (1)",
+        "customfield_11794": "Hotel (1)",
+        "customfield_11795": "Cia A\u00e9rea (2)",
+        "customfield_11796": "Cia A\u00e9rea (3)",
+        "customfield_11797": "Hotel (3)",
+        "customfield_11798": "Hotel (2)",
+        "customfield_11802": "Valor Hospedagem (1)",
+        "customfield_11803": "Valor Hospedagem (2)",
+        "customfield_11804": "Valor Hospedagem (3)",
+        "customfield_11805": "Valor Passagem (1)",
+        "customfield_11806": "Valor Passagem (2)",
+        "customfield_11807": "Valor Passagem (3)",
+        "customfield_11808": "Bagagem a Despachar (2)",
+        "customfield_11809": "Bagagem a Despachar",
         "description": "Description",
         "duedate": "Due Date",
         "environment": "Environment",
@@ -845,6 +1066,288 @@
             "customId": 11747,
             "type": "option"
         },
+        "customfield_11749": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:select",
+            "customId": 11749,
+            "type": "option"
+        },
+        "customfield_11750": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11750,
+            "type": "string"
+        },
+        "customfield_11751": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11751,
+            "type": "string"
+        },
+        "customfield_11752": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11752,
+            "type": "string"
+        },
+        "customfield_11753": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11753,
+            "type": "string"
+        },
+        "customfield_11754": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11754,
+            "type": "string"
+        },
+        "customfield_11755": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11755,
+            "type": "string"
+        },
+        "customfield_11756": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11756,
+            "type": "string"
+        },
+        "customfield_11757": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11757,
+            "type": "string"
+        },
+        "customfield_11758": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11758,
+            "type": "string"
+        },
+        "customfield_11759": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:select",
+            "customId": 11759,
+            "type": "option"
+        },
+        "customfield_11760": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:select",
+            "customId": 11760,
+            "type": "option"
+        },
+        "customfield_11764": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:select",
+            "customId": 11764,
+            "type": "option"
+        },
+        "customfield_11765": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11765,
+            "type": "string"
+        },
+        "customfield_11766": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11766,
+            "type": "string"
+        },
+        "customfield_11767": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11767,
+            "type": "string"
+        },
+        "customfield_11768": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11768,
+            "type": "string"
+        },
+        "customfield_11769": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:select",
+            "customId": 11769,
+            "type": "option"
+        },
+        "customfield_11770": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:select",
+            "customId": 11770,
+            "type": "option"
+        },
+        "customfield_11771": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11771,
+            "type": "string"
+        },
+        "customfield_11772": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11772,
+            "type": "string"
+        },
+        "customfield_11774": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:multicheckboxes",
+            "customId": 11774,
+            "items": "option",
+            "type": "array"
+        },
+        "customfield_11775": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:multicheckboxes",
+            "customId": 11775,
+            "items": "option",
+            "type": "array"
+        },
+        "customfield_11776": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:multicheckboxes",
+            "customId": 11776,
+            "items": "option",
+            "type": "array"
+        },
+        "customfield_11777": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:multiselect",
+            "customId": 11777,
+            "items": "option",
+            "type": "array"
+        },
+        "customfield_11778": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:multiselect",
+            "customId": 11778,
+            "items": "option",
+            "type": "array"
+        },
+        "customfield_11779": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:multiselect",
+            "customId": 11779,
+            "items": "option",
+            "type": "array"
+        },
+        "customfield_11780": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11780,
+            "type": "string"
+        },
+        "customfield_11781": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11781,
+            "type": "string"
+        },
+        "customfield_11782": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11782,
+            "type": "string"
+        },
+        "customfield_11783": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11783,
+            "type": "string"
+        },
+        "customfield_11784": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11784,
+            "type": "string"
+        },
+        "customfield_11785": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11785,
+            "type": "string"
+        },
+        "customfield_11786": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:multiselect",
+            "customId": 11786,
+            "items": "option",
+            "type": "array"
+        },
+        "customfield_11787": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:multiselect",
+            "customId": 11787,
+            "items": "option",
+            "type": "array"
+        },
+        "customfield_11788": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:multiselect",
+            "customId": 11788,
+            "items": "option",
+            "type": "array"
+        },
+        "customfield_11789": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11789,
+            "type": "string"
+        },
+        "customfield_11790": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11790,
+            "type": "string"
+        },
+        "customfield_11791": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11791,
+            "type": "string"
+        },
+        "customfield_11792": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:multicheckboxes",
+            "customId": 11792,
+            "items": "option",
+            "type": "array"
+        },
+        "customfield_11793": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11793,
+            "type": "string"
+        },
+        "customfield_11794": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11794,
+            "type": "string"
+        },
+        "customfield_11795": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11795,
+            "type": "string"
+        },
+        "customfield_11796": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11796,
+            "type": "string"
+        },
+        "customfield_11797": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11797,
+            "type": "string"
+        },
+        "customfield_11798": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
+            "customId": 11798,
+            "type": "string"
+        },
+        "customfield_11802": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:float",
+            "customId": 11802,
+            "type": "number"
+        },
+        "customfield_11803": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:float",
+            "customId": 11803,
+            "type": "number"
+        },
+        "customfield_11804": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:float",
+            "customId": 11804,
+            "type": "number"
+        },
+        "customfield_11805": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:float",
+            "customId": 11805,
+            "type": "number"
+        },
+        "customfield_11806": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:float",
+            "customId": 11806,
+            "type": "number"
+        },
+        "customfield_11807": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:float",
+            "customId": 11807,
+            "type": "number"
+        },
+        "customfield_11808": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:multicheckboxes",
+            "customId": 11808,
+            "items": "option",
+            "type": "array"
+        },
+        "customfield_11809": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:multicheckboxes",
+            "customId": 11809,
+            "items": "option",
+            "type": "array"
+        },
         "description": {
             "system": "description",
             "type": "string"
@@ -960,23 +1463,23 @@
             "type": "number"
         }
     },
-    "self": "http://localhost:4567/rest/api/latest/issue/219954",
+    "self": "http://54.68.128.117:8100/rest/api/latest/issue/221497",
     "transitions": [
         {
             "id": "71",
             "name": "Back to 'Doing'",
             "to": {
                 "description": "Taskboard",
-                "iconUrl": "http://localhost:4567/images/icons/statuses/generic.png",
+                "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                 "id": "10652",
                 "name": "Doing",
-                "self": "http://localhost:4567/rest/api/latest/status/10652",
+                "self": "http://54.68.128.117:8100/rest/api/2/status/10652",
                 "statusCategory": {
                     "colorName": "yellow",
                     "id": 4,
                     "key": "indeterminate",
                     "name": "In Progress",
-                    "self": "http://localhost:4567/rest/api/latest/statuscategory/4"
+                    "self": "http://54.68.128.117:8100/rest/api/2/statuscategory/4"
                 }
             }
         },
@@ -985,16 +1488,16 @@
             "name": "Cancel",
             "to": {
                 "description": "Taskboard",
-                "iconUrl": "http://localhost:4567/images/icons/statuses/generic.png",
+                "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
                 "id": "10656",
                 "name": "Cancelled",
-                "self": "http://localhost:4567/rest/api/latest/status/10656",
+                "self": "http://54.68.128.117:8100/rest/api/2/status/10656",
                 "statusCategory": {
                     "colorName": "green",
                     "id": 3,
                     "key": "done",
                     "name": "Done",
-                    "self": "http://localhost:4567/rest/api/latest/statuscategory/3"
+                    "self": "http://54.68.128.117:8100/rest/api/2/statuscategory/3"
                 }
             }
         }
