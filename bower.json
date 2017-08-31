@@ -2,18 +2,19 @@
   "name": "objective-taskboard",
   "private": true,
   "dependencies": {
+    "polymer": "Polymer/polymer#^1.2.0",
     "iron-elements": "PolymerElements/iron-elements#1.0.6",
-    "jquery-ui": "1.12.1",
-    "neon-elements": "PolymerElements/neon-elements#1.0.0",
-    "page": "visionmedia/page.js#~1.6.3",
     "paper-elements": "PolymerElements/paper-elements#1.0.6",
+    "neon-elements": "PolymerElements/neon-elements#1.0.0",
     "platinum-elements": "PolymerElements/platinum-elements#1.1.0",
     "iron-icons": "PolymerElements/iron-icons#~1.0.3",
-    "polymer": "Polymer/polymer#^1.2.0",
-    "underscore": "1.8.3",
+    "font-roboto": "PolymerElements/font-roboto-local#1.0.0",
+    "jquery-ui": "1.12.1",
     "jquery.floatThead": "floatThead#1.4.1",
     "jquery-ui-sortable-animation": "*",
     "jquery.easing": "^1.3.1",
+    "page": "visionmedia/page.js#~1.6.3",
+    "underscore": "1.8.3",
     "marked-element": "^1.0.0"
   },
   "devDependencies": {
@@ -21,6 +22,7 @@
     "test-fixture": "PolymerElements/test-fixture#^1.1.0"
   },
   "resolutions": {
-    "jquery-ui": "1.12.1"
+    "jquery-ui": "1.12.1",
+    "font-roboto": "1.0.0"
   }
 }
