@@ -26,7 +26,7 @@ import org.junit.Before;
 public abstract class AuthenticatedIntegrationTest extends AbstractUIWithCoverageIntegrationTest {
 
     @Before
-    public void before() {
+    public final void doLogin() {
         LoginPage loginPage = LoginPage.to(webDriver);
         loginPage.login("foo", "bar");
         

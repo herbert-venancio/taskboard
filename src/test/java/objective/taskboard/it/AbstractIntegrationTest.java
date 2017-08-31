@@ -45,7 +45,7 @@ public abstract class AbstractIntegrationTest {
     private static final long TIMEOUT_IN_SECONDS = 120;
 
     @Before
-    public void setup() {
+    public final void setupIntegrationTest() {
         JiraMockController.resetMock();
         waitServerReady();
         resetIssueBuffer();

@@ -24,6 +24,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
@@ -41,15 +42,13 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 public abstract class AbstractUIIntegrationTest extends AbstractIntegrationTest {
     protected WebDriver webDriver;
 
-    public void setup() {
+    @Before
+    public final void setupUIIntegrationTest() {
         if (System.getProperty("webdriver.gecko.driver") == null)
             System.setProperty("webdriver.gecko.driver", "drivers/linux/marionette/64bit/geckodriver");
-        
-        
+
         if (!new File("drivers/linux/marionette/64bit/geckodriver").exists()) 
             throw new IllegalStateException("To run integration tests, you must run 'mvn clean install' at least once to download gecko driver");
-        
-        super.setup();
 
         FirefoxOptions options = new FirefoxOptions();
         options.addPreference("dom.file.createInChild", true);
@@ -66,7 +65,7 @@ public abstract class AbstractUIIntegrationTest extends AbstractIntegrationTest 
     public byte[] capturePage = null;
 
     @After
-    public void cleanupThread() {
+    public final void cleanupThread() {
         if (webDriver == null) return;
         try {
             // capture the dom

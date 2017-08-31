@@ -36,7 +36,7 @@ public abstract class AbstractUIWithCoverageIntegrationTest extends AbstractUIIn
     public final TestName testName = new TestName();
 
     @After
-    public void saveCoverage() {
+    public final void saveCoverage() {
         if (webDriver == null) {
             System.err.println("Can't save javascript coverage because webdriver is null");
             return;

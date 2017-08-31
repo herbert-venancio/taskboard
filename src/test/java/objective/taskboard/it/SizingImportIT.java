@@ -1,131 +1,118 @@
 package objective.taskboard.it;
 
+import org.junit.Before;
 import org.junit.Test;
-
-import objective.taskboard.it.SizingImportUi.SizingStepFour;
-import objective.taskboard.it.SizingImportUi.SizingStepOne;
-import objective.taskboard.it.SizingImportUi.SizingStepThree;
-import objective.taskboard.it.SizingImportUi.SizingStepTwo;
 
 public class SizingImportIT extends AuthenticatedIntegrationTest {
 
-    final static String SPREADSHEET_URL_VALID = "https://docs.google.com/spreadsheets/d/1iJqwMxLWOr1fDcYDNuV-CUp-1smHpYtYqvaTk14Nwek";
-    final static String SPREADSHEET_URL_INVALID = "https://docs.google.com/spreadsheets/d/";
+    private final static String SPREADSHEET_URL_VALID = "https://docs.google.com/spreadsheets/d/1iJqwMxLWOr1fDcYDNuV-CUp-1smHpYtYqvaTk14Nwek";
+    private final static String SPREADSHEET_URL_INVALID = "https://docs.google.com/spreadsheets/d/";
 
-    final static String LAST_COLUMN = "AB";
-    final static String INVALID_COLUMN = "AAAA";
+    private final static String LAST_COLUMN = "AB";
+    private final static String INVALID_COLUMN = "AAAA";
+    
+    private MainPage mainPage;
+    
+    @Before
+    public void setup() {
+        mainPage = MainPage.produce(webDriver);
+    }
 
     @Test
     public void whenFinishAllSteps_ImportSizingAndClose() {
-        MainPage mainPage = MainPage.produce(webDriver);
         SizingImportUi sizing = mainPage.openSizingImport();
+        sizing.assertIsOpen();
 
-        SizingStepOne stepOne = sizing.showStepOne();
+        sizing.waitForStepOne()
+            .withSpreadsheetUrl(SPREADSHEET_URL_VALID)
+            .submitStep();
 
-        sizing.assertShowingCorrectStep(1);
-        sizing.asserWithShowingSizing(true);
+        sizing.waitForStepTwo().submitStep();
 
-        SizingStepTwo stepTwo = stepOne.
-                withSpreadsheetUrl(SPREADSHEET_URL_VALID).
-                submitStep().
-                showStepTwo();
-        sizing.assertShowingCorrectStep(2);
+        sizing.waitForStepThree().submitStep();
 
-        SizingStepThree stepThree = stepTwo.
-                submitStep().
-                showStepThree();
-        sizing.assertShowingCorrectStep(3);
+        sizing.waitForStepFour()
+            .assertShowingButtonsAfterFinish()
+            .returnToTaskboard();
 
-        SizingStepFour stepFour = stepThree.
-                submitStep().
-                showStepFour();
-        sizing.assertShowingCorrectStep(4);
-
-        stepFour.assertShowingButtonsAfterFinish();
-        sizing.assertWithShowingError(false);
-
-        stepFour.returnToTaskboard();
-        sizing.asserWithShowingSizing(false);
+        sizing.assertIsClosed();
     }
 
     @Test
     public void whenSubmitStepOneWithoutFillSpreadsheetUrl_ShowError() {
-        MainPage mainPage = MainPage.produce(webDriver);
         SizingImportUi sizing = mainPage.openSizingImport();
 
-        sizing.
-            showStepOne().
-            submitStep();
+        sizing.waitForStepOne().submitStep();
         
-        sizing.assertWithShowingError(true);
-        sizing.assertShowingCorrectStep(1);
+        sizing.assertErrorMessage("Please, inform the Google Spreadsheet URL to import.");
+        sizing.waitForStepOne();
     }
 
     @Test
     public void whenInputtingColumnValues_CheckIfTheValuesAreCorrect() {
-        MainPage mainPage = MainPage.produce(webDriver);
         SizingImportUi sizing = mainPage.openSizingImport();
         
-        SizingStepTwo stepTwo = sizing.
-            showStepOne().
-            withSpreadsheetUrl(SPREADSHEET_URL_VALID).
-            submitStep().
-            showStepTwo().
-            withColumnValue(0, INVALID_COLUMN).
-            withColumnValue(1, LAST_COLUMN);
+        sizing.waitForStepOne()
+            .withSpreadsheetUrl(SPREADSHEET_URL_VALID)
+            .submitStep();
+        
+        sizing.waitForStepTwo()
+                .openAdvancedMapping()
+                .withColumnValue(0, INVALID_COLUMN)
+                .withColumnValue(1, LAST_COLUMN)
+                .assertColumnValueEquals(0, INVALID_COLUMN, false)
+                .assertColumnValueEquals(1, LAST_COLUMN, true);
 
-        stepTwo.assertColumnValueEquals(0, INVALID_COLUMN, false);
-        stepTwo.assertColumnValueEquals(1, LAST_COLUMN, true);
-
-        sizing.assertWithShowingError(false);
+        sizing.assertNoErrorMessage();
+        
+        sizing.waitForStepTwo().submitStep();
+        sizing.waitForStepThree();
     }
 
     @Test
     public void whenSubmitStepOneWithInvalidSpreadsheetUrl_ShowError() {
-        MainPage mainPage = MainPage.produce(webDriver);
         SizingImportUi sizing = mainPage.openSizingImport();
 
-        sizing.
-            showStepOne().
-            withSpreadsheetUrl(SPREADSHEET_URL_INVALID).
-            submitStep();
+        sizing.waitForStepOne()
+            .withSpreadsheetUrl(SPREADSHEET_URL_INVALID)
+            .submitStep();
 
-        sizing.assertWithShowingError(true);
-        sizing.assertShowingCorrectStep(1);
+        sizing.assertErrorMessage("Invalid Google Spreadsheet URL. Please, try another.");
+        sizing.waitForStepOne();
     }
 
     @Test
     public void whenSubmitStepTwoWithRepeatedColumnField_ShowError() {
-        MainPage mainPage = MainPage.produce(webDriver);
         SizingImportUi sizing = mainPage.openSizingImport();
 
-        sizing.
-            showStepOne().
-            withSpreadsheetUrl(SPREADSHEET_URL_VALID).
-            submitStep().
-            showStepTwo().
-            withRepeatedColumns().
-            submitStep();
+        sizing.waitForStepOne()
+            .withSpreadsheetUrl(SPREADSHEET_URL_VALID)
+            .submitStep();
 
-        sizing.assertWithShowingError(true);
-        sizing.assertShowingCorrectStep(2);
+        sizing.waitForStepTwo()
+            .openAdvancedMapping()
+            .withRepeatedColumns()
+            .submitStep();
+
+        sizing.assertErrorMessage("Column repeated.");
+        sizing.waitForStepTwo();
     }
 
     @Test
     public void whenSubmitStepTwoWithoutFillRequiredFields_ShowError() {
-        MainPage mainPage = MainPage.produce(webDriver);
         SizingImportUi sizing = mainPage.openSizingImport();
 
-        sizing.
-            showStepOne().
-            withSpreadsheetUrl(SPREADSHEET_URL_VALID).
-            submitStep().
-            showStepTwo().
-            withRequiredFieldsWithoutValues().
-            submitStep();
+        sizing.waitForStepOne()
+            .withSpreadsheetUrl(SPREADSHEET_URL_VALID)
+            .submitStep();
+        
+        sizing.waitForStepTwo()
+            .openAdvancedMapping()
+            .withRequiredFieldsWithoutValues()
+            .submitStep();
 
-        sizing.assertWithShowingError(true);
-        sizing.assertShowingCorrectStep(2);
+        sizing.assertErrorMessage("All required fields must have columns associated.");
+        sizing.waitForStepTwo();
     }
 
 }
