@@ -293,6 +293,7 @@
                 preferencesUpdated: function() {
                     this.filter();
                     this.lastPreferenceUpdate = new Date();
+                    this.getParentLane().lastPreferenceUpdate = this.lastPreferenceUpdate;
                 },
 
                 searchFilterChanged: function(event, data) {
