@@ -1,5 +1,3 @@
-package objective.taskboard.it;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,6 +18,7 @@ package objective.taskboard.it;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.it;
 
 import org.junit.Test;
 
@@ -41,7 +40,7 @@ public class ReleaseFilterIT extends AuthenticatedIntegrationTest {
     public void whenFilterByRelease_onlyIssueInTheReleaseShowUp() {
         MainPage.produce(webDriver)
                 .filterByRelease("TASKB - 1.0")
-                .assertVisibleIssues("TASKB-238");
+                .assertVisibleIssues("TASKB-186","TASKB-238","TASKB-572");
     }
 
 }

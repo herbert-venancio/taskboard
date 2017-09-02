@@ -1,5 +1,3 @@
-package objective.taskboard.domain.converter;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,6 +18,7 @@ package objective.taskboard.domain.converter;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.domain.converter;
 
 import static com.atlassian.jira.rest.client.api.domain.IssueLinkType.Direction.*;
 import static java.util.Arrays.asList;
@@ -28,6 +27,7 @@ import static org.mockito.Mockito.*;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 import org.codehaus.jettison.json.JSONArray;
@@ -58,7 +58,7 @@ import objective.taskboard.jira.JiraProperties.CustomField.TShirtSize;
 import objective.taskboard.jira.JiraProperties.IssueType.IssueTypeDetails;
 
 @RunWith(MockitoJUnitRunner.class)
-public class IssueMetadataTest {
+public class IssueFieldsExtractorTest {
 
     private static final String PARENT_ID = "parent";
     private static final String CLASS_OF_SERVICE_ID = "classOfServiceId";
@@ -177,31 +177,25 @@ public class IssueMetadataTest {
         JSONObject jsonRealParent = new JSONObject("{key:'ISSUE-1', fields:{issuetype:{id:2, iconUrl:'url'}}}");
         mockIssueField(PARENT_ID, jsonRealParent);
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        assertNotNull("Real parent shouldn't be null", metadata.getRealParent());
-        assertEquals("Real parent key", ISSUE_KEY, metadata.getRealParent().getKey());
-        assertEquals("Real parent issue type id", 2, metadata.getRealParent().getTypeId());
-        assertEquals("Real parent issue type icon url", "url", metadata.getRealParent().getTypeIconUrl());
-        assertEquals("Parent key", ISSUE_KEY, metadata.getParentKey());
+        assertNotNull("Real parent shouldn't be null", IssueFieldsExtractor.extractRealParent(issue));
+        assertEquals("Real parent key", ISSUE_KEY, IssueFieldsExtractor.extractRealParent(issue).getKey());
+        assertEquals("Real parent issue type id", 2, IssueFieldsExtractor.extractRealParent(issue).getTypeId());
+        assertEquals("Real parent issue type icon url", "url", IssueFieldsExtractor.extractRealParent(issue).getTypeIconUrl());
+        assertEquals("Parent key", ISSUE_KEY, IssueFieldsExtractor.extractParentKey(jiraProperties, issue, null));
     }
 
     @Test
     public void extractRealParentFieldValueNull() {
         mockIssueField(PARENT_ID, null);
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        assertNull(MSG_REAL_PARENT_SHOULD_BE_NULL, metadata.getRealParent());
+        assertNull(MSG_REAL_PARENT_SHOULD_BE_NULL, IssueFieldsExtractor.extractRealParent(issue));
     }
 
     @Test
     public void extractRealParentFieldNull() {
         when(issue.getField(PARENT_ID)).thenReturn(null);
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        assertNull(MSG_REAL_PARENT_SHOULD_BE_NULL, metadata.getRealParent());
+        assertNull(MSG_REAL_PARENT_SHOULD_BE_NULL, IssueFieldsExtractor.extractRealParent(issue));
     }
 
     @Test
@@ -209,9 +203,7 @@ public class IssueMetadataTest {
         JSONObject jsonRealParent = new JSONObject("{fields:{issuetype:{id:2, iconUrl:'url'}}}");
         mockIssueField(PARENT_ID, jsonRealParent);
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        assertNull(MSG_REAL_PARENT_SHOULD_BE_NULL, metadata.getRealParent());
+        assertNull(MSG_REAL_PARENT_SHOULD_BE_NULL, IssueFieldsExtractor.extractRealParent(issue));
     }
 
     @Test
@@ -223,10 +215,8 @@ public class IssueMetadataTest {
         when(issueLink.getTargetIssueKey()).thenReturn(ISSUE_KEY);
         when(issue.getIssueLinks()).thenReturn(asList(issueLink));
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, asList(LINK_TYPE_DESC_DEMAND), log);
-
-        assertEquals("Linked parent key", ISSUE_KEY, metadata.getLinkedParentKey());
-        assertEquals("Parent key", ISSUE_KEY, metadata.getParentKey());
+        assertEquals("Linked parent key", ISSUE_KEY, IssueFieldsExtractor.extractLinkedParentKey(jiraProperties, issue, asList(LINK_TYPE_DESC_DEMAND)));
+        assertEquals("Parent key", ISSUE_KEY, IssueFieldsExtractor.extractParentKey(jiraProperties, issue, asList(LINK_TYPE_DESC_DEMAND)));
     }
 
     @Test
@@ -238,9 +228,7 @@ public class IssueMetadataTest {
         when(issueLink.getTargetIssueKey()).thenReturn(ISSUE_KEY);
         when(issue.getIssueLinks()).thenReturn(asList(issueLink));
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, asList(LINK_TYPE_DESC_DEMAND), log);
-
-        assertNull("Linked parent key should be null", metadata.getLinkedParentKey());
+        assertNull("Linked parent key should be null", IssueFieldsExtractor.extractLinkedParentKey(jiraProperties, issue, asList(LINK_TYPE_DESC_DEMAND)));
     }
 
     @Test
@@ -253,9 +241,7 @@ public class IssueMetadataTest {
         when(issue.getIssueLinks()).thenReturn(asList(issueLink));
         when(issueType.getId()).thenReturn(1L);
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, asList(LINK_TYPE_DESC_DEMAND), log);
-
-        assertNull("Linked parent key should be null", metadata.getLinkedParentKey());
+        assertNull("Linked parent key should be null", IssueFieldsExtractor.extractLinkedParentKey(jiraProperties, issue, asList(LINK_TYPE_DESC_DEMAND)));
     }
 
     @Test
@@ -264,31 +250,26 @@ public class IssueMetadataTest {
                 + "{name:'Co-assignee 2', avatarUrls:{24x24:'avatarUrl2'}}]");
         mockIssueField(CO_ASSIGNEES_ID, jsonCoAssignees);
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        assertEquals(MSG_CO_ASSIGNEES_QUANTITY, 2, metadata.getCoAssignees().size());
-        assertEquals("First co-assignee name", "Co-assignee 1", metadata.getCoAssignees().get(0).getName());
-        assertEquals("First co-assignee avatar url", "avatarUrl1", metadata.getCoAssignees().get(0).getAvatarUrl());
-        assertEquals("Second co-assignee name", "Co-assignee 2", metadata.getCoAssignees().get(1).getName());
-        assertEquals("Second co-assignee avatar url", "avatarUrl2", metadata.getCoAssignees().get(1).getAvatarUrl());
+        List<IssueCoAssignee> coAssignees = IssueFieldsExtractor.extractCoAssignees(jiraProperties, issue);
+        assertEquals(MSG_CO_ASSIGNEES_QUANTITY, 2, coAssignees.size());
+        assertEquals("First co-assignee name", "Co-assignee 1", coAssignees.get(0).getName());
+        assertEquals("First co-assignee avatar url", "avatarUrl1", coAssignees.get(0).getAvatarUrl());
+        assertEquals("Second co-assignee name", "Co-assignee 2", coAssignees.get(1).getName());
+        assertEquals("Second co-assignee avatar url", "avatarUrl2", coAssignees.get(1).getAvatarUrl());
     }
 
     @Test
     public void extractCoAssigneesFieldValueNull() {
         mockIssueField(CO_ASSIGNEES_ID, null);
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        assertEquals(MSG_CO_ASSIGNEES_QUANTITY, 0, metadata.getCoAssignees().size());
+        assertEquals(MSG_CO_ASSIGNEES_QUANTITY, 0, IssueFieldsExtractor.extractCoAssignees(jiraProperties, issue).size());
     }
 
     @Test
     public void extractCoAssigneesFieldNull() {
         when(issue.getField(CO_ASSIGNEES_ID)).thenReturn(null);
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        assertEquals(MSG_CO_ASSIGNEES_QUANTITY, 0, metadata.getCoAssignees().size());
+        assertEquals(MSG_CO_ASSIGNEES_QUANTITY, 0, IssueFieldsExtractor.extractCoAssignees(jiraProperties, issue).size());
     }
 
     @Test
@@ -297,11 +278,10 @@ public class IssueMetadataTest {
                 + "{name:'Co-assignee 2', avatarUrls:{24x24:'avatarUrl2'}}]");
         mockIssueField(CO_ASSIGNEES_ID, jsonCoAssignees);
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        assertEquals(MSG_CO_ASSIGNEES_QUANTITY, 1, metadata.getCoAssignees().size());
-        assertEquals("Co-assignee name", "Co-assignee 2", metadata.getCoAssignees().get(0).getName());
-        assertEquals("Co-assignee avatar url", "avatarUrl2", metadata.getCoAssignees().get(0).getAvatarUrl());
+        List<IssueCoAssignee> coAssignees = IssueFieldsExtractor.extractCoAssignees(jiraProperties, issue);
+        assertEquals(MSG_CO_ASSIGNEES_QUANTITY, 1, coAssignees.size());
+        assertEquals("Co-assignee name", "Co-assignee 2", coAssignees.get(0).getName());
+        assertEquals("Co-assignee avatar url", "avatarUrl2", coAssignees.get(0).getAvatarUrl());
     }
 
     @Test
@@ -309,29 +289,24 @@ public class IssueMetadataTest {
         JSONObject jsonClassOfService = new JSONObject("{id:1, value:'Standard'}");
         mockIssueField(CLASS_OF_SERVICE_ID, jsonClassOfService);
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        assertNotNull("Class of service shouldn't be null", metadata.getClassOfService());
-        assertEquals("Class of service value", "Standard", metadata.getClassOfService().getValue().toString());
-        assertEquals("Class of service id", 1, metadata.getClassOfService().getOptionId().longValue());
+        objective.taskboard.data.CustomField classOfService = IssueFieldsExtractor.extractClassOfService(jiraProperties, issue);
+        assertNotNull("Class of service shouldn't be null", classOfService);
+        assertEquals("Class of service value", "Standard", classOfService.getValue().toString());
+        assertEquals("Class of service id", 1, classOfService.getOptionId().longValue());
     }
 
     @Test
     public void extractClassOfServiceFieldValueNull() {
         mockIssueField(CLASS_OF_SERVICE_ID, null);
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        assertNull(MSG_CLASS_OF_SERVICE_SHOULD_BE_NULL, metadata.getClassOfService());
+        assertNull(MSG_CLASS_OF_SERVICE_SHOULD_BE_NULL, IssueFieldsExtractor.extractClassOfService(jiraProperties, issue));
     }
 
     @Test
     public void extractClassOfServiceFieldNull() {
         when(issue.getField(CLASS_OF_SERVICE_ID)).thenReturn(null);
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        assertNull(MSG_CLASS_OF_SERVICE_SHOULD_BE_NULL, metadata.getClassOfService());
+        assertNull(MSG_CLASS_OF_SERVICE_SHOULD_BE_NULL, IssueFieldsExtractor.extractClassOfService(jiraProperties, issue));
     }
 
     @Test
@@ -339,9 +314,7 @@ public class IssueMetadataTest {
         JSONObject jsonClassOfService = new JSONObject("{value:'Standard'}");
         mockIssueField(CLASS_OF_SERVICE_ID, jsonClassOfService);
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        assertNull(MSG_CLASS_OF_SERVICE_SHOULD_BE_NULL, metadata.getClassOfService());
+        assertNull(MSG_CLASS_OF_SERVICE_SHOULD_BE_NULL, IssueFieldsExtractor.extractClassOfService(jiraProperties, issue));
     }
 
     @Test
@@ -349,27 +322,21 @@ public class IssueMetadataTest {
         JSONArray jsonBlocked = new JSONArray("[{value:'Yes'}]");
         mockIssueField(BLOCKED_ID, jsonBlocked);
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        assertEquals(MSG_ASSERT_BLOCKED, "Yes", metadata.getBlocked());
+        assertEquals(MSG_ASSERT_BLOCKED, "Yes", IssueFieldsExtractor.extractBlocked(jiraProperties, issue));
     }
 
     @Test
     public void extractBlockedFieldValueNull() {
         mockIssueField(BLOCKED_ID, null);
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        assertEquals(MSG_ASSERT_BLOCKED, "", metadata.getBlocked());
+        assertEquals(MSG_ASSERT_BLOCKED, "", IssueFieldsExtractor.extractBlocked(jiraProperties, issue));
     }
 
     @Test
     public void extractBlockedFieldNull() {
         when(issue.getField(BLOCKED_ID)).thenReturn(null);
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        assertEquals(MSG_ASSERT_BLOCKED, "", metadata.getBlocked());
+        assertEquals(MSG_ASSERT_BLOCKED, "", IssueFieldsExtractor.extractBlocked(jiraProperties, issue));
     }
 
     @Test
@@ -377,9 +344,7 @@ public class IssueMetadataTest {
         JSONArray jsonBlocked = new JSONArray("[]");
         mockIssueField(BLOCKED_ID, jsonBlocked);
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        assertEquals(MSG_ASSERT_BLOCKED, "", metadata.getBlocked());
+        assertEquals(MSG_ASSERT_BLOCKED, "", IssueFieldsExtractor.extractBlocked(jiraProperties, issue));
     }
 
     @Test
@@ -387,18 +352,14 @@ public class IssueMetadataTest {
         JSONArray jsonBlocked = new JSONArray("[{valuee:'Yes'}]");
         mockIssueField(BLOCKED_ID, jsonBlocked);
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        assertEquals(MSG_ASSERT_BLOCKED, "", metadata.getBlocked());
+        assertEquals(MSG_ASSERT_BLOCKED, "", IssueFieldsExtractor.extractBlocked(jiraProperties, issue));
     }
 
     @Test
     public void extractLastBlockReasonValid() {
         mockIssueField(LAST_BLOCK_REASON_ID, "Issue blocked");
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        assertEquals(MSG_ASSERT_LAST_BLOCK_REASON, "Issue blocked", metadata.getLastBlockReason());
+        assertEquals(MSG_ASSERT_LAST_BLOCK_REASON, "Issue blocked", IssueFieldsExtractor.extractLastBlockReason(jiraProperties, issue));
     }
 
     @Test
@@ -407,29 +368,23 @@ public class IssueMetadataTest {
                 + "                                                                                 "
                 + "                                                             Issue blocked");
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
         assertEquals(MSG_ASSERT_LAST_BLOCK_REASON, "Issue blocked                                       "
                 + "                                                                                 "
-                + "                                                             Issue ...", metadata.getLastBlockReason());
+                + "                                                             Issue ...", IssueFieldsExtractor.extractLastBlockReason(jiraProperties, issue));
     }
 
     @Test
     public void extractLastBlockReasonFieldValueNull() {
         mockIssueField(LAST_BLOCK_REASON_ID, null);
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        assertEquals(MSG_ASSERT_LAST_BLOCK_REASON, "", metadata.getLastBlockReason());
+        assertEquals(MSG_ASSERT_LAST_BLOCK_REASON, "", IssueFieldsExtractor.extractLastBlockReason(jiraProperties, issue));
     }
 
     @Test
     public void extractLastBlockReasonFieldNull() {
         when(issue.getField(LAST_BLOCK_REASON_ID)).thenReturn(null);
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        assertEquals(MSG_ASSERT_LAST_BLOCK_REASON, "", metadata.getLastBlockReason());
+        assertEquals(MSG_ASSERT_LAST_BLOCK_REASON, "", IssueFieldsExtractor.extractLastBlockReason(jiraProperties, issue));
     }
 
     @Test
@@ -439,11 +394,10 @@ public class IssueMetadataTest {
         mockIssueField(T_SHIRT_SIZE_ID1, jsonTShirtSize);
         mockIssueField(T_SHIRT_SIZE_ID2, jsonTShirtSize);
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        assertEquals(MSG_T_SHIRT_SIZES_QUANTITY, 2, metadata.getTShirtSizes().size());
-        assertEquals("T-Shirt size 1 value", "M", metadata.getTShirtSizes().get(T_SHIRT_SIZE_ID1).getValue());
-        assertEquals("T-Shirt size 2 value", "M", metadata.getTShirtSizes().get(T_SHIRT_SIZE_ID2).getValue());
+        Map<String, objective.taskboard.data.CustomField> tShirtSizes = IssueFieldsExtractor.extractTShirtSizes(jiraProperties, issue);
+        assertEquals(MSG_T_SHIRT_SIZES_QUANTITY, 2, tShirtSizes.size());
+        assertEquals("T-Shirt size 1 value", "M", tShirtSizes.get(T_SHIRT_SIZE_ID1).getValue());
+        assertEquals("T-Shirt size 2 value", "M", tShirtSizes.get(T_SHIRT_SIZE_ID2).getValue());
     }
 
     @Test
@@ -452,9 +406,7 @@ public class IssueMetadataTest {
         mockIssueField(T_SHIRT_SIZE_ID1, null);
         mockIssueField(T_SHIRT_SIZE_ID2, null);
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        assertEquals(MSG_T_SHIRT_SIZES_QUANTITY, 0, metadata.getTShirtSizes().size());
+        assertEquals(MSG_T_SHIRT_SIZES_QUANTITY, 0, IssueFieldsExtractor.extractTShirtSizes(jiraProperties, issue).size());
     }
 
     @Test
@@ -463,9 +415,7 @@ public class IssueMetadataTest {
         when(issue.getField(T_SHIRT_SIZE_ID1)).thenReturn(null);
         when(issue.getField(T_SHIRT_SIZE_ID2)).thenReturn(null);
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        assertEquals(MSG_T_SHIRT_SIZES_QUANTITY, 0, metadata.getTShirtSizes().size());
+        assertEquals(MSG_T_SHIRT_SIZES_QUANTITY, 0, IssueFieldsExtractor.extractTShirtSizes(jiraProperties, issue).size());
     }
 
     @Test
@@ -475,9 +425,7 @@ public class IssueMetadataTest {
         mockIssueField(T_SHIRT_SIZE_ID1, jsonTShirtSize);
         mockIssueField(T_SHIRT_SIZE_ID2, jsonTShirtSize);
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        assertEquals(MSG_T_SHIRT_SIZES_QUANTITY, 0, metadata.getTShirtSizes().size());
+        assertEquals(MSG_T_SHIRT_SIZES_QUANTITY, 0, IssueFieldsExtractor.extractTShirtSizes(jiraProperties, issue).size());
     }
 
     @Test
@@ -485,17 +433,14 @@ public class IssueMetadataTest {
         when(comment.toString()).thenReturn("Comment");
         when(issue.getComments()).thenReturn(asList(comment));
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        assertEquals(MSG_COMMENTS_QUANTITY, 1, metadata.getComments().size());
-        assertEquals("Comment", "Comment", metadata.getComments().get(0));
+        List<String> comments = IssueFieldsExtractor.extractComments(issue);
+        assertEquals(MSG_COMMENTS_QUANTITY, 1, comments.size());
+        assertEquals("Comment", "Comment", comments.get(0));
     }
 
     @Test
     public void extractCommentsEmpty() {
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        assertEquals(MSG_COMMENTS_QUANTITY, 0, metadata.getComments().size());
+        assertEquals(MSG_COMMENTS_QUANTITY, 0, IssueFieldsExtractor.extractComments(issue).size());
     }
 
     @Test
@@ -508,10 +453,9 @@ public class IssueMetadataTest {
         when(issueLink.getTargetIssueKey()).thenReturn(ISSUE_KEY);
         when(issue.getIssueLinks()).thenReturn(asList(issueLink));
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, asList(LINK_TYPE_DESC_DEMAND), log);
-
-        assertEquals(MSG_DEPENDENCIES_ISSUES_QUANTITY, 1, metadata.getDependenciesIssuesKey().size());
-        assertEquals("Dependency issue key", ISSUE_KEY, metadata.getDependenciesIssuesKey().get(0));
+        List<String> dependenciesIssuesKey = IssueFieldsExtractor.extractDependenciesIssues(jiraProperties, issue);
+        assertEquals(MSG_DEPENDENCIES_ISSUES_QUANTITY, 1, dependenciesIssuesKey.size());
+        assertEquals("Dependency issue key", ISSUE_KEY, dependenciesIssuesKey.get(0));
     }
 
     @Test
@@ -524,18 +468,14 @@ public class IssueMetadataTest {
         when(issueLink.getTargetIssueKey()).thenReturn(ISSUE_KEY);
         when(issue.getIssueLinks()).thenReturn(asList(issueLink));
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, asList(LINK_TYPE_DESC_DEMAND), log);
-
-        assertEquals(MSG_DEPENDENCIES_ISSUES_QUANTITY, 0, metadata.getDependenciesIssuesKey().size());
+        assertEquals(MSG_DEPENDENCIES_ISSUES_QUANTITY, 0, IssueFieldsExtractor.extractDependenciesIssues(jiraProperties, issue).size());
     }
 
     @Test
     public void extractAdditionalEstimatedHoursValid() {
         mockIssueField(ADDITIONAL_ESTIMATED_HOURS_ID, 1.1);
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        Map<String, objective.taskboard.data.CustomField> additionalEstimatedHours = metadata.getAdditionalEstimatedHours();
+        Map<String, objective.taskboard.data.CustomField> additionalEstimatedHours = IssueFieldsExtractor.extractAdditionalEstimatedHours(jiraProperties, issue);
         assertTrue("Additional estimated hours should have been extracted", additionalEstimatedHours.containsKey(ADDITIONAL_ESTIMATED_HOURS_ID));
 
         objective.taskboard.data.CustomField cfAdditionalEstimatedHours = additionalEstimatedHours.get(ADDITIONAL_ESTIMATED_HOURS_ID);
@@ -547,9 +487,7 @@ public class IssueMetadataTest {
     public void extractAdditionalEstimatedHoursFieldValueNull() {
         mockIssueField(ADDITIONAL_ESTIMATED_HOURS_ID, null);
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        assertTrue("Additional estimated hours should be empty", metadata.getAdditionalEstimatedHours().isEmpty());
+        assertTrue("Additional estimated hours should be empty", IssueFieldsExtractor.extractAdditionalEstimatedHours(jiraProperties, issue).isEmpty());
     }
 
     @Test
@@ -557,9 +495,7 @@ public class IssueMetadataTest {
         JSONObject jsonRelease = new JSONObject("{name:RELEASE}");
         mockIssueField(RELEASE_ID, jsonRelease);
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        Map<String, objective.taskboard.data.CustomField> release = metadata.getRelease();
+        Map<String, objective.taskboard.data.CustomField> release = IssueFieldsExtractor.extractRelease(jiraProperties, issue);
         assertTrue("Release should have been extracted", release.containsKey(RELEASE_ID));
 
         objective.taskboard.data.CustomField customFieldRelease = release.get(RELEASE_ID);
@@ -572,25 +508,19 @@ public class IssueMetadataTest {
         JSONObject jsonRelease = new JSONObject("{namee:RELEASE}");
         mockIssueField(RELEASE_ID, jsonRelease);
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        assertTrue(MSG_RELEASE_SHOULD_BE_EMPTY, metadata.getRelease().isEmpty());
+        assertTrue(MSG_RELEASE_SHOULD_BE_EMPTY, IssueFieldsExtractor.extractRelease(jiraProperties, issue).isEmpty());
     }
 
     @Test
     public void extractReleaseFieldValueNull() {
         mockIssueField(RELEASE_ID, null);
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        assertTrue(MSG_RELEASE_SHOULD_BE_EMPTY, metadata.getRelease().isEmpty());
+        assertTrue(MSG_RELEASE_SHOULD_BE_EMPTY, IssueFieldsExtractor.extractRelease(jiraProperties, issue).isEmpty());
     }
 
     @Test
     public void parentKeyEmpty() {
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        assertEquals("Parent key", "", metadata.getParentKey());
+        assertEquals("Parent key", "", IssueFieldsExtractor.extractParentKey(jiraProperties, issue, null));
     }
 
     @Test
@@ -600,21 +530,18 @@ public class IssueMetadataTest {
         labels.add("label2");
         when(issue.getLabels()).thenReturn(labels);
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        Collections.sort(metadata.getLabels());
-        assertEquals("Labels quantity", 2, metadata.getLabels().size());
-        assertEquals("First label", "label1", metadata.getLabels().get(0));
-        assertEquals("Second label", "label2", metadata.getLabels().get(1));
+        List<String> extractedLabels = IssueFieldsExtractor.extractLabels(issue);
+        Collections.sort(extractedLabels);
+        assertEquals("Labels quantity", 2, extractedLabels.size());
+        assertEquals("First label", "label1", extractedLabels.get(0));
+        assertEquals("Second label", "label2", extractedLabels.get(1));
     }
 
     @Test
     public void extractLabelsNull() {
         when(issue.getLabels()).thenReturn(null);
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        assertTrue("Labels should be empty", metadata.getLabels().isEmpty());
+        assertTrue("Labels should be empty", IssueFieldsExtractor.extractLabels(issue).isEmpty());
     }
 
     @Test
@@ -622,18 +549,15 @@ public class IssueMetadataTest {
         when(basicComponent.getName()).thenReturn("component1");
         when(issue.getComponents()).thenReturn(asList(basicComponent));
 
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        Collections.sort(metadata.getComponents());
-        assertEquals("Components quantity", 1, metadata.getComponents().size());
-        assertEquals("Component name", "component1", metadata.getComponents().get(0));
+        List<String> components = IssueFieldsExtractor.extractComponents(issue);
+        Collections.sort(components);
+        assertEquals("Components quantity", 1, components.size());
+        assertEquals("Component name", "component1", components.get(0));
     }
 
     @Test
     public void extractComponentsNull() {
-        IssueMetadata metadata = new IssueMetadata(issue, jiraProperties, null, log);
-
-        assertTrue("Components should be empty", metadata.getComponents().isEmpty());
+        assertTrue("Components should be empty", IssueFieldsExtractor.extractComponents(issue).isEmpty());
     }
 
 }

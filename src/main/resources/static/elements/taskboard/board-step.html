@@ -303,6 +303,8 @@
 
                 handleUpdatedIssues: function(event, data) {
                     var issueBoardStep = taskboard.getIssueStep(data.issue)
+                    if (issueBoardStep == null)
+                        return;
                     var belongsToThisStep = this.stepMetadata.id === issueBoardStep.id;
                     var self = this;
                     var issueIndex = -1

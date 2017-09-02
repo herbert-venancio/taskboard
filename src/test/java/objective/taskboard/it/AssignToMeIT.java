@@ -27,6 +27,7 @@ public class AssignToMeIT extends AuthenticatedIntegrationTest {
     @Test
     public void whenAssignToMeIsClicked_ShouldUpdateIssueImmediatlyWithAssignedUser(){
         MainPage mainPage = MainPage.produce(webDriver);
+        mainPage.errorToast().close();
         mainPage.issue("TASKB-625")
             .click()
             .issueDetails()

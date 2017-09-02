@@ -20,18 +20,32 @@
  */
 package objective.taskboard.domain.converter;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.stream.Collectors.toList;
+import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractAdditionalEstimatedHours;
+import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractBlocked;
+import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractClassOfService;
+import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractCoAssignees;
+import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractComments;
+import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractComponents;
+import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractDependenciesIssues;
+import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractLabels;
+import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractLastBlockReason;
+import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractParentKey;
+import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractRealParent;
+import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractRelease;
+import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractTShirtSizes;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
-import java.util.ArrayList;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -40,20 +54,18 @@ import org.springframework.stereotype.Service;
 
 import com.atlassian.jira.rest.client.api.domain.Issue;
 
-import objective.taskboard.data.CustomField;
-import objective.taskboard.data.Issue.TaskboardTimeTracking;
+import objective.taskboard.data.IssueScratch;
+import objective.taskboard.data.TaskboardTimeTracking;
 import objective.taskboard.database.IssuePriorityService;
 import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.domain.ParentIssueLink;
 import objective.taskboard.domain.converter.IssueTeamService.InvalidTeamException;
 import objective.taskboard.jira.JiraProperties;
-import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.repository.ParentIssueLinkRepository;
 
 @Service
 public class JiraIssueToIssueConverter {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JiraIssueToIssueConverter.class);
     public static final String INVALID_TEAM = "NO PROJECT TEAM";
 
     @Autowired
@@ -61,9 +73,6 @@ public class JiraIssueToIssueConverter {
 
     @Autowired
     private IssueTeamService issueTeamService;
-
-    @Autowired
-    private JiraService jiraService;
 
     @Autowired
     private JiraProperties jiraProperties;
@@ -80,7 +89,11 @@ public class JiraIssueToIssueConverter {
     @Autowired
     private MetadataService metadataService;
 
-    private List<String> parentIssueLinks;
+    private List<String> parentIssueLinks = new ArrayList<>();
+    
+    public void setParentIssueLinks(List<String> parentIssueLinks) {
+        this.parentIssueLinks = parentIssueLinks;
+    }
 
     @PostConstruct
     private void loadParentIssueLinks() {
@@ -88,56 +101,16 @@ public class JiraIssueToIssueConverter {
                                .map(ParentIssueLink::getDescriptionIssueLink)
                                .collect(toList());
     }
-
-    public List<objective.taskboard.data.Issue> convertIssues(List<Issue> issueList, Map<String, IssueMetadata> issuesMetadataByKey) {
-        loadParentIssueLinks();
-
-        for (Issue issue : issueList)
-            issuesMetadataByKey.put(issue.getKey(), new IssueMetadata(issue, jiraProperties, parentIssueLinks, log));
-
-        List<objective.taskboard.data.Issue> converted = new ArrayList<>();
-        Iterator<Issue> it = issueList.iterator();
-        while (it.hasNext()) {
-            converted.add(convert(it.next(), issuesMetadataByKey));
-            it.remove();
-        }
-        System.out.println("Converted issues: " + converted.size());
-        return converted;
-    }
-
-    public objective.taskboard.data.Issue convertSingleIssue(Issue jiraIssue, Map<String, IssueMetadata> issuesMetadataByKey) {
-        issuesMetadataByKey.put(jiraIssue.getKey(), new IssueMetadata(jiraIssue, jiraProperties, parentIssueLinks, log));
-        return convert(jiraIssue, issuesMetadataByKey);
-    }
-
-    private objective.taskboard.data.Issue convert(Issue jiraIssue, Map<String, IssueMetadata> issuesMetadataByKey) {
-        IssueMetadata metadata = issuesMetadataByKey.get(jiraIssue.getKey());
-
+    
+    public objective.taskboard.data.Issue convertSingleIssue(Issue jiraIssue, ParentProvider provider) {
+        List<IssueCoAssignee> coAssignees = extractCoAssignees(jiraProperties, jiraIssue);
+        
         String avatarCoAssignee1 = jiraIssue.getAssignee() != null ? jiraIssue.getAssignee().getAvatarUri("24x24").toString() : "";
-        String avatarCoAssignee2 = metadata.getCoAssignees().stream()
+        String avatarCoAssignee2 = coAssignees.stream()
                 .map(c -> c.getAvatarUrl())
                 .filter(url -> !url.equals(avatarCoAssignee1))
                 .findFirst().orElse("");
-
-        List<String> issueTeams = newArrayList();
-        List<String> usersTeam = newArrayList();
-        try {
-            IssueMetadata parentMetadata = getParentMetadata(metadata, issuesMetadataByKey);
-
-            Map<String, List<String>> mapUsersTeams = issueTeamService.getIssueTeams(metadata, parentMetadata);
-
-            for (List<String> teams : mapUsersTeams.values())
-                issueTeams.addAll(teams);
-
-            issueTeams = issueTeams.stream()
-                    .distinct()
-                    .collect(toList());
-
-            usersTeam.addAll(mapUsersTeams.keySet());
-        } catch (InvalidTeamException e) {
-            issueTeams.add(INVALID_TEAM);
-            usersTeam.addAll(e.getUsersInInvalidTeam());
-        }
+        
         Long priorityOrder = priorityService.determinePriority(jiraIssue);
         
         Date issueUpdatedDate = jiraIssue.getUpdateDate() == null? null : jiraIssue.getUpdateDate().toDate();
@@ -146,137 +119,108 @@ public class JiraIssueToIssueConverter {
             if (issueUpdatedDate == null || priorityUpdateDate.get().after(issueUpdatedDate))
                 issueUpdatedDate = priorityUpdateDate.get();
         }
-        objective.taskboard.data.Issue i = objective.taskboard.data.Issue.from(
+        
+        IssueScratch converted = new IssueScratch(
                 jiraIssue.getId(),
                 jiraIssue.getKey(),
                 jiraIssue.getProject().getKey(),
                 jiraIssue.getProject().getName(),
                 jiraIssue.getIssueType().getId(),
                 jiraIssue.getIssueType().getIconUri().toASCIIString(),
-                coalesce(jiraIssue.getSummary(),""),
+                defaultIfNull(jiraIssue.getSummary(),""),
                 jiraIssue.getStatus().getId(),
                 startDateStepService.get(jiraIssue),
                 avatarCoAssignee1,
                 avatarCoAssignee2,
-                metadata.getParentKey(),
-                getParentTypeId(metadata),
-                getParentTypeIconUri(metadata),
-                metadata.getDependenciesIssuesKey(),
-                issueColorService.getColor(getClassOfServiceId(metadata, issuesMetadataByKey)),
-                String.join(",", getCoAssigneesName(metadata)),
+                extractParentKey(jiraProperties, jiraIssue, parentIssueLinks),
+                getParentTypeId(jiraIssue),
+                getParentTypeIconUri(jiraIssue),
+                extractDependenciesIssues(jiraProperties, jiraIssue),
+                String.join(",", coAssignees.stream().map(x -> x.getName()).collect(toList())),
                 jiraIssue.getAssignee() != null ? jiraIssue.getAssignee().getName() : "",
-                String.join(",", usersTeam),
                 jiraIssue.getPriority() != null ? jiraIssue.getPriority().getId() : 0l,
                 jiraIssue.getDueDate() != null ? jiraIssue.getDueDate().toDate() : null,
                 jiraIssue.getCreationDate().getMillis(),
                 issueUpdatedDate,
-                coalesce(jiraIssue.getDescription(), ""),
-                issueTeams,
-                getComments(metadata),
-                metadata.getLabels(),
-                metadata.getComponents(),
-                getCustomFields(metadata, issuesMetadataByKey),
+                defaultIfNull(jiraIssue.getDescription(), ""),
+                getComments(jiraIssue),
+                extractLabels(jiraIssue),
+                extractComponents(jiraIssue),
+                getCustomFields(jiraIssue),
                 priorityOrder,
                 TaskboardTimeTracking.fromJira(jiraIssue.getTimeTracking()),
-                jiraProperties,
-                metadataService
+                jiraIssue.getReporter() == null ? null : jiraIssue.getReporter().getName(),
+                coAssignees,
+                extractClassOfService(jiraProperties, jiraIssue),
+                extractRelease(jiraProperties, jiraIssue)
         );
-        return i;
+        
+        return createIssueFromScratch(converted, provider);
     }
 
-    private <T> T coalesce(T value, T def) {
-        return value == null? def: value;
+    public objective.taskboard.data.Issue createIssueFromScratch(IssueScratch scratch, ParentProvider provider) {
+        objective.taskboard.data.Issue converted = new objective.taskboard.data.Issue(scratch, jiraProperties, metadataService);
+    	if (!isEmpty(converted.getParent())) {
+    	    Optional<objective.taskboard.data.Issue> parentCard = provider.get(converted.getParent());
+    	    if (!parentCard.isPresent())
+    	        throw new IncompleteIssueException(scratch, converted.getParent());
+    	    
+            converted.setParentCard(parentCard.get());
+    	}
+    	
+        Set<String> issueTeams = new LinkedHashSet<>();
+        Set<String> usersTeam = new LinkedHashSet<>();
+        try {
+            Map<String, List<String>> mapUsersTeams = issueTeamService.getIssueTeams(converted);
+
+            for (List<String> teams : mapUsersTeams.values())
+                issueTeams.addAll(teams);
+
+            usersTeam.addAll(mapUsersTeams.keySet());
+        } catch (InvalidTeamException e) {
+            issueTeams.add(INVALID_TEAM);
+            usersTeam.addAll(e.getUsersInInvalidTeam());
+        }
+        
+        converted.setTeams(issueTeams);
+        converted.setColor(issueColorService.getColor(converted.getClassOfServiceId()));
+        converted.setUsersTeam(String.join(",", usersTeam));
+        
+        Map<String, Serializable> customFields = converted.getCustomFields();
+        customFields.put(jiraProperties.getCustomfield().getClassOfService().getId(), converted.getClassOfServiceValue());
+        customFields.putAll(converted.getRelease());
+        
+        return converted;
     }
 
-    private long getParentTypeId(IssueMetadata metadata) {
-        if (metadata.getRealParent() == null)
+    private long getParentTypeId(Issue issue) {
+    	IssueParent realParent = extractRealParent(issue);
+        if (realParent == null)
             return 0;
-        return metadata.getRealParent().getTypeId();
+        return realParent.getTypeId();
     }
 
-    private String getParentTypeIconUri(IssueMetadata metadata) {
-        if (metadata.getRealParent() == null)
+    private String getParentTypeIconUri(Issue issue) {
+    	IssueParent realParent = extractRealParent(issue);
+        if (realParent == null)
             return "";
-        return metadata.getRealParent().getTypeIconUrl();
+        return realParent.getTypeIconUrl();
     }
 
-    private List<String> getCoAssigneesName(IssueMetadata metadata) {
-        return metadata.getCoAssignees().stream()
-                .map(x -> x.getName())
-                .collect(toList());
-    }
-
-    private String getComments(IssueMetadata metadata) {
-        if (metadata.getComments().isEmpty())
+    private String getComments(Issue issue) {
+    	List<String> comments = extractComments(issue);
+        if (comments.isEmpty())
             return "";
-        return metadata.getComments().get(0);
+        return comments.get(0);
     }
-
-    private Map<String, Serializable> getCustomFields(IssueMetadata metadata, Map<String, IssueMetadata> issuesMetadataByKey) {
+    
+    private Map<String, Serializable> getCustomFields(Issue issue) {
         Map<String, Serializable> customFields = newHashMap();
-        customFields.put(jiraProperties.getCustomfield().getClassOfService().getId(), getClassOfServiceValue(metadata, issuesMetadataByKey));
-        customFields.put(jiraProperties.getCustomfield().getBlocked().getId(), metadata.getBlocked());
-        customFields.put(jiraProperties.getCustomfield().getLastBlockReason().getId(), metadata.getLastBlockReason());
-        customFields.putAll(metadata.getTShirtSizes());
-        customFields.putAll(metadata.getAdditionalEstimatedHours());
-        customFields.putAll(getRelease(metadata, issuesMetadataByKey));
+        
+        customFields.put(jiraProperties.getCustomfield().getBlocked().getId(), extractBlocked(jiraProperties, issue));
+        customFields.put(jiraProperties.getCustomfield().getLastBlockReason().getId(), extractLastBlockReason(jiraProperties, issue));
+        customFields.putAll(extractTShirtSizes(jiraProperties, issue));
+        customFields.putAll(extractAdditionalEstimatedHours(jiraProperties, issue));
         return customFields;
-    }
-
-    private String getClassOfServiceValue(IssueMetadata metadata, Map<String, IssueMetadata> issuesMetadataByKey) {
-        String defaultClassOfService = jiraProperties.getCustomfield().getClassOfService().getDefaultValue();
-        CustomField classOfService = getClassOfService(metadata, issuesMetadataByKey);
-        return classOfService == null ? defaultClassOfService : (String)classOfService.getValue();
-    }
-
-    private Long getClassOfServiceId(IssueMetadata metadata, Map<String, IssueMetadata> issuesMetadataByKey) {
-        CustomField classOfService = getClassOfService(metadata, issuesMetadataByKey);
-        return classOfService == null ? 0L : classOfService.getOptionId();
-    }
-
-    private CustomField getClassOfService(IssueMetadata metadata, Map<String, IssueMetadata> issuesMetadataByKey) {
-        String defaultClassOfService = jiraProperties.getCustomfield().getClassOfService().getDefaultValue();
-        CustomField classOfService = metadata.getClassOfService();
-
-        boolean isNotDefaultClassOfService = classOfService != null
-                                             && classOfService.getValue() != null
-                                             && !classOfService.getValue().toString().equals(defaultClassOfService);
-        if (isNotDefaultClassOfService)
-            return classOfService;
-
-        IssueMetadata parentMetadata = getParentMetadata(metadata, issuesMetadataByKey);
-        if (parentMetadata == null)
-            return classOfService;
-
-        return getClassOfService(parentMetadata, issuesMetadataByKey);
-    }
-
-    private Map<String, CustomField> getRelease(IssueMetadata metadata, Map<String, IssueMetadata> issuesMetadataByKey) {
-        Map<String, CustomField> release = metadata.getRelease();
-
-        if (!release.isEmpty())
-            return release;
-
-        IssueMetadata parentMetadata = getParentMetadata(metadata, issuesMetadataByKey);
-        if (parentMetadata == null)
-            return newHashMap();
-
-        return getRelease(parentMetadata, issuesMetadataByKey);
-    }
-
-    private IssueMetadata getParentMetadata(IssueMetadata metadata, Map<String, IssueMetadata> issuesMetadataByKey) {
-        String parentKey = metadata.getParentKey();
-        if (isNullOrEmpty(parentKey))
-            return null;
-
-        IssueMetadata parentMetadata = issuesMetadataByKey.get(parentKey);
-
-        if (parentMetadata != null)
-            return parentMetadata;
-
-        Issue parent = jiraService.getIssueByKeyAsMaster(parentKey);
-        parentMetadata = new IssueMetadata(parent, jiraProperties, parentIssueLinks, log);
-        issuesMetadataByKey.put(parent.getKey(), parentMetadata);
-        return parentMetadata;
     }
 }

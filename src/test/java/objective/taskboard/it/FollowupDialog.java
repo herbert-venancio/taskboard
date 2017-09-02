@@ -62,7 +62,9 @@ public class FollowupDialog extends AbstractUiFragment {
     
     public FollowupDialog selectAProject(int projectIndex) {
         List<WebElement> projectsCheckbox = dialog.findElements(By.cssSelector("paper-checkbox"));
-        projectsCheckbox.get(projectIndex).click();
+        WebElement webElement = projectsCheckbox.get(projectIndex);
+        waitVisibilityOfElement(webElement);
+        webElement.click();
         return this;
     }
 

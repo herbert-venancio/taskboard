@@ -23,11 +23,18 @@ package objective.taskboard.jira;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
+import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractLinkedParentKey;
+import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractRealParent;
+import static org.apache.commons.lang3.StringUtils.join;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
-import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.Validate;
 import org.codehaus.jettison.json.JSONException;
@@ -42,9 +49,12 @@ import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.SearchResult;
 import com.atlassian.jira.rest.client.internal.json.SearchResultJsonParser;
 
+import objective.taskboard.domain.ParentIssueLink;
+import objective.taskboard.domain.converter.IssueParent;
 import objective.taskboard.jira.JiraService.ParametrosDePesquisaInvalidosException;
 import objective.taskboard.jira.JiraService.PermissaoNegadaException;
 import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
+import objective.taskboard.repository.ParentIssueLinkRepository;
 
 @Service
 public class JiraSearchService {
@@ -65,45 +75,80 @@ public class JiraSearchService {
 
     @Autowired
     private JiraEndpointAsMaster jiraEndpointAsMaster;
+    
+    @Autowired
+    private ParentIssueLinkRepository parentIssueLinkRepository;
+    
+    private List<String> parentIssueLinks;
+    
+    @PostConstruct
+    private void loadParentIssueLinks() {
+        parentIssueLinks = parentIssueLinkRepository.findAll().stream()
+                               .map(ParentIssueLink::getDescriptionIssueLink)
+                               .collect(toList());
+    }
 
-    static int seq = 0;
-
-    public List<Issue> searchIssues(String jql, String... additionalFields) {
-
+    public void searchIssuesAndParents(SearchIssueVisitor visitor, String jql) {
+        Set<String> found = new LinkedHashSet<>();
+        Set<String> missing = new LinkedHashSet<>();
+        
+        String currentJql = jql;
+        do {
+            if (missing.size() > 0) 
+                log.debug("⬣⬣⬣⬣⬣  searchingMissingParents");
+            
+            missing.clear();
+            searchIssues(currentJql, issue -> {
+                    visitor.processIssue(issue);
+                    
+                    missing.remove(issue.getKey());
+                    found.add(issue.getKey());
+                    getParentKey(issue)      .ifPresent(key-> { if (!found.contains(key)) missing.add(key); });
+                    getLinkedParentKey(issue).ifPresent(key-> { if (!found.contains(key)) missing.add(key); });
+            });
+            
+            currentJql = "key in ("+join(missing,",")+")";
+        }
+        while(missing.size() > 0);
+        visitor.complete();
+    }
+    
+    public void searchIssues(String jql, SearchIssueVisitor visitor, String... additionalFields) {       
         Validate.notNull(jql);
         log.debug("⬣⬣⬣⬣⬣  searchIssues");
-
-        Set<String> fields = getFields();
-        fields.addAll(asList(additionalFields));
         
+
+        for (int i = 0; true; i++) {
+            SearchResult searchResult = searchRequest(jql, i, additionalFields);
+            
+            List<Issue> issuesSearchResult = newArrayList(searchResult.getIssues());
+
+            issuesSearchResult.stream().forEach(item->visitor.processIssue(item));
+            
+            boolean searchComplete = issuesSearchResult.isEmpty() || issuesSearchResult.size() < searchResult.getMaxResults();
+			if (searchComplete)
+                break;
+        }
+        visitor.complete();
+        log.debug("⬣⬣⬣⬣⬣  searchIssues complete");
+    }
+
+    private SearchResult searchRequest(String jql, int startFrom, String[] additionalFields) {
+        SearchResultJsonParser searchResultParser = new SearchResultJsonParser();
+        Set<String> fields = getFields(additionalFields);
         try {
-            SearchResultJsonParser searchResultParser = new SearchResultJsonParser();
-            List<Issue> listIssues = new ArrayList<>();
-
-            for (int i = 0; true; i++) {
-                JSONObject searchRequest = new JSONObject();
-                searchRequest.put(JQL_ATTRIBUTE, jql)
-                             .put(EXPAND_ATTRIBUTE, EXPAND)
-                             .put(MAX_RESULTS_ATTRIBUTE, MAX_RESULTS)
-                             .put(START_AT_ATTRIBUTE, i * MAX_RESULTS)
-                             .put(FIELDS_ATTRIBUTE, fields);
-
-                String jsonResponse = jiraEndpointAsMaster.postWithRestTemplate(PATH_REST_API_SEARCH, APPLICATION_JSON, searchRequest);
-                SearchResult searchResult = searchResultParser.parse(new JSONObject(jsonResponse));
-                
-                log.debug("⬣⬣⬣⬣⬣  searchIssues... ongoing..." + (searchResult.getStartIndex() + searchResult.getMaxResults())+ "/" + searchResult.getTotal());
-                
-                List<Issue> issuesSearchResult = newArrayList(searchResult.getIssues());
-
-                listIssues.addAll(issuesSearchResult);
-                
-                if (issuesSearchResult.isEmpty() || issuesSearchResult.size() < searchResult.getMaxResults())
-                    break;
-
-            }
-            log.debug("⬣⬣⬣⬣⬣  searchIssues complete");
-            return listIssues;
-        } 
+            JSONObject searchRequest = new JSONObject();
+            searchRequest.put(JQL_ATTRIBUTE, jql)
+                         .put(EXPAND_ATTRIBUTE, EXPAND)
+                         .put(MAX_RESULTS_ATTRIBUTE, MAX_RESULTS)
+                         .put(START_AT_ATTRIBUTE, startFrom * MAX_RESULTS)
+                         .put(FIELDS_ATTRIBUTE, fields);
+       
+            String jsonResponse = jiraEndpointAsMaster.postWithRestTemplate(PATH_REST_API_SEARCH, APPLICATION_JSON, searchRequest);
+            SearchResult searchResult = searchResultParser.parse(new JSONObject(jsonResponse));
+            log.debug("⬣⬣⬣⬣⬣  searchIssues... ongoing..." + (searchResult.getStartIndex() + searchResult.getMaxResults())+ "/" + searchResult.getTotal());
+            return searchResult;
+        }
         catch (JSONException e) {
             log.error(jql);
             throw new IllegalStateException(e);        
@@ -123,6 +168,22 @@ public class JiraSearchService {
             throw new IllegalStateException(e);
         }
     }
+   
+    private Optional<String> getParentKey(Issue issue) {
+        IssueParent parent = extractRealParent(issue);
+        if (parent == null)
+            return Optional.empty();
+        
+        return Optional.of(parent.getKey());
+    }
+    
+    private Optional<String> getLinkedParentKey(Issue issue) {
+        String linkedParentKey = extractLinkedParentKey(properties, issue, parentIssueLinks);
+        if (linkedParentKey == null)
+            return Optional.empty();
+
+        return Optional.of(linkedParentKey);
+    }
 
     private long extractStatusCode(Exception e) {
         if (e instanceof RestClientException)
@@ -130,7 +191,7 @@ public class JiraSearchService {
         return ((HttpClientErrorException)e).getRawStatusCode();
     }
 
-    private Set<String> getFields() {
+    private Set<String> getFields(String[] additionalFields) {
         Set<String> fields = newHashSet(
             "parent", "project", "status", "created", "updated", "issuelinks",
             "issuetype", "summary", "description", "name", "assignee", "reporter", 
@@ -142,6 +203,7 @@ public class JiraSearchService {
             properties.getCustomfield().getAdditionalEstimatedHours().getId(),
             properties.getCustomfield().getRelease().getId());
         fields.addAll(properties.getCustomfield().getTShirtSize().getIds());
+        fields.addAll(asList(additionalFields));
         return fields;
     }
 }

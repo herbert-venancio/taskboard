@@ -24,15 +24,17 @@ package objective.taskboard.domain.converter;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.stream.Collectors.toList;
+import static org.springframework.util.StringUtils.isEmpty;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import objective.taskboard.domain.converter.IssueMetadata.IssueCoAssignee;
+import objective.taskboard.data.Issue;
 import objective.taskboard.filterConfiguration.TeamFilterConfigurationService;
 
 @Service
@@ -41,36 +43,38 @@ public class IssueTeamService {
     @Autowired
     private TeamFilterConfigurationService teamFilterConfigurationService;
 
-    public Map<String, List<String>> getIssueTeams(IssueMetadata metadata, IssueMetadata parentMetadata) throws InvalidTeamException {
-        Map<String, List<String>> usersTeam = getIssueUsersTeams(metadata);
+    public Map<String, List<String>> getIssueTeams(Issue issue) throws InvalidTeamException {
+        Map<String, List<String>> usersTeam = getIssueUsersTeams(issue);
         if (!usersTeam.isEmpty())
             return usersTeam;
+        
+        Optional<Issue> parent = issue.getParentCard();
 
-        Map<String, List<String>> parentUsersTeam = getParentIssueUsersTeams(parentMetadata);
+        Map<String, List<String>> parentUsersTeam = parent.isPresent()? getIssueUsersTeams(parent.get()):newHashMap();
         if (!parentUsersTeam.isEmpty())
             return parentUsersTeam;
 
-        String reporter = metadata.getReporter();
+        String reporter = issue.getReporter();
         if (reporter == null)
             return newHashMap();
 
-        return getUsersTeams(newArrayList(reporter), metadata.getProjectKey());
+        return getUsersTeams(newArrayList(reporter), issue.getProjectKey());
     }
 
-    private Map<String, List<String>> getIssueUsersTeams(IssueMetadata metadata) throws InvalidTeamException {
+    private Map<String, List<String>> getIssueUsersTeams(Issue issue) throws InvalidTeamException {
         List<String> users = newArrayList();
 
-        String assignee = metadata.getAssignee();
-        if (assignee != null)
+        String assignee = issue.getAssignee();
+        if (!isEmpty(assignee))
             users.add(assignee);
-        for (IssueCoAssignee coAssignee : metadata.getCoAssignees())
+        for (IssueCoAssignee coAssignee : issue.getCoAssignees())
             users.add(coAssignee.getName());
 
         users = users.stream()
                 .distinct()
                 .collect(toList());
 
-        return getUsersTeams(users, metadata.getProjectKey());
+        return getUsersTeams(users, issue.getProjectKey());
     }
 
     private Map<String, List<String>> getUsersTeams(List<String> users, String projectKey) throws InvalidTeamException {
@@ -90,12 +94,6 @@ public class IssueTeamService {
             throw new InvalidTeamException(users);
 
         return usersTeams;
-    }
-
-    private Map<String, List<String>> getParentIssueUsersTeams(IssueMetadata parentMetadata) throws InvalidTeamException {
-        if (parentMetadata == null)
-            return newHashMap();
-        return getIssueUsersTeams(parentMetadata);
     }
 
     public static class InvalidTeamException extends Exception {

@@ -1,5 +1,3 @@
-package objective.taskboard.it;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,6 +18,7 @@ package objective.taskboard.it;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.it;
 
 import org.junit.Test;
 
@@ -48,11 +47,14 @@ public class IssueTransitionIT extends AuthenticatedIntegrationTest {
                 "TASKB-684",
                 "TASKB-686"
                 );
-        operational.boardStep("Doing").issueCountBadge(2);
+        operational.boardStep("Doing").issueCountBadge(5);
         operational.boardStep("Doing").assertIssueList(
                 "TASKB-601",
+                "TASKB-572",
+                "TASKB-342",
+                "TASKB-273",
                 "TASKB-646"
-                );        
+                );
         
         mainPage.issue("TASKB-625")
             .click()
@@ -62,7 +64,7 @@ public class IssueTransitionIT extends AuthenticatedIntegrationTest {
         
         mainPage.issueDetails().assertIsHidden();
 
-        operational.boardStep("To Do").issueCountBadge(13);
+        operational.boardStep("To Do").issueCountBadge(6);
         operational.boardStep("To Do").assertIssueList(
                 "TASKB-627",
                 "TASKB-643",
@@ -79,9 +81,12 @@ public class IssueTransitionIT extends AuthenticatedIntegrationTest {
                 "TASKB-686"
                 );
         
-        operational.boardStep("Doing").issueCountBadge(3);
+        operational.boardStep("Doing").issueCountBadge(7);
         operational.boardStep("Doing").assertIssueList(
                 "TASKB-601",
+                "TASKB-572",
+                "TASKB-342",
+                "TASKB-273",
                 "TASKB-625",
                 "TASKB-646"
                 );

@@ -65,6 +65,9 @@ public class JiraProperties {
     private List<Integer> statusesCanceledIds;
     @NotNull
     @NotEmpty
+    private List<Long> statusesDeferredIds;
+    @NotNull
+    @NotEmpty
     private List<String> transitionsWithRequiredCommentNames;
     @NotNull
     @NotEmpty
@@ -1252,6 +1255,10 @@ public class JiraProperties {
     public List<Integer> getStatusesCanceledIds() {
         return this.statusesCanceledIds;
     }
+    
+    public List<Long> getStatusesDeferredIds() {
+        return this.statusesDeferredIds;
+    }
 
     public List<String> getTransitionsWithRequiredCommentNames() {
         return this.transitionsWithRequiredCommentNames;
@@ -1303,6 +1310,10 @@ public class JiraProperties {
 
     public void setStatusesCanceledIds(final List<Integer> statusesCanceledIds) {
         this.statusesCanceledIds = statusesCanceledIds;
+    }
+    
+    public void setStatusesDeferredIds(final List<Long> statusesDeferredIds) {
+        this.statusesDeferredIds = statusesDeferredIds;
     }
 
     public void setTransitionsWithRequiredCommentNames(final List<String> transitionsWithRequiredCommentNames) {

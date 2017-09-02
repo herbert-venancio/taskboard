@@ -1,5 +1,3 @@
-package objective.taskboard.controller;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,6 +18,7 @@ package objective.taskboard.controller;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.controller;
 
 import static java.util.stream.Collectors.toList;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -28,6 +27,7 @@ import static org.springframework.http.HttpStatus.PRECONDITION_FAILED;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.ws.rs.QueryParam;
 
@@ -52,6 +52,7 @@ import objective.taskboard.repository.ProjectTeamRepository;
 import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.repository.UserTeamCachedRepository;
 import objective.taskboard.repository.WipConfigurationRepository;
+
 
 @RestController
 @RequestMapping("/api/wip-validator")
@@ -129,22 +130,23 @@ public class WipValidatorController {
                     .map(p -> p.getProjectKey())
                     .collect(toList());
 
-            Integer wipActual = jiraSearchService
-                    .searchIssues("assignee in ('" + String.join("','", userTeamsWip) + "') " +
-                            "and project in ('" + String.join("','", projectTeams) + "') " +
-                            "and status = '" + status + "' " +
-                            (i.getIssueType().isSubtask() ?
-                                    "and issuetype in subTaskIssueTypes()" :
-                                    "and issuetype in standardIssueTypes()"))
-                    .size();
+            String query = "assignee in ('" + String.join("','", userTeamsWip) + "') " +
+                    "and project in ('" + String.join("','", projectTeams) + "') " +
+                    "and status = '" + status + "' " +
+                    (i.getIssueType().isSubtask() ?
+                            "and issuetype in subTaskIssueTypes()" :
+                            "and issuetype in standardIssueTypes()");
+            
+            AtomicInteger wipActual = new AtomicInteger(0);
+            jiraSearchService.searchIssues(query, _i -> wipActual.incrementAndGet());
 
-            if (wipActual >= wipConfig.getWip()) {
+            if (wipActual.get() >= wipConfig.getWip()) {
                 response.isWipExceeded = true;
                 response.message = "You can't exceed your team's WIP limit ";
             }
 
             response.message += String.format("(Team: %s, Actual: %d, Limit: %d)", wipConfig.getTeam(),
-                    wipActual, wipConfig.getWip());
+                    wipActual.get(), wipConfig.getWip());
 
             return new ResponseEntity<WipValidatorResponse>(response, OK);
         } catch (Exception e) {
