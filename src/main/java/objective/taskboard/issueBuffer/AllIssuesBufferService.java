@@ -70,15 +70,17 @@ public class AllIssuesBufferService {
                 stopWatch.start();
                 state = state.start();
                 log.debug("updateAllIssuesBuffer start");
-                allIssuesBuffer.clear();
+                Map<String, Issue> newIssuesBuffer = new LinkedHashMap<>();
                 List<Issue> list = issueConverter.convertIssues(jiraIssueService.searchAllProjectIssues(), allMetadatasByIssueKey);
                 
                 Iterator<Issue> it = list.iterator();
                 while (it.hasNext()) {
                     Issue issue = it.next();
-                    allIssuesBuffer.put(issue.getIssueKey(), issue);
+                    newIssuesBuffer.put(issue.getIssueKey(), issue);
                     it.remove();
                 }
+                allIssuesBuffer.clear();
+                allIssuesBuffer = newIssuesBuffer;
                 log.debug("All issues count: " + allIssuesBuffer.size());
                 log.debug("updateAllIssuesBuffer complete");
                 log.debug("updateAllIssuesBuffer time spent " +stopWatch.getTime());
