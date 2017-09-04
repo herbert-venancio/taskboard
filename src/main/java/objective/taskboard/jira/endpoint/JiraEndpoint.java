@@ -30,7 +30,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -87,11 +87,14 @@ public class JiraEndpoint {
 
     public void setConnectionTimeout(RestTemplate restTemplate) {
         ClientHttpRequestFactory rf = restTemplate.getRequestFactory();
-        if (rf instanceof HttpComponentsClientHttpRequestFactory) {
-            HttpComponentsClientHttpRequestFactory httprf = (HttpComponentsClientHttpRequestFactory)rf;
+        if (rf instanceof SimpleClientHttpRequestFactory) {
+            SimpleClientHttpRequestFactory httprf = (SimpleClientHttpRequestFactory)rf;
             httprf.setReadTimeout((int) TimeUnit.SECONDS.toMillis(60));
             httprf.setConnectTimeout((int) TimeUnit.SECONDS.toMillis(60));
+            
+            return;
         }
+        throw new IllegalStateException("SimpleClientHttpRequestFactory of unsupported type " + rf.getClass());
     }
 
     private HttpHeaders getAuthorizationRequestHeader(String username, String password, MediaType mediaType) {
