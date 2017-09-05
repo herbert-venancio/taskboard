@@ -47,7 +47,9 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
                 );
 
         mainPage.issue("TASKB-643").dragOver("TASKB-627");
+        mainPage.reload();
 
+        operational = mainPage.lane("Operational");
         operational.boardStep("To Do").assertIssueList(
                 "TASKB-625",
                 "TASKB-643",
@@ -134,6 +136,25 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
                 "TASKB-683",
                 "TASKB-684",
                 "TASKB-686"
-                );        
+                );
+    }
+
+    @Test
+    public void givenIssuesFilteredByAspectFilter_whenChangePriorityOrder_thenAfterFiltersShouldWork() {
+        MainPage mainPage = MainPage.produce(webDriver);
+        mainPage.openMenuFilters()
+            .openAspectsFilter()
+            .clickAspectSubitemFilter("Team", "TASKBOARD 1")
+            .closeMenuFilters();
+
+        LaneFragment deployable = mainPage.lane("Deployable");
+        deployable.boardStep("Doing").assertIssueList("TASKB-6", "TASKB-641", "TASKB-645");
+        mainPage.issue("TASKB-645").dragOver("TASKB-641");
+        deployable.boardStep("Doing").assertIssueList("TASKB-6", "TASKB-645", "TASKB-641");
+
+        mainPage.openMenuFilters()
+            .clickCheckAllFilter("Team");
+
+        mainPage.assertVisibleIssues();
     }
 }

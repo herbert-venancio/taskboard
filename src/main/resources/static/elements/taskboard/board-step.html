@@ -164,10 +164,11 @@
                                  var issueByKey = []
                                  converted.forEach(function(issue) {
                                      issueByKey[issue.issueKey] = issue;
-                                 })
+                                 });
                                  self.issues.forEach(function(issue, index) {
-                                     self.issues[index] = issueByKey[issue.issueKey]; 
-                                 })
+                                     if (!issueByKey[issue.issueKey]) return;
+                                     self.issues[index] = issueByKey[issue.issueKey];
+                                 });
                              },
                              error: function (jqXhr, textStatus, errorThrown) {
                                  self.fire("iron-signal", {name:"show-error-message", data:"Repriorization failed. Reason: status ("+jqXhr.status+") " + textStatus    })

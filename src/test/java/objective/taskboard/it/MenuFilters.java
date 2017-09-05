@@ -35,6 +35,9 @@ public class MenuFilters extends AbstractUiFragment {
     @FindBy(css = ".aspect-item-filter.config-item-title")
     private List<WebElement> aspectItemFilters;
 
+    @FindBy(tagName = "aspect-subitem-filter")
+    private List<WebElement> aspectSubitemFilters;
+
     public MenuFilters(WebDriver webDriver) {
         super(webDriver);
     }
@@ -56,6 +59,29 @@ public class MenuFilters extends AbstractUiFragment {
 
         waitVisibilityOfElement(checkAll);
         checkAll.click();
+        return this;
+    }
+
+    public MenuFilters clickAspectSubitemFilter(String filterName, String subitemFilterName) {
+        WebElement aspectItemFilter = aspectItemFilters.stream()
+            .filter(item -> filterName.equals(item.getText()))
+            .findFirst().orElse(null);
+
+        if (aspectItemFilter == null)
+            throw new IllegalArgumentException(filterName + " filter  not found");
+
+        waitVisibilityOfElement(aspectItemFilter);
+        aspectItemFilter.click();
+
+        WebElement aspectSubitemFilter = aspectSubitemFilters.stream()
+            .filter(subitem -> subitemFilterName.equals(subitem.getText()))
+            .findFirst().orElse(null);
+
+        if (aspectSubitemFilter == null)
+            throw new IllegalArgumentException(subitemFilterName + " filter  not found");
+
+        waitVisibilityOfElement(aspectSubitemFilter);
+        aspectSubitemFilter.click();
         return this;
     }
 
