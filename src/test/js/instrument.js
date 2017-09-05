@@ -12,7 +12,7 @@ var path = require("path");
 var readdirp = require('readdirp');
 
 var srcDir = "src/main/resources/static/";
-var outDir = "target/test-classes/static/";
+var outDir = "target/instrumented-resources/static/";
 
 getFileListFromSrcDir()
   .then(instrumentAll)
