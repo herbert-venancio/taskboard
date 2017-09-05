@@ -1,6 +1,7 @@
 #!/usr/bin/env groovy
 
 import java.util.concurrent.TimeUnit
+import groovy.transform.Field;
 
 @Library("liferay-sdlc-jenkins-lib")
 import static org.liferay.sdlc.SDLCPrUtilities.*
@@ -15,8 +16,8 @@ properties([
         ])
 ])
 
-final String RELEASE_URL = "http://repo:8080/archiva/repository/internal"
-final String SNAPSHOT_URL = "http://repo:8080/archiva/repository/snapshots"
+@Field final String RELEASE_URL = "http://repo:8080/archiva/repository/internal"
+@Field final String SNAPSHOT_URL = "http://repo:8080/archiva/repository/snapshots"
 
 node("single-executor") {
     // start with a clean workspace
