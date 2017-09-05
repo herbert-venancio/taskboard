@@ -31,7 +31,7 @@ node("single-executor") {
         try {
             stage('Build') {
                 try {
-                    timeout(time: 15, unit: TimeUnit.MINUTES) {
+                    timeout(time: 20, unit: TimeUnit.MINUTES) {
                         wrap([$class: 'Xvnc']) {
                             sh "${mvnHome}/bin/mvn --batch-mode -V -U -Dmaven.test.failure.ignore=true clean verify -P packaging-war,dev"
                         }
@@ -72,7 +72,11 @@ node("single-executor") {
 
             stage('Flyway') {
                 def flyway = load 'src/main/jenkins/flyway.groovy'
-                flyway.testMariaDBMigration()
+                parallel mariadb: {
+                    flyway.testMariaDBMigration()
+                }, oracle: {
+                    flyway.testOracleMigration()
+                }
                 clearDocker()
             }
         } catch (ex) {
@@ -171,11 +175,13 @@ def createPostBuildBranch(project) {
 }
 
 def killLeakedProcesses() {
-    def TestMainPID = sh(script: "ps eaux | grep objective.taskboard.TestMain | grep BUILD_URL=${env.BUILD_URL} | awk '{print \$2}'", returnStdout: true)
+    def BUILD_URL = env.BUILD_URL.trim()
+    def TestMainPID = sh(script: "ps eaux | grep objective.taskboard.TestMain | grep 'BUILD_URL=$BUILD_URL' | awk '{print \$2}'", returnStdout: true)
     if (TestMainPID)
         sh(script: "kill -9 ${TestMainPID}", returnStatus: true)
 
-    def FirefoxPID = sh(script: "ps aux | grep firefox | grep ${env.WORKSPACE} | awk '{print \$2}')", returnStdout: true)
+    def WORKSPACE = env.WORKSPACE.trim()
+    def FirefoxPID = sh(script: "ps aux | grep firefox | grep '$WORKSPACE' | awk '{print \$2}'", returnStdout: true)
     if (FirefoxPID)
         sh(script: "kill -9 ${FirefoxPID}", returnStatus: true)
 }
