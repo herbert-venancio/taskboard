@@ -1,5 +1,3 @@
-package objective.taskboard.domain.converter;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,10 +18,14 @@ package objective.taskboard.domain.converter;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.domain.converter;
 
 import static java.util.Arrays.asList;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
@@ -35,7 +37,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import objective.taskboard.domain.converter.IssueMetadata.IssueCoAssignee;
+import objective.taskboard.data.Issue;
 import objective.taskboard.domain.converter.IssueTeamService.InvalidTeamException;
 import objective.taskboard.filterConfiguration.TeamFilterConfigurationService;
 
@@ -55,10 +57,11 @@ public class IssueTeamServiceTest {
 
     @Mock
     private TeamFilterConfigurationService teamFilterConfigurationService;
+    
+    private Issue issue = new Issue();
+    
     @Mock
-    private IssueMetadata issueMetadata;
-    @Mock
-    private IssueMetadata parentMetadata;
+    private Issue parentMetadata;
     @Mock
     private IssueCoAssignee coAssignee;
 
@@ -69,28 +72,28 @@ public class IssueTeamServiceTest {
 
     @Test
     public void issueWithValidAssignee() throws InvalidTeamException {
-        when(issueMetadata.getAssignee()).thenReturn(NAME_ASSIGNEE);
+        issue.setAssignee(NAME_ASSIGNEE);
 
-        Map<String, List<String>> issueTeams = subject.getIssueTeams(issueMetadata, null);
+        Map<String, List<String>> issueTeams = subject.getIssueTeams(issue);
         assertUserTeam(issueTeams, NAME_ASSIGNEE);
     }
 
     @Test
     public void issueWithValidCoAssignee() throws InvalidTeamException {
         when(coAssignee.getName()).thenReturn(NAME_CO_ASSIGNEE);
-        when(issueMetadata.getCoAssignees()).thenReturn(asList(coAssignee));
+        issue.setCoAssignees(asList(coAssignee));
 
-        Map<String, List<String>> issueTeams = subject.getIssueTeams(issueMetadata, null);
+        Map<String, List<String>> issueTeams = subject.getIssueTeams(issue);
         assertUserTeam(issueTeams, NAME_CO_ASSIGNEE);
     }
 
     @Test
     public void issueWithInvalidAssignee() {
-        when(issueMetadata.getAssignee()).thenReturn(NAME_ASSIGNEE);
+        issue.setAssignee(NAME_ASSIGNEE);
         when(teamFilterConfigurationService.getConfiguredTeamsNamesByUserAndProject(anyString(), anyString())).thenReturn(asList());
 
         try {
-            subject.getIssueTeams(issueMetadata, null);
+            subject.getIssueTeams(issue);
             fail();
         } catch (InvalidTeamException e) {
             assertEquals("Users in invalid team quantity", 1, e.getUsersInInvalidTeam().size());
@@ -100,15 +103,16 @@ public class IssueTeamServiceTest {
 
     @Test
     public void issueWithNoUserAndNoParent() throws InvalidTeamException {
-        Map<String, List<String>> issueTeams = subject.getIssueTeams(issueMetadata, null);
+        Map<String, List<String>> issueTeams = subject.getIssueTeams(issue);
         assertTrue(MSG_USERS_SHOULD_BE_EMPTY, issueTeams.isEmpty());
     }
 
     @Test
     public void parentIssueWithValidAssignee() throws InvalidTeamException {
         when(parentMetadata.getAssignee()).thenReturn(NAME_PARENT_ASSIGNEE);
+        issue.setParentCard(parentMetadata);
 
-        Map<String, List<String>> issueTeams = subject.getIssueTeams(issueMetadata, parentMetadata);
+        Map<String, List<String>> issueTeams = subject.getIssueTeams(issue);
         assertUserTeam(issueTeams, NAME_PARENT_ASSIGNEE);
     }
 
@@ -116,22 +120,25 @@ public class IssueTeamServiceTest {
     public void parentIssueWithValidCoAssignee() throws InvalidTeamException {
         when(coAssignee.getName()).thenReturn(NAME_PARENT_CO_ASSIGNEE);
         when(parentMetadata.getCoAssignees()).thenReturn(asList(coAssignee));
+        issue.setParentCard(parentMetadata);
 
-        Map<String, List<String>> issueTeams = subject.getIssueTeams(issueMetadata, parentMetadata);
+        Map<String, List<String>> issueTeams = subject.getIssueTeams(issue);
         assertUserTeam(issueTeams, NAME_PARENT_CO_ASSIGNEE);
     }
 
     @Test
     public void issueWithValidReporter() throws InvalidTeamException {
-        when(issueMetadata.getReporter()).thenReturn(NAME_REPORTER);
+        issue.setReporter(NAME_REPORTER);
+        issue.setParentCard(parentMetadata);
 
-        Map<String, List<String>> issueTeams = subject.getIssueTeams(issueMetadata, parentMetadata);
+        Map<String, List<String>> issueTeams = subject.getIssueTeams(issue);
         assertUserTeam(issueTeams, NAME_REPORTER);
     }
 
     @Test
     public void issueWithReporterNull() throws InvalidTeamException {
-        Map<String, List<String>> issueTeams = subject.getIssueTeams(issueMetadata, parentMetadata);
+        issue.setParentCard(parentMetadata);
+        Map<String, List<String>> issueTeams = subject.getIssueTeams(issue);
         assertTrue(MSG_USERS_SHOULD_BE_EMPTY, issueTeams.isEmpty());
     }
 

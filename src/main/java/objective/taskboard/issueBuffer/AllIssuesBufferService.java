@@ -20,10 +20,8 @@
  */
 package objective.taskboard.issueBuffer;
 
-import static com.google.common.collect.Maps.newHashMap;
 import static java.util.stream.Collectors.toList;
 
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import objective.taskboard.data.Issue;
-import objective.taskboard.domain.converter.IssueMetadata;
 import objective.taskboard.domain.converter.JiraIssueToIssueConverter;
 import objective.taskboard.jira.JiraIssueService;
 
@@ -46,8 +43,6 @@ public class AllIssuesBufferService {
 
     @Autowired
     private JiraIssueService jiraIssueService;
-
-    private Map<String, IssueMetadata> allMetadatasByIssueKey = newHashMap();
 
     private Map<String, Issue> allIssuesBuffer = new LinkedHashMap<>();
 
@@ -70,17 +65,12 @@ public class AllIssuesBufferService {
                 stopWatch.start();
                 state = state.start();
                 log.debug("updateAllIssuesBuffer start");
-                Map<String, Issue> newIssuesBuffer = new LinkedHashMap<>();
-                List<Issue> list = issueConverter.convertIssues(jiraIssueService.searchAllProjectIssues(), allMetadatasByIssueKey);
+               
+                IssueBufferServiceSearchVisitor searchVisitor = new IssueBufferServiceSearchVisitor(issueConverter);
+                jiraIssueService.searchAllProjectIssues(searchVisitor);
                 
-                Iterator<Issue> it = list.iterator();
-                while (it.hasNext()) {
-                    Issue issue = it.next();
-                    newIssuesBuffer.put(issue.getIssueKey(), issue);
-                    it.remove();
-                }
-                allIssuesBuffer.clear();
-                allIssuesBuffer = newIssuesBuffer;
+                allIssuesBuffer = searchVisitor.getIssuesByKey();
+
                 log.debug("All issues count: " + allIssuesBuffer.size());
                 log.debug("updateAllIssuesBuffer complete");
                 log.debug("updateAllIssuesBuffer time spent " +stopWatch.getTime());
@@ -94,7 +84,7 @@ public class AllIssuesBufferService {
                 isUpdatingAllIssuesBuffer = false;
             }
         });
-        thread.setName("AllIssuesBufferService.updateIssueBuffer()");
+        thread.setName("AllIssues.update");
         thread.setDaemon(true);
         thread.start();
     }

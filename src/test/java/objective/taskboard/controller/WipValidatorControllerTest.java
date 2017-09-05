@@ -38,6 +38,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.ResponseEntity;
 
@@ -55,6 +56,7 @@ import objective.taskboard.jira.JiraProperties.CustomField;
 import objective.taskboard.jira.JiraProperties.CustomField.ClassOfServiceDetails;
 import objective.taskboard.jira.JiraSearchService;
 import objective.taskboard.jira.JiraService;
+import objective.taskboard.jira.SearchIssueVisitor;
 import objective.taskboard.repository.ProjectTeamRepository;
 import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.repository.UserTeamCachedRepository;
@@ -80,8 +82,18 @@ public class WipValidatorControllerTest {
     @InjectMocks
     private WipValidatorController subject;
 
-    @Mock
-    private JiraSearchService jiraSearchService;
+    boolean throwExceptionDuringSearch = false;
+    
+    @Spy
+    private JiraSearchService jiraSearchService =  new JiraSearchService() {
+        @Override
+        public void searchIssues(String jql, SearchIssueVisitor visitor, String... additionalFields) {
+            if (throwExceptionDuringSearch)
+                throw new RuntimeException("Error");
+            visitor.processIssue(issue);
+        }
+    };
+    
     @Mock
     private JiraService jiraService;
     @Mock
@@ -116,7 +128,7 @@ public class WipValidatorControllerTest {
     private WipConfiguration wipConfig;
     @Mock
     private WipConfiguration wipConfig2;
-
+    
     @Before
     public void before() throws JSONException {
         when(classOfServiceDetails.getId()).thenReturn(CLASS_OF_SERVICE_ID);
@@ -150,8 +162,6 @@ public class WipValidatorControllerTest {
         when(wipConfig.getTeam()).thenReturn(TEAM_NAME);
         when(wipConfig.getWip()).thenReturn(1);
         when(wipConfigRepo.findByTeamAndStatus(TEAM_NAME, STATUS)).thenReturn(asList(wipConfig));
-
-        when(jiraSearchService.searchIssues(anyString())).thenReturn(asList(issue));
     }
 
     @Test
@@ -336,7 +346,7 @@ public class WipValidatorControllerTest {
 
     @Test
     public void throwedAnyException() {
-        when(jiraSearchService.searchIssues(anyString())).thenThrow(new RuntimeException("Error"));
+        throwExceptionDuringSearch = true;
         ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("I-1", USER, STATUS);
         assertFalse(MSG_ASSERT_WIP_SHOULDN_T_HAVE_EXCEEDED, responseEntity.getBody().isWipExceeded);
         assertEquals(MSG_ASSERT_RESPONSE_MESSAGE, "Error", responseEntity.getBody().message);

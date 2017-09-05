@@ -20,224 +20,96 @@
  */
 package objective.taskboard.data;
 
+import static com.google.common.collect.Maps.newHashMap;
+
 import java.io.Serializable;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.atlassian.jira.rest.client.api.domain.TimeTracking;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.DateDeserializers.DateDeserializer;
 
 import objective.taskboard.config.SpringContextBridge;
+import objective.taskboard.domain.converter.IssueCoAssignee;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraProperties.BallparkMapping;
 import objective.taskboard.jira.MetadataService;
 
 @JsonIgnoreProperties({"jiraProperties", "metaDataService"})
-public class Issue implements Serializable {
+public class Issue extends IssueScratch implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Long id;
-
-    private String issueKey;
-
-    private String projectKey;
-
-    private String project;
-
-    private long type;
-
-    private String typeIconUri;
-
-    private String summary;
-
-    private long status;
-
-    private long startDateStepMillis;
-
-    private String subresponsavel1;
-
-    private String subresponsavel2;
-
-    private String parent;
-
-    private long parentType;
-
-    private String parentTypeIconUri;
-
-    private List<String> dependencies;
-
-    private boolean render;
-
-    private boolean favorite;
-
-    private boolean hidden;
-
-    private String color;
-
-    private String subResponsaveis;
-
-    private String assignee;
-
     private String usersTeam;
 
-    private long priority;
-
-    @JsonDeserialize(using = DateDeserializer.class)
-    private Date dueDate;
-
-    @JsonDeserialize(using = DateDeserializer.class)
-    private Date updatedDate;
-
-    private long created;
-
-    private String description;
-
-    private List<String> teams;
-
-    private String comments;
-
-    private List<String> labels;
-
-    private List<String> components;
-
-    @JsonProperty(access = Access.WRITE_ONLY)
-    private Map<String, Serializable> customFields;
+    private Set<String> teams;
 
     private Long priorityOrder;
-
-    private TaskboardTimeTracking timeTracking;
+    
+    @JsonIgnore
+    private Issue parentCard;
 
     private transient JiraProperties jiraProperties;
     
     private transient MetadataService metaDataService;
-
-    public static Issue from(Long id,
-            String issueKey,
-            String projectKey,
-            String project,
-            long issueType,
-            String typeIconUri,
-            String summary,
-            long status,
-            long startDateStepMillis,
-            String subresponsavel1,
-            String subresponsavel2,
-            String parent,
-            long parentType,
-            String parentTypeIconUri,
-            List<String> dependencies,
-            String color,
-            String subResponsaveis,
-            String assignee,
-            String usersTeam,
-            long priority,
-            Date dueDate,
-            long created,
-            Date updatedDate,
-            String description,
-            List<String> teams,
-            String comments,
-            List<String> labels,
-            List<String> components, 
-            Map<String, Serializable> customFields,
-            Long priorityOrder,
-            TaskboardTimeTracking timeTracking,
-            JiraProperties jiraProperties,
-            MetadataService metaDataService)
-    {
-        return new Issue(id,
-                issueKey,
-                projectKey,
-                project,
-                issueType,
-                typeIconUri,
-                summary,
-                status,
-                startDateStepMillis,
-                subresponsavel1,
-                subresponsavel2,
-                parent,
-                parentType,
-                parentTypeIconUri,
-                dependencies,
-                false,
-                false,
-                false,
-                color,
-                subResponsaveis,
-                assignee,
-                usersTeam,
-                priority,
-                dueDate,
-                created,
-                description,
-                teams,
-                comments,
-                labels,
-                components,
-                customFields,
-                priorityOrder,
-                timeTracking,
-                jiraProperties,
-                metaDataService,
-                updatedDate);
-    }
     
-    public static class TaskboardTimeTracking implements Serializable {
-        private static final long serialVersionUID = 6559922928445540685L;
-        private Integer originalEstimateMinutes;
-        private Integer timeSpentMinutes;
+    @JsonIgnore
+    private List<IssueCoAssignee> coAssignees = new LinkedList<>();
 
-        public TaskboardTimeTracking() {
-            originalEstimateMinutes = 0;
-            timeSpentMinutes = 0;
-        }
-
-        public TaskboardTimeTracking(Integer originalEstimateMinutes, Integer timeSpentMinutes) {
-            this.originalEstimateMinutes = originalEstimateMinutes;
-            this.timeSpentMinutes = timeSpentMinutes;
-        }
-
-        public static TaskboardTimeTracking fromJira(TimeTracking tt) {
-            if (tt == null)
-                return null;
-            return new TaskboardTimeTracking(tt.getOriginalEstimateMinutes(), tt.getTimeSpentMinutes());
-        }
-
-        public Integer getOriginalEstimateMinutes() {
-            return originalEstimateMinutes;
-        }
-        public void setOriginalEstimateMinutes(Integer originalEstimateMinutes) {
-            this.originalEstimateMinutes = originalEstimateMinutes;
-        }
-        public Integer getTimeSpentMinutes() {
-            return timeSpentMinutes;
-        }
-        public void setTimeSpentMinutes(Integer timeSpentMinutes) {
-            this.timeSpentMinutes = timeSpentMinutes;
-        }
-    }
-
-    /**
-     * Subtasks only need to show their key and summary.
-     * 
-     * DON'T USE. Will be terminated
-     */
-    @Deprecated
-    public static Issue from(String issueKey, String summary) {
-        Issue issue = new Issue();
-        issue.setIssueKey(issueKey);
-        issue.setSummary(summary);
-        return issue;
+    @JsonIgnore
+    private CustomField classOfService;
+    
+    String color;
+    
+    public Issue(IssueScratch scratch, JiraProperties properties, MetadataService metadataService) {
+        this.id = scratch.id;
+        this.issueKey = scratch.issueKey;
+        this.projectKey = scratch.projectKey;
+        this.project = scratch.project;
+        this.type = scratch.type;
+        this.typeIconUri = scratch.typeIconUri;
+        this.summary = scratch.summary;
+        this.status = scratch.status;
+        this.startDateStepMillis = scratch.startDateStepMillis;
+        this.subresponsavel1 = scratch.subresponsavel1;
+        this.subresponsavel2 = scratch.subresponsavel2;
+        this.parent = scratch.parent;
+        this.parentType = scratch.parentType;
+        this.parentTypeIconUri = scratch.parentTypeIconUri;
+        this.dependencies = scratch.dependencies;
+        this.render = false;
+        this.favorite = false;
+        this.hidden = false;
+        this.color = null;
+        this.subResponsaveis = scratch.subResponsaveis;
+        this.assignee = scratch.assignee;
+        this.usersTeam = null;
+        this.priority = scratch.priority;
+        this.dueDate = scratch.dueDate;
+        this.created = scratch.created;
+        this.updatedDate = scratch.updatedDate;
+        this.description = scratch.description;
+        this.teams = null;
+        this.comments = scratch.comments;
+        this.labels = scratch.labels;
+        this.components = scratch.components;
+        this.customFields = scratch.customFields;
+        this.priorityOrder = scratch.priorityOrder;
+        this.timeTracking = scratch.timeTracking;
+        this.jiraProperties = properties;
+        this.metaDataService = metadataService;
+        this.reporter = scratch.reporter;
+        this.coAssignees = scratch.coAssignees;
+        this.classOfService = scratch.classOfService;
+        this.release = scratch.release;
     }
 
     @JsonAnyGetter
@@ -250,72 +122,12 @@ public class Issue implements Serializable {
         metaDataService = SpringContextBridge.getBean(MetadataService.class);
     }
 
-    private Issue(Long id, String issueKey, String projectKey, String project, long type, String typeIconUri,
-            String summary, long status, long startDateStepMillis, String subresponsavel1, String subresponsavel2,
-            String parent, long parentType, String parentTypeIconUri, List<String> dependencies, boolean render,
-            boolean favorite, boolean hidden, String color, String subResponsaveis, String assignee, String usersTeam,
-            long priority, Date dueDate, long created, String description, List<String> teams, String comments,
-            List<String> labels, List<String> components, Map<String, Serializable> customFields, Long priorityOrder, 
-            TaskboardTimeTracking timeTracking,
-            JiraProperties properties,
-            MetadataService metaDataService,
-            Date updatedDate) {
-        this.id = id;
-        this.issueKey = issueKey;
-        this.projectKey = projectKey;
-        this.project = project;
-        this.type = type;
-        this.typeIconUri = typeIconUri;
-        this.summary = summary;
-        this.status = status;
-        this.startDateStepMillis = startDateStepMillis;
-        this.subresponsavel1 = subresponsavel1;
-        this.subresponsavel2 = subresponsavel2;
-        this.parent = parent;
-        this.parentType = parentType;
-        this.parentTypeIconUri = parentTypeIconUri;
-        this.dependencies = dependencies;
-        this.render = render;
-        this.favorite = favorite;
-        this.hidden = hidden;
-        this.color = color;
-        this.subResponsaveis = subResponsaveis;
-        this.assignee = assignee;
-        this.usersTeam = usersTeam;
-        this.priority = priority;
-        this.dueDate = dueDate;
-        this.created = created;
-        this.updatedDate = updatedDate;
-        this.description = description;
-        this.teams = teams;
-        this.comments = comments;
-        this.labels = labels;
-        this.components = components;
-        this.customFields = customFields;
-        this.priorityOrder = priorityOrder;
-        this.timeTracking = timeTracking;
-        this.jiraProperties = properties;
-        this.metaDataService = metaDataService;
-    }
-
     @JsonIgnore
-    public boolean isDemand() {
-        return jiraProperties.getIssuetype().getDemand().getId() == this.getType();
-    }
-
-    @JsonIgnore
-    public boolean isFeature() {
-        return jiraProperties.getIssuetype().getFeatures().stream().anyMatch(ft -> ft.getId() == this.getType());
-    }
-
-    @JsonIgnore
-    public boolean isSubTask() {
-        return !isDemand() && !isFeature();
-    }
-
-    @JsonIgnore
-    public Integer getIssueKeyNum() {
-        return Integer.parseInt(issueKey.replace(projectKey+"-", ""));
+    public boolean isDeferred() {
+        boolean isDeferredStatus = jiraProperties.getStatusesDeferredIds().contains(this.getStatus());
+        if (!isDeferredStatus && parentCard != null)
+            return parentCard.isDeferred();
+        return isDeferredStatus;
     }
 
     @JsonIgnore
@@ -364,6 +176,106 @@ public class Issue implements Serializable {
         return list.stream().filter(bm -> getTshirtSizeOfSubtaskForBallpark(bm)!=null).collect(Collectors.toList());
     }
 
+    public String getColor() {
+        return this.color;
+    }
+
+    public String getUsersTeam() {
+        return this.usersTeam;
+    }
+
+    public Set<String> getTeams() {
+        return this.teams;
+    }
+
+    public void setColor(final String color) {
+        this.color = color;
+    }
+
+    public void setUsersTeam(final String usersTeam) {
+        this.usersTeam = usersTeam;
+    }
+
+    public void setTeams(final Set<String> teams) {
+        this.teams = teams;
+    }
+
+    public void setParentCard(Issue parentCard) {
+        this.parentCard = parentCard;
+    }
+    
+    @JsonIgnore
+    public Optional<Issue> getParentCard() {
+        return Optional.ofNullable(parentCard);
+    }
+
+    @JsonIgnore
+    public String getClassOfServiceValue() {
+        String defaultClassOfService = jiraProperties.getCustomfield().getClassOfService().getDefaultValue();
+        CustomField classOfService = getClassOfServiceCustomField();
+        return classOfService == null ? defaultClassOfService : (String)classOfService.getValue();
+    }
+
+    @JsonIgnore
+    public Long getClassOfServiceId() {
+        CustomField classOfService = getClassOfServiceCustomField();
+        return classOfService == null ? 0L : classOfService.getOptionId();
+    }
+
+    @JsonIgnore
+    public CustomField getClassOfServiceCustomField() {
+        String defaultClassOfService = jiraProperties.getCustomfield().getClassOfService().getDefaultValue();
+        CustomField classOfService = getLocalClassOfServiceCustomField();
+
+        boolean isNotDefaultClassOfService = classOfService != null
+                                             && classOfService.getValue() != null
+                                             && !classOfService.getValue().toString().equals(defaultClassOfService);
+        if (isNotDefaultClassOfService)
+            return classOfService;
+
+        Optional<Issue> pc = getParentCard();
+        if (pc.isPresent())
+            return pc.get().getClassOfServiceCustomField();
+            
+        return classOfService;
+    }
+    
+    @JsonIgnore
+    public Map<String, CustomField> getRelease() {
+        Map<String, CustomField> release = getLocalRelease();
+
+        if (!release.isEmpty())
+            return release;
+
+        Optional<Issue> pc = getParentCard();
+        if (!pc.isPresent())
+            return newHashMap();
+
+        return pc.get().getRelease();
+    }
+    
+    @JsonIgnore
+    public boolean isDemand() {
+        return jiraProperties.getIssuetype().getDemand().getId() == this.getType();
+    }
+
+    @JsonIgnore
+    public boolean isFeature() {
+        return jiraProperties.getIssuetype().getFeatures().stream().anyMatch(ft -> ft.getId() == this.getType());
+    }
+
+    @JsonIgnore
+    public boolean isSubTask() {
+        return !isDemand() && !isFeature();
+    }
+
+    @JsonIgnore
+    public Integer getIssueKeyNum() {
+        return Integer.parseInt(issueKey.replace(projectKey+"-", ""));
+    }
+
+    
+
     @JsonIgnore
     public String getIssueTypeName() {
         return metaDataService.getIssueTypeById(type).getName();
@@ -378,16 +290,20 @@ public class Issue implements Serializable {
     public String getStatusOrderedName() {
         return getStatusPriority() + "." + getStatusName();
     }
-    
+
     @JsonIgnore
     public Integer getStatusPriority() {
+        Integer r;
         if (this.isDemand())
-            return jiraProperties.getStatusPriorityOrder().getDemandPriorityByStatus(this.getStatusName());
-
+            r = jiraProperties.getStatusPriorityOrder().getDemandPriorityByStatus(this.getStatusName());
+        else
         if (this.isFeature())
-            return jiraProperties.getStatusPriorityOrder().getTaskPriorityByStatus(this.getStatusName());
-
-        return jiraProperties.getStatusPriorityOrder().getSubtaskPriorityByStatus(this.getStatusName());
+            r = jiraProperties.getStatusPriorityOrder().getTaskPriorityByStatus(this.getStatusName());
+        else
+            r = jiraProperties.getStatusPriorityOrder().getSubtaskPriorityByStatus(this.getStatusName());
+        
+        if (r == null) r = 0;
+        return r;
     }
 
     public Long getId() {
@@ -462,10 +378,6 @@ public class Issue implements Serializable {
         return this.hidden;
     }
 
-    public String getColor() {
-        return this.color;
-    }
-
     public String getSubResponsaveis() {
         return this.subResponsaveis;
     }
@@ -474,18 +386,16 @@ public class Issue implements Serializable {
         return this.assignee;
     }
 
-    public String getUsersTeam() {
-        return this.usersTeam;
-    }
-
     public long getPriority() {
         return this.priority;
     }
 
+    @JsonDeserialize(using = DateDeserializer.class)
     public Date getDueDate() {
         return this.dueDate;
     }
 
+    @JsonDeserialize(using = DateDeserializer.class)
     public Date getUpdatedDate() {
         return this.updatedDate;
     }
@@ -496,10 +406,6 @@ public class Issue implements Serializable {
 
     public String getDescription() {
         return this.description;
-    }
-
-    public List<String> getTeams() {
-        return this.teams;
     }
 
     public String getComments() {
@@ -602,20 +508,12 @@ public class Issue implements Serializable {
         this.hidden = hidden;
     }
 
-    public void setColor(final String color) {
-        this.color = color;
-    }
-
     public void setSubResponsaveis(final String subResponsaveis) {
         this.subResponsaveis = subResponsaveis;
     }
 
     public void setAssignee(final String assignee) {
         this.assignee = assignee;
-    }
-
-    public void setUsersTeam(final String usersTeam) {
-        this.usersTeam = usersTeam;
     }
 
     public void setPriority(final long priority) {
@@ -638,10 +536,6 @@ public class Issue implements Serializable {
         this.description = description;
     }
 
-    public void setTeams(final List<String> teams) {
-        this.teams = teams;
-    }
-
     public void setComments(final String comments) {
         this.comments = comments;
     }
@@ -652,10 +546,6 @@ public class Issue implements Serializable {
 
     public void setComponents(final List<String> components) {
         this.components = components;
-    }
-
-    public void setCustomFields(final Map<String, Serializable> customFields) {
-        this.customFields = customFields;
     }
 
     public void setPriorityOrder(final Long priorityOrder) {
@@ -673,6 +563,38 @@ public class Issue implements Serializable {
     public void setMetaDataService(final MetadataService metaDataService) {
         this.metaDataService = metaDataService;
     }
+
+    @JsonIgnore
+    public String getReporter() {
+        return reporter;
+    }
+
+    public void setReporter(String nameReporter) {
+        this.reporter = nameReporter;
+    }
+
+    @JsonIgnore
+    public List<IssueCoAssignee> getCoAssignees() {
+        return coAssignees;
+    }
+
+    public void setCoAssignees(List<IssueCoAssignee> coAssigness) {
+        this.coAssignees = coAssigness;
+    }
+
+    @JsonIgnore
+    public CustomField getLocalClassOfServiceCustomField() {
+        return classOfService;
+    }
+
+    @JsonIgnore
+    public Map<String, CustomField> getLocalRelease() {
+        return release;
+    }
+
+    public void setCustomFields(final Map<String, Serializable> customFields) {
+        this.customFields = customFields;
+    }    
 
     @Override
     public boolean equals(Object o) {

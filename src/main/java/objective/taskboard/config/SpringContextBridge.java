@@ -36,6 +36,8 @@ public class SpringContextBridge implements ApplicationContextAware {
     }
 
     public static <T> T getBean(Class<T> klass) {
+        if (applicationContext == null)
+            return null;
         return applicationContext.getBean(klass);
     }
 }

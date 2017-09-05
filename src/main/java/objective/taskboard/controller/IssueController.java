@@ -111,7 +111,7 @@ public class IssueController {
         return issueBufferService.toggleAssignAndSubresponsavelToUser(issue.getIssueKey());
     }
 
-    @SuppressWarnings("deprecation")
+    @Deprecated
     @RequestMapping(path = "create-issue", method = RequestMethod.POST)
     public Issue createIssue(@RequestBody Issue issue) throws JSONException {
         com.atlassian.jira.rest.client.api.domain.Issue parent = jiraBean.getIssueByKey(issue.getParent());
@@ -131,8 +131,7 @@ public class IssueController {
         log.info("Creating issue: " + issue);
         String issueKey = jiraBean.createIssue(issueBuilder.build());
         log.info("Created issue " + issueKey);
-        com.atlassian.jira.rest.client.api.domain.Issue created = jiraBean.getIssueByKey(issueKey);
-        return Issue.from(created.getKey(), created.getSummary());
+        return issueBufferService.updateIssueBufferFetchParentIfNeeded(jiraBean.getIssueByKey(issueKey));
     }
 
     @RequestMapping(path = "transition", method = RequestMethod.POST)

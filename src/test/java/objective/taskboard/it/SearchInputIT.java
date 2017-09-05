@@ -1,5 +1,3 @@
-package objective.taskboard.it;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,6 +18,7 @@ package objective.taskboard.it;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.it;
 
 import org.junit.Test;
 
@@ -28,6 +27,6 @@ public class SearchInputIT extends AuthenticatedIntegrationTest {
     public void whenIssueKeyIsTyped_onlyMatchingIssuesShouldBeFound() {
         MainPage mainPage = MainPage.produce(webDriver);
         mainPage.typeSearch("TASKB-61");
-        mainPage.assertVisibleIssues("TASKB-610", "TASKB-611", "TASKB-612", "TASKB-613");
+        mainPage.assertVisibleIssues("TASKB-611", "TASKB-612", "TASKB-613", "TASKB-610", "TASKB-614");
     }
 }

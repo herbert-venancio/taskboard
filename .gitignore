@@ -19,5 +19,5 @@ application-liferay.yaml
 application-uat.properties
 application-uat.yml
 testbed
-data
+/data
 rootDataTest

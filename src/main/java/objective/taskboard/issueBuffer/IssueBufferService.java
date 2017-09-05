@@ -21,7 +21,6 @@
 package objective.taskboard.issueBuffer;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Maps.newHashMap;
 import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
@@ -29,8 +28,8 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -41,8 +40,8 @@ import objective.taskboard.data.Issue;
 import objective.taskboard.data.IssuePriorityOrderChanged;
 import objective.taskboard.data.TaskboardIssue;
 import objective.taskboard.database.IssuePriorityService;
-import objective.taskboard.domain.converter.IssueMetadata;
 import objective.taskboard.domain.converter.JiraIssueToIssueConverter;
+import objective.taskboard.domain.converter.ParentProvider;
 import objective.taskboard.issue.IssueUpdate;
 import objective.taskboard.issue.IssueUpdateType;
 import objective.taskboard.issue.IssuesUpdateEvent;
@@ -75,12 +74,25 @@ public class IssueBufferService {
 
     @Autowired
     private IssueEventProcessScheduler issueEvents;
-
-    private Map<String, IssueMetadata> taskboardMetadatasByIssueKey = newHashMap();
+    
+    private Map<String, Issue> issueBuffer = new LinkedHashMap<>();
+    
+    private final ParentProvider parentProviderFetchesMissingParents = parentKey -> {
+        Issue parent = issueBuffer.get(parentKey);
+        if (parent == null)
+            parent = updateIssueBufferFetchParentIfNeeded(jiraBean.getIssueByKeyAsMaster(parentKey));
+        return Optional.of(parent);
+    };
+    
+    private final ParentProvider parentProviderRejectsIfMissingParent = parentKey ->  {
+        Issue parent = issueBuffer.get(parentKey);
+        if (parent == null)
+            throw new IllegalArgumentException("Parent issue " + parentKey + " not available. This is probably a bug.");
+        return Optional.of(parent);
+    };   
 
     private IssueBufferState state = IssueBufferState.uninitialised;
 
-    private Map<String, Issue> issueBuffer = new LinkedHashMap<>();
 
     private boolean isUpdatingTaskboardIssuesBuffer = false;
 
@@ -100,7 +112,14 @@ public class IssueBufferService {
             stopWatch.start();
             try {
                 updateState(state.start());
-                setIssues(issueConverter.convertIssues(jiraIssueService.searchAll(), taskboardMetadatasByIssueKey));
+                
+                IssueBufferServiceSearchVisitor visitor = new IssueBufferServiceSearchVisitor(issueConverter);
+                jiraIssueService.searchAllWithParents(visitor);
+                
+                Map<String, Issue> newIssueBuffer = visitor.getIssuesByKey();
+                log.info("Issue buffer service - processed " + newIssueBuffer.size()+ " issues");
+                setIssues(newIssueBuffer);
+                
                 updateState(state.done());
             }catch(Exception e) {
                 updateState(state.error());
@@ -111,7 +130,7 @@ public class IssueBufferService {
                 isUpdatingTaskboardIssuesBuffer = false;
             }
         });
-        thread.setName("IssueBufferService.updateIssueBuffer()");
+        thread.setName("Buffer.update");
         thread.setDaemon(true);
         thread.start();
     }
@@ -122,14 +141,14 @@ public class IssueBufferService {
     }
 
     public Issue updateIssueBuffer(final String key) {
-        com.atlassian.jira.rest.client.api.domain.Issue jiraIssue = jiraIssueService.searchIssueByKey(key);
-        if (jiraIssue == null) 
+        Optional<com.atlassian.jira.rest.client.api.domain.Issue> foundIssue = jiraIssueService.searchIssueByKey(key);
+        if (!foundIssue.isPresent()) 
             return issueBuffer.remove(key);
-       return updateIssueBuffer(jiraIssue);
+       return updateIssueBufferFetchParentIfNeeded(foundIssue.get());
     }
 
-    public synchronized Issue updateIssueBuffer(final com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        final Issue issue = issueConverter.convertSingleIssue(jiraIssue, taskboardMetadatasByIssueKey);
+    public synchronized Issue updateIssueBufferFetchParentIfNeeded(final com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
+        final Issue issue = issueConverter.convertSingleIssue(jiraIssue, parentProviderFetchesMissingParents);
         putIssue(issue);
 
         updateSubtasks(issue.getIssueKey());
@@ -143,7 +162,7 @@ public class IssueBufferService {
             return issueBuffer.remove(key);
         }
 
-        Issue updated = updateIssueBuffer(jiraIssue);
+        Issue updated = updateIssueBufferFetchParentIfNeeded(jiraIssue);
 
         IssueUpdateType updateType = IssueUpdateType.UPDATED;
         if (event == WebhookEvent.ISSUE_CREATED)
@@ -164,13 +183,11 @@ public class IssueBufferService {
         issuesUpdatedByEvent.clear();
     }
 
-    private void updateSubtasks(String key) {
+    private synchronized void updateSubtasks(String key) {
         List<String> subtasksKeys = getSubtasksKeys(key);
-        List<com.atlassian.jira.rest.client.api.domain.Issue> jiraSubtasks = jiraIssueService.searchIssuesByKeys(subtasksKeys);
-        for (com.atlassian.jira.rest.client.api.domain.Issue jiraSubtask : jiraSubtasks) {
-            Issue subtaskConverted = issueConverter.convertSingleIssue(jiraSubtask, taskboardMetadatasByIssueKey);
-            putIssue(subtaskConverted);
-        }
+        jiraIssueService.searchIssuesByKeys(subtasksKeys, 
+            issue -> putIssue(issueConverter.convertSingleIssue(issue, parentProviderRejectsIfMissingParent))                   
+        );
     }
 
     private List<String> getSubtasksKeys(String key) {
@@ -190,10 +207,11 @@ public class IssueBufferService {
     }
 
     public synchronized List<Issue> getIssues() {
-        return issueBuffer.values().stream()
+        List<Issue> collect = issueBuffer.values().stream()
                 .filter(t -> projectService.isProjectVisible(t.getProjectKey()))
-                .filter(t -> isParentVisible(t))
+                .filter(t -> !t.isDeferred())
                 .collect(toList());
+        return collect;
     }
 
     public synchronized Issue getIssueByKey(String key) {
@@ -201,8 +219,10 @@ public class IssueBufferService {
     }
 
     public List<objective.taskboard.data.Issue> getIssueSubTasks(objective.taskboard.data.Issue issue) {
-        List<com.atlassian.jira.rest.client.api.domain.Issue> subtasksFromJira = jiraIssueService.searchIssueSubTasksAndDemandedByKey(issue.getIssueKey());
-        return issueConverter.convertIssues(subtasksFromJira, taskboardMetadatasByIssueKey);
+        List<Issue> subtasks= new ArrayList<>();
+        jiraIssueService.searchIssueSubTasksAndDemandedByKey(issue.getIssueKey(), 
+            jiraIssue -> subtasks.add(issueConverter.convertSingleIssue(jiraIssue, parentProviderRejectsIfMissingParent)));
+        return subtasks;
     }
 
     public synchronized Issue toggleAssignAndSubresponsavelToUser(String issueKey) {
@@ -225,27 +245,8 @@ public class IssueBufferService {
         }
     }
 
-    private boolean isParentVisible(Issue issue) {
-    	
-    	boolean visible = false;
-    	    	
-    	if (StringUtils.isEmpty(issue.getParent()))
-    		return true;
-    	
-    	Issue findFirst = issueBuffer.values().stream()
-		    .filter(t -> t.getIssueKey().equals(issue.getParent()))
-		    .findFirst().orElse(null);
-    	
-    	if (findFirst != null)
-    		visible = isParentVisible(findFirst);
-
-		return visible;
-	}
-
-    private synchronized void setIssues(List<Issue> issues) {
-        issueBuffer.clear();
-        for (Issue issue : issues)
-            putIssue(issue);
+    private synchronized void setIssues(Map<String, Issue> issues) {
+        issueBuffer = issues;
     }
 
     private void putIssue(Issue issue) {
@@ -279,4 +280,5 @@ public class IssueBufferService {
         
         return updatedIssues;
     }
+
 }

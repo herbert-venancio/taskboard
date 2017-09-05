@@ -1,4 +1,3 @@
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -27,12 +26,11 @@ import static org.openqa.selenium.support.PageFactory.initElements;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementValue;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -119,14 +117,15 @@ public class MainPage extends AbstractUiFragment {
     }
 
     public MainPage assertVisibleIssues(String ... expectedIssueKeyList) {
-        waitUntil(ExpectedConditions.numberOfElementsToBe(By.cssSelector("paper-material.issue"), expectedIssueKeyList.length));
+        try {
+            waitUntil(ExpectedConditions.numberOfElementsToBe(By.cssSelector("paper-material.issue"), expectedIssueKeyList.length));
+        }catch(TimeoutException te) {
+            // let the assert show the differences
+        }
         List<WebElement> findElements = webDriver.findElements(By.cssSelector("paper-material.issue"));
         ArrayList<String> actualIssueKeyList = new ArrayList<String>(); 
         for (WebElement webElement : findElements) 
             actualIssueKeyList.add( webElement.findElement(By.cssSelector(".key.issue-item")).getText().trim());
-        Arrays.sort(expectedIssueKeyList);
-        Collections.sort(actualIssueKeyList);
-        
         assertEquals(join(expectedIssueKeyList,"\n"), join(actualIssueKeyList,"\n"));
         return this;
     }

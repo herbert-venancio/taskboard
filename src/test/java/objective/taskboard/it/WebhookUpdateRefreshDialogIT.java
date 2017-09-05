@@ -1,5 +1,3 @@
-package objective.taskboard.it;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,6 +18,7 @@ package objective.taskboard.it;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.it;
 
 import java.io.IOException;
 
@@ -39,17 +38,18 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
         mainPage.refreshToast().toggleShowHide();
         mainPage.assertVisibleIssues("TASKB-625");
         mainPage.refreshToast().toggleShowHide();
-        mainPage.assertVisibleIssues("TASKB-610", "TASKB-611", "TASKB-612", "TASKB-613");
+        mainPage.assertVisibleIssues("TASKB-611", "TASKB-612", "TASKB-613", "TASKB-610", "TASKB-614");
         mainPage.refreshToast().toggleShowHide();
         mainPage.refreshToast().dismiss();
         mainPage.refreshToast().assertNotVisible();
-        mainPage.assertVisibleIssues("TASKB-610", "TASKB-611", "TASKB-612", "TASKB-613");
+        mainPage.assertVisibleIssues("TASKB-611", "TASKB-612", "TASKB-613", "TASKB-610", "TASKB-614");
     }
 
     @Test
     public void whenUpdateHappensViaWebHookAndUpdatedIssueIsOpen_ShouldWarnUser() throws IOException {
         
         MainPage mainPage = MainPage.produce(webDriver);
+        mainPage.errorToast().close();
         IssueDetails issueDetails = mainPage
             .issue("TASKB-625")
             .click()

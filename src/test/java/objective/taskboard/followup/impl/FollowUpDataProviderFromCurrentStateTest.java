@@ -1,5 +1,3 @@
-package objective.taskboard.followup.impl;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,6 +18,7 @@ package objective.taskboard.followup.impl;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.followup.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -52,6 +51,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import objective.taskboard.data.Issue;
+import objective.taskboard.data.IssueScratch;
+import objective.taskboard.data.TaskboardTimeTracking;
 import objective.taskboard.followup.FollowUpData;
 import objective.taskboard.issueBuffer.AllIssuesBufferService;
 import objective.taskboard.jira.JiraProperties;
@@ -1577,42 +1578,44 @@ public class FollowUpDataProviderFromCurrentStateTest {
         }
         
         public Issue build() {
-            Issue.TaskboardTimeTracking timeTracking = new Issue.TaskboardTimeTracking(originalEstimateMinutes, timeSpentMinutes);
+            TaskboardTimeTracking timeTracking = new TaskboardTimeTracking(originalEstimateMinutes, timeSpentMinutes);
             if (originalEstimateMinutes == null && timeSpentMinutes == null)
                 timeTracking = null;
-            return Issue.from(id, 
-                key, 
-                getProjectKey(project), 
-                getProjectName(), 
-                issueType, 
-                null, //typeIconUri
-                summary, 
-                status, 
-                0L,   //startDateStepMillis
-                null, //subresponsavel1
-                null, //subresponsavel2
-                parent, 
-                0L,   //parentType
-                null, //parentTypeIconUri
-                new ArrayList<String>(),//dependencies 
-                null, //color
-                null, //subResponsaveis
-                null, //assignee
-                null, //usersTeam
-                0L, //priority
-                null, //dueDate
-                0L, //created
-                null, //description 
-                null, //teams
-                null, //comments
-                null, //labels
-                null, //components
-                null, //customFields
-                customFields,
-                priorityOrder,
-                timeTracking,
-                jiraProperties,
-                metadataService);
+            IssueScratch scratch = new IssueScratch(
+                    id, 
+                    key, 
+                    getProjectKey(project), 
+                    getProjectName(), 
+                    issueType, 
+                    null, //typeIconUri
+                    summary, 
+                    status, 
+                    0L,   //startDateStepMillis
+                    null, //subresponsavel1
+                    null, //subresponsavel2
+                    parent, 
+                    0L,   //parentType
+                    null, //parentTypeIconUri
+                    new ArrayList<String>(),//dependencies 
+                    null, //subResponsaveis
+                    null, //assignee
+                    0L, //priority
+                    null, //dueDate
+                    0L, //created
+                    null,//Date updatedDate,
+                    null, //description 
+                    null, //comments
+                    null, //labels
+                    null, //components
+                    customFields,
+                    priorityOrder,
+                    timeTracking,
+                    null,//reporter
+                    null,//coAssignees
+                    null,//classOfService
+                    null //release
+                    );
+            return new Issue(scratch, jiraProperties, metadataService);
         }
     }
     
