@@ -17,6 +17,8 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
@@ -30,7 +32,8 @@ import objective.taskboard.auth.CredentialsHolder;
 @Profile({"prod", "dev"})
 class GoogleApiServiceHttp implements GoogleApiService {
     private static final String APPLICATION_NAME = "Objective Taskboard";
-    
+    private static final Integer GOOGLE_CREDENTIAL_TIMEOUT = 60000 * 2;
+
     private final GoogleApiConfig config;
     private final JsonFactory jsonFactory;
     private final HttpTransport httpTransport;
@@ -44,7 +47,6 @@ class GoogleApiServiceHttp implements GoogleApiService {
             jsonFactory = JacksonFactory.getDefaultInstance();
             httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             credentialDataStore = config.getCredentialDataStore();
-
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
@@ -68,7 +70,7 @@ class GoogleApiServiceHttp implements GoogleApiService {
             }
         }
         
-        Oauth2 oauth2 = new Oauth2.Builder(httpTransport, jsonFactory, credential)
+        Oauth2 oauth2 = new Oauth2.Builder(httpTransport, jsonFactory, makeInitializer(credential))
                 .setApplicationName(APPLICATION_NAME)
                 .build();
         
@@ -92,9 +94,20 @@ class GoogleApiServiceHttp implements GoogleApiService {
         if (!credential.isPresent())
             throw new RuntimeException("There is no Google credential to user " + getLoggedUser());
         
-        return new Sheets.Builder(httpTransport, jsonFactory, credential.get())
+        return new Sheets.Builder(httpTransport, jsonFactory, makeInitializer(credential.get()))
                 .setApplicationName(APPLICATION_NAME)
                 .build();
+    }
+
+    private HttpRequestInitializer makeInitializer(GoogleCredential googleCredential) {
+        return new HttpRequestInitializer() {
+            @Override
+            public void initialize(HttpRequest request) throws IOException {
+                googleCredential.initialize(request);
+                request.setConnectTimeout(GOOGLE_CREDENTIAL_TIMEOUT);
+                request.setReadTimeout(GOOGLE_CREDENTIAL_TIMEOUT);
+            }
+        };
     }
     
     @Override
