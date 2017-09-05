@@ -185,6 +185,7 @@
 								<argument>${jacoco.agent.it.arg}</argument>
 								<argument>-classpath</argument>
 								<classpath />
+								<argument>-Xbootclasspath/p:${project.build.directory}/instrumented-resources/</argument>
 								<argument>objective.taskboard.TestMain</argument>
 							</arguments>
 						</configuration>
