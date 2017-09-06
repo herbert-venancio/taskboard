@@ -287,11 +287,6 @@ public class Issue extends IssueScratch implements Serializable {
     }
 
     @JsonIgnore
-    public String getStatusOrderedName() {
-        return getStatusPriority() + "." + getStatusName();
-    }
-
-    @JsonIgnore
     public Integer getStatusPriority() {
         Integer r;
         if (this.isDemand())
