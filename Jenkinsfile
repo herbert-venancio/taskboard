@@ -31,7 +31,7 @@ node("single-executor") {
         try {
             stage('Build') {
                 try {
-                    timeout(time: 15, unit: TimeUnit.MINUTES) {
+                    timeout(time: 20, unit: TimeUnit.MINUTES) {
                         wrap([$class: 'Xvnc']) {
                             sh "${mvnHome}/bin/mvn --batch-mode -V -U -Dmaven.test.failure.ignore=true clean verify -P packaging-war,dev"
                         }
@@ -40,11 +40,7 @@ node("single-executor") {
                     archiveArtifacts artifacts: 'target/test-attachments/**', fingerprint: true, allowEmptyArchive: true
                     junit testResults: 'target/surefire-reports/*.xml', testDataPublishers: [[$class: 'AttachmentPublisher']], allowEmptyResults: true
                     junit testResults: 'target/failsafe-reports/*.xml', testDataPublishers: [[$class: 'AttachmentPublisher']], allowEmptyResults: true
-                    try {
-                        killLeakedProcesses()
-                    } catch(e) {
-                        // ignore kill errors
-                    }
+                    killLeakedProcesses()
                 }
             }
 
@@ -72,6 +68,16 @@ node("single-executor") {
                         -Dsonar.github.repository=${GIT_REPO}"
                     }
                 }
+            }
+
+            stage('Flyway') {
+                def flyway = load 'src/main/jenkins/flyway.groovy'
+                parallel mariadb: {
+                    flyway.testMariaDBMigration()
+                }, oracle: {
+                    flyway.testOracleMigration()
+                }
+                clearDocker()
             }
         } catch (ex) {
             handleError('objective-solutions/taskboard', 'devops@objective.com.br', 'objective-solutions-user')
@@ -169,12 +175,23 @@ def createPostBuildBranch(project) {
 }
 
 def killLeakedProcesses() {
-    def TestMainPID = sh ( script: "ps eaux | grep objective.taskboard.TestMain | grep BUILD_URL=${env.BUILD_URL} | awk '{print \$2}'", returnStdout: true)
-    if (TestMainPID) {
-        sh "kill -9 ${TestMainPID} || true"
-    }
-    def FirefoxPID = sh ( script: "ps aux | grep firefox | grep ${env.WORKSPACE} | awk '{print \$2}')", returnStdout: true)
-    if (FirefoxPID) {
-        sh "kill -9 ${FirefoxPID} || true"
-    }
+    def BUILD_URL = env.BUILD_URL.trim()
+    def TestMainPID = sh(script: "ps eaux | grep objective.taskboard.TestMain | grep 'BUILD_URL=$BUILD_URL' | awk '{print \$2}'", returnStdout: true)
+    if (TestMainPID)
+        sh(script: "kill -9 ${TestMainPID}", returnStatus: true)
+
+    def WORKSPACE = env.WORKSPACE.trim()
+    def FirefoxPID = sh(script: "ps aux | grep firefox | grep '$WORKSPACE' | awk '{print \$2}'", returnStdout: true)
+    if (FirefoxPID)
+        sh(script: "kill -9 ${FirefoxPID}", returnStatus: true)
+}
+
+void clearDocker() {
+    def images = sh(script: 'sudo docker images -qf dangling=true', returnStdout: true).trim()
+    if(images)
+        sh(script: "sudo docker rmi $images", returnStatus: true)
+
+    def volumes = sh(script: 'sudo docker volume ls -qf dangling=true', returnStdout: true).trim()
+    if(volumes)
+        sh(script: "sudo docker volume rm $volumes", returnStatus: true)
 }
