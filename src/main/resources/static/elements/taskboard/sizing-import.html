@@ -119,7 +119,6 @@
         }
 
         .error-message {
-            white-space: pre;
             color: red;
             font-weight: bold;
             margin-top: 30px;
@@ -211,14 +210,6 @@
         }
 
         .steps__content {
-        }
-
-        .step {
-            display: none;
-        }
-
-        .step.active {
-            display: block;
         }
 
         .step__title {
@@ -326,7 +317,6 @@
     </style>
 
     <template>
-        <iron-signals on-iron-signal-sizing-authorization-response="responseOfStepOne"></iron-signals>
         <iron-signals on-iron-signal-sizing-import-status="statusOfStepFour"></iron-signals>
         <paper-dialog class="sizingimport-modal" id="modal" entry-animation="scale-up-animation" exit-animation="fade-out-animation" with-backdrop modal>
             <paper-card class="card-custom">
@@ -346,16 +336,15 @@
                     <div class="steps">
 
                         <div id="stepsNumbers" class="steps__numbers">
-                            <a data-step="1" class="steps__number">1</a>
-                            <a data-step="2" class="steps__number">2</a>
-                            <a data-step="3" class="steps__number">3</a>
-                            <a data-step="4" class="steps__number">4</a>
+                            <a class$="{{getStepNumberClass(stepNumber, 1)}}">1</a>
+                            <a class$="{{getStepNumberClass(stepNumber, 2)}}">2</a>
+                            <a class$="{{getStepNumberClass(stepNumber, 3)}}">3</a>
+                            <a class$="{{getStepNumberClass(stepNumber, 4)}}">4</a>
                         </div><!-- .steps__numbers -->
 
                         <div class="steps__content">
-
-                            <div data-step="1" class="step sizing__step">
-
+                        
+                            <template is="dom-if" if="{{isStepActive(stepNumber, 1)}}" restamp="true">
                                 <h3 class="step__title">
                                     Checking authorization
                                 </h3>
@@ -383,6 +372,8 @@
                                         </div>
                                     </div><!-- .step__content -->
 
+                                    <div id="error-message" class="error-message">{{errorMessage}}</div>
+
                                     <div class="step__buttons">
                                         <div class="step__buttons-left">
                                             <paper-button class="sizing__cancel" raised on-tap="cancelImportation" title="Cancel importation">
@@ -398,9 +389,9 @@
 
                                 </form><!-- .tb-form -->
 
-                            </div><!-- .step -->
+                            </template><!-- .step -->
 
-                            <div data-step="2" class="step sizing__step">
+                            <template is="dom-if" if="{{isStepActive(stepNumber, 2)}}" restamp="true">
 
                                 <h3 class="step__title">
                                     Google Spreadsheet Mapping
@@ -472,6 +463,8 @@
 
                                 </div><!-- .step__content -->
 
+                                <div id="error-message" class="error-message">{{errorMessage}}</div>
+
                                 <div class="step__buttons">
                                     <div class="step__buttons-left">
                                         <paper-button class="sizing__cancel" raised on-tap="cancelImportation" title="Cancel importation">
@@ -488,9 +481,9 @@
                                     </div>
                                 </div><!-- .step__buttons -->
 
-                            </div><!-- .step -->
+                            </template><!-- .step -->
 
-                            <div data-step="3" class="step sizing__step">
+                            <template is="dom-if" if="{{isStepActive(stepNumber, 3)}}" restamp="true">
 
                                 <h3 class="step__title">
                                     Confirmation
@@ -555,9 +548,12 @@
 
                                 </form><!-- .tb-form -->
 
-                            </div><!-- .step -->
+                            </template><!-- .step -->
 
-                            <div data-step="4" class="step sizing__step">
+                            <template is="dom-if" if="{{isStepActive(stepNumber, 4)}}" restamp="true">
+                                <h3 class="step__title">
+                                    Import Progress
+                                </h3>
 
                                 <div class="step__content">
                                     <progress-bar class="importation-progress" percent="{{statusPercent}}" message="{{statusMessage}}"></progress-bar>
@@ -578,15 +574,11 @@
                                     </div><!-- .step__buttons -->
                                 </template>
 
-                            </div><!-- .step -->
+                            </template><!-- .step -->
 
                         </div><!-- .steps__content -->
 
                     </div><!-- .steps -->
-
-                    <template is="dom-if" if="{{errorMessage}}">
-                        <div id="errorMessage" class="error-message">{{errorMessage}}</div>
-                    </template>
 
                 </div><!-- .content-box -->
 
@@ -870,7 +862,6 @@
                     this.spreadsheetDataHeader = response.headers;
                     this.spreadsheetDataRows = response.rows;
                     this.spreadsheetDataTotalLines = response.totalLinesCount;
-                    this.errorMessage = "";
                     this.goToStep(3);
                     this.loadingDisable();
                 },
@@ -901,9 +892,8 @@
                         contentType: 'application/json',
                         success: function () {},
                         error: function (jqXhr, textStatus, errorThrown) {
-                            self.errorMessage = 'Failed to import';
-                            self.statusMessage = '';
-                            this.isImportationCompleted = true;
+                            self.statusMessage = 'Failed to import';
+                            self.isImportationCompleted = true;
                         }
                     });
 
@@ -915,7 +905,6 @@
                     this.isImportationCompleted = false;
                     this.statusPercent = 0;
                     this.statusMessage = "Starting to import...";
-                    this.errorMessage = "";
 
                     this.goToStep(4);
                 },
@@ -957,13 +946,11 @@
                 },
 
                 collapseCustomFieldsMappingTap: function (e) {
-                    this.$.collapseCustomFieldsMapping.toggle();
-
-                    if (this.$.collapseCustomFieldsMapping.opened) {
-                        this.$.collapseCustomFieldsMappingToggleIcon.icon = 'expand-more';
-                    } else {
-                        this.$.collapseCustomFieldsMappingToggleIcon.icon = 'chevron-right';
-                    }
+                    var collapse = this.$$('#collapseCustomFieldsMapping');
+                    var collapseIcon = this.$$('#collapseCustomFieldsMappingToggleIcon');
+                    
+                    collapse.toggle();
+                    collapseIcon.icon = collapse.opened ? 'expand-more' : 'chevron-right';
                 },
 
                 getCustomFieldClass: function(field) {
@@ -1093,6 +1080,19 @@
                     return index + 1;
                 },
 
+                isStepActive: function(currentStep, step) {
+                    return currentStep == step;                    
+                },
+                
+                getStepNumberClass: function(currentStep, step) {
+                    var classes = 'steps__number';
+                    
+                    if (currentStep == step)
+                        classes += ' active';
+                    
+                    return classes;
+                },
+                
                 previousStep: function() {
                     this.errorMessage = "";
                     this.stepNumber--;
@@ -1106,14 +1106,6 @@
 
                 goToStep: function(stepNumber) {
                     this.stepNumber = stepNumber;
-                    var stepItemsToDesactive = this.querySelectorAll('[data-step].active');
-                    stepItemsToDesactive.forEach(function(step) {
-                        step.classList.remove('active');
-                    });
-                    var stepItemsToActive = this.querySelectorAll('[data-step="' + this.stepNumber + '"]');
-                    stepItemsToActive.forEach(function(step) {
-                        step.classList.add('active');
-                    });
                     this.$.modal.notifyResize();
                 }
             });

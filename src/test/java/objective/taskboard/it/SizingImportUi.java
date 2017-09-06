@@ -21,105 +21,143 @@ public class SizingImportUi extends AbstractUiFragment {
     @FindBy(className="sizingimport-modal")
     private WebElement modal;
 
-    List<WebElement> stepsNumbers;
+    @FindBy(id="error-message")
+    private WebElement errorMessageTitle;
+
+    private SizingStepOne stepOne;
+    private SizingStepTwo stepTwo;
+    private SizingStepThree stepThree;
+    private SizingStepFour stepFour;
 
     public SizingImportUi(WebDriver driver) {
         super(driver);
+        initElements(driver, this);
+        
+        stepOne = new SizingStepOne(webDriver);
+        stepTwo = new SizingStepTwo(webDriver);
+        stepThree = new SizingStepThree(webDriver);
+        stepFour = new SizingStepFour(webDriver);
     }
 
     public static SizingImportUi open(WebDriver webDriver) {
-        return initElements(webDriver, SizingImportUi.class).open();
+        return new SizingImportUi(webDriver).open();
     }
 
     private SizingImportUi open() {
         buttonOpenSizing.click();
         waitVisibilityOfElement(sizing);
-        stepsNumbers = sizing.findElements(By.cssSelector(".steps__number[data-step]"));
         return this;
     }
 
-    public SizingStepOne showStepOne() {
-        return new SizingStepOne();
+    public SizingStepOne waitForStepOne() {
+        stepOne.waitForStep();
+        return stepOne;
     }
 
-    public void assertWithShowingError(Boolean showingError) {
-        if (showingError)
-            waitUntilElementExists(By.id("errorMessage"));
-        else
-            waitUntilElementNotExists(By.id("errorMessage"));
+    public SizingStepTwo waitForStepTwo() {
+        stepTwo.waitForStep();
+        return stepTwo;
     }
 
-    public void asserWithShowingSizing(Boolean showingSizing) {
-        if (showingSizing)
-            waitVisibilityOfElement(modal);
-        else
-            waitInvisibilityOfElement(modal);
+    public SizingStepThree waitForStepThree() {
+        stepThree.waitForStep();
+        return stepThree;
     }
 
-    public void assertShowingCorrectStep(Integer stepNumber) {
-        WebElement activeStepNumber = stepsNumbers.get(stepNumber - 1);    	
-        waitAttributeValueInElementContains(activeStepNumber, "class",  "active");
-
-        WebElement step = webDriver.findElement(By.cssSelector(".sizing__step.active[data-step='" + stepNumber + "'"));
-        waitVisibilityOfElement(step);
+    public SizingStepFour waitForStepFour() {
+        stepFour.waitForStep();
+        return stepFour;
     }
 
-    private void removeValues(WebElement element) {
+    public void assertErrorMessage(String expectedTitle) {
+        waitTextInElement(errorMessageTitle, expectedTitle);
+    }
+
+    public void assertNoErrorMessage() {
+        waitUntilElementNotExists(By.id("error-message-title"));
+    }
+
+    public void assertIsOpen() {
+        waitVisibilityOfElement(modal);
+    }
+    
+    public void assertIsClosed() {
+        waitInvisibilityOfElement(modal);
+    }
+
+    private static void removeValues(WebElement element) {
         while(!"".equals(element.getAttribute("value")))
             element.sendKeys(Keys.BACK_SPACE);
     }
+    
+    static abstract class SizingStep extends AbstractUiFragment {
+        private final Integer stepNumber;
+        private final String title;
 
-    abstract class SizingMiddleStep {
+        @FindBy(css="#sizingimport #stepsNumbers .steps__number.active")
+        private WebElement activeStepNumber;
+        
+        @FindBy(css="#sizingimport .step__title")
+        private WebElement titleElement;
+        
+        public SizingStep(WebDriver driver, Integer stepNumber, String title) {
+            super(driver);
+            initElements(driver, this);
 
-        protected Integer stepNumber;
+            this.stepNumber = stepNumber;
+            this.title = title;
+        }
+        
+        public void waitForStep() {
+            waitTextInElement(activeStepNumber, stepNumber.toString());
+            waitTextInElement(titleElement, title);
+        }
+    }
 
-        protected WebElement step;
+    static abstract class SizingMiddleStep extends SizingStep {
+
+        @FindBy(css="#sizingimport .steps__content .sizing__back")
         protected WebElement buttonBack;
+        
+        @FindBy(css="#sizingimport .steps__content .sizing__cancel")
         protected WebElement buttonCancel;
+        
+        @FindBy(css="#sizingimport .steps__content .sizing__submit")
         protected WebElement buttonSubmit;
+
+        public SizingMiddleStep(WebDriver driver, Integer stepNumber, String title) {
+            super(driver, stepNumber, title);
+        }
 
         public void cancel() {
             buttonCancel.click();
-            waitInvisibilityOfElement(modal);
         }
 
-        protected void setDefaultMiddleStepElements() {
-            step = sizing.findElement(By.cssSelector(".sizing__step[data-step='" + stepNumber + "']"));
-            waitVisibilityOfElement(step);
-            buttonBack = step.findElement(By.cssSelector(".sizing__back"));
-            buttonCancel = step.findElement(By.cssSelector(".sizing__cancel"));
-            buttonSubmit = step.findElement(By.cssSelector(".sizing__submit"));
-            waitVisibilityOfElements(buttonBack, buttonCancel, buttonSubmit);
+        public void backStep() {
+            buttonBack.click();
         }
 
+        public void submitStep() {
+            buttonSubmit.click();
+        }
     }
 
-    class SizingStepOne {
+    static class SizingStepOne extends SizingStep {
 
-        private Integer stepNumber;
-
-        private WebElement step;
+        @FindBy(css="#sizingimport .steps__content .sizing__cancel")
         private WebElement buttonCancel;
+
+        @FindBy(css="#sizingimport .steps__content .sizing__submit")
         private WebElement buttonSubmit;
 
+        @FindBy(css="#sizingimport .steps__content #projectkey")
         private WebElement selectProjectElement;
+        
+        @FindBy(css="#sizingimport .steps__content #spreadsheetUrl")
         private WebElement spreadsheetUrl;
 
-        public SizingStepOne() {
-            stepNumber = 1;
-            setDefaultFirstStepElements();
-
-            spreadsheetUrl = step.findElement(By.id("spreadsheetUrl"));  
-            selectProjectElement = step.findElement(By.id("projectkey"));
-            waitVisibilityOfElements(selectProjectElement,spreadsheetUrl);
-        }
-
-        private void setDefaultFirstStepElements() {
-            step = sizing.findElement(By.cssSelector(".sizing__step[data-step='" + stepNumber + "']"));
-            waitVisibilityOfElement(step);
-            buttonCancel = step.findElement(By.cssSelector(".sizing__cancel"));
-            buttonSubmit = step.findElement(By.cssSelector(".sizing__submit"));
-            waitVisibilityOfElements(buttonCancel, buttonSubmit);
+        public SizingStepOne(WebDriver driver) {
+            super(driver, 1, "Checking authorization");
         }
 
         public SizingStepOne withSpreadsheetUrl(String url) {
@@ -128,42 +166,31 @@ public class SizingImportUi extends AbstractUiFragment {
             return this;
         }
 
-        public void assertCanCancel() {
-            cancel();
-        }
-
         protected void cancel() {
             buttonCancel.click();
-            waitInvisibilityOfElement(modal);
         }
 
-        public SizingStepOne submitStep() {
+        public void submitStep() {
             buttonSubmit.click();
-            return this;
         }
-
-        public SizingStepTwo showStepTwo() {
-            return new SizingStepTwo();
-        }
-
     }
 
-    class SizingStepTwo extends SizingMiddleStep {
+    static class SizingStepTwo extends SizingMiddleStep {
 
+        @FindBy(css="#sizingimport .steps__content .sizing__open-advanced-mapping")
         private WebElement buttonAdvancedMapping;
+
+        @FindBy(css="#sizingimport .sizing__mapping-column")
         private List<WebElement> columnsOfAdvancedMapping;
+        
+        @FindBy(css="#sizingimport .sizing__mapping-column.is-required")
         private List<WebElement> requiredColumnsOfAdvancedMapping;
 
-        public SizingStepTwo() {
-            stepNumber = 2;
-            setDefaultMiddleStepElements();
-            buttonAdvancedMapping = step.findElement(By.cssSelector(".sizing__open-advanced-mapping"));
-            waitVisibilityOfElement(buttonAdvancedMapping);
-            waitUntilElementExists(By.cssSelector(".sizing__mapping-column[data-index='1']"));
+        public SizingStepTwo(WebDriver driver) {
+            super(driver, 2, "Google Spreadsheet Mapping");
         }
 
         public SizingStepTwo withRepeatedColumns() {
-            openAdvancedMappingAndGetElements();
             columnsOfAdvancedMapping.forEach(column -> {
                 removeValues(column);
                 column.sendKeys("A");
@@ -172,7 +199,6 @@ public class SizingImportUi extends AbstractUiFragment {
         }
 
         public SizingStepTwo withRequiredFieldsWithoutValues() {
-            openAdvancedMappingAndGetElements();
             requiredColumnsOfAdvancedMapping.forEach(column -> {
                 removeValues(column);
             });
@@ -180,112 +206,57 @@ public class SizingImportUi extends AbstractUiFragment {
         }
 
         public SizingStepTwo withColumnValue(Integer columnIndex, String columnValue) {
-            openAdvancedMappingAndGetElements();
             WebElement input = requiredColumnsOfAdvancedMapping.get(columnIndex);
             removeValues(input);
             input.sendKeys(columnValue);
             return this;
         }
 
-        public void assertColumnValueEquals(Integer columnIndex, String columnValue, Boolean isEquals) {
+        public SizingStepTwo assertColumnValueEquals(Integer columnIndex, String columnValue, Boolean isEquals) {
             WebElement input = requiredColumnsOfAdvancedMapping.get(columnIndex);
             waitVisibilityOfElement(input);
             if(isEquals)
                 waitAttributeValueInElement(input, "value", columnValue);
             else
                 waitAttributeValueInElementIsNot(input, "value", columnValue);
-        }
-
-        public SizingStepOne backStep() {
-            buttonSubmit.click();
-            return new SizingStepOne();
-        }
-
-        public SizingStepTwo submitStep() {
-            buttonSubmit.click();
+            
             return this;
         }
 
-        public SizingStepThree showStepThree() {
-            return new SizingStepThree();
-        }
-
-        private void openAdvancedMappingAndGetElements() {
-            WebElement advancedMappingAccordion = step.findElement(By.cssSelector(".tb-accordion__collapse"));
-            if (!Boolean.valueOf(advancedMappingAccordion.getAttribute("aria-expanded"))) {
-                buttonAdvancedMapping.click();
-                WebElement advancedMapping = step.findElement(By.cssSelector(".sizing__advanced-mapping"));
-                waitVisibilityOfElement(advancedMapping);
-                columnsOfAdvancedMapping = step.findElements(By.cssSelector(".sizing__mapping-column"));
-                requiredColumnsOfAdvancedMapping = step.findElements(By.cssSelector(".sizing__mapping-column.is-required"));
-            }
-        }
-
-    }
-
-    class SizingStepThree extends SizingMiddleStep {
-
-        private List<WebElement> spreadSheetHeaderValues;
-        private List<WebElement> spreadSheetValuesOfFirstRow;
-
-        public SizingStepThree() {
-            stepNumber = 3;
-            setDefaultMiddleStepElements();
-
-            spreadSheetHeaderValues = getElementsWhenTheyExists(By.cssSelector(".sizing__confirmation-header-value"));
-            spreadSheetValuesOfFirstRow = getElementsWhenTheyExists(By.cssSelector(".sizing__confirmation-row:first-child .sizing__confirmation-row-value"));
-            waitVisibilityOfElements(spreadSheetHeaderValues.get(0), spreadSheetValuesOfFirstRow.get(0));
-        }
-
-        public SizingStepTwo backStep() {
-            buttonSubmit.click();
-            return new SizingStepTwo();
-        }
-
-        public SizingStepThree submitStep() {
-            buttonSubmit.click();
+        public SizingStepTwo openAdvancedMapping() {
+            buttonAdvancedMapping.click();
+            WebElement advancedMapping = webDriver.findElement(By.cssSelector("#sizingimport .sizing__advanced-mapping"));
+            waitVisibilityOfElement(advancedMapping);
             return this;
         }
-
-        public SizingStepFour showStepFour() {
-            return new SizingStepFour();
-        }
-
     }
 
-    class SizingStepFour {
+    static class SizingStepThree extends SizingMiddleStep {
 
-        private Integer stepNumber;
+        public SizingStepThree(WebDriver driver) {
+            super(driver, 3, "Confirmation");
+        }
+    }
 
-        private WebElement step;
+    static class SizingStepFour extends SizingStep {
+        
+        @FindBy(css="#sizingimport .steps__content .sizing__return-to-taskboard")
         private WebElement buttonReturnToTaskboard;
+        
+        @FindBy(css="#sizingimport .steps__content .sizing__open-spreadsheet")
         private WebElement buttonOpenSpreadsheet;
 
-        public SizingStepFour() {
-            stepNumber = 4;
-            setDefaultLastStepElements();
-            buttonReturnToTaskboard = getElementWhenItExists(By.cssSelector(".sizing__return-to-taskboard"));
-            buttonOpenSpreadsheet = getElementWhenItExists(By.cssSelector(".sizing__open-spreadsheet"));
+        public SizingStepFour(WebDriver driver) {
+            super(driver, 4, "Import Progress");
         }
 
-        public void assertShowingButtonsAfterFinish() {
+        public SizingStepFour assertShowingButtonsAfterFinish() {
             waitVisibilityOfElements(buttonReturnToTaskboard, buttonOpenSpreadsheet);
+            return this;
         }
 
         public void returnToTaskboard() {
             buttonReturnToTaskboard.click();
-            waitInvisibilityOfElement(modal);
         }
-
-        private void setDefaultLastStepElements() {
-            step = sizing.findElement(By.cssSelector(".sizing__step[data-step='" + stepNumber + "']"));
-            waitVisibilityOfElement(step);
-            waitUntilElementExists(By.cssSelector(".sizing__step[data-step='" + stepNumber + "'] .step__buttons"));
-            buttonReturnToTaskboard = step.findElement(By.cssSelector(".sizing__return-to-taskboard"));
-            buttonOpenSpreadsheet = step.findElement(By.cssSelector(".sizing__open-spreadsheet"));
-            waitVisibilityOfElements(buttonReturnToTaskboard, buttonOpenSpreadsheet);
-        }
-
     }
-
 }
