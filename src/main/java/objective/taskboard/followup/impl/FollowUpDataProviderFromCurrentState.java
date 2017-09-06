@@ -190,7 +190,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         
         followUpData.demandId = demand.getId();
         followUpData.demandType = demand.getIssueTypeName();
-        followUpData.demandStatus= demand.getStatusOrderedName();
+        followUpData.demandStatus= demand.getStatusName();
         followUpData.demandNum = demand.getIssueKey();
         followUpData.demandSummary = demand.getSummary();
         followUpData.demandDescription = issueDescription("M", demand);
@@ -247,7 +247,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         
         if (demand != null) {
             followUpData.demandType = demand.getIssueTypeName();
-            followUpData.demandStatus= demand.getStatusOrderedName();
+            followUpData.demandStatus= demand.getStatusName();
             followUpData.demandId = demand.getId();
             followUpData.demandNum = demand.getIssueKey();
             followUpData.demandSummary = demand.getSummary();
@@ -257,7 +257,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         }
         
         followUpData.taskType = task.getIssueTypeName();
-        followUpData.taskStatus = task.getStatusOrderedName();
+        followUpData.taskStatus = task.getStatusName();
         followUpData.taskId = task.getId();
         followUpData.taskNum = task.getIssueKey();
         followUpData.taskSummary=task.getSummary();
@@ -295,7 +295,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         if (demand != null) {
             followUpData.demandId = demand.getId();
             followUpData.demandType = demand.getIssueTypeName();
-            followUpData.demandStatus= demand.getStatusOrderedName();
+            followUpData.demandStatus= demand.getStatusName();
             followUpData.demandNum = demand.getIssueKey();
             followUpData.demandSummary = demand.getSummary();
             followUpData.demandDescription = issueDescription("",demand);
@@ -305,7 +305,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         }
         
         followUpData.taskType = task.getIssueTypeName();
-        followUpData.taskStatus = task.getStatusOrderedName();
+        followUpData.taskStatus = task.getStatusName();
         followUpData.taskId = task.getId();
         followUpData.taskNum = task.getIssueKey();
         followUpData.taskSummary=task.getSummary();
@@ -316,7 +316,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         followUpData.taskPriorityOrder = task.getPriorityOrder();
         
         followUpData.subtaskType = subtask.getIssueTypeName();
-        followUpData.subtaskStatus = subtask.getStatusOrderedName();
+        followUpData.subtaskStatus = subtask.getStatusName();
         followUpData.subtaskId = subtask.getId();
         followUpData.subtaskNum = subtask.getIssueKey();
         followUpData.subtaskSummary = subtask.getSummary();

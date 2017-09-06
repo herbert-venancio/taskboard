@@ -31,22 +31,22 @@
     <tableColumn id="39" uniqueName="39" name="TASK_BALLPARK" queryTableFieldId="86"/>
     <tableColumn id="40" uniqueName="40" name="tshirt_size" queryTableFieldId="87"/>
     <tableColumn id="41" uniqueName="41" name="Query_Type" queryTableFieldId="92"/>
-    <tableColumn id="24" uniqueName="24" name="EffortEstimate" queryTableFieldId="78" dataDxfId="163"/>
-    <tableColumn id="26" uniqueName="26" name="CycleEstimate" queryTableFieldId="84" dataDxfId="162"/>
-    <tableColumn id="14" uniqueName="14" name="EffortOnBacklog" queryTableFieldId="88" dataDxfId="161"/>
-    <tableColumn id="48" uniqueName="48" name="CycleOnBacklog" queryTableFieldId="93" dataDxfId="160"/>
-    <tableColumn id="31" uniqueName="31" name="BallparkEffort" queryTableFieldId="52" dataDxfId="159"/>
-    <tableColumn id="30" uniqueName="30" name="PlannedEffort" queryTableFieldId="51" dataDxfId="158"/>
-    <tableColumn id="25" uniqueName="25" name="EffortDone" queryTableFieldId="25" dataDxfId="157"/>
-    <tableColumn id="49" uniqueName="49" name="CycleDone" queryTableFieldId="94" dataDxfId="156"/>
-    <tableColumn id="21" uniqueName="21" name="WorklogDone" queryTableFieldId="96" dataDxfId="155"/>
-    <tableColumn id="27" uniqueName="27" name="WorklogDoing" queryTableFieldId="97" dataDxfId="154"/>
-    <tableColumn id="37" uniqueName="37" name="CountTasks" queryTableFieldId="37" dataDxfId="153"/>
-    <tableColumn id="36" uniqueName="36" name="CountDemands" queryTableFieldId="36" dataDxfId="152"/>
-    <tableColumn id="38" uniqueName="38" name="CountSubtasks" queryTableFieldId="38" dataDxfId="151"/>
-    <tableColumn id="34" uniqueName="34" name="SubtaskEstimativeForEEPCalculation" queryTableFieldId="34" dataDxfId="150"/>
-    <tableColumn id="46" uniqueName="46" name="PlannedEffortOnBug" queryTableFieldId="57" dataDxfId="149"/>
-    <tableColumn id="47" uniqueName="47" name="WorklogOnBug" queryTableFieldId="58" dataDxfId="148"/>
+    <tableColumn id="24" uniqueName="24" name="EffortEstimate" queryTableFieldId="78"/>
+    <tableColumn id="26" uniqueName="26" name="CycleEstimate" queryTableFieldId="84"/>
+    <tableColumn id="14" uniqueName="14" name="EffortOnBacklog" queryTableFieldId="88"/>
+    <tableColumn id="48" uniqueName="48" name="CycleOnBacklog" queryTableFieldId="93"/>
+    <tableColumn id="31" uniqueName="31" name="BallparkEffort" queryTableFieldId="52"/>
+    <tableColumn id="30" uniqueName="30" name="PlannedEffort" queryTableFieldId="51"/>
+    <tableColumn id="25" uniqueName="25" name="EffortDone" queryTableFieldId="25"/>
+    <tableColumn id="49" uniqueName="49" name="CycleDone" queryTableFieldId="94"/>
+    <tableColumn id="21" uniqueName="21" name="WorklogDone" queryTableFieldId="96"/>
+    <tableColumn id="27" uniqueName="27" name="WorklogDoing" queryTableFieldId="97"/>
+    <tableColumn id="37" uniqueName="37" name="CountTasks" queryTableFieldId="37"/>
+    <tableColumn id="36" uniqueName="36" name="CountDemands" queryTableFieldId="36"/>
+    <tableColumn id="38" uniqueName="38" name="CountSubtasks" queryTableFieldId="38"/>
+    <tableColumn id="34" uniqueName="34" name="SubtaskEstimativeForEEPCalculation" queryTableFieldId="34"/>
+    <tableColumn id="46" uniqueName="46" name="PlannedEffortOnBug" queryTableFieldId="57"/>
+    <tableColumn id="47" uniqueName="47" name="WorklogOnBug" queryTableFieldId="58"/>
   </tableColumns>
   <tableStyleInfo name="TableStyleMedium2" showFirstColumn="0" showLastColumn="0" showRowStripes="1" showColumnStripes="0"/>
 </table>
