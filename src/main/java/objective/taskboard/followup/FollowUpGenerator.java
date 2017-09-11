@@ -77,7 +77,7 @@ public class FollowUpGenerator {
             Map<String, Long> sharedStrings = getSharedStringsInitial();
 
             File fileSheet7 = new File(directoryTempFollowup, PATH_SHEET7);
-            List<FollowUpData> jiraData = provider.getJiraData(includedProjects);
+            List<FromJiraDataRow> jiraData = provider.getJiraData(includedProjects);
             write(fileSheet7, generateJiraDataSheet(sharedStrings, jiraData));
             File fileSharedStrings = new File(directoryTempFollowup, PATH_SHARED_STRINGS);
             write(fileSharedStrings, generateSharedStrings(sharedStrings));
@@ -126,16 +126,16 @@ public class FollowUpGenerator {
     }
 
     String generateJiraDataSheet(Map<String, Long> sharedStrings, String [] includedProjects) {
-        List<FollowUpData> jiraData = provider.getJiraData(includedProjects);
+        List<FromJiraDataRow> jiraData = provider.getJiraData(includedProjects);
         return generateJiraDataSheet(sharedStrings, jiraData);
     }
 
-    String generateJiraDataSheet(Map<String, Long> sharedStrings, List<FollowUpData> jiraData) {
+    String generateJiraDataSheet(Map<String, Long> sharedStrings, List<FromJiraDataRow> jiraData) {
         String rowTemplate = getStringFromXML(template.getPathSheet7RowTemplate());
         StringBuilder rows = new StringBuilder();
         int rowNumber = 2;
 
-        for (FollowUpData followUpData : jiraData) {
+        for (FromJiraDataRow followUpData : jiraData) {
             Map<String, Object> rowValues = new HashMap<>();
             rowValues.put("rowNumber", rowNumber);
             rowValues.put("project", getOrSetIndexInSharedStrings(sharedStrings, followUpData.project));

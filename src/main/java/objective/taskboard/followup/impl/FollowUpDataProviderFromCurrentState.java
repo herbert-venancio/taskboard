@@ -38,7 +38,7 @@ import org.springframework.util.StringUtils;
 
 import objective.taskboard.data.CustomField;
 import objective.taskboard.data.Issue;
-import objective.taskboard.followup.FollowUpData;
+import objective.taskboard.followup.FromJiraDataRow;
 import objective.taskboard.followup.FollowupDataProvider;
 import objective.taskboard.issueBuffer.AllIssuesBufferService;
 import objective.taskboard.issueBuffer.IssueBufferState;
@@ -59,7 +59,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
     
     private Map<String, Issue> demandsByKey;
     private Map<String, Issue> featuresByKey;
-    private Map<String, FollowUpData> followUpBallparks;
+    private Map<String, FromJiraDataRow> followUpBallparks;
     
     @Override
     public IssueBufferState getFollowupState() {
@@ -67,7 +67,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
     }
     
     @Override
-    public List<FollowUpData> getJiraData(String[] includeProjects) {
+    public List<FromJiraDataRow> getJiraData(String[] includeProjects) {
         List<String> i = Arrays.asList(includeProjects);
         List<Issue> issuesVisibleToUser = issueBufferService.getAllIssues().stream()
 	         .filter(issue -> isAllowedStatus(issue.getStatus()))
@@ -76,17 +76,17 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
 
         LinkedList<Issue> issues = new LinkedList<>(issuesVisibleToUser);
         
-        followUpBallparks = new LinkedHashMap<String, FollowUpData>();
+        followUpBallparks = new LinkedHashMap<String, FromJiraDataRow>();
         
         demandsByKey = makeDemandBallparks(issues);
         
         featuresByKey = makeFeatureBallparks(issues);
         
-        final List<FollowUpData> result = makeSubtasks(issues);
+        final List<FromJiraDataRow> result = makeSubtasks(issues);
 
         result.addAll(followUpBallparks.values());
         
-        result.sort(Comparator.comparingInt((FollowUpData f) -> f.demandStatusPriority)
+        result.sort(Comparator.comparingInt((FromJiraDataRow f) -> f.demandStatusPriority)
                 .thenComparingLong(f -> f.demandPriorityOrder)
                 .thenComparingInt(f -> f.taskStatusPriority)
                 .thenComparingLong(f -> f.taskPriorityOrder)
@@ -143,9 +143,9 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         return features;
     }
 
-    private List<FollowUpData> makeSubtasks(LinkedList<Issue> issues) {
+    private List<FromJiraDataRow> makeSubtasks(LinkedList<Issue> issues) {
         
-        final List<FollowUpData> subtasksFollowups = new LinkedList<FollowUpData>();
+        final List<FromJiraDataRow> subtasksFollowups = new LinkedList<FromJiraDataRow>();
         Iterator<Issue> it = issues.iterator();
         while(it.hasNext()) {
             Issue issue = it.next();
@@ -183,8 +183,8 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         return mappings;
     }
 
-    private FollowUpData createBallparkDemand(Issue demand) {
-        FollowUpData followUpData = new FollowUpData();
+    private FromJiraDataRow createBallparkDemand(Issue demand) {
+        FromJiraDataRow followUpData = new FromJiraDataRow();
         followUpData.planningType = "Ballpark";
         followUpData.project = demand.getProject();
         
@@ -240,8 +240,8 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         return issue.getTimeTracking().getOriginalEstimateMinutes()/60.0;
     }
     
-    private FollowUpData createBallparkFeature(Issue demand, Issue task, BallparkMapping ballparkMapping) {
-        FollowUpData followUpData = new FollowUpData();
+    private FromJiraDataRow createBallparkFeature(Issue demand, Issue task, BallparkMapping ballparkMapping) {
+        FromJiraDataRow followUpData = new FromJiraDataRow();
         followUpData.planningType = "Ballpark";
         followUpData.project = task.getProject();
         
@@ -287,8 +287,8 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         return metadataService.getStatusById(jiraProperties.getFollowup().getBallparkDefaultStatus()).getName();
     }
 
-    private FollowUpData createSubTaskFollowup(Issue demand, Issue task, Issue subtask) {
-        FollowUpData followUpData = new FollowUpData();
+    private FromJiraDataRow createSubTaskFollowup(Issue demand, Issue task, Issue subtask) {
+        FromJiraDataRow followUpData = new FromJiraDataRow();
         followUpData.planningType = "Plan";
         followUpData.project = task.getProject();
         

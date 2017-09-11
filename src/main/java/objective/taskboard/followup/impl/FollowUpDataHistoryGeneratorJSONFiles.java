@@ -46,7 +46,7 @@ import com.google.gson.GsonBuilder;
 
 import objective.taskboard.database.directory.DataBaseDirectory;
 import objective.taskboard.domain.ProjectFilterConfiguration;
-import objective.taskboard.followup.FollowUpData;
+import objective.taskboard.followup.FromJiraDataRow;
 import objective.taskboard.followup.FollowUpDataHistoryGenerator;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 
@@ -118,7 +118,7 @@ public class FollowUpDataHistoryGeneratorJSONFiles implements FollowUpDataHistor
             Path pathJSON = pathProject.resolve(TODAY + EXTENSION_JSON);
 
             try {
-                List<FollowUpData> jiraData = providerFromCurrentState.getJiraData(projectKey.split(","));
+                List<FromJiraDataRow> jiraData = providerFromCurrentState.getJiraData(projectKey.split(","));
                 write(pathJSON.toFile(), gson.toJson(jiraData));
 
                 Path pathZIP = Paths.get(pathJSON.toString() + EXTENSION_ZIP);
