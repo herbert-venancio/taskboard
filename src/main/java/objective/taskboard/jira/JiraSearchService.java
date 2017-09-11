@@ -33,9 +33,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
+import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.commons.lang3.Validate;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -55,6 +57,7 @@ import objective.taskboard.jira.JiraService.ParametrosDePesquisaInvalidosExcepti
 import objective.taskboard.jira.JiraService.PermissaoNegadaException;
 import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
 import objective.taskboard.repository.ParentIssueLinkRepository;
+import org.springframework.web.client.HttpServerErrorException;
 
 @Service
 public class JiraSearchService {
@@ -143,8 +146,22 @@ public class JiraSearchService {
                          .put(MAX_RESULTS_ATTRIBUTE, MAX_RESULTS)
                          .put(START_AT_ATTRIBUTE, startFrom * MAX_RESULTS)
                          .put(FIELDS_ATTRIBUTE, fields);
-       
-            String jsonResponse = jiraEndpointAsMaster.postWithRestTemplate(PATH_REST_API_SEARCH, APPLICATION_JSON, searchRequest);
+
+            boolean retry = true;
+            String jsonResponse = null;
+            for(int attempts = 0; retry && attempts < 3; ++attempts) {
+                try {
+                    jsonResponse = jiraEndpointAsMaster.postWithRestTemplate(PATH_REST_API_SEARCH, APPLICATION_JSON, searchRequest);
+                    retry = false;
+                } catch (HttpServerErrorException ex) {
+                    if (ex.getStatusCode() == HttpStatus.GATEWAY_TIMEOUT) {
+                        Uninterruptibles.sleepUninterruptibly(5, TimeUnit.SECONDS);
+                    } else {
+                        throw ex;
+                    }
+                }
+            }
+
             SearchResult searchResult = searchResultParser.parse(new JSONObject(jsonResponse));
             log.debug("⬣⬣⬣⬣⬣  searchIssues... ongoing..." + (searchResult.getStartIndex() + searchResult.getMaxResults())+ "/" + searchResult.getTotal());
             return searchResult;
