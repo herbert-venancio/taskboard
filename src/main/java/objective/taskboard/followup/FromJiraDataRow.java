@@ -23,7 +23,7 @@ import static org.apache.commons.lang.ObjectUtils.defaultIfNull;
  * [/LICENSE]
  */
 
-public class FollowUpData {
+public class FromJiraDataRow {
     public String planningType;
     public String project;
     public String demandType = "";

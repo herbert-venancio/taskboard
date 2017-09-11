@@ -27,8 +27,8 @@ import java.util.List;
 
 public class FollowUpHelper {
 
-    public static FollowUpData getFollowUpDataDefault() {
-        FollowUpData followUpData = new FollowUpData();
+    public static FromJiraDataRow getFollowUpDataDefault() {
+        FromJiraDataRow followUpData = new FromJiraDataRow();
         followUpData.planningType = "Ballpark";
         followUpData.project = "PROJECT TEST";
         followUpData.demandType = "Demand";
@@ -61,12 +61,12 @@ public class FollowUpHelper {
         return followUpData;
     }
 
-    public static List<FollowUpData> getFollowUpDataDefaultList() {
+    public static List<FromJiraDataRow> getFollowUpDataDefaultList() {
         return Collections.singletonList(getFollowUpDataDefault());
     }
 
-    public static void assertFollowUpDataDefault(FollowUpData actual) {
-        FollowUpData expected = getFollowUpDataDefault();
+    public static void assertFollowUpDataDefault(FromJiraDataRow actual) {
+        FromJiraDataRow expected = getFollowUpDataDefault();
         assertEquals("planningType", expected.planningType, actual.planningType);
         assertEquals("project", expected.project, actual.project);
         assertEquals("demandType", expected.demandType, actual.demandType);

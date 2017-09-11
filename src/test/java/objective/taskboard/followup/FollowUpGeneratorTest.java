@@ -33,13 +33,11 @@ import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import objective.taskboard.followup.impl.DefaultFollowUpTemplateStorage;
-
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.io.Resource;
 import org.xml.sax.SAXException;
 
+import objective.taskboard.followup.impl.DefaultFollowUpTemplateStorage;
 import objective.taskboard.utils.IOUtilities;
 
 public class FollowUpGeneratorTest {
@@ -137,7 +135,7 @@ public class FollowUpGeneratorTest {
 
     @Test
     public void generateJiraDataSheetWithSomeEmptyAndNullAttributesJiraDataTest() throws ParserConfigurationException, SAXException, IOException {
-        FollowUpData followupDefault = FollowUpHelper.getFollowUpDataDefault();
+        FromJiraDataRow followupDefault = FollowUpHelper.getFollowUpDataDefault();
         followupDefault.project = "";
         followupDefault.demandType = null;
         followupDefault.taskId = 0L;
@@ -193,7 +191,7 @@ public class FollowUpGeneratorTest {
                 , resolve(PATH_TABLE7_TEMPLATE)));
     }
 
-    private FollowupDataProvider getFollowupDataProvider(List<FollowUpData> jiraData) {
+    private FollowupDataProvider getFollowupDataProvider(List<FromJiraDataRow> jiraData) {
         FollowupDataProvider provider = mock(FollowupDataProvider.class);
         when(provider.getJiraData(emptyArray())).thenReturn(jiraData);
         return provider;
