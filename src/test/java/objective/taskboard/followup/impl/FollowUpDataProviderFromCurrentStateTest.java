@@ -53,7 +53,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import objective.taskboard.data.Issue;
 import objective.taskboard.data.IssueScratch;
 import objective.taskboard.data.TaskboardTimeTracking;
-import objective.taskboard.followup.FollowUpData;
+import objective.taskboard.followup.FromJiraDataRow;
 import objective.taskboard.issueBuffer.AllIssuesBufferService;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraProperties.BallparkMapping;
@@ -1447,10 +1447,10 @@ public class FollowUpDataProviderFromCurrentStateTest {
         followup.setBallparkMappings(ballparkMappings);
     }
     
-    private List<FollowUpData> sortJiraDataByIssuesKeys(List<FollowUpData> actual) {
-        Collections.sort(actual, new Comparator<FollowUpData>() {
+    private List<FromJiraDataRow> sortJiraDataByIssuesKeys(List<FromJiraDataRow> actual) {
+        Collections.sort(actual, new Comparator<FromJiraDataRow>() {
             @Override
-            public int compare(FollowUpData o1, FollowUpData o2) {
+            public int compare(FromJiraDataRow o1, FromJiraDataRow o2) {
                 return (o1.demandNum + o1.taskNum + o1.subtaskNum).compareTo(o2.demandNum + o2.taskNum + o2.subtaskNum);
             }
         });
@@ -1458,12 +1458,12 @@ public class FollowUpDataProviderFromCurrentStateTest {
     }
 
     private void assertFollowupsForIssuesEqualsOrdered(String expectedFollowupList) {
-        List<FollowUpData> actual = subject.getJiraData(defaultProjects());
+        List<FromJiraDataRow> actual = subject.getJiraData(defaultProjects());
         assertEquals(expectedFollowupList, StringUtils.join(actual, "\n\n"));
     }
 
     private void assertFollowupsForIssuesEquals(String expectedFollowupList) {
-        List<FollowUpData> actual = sortJiraDataByIssuesKeys(subject.getJiraData(defaultProjects()));
+        List<FromJiraDataRow> actual = sortJiraDataByIssuesKeys(subject.getJiraData(defaultProjects()));
 
         assertEquals(
             expectedFollowupList,

@@ -46,7 +46,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import objective.taskboard.database.directory.DataBaseDirectory;
-import objective.taskboard.followup.FollowUpData;
+import objective.taskboard.followup.FromJiraDataRow;
 import objective.taskboard.followup.FollowupDataProvider;
 import objective.taskboard.issueBuffer.IssueBufferState;
 
@@ -64,10 +64,10 @@ public class FollowUpDataProviderFromHistory implements FollowupDataProvider {
 
     @SuppressWarnings("serial")
     @Override
-    public List<FollowUpData> getJiraData(String[] includeProjects) {
+    public List<FromJiraDataRow> getJiraData(String[] includeProjects) {
         List<String> projects = asList(includeProjects);
 
-        List<FollowUpData> data = new ArrayList<FollowUpData>();
+        List<FromJiraDataRow> data = new ArrayList<FromJiraDataRow>();
         for (String project : projects) {
             String fileZipName = date + EXTENSION_JSON + EXTENSION_ZIP;
             File fileZip = dataBaseDirectory.path(PATH_FOLLOWUP_HISTORY).resolve(project).resolve(fileZipName).toFile();
@@ -84,7 +84,7 @@ public class FollowUpDataProviderFromHistory implements FollowupDataProvider {
                     throw new IllegalStateException(fileJSON.toString() + " not found");
 
                 String json = IOUtils.toString(asResource(fileJSON).getInputStream(), ENCODE_UTF_8);
-                Type type = new TypeToken<List<FollowUpData>>(){}.getType();
+                Type type = new TypeToken<List<FromJiraDataRow>>(){}.getType();
                 data.addAll(gson.fromJson(json, type));
             } catch (IOException e) {
                 throw new RuntimeException(e);
