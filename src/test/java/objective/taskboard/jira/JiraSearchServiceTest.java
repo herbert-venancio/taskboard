@@ -1,9 +1,12 @@
 package objective.taskboard.jira;
 
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONObject;
@@ -28,6 +31,8 @@ import objective.taskboard.jira.JiraProperties.IssueType;
 import objective.taskboard.jira.JiraProperties.IssueType.IssueTypeDetails;
 import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
 import objective.taskboard.utils.IOUtilities;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpServerErrorException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JiraSearchServiceTest {
@@ -101,7 +106,42 @@ public class JiraSearchServiceTest {
         
         assertEquals("TASKB-686,TASKB-685", collector.collectedIssues());
     }
-    
+
+    @Test
+    public void whenSearchIssuesTimeout_shouldRetry() {
+        AtomicInteger attempts = new AtomicInteger();
+        when(jiraEndpointAsMaster.postWithRestTemplate(Matchers.anyString(), Matchers.any(), Matchers.any()))
+                .thenAnswer(invocation -> {
+                    int attempt = attempts.incrementAndGet();
+                    if(attempt > 1) {
+                        return result("TASKB-688");
+                    } else {
+                        throw new HttpServerErrorException(HttpStatus.GATEWAY_TIMEOUT, "failed attempt " + attempt);
+                    }
+                });
+
+        SearchAndCollectFoundIssues collector = new SearchAndCollectFoundIssues();
+        subject.searchIssuesAndParents(collector,"");
+
+        assertEquals("TASKB-688", collector.collectedIssues());
+    }
+
+    @Test
+    public void whenSearchIssuesFails_shouldNotRetry() {
+        AtomicInteger attempts = new AtomicInteger();
+        when(jiraEndpointAsMaster.postWithRestTemplate(Matchers.anyString(), Matchers.any(), Matchers.any()))
+                .thenAnswer(invocation -> {
+                    int attempt = attempts.incrementAndGet();
+                    throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "failed attempt " + attempt);
+                });
+
+        SearchAndCollectFoundIssues collector = new SearchAndCollectFoundIssues();
+        try {
+            subject.searchIssuesAndParents(collector, "");
+        } catch (HttpServerErrorException ex) {
+            assertThat(attempts.get(), is(1));
+        }
+    }
 
     public static String result(String string) {
         return IOUtilities.resourceToString(IOUtilities.class, "/objective-jira-teste/"+"search_" + string + ".json");
