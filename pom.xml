@@ -26,6 +26,8 @@
 		<jacoco.itReportPath>${project.build.directory}/jacoco-it.exec</jacoco.itReportPath>
 		<sonar.jacoco.reportPaths>${jacoco.reportPath}, ${jacoco.itReportPath}</sonar.jacoco.reportPaths>
 		<sonar.javascript.lcov.reportPaths>${project.build.directory}/istanbul-reports/lcov.info</sonar.javascript.lcov.reportPaths>
+		<project.build.date>${maven.build.timestamp}</project.build.date>
+		<maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
 	</properties>
 	<prerequisites>
 		<maven>3.1.0</maven>
@@ -55,6 +57,20 @@
 		<tag>HEAD</tag>
 	</scm>
 	<build>
+	
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>false</filtering>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>taskboard-build.properties</include>
+				</includes>
+			</resource>
+		</resources>
 		<plugins>
 
 			<plugin>
@@ -541,24 +557,9 @@
 			<version>2.2.0</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>4.2.1-atlassian-2</version><!--$NO-MVN-MAN-VER$ -->
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpasyncclient</artifactId>
-			<version>4.0-beta3-atlassian-1</version><!--$NO-MVN-MAN-VER$ -->
-		</dependency>
-		<dependency>
 			<groupId>com.atlassian.jira</groupId>
 			<artifactId>jira-rest-java-client-api</artifactId>
 			<version>${jira.api.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.atlassian.jira</groupId>
-			<artifactId>jira-rest-java-client-plugin</artifactId>
-			<version>3.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
