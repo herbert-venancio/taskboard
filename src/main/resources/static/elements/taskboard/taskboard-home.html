@@ -210,7 +210,8 @@
 
         .followup-button,
         .template-followup-button,
-        .sizing-button {
+        .sizing-button,
+        .about-button {
             width: 35px;
             height: 35px;
             padding: 4px;
@@ -220,7 +221,8 @@
 
         .followup-button:hover,
         .template-followup-button:hover,
-        .sizing-button:hover {
+        .sizing-button:hover,
+        .about-button:hover {
             background: #CCC;
             opacity: 0.8;
             -webkit-transition: all .5s;
@@ -260,6 +262,8 @@
         <followup-crud-modal id="followupCrudModal"></followup-crud-modal>
 
         <sizing-import id="sizingimport"></sizing-import>
+
+        <about-modal id="aboutModal"></about-modal>
 
         <paper-spinner id="spinner" active="{{!done}}" alt="Loading..."></paper-spinner>
 
@@ -316,6 +320,10 @@
                         <div>
                             <paper-icon-button icon="save" title="Import Sizing Spreadsheet"
                                                class="sizing-button" on-tap="openSizingImport"></paper-icon-button>
+                        </div>
+                        <div>
+                            <paper-icon-button icon="info" title="Taskboard About"
+                                               class="about-button" on-tap="openAbout"></paper-icon-button>
                         </div>
                     </paper-material>
                     <board-table id="table" conf={{conf}} aspects-filter="{{aspectsFilter}}"></board-table>
@@ -524,6 +532,10 @@
 
                 openFollowupCrudModal: function() {
                     this.$.followupCrudModal.open();
+                },
+
+                openAbout: function() {
+                    this.$.aboutModal.open();
                 },
 
                 searchFilterChanged: function(event, data) {
