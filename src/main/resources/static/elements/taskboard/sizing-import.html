@@ -119,11 +119,9 @@
         }
 
         .error-message {
-            color: red;
-            font-weight: bold;
-            margin-top: 30px;
+            margin-top: 10px;
         }
-
+        
         .buttonClose {
             min-width: auto;
             display: inline;
@@ -230,8 +228,7 @@
 
         .step__buttons {
             display: flex;
-
-            margin-top: 30px;
+            margin-top: 20px;
         }
 
         .step__content paper-button {
@@ -346,7 +343,7 @@
                         
                             <template is="dom-if" if="{{isStepActive(stepNumber, 1)}}" restamp="true">
                                 <h3 class="step__title">
-                                    Checking authorization
+                                    Checking authorization and spreadsheet format
                                 </h3>
 
                                 <div class="tb-text step__text">
@@ -369,10 +366,18 @@
                                         <div class="tb-form__row">
                                             <label for="spreadsheetUrl">Insert the URL of your Google Spreadsheet:</label>
                                             <input placeholder="ex.: https://docs.google.com/spreadsheets/d/abcdegfhijklmnop/" type="url" id="spreadsheetUrl" name="spreadsheetUrl" value="{{spreadsheetUrl::input}}" />
+                                            <div class="alert alert-info">If the Google authorization screen says “This app isn't verified”,
+                                                select <strong>Advanced</strong>, select <strong>Go to ____ (unsafe)</strong> and follow the instructions.
+                                                See <a target="blank" href="https://support.google.com/accounts/answer/7455163">this page</a> for more information.</div>
                                         </div>
                                     </div><!-- .step__content -->
 
-                                    <div id="error-message" class="error-message">{{errorMessage}}</div>
+                                    <template is="dom-if" if="{{_errorMessage}}">
+                                        <div class="error-message alert alert-danger">
+                                            <strong id="error-message">{{_errorMessage}}</strong>
+                                            <div id="error-detail">{{_errorDetail}}</div>
+                                        </div>
+                                    </template>
 
                                     <div class="step__buttons">
                                         <div class="step__buttons-left">
@@ -427,7 +432,6 @@
                                                 <table class="tb-table tb-table--scroll">
                                                     <thead class="tb-table__header">
                                                         <tr>
-                                                            <th class="tb-table__column tb-table__column--index"></th>
                                                             <th class="tb-table__column tb-table__column--field tb-table__column--header">Task type</th>
                                                             <th class="tb-table__column tb-table__column--column tb-table__column--header">Column</th>
                                                         </tr>
@@ -435,13 +439,8 @@
                                                     <tbody id="jira-issuefields" class="tb-table__content">
                                                         <template is="dom-repeat" items="{{customFields}}" as="field" index-as="fieldIndex">
                                                             <tr class="jira-issuefield">
-                                                                <td class="tb-table__column tb-table__column--index">
-                                                                    # {{displayIndex(fieldIndex)}}
-                                                                </td>
                                                                 <td class="tb-table__column tb-table__column--field">
-                                                                    <input class$="{{getCustomFieldClass(field)}}"
-                                                                        value="{{field.name}} {{getTextIfIsRequired(field)}}"
-                                                                        type="text" readonly />
+                                                                        {{field.name}} {{getTextIfIsRequired(field)}}
                                                                 </td>
                                                                 <td class="step__mapp tb-table__column tb-table__column--column">
                                                                     <input class$="tb-text--align-center sizing__mapping-column {{getCustomFieldClass(field)}}"
@@ -463,7 +462,12 @@
 
                                 </div><!-- .step__content -->
 
-                                <div id="error-message" class="error-message">{{errorMessage}}</div>
+                                <template is="dom-if" if="{{_errorMessage}}">
+                                    <div class="error-message alert alert-danger">
+                                        <strong id="error-message">{{_errorMessage}}</strong>
+                                        <div id="error-detail">{{_errorDetail}}</div>
+                                    </div>
+                                </template>
 
                                 <div class="step__buttons">
                                     <div class="step__buttons-left">
@@ -642,7 +646,9 @@
                     },
                     isImportationCompleted: {
                         type: Boolean
-                    }
+                    },
+                    _errorMessage: String,
+                    _errorDetail: String
                 },
 
                 opendialog: function () {
@@ -651,31 +657,35 @@
 
                 initStepOne: function() {
                     var self = this;
-                    
-                    this.loadingEnable();
-                    
+
                     this.stepNumber = 1;
                     this.projects = [];
                     this.projectKey = null;
 
                     this.spreadsheetUrl = '';
                     this.spreadsheetId = '';
-                    this.errorMessage = null;
+                    this.clearErrorMessage();
 
-                    this.loadInitialData().then(function() {
-                        if (self.needsGoogleAuthorizarion)
-                            return self.initGoogleAuth();
-                        })
+                    this.loadingEnable();
+                    this.$.modal.open();
+
+                    this.loadInitialData()
+                        .then(function() {
+	                        if (self.needsGoogleAuthorizarion)
+	                            return self.initGoogleAuth();
+	                    })
                         .fail(function() {
-                            self.errorMessage = 'Failed to load initial data.' })
+                            self.setErrorMessage('Failed to load initial data.');
+                        })
                         .always(function() {
-                            self.showStepOne()
+                            self.goToStep(1);
+                            self.loadingDisable();
                         });
                 },
 
                 loadInitialData: function() {
                     var self = this;
-                    
+
                     return $.getJSON('ws/sizing-import/initial-data/')
                         .done(function(data) { 
                             self.needsGoogleAuthorizarion = data.needsGoogleAuthorizarion;
@@ -698,23 +708,17 @@
                     return result.promise();
                 },
 
-                showStepOne: function() {
-                    this.$.modal.open();
-                    this.goToStep(1);
-                    this.loadingDisable();
-                },
-
                 submitStepOne: function() {
-                    this.errorMessage = "";
+                    this.clearErrorMessage();
 
                     if (!this.spreadsheetUrl) {
-                        this.errorMessage = "Please, inform the Google Spreadsheet URL to import.";
+                        this.setErrorMessage("Please, inform the Google Spreadsheet URL to import.");
                         return;
                     }
 
                     this.spreadsheetId = this.getGoogleIdFromUrl(this.spreadsheetUrl);
                     if (!this.spreadsheetId) {
-                        this.errorMessage = "Invalid Google Spreadsheet URL. Please, try another.";
+                        this.setErrorMessage("Invalid Google Spreadsheet URL. Please, try another.");
                         return;
                     }
 
@@ -736,12 +740,12 @@
                                 self.initStepTwo();
 
                             } else {
-                                self.errorMessage = data.errorMessage;
+                                self.setErrorMessage(data.errorMessage, data.errorDetail);
                                 self.loadingDisable();
                             }
                         },
                         error: function () {
-                            self.errorMessage = 'Internal server error';
+                            self.setErrorMessage('Internal server error');
                             self.loadingDisable();
                         }
                     });
@@ -763,20 +767,9 @@
                                     self.validateStepOne();
                                 });
                         }, function() {
-                            self.errorMessage = 'Google authorization failed.';
+                            self.setErrorMessage('Google authorization failed.');
                             self.loadingDisable();
                         });
-                },
-
-                responseOfStepOne: function(event) {
-                    authorizationObject = event.detail.authorizationObject;
-                    if (authorizationObject.hasAuthorization) {
-                        this.initStepTwo();
-                    }
-                    else {
-                        this.errorMessage = authorizationObject.errorMsg;
-                        this.loadingDisable();
-                    }
                 },
 
                 initStepTwo: function() {
@@ -786,7 +779,7 @@
                             self.showStepTwo(data);
                         })
                         .fail(function() {
-                            self.errorMessage = 'Internal server error';
+                            self.setErrorMessage('Internal server error');
                             self.loadingDisable();
                         });
                 },
@@ -821,15 +814,15 @@
 
                     var self = this;
 
-                    this.errorMessage = "";
+                    this.clearErrorMessage();
 
                     if (this.hasRequiredCustomFieldsWithoutColumn()) {
-                        this.errorMessage = "All required fields must have columns associated.";
+                        this.setErrorMessage("All required fields must have columns associated.");
                         return;
                     }
 
                     if (this.hasRepeatedColumnLetter()) {
-                        this.errorMessage = "Column repeated.";
+                        this.setErrorMessage("Column repeated.");
                         return;
                     }
 
@@ -851,7 +844,7 @@
                             self.showStepThree(data);
                         },
                         error: function (jqXhr, textStatus, errorThrown) {
-                            self.errorMessage = errorThrown;
+                            self.setErrorMessage(errorThrown);
                             self.loadingDisable();
                         },
                         async: true
@@ -1076,8 +1069,13 @@
                         return null;
                 },
 
-                displayIndex: function(index) {
-                    return index + 1;
+                setErrorMessage: function(message, detail) {
+                    this._errorMessage = message;
+                    this._errorDetail = detail || '';
+                },
+                
+                clearErrorMessage: function() {
+                    this.setErrorMessage('');
                 },
 
                 isStepActive: function(currentStep, step) {
@@ -1094,7 +1092,7 @@
                 },
                 
                 previousStep: function() {
-                    this.errorMessage = "";
+                    this.clearErrorMessage();
                     this.stepNumber--;
                     this.goToStep(this.stepNumber);
                 },

@@ -1,5 +1,10 @@
 package objective.taskboard.sizingImport;
 
+import static java.util.stream.Collectors.toList;
+
+import java.util.Collection;
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -52,11 +57,20 @@ class JiraUtils {
         return metadataService.getIssueLinksMetadata().get(jiraProperties.getIssuelink().getDemandId().toString());
     }
 
-    public CimIssueType getFeatureMetadata(String projectKey) {
+    public CimIssueType requestFeatureCreateIssueMetadata(String projectKey) {
         long featureTypeId = jiraProperties.getIssuetype().getDefaultFeature().getId();
-        return getIssueTypeMetadata(projectKey, featureTypeId);
+        return requestCreateIssueMetadata(projectKey, featureTypeId);
     }
 
+    public List<CimFieldInfo> getSizingFields(CimIssueType createIssueMetadata) {
+        List<String> configuredSizingFieldsId = jiraProperties.getCustomfield().getTShirtSize().getIds();
+        Collection<CimFieldInfo> issueFields = createIssueMetadata.getFields().values();
+        
+        return issueFields.stream()
+                .filter(f -> configuredSizingFieldsId.contains(f.getId()))
+                .collect(toList());
+    }
+    
     public Project getProject(String projectKey) {
         return jiraEndpoint.executeRequest(client -> client.getProjectClient().getProject(projectKey));
     }
@@ -86,14 +100,14 @@ class JiraUtils {
         return jiraEndpoint.executeRequest(client -> client.getVersionRestClient().createVersion(versionInput));
     }
 
-    public boolean isAdminOfProject(String project) {
+    public boolean isAdminOfProject(String projectKey) {
         Permissions permissions = jiraEndpoint.executeRequest(client -> 
-            client.getMyPermissionsRestClient().getMyPermissions(MyPermissionsInput.withProject(project)));
+            client.getMyPermissionsRestClient().getMyPermissions(MyPermissionsInput.withProject(projectKey)));
 
         return permissions.havePermission("PROJECT_ADMIN");
     }
 
-    private CimIssueType getIssueTypeMetadata(String projectKey, Long issueTypeId) {
+    private CimIssueType requestCreateIssueMetadata(String projectKey, Long issueTypeId) {
         GetCreateIssueMetadataOptions options = new GetCreateIssueMetadataOptionsBuilder()
                 .withExpandedIssueTypesFields()
                 .withProjectKeys(projectKey)

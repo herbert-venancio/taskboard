@@ -22,7 +22,10 @@ public class SizingImportUi extends AbstractUiFragment {
     private WebElement modal;
 
     @FindBy(id="error-message")
-    private WebElement errorMessageTitle;
+    private WebElement errorMessage;
+    
+    @FindBy(id="error-detail")
+    private WebElement errorDetail;
 
     private SizingStepOne stepOne;
     private SizingStepTwo stepTwo;
@@ -69,8 +72,13 @@ public class SizingImportUi extends AbstractUiFragment {
         return stepFour;
     }
 
-    public void assertErrorMessage(String expectedTitle) {
-        waitTextInElement(errorMessageTitle, expectedTitle);
+    public void assertErrorMessage(String expectedMessage, String expectedDetail) {
+        waitTextInElement(errorMessage, expectedMessage);
+        waitTextInElement(errorDetail, expectedDetail);
+    }
+    
+    public void assertErrorMessage(String expectedMessage) {
+        assertErrorMessage(expectedMessage, "");
     }
 
     public void assertNoErrorMessage() {

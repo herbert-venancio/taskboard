@@ -1,8 +1,11 @@
 package objective.taskboard.sizingImport;
 
 import static java.util.Collections.unmodifiableList;
+import static java.util.stream.Collectors.toList;
+import static objective.taskboard.google.SpreadsheetUtils.COLUMN_LETTER_COMPARATOR;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,13 +27,17 @@ class SheetStaticColumns {
 
     @Autowired
     public SheetStaticColumns(SizingImportConfig importConfig) {
-        columns = unmodifiableList(Arrays.asList(
+        List<SheetStaticColumn> columns = Arrays.asList(
                 new SheetStaticColumn(PHASE_NAME, importConfig.getSheetMap().getIssuePhase()),
                 new SheetStaticColumn(DEMAND_NAME, importConfig.getSheetMap().getIssueDemand()),
                 new SheetStaticColumn(FEATURE_NAME, importConfig.getSheetMap().getIssueFeature()),
                 new SheetStaticColumn(KEY_NAME, importConfig.getSheetMap().getIssueKey()),
                 new SheetStaticColumn(ACCEPTANCE_CRITERIA, importConfig.getSheetMap().getIssueAcceptanceCriteria()),
-                new SheetStaticColumn(INCLUDE_NAME, importConfig.getSheetMap().getInclude())));
+                new SheetStaticColumn(INCLUDE_NAME, importConfig.getSheetMap().getInclude()));
+        
+        this.columns = unmodifiableList(columns.stream()
+                .sorted(Comparator.comparing(SheetStaticColumn::getColumnLetter, COLUMN_LETTER_COMPARATOR))
+                .collect(toList()));
     }
 
     public List<SheetStaticColumn> get() {

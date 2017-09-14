@@ -24,10 +24,7 @@ public class DynamicColumnsDefinitionBuilderTest {
 
     @Before
     public void setUp() {
-        Collection<String> configuredTShirtSizeFieldsId = asList("cf_2", "cf_3");
-
-        List<CimFieldInfo> featureIssueFields = Arrays.asList(
-                new CimFieldInfo("cf_1", true, "User", null, null, null, null),
+        List<CimFieldInfo> tShirtFields = Arrays.asList(
                 new CimFieldInfo("cf_2", true, "Feature TSize", null, null, null, null),
                 new CimFieldInfo("cf_3", false, "UX TSize", null, null, null, null));
         
@@ -37,7 +34,7 @@ public class DynamicColumnsDefinitionBuilderTest {
 
         Collection<DefaultColumn> defaultColumns = asList(defaultColumnCf2);
 
-        subject = new DynamicColumnsDefinitionBuilder(configuredTShirtSizeFieldsId, featureIssueFields)
+        subject = new DynamicColumnsDefinitionBuilder(tShirtFields)
                 .setDefaultColumns(defaultColumns);
     }
     

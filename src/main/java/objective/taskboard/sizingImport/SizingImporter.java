@@ -55,7 +55,7 @@ class SizingImporter {
         notifyImportStarted(allLines.size(), linesToImport.size());
 
         Project project = jiraUtils.getProject(projectKey);
-        CimIssueType featureMetadata = jiraUtils.getFeatureMetadata(projectKey);
+        CimIssueType featureMetadata = jiraUtils.requestFeatureCreateIssueMetadata(projectKey);
         Map<Name, Version> importedVersions = recoverImportedVersions(project);
         Map<Name, ImportedDemand> importedDemands = recoverImportedDemands(allLines);
 

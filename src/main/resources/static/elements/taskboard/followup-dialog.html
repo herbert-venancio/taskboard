@@ -145,10 +145,7 @@
 		}
         
         .warn-box {
-            background-color: #fff8c4;
-            padding: 10px;
             margin: 20px 0;
-            color: #904506;
             max-width: 250px;
         }
         
@@ -238,13 +235,11 @@
 
                 </div>
                 
-                <div id="noTemplateWarning" class="warn-box" hidden$={{!showNoTemplatesFoundWarning}}>
-                    No matching template<br />
-                    <small>
-                        Could not find a template for the selected set of projects.
-                        <span class="set-template-link" on-tap="openTemplateFollowupDialog">Click here</span> 
-                        to create a template
-                    </small>
+                <div id="noTemplateWarning" class="alert alert-warning warn-box" hidden$={{!showNoTemplatesFoundWarning}}>
+                    <strong>No matching template</strong><br />
+                    Could not find a template for the selected set of projects.
+                    <span class="set-template-link" on-tap="openTemplateFollowupDialog">Click here</span> 
+                    to create a template
                 </div>
 
                 <div class="custom-footer">
