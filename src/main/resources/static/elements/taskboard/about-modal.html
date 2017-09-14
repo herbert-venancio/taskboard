@@ -72,7 +72,7 @@
                 open: function() {
                     $.getJSON("/about", $.proxy(function (data) {
                         this.version = data.version;
-                        this.versionDate = new Date(data.versionDate).toLocaleDateString();
+                        this.versionDate = new Date(data.versionDate).toLocaleString();
                         this.upTime = data.upTime;
                         this.startTime = new Date(data.startTime).toLocaleString();
                     }, this));
