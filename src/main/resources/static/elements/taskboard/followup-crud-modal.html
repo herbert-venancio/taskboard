@@ -43,14 +43,6 @@
             text-transform: none;
         }
 
-        .clean-cache-msg {
-            color: #717171;
-		    font-size: 13px;
-		    margin: 15px 0;
-		    background-color: #fff8db;
-		    padding: 20px;
-        }
-
         .clean-cache-msg span {
             display: block;
             margin-top: 10px;
@@ -91,7 +83,7 @@
                                 <paper-checkbox checked="{{item.checked}}">{{item.projectKey}}</paper-checkbox><br>
                             </template>
                         </div>
-                        <div class="clean-cache-msg">
+                        <div class="alert alert-warning clean-cache-msg">
                             <strong>Before uploading the template, make sure you clean up the pivot tables cache</strong>
                             <paper-button hidden$="{{showCacheInstructions}}" title="Show instructions" on-tap="howDoICleanTheCache">
 		                        How do I clean up the cache?

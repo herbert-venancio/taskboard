@@ -26,7 +26,7 @@ import objective.taskboard.jira.ProjectService;
 import objective.taskboard.sizingImport.SheetDefinition.SheetColumnDefinition;
 import objective.taskboard.sizingImport.SheetDefinition.SheetStaticColumn;
 import objective.taskboard.sizingImport.SizingImportService.ImportPreview;
-import objective.taskboard.sizingImport.SizingImportService.SpreadsheetValidationResult;
+import objective.taskboard.sizingImport.SizingImportValidator.ValidationResult;
 import objective.taskboard.sizingImport.SizingSheetParser.SheetColumnMapping;
 
 @RestController
@@ -58,7 +58,7 @@ public class SizingImportController {
             @PathVariable String projectKey, 
             @PathVariable String spreadsheetId) {
 
-        SpreadsheetValidationResult validationResult = sizingImportService.validateSpreadsheet(projectKey, spreadsheetId);
+        ValidationResult validationResult = sizingImportService.validateSpreadsheet(projectKey, spreadsheetId);
         return new SpreadsheetValidationResultDto(validationResult);
     }
 
@@ -196,10 +196,12 @@ public class SizingImportController {
     protected static class SpreadsheetValidationResultDto {
         public final boolean success;
         public final String errorMessage;
+        public final String errorDetail;
 
-        private SpreadsheetValidationResultDto(SpreadsheetValidationResult validationResult) {
+        private SpreadsheetValidationResultDto(ValidationResult validationResult) {
             this.success = validationResult.success;
             this.errorMessage = validationResult.errorMessage;
+            this.errorDetail = validationResult.errorDetail;
         }
     }
     

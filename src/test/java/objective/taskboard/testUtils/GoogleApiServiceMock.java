@@ -1,5 +1,6 @@
 package objective.taskboard.testUtils;
 
+import static java.util.Arrays.asList;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
@@ -48,6 +49,15 @@ public class GoogleApiServiceMock implements GoogleApiService {
         when(spreadsheetsManager.getSheetId(anyString(), anyString())).thenReturn(1);
         
         doNothing().when(spreadsheetsManager).batchUpdate(anyString(), anyObject());
+        
+        when(spreadsheetsManager.getSheetsTitles(anyString())).thenAnswer(invocation -> {
+            String spreadsheetId = invocation.getArgumentAt(0, String.class);
+            
+            if ("spreadsheet-without-scope-sheet".equals(spreadsheetId))
+                return asList("Timeline", "Cost");
+
+            return asList("Scope", "Timeline", "Cost");
+        });
         
         return spreadsheetsManager;
     }

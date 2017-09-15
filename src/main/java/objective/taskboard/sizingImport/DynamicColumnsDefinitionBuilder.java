@@ -18,13 +18,11 @@ import objective.taskboard.sizingImport.SizingImportConfig.SheetMap.DefaultColum
 
 class DynamicColumnsDefinitionBuilder {
 
-    private final Collection<String> configuredTShirtSizeFieldsId;
-    private final Collection<CimFieldInfo> featureIssueFields;
+    private final List<CimFieldInfo> tShirtFields;
     private Collection<DefaultColumn> defaultColumns = Collections.emptyList();
 
-    public DynamicColumnsDefinitionBuilder(Collection<String> configuredTShirtSizeFieldsId, Collection<CimFieldInfo> featureIssueFields) {
-        this.configuredTShirtSizeFieldsId = configuredTShirtSizeFieldsId;
-        this.featureIssueFields = featureIssueFields;
+    public DynamicColumnsDefinitionBuilder(List<CimFieldInfo> tShirtFields) {
+        this.tShirtFields = tShirtFields;
     }
     
     public DynamicColumnsDefinitionBuilder setDefaultColumns(Collection<DefaultColumn> defaultColumns) {
@@ -33,10 +31,6 @@ class DynamicColumnsDefinitionBuilder {
     }
     
     public List<SheetColumnDefinition> build() {
-        List<CimFieldInfo> tShirtFields = featureIssueFields.stream()
-            .filter(f -> configuredTShirtSizeFieldsId.contains(f.getId()))
-            .collect(toList());
-        
         Map<String, String> defaultColumnByFieldId = defaultColumns.stream()
                 .collect(toMap(DefaultColumn::getFieldId, DefaultColumn::getColumn));
 

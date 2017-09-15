@@ -47,6 +47,21 @@ public class SizingImportIT extends AuthenticatedIntegrationTest {
         sizing.assertErrorMessage("Please, inform the Google Spreadsheet URL to import.");
         sizing.waitForStepOne();
     }
+    
+    @Test
+    public void whenSubmitStepOneUsingASpreadsheetWithoutScopeSheet_ShowError() {
+        SizingImportUi sizing = mainPage.openSizingImport();
+        
+        sizing.waitForStepOne()
+            .withSpreadsheetUrl("https://docs.google.com/spreadsheets/d/spreadsheet-without-scope-sheet")
+            .submitStep();
+        
+        sizing.assertErrorMessage(
+                "Invalid spreadsheet format: Specified URL should contain a sheet with title “Scope”.", 
+                "Found sheets: Timeline, Cost");
+        
+        sizing.waitForStepOne();
+    }
 
     @Test
     public void whenInputtingColumnValues_CheckIfTheValuesAreCorrect() {
