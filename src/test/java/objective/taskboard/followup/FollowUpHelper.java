@@ -23,11 +23,12 @@ package objective.taskboard.followup;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
-import java.util.List;
+
+import objective.taskboard.Constants;
 
 public class FollowUpHelper {
 
-    public static FromJiraDataRow getFollowUpDataDefault() {
+    public static FromJiraDataRow getDefaultFromJiraDataRow() {
         FromJiraDataRow followUpData = new FromJiraDataRow();
         followUpData.planningType = "Ballpark";
         followUpData.project = "PROJECT TEST";
@@ -61,12 +62,16 @@ public class FollowUpHelper {
         return followUpData;
     }
 
-    public static List<FromJiraDataRow> getFollowUpDataDefaultList() {
-        return Collections.singletonList(getFollowUpDataDefault());
+    public static FollowupData getDefaultFollowupData() {
+        return new FollowupData(new FromJiraDataSet(Constants.FROMJIRA_HEADERS, Collections.singletonList(getDefaultFromJiraDataRow())), null, null);
+    }
+
+    public static FollowupData getEmptyFollowupData() {
+        return new FollowupData(new FromJiraDataSet(Constants.FROMJIRA_HEADERS, Collections.emptyList()), null, null);
     }
 
     public static void assertFollowUpDataDefault(FromJiraDataRow actual) {
-        FromJiraDataRow expected = getFollowUpDataDefault();
+        FromJiraDataRow expected = getDefaultFromJiraDataRow();
         assertEquals("planningType", expected.planningType, actual.planningType);
         assertEquals("project", expected.project, actual.project);
         assertEquals("demandType", expected.demandType, actual.demandType);

@@ -43,6 +43,7 @@ public class IssueScratch {
     protected List<String> components;
     protected Long priorityOrder;
     protected TaskboardTimeTracking timeTracking;
+    protected List<Changelog> changelog;
     
     @JsonIgnore
     protected String reporter;
@@ -91,7 +92,8 @@ public class IssueScratch {
             String reporter, 
             List<IssueCoAssignee> coAssignees, 
             CustomField classOfService, 
-            Map<String, CustomField> release) {
+            Map<String, CustomField> release,
+            List<Changelog> changelog) {
         this.id = id;
         this.issueKey = issueKey;
         this.projectKey = projectKey;
@@ -124,6 +126,7 @@ public class IssueScratch {
         this.coAssignees = coAssignees;
         this.classOfService = classOfService;
         this.release = release;
+        this.changelog = changelog;
         
         this.render = false;
         this.favorite = false;

@@ -102,7 +102,7 @@ public class FollowUpFacadeTest {
     @Test
     public void generate() throws Exception {
         given(templateService.getTemplate(TEMPLATE_NAME)).willReturn(template);
-        given(provider.getJiraData(INCLUDED_PROJECTS)).willReturn(FollowUpHelper.getFollowUpDataDefaultList());
+        given(provider.getJiraData(INCLUDED_PROJECTS)).willReturn(FollowUpHelper.getDefaultFollowupData());
 
         FollowUpGenerator followupGenerator = followUpFacade.getGenerator(TEMPLATE_NAME, Optional.empty());
         Resource resource = followupGenerator.generate(INCLUDED_PROJECTS);

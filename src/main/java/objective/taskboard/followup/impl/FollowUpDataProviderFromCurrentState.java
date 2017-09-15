@@ -36,10 +36,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import objective.taskboard.Constants;
 import objective.taskboard.data.CustomField;
 import objective.taskboard.data.Issue;
-import objective.taskboard.followup.FromJiraDataRow;
+import objective.taskboard.followup.AnalyticsTransitionsDataSet;
+import objective.taskboard.followup.FollowupData;
 import objective.taskboard.followup.FollowupDataProvider;
+import objective.taskboard.followup.FromJiraDataRow;
+import objective.taskboard.followup.FromJiraDataSet;
+import objective.taskboard.followup.SyntheticTransitionsDataSet;
 import objective.taskboard.issueBuffer.AllIssuesBufferService;
 import objective.taskboard.issueBuffer.IssueBufferState;
 import objective.taskboard.jira.JiraProperties;
@@ -48,44 +53,54 @@ import objective.taskboard.jira.MetadataService;
 
 @Service
 public class FollowUpDataProviderFromCurrentState implements FollowupDataProvider {
+
     @Autowired
     private JiraProperties jiraProperties;
-    
+
     @Autowired
     private MetadataService metadataService;
-    
+
     @Autowired
     private AllIssuesBufferService issueBufferService;
-    
+
     private Map<String, Issue> demandsByKey;
     private Map<String, Issue> featuresByKey;
     private Map<String, FromJiraDataRow> followUpBallparks;
-    
+
     @Override
     public IssueBufferState getFollowupState() {
         return issueBufferService.getState();
     }
-    
-    @Override
-    public List<FromJiraDataRow> getJiraData(String[] includeProjects) {
-        List<String> i = Arrays.asList(includeProjects);
-        List<Issue> issuesVisibleToUser = issueBufferService.getAllIssues().stream()
-	         .filter(issue -> isAllowedStatus(issue.getStatus()))
-	         .filter(issue -> i.contains(issue.getProjectKey()))
-	         .collect(Collectors.toList());
 
+    @Override
+    public FollowupData getJiraData(String[] includeProjects) {
+        List<String> i = Arrays.asList(includeProjects);
+
+        List<Issue> issuesVisibleToUser = issueBufferService.getAllIssues().stream()
+                .filter(issue -> isAllowedStatus(issue.getStatus()))
+                .filter(issue -> i.contains(issue.getProjectKey()))
+                .collect(Collectors.toList());
+
+        FromJiraDataSet fromJiraDs = getFromJiraDs(issuesVisibleToUser);
+
+        FollowUpTransitionsDataProvider transitions = new FollowUpTransitionsDataProvider(jiraProperties);
+        List<AnalyticsTransitionsDataSet> analyticsTransitionsDsList = transitions.getAnalyticsTransitionsDsList(issuesVisibleToUser);
+        List<SyntheticTransitionsDataSet> syntheticsTransitionsDsList = transitions.getSyntheticTransitionsDsList(analyticsTransitionsDsList);
+
+        return new FollowupData(fromJiraDs, analyticsTransitionsDsList, syntheticsTransitionsDsList);
+    }
+
+    private FromJiraDataSet getFromJiraDs(List<Issue> issuesVisibleToUser) {
         LinkedList<Issue> issues = new LinkedList<>(issuesVisibleToUser);
-        
+
         followUpBallparks = new LinkedHashMap<String, FromJiraDataRow>();
-        
         demandsByKey = makeDemandBallparks(issues);
-        
         featuresByKey = makeFeatureBallparks(issues);
-        
+
         final List<FromJiraDataRow> result = makeSubtasks(issues);
 
         result.addAll(followUpBallparks.values());
-        
+
         result.sort(Comparator.comparingInt((FromJiraDataRow f) -> f.demandStatusPriority)
                 .thenComparingLong(f -> f.demandPriorityOrder)
                 .thenComparingInt(f -> f.taskStatusPriority)
@@ -93,9 +108,9 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
                 .thenComparingInt(f -> f.subtaskStatusPriority)
                 .thenComparingLong(f -> f.subtaskPriorityOrder));
 
-        return result;
+        return new FromJiraDataSet(Constants.FROMJIRA_HEADERS, result);
     }
-    
+
     private boolean isAllowedStatus(long status) {
         return !jiraProperties.getFollowup().getStatusExcludedFromFollowup().contains(status);
     }
@@ -113,26 +128,26 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         }
         return demands;
     }
-    
+
     private Map<String, Issue> makeFeatureBallparks(LinkedList<Issue> issues) {
         Map<String, Issue> features = new LinkedHashMap<String, Issue>();
-        
+
         Iterator<Issue> it = issues.iterator();
         while(it.hasNext()) {
             Issue feature = it.next();
-            if (!feature.isFeature()) 
+            if (!feature.isFeature())
                 continue;
             it.remove();
-            
+
             Issue demand = demandsByKey.get(feature.getParent());
             if (demand != null)
                 followUpBallparks.remove(demand.getIssueKey());
-            
+
             features.put(feature.getIssueKey(), feature);
-            
+
             if (jiraProperties.getFollowup().getFeatureStatusThatDontGenerateBallpark().contains(feature.getStatus()))
                 continue;
-            
+
             List<BallparkMapping> mappingList = getBallparksOrCry(feature);
 
             for (BallparkMapping mapping : mappingList) {
@@ -144,7 +159,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
     }
 
     private List<FromJiraDataRow> makeSubtasks(LinkedList<Issue> issues) {
-        
+
         final List<FromJiraDataRow> subtasksFollowups = new LinkedList<FromJiraDataRow>();
         Iterator<Issue> it = issues.iterator();
         while(it.hasNext()) {
@@ -152,28 +167,28 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
             Issue feature = featuresByKey.get(issue.getParent());
             if (feature == null)
                 continue;
-            
+
             Issue demand  = demandsByKey.get(feature.getParent());
             if (demand != null)
                 followUpBallparks.remove(demand.getIssueKey());
-            
+
             subtasksFollowups.add(createSubTaskFollowup(demand, feature, issue));
 
             if (jiraProperties.getFollowup().getSubtaskStatusThatDontPreventBallparkGeneration().contains(issue.getStatus()))
                 continue;
-            
+
             String featureTshirtForThisSubTask = "";
             List<BallparkMapping> mappingList = getBallparksOrCry(feature);
             for (BallparkMapping mapping : mappingList) {
-                if (mapping.getJiraIssueTypes().contains(issue.getType())) 
+                if (mapping.getJiraIssueTypes().contains(issue.getType()))
                     featureTshirtForThisSubTask = mapping.getTshirtCustomFieldId();
             }
-            
+
             followUpBallparks.remove(feature.getIssueKey()+featureTshirtForThisSubTask);
         }
         return subtasksFollowups;
     }
-    
+
     private List<BallparkMapping> getBallparksOrCry(Issue issue) {
         List<BallparkMapping> mappings = issue.getActiveBallparkMappings();
         if (mappings == null) {
@@ -187,7 +202,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         FromJiraDataRow followUpData = new FromJiraDataRow();
         followUpData.planningType = "Ballpark";
         followUpData.project = demand.getProject();
-        
+
         followUpData.demandId = demand.getId();
         followUpData.demandType = demand.getIssueTypeName();
         followUpData.demandStatus= demand.getStatusName();
@@ -196,7 +211,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         followUpData.demandDescription = issueDescription("M", demand);
         followUpData.demandStatusPriority = demand.getStatusPriority();
         followUpData.demandPriorityOrder = demand.getPriorityOrder();
-        
+
         followUpData.taskType = "BALLPARK - Demand";
         followUpData.taskStatus = getBallparkStatus();
         followUpData.taskId = 0L;
@@ -205,7 +220,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         followUpData.taskDescription = issueDescription(0, demand.getSummary());
         followUpData.taskFullDescription = issueFullDescription("BALLPARK - Demand", "M", 0, demand.getSummary());
         followUpData.taskRelease = (String) defaultIfNull(getRelease(demand), "No release set");
-        
+
         followUpData.subtaskType = "BALLPARK - Demand";
         followUpData.subtaskStatus = followUpData.demandStatus;
         followUpData.subtaskId = 0L;
@@ -215,13 +230,13 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         followUpData.subtaskFullDescription = issueFullDescription("BALLPARK - Demand", "M", 0, demand.getSummary());
         followUpData.tshirtSize = "M";
         followUpData.worklog = 0.0;
-        followUpData.wrongWorklog = timeSpentInHour(demand); 
+        followUpData.wrongWorklog = timeSpentInHour(demand);
         followUpData.demandBallpark = originalEstimateInHour(demand);
         followUpData.taskBallpark = 0.0;
         followUpData.queryType = "DEMAND BALLPARK";
         return followUpData;
     }
-    
+
     private Double timeSpentInHour(Issue issue) {
         if (issue.getTimeTracking() == null)
             return 0.0;
@@ -229,7 +244,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
             return 0.0;
         return issue.getTimeTracking().getTimeSpentMinutes()/60.0;
     }
-    
+
     private Double originalEstimateInHour(Issue issue) {
         if (issue == null)
             return 0.0;
@@ -239,12 +254,12 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
             return 0.0;
         return issue.getTimeTracking().getOriginalEstimateMinutes()/60.0;
     }
-    
+
     private FromJiraDataRow createBallparkFeature(Issue demand, Issue task, BallparkMapping ballparkMapping) {
         FromJiraDataRow followUpData = new FromJiraDataRow();
         followUpData.planningType = "Ballpark";
         followUpData.project = task.getProject();
-        
+
         if (demand != null) {
             followUpData.demandType = demand.getIssueTypeName();
             followUpData.demandStatus= demand.getStatusName();
@@ -255,7 +270,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
             followUpData.demandStatusPriority = demand.getStatusPriority();
             followUpData.demandPriorityOrder = demand.getPriorityOrder();
         }
-        
+
         followUpData.taskType = task.getIssueTypeName();
         followUpData.taskStatus = task.getStatusName();
         followUpData.taskId = task.getId();
@@ -266,7 +281,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         followUpData.taskRelease = coalesce(getRelease(task), getRelease(demand) ,"No release set");
         followUpData.taskStatusPriority = task.getStatusPriority();
         followUpData.taskPriorityOrder = task.getPriorityOrder();
-        
+
         followUpData.subtaskType = ballparkMapping.getIssueType();
         followUpData.subtaskStatus = getBallparkStatus();
         followUpData.subtaskId = 0L;
@@ -276,13 +291,13 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         followUpData.subtaskFullDescription = issueFullDescription(ballparkMapping.getIssueType(), "", 0, task.getSummary());
         followUpData.tshirtSize = task.getTshirtSizeOfSubtaskForBallpark(ballparkMapping);
         followUpData.worklog = 0.0;
-        followUpData.wrongWorklog = timeSpentInHour(task); 
+        followUpData.wrongWorklog = timeSpentInHour(task);
         followUpData.demandBallpark = originalEstimateInHour(demand);
         followUpData.taskBallpark = originalEstimateInHour(task);
         followUpData.queryType = "FEATURE BALLPARK";
         return followUpData;
     }
-    
+
     private String getBallparkStatus() {
         return metadataService.getStatusById(jiraProperties.getFollowup().getBallparkDefaultStatus()).getName();
     }
@@ -291,7 +306,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         FromJiraDataRow followUpData = new FromJiraDataRow();
         followUpData.planningType = "Plan";
         followUpData.project = task.getProject();
-        
+
         if (demand != null) {
             followUpData.demandId = demand.getId();
             followUpData.demandType = demand.getIssueTypeName();
@@ -303,7 +318,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
             followUpData.demandStatusPriority = demand.getStatusPriority();
             followUpData.demandPriorityOrder = demand.getPriorityOrder();
         }
-        
+
         followUpData.taskType = task.getIssueTypeName();
         followUpData.taskStatus = task.getStatusName();
         followUpData.taskId = task.getId();
@@ -314,7 +329,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         followUpData.taskRelease = coalesce(getRelease(subtask), getRelease(task), getRelease(demand), "No release set");
         followUpData.taskStatusPriority = task.getStatusPriority();
         followUpData.taskPriorityOrder = task.getPriorityOrder();
-        
+
         followUpData.subtaskType = subtask.getIssueTypeName();
         followUpData.subtaskStatus = subtask.getStatusName();
         followUpData.subtaskId = subtask.getId();
@@ -322,12 +337,12 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         followUpData.subtaskSummary = subtask.getSummary();
         followUpData.subtaskStatusPriority = subtask.getStatusPriority();
         followUpData.subtaskPriorityOrder = subtask.getPriorityOrder();
-        
+
         followUpData.subtaskDescription = issueDescription(subtask);
         followUpData.subtaskFullDescription = subtask.getStatusName() + " > " + issueFullDescription(subtask);
         followUpData.tshirtSize = subtask.getTShirtSize();
         followUpData.worklog = timeSpentInHour(subtask);
-        followUpData.wrongWorklog = 0.0; 
+        followUpData.wrongWorklog = 0.0;
         followUpData.taskBallpark = originalEstimateInHour(task);
         followUpData.queryType = "SUBTASK PLAN";
         return followUpData;
@@ -338,11 +353,11 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         if (i.isDemand()) return "M";
         return i.getTShirtSize();
     }
-    
+
     private String getRelease(Issue i) {
         if (i == null)
             return null;
-        
+
         CustomField customField = (CustomField)i.getCustomFields().get(jiraProperties.getCustomfield().getRelease().getId());
         if (customField == null) return null;
         if (customField.getValue() == null)
@@ -353,11 +368,11 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
     private String issueDescription(Issue issue) {
         return issueDescription(getTshirtSize(issue), issue.getIssueKeyNum(), issue.getSummary());
     }
-    
+
     private String issueDescription(String size, Issue issue) {
         return issueDescription(size, issue.getIssueKeyNum(), issue.getSummary());
     }
-    
+
     private String issueDescription(Integer issueNum, String description) {
         return issueDescription(null, issueNum, description);
     }
@@ -366,18 +381,19 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         String sizePart = StringUtils.isEmpty(size)?"":size+" | ";
         return String.format("%s%05d - %s", sizePart, issueNum, description);
     }
-    
+
     private String issueFullDescription(Issue issue) {
         return issue.getIssueTypeName() +
                 " | " + issueDescription(getTshirtSize(issue), issue.getIssueKeyNum(), issue.getSummary());
     }
-    
+
     private String issueFullDescription(String issueType, String size, Integer issueNum, String description) {
         return issueType + " | " +issueDescription(size, issueNum, description);
     }
-    
+
     private static <T> T coalesce(@SuppressWarnings("unchecked") T ...items) {
         for(T i : items) if(i != null) return i;
         return null;
     }
+
 }

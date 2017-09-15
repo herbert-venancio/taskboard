@@ -1,5 +1,3 @@
-package objective.taskboard.followup;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,13 +18,12 @@ package objective.taskboard.followup;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
-
-import java.util.List;
+package objective.taskboard.followup;
 
 import objective.taskboard.issueBuffer.IssueBufferState;
 
 public interface FollowupDataProvider {
-    List<FromJiraDataRow> getJiraData(String[] includeProjects);
+    FollowupData getJiraData(String[] includeProjects);
 
     IssueBufferState getFollowupState();
 }

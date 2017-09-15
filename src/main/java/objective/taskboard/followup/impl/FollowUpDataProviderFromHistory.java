@@ -44,9 +44,14 @@ import org.apache.commons.io.IOUtils;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
+import objective.taskboard.Constants;
 import objective.taskboard.database.directory.DataBaseDirectory;
 import objective.taskboard.followup.FromJiraDataRow;
+import objective.taskboard.followup.FromJiraDataSet;
+import objective.taskboard.followup.FollowupData;
 import objective.taskboard.followup.FollowupDataProvider;
 import objective.taskboard.issueBuffer.IssueBufferState;
 
@@ -64,7 +69,7 @@ public class FollowUpDataProviderFromHistory implements FollowupDataProvider {
 
     @SuppressWarnings("serial")
     @Override
-    public List<FromJiraDataRow> getJiraData(String[] includeProjects) {
+    public FollowupData getJiraData(String[] includeProjects) {
         List<String> projects = asList(includeProjects);
 
         List<FromJiraDataRow> data = new ArrayList<FromJiraDataRow>();
@@ -84,8 +89,9 @@ public class FollowUpDataProviderFromHistory implements FollowupDataProvider {
                     throw new IllegalStateException(fileJSON.toString() + " not found");
 
                 String json = IOUtils.toString(asResource(fileJSON).getInputStream(), ENCODE_UTF_8);
+                JsonElement jsonElement = new JsonParser().parse(json);
                 Type type = new TypeToken<List<FromJiraDataRow>>(){}.getType();
-                data.addAll(gson.fromJson(json, type));
+                data.addAll(gson.fromJson(jsonElement, type));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             } finally {
@@ -93,7 +99,7 @@ public class FollowUpDataProviderFromHistory implements FollowupDataProvider {
                     deleteQuietly(temp.toFile());
             }
         }
-        return data;
+        return new FollowupData(new FromJiraDataSet(Constants.FROMJIRA_HEADERS, data), null, null);
     }
 
     @Override

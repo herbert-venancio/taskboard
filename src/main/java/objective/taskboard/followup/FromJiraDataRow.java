@@ -1,7 +1,3 @@
-package objective.taskboard.followup;
-
-import static org.apache.commons.lang.ObjectUtils.defaultIfNull;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -22,6 +18,9 @@ import static org.apache.commons.lang.ObjectUtils.defaultIfNull;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.followup;
+
+import static org.apache.commons.lang.ObjectUtils.defaultIfNull;
 
 public class FromJiraDataRow {
     public String planningType;

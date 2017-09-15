@@ -25,6 +25,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.stream.Collectors.toList;
 
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +41,7 @@ import com.atlassian.jira.rest.client.api.domain.IssueField;
 import com.atlassian.jira.rest.client.api.domain.IssueLink;
 import com.atlassian.jira.rest.client.api.domain.IssueLinkType.Direction;
 
+import objective.taskboard.data.Changelog;
 import objective.taskboard.data.CustomField;
 import objective.taskboard.jira.JiraProperties;
 
@@ -277,6 +280,20 @@ public class IssueFieldsExtractor {
         return newArrayList(issue.getComponents()).stream()
                 .map(BasicComponent::getName)
                 .collect(toList());
+    }
+
+    public static List<Changelog> extractChangelog(Issue issue) {
+        if (issue.getChangelog() == null)
+            return Collections.emptyList();
+
+        List<Changelog> result = new LinkedList<>();
+        issue.getChangelog().forEach(change -> {
+            change.getItems().forEach(item -> {
+                result.add(new Changelog(change.getAuthor().getName(), item.getField(), item.getFromString(), item.getToString(), change.getCreated()));
+            });
+        });
+        result.sort((item1, item2) -> item1.timestamp.compareTo(item2.timestamp));
+        return result;
     }
 
     private static void logErrorExtractField(Issue issue, IssueField field, JSONException e) {

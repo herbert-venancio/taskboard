@@ -110,6 +110,7 @@ public class Issue extends IssueScratch implements Serializable {
         this.coAssignees = scratch.coAssignees;
         this.classOfService = scratch.classOfService;
         this.release = scratch.release;
+        this.changelog = scratch.changelog;
     }
 
     @JsonAnyGetter
@@ -255,6 +256,11 @@ public class Issue extends IssueScratch implements Serializable {
     }
     
     @JsonIgnore
+    public List<Changelog> getChangelog() {
+        return changelog;
+    }
+
+    @JsonIgnore
     public boolean isDemand() {
         return jiraProperties.getIssuetype().getDemand().getId() == this.getType();
     }
@@ -273,8 +279,6 @@ public class Issue extends IssueScratch implements Serializable {
     public Integer getIssueKeyNum() {
         return Integer.parseInt(issueKey.replace(projectKey+"-", ""));
     }
-
-    
 
     @JsonIgnore
     public String getIssueTypeName() {

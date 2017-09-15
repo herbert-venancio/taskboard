@@ -20,138 +20,27 @@
  */
 package objective.taskboard.followup.impl;
 
+import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Mockito.when;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang.StringUtils;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
-import com.atlassian.jira.rest.client.api.domain.IssueType;
-import com.atlassian.jira.rest.client.api.domain.Status;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-
-import objective.taskboard.data.Issue;
-import objective.taskboard.data.IssueScratch;
-import objective.taskboard.data.TaskboardTimeTracking;
 import objective.taskboard.followup.FromJiraDataRow;
-import objective.taskboard.issueBuffer.AllIssuesBufferService;
-import objective.taskboard.jira.JiraProperties;
-import objective.taskboard.jira.JiraProperties.BallparkMapping;
-import objective.taskboard.jira.JiraProperties.CustomField;
-import objective.taskboard.jira.JiraProperties.CustomField.CustomFieldDetails;
-import objective.taskboard.jira.JiraProperties.CustomField.TShirtSize;
-import objective.taskboard.jira.JiraProperties.IssueLink;
-import objective.taskboard.jira.JiraProperties.IssueType.IssueTypeDetails;
-import objective.taskboard.jira.MetadataService;
 
-@RunWith(MockitoJUnitRunner.class)
-public class FollowUpDataProviderFromCurrentStateTest {
-    @Mock
-    private JiraProperties jiraProperties;
-    
-    @Mock
-    private MetadataService metadataService;
-    
-    @Mock
-    private AllIssuesBufferService issueBufferService;
-    
-    CustomField propertiesCustomField;
-    private TShirtSize tshirtSizeInfo;
-    
-    private JiraProperties.Followup followup = new JiraProperties.Followup();
-    
-    @InjectMocks
-    FollowUpDataProviderFromCurrentState subject;
-    
-    private static final long demandIssueType  = 13;
-    private static final long taskIssueType    = 12; 
-    private static final long devIssueType     = 14;
-    private static final long alphaIssueType   = 15;
-    private static final long reviewIssueType  = 16;
-    private static final long deployIssueType  = 17;
-    private static final long frontEndIssueType     = 18;
-    
-    private static final long statusOpen = 11L;
-    private static final long statusToDo = 13L;
-    private static final long statusInProgress = 15L;
-    private static final long statusCancelled = 16L;
-    private static final long statusDone = 17L;
-    
-    @Before
-    public void before() throws InterruptedException, ExecutionException {
-        Map<Long, Status> statusMap = new LinkedHashMap<>();
-        statusMap.put(statusOpen,       new Status(null, statusOpen,       "Open", null, null));
-        statusMap.put(statusToDo,       new Status(null, statusToDo,       "To Do", null, null));
-        statusMap.put(statusInProgress, new Status(null, statusInProgress, "In Progress", null, null));
-        statusMap.put(statusCancelled,  new Status(null, statusCancelled,  "Cancelled", null, null));
-        statusMap.put(statusDone,       new Status(null, statusDone,       "Done", null, null));
-        when(metadataService.getStatusesMetadata()).thenReturn(statusMap );
-        when(metadataService.getStatusById(anyLong())).thenCallRealMethod();
-        when(metadataService.getIssueTypeById(anyLong())).thenCallRealMethod();
-        
-        Map<Long, IssueType> issueTypeMap = new LinkedHashMap<>();
-        issueTypeMap.put(demandIssueType, new IssueType(null, demandIssueType, "Demand", false, null,null));
-        issueTypeMap.put(taskIssueType,   new IssueType(null, taskIssueType,   "Task", false, null,null));
-        issueTypeMap.put(devIssueType,    new IssueType(null, devIssueType,    "Dev", false, null,null));
-        issueTypeMap.put(alphaIssueType,  new IssueType(null, alphaIssueType,  "Alpha", false, null,null));
-        when(metadataService.getIssueTypeMetadata()).thenReturn(issueTypeMap);
-        
-        // tshirt size information
-        tshirtSizeInfo = new TShirtSize();
-        tshirtSizeInfo.setMainTShirtSizeFieldId("MAINID");
-        propertiesCustomField = new CustomField();
-        propertiesCustomField.setTShirtSize(tshirtSizeInfo);
-        when(jiraProperties.getCustomfield()).thenReturn(propertiesCustomField);
-        
-        IssueLink issueLink = new IssueLink();
-        when(jiraProperties.getIssuelink()).thenReturn(issueLink);
-        
-        JiraProperties.IssueType issueType = new JiraProperties.IssueType();
-        issueType.setFeatures(Arrays.asList(new IssueTypeDetails(taskIssueType)));
-        issueType.setDemand(new IssueTypeDetails(demandIssueType));
-        when(jiraProperties.getIssuetype()).thenReturn(issueType);
-        
-        followup.setBallparkDefaultStatus(statusOpen);
-        when(jiraProperties.getFollowup()).thenReturn(followup);
-        propertiesCustomField.setRelease(new CustomFieldDetails("RELEASE_CF_ID"));
+public class FollowUpDataProviderFromCurrentStateTest extends AbstractFollowUpDataProviderTest {
 
-        String[] demandsOrder = new String[] { "Done", "UATing", "To UAT", "Doing", "To Do", "Open", "Cancelled" };
-        String[] subtaskOrder = new String[] { "Done", "Reviewing", "To Review", "Doing", "To Do", "Open","Cancelled" };
-        String[] tasksOrder = new String[] { "Done", "QAing", "To QA", "Feature Reviewing", "To Feature Review",
-                "Alpha Testing", "To Alpha Test", "Doing", "To Do", "To Do", "Open", "Cancelled" };
-        JiraProperties.StatusPriorityOrder statusOrder = new JiraProperties.StatusPriorityOrder();
-        statusOrder.setDemands(demandsOrder);
-        statusOrder.setTasks(tasksOrder);
-        statusOrder.setSubtasks(subtaskOrder);
-        when(jiraProperties.getStatusPriorityOrder()).thenReturn(statusOrder);
-    }
-    
     @Test
     public void demandWithoutChildFeatures_shouldCreateASingleBallpark() {
         issues( 
             demand().id(1).key("PROJ-1").summary("Smry 1").originalEstimateInHours(1).timeSpentInHours(10)
         );
-        
+
         assertFollowupsForIssuesEquals(
             " planningType           : Ballpark\n" + 
             " project                : A Project\n" + 
@@ -184,13 +73,13 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " queryType              : DEMAND BALLPARK"
         );
     }
-    
+
     @Test
     public void demandWithRelease_shouldCreateABallparkWithReleaseInfo() {
         issues( 
             demand().id(1).key("PROJ-1").summary("Smry 1").originalEstimateInHours(1).timeSpentInHours(10).release("Release 42")
         );
-        
+
         assertFollowupsForIssuesEquals(
             " planningType           : Ballpark\n" + 
             " project                : A Project\n" + 
@@ -223,7 +112,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " queryType              : DEMAND BALLPARK"
         );
     }
-    
+
     @Test
     public void subtaskWithDemandAndSubtask_shouldCreateOnlyOneSubTaskAndNoBallparks() {
         configureBallparkMappings(
@@ -239,7 +128,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
                 task().id(3).key("PROJ-3").summary("Smry 3").originalEstimateInHours(2).parent("PROJ-2").priorityOrder(1l),
                 subtask().id(4).key("PROJ-4").summary("Smry 4").timeSpentInHours(5).parent("PROJ-3").issueType(devIssueType).tshirtSize("XL").priorityOrder(1l)
         );
-        
+
         assertFollowupsForIssuesEquals(
             " planningType           : Ballpark\n" + 
             " project                : A Project\n" + 
@@ -270,9 +159,9 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " demandBallpark         : 1.0\n" + 
             " taskBallpark           : 0.0\n" + 
             " queryType              : DEMAND BALLPARK"+
-            
+
             "\n\n"+
-                
+
             " planningType           : Plan\n" + 
             " project                : A Project\n" + 
             " demandType             : Demand\n" + 
@@ -312,23 +201,23 @@ public class FollowUpDataProviderFromCurrentStateTest {
             "    tshirtCustomFieldId: Dev_Tshirt\n" + 
             "    jiraIssueTypes:\n" + 
             "      - "+ devIssueType + "\n" + 
-    
+
             "  - issueType : BALLPARK - Alpha\n" + 
             "    tshirtCustomFieldId: Alpha_TestTshirt\n" + 
             "    jiraIssueTypes:\n" + 
             "      - " + alphaIssueType + " # UX\n");
-        
-        tshirtSizeInfo.setIds(Arrays.asList("Dev_Tshirt","Alpha_TestTshirt"));
-        
+
+        tshirtSizeInfo.setIds(asList("Dev_Tshirt","Alpha_TestTshirt"));
+
         issues( 
             demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1).priorityOrder(1l),
-            
+
             task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2).timeSpentInHours(1)
                 .tshirt("Dev_Tshirt","L")
                 .tshirt("Alpha_TestTshirt","S")
                 .priorityOrder(1l)
         );
-        
+
         assertFollowupsForIssuesEquals(
             " planningType           : Ballpark\n" + 
             " project                : A Project\n" + 
@@ -359,9 +248,9 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " demandBallpark         : 1.0\n" + 
             " taskBallpark           : 2.0\n" + 
             " queryType              : FEATURE BALLPARK"+
-            
+
             "\n\n"+
-            
+
             " planningType           : Ballpark\n" + 
             " project                : A Project\n" + 
             " demandType             : Demand\n" + 
@@ -386,7 +275,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " subtaskDescription     : 00000 - Smry 3\n" + 
             " subtaskFullDescription : BALLPARK - Alpha | 00000 - Smry 3\n" + 
             " tshirtSize             : S\n" + 
-            
+
             " worklog                : 0.0\n" + 
             " wrongWorklog           : 1.0\n" + 
             " demandBallpark         : 1.0\n" + 
@@ -403,37 +292,37 @@ public class FollowUpDataProviderFromCurrentStateTest {
                 "    jiraIssueTypes:\n" + 
                 "      - "+ frontEndIssueType + "\n" +
                 "      - "+ devIssueType + "\n" +
-        
+
                 "  - issueType : BALLPARK - Alpha\n" + 
                 "    tshirtCustomFieldId: Alpha_TestTshirt\n" + 
                 "    jiraIssueTypes:\n" + 
                 "      - " + alphaIssueType + "\n" +
-                
+
                 "  - issueType : BALLPARK - Deploy\n" + 
                 "    tshirtCustomFieldId: Deploy_TestTshirt\n" + 
                 "    jiraIssueTypes:\n" + 
                 "      - " + deployIssueType + "\n" +
-                
+
                 reviewIssueType + " : \n" +
                 "  - issueType : BALLPARK - Review\n" + 
                 "    tshirtCustomFieldId: Review_Tshirt\n" + 
                 "    jiraIssueTypes:\n" + 
                 "      - "+ devIssueType + "\n"
                 );
-            
-        tshirtSizeInfo.setIds(Arrays.asList("Dev_Tshirt","Alpha_TestTshirt","Review_Tshirt"));
-        
+
+        tshirtSizeInfo.setIds(asList("Dev_Tshirt","Alpha_TestTshirt","Review_Tshirt"));
+
         issues( 
             demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1).priorityOrder(1l),
-            
+
             task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2).timeSpentInHours(1)
                     .tshirt("Dev_Tshirt", "L")
                     .tshirt("Alpha_TestTshirt", "S")
                     .priorityOrder(1l),
-                    
+
             subtask().id(4).key("PROJ-4").summary("Smry 4").timeSpentInHours(5).parent("PROJ-3").issueType(devIssueType).tshirtSize("XL").priorityOrder(1l)
         );
-        
+
         assertFollowupsForIssuesEquals(
             " planningType           : Ballpark\n" + 
             " project                : A Project\n" + 
@@ -464,9 +353,9 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " demandBallpark         : 1.0\n" + 
             " taskBallpark           : 2.0\n" + 
             " queryType              : FEATURE BALLPARK" +
-            
+
             "\n\n"+
-            
+
             " planningType           : Plan\n" + 
             " project                : A Project\n" + 
             " demandType             : Demand\n" + 
@@ -497,7 +386,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " taskBallpark           : 2.0\n" + 
             " queryType              : SUBTASK PLAN");
     }
-    
+
     @Test
     public void featureWithAllSubtasks_ShouldNotCreateDummies() {
         configureBallparkMappings(
@@ -506,28 +395,28 @@ public class FollowUpDataProviderFromCurrentStateTest {
                 "    tshirtCustomFieldId: Dev_Tshirt\n" + 
                 "    jiraIssueTypes:\n" + 
                 "      - " + devIssueType + "\n" +
-        
+
                 "  - issueType : BALLPARK - Alpha\n" + 
                 "    tshirtCustomFieldId: Alpha_TestTshirt\n" + 
                 "    jiraIssueTypes:\n" + 
                 "      - " + alphaIssueType + "\n"
                 );
-            
-        tshirtSizeInfo.setIds(Arrays.asList("Dev_Tshirt","Alpha_TestTshirt","Review_Tshirt"));
-        
+
+        tshirtSizeInfo.setIds(asList("Dev_Tshirt","Alpha_TestTshirt","Review_Tshirt"));
+
         issues( 
             demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1).priorityOrder(1l),
-            
+
             task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2).timeSpentInHours(1)
                     .tshirt("Dev_Tshirt", "L")
                     .tshirt("Alpha_TestTshirt", "S")
                     .priorityOrder(1l),
-                    
+
             subtask().id(4).key("PROJ-4").summary("Smry 4").timeSpentInHours(5).parent("PROJ-3").issueType(devIssueType).tshirtSize("XL").priorityOrder(1l),
-            
+
             subtask().id(5).key("PROJ-5").summary("Smry 5").timeSpentInHours(15).parent("PROJ-3").issueType(alphaIssueType).tshirtSize("L").priorityOrder(1l)
         );
-        
+
         assertFollowupsForIssuesEquals(
             " planningType           : Plan\n" + 
             " project                : A Project\n" + 
@@ -558,9 +447,9 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " demandBallpark         : 1.0\n" + 
             " taskBallpark           : 2.0\n" + 
             " queryType              : SUBTASK PLAN" +
-            
+
             "\n\n"+
-            
+
             " planningType           : Plan\n" + 
             " project                : A Project\n" + 
             " demandType             : Demand\n" + 
@@ -591,7 +480,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " taskBallpark           : 2.0\n" + 
             " queryType              : SUBTASK PLAN");
     }
-    
+
     @Test
     public void featureWithRelease_ShouldCreateBallparksWithRelease() {
         configureBallparkMappings(
@@ -600,16 +489,16 @@ public class FollowUpDataProviderFromCurrentStateTest {
             "    tshirtCustomFieldId: Dev_Tshirt\n" + 
             "    jiraIssueTypes:\n" + 
             "      - "+ devIssueType + "\n");
-        
-        tshirtSizeInfo.setIds(Arrays.asList("Dev_Tshirt","Alpha_TestTshirt"));
-        
+
+        tshirtSizeInfo.setIds(asList("Dev_Tshirt","Alpha_TestTshirt"));
+
         issues( 
             demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1),
-            
+
             task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2).timeSpentInHours(1)
                 .tshirt("Dev_Tshirt","L").release("release 66")
         );
-        
+
         assertFollowupsForIssuesEquals(
             " planningType           : Ballpark\n" + 
             " project                : A Project\n" + 
@@ -642,7 +531,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " queryType              : FEATURE BALLPARK"
             );
     }
-    
+
     @Test
     public void featureWithRelease_ShouldCreateSubtaskWithRelease() {
         configureBallparkMappings(
@@ -652,18 +541,18 @@ public class FollowUpDataProviderFromCurrentStateTest {
                 "    jiraIssueTypes:\n" + 
                 "      - " + devIssueType + "\n"
                 );
-            
-        tshirtSizeInfo.setIds(Arrays.asList("Dev_Tshirt","Alpha_TestTshirt","Review_Tshirt"));
-        
+
+        tshirtSizeInfo.setIds(asList("Dev_Tshirt","Alpha_TestTshirt","Review_Tshirt"));
+
         issues( 
             demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1),
-            
+
             task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2).timeSpentInHours(1)
                     .tshirt("Dev_Tshirt", "L").release("release 66"),
-                    
+
             subtask().id(4).key("PROJ-4").summary("Smry 4").timeSpentInHours(5).parent("PROJ-3").issueType(devIssueType).tshirtSize("XL")
         );
-        
+
         assertFollowupsForIssuesEquals(
             " planningType           : Plan\n" + 
             " project                : A Project\n" + 
@@ -696,7 +585,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " queryType              : SUBTASK PLAN"
             );
     }
-    
+
     @Test
     public void subtaskWithoutParents_shouldSubTaskWithNullFields() {
         configureBallparkMappings(
@@ -710,7 +599,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
                 task().id(3).key("PROJ-3").summary("Smry 3").originalEstimateInHours(2),
                 subtask().id(4).key("PROJ-4").summary("Smry 4").timeSpentInHours(5).parent("PROJ-3").issueType(devIssueType).tshirtSize("XL")
         );
-        
+
         assertFollowupsForIssuesEquals(
             " planningType           : Plan\n" + 
             " project                : A Project\n" + 
@@ -753,17 +642,17 @@ public class FollowUpDataProviderFromCurrentStateTest {
                 "      - "+ frontEndIssueType + "\n" +
                 "      - "+ devIssueType + "\n" 
                 );
-            
-        tshirtSizeInfo.setIds(Arrays.asList("Dev_Tshirt","Alpha_TestTshirt"));
-        followup.setFeatureStatusThatDontGenerateBallpark(Arrays.asList(statusDone));
-        
+
+        tshirtSizeInfo.setIds(asList("Dev_Tshirt","Alpha_TestTshirt"));
+        followup.setFeatureStatusThatDontGenerateBallpark(asList(statusDone));
+
         issues( 
             demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1),
-            
+
             task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2).timeSpentInHours(1)
                     .tshirt("Dev_Tshirt", "L").issueStatus(statusDone)
         );
-        
+
         assertFollowupsForIssuesEquals("");
     }
 
@@ -776,20 +665,20 @@ public class FollowUpDataProviderFromCurrentStateTest {
                 "    jiraIssueTypes:\n" + 
                 "      - "+ devIssueType + "\n"
                 );
-            
-        tshirtSizeInfo.setIds(Arrays.asList("Dev_Tshirt","Alpha_TestTshirt","Review_Tshirt"));
-        followup.setSubtaskStatusThatDontPreventBallparkGeneration(Arrays.asList(statusCancelled));
-        
+
+        tshirtSizeInfo.setIds(asList("Dev_Tshirt","Alpha_TestTshirt","Review_Tshirt"));
+        followup.setSubtaskStatusThatDontPreventBallparkGeneration(asList(statusCancelled));
+
         issues( 
             demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1).priorityOrder(1l),
-            
+
             task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2).timeSpentInHours(1)
                     .tshirt("Dev_Tshirt", "L").priorityOrder(1l),
-                    
+
             subtask().id(4).key("PROJ-4").summary("Smry 4").timeSpentInHours(5).parent("PROJ-3").issueType(devIssueType).tshirtSize("XL")
                 .issueStatus(statusCancelled).priorityOrder(1l)
         );
-        
+
         assertFollowupsForIssuesEquals(
             " planningType           : Ballpark\n" + 
             " project                : A Project\n" + 
@@ -820,9 +709,9 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " demandBallpark         : 1.0\n" + 
             " taskBallpark           : 2.0\n" + 
             " queryType              : FEATURE BALLPARK"+
-            
+
             "\n\n"+
-            
+
             " planningType           : Plan\n" + 
             " project                : A Project\n" + 
             " demandType             : Demand\n" + 
@@ -853,14 +742,14 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " taskBallpark           : 2.0\n" + 
             " queryType              : SUBTASK PLAN");
     }
-    
+
     @Test
     public void withoutBallparkConfiguration_ShouldFail() {
         issues( 
                 task().id(3).key("PROJ-3").summary("Smry 3").originalEstimateInHours(2),
                 subtask().id(4).key("PROJ-4").summary("Smry 4").timeSpentInHours(5).parent("PROJ-3").issueType(devIssueType).tshirtSize("XL")
         );
-        
+
         try {
             subject.getJiraData(defaultProjects());
             fail("Should fail when trying to generate ballbark without mapping for given issue type");
@@ -868,7 +757,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             assertEquals("Ballpark mapping for issue type 'Task' (id 12) missing in configuration", e.getMessage());
         }
     }
-    
+
     @Test
     public void demandAndfeatureWithRelease_ShouldCreateBallparksWithFeatureRelease() {
         configureBallparkMappings(
@@ -877,16 +766,16 @@ public class FollowUpDataProviderFromCurrentStateTest {
             "    tshirtCustomFieldId: Dev_Tshirt\n" + 
             "    jiraIssueTypes:\n" + 
             "      - "+ devIssueType + "\n");
-        
-        tshirtSizeInfo.setIds(Arrays.asList("Dev_Tshirt","Alpha_TestTshirt"));
-        
+
+        tshirtSizeInfo.setIds(asList("Dev_Tshirt","Alpha_TestTshirt"));
+
         issues( 
             demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1).release("release 66"),
-            
+
             task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2).timeSpentInHours(1)
                 .tshirt("Dev_Tshirt","L").release("release 88")
         );
-        
+
         assertFollowupsForIssuesEquals(
             " planningType           : Ballpark\n" + 
             " project                : A Project\n" + 
@@ -919,7 +808,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " queryType              : FEATURE BALLPARK"
             );
     }
-    
+
     @Test
     public void demandWithReleaseAndfeatureWithout_ShouldCreateBallparksWithDemandRelease() {
         configureBallparkMappings(
@@ -928,16 +817,16 @@ public class FollowUpDataProviderFromCurrentStateTest {
             "    tshirtCustomFieldId: Dev_Tshirt\n" + 
             "    jiraIssueTypes:\n" + 
             "      - "+ devIssueType + "\n");
-        
-        tshirtSizeInfo.setIds(Arrays.asList("Dev_Tshirt","Alpha_TestTshirt"));
-        
+
+        tshirtSizeInfo.setIds(asList("Dev_Tshirt","Alpha_TestTshirt"));
+
         issues( 
             demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1).release("release 66"),
-            
+
             task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2).timeSpentInHours(1)
                 .tshirt("Dev_Tshirt","L")
         );
-        
+
         assertFollowupsForIssuesEquals(
             " planningType           : Ballpark\n" + 
             " project                : A Project\n" + 
@@ -970,7 +859,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " queryType              : FEATURE BALLPARK"
             );
     }    
-    
+
     @Test
     public void ifSubtaskHasRelease_ShouldPreferSubtaskRelease() {
         configureBallparkMappings(
@@ -980,25 +869,25 @@ public class FollowUpDataProviderFromCurrentStateTest {
                 "    jiraIssueTypes:\n" + 
                 "      - " + devIssueType + "\n"
                 );
-            
-        tshirtSizeInfo.setIds(Arrays.asList("Dev_Tshirt","Alpha_TestTshirt","Review_Tshirt"));
-        
+
+        tshirtSizeInfo.setIds(asList("Dev_Tshirt","Alpha_TestTshirt","Review_Tshirt"));
+
         issues( 
             demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1).release("Demand Release #1").priorityOrder(1l),
-            
+
             task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2).timeSpentInHours(1)
                     .tshirt("Dev_Tshirt", "L")
                     .tshirt("Alpha_TestTshirt", "S")
                     .priorityOrder(1l)
                     .release("Feature Release #2"),
-                    
+
             subtask().id(4).key("PROJ-4").summary("Smry 4").timeSpentInHours(5).parent("PROJ-3").issueType(devIssueType).tshirtSize("XL")
                     .release("Sub Task Release #3").priorityOrder(1l),
-                    
+
             subtask().id(5).key("PROJ-5").summary("Smry 5").timeSpentInHours(5).parent("PROJ-3").issueType(devIssueType).tshirtSize("XL")
                     .release("Sub Task Release #4").priorityOrder(1l)                  
         );
-        
+
         assertFollowupsForIssuesEquals(
             " planningType           : Plan\n" + 
             " project                : A Project\n" + 
@@ -1029,9 +918,9 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " demandBallpark         : 1.0\n" + 
             " taskBallpark           : 2.0\n" + 
             " queryType              : SUBTASK PLAN" +
-            
+
             "\n\n"+
-            
+
             " planningType           : Plan\n" + 
             " project                : A Project\n" + 
             " demandType             : Demand\n" + 
@@ -1063,7 +952,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " queryType              : SUBTASK PLAN"             
             );
     }
-    
+
     @Test
     public void ifDemandHasReleaseAndFeatureAndSubTaskDoesnt_UseDemandRelease() {
         configureBallparkMappings(
@@ -1073,19 +962,19 @@ public class FollowUpDataProviderFromCurrentStateTest {
                 "    jiraIssueTypes:\n" + 
                 "      - " + devIssueType + "\n"
                 );
-            
-        tshirtSizeInfo.setIds(Arrays.asList("Dev_Tshirt","Alpha_TestTshirt","Review_Tshirt"));
-        
+
+        tshirtSizeInfo.setIds(asList("Dev_Tshirt","Alpha_TestTshirt","Review_Tshirt"));
+
         issues( 
             demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1).release("Demand Release #1"),
-            
+
             task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2).timeSpentInHours(1)
                     .tshirt("Dev_Tshirt", "L")
                     .tshirt("Alpha_TestTshirt", "S"),
-                    
+
             subtask().id(4).key("PROJ-4").summary("Smry 4").timeSpentInHours(5).parent("PROJ-3").issueType(devIssueType).tshirtSize("XL")
         );
-        
+
         assertFollowupsForIssuesEquals(
             " planningType           : Plan\n" + 
             " project                : A Project\n" + 
@@ -1118,7 +1007,7 @@ public class FollowUpDataProviderFromCurrentStateTest {
             " queryType              : SUBTASK PLAN"
             );
     }
-    
+
     @Test
     public void verifyDemandsOrder_ShouldBeOrderedByStatusAndPriority() {
         Long hightPriority = 1l;
@@ -1266,24 +1155,24 @@ public class FollowUpDataProviderFromCurrentStateTest {
                 "    jiraIssueTypes:\n" + 
                 "      - " + devIssueType + "\n"
                 );
-        
-        followup.setStatusExcludedFromFollowup(Arrays.asList(statusOpen));
-        
+
+        followup.setStatusExcludedFromFollowup(asList(statusOpen));
+
         issues( 
                 demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1).release("Demand Release #1").issueStatus(statusOpen),
-                
+
                 task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2).timeSpentInHours(1)
                         .issueStatus(statusOpen)
                         .tshirt("Dev_Tshirt", "L")
                         .tshirt("Alpha_TestTshirt", "S"),
-                        
+
                 subtask().id(4).key("PROJ-4").summary("Smry 4").timeSpentInHours(5).parent("PROJ-3").issueType(devIssueType).tshirtSize("XL")
                         .issueStatus(statusOpen)
             );
-        
+
         assertFollowupsForIssuesEquals("");
     }
-    
+
     @Test
     public void issuesWithoutParent_shouldNotBreakTheFollowupGeneration() {
         configureBallparkMappings(
@@ -1293,13 +1182,13 @@ public class FollowUpDataProviderFromCurrentStateTest {
                 "    jiraIssueTypes:\n" + 
                 "      - " + devIssueType + "\n"
                 );
-        
+
         issues( 
                 subtask().id(4).key("PROJ-4").summary("Smry 4").timeSpentInHours(5).issueType(devIssueType).tshirtSize("XL")
             );
         assertFollowupsForIssuesEquals("");
     }
-    
+
     @Test
     public void nullTimeSpent_ShouldNotBreak() {
         configureBallparkMappings(
@@ -1310,10 +1199,10 @@ public class FollowUpDataProviderFromCurrentStateTest {
                 "      - "+ frontEndIssueType + "\n" +
                 "      - "+ devIssueType + "\n" 
                 );
-            
-        tshirtSizeInfo.setIds(Arrays.asList("Dev_Tshirt","Alpha_TestTshirt"));
-        followup.setFeatureStatusThatDontGenerateBallpark(Arrays.asList(statusDone));
-        
+
+        tshirtSizeInfo.setIds(asList("Dev_Tshirt","Alpha_TestTshirt"));
+        followup.setFeatureStatusThatDontGenerateBallpark(asList(statusDone));
+
         issues( 
             demand().id(2).key("PROJ-2").summary("Smry 2"),
             task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3")
@@ -1323,10 +1212,10 @@ public class FollowUpDataProviderFromCurrentStateTest {
                 subtask().id(4).key("PROJ-4").summary("Smry 4").parent("PROJ-3").issueType(devIssueType).tshirtSize("XL")
                 .issueStatus(statusOpen)
         );
-        
+
         subject.getJiraData(defaultProjects());
     }
-    
+
     @Test
     public void nullOriginalEstimate_ShouldNotBreak() {
         configureBallparkMappings(
@@ -1337,17 +1226,17 @@ public class FollowUpDataProviderFromCurrentStateTest {
                 "      - "+ frontEndIssueType + "\n" +
                 "      - "+ devIssueType + "\n" 
                 );
-            
-        tshirtSizeInfo.setIds(Arrays.asList("Dev_Tshirt","Alpha_TestTshirt"));
-        followup.setFeatureStatusThatDontGenerateBallpark(Arrays.asList(statusDone));
-        
+
+        tshirtSizeInfo.setIds(asList("Dev_Tshirt","Alpha_TestTshirt"));
+        followup.setFeatureStatusThatDontGenerateBallpark(asList(statusDone));
+
         issues( 
             demand().id(2).key("PROJ-2").summary("Smry 2").timeSpentInHours(0).originalEstimateInHours(null)
         );
-        
+
         subject.getJiraData(defaultProjects());
     }
-    
+
     @Test
     public void featureWithoutDemand_ShouldNotBreak() {
         configureBallparkMappings(
@@ -1356,9 +1245,9 @@ public class FollowUpDataProviderFromCurrentStateTest {
             "    tshirtCustomFieldId: Dev_Tshirt\n" + 
             "    jiraIssueTypes:\n" + 
             "      - "+ devIssueType + "\n");
-        
-        tshirtSizeInfo.setIds(Arrays.asList("Dev_Tshirt","Alpha_TestTshirt"));
-        
+
+        tshirtSizeInfo.setIds(asList("Dev_Tshirt","Alpha_TestTshirt"));
+
         issues( 
             task()  .id(3).key("PROJ-3").summary("Smry 3").originalEstimateInHours(2).timeSpentInHours(1)
                 .tshirt("Dev_Tshirt","L")
@@ -1401,52 +1290,40 @@ public class FollowUpDataProviderFromCurrentStateTest {
                 demand().id(1).key("PROJ-1").summary("Smry 1").originalEstimateInHours(1).timeSpentInHours(10),
                 demand().id(2).project("ANOTHER").key("ANOTHER-1").summary("Smry 2").originalEstimateInHours(1).timeSpentInHours(10)
             );
-            
-            assertFollowupsForIssuesEquals(
-                " planningType           : Ballpark\n" + 
-                " project                : A Project\n" + 
-                " demandType             : Demand\n" + 
-                " demandStatus           : To Do\n" + 
-                " demandId               : 1\n" + 
-                " demandNum              : PROJ-1\n" + 
-                " demandSummary          : Smry 1\n" + 
-                " demandDescription      : M | 00001 - Smry 1\n" + 
-                " taskType               : BALLPARK - Demand\n" + 
-                " taskStatus             : Open\n" + 
-                " taskId                 : 0\n" + 
-                " taskNum                : PROJ-1\n" + 
-                " taskSummary            : Dummy Feature\n" + 
-                " taskDescription        : 00000 - Smry 1\n" + 
-                " taskFullDescription    : BALLPARK - Demand | M | 00000 - Smry 1\n" + 
-                " taskRelease            : No release set\n" + 
-                " subtaskType            : BALLPARK - Demand\n" + 
-                " subtaskStatus          : To Do\n" + 
-                " subtaskId              : 0\n" + 
-                " subtaskNum             : PROJ-0\n" + 
-                " subtaskSummary         : Smry 1\n" + 
-                " subtaskDescription     : M | 00000 - Smry 1\n" + 
-                " subtaskFullDescription : BALLPARK - Demand | M | 00000 - Smry 1\n" + 
-                " tshirtSize             : M\n" + 
-                " worklog                : 0.0\n" + 
-                " wrongWorklog           : 10.0\n" + 
-                " demandBallpark         : 1.0\n" + 
-                " taskBallpark           : 0.0\n" + 
-                " queryType              : DEMAND BALLPARK"
-            );
+
+        assertFollowupsForIssuesEquals(
+            " planningType           : Ballpark\n" + 
+            " project                : A Project\n" + 
+            " demandType             : Demand\n" + 
+            " demandStatus           : To Do\n" + 
+            " demandId               : 1\n" + 
+            " demandNum              : PROJ-1\n" +         
+            " demandSummary          : Smry 1\n" + 
+            " demandDescription      : M | 00001 - Smry 1\n" + 
+            " taskType               : BALLPARK - Demand\n" + 
+            " taskStatus             : Open\n" + 
+            " taskId                 : 0\n" + 
+            " taskNum                : PROJ-1\n" + 
+            " taskSummary            : Dummy Feature\n" + 
+            " taskDescription        : 00000 - Smry 1\n" + 
+            " taskFullDescription    : BALLPARK - Demand | M | 00000 - Smry 1\n" + 
+            " taskRelease            : No release set\n" + 
+            " subtaskType            : BALLPARK - Demand\n" + 
+            " subtaskStatus          : To Do\n" + 
+            " subtaskId              : 0\n" + 
+            " subtaskNum             : PROJ-0\n" + 
+            " subtaskSummary         : Smry 1\n" + 
+            " subtaskDescription     : M | 00000 - Smry 1\n" + 
+            " subtaskFullDescription : BALLPARK - Demand | M | 00000 - Smry 1\n" + 
+            " tshirtSize             : M\n" + 
+            " worklog                : 0.0\n" + 
+            " wrongWorklog           : 10.0\n" + 
+            " demandBallpark         : 1.0\n" + 
+            " taskBallpark           : 0.0\n" + 
+            " queryType              : DEMAND BALLPARK"
+        );
     }
-    
-    
-    private void configureBallparkMappings(String string) {
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        Map<Long, List<BallparkMapping>> ballparkMappings;
-        try {
-            ballparkMappings = mapper.readValue(string,new TypeReference<Map<Long, List<BallparkMapping>>>(){});
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-        followup.setBallparkMappings(ballparkMappings);
-    }
-    
+
     private List<FromJiraDataRow> sortJiraDataByIssuesKeys(List<FromJiraDataRow> actual) {
         Collections.sort(actual, new Comparator<FromJiraDataRow>() {
             @Override
@@ -1458,168 +1335,16 @@ public class FollowUpDataProviderFromCurrentStateTest {
     }
 
     private void assertFollowupsForIssuesEqualsOrdered(String expectedFollowupList) {
-        List<FromJiraDataRow> actual = subject.getJiraData(defaultProjects());
+        List<FromJiraDataRow> actual = subject.getJiraData(defaultProjects()).fromJiraDs.rows;
         assertEquals(expectedFollowupList, StringUtils.join(actual, "\n\n"));
     }
 
     private void assertFollowupsForIssuesEquals(String expectedFollowupList) {
-        List<FromJiraDataRow> actual = sortJiraDataByIssuesKeys(subject.getJiraData(defaultProjects()));
+        List<FromJiraDataRow> actual = sortJiraDataByIssuesKeys(subject.getJiraData(defaultProjects()).fromJiraDs.rows);
 
         assertEquals(
             expectedFollowupList,
             StringUtils.join(actual, "\n\n"));
     }
-    
-    private void issues(IssueBuilder ... builders) {
-        List<Issue> issueList = new ArrayList<>();
-        for(IssueBuilder b : builders)
-            issueList.add(b.build());
-        when(issueBufferService.getAllIssues()).thenReturn(issueList);
-    }
-    
-    private IssueBuilder demand() {
-        return new IssueBuilder()
-                .issueType(demandIssueType);
-    }
-	
-	private IssueBuilder subtask() {
-	    return new IssueBuilder();
-	}
-	
-	private IssueBuilder task() {
-	    return new IssueBuilder().issueType(taskIssueType);
-	}
-	
-    private static String getProjectName() {
-        return "A Project";
-    }
 
-    private static String getProjectKey(String project) {
-        if (project != null)
-            return project;
-        return "PROJ";
-    }
-    
-    private class IssueBuilder {
-        private long issueType;
-        private Long id; 
-        private String project;
-        private String key; 
-        private String summary; 
-        private Long status = statusToDo;
-        private Integer originalEstimateMinutes;
-        private Integer timeSpentMinutes;
-        private String parent;
-        private Map<String, Serializable> customFields = new LinkedHashMap<>();
-        private Long priorityOrder;
-        
-        public IssueBuilder id(int id) {
-            this.id = (long) id;
-            return this;
-        }
-
-        public IssueBuilder project(String p) {
-            this.project=p;
-            return this;
-        }
-
-        public IssueBuilder release(String releaseName) {
-            String releaseId = jiraProperties.getCustomfield().getRelease().getId();
-            customFields.put(releaseId, new objective.taskboard.data.CustomField(releaseId, releaseName));
-            return this;
-        }
-
-        public IssueBuilder issueStatus(long status) {
-            this.status = status;
-            return this;
-        }
-
-        public IssueBuilder tshirt(String tshirtId, String tshirtSize) {
-            customFields.put(tshirtId, new objective.taskboard.data.CustomField(tshirtId, tshirtSize));
-            return this;
-        }
-
-        public IssueBuilder parent(String parent) {
-            this.parent = parent;
-            return this;
-        }
-
-        public IssueBuilder issueType(long issueType) {
-            this.issueType = issueType;
-            return this;
-        }
-
-        public IssueBuilder timeSpentInHours(Integer hours) {
-            this.timeSpentMinutes = hours * 60;
-            return this;
-        }
-
-        public IssueBuilder originalEstimateInHours(Integer hours) {
-            this.originalEstimateMinutes = (hours == null?0:hours) * 60;
-            return this;
-        }
-        public IssueBuilder key(String key) {
-            this.key = key;
-            return this;
-        }
-
-        public IssueBuilder summary(String summary) {
-            this.summary = summary;
-            return this;
-        }
-        
-        public IssueBuilder priorityOrder(Long priorityOrder) {
-            this.priorityOrder = priorityOrder;
-            return this;
-        }
-
-        private IssueBuilder tshirtSize(String tShirtSize) {
-            return tshirt(tshirtSizeInfo.getMainTShirtSizeFieldId(), tShirtSize);
-        }
-        
-        public Issue build() {
-            TaskboardTimeTracking timeTracking = new TaskboardTimeTracking(originalEstimateMinutes, timeSpentMinutes);
-            if (originalEstimateMinutes == null && timeSpentMinutes == null)
-                timeTracking = null;
-            IssueScratch scratch = new IssueScratch(
-                    id, 
-                    key, 
-                    getProjectKey(project), 
-                    getProjectName(), 
-                    issueType, 
-                    null, //typeIconUri
-                    summary, 
-                    status, 
-                    0L,   //startDateStepMillis
-                    null, //subresponsavel1
-                    null, //subresponsavel2
-                    parent, 
-                    0L,   //parentType
-                    null, //parentTypeIconUri
-                    new ArrayList<String>(),//dependencies 
-                    null, //subResponsaveis
-                    null, //assignee
-                    0L, //priority
-                    null, //dueDate
-                    0L, //created
-                    null,//Date updatedDate,
-                    null, //description 
-                    null, //comments
-                    null, //labels
-                    null, //components
-                    customFields,
-                    priorityOrder,
-                    timeTracking,
-                    null,//reporter
-                    null,//coAssignees
-                    null,//classOfService
-                    null //release
-                    );
-            return new Issue(scratch, jiraProperties, metadataService);
-        }
-    }
-    
-    private String[] defaultProjects() {
-        return new String[]{"PROJ"};
-    }
 }
