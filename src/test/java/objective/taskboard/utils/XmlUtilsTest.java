@@ -1,5 +1,24 @@
 package objective.taskboard.utils;
 
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 /*-
  * [LICENSE]
  * Taskboard
@@ -23,18 +42,8 @@ package objective.taskboard.utils;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
+import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
-
-import javax.xml.transform.TransformerException;
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 
 public class XmlUtilsTest {
 
@@ -66,7 +75,7 @@ public class XmlUtilsTest {
             File inputXmlFile = new File(XmlUtilsTest.class.getResource("unformattedFile.xml").toURI());
             File expectedResult = new File(XmlUtilsTest.class.getResource("file.xml").toURI());
 
-            XmlUtils.format(inputXmlFile, outputXmlFile);
+            format(inputXmlFile, outputXmlFile);
 
             assertEquals("The files differ!",
                     FileUtils.readFileToString(expectedResult, "utf-8"),
@@ -125,5 +134,22 @@ public class XmlUtilsTest {
         assertThat(
                 XmlUtils.asString(XmlUtils.xpath(xmlFile, locator))
                 , is("text-content"));
+    }
+    
+    private static void format(File inputXmlFile, File outputXmlFile) {
+        try {
+            Document document = XmlUtils.asDocument(inputXmlFile);
+            TransformerFactory transFactory = TransformerFactory.newInstance();
+            Transformer idTransform = transFactory.newTransformer();
+            idTransform.setOutputProperty(OutputKeys.METHOD, "xml");
+            idTransform.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+            idTransform.setOutputProperty(OutputKeys.INDENT, "yes");
+            idTransform.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+            Source input = new DOMSource(document);
+            Result output = new StreamResult(outputXmlFile);
+            idTransform.transform(input, output);
+        } catch (TransformerException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

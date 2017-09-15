@@ -18,32 +18,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
-
 package objective.taskboard.followup.impl;
 
 import static objective.taskboard.utils.ZipUtils.unzip;
 import static objective.taskboard.utils.ZipUtils.zip;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
 
-import objective.taskboard.database.directory.DataBaseDirectory;
-import objective.taskboard.followup.FollowUpTemplate;
-import objective.taskboard.followup.FollowUpTemplateStorage;
-import objective.taskboard.followup.FollowUpTemplateValidator;
-import objective.taskboard.followup.UpdateFollowUpService;
-import objective.taskboard.utils.IOUtilities;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import objective.taskboard.database.directory.DataBaseDirectory;
+import objective.taskboard.followup.FollowUpTemplate;
+import objective.taskboard.followup.FollowUpTemplateStorageInterface;
+import objective.taskboard.followup.FollowUpTemplateValidator;
+import objective.taskboard.utils.IOUtilities;
 
 @Service
-public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
-
-    @Autowired
-    private UpdateFollowUpService updateFollowUpService;
+public class FollowUpTemplateStorage implements FollowUpTemplateStorageInterface {
 
     @Autowired
     private DataBaseDirectory dataBaseDirectory;
@@ -51,15 +50,7 @@ public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
     @Override
     public FollowUpTemplate getTemplate(String path) {
         Path templatePath = getTemplateRoot().resolve(path);
-        return new FollowUpTemplate(
-                resolve(templatePath, "sharedStrings-initial.xml")
-                , resolve("followup-template/sharedStrings-template.xml")
-                , resolve("followup-template/sharedStrings-si-template.xml")
-                , resolve(templatePath, "sheet7-template.xml")
-                , resolve("followup-template/sheet7-row-template.xml")
-                , resolve(templatePath, "Followup-template.xlsm")
-                , resolve("followup-template/table7-template.xml")
-        );
+        return new FollowUpTemplate(resolve(templatePath, "Followup-template.xlsm"));
     }
 
     @Override
@@ -69,7 +60,7 @@ public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
 
     @Override
     public String storeTemplate(InputStream stream, FollowUpTemplateValidator validator) throws IOException {
-        if(!Files.exists(getTemplateRoot()))
+        if(!getTemplateRoot().toFile().exists())
             Files.createDirectories(getTemplateRoot());
 
         Path pathFollowup = Files.createTempDirectory(getTemplateRoot(), "Followup");
@@ -77,9 +68,6 @@ public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
         unzip(stream, tempFolder);
         try {
             validator.validate(tempFolder);
-            updateFollowUpService.updateFromJiraTemplate(tempFolder, pathFollowup.resolve("sheet7-template.xml"));
-            updateFollowUpService.updateSharedStringsInitial(tempFolder, pathFollowup.resolve("sharedStrings-initial.xml"));
-            updateFollowUpService.deleteGeneratedFiles(tempFolder);
             zip(tempFolder, pathFollowup.resolve("Followup-template.xlsm"));
             deleteQuietly(tempFolder.toFile());
         } catch (Exception e) {
@@ -97,10 +85,6 @@ public class DefaultFollowUpTemplateStorage implements FollowUpTemplateStorage {
 
     private Path getTemplateRoot() {
         return dataBaseDirectory.path("followup-templates");
-    }
-
-    private static Resource resolve(String resourceName) {
-        return IOUtilities.asResource(DefaultFollowUpTemplateStorage.class.getClassLoader().getResource(resourceName));
     }
 
     private Resource resolve(Path templatePath, String relativePath) {
