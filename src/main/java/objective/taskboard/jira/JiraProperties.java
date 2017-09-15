@@ -101,23 +101,42 @@ public class JiraProperties {
             return map;
         }
 
-        public Integer getDemandPriorityByStatus(String status) {
+        private void ensureDemandInitialized() {
             if (demandPriorityByStatus == null)
                 demandPriorityByStatus = initMap(demands);
-
-            return demandPriorityByStatus.get(status);
         }
-        public Integer getTaskPriorityByStatus(String status) {
+
+        private void ensureTaskInitialized() {
             if (taskPriorityByStatus == null)
                 taskPriorityByStatus = initMap(tasks);
+        }
 
+        private void ensureSubtaskInitialized() {
+            if (subtaskPriorityByStatus == null)
+                subtaskPriorityByStatus = initMap(subtasks);
+        }
+
+        public Integer getDemandPriorityByStatus(String status) {
+            ensureDemandInitialized();
+            return demandPriorityByStatus.get(status);
+        }
+
+        public Integer getTaskPriorityByStatus(String status) {
+            ensureTaskInitialized();
             return taskPriorityByStatus.get(status);
         }
         public Integer getSubtaskPriorityByStatus(String status) {
-            if (subtaskPriorityByStatus == null)
-                subtaskPriorityByStatus = initMap(subtasks);
-
+            ensureSubtaskInitialized();
             return subtaskPriorityByStatus.get(status);
+        }
+        public String[] getDemands() {
+            return demands;
+        }
+        public String[] getTasks() {
+            return tasks;
+        }
+        public String[] getSubtasks() {
+            return subtasks;
         }
         public void setDemands(String[] demands) {
             this.demands = demands;

@@ -118,7 +118,7 @@ public class FollowUpDataHistoryGeneratorJSONFiles implements FollowUpDataHistor
             Path pathJSON = pathProject.resolve(TODAY + EXTENSION_JSON);
 
             try {
-                List<FromJiraDataRow> jiraData = providerFromCurrentState.getJiraData(projectKey.split(","));
+                List<FromJiraDataRow> jiraData = providerFromCurrentState.getJiraData(projectKey.split(",")).fromJiraDs.rows;
                 write(pathJSON.toFile(), gson.toJson(jiraData));
 
                 Path pathZIP = Paths.get(pathJSON.toString() + EXTENSION_ZIP);

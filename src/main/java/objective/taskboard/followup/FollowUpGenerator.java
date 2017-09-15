@@ -75,14 +75,12 @@ public class FollowUpGenerator {
             directoryTempFollowup = decompressTemplate().toFile();
 
             Map<String, Long> sharedStrings = getSharedStringsInitial();
+            FollowupData followupData = provider.getJiraData(includedProjects);
+            List<FromJiraDataRow> jiraData = followupData.fromJiraDs.rows;
 
-            File fileSheet7 = new File(directoryTempFollowup, PATH_SHEET7);
-            List<FromJiraDataRow> jiraData = provider.getJiraData(includedProjects);
-            write(fileSheet7, generateJiraDataSheet(sharedStrings, jiraData));
-            File fileSharedStrings = new File(directoryTempFollowup, PATH_SHARED_STRINGS);
-            write(fileSharedStrings, generateSharedStrings(sharedStrings));
-            File table7 = new File(directoryTempFollowup, PATH_TABLE7);
-            write(table7, generateTable7(FileUtils.readFileToString(table7, "UTF-8"), jiraData.size()));
+            generateSheet7(directoryTempFollowup, sharedStrings, jiraData);
+            generateSharedStrings(directoryTempFollowup, sharedStrings);
+            generateTable7(directoryTempFollowup, jiraData);
 
             pathFollowupXLSM = compress(directoryTempFollowup.toPath());
             return IOUtilities.asResource(Files.readAllBytes(pathFollowupXLSM));
@@ -95,6 +93,21 @@ public class FollowUpGenerator {
             if (pathFollowupXLSM != null && pathFollowupXLSM.toFile().exists())
                 Files.delete(pathFollowupXLSM);
         }
+    }
+
+    private void generateTable7(File directoryTempFollowup, List<FromJiraDataRow> jiraData) throws IOException {
+        File table7 = new File(directoryTempFollowup, PATH_TABLE7);
+        write(table7, generateTable7(FileUtils.readFileToString(table7, "UTF-8"), jiraData.size()));
+    }
+
+    private void generateSharedStrings(File directoryTempFollowup, Map<String, Long> sharedStrings) throws IOException {
+        File fileSharedStrings = new File(directoryTempFollowup, PATH_SHARED_STRINGS);
+        write(fileSharedStrings, generateSharedStrings(sharedStrings));
+    }
+
+    private void generateSheet7(File directoryTempFollowup, Map<String, Long> sharedStrings, List<FromJiraDataRow> jiraData) throws IOException {
+        File fileSheet7 = new File(directoryTempFollowup, PATH_SHEET7);
+        write(fileSheet7, generateJiraDataSheet(sharedStrings, jiraData));
     }
 
     private Path decompressTemplate() throws Exception {
@@ -126,7 +139,7 @@ public class FollowUpGenerator {
     }
 
     String generateJiraDataSheet(Map<String, Long> sharedStrings, String [] includedProjects) {
-        List<FromJiraDataRow> jiraData = provider.getJiraData(includedProjects);
+        List<FromJiraDataRow> jiraData = provider.getJiraData(includedProjects).fromJiraDs.rows;
         return generateJiraDataSheet(sharedStrings, jiraData);
     }
 

@@ -27,7 +27,8 @@ import static java.nio.file.Files.createTempDirectory;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.size;
 import static java.util.Arrays.asList;
-import static objective.taskboard.followup.FollowUpHelper.getFollowUpDataDefaultList;
+import static objective.taskboard.followup.FollowUpHelper.getDefaultFollowupData;
+import static objective.taskboard.followup.FollowUpHelper.getEmptyFollowupData;
 import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.EXTENSION_JSON;
 import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.EXTENSION_ZIP;
 import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.FILE_NAME_FORMAT;
@@ -102,7 +103,7 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
     @Test
     public void whenHasOneProject_thenOneFileShouldBeGenerated() throws IOException, InterruptedException {
         when(projectFilterCacheRepo.getProjects()).thenReturn(asList(projectFilter));
-        when(providerFromCurrentState.getJiraData(any())).thenReturn(getFollowUpDataDefaultList());
+        when(providerFromCurrentState.getJiraData(any())).thenReturn(getDefaultFollowupData());
 
         subject.generate();
 
@@ -113,7 +114,7 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
     @Test
     public void whenProjectDoesNotHaveData_thenNoDataShouldBeGenerated() throws IOException, InterruptedException {
         when(projectFilterCacheRepo.getProjects()).thenReturn(asList(projectFilter));
-        when(providerFromCurrentState.getJiraData(Mockito.any())).thenReturn(asList());
+        when(providerFromCurrentState.getJiraData(Mockito.any())).thenReturn(getEmptyFollowupData());
 
         subject.generate();
 
@@ -123,7 +124,7 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
     @Test
     public void whenHasTwoProjects_thenTwoFilesShouldBeGenerated() throws IOException, InterruptedException {
         when(projectFilterCacheRepo.getProjects()).thenReturn(asList(projectFilter, projectFilter2));
-        when(providerFromCurrentState.getJiraData(Mockito.any())).thenReturn(getFollowUpDataDefaultList());
+        when(providerFromCurrentState.getJiraData(Mockito.any())).thenReturn(getDefaultFollowupData());
 
         subject.generate();
 

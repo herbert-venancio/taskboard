@@ -20,7 +20,6 @@
  */
 package objective.taskboard.followup;
 
-import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
@@ -37,6 +36,7 @@ import org.junit.Test;
 import org.springframework.core.io.Resource;
 import org.xml.sax.SAXException;
 
+import objective.taskboard.Constants;
 import objective.taskboard.followup.impl.DefaultFollowUpTemplateStorage;
 import objective.taskboard.utils.IOUtilities;
 
@@ -65,7 +65,7 @@ public class FollowUpGeneratorTest {
 
     @Test
     public void addNewSharedStringsInTheEndTest() throws ParserConfigurationException, SAXException, IOException {
-        FollowupDataProvider provider = getFollowupDataProvider(FollowUpHelper.getFollowUpDataDefaultList());
+        FollowupDataProvider provider = getFollowupDataProvider(FollowUpHelper.getDefaultFollowupData());
         FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
 
         Map<String, Long> sharedStrings = subject.getSharedStringsInitial();
@@ -94,7 +94,7 @@ public class FollowUpGeneratorTest {
 
     @Test
     public void generateSharedStringsInOrderAfterAddNewSharedStringTest() throws ParserConfigurationException, SAXException, IOException {
-        FollowupDataProvider provider = getFollowupDataProvider(FollowUpHelper.getFollowUpDataDefaultList());
+        FollowupDataProvider provider = getFollowupDataProvider(FollowUpHelper.getDefaultFollowupData());
         FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
 
         Map<String, Long> sharedStrings = subject.getSharedStringsInitial();
@@ -111,7 +111,7 @@ public class FollowUpGeneratorTest {
 
     @Test
     public void generateJiraDataSheetTest() throws ParserConfigurationException, SAXException, IOException {
-        FollowupDataProvider provider = getFollowupDataProvider(FollowUpHelper.getFollowUpDataDefaultList());
+        FollowupDataProvider provider = getFollowupDataProvider(FollowUpHelper.getDefaultFollowupData());
         FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
 
         Map<String, Long> sharedStrings = subject.getSharedStringsInitial();
@@ -135,14 +135,14 @@ public class FollowUpGeneratorTest {
 
     @Test
     public void generateJiraDataSheetWithSomeEmptyAndNullAttributesJiraDataTest() throws ParserConfigurationException, SAXException, IOException {
-        FromJiraDataRow followupDefault = FollowUpHelper.getFollowUpDataDefault();
+        FromJiraDataRow followupDefault = FollowUpHelper.getDefaultFromJiraDataRow();
         followupDefault.project = "";
         followupDefault.demandType = null;
         followupDefault.taskId = 0L;
         followupDefault.subtaskId = null;
         followupDefault.worklog = 0.0;
         followupDefault.wrongWorklog = null;
-        FollowupDataProvider provider = getFollowupDataProvider(asList(followupDefault));
+        FollowupDataProvider provider = getFollowupDataProvider(followupDefault);
         FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
 
         Map<String, Long> sharedStrings = subject.getSharedStringsInitial();
@@ -154,7 +154,7 @@ public class FollowUpGeneratorTest {
 
     @Test
     public void generateTest() throws Exception {
-        FollowupDataProvider provider = getFollowupDataProvider(FollowUpHelper.getFollowUpDataDefaultList());
+        FollowupDataProvider provider = getFollowupDataProvider(FollowUpHelper.getDefaultFollowupData());
         FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
         Resource resource = subject.generate(emptyArray());
         assertNotNull("Resource shouldn't be null", resource);
@@ -162,7 +162,7 @@ public class FollowUpGeneratorTest {
 
     @Test
     public void generateUsingDefaultTemplatesTest() throws Exception {
-        FollowupDataProvider provider = getFollowupDataProvider(FollowUpHelper.getFollowUpDataDefaultList());
+        FollowupDataProvider provider = getFollowupDataProvider(FollowUpHelper.getDefaultFollowupData());
         FollowUpGenerator subject = getDefaultFollowUpGenerator(provider);
         Resource resource = subject.generate(emptyArray());
         assertNotNull("Resource shouldn't be null", resource);
@@ -191,10 +191,18 @@ public class FollowUpGeneratorTest {
                 , resolve(PATH_TABLE7_TEMPLATE)));
     }
 
-    private FollowupDataProvider getFollowupDataProvider(List<FromJiraDataRow> jiraData) {
+    private FollowupDataProvider getFollowupDataProvider(FollowupData data) {
         FollowupDataProvider provider = mock(FollowupDataProvider.class);
-        when(provider.getJiraData(emptyArray())).thenReturn(jiraData);
+        when(provider.getJiraData(emptyArray())).thenReturn(data);
         return provider;
+    }
+
+    private FollowupDataProvider getFollowupDataProvider(List<FromJiraDataRow> jiraData) {
+        return getFollowupDataProvider(from(jiraData));
+    }
+
+    private FollowupDataProvider getFollowupDataProvider(FromJiraDataRow jiraData) {
+        return getFollowupDataProvider(Collections.singletonList(jiraData));
     }
 
     private String getStringExpected(String pathResource) {
@@ -207,5 +215,25 @@ public class FollowUpGeneratorTest {
 
     private static Resource resolve(String resourceName) {
         return IOUtilities.asResource(DefaultFollowUpTemplateStorage.class.getClassLoader().getResource(resourceName));
+    }
+
+    private FollowupData from(List<FromJiraDataRow> jiraData) {
+        FollowupDataBuilder builder = new FollowupDataBuilder();
+        builder.with(jiraData);
+        return builder.build();
+    }
+
+    private class FollowupDataBuilder {
+
+        private List<FromJiraDataRow> jiraData;
+
+        public void with(List<FromJiraDataRow> jiraData) {
+            this.jiraData = jiraData;
+        }
+
+        public FollowupData build() {
+            FromJiraDataSet fromJiraDataSet = new FromJiraDataSet(Constants.FROMJIRA_HEADERS, jiraData);
+            return new FollowupData(fromJiraDataSet, null, null);
+        }
     }
 }

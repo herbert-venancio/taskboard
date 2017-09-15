@@ -76,7 +76,7 @@ public class FollowUpDataProviderFromHistoryTest {
     public void whenHasDataHistory_ShouldReturnSomeData() throws IOException, URISyntaxException {
         createProjectZip(PROJECT_TEST);
 
-        List<FromJiraDataRow> jiraData = subject.getJiraData(PROJECT_TEST.split(","));
+        List<FromJiraDataRow> jiraData = subject.getJiraData(PROJECT_TEST.split(",")).fromJiraDs.rows;
 
         assertEquals("Jira data size", jiraData.size(), 1);
         assertFollowUpDataDefault(jiraData.get(0));
@@ -112,7 +112,7 @@ public class FollowUpDataProviderFromHistoryTest {
         createProjectZip(PROJECT_TEST_2);
 
         String projects = PROJECT_TEST + "," + PROJECT_TEST_2;
-        List<FromJiraDataRow> jiraData = subject.getJiraData(projects.split(","));
+        List<FromJiraDataRow> jiraData = subject.getJiraData(projects.split(",")).fromJiraDs.rows;
 
         assertEquals("Jira data size", jiraData.size(), 2);
         assertFollowUpDataDefault(jiraData.get(0));
