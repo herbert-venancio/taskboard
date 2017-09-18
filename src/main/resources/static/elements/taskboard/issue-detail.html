@@ -1166,7 +1166,7 @@
                 updateIssue: function(event) {
                     if (event.detail.source === 'client')
                         return;
-                    if (this.item !== null && event.detail.issue.issueKey !== this.item.issueKey)
+                    if (this.item != null && event.detail.issue.issueKey !== this.item.issueKey)
                         return;
                     
                     this.isObserving = true;
