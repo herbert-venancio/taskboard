@@ -122,7 +122,7 @@ jira.subtask-creation[0].transition-id=11                          # transition 
 ```
 ## Troubleshooting
 
-### What if I run inside eclipse and the site is blank?
+#### What if I run inside eclipse and the site is blank?
 If for some reason there are missing resources in the folder `target/classes/static` like `bower_components`,
 you will see just a blank page on the browser when you run the tests from eclipse. 
 Just execute `mvn package` to regenerate these resources and rerun the tests.
