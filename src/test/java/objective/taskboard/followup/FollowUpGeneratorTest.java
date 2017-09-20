@@ -74,7 +74,7 @@ public class FollowUpGeneratorTest {
 
     @Test
     public void generateJiraDataSheetWithSomeEmptyAndNullAttributesJiraDataTest() throws ParserConfigurationException, SAXException, IOException {
-        FromJiraDataRow followupDefault = FollowUpHelper.getFollowUpDataDefault();
+        FromJiraDataRow followupDefault = FollowUpHelper.getDefaultFromJiraDataRow();
         followupDefault.project = "";
         followupDefault.demandType = null;
         followupDefault.taskId = 0L;
@@ -106,12 +106,12 @@ public class FollowUpGeneratorTest {
         Resource resource = subject.generate(new String[0]);
         assertNotNull("Resource shouldn't be null", resource);
     }
-    
+
     @Test
     public void generateLotsOfLines() throws Exception {
         List<FromJiraDataRow> l = new LinkedList<>();
         for (int i=0; i < 5000; i++) {
-            l.add(FollowUpHelper.getFollowUpDataDefault());
+            l.add(FollowUpHelper.getDefaultFromJiraDataRow());
         }
         FollowupDataProvider provider = getFollowupDataProvider(l);
         FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
@@ -145,7 +145,7 @@ public class FollowUpGeneratorTest {
 
     private FollowupData emptyFollowupData() {
         FromJiraDataSet dataSet = new FromJiraDataSet(FROMJIRA_HEADERS, Collections.emptyList());
-        
+
         return new FollowupData(dataSet, emptyList(), emptyList());
     }
 

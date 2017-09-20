@@ -1,11 +1,14 @@
 package objective.taskboard.followup.impl;
 
 import static java.util.Arrays.asList;
+import static objective.taskboard.utils.DateTimeUtils.parseDate;
+import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -14,8 +17,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.joda.time.DateTime;
-import org.joda.time.format.ISODateTimeFormat;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -124,11 +125,6 @@ public abstract class AbstractFollowUpDataProviderTest {
         when(jiraProperties.getStatusPriorityOrder()).thenReturn(statusOrder);
     }
 
-    public static DateTime parseDate(String yyyymmdd) {
-        return DateTime.parse(yyyymmdd, ISODateTimeFormat.yearMonthDay());
-    }
-
-
     public String[] defaultProjects() {
         return new String[]{"PROJ"};
     }
@@ -156,8 +152,8 @@ public abstract class AbstractFollowUpDataProviderTest {
         private String parent;
         private Map<String, Serializable> customFields = new LinkedHashMap<>();
         private Long priorityOrder;
-        private List<Pair<String, DateTime>> transitions = new LinkedList<>();
-        private Long startDateStepMillis = 0L;
+        private List<Pair<String, ZonedDateTime>> transitions = new LinkedList<>();
+        private Long created = 0L;
 
         public IssueBuilder id(int id) {
             this.id = (long) id;
@@ -227,18 +223,30 @@ public abstract class AbstractFollowUpDataProviderTest {
             return transition(status, parseDate(date));
         }
 
-        public IssueBuilder transition(String status, DateTime date) {
+        public IssueBuilder transition(String status, ZonedDateTime date) {
             this.transitions.add(Pair.of(status, date));
             return this;
         }
 
-        public IssueBuilder startDateStepMillis(Long startDateStepMillis) {
-            this.startDateStepMillis = startDateStepMillis;
+        public IssueBuilder transition(String status, String date, String time) {
+            return transition(status, parseDateTime(date, time));
+        }
+
+        public IssueBuilder created(Long created) {
+            this.created = created;
             return this;
         }
 
-        public IssueBuilder startDate(DateTime startDate) {
-            return startDateStepMillis(startDate.getMillis());
+        public IssueBuilder created(ZonedDateTime created) {
+            return created(created.toInstant().toEpochMilli());
+        }
+        
+        public IssueBuilder created(String created) {
+            return created(parseDate(created));
+        }
+
+        public IssueBuilder created(String date, String time) {
+            return created(parseDateTime(date, time));
         }
 
         public Issue build() {
@@ -254,7 +262,7 @@ public abstract class AbstractFollowUpDataProviderTest {
                     null, //typeIconUri
                     summary,
                     status,
-                    startDateStepMillis,
+                    0L, //startDateStepMillis
                     null, //subresponsavel1
                     null, //subresponsavel2
                     parent,
@@ -265,7 +273,7 @@ public abstract class AbstractFollowUpDataProviderTest {
                     null, //assignee
                     0L, //priority
                     null, //dueDate
-                    0L, //created
+                    created, //created
                     null,//Date updatedDate,
                     null, //description
                     null, //comments
@@ -286,9 +294,9 @@ public abstract class AbstractFollowUpDataProviderTest {
         private List<Changelog> buildTransitions() {
             String currentState = "Open";
             List<Changelog> changes = new LinkedList<>();
-            for(Pair<String, DateTime> t : transitions) {
+            for(Pair<String, ZonedDateTime> t : transitions) {
                 String newState = t.getLeft();
-                DateTime timestamp = t.getRight();
+                ZonedDateTime timestamp = t.getRight();
                 changes.add(new Changelog(null, "status", currentState, newState, timestamp));
                 currentState = t.getKey();
             }

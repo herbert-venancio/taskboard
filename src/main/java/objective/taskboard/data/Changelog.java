@@ -1,6 +1,6 @@
 package objective.taskboard.data;
 
-import org.joda.time.DateTime;
+import java.time.ZonedDateTime;
 
 public class Changelog {
 
@@ -8,9 +8,9 @@ public class Changelog {
     public final String field;
     public final String from;
     public final String to;
-    public final DateTime timestamp;
+    public final ZonedDateTime timestamp;
 
-    public Changelog(String author, String field, String from, String to, DateTime timestamp) {
+    public Changelog(String author, String field, String from, String to, ZonedDateTime timestamp) {
         this.author = author;
         this.field = field;
         this.from = from;

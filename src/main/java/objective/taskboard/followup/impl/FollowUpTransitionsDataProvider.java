@@ -1,5 +1,7 @@
 package objective.taskboard.followup.impl;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -10,8 +12,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.joda.time.DateTime;
-import org.joda.time.Interval;
+import org.apache.commons.lang3.Range;
 import org.springframework.util.CollectionUtils;
 
 import com.google.common.primitives.Ints;
@@ -23,6 +24,7 @@ import objective.taskboard.followup.AnalyticsTransitionsDataSet;
 import objective.taskboard.followup.SyntheticTransitionsDataRow;
 import objective.taskboard.followup.SyntheticTransitionsDataSet;
 import objective.taskboard.jira.JiraProperties;
+import objective.taskboard.utils.DateTimeUtils;
 
 class FollowUpTransitionsDataProvider {
 
@@ -35,7 +37,7 @@ class FollowUpTransitionsDataProvider {
         this.jiraProperties = jiraProperties;
     }
 
-    public List<AnalyticsTransitionsDataSet> getAnalyticsTransitionsDsList(List<Issue> issuesVisibleToUser) {
+    public List<AnalyticsTransitionsDataSet> getAnalyticsTransitionsDsList(List<Issue> issuesVisibleToUser, ZoneId timezone) {
         List<Issue> demands = new LinkedList<>();
         List<Issue> features = new LinkedList<>();
         List<Issue> subtasks = new LinkedList<>();
@@ -49,36 +51,44 @@ class FollowUpTransitionsDataProvider {
         });
 
         List<AnalyticsTransitionsDataSet> analyticsTransitionsDSs = new LinkedList<>();
-        analyticsTransitionsDSs.add(getAnalyticsTransitionsDs("Demand", reversedCopy(jiraProperties.getStatusPriorityOrder().getDemands()), demands));
-        analyticsTransitionsDSs.add(getAnalyticsTransitionsDs("Features", reversedCopy(jiraProperties.getStatusPriorityOrder().getTasks()), features));
-        analyticsTransitionsDSs.add(getAnalyticsTransitionsDs("Subtasks", reversedCopy(jiraProperties.getStatusPriorityOrder().getSubtasks()), subtasks));
+        analyticsTransitionsDSs.add(getAnalyticsTransitionsDs("Demand", jiraProperties.getStatusPriorityOrder().getDemandsInOrder(), demands, timezone));
+        analyticsTransitionsDSs.add(getAnalyticsTransitionsDs("Features", jiraProperties.getStatusPriorityOrder().getTasksInOrder(), features, timezone));
+        analyticsTransitionsDSs.add(getAnalyticsTransitionsDs("Subtasks", jiraProperties.getStatusPriorityOrder().getSubtasksInOrder(), subtasks, timezone));
         return analyticsTransitionsDSs;
     }
 
-    public AnalyticsTransitionsDataSet getAnalyticsTransitionsDs(String issueType, String[] statuses, List<Issue> issuesVisibleToUser) {
+    public AnalyticsTransitionsDataSet getAnalyticsTransitionsDs(String issueType, String[] statuses, List<Issue> issuesVisibleToUser, ZoneId timezone) {
         List<String> headers = new LinkedList<>();
         headers.add(HEADER_ISSUE_KEY_COLUMN_NAME);
         Collections.addAll(headers, statuses);
-        List<AnalyticsTransitionsDataRow> rows = getAnalyticsTransitionsDataRows(statuses, issuesVisibleToUser);
+        List<AnalyticsTransitionsDataRow> rows = getAnalyticsTransitionsDataRows(statuses, issuesVisibleToUser, timezone);
         return new AnalyticsTransitionsDataSet(issueType, headers, rows);
     }
 
-    private List<AnalyticsTransitionsDataRow> getAnalyticsTransitionsDataRows(String[] statuses, List<Issue> issuesVisibleToUser) {
-        final String firstState = statuses[0];
+    private List<AnalyticsTransitionsDataRow> getAnalyticsTransitionsDataRows(String[] statuses, List<Issue> issuesVisibleToUser, ZoneId timezone) {
         List<AnalyticsTransitionsDataRow> rows = new LinkedList<>();
         for (Issue issue : issuesVisibleToUser) {
-            Map<String, DateTime> lastTransitionDate = new LinkedHashMap<>();
-            for (String status : statuses)
-                lastTransitionDate.put(status, null);
-            lastTransitionDate.put(firstState, new DateTime(issue.getStartDateStepMillis()));
-            int lastStatusIndex = ArrayUtils.indexOf(statuses, issue.getStatusName());
-            for (Changelog change : issue.getChangelog())
-                if ("status".equals(change.field) && ArrayUtils.indexOf(statuses, change.to) <= lastStatusIndex)
-                    lastTransitionDate.put(change.to, change.timestamp);
+            Map<String, ZonedDateTime> lastTransitionDate = mapStatusLastTransitionDates(issue, statuses, timezone);
             rows.add(new AnalyticsTransitionsDataRow(issue.getIssueKey(),
                     new LinkedList<>(lastTransitionDate.values())));
         }
         return rows;
+    }
+
+    private Map<String, ZonedDateTime> mapStatusLastTransitionDates(Issue issue, String[] statuses, ZoneId timezone) {
+        final String firstState = statuses[0];
+        Map<String, ZonedDateTime> lastTransitionDate = new LinkedHashMap<>();
+        for (String status : statuses)
+            lastTransitionDate.put(status, null);
+        lastTransitionDate.put(firstState, DateTimeUtils.get(issue.getCreated(), timezone));
+        int lastStatusIndex = ArrayUtils.indexOf(statuses, issue.getStatusName());
+        for (Changelog change : issue.getChangelog())
+            if ("status".equals(change.field)) {
+                int statusIndex = ArrayUtils.indexOf(statuses, change.to);
+                if (statusIndex != ArrayUtils.INDEX_NOT_FOUND && statusIndex <= lastStatusIndex)
+                    lastTransitionDate.put(change.to, DateTimeUtils.get(change.timestamp, timezone));
+            }
+        return lastTransitionDate;
     }
 
     public List<SyntheticTransitionsDataSet> getSyntheticTransitionsDsList(List<AnalyticsTransitionsDataSet> analyticsTransitionsDSs) {
@@ -88,35 +98,38 @@ class FollowUpTransitionsDataProvider {
     }
 
     private SyntheticTransitionsDataSet getSyntheticTransitionsDs(AnalyticsTransitionsDataSet dataset) {
-        if (CollectionUtils.isEmpty(dataset.rows))
-            return null;
-
-        Interval dateRange = calculateInterval(dataset);
-
+        List<String> headers = new LinkedList<>(dataset.headers);
+        headers.set(0, HEADER_DATE_COLUMN_NAME);
 
         List<SyntheticTransitionsDataRow> dataRows = new LinkedList<>();
-        for (DateTime date = dateRange.getStart(); date.isBefore(dateRange.getEnd()); date = date.plusDays(1)) {
-            int[] issuesInStatusCount = new int[dataset.headers.size() - 1];
-            Arrays.fill(issuesInStatusCount, 0);
-            for (AnalyticsTransitionsDataRow row : dataset.rows) {
-                Optional<Integer> index = getTransitionIndexByDate(row, date);
-                if (index.isPresent())
-                    issuesInStatusCount[index.get()]++;
+        if (!CollectionUtils.isEmpty(dataset.rows)) {
+            Range<ZonedDateTime> dateRange = calculateInterval(dataset);
+            for (ZonedDateTime date = dateRange.getMinimum(); !date.isAfter(dateRange.getMaximum()); date = date.plusDays(1)) {
+                int[] issuesInStatusCount = countIssuesInStatus(dataset, date);
+                dataRows.add(new SyntheticTransitionsDataRow(date, Ints.asList(issuesInStatusCount)));
             }
-            dataRows.add(new SyntheticTransitionsDataRow(date, Ints.asList(issuesInStatusCount)));
         }
-
-        List<String> headers = dataset.headers;
-        headers.set(0, HEADER_DATE_COLUMN_NAME);
 
         return new SyntheticTransitionsDataSet(dataset.issueType, headers, dataRows);
     }
 
-    private Interval calculateInterval(AnalyticsTransitionsDataSet dataset) {
-        DateTime firstDate = null;
-        DateTime lastDate = null;
+    private int[] countIssuesInStatus(AnalyticsTransitionsDataSet dataset, ZonedDateTime date) {
+        int[] issuesInStatusCount = new int[dataset.headers.size() - 1];
+        Arrays.fill(issuesInStatusCount, 0);
         for (AnalyticsTransitionsDataRow row : dataset.rows) {
-            for (DateTime date : row.transitionsDates) {
+            Optional<Integer> index = getTransitionIndexByDate(row, DateTimeUtils.roundUp(date));
+            if (index.isPresent())
+                issuesInStatusCount[index.get()]++;
+        }
+        return issuesInStatusCount;
+    }
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private Range<ZonedDateTime> calculateInterval(AnalyticsTransitionsDataSet dataset) {
+        ZonedDateTime firstDate = null;
+        ZonedDateTime lastDate = null;
+        for (AnalyticsTransitionsDataRow row : dataset.rows) {
+            for (ZonedDateTime date : row.transitionsDates) {
                 if (date == null)
                     continue;
                 if (firstDate == null || date.isBefore(firstDate))
@@ -129,25 +142,19 @@ class FollowUpTransitionsDataProvider {
         if (firstDate == null || lastDate == null)
             throw new IllegalArgumentException("Invalid dates.");
 
-        return new Interval(firstDate.dayOfMonth().roundFloorCopy(), lastDate.plusDays(1));
+        return (Range) Range.between(DateTimeUtils.roundDown(firstDate), DateTimeUtils.roundUp(lastDate));
     }
 
-    private Optional<Integer> getTransitionIndexByDate(AnalyticsTransitionsDataRow row, DateTime date) {
-        List<DateTime> transitionsDates = row.transitionsDates;
+    private Optional<Integer> getTransitionIndexByDate(AnalyticsTransitionsDataRow row, ZonedDateTime date) {
+        List<ZonedDateTime> transitionsDates = row.transitionsDates;
         Integer index = null;
         for (int i = 0; i < transitionsDates.size(); ++i) {
-            DateTime transitionDate = transitionsDates.get(i);
+            ZonedDateTime transitionDate = transitionsDates.get(i);
             if (transitionDate == null)
                 continue;
             if (!date.isBefore(transitionDate))
                 index = i;
         }
         return Optional.ofNullable(index);
-    }
-
-    private String[] reversedCopy(String[] original) {
-        String[] clone = original.clone();
-        ArrayUtils.reverse(clone);
-        return clone;
     }
 }

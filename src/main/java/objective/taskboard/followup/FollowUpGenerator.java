@@ -43,9 +43,9 @@ public class FollowUpGenerator {
         try {
             editor.open();
             FollowupData jiraData = provider.getJiraData(includedProjects);
-            
+
             generateJiraDataSheet(editor, jiraData);
-            
+
             return IOUtilities.asResource(editor.toBytes());
         } catch (Exception e) {
             log.error(e.getMessage() == null ? e.toString() : e.getMessage());
@@ -60,7 +60,7 @@ public class FollowUpGenerator {
         sheet.truncate(1);
         for (FromJiraDataRow followUpData : jiraData.fromJiraDs.rows) {
         	SheetRow row = sheet.createRow();
-        	
+
         	row.addColumn(followUpData.project);
         	row.addColumn(followUpData.demandType);
         	row.addColumn(followUpData.demandStatus);
@@ -106,11 +106,11 @@ public class FollowUpGenerator {
         	row.addFormula("IF(AllIssues[[#This Row],[SUBTASK_STATUS]]=\"Done\", AllIssues[[#This Row],[EffortDone]],0)");
         	row.addFormula("IF(AllIssues[TASK_TYPE]=\"Bug\",AllIssues[EffortEstimate], 0)");
         	row.addFormula("IF(AllIssues[TASK_TYPE]=\"Bug\",AllIssues[worklog],0)");
-        	
+
         	row.save();
         }
         sheet.save();
-        
+
         return sheet;
     }
 
