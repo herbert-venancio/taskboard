@@ -120,3 +120,9 @@ jira.subtask-creation[0].t-shirt-size-subtask-id=customfield_11457 # t-shirt-siz
 jira.subtask-creation[0].t-shirt-size-default-value=M              # default t-shirt-size for subtask, if not available on parent (optional)
 jira.subtask-creation[0].transition-id=11                          # transition executed on the subtask (optional)
 ```
+## Troubleshooting
+
+#### What if I run inside eclipse and the site is blank?
+If for some reason there are missing resources in the folder `target/classes/static` like `bower_components`,
+you will see just a blank page on the browser when you run the tests from eclipse. 
+Just execute `mvn package` to regenerate these resources and rerun the tests.
