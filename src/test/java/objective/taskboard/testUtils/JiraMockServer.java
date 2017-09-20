@@ -193,6 +193,9 @@ public class JiraMockServer {
                     case "customfield_11456"://co-assignee
                         setCoassignee(fields, aKey, reqFields.getJSONArray(aKey));
                         break;
+                    case "status":
+                        setStatus(fields, reqFields.getJSONObject(aKey));
+                        break;
                     default:
                         throw new IllegalStateException("Unsupported Field in Mock : " + aKey);
                 }
@@ -251,6 +254,25 @@ public class JiraMockServer {
 
     private static int countIssueCreated;
 
+    private static void setStatus(JSONObject fields, JSONObject newStatus) throws JSONException {
+        JSONObject makeStatus = createEmptyStatus();
+        makeStatus.put("id", newStatus.get("id"));
+        makeStatus.put("name", newStatus.get("name"));
+        fields.put("status", makeStatus);
+        fields.put("updated", nowIso8601());
+    }
+
+    private static JSONObject createEmptyStatus() throws JSONException {
+        JSONObject status = new JSONObject();
+        status.put("description", "");
+        status.put("iconUrl", "");
+        status.put("id", "");
+        status.put("name", "");
+        status.put("self", "");
+        status.put("statusCategory", "");
+        return status;
+    }
+
     private static void setCoassignee(JSONObject coassigneeField, String aKey, JSONArray coassignees) throws JSONException {
         for (int i = 0; i < coassignees.length(); i++) {
             JSONObject coassignee = coassignees.getJSONObject(i);
@@ -286,10 +308,10 @@ public class JiraMockServer {
 
     private static JSONObject makeAvatarUrls() throws JSONException {
         JSONObject avatarUrls= new JSONObject();
-        avatarUrls.put("16x16", "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=16");
-        avatarUrls.put("24x24", "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=24");
-        avatarUrls.put("32x32", "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=32");
-        avatarUrls.put("48x48", "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=48");
+        avatarUrls.put("16x16", "http://www.gravatar.com/avatar/c2b78b1ds52b346ff4528044ee123cc74?d=mm&s=16");
+        avatarUrls.put("24x24", "http://www.gravatar.com/avatar/c2b78b1ds52b346ff4528044ee123cc74?d=mm&s=24");
+        avatarUrls.put("32x32", "http://www.gravatar.com/avatar/c2b78b1ds52b346ff4528044ee123cc74?d=mm&s=32");
+        avatarUrls.put("48x48", "http://www.gravatar.com/avatar/c2b78b1ds52b346ff4528044ee123cc74?d=mm&s=48");
         return avatarUrls;
     }
     

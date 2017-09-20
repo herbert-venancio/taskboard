@@ -69,9 +69,16 @@ class TestIssue extends AbstractUiFragment {
         return new IssueDetails(webDriver);
     }
 
-    public void assertHasFirstAssignee() {
+    public TestIssue assertHasFirstAssignee() {
         WebElement assignee1 = issueElement.findElement(By.id("assignee1"));
         waitVisibilityOfElement(assignee1);
+        return this;
+    }
+
+    public TestIssue assertHasSecondAssignee() {
+        WebElement assignee2 = issueElement.findElement(By.id("assignee2"));
+        waitVisibilityOfElement(assignee2);
+        return this;
     }
 
     public void dragOver(String targetKey) {
