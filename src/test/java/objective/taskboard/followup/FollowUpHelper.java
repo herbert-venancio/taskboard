@@ -23,12 +23,12 @@ package objective.taskboard.followup;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
-
+import java.util.List;
 import objective.taskboard.Constants;
 
 public class FollowUpHelper {
 
-    public static FromJiraDataRow getDefaultFromJiraDataRow() {
+    public static FromJiraDataRow getFollowUpDataDefault() {
         FromJiraDataRow followUpData = new FromJiraDataRow();
         followUpData.planningType = "Ballpark";
         followUpData.project = "PROJECT TEST";
@@ -61,17 +61,22 @@ public class FollowUpHelper {
         followUpData.queryType = "Type";
         return followUpData;
     }
-
+    
+    
     public static FollowupData getDefaultFollowupData() {
-        return new FollowupData(new FromJiraDataSet(Constants.FROMJIRA_HEADERS, Collections.singletonList(getDefaultFromJiraDataRow())), null, null);
+        return new FollowupData(new FromJiraDataSet(Constants.FROMJIRA_HEADERS, Collections.singletonList(getFollowUpDataDefault())), null, null);
     }
-
+    
     public static FollowupData getEmptyFollowupData() {
         return new FollowupData(new FromJiraDataSet(Constants.FROMJIRA_HEADERS, Collections.emptyList()), null, null);
     }
 
+    public static List<FromJiraDataRow> getFollowUpDataDefaultList() {
+        return Collections.singletonList(getFollowUpDataDefault());
+    }
+
     public static void assertFollowUpDataDefault(FromJiraDataRow actual) {
-        FromJiraDataRow expected = getDefaultFromJiraDataRow();
+        FromJiraDataRow expected = getFollowUpDataDefault();
         assertEquals("planningType", expected.planningType, actual.planningType);
         assertEquals("project", expected.project, actual.project);
         assertEquals("demandType", expected.demandType, actual.demandType);

@@ -20,19 +20,15 @@
  */
 package objective.taskboard.utils;
 
-import org.apache.xalan.processor.TransformerFactoryImpl;
-import org.apache.xerces.jaxp.DocumentBuilderFactoryImpl;
-import org.apache.xpath.jaxp.XPathFactoryImpl;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Result;
-import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -42,14 +38,14 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+
+import org.apache.xalan.processor.TransformerFactoryImpl;
+import org.apache.xerces.jaxp.DocumentBuilderFactoryImpl;
+import org.apache.xpath.jaxp.XPathFactoryImpl;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 public class XmlUtils {
 
@@ -61,7 +57,7 @@ public class XmlUtils {
         return xpath(asDocument(xmlString), locator);
     }
 
-    private static NodeList xpath(Document doc, String locator) {
+    public static NodeList xpath(Document doc, String locator) {
         try {
             // create XPath
             XPathFactory xPathfactory = new XPathFactoryImpl();
@@ -97,14 +93,6 @@ public class XmlUtils {
         return asDocument(new InputSource(stream));
     }
 
-    public static Document asDocument(Path path) {
-        try {
-            return asDocument(Files.newInputStream(path));
-        } catch (IOException e) {
-            throw new InvalidXmlException(e);
-        }
-    }
-
     public static Document asDocument(InputSource source) {
         try {
             DocumentBuilderFactory factory = new DocumentBuilderFactoryImpl();
@@ -112,6 +100,25 @@ public class XmlUtils {
             return builder.parse(source);
         } catch (Exception e) {
             throw new InvalidXmlException(e);
+        }
+    }
+    
+    public static String asString(Document doc) {
+        try {
+            StringWriter sw = new StringWriter();
+            TransformerFactory tf = TransformerFactory.newInstance();
+            Transformer transformer = tf.newTransformer();
+            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+            transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+            transformer.setOutputProperty(OutputKeys.STANDALONE, "yes");
+            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+
+            transformer.transform(new DOMSource(doc), new StreamResult(sw));
+            return sw.toString();
+        } catch (Exception ex) {
+            throw new RuntimeException("Error converting to String", ex);
         }
     }
 
@@ -139,21 +146,8 @@ public class XmlUtils {
         return "";
     }
 
-    public static void format(File inputXmlFile, File outputXmlFile) {
-        try {
-            Document document = asDocument(inputXmlFile);
-            TransformerFactory transFactory = TransformerFactory.newInstance();
-            Transformer idTransform = transFactory.newTransformer();
-            idTransform.setOutputProperty(OutputKeys.METHOD, "xml");
-            idTransform.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-            idTransform.setOutputProperty(OutputKeys.INDENT, "yes");
-            idTransform.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-            Source input = new DOMSource(document);
-            Result output = new StreamResult(outputXmlFile);
-            idTransform.transform(input, output);
-        } catch (TransformerException e) {
-            throw new RuntimeException(e);
-        }
+    public static String normalizeXml(String s) {
+        return XmlUtils.asString(XmlUtils.asDocument(s));
     }
 
     public static class InvalidXPathOperationException extends RuntimeException {

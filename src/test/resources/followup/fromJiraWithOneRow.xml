@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac" mc:Ignorable="x14ac">
+  <sheetPr codeName="Sheet2">
+    <tabColor rgb="FFFF0000"/>
+  </sheetPr>
+  <dimension ref="A1:BF3665"/>
+  <sheetViews>
+    <sheetView workbookViewId="0"/>
+  </sheetViews>
+  <sheetFormatPr defaultColWidth="8.7109375" defaultRowHeight="15" x14ac:dyDescent="0.25"/>
+  <cols>
+    <col bestFit="1" customWidth="1" max="1" min="1" width="35.28515625"/>
+    <col bestFit="1" customWidth="1" max="2" min="2" width="15.7109375"/>
+    <col bestFit="1" customWidth="1" max="3" min="3" width="17"/>
+    <col bestFit="1" customWidth="1" max="4" min="4" width="15.7109375"/>
+    <col bestFit="1" customWidth="1" max="5" min="5" width="47.5703125"/>
+    <col bestFit="1" customWidth="1" max="6" min="6" width="54.28515625"/>
+    <col bestFit="1" customWidth="1" max="7" min="7" width="17.42578125"/>
+    <col bestFit="1" customWidth="1" max="8" min="8" width="24.7109375"/>
+    <col bestFit="1" customWidth="1" max="9" min="9" width="17.42578125"/>
+    <col customWidth="1" max="10" min="10" width="81.140625"/>
+    <col customWidth="1" hidden="1" max="12" min="11" width="81.140625"/>
+    <col bestFit="1" customWidth="1" max="13" min="13" width="28.7109375"/>
+    <col customWidth="1" max="14" min="14" width="24.7109375"/>
+    <col bestFit="1" customWidth="1" max="15" min="15" width="17.42578125"/>
+    <col customWidth="1" max="16" min="16" width="81.140625"/>
+    <col customWidth="1" hidden="1" max="18" min="17" width="81.140625"/>
+    <col customWidth="1" hidden="1" max="19" min="19" width="14.28515625"/>
+    <col customWidth="1" hidden="1" max="20" min="20" width="10.5703125"/>
+    <col customWidth="1" hidden="1" max="21" min="21" width="14.140625"/>
+    <col customWidth="1" hidden="1" max="22" min="22" width="16.140625"/>
+    <col customWidth="1" max="23" min="23" width="14.42578125"/>
+    <col customWidth="1" max="24" min="24" width="10.42578125"/>
+    <col customWidth="1" max="25" min="25" style="25" width="17.140625"/>
+    <col customWidth="1" max="26" min="26" width="19"/>
+    <col customWidth="1" max="27" min="27" width="17.7109375"/>
+    <col customWidth="1" max="28" min="28" width="12.42578125"/>
+    <col customWidth="1" max="29" min="29" width="19.28515625"/>
+    <col customWidth="1" max="30" min="30" width="16.140625"/>
+    <col customWidth="1" max="31" min="31" width="15.85546875"/>
+    <col bestFit="1" customWidth="1" max="32" min="32" width="17.7109375"/>
+    <col bestFit="1" customWidth="1" max="33" min="33" width="17.42578125"/>
+    <col bestFit="1" customWidth="1" max="34" min="34" width="15.5703125"/>
+    <col bestFit="1" customWidth="1" max="35" min="35" width="15.7109375"/>
+    <col bestFit="1" customWidth="1" max="36" min="36" width="13"/>
+    <col bestFit="1" customWidth="1" max="37" min="37" width="12.7109375"/>
+    <col bestFit="1" customWidth="1" max="38" min="38" width="15.7109375"/>
+    <col bestFit="1" customWidth="1" max="39" min="39" width="16.140625"/>
+    <col bestFit="1" customWidth="1" max="40" min="40" width="13.28515625"/>
+    <col bestFit="1" customWidth="1" max="41" min="41" width="17"/>
+    <col bestFit="1" customWidth="1" max="42" min="42" width="16.42578125"/>
+    <col bestFit="1" customWidth="1" max="43" min="43" width="36.140625"/>
+    <col bestFit="1" customWidth="1" max="44" min="44" width="24"/>
+    <col bestFit="1" customWidth="1" max="45" min="45" width="20.28515625"/>
+    <col bestFit="1" customWidth="1" max="46" min="46" width="23.28515625"/>
+    <col customWidth="1" max="47" min="47" width="81.140625"/>
+    <col bestFit="1" customWidth="1" max="48" min="48" width="21.7109375"/>
+    <col bestFit="1" customWidth="1" max="49" min="49" width="16.85546875"/>
+    <col customWidth="1" max="51" min="50" width="16.85546875"/>
+    <col bestFit="1" customWidth="1" max="52" min="52" width="22.140625"/>
+    <col bestFit="1" customWidth="1" max="53" min="53" width="80.7109375"/>
+    <col bestFit="1" customWidth="1" max="54" min="54" width="13.42578125"/>
+    <col bestFit="1" customWidth="1" max="55" min="55" width="20.7109375"/>
+    <col bestFit="1" customWidth="1" max="56" min="56" width="16.140625"/>
+    <col bestFit="1" customWidth="1" max="57" min="57" width="22.140625"/>
+    <col bestFit="1" customWidth="1" max="58" min="58" width="17.42578125"/>
+    <col bestFit="1" customWidth="1" max="59" min="59" width="22.7109375"/>
+    <col bestFit="1" customWidth="1" max="60" min="60" width="19.140625"/>
+    <col bestFit="1" customWidth="1" max="61" min="61" width="22.140625"/>
+    <col bestFit="1" customWidth="1" max="62" min="62" width="80.7109375"/>
+    <col bestFit="1" customWidth="1" max="63" min="63" width="13.42578125"/>
+    <col bestFit="1" customWidth="1" max="64" min="64" width="20.7109375"/>
+    <col bestFit="1" customWidth="1" max="65" min="65" width="16.140625"/>
+    <col bestFit="1" customWidth="1" max="66" min="66" width="22.140625"/>
+    <col bestFit="1" customWidth="1" max="68" min="67" width="17.42578125"/>
+    <col bestFit="1" customWidth="1" max="69" min="69" width="11.42578125"/>
+    <col bestFit="1" customWidth="1" max="71" min="70" width="80.7109375"/>
+    <col customWidth="1" max="72" min="72" width="11.42578125"/>
+    <col customWidth="1" max="73" min="73" width="15.28515625"/>
+    <col bestFit="1" customWidth="1" max="74" min="74" width="19.7109375"/>
+    <col bestFit="1" customWidth="1" max="75" min="75" width="16.7109375"/>
+    <col bestFit="1" customWidth="1" max="76" min="76" width="13.28515625"/>
+    <col customWidth="1" max="77" min="77" width="15"/>
+    <col customWidth="1" max="78" min="78" width="16.28515625"/>
+    <col customWidth="1" max="79" min="79" width="15.140625"/>
+    <col customWidth="1" max="80" min="80" width="45.42578125"/>
+    <col customWidth="1" max="81" min="81" width="52.28515625"/>
+    <col customWidth="1" max="82" min="82" width="20.28515625"/>
+    <col customWidth="1" max="83" min="83" width="21.7109375"/>
+    <col bestFit="1" customWidth="1" max="84" min="84" width="15.28515625"/>
+    <col bestFit="1" customWidth="1" max="85" min="85" width="11.42578125"/>
+    <col bestFit="1" customWidth="1" max="87" min="86" width="80.7109375"/>
+    <col bestFit="1" customWidth="1" max="89" min="88" width="57.28515625"/>
+    <col bestFit="1" customWidth="1" max="90" min="90" width="80.7109375"/>
+    <col bestFit="1" customWidth="1" max="91" min="91" width="24.140625"/>
+    <col bestFit="1" customWidth="1" max="92" min="92" width="80.7109375"/>
+    <col bestFit="1" customWidth="1" max="93" min="93" width="22.7109375"/>
+    <col bestFit="1" customWidth="1" max="94" min="94" width="10.7109375"/>
+    <col bestFit="1" customWidth="1" max="95" min="95" width="15.7109375"/>
+    <col bestFit="1" customWidth="1" max="96" min="96" width="10.140625"/>
+    <col bestFit="1" customWidth="1" max="97" min="97" width="22.7109375"/>
+    <col bestFit="1" customWidth="1" max="98" min="98" width="14.7109375"/>
+  </cols>
+  <sheetData>
+    <row r="1" spans="1:45" x14ac:dyDescent="0.25">
+      <c r="A1" s="6" t="s">
+        <v>0</v>
+      </c>
+      <c r="B1" t="s">
+        <v>11</v>
+      </c>
+      <c r="C1" t="s">
+        <v>12</v>
+      </c>
+      <c r="D1" t="s">
+        <v>13</v>
+      </c>
+      <c r="E1" t="s">
+        <v>160</v>
+      </c>
+      <c r="F1" t="s">
+        <v>14</v>
+      </c>
+      <c r="G1" t="s">
+        <v>161</v>
+      </c>
+      <c r="H1" t="s">
+        <v>162</v>
+      </c>
+      <c r="I1" t="s">
+        <v>164</v>
+      </c>
+      <c r="J1" t="s">
+        <v>165</v>
+      </c>
+      <c r="K1" t="s">
+        <v>166</v>
+      </c>
+      <c r="L1" t="s">
+        <v>167</v>
+      </c>
+      <c r="M1" t="s">
+        <v>168</v>
+      </c>
+      <c r="N1" t="s">
+        <v>169</v>
+      </c>
+      <c r="O1" t="s">
+        <v>171</v>
+      </c>
+      <c r="P1" t="s">
+        <v>172</v>
+      </c>
+      <c r="Q1" t="s">
+        <v>173</v>
+      </c>
+      <c r="R1" t="s">
+        <v>174</v>
+      </c>
+      <c r="S1" s="6" t="s">
+        <v>159</v>
+      </c>
+      <c r="T1" s="6" t="s">
+        <v>163</v>
+      </c>
+      <c r="U1" s="6" t="s">
+        <v>170</v>
+      </c>
+      <c r="V1" s="6" t="s">
+        <v>61</v>
+      </c>
+      <c r="W1" s="6" t="s">
+        <v>62</v>
+      </c>
+      <c r="X1" s="6" t="s">
+        <v>63</v>
+      </c>
+      <c r="Y1" s="6" t="s">
+        <v>73</v>
+      </c>
+      <c r="Z1" s="6" t="s">
+        <v>78</v>
+      </c>
+      <c r="AA1" s="6" t="s">
+        <v>175</v>
+      </c>
+      <c r="AB1" s="6" t="s">
+        <v>79</v>
+      </c>
+      <c r="AC1" s="6" t="s">
+        <v>105</v>
+      </c>
+      <c r="AD1" s="6" t="s">
+        <v>114</v>
+      </c>
+      <c r="AE1" s="6" t="s">
+        <v>116</v>
+      </c>
+      <c r="AF1" s="6" t="s">
+        <v>112</v>
+      </c>
+      <c r="AG1" s="6" t="s">
+        <v>113</v>
+      </c>
+      <c r="AH1" s="6" t="s">
+        <v>118</v>
+      </c>
+      <c r="AI1" s="6" t="s">
+        <v>119</v>
+      </c>
+      <c r="AJ1" t="s">
+        <v>72</v>
+      </c>
+      <c r="AK1" t="s">
+        <v>115</v>
+      </c>
+      <c r="AL1" t="s">
+        <v>133</v>
+      </c>
+      <c r="AM1" t="s">
+        <v>134</v>
+      </c>
+      <c r="AN1" t="s">
+        <v>28</v>
+      </c>
+      <c r="AO1" t="s">
+        <v>27</v>
+      </c>
+      <c r="AP1" t="s">
+        <v>29</v>
+      </c>
+      <c r="AQ1" t="s">
+        <v>26</v>
+      </c>
+      <c r="AR1" t="s">
+        <v>36</v>
+      </c>
+      <c r="AS1" t="s">
+        <v>37</v>
+      </c>
+    </row>
+    <row r="2" spans="1:45" x14ac:dyDescent="0.25">
+      <c r="A2" t="s">
+        <v>204</v>
+      </c>
+      <c r="B2" t="s">
+        <v>53</v>
+      </c>
+      <c r="C2" t="s">
+        <v>5</v>
+      </c>
+      <c r="D2" t="s">
+        <v>205</v>
+      </c>
+      <c r="E2" t="s">
+        <v>206</v>
+      </c>
+      <c r="F2" t="s">
+        <v>207</v>
+      </c>
+      <c r="G2" t="s">
+        <v>208</v>
+      </c>
+      <c r="H2" t="s">
+        <v>5</v>
+      </c>
+      <c r="I2" t="s">
+        <v>209</v>
+      </c>
+      <c r="J2" t="s">
+        <v>210</v>
+      </c>
+      <c r="K2" t="s">
+        <v>211</v>
+      </c>
+      <c r="L2" t="s">
+        <v>212</v>
+      </c>
+      <c r="M2" t="s">
+        <v>213</v>
+      </c>
+      <c r="N2" t="s">
+        <v>5</v>
+      </c>
+      <c r="O2" t="s">
+        <v>214</v>
+      </c>
+      <c r="P2" t="s">
+        <v>215</v>
+      </c>
+      <c r="Q2" t="s">
+        <v>216</v>
+      </c>
+      <c r="R2" t="s">
+        <v>217</v>
+      </c>
+      <c r="S2">
+        <v>1</v>
+      </c>
+      <c r="T2">
+        <v>2</v>
+      </c>
+      <c r="U2">
+        <v>3</v>
+      </c>
+      <c r="V2" t="s">
+        <v>45</v>
+      </c>
+      <c r="W2" t="s">
+        <v>102</v>
+      </c>
+      <c r="X2">
+        <v>1.0</v>
+      </c>
+      <c r="Y2">
+        <v>1.0</v>
+      </c>
+      <c r="Z2">
+        <v>1.0</v>
+      </c>
+      <c r="AA2">
+        <v>1.0</v>
+      </c>
+      <c r="AB2" t="s">
+        <v>23</v>
+      </c>
+      <c r="AC2" t="s">
+        <v>18</v>
+      </c>
+      <c r="AD2" s="4">
+        <f>SUMIFS(Clusters[Effort],Clusters[Cluster Name],AllIssues[[#This Row],[SUBTASK_TYPE]],Clusters[T-Shirt Size],AllIssues[tshirt_size])</f>
+      </c>
+      <c r="AE2" s="4">
+        <f>SUMIFS(Clusters[Cycle],Clusters[Cluster Name],AllIssues[[#This Row],[SUBTASK_TYPE]],Clusters[T-Shirt Size],AllIssues[tshirt_size])</f>
+      </c>
+      <c r="AF2" s="4">
+        <f>AllIssues[EffortEstimate]-AllIssues[EffortDone]</f>
+      </c>
+      <c r="AG2" s="4">
+        <f>AllIssues[CycleEstimate]-AllIssues[CycleDone]</f>
+      </c>
+      <c r="AH2" s="4">
+        <f>IF(AllIssues[[#This Row],[planning_type]]="Ballpark",AllIssues[EffortEstimate],0)</f>
+      </c>
+      <c r="AI2" s="4">
+        <f>IF(AllIssues[[#This Row],[planning_type]]="Plan",AllIssues[EffortEstimate],0)</f>
+      </c>
+      <c r="AJ2" s="4">
+        <f>IF(OR(AllIssues[SUBTASK_STATUS]="Done",AllIssues[SUBTASK_STATUS]="Cancelled"),AllIssues[EffortEstimate],0)</f>
+      </c>
+      <c r="AK2" s="4">
+        <f>IF(OR(AllIssues[SUBTASK_STATUS]="Done",AllIssues[SUBTASK_STATUS]="Cancelled"),AllIssues[CycleEstimate],0)</f>
+      </c>
+      <c r="AL2" s="4">
+        <f>IF(OR(AllIssues[SUBTASK_STATUS]="Done",AllIssues[SUBTASK_STATUS]="Cancelled"),AllIssues[worklog],0)</f>
+      </c>
+      <c r="AM2" s="4">
+        <f>IF(OR(AllIssues[SUBTASK_STATUS]="Done",AllIssues[SUBTASK_STATUS]="Cancelled"),0, AllIssues[worklog])</f>
+      </c>
+      <c r="AN2" s="4">
+        <f>IF(COUNTIFS(AllIssues[TASK_ID],AllIssues[TASK_ID],AllIssues[TASK_ID],"&gt;0")=0,0,1/COUNTIFS(AllIssues[TASK_ID],AllIssues[TASK_ID],AllIssues[TASK_ID],"&gt;0"))</f>
+      </c>
+      <c r="AO2" s="4">
+        <f>IF(COUNTIFS(AllIssues[demand_description],AllIssues[demand_description])=0,0,1/COUNTIFS(AllIssues[demand_description],AllIssues[demand_description]))</f>
+      </c>
+      <c r="AP2" s="4">
+        <f>IF(AllIssues[planning_type]="Plan",1,0)</f>
+      </c>
+      <c r="AQ2" s="4">
+        <f>IF(AllIssues[[#This Row],[SUBTASK_STATUS]]="Done", AllIssues[[#This Row],[EffortDone]],0)</f>
+      </c>
+      <c r="AR2" s="4">
+        <f>IF(AllIssues[TASK_TYPE]="Bug",AllIssues[EffortEstimate], 0)</f>
+      </c>
+      <c r="AS2" s="4">
+        <f>IF(AllIssues[TASK_TYPE]="Bug",AllIssues[worklog],0)</f>
+      </c>
+    </row>
+  </sheetData>
+  <pageMargins bottom="0.78740157499999996" footer="0.31496062000000002" header="0.31496062000000002" left="0.511811024" right="0.511811024" top="0.78740157499999996"/>
+  <pageSetup orientation="portrait" paperSize="9" r:id="rId1"/>
+  <tableParts count="1">
+    <tablePart r:id="rId2"/>
+  </tableParts>
+</worksheet>

@@ -24,7 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-public interface FollowUpTemplateStorage {
+public interface FollowUpTemplateStorageInterface {
 
     /**
      * Uses a path returned by {@link #storeTemplate} to retrieve it

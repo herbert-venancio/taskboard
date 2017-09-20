@@ -20,238 +20,101 @@
  */
 package objective.taskboard.followup;
 
-import static java.util.stream.Collectors.toList;
-import static objective.taskboard.utils.IOUtilities.write;
-import static objective.taskboard.utils.ZipUtils.unzip;
-import static objective.taskboard.utils.ZipUtils.zip;
-import static org.apache.commons.lang.ObjectUtils.defaultIfNull;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.text.StrSubstitutor;
 import org.springframework.core.io.Resource;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
+import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor;
+import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor.Sheet;
+import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor.SheetRow;
 import objective.taskboard.utils.IOUtilities;
-import objective.taskboard.utils.XmlUtils;
 
 public class FollowUpGenerator {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FollowUpGenerator.class);
 
-    private static final String PROPERTY_XML_SPACE_PRESERVE = " xml:space=\"preserve\"";
-    private static final String TAG_T_IN_SHARED_STRINGS = "t";
-
-    private static final String PATH_SHEET7 = "xl/worksheets/sheet7.xml";
-    private static final String PATH_SHARED_STRINGS = "xl/sharedStrings.xml";
-    private static final String PATH_TABLE7 = "xl/tables/table7.xml";
-
-    private final FollowUpTemplate template;
     private final FollowupDataProvider provider;
 
-    public FollowUpGenerator(FollowupDataProvider provider, FollowUpTemplate template) {
+	private SimpleSpreadsheetEditor editor;
+
+    public FollowUpGenerator(FollowupDataProvider provider, SimpleSpreadsheetEditor editor) {
         this.provider = provider;
-        this.template = template;
+        this.editor = editor;
     }
 
-    public Resource generate(String [] includedProjects) throws Exception {
-        File directoryTempFollowup = null;
-        Path pathFollowupXLSM = null;
+    public Resource generate(String [] includedProjects) {
         try {
-            directoryTempFollowup = decompressTemplate().toFile();
-
-            Map<String, Long> sharedStrings = getSharedStringsInitial();
-            FollowupData followupData = provider.getJiraData(includedProjects);
-            List<FromJiraDataRow> jiraData = followupData.fromJiraDs.rows;
-
-            generateSheet7(directoryTempFollowup, sharedStrings, jiraData);
-            generateSharedStrings(directoryTempFollowup, sharedStrings);
-            generateTable7(directoryTempFollowup, jiraData);
-
-            pathFollowupXLSM = compress(directoryTempFollowup.toPath());
-            return IOUtilities.asResource(Files.readAllBytes(pathFollowupXLSM));
+            editor.open();
+            FollowupData jiraData = provider.getJiraData(includedProjects);
+            
+            generateJiraDataSheet(editor, jiraData);
+            
+            return IOUtilities.asResource(editor.toBytes());
         } catch (Exception e) {
             log.error(e.getMessage() == null ? e.toString() : e.getMessage());
             throw e;
         } finally {
-            if (directoryTempFollowup != null && directoryTempFollowup.exists())
-                FileUtils.deleteDirectory(directoryTempFollowup);
-            if (pathFollowupXLSM != null && pathFollowupXLSM.toFile().exists())
-                Files.delete(pathFollowupXLSM);
+            editor.close();
         }
     }
 
-    private void generateTable7(File directoryTempFollowup, List<FromJiraDataRow> jiraData) throws IOException {
-        File table7 = new File(directoryTempFollowup, PATH_TABLE7);
-        write(table7, generateTable7(FileUtils.readFileToString(table7, "UTF-8"), jiraData.size()));
-    }
-
-    private void generateSharedStrings(File directoryTempFollowup, Map<String, Long> sharedStrings) throws IOException {
-        File fileSharedStrings = new File(directoryTempFollowup, PATH_SHARED_STRINGS);
-        write(fileSharedStrings, generateSharedStrings(sharedStrings));
-    }
-
-    private void generateSheet7(File directoryTempFollowup, Map<String, Long> sharedStrings, List<FromJiraDataRow> jiraData) throws IOException {
-        File fileSheet7 = new File(directoryTempFollowup, PATH_SHEET7);
-        write(fileSheet7, generateJiraDataSheet(sharedStrings, jiraData));
-    }
-
-    private Path decompressTemplate() throws Exception {
-        Path pathFollowup = Files.createTempDirectory("Followup");
-        unzip(template.getPathFollowupTemplateXLSM().getInputStream(), pathFollowup);
-        return pathFollowup;
-    }
-
-    private Path compress(Path directoryFollowup) throws Exception {
-        Path pathFollowupXLSM = Files.createTempFile("Followup", ".xlsm");
-        zip(directoryFollowup, pathFollowupXLSM);
-        return pathFollowupXLSM;
-    }
-
-    Map<String, Long> getSharedStringsInitial() throws ParserConfigurationException, SAXException, IOException {
-        Map<String, Long> sharedStrings = new HashMap<>();
-        Document doc = XmlUtils.asDocument(template.getPathSharedStringsInitial().getInputStream());
-        doc.getDocumentElement().normalize();
-        NodeList nodes = doc.getElementsByTagName(TAG_T_IN_SHARED_STRINGS);
-
-        for (Long index = 0L; index < nodes.getLength(); index++) {
-            Node node = nodes.item(index.intValue());
-            if (node.getNodeType() != Node.ELEMENT_NODE)
-                continue;
-
-            sharedStrings.put(node.getTextContent(), index);
+    SimpleSpreadsheetEditor.Sheet generateJiraDataSheet(SimpleSpreadsheetEditor editor, FollowupData jiraData) {
+        Sheet sheet = editor.getSheet("From Jira");
+        sheet.truncate(1);
+        for (FromJiraDataRow followUpData : jiraData.fromJiraDs.rows) {
+        	SheetRow row = sheet.createRow();
+        	
+        	row.addColumn(followUpData.project);
+        	row.addColumn(followUpData.demandType);
+        	row.addColumn(followUpData.demandStatus);
+        	row.addColumn(followUpData.demandNum);
+        	row.addColumn(followUpData.demandSummary);
+        	row.addColumn(followUpData.demandDescription);
+        	row.addColumn(followUpData.taskType);
+        	row.addColumn(followUpData.taskStatus);
+        	row.addColumn(followUpData.taskNum);
+        	row.addColumn(followUpData.taskSummary);
+        	row.addColumn(followUpData.taskDescription);
+        	row.addColumn(followUpData.taskFullDescription);
+        	row.addColumn(followUpData.subtaskType);
+        	row.addColumn(followUpData.subtaskStatus);
+        	row.addColumn(followUpData.subtaskNum);
+        	row.addColumn(followUpData.subtaskSummary);
+        	row.addColumn(followUpData.subtaskDescription);
+        	row.addColumn(followUpData.subtaskFullDescription);
+        	row.addColumn(followUpData.demandId);
+        	row.addColumn(followUpData.taskId);
+        	row.addColumn(followUpData.subtaskId);
+        	row.addColumn(followUpData.planningType);
+        	row.addColumn(followUpData.taskRelease);
+        	row.addColumn(followUpData.worklog);
+        	row.addColumn(followUpData.wrongWorklog);
+        	row.addColumn(followUpData.demandBallpark);
+        	row.addColumn(followUpData.taskBallpark);
+        	row.addColumn(followUpData.tshirtSize);
+        	row.addColumn(followUpData.queryType);
+        	row.addFormula("SUMIFS(Clusters[Effort],Clusters[Cluster Name],AllIssues[[#This Row],[SUBTASK_TYPE]],Clusters[T-Shirt Size],AllIssues[tshirt_size])");
+        	row.addFormula("SUMIFS(Clusters[Cycle],Clusters[Cluster Name],AllIssues[[#This Row],[SUBTASK_TYPE]],Clusters[T-Shirt Size],AllIssues[tshirt_size])");
+        	row.addFormula("AllIssues[EffortEstimate]-AllIssues[EffortDone]");
+        	row.addFormula("AllIssues[CycleEstimate]-AllIssues[CycleDone]");
+        	row.addFormula("IF(AllIssues[[#This Row],[planning_type]]=\"Ballpark\",AllIssues[EffortEstimate],0)");
+        	row.addFormula("IF(AllIssues[[#This Row],[planning_type]]=\"Plan\",AllIssues[EffortEstimate],0)");
+        	row.addFormula("IF(OR(AllIssues[SUBTASK_STATUS]=\"Done\",AllIssues[SUBTASK_STATUS]=\"Cancelled\"),AllIssues[EffortEstimate],0)");
+        	row.addFormula("IF(OR(AllIssues[SUBTASK_STATUS]=\"Done\",AllIssues[SUBTASK_STATUS]=\"Cancelled\"),AllIssues[CycleEstimate],0)");
+        	row.addFormula("IF(OR(AllIssues[SUBTASK_STATUS]=\"Done\",AllIssues[SUBTASK_STATUS]=\"Cancelled\"),AllIssues[worklog],0)");
+        	row.addFormula("IF(OR(AllIssues[SUBTASK_STATUS]=\"Done\",AllIssues[SUBTASK_STATUS]=\"Cancelled\"),0, AllIssues[worklog])");
+        	row.addFormula("IF(COUNTIFS(AllIssues[TASK_ID],AllIssues[TASK_ID],AllIssues[TASK_ID],\">0\")=0,0,1/COUNTIFS(AllIssues[TASK_ID],AllIssues[TASK_ID],AllIssues[TASK_ID],\">0\"))");
+        	row.addFormula("IF(COUNTIFS(AllIssues[demand_description],AllIssues[demand_description])=0,0,1/COUNTIFS(AllIssues[demand_description],AllIssues[demand_description]))");
+        	row.addFormula("IF(AllIssues[planning_type]=\"Plan\",1,0)");
+        	row.addFormula("IF(AllIssues[[#This Row],[SUBTASK_STATUS]]=\"Done\", AllIssues[[#This Row],[EffortDone]],0)");
+        	row.addFormula("IF(AllIssues[TASK_TYPE]=\"Bug\",AllIssues[EffortEstimate], 0)");
+        	row.addFormula("IF(AllIssues[TASK_TYPE]=\"Bug\",AllIssues[worklog],0)");
+        	
+        	row.save();
         }
-        return sharedStrings;
+        sheet.save();
+        
+        return sheet;
     }
 
-    String generateJiraDataSheet(Map<String, Long> sharedStrings, String [] includedProjects) {
-        List<FromJiraDataRow> jiraData = provider.getJiraData(includedProjects).fromJiraDs.rows;
-        return generateJiraDataSheet(sharedStrings, jiraData);
-    }
-
-    String generateJiraDataSheet(Map<String, Long> sharedStrings, List<FromJiraDataRow> jiraData) {
-        String rowTemplate = getStringFromXML(template.getPathSheet7RowTemplate());
-        StringBuilder rows = new StringBuilder();
-        int rowNumber = 2;
-
-        for (FromJiraDataRow followUpData : jiraData) {
-            Map<String, Object> rowValues = new HashMap<>();
-            rowValues.put("rowNumber", rowNumber);
-            rowValues.put("project", getOrSetIndexInSharedStrings(sharedStrings, followUpData.project));
-            rowValues.put("demandType", getOrSetIndexInSharedStrings(sharedStrings, followUpData.demandType));
-            rowValues.put("demandStatus", getOrSetIndexInSharedStrings(sharedStrings, followUpData.demandStatus));
-            rowValues.put("demandNum", getOrSetIndexInSharedStrings(sharedStrings, followUpData.demandNum));
-            rowValues.put("demandSummary", getOrSetIndexInSharedStrings(sharedStrings, followUpData.demandSummary));
-            rowValues.put("demandDescription", getOrSetIndexInSharedStrings(sharedStrings, followUpData.demandDescription));
-            rowValues.put("taskType", getOrSetIndexInSharedStrings(sharedStrings, followUpData.taskType));
-            rowValues.put("taskStatus", getOrSetIndexInSharedStrings(sharedStrings, followUpData.taskStatus));
-            rowValues.put("taskNum", getOrSetIndexInSharedStrings(sharedStrings, followUpData.taskNum));
-            rowValues.put("taskSummary", getOrSetIndexInSharedStrings(sharedStrings, followUpData.taskSummary));
-            rowValues.put("taskDescription", getOrSetIndexInSharedStrings(sharedStrings, followUpData.taskDescription));
-            rowValues.put("taskFullDescription", getOrSetIndexInSharedStrings(sharedStrings, followUpData.taskFullDescription));
-            rowValues.put("subtaskType", getOrSetIndexInSharedStrings(sharedStrings, followUpData.subtaskType));
-            rowValues.put("subtaskStatus", getOrSetIndexInSharedStrings(sharedStrings, followUpData.subtaskStatus));
-            rowValues.put("subtaskNum", getOrSetIndexInSharedStrings(sharedStrings, followUpData.subtaskNum));
-            rowValues.put("subtaskSummary", getOrSetIndexInSharedStrings(sharedStrings, followUpData.subtaskSummary));
-            rowValues.put("subtaskDescription", getOrSetIndexInSharedStrings(sharedStrings, followUpData.subtaskDescription));
-            rowValues.put("subtaskFullDescription", getOrSetIndexInSharedStrings(sharedStrings, followUpData.subtaskFullDescription));
-            rowValues.put("demandId", defaultIfNull(followUpData.demandId, ""));
-            rowValues.put("taskId", defaultIfNull(followUpData.taskId, ""));
-            rowValues.put("subtaskId", defaultIfNull(followUpData.subtaskId, ""));
-            rowValues.put("planningType", getOrSetIndexInSharedStrings(sharedStrings, followUpData.planningType));
-            rowValues.put("taskRelease", getOrSetIndexInSharedStrings(sharedStrings, followUpData.taskRelease));
-            rowValues.put("worklog", defaultIfNull(followUpData.worklog, ""));
-            rowValues.put("wrongWorklog", defaultIfNull(followUpData.wrongWorklog, ""));
-            rowValues.put("demandBallpark", defaultIfNull(followUpData.demandBallpark, ""));
-            rowValues.put("taskBallpark", defaultIfNull(followUpData.taskBallpark, ""));
-            rowValues.put("tshirtSize", getOrSetIndexInSharedStrings(sharedStrings, followUpData.tshirtSize));
-            rowValues.put("queryType", getOrSetIndexInSharedStrings(sharedStrings, followUpData.queryType));
-            rows.append(StrSubstitutor.replace(rowTemplate, rowValues));
-            rowNumber++;
-        }
-
-        String sheetTemplate = getStringFromXML(template.getPathSheet7Template());
-        Map<String, String> sheetValues = new HashMap<>();
-        sheetValues.put("rows", rows.toString());
-        return StrSubstitutor.replace(sheetTemplate, sheetValues);
-    }
-
-    private String getStringFromXML(Resource pathXML) {
-        try {
-            return IOUtils.toString(pathXML.getInputStream(), "UTF-8");
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    private Object getOrSetIndexInSharedStrings(Map<String, Long> sharedStrings, String followUpDataAttrValue) {
-        if (followUpDataAttrValue == null || followUpDataAttrValue.isEmpty())
-            return "";
-
-        Long index = sharedStrings.get(followUpDataAttrValue);
-        if (index != null)
-            return index;
-
-        index = Long.valueOf(sharedStrings.size());
-        sharedStrings.put(followUpDataAttrValue, index);
-        return index;
-    }
-
-    String generateSharedStrings(Map<String, Long> sharedStrings) throws IOException {
-        String siSharedStringsTemplate = getStringFromXML(template.getPathSISharedStringsTemplate());
-        List<String> sharedStringsSorted = sharedStrings.keySet().stream()
-            .sorted((s1, s2) -> sharedStrings.get(s1).compareTo(sharedStrings.get(s2)))
-            .collect(toList());
-        StringBuilder allSharedStrings = new StringBuilder();
-
-        for (String sharedString : sharedStringsSorted) {
-            Map<String, Object> siValues = new HashMap<>();
-            siValues.put("preserve", sharedString.endsWith(" ") ? PROPERTY_XML_SPACE_PRESERVE : "");
-            siValues.put("sharedString", StringEscapeUtils.escapeXml(sharedString));
-            allSharedStrings.append(StrSubstitutor.replace(siSharedStringsTemplate, siValues));
-        }
-
-        String sharedStringsTemplate = getStringFromXML(template.getPathSharedStringsTemplate());
-        Map<String, Object> sharedStringsValues = new HashMap<>();
-        sharedStringsValues.put("sharedStringsSize", sharedStringsSorted.size());
-        sharedStringsValues.put("allSharedStrings", allSharedStrings.toString());
-        return StrSubstitutor.replace(sharedStringsTemplate, sharedStringsValues);
-    }
-
-    // for now, keep the original table7 to avoid corruption
-    String generateTable7(String originalTable7, int lineCount) {
-        return originalTable7;    
-    }
-
-    @SuppressWarnings("unused")
-    private int computeLineCount(String originalTable7, int lineCount) {
-        String ref = parseLineCountFromXmlString(originalTable7);
-        int oldLineCount = Integer.parseInt(ref);
-        if (oldLineCount > lineCount)
-            lineCount = oldLineCount-1;
-        return lineCount;
-    }
-
-    private String parseLineCountFromXmlString(String originalTable7) {
-        try {
-            NodeList nodeList = XmlUtils.xpath(originalTable7, "/table/autoFilter/@ref");
-            return XmlUtils.asString(nodeList).replace("A1:AS", "");
-        } catch (TransformerException e) {
-            throw new IllegalStateException(e);
-        }
-    }
+	public SimpleSpreadsheetEditor getEditor() {
+		return editor;
+	}
 }

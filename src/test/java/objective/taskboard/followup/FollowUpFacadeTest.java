@@ -20,13 +20,19 @@
  */
 package objective.taskboard.followup;
 
-import objective.taskboard.database.directory.DataBaseDirectory;
-import objective.taskboard.followup.data.Template;
-import objective.taskboard.followup.impl.DefaultFollowUpFacade;
-import objective.taskboard.followup.impl.DefaultFollowUpTemplateStorage;
-import objective.taskboard.followup.impl.DefaultUpdateFollowUpService;
-import objective.taskboard.followup.impl.FollowUpDataProviderFromCurrentState;
-import objective.taskboard.rules.CleanupDataFolderRule;
+import static org.junit.Assert.assertArrayEquals;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.Optional;
+
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.SpreadsheetMLPackage;
 import org.docx4j.openpackaging.parts.SpreadsheetML.WorksheetPart;
@@ -34,7 +40,10 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.web.MockMultipartFile;
@@ -44,14 +53,11 @@ import org.xlsx4j.org.apache.poi.ss.usermodel.DataFormatter;
 import org.xlsx4j.sml.Cell;
 import org.xlsx4j.sml.Row;
 
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.Optional;
-
-import static org.junit.Assert.assertArrayEquals;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import objective.taskboard.database.directory.DataBaseDirectory;
+import objective.taskboard.followup.data.Template;
+import objective.taskboard.followup.impl.FollowUpDataProviderFromCurrentState;
+import objective.taskboard.followup.impl.FollowUpTemplateStorage;
+import objective.taskboard.rules.CleanupDataFolderRule;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FollowUpFacadeTest {
@@ -71,14 +77,11 @@ public class FollowUpFacadeTest {
     private DataBaseDirectory dataBaseDirectory;
 
     @Spy
-    private DefaultUpdateFollowUpService updateFollowUpService = new DefaultUpdateFollowUpService();
-
-    @Spy
     @InjectMocks
-    private DefaultFollowUpTemplateStorage followUpTemplateStorage = new DefaultFollowUpTemplateStorage();
+    private FollowUpTemplateStorage followUpTemplateStorage = new FollowUpTemplateStorage();
 
     @InjectMocks
-    private DefaultFollowUpFacade followUpFacade = new DefaultFollowUpFacade();
+    private FollowUpFacade followUpFacade = new FollowUpFacade();
 
     private static final String TEMPLATE_NAME = "OkFollowupTemplate.xlsm";
     private static final String PROJECTS = "TASKB,PROJ1";

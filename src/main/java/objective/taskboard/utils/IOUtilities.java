@@ -52,6 +52,22 @@ public class IOUtilities {
             throw new IllegalStateException(e);
         }
     }
+    
+    public static String resourceAsString(Resource pathXML) {
+        try {
+            return IOUtils.toString(pathXML.getInputStream(), "UTF-8");
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+    
+    public static String resourceAsString(InputStream is) {
+        try {
+            return IOUtils.toString(is, "UTF-8");
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
     public static Resource asResource(URL url) {
         return new UrlResource(url);

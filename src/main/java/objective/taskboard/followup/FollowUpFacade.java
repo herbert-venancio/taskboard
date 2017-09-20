@@ -20,28 +20,132 @@
  */
 package objective.taskboard.followup;
 
-import objective.taskboard.controller.TemplateData;
-import objective.taskboard.issueBuffer.IssueBufferState;
-import org.springframework.core.io.Resource;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-public interface FollowUpFacade {
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-    FollowUpGenerator getGenerator(String templateName, Optional<String> date);
+import objective.taskboard.controller.TemplateData;
+import objective.taskboard.database.directory.DataBaseDirectory;
+import objective.taskboard.domain.Project;
+import objective.taskboard.followup.data.Template;
+import objective.taskboard.followup.impl.FollowUpDataProviderFromCurrentState;
+import objective.taskboard.followup.impl.FollowUpDataProviderFromHistory;
+import objective.taskboard.issueBuffer.IssueBufferState;
+import objective.taskboard.jira.ProjectService;
+import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor;
+import objective.taskboard.utils.IOUtilities;
 
-    FollowupDataProvider getProvider(Optional<String> date);
+@Service
+public class FollowUpFacade implements FollowUpFacadeInterface {
 
-    IssueBufferState getFollowUpState(Optional<String> date);
+    @Autowired
+    private FollowUpTemplateStorageInterface followUpTemplateStorage;
 
-    void createTemplate(String templateName, String projects, MultipartFile file) throws IOException;
-    void updateTemplate(Long id, String templateName, String projects, Optional<MultipartFile> file) throws IOException;
-    void deleteTemplate(Long id) throws IOException;
+    @Autowired
+    private FollowUpDataProviderFromCurrentState providerFromCurrentState;
 
-    List<TemplateData> getTemplatesForCurrentUser();
+    @Autowired
+    private TemplateService templateService;
 
-    Resource getGenericTemplate();
+    @Autowired
+    private ProjectService projectService;
+
+    @Autowired
+    private Converter<Template, TemplateData> templateConverter;
+
+    @Autowired
+    private DataBaseDirectory dataBaseDirectory;
+
+    @Override
+    public FollowUpGenerator getGenerator(String templateName, Optional<String> date) {
+        Template template = templateService.getTemplate(templateName);
+        return new FollowUpGenerator(getProvider(date), new SimpleSpreadsheetEditor(followUpTemplateStorage.getTemplate(template.getPath())));
+    }
+
+    @Override
+    public FollowupDataProvider getProvider(Optional<String> date) {
+        if (!date.isPresent() || date.get().isEmpty())
+            return providerFromCurrentState;
+        return new FollowUpDataProviderFromHistory(date.get(), dataBaseDirectory);
+    }
+
+    @Override
+    public IssueBufferState getFollowUpState(Optional<String> date) {
+        return getProvider(date).getFollowupState();
+    }
+
+    @Override
+    public List<TemplateData> getTemplatesForCurrentUser() {
+        List<String> projectKeys = projectService.getVisibleProjects()
+                .stream()
+                .map(Project::getKey)
+                .collect(Collectors.toList());
+
+        List<Template> templates = templateService.findTemplatesForProjectKeys(projectKeys);
+
+        return templates
+                .stream()
+                .map(t -> templateConverter.convert(t))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void createTemplate(String templateName, String projects,
+                               MultipartFile file) throws IOException {
+        List<String> projectKeys = Arrays.asList(projects.split(","));
+        
+        if (templateService.getTemplate(templateName) != null)
+            throw new RuntimeException("This template name is already in use");
+        
+        if (templateService.findATemplateOnlyMatchedWithThisProjectKey(projectKeys) != null)
+            throw new RuntimeException("This match of projects is already used by other template");
+        
+        String path = followUpTemplateStorage
+                .storeTemplate(file.getInputStream(), new FollowUpTemplateValidator());
+        
+        templateService.saveTemplate(templateName, projectKeys, path);
+    }
+    
+    public void deleteTemplate(Long id) throws IOException {
+        Template template = templateService.getTemplate(id);
+        followUpTemplateStorage.deleteFile(template.getPath());
+        templateService.deleteTemplate(id);
+    }
+    
+    public void updateTemplate(Long id, String templateName, String projects,
+                               Optional<MultipartFile> file) throws IOException {
+        String path = null;
+        String oldPath = null;
+        if (file.isPresent()) {
+            oldPath = templateService.getTemplate(id).getPath();
+            path = followUpTemplateStorage
+                    .storeTemplate(file.get().getInputStream(),
+                            new FollowUpTemplateValidator());
+        }
+
+        try {
+            templateService.updateTemplate(id, templateName, projects, path);
+        } catch(Exception t) {
+            if(path != null) {
+                followUpTemplateStorage.deleteFile(path);
+            }
+            throw t;
+        }
+        if(oldPath != null) {
+            followUpTemplateStorage.deleteFile(oldPath);
+        }
+    }
+
+    @Override
+    public Resource getGenericTemplate() {
+        return IOUtilities.asResource(FollowUpFacade.class.getResource("/followup-template/generic-followup-template.xlsm"));
+    }
 }
