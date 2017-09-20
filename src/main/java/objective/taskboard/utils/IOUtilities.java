@@ -85,14 +85,11 @@ public class IOUtilities {
         return new ByteArrayResource(bytes);
     }
 
-    public static void write(File file, String data) throws IOException {
-        FileOutputStream output = null;
-        try {
-            output = new FileOutputStream(file);
+    public static void write(File file, String data)  {
+        try (FileOutputStream output = new FileOutputStream(file)){
             output.write(data.getBytes(ENCODE_UTF_8));
-        } finally {
-            if (output != null)
-                output.close();
+        } catch(IOException e) {
+            throw new IllegalStateException(e);
         }
     }
 }
