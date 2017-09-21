@@ -36,6 +36,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Path;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,7 +70,7 @@ public class FollowUpDataProviderFromHistory implements FollowupDataProvider {
 
     @SuppressWarnings("serial")
     @Override
-    public FollowupData getJiraData(String[] includeProjects) {
+    public FollowupData getJiraData(String[] includeProjects, ZoneId timezone) {
         List<String> projects = asList(includeProjects);
 
         List<FromJiraDataRow> data = new ArrayList<FromJiraDataRow>();

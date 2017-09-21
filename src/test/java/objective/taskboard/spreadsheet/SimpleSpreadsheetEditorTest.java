@@ -71,7 +71,7 @@ public class SimpleSpreadsheetEditorTest {
             
             Sheet sheet = subject.getSheet("From Jira");
             sheet.truncate(1);
-            addRow(sheet, FollowUpHelper.getFollowUpDataDefault());
+            addRow(sheet, FollowUpHelper.getDefaultFromJiraDataRow());
             sheet.save();
     
             String jiraDataSheet = subject.getSheet("From Jira").stringValue();

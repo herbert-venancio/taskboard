@@ -1,15 +1,17 @@
 package objective.taskboard.followup.impl;
 
 import static java.util.Arrays.asList;
+import static objective.taskboard.utils.DateTimeUtils.parseDate;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -46,10 +48,10 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
         );
 
         // when
-        List<AnalyticsTransitionsDataSet> dataList = subject.getJiraData(defaultProjects()).analyticsTransitionsDsList;
+        List<AnalyticsTransitionsDataSet> dataList = subject.getJiraData(defaultProjects(), ZoneId.systemDefault()).analyticsTransitionsDsList;
 
         // then
-        List<DateTime> subtaskTransitionsDatesFirstRow = dataList.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows.get(0).transitionsDates;
+        List<ZonedDateTime> subtaskTransitionsDatesFirstRow = dataList.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows.get(0).transitionsDates;
         assertThat(subtaskTransitionsDatesFirstRow.size(), is(7));
         assertThat(subtaskTransitionsDatesFirstRow.get(0), is(parseDate("2020-01-01")));
         assertThat(subtaskTransitionsDatesFirstRow.get(1), is(parseDate("2020-01-02")));
@@ -78,10 +80,10 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
         );
 
         // when
-        List<AnalyticsTransitionsDataSet> dataList = subject.getJiraData(defaultProjects()).analyticsTransitionsDsList;
+        List<AnalyticsTransitionsDataSet> dataList = subject.getJiraData(defaultProjects(), ZoneId.systemDefault()).analyticsTransitionsDsList;
 
         // then
-        List<DateTime> subtaskTransitionsDatesFirstRow = dataList.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows.get(0).transitionsDates;
+        List<ZonedDateTime> subtaskTransitionsDatesFirstRow = dataList.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows.get(0).transitionsDates;
         assertThat(subtaskTransitionsDatesFirstRow.size(), is(7));
         assertThat(subtaskTransitionsDatesFirstRow.get(0), is(parseDate("2020-01-03")));
         assertThat(subtaskTransitionsDatesFirstRow.get(1), is(parseDate("2020-01-04")));
@@ -105,10 +107,10 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
         );
 
         // when
-        List<AnalyticsTransitionsDataSet> dataList = subject.getJiraData(defaultProjects()).analyticsTransitionsDsList;
+        List<AnalyticsTransitionsDataSet> dataList = subject.getJiraData(defaultProjects(), ZoneId.systemDefault()).analyticsTransitionsDsList;
 
         // then
-        List<DateTime> subtaskTransitionsDatesFirstRow = dataList.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows.get(0).transitionsDates;
+        List<ZonedDateTime> subtaskTransitionsDatesFirstRow = dataList.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows.get(0).transitionsDates;
         assertThat(subtaskTransitionsDatesFirstRow.size(), is(7));
         assertThat(subtaskTransitionsDatesFirstRow.get(0), is(parseDate("2020-01-05")));
         assertThat(subtaskTransitionsDatesFirstRow.get(1), nullValue());
@@ -123,7 +125,7 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
     public void issueChangeAllStatusInOneDay_shouldFillAllTransitions() {
         // given
         issues(
-                subtask().id(100).key("PROJ-101").startDate(parseDate("2020-01-01"))
+                subtask().id(100).key("PROJ-101").created("2020-01-01")
                     .transition("To Do", "2020-01-01")
                     .transition("Doing", "2020-01-01")
                     .transition("To Review", "2020-01-01")
@@ -132,10 +134,10 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
         );
 
         // when
-        List<AnalyticsTransitionsDataSet> dataList = subject.getJiraData(defaultProjects()).analyticsTransitionsDsList;
+        List<AnalyticsTransitionsDataSet> dataList = subject.getJiraData(defaultProjects(), ZoneId.systemDefault()).analyticsTransitionsDsList;
 
         // then
-        List<DateTime> subtaskTransitionsDatesFirstRow = dataList.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows.get(0).transitionsDates;
+        List<ZonedDateTime> subtaskTransitionsDatesFirstRow = dataList.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows.get(0).transitionsDates;
         assertThat(subtaskTransitionsDatesFirstRow.get(0), is(parseDate("2020-01-01")));
         assertThat(subtaskTransitionsDatesFirstRow.get(1), is(parseDate("2020-01-01")));
         assertThat(subtaskTransitionsDatesFirstRow.get(2), is(parseDate("2020-01-01")));
@@ -149,15 +151,15 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
     public void issueWasCancelled() {
         // given
         issues(
-                subtask().id(100).key("PROJ-101").startDate(parseDate("2020-01-01"))
+                subtask().id(100).key("PROJ-101").created("2020-01-01")
                     .transition("Cancelled", "2020-01-02").issueStatus(statusCancelled)
         );
 
         // when
-        List<AnalyticsTransitionsDataSet> dataList = subject.getJiraData(defaultProjects()).analyticsTransitionsDsList;
+        List<AnalyticsTransitionsDataSet> dataList = subject.getJiraData(defaultProjects(), ZoneId.systemDefault()).analyticsTransitionsDsList;
 
         // then
-        List<DateTime> subtaskTransitionsDatesFirstRow = dataList.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows.get(0).transitionsDates;
+        List<ZonedDateTime> subtaskTransitionsDatesFirstRow = dataList.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows.get(0).transitionsDates;
         assertThat(subtaskTransitionsDatesFirstRow.get(0), is(parseDate("2020-01-01")));
         assertThat(subtaskTransitionsDatesFirstRow.get(1), nullValue());
         assertThat(subtaskTransitionsDatesFirstRow.get(2), nullValue());
@@ -171,16 +173,17 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
     public void issueCreatedAndNoStatusChange_shouldHaveOneRowWithOneOpenIssue() {
         // given
         issues(
-                subtask().id(100).key("PROJ-100").issueStatus(statusOpen).startDate(parseDate("2017-01-01"))
+                subtask().id(100).key("PROJ-100").issueStatus(statusOpen).created("2017-01-01")
         );
 
         // when
-        List<SyntheticTransitionsDataSet> sets = subject.getJiraData(defaultProjects()).cfdTransitionsDsList;
+        List<SyntheticTransitionsDataSet> sets = subject.getJiraData(defaultProjects(), ZoneId.systemDefault()).syntheticsTransitionsDsList;
 
         // then
         List<SyntheticTransitionsDataRow> rows = sets.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows;
         assertThat(rows.size(), is(1));
         SyntheticTransitionsDataRow firstRow = rows.get(0);
+        assertThat(firstRow.date, is(parseDate("2017-01-01")));
         assertThat(firstRow.amountOfIssueInStatus, equalTo(asList(1, 0, 0, 0, 0, 0, 0)));
     }
 
@@ -188,12 +191,12 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
     public void twoIssuesCreatedOnDifferentDaysAndNoStatusChange_shouldHaveTwoRows() {
         // given
         issues(
-                subtask().id(100).key("PROJ-100").issueStatus(statusOpen).startDate(parseDate("2017-01-01"))
-                , subtask().id(100).key("PROJ-101").issueStatus(statusOpen).startDate(parseDate("2017-01-02"))
+                subtask().id(100).key("PROJ-100").issueStatus(statusOpen).created("2017-01-01")
+                , subtask().id(100).key("PROJ-101").issueStatus(statusOpen).created("2017-01-02")
         );
 
         // when
-        List<SyntheticTransitionsDataSet> sets = subject.getJiraData(defaultProjects()).cfdTransitionsDsList;
+        List<SyntheticTransitionsDataSet> sets = subject.getJiraData(defaultProjects(), ZoneId.systemDefault()).syntheticsTransitionsDsList;
 
         // then
         List<SyntheticTransitionsDataRow> rows = sets.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows;
@@ -208,7 +211,7 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
     public void someIssuesWithTransitions() {
         // given
         issues(
-                subtask().id(100).key("PROJ-100").startDate(parseDate("2017-01-01"))
+                subtask().id(100).key("PROJ-100").created("2017-01-01")
                     .transition("To Do", "2017-01-02")
                     .transition("Doing", "2017-01-03")
                     .transition("To Do", "2017-01-04")
@@ -218,24 +221,24 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
                     .transition("To Review", "2017-01-08")
                     .transition("Reviewing", "2017-01-09")
                     .transition("Done", "2017-01-10").issueStatus(statusDone)
-                , subtask().id(101).key("PROJ-101").startDate(parseDate("2017-01-02"))
+                , subtask().id(101).key("PROJ-101").created("2017-01-02")
                     .transition("To Do", "2017-01-02")
                     .transition("Doing", "2017-01-02")
                     .transition("To Review", "2017-01-02")
                     .transition("Reviewing", "2017-01-02")
                     .transition("Done", "2017-01-02").issueStatus(statusDone)
-                , subtask().id(102).key("PROJ-102").startDate(parseDate("2017-01-03"))
+                , subtask().id(102).key("PROJ-102").created("2017-01-03")
                     .transition("To Do", "2017-01-04")
                     .transition("Doing", "2017-01-05")
                     .transition("To Review", "2017-01-06")
                     .transition("Reviewing", "2017-01-07")
                     .transition("Done", "2017-01-08").issueStatus(statusDone)
-                , subtask().id(103).key("PROJ-103").startDate(parseDate("2017-01-04"))
+                , subtask().id(103).key("PROJ-103").created("2017-01-04")
                     .transition("Cancelled", "2017-01-05").issueStatus(statusCancelled)
         );
 
         // when
-        List<SyntheticTransitionsDataSet> sets = subject.getJiraData(defaultProjects()).cfdTransitionsDsList;
+        List<SyntheticTransitionsDataSet> sets = subject.getJiraData(defaultProjects(), ZoneId.systemDefault()).syntheticsTransitionsDsList;
 
         // then
         List<SyntheticTransitionsDataRow> rows = sets.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows;
@@ -256,12 +259,12 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
     public void issueWasCancelled_shouldCalculateDateRangeCorrectly() {
         // given
         issues(
-                subtask().id(100).key("PROJ-101").startDate(parseDate("2020-01-01"))
+                subtask().id(100).key("PROJ-101").created("2020-01-01")
                     .transition("Cancelled", "2020-01-07").issueStatus(statusCancelled)
         );
 
         // when
-        List<SyntheticTransitionsDataSet> sets = subject.getJiraData(defaultProjects()).cfdTransitionsDsList;
+        List<SyntheticTransitionsDataSet> sets = subject.getJiraData(defaultProjects(), ZoneId.systemDefault()).syntheticsTransitionsDsList;
 
         // then
         List<SyntheticTransitionsDataRow> rows = sets.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows;
@@ -273,5 +276,31 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
         assertThat(rows.get(4).amountOfIssueInStatus, equalTo(asList(1, 0, 0, 0, 0, 0, 0)));
         assertThat(rows.get(5).amountOfIssueInStatus, equalTo(asList(1, 0, 0, 0, 0, 0, 0)));
         assertThat(rows.get(6).amountOfIssueInStatus, equalTo(asList(0, 0, 0, 0, 0, 0, 1)));
+    }
+
+    @Test
+    public void issueTransitionsWithRandomHours_shouldCalculateSyntheticAtTheEndOfTheDay() {
+        // given
+        issues(
+                subtask().id(100).key("PROJ-100").created("2020-01-01", "00:00:00")
+                        .transition("To Do", "2020-01-02", "01:00:00")
+                        .transition("Doing", "2020-01-03", "04:00:00")
+                        .transition("To Review", "2020-01-04", "12:00:00")
+                        .transition("Reviewing", "2020-01-05", "15:00:00")
+                        .transition("Done", "2020-01-06", "23:59:59").issueStatus(statusDone)
+        );
+
+        // when
+        List<SyntheticTransitionsDataSet> sets = subject.getJiraData(defaultProjects(), ZoneId.systemDefault()).syntheticsTransitionsDsList;
+
+        // then
+        List<SyntheticTransitionsDataRow> rows = sets.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows;
+        assertThat(rows.size(), is(6));
+        assertThat(rows.get(0).amountOfIssueInStatus, equalTo(asList(1, 0, 0, 0, 0, 0, 0)));
+        assertThat(rows.get(1).amountOfIssueInStatus, equalTo(asList(0, 1, 0, 0, 0, 0, 0)));
+        assertThat(rows.get(2).amountOfIssueInStatus, equalTo(asList(0, 0, 1, 0, 0, 0, 0)));
+        assertThat(rows.get(3).amountOfIssueInStatus, equalTo(asList(0, 0, 0, 1, 0, 0, 0)));
+        assertThat(rows.get(4).amountOfIssueInStatus, equalTo(asList(0, 0, 0, 0, 1, 0, 0)));
+        assertThat(rows.get(5).amountOfIssueInStatus, equalTo(asList(0, 0, 0, 0, 0, 1, 0)));
     }
 }

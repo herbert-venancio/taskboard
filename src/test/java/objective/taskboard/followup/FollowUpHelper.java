@@ -22,13 +22,27 @@ package objective.taskboard.followup;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UncheckedIOException;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import objective.taskboard.Constants;
+import objective.taskboard.utils.DateTimeUtils.ZonedDateTimeAdapter;
 
 public class FollowUpHelper {
 
-    public static FromJiraDataRow getFollowUpDataDefault() {
+    public static FromJiraDataRow getDefaultFromJiraDataRow() {
         FromJiraDataRow followUpData = new FromJiraDataRow();
         followUpData.planningType = "Ballpark";
         followUpData.project = "PROJECT TEST";
@@ -61,22 +75,46 @@ public class FollowUpHelper {
         followUpData.queryType = "Type";
         return followUpData;
     }
-    
-    
+
     public static FollowupData getDefaultFollowupData() {
-        return new FollowupData(new FromJiraDataSet(Constants.FROMJIRA_HEADERS, Collections.singletonList(getFollowUpDataDefault())), null, null);
+        return new FollowupData(new FromJiraDataSet(Constants.FROMJIRA_HEADERS, Collections.singletonList(getDefaultFromJiraDataRow())), null, null);
     }
-    
+
     public static FollowupData getEmptyFollowupData() {
         return new FollowupData(new FromJiraDataSet(Constants.FROMJIRA_HEADERS, Collections.emptyList()), null, null);
     }
 
     public static List<FromJiraDataRow> getFollowUpDataDefaultList() {
-        return Collections.singletonList(getFollowUpDataDefault());
+        return Collections.singletonList(getDefaultFromJiraDataRow());
+    }
+
+    public static FollowupData getFromFile() {
+        Gson gson = new GsonBuilder().registerTypeAdapter(ZonedDateTime.class, new ZonedDateTimeAdapter()).create();
+
+        try(InputStream file = FollowUpHelper.class.getResourceAsStream("jiradata.json")) {
+            return gson.fromJson(new InputStreamReader(file), FollowupData.class);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public static void toJsonFile(FollowupData data, File file) {
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(ZonedDateTime.class, new ZonedDateTimeAdapter())
+                .setPrettyPrinting()
+                .create();
+
+        try(OutputStream stream = new FileOutputStream(file)) {
+            OutputStreamWriter writer = new OutputStreamWriter(stream);
+            gson.toJson(data, writer);
+            writer.flush();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     public static void assertFollowUpDataDefault(FromJiraDataRow actual) {
-        FromJiraDataRow expected = getFollowUpDataDefault();
+        FromJiraDataRow expected = getDefaultFromJiraDataRow();
         assertEquals("planningType", expected.planningType, actual.planningType);
         assertEquals("project", expected.project, actual.project);
         assertEquals("demandType", expected.demandType, actual.demandType);

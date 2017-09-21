@@ -59,7 +59,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import objective.taskboard.database.directory.DataBaseDirectory;
@@ -114,7 +113,7 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
     @Test
     public void whenProjectDoesNotHaveData_thenNoDataShouldBeGenerated() throws IOException, InterruptedException {
         when(projectFilterCacheRepo.getProjects()).thenReturn(asList(projectFilter));
-        when(providerFromCurrentState.getJiraData(Mockito.any())).thenReturn(getEmptyFollowupData());
+        when(providerFromCurrentState.getJiraData(any())).thenReturn(getEmptyFollowupData());
 
         subject.generate();
 
@@ -124,7 +123,7 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
     @Test
     public void whenHasTwoProjects_thenTwoFilesShouldBeGenerated() throws IOException, InterruptedException {
         when(projectFilterCacheRepo.getProjects()).thenReturn(asList(projectFilter, projectFilter2));
-        when(providerFromCurrentState.getJiraData(Mockito.any())).thenReturn(getDefaultFollowupData());
+        when(providerFromCurrentState.getJiraData(any())).thenReturn(getDefaultFollowupData());
 
         subject.generate();
 

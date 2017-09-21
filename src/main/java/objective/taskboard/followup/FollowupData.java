@@ -18,23 +18,16 @@ public class FollowupData {
     public final Version followupDataVersion;
     public final FromJiraDataSet fromJiraDs;
     public final List<AnalyticsTransitionsDataSet> analyticsTransitionsDsList;
-    public final List<SyntheticTransitionsDataSet> cfdTransitionsDsList;
+    public final List<SyntheticTransitionsDataSet> syntheticsTransitionsDsList;
 
-    public FollowupData(FromJiraDataSet fromJiraDs, List<AnalyticsTransitionsDataSet> analyticsTransitionsDsList, List<SyntheticTransitionsDataSet> cfdTransitionsDsList) {
-        this(Version.VERSION_1, fromJiraDs, analyticsTransitionsDsList, cfdTransitionsDsList);
+    public FollowupData(FromJiraDataSet fromJiraDs, List<AnalyticsTransitionsDataSet> analyticsTransitionsDsList, List<SyntheticTransitionsDataSet> syntheticsTransitionsDsList) {
+        this(Version.VERSION_1, fromJiraDs, analyticsTransitionsDsList, syntheticsTransitionsDsList);
     }
 
-    public FollowupData(Version version, FromJiraDataSet fromJiraDs, List<AnalyticsTransitionsDataSet> analyticsTransitionsDsList, List<SyntheticTransitionsDataSet> cfdTransitionsDsList) {
+    public FollowupData(Version version, FromJiraDataSet fromJiraDs, List<AnalyticsTransitionsDataSet> analyticsTransitionsDsList, List<SyntheticTransitionsDataSet> syntheticsTransitionsDsList) {
         this.followupDataVersion = version;
         this.fromJiraDs = fromJiraDs;
         this.analyticsTransitionsDsList = analyticsTransitionsDsList;
-        this.cfdTransitionsDsList = cfdTransitionsDsList;
-    }
-
-    @Override
-    public String toString() {
-        return "FollowupData [followupDataVersion=" + followupDataVersion + ", fromJiraDs=" + fromJiraDs
-                + ", analyticsTransitionsDsList=" + analyticsTransitionsDsList + ", cfdTransitionsDsList="
-                + cfdTransitionsDsList + "]";
+        this.syntheticsTransitionsDsList = syntheticsTransitionsDsList;
     }
 }

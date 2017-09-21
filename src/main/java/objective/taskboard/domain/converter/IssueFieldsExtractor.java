@@ -30,6 +30,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import objective.taskboard.utils.DateTimeUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -289,7 +290,7 @@ public class IssueFieldsExtractor {
         List<Changelog> result = new LinkedList<>();
         issue.getChangelog().forEach(change -> {
             change.getItems().forEach(item -> {
-                result.add(new Changelog(change.getAuthor().getName(), item.getField(), item.getFromString(), item.getToString(), change.getCreated()));
+                result.add(new Changelog(change.getAuthor().getName(), item.getField(), item.getFromString(), item.getToString(), DateTimeUtils.get(change.getCreated())));
             });
         });
         result.sort((item1, item2) -> item1.timestamp.compareTo(item2.timestamp));

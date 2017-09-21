@@ -32,6 +32,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
@@ -129,14 +130,14 @@ public class JiraProperties {
             ensureSubtaskInitialized();
             return subtaskPriorityByStatus.get(status);
         }
-        public String[] getDemands() {
-            return demands;
+        public String[] getDemandsInOrder() {
+            return reversedCopy(demands);
         }
-        public String[] getTasks() {
-            return tasks;
+        public String[] getTasksInOrder() {
+            return reversedCopy(tasks);
         }
-        public String[] getSubtasks() {
-            return subtasks;
+        public String[] getSubtasksInOrder() {
+            return reversedCopy(subtasks);
         }
         public void setDemands(String[] demands) {
             this.demands = demands;
@@ -146,6 +147,12 @@ public class JiraProperties {
         }
         public void setSubtasks(String[] subtasks) {
             this.subtasks = subtasks;
+        }
+
+        private static String[] reversedCopy(String[] original) {
+            String[] clone = original.clone();
+            ArrayUtils.reverse(clone);
+            return clone;
         }
     }
 

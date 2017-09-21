@@ -28,11 +28,13 @@ import static org.apache.commons.io.IOUtils.closeQuietly;
 
 import org.apache.commons.io.IOUtils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -139,20 +141,35 @@ public class ZipUtils {
         if (output.toFile().isDirectory())
             throw new RuntimeException("Output must be a file");
 
-        try (ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(output))) {
-            try {
-                stream.forEach(ze -> {
-                    ZipEntry newEntry = new ZipEntry(ze.getName());
-                    try {
-                        zipOutputStream.putNextEntry(newEntry);
-                        IOUtils.copy(ze.getInputStream(), zipOutputStream);
-                    } catch (IOException e) {
-                        throw new UncheckedIOException(e);
-                    }
-                });
-            } finally {
-                stream.close();
-            }
+        try (OutputStream outputStream = Files.newOutputStream(output)) {
+            zip(stream, outputStream);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public static void zip(Stream<ZipStreamEntry> stream, OutputStream outputStream) {
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream)) {
+            stream.forEach(ze -> {
+                ZipEntry newEntry = new ZipEntry(ze.getName());
+                try {
+                    zipOutputStream.putNextEntry(newEntry);
+                    IOUtils.copy(ze.getInputStream(), zipOutputStream);
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            });
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        } finally {
+            stream.close();
+        }
+    }
+
+    public static byte[] zipToByteArray(Stream<ZipStreamEntry> stream) {
+        try(ByteArrayOutputStream outStream = new ByteArrayOutputStream()) {
+            zip(stream, outStream);
+            return outStream.toByteArray();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

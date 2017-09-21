@@ -1,20 +1,26 @@
 package objective.taskboard.followup;
 
+import java.time.ZonedDateTime;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import org.joda.time.DateTime;
-
-public class SyntheticTransitionsDataRow {
-    public final DateTime date;
+public class SyntheticTransitionsDataRow implements TransitionDataRow {
+    public final ZonedDateTime date;
     public final List<Integer> amountOfIssueInStatus;
     
-    public SyntheticTransitionsDataRow(DateTime date, List<Integer> amountOfIssueInStatus) {
+    public SyntheticTransitionsDataRow(ZonedDateTime date, List<Integer> amountOfIssueInStatus) {
         this.date = date;
         this.amountOfIssueInStatus = amountOfIssueInStatus;
     }
 
     @Override
-    public String toString() {
-        return "SyntheticTransitionsDataRow [date=" + date + ", amountOfIssueInStatus=" + amountOfIssueInStatus + "]";
+    public List<String> getAsStringList() {
+        List<String> list = new LinkedList<>();
+        list.add(this.date.toString());
+        list.addAll(this.amountOfIssueInStatus.stream()
+                .map(Object::toString)
+                .collect(Collectors.toList()));
+        return list;
     }
 }

@@ -23,6 +23,7 @@ package objective.taskboard.followup.impl;
 
 import static org.apache.commons.lang.ObjectUtils.defaultIfNull;
 
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -73,7 +74,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
     }
 
     @Override
-    public FollowupData getJiraData(String[] includeProjects) {
+    public FollowupData getJiraData(String[] includeProjects, ZoneId timezone) {
         List<String> i = Arrays.asList(includeProjects);
 
         List<Issue> issuesVisibleToUser = issueBufferService.getAllIssues().stream()
@@ -84,7 +85,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         FromJiraDataSet fromJiraDs = getFromJiraDs(issuesVisibleToUser);
 
         FollowUpTransitionsDataProvider transitions = new FollowUpTransitionsDataProvider(jiraProperties);
-        List<AnalyticsTransitionsDataSet> analyticsTransitionsDsList = transitions.getAnalyticsTransitionsDsList(issuesVisibleToUser);
+        List<AnalyticsTransitionsDataSet> analyticsTransitionsDsList = transitions.getAnalyticsTransitionsDsList(issuesVisibleToUser, timezone);
         List<SyntheticTransitionsDataSet> syntheticsTransitionsDsList = transitions.getSyntheticTransitionsDsList(analyticsTransitionsDsList);
 
         return new FollowupData(fromJiraDs, analyticsTransitionsDsList, syntheticsTransitionsDsList);
