@@ -202,7 +202,7 @@
                 },
 
                 showTeamCount: function() {
-                    return userPreferences.getPreferences().laneConfiguration[0].showCount && this.getIssueCount() > 0;
+                    return userPreferences.getPreferences().laneConfiguration[0].showCount && this.getIssueCount() > 0 && this.team != null;
                 },
 
                 showSynthetic: function() {
@@ -346,10 +346,10 @@
                             previous = $(this);
                         });
 
+                        self.issues.splice(issueIndex,1);
                         $(issueToRemoveDom).fadeOut(
                             800,
                             function() {
-                                self.issues.splice(issueIndex,1);
                                 this.async(function() {
                                     $(issueToRemoveDom).fadeIn(0);
                                     self.filter();

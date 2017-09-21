@@ -20,6 +20,8 @@
  */
 package objective.taskboard.it;
 
+import static java.lang.Thread.sleep;
+
 import java.io.IOException;
 
 import org.junit.Test;
@@ -30,13 +32,19 @@ import objective.taskboard.utils.IOUtilities;
 public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
     @Test
     public void whenUpdateHappensViaWebHook_RefreshToastShouldShowUP() throws IOException {
-        emulateAssignToFoo();
-        
         MainPage mainPage = MainPage.produce(webDriver);
-        mainPage.typeSearch("TASKB-61");
+        mainPage.issue("TASKB-625")
+            .assertHasFirstAssignee();
+
+        emulateAssignToFoo();
+
         mainPage.refreshToast().assertVisible();
+        mainPage.typeSearch("TASKB-61");
         mainPage.refreshToast().toggleShowHide();
         mainPage.assertVisibleIssues("TASKB-625");
+        mainPage.issue("TASKB-625")
+            .assertHasFirstAssignee()
+            .assertHasSecondAssignee();
         mainPage.refreshToast().toggleShowHide();
         mainPage.assertVisibleIssues("TASKB-611", "TASKB-612", "TASKB-613", "TASKB-610", "TASKB-614");
         mainPage.refreshToast().toggleShowHide();
@@ -62,7 +70,30 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
             .clickOnWarning()
             .assertAssigneeIs("foo");
     }
-    
+
+    @Test
+    public void givenAnIssueNotVisible_whenUpdateHappensViaWebHook_RefreshToastShouldNotShowUP() throws IOException, InterruptedException {
+        MainPage mainPage = MainPage.produce(webDriver);
+        mainPage.typeSearch("TASKB-625");
+
+        BoardStepFragment stepToDo = mainPage.lane("Operational")
+                .boardStep("To Do");
+        stepToDo.assertIssueList("TASKB-625");
+
+        mainPage.typeSearch("TASKB-61")
+            .assertVisibleIssues("TASKB-611", "TASKB-612", "TASKB-613", "TASKB-610", "TASKB-614");
+
+        emulateTransitionIssue();
+        sleep(3000);
+
+        mainPage.refreshToast().assertNotVisible();
+        mainPage.typeSearch("TASKB-625");
+        stepToDo.assertIssueList();
+        mainPage.lane("Operational")
+            .boardStep("Doing")
+            .assertIssueList("TASKB-625");
+    }
+
     private static void emulateAssignToFoo() {
         RequestBuilder
             .url("http://localhost:4567/rest/api/latest/issue/TASKB-625")
@@ -76,8 +107,21 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
             .body(body)
             .post();
     }
-    
-    
+
+    private static void emulateTransitionIssue() {
+        RequestBuilder
+            .url("http://localhost:4567/rest/api/latest/issue/TASKB-625")
+            .body("{\"fields\":{\"status\":{\"id\": \"10652\",\"name\": \"Doing\"}}}")
+            .put();
+
+        String body = IOUtilities.resourceToString("webhook/TASKB_625_updatePayload.json");
+        RequestBuilder
+            .url(getSiteBase()+"/webhook/TASKB")
+            .header("Content-Type", "application/json")
+            .body(body)
+            .post();
+    }
+
     public static void main(String[] args) {
         emulateAssignToFoo();
     }

@@ -16608,7 +16608,20 @@
             },
             "expand": "operations,versionedRepresentations,editmeta,changelog,transitions,renderedFields",
             "fields": {
-                "assignee": null,
+                "assignee": {
+                    "active": true,
+                    "avatarUrls": {
+                        "16x16": "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=16",
+                        "24x24": "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=24",
+                        "32x32": "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=32",
+                        "48x48": "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=48"
+                    },
+                    "displayName": "Gabriel Takeuchi",
+                    "key": "gtakeuchi",
+                    "name": "gtakeuchi",
+                    "self": "http://localhost:4567/rest/api/2/user?username=gtakeuchi",
+                    "timeZone": "America/Sao_Paulo"
+                },
                 "created": "2017-05-30T19:48:40.000+0000",
                 "customfield_11440": {
                     "id": "12606",
@@ -16618,7 +16631,22 @@
                 "customfield_11451": null,
                 "customfield_11452": null,
                 "customfield_11455": null,
-                "customfield_11456": null,
+                "customfield_11456": [
+                    {
+                        "active": true,
+                        "avatarUrls": {
+                            "16x16": "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=16",
+                            "24x24": "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=24",
+                            "32x32": "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=32",
+                            "48x48": "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=48"
+                        },
+                        "displayName": "Gabriel Takeuchi",
+                        "key": "gtakeuchi",
+                        "name": "gtakeuchi",
+                        "self": "http://localhost:4567/rest/api/2/user?username=gtakeuchi",
+                        "timeZone": "America/Sao_Paulo"
+                    }
+                ],
                 "customfield_11457": {
                     "id": "12657",
                     "self": "http://localhost:4567/rest/api/latest/customFieldOption/12657",

@@ -24,7 +24,7 @@ function Taskboard() {
 
     var aspectFilters;
     var issues;
-    var filteredIssues;
+    var issuesBySteps;
     var laneConfiguration;
     var rootHierarchicalFilter;
 
@@ -55,14 +55,14 @@ function Taskboard() {
 
     this.setIssues = function(issues) {
         this.issues = issues;
-        this.setFilteredIssues(issues)
+        setIssuesBySteps(issues);
         this.refitSteps();
     };
 
-    this.setFilteredIssues = function(issues) {
-        this.filteredIssues = new Object()
+    function setIssuesBySteps(issues) {
+        issuesBySteps = new Object()
 
-        var steps = this.getAllSteps()
+        var steps = self.getAllSteps()
         for (s in steps) {
             var step = steps[s]
             var filters = step.issuesConfiguration
@@ -78,10 +78,10 @@ function Taskboard() {
                 }
             }
 
-            this.filteredIssues[step.id] = issuesByStep;
+            issuesBySteps[step.id] = issuesByStep;
         }
-    };
-    
+    }
+
     this.getIssueStep = function(issue) {
         var steps = self.getAllSteps()
         for (s in steps) {
@@ -99,8 +99,8 @@ function Taskboard() {
     };
     
     this.getIssuesByStep = function(stepId) {
-        if (this.filteredIssues)
-            return this.filteredIssues[stepId];
+        if (issuesBySteps)
+            return issuesBySteps[stepId];
     };
 
     this.getIssues = function() {
@@ -331,6 +331,9 @@ function Taskboard() {
             }})
         })
 
+        if (!hasSomeFilteredIssue(updatedIssueKeys))
+            return;
+
         taskboardHome.fire("iron-signal", {name:"show-issue-updated-message", data:{
             message: "Jira issues have been updated.",
             updatedIssueKeys: updatedIssueKeys
@@ -405,6 +408,46 @@ function Taskboard() {
         };
 
         return issue;
+    }
+
+    function hasSomeFilteredIssue(issues) {
+        var filteredIssues = self.getFilteredIssues();
+        var filteredIssue = _.find(filteredIssues, function(f) {
+            return issues.indexOf(f.issueKey) >= 0;
+        });
+        return filteredIssue != null;
+    }
+
+    this.getFilteredIssues = function() {
+        var filteredIssues = [];
+
+        self.laneConfiguration.forEach(function(lane) {
+            if (!lane.showLevel)
+                return;
+
+            var stepsOfLane = getStepsOfLane(lane);
+            stepsOfLane.forEach(function(step) {
+                var boardStep = document.querySelector('.step-' + step.id) == null ?
+                                    document.querySelector('board-step') :
+                                    document.querySelector('.step-' + step.id);
+
+                if (boardStep == null)
+                    return;
+
+                var allIssuesStep = self.getIssuesByStep(step.id);
+                var filteredIssuesStep = boardStep.filterIssuesDisabledTeam(allIssuesStep);
+                filteredIssues = filteredIssues.concat(filteredIssuesStep);
+            });
+        });
+        return filteredIssues;
+    };
+
+    function getStepsOfLane(lane) {
+        var stepsOfLane = [];
+        lane.stages.forEach(function(stage) {
+            stepsOfLane = stepsOfLane.concat(stage.steps);
+        });
+        return stepsOfLane;
     }
 }
 

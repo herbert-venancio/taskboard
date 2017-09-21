@@ -550,6 +550,7 @@
 
                 dismiss: function() {
                     this.updatedIssueKeys = [];
+                    this.infoMessage = "";
                     toastIssueUpdated.close();
                     if (this.filterByUpdate)
                         this.fire('iron-signal', {name: 'search-filter-changed', data: this.currentQueryData});
