@@ -69,7 +69,7 @@ class FollowUpTransitionsDataProvider {
         List<AnalyticsTransitionsDataRow> rows = new LinkedList<>();
         for (Issue issue : issuesVisibleToUser) {
             Map<String, ZonedDateTime> lastTransitionDate = mapStatusLastTransitionDates(issue, statuses, timezone);
-            rows.add(new AnalyticsTransitionsDataRow(issue.getIssueKey(),
+            rows.add(new AnalyticsTransitionsDataRow(issue.getIssueKey(), issue.getIssueTypeName(),
                     new LinkedList<>(lastTransitionDate.values())));
         }
         return rows;
