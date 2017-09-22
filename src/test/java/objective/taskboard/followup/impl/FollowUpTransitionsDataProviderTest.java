@@ -37,14 +37,14 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
     public void issuePassedThroughAllStatus_thenAllColumnsShouldBeFilled() {
         // given
         issues(
-                subtask().id(100).key("PROJ-100").issueStatus(statusCancelled)
+                subtask().id(100).key("PROJ-100").issueType(devIssueType)
                     .transition("Open", "2020-01-01")
                     .transition("To Do", "2020-01-02")
                     .transition("Doing", "2020-01-03")
                     .transition("To Review", "2020-01-04")
                     .transition("Reviewing", "2020-01-05")
                     .transition("Done", "2020-01-06")
-                    .transition("Cancelled", "2020-01-07")
+                    .transition("Cancelled", "2020-01-07").issueStatus(statusCancelled)
         );
 
         // when
@@ -66,7 +66,7 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
     public void issueStatusGoneBackAndForth_shouldReturnLastChange() {
         // given
         issues(
-                subtask().id(100).key("PROJ-100").issueStatus(statusDone)
+                subtask().id(100).key("PROJ-100").issueType(devIssueType)
                 .transition("Open", "2020-01-01")
                 .transition("To Do", "2020-01-02")
                 .transition("Open", "2020-01-03") // last
@@ -76,7 +76,7 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
                 .transition("Reviewing", "2020-01-07")
                 .transition("To Review", "2020-01-08") // last
                 .transition("Reviewing", "2020-01-09") // last
-                .transition("Done", "2020-01-10") // last
+                .transition("Done", "2020-01-10").issueStatus(statusDone) // last
         );
 
         // when
@@ -98,12 +98,12 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
     public void issueGoBackStatus_shouldNotConsiderNextStatus() {
         // given
         issues(
-                subtask().id(100).key("PROJ-100").issueStatus(statusOpen)
+                subtask().id(100).key("PROJ-100").issueType(devIssueType)
                 .transition("Open", "2020-01-01")
                 .transition("To Do", "2020-01-02")
                 .transition("Doing", "2020-01-03")
                 .transition("To Do", "2020-01-04")
-                .transition("Open", "2020-01-05")
+                .transition("Open", "2020-01-05").issueStatus(statusOpen)
         );
 
         // when
@@ -125,7 +125,8 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
     public void issueChangeAllStatusInOneDay_shouldFillAllTransitions() {
         // given
         issues(
-                subtask().id(100).key("PROJ-101").created("2020-01-01")
+                subtask().id(100).key("PROJ-101").issueType(devIssueType)
+                    .created("2020-01-01")
                     .transition("To Do", "2020-01-01")
                     .transition("Doing", "2020-01-01")
                     .transition("To Review", "2020-01-01")
@@ -151,7 +152,8 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
     public void issueWasCancelled() {
         // given
         issues(
-                subtask().id(100).key("PROJ-101").created("2020-01-01")
+                subtask().id(100).key("PROJ-101").issueType(devIssueType)
+                    .created("2020-01-01")
                     .transition("Cancelled", "2020-01-02").issueStatus(statusCancelled)
         );
 
@@ -173,7 +175,8 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
     public void issueCreatedAndNoStatusChange_shouldHaveOneRowWithOneOpenIssue() {
         // given
         issues(
-                subtask().id(100).key("PROJ-100").issueStatus(statusOpen).created("2017-01-01")
+                subtask().id(100).key("PROJ-100").issueType(devIssueType)
+                        .created("2017-01-01").issueStatus(statusOpen)
         );
 
         // when
@@ -191,8 +194,10 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
     public void twoIssuesCreatedOnDifferentDaysAndNoStatusChange_shouldHaveTwoRows() {
         // given
         issues(
-                subtask().id(100).key("PROJ-100").issueStatus(statusOpen).created("2017-01-01")
-                , subtask().id(100).key("PROJ-101").issueStatus(statusOpen).created("2017-01-02")
+                subtask().id(100).key("PROJ-100").issueType(devIssueType)
+                        .created("2017-01-01").issueStatus(statusOpen)
+                , subtask().id(100).key("PROJ-101").issueType(devIssueType)
+                        .created("2017-01-02").issueStatus(statusOpen)
         );
 
         // when
@@ -211,7 +216,8 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
     public void someIssuesWithTransitions() {
         // given
         issues(
-                subtask().id(100).key("PROJ-100").created("2017-01-01")
+                subtask().id(100).key("PROJ-100").issueType(devIssueType)
+                    .created("2017-01-01")
                     .transition("To Do", "2017-01-02")
                     .transition("Doing", "2017-01-03")
                     .transition("To Do", "2017-01-04")
@@ -221,19 +227,22 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
                     .transition("To Review", "2017-01-08")
                     .transition("Reviewing", "2017-01-09")
                     .transition("Done", "2017-01-10").issueStatus(statusDone)
-                , subtask().id(101).key("PROJ-101").created("2017-01-02")
+                , subtask().id(101).key("PROJ-101").issueType(devIssueType)
+                    .created("2017-01-02")
                     .transition("To Do", "2017-01-02")
                     .transition("Doing", "2017-01-02")
                     .transition("To Review", "2017-01-02")
                     .transition("Reviewing", "2017-01-02")
                     .transition("Done", "2017-01-02").issueStatus(statusDone)
-                , subtask().id(102).key("PROJ-102").created("2017-01-03")
+                , subtask().id(102).key("PROJ-102").issueType(devIssueType)
+                    .created("2017-01-03")
                     .transition("To Do", "2017-01-04")
                     .transition("Doing", "2017-01-05")
                     .transition("To Review", "2017-01-06")
                     .transition("Reviewing", "2017-01-07")
                     .transition("Done", "2017-01-08").issueStatus(statusDone)
-                , subtask().id(103).key("PROJ-103").created("2017-01-04")
+                , subtask().id(103).key("PROJ-103").issueType(devIssueType)
+                    .created("2017-01-04")
                     .transition("Cancelled", "2017-01-05").issueStatus(statusCancelled)
         );
 
@@ -259,7 +268,8 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
     public void issueWasCancelled_shouldCalculateDateRangeCorrectly() {
         // given
         issues(
-                subtask().id(100).key("PROJ-101").created("2020-01-01")
+                subtask().id(100).key("PROJ-101").issueType(devIssueType)
+                    .created("2020-01-01")
                     .transition("Cancelled", "2020-01-07").issueStatus(statusCancelled)
         );
 
@@ -282,7 +292,8 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
     public void issueTransitionsWithRandomHours_shouldCalculateSyntheticAtTheEndOfTheDay() {
         // given
         issues(
-                subtask().id(100).key("PROJ-100").created("2020-01-01", "00:00:00")
+                subtask().id(100).key("PROJ-100").issueType(devIssueType)
+                        .created("2020-01-01", "00:00:00")
                         .transition("To Do", "2020-01-02", "01:00:00")
                         .transition("Doing", "2020-01-03", "04:00:00")
                         .transition("To Review", "2020-01-04", "12:00:00")

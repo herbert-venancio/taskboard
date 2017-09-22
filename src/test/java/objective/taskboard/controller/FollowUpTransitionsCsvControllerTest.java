@@ -45,4 +45,9 @@ public class FollowUpTransitionsCsvControllerTest {
         assertThat(response.getStatusCode(), is(HttpStatus.OK));
     }
 
+    @Test
+    public void invalidZoneId() {
+        ResponseEntity<Object> response = subject.transitions("TASKB", "invalid");
+        assertThat(response.getStatusCode(), is(HttpStatus.BAD_REQUEST));
+    }
 }

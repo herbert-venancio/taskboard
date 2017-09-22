@@ -25,7 +25,7 @@ import java.util.List;
 
 public interface FollowUpDataHistoryGenerator {
 
-    public void generate() throws Exception;
+    public void scheduledGenerate();
 
     public List<String> getHistoryByProject(String project);
 

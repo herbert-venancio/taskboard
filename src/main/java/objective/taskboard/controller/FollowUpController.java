@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import objective.taskboard.followup.FollowUpDataHistoryGenerator;
 import objective.taskboard.followup.FollowUpFacadeInterface;
 import objective.taskboard.followup.FollowUpGenerator;
 import objective.taskboard.issueBuffer.IssueBufferState;
@@ -43,6 +44,9 @@ public class FollowUpController {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FollowUpController.class);
     @Autowired
     private FollowUpFacadeInterface followUpFacade;
+
+    @Autowired
+    private FollowUpDataHistoryGenerator followUpDataHistoryGenerator;
 
     @RequestMapping
     public ResponseEntity<Object> download(@RequestParam("projects") String projects, @RequestParam("template") String template,
@@ -83,5 +87,11 @@ public class FollowUpController {
             log.warn("Error while serving genericTemplate", e);
             return new ResponseEntity<>(e.getMessage() == null ? e.toString() : e.getMessage(), INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @RequestMapping("generate-history")
+    public String generateHistory() {
+        followUpDataHistoryGenerator.scheduledGenerate();
+        return "HISTORY GENERATOR STARTED";
     }
 }

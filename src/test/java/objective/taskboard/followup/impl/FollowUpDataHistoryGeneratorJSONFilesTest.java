@@ -32,7 +32,6 @@ import static objective.taskboard.followup.FollowUpHelper.getEmptyFollowupData;
 import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.EXTENSION_JSON;
 import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.EXTENSION_ZIP;
 import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.FILE_NAME_FORMAT;
-import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.TODAY;
 import static objective.taskboard.issueBuffer.IssueBufferState.ready;
 import static objective.taskboard.utils.IOUtilities.ENCODE_UTF_8;
 import static objective.taskboard.utils.IOUtilities.asResource;
@@ -70,6 +69,7 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
 
     private static final String PROJECT_TEST = "PROJECT TEST";
     private static final String PROJECT_TEST_2 = "PROJECT TEST 2";
+    private static final String TODAY = DateTime.now().toString(FILE_NAME_FORMAT);
     private static final String YESTERDAY = DateTime.now().minusDays(1).toString(FILE_NAME_FORMAT);
 
     @InjectMocks
