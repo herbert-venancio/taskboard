@@ -3,14 +3,21 @@ package objective.taskboard.spreadsheet;
 import static objective.taskboard.utils.IOUtilities.resourceToString;
 import static objective.taskboard.utils.XmlUtils.normalizeXml;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 import org.springframework.core.io.Resource;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import objective.taskboard.followup.FollowUpHelper;
@@ -19,6 +26,7 @@ import objective.taskboard.followup.FromJiraDataRow;
 import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor.Sheet;
 import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor.SheetRow;
 import objective.taskboard.utils.IOUtilities;
+import objective.taskboard.utils.XmlUtils;
 
 public class SimpleSpreadsheetEditorTest { 
     private static final String PATH_FOLLOWUP_TEMPLATE = "followup/Followup-template.xlsm";
@@ -142,6 +150,69 @@ public class SimpleSpreadsheetEditorTest {
             
             assertEquals("xl/worksheets/sheet6.xml", path);
         }
+    }
+
+    @Test
+    public void whenNewSheetIsAdded_updateExpectedFiles() throws Exception {
+        FollowUpTemplate template = new FollowUpTemplate(resolve(PATH_FOLLOWUP_TEMPLATE));
+        try (SimpleSpreadsheetEditor subject = new SimpleSpreadsheetEditor(template)) {
+            subject.open();
+            
+            Sheet sheet = subject.createSheet("A New Sheet");
+            assertEquals("xl/worksheets/sheet10.xml", sheet.getSheetPath());
+            
+            Sheet sheetAgain = subject.getSheet("A New Sheet");
+            
+            assertNotNull(sheetAgain);
+            
+            checkXmlElementInSpreadsheetFile(subject, 
+                    "xl/_rels/workbook.xml.rels", 
+                    "/Relationships/Relationship[@Id=\"rId20\"]", 
+                    expectedAttributeValue("Target", "worksheets/sheet10.xml"));
+            
+            checkXmlElementInSpreadsheetFile(subject, 
+                    "xl/workbook.xml", 
+                    "/workbook/sheets/sheet[@sheetId=\"22\"]", 
+                    expectedAttributeValue("name", "A New Sheet"),
+                    expectedAttributeValue("r:id", "rId20"));
+            
+            checkXmlElementInSpreadsheetFile(subject, 
+                    "[Content_Types].xml", 
+                    "/Types/Override[@PartName=\"/xl/worksheets/sheet10.xml\"]", 
+                    expectedAttributeValue("ContentType", "application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"));
+        }
+    } 
+
+    @Test
+    public void generateLotsOfLines() throws FileNotFoundException, IOException {
+        FollowUpTemplate template = new FollowUpTemplate(resolve(PATH_FOLLOWUP_TEMPLATE));
+        try (SimpleSpreadsheetEditor subject = new SimpleSpreadsheetEditor(template)) {
+            subject.open();
+            
+            Sheet sheet = subject.createSheet("A New Sheet");
+
+            for (int i = 0; i < 5000; i++) {
+                addRow(sheet, FollowUpHelper.getDefaultFromJiraDataRow());
+            }
+            sheet.save();
+        }
+    }
+
+    private Pair<String, String> expectedAttributeValue(String a, String b) {
+        return new ImmutablePair<>(a, b);
+    }
+
+    @SafeVarargs
+    private final void checkXmlElementInSpreadsheetFile(SimpleSpreadsheetEditor subject, 
+            String xmlPath, 
+            String locator,
+            Pair<String, String> ...attributeExpectations) throws IOException {
+        String workbookRelContent = FileUtils.readFileToString(new File(subject.getExtractedSheetDirectory(), xmlPath),"UTF-8");
+        NodeList list = XmlUtils.xpath(workbookRelContent, locator);
+        assertEquals(1, list.getLength());
+        for (Pair<String, String> pair : attributeExpectations) 
+            assertEquals(pair.getValue(), list.item(0).getAttributes().getNamedItem(pair.getKey()).getNodeValue());
+        
     }
     
     private FollowUpTemplate getBasicTemplate() {
