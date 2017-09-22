@@ -17,8 +17,8 @@ public class SyntheticTransitionsDataRow implements TransitionDataRow {
     @Override
     public List<String> getAsStringList() {
         List<String> list = new LinkedList<>();
-        list.add(this.date.toString());
-        list.addAll(this.amountOfIssueInStatus.stream()
+        list.add(date.toString());
+        list.addAll(amountOfIssueInStatus.stream()
                 .map(Object::toString)
                 .collect(Collectors.toList()));
         return list;
