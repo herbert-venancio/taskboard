@@ -54,6 +54,13 @@ public class DateTimeUtils {
         return date.with(field, field.range().getMaximum());
     }
 
+    public static String toStringExcelFormat(ZonedDateTime date) {
+        if(date == null)
+            return "";
+
+        return DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss").format(date);
+    }
+
     public static class ZonedDateTimeAdapter implements JsonSerializer<ZonedDateTime>, JsonDeserializer<ZonedDateTime> {
         @Override
         public JsonElement serialize(ZonedDateTime src, Type typeOfSrc, JsonSerializationContext context) {

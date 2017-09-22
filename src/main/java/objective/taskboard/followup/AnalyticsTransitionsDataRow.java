@@ -1,5 +1,7 @@
 package objective.taskboard.followup;
 
+import objective.taskboard.utils.DateTimeUtils;
+
 import java.time.ZonedDateTime;
 import java.util.LinkedList;
 import java.util.List;
@@ -7,20 +9,23 @@ import java.util.stream.Collectors;
 
 public class AnalyticsTransitionsDataRow implements TransitionDataRow {
     public final String issueKey;
+    public final String issueType;
     public final List<ZonedDateTime> transitionsDates;
     
-    public AnalyticsTransitionsDataRow(String issueKey, List<ZonedDateTime> lastTransitionDate) {
+    public AnalyticsTransitionsDataRow(String issueKey, String issueType, List<ZonedDateTime> lastTransitionDate) {
         this.issueKey = issueKey;
+        this.issueType = issueType;
         this.transitionsDates = lastTransitionDate;
     }
 
     @Override
     public List<String> getAsStringList() {
         List<String> list = new LinkedList<>();
-        list.add(this.issueKey);
-        list.addAll(this.transitionsDates.stream().map(
-                date -> date == null ? "" : date.toString()
-        ).collect(Collectors.toList()));
+        list.add(issueKey);
+        list.add(issueType);
+        list.addAll(transitionsDates.stream()
+                .map(DateTimeUtils::toStringExcelFormat)
+                .collect(Collectors.toList()));
         return list;
     }
 }
