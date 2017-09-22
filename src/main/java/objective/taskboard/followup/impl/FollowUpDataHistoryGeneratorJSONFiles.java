@@ -22,7 +22,10 @@ package objective.taskboard.followup.impl;
 
 import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.walk;
+import static java.util.Arrays.asList;
 import static objective.taskboard.issueBuffer.IssueBufferState.ready;
+import static objective.taskboard.issueBuffer.IssueBufferState.updateError;
+import static objective.taskboard.issueBuffer.IssueBufferState.updating;
 import static objective.taskboard.utils.IOUtilities.write;
 import static objective.taskboard.utils.ZipUtils.zip;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
@@ -47,6 +50,7 @@ import com.google.gson.GsonBuilder;
 import objective.taskboard.database.directory.DataBaseDirectory;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.FromJiraDataRow;
+import objective.taskboard.issueBuffer.IssueBufferState;
 import objective.taskboard.followup.FollowUpDataHistoryGenerator;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 
@@ -57,8 +61,8 @@ public class FollowUpDataHistoryGeneratorJSONFiles implements FollowUpDataHistor
     public static final String FILE_NAME_FORMAT = "yyyyMMdd";
     public static final String EXTENSION_JSON = ".json";
     public static final String EXTENSION_ZIP = ".zip";
-    public static final String TODAY = DateTime.now().toString(FILE_NAME_FORMAT);
 
+    private static final List<IssueBufferState> ISSUE_BUFFER_STATES_READY = asList(ready, updating, updateError);
     private static final long MINUTE = 60 * 1000L;
     private static final long SLEEP_TIME_IN_MINUTES = 5L;
 
@@ -80,6 +84,7 @@ public class FollowUpDataHistoryGeneratorJSONFiles implements FollowUpDataHistor
         scheduledGenerate();
     }
 
+    @Override
     @Scheduled(cron = "${jira.followup.executionDataHistoryGenerator.cron}", zone = "${jira.followup.executionDataHistoryGenerator.timezone}")
     public void scheduledGenerate() {
         if (isExecutingDataHistoryGenerate)
@@ -95,14 +100,13 @@ public class FollowUpDataHistoryGeneratorJSONFiles implements FollowUpDataHistor
                 isExecutingDataHistoryGenerate = false;
             }
         });
-        thread.setName("FollowUpDataHistoryGeneratorJSONFiles.generate()");
+        thread.setName(getClass().getSimpleName());
         thread.setDaemon(true);
         thread.start();
     }
 
-    @Override
-    public void generate() throws IOException, InterruptedException {
-        while (!ready.equals(providerFromCurrentState.getFollowupState())) {
+    protected void generate() throws IOException, InterruptedException {
+        while (!ISSUE_BUFFER_STATES_READY.contains(providerFromCurrentState.getFollowupState())) {
             log.debug("Waiting for updateAllIssuesBuffer...");
             Thread.sleep(SLEEP_TIME_IN_MINUTES * MINUTE);
         }
@@ -115,8 +119,10 @@ public class FollowUpDataHistoryGeneratorJSONFiles implements FollowUpDataHistor
             if (!pathProject.toFile().exists())
                 createDirectories(pathProject);
 
-            Path pathJSON = pathProject.resolve(TODAY + EXTENSION_JSON);
+            String today = DateTime.now().toString(FILE_NAME_FORMAT);
+            Path pathJSON = pathProject.resolve(today + EXTENSION_JSON);
 
+            log.info("Generating history of project " + projectKey);
             try {
                 List<FromJiraDataRow> jiraData = providerFromCurrentState.getJiraData(projectKey.split(",")).fromJiraDs.rows;
                 write(pathJSON.toFile(), gson.toJson(jiraData));
@@ -124,6 +130,7 @@ public class FollowUpDataHistoryGeneratorJSONFiles implements FollowUpDataHistor
                 Path pathZIP = Paths.get(pathJSON.toString() + EXTENSION_ZIP);
                 deleteQuietly(pathZIP.toFile());
                 zip(pathJSON, pathZIP);
+                log.info("History generated: " + pathZIP.toString());
             } finally {
                 deleteQuietly(pathJSON.toFile());
             }
@@ -146,7 +153,8 @@ public class FollowUpDataHistoryGeneratorJSONFiles implements FollowUpDataHistor
                     continue;
 
                 String fileName = path.toFile().getName().replace(EXTENSION_JSON + EXTENSION_ZIP, "");
-                if (TODAY.equals(fileName))
+                String today = DateTime.now().toString(FILE_NAME_FORMAT);
+                if (today.equals(fileName))
                     continue;
 
                 history.add(fileName);
