@@ -54,19 +54,6 @@ public class SimpleSpreadsheetEditor implements Closeable {
         initializeWorkbookRelations();
     }
 
-    private void ensureFullCalcOnReloadIsSet() {
-        Document workbook = getWorkbook();
-        Node calcPr = workbook.getElementsByTagName("calcPr").item(0);
-        Attr fullCalcOnLoad = workbook.createAttribute("fullCalcOnLoad");
-        fullCalcOnLoad.setValue("1");
-        calcPr.getAttributes().setNamedItem(fullCalcOnLoad);
-        IOUtilities.write(getWorkbookFile(), XmlUtils.asString(workbook));
-    }
-    
-    private void resetCalcChainToAvoidFormulaCorruption() {
-        new File(extractedSheetDirectory, "xl/calcChain.xml").delete();
-    }
-    
     public Sheet getSheet(String sheetName) {
         return new Sheet(sheetPathByName.get(sheetName));
     }
@@ -287,6 +274,19 @@ public class SimpleSpreadsheetEditor implements Closeable {
         write(fileSharedStrings, generateSharedStrings());
         ensureFullCalcOnReloadIsSet();
         resetCalcChainToAvoidFormulaCorruption();
+    }
+    
+    private void ensureFullCalcOnReloadIsSet() {
+        Document workbook = getWorkbook();
+        Node calcPr = workbook.getElementsByTagName("calcPr").item(0);
+        Attr fullCalcOnLoad = workbook.createAttribute("fullCalcOnLoad");
+        fullCalcOnLoad.setValue("1");
+        calcPr.getAttributes().setNamedItem(fullCalcOnLoad);
+        IOUtilities.write(getWorkbookFile(), XmlUtils.asString(workbook));
+    }
+    
+    private void resetCalcChainToAvoidFormulaCorruption() {
+        new File(extractedSheetDirectory, "xl/calcChain.xml").delete();
     }
     
     private Path compress(Path directoryFollowup) throws IOException  {
