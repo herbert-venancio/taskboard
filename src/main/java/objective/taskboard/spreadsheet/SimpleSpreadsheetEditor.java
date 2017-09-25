@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -52,8 +53,17 @@ public class SimpleSpreadsheetEditor implements Closeable {
         sharedStrings = initializeSharedStrings();
         initializeWorkbookRelations();
     }
+
+    private void ensureFullCalcOnReloadIsSet() {
+        Document workbook = getWorkbook();
+        Node calcPr = workbook.getElementsByTagName("calcPr").item(0);
+        Attr fullCalcOnLoad = workbook.createAttribute("fullCalcOnLoad");
+        fullCalcOnLoad.setValue("1");
+        calcPr.getAttributes().setNamedItem(fullCalcOnLoad);
+        IOUtilities.write(getWorkbookFile(), XmlUtils.asString(workbook));
+    }
     
-    public void resetCalcChain() {
+    private void resetCalcChainToAvoidFormulaCorruption() {
         new File(extractedSheetDirectory, "xl/calcChain.xml").delete();
     }
     
@@ -272,9 +282,11 @@ public class SimpleSpreadsheetEditor implements Closeable {
         }
     }
 
-    private void save() throws IOException {
+    public void save() throws IOException {
         File fileSharedStrings = new File(extractedSheetDirectory, PATH_SHARED_STRINGS);
         write(fileSharedStrings, generateSharedStrings());
+        ensureFullCalcOnReloadIsSet();
+        resetCalcChainToAvoidFormulaCorruption();
     }
     
     private Path compress(Path directoryFollowup) throws IOException  {
