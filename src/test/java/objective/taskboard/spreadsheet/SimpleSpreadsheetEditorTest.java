@@ -17,6 +17,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 import org.springframework.core.io.Resource;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -195,6 +196,21 @@ public class SimpleSpreadsheetEditorTest {
                 addRow(sheet, FollowUpHelper.getDefaultFromJiraDataRow());
             }
             sheet.save();
+        }
+    }
+    
+    @Test
+    public void openSpreadsheetShouldHaveFullRecalcOnLoadSet() throws IOException {
+        FollowUpTemplate template = new FollowUpTemplate(resolve(PATH_FOLLOWUP_TEMPLATE));
+        try (SimpleSpreadsheetEditor subject = new SimpleSpreadsheetEditor(template)) {
+            subject.open();
+            subject.save();
+            
+            NodeList calcPrList = XmlUtils.xpath(new File(subject.getExtractedSheetDirectory(), "xl/workbook.xml"), "/workbook/calcPr");
+            Node calcPr = calcPrList.item(0);
+            Node fullCalcOnLoad = calcPr.getAttributes().getNamedItem("fullCalcOnLoad");
+            
+            assertEquals("1", fullCalcOnLoad.getNodeValue());
         }
     }
 

@@ -42,7 +42,7 @@ public class FollowUpGenerator {
     public Resource generate(String [] includedProjects) {
         try {
             editor.open();
-            editor.resetCalcChain();
+            
             FollowupData jiraData = provider.getJiraData(includedProjects);
 
             generateJiraDataSheet(editor, jiraData);
