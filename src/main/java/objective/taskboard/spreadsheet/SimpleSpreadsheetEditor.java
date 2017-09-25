@@ -53,6 +53,10 @@ public class SimpleSpreadsheetEditor implements Closeable {
         initializeWorkbookRelations();
     }
     
+    public void resetCalcChain() {
+        new File(extractedSheetDirectory, "xl/calcChain.xml").delete();
+    }
+    
     public Sheet getSheet(String sheetName) {
         return new Sheet(sheetPathByName.get(sheetName));
     }

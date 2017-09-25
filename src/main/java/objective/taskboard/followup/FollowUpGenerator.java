@@ -42,6 +42,7 @@ public class FollowUpGenerator {
     public Resource generate(String [] includedProjects) {
         try {
             editor.open();
+            editor.resetCalcChain();
             FollowupData jiraData = provider.getJiraData(includedProjects);
 
             generateJiraDataSheet(editor, jiraData);
@@ -90,8 +91,8 @@ public class FollowUpGenerator {
         	row.addColumn(followUpData.taskBallpark);
         	row.addColumn(followUpData.tshirtSize);
         	row.addColumn(followUpData.queryType);
-        	row.addFormula("IF([@[TASK_BALLPARK]]>0;[@[TASK_BALLPARK]];SUMIFS(Clusters[Effort];Clusters[Cluster Name];[@[SUBTASK_TYPE]];Clusters[T-Shirt Size];[tshirt_size]))");
-        	row.addFormula("IF([@[TASK_BALLPARK]]>0;[@[TASK_BALLPARK]]*1,3;SUMIFS(Clusters[Cycle];Clusters[Cluster Name];[@[SUBTASK_TYPE]];Clusters[T-Shirt Size];[tshirt_size]))");
+        	row.addFormula("IF(AllIssues[[#This Row],[TASK_BALLPARK]]>0,AllIssues[[#This Row],[TASK_BALLPARK]],SUMIFS(Clusters[Effort],Clusters[Cluster Name],AllIssues[[#This Row],[SUBTASK_TYPE]],Clusters[T-Shirt Size],AllIssues[tshirt_size]))");
+        	row.addFormula("IF(AllIssues[[#This Row],[TASK_BALLPARK]]>0,AllIssues[[#This Row],[TASK_BALLPARK]]*1.3,SUMIFS(Clusters[Cycle],Clusters[Cluster Name],AllIssues[[#This Row],[SUBTASK_TYPE]],Clusters[T-Shirt Size],AllIssues[tshirt_size]))");
         	row.addFormula("AllIssues[EffortEstimate]-AllIssues[EffortDone]");
         	row.addFormula("AllIssues[CycleEstimate]-AllIssues[CycleDone]");
         	row.addFormula("IF(AllIssues[[#This Row],[planning_type]]=\"Ballpark\",AllIssues[EffortEstimate],0)");
