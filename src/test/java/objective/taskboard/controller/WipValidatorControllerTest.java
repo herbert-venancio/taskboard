@@ -25,11 +25,16 @@ import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.contains;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.PRECONDITION_FAILED;
+
+import java.util.List;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -54,6 +59,7 @@ import objective.taskboard.domain.WipConfiguration;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraProperties.CustomField;
 import objective.taskboard.jira.JiraProperties.CustomField.ClassOfServiceDetails;
+import objective.taskboard.jira.JiraProperties.Wip;
 import objective.taskboard.jira.JiraSearchService;
 import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.SearchIssueVisitor;
@@ -78,6 +84,9 @@ public class WipValidatorControllerTest {
     private static final String USER = "user";
     private static final String TEAM_NAME = "Team";
     private static final String CLASS_OF_SERVICE_ID = "classOfServiceId";
+    
+    private static final List<Long> ISSUE_TYPES_TO_IGNORE = asList(1L,2L);
+    private static final String ISSUE_TYPES_TO_IGNORE_ON_QUERY = "and issuetype not in (1,2)";
 
     @InjectMocks
     private WipValidatorController subject;
@@ -351,6 +360,16 @@ public class WipValidatorControllerTest {
         assertFalse(MSG_ASSERT_WIP_SHOULDN_T_HAVE_EXCEEDED, responseEntity.getBody().isWipExceeded);
         assertEquals(MSG_ASSERT_RESPONSE_MESSAGE, "Error", responseEntity.getBody().message);
         assertEquals(MSG_ASSERT_RESPONSE_STATUS_CODE, INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+    }
+
+    @Test
+    public void ignoreIssueTypesOnGetWipCountWhenPropertyIsNotEmpty() {
+        Wip wip = new Wip();
+        wip.setIgnoreIssuetypesIds(ISSUE_TYPES_TO_IGNORE);
+        when(jiraProperties.getWip()).thenReturn(wip);
+
+        subject.validate("I-1", USER, STATUS);
+        verify(jiraSearchService).searchIssues(contains(ISSUE_TYPES_TO_IGNORE_ON_QUERY), anyObject());
     }
 
 }
