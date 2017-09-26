@@ -86,6 +86,8 @@ public class JiraProperties {
     @Valid
     private StatusPriorityOrder statusPriorityOrder;
 
+    private Wip wip;
+
     public static class StatusPriorityOrder {
         private String[] demands;
         private String[] tasks;
@@ -603,6 +605,17 @@ public class JiraProperties {
         }
     }
 
+    public static class Wip {
+        private List<Long> ignoreIssuetypesIds = new ArrayList<>();
+
+        public List<Long> getIgnoreIssuetypesIds() {
+            return this.ignoreIssuetypesIds;
+        }
+
+        public void setIgnoreIssuetypesIds(List<Long> ignoreIssuetypesIds) {
+            this.ignoreIssuetypesIds = ignoreIssuetypesIds;
+        }
+    }
 
     public static class IssueLink {
         @NotNull
@@ -1304,6 +1317,14 @@ public class JiraProperties {
 
     public Followup getFollowup() {
         return this.followup;
+    }
+
+    public Wip getWip() {
+        return this.wip;
+    }
+
+    public void setWip(Wip wip) {
+        this.wip = wip;
     }
 
     public List<SubtaskCreation> getSubtaskCreation() {

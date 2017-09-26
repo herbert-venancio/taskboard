@@ -31,6 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.ws.rs.QueryParam;
 
+import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,15 +88,15 @@ public class WipValidatorController {
         WipValidatorResponse response = new WipValidatorResponse();
 
         try {
-            Issue i;
+            Issue jiraIssue;
             try {
-                i = jiraService.getIssueByKeyAsMaster(issue);
+                jiraIssue = jiraService.getIssueByKeyAsMaster(issue);
             } catch (Exception e) {
                 response.message = "Issue " + issue + " not found (" + (e.getMessage() == null ? e.toString() : e.getMessage()) + ")";
                 return new ResponseEntity<WipValidatorResponse>(response, PRECONDITION_FAILED);
             }
 
-            if (i == null) {
+            if (jiraIssue == null) {
                 response.message = "Issue " + issue + " not found";
                 return new ResponseEntity<WipValidatorResponse>(response, PRECONDITION_FAILED);
             }
@@ -110,12 +111,12 @@ public class WipValidatorController {
                 return new ResponseEntity<WipValidatorResponse>(response, PRECONDITION_FAILED);
             }
 
-            if (isClassOfServiceExpedite(i)) {
+            if (isClassOfServiceExpedite(jiraIssue)) {
                 response.message = "Class of service is " + CLASS_OF_SERVICE_EXPEDITE;
                 return new ResponseEntity<WipValidatorResponse>(response, OK);
             }
 
-            WipConfiguration wipConfig = getWipConfig(user, i.getProject().getKey(), status);
+            WipConfiguration wipConfig = getWipConfig(user, jiraIssue.getProject().getKey(), status);
             if (wipConfig == null) {
                 response.message = "No wip configuration was found";
                 return new ResponseEntity<WipValidatorResponse>(response, OK);
@@ -130,13 +131,8 @@ public class WipValidatorController {
                     .map(p -> p.getProjectKey())
                     .collect(toList());
 
-            String query = "assignee in ('" + String.join("','", userTeamsWip) + "') " +
-                    "and project in ('" + String.join("','", projectTeams) + "') " +
-                    "and status = '" + status + "' " +
-                    (i.getIssueType().isSubtask() ?
-                            "and issuetype in subTaskIssueTypes()" :
-                            "and issuetype in standardIssueTypes()");
-            
+            String query = getWipCountQuery(status, jiraIssue, userTeamsWip, projectTeams);
+
             AtomicInteger wipActual = new AtomicInteger(0);
             jiraSearchService.searchIssues(query, _i -> wipActual.incrementAndGet());
 
@@ -194,6 +190,24 @@ public class WipValidatorController {
         }).collect(toList());
 
         return wipsSorted.get(0);
+    }
+
+    private String getWipCountQuery(String status, Issue jiraIssue, List<String> userTeamsWip, List<String> projectTeams) {
+        String query = "assignee in ('" + String.join("','", userTeamsWip) + "') " +
+                "and project in ('" + String.join("','", projectTeams) + "') " +
+                "and status = '" + status + "' " +
+                (jiraIssue.getIssueType().isSubtask() ?
+                        "and issuetype in subTaskIssueTypes()" :
+                        "and issuetype in standardIssueTypes()") +
+                getIgnoreIssueTypesToQuery();
+        return query;
+    }
+
+    private String getIgnoreIssueTypesToQuery() {
+        if (jiraProperties.getWip() == null)
+            return "";
+        List<Long> ids = jiraProperties.getWip().getIgnoreIssuetypesIds();
+        return ids.size() > 0 ? " and issuetype not in (" + StringUtils.join(ids, ',') + ") " : "";
     }
 
 }
