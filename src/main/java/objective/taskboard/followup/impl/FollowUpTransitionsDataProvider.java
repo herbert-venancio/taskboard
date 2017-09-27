@@ -2,6 +2,7 @@ package objective.taskboard.followup.impl;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -10,9 +11,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+import objective.taskboard.jira.MetadataService;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.Range;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
 import com.google.common.primitives.Ints;
@@ -28,13 +32,18 @@ import objective.taskboard.utils.DateTimeUtils;
 
 class FollowUpTransitionsDataProvider {
 
+    private static final long STATUS_CATEGORY_DONE = 3L;
+
     private static final String HEADER_ISSUE_KEY_COLUMN_NAME = "PKEY";
+    private static final String HEADER_ISSUE_TYPE_COLUMN_NAME = "Type";
     private static final String HEADER_DATE_COLUMN_NAME = "Date";
 
     private JiraProperties jiraProperties;
+    private MetadataService metadataService;
 
-    public FollowUpTransitionsDataProvider(JiraProperties jiraProperties) {
+    public FollowUpTransitionsDataProvider(JiraProperties jiraProperties, MetadataService metadataService) {
         this.jiraProperties = jiraProperties;
+        this.metadataService = metadataService;
     }
 
     public List<AnalyticsTransitionsDataSet> getAnalyticsTransitionsDsList(List<Issue> issuesVisibleToUser, ZoneId timezone) {
@@ -57,9 +66,10 @@ class FollowUpTransitionsDataProvider {
         return analyticsTransitionsDSs;
     }
 
-    public AnalyticsTransitionsDataSet getAnalyticsTransitionsDs(String issueType, String[] statuses, List<Issue> issuesVisibleToUser, ZoneId timezone) {
+    private AnalyticsTransitionsDataSet getAnalyticsTransitionsDs(String issueType, String[] statuses, List<Issue> issuesVisibleToUser, ZoneId timezone) {
         List<String> headers = new LinkedList<>();
         headers.add(HEADER_ISSUE_KEY_COLUMN_NAME);
+        headers.add(HEADER_ISSUE_TYPE_COLUMN_NAME);
         Collections.addAll(headers, statuses);
         List<AnalyticsTransitionsDataRow> rows = getAnalyticsTransitionsDataRows(statuses, issuesVisibleToUser, timezone);
         return new AnalyticsTransitionsDataSet(issueType, headers, rows);
@@ -92,20 +102,31 @@ class FollowUpTransitionsDataProvider {
     }
 
     public List<SyntheticTransitionsDataSet> getSyntheticTransitionsDsList(List<AnalyticsTransitionsDataSet> analyticsTransitionsDSs) {
-        return analyticsTransitionsDSs.stream()
-                .map(this::getSyntheticTransitionsDs)
+        List<String[]> statuses = Arrays.asList(
+                jiraProperties.getStatusPriorityOrder().getDemandsInOrder()
+                , jiraProperties.getStatusPriorityOrder().getTasksInOrder()
+                , jiraProperties.getStatusPriorityOrder().getSubtasksInOrder());
+        return IntStream.range(0, 3)
+                .mapToObj(i -> getSyntheticTransitionsDs(statuses.get(i), analyticsTransitionsDSs.get(i)))
                 .collect(Collectors.toList());
     }
 
-    private SyntheticTransitionsDataSet getSyntheticTransitionsDs(AnalyticsTransitionsDataSet dataset) {
-        List<String> headers = new LinkedList<>(dataset.headers);
-        headers.set(0, HEADER_DATE_COLUMN_NAME);
+    private SyntheticTransitionsDataSet getSyntheticTransitionsDs(String[] statuses, AnalyticsTransitionsDataSet dataset) {
+        List<String> headers = new LinkedList<>();
+        headers.add(HEADER_DATE_COLUMN_NAME);
+        List<String> doneStatuses = metadataService.getStatusesMetadata().values()
+                .stream()
+                .filter(status -> status.statusCategory.id == STATUS_CATEGORY_DONE)
+                .map(status -> status.name)
+                .collect(Collectors.toList());
+        Collections.addAll(headers, mergeDoneStatusesHeaders(statuses, doneStatuses));
 
         List<SyntheticTransitionsDataRow> dataRows = new LinkedList<>();
         if (!CollectionUtils.isEmpty(dataset.rows)) {
             Range<ZonedDateTime> dateRange = calculateInterval(dataset);
             for (ZonedDateTime date = dateRange.getMinimum(); !date.isAfter(dateRange.getMaximum()); date = date.plusDays(1)) {
-                int[] issuesInStatusCount = countIssuesInStatus(dataset, date);
+                int[] issuesInStatusCount = countIssuesInStatus(statuses, dataset, date);
+                issuesInStatusCount = mergeDoneStatusesCount(statuses, doneStatuses, issuesInStatusCount);
                 dataRows.add(new SyntheticTransitionsDataRow(date, Ints.asList(issuesInStatusCount)));
             }
         }
@@ -113,8 +134,8 @@ class FollowUpTransitionsDataProvider {
         return new SyntheticTransitionsDataSet(dataset.issueType, headers, dataRows);
     }
 
-    private int[] countIssuesInStatus(AnalyticsTransitionsDataSet dataset, ZonedDateTime date) {
-        int[] issuesInStatusCount = new int[dataset.headers.size() - 1];
+    private int[] countIssuesInStatus(String[] statuses, AnalyticsTransitionsDataSet dataset, ZonedDateTime date) {
+        int[] issuesInStatusCount = new int[statuses.length];
         Arrays.fill(issuesInStatusCount, 0);
         for (AnalyticsTransitionsDataRow row : dataset.rows) {
             Optional<Integer> index = getTransitionIndexByDate(row, DateTimeUtils.roundUp(date));
@@ -122,6 +143,51 @@ class FollowUpTransitionsDataProvider {
                 issuesInStatusCount[index.get()]++;
         }
         return issuesInStatusCount;
+    }
+
+    private String[] mergeDoneStatusesHeaders(String[] statuses, List<String> doneStatuses) {
+        if (doneStatuses.isEmpty())
+            return statuses;
+
+        List<String> statusList = new ArrayList<>();
+        List<String> doneList = new ArrayList<>();
+        for (String status : statuses) {
+            if (doneStatuses.contains(status))
+                doneList.add(status);
+            else
+                statusList.add(status);
+        }
+        if (doneList.isEmpty()) {
+            return statuses;
+        } else {
+            statusList.add(StringUtils.join(doneList, "/"));
+            return statusList.toArray(new String[0]);
+        }
+    }
+
+    private int[] mergeDoneStatusesCount(String[] statuses, List<String> doneStatuses, int[] issuesInStatusCount) {
+        if (doneStatuses.isEmpty())
+            return issuesInStatusCount;
+
+        List<Integer> issuesInStatusList = new ArrayList<>();
+        int done = 0;
+        boolean empty = true;
+        for (int i = 0; i < statuses.length; ++i) {
+            String status = statuses[i];
+            int count = issuesInStatusCount[i];
+            if (doneStatuses.contains(status)) {
+                empty = false;
+                done += count;
+            } else {
+                issuesInStatusList.add(count);
+            }
+        }
+        if (empty) {
+            return issuesInStatusCount;
+        } else {
+            issuesInStatusList.add(done);
+            return Ints.toArray(issuesInStatusList);
+        }
     }
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

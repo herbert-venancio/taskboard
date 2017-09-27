@@ -6,18 +6,23 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.doReturn;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import objective.taskboard.followup.AnalyticsTransitionsDataSet;
+import objective.taskboard.followup.FollowupData;
 import objective.taskboard.followup.SyntheticTransitionsDataRow;
 import objective.taskboard.followup.SyntheticTransitionsDataSet;
+import objective.taskboard.jira.data.Status;
 
 public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataProviderTest {
 
@@ -31,6 +36,23 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
                 "    tshirtCustomFieldId: Dev_Tshirt\n" +
                 "    jiraIssueTypes:\n" +
                 "      - "+ devIssueType + "\n");
+    }
+
+    @Test
+    public void checkHeaders() {
+        // given
+        FollowupData jiraData = subject.getJiraData(defaultProjects(), ZoneId.systemDefault());
+        List<AnalyticsTransitionsDataSet> analytics = jiraData.analyticsTransitionsDsList;
+        List<SyntheticTransitionsDataSet> synthetic = jiraData.syntheticsTransitionsDsList;
+
+        // then
+        assertThat(analytics.get(0).headers, equalTo(asList("PKEY", "Type", "Open", "To Do", "Doing", "To UAT", "UATing", "Done", "Cancelled")));
+        assertThat(analytics.get(1).headers, equalTo(asList("PKEY", "Type", "Open", "To Do", "Doing", "To Alpha Test", "Alpha Testing", "To Feature Review", "Feature Reviewing", "To QA", "QAing", "Done", "Cancelled")));
+        assertThat(analytics.get(2).headers, equalTo(asList("PKEY", "Type", "Open", "To Do", "Doing", "To Review", "Reviewing", "Done", "Cancelled")));
+
+        assertThat(synthetic.get(0).headers, equalTo(asList("Date", "Open", "To Do", "Doing", "To UAT", "UATing", "Done", "Cancelled")));
+        assertThat(synthetic.get(1).headers, equalTo(asList("Date", "Open", "To Do", "Doing", "To Alpha Test", "Alpha Testing", "To Feature Review", "Feature Reviewing", "To QA", "QAing", "Done", "Cancelled")));
+        assertThat(synthetic.get(2).headers, equalTo(asList("Date", "Open", "To Do", "Doing", "To Review", "Reviewing", "Done", "Cancelled")));
     }
 
     @Test
@@ -313,5 +335,69 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
         assertThat(rows.get(3).amountOfIssueInStatus, equalTo(asList(0, 0, 0, 1, 0, 0, 0)));
         assertThat(rows.get(4).amountOfIssueInStatus, equalTo(asList(0, 0, 0, 0, 1, 0, 0)));
         assertThat(rows.get(5).amountOfIssueInStatus, equalTo(asList(0, 0, 0, 0, 0, 1, 0)));
+    }
+
+    @Test
+    public void mergeFinalizationStatusOnSyntheticDataSet() {
+        // given
+        Map<Long, Status> statusMap = new LinkedHashMap<>();
+        statusMap.put(statusOpen,       new Status(null, statusOpen,       "Open", null, CATEGORY_NEW));
+        statusMap.put(statusToDo,       new Status(null, statusToDo,       "To Do", null, CATEGORY_IN_PROGRESS));
+        statusMap.put(statusDoing,      new Status(null, statusDoing,      "Doing", null, CATEGORY_IN_PROGRESS));
+        statusMap.put(statusCancelled,  new Status(null, statusCancelled,  "Cancelled", null, CATEGORY_DONE));
+        statusMap.put(statusDone,       new Status(null, statusDone,       "Done", null, CATEGORY_DONE));
+        doReturn(statusMap).when(metadataService).getStatusesMetadata();
+
+        issues(
+                subtask().id(100).key("PROJ-100").issueType(devIssueType)
+                        .created("2020-01-01")
+                        .transition("To Do", "2020-01-02")
+                        .transition("Doing", "2020-01-02")
+                        .transition("To Review", "2020-01-02")
+                        .transition("Reviewing", "2020-01-02")
+                        .transition("Done", "2020-01-02").issueStatus(statusDone)
+                , subtask().id(101).key("PROJ-101").issueType(devIssueType)
+                        .created("2020-01-02")
+                        .transition("Cancelled", "2020-01-03").issueStatus(statusCancelled)
+        );
+
+        // when
+        FollowupData jiraData = subject.getJiraData(defaultProjects(), ZoneId.systemDefault());
+        List<AnalyticsTransitionsDataSet> analytics = jiraData.analyticsTransitionsDsList;
+        List<SyntheticTransitionsDataSet> synthetic = jiraData.syntheticsTransitionsDsList;
+
+        // then
+        assertThat(analytics.get(0).headers, equalTo(asList("PKEY", "Type", "Open", "To Do", "Doing", "To UAT", "UATing", "Done", "Cancelled")));
+        assertThat(analytics.get(1).headers, equalTo(asList("PKEY", "Type", "Open", "To Do", "Doing", "To Alpha Test", "Alpha Testing", "To Feature Review", "Feature Reviewing", "To QA", "QAing", "Done", "Cancelled")));
+        assertThat(analytics.get(2).headers, equalTo(asList("PKEY", "Type", "Open", "To Do", "Doing", "To Review", "Reviewing", "Done", "Cancelled")));
+
+        assertThat(synthetic.get(0).headers, equalTo(asList("Date", "Open", "To Do", "Doing", "To UAT", "UATing", "Done/Cancelled")));
+        assertThat(synthetic.get(1).headers, equalTo(asList("Date", "Open", "To Do", "Doing", "To Alpha Test", "Alpha Testing", "To Feature Review", "Feature Reviewing", "To QA", "QAing", "Done/Cancelled")));
+        assertThat(synthetic.get(2).headers, equalTo(asList("Date", "Open", "To Do", "Doing", "To Review", "Reviewing", "Done/Cancelled")));
+
+        List<ZonedDateTime> subtaskTransitionsDatesFirstRow = analytics.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows.get(0).transitionsDates;
+        assertThat(subtaskTransitionsDatesFirstRow.size(), is(7));
+        assertThat(subtaskTransitionsDatesFirstRow.get(0), is(parseDate("2020-01-01")));
+        assertThat(subtaskTransitionsDatesFirstRow.get(1), is(parseDate("2020-01-02")));
+        assertThat(subtaskTransitionsDatesFirstRow.get(2), is(parseDate("2020-01-02")));
+        assertThat(subtaskTransitionsDatesFirstRow.get(3), is(parseDate("2020-01-02")));
+        assertThat(subtaskTransitionsDatesFirstRow.get(4), is(parseDate("2020-01-02")));
+        assertThat(subtaskTransitionsDatesFirstRow.get(5), is(parseDate("2020-01-02")));
+        assertThat(subtaskTransitionsDatesFirstRow.get(6), nullValue());
+        List<ZonedDateTime> subtaskTransitionsDatesSecondRow = analytics.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows.get(1).transitionsDates;
+        assertThat(subtaskTransitionsDatesSecondRow.size(), is(7));
+        assertThat(subtaskTransitionsDatesSecondRow.get(0), is(parseDate("2020-01-02")));
+        assertThat(subtaskTransitionsDatesSecondRow.get(1), nullValue());
+        assertThat(subtaskTransitionsDatesSecondRow.get(2), nullValue());
+        assertThat(subtaskTransitionsDatesSecondRow.get(3), nullValue());
+        assertThat(subtaskTransitionsDatesSecondRow.get(4), nullValue());
+        assertThat(subtaskTransitionsDatesSecondRow.get(5), nullValue());
+        assertThat(subtaskTransitionsDatesSecondRow.get(6), is(parseDate("2020-01-03")));
+
+        List<SyntheticTransitionsDataRow> rows = synthetic.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows;
+        assertThat(rows.size(), is(3));
+        assertThat(rows.get(0).amountOfIssueInStatus, equalTo(asList(1, 0, 0, 0, 0, 0)));
+        assertThat(rows.get(1).amountOfIssueInStatus, equalTo(asList(1, 0, 0, 0, 0, 1)));
+        assertThat(rows.get(2).amountOfIssueInStatus, equalTo(asList(0, 0, 0, 0, 0, 2)));
     }
 }

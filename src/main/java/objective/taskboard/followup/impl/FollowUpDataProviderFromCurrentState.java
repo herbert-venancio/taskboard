@@ -84,7 +84,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
 
         FromJiraDataSet fromJiraDs = getFromJiraDs(issuesVisibleToUser);
 
-        FollowUpTransitionsDataProvider transitions = new FollowUpTransitionsDataProvider(jiraProperties);
+        FollowUpTransitionsDataProvider transitions = new FollowUpTransitionsDataProvider(jiraProperties, metadataService);
         List<AnalyticsTransitionsDataSet> analyticsTransitionsDsList = transitions.getAnalyticsTransitionsDsList(issuesVisibleToUser, timezone);
         List<SyntheticTransitionsDataSet> syntheticsTransitionsDsList = transitions.getSyntheticTransitionsDsList(analyticsTransitionsDsList);
 
@@ -300,7 +300,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
     }
 
     private String getBallparkStatus() {
-        return metadataService.getStatusById(jiraProperties.getFollowup().getBallparkDefaultStatus()).getName();
+        return metadataService.getStatusById(jiraProperties.getFollowup().getBallparkDefaultStatus()).name;
     }
 
     private FromJiraDataRow createSubTaskFollowup(Issue demand, Issue task, Issue subtask) {

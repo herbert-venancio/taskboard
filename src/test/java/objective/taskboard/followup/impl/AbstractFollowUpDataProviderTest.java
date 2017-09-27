@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -16,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import objective.taskboard.jira.data.Status;
+import objective.taskboard.jira.data.StatusCategory;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -25,7 +28,6 @@ import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.atlassian.jira.rest.client.api.domain.IssueType;
-import com.atlassian.jira.rest.client.api.domain.Status;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -78,14 +80,39 @@ public abstract class AbstractFollowUpDataProviderTest {
     protected static final long statusCancelled = 16L;
     protected static final long statusDone      = 17L;
 
+    protected static final StatusCategory CATEGORY_UNDEFINED = new StatusCategory(
+            URI.create("http://localhost:4567/rest/api/2/statuscategory/1")
+            , Long.valueOf(1L)
+            , "undefined"
+            , "medium-gray"
+            , "No Category");
+    protected static final StatusCategory CATEGORY_NEW = new StatusCategory(
+            URI.create("http://localhost:4567/rest/api/2/statuscategory/2")
+            , 2L
+            , "new"
+            , "blue-gray"
+            , "To Do");
+    protected static final StatusCategory CATEGORY_IN_PROGRESS = new StatusCategory(
+            URI.create("http://localhost:4567/rest/api/2/statuscategory/4")
+            , 4L
+            , "indeterminate"
+            , "yellow"
+            , "In Progress");
+    protected static final StatusCategory CATEGORY_DONE = new StatusCategory(
+            URI.create("http://localhost:4567/rest/api/2/statuscategory/3")
+            , 3L
+            , "done"
+            , "green"
+            , "Done");
+
     @Before
     public void before() throws InterruptedException, ExecutionException {
         Map<Long, Status> statusMap = new LinkedHashMap<>();
-        statusMap.put(statusOpen,       new Status(null, statusOpen,       "Open", null, null));
-        statusMap.put(statusToDo,       new Status(null, statusToDo,       "To Do", null, null));
-        statusMap.put(statusDoing,      new Status(null, statusDoing,      "Doing", null, null));
-        statusMap.put(statusCancelled,  new Status(null, statusCancelled,  "Cancelled", null, null));
-        statusMap.put(statusDone,       new Status(null, statusDone,       "Done", null, null));
+        statusMap.put(statusOpen,       new Status(null, statusOpen,       "Open", null, CATEGORY_UNDEFINED));
+        statusMap.put(statusToDo,       new Status(null, statusToDo,       "To Do", null, CATEGORY_UNDEFINED));
+        statusMap.put(statusDoing,      new Status(null, statusDoing,      "Doing", null, CATEGORY_UNDEFINED));
+        statusMap.put(statusCancelled,  new Status(null, statusCancelled,  "Cancelled", null, CATEGORY_UNDEFINED));
+        statusMap.put(statusDone,       new Status(null, statusDone,       "Done", null, CATEGORY_UNDEFINED));
         doReturn(statusMap).when(metadataService).getStatusesMetadata();
 
         Map<Long, IssueType> issueTypeMap = new LinkedHashMap<>();
@@ -117,7 +144,7 @@ public abstract class AbstractFollowUpDataProviderTest {
         String[] demandsOrder = new String[] { "Cancelled", "Done", "UATing", "To UAT", "Doing", "To Do", "Open" };
         String[] subtaskOrder = new String[] { "Cancelled", "Done", "Reviewing", "To Review", "Doing", "To Do", "Open" };
         String[] tasksOrder = new String[] { "Cancelled", "Done", "QAing", "To QA", "Feature Reviewing", "To Feature Review",
-                "Alpha Testing", "To Alpha Test", "Doing", "To Do", "To Do", "Open" };
+                "Alpha Testing", "To Alpha Test", "Doing", "To Do", "Open" };
         JiraProperties.StatusPriorityOrder statusOrder = new JiraProperties.StatusPriorityOrder();
         statusOrder.setDemands(demandsOrder);
         statusOrder.setTasks(tasksOrder);
