@@ -181,11 +181,11 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
             String featureTshirtForThisSubTask = "";
             List<BallparkMapping> mappingList = getBallparksOrCry(feature);
             for (BallparkMapping mapping : mappingList) {
-                if (mapping.getJiraIssueTypes().contains(issue.getType()))
+                if (mapping.getJiraIssueTypes().contains(issue.getType())) {
                     featureTshirtForThisSubTask = mapping.getTshirtCustomFieldId();
+                    followUpBallparks.remove(feature.getIssueKey()+featureTshirtForThisSubTask);
+                }
             }
-
-            followUpBallparks.remove(feature.getIssueKey()+featureTshirtForThisSubTask);
         }
         return subtasksFollowups;
     }

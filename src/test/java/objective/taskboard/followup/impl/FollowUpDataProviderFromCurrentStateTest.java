@@ -192,6 +192,60 @@ public class FollowUpDataProviderFromCurrentStateTest extends AbstractFollowUpDa
             " taskBallpark           : 2.0\n" + 
             " queryType              : SUBTASK PLAN");
     }
+    
+    @Test
+    public void featureWithTwoBallparksMappedToTheSameIssueTypes_ShouldNotGenerateBallParks() {
+        configureBallparkMappings(
+                taskIssueType + " : \n" +
+                "  - issueType : BALLPARK - Development\n" + 
+                "    tshirtCustomFieldId: Dev_Tshirt\n" + 
+                "    jiraIssueTypes:\n" + 
+                "      - " + devIssueType + "\n" +
+                "\n" +
+                "  - issueType : BALLPARK - Front Development\n" + 
+                "    tshirtCustomFieldId: FrontDev_Tshirt\n" + 
+                "    jiraIssueTypes:\n" + 
+                "      - " + devIssueType + "\n"                
+                );
+        issues( 
+                demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1).priorityOrder(1l),
+                task().id(3).key("PROJ-3").summary("Smry 3").originalEstimateInHours(2).parent("PROJ-2").priorityOrder(1l)
+                    .tshirt("Dev_Tshirt",      "S")
+                    .tshirt("FrontDev_Tshirt", "S"),
+                subtask().id(4).key("PROJ-4").summary("Smry 4").timeSpentInHours(5).parent("PROJ-3").issueType(devIssueType).tshirtSize("XL").priorityOrder(1l)
+        );
+
+        assertFollowupsForIssuesEquals(
+            " planningType           : Plan\n" + 
+            " project                : A Project\n" + 
+            " demandType             : Demand\n" + 
+            " demandStatus           : To Do\n" + 
+            " demandId               : 2\n" + 
+            " demandNum              : PROJ-2\n" + 
+            " demandSummary          : Smry 2\n" + 
+            " demandDescription      : 00002 - Smry 2\n" + 
+            " taskType               : Task\n" + 
+            " taskStatus             : To Do\n" + 
+            " taskId                 : 3\n" + 
+            " taskNum                : PROJ-3\n" + 
+            " taskSummary            : Smry 3\n" + 
+            " taskDescription        : 00003 - Smry 3\n" + 
+            " taskFullDescription    : Task | 00003 - Smry 3\n" + 
+            " taskRelease            : No release set\n" + 
+            " subtaskType            : Dev\n" + 
+            " subtaskStatus          : To Do\n" + 
+            " subtaskId              : 4\n" + 
+            " subtaskNum             : PROJ-4\n" + 
+            " subtaskSummary         : Smry 4\n" + 
+            " subtaskDescription     : XL | 00004 - Smry 4\n" + 
+            " subtaskFullDescription : To Do > Dev | XL | 00004 - Smry 4\n" + 
+            " tshirtSize             : XL\n" + 
+            " worklog                : 5.0\n" + 
+            " wrongWorklog           : 0.0\n" + 
+            " demandBallpark         : 1.0\n" + 
+            " taskBallpark           : 2.0\n" + 
+            " queryType              : SUBTASK PLAN");
+    }
 
     @Test
     public void featureWithoutAnySubtasks_ShouldCreateDummyFeaturesForAllTShirts() {
