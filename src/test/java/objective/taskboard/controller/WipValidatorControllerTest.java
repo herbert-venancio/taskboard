@@ -84,9 +84,14 @@ public class WipValidatorControllerTest {
     private static final String USER = "user";
     private static final String TEAM_NAME = "Team";
     private static final String CLASS_OF_SERVICE_ID = "classOfServiceId";
-    
+
     private static final List<Long> ISSUE_TYPES_TO_IGNORE = asList(1L,2L);
     private static final String ISSUE_TYPES_TO_IGNORE_ON_QUERY = "and issuetype not in (1,2)";
+    private static final Long ISSUE_TYPE_TO_DO_NOT_IGNORE_ID = 3L;
+    private static final String ISSUE_TYPE_TO_DO_NOT_IGNORE_NAME = "Backend Development";
+    private static final Long ISSUE_TYPE_TO_IGNORE_ID = 1L;
+    private static final String ISSUE_TYPE_TO_IGNORE_NAME = "Feature Planning";
+    private static final String MSG_EXPECTED_IGNORE_ISSUE_TYPE = "Issue Type " + ISSUE_TYPE_TO_IGNORE_NAME + " is ignored on WIP count.";
 
     @InjectMocks
     private WipValidatorController subject;
@@ -354,22 +359,38 @@ public class WipValidatorControllerTest {
     }
 
     @Test
+    public void ignoreIssueTypesOnGetWipCountWhenPropertyIsNotEmpty() {
+        Wip wip = new Wip();
+        wip.setIgnoreIssuetypesIds(ISSUE_TYPES_TO_IGNORE);
+        when(jiraProperties.getWip()).thenReturn(wip);
+        when(issue.getIssueType().getId()).thenReturn(ISSUE_TYPE_TO_DO_NOT_IGNORE_ID);
+        when(issue.getIssueType().getName()).thenReturn(ISSUE_TYPE_TO_DO_NOT_IGNORE_NAME);
+
+        subject.validate("I-1", USER, STATUS);
+        verify(jiraSearchService).searchIssues(contains(ISSUE_TYPES_TO_IGNORE_ON_QUERY), anyObject());
+    }
+
+    @Test
+    public void ignoreWipIfIssueHasTheSameIssueTypeFromProperty() {
+        Wip wip = new Wip();
+        wip.setIgnoreIssuetypesIds(ISSUE_TYPES_TO_IGNORE);
+        when(jiraProperties.getWip()).thenReturn(wip);
+        when(issue.getIssueType().getId()).thenReturn(ISSUE_TYPE_TO_IGNORE_ID);
+        when(issue.getIssueType().getName()).thenReturn(ISSUE_TYPE_TO_IGNORE_NAME);
+
+        ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("I-1", USER, STATUS);
+        assertFalse(responseEntity.getBody().isWipExceeded);
+        assertEquals(MSG_EXPECTED_IGNORE_ISSUE_TYPE, responseEntity.getBody().message);
+        assertEquals(OK, responseEntity.getStatusCode());
+    }
+
+    @Test
     public void throwedAnyException() {
         throwExceptionDuringSearch = true;
         ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("I-1", USER, STATUS);
         assertFalse(MSG_ASSERT_WIP_SHOULDN_T_HAVE_EXCEEDED, responseEntity.getBody().isWipExceeded);
         assertEquals(MSG_ASSERT_RESPONSE_MESSAGE, "Error", responseEntity.getBody().message);
         assertEquals(MSG_ASSERT_RESPONSE_STATUS_CODE, INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
-    }
-
-    @Test
-    public void ignoreIssueTypesOnGetWipCountWhenPropertyIsNotEmpty() {
-        Wip wip = new Wip();
-        wip.setIgnoreIssuetypesIds(ISSUE_TYPES_TO_IGNORE);
-        when(jiraProperties.getWip()).thenReturn(wip);
-
-        subject.validate("I-1", USER, STATUS);
-        verify(jiraSearchService).searchIssues(contains(ISSUE_TYPES_TO_IGNORE_ON_QUERY), anyObject());
     }
 
 }

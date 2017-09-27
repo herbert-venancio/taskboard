@@ -116,6 +116,11 @@ public class WipValidatorController {
                 return new ResponseEntity<WipValidatorResponse>(response, OK);
             }
 
+            if (isIssueTypeToIgnore(jiraIssue)) {
+                response.message = "Issue Type " + jiraIssue.getIssueType().getName() + " is ignored on WIP count.";
+                return new ResponseEntity<WipValidatorResponse>(response, OK);
+            }
+
             WipConfiguration wipConfig = getWipConfig(user, jiraIssue.getProject().getKey(), status);
             if (wipConfig == null) {
                 response.message = "No wip configuration was found";
@@ -206,8 +211,15 @@ public class WipValidatorController {
     private String getIgnoreIssueTypesToQuery() {
         if (jiraProperties.getWip() == null)
             return "";
-        List<Long> ids = jiraProperties.getWip().getIgnoreIssuetypesIds();
-        return ids.size() > 0 ? " and issuetype not in (" + StringUtils.join(ids, ',') + ") " : "";
+        List<Long> idsToIgnore = jiraProperties.getWip().getIgnoreIssuetypesIds();
+        return idsToIgnore.size() > 0 ? " and issuetype not in (" + StringUtils.join(idsToIgnore, ',') + ") " : "";
+    }
+
+    private Boolean isIssueTypeToIgnore(Issue issue) {
+        if (jiraProperties.getWip() == null)
+            return false;
+        List<Long> idsToIgnore = jiraProperties.getWip().getIgnoreIssuetypesIds();
+        return idsToIgnore.contains(issue.getIssueType().getId()) ? true : false;
     }
 
 }
