@@ -2,36 +2,120 @@ jira:
   followup:
     ballparkMappings:
       # Feature mappings
-      11 : # Parent issue type (Feature)
-        - issueType : Ballpark - Planejamento
-          tshirtCustomFieldId: customfield_11244 # Planejamento Tamanho
+      10601 : # Parent issue type (Feature)
+        - issueType : BALLPARK - Planning
+          tshirtCustomFieldId: customfield_11444 # Feature Planning TSize
           jiraIssueTypes:
-            - 32 # Análise Desenvolvimento
+            - 10604 # Feature Planning
+            - 10607 # Tech Planning
           valueStreamOrder: 1
           
-        - issueType : Ballpark - Desenvolvimento
-          tshirtCustomFieldId: customfield_11245 # Desenvolvimento Tamanho
+        - issueType : BALLPARK - UX
+          tshirtCustomFieldId: customfield_11446 # UX TSize
           jiraIssueTypes:
-            - 9 # Tarefa de Fábrica
-            - 10002 # Bug de Alfa
-            - 10006 # Reintegração de Branch
-            - 10005 # Preparação Produção
+            - 10609 # UX
           valueStreamOrder: 2
           
-        - issueType : Ballpark - Alfa
-          tshirtCustomFieldId: customfield_11246 # Alfa Tamanho
+        - issueType : BALLPARK - Development
+          tshirtCustomFieldId: customfield_11447 # Development TSize
           jiraIssueTypes:
-            - 21 # Teste (Alfa)
+            - 10605 # Frontend Development
+            - 10610 # Backend Development
+            - 10602 # Alpha Bug
           valueStreamOrder: 3
           
-        - issueType : Ballpark - Acompanhamento Desenvolvimento
-          tshirtCustomFieldId: customfield_11247 # Acompanhamento Tamanho
+        - issueType : BALLPARK - Alpha Test
+          tshirtCustomFieldId: customfield_11441 # Alpha Test TSize
           jiraIssueTypes:
-            - 10003 # Acompanhamento Desenvolvimento 
+            - 10603 # Alpha Test
           valueStreamOrder: 4
           
-        - issueType : Ballpark - Beta
-          tshirtCustomFieldId: customfield_11340 # Beta Tamanho      
+        - issueType : BALLPARK - Feature Review
+          tshirtCustomFieldId: customfield_11442 # Feature Review Tsize
           jiraIssueTypes:
-            - 10004 # Acompanhamento Beta 
+            - 10606 # Feature Review
           valueStreamOrder: 5
+                
+        - issueType : BALLPARK - Developer Support
+          tshirtCustomFieldId: customfield_11449 # Dev Support TSize
+          jiraIssueTypes:
+            - 10605 # Frontend Development
+            - 10610 # Backend Development
+            - 10602 # Alpha Bug
+          valueStreamOrder: 6
+  
+        - issueType : BALLPARK - QA/UAT Support
+          tshirtCustomFieldId: customfield_11443 # QA Support TSize
+          jiraIssueTypes:
+            - 10611 # QA
+          valueStreamOrder: 7
+  
+        - issueType : BALLPARK - Subtask
+          tshirtCustomFieldId: customfield_11457 # T-Shirt Size
+          jiraIssueTypes:
+            - 12 # Sub-Task
+          valueStreamOrder: 8
+        
+      # Bug mappings
+      4 : # Parent issue type (Bug)
+        - issueType : BALLPARK - Planning
+          tshirtCustomFieldId: customfield_11444 # Feature Planning TSize
+          jiraIssueTypes:
+            - 10604 # Feature Planning
+            - 10607 # Tech Planning
+          valueStreamOrder: 1
+          
+        - issueType : BALLPARK - UX
+          tshirtCustomFieldId: customfield_11446 # UX TSize
+          jiraIssueTypes:
+            - 10609 # UX
+          valueStreamOrder: 2
+          
+        - issueType : BALLPARK - Development
+          tshirtCustomFieldId: customfield_11447 # Development TSize
+          jiraIssueTypes:
+            - 10605 # Frontend Development
+            - 10610 # Backend Development
+            - 10602 # Alpha Bug
+          valueStreamOrder: 3
+          
+        - issueType : BALLPARK - Alpha Test
+          tshirtCustomFieldId: customfield_11441 # Alpha Test TSize
+          jiraIssueTypes:
+            - 10603 # Alpha Test
+          valueStreamOrder: 4
+          
+        - issueType : BALLPARK - Feature Review
+          tshirtCustomFieldId: customfield_11442 # Feature Review Tsize
+          jiraIssueTypes:
+            - 10606 # Feature Review
+          valueStreamOrder: 5
+                
+        - issueType : BALLPARK - Developer Support
+          tshirtCustomFieldId: customfield_11449 # Dev Support TSize
+          jiraIssueTypes:
+            - 10605 # Frontend Development
+            - 10610 # Backend Development
+            - 10602 # Alpha Bug
+          valueStreamOrder: 6
+  
+        - issueType : BALLPARK - QA/UAT Support
+          tshirtCustomFieldId: customfield_11443 # QA Support TSize
+          jiraIssueTypes:
+            - 10611 # QA
+          valueStreamOrder: 7
+  
+        - issueType : BALLPARK - Subtask
+          tshirtCustomFieldId: customfield_11457 # T-Shirt Size
+          jiraIssueTypes:
+            - 12 # Sub-Task
+          valueStreamOrder: 8
+  
+      # Task Mappings
+      11 : # Parent issue type (Task)
+        - issueType : BALLPARK - Subtask
+          tshirtCustomFieldId: customfield_11457 # T-Shirt Size
+          jiraIssueTypes:
+            - 12 # Sub-Task
+          valueStreamOrder: 1
+

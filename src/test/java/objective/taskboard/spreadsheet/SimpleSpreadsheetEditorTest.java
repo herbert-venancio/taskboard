@@ -61,7 +61,7 @@ public class SimpleSpreadsheetEditorTest {
             assertEquals("Last shared string", 203, sharedStrings.get("BALLPARK").longValue());
     
             Sheet sheet = subject.getSheet("From Jira");
-            for (FromJiraDataRow followUpData : FollowUpHelper.getFollowUpDataDefaultList()) 
+            for (FromJiraDataRow followUpData : FollowUpHelper.getDefaultFromJiraDataRowList()) 
                 addRow(sheet, followUpData);
             sheet.save();
     
@@ -112,7 +112,7 @@ public class SimpleSpreadsheetEditorTest {
             assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 204, sharedStrings.size());
             
             Sheet sheet = subject.getSheet("From Jira");
-            for (FromJiraDataRow followUpData : FollowUpHelper.getFollowUpDataDefaultList()) 
+            for (FromJiraDataRow followUpData : FollowUpHelper.getDefaultFromJiraDataRowList()) 
                 addRow(sheet, followUpData);
             
             sheet.save();

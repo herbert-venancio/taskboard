@@ -23,24 +23,28 @@ package objective.taskboard.followup;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static objective.taskboard.Constants.FROMJIRA_HEADERS;
+import static objective.taskboard.followup.FollowUpHelper.getDefaultAnalyticsTransitionsDataSet;
+import static objective.taskboard.followup.FollowUpHelper.getDefaultFromJiraDataRow;
+import static objective.taskboard.followup.FollowUpHelper.getDefaultFromJiraDataRowList;
+import static objective.taskboard.followup.FollowUpHelper.getDefaultSyntheticTransitionsDataSet;
+import static objective.taskboard.followup.FollowUpHelper.getEmptyAnalyticsTransitionsDataSet;
+import static objective.taskboard.followup.FollowUpHelper.getEmptyFollowupData;
+import static objective.taskboard.followup.FollowUpHelper.getEmptySyntheticTransitionsDataSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
-import java.util.Collections;
+import java.time.ZoneId;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.junit.Test;
 import org.springframework.core.io.Resource;
-import org.xml.sax.SAXException;
 
 import objective.taskboard.followup.impl.FollowUpTemplateStorage;
 import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor;
+import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor.Sheet;
 import objective.taskboard.utils.IOUtilities;
 import objective.taskboard.utils.XmlUtils;
 
@@ -49,79 +53,115 @@ public class FollowUpGeneratorTest {
     private static final String PATH_FOLLOWUP_TEMPLATE = "followup/Followup-template.xlsm";
 
     @Test
-    public void generateJiraDataSheetTest() throws ParserConfigurationException, SAXException, IOException {
-        FollowupDataProvider provider = getFollowupDataProvider(FollowUpHelper.getFollowUpDataDefaultList());
+    public void generateJiraDataSheetTest() {
+        FollowupDataProvider provider = getMockFollowupDataProvider(getDefaultFromJiraDataRowList(), emptyList(), emptyList());
         FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
 
         subject.getEditor().open();
-        String jiraDataSheet = subject.generateJiraDataSheet(subject.getEditor(), provider.getJiraData(new String[0])).stringValue();
+        String jiraDataSheet = subject.generateFromJiraSheet(provider.getJiraData(emptyArray(), ZoneId.systemDefault())).stringValue();
 
         String jiraDataSheetExpected = normalizedXmlResource("followup/generateJiraDataSheetTest.xml");
         assertEquals("Jira data sheet", jiraDataSheetExpected, jiraDataSheet);
     }
 
     @Test
-    public void whenGeneratingWithoutData_generatesFromJiraKeepingOnlyHeaders() throws ParserConfigurationException, SAXException, IOException {
-        FollowupDataProvider provider = getFollowupDataProvider(Collections.emptyList());
+    public void whenGeneratingWithoutData_generatesFromJiraKeepingOnlyHeaders() {
+        FollowupDataProvider provider = getMockFollowupDataProvider(emptyList(), emptyList(), emptyList());
         FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
 
         subject.getEditor().open();
-        String jiraDataSheet = subject.generateJiraDataSheet(subject.getEditor(), emptyFollowupData()).stringValue();
+        String jiraDataSheet = subject.generateFromJiraSheet(getEmptyFollowupData()).stringValue();
 
         String jiraDataSheetExpected = normalizedXmlResource("followup/emptyFromJiraOnlyWithHeaders.xml");
         assertEquals("Jira data sheet", jiraDataSheetExpected, jiraDataSheet);
     }
 
     @Test
-    public void generateJiraDataSheetWithSomeEmptyAndNullAttributesJiraDataTest() throws ParserConfigurationException, SAXException, IOException {
-        FromJiraDataRow followupDefault = FollowUpHelper.getDefaultFromJiraDataRow();
-        followupDefault.project = "";
-        followupDefault.demandType = null;
-        followupDefault.taskId = 0L;
-        followupDefault.subtaskId = null;
-        followupDefault.worklog = 0.0;
-        followupDefault.wrongWorklog = null;
-        FollowupDataProvider provider = getFollowupDataProvider(asList(followupDefault));
+    public void generateJiraDataSheetWithSomeEmptyAndNullAttributesJiraDataTest() {
+        FromJiraDataRow fromJiraDefault = getDefaultFromJiraDataRow();
+        fromJiraDefault.project = "";
+        fromJiraDefault.demandType = null;
+        fromJiraDefault.taskId = 0L;
+        fromJiraDefault.subtaskId = null;
+        fromJiraDefault.worklog = 0.0;
+        fromJiraDefault.wrongWorklog = null;
+        FollowupDataProvider provider = getMockFollowupDataProvider(asList(fromJiraDefault), emptyList(), emptyList());
         FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
 
         subject.getEditor().open();
-        String jiraDataSheet = subject.generateJiraDataSheet(subject.getEditor(), provider.getJiraData(new String[0])).stringValue();
+        String jiraDataSheet = subject.generateFromJiraSheet(provider.getJiraData(emptyArray(), ZoneId.systemDefault())).stringValue();
 
         String jiraDataSheetExpected = normalizedXmlResource("followup/generateJiraDataSheetWithSomeEmptyAndNullAttributesJiraDataTest.xml");
         assertEquals("Jira data sheet", jiraDataSheetExpected, jiraDataSheet);
     }
 
     @Test
-    public void generateTest() throws Exception {
-        FollowupDataProvider provider = getFollowupDataProvider(FollowUpHelper.getFollowUpDataDefaultList());
+    public void generateTest() {
+        FollowupDataProvider provider = getMockFollowupDataProvider(getDefaultFromJiraDataRowList(), getDefaultAnalyticsTransitionsDataSet(),
+                getDefaultSyntheticTransitionsDataSet());
         FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
-        Resource resource = subject.generate(new String[0]);
+        Resource resource = subject.generate(emptyArray(), ZoneId.systemDefault());
         assertNotNull("Resource shouldn't be null", resource);
     }
 
     @Test
-    public void generateUsingDefaultTemplatesTest() throws Exception {
-        FollowupDataProvider provider = getFollowupDataProvider(FollowUpHelper.getFollowUpDataDefaultList());
+    public void generateUsingDefaultTemplatesTest() {
+        FollowupDataProvider provider = getMockFollowupDataProvider(getDefaultFromJiraDataRowList(), getDefaultAnalyticsTransitionsDataSet(),
+                getDefaultSyntheticTransitionsDataSet());
         FollowUpGenerator subject = getDefaultFollowUpGenerator(provider);
-        Resource resource = subject.generate(new String[0]);
+        Resource resource = subject.generate(emptyArray(), ZoneId.systemDefault());
         assertNotNull("Resource shouldn't be null", resource);
     }
     
     @Test
-    public void generateLotsOfLines() throws Exception {
-        List<FromJiraDataRow> l = new LinkedList<>();
+    public void generateLotsOfLines() {
+        List<FromJiraDataRow> fromJiraDataRowList = new LinkedList<>();
         for (int i=0; i < 5000; i++) 
-            l.add(FollowUpHelper.getDefaultFromJiraDataRow());
-        
-        FollowupDataProvider provider = getFollowupDataProvider(l);
+            fromJiraDataRowList.add(getDefaultFromJiraDataRow());
+
+        FollowupDataProvider provider = getMockFollowupDataProvider(fromJiraDataRowList, getDefaultAnalyticsTransitionsDataSet(),
+                getDefaultSyntheticTransitionsDataSet());
         FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
-        Resource resource = subject.generate(new String[0]);
+        Resource resource = subject.generate(emptyArray(), ZoneId.systemDefault());
         assertNotNull("Resource shouldn't be null", resource);
     }
 
+    @Test
+    public void givenOneIssue_whenGenerateTransitionsSheets_thenSheetsShouldBeGenerated() {
+        FollowupDataProvider provider = getMockFollowupDataProvider(null, getDefaultAnalyticsTransitionsDataSet(),
+                getDefaultSyntheticTransitionsDataSet());
+        FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
+
+        subject.getEditor().open();
+        List<Sheet> transitionsSheets = subject.generateTransitionsSheets(provider.getJiraData(emptyArray(), ZoneId.systemDefault()));
+        assertEquals("Transitions sheets quantity", 2, transitionsSheets.size());
+
+        String analyticTransitionsSheetExpected = normalizedXmlResource("followup/analyticTransitionsWithOneIssue.xml");
+        assertEquals("Analytic transitions sheet", analyticTransitionsSheetExpected, transitionsSheets.get(0).stringValue());
+        String syntheticTransitionsSheetExpected = normalizedXmlResource("followup/syntheticTransitionsWithOneIssue.xml");
+        assertEquals("Synthetic transitions sheet", syntheticTransitionsSheetExpected, transitionsSheets.get(1).stringValue());
+    }
+
+    @Test
+    public void givenNoIssue_whenGenerateTransitionsSheets_thenSheetsShouldNotBeGenerated() {
+        FollowupDataProvider provider = getMockFollowupDataProvider(null, emptyList(), emptyList());
+        FollowUpGenerator subject = getFollowUpGeneratorUsingTestTemplates(provider);
+
+        subject.getEditor().open();
+        List<Sheet> transitionsSheets = subject.generateTransitionsSheets(provider.getJiraData(emptyArray(), ZoneId.systemDefault()));
+        assertEquals("Transitions sheets quantity", 0, transitionsSheets.size());
+
+        provider = getMockFollowupDataProvider(null, getEmptyAnalyticsTransitionsDataSet(), getEmptySyntheticTransitionsDataSet());
+        subject = getFollowUpGeneratorUsingTestTemplates(provider);
+
+        subject.getEditor().open();
+        transitionsSheets = subject.generateTransitionsSheets(provider.getJiraData(emptyArray(), ZoneId.systemDefault()));
+        assertEquals("Transitions sheets quantity", 0, transitionsSheets.size());
+    }
+
     private FollowUpGenerator getDefaultFollowUpGenerator(FollowupDataProvider provider) {
-        return new FollowUpGenerator(provider, new SimpleSpreadsheetEditor(new FollowUpTemplate(resolve("followup-template/Followup-template.xlsm"))
-        ));
+        FollowUpTemplate template = new FollowUpTemplate(resolve("followup-template/Followup-template.xlsm"));
+        return new FollowUpGenerator(provider, new SimpleSpreadsheetEditor(template));
     }
 
     private FollowUpGenerator getFollowUpGeneratorUsingTestTemplates(FollowupDataProvider provider) {
@@ -132,10 +172,13 @@ public class FollowUpGeneratorTest {
         return new FollowUpTemplate(resolve(PATH_FOLLOWUP_TEMPLATE));
     }
 
-    private FollowupDataProvider getFollowupDataProvider(List<FromJiraDataRow> jiraData) {
-        FollowupData followupData = new FollowupData(new FromJiraDataSet(FROMJIRA_HEADERS, jiraData), emptyList(), emptyList());
+    private FollowupDataProvider getMockFollowupDataProvider(List<FromJiraDataRow> fromJiraDataRowList,
+            List<AnalyticsTransitionsDataSet> analyticTransitionsDataSets,
+            List<SyntheticTransitionsDataSet> syntheticTransitionsDataSets) {
+        FromJiraDataSet fromJiraDs = new FromJiraDataSet(FROMJIRA_HEADERS, fromJiraDataRowList);
+        FollowupData followupData = new FollowupData(fromJiraDs, analyticTransitionsDataSets, syntheticTransitionsDataSets);
         FollowupDataProvider provider = mock(FollowupDataProvider.class);
-        when(provider.getJiraData(new String[0])).thenReturn(followupData);
+        when(provider.getJiraData(emptyArray(), ZoneId.systemDefault())).thenReturn(followupData);
         return provider;
     }
 
@@ -143,13 +186,11 @@ public class FollowUpGeneratorTest {
         return XmlUtils.normalizeXml(IOUtilities.resourceToString(pathResource));
     }
 
-    private FollowupData emptyFollowupData() {
-        FromJiraDataSet dataSet = new FromJiraDataSet(FROMJIRA_HEADERS, Collections.emptyList());
-        
-        return new FollowupData(dataSet, emptyList(), emptyList());
-    }
-
     private static Resource resolve(String resourceName) {
         return IOUtilities.asResource(FollowUpTemplateStorage.class.getClassLoader().getResource(resourceName));
+    }
+
+    private String[] emptyArray() {
+        return new String[0];
     }
 }
