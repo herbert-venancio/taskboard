@@ -287,7 +287,7 @@ public class Issue extends IssueScratch implements Serializable {
 
     @JsonIgnore
     public String getStatusName() {
-        return metaDataService.getStatusById(status).getName();
+        return metaDataService.getStatusById(status).name;
     }
 
     @JsonIgnore
