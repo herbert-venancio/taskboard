@@ -64,7 +64,7 @@ import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
 public class JiraService {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JiraService.class);
     private static String MSG_UNAUTHORIZED = "Incorrect user or password";
-    private static String MSG_FORBIDDEN = "The jira account is locked";
+    private static String MSG_FORBIDDEN = "The jira account is requesting a captcha challenge. Try logging in jira";
 
     @Autowired
     private JiraProperties properties;
