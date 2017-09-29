@@ -1,5 +1,3 @@
-package objective.taskboard.config;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,10 +18,7 @@ package objective.taskboard.config;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
-
-import com.google.common.collect.Lists;
-
-import objective.taskboard.jira.JiraService;
+package objective.taskboard.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
@@ -31,12 +26,16 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import com.google.common.collect.Lists;
+
+import objective.taskboard.jira.JiraService;
 
 
 @Configuration
@@ -76,7 +75,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 String name = authentication.getName();
                 String password = authentication.getCredentials().toString();
 
-                jiraService.authenticate(name, password);
+                try {
+                    jiraService.authenticate(name, password);
+                }catch(Exception e) {
+                    throw new BadCredentialsException(e.getMessage());
+                }
                 return new UsernamePasswordAuthenticationToken(name, password, Lists.newArrayList());
             }
 
