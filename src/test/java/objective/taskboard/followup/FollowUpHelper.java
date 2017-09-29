@@ -20,6 +20,8 @@
  */
 package objective.taskboard.followup;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
@@ -31,13 +33,15 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UncheckedIOException;
 import java.time.ZonedDateTime;
-import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
+import com.google.common.primitives.Ints;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import objective.taskboard.Constants;
+import objective.taskboard.utils.DateTimeUtils;
 import objective.taskboard.utils.DateTimeUtils.ZonedDateTimeAdapter;
 
 public class FollowUpHelper {
@@ -77,15 +81,16 @@ public class FollowUpHelper {
     }
 
     public static FollowupData getDefaultFollowupData() {
-        return new FollowupData(new FromJiraDataSet(Constants.FROMJIRA_HEADERS, Collections.singletonList(getDefaultFromJiraDataRow())), null, null);
+        return new FollowupData(new FromJiraDataSet(Constants.FROMJIRA_HEADERS, getDefaultFromJiraDataRowList()),
+                getDefaultAnalyticsTransitionsDataSet(), getDefaultSyntheticTransitionsDataSet());
     }
 
     public static FollowupData getEmptyFollowupData() {
-        return new FollowupData(new FromJiraDataSet(Constants.FROMJIRA_HEADERS, Collections.emptyList()), null, null);
+        return new FollowupData(new FromJiraDataSet(Constants.FROMJIRA_HEADERS, emptyList()), emptyList(), emptyList());
     }
 
-    public static List<FromJiraDataRow> getFollowUpDataDefaultList() {
-        return Collections.singletonList(getDefaultFromJiraDataRow());
+    public static List<FromJiraDataRow> getDefaultFromJiraDataRowList() {
+        return singletonList(getDefaultFromJiraDataRow());
     }
 
     public static FollowupData getFromFile() {
@@ -144,5 +149,45 @@ public class FollowUpHelper {
         assertEquals("demandBallpark", expected.demandBallpark, actual.demandBallpark);
         assertEquals("taskBallpark", expected.taskBallpark, actual.taskBallpark);
         assertEquals("queryType", expected.queryType, actual.queryType);
+    }
+
+    public static List<AnalyticsTransitionsDataSet> getDefaultAnalyticsTransitionsDataSet() {
+        List<String> headers = new LinkedList<>();
+        headers.add("PKEY");
+        headers.add("ISSUE_TYPE");
+        headers.add("To Do");
+        headers.add("Doing");
+        headers.add("Done");
+
+        List<ZonedDateTime> lastTransitionsDate = new LinkedList<>();
+        lastTransitionsDate.add(DateTimeUtils.parseDate("2017-09-25"));
+        lastTransitionsDate.add(DateTimeUtils.parseDate("2017-09-26"));
+        lastTransitionsDate.add(DateTimeUtils.parseDate("2017-09-27"));
+        AnalyticsTransitionsDataRow row = new AnalyticsTransitionsDataRow("I-1", "Demand", lastTransitionsDate);
+
+        return singletonList(new AnalyticsTransitionsDataSet("Demands", headers, singletonList(row)));
+    }
+
+    public static List<AnalyticsTransitionsDataSet> getEmptyAnalyticsTransitionsDataSet() {
+        return singletonList(new AnalyticsTransitionsDataSet("Demands", emptyList(), emptyList()));
+    }
+
+    public static List<SyntheticTransitionsDataSet> getDefaultSyntheticTransitionsDataSet() {
+        List<String> headers = new LinkedList<>();
+        headers.add("Date");
+        headers.add("To Do");
+        headers.add("Doing");
+        headers.add("Done");
+
+        List<SyntheticTransitionsDataRow> rows = new LinkedList<>();
+        rows.add(new SyntheticTransitionsDataRow(DateTimeUtils.parseDate("2017-09-25"), Ints.asList(1, 0, 0)));
+        rows.add(new SyntheticTransitionsDataRow(DateTimeUtils.parseDate("2017-09-26"), Ints.asList(0, 1, 0)));
+        rows.add(new SyntheticTransitionsDataRow(DateTimeUtils.parseDate("2017-09-27"), Ints.asList(0, 0, 1)));
+
+        return singletonList(new SyntheticTransitionsDataSet("Demands", headers, rows));
+    }
+
+    public static List<SyntheticTransitionsDataSet> getEmptySyntheticTransitionsDataSet() {
+        return singletonList(new SyntheticTransitionsDataSet("Demands", emptyList(), emptyList()));
     }
 }

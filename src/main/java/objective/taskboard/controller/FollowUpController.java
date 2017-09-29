@@ -23,8 +23,10 @@ package objective.taskboard.controller;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
+import java.time.ZoneId;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
@@ -50,16 +52,19 @@ public class FollowUpController {
 
     @RequestMapping
     public ResponseEntity<Object> download(@RequestParam("projects") String projects, @RequestParam("template") String template,
-            @RequestParam("date") Optional<String> date) {
+            @RequestParam("date") Optional<String> date, @RequestParam("timezone") String zoneId) {
         if (ObjectUtils.isEmpty(projects))
             return new ResponseEntity<>("You must provide a list of projects separated by comma", BAD_REQUEST);
         if (ObjectUtils.isEmpty(template))
             return new ResponseEntity<>("Template not selected", BAD_REQUEST);
+        if (StringUtils.isEmpty(zoneId))
+            return new ResponseEntity<>("You must provide a timezone id", BAD_REQUEST);
 
         String [] includedProjects = projects.split(",");
         try {
+            ZoneId timezone = ZoneId.of(zoneId);
             FollowUpGenerator followupGenerator = followUpFacade.getGenerator(template, date);
-            Resource resource = followupGenerator.generate(includedProjects);
+            Resource resource = followupGenerator.generate(includedProjects, timezone);
             return ResponseEntity.ok()
                   .contentLength(resource.contentLength())
                   .header("Content-Disposition","attachment; filename=Followup.xlsm")

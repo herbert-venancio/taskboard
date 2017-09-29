@@ -426,6 +426,7 @@
                 	var projectQuery = "projects="+selectedKeys.join(",")
                 	var templateQuery = "template=" + this.template.value;
                     var dateQuery = "date=" + (this.selectedIndexDate > 0 ? this.selectedItemDate.value : "");
+                    var timezone = "timezone=" + Intl.DateTimeFormat().resolvedOptions().timeZone;
                 	
                 	$.ajax({
                         url: '/ws/followup/state?' + dateQuery,
@@ -441,7 +442,7 @@
 	                        		return;
                         	}
                         	self.close();
-                            window.location = "ws/followup?"+projectQuery + "&" + templateQuery + "&" + dateQuery;
+                            window.location = "ws/followup?"+projectQuery + "&" + templateQuery + "&" + dateQuery + "&" + timezone;
                         },
                         error: function (jqXhr, textStatus, errorThrown) {
                             self.errorMessage = errorThrown;

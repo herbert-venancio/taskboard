@@ -20,6 +20,7 @@
  */
 package objective.taskboard.followup;
 
+import static objective.taskboard.followup.FollowUpHelper.getDefaultFollowupData;
 import static org.junit.Assert.assertArrayEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
@@ -31,6 +32,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.time.ZoneId;
 import java.util.Optional;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
@@ -105,10 +107,10 @@ public class FollowUpFacadeTest {
     @Test
     public void generate() throws Exception {
         given(templateService.getTemplate(TEMPLATE_NAME)).willReturn(template);
-        given(provider.getJiraData(INCLUDED_PROJECTS)).willReturn(FollowUpHelper.getDefaultFollowupData());
+        given(provider.getJiraData(INCLUDED_PROJECTS, ZoneId.systemDefault())).willReturn(getDefaultFollowupData());
 
         FollowUpGenerator followupGenerator = followUpFacade.getGenerator(TEMPLATE_NAME, Optional.empty());
-        Resource resource = followupGenerator.generate(INCLUDED_PROJECTS);
+        Resource resource = followupGenerator.generate(INCLUDED_PROJECTS, ZoneId.systemDefault());
 
         String[] actualRowContent = formattedContentOfFirstRowOfFromJiraWorksheet(resource);
 
