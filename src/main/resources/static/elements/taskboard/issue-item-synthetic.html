@@ -19,114 +19,113 @@
   [/LICENSE]
   -->
 <dom-module id="issue-item-synthetic">
-    <style is="custom-style">
-
-        :host {
-            margin-top: auto;
-            margin-bottom: auto;
-        }
-        
-        paper-material {
-            cursor: pointer;
-        }
-
-        .icons_s {
-            display: flex;
-            --iron-icon-height: 100%;
-            --iron-icon-width: 100%;
-        }
-
-        .size-pp {
-            padding: 0px;
-            height: 25px;
-            width: 25px;
-        }
-
-        .size-p {
-            padding: 0px;
-            height: 25px;
-            width: 25px;
-        }
-
-        .size-m {
-            padding: 0px;
-            height: 35px;
-            width: 35px;
-        }
-
-        .size-g {
-            padding: 0px;
-            height: 40px;
-            width: 40px;
-        }
-
-        .size-gg {
-            padding: 0px;
-            height: 40px;
-            width: 40px;
-        }
-
-        .impedida {
-            text-align: center;
-            color: #F78181;
-            background: rgba(0, 0, 0, .3);
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            position: absolute;
-            -webkit-filter: drop-shadow(1px 1px 1px #616161);
-            filter: drop-shadow(1px 1px 1px #616161);
-        }
-
-        .cancelada {
-            text-align: center;
-            color: #FFCD00;
-            background: rgba(0, 0, 0, .3);
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            position: absolute;
-            -webkit-filter: drop-shadow(1px 1px 1px #616161);
-            filter: drop-shadow(1px 1px 1px #616161);
-        }
-
-        .iconImpedidaCancelada {
-            width: 25px;
-            height: 25px;
-            display: block;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        .image {
-            -webkit-mask-size: 100% auto;
-            -moz-mask-size: 100% auto;
-            -ms-mask-size: 100% auto;
-            mask-size: 100% auto;
-
-            -webkit-mask-position: center center;
-            -moz-mask-position: center center;
-            -ms-mask-position: center center;
-            mask-position: center center;
-
-            -webkit-mask-repeat: no-repeat;
-            -moz-mask-repeat: no-repeat;
-            -ms-mask-repeat: no-repeat;
-            mask-repeat: no-repeat;
-
-            display: block;
-            text-indent: -9000px;
-            overflow: hidden;
-        }
-
-    </style>
-
 
     <template>
+
+        <style>
+            :host {
+                margin-top: auto;
+                margin-bottom: auto;
+            }
+
+            paper-material {
+                cursor: pointer;
+            }
+
+            .icons_s {
+                display: flex;
+                --iron-icon-height: 100%;
+                --iron-icon-width: 100%;
+            }
+
+            .size-pp {
+                padding: 0px;
+                height: 25px;
+                width: 25px;
+            }
+
+            .size-p {
+                padding: 0px;
+                height: 25px;
+                width: 25px;
+            }
+
+            .size-m {
+                padding: 0px;
+                height: 35px;
+                width: 35px;
+            }
+
+            .size-g {
+                padding: 0px;
+                height: 40px;
+                width: 40px;
+            }
+
+            .size-gg {
+                padding: 0px;
+                height: 40px;
+                width: 40px;
+            }
+
+            .impedida {
+                text-align: center;
+                color: #F78181;
+                background: rgba(0, 0, 0, .3);
+                width: 100%;
+                height: 100%;
+                top: 0;
+                left: 0;
+                position: absolute;
+                -webkit-filter: drop-shadow(1px 1px 1px #616161);
+                filter: drop-shadow(1px 1px 1px #616161);
+            }
+
+            .cancelada {
+                text-align: center;
+                color: #FFCD00;
+                background: rgba(0, 0, 0, .3);
+                width: 100%;
+                height: 100%;
+                top: 0;
+                left: 0;
+                position: absolute;
+                -webkit-filter: drop-shadow(1px 1px 1px #616161);
+                filter: drop-shadow(1px 1px 1px #616161);
+            }
+
+            .iconImpedidaCancelada {
+                width: 25px;
+                height: 25px;
+                display: block;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+
+            .image {
+                -webkit-mask-size: 100% auto;
+                -moz-mask-size: 100% auto;
+                -ms-mask-size: 100% auto;
+                mask-size: 100% auto;
+
+                -webkit-mask-position: center center;
+                -moz-mask-position: center center;
+                -ms-mask-position: center center;
+                mask-position: center center;
+
+                -webkit-mask-repeat: no-repeat;
+                -moz-mask-repeat: no-repeat;
+                -ms-mask-repeat: no-repeat;
+                mask-repeat: no-repeat;
+
+                display: block;
+                text-indent: -9000px;
+                overflow: hidden;
+            }
+
+        </style>
 
         <paper-material on-tap="opendialog" elevation="0">
             <div>
