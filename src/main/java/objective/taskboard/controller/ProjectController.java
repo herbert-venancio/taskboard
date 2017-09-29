@@ -205,7 +205,7 @@ public class ProjectController {
     private void validateWipConfigurationsDontExist(ProjectCreationDataTeam team) {
         List<WipConfiguration> wipConfigurations = wipConfigRepo.findByTeam(team.name);
         for (ProjectCreationDataWip newWipConfig : team.wipConfigurations) {
-            String statusName = metadataService.getStatusById(newWipConfig.statusId).getName();
+            String statusName = metadataService.getStatusById(newWipConfig.statusId).name;
             for (WipConfiguration wipConfiguration : wipConfigurations) {
                 if (wipConfiguration.getStatus().equals(statusName))
                     throw new IllegalArgumentException("WIP Configuration status '"
@@ -249,7 +249,7 @@ public class ProjectController {
 
     private void createTeamWipConfigurations(Team team, List<ProjectCreationDataWip> wipConfigurations) {
         for (ProjectCreationDataWip newWipConfiguration : wipConfigurations) {
-            String statusName = metadataService.getStatusById(newWipConfiguration.statusId).getName();
+            String statusName = metadataService.getStatusById(newWipConfiguration.statusId).name;
             WipConfiguration wipConfiguration = new WipConfiguration(team.getName(), statusName, newWipConfiguration.wip);
             wipConfigRepo.save(wipConfiguration);
         }

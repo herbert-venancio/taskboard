@@ -22,9 +22,7 @@ package objective.taskboard.testUtils;
  */
 
 
-import static spark.Spark.get;
-import static spark.Spark.post;
-import static spark.Spark.put;
+import static spark.Service.ignite;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,24 +44,45 @@ import com.google.gson.GsonBuilder;
 
 import objective.taskboard.RequestBuilder;
 import objective.taskboard.utils.IOUtilities;
-import spark.Spark;
+import spark.ExceptionHandler;
+import spark.Route;
+import spark.Service;
 
 
 public class JiraMockServer {
+
+    private Service server;
+
     public static void main(String[] args) {
-        defineRoutesAndStart();
+        new JiraMockServer().defineRoutesAndStart();
     }
     
     public static void begin() { 
-        Thread thread = new Thread(JiraMockServer::defineRoutesAndStart);
+        Thread thread = new Thread(new JiraMockServer()::defineRoutesAndStart);
         thread.setDaemon(true);
         thread.start();
     }
-    
+
+    public int port() {
+        return server.port();
+    }
+
+    public JiraMockServer port(int port) {
+        ensureInitialized();
+        server.port(port);
+        return this;
+    }
+
+    public JiraMockServer startAndWait() {
+        defineRoutesAndStart();
+        server.awaitInitialization();
+        return this;
+    }
+
     @SuppressWarnings({ "rawtypes" })
-    public static void defineRoutesAndStart() {
+    public void defineRoutesAndStart() {
         loadMap();
-        Spark.exception(Exception.class, (ex, req, res) -> {
+        exception(Exception.class, (ex, req, res) -> {
             ex.printStackTrace();
         });
 
@@ -233,6 +252,10 @@ public class JiraMockServer {
         
         post("/rest/api/latest/version", "application/json", (req,res) -> {
             return loadMockData("createversion.response.json");
+        });
+
+        get("/rest/api/latest/statuscategory", (req, res) -> {
+            return loadMockData("status-categories.json");
         });
 
         get("*", (req, res) -> {
@@ -429,5 +452,34 @@ public class JiraMockServer {
     private static String username;
     private static boolean searchFailureEnabled = false;
     private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
-}
 
+    private void ensureInitialized() {
+        if(server == null)
+            server = ignite();
+    }
+
+	private <T extends Exception> void exception(Class<T> exceptionClass, ExceptionHandler<? super T> handler) {
+        ensureInitialized();
+        server.exception(exceptionClass, handler);
+    }
+
+    private void get(String path, Route route) {
+        ensureInitialized();
+        server.get(path, route);
+    }
+
+    private void post(String path, Route route) {
+        ensureInitialized();
+        server.post(path, route);
+    }
+
+    private void post(String path, String acceptType, Route route) {
+        ensureInitialized();
+        server.post(path, acceptType, route);
+    }
+
+    private void put(String path, Route route) {
+        ensureInitialized();
+        server.put(path, route);
+    }
+}

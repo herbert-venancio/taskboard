@@ -32,8 +32,12 @@ public abstract class AuthorizedJiraEndpoint {
     @Autowired
     private JiraEndpoint jiraEndpoint;
 
-    public <T> T executeRequest(Request<T> request) {       
+    public <T> T executeRequest(Request<T> request) {
         return jiraEndpoint.executeRequest(getUsername(), getPassword(), request);
+    }
+
+    public <S> S request(Class<S> service) {
+        return jiraEndpoint.request(service, getUsername(), getPassword());
     }
 
     public String postWithRestTemplate(String path, MediaType mediaType, JSONObject jsonRequest) {
