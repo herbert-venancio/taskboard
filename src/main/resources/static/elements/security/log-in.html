@@ -33,26 +33,26 @@
             height: auto;
             box-shadow: none !important;
             
-		    position: absolute;
-		    top: 50%;
-		    left: 50%;
-		    transform: translate(-50%, -50%);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
         
         .fields {
-        	position: relative;
-        	padding: 20px 25px 40px 25px;
-        	border-radius: 10px;
-        	box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
+            position: relative;
+            padding: 20px 25px 40px 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
         }
         
         .field {
         }
         
         .incorrect {
-        	left: 0;
-        	bottom: calc(100% + 10px);
-        	position: absolute;
+            left: 0;
+            bottom: calc(100% + 10px);
+            position: absolute;
         }
         
         span {
@@ -60,7 +60,7 @@
         }
 
         paper-toolbar .app-name {
-        	width: 100%;
+            width: 100%;
             font-size: 30px;
             font-weight: 300;
             justify-content: center;
@@ -86,10 +86,10 @@
         }
         
         #loginLoad {
-		    position: absolute;
-		    top: 50%;
-		    left: 50%;
-		    transform: translate(-50%, -50%);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
     </style>
 
@@ -113,7 +113,7 @@
                                      required></paper-input>
                         <paper-input class="field" id="password" bind-value="{{password}}" name="password" label="Password"
                                      type="password" required></paper-input>
-						<paper-spinner id="loginLoad" alt="Loading..."></paper-spinner>
+                        <paper-spinner id="loginLoad" alt="Loading..."></paper-spinner>
                     </div>
                     <div class="button-content">
                         <paper-button id="login" class="button" raised on-click="submit">Login</paper-button>
@@ -168,14 +168,11 @@
                     that.$.login.disable = true;
                     window.location = "/";
                 }).fail(function (jqXHR, textStatus, errorThrown) {
-                    if (jqXHR.responseJSON &&
-                        jqXHR.responseJSON.exception &&
-                        jqXHR.responseJSON.exception.indexOf("AccessDeniedException") >= 0) {
-
-                        that.errorMsg =  jqXHR.responseJSON.message.replace("org.springframework.security.access.AccessDeniedException: ","");
-                    } else {
+                    if (jqXHR.status === 401) 
+                        that.errorMsg = jqXHR.responseJSON.message.replace("Authentication Failed: ","")
+                    else 
                         that.errorMsg = "An internal error occurred"
-                    }
+                    
                     that.$.loginLoad.active = false;
                 });
             },
