@@ -81,7 +81,8 @@ public class FollowUpHelper {
     }
 
     public static FollowupData getDefaultFollowupData() {
-        return new FollowupData(new FromJiraDataSet(Constants.FROMJIRA_HEADERS, getDefaultFromJiraDataRowList()), emptyList(), emptyList());
+        return new FollowupData(new FromJiraDataSet(Constants.FROMJIRA_HEADERS, getDefaultFromJiraDataRowList()),
+                getDefaultAnalyticsTransitionsDataSet(), getDefaultSyntheticTransitionsDataSet());
     }
 
     public static FollowupData getEmptyFollowupData() {
