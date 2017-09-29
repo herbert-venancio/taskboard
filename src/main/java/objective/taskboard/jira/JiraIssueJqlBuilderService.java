@@ -1,9 +1,12 @@
 package objective.taskboard.jira;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +36,7 @@ public class JiraIssueJqlBuilderService {
         return String.format("project in (%s) ", projectKeys);
     }
 
-    public String buildQueryForIssues() {
+    public String buildQueryForIssues(Optional<Date> lastRemoteUpdatedDate) {
         List<Filter> filters = filterRepository.getCache();
         List<IssuesConfiguration> configs = filters.stream().map(x -> IssuesConfiguration.fromFilter(x)).collect(Collectors.toList());
         
@@ -43,7 +46,11 @@ public class JiraIssueJqlBuilderService {
             return String.format("(%s)", projectsJql);
         
         issueTypeAndStatusJql += " OR (status in ("+StringUtils.join(jiraProperties.getStatusesDeferredIds(),",")+"))";
-        return String.format("(%s) AND (%s)", projectsJql, issueTypeAndStatusJql);
+        String jql = String.format("(%s) AND (%s)", projectsJql, issueTypeAndStatusJql);
+        if (lastRemoteUpdatedDate.isPresent()) {
+            jql = "("+jql+") AND updated>=" +LocalDateTime.fromDateFields(lastRemoteUpdatedDate.get()).toString("yyyy-MM-dd HH:mm:ss Z");
+        }
+        return jql;
     }
 
     private String issueTypeAndStatusAndLimitInDays(List<IssuesConfiguration> configs) {

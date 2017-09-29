@@ -69,6 +69,7 @@ import objective.taskboard.jira.JiraProperties.CustomField.ClassOfServiceDetails
 import objective.taskboard.jira.JiraProperties.CustomField.CustomFieldDetails;
 import objective.taskboard.jira.JiraProperties.CustomField.TShirtSize;
 import objective.taskboard.jira.JiraService;
+import objective.taskboard.repository.FilterCachedRepository;
 import objective.taskboard.repository.ParentIssueLinkRepository;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -112,8 +113,6 @@ public class JiraIssueToIssueConverterTest {
     @Mock
     private User assignee;
     @Mock
-    private IssueFieldsExtractor issueMetadata;
-    @Mock
     private JiraProperties jiraProperties;
     @Mock
     private CustomField customField;
@@ -151,6 +150,10 @@ public class JiraIssueToIssueConverterTest {
     private IssuePriorityService priorityService;
     @Mock
     private Comment comment;
+    @Mock
+    private FilterCachedRepository filterRepository;
+    @Mock
+    private MaxVisibilityDateCalculatorService maxVisibilityDateCalculatorService;
     
     @Before
     public void before() {
@@ -331,7 +334,6 @@ public class JiraIssueToIssueConverterTest {
         subject.convertSingleIssue(A, provider);
     }
     
-
     private void mockIssue(Issue issue, String issueKey) {
         when(issue.getKey()).thenReturn(issueKey);
         when(issue.getProject()).thenReturn(project);

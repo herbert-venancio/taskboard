@@ -24,6 +24,7 @@ import static com.google.common.collect.Maps.newHashMap;
 import static java.util.stream.Collectors.toList;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractAdditionalEstimatedHours;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractBlocked;
+import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractChangelog;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractClassOfService;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractCoAssignees;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractComments;
@@ -35,7 +36,6 @@ import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractP
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractRealParent;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractRelease;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractTShirtSizes;
-import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractChangelog;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -58,12 +58,15 @@ import com.atlassian.jira.rest.client.api.domain.Issue;
 import objective.taskboard.data.IssueScratch;
 import objective.taskboard.data.TaskboardTimeTracking;
 import objective.taskboard.database.IssuePriorityService;
+import objective.taskboard.domain.Filter;
 import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.domain.ParentIssueLink;
 import objective.taskboard.domain.converter.IssueTeamService.InvalidTeamException;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.MetadataService;
+import objective.taskboard.repository.FilterCachedRepository;
 import objective.taskboard.repository.ParentIssueLinkRepository;
+import objective.taskboard.utils.LocalDateTimeProviderInterface;
 
 @Service
 public class JiraIssueToIssueConverter {
@@ -90,6 +93,15 @@ public class JiraIssueToIssueConverter {
     @Autowired
     private MetadataService metadataService;
 
+    @Autowired
+    private FilterCachedRepository filterRepository;
+
+    @Autowired
+    private MaxVisibilityDateCalculatorService maxVisibilityDateCalculatorService;
+
+    @Autowired
+    private LocalDateTimeProviderInterface localDateTimeService;
+    
     private List<String> parentIssueLinks = new ArrayList<>();
     
     public void setParentIssueLinks(List<String> parentIssueLinks) {
@@ -114,11 +126,11 @@ public class JiraIssueToIssueConverter {
         
         Long priorityOrder = priorityService.determinePriority(jiraIssue);
         
-        Date issueUpdatedDate = jiraIssue.getUpdateDate() == null? null : jiraIssue.getUpdateDate().toDate();
+        Date cardUpdatedDate = jiraIssue.getUpdateDate() == null? null : jiraIssue.getUpdateDate().toDate();
         Optional<Date> priorityUpdateDate = priorityService.priorityUpdateDate(jiraIssue);
         if (priorityUpdateDate.isPresent()) {
-            if (issueUpdatedDate == null || priorityUpdateDate.get().after(issueUpdatedDate))
-                issueUpdatedDate = priorityUpdateDate.get();
+            if (cardUpdatedDate == null || priorityUpdateDate.get().after(cardUpdatedDate))
+                cardUpdatedDate = priorityUpdateDate.get();
         }
         
         IssueScratch converted = new IssueScratch(
@@ -142,7 +154,8 @@ public class JiraIssueToIssueConverter {
                 jiraIssue.getPriority() != null ? jiraIssue.getPriority().getId() : 0l,
                 jiraIssue.getDueDate() != null ? jiraIssue.getDueDate().toDate() : null,
                 jiraIssue.getCreationDate().getMillis(),
-                issueUpdatedDate,
+                cardUpdatedDate,
+                jiraIssue.getUpdateDate() != null ? jiraIssue.getUpdateDate().toDate() : jiraIssue.getCreationDate().toDate(),
                 defaultIfNull(jiraIssue.getDescription(), ""),
                 getComments(jiraIssue),
                 extractLabels(jiraIssue),
@@ -154,14 +167,16 @@ public class JiraIssueToIssueConverter {
                 coAssignees,
                 extractClassOfService(jiraProperties, jiraIssue),
                 extractRelease(jiraProperties, jiraIssue),
-                extractChangelog(jiraIssue)
+                extractChangelog(jiraIssue),
+                isVisible(jiraIssue),
+                maxVisibilityDateCalculatorService.calculateVisibleUntil(jiraIssue.getStatus().getId(), extractChangelog(jiraIssue))
         );
         
         return createIssueFromScratch(converted, provider);
     }
 
     public objective.taskboard.data.Issue createIssueFromScratch(IssueScratch scratch, ParentProvider provider) {
-        objective.taskboard.data.Issue converted = new objective.taskboard.data.Issue(scratch, jiraProperties, metadataService);
+        objective.taskboard.data.Issue converted = new objective.taskboard.data.Issue(scratch, jiraProperties, metadataService, localDateTimeService);
     	if (!isEmpty(converted.getParent())) {
     	    Optional<objective.taskboard.data.Issue> parentCard = provider.get(converted.getParent());
     	    if (!parentCard.isPresent())
@@ -224,5 +239,18 @@ public class JiraIssueToIssueConverter {
         customFields.putAll(extractTShirtSizes(jiraProperties, issue));
         customFields.putAll(extractAdditionalEstimatedHours(jiraProperties, issue));
         return customFields;
+    }
+    
+    private boolean isVisible(com.atlassian.jira.rest.client.api.domain.Issue issue) {
+        List<Filter> filters = filterRepository.getCache();
+
+        return filters.stream()
+                .filter(f -> isApplicable(f, issue))
+                .count() != 0;
+    }
+
+    private boolean isApplicable(Filter f, Issue issue) {
+        return f.getStatusId() == issue.getStatus().getId() &&
+               f.getIssueTypeId() == issue.getIssueType().getId();
     }
 }

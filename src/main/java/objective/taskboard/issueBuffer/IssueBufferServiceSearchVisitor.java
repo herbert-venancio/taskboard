@@ -22,22 +22,25 @@ import objective.taskboard.jira.SearchIssueVisitor;
 
 public class IssueBufferServiceSearchVisitor implements SearchIssueVisitor {
     private final JiraIssueToIssueConverter issueConverter;
-    private final Map<String, Issue> issueByKey = new LinkedHashMap<>();
+    private final CardRepo issueByKey;
     private final Map<String, List<IssueScratch>> pending = new LinkedHashMap<>();
 
-    private final ParentProvider provider = parentKey -> {
-        Issue issue = issueByKey.get(parentKey);
-        if (issue == null)
-            return Optional.empty();
-        
-        return Optional.of(issue);
-    };
+    private final ParentProvider provider;
     
-    public IssueBufferServiceSearchVisitor(JiraIssueToIssueConverter issueConverter) {
+    public IssueBufferServiceSearchVisitor(JiraIssueToIssueConverter issueConverter, CardRepo issueBuffer) {
         this.issueConverter = issueConverter;
+        issueByKey = issueBuffer;
+        
+        provider = parentKey -> {
+            Issue issue = issueByKey.get(parentKey);
+            if (issue == null)
+                return Optional.empty();
+            
+            return Optional.of(issue);
+        };
     }
     
-    public Map<String, Issue> getIssuesByKey() {
+    public CardRepo getIssuesByKey() {
         return issueByKey;
     }
     
@@ -45,7 +48,7 @@ public class IssueBufferServiceSearchVisitor implements SearchIssueVisitor {
     public void processIssue(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
         String currentIssueKey = jiraIssue.getKey();
         try {
-            issueByKey.put(currentIssueKey, issueConverter.convertSingleIssue(jiraIssue, provider));
+            issueByKey.putOnlyIfNewer(currentIssueKey, issueConverter.convertSingleIssue(jiraIssue, provider));
         }catch(IncompleteIssueException e) {
             String parentKey = e.getMissingParentKey();
             List<IssueScratch> issuesDependingOnParent = pending.get(parentKey);
@@ -66,7 +69,7 @@ public class IssueBufferServiceSearchVisitor implements SearchIssueVisitor {
         
         while (issuesToConvert.size() > 0) {
             IssueScratch scratch = issuesToConvert.poll();
-            issueByKey.put(scratch.getIssueKey(), issueConverter.createIssueFromScratch(scratch, provider));
+            issueByKey.putOnlyIfNewer(scratch.getIssueKey(), issueConverter.createIssueFromScratch(scratch, provider));
             
             issuesToConvert.addAll(defaultIfNull(pending.remove(scratch.getIssueKey()), emptyList()));
         }
@@ -79,11 +82,10 @@ public class IssueBufferServiceSearchVisitor implements SearchIssueVisitor {
     
     private void validateNotPending() {
         List<String> missingParents = new LinkedList<String>();
-        for (Entry<String, List<IssueScratch>> each : pending.entrySet()) {
-            if (each.getValue().size() > 0) {
+        for (Entry<String, List<IssueScratch>> each : pending.entrySet()) 
+            if (each.getValue().size() > 0) 
                 missingParents.add(each.getKey());
-            }
-        }
+        
         if (missingParents.size() > 0)
             throw new IllegalStateException("Some parents were never found: " + StringUtils.join(missingParents,","));
         

@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
@@ -30,6 +29,7 @@ import objective.taskboard.database.IssuePriorityService;
 import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.domain.converter.IssueTeamService;
 import objective.taskboard.domain.converter.JiraIssueToIssueConverter;
+import objective.taskboard.domain.converter.MaxVisibilityDateCalculatorService;
 import objective.taskboard.domain.converter.StartDateStepService;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraProperties.CustomField;
@@ -40,15 +40,22 @@ import objective.taskboard.jira.JiraProperties.IssueLink;
 import objective.taskboard.jira.JiraProperties.IssueType;
 import objective.taskboard.jira.JiraProperties.IssueType.IssueTypeDetails;
 import objective.taskboard.jira.JiraSearchServiceTest;
+import objective.taskboard.repository.FilterCachedRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class IssueBufferServiceSearchVisitorTest {
     
     @Spy
-    JiraProperties properties = new JiraProperties();
+    private JiraProperties properties = new JiraProperties();
     
     @Mock
-    IssuePriorityService priorityService;
+    private IssuePriorityService priorityService;
+    
+    @Mock
+    private FilterCachedRepository filterCachedRepo;
+    
+    @Mock
+    private MaxVisibilityDateCalculatorService maxVisibilityDateCalculatorService;
     
     @Mock
     private StartDateStepService startDateStepService;
@@ -99,7 +106,7 @@ public class IssueBufferServiceSearchVisitorTest {
     
     @Test
 	public void whenProcessingIssueWithoutParent() throws JSONException {
-        IssueBufferServiceSearchVisitor subject = new IssueBufferServiceSearchVisitor(issueConverter);
+        IssueBufferServiceSearchVisitor subject = new IssueBufferServiceSearchVisitor(issueConverter, new CardRepo());
 	    
         SearchResultJsonParser searchResultParser = new SearchResultJsonParser();
         SearchResult searchResult = searchResultParser.parse(new JSONObject(JiraSearchServiceTest.result("TASKB-685")));
@@ -107,7 +114,7 @@ public class IssueBufferServiceSearchVisitorTest {
         
         list.stream().forEach(subject::processIssue);
         
-        Map<String, objective.taskboard.data.Issue> buffer = subject.getIssuesByKey();
+        CardRepo buffer = subject.getIssuesByKey();
         
         ArrayList<String> keys = new ArrayList<String>(buffer.keySet());
         Collections.sort(keys);
@@ -117,7 +124,7 @@ public class IssueBufferServiceSearchVisitorTest {
     
     @Test
     public void whenIssuesAreReturnedOutOfOrder() throws JSONException {
-        IssueBufferServiceSearchVisitor subject = new IssueBufferServiceSearchVisitor(issueConverter);
+        IssueBufferServiceSearchVisitor subject = new IssueBufferServiceSearchVisitor(issueConverter, new CardRepo());
         
         SearchResultJsonParser searchResultParser = new SearchResultJsonParser();
         SearchResult searchResult = searchResultParser.parse(new JSONObject(JiraSearchServiceTest.result("TASKB-686_TASKB-685")));
@@ -125,7 +132,7 @@ public class IssueBufferServiceSearchVisitorTest {
         
         list.stream().forEach(subject::processIssue);
         
-        Map<String, objective.taskboard.data.Issue> buffer = subject.getIssuesByKey();
+        CardRepo buffer = subject.getIssuesByKey();
         
         ArrayList<String> keys = new ArrayList<String>(buffer.keySet());
         assertEquals("TASKB-685,TASKB-686", StringUtils.join(keys,","));
@@ -136,7 +143,7 @@ public class IssueBufferServiceSearchVisitorTest {
     public void whenIssuesAreReturnedOutOfOrderWithNestedDependencies() throws JSONException {
         issueConverter.setParentIssueLinks(Arrays.asList("is demanded by"));
         
-        IssueBufferServiceSearchVisitor subject = new IssueBufferServiceSearchVisitor(issueConverter);
+        IssueBufferServiceSearchVisitor subject = new IssueBufferServiceSearchVisitor(issueConverter, new CardRepo());
         
         SearchResultJsonParser searchResultParser = new SearchResultJsonParser();
         SearchResult searchResult = searchResultParser.parse(new JSONObject(JiraSearchServiceTest.result("TASKB-634_TASKB-630_TASKB-628")));
@@ -144,7 +151,7 @@ public class IssueBufferServiceSearchVisitorTest {
         
         list.stream().forEach(subject::processIssue);
         
-        Map<String, objective.taskboard.data.Issue> buffer = subject.getIssuesByKey();
+        CardRepo buffer = subject.getIssuesByKey();
         
         ArrayList<String> keys = new ArrayList<String>(buffer.keySet());
         assertEquals("TASKB-628,TASKB-630,TASKB-634", StringUtils.join(keys,","));
@@ -153,7 +160,7 @@ public class IssueBufferServiceSearchVisitorTest {
     
     @Test
     public void whenIssuesAreReturnedInOrder() throws JSONException {
-        IssueBufferServiceSearchVisitor subject = new IssueBufferServiceSearchVisitor(issueConverter);
+        IssueBufferServiceSearchVisitor subject = new IssueBufferServiceSearchVisitor(issueConverter, new CardRepo());
         
         SearchResultJsonParser searchResultParser = new SearchResultJsonParser();
         SearchResult searchResult = searchResultParser.parse(new JSONObject(JiraSearchServiceTest.result("TASKB-685_TASKB-686")));
@@ -161,7 +168,7 @@ public class IssueBufferServiceSearchVisitorTest {
         
         list.stream().forEach(subject::processIssue);
         
-        Map<String, objective.taskboard.data.Issue> buffer = subject.getIssuesByKey();
+        CardRepo buffer = subject.getIssuesByKey();
         
         ArrayList<String> keys = new ArrayList<String>(buffer.keySet());
         assertEquals("TASKB-685,TASKB-686", StringUtils.join(keys,","));

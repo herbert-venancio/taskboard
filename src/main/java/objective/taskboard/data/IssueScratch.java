@@ -1,10 +1,12 @@
 package objective.taskboard.data;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,7 +14,9 @@ import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 import objective.taskboard.domain.converter.IssueCoAssignee;
 
-public class IssueScratch {
+public class IssueScratch implements Serializable {
+    private static final long serialVersionUID = -8643342601909365442L;
+    
     protected Long id;
     protected String issueKey;
     protected String projectKey;
@@ -36,6 +40,8 @@ public class IssueScratch {
     protected long priority;
     protected Date dueDate;
     protected Date updatedDate;
+    protected Date remoteIssueUpdatedDate;
+
     protected long created;
     protected String description;
     protected String comments;
@@ -44,6 +50,8 @@ public class IssueScratch {
     protected Long priorityOrder;
     protected TaskboardTimeTracking timeTracking;
     protected List<Changelog> changelog;
+    protected boolean isVisible;
+    protected LocalDateTime visibleUntil;
     
     @JsonIgnore
     protected String reporter;
@@ -82,6 +90,7 @@ public class IssueScratch {
             Date dueDate, 
             long created,
             Date updatedDate, 
+            Date remoteIssueUpdatedDate,
             String description, 
             String comments, 
             List<String> labels, 
@@ -93,7 +102,9 @@ public class IssueScratch {
             List<IssueCoAssignee> coAssignees, 
             CustomField classOfService, 
             Map<String, CustomField> release,
-            List<Changelog> changelog) {
+            List<Changelog> changelog,
+            boolean isVisible,
+            Optional<LocalDateTime> visibleUntil) {
         this.id = id;
         this.issueKey = issueKey;
         this.projectKey = projectKey;
@@ -115,6 +126,7 @@ public class IssueScratch {
         this.dueDate = dueDate;
         this.created = created;
         this.updatedDate = updatedDate;
+        this.remoteIssueUpdatedDate = remoteIssueUpdatedDate;
         this.description = description;
         this.comments = comments;
         this.labels = labels;
@@ -127,6 +139,9 @@ public class IssueScratch {
         this.classOfService = classOfService;
         this.release = release;
         this.changelog = changelog;
+        this.isVisible = isVisible;
+        if (visibleUntil.isPresent())
+            this.visibleUntil = visibleUntil.get();
         
         this.render = false;
         this.favorite = false;

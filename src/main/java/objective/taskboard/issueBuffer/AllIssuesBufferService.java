@@ -22,9 +22,7 @@ package objective.taskboard.issueBuffer;
 
 import static java.util.stream.Collectors.toList;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang.time.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +42,7 @@ public class AllIssuesBufferService {
     @Autowired
     private JiraIssueService jiraIssueService;
 
-    private Map<String, Issue> allIssuesBuffer = new LinkedHashMap<>();
+    private CardRepo allCardsRepo = new CardRepo();
 
     private boolean isUpdatingAllIssuesBuffer = false;
 
@@ -66,12 +64,10 @@ public class AllIssuesBufferService {
                 state = state.start();
                 log.debug("updateAllIssuesBuffer start");
                
-                IssueBufferServiceSearchVisitor searchVisitor = new IssueBufferServiceSearchVisitor(issueConverter);
+                IssueBufferServiceSearchVisitor searchVisitor = new IssueBufferServiceSearchVisitor(issueConverter, allCardsRepo);
                 jiraIssueService.searchAllProjectIssues(searchVisitor);
                 
-                allIssuesBuffer = searchVisitor.getIssuesByKey();
-
-                log.debug("All issues count: " + allIssuesBuffer.size());
+                log.debug("All issues count: " + allCardsRepo.size());
                 log.debug("updateAllIssuesBuffer complete");
                 log.debug("updateAllIssuesBuffer time spent " +stopWatch.getTime());
                 state = state.done();
@@ -90,7 +86,7 @@ public class AllIssuesBufferService {
     }
 
     public synchronized List<Issue> getAllIssues() {
-        return allIssuesBuffer.values().stream()
+        return allCardsRepo.values().stream()
                 .collect(toList());
     }
 }

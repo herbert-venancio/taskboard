@@ -4,6 +4,8 @@ import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -47,7 +49,7 @@ public class JiraIssueJqlBuilderServiceTest {
         
         when(filterRepository.getCache()).thenReturn(asList());
         
-        String actual = subject.buildQueryForIssues().trim();
+        String actual = subject.buildQueryForIssues(Optional.empty()).trim();
         
         assertEquals("(project in ('PROJ') )", actual);
     }
@@ -68,7 +70,7 @@ public class JiraIssueJqlBuilderServiceTest {
         
         when(jiraProperties.getStatusesDeferredIds()).thenReturn(asList(666l, 999l));
         
-        String actual = subject.buildQueryForIssues().trim();
+        String actual = subject.buildQueryForIssues(Optional.empty()).trim();
         
         assertEquals("(project in ('PROJ') ) AND ("
                 + "(status=66 AND type=10) "

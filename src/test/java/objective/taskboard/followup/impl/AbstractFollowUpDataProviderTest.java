@@ -15,10 +15,9 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
-import objective.taskboard.jira.data.Status;
-import objective.taskboard.jira.data.StatusCategory;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -45,6 +44,9 @@ import objective.taskboard.jira.JiraProperties.CustomField.TShirtSize;
 import objective.taskboard.jira.JiraProperties.IssueLink;
 import objective.taskboard.jira.JiraProperties.IssueType.IssueTypeDetails;
 import objective.taskboard.jira.MetadataService;
+import objective.taskboard.jira.data.Status;
+import objective.taskboard.jira.data.StatusCategory;
+import objective.taskboard.utils.LocalDateTimeProviderInterface;
 
 @RunWith(MockitoJUnitRunner.class)
 public abstract class AbstractFollowUpDataProviderTest {
@@ -57,6 +59,9 @@ public abstract class AbstractFollowUpDataProviderTest {
 
     @Mock
     protected AllIssuesBufferService issueBufferService;
+    
+    @Mock
+    private LocalDateTimeProviderInterface localDateTimeService;
 
     CustomField propertiesCustomField;
     protected TShirtSize tshirtSizeInfo;
@@ -302,6 +307,7 @@ public abstract class AbstractFollowUpDataProviderTest {
                     null, //dueDate
                     created, //created
                     null,//Date updatedDate,
+                    null,//Date remoteUpdatedDate,
                     null, //description
                     null, //comments
                     null, //labels
@@ -313,9 +319,11 @@ public abstract class AbstractFollowUpDataProviderTest {
                     null,//coAssignees
                     null,//classOfService
                     null, //release
-                    buildTransitions()
+                    buildTransitions(),
+                    true,
+                    Optional.empty()
                     );
-            return new Issue(scratch, jiraProperties, metadataService);
+            return new Issue(scratch, jiraProperties, metadataService, localDateTimeService);
         }
 
         private List<Changelog> buildTransitions() {
@@ -324,7 +332,7 @@ public abstract class AbstractFollowUpDataProviderTest {
             for(Pair<String, ZonedDateTime> t : transitions) {
                 String newState = t.getLeft();
                 ZonedDateTime timestamp = t.getRight();
-                changes.add(new Changelog(null, "status", currentState, newState, timestamp));
+                changes.add(new Changelog(null, "status", currentState, newState, "42",timestamp));
                 currentState = t.getKey();
             }
             return changes;

@@ -20,10 +20,16 @@
  */
 package objective.taskboard.domain.converter;
 
-import static com.atlassian.jira.rest.client.api.domain.IssueLinkType.Direction.*;
+import static com.atlassian.jira.rest.client.api.domain.IssueLinkType.Direction.INBOUND;
+import static com.atlassian.jira.rest.client.api.domain.IssueLinkType.Direction.OUTBOUND;
 import static java.util.Arrays.asList;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -559,5 +565,4 @@ public class IssueFieldsExtractorTest {
     public void extractComponentsNull() {
         assertTrue("Components should be empty", IssueFieldsExtractor.extractComponents(issue).isEmpty());
     }
-
 }

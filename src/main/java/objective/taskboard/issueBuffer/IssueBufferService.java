@@ -23,12 +23,13 @@ package objective.taskboard.issueBuffer;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toList;
 
+import java.io.File;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang.time.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,9 +47,12 @@ import objective.taskboard.issue.IssueUpdate;
 import objective.taskboard.issue.IssueUpdateType;
 import objective.taskboard.issue.IssuesUpdateEvent;
 import objective.taskboard.jira.JiraIssueService;
+import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraService;
+import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.task.IssueEventProcessScheduler;
+import objective.taskboard.utils.LocalDateTimeProviderInterface;
 
 @Service
 public class IssueBufferService {
@@ -75,17 +79,26 @@ public class IssueBufferService {
     @Autowired
     private IssueEventProcessScheduler issueEvents;
     
-    private Map<String, Issue> issueBuffer = new LinkedHashMap<>();
+    @Autowired
+    JiraProperties jiraProperties;
+    
+    @Autowired
+    MetadataService metaDataService;
+    
+    @Autowired
+    LocalDateTimeProviderInterface localDateTimeProvider;
+    
+    private CardRepo cardsRepo = new CardRepo();
     
     private final ParentProvider parentProviderFetchesMissingParents = parentKey -> {
-        Issue parent = issueBuffer.get(parentKey);
+        Issue parent = cardsRepo.get(parentKey);
         if (parent == null)
             parent = updateIssueBufferFetchParentIfNeeded(jiraBean.getIssueByKeyAsMaster(parentKey));
         return Optional.of(parent);
     };
     
     private final ParentProvider parentProviderRejectsIfMissingParent = parentKey ->  {
-        Issue parent = issueBuffer.get(parentKey);
+        Issue parent = cardsRepo.get(parentKey);
         if (parent == null)
             throw new IllegalArgumentException("Parent issue " + parentKey + " not available. This is probably a bug.");
         return Optional.of(parent);
@@ -93,10 +106,24 @@ public class IssueBufferService {
 
     private IssueBufferState state = IssueBufferState.uninitialised;
 
-
+    
     private boolean isUpdatingTaskboardIssuesBuffer = false;
 
     private List<IssueUpdate> issuesUpdatedByEvent = new ArrayList<>();
+
+    @PostConstruct
+    private synchronized void loadCache() {
+        File cache = new File("data/issues.dat");
+        Optional<CardRepo> repo = CardRepo.from(cache, jiraProperties, metaDataService, localDateTimeProvider);
+        if (repo.isPresent()) {
+            cardsRepo = repo.get();
+            state = IssueBufferState.ready;
+        }
+    }
+    
+    private synchronized void saveCache() {
+        cardsRepo.writeTo(new File("data/issues.dat"));
+    }
 
     public IssueBufferState getState() {
         return state;
@@ -113,14 +140,13 @@ public class IssueBufferService {
             try {
                 updateState(state.start());
                 
-                IssueBufferServiceSearchVisitor visitor = new IssueBufferServiceSearchVisitor(issueConverter);
-                jiraIssueService.searchAllWithParents(visitor);
+                IssueBufferServiceSearchVisitor visitor = new IssueBufferServiceSearchVisitor(issueConverter, cardsRepo);
+                jiraIssueService.searchAllWithParents(visitor, cardsRepo.getLastUpdatedDate());
                 
-                Map<String, Issue> newIssueBuffer = visitor.getIssuesByKey();
-                log.info("Issue buffer service - processed " + newIssueBuffer.size()+ " issues");
-                setIssues(newIssueBuffer);
+                log.info("Issue buffer service - processed " + cardsRepo.size()+ " issues");
                 
                 updateState(state.done());
+                saveCache();
             }catch(Exception e) {
                 updateState(state.error());
                 log.error("objective.taskboard.issueBuffer.IssueBufferService.updateIssueBuffer - Failed to bring issues", e);
@@ -143,7 +169,7 @@ public class IssueBufferService {
     public Issue updateIssueBuffer(final String key) {
         Optional<com.atlassian.jira.rest.client.api.domain.Issue> foundIssue = jiraIssueService.searchIssueByKey(key);
         if (!foundIssue.isPresent()) 
-            return issueBuffer.remove(key);
+            return cardsRepo.remove(key);
        return updateIssueBufferFetchParentIfNeeded(foundIssue.get());
     }
 
@@ -158,8 +184,8 @@ public class IssueBufferService {
 
     public synchronized Issue updateByEvent(WebhookEvent event, final String key, com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
         if (event == WebhookEvent.ISSUE_DELETED || jiraIssue == null) {
-            issuesUpdatedByEvent.add(new IssueUpdate(issueBuffer.get(key), IssueUpdateType.DELETED));
-            return issueBuffer.remove(key);
+            issuesUpdatedByEvent.add(new IssueUpdate(cardsRepo.get(key), IssueUpdateType.DELETED));
+            return cardsRepo.remove(key);
         }
 
         Issue updated = updateIssueBufferFetchParentIfNeeded(jiraIssue);
@@ -191,7 +217,7 @@ public class IssueBufferService {
     }
 
     private List<String> getSubtasksKeys(String key) {
-        List<String> subtasksKeys = issueBuffer.values().stream()
+        List<String> subtasksKeys = cardsRepo.values().stream()
             .filter(i -> key.equals(i.getParent()))
             .map(i -> i.getIssueKey())
             .collect(toList());
@@ -207,15 +233,15 @@ public class IssueBufferService {
     }
 
     public synchronized List<Issue> getIssues() {
-        List<Issue> collect = issueBuffer.values().stream()
+        List<Issue> collect = cardsRepo.values().stream()
                 .filter(t -> projectService.isProjectVisible(t.getProjectKey()))
-                .filter(t -> !t.isDeferred())
+                .filter(t -> t.isVisible())
                 .collect(toList());
         return collect;
     }
 
     public synchronized Issue getIssueByKey(String key) {
-        return issueBuffer.get(key);
+        return cardsRepo.get(key);
     }
 
     public List<objective.taskboard.data.Issue> getIssueSubTasks(objective.taskboard.data.Issue issue) {
@@ -238,29 +264,26 @@ public class IssueBufferService {
 
     public synchronized void updateIssuesPriorities(List<TaskboardIssue> issuesPriorities) {
         for (TaskboardIssue taskboardIssue : issuesPriorities) { 
-            Issue issue = issueBuffer.get(taskboardIssue.getProjectKey());
+            Issue issue = cardsRepo.get(taskboardIssue.getProjectKey());
             issue.setPriorityOrder(taskboardIssue.getPriority());
             issue.setUpdatedDate(taskboardIssue.getUpdated());
             issueEvents.add(WebhookEvent.ISSUE_UPDATED, issue.getIssueKey(), null);
         }
     }
 
-    private synchronized void setIssues(Map<String, Issue> issues) {
-        issueBuffer = issues;
-    }
-
     private void putIssue(Issue issue) {
-        issueBuffer.put(issue.getIssueKey(), issue);
+        cardsRepo.putOnlyIfNewer(issue.getIssueKey(), issue);
     }
 
     @EventListener
     protected void onAfterSave(IssuePriorityOrderChanged event) {
         TaskboardIssue entity = event.getTarget();
-        issueBuffer.get(entity.getProjectKey()).setPriorityOrder(entity.getPriority());
+        cardsRepo.get(entity.getProjectKey()).setPriorityOrder(entity.getPriority());
     }
 
     public void reset() {
         state = IssueBufferState.uninitialised;
+        cardsRepo.clear();
         updateIssueBuffer();
         while (isUpdatingTaskboardIssuesBuffer)
             try {

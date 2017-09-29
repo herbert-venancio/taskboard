@@ -22,6 +22,7 @@ package objective.taskboard.jira;
 
 import static java.util.Arrays.asList;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -69,8 +70,8 @@ public class JiraIssueService {
         jiraSearchService.searchIssues(jql, visitor);
     }
 
-    public void searchAllWithParents(SearchIssueVisitor visitor) {
-        jiraSearchService.searchIssuesAndParents(visitor,jqlService.buildQueryForIssues());
+    public void searchAllWithParents(SearchIssueVisitor visitor, Optional<Date> lastRemoteUpdatedDate) {
+        jiraSearchService.searchIssuesAndParents(visitor,jqlService.buildQueryForIssues(lastRemoteUpdatedDate));
     }
     
     public void searchAllProjectIssues(SearchIssueVisitor visitor) {
@@ -78,7 +79,7 @@ public class JiraIssueService {
     }
 
     private void searchIssues(SearchIssueVisitor visitor, String additionalJqlCondition, String... additionalFields) {
-        String jql = jqlService.buildQueryForIssues();
+        String jql = jqlService.buildQueryForIssues(Optional.empty());
         if (additionalJqlCondition != null) 
             jql = "(" + additionalJqlCondition + ") AND " + jql;
         

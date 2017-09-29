@@ -42,6 +42,7 @@ import objective.taskboard.domain.converter.IssueCoAssignee;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraProperties.BallparkMapping;
 import objective.taskboard.jira.MetadataService;
+import objective.taskboard.utils.LocalDateTimeProviderInterface;
 
 @JsonIgnoreProperties({"jiraProperties", "metaDataService"})
 public class Issue extends IssueScratch implements Serializable {
@@ -52,24 +53,21 @@ public class Issue extends IssueScratch implements Serializable {
 
     private Set<String> teams;
 
-    private Long priorityOrder;
-    
     @JsonIgnore
-    private Issue parentCard;
+    private transient Issue parentCard;
 
     private transient JiraProperties jiraProperties;
     
     private transient MetadataService metaDataService;
     
+    private transient LocalDateTimeProviderInterface localDateTimeProvider;
+    
     @JsonIgnore
     private List<IssueCoAssignee> coAssignees = new LinkedList<>();
+    
+    private String color;
 
-    @JsonIgnore
-    private CustomField classOfService;
-    
-    String color;
-    
-    public Issue(IssueScratch scratch, JiraProperties properties, MetadataService metadataService) {
+    public Issue(IssueScratch scratch, JiraProperties properties, MetadataService metadataService, LocalDateTimeProviderInterface localDateTimeProvider) {
         this.id = scratch.id;
         this.issueKey = scratch.issueKey;
         this.projectKey = scratch.projectKey;
@@ -85,34 +83,39 @@ public class Issue extends IssueScratch implements Serializable {
         this.parentType = scratch.parentType;
         this.parentTypeIconUri = scratch.parentTypeIconUri;
         this.dependencies = scratch.dependencies;
-        this.render = false;
-        this.favorite = false;
-        this.hidden = false;
-        this.color = null;
         this.subResponsaveis = scratch.subResponsaveis;
         this.assignee = scratch.assignee;
-        this.usersTeam = null;
         this.priority = scratch.priority;
         this.dueDate = scratch.dueDate;
         this.created = scratch.created;
         this.updatedDate = scratch.updatedDate;
         this.description = scratch.description;
-        this.teams = null;
         this.comments = scratch.comments;
         this.labels = scratch.labels;
         this.components = scratch.components;
         this.customFields = scratch.customFields;
         this.priorityOrder = scratch.priorityOrder;
         this.timeTracking = scratch.timeTracking;
-        this.jiraProperties = properties;
-        this.metaDataService = metadataService;
         this.reporter = scratch.reporter;
         this.coAssignees = scratch.coAssignees;
         this.classOfService = scratch.classOfService;
         this.release = scratch.release;
         this.changelog = scratch.changelog;
+        this.remoteIssueUpdatedDate = scratch.remoteIssueUpdatedDate;
+        this.isVisible = scratch.isVisible;
+        this.visibleUntil = scratch.visibleUntil;
+        
+        this.localDateTimeProvider = localDateTimeProvider;
+        this.metaDataService = metadataService;
+        this.jiraProperties = properties;
+        this.render = false;
+        this.favorite = false;
+        this.hidden = false;        
+        this.teams = null;
+        this.color = null;
+        this.usersTeam = null;
     }
-
+    
     @JsonAnyGetter
     public Map<String, Serializable> getCustomFields() {
         return customFields;
@@ -121,6 +124,7 @@ public class Issue extends IssueScratch implements Serializable {
     public Issue() {
         jiraProperties = SpringContextBridge.getBean(JiraProperties.class);
         metaDataService = SpringContextBridge.getBean(MetadataService.class);
+        localDateTimeProvider = SpringContextBridge.getBean(LocalDateTimeProviderInterface.class);
     }
 
     @JsonIgnore
@@ -398,7 +402,7 @@ public class Issue extends IssueScratch implements Serializable {
     public Date getUpdatedDate() {
         return this.updatedDate;
     }
-
+    
     public long getCreated() {
         return this.created;
     }
@@ -526,7 +530,16 @@ public class Issue extends IssueScratch implements Serializable {
     public void setUpdatedDate(final Date updatedDate) {
         this.updatedDate = updatedDate;
     }
-
+    
+    public void setRemoteIssueUpdatedDate(final Date remoteIssueUpdatedDate) {
+        this.remoteIssueUpdatedDate = remoteIssueUpdatedDate;
+    }
+    
+    @JsonDeserialize(using = DateDeserializer.class)
+    public Date getRemoteIssueUpdatedDate() {
+        return remoteIssueUpdatedDate;
+    }
+    
     public void setCreated(final long created) {
         this.created = created;
     }
@@ -562,6 +575,10 @@ public class Issue extends IssueScratch implements Serializable {
     public void setMetaDataService(final MetadataService metaDataService) {
         this.metaDataService = metaDataService;
     }
+    
+    public void setLocalDateTimeProvider(LocalDateTimeProviderInterface localDateTimeProvider) {
+        this.localDateTimeProvider = localDateTimeProvider;
+    }
 
     @JsonIgnore
     public String getReporter() {
@@ -593,8 +610,21 @@ public class Issue extends IssueScratch implements Serializable {
 
     public void setCustomFields(final Map<String, Serializable> customFields) {
         this.customFields = customFields;
-    }    
-
+    }
+    
+    public boolean isVisible() {
+        if (isDeferred())
+            return false;
+        
+        if (!isVisible)
+            return false;
+        
+        if (visibleUntil != null)
+            return localDateTimeProvider.now().isBefore(visibleUntil);
+        
+        return true;
+    }
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
