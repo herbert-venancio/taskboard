@@ -2,7 +2,7 @@
   "name": "objective-taskboard",
   "private": true,
   "dependencies": {
-    "polymer": "Polymer/polymer#^1.2.0",
+    "polymer": "Polymer/polymer#1.10.1",
     "iron-elements": "PolymerElements/iron-elements#1.0.6",
     "paper-elements": "PolymerElements/paper-elements#1.0.6",
     "neon-elements": "PolymerElements/neon-elements#1.0.0",
@@ -18,8 +18,7 @@
     "marked-element": "^1.0.0"
   },
   "devDependencies": {
-    "web-component-tester": "3.4.2",
-    "test-fixture": "PolymerElements/test-fixture#^1.1.0"
+    "web-component-tester": "3.4.2"
   },
   "resolutions": {
     "jquery-ui": "1.12.1",
