@@ -20,121 +20,122 @@
   -->
 <dom-module id="board-lane">
 
-    <style>
-        :host {
-            width: 100%;
-        }
-
-        .ui-sortable-placeholder {
-            background: #000;
-            opacity: 0.8;
-        }
-
-        .header {
-            align-items: center;
-        }
-
-        .header-lane {
-            background-color: #333;
-            display: flex;
-        }
-
-        .label {
-            color: white;
-            margin: 0 auto;
-            white-space: nowrap;
-        }
-
-        .label-lane {
-            padding: 3px;
-            font-size: 12px;
-            text-transform: uppercase;
-        }
-
-        .label-stage {
-            height: 25px;
-            padding: 0 10px;
-            font-size: 12px;
-            font-weight: 500;
-            text-align: left;
-        }
-
-        .lane-body {
-            table-layout: fixed;
-            border-collapse: collapse;
-            width: 100%;
-            height: 100%;
-        }
-
-        .wrapper {
-            box-shadow: 0 4px 9px -3px rgba(0,0,0,0.75);
-            opacity: 0.9;
-        }
-
-        .table-wrapper {
-            background: #555;
-            height: 300px;
-            overflow-x: auto;
-            overflow-y: scroll;
-        }
-
-        .counter {
-            background: transparent;
-            padding: 0;
-            margin-right: 5px;
-            display: block;
-            float: left;
-            font-size: inherit;
-            color: inherit;
-            border-radius: 0;
-            vertical-align: middle;
-            font-weight: inherit;
-        }
-
-        .name {
-        }
-
-        .table-body {
-            width: 100%;
-            height: 100%;
-        }
-
-        .team-header {
-            width: 100%;
-            height: 100%;
-            background-color: white;
-        }
-
-        .team-col {
-            width: 118px;
-            padding: 0;
-        }
-
-        .cell {
-            padding: 2px 2px 5px 2px;
-            vertical-align: top;
-            border-bottom: 1px solid;
-            border-color: #666;
-        }
-
-        .team-cell {
-            background: #EFEFEF;
-            border-color: #DDD;
-            font-size: 14px;
-            padding: 10px 8px;
-        }
-
-        .step-cell {
-            border-left: 1px solid #666;
-        }
-
-        .issue-item {
-            border-bottom: 5px;
-        }
-
-    </style>
-
     <template>
+
+        <style>
+            :host {
+                width: 100%;
+            }
+
+            .ui-sortable-placeholder {
+                background: #000;
+                opacity: 0.8;
+            }
+
+            .header {
+                align-items: center;
+            }
+
+            .header-lane {
+                background-color: #333;
+                display: flex;
+            }
+
+            .label {
+                color: white;
+                margin: 0 auto;
+                white-space: nowrap;
+            }
+
+            .label-lane {
+                padding: 3px;
+                font-size: 12px;
+                text-transform: uppercase;
+            }
+
+            .label-stage {
+                height: 25px;
+                padding: 0 10px;
+                font-size: 12px;
+                font-weight: 500;
+                text-align: left;
+            }
+
+            .lane-body {
+                table-layout: fixed;
+                border-collapse: collapse;
+                width: 100%;
+                height: 100%;
+            }
+
+            .wrapper {
+                box-shadow: 0 4px 9px -3px rgba(0,0,0,0.75);
+                opacity: 0.9;
+            }
+
+            .table-wrapper {
+                background: #555;
+                height: 300px;
+                overflow-x: auto;
+                overflow-y: scroll;
+            }
+
+            .counter {
+                background: transparent;
+                padding: 0;
+                margin-right: 5px;
+                display: block;
+                float: left;
+                font-size: inherit;
+                color: inherit;
+                border-radius: 0;
+                vertical-align: middle;
+                font-weight: inherit;
+            }
+
+            .name {
+            }
+
+            .table-body {
+                width: 100%;
+                height: 100%;
+            }
+
+            .team-header {
+                width: 100%;
+                height: 100%;
+                background-color: white;
+            }
+
+            .team-col {
+                width: 118px;
+                padding: 0;
+            }
+
+            .cell {
+                padding: 2px 2px 5px 2px;
+                vertical-align: top;
+                border-bottom: 1px solid;
+                border-color: #666;
+            }
+
+            .team-cell {
+                background: #EFEFEF;
+                border-color: #DDD;
+                font-size: 14px;
+                padding: 10px 8px;
+            }
+
+            .step-cell {
+                border-left: 1px solid #666;
+            }
+
+            .issue-item {
+                border-bottom: 5px;
+            }
+
+        </style>
+
         <iron-signals on-iron-signal-update-user-preferences="preferencesUpdated"
                       on-iron-signal-level-visibility-changed="preferencesUpdated"
                       on-iron-signal-hierarchical-filter-changed="preferencesUpdated"

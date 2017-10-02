@@ -20,56 +20,56 @@
   -->
 <dom-module id="config-visibility">
 
-    <style>
-        .customViews {
-            display: flex;
-        }
-
-        .customViews-icon {
-            width: 30px;
-            height: 30px;
-            padding: 4px;
-            margin-left: 5px;
-            display: block;
-        }
-
-        .customViews-icon:first-child {
-            margin-left: 0px;
-        }
-
-        .customViews-icon:hover {
-            background: #CCC;
-            opacity: 0.8;
-            
-            -webkit-transition: all .5s;
-            -moz-transition: all .5s;
-            transition: all .5s;
-        }
-
-        .customViews-icon.active {
-            background: #CCC;
-        }
-
-        .iconsAnalytics {
-        }
-
-        .iconsAnalytics:hover {
-        }
-        
-        .iconsAnalytics.active {
-        }
-
-        .iconsSynthetic {
-        }
-
-        .iconsSynthetic:hover {
-        }
-        
-        .iconsSynthetic.active {
-        }
-    </style>
-
     <template>
+
+        <style>
+            .customViews {
+                display: flex;
+            }
+
+            .customViews-icon {
+                width: 30px;
+                height: 30px;
+                padding: 4px;
+                margin-left: 5px;
+                display: block;
+            }
+
+            .customViews-icon:first-child {
+                margin-left: 0px;
+            }
+
+            .customViews-icon:hover {
+                background: #CCC;
+                opacity: 0.8;
+
+                -webkit-transition: all .5s;
+                -moz-transition: all .5s;
+                transition: all .5s;
+            }
+
+            .customViews-icon.active {
+                background: #CCC;
+            }
+
+            .iconsAnalytics {
+            }
+
+            .iconsAnalytics:hover {
+            }
+
+            .iconsAnalytics.active {
+            }
+
+            .iconsSynthetic {
+            }
+
+            .iconsSynthetic:hover {
+            }
+
+            .iconsSynthetic.active {
+            }
+        </style>
 
         <div class="customViews">
             <paper-icon-button class$="customViews-icon iconsSynthetic {{getStyleSynthetic(visibilityConfiguration.showSynthetic)}}"

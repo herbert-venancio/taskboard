@@ -20,133 +20,133 @@
   -->
 <dom-module id="fields-required-modal">
 
-    <style>
-        paper-button {
-            float: right;
-            padding: 10px;
-        }
-
-        paper-button.colorful {
-            color: #4285f4;
-            margin-bottom: 6px;
-        }
-
-        paper-button[raised].colorful {
-            background: #4285f4;
-            color: #fff;
-        }
-
-        .card-custom {
-            --paper-card: {
-                width: auto;
-                font-size: 12px;
-                padding: 5px;
-                margin-top: 5px;
-                padding-top: 10px;
-                min-height: 200px;
-                min-width: 200px;
-            }
-        }
-
-        .card-header-custom {
-            padding-bottom: 15px;
-            width: 100%;
-            font-size: 24px;
-            text-align: center;
-        }
-
-        .content-box {
-            background-color: #eee;
-            width: auto;
-            min-height: auto;
-            border-radius: 5px;
-            box-shadow: inset 1px 1px 1px #A5A1A1;
-            padding-top: 6px;
-        }
-
-        .content-row {
-            width: auto;
-            display: flex;
-        }
-
-        #fieldsModal {
-            padding-left: 5px;
-            padding-right: 5px;
-        }
-
-        .column-block {
-            display: table-cell;
-            padding-left: 5px;
-            padding-right: 5px;
-            min-height: auto;
-        }
-
-        .half-button {
-            width: 100%;
-            padding: 10px;
-        }
-
-        .input-fields {
-            border-radius: 3px;
-            height: 30px;
-            width: 470px;
-            border: none;
-            background: #E6E3E3;
-            box-shadow: inset 1px 1px 1px #ABABAF;
-            margin-top: 7px;
-        }
-
-        textarea {
-            max-width: 470px;
-            max-height: 400px;
-        }
-
-        .title {
-            font-size: 24px;
-            display: inline;
-            color: #3F51B5;
-            font-weight: bold;
-        }
-
-        .buttonClose {
-            min-width: auto;
-            padding: 0;
-            margin: 0;
-        }
-
-        .buttons {
-            padding: 0;
-            width: auto !important;
-            height: auto;
-            display: initial;
-            float: right;
-        }
-
-        .error-message {
-            white-space: pre;
-            margin-left: 10px;
-            color: red;
-            font-weight: bold;
-        }
-
-        .sub-header {
-            font-size: 13px;
-            font-weight: 500;
-            text-align: left;
-        }
-
-        paper-menu {
-            right: 43.5%;
-            margin-top: 40px;
-            position: fixed;
-        }
-
-        .required {
-            color: red
-        }
-    </style>
-
     <template>
+
+        <style>
+            paper-button {
+                float: right;
+                padding: 10px;
+            }
+
+            paper-button.colorful {
+                color: #4285f4;
+                margin-bottom: 6px;
+            }
+
+            paper-button[raised].colorful {
+                background: #4285f4;
+                color: #fff;
+            }
+
+            .card-custom {
+                --paper-card: {
+                    width: auto;
+                    font-size: 12px;
+                    padding: 5px;
+                    margin-top: 5px;
+                    padding-top: 10px;
+                    min-height: 200px;
+                    min-width: 200px;
+                }
+            }
+
+            .card-header-custom {
+                padding-bottom: 15px;
+                width: 100%;
+                font-size: 24px;
+                text-align: center;
+            }
+
+            .content-box {
+                background-color: #eee;
+                width: auto;
+                min-height: auto;
+                border-radius: 5px;
+                box-shadow: inset 1px 1px 1px #A5A1A1;
+                padding-top: 6px;
+            }
+
+            .content-row {
+                width: auto;
+                display: flex;
+            }
+
+            #fieldsModal {
+                padding-left: 5px;
+                padding-right: 5px;
+            }
+
+            .column-block {
+                display: table-cell;
+                padding-left: 5px;
+                padding-right: 5px;
+                min-height: auto;
+            }
+
+            .half-button {
+                width: 100%;
+                padding: 10px;
+            }
+
+            .input-fields {
+                border-radius: 3px;
+                height: 30px;
+                width: 470px;
+                border: none;
+                background: #E6E3E3;
+                box-shadow: inset 1px 1px 1px #ABABAF;
+                margin-top: 7px;
+            }
+
+            textarea {
+                max-width: 470px;
+                max-height: 400px;
+            }
+
+            .title {
+                font-size: 24px;
+                display: inline;
+                color: #3F51B5;
+                font-weight: bold;
+            }
+
+            .buttonClose {
+                min-width: auto;
+                padding: 0;
+                margin: 0;
+            }
+
+            .buttons {
+                padding: 0;
+                width: auto !important;
+                height: auto;
+                display: initial;
+                float: right;
+            }
+
+            .error-message {
+                white-space: pre;
+                margin-left: 10px;
+                color: red;
+                font-weight: bold;
+            }
+
+            .sub-header {
+                font-size: 13px;
+                font-weight: 500;
+                text-align: left;
+            }
+
+            paper-menu {
+                right: 43.5%;
+                margin-top: 40px;
+                position: fixed;
+            }
+
+            .required {
+                color: red
+            }
+        </style>
 
         <paper-dialog id="fieldsModal" entry-animation="scale-up-animation" exit-animation="fade-out-animation" modal>
              <paper-card class="card-custom">

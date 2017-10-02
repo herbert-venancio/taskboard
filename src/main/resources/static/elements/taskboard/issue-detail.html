@@ -20,359 +20,360 @@
   -->
 <dom-module id="issue-detail">
 
-    <style>
-        :host {
-        }
-
-        .card-custom {
-            background: transparent;
-            width: 100%;
-            min-height: 360px;
-            padding: 20px;
-            margin: 0;
-        }
-
-        .half-column {
-        }
-
-        .card-header-custom {
-            width: 100%;
-            margin-bottom: 30px;
-            font-size: 24px;
-            display: flex;
-        }
-
-        .card-header-info {
-            flex: 1;
-        }
-
-        .card-header-breadcrumb {
-            margin-bottom: 10px;
-            font-size: 15px;
-        }
-
-        .arrow {
-            margin: 0 5px;
-        }
-
-        paper-button.headerLink {
-            min-width: initial;
-            margin: 0px;
-            padding: 0px;
-            font-weight: normal;
-        }
-
-        .issue-key-link {
-            font-weight: 600;
-        }
-
-        .card-header-title paper-button {
-            text-transform: none;
-            font-size: 25px;
-            line-height: normal;
-            display: block;
-        }
-
-        .sub-header {
-            line-height: normal;
-            margin-bottom: 5px;
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .content-row {
-            display: flex;
-            margin-top: 20px;
-            margin-left: -10px;
-            margin-right: -10px;
-        }
-        
-        .content-row:first-child {
-            margin-top: 0;
-        }
-
-        .column-block {
-            flex: 1;
-            margin-left: 10px;
-            margin-right: 10px;
-        }
-        
-        .column-block.top-bottom-alignment {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .column-block.top-bottom-alignment .sub-content {
-            margin-top: auto;
-        }
-
-        .sub-content {
-            font-size: 15px;
-        }
-
-        paper-button {
-            margin-bottom: 12px;
-        }
-
-        .card-header-buttons {
-            padding: 0;
-            margin-left: auto;
-        }
-
-        .icon-text {
-            display: flex;
-            align-items: center;
-        }
-
-        .icon-text .icon {
-            margin-right: 5px;
-            filter: initial;
-            bottom: initial;
-        }
-
-        .assign-icon {
-            height: 17px;
-            width: 18px;
-        }
-
-        paper-material, paper-button {
-            box-shadow: none !important;
-        }
-
-        paper-button.colorful {
-            color: #4285f4;
-        }
-
-        paper-button[raised].colorful {
-            background: #4285f4;
-            color: #fff;
-        }
-
-        paper-button[toggles] {
-            transition: all 0.3s;
-        }
-
-        paper-button[toggles][active] {
-            background-color: rgba(0, 0, 0, 0.25);
-        }
-
-        paper-button[toggles][active].colorful {
-            background-color: rgba(66, 133, 244, 0.25);
-        }
-
-        paper-button[toggles][active][raised].colorful {
-            background-color: rgba(66, 133, 244, 0.75);
-        }
-        
-        paper-button.parentLink {
-            font-size: 15px;
-            font-weight: 600;
-            margin: 0px;
-            padding: 0px;
-            text-align: left;
-            color: #3B50C7;
-        }
-
-        paper-button.subtaskLink {
-            font-size: inherit;
-            font-weight: 600;
-            color: #3B50C7;
-            margin: 0 5px 0 0;
-            padding: 0;
-            display: inline;
-        }
-
-        paper-material.subtaskPanel {
-            margin-top: 5px;
-        }
-
-        paper-material.subtaskPanel:first-child {
-            margin-top: 0;
-        }
-
-        paper-material.highlightPanel {
-            padding: 4px;
-            padding-left: 8px;
-            padding-right: 8px;
-            border-radius: 5px;
-            color: white;
-            background-color: #7180D6;
-            margin: 2px;
-        }
-
-        .red {
-            --paper-progress-active-color: var(--paper-red-500);
-            --paper-progress-secondary-color: var(--paper-red-100);
-        }
-
-        .green {
-            --paper-progress-active-color: var(--paper-light-green-500);
-            --paper-progress-secondary-color: var(--paper-light-green-100);
-        }
-
-        .content-box {
-        }
-        
-        #timetracking_content {
-            height: 40px;
-        }
-
-        #timetracking_content paper-progress {
-            width: 100%;
-            --paper-progress-height: 10px;
-            margin-top: 5px;
-        }
-
-        #modal {
-            background: transparent;
-            min-width: 600px;
-            min-height: 360px;
-            margin: 0;
-            display: block;
-            font-family: inherit;
-        }
-
-        #loadCard {
-            margin-top: 12px;
-        }
-
-        .bottom {
-            margin: 4px;
-            display: flex;
-        }
-
-        .icon-blocked {
-            color: #F78181;
-            bottom: 3px;
-            -webkit-filter: drop-shadow(1px 1px 1px #616161);
-            filter: drop-shadow(1px 1px 1px #616161);
-        }
-
-        .icon-cancelada {
-            color: #FFCD00;
-            bottom: 3px;
-            -webkit-filter: drop-shadow(1px 1px 1px #616161);
-            filter: drop-shadow(1px 1px 1px #616161);
-        }
-
-        .info {
-            -webkit-filter: drop-shadow(1px 1px 1px #616161);
-            filter: drop-shadow(1px 1px 1px #616161);
-        }
-
-        .error-message {
-            white-space: pre;
-            margin-left: 10px;
-            color: red;
-            font-weight: bold;
-            width: 100%;
-        }
-
-        .buttonClose {
-            min-width: auto;
-            display: inline;
-            padding: 0;
-            margin: 0;
-        }
-
-        textarea {
-            height: 30px;
-            width: 100%;
-            border: none;
-            background-color: inherit;
-            margin-top: 7px;
-        }
-
-        .icon img {
-            display: block;
-        }
-
-        .icon-small {
-            width: 25px;
-            height: 25px;
-        }
-
-        .scroll {
-            padding: 10px;
-            overflow: auto;
-            overflow-x: hidden;
-            max-height: 150px;
-            max-width: 100%;
-            background-color: white;
-        }
-
-        .custom-footer {
-            margin-top: 30px;
-        }
-
-        .custom-footer-buttons {
-            display: flex;
-            margin-left: -5px;
-            margin-right: -5px;
-        }
-
-        .custom-footer-buttons paper-button {
-            padding: 5px 10px;
-            margin: 0 5px;
-            text-transform: none;
-            text-align: center;
-        }
-
-        paper-spinner[aria-hidden=true] {
-            display: none;
-        }
-
-        .last-block-reason-textarea {
-            border: 1px solid #CCC;
-            background: #FFF;
-            width: 100%;
-            min-height: 54px;
-            min-width: 100%;
-            max-width: 100%;
-            padding: 5px;
-            margin: 0px;
-            font-size: inherit;
-            line-height: normal;
-            font-family: inherit;
-            color: inherit;
-        }
-
-        .last-block-reason-textarea:disabled {
-            background: #DDD;
-            color: #555;
-        }
-        
-        .glasspane {
-            position: absolute;
-            left: 0px;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(197, 202, 233, 0.72);
-            z-index: 1000;
-            visibility: hidden;
-            margin: 0;
-            padding: 0;
-            cursor: pointer;
-        }
-        
-        .glasspane span {
-            font-size: 24px;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 100%;
-            text-align: center;
-            line-height: 30px;
-        }
-        
-        .visible-glasspane {
-            visibility: visible !important;
-        }
-
-    </style>
-
     <template>
+
+        <style>
+            :host {
+            }
+
+            .card-custom {
+                background: transparent;
+                width: 100%;
+                min-height: 360px;
+                padding: 20px;
+                margin: 0;
+            }
+
+            .half-column {
+            }
+
+            .card-header-custom {
+                width: 100%;
+                margin-bottom: 30px;
+                font-size: 24px;
+                display: flex;
+            }
+
+            .card-header-info {
+                flex: 1;
+            }
+
+            .card-header-breadcrumb {
+                margin-bottom: 10px;
+                font-size: 15px;
+            }
+
+            .arrow {
+                margin: 0 5px;
+            }
+
+            paper-button.headerLink {
+                min-width: initial;
+                margin: 0px;
+                padding: 0px;
+                font-weight: normal;
+            }
+
+            .issue-key-link {
+                font-weight: 600;
+            }
+
+            .card-header-title paper-button {
+                text-transform: none;
+                font-size: 25px;
+                line-height: normal;
+                display: block;
+            }
+
+            .sub-header {
+                line-height: normal;
+                margin-bottom: 5px;
+                font-size: 13px;
+                font-weight: 600;
+            }
+
+            .content-row {
+                display: flex;
+                margin-top: 20px;
+                margin-left: -10px;
+                margin-right: -10px;
+            }
+
+            .content-row:first-child {
+                margin-top: 0;
+            }
+
+            .column-block {
+                flex: 1;
+                margin-left: 10px;
+                margin-right: 10px;
+            }
+
+            .column-block.top-bottom-alignment {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .column-block.top-bottom-alignment .sub-content {
+                margin-top: auto;
+            }
+
+            .sub-content {
+                font-size: 15px;
+            }
+
+            paper-button {
+                margin-bottom: 12px;
+            }
+
+            .card-header-buttons {
+                padding: 0;
+                margin-left: auto;
+            }
+
+            .icon-text {
+                display: flex;
+                align-items: center;
+            }
+
+            .icon-text .icon {
+                margin-right: 5px;
+                filter: initial;
+                bottom: initial;
+            }
+
+            .assign-icon {
+                height: 17px;
+                width: 18px;
+            }
+
+            paper-material, paper-button {
+                box-shadow: none !important;
+            }
+
+            paper-button.colorful {
+                color: #4285f4;
+            }
+
+            paper-button[raised].colorful {
+                background: #4285f4;
+                color: #fff;
+            }
+
+            paper-button[toggles] {
+                transition: all 0.3s;
+            }
+
+            paper-button[toggles][active] {
+                background-color: rgba(0, 0, 0, 0.25);
+            }
+
+            paper-button[toggles][active].colorful {
+                background-color: rgba(66, 133, 244, 0.25);
+            }
+
+            paper-button[toggles][active][raised].colorful {
+                background-color: rgba(66, 133, 244, 0.75);
+            }
+
+            paper-button.parentLink {
+                font-size: 15px;
+                font-weight: 600;
+                margin: 0px;
+                padding: 0px;
+                text-align: left;
+                color: #3B50C7;
+            }
+
+            paper-button.subtaskLink {
+                font-size: inherit;
+                font-weight: 600;
+                color: #3B50C7;
+                margin: 0 5px 0 0;
+                padding: 0;
+                display: inline;
+            }
+
+            paper-material.subtaskPanel {
+                margin-top: 5px;
+            }
+
+            paper-material.subtaskPanel:first-child {
+                margin-top: 0;
+            }
+
+            paper-material.highlightPanel {
+                padding: 4px;
+                padding-left: 8px;
+                padding-right: 8px;
+                border-radius: 5px;
+                color: white;
+                background-color: #7180D6;
+                margin: 2px;
+            }
+
+            .red {
+                --paper-progress-active-color: var(--paper-red-500);
+                --paper-progress-secondary-color: var(--paper-red-100);
+            }
+
+            .green {
+                --paper-progress-active-color: var(--paper-light-green-500);
+                --paper-progress-secondary-color: var(--paper-light-green-100);
+            }
+
+            .content-box {
+            }
+
+            #timetracking_content {
+                height: 40px;
+            }
+
+            #timetracking_content paper-progress {
+                width: 100%;
+                --paper-progress-height: 10px;
+                margin-top: 5px;
+            }
+
+            #modal {
+                background: transparent;
+                min-width: 600px;
+                min-height: 360px;
+                margin: 0;
+                display: block;
+                font-family: inherit;
+            }
+
+            #loadCard {
+                margin-top: 12px;
+            }
+
+            .bottom {
+                margin: 4px;
+                display: flex;
+            }
+
+            .icon-blocked {
+                color: #F78181;
+                bottom: 3px;
+                -webkit-filter: drop-shadow(1px 1px 1px #616161);
+                filter: drop-shadow(1px 1px 1px #616161);
+            }
+
+            .icon-cancelada {
+                color: #FFCD00;
+                bottom: 3px;
+                -webkit-filter: drop-shadow(1px 1px 1px #616161);
+                filter: drop-shadow(1px 1px 1px #616161);
+            }
+
+            .info {
+                -webkit-filter: drop-shadow(1px 1px 1px #616161);
+                filter: drop-shadow(1px 1px 1px #616161);
+            }
+
+            .error-message {
+                white-space: pre;
+                margin-left: 10px;
+                color: red;
+                font-weight: bold;
+                width: 100%;
+            }
+
+            .buttonClose {
+                min-width: auto;
+                display: inline;
+                padding: 0;
+                margin: 0;
+            }
+
+            textarea {
+                height: 30px;
+                width: 100%;
+                border: none;
+                background-color: inherit;
+                margin-top: 7px;
+            }
+
+            .icon img {
+                display: block;
+            }
+
+            .icon-small {
+                width: 25px;
+                height: 25px;
+            }
+
+            .scroll {
+                padding: 10px;
+                overflow: auto;
+                overflow-x: hidden;
+                max-height: 150px;
+                max-width: 100%;
+                background-color: white;
+            }
+
+            .custom-footer {
+                margin-top: 30px;
+            }
+
+            .custom-footer-buttons {
+                display: flex;
+                margin-left: -5px;
+                margin-right: -5px;
+            }
+
+            .custom-footer-buttons paper-button {
+                padding: 5px 10px;
+                margin: 0 5px;
+                text-transform: none;
+                text-align: center;
+            }
+
+            paper-spinner[aria-hidden=true] {
+                display: none;
+            }
+
+            .last-block-reason-textarea {
+                border: 1px solid #CCC;
+                background: #FFF;
+                width: 100%;
+                min-height: 54px;
+                min-width: 100%;
+                max-width: 100%;
+                padding: 5px;
+                margin: 0px;
+                font-size: inherit;
+                line-height: normal;
+                font-family: inherit;
+                color: inherit;
+            }
+
+            .last-block-reason-textarea:disabled {
+                background: #DDD;
+                color: #555;
+            }
+
+            .glasspane {
+                position: absolute;
+                left: 0px;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(197, 202, 233, 0.72);
+                z-index: 1000;
+                visibility: hidden;
+                margin: 0;
+                padding: 0;
+                cursor: pointer;
+            }
+
+            .glasspane span {
+                font-size: 24px;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 100%;
+                text-align: center;
+                line-height: 30px;
+            }
+
+            .visible-glasspane {
+                visibility: visible !important;
+            }
+
+        </style>
+
         <iron-ajax id="ajaxTransitions"
                    method="POST"
                    url="/ws/issues/transitions"

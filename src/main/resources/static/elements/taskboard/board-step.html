@@ -20,29 +20,29 @@
   -->
 
 <dom-module id="board-step">
-    <style>
-
-        .step-count-wrapper {
-            width: 100%;
-        }
-
-        .step-count {
-            background: #777;
-            display: inline-block;
-            padding: 3px 10px;
-            color: #FFF;
-            border-radius: 3px;
-            margin: 3px;
-            font-size: 13px;
-        }
-
-        .issue-transition-state {
-            box-shadow: inset 0 0 1px !important
-        }
-
-    </style>
 
     <template>
+
+        <style>
+            .step-count-wrapper {
+                width: 100%;
+            }
+
+            .step-count {
+                background: #777;
+                display: inline-block;
+                padding: 3px 10px;
+                color: #FFF;
+                border-radius: 3px;
+                margin: 3px;
+                font-size: 13px;
+            }
+
+            .issue-transition-state {
+                box-shadow: inset 0 0 1px !important
+            }
+        </style>
+
         <iron-signals on-iron-signal-update-user-preferences="preferencesUpdated"
                       on-iron-signal-config-visibility-synthetic-changed="preferencesUpdated"
                       on-iron-signal-search-filter-changed="searchFilterChanged"
@@ -333,7 +333,7 @@
                     if (!belongsToThisStep && issueIndex > -1) {
                         // issue removed from this board step
                         var issueToRemoveDom = Polymer.dom(this.root).querySelector("#"+data.issue.issueKey);
-                        
+
                         var previous = $(issueToRemoveDom);
                         previous.nextAll("issue-item").each(function(){
                             var deltaY = previous.offset().top - $(this).offset().top;

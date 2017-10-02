@@ -20,266 +20,265 @@
   -->
 <dom-module id="taskboard-home">
 
-    <style>
-        paper-spinner {
-            --paper-spinner-layer-1-color: var(--accent-color);
-            --paper-spinner-layer-2-color: var(--accent-color);
-            --paper-spinner-layer-3-color: var(--accent-color);
-            --paper-spinner-layer-4-color: var(--accent-color);
-            position: absolute;
-            left: 50%;
-            margin-left: -14px;
-            top: 50%;
-            margin-top: -14px;
-        }
-
-        paper-drawer-panel {
-            --paper-drawer-panel-main-container: {
-                position: static;
-            };
-            --paper-drawer-panel-right-drawer-container: {
-                background-color: white;
-                z-index: 100
-            };
-            --paper-drawer-panel-scrim: {
-                z-index: 99;
-            };
-        }
-
-        .issue-state {
-            margin-top: -2px;
-            margin-left: 5px;
-            width: 16px;
-            display: inline-block;
-        }
-        
-        .issue-state-ready {
-            color: #3da83d;
-        }
-
-        .issue-state-updating {
-            color: #3da83d;
-            
-            animation-name: spin;
-            animation-duration: 4000ms;
-            animation-iteration-count: infinite;
-            animation-timing-function: linear;
-            -webkit-animation-name: spin;
-            -webkit-animation-duration: 4000ms;
-            -webkit-animation-iteration-count: infinite;
-            -webkit-animation-timing-function: linear;
-            -moz-animation-name: spin;
-            -moz-animation-duration: 4000ms;
-            -moz-animation-iteration-count: infinite;
-            -moz-animation-timing-function: linear;
-            -ms-animation-name: spin;
-            -ms-animation-duration: 4000ms;
-            -ms-animation-iteration-count: infinite;
-            -ms-animation-timing-function: linear;
-        }        
-
-        .issue-state-initializing {
-            color: #3da83d;
-            
-            animation-name: spin;
-            animation-duration: 4000ms;
-            animation-iteration-count: infinite;
-            animation-timing-function: linear;
-            -webkit-animation-name: spin;
-            -webkit-animation-duration: 4000ms;
-            -webkit-animation-iteration-count: infinite;
-            -webkit-animation-timing-function: linear;
-            -moz-animation-name: spin;
-            -moz-animation-duration: 4000ms;
-            -moz-animation-iteration-count: infinite;
-            -moz-animation-timing-function: linear;
-            -ms-animation-name: spin;
-            -ms-animation-duration: 4000ms;
-            -ms-animation-iteration-count: infinite;
-            -ms-animation-timing-function: linear;       
-        }
-
-        .issue-state-updateError {
-            color: #ff9800;
-        }
-
-        .issue-state-initialisationError {
-            color: #fe6565;
-        }
-
-        .app-name {
-            background-color: #3f51b5;
-            color: white;
-            font-weight: 400;
-            font-size: x-large;
-            padding: 20px;
-            z-index: 1;
-        }
-
-        .bottom {
-            background-color: #3F51B5;
-            height: 35px;
-            width: 100%;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-        }
-
-        .label-colors {
-            font-size: 15px;
-            font-weight: 600;
-            padding-left: 5px;
-            margin-left: 10px;
-        }
-
-        .label-colors.os {
-            color: #add9fe;
-        }
-
-        .label-colors.task {
-            color: #FDD28A;
-        }
-
-        .label-colors.bug {
-            color: #FF8B94;
-        }
-
-        .label-colors.outros {
-            color: #A0CB9C;
-        }
-
-        .legendas {
-            justify-content: center;
-            position: absolute;
-            width: 100%;
-            bottom: 0;
-            left: 0;
-        }
-
-        #toastError .yellow-button {
-            text-transform: none;
-            color: #eeff41;
-        }
-
-        #toastErrorTop .yellow-button {
-            text-transform: none;
-            color: #eeff41;
-        }        
-
-        #toastIssueUpdated .yellow-button {
-            text-transform: none;
-            color: #ff9800;
-            font-weight: bold;
-            --paper-toast-background-color: #EEEEEE;
-            --paper-toast-color: black;
-        }
-
-        .menu-header {
-            display: flex;
-            align-items: center;
-            height: 40px;
-            padding: 0 20px;
-            position: relative;
-            z-index: 10;
-            background-color: #EFEFEF;
-            color: #333;
-            box-shadow: none;
-        }
-
-        .search {
-        }
-
-        .visibility {
-            margin-left: 10px;
-        }
-
-        .title {
-            width: 150px;
-            top: 50%;
-            left: 50%;
-            position: absolute;
-            transform: translate(-50%, -50%);
-            font-size: x-large;
-            text-align: center;
-        }
-
-        .user {
-            margin-left: auto;
-        }
-
-        .openMenu {
-            margin-left: 10px;
-        }
-
-        .menuLink {
-            background: transparent;
-            font-size: 15px;
-            font-weight: bold;
-            color: inherit;
-        }
-
-        .menuLink:hover {
-            -webkit-transition: all .5s;
-            -moz-transition: all .5s;
-            transition: all .5s;
-            opacity: 0.9;
-            background: #CCC;
-            border-radius: 3px;
-        }
-
-        paper-toolbar {
-            height: 35px;
-            cursor: pointer;
-        }
-
-        paper-toolbar ::shadow #topBar {
-            height: 35px;
-            padding: 0px 3px 0px;
-        }
-
-        .menu-icon {
-            height: 31px;
-            width: 31px;
-        }
-
-        .followup-button,
-        .template-followup-button,
-        .sizing-button,
-        .about-button {
-            width: 35px;
-            height: 35px;
-            padding: 4px;
-            margin-left: 5px;
-            display: block;
-        }
-
-        .followup-button:hover,
-        .template-followup-button:hover,
-        .sizing-button:hover,
-        .about-button:hover {
-            background: #CCC;
-            opacity: 0.8;
-            -webkit-transition: all .5s;
-            -moz-transition: all .5s;
-            transition: all .5s;
-        }
-
-
-        @-moz-keyframes spin {
-            from { -moz-transform: rotate(0deg); }
-            to { -moz-transform: rotate(360deg); }
-        }
-        @-webkit-keyframes spin {
-            from { -webkit-transform: rotate(0deg); }
-            to { -webkit-transform: rotate(360deg); }
-        }
-        @keyframes spin {
-            from {transform:rotate(0deg);}
-            to {transform:rotate(360deg);}
-        }
-    </style>
-
     <template>
+
+        <style>
+            paper-spinner {
+                --paper-spinner-layer-1-color: var(--accent-color);
+                --paper-spinner-layer-2-color: var(--accent-color);
+                --paper-spinner-layer-3-color: var(--accent-color);
+                --paper-spinner-layer-4-color: var(--accent-color);
+                position: absolute;
+                left: 50%;
+                margin-left: -14px;
+                top: 50%;
+                margin-top: -14px;
+            }
+
+            paper-drawer-panel {
+                --paper-drawer-panel-main-container: {
+                    position: static;
+                };
+                --paper-drawer-panel-right-drawer-container: {
+                    background-color: white;
+                    z-index: 100
+                };
+                --paper-drawer-panel-scrim: {
+                    z-index: 99;
+                };
+            }
+
+            .issue-state {
+                margin-top: -2px;
+                margin-left: 5px;
+                width: 16px;
+                display: inline-block;
+            }
+
+            .issue-state-ready {
+                color: #3da83d;
+            }
+
+            .issue-state-updating {
+                color: #3da83d;
+
+                animation-name: spin;
+                animation-duration: 4000ms;
+                animation-iteration-count: infinite;
+                animation-timing-function: linear;
+                -webkit-animation-name: spin;
+                -webkit-animation-duration: 4000ms;
+                -webkit-animation-iteration-count: infinite;
+                -webkit-animation-timing-function: linear;
+                -moz-animation-name: spin;
+                -moz-animation-duration: 4000ms;
+                -moz-animation-iteration-count: infinite;
+                -moz-animation-timing-function: linear;
+                -ms-animation-name: spin;
+                -ms-animation-duration: 4000ms;
+                -ms-animation-iteration-count: infinite;
+                -ms-animation-timing-function: linear;
+            }
+
+            .issue-state-initializing {
+                color: #3da83d;
+
+                animation-name: spin;
+                animation-duration: 4000ms;
+                animation-iteration-count: infinite;
+                animation-timing-function: linear;
+                -webkit-animation-name: spin;
+                -webkit-animation-duration: 4000ms;
+                -webkit-animation-iteration-count: infinite;
+                -webkit-animation-timing-function: linear;
+                -moz-animation-name: spin;
+                -moz-animation-duration: 4000ms;
+                -moz-animation-iteration-count: infinite;
+                -moz-animation-timing-function: linear;
+                -ms-animation-name: spin;
+                -ms-animation-duration: 4000ms;
+                -ms-animation-iteration-count: infinite;
+                -ms-animation-timing-function: linear;
+            }
+
+            .issue-state-updateError {
+                color: #ff9800;
+            }
+
+            .issue-state-initialisationError {
+                color: #fe6565;
+            }
+
+            .app-name {
+                background-color: #3f51b5;
+                color: white;
+                font-weight: 400;
+                font-size: x-large;
+                padding: 20px;
+                z-index: 1;
+            }
+
+            .bottom {
+                background-color: #3F51B5;
+                height: 35px;
+                width: 100%;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+            }
+
+            .label-colors {
+                font-size: 15px;
+                font-weight: 600;
+                padding-left: 5px;
+                margin-left: 10px;
+            }
+
+            .label-colors.os {
+                color: #add9fe;
+            }
+
+            .label-colors.task {
+                color: #FDD28A;
+            }
+
+            .label-colors.bug {
+                color: #FF8B94;
+            }
+
+            .label-colors.outros {
+                color: #A0CB9C;
+            }
+
+            .legendas {
+                justify-content: center;
+                position: absolute;
+                width: 100%;
+                bottom: 0;
+                left: 0;
+            }
+
+            #toastError .yellow-button {
+                text-transform: none;
+                color: #eeff41;
+            }
+
+            #toastErrorTop .yellow-button {
+                text-transform: none;
+                color: #eeff41;
+            }
+
+            #toastIssueUpdated .yellow-button {
+                text-transform: none;
+                color: #ff9800;
+                font-weight: bold;
+                --paper-toast-background-color: #EEEEEE;
+                --paper-toast-color: black;
+            }
+
+            .menu-header {
+                display: flex;
+                align-items: center;
+                height: 40px;
+                padding: 0 20px;
+                position: relative;
+                z-index: 10;
+                background-color: #EFEFEF;
+                color: #333;
+                box-shadow: none;
+            }
+
+            .search {
+            }
+
+            .visibility {
+                margin-left: 10px;
+            }
+
+            .title {
+                width: 150px;
+                top: 50%;
+                left: 50%;
+                position: absolute;
+                transform: translate(-50%, -50%);
+                font-size: x-large;
+                text-align: center;
+            }
+
+            .user {
+                margin-left: auto;
+            }
+
+            .openMenu {
+                margin-left: 10px;
+            }
+
+            .menuLink {
+                background: transparent;
+                font-size: 15px;
+                font-weight: bold;
+                color: inherit;
+            }
+
+            .menuLink:hover {
+                -webkit-transition: all .5s;
+                -moz-transition: all .5s;
+                transition: all .5s;
+                opacity: 0.9;
+                background: #CCC;
+                border-radius: 3px;
+            }
+
+            paper-toolbar {
+                height: 35px;
+                cursor: pointer;
+            }
+
+            paper-toolbar ::shadow #topBar {
+                height: 35px;
+                padding: 0px 3px 0px;
+            }
+
+            .menu-icon {
+                height: 31px;
+                width: 31px;
+            }
+
+            .followup-button,
+            .template-followup-button,
+            .sizing-button,
+            .about-button {
+                width: 35px;
+                height: 35px;
+                padding: 4px;
+                margin-left: 5px;
+                display: block;
+            }
+
+            .followup-button:hover,
+            .template-followup-button:hover,
+            .sizing-button:hover,
+            .about-button:hover {
+                background: #CCC;
+                opacity: 0.8;
+                -webkit-transition: all .5s;
+                -moz-transition: all .5s;
+                transition: all .5s;
+            }
+
+            @-moz-keyframes spin {
+                from { -moz-transform: rotate(0deg); }
+                to { -moz-transform: rotate(360deg); }
+            }
+            @-webkit-keyframes spin {
+                from { -webkit-transform: rotate(0deg); }
+                to { -webkit-transform: rotate(360deg); }
+            }
+            @keyframes spin {
+                from {transform:rotate(0deg);}
+                to {transform:rotate(360deg);}
+            }
+        </style>
 
         <iron-ajax id="ajaxState"
                auto

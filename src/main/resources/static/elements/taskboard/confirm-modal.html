@@ -20,43 +20,43 @@
   -->
 <dom-module id="confirm-modal">
 
-    <style>
-        paper-dialog {
-            padding: 6px;
-            background: #FFF;
-        }
-
-        paper-button {
-            float: right;
-            padding: 10px;
-        }
-
-        paper-button.colorful {
-            color: #4285f4;
-            margin-bottom: 6px;
-        }
-
-        paper-button[raised].colorful {
-            background: #4285f4;
-            color: #fff;
-        }
-
-        .confirmText {
-            padding: 18px;
-            margin-bottom: 20px;
-        }
-
-        paper-button {
-            margin: 0 5px;
-            text-align: center;
-            padding: 5px 10px;
-            text-transform: none;
-            box-shadow: none !important;
-        }
-
-    </style>
-
     <template>
+
+        <style>
+            paper-dialog {
+                padding: 6px;
+                background: #FFF;
+            }
+
+            paper-button {
+                float: right;
+                padding: 10px;
+            }
+
+            paper-button.colorful {
+                color: #4285f4;
+                margin-bottom: 6px;
+            }
+
+            paper-button[raised].colorful {
+                background: #4285f4;
+                color: #fff;
+            }
+
+            .confirmText {
+                padding: 18px;
+                margin-bottom: 20px;
+            }
+
+            paper-button {
+                margin: 0 5px;
+                text-align: center;
+                padding: 5px 10px;
+                text-transform: none;
+                box-shadow: none !important;
+            }
+
+        </style>
 
         <paper-dialog id="confirmPaperDialog">
             <h2>[[title]]</h2>

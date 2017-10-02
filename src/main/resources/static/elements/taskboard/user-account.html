@@ -20,86 +20,86 @@
   -->
 <dom-module id="user-account">
 
-    <style>
-        user-account {
-            display: block;
-        }
-
-        .dropdow-menu-item:first-child {
-            margin-top: 0;
-        }
-
-        paper-item:hover {
-            background: rgba(0, 0, 0, 0.15);
-            border-radius: 3px;
-        }
-
-        paper-menu-button {
-            cursor: pointer;
-        }
-
-        paper-menu-button ::shadow #topBar {
-            height: 35px;
-            padding: 0px 10px 0px;
-            justify-content: flex-end;
-
-        }
-
-        paper-menu {
-            min-width: 170px;
-            padding: 10px;
-            background: #DDD;
-            margin-top: 35px;
-            right: 70px;
-            position: fixed;
-        }
-
-        .title {
-            display: flex;
-            align-items: center;
-            font-size: 17px;
-            padding: 0 5px;
-        }
-
-        .title:hover {
-            -webkit-transition: all .5s;
-            -moz-transition: all .5s;
-            transition: all .5s;
-            opacity: 0.9;
-            background: #CCC;
-            border-radius: 3px;
-        }
-
-        .avatar {
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            display: block;
-            margin-left: 8px;
-            vertical-align: middle;
-        }
-
-        .configUser {
-            padding: 0;
-        }
-
-        .dropdow-menu-item {
-            min-height: 0;
-            margin-top: 5px;
-            padding: 5px;
-            cursor: pointer;
-            box-shadow: none;
-        }
-
-        .dropdow-menu-item .icon {
-        }
-
-        .dropdow-menu-item .text {
-        }
-
-    </style>
-
     <template>
+
+        <style>
+            user-account {
+                display: block;
+            }
+
+            .dropdow-menu-item:first-child {
+                margin-top: 0;
+            }
+
+            paper-item:hover {
+                background: rgba(0, 0, 0, 0.15);
+                border-radius: 3px;
+            }
+
+            paper-menu-button {
+                cursor: pointer;
+            }
+
+            paper-menu-button ::shadow #topBar {
+                height: 35px;
+                padding: 0px 10px 0px;
+                justify-content: flex-end;
+
+            }
+
+            paper-menu {
+                min-width: 170px;
+                padding: 10px;
+                background: #DDD;
+                margin-top: 35px;
+                right: 70px;
+                position: fixed;
+            }
+
+            .title {
+                display: flex;
+                align-items: center;
+                font-size: 17px;
+                padding: 0 5px;
+            }
+
+            .title:hover {
+                -webkit-transition: all .5s;
+                -moz-transition: all .5s;
+                transition: all .5s;
+                opacity: 0.9;
+                background: #CCC;
+                border-radius: 3px;
+            }
+
+            .avatar {
+                border-radius: 50%;
+                width: 30px;
+                height: 30px;
+                display: block;
+                margin-left: 8px;
+                vertical-align: middle;
+            }
+
+            .configUser {
+                padding: 0;
+            }
+
+            .dropdow-menu-item {
+                min-height: 0;
+                margin-top: 5px;
+                padding: 5px;
+                cursor: pointer;
+                box-shadow: none;
+            }
+
+            .dropdow-menu-item .icon {
+            }
+
+            .dropdow-menu-item .text {
+            }
+        </style>
+
         <paper-menu-button class="configUser">
             <div class="dropdown-trigger title">
                 <span class="nameButton">{{user.user}}</span>

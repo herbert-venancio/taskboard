@@ -19,170 +19,171 @@
   [/LICENSE]
   -->
 <dom-module id="issue-new-task">
-    <style>
-        :host {
-
-        }
-
-        .card-custom {
-            --paper-card: {
-                width: 100%;
-                font-size: 12px;
-                padding: 5px;
-                margin-top: 5px;
-                padding-top: 10px;
-                min-height: 360px;
-            }
-        }
-
-        .column-block {
-            display: table-cell;
-            padding-left: 5px;
-            padding-right: 5px;
-            min-height: 40px;
-        }
-
-        .half-column {
-            width: 47%;
-        }
-
-        .card-hearder-custom {
-            display: block;
-            width: 100%;
-        }
-
-        .card-header-custom div {
-            width: 100%;
-            font-size: 24px;
-            text-align: center;
-        }
-
-        .header {
-            margin-bottom: 0px;
-            padding: 4px;
-            font-size: 22px;
-            font-weight: 600;
-            color: #3B50C7;
-        }
-
-        .sub-header {
-            font-size: 13px;
-            font-weight: 500;
-            text-align: left;
-        }
-
-        .content-row {
-            width: 100%;
-            display: table;
-        }
-
-        .sub-content {
-            min-height: 25px;
-            font-size: 15px;
-        }
-
-        paper-input {
-            --paper-input-container-color: #000000;
-            --paper-input-container-focus-color: #3F51B5;
-            --paper-input-container-input-color: #696969;
-        }
-
-        paper-dropdown-menu {
-            --paper-input-container-color: #000000;
-            --paper-input-container-focus-color: #3F51B5;
-            --paper-input-container-input-color: #696969;
-        }
-
-        paper-button {
-            margin-bottom: 12px;
-        }
-
-        .buttons {
-            width: 100%;
-        }
-
-        .buttons paper-button {
-            margin-bottom: 0;
-            left: 20px;
-        }
-
-        paper-button.colorful {
-            color: #4285f4;
-        }
-
-        paper-button[raised].colorful {
-            background: #4285f4;
-            color: #fff;
-        }
-
-        paper-button[toggles] {
-            transition: all 0.3s;
-        }
-
-        paper-button[toggles][active] {
-            background-color: rgba(0, 0, 0, 0.25);
-        }
-
-        paper-button[toggles][active].colorful {
-            background-color: rgba(66, 133, 244, 0.25);
-        }
-
-        paper-button[toggles][active][raised].colorful {
-            background-color: rgba(66, 133, 244, 0.75);
-        }
-
-        paper-button.headerLink {
-            margin-bottom: 0px;
-            padding: 4px;
-            font-size: 22px;
-            font-weight: 600;
-            color: #3B50C7;
-        }
-
-        paper-button.parentLink {
-            font-size: 15px;
-            font-weight: 600;
-            margin: 0px;
-            padding: 0px;
-            text-align: left;
-            color: #3B50C7;
-        }
-
-        .content-box {
-            background-color: #eee;
-            width: 100%;
-            min-height: 360px;
-        }
-
-        #modal {
-            padding-left: 5px;
-            padding-right: 5px;
-            min-width: 500px;
-            min-height: 360px;
-            background-color: #ccc;
-        }
-
-        #loadCard {
-            margin-top: 12px;
-        }
-
-        .bottom {
-            margin: 4px;
-            display: flex;
-        }
-
-        .header-box {
-            width: 40px !important;
-            height: 40px;
-            float: right;
-        }
-
-        .error {
-            color: red;
-        }
-    </style>
 
     <template>
+
+        <style>
+            :host {
+
+            }
+
+            .card-custom {
+                --paper-card: {
+                    width: 100%;
+                    font-size: 12px;
+                    padding: 5px;
+                    margin-top: 5px;
+                    padding-top: 10px;
+                    min-height: 360px;
+                }
+            }
+
+            .column-block {
+                display: table-cell;
+                padding-left: 5px;
+                padding-right: 5px;
+                min-height: 40px;
+            }
+
+            .half-column {
+                width: 47%;
+            }
+
+            .card-hearder-custom {
+                display: block;
+                width: 100%;
+            }
+
+            .card-header-custom div {
+                width: 100%;
+                font-size: 24px;
+                text-align: center;
+            }
+
+            .header {
+                margin-bottom: 0px;
+                padding: 4px;
+                font-size: 22px;
+                font-weight: 600;
+                color: #3B50C7;
+            }
+
+            .sub-header {
+                font-size: 13px;
+                font-weight: 500;
+                text-align: left;
+            }
+
+            .content-row {
+                width: 100%;
+                display: table;
+            }
+
+            .sub-content {
+                min-height: 25px;
+                font-size: 15px;
+            }
+
+            paper-input {
+                --paper-input-container-color: #000000;
+                --paper-input-container-focus-color: #3F51B5;
+                --paper-input-container-input-color: #696969;
+            }
+
+            paper-dropdown-menu {
+                --paper-input-container-color: #000000;
+                --paper-input-container-focus-color: #3F51B5;
+                --paper-input-container-input-color: #696969;
+            }
+
+            paper-button {
+                margin-bottom: 12px;
+            }
+
+            .buttons {
+                width: 100%;
+            }
+
+            .buttons paper-button {
+                margin-bottom: 0;
+                left: 20px;
+            }
+
+            paper-button.colorful {
+                color: #4285f4;
+            }
+
+            paper-button[raised].colorful {
+                background: #4285f4;
+                color: #fff;
+            }
+
+            paper-button[toggles] {
+                transition: all 0.3s;
+            }
+
+            paper-button[toggles][active] {
+                background-color: rgba(0, 0, 0, 0.25);
+            }
+
+            paper-button[toggles][active].colorful {
+                background-color: rgba(66, 133, 244, 0.25);
+            }
+
+            paper-button[toggles][active][raised].colorful {
+                background-color: rgba(66, 133, 244, 0.75);
+            }
+
+            paper-button.headerLink {
+                margin-bottom: 0px;
+                padding: 4px;
+                font-size: 22px;
+                font-weight: 600;
+                color: #3B50C7;
+            }
+
+            paper-button.parentLink {
+                font-size: 15px;
+                font-weight: 600;
+                margin: 0px;
+                padding: 0px;
+                text-align: left;
+                color: #3B50C7;
+            }
+
+            .content-box {
+                background-color: #eee;
+                width: 100%;
+                min-height: 360px;
+            }
+
+            #modal {
+                padding-left: 5px;
+                padding-right: 5px;
+                min-width: 500px;
+                min-height: 360px;
+                background-color: #ccc;
+            }
+
+            #loadCard {
+                margin-top: 12px;
+            }
+
+            .bottom {
+                margin: 4px;
+                display: flex;
+            }
+
+            .header-box {
+                width: 40px !important;
+                height: 40px;
+                float: right;
+            }
+
+            .error {
+                color: red;
+            }
+        </style>
 
         <paper-dialog id="modal" entry-animation="scale-up-animation" exit-animation="fade-out-animation" with-backdrop
                       modal>

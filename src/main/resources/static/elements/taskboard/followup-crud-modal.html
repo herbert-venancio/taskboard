@@ -1,55 +1,58 @@
 <dom-module id="followup-crud-modal">
-    <style>
-        .template-list {
-            float: left;
-            height: 350px;
-            width: 250px;
-            margin-top: 20px;
-        }
-        
-        .template-form {
-            width: 350px;
-            margin: 0 20px;
-            float: right;
-        }
-        
-        .projects-list {
-            margin: 15px 0;
-            max-height: 250px;
-        }
-        
-        paper-item.selected {
-            background-color: #dedede;
-        }
-        
-        .delete {
-            background: red;
-            color: #820000;
-        }
-        
-        input[type='file'] {
-          display: none
-        }
-        
-        paper-item {
-            cursor: pointer;
-        }
-        
-        paper-listbox {
-            background: #f5f5f5 !important;
-        }
 
-        paper-button {
-            text-transform: none;
-        }
-
-        .clean-cache-msg span {
-            display: block;
-            margin-top: 10px;
-        }
-        
-    </style>
     <template>
+
+        <style>
+            .template-list {
+                float: left;
+                height: 350px;
+                width: 250px;
+                margin-top: 20px;
+            }
+
+            .template-form {
+                width: 350px;
+                margin: 0 20px;
+                float: right;
+            }
+
+            .projects-list {
+                margin: 15px 0;
+                max-height: 250px;
+            }
+
+            paper-item.selected {
+                background-color: #dedede;
+            }
+
+            .delete {
+                background: red;
+                color: #820000;
+            }
+
+            input[type='file'] {
+              display: none
+            }
+
+            paper-item {
+                cursor: pointer;
+            }
+
+            paper-listbox {
+                background: #f5f5f5 !important;
+            }
+
+            paper-button {
+                text-transform: none;
+            }
+
+            .clean-cache-msg span {
+                display: block;
+                margin-top: 10px;
+            }
+
+        </style>
+
         <iron-ajax id="ajaxProjects"
                    method="GET"
                    on-response="_handleProjectsResponse"
