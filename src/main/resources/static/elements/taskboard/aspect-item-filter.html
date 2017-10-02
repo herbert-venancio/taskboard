@@ -20,38 +20,38 @@
   -->
 <dom-module id="aspect-item-filter">
 
-    <style>
-        .config-item-title {
-            padding: 0 5px;
-        }
-
-        .config-item-title:hover {
-            -webkit-transition: all .5s;
-            -moz-transition: all .5s;
-            transition: all .5s;
-            opacity: 0.9;
-        }
-
-        paper-toolbar {
-            height: 35px;
-            background-color: var(--dark-primary-color);
-        }
-
-        paper-toolbar ::shadow #topBar {
-            height: 35px;
-        }
-
-        paper-toolbar paper-checkbox {
-            --paper-checkbox-checked-color: var(--accent-color);
-            margin-left: 4px;
-        }
-
-        iron-collapse {
-            padding: 5px 0px;
-        }
-    </style>
-
     <template>
+
+        <style>
+            .config-item-title {
+                padding: 0 5px;
+            }
+
+            .config-item-title:hover {
+                -webkit-transition: all .5s;
+                -moz-transition: all .5s;
+                transition: all .5s;
+                opacity: 0.9;
+            }
+
+            paper-toolbar {
+                height: 35px;
+                background-color: var(--dark-primary-color);
+            }
+
+            paper-toolbar ::shadow #topBar {
+                height: 35px;
+            }
+
+            paper-toolbar paper-checkbox {
+                --paper-checkbox-checked-color: var(--accent-color);
+                margin-left: 4px;
+            }
+
+            iron-collapse {
+                padding: 5px 0px;
+            }
+        </style>
 
         <iron-signals on-iron-signal-refresh-filter-teams="refreshFilterTeams"></iron-signals>
 

@@ -19,22 +19,25 @@
   [/LICENSE]
   -->
 <dom-module id="vertical-line">
-    <style is="custom-style">
-        div {
-            width: 1px;
-            background-color: lightgrey;
-            height: 100%;
-            float: right;
-            overflow-y: hidden;
-            position: absolute;
-            /* Causes the line to float to left of content.
-                       You can instead use position:absolute or display:inline-block
-                       if this fits better with your design */
-        }
-    </style>
 
     <template>
+
+        <style>
+            div {
+                width: 1px;
+                background-color: lightgrey;
+                height: 100%;
+                float: right;
+                overflow-y: hidden;
+                position: absolute;
+                /* Causes the line to float to left of content.
+                           You can instead use position:absolute or display:inline-block
+                           if this fits better with your design */
+            }
+        </style>
+
         <div></div>
+
     </template>
 
     <script>

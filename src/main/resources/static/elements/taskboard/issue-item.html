@@ -20,228 +20,229 @@
   -->
 <dom-module id="issue-item">
 
-    <style is="custom-style">
-        :host {
-            margin-top: 5px;
-            display: flex;
-        }
-
-        .sortable-issue-item {
-            width: calc(100% - 6px);
-            margin-right: 3px;
-            margin-left: 3px;
-        }
-
-        .issue {
-            height: 100%;
-            padding: 8px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            cursor: pointer;
-            border-radius: 3px;
-            transition: all 0.3s ease;
-        }
-
-        .issue:hover {
-            -webkit-filter: brightness(90%);
-            -moz-filter: brightness(90%);
-            transition: all 0.3s ease;
-        }
-
-        .issue.dependency {
-            border: 2px solid red;
-        }
-
-        .issue.root {
-            outline: 2px solid #000;
-            transition: all 0.3s ease;
-        }
-
-        .top {
-            margin-bottom: 5px;
-            display: flex;
-            flex-direction: row;
-            flex-wrap: wrap;
-        }
-
-        .issue:hover div {
-            opacity: 1;
-        }
-
-        .filterButton {
-            opacity: 0;
-            position: absolute;
-            background: rgba(241, 238, 238, 0.6);
-            top: 2px;
-            right: 2px;
-            border-radius: 5px;
-            transition: all 0.3s ease;
-        }
-
-        .issue:hover .filterButton {
-            opacity: 1;
-            transition: all 0.3s ease;
-        }
-
-        .issue.root .filterButton {
-            opacity: 0.7;
-            background: #000;
-            transition: all 0.3s ease;
-        }
-
-        .issue.root .filterIcon {
-            color: #FFF;
-        }
-
-        .filterButton:hover {
-            background: rgba(0, 0, 0, 0.18);
-            transition: all 0.3s ease;
-        }
-
-        .filterIcon {
-            width: 25px;
-            height: 25px;
-            padding: 3px;
-        }
-
-        .bottom {
-            margin-top: auto;
-            display: flex;
-            justify-content: flex-start;
-        }
-
-        .info-issue {
-            flex-direction: column;
-            display: flex;
-            justify-content: flex-end;
-        }
-
-        .size {
-        }
-
-        .key {
-            font-size: 11px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
-
-        .key:hover {
-            background: rgba(0, 0, 0, 0.18);
-            transition: all 0.3s ease;
-        }
-
-        .icons {
-            display: flex;
-            margin-left: auto;
-            align-self: flex-end;
-        }
-
-        :host.tiny .icons {
-            width: 75px;
-            justify-content: flex-end;
-        }
-
-        .icon-small {
-            width: 20px;
-            height: 20px;
-        }
-
-        .module {
-            overflow: hidden;
-        }
-
-        .module p {
-            line-height: 18px;
-            font-size: 14px;
-            margin: 0;
-        }
-
-        .issue-size {
-            text-align: left;
-            font-size: 15px;
-            font-weight: 600;
-        }
-
-        .impedida {
-            text-align: center;
-            color: #F78181;
-            height: 100%;
-            width: 100%;
-            position: absolute;
-            background: rgba(0, 0, 0, .3);
-            top: 0;
-            left: 0;
-            -webkit-filter: drop-shadow(1px 1px 1px #616161);
-            filter: drop-shadow(1px 1px 1px #616161);
-            pointer-events: none;
-        }
-
-        .cancelada {
-            text-align: center;
-            color: #FFCD00;
-            height: 100%;
-            width: 100%;
-            position: absolute;
-            background: rgba(0, 0, 0, .3);
-            top: 0;
-            left: 0;
-            -webkit-filter: drop-shadow(1px 1px 1px #616161);
-            filter: drop-shadow(1px 1px 1px #616161);
-            pointer-events: none;
-        }
-
-        .iconImpedidaCancelada {
-            width: 25px;
-            height: 25px;
-            display: block;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        paper-spinner {
-            position: absolute;
-            width: 0px;
-            height: 0px;
-            z-index: 1;
-            top: 20%;
-            left: 40%;
-        }
-
-        .spinner-active {
-            width: 28px;
-            height: 28px;
-        }
-
-        .freeze {
-            opacity: 1;
-            height: 100%;
-            width: 100%;
-            position: absolute;
-            background: rgba(255, 255, 255, .8);
-            top: 0;
-            left: 0;
-            -webkit-transition: all .5s;
-            -moz-transition: all .5s;
-            transition: all .5s;
-        }
-
-        .icon-issuetype {
-            z-index: 0;
-        }
-
-        .issue-UPDATED {
-            box-shadow: inset 0 0 10px #acac00
-        }
-
-        .issue-DELETED {
-            border: 3px solid #c67575
-        }
-    </style>
-
     <template>
+
+        <style>
+            :host {
+                margin-top: 5px;
+                display: flex;
+            }
+
+            .sortable-issue-item {
+                width: calc(100% - 6px);
+                margin-right: 3px;
+                margin-left: 3px;
+            }
+
+            .issue {
+                height: 100%;
+                padding: 8px;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+                cursor: pointer;
+                border-radius: 3px;
+                transition: all 0.3s ease;
+            }
+
+            .issue:hover {
+                -webkit-filter: brightness(90%);
+                -moz-filter: brightness(90%);
+                transition: all 0.3s ease;
+            }
+
+            .issue.dependency {
+                border: 2px solid red;
+            }
+
+            .issue.root {
+                outline: 2px solid #000;
+                transition: all 0.3s ease;
+            }
+
+            .top {
+                margin-bottom: 5px;
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+
+            .issue:hover div {
+                opacity: 1;
+            }
+
+            .filterButton {
+                opacity: 0;
+                position: absolute;
+                background: rgba(241, 238, 238, 0.6);
+                top: 2px;
+                right: 2px;
+                border-radius: 5px;
+                transition: all 0.3s ease;
+            }
+
+            .issue:hover .filterButton {
+                opacity: 1;
+                transition: all 0.3s ease;
+            }
+
+            .issue.root .filterButton {
+                opacity: 0.7;
+                background: #000;
+                transition: all 0.3s ease;
+            }
+
+            .issue.root .filterIcon {
+                color: #FFF;
+            }
+
+            .filterButton:hover {
+                background: rgba(0, 0, 0, 0.18);
+                transition: all 0.3s ease;
+            }
+
+            .filterIcon {
+                width: 25px;
+                height: 25px;
+                padding: 3px;
+            }
+
+            .bottom {
+                margin-top: auto;
+                display: flex;
+                justify-content: flex-start;
+            }
+
+            .info-issue {
+                flex-direction: column;
+                display: flex;
+                justify-content: flex-end;
+            }
+
+            .size {
+            }
+
+            .key {
+                font-size: 11px;
+                font-weight: bold;
+                transition: all 0.3s ease;
+            }
+
+            .key:hover {
+                background: rgba(0, 0, 0, 0.18);
+                transition: all 0.3s ease;
+            }
+
+            .icons {
+                display: flex;
+                margin-left: auto;
+                align-self: flex-end;
+            }
+
+            :host.tiny .icons {
+                width: 75px;
+                justify-content: flex-end;
+            }
+
+            .icon-small {
+                width: 20px;
+                height: 20px;
+            }
+
+            .module {
+                overflow: hidden;
+            }
+
+            .module p {
+                line-height: 18px;
+                font-size: 14px;
+                margin: 0;
+            }
+
+            .issue-size {
+                text-align: left;
+                font-size: 15px;
+                font-weight: 600;
+            }
+
+            .impedida {
+                text-align: center;
+                color: #F78181;
+                height: 100%;
+                width: 100%;
+                position: absolute;
+                background: rgba(0, 0, 0, .3);
+                top: 0;
+                left: 0;
+                -webkit-filter: drop-shadow(1px 1px 1px #616161);
+                filter: drop-shadow(1px 1px 1px #616161);
+                pointer-events: none;
+            }
+
+            .cancelada {
+                text-align: center;
+                color: #FFCD00;
+                height: 100%;
+                width: 100%;
+                position: absolute;
+                background: rgba(0, 0, 0, .3);
+                top: 0;
+                left: 0;
+                -webkit-filter: drop-shadow(1px 1px 1px #616161);
+                filter: drop-shadow(1px 1px 1px #616161);
+                pointer-events: none;
+            }
+
+            .iconImpedidaCancelada {
+                width: 25px;
+                height: 25px;
+                display: block;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+
+            paper-spinner {
+                position: absolute;
+                width: 0px;
+                height: 0px;
+                z-index: 1;
+                top: 20%;
+                left: 40%;
+            }
+
+            .spinner-active {
+                width: 28px;
+                height: 28px;
+            }
+
+            .freeze {
+                opacity: 1;
+                height: 100%;
+                width: 100%;
+                position: absolute;
+                background: rgba(255, 255, 255, .8);
+                top: 0;
+                left: 0;
+                -webkit-transition: all .5s;
+                -moz-transition: all .5s;
+                transition: all .5s;
+            }
+
+            .icon-issuetype {
+                z-index: 0;
+            }
+
+            .issue-UPDATED {
+                box-shadow: inset 0 0 10px #acac00
+            }
+
+            .issue-DELETED {
+                border: 3px solid #c67575
+            }
+        </style>
+
         <div class="sortable-issue-item">
             <input type="hidden" name="issueKey" value="{{item.issueKey}}" />
             <iron-ajax id="ajax"

@@ -20,59 +20,60 @@
   -->
 <dom-module id="aspect-subitem-filter">
 
-    <style>
-        :host {
-            text-align: left;
-            font-size: 12px;
-        }
-
-        paper-button {
-            padding: 0;
-            display: inline-block;
-            width: 100%;
-            text-align: left;
-        }
-
-        paper-icon-button {
-            margin: 0px 6px 0px 10px;
-            padding: 5px;
-            width: 35px;
-            height: 35px;
-        }
-
-        .icon:after {
-            content: "";
-            height: 2px;
-            width: 35px;
-            background-color: red;
-            position: absolute;
-            top: 16px;
-            left: 10px;
-            -moz-transform: rotate(45deg);
-            -webkit-transform: rotate(45deg);
-            -o-transform: rotate(45deg);
-            -ms-transform: rotate(45deg);
-            transform: rotate(45deg);
-        }
-
-        .icon:before {
-            content: "";
-            height: 2px;
-            width: 35px;
-            background-color: red;
-            position: absolute;
-            top: 16px;
-            left: 10px;
-            -moz-transform: rotate(135deg);
-            -webkit-transform: rotate(135deg);
-            -o-transform: rotate(135deg);
-            -ms-transform: rotate(135deg);
-            transform: rotate(135deg);
-        }
-
-    </style>
-
     <template>
+
+        <style>
+
+            :host {
+                text-align: left;
+                font-size: 12px;
+            }
+
+            paper-button {
+                padding: 0;
+                display: inline-block;
+                width: 100%;
+                text-align: left;
+            }
+
+            paper-icon-button {
+                margin: 0px 6px 0px 10px;
+                padding: 5px;
+                width: 35px;
+                height: 35px;
+            }
+
+            .icon:after {
+                content: "";
+                height: 2px;
+                width: 35px;
+                background-color: red;
+                position: absolute;
+                top: 16px;
+                left: 10px;
+                -moz-transform: rotate(45deg);
+                -webkit-transform: rotate(45deg);
+                -o-transform: rotate(45deg);
+                -ms-transform: rotate(45deg);
+                transform: rotate(45deg);
+            }
+
+            .icon:before {
+                content: "";
+                height: 2px;
+                width: 35px;
+                background-color: red;
+                position: absolute;
+                top: 16px;
+                left: 10px;
+                -moz-transform: rotate(135deg);
+                -webkit-transform: rotate(135deg);
+                -o-transform: rotate(135deg);
+                -ms-transform: rotate(135deg);
+                transform: rotate(135deg);
+            }
+
+        </style>
 
         <paper-button elevation="0" on-tap="toggle">
           <template is="dom-if" if="{{isUrl(aspectSubitemFilter)}}">

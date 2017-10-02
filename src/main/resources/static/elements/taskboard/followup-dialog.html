@@ -20,152 +20,152 @@
   -->
 <dom-module id="followup-dialog">
 
-    <style>
-        :host {
-        }
-
-        .card-custom {
-        	background: transparent;
-			width: 100%;
-			min-height: 360px;
-			padding: 20px;
-			margin: 0;
-        }
-
-        .card-header-custom {
-            width: 100%;
-            margin-bottom: 30px;
-            font-size: 24px;
-            display: flex;
-        }
-        
-        .card-header-info {
-        	flex: 1;
-        }
-
-        .card-header-breadcrumb {
-        	margin-bottom: 10px;
-        	font-size: 15px;
-        }
-        
-        
-        .sub-header {
-        	line-height: normal;
-        	margin-bottom: 5px;
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .content-row {
-            display: flex;
-            margin-top: 10px;
-            align-items: center;
-        }
-        
-        .content-row:first-child {
-        	margin-top: 0;
-        }
-
-        .card-header-buttons {
-        	padding: 0;
-            margin-left: auto;
-        }
-        
-        paper-material, paper-button {
-        	box-shadow: none !important;
-        }
-
-        paper-button {
-            background: #4285f4;
-            color: #fff;
-            margin-bottom: 12px;
-        }
-
-        paper-button[toggles] {
-            transition: all 0.3s;
-        }
-
-        paper-button[toggles][active] {
-            background-color: rgba(0, 0, 0, 0.25);
-        }
-
-        paper-button[toggles][active].colorful {
-            background-color: rgba(66, 133, 244, 0.25);
-        }
-
-        paper-button[toggles][active][raised].colorful {
-            background-color: rgba(66, 133, 244, 0.75);
-        }
-
-        #modal {
-		    background: white;
-		    min-width: 300px;
-		    min-height: 360px;
-		    margin: 0;
-		    display: block;
-		    font-family: inherit;
-        }
-
-        .error-message {
-            color: red;
-            font-weight: bold;
-            width: 100%;
-            margin-top: 5px;
-            margin-bottom: 15px;
-        }
-
-        .buttonClose {
-            background: #fff;
-            color: #000;
-        	min-width: auto;
-            display: inline;
-            padding: 0;
-            margin: 0;
-        }
-        
-        .custom-footer {
-            bottom: 20px;
-        }
-        
-        .custom-footer-buttons {
-        	display: flex;
-        	margin-left: -5px;
-        	margin-right: -5px;
-        }
-        
-        .custom-footer-buttons paper-button {
-        	padding: 5px 10px;
-        	margin: 0 5px;
-        	text-transform: none;
-        	text-align: center;
-        }
-        
-		paper-spinner[aria-hidden=true] {
-		    display: none;
-		}
-        
-        .warn-box {
-            margin: 20px 0;
-            max-width: 250px;
-        }
-        
-        .scroll {
-            padding: 10px;
-            overflow: auto;
-            overflow-x: hidden;
-            max-height: 150px;
-            width: 100%;
-            background-color: white;
-        }
-        
-        .set-template-link {
-            text-decoration: underline;
-            cursor: pointer;
-        }
-    </style>
-
     <template>
-    	<iron-ajax id="ajaxProjects"
+
+        <style>
+            :host {
+            }
+
+            .card-custom {
+                background: transparent;
+                width: 100%;
+                min-height: 360px;
+                padding: 20px;
+                margin: 0;
+            }
+
+            .card-header-custom {
+                width: 100%;
+                margin-bottom: 30px;
+                font-size: 24px;
+                display: flex;
+            }
+
+            .card-header-info {
+                flex: 1;
+            }
+
+            .card-header-breadcrumb {
+                margin-bottom: 10px;
+                font-size: 15px;
+            }
+
+            .sub-header {
+                line-height: normal;
+                margin-bottom: 5px;
+                font-size: 13px;
+                font-weight: 600;
+            }
+
+            .content-row {
+                display: flex;
+                margin-top: 10px;
+                align-items: center;
+            }
+
+            .content-row:first-child {
+                margin-top: 0;
+            }
+
+            .card-header-buttons {
+                padding: 0;
+                margin-left: auto;
+            }
+
+            paper-material, paper-button {
+                box-shadow: none !important;
+            }
+
+            paper-button {
+                background: #4285f4;
+                color: #fff;
+                margin-bottom: 12px;
+            }
+
+            paper-button[toggles] {
+                transition: all 0.3s;
+            }
+
+            paper-button[toggles][active] {
+                background-color: rgba(0, 0, 0, 0.25);
+            }
+
+            paper-button[toggles][active].colorful {
+                background-color: rgba(66, 133, 244, 0.25);
+            }
+
+            paper-button[toggles][active][raised].colorful {
+                background-color: rgba(66, 133, 244, 0.75);
+            }
+
+            #modal {
+                background: white;
+                min-width: 300px;
+                min-height: 360px;
+                margin: 0;
+                display: block;
+                font-family: inherit;
+            }
+
+            .error-message {
+                color: red;
+                font-weight: bold;
+                width: 100%;
+                margin-top: 5px;
+                margin-bottom: 15px;
+            }
+
+            .buttonClose {
+                background: #fff;
+                color: #000;
+                min-width: auto;
+                display: inline;
+                padding: 0;
+                margin: 0;
+            }
+
+            .custom-footer {
+                bottom: 20px;
+            }
+
+            .custom-footer-buttons {
+                display: flex;
+                margin-left: -5px;
+                margin-right: -5px;
+            }
+
+            .custom-footer-buttons paper-button {
+                padding: 5px 10px;
+                margin: 0 5px;
+                text-transform: none;
+                text-align: center;
+            }
+
+            paper-spinner[aria-hidden=true] {
+                display: none;
+            }
+
+            .warn-box {
+                margin: 20px 0;
+                max-width: 250px;
+            }
+
+            .scroll {
+                padding: 10px;
+                overflow: auto;
+                overflow-x: hidden;
+                max-height: 150px;
+                width: 100%;
+                background-color: white;
+            }
+
+            .set-template-link {
+                text-decoration: underline;
+                cursor: pointer;
+            }
+        </style>
+
+        <iron-ajax id="ajaxProjects"
                    method="GET"
                    url="/api/projects"
                    content-type='application/json'
@@ -234,11 +234,11 @@
                     <div class="error-message" hidden$="{{!errorMessage}}">{{errorMessage}}</div>
 
                 </div>
-                
+
                 <div id="noTemplateWarning" class="alert alert-warning warn-box" hidden$={{!showNoTemplatesFoundWarning}}>
                     <strong>No matching template</strong><br />
                     Could not find a template for the selected set of projects.
-                    <span class="set-template-link" on-tap="openTemplateFollowupDialog">Click here</span> 
+                    <span class="set-template-link" on-tap="openTemplateFollowupDialog">Click here</span>
                     to create a template
                 </div>
 
@@ -275,13 +275,13 @@
                         type: Object
                     },
                     showTemplatesCombo: {
-                    	type: Boolean
+                        type: Boolean
                     },
                     showNoTemplatesFoundWarning: {
-                    	type: Boolean
+                        type: Boolean
                     },
                     disableGenerateButton: {
-                    	type: Boolean
+                        type: Boolean
                     },
                     showDateCombo: {
                         type: Boolean
@@ -300,12 +300,12 @@
                         type: Boolean
                     }
                 },
-                
+
                 opendialog: function () {
                     this.projects = [];
                     this.$.ajaxProjects.generateRequest();
                     this.templates = [];
-                	this.$.ajaxTemplates.generateRequest();
+                    this.$.ajaxTemplates.generateRequest();
                     this.$.modal.open();
                     this.showTemplatesCombo = false;
                     this.showNoTemplatesFoundWarning = false;
@@ -313,14 +313,14 @@
                     this.showDateCombo = false;
                     this.showClearDate = false;
                 },
-                
+
                 close: function() {
                     this.$.modal.close();
                 },
-                
+
                 openTemplateFollowupDialog: function() {
-                	this.close();
-                	this.fire('iron-signal', {name: 'open-template-followup-modal'})
+                    this.close();
+                    this.fire('iron-signal', {name: 'open-template-followup-modal'})
                 },
 
                 filter: function() {
@@ -339,20 +339,20 @@
                             && _.every(t.projects, function(proj) { return _.contains(selectedProjects, proj); } ) )
                             templates.push(t);
                     });
-					
+
                     this.availableTemplates = templates;
                     var areTemplatesAvailable = this.availableTemplates && this.availableTemplates.length != 0;
                     this.showTemplatesCombo = this.availableTemplates.length > 1;
                     this.showNoTemplatesFoundWarning = !areTemplatesAvailable && selectedProjects.length > 0;
-                    
+
                     // update combo selection if old selection became invalid
-                    if ( oldSelection && ! _.contains(templates, oldSelection.value) ) 
+                    if ( oldSelection && ! _.contains(templates, oldSelection.value) )
                         this.selectedItem = -1;
 
                     var self = this;
                     this.async(function() {
                         // select first option, if available
-                        if (areTemplatesAvailable) 
+                        if (areTemplatesAvailable)
                             self.selectedItem = 0;
 
                         self.disableGenerateButton = !areTemplatesAvailable || self.selectedItem == -1;
@@ -407,41 +407,42 @@
                 },
 
                 downloadFollowup: function() {
-                	var self = this;
+                    var self = this;
                     self.errorMessage = "";
-                	var selectedKeys = this.filterSelectedProjectKeys();
-                	
-                	if (selectedKeys.length == 0) {
-                	    this.errorMessage = "Please, selected at least one project"
-                	    $(".error-message").show().delay(2000).fadeOut();
-                	    return;
-                	}
+                    var selectedKeys = this.filterSelectedProjectKeys();
 
-                	if (!this.template) {
-                	    this.errorMessage = "Template not selected";
-                	    $(".error-message").show().delay(2000).fadeOut();
-                	    return;
-                	}
-                	
-                	var projectQuery = "projects="+selectedKeys.join(",")
-                	var templateQuery = "template=" + this.template.value;
+                    if (selectedKeys.length == 0) {
+                        this.errorMessage = "Please, selected at least one project"
+                        $(".error-message").show().delay(2000).fadeOut();
+                        return;
+                    }
+
+                    if (!this.template) {
+                        this.errorMessage = "Template not selected";
+                        $(".error-message").show().delay(2000).fadeOut();
+                        return;
+                    }
+
+                    var projectQuery = "projects="+selectedKeys.join(",")
+                    var templateQuery = "template=" + this.template.value;
                     var dateQuery = "date=" + (this.selectedIndexDate > 0 ? this.selectedItemDate.value : "");
+
                     var timezone = "timezone=" + Intl.DateTimeFormat().resolvedOptions().timeZone;
-                	
-                	$.ajax({
+
+                    $.ajax({
                         url: '/ws/followup/state?' + dateQuery,
                         success: function (data) {
-                        	switch(data) {
-	                        	case "uninitialised":
-	                        	case "initialising":
-	                        		self.errorMessage = "Followup data not ready... try again in a few minutes"
-	                        		return;
-	                        	
-	                        	case "initialisationError":
-	                        	    self.errorMessage = "Followup data failed to initialise. Will retry later"
-	                        		return;
-                        	}
-                        	self.close();
+                            switch(data) {
+                                case "uninitialised":
+                                case "initialising":
+                                    self.errorMessage = "Followup data not ready... try again in a few minutes"
+                                    return;
+
+                                case "initialisationError":
+                                    self.errorMessage = "Followup data failed to initialise. Will retry later"
+                                    return;
+                            }
+                            self.close();
                             window.location = "ws/followup?"+projectQuery + "&" + templateQuery + "&" + dateQuery + "&" + timezone;
                         },
                         error: function (jqXhr, textStatus, errorThrown) {

@@ -20,30 +20,30 @@
   -->
 <dom-module id="config-table">
 
-    <style>
-        paper-toolbar {
-            height: 40px;
-        }
-
-        paper-toolbar ::shadow #topBar {
-            height: 40px;
-        }
-
-        .config-item {
-            display: flex;
-            align-items: center;
-        }
-
-        .config-icon {
-            flex: 0 0 auto;
-        }
-
-        .config-title {
-            flex: 1;
-        }
-    </style>
-
     <template>
+
+        <style>
+            paper-toolbar {
+                height: 40px;
+            }
+
+            paper-toolbar ::shadow #topBar {
+                height: 40px;
+            }
+
+            .config-item {
+                display: flex;
+                align-items: center;
+            }
+
+            .config-icon {
+                flex: 0 0 auto;
+            }
+
+            .config-title {
+                flex: 1;
+            }
+        </style>
 
         <paper-material>
             <paper-toolbar on-tap="collapseMenuTap">

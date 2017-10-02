@@ -20,40 +20,41 @@
   -->
 <dom-module id="board-search">
 
-    <style is="custom-style">
-        :host {
-            display: flex;
-            align-items: center;
-        }
-
-        .input-search {
-            border-radius: 3px;
-            height: 30px;
-            width: 200px;
-            padding: 0 10px;
-            border: none;
-            background: #DDD;
-        }
-
-        paper-dropdown-menu.custom {
-            width: 150px;
-            margin-left: 10px;
-            --paper-input-container-underline: { display: none; };
-            --paper-input-container-label: { font-size: 14px; };
-            --paper-input-container-input: { font-size: 14px; };
-         }
-
-         paper-listbox {
-             border-radius: 3px;
-         }
-
-         paper-dropdown-menu.no-releases {
-            width: 230px;
-            color: gray;
-         }
-    </style>
-
     <template>
+
+        <style>
+            :host {
+                display: flex;
+                align-items: center;
+            }
+
+            .input-search {
+                border-radius: 3px;
+                height: 30px;
+                width: 200px;
+                padding: 0 10px;
+                border: none;
+                background: #DDD;
+            }
+
+            paper-dropdown-menu.custom {
+                width: 150px;
+                margin-left: 10px;
+                --paper-input-container-underline: { display: none; };
+                --paper-input-container-label: { font-size: 14px; };
+                --paper-input-container-input: { font-size: 14px; };
+            }
+
+            paper-listbox {
+                border-radius: 3px;
+            }
+
+            paper-dropdown-menu.no-releases {
+                width: 230px;
+                color: gray;
+            }
+        </style>
+
         <iron-signals on-iron-signal-search-filter-reset="searchReset"
                       on-iron-signal-refresh-release-filter="retrieveReleases"></iron-signals>
 

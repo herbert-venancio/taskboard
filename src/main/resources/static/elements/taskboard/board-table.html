@@ -19,13 +19,15 @@
   [/LICENSE]
   -->
 <dom-module id="board-table">
-    <style>
-        .board {
-            margin-top: 40px;
-        }
-    </style>
 
     <template>
+
+        <style>
+            .board {
+                margin-top: 40px;
+            }
+        </style>
+
         <iron-ajax id=ajax
                    method="POST"
                    url="/ws/issues/"
