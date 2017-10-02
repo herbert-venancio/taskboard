@@ -15,7 +15,7 @@ public class FollowupData {
         }
     }
 
-    public final Version followupDataVersion;
+    public final String followupDataVersion;
     public final FromJiraDataSet fromJiraDs;
     public final List<AnalyticsTransitionsDataSet> analyticsTransitionsDsList;
     public final List<SyntheticTransitionsDataSet> syntheticsTransitionsDsList;
@@ -25,7 +25,7 @@ public class FollowupData {
     }
 
     public FollowupData(Version version, FromJiraDataSet fromJiraDs, List<AnalyticsTransitionsDataSet> analyticsTransitionsDsList, List<SyntheticTransitionsDataSet> syntheticsTransitionsDsList) {
-        this.followupDataVersion = version;
+        this.followupDataVersion = version.value;
         this.fromJiraDs = fromJiraDs;
         this.analyticsTransitionsDsList = analyticsTransitionsDsList;
         this.syntheticsTransitionsDsList = syntheticsTransitionsDsList;

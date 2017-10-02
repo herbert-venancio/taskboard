@@ -27,7 +27,7 @@ import java.time.ZoneId;
 public interface FollowupDataProvider {
     FollowupData getJiraData(String[] includeProjects, ZoneId timezone);
 
-    default FollowupData getJiraData(String[] includeProjects) {
+    default FollowupData getJiraData(String... includeProjects) {
         return getJiraData(includeProjects, ZoneId.systemDefault());
     }
 

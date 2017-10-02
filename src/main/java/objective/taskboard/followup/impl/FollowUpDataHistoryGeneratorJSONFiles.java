@@ -29,13 +29,16 @@ import static objective.taskboard.issueBuffer.IssueBufferState.updating;
 import static objective.taskboard.utils.IOUtilities.write;
 import static objective.taskboard.utils.ZipUtils.zip;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
@@ -49,10 +52,13 @@ import com.google.gson.GsonBuilder;
 
 import objective.taskboard.database.directory.DataBaseDirectory;
 import objective.taskboard.domain.ProjectFilterConfiguration;
-import objective.taskboard.followup.FromJiraDataRow;
-import objective.taskboard.issueBuffer.IssueBufferState;
 import objective.taskboard.followup.FollowUpDataHistoryGenerator;
+import objective.taskboard.followup.FollowupData;
+import objective.taskboard.followup.FromJiraDataSet;
+import objective.taskboard.followup.SyntheticTransitionsDataSet;
+import objective.taskboard.issueBuffer.IssueBufferState;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
+import objective.taskboard.utils.DateTimeUtils;
 
 @Component
 public class FollowUpDataHistoryGeneratorJSONFiles implements FollowUpDataHistoryGenerator {
@@ -75,7 +81,10 @@ public class FollowUpDataHistoryGeneratorJSONFiles implements FollowUpDataHistor
     @Autowired
     private DataBaseDirectory dataBaseDirectory;
 
-    private Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    private Gson gson = new GsonBuilder()
+            .registerTypeAdapter(ZonedDateTime.class, new DateTimeUtils.ZonedDateTimeAdapter())
+            .setPrettyPrinting()
+            .create();
 
     private boolean isExecutingDataHistoryGenerate = false;
 
@@ -124,7 +133,11 @@ public class FollowUpDataHistoryGeneratorJSONFiles implements FollowUpDataHistor
 
             log.info("Generating history of project " + projectKey);
             try {
-                List<FromJiraDataRow> jiraData = providerFromCurrentState.getJiraData(projectKey.split(",")).fromJiraDs.rows;
+                FollowupData jiraData = providerFromCurrentState.getJiraData(projectKey);
+                jiraData = new FollowupData(
+                        nullIfEmpty(jiraData.fromJiraDs)
+                        , nullIfEmpty(jiraData.analyticsTransitionsDsList)
+                        , headerOnly(jiraData.syntheticsTransitionsDsList));
                 write(pathJSON.toFile(), gson.toJson(jiraData));
 
                 Path pathZIP = Paths.get(pathJSON.toString() + EXTENSION_ZIP);
@@ -136,6 +149,30 @@ public class FollowUpDataHistoryGeneratorJSONFiles implements FollowUpDataHistor
             }
         }
         log.info(getClass().getSimpleName() + " complete");
+    }
+
+    private static FromJiraDataSet nullIfEmpty(FromJiraDataSet fromJiraDs) {
+        if(isEmpty(fromJiraDs.rows)) {
+            return null;
+        }
+        return new FromJiraDataSet(null, fromJiraDs.rows);
+    }
+
+    private static <T> List<T> nullIfEmpty(List<T> list) {
+        return isEmpty(list) ? null : list;
+    }
+
+    /**
+     * Should not persist data, only headers
+     * @param syntheticsDsList
+     * @return
+     */
+    private static List<SyntheticTransitionsDataSet> headerOnly(List<SyntheticTransitionsDataSet> syntheticsDsList) {
+        if(isEmpty(syntheticsDsList))
+            return null;
+        return syntheticsDsList.stream()
+                .map(s -> new SyntheticTransitionsDataSet(s.issueType, s.headers, null))
+                .collect(Collectors.toList());
     }
 
     @Override

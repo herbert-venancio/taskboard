@@ -1,0 +1,78 @@
+{
+  "followupDataVersion": "1",
+  "fromJiraDs": {
+    "rows": [
+      {
+        "planningType": "Ballpark",
+        "project": "PROJECT TEST",
+        "demandType": "Demand",
+        "demandStatus": "Doing",
+        "demandId": 1,
+        "demandNum": "I-1",
+        "demandSummary": "Summary Demand",
+        "demandDescription": "Description Demand",
+        "demandStatusPriority": 0,
+        "demandPriorityOrder": 0,
+        "taskType": "Feature",
+        "taskStatus": "Doing",
+        "taskId": 2,
+        "taskNum": "I-2",
+        "taskSummary": "Summary Feature",
+        "taskDescription": "Description Feature",
+        "taskFullDescription": "Full Description Feature",
+        "taskRelease": "Release",
+        "taskStatusPriority": 0,
+        "taskPriorityOrder": 0,
+        "subtaskType": "Sub-task",
+        "subtaskStatus": "Doing",
+        "subtaskId": 3,
+        "subtaskNum": "I-3",
+        "subtaskSummary": "Summary Sub-task",
+        "subtaskDescription": "Description Sub-task",
+        "subtaskFullDescription": "Full Description Sub-task",
+        "tshirtSize": "M",
+        "subtaskStatusPriority": 0,
+        "subtaskPriorityOrder": 0,
+        "worklog": 1.0,
+        "wrongWorklog": 1.0,
+        "demandBallpark": 1.0,
+        "taskBallpark": 1.0,
+        "queryType": "Type"
+      }
+    ]
+  },
+  "analyticsTransitionsDsList": [
+    {
+      "issueType": "Demands",
+      "headers": [
+        "PKEY",
+        "ISSUE_TYPE",
+        "To Do",
+        "Doing",
+        "Done"
+      ],
+      "rows": [
+        {
+          "issueKey": "I-1",
+          "issueType": "Demand",
+          "transitionsDates": [
+            "2017-09-25T00:00-03:00[America/Sao_Paulo]",
+            "2017-09-26T00:00-03:00[America/Sao_Paulo]",
+            "2017-09-27T00:00-03:00[America/Sao_Paulo]"
+          ]
+        }
+      ]
+    }
+  ],
+  "syntheticsTransitionsDsList": [
+    {
+      "issueType": "Demands",
+      "headers": [
+        "Date",
+        "To Do",
+        "Doing",
+        "Done"
+      ]
+    }
+  ]
+}

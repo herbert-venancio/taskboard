@@ -13,7 +13,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import objective.taskboard.jira.MetadataService;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.Range;
 import org.apache.commons.lang3.StringUtils;
@@ -28,9 +27,10 @@ import objective.taskboard.followup.AnalyticsTransitionsDataSet;
 import objective.taskboard.followup.SyntheticTransitionsDataRow;
 import objective.taskboard.followup.SyntheticTransitionsDataSet;
 import objective.taskboard.jira.JiraProperties;
+import objective.taskboard.jira.MetadataService;
 import objective.taskboard.utils.DateTimeUtils;
 
-class FollowUpTransitionsDataProvider {
+public class FollowUpTransitionsDataProvider {
 
     private static final long STATUS_CATEGORY_DONE = 3L;
 
@@ -121,6 +121,10 @@ class FollowUpTransitionsDataProvider {
                 .collect(Collectors.toList());
         Collections.addAll(headers, mergeDoneStatusesHeaders(statuses, doneStatuses));
 
+        return getSyntheticTransitionsDs(headers, statuses, doneStatuses, dataset);
+    }
+
+    public static SyntheticTransitionsDataSet getSyntheticTransitionsDs(List<String> headers, String[] statuses, List<String> doneStatuses, AnalyticsTransitionsDataSet dataset) {
         List<SyntheticTransitionsDataRow> dataRows = new LinkedList<>();
         if (!CollectionUtils.isEmpty(dataset.rows)) {
             Range<ZonedDateTime> dateRange = calculateInterval(dataset);
@@ -134,7 +138,7 @@ class FollowUpTransitionsDataProvider {
         return new SyntheticTransitionsDataSet(dataset.issueType, headers, dataRows);
     }
 
-    private int[] countIssuesInStatus(String[] statuses, AnalyticsTransitionsDataSet dataset, ZonedDateTime date) {
+    private static int[] countIssuesInStatus(String[] statuses, AnalyticsTransitionsDataSet dataset, ZonedDateTime date) {
         int[] issuesInStatusCount = new int[statuses.length];
         Arrays.fill(issuesInStatusCount, 0);
         for (AnalyticsTransitionsDataRow row : dataset.rows) {
@@ -145,7 +149,7 @@ class FollowUpTransitionsDataProvider {
         return issuesInStatusCount;
     }
 
-    private String[] mergeDoneStatusesHeaders(String[] statuses, List<String> doneStatuses) {
+    private static String[] mergeDoneStatusesHeaders(String[] statuses, List<String> doneStatuses) {
         if (doneStatuses.isEmpty())
             return statuses;
 
@@ -165,7 +169,7 @@ class FollowUpTransitionsDataProvider {
         }
     }
 
-    private int[] mergeDoneStatusesCount(String[] statuses, List<String> doneStatuses, int[] issuesInStatusCount) {
+    private static int[] mergeDoneStatusesCount(String[] statuses, List<String> doneStatuses, int[] issuesInStatusCount) {
         if (doneStatuses.isEmpty())
             return issuesInStatusCount;
 
@@ -191,7 +195,7 @@ class FollowUpTransitionsDataProvider {
     }
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private Range<ZonedDateTime> calculateInterval(AnalyticsTransitionsDataSet dataset) {
+	private static Range<ZonedDateTime> calculateInterval(AnalyticsTransitionsDataSet dataset) {
         ZonedDateTime firstDate = null;
         ZonedDateTime lastDate = null;
         for (AnalyticsTransitionsDataRow row : dataset.rows) {
@@ -211,7 +215,7 @@ class FollowUpTransitionsDataProvider {
         return (Range) Range.between(DateTimeUtils.roundDown(firstDate), DateTimeUtils.roundUp(lastDate));
     }
 
-    private Optional<Integer> getTransitionIndexByDate(AnalyticsTransitionsDataRow row, ZonedDateTime date) {
+    private static Optional<Integer> getTransitionIndexByDate(AnalyticsTransitionsDataRow row, ZonedDateTime date) {
         List<ZonedDateTime> transitionsDates = row.transitionsDates;
         Integer index = null;
         for (int i = 0; i < transitionsDates.size(); ++i) {

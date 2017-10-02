@@ -22,6 +22,7 @@ package objective.taskboard.followup;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static objective.taskboard.utils.IOUtilities.resourceToString;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
@@ -41,6 +42,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import objective.taskboard.Constants;
+import objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFilesTest;
 import objective.taskboard.utils.DateTimeUtils;
 import objective.taskboard.utils.DateTimeUtils.ZonedDateTimeAdapter;
 
@@ -189,5 +191,18 @@ public class FollowUpHelper {
 
     public static List<SyntheticTransitionsDataSet> getEmptySyntheticTransitionsDataSet() {
         return singletonList(new SyntheticTransitionsDataSet("Demands", emptyList(), emptyList()));
+    }
+
+    public static String followupEmptyV0() {
+        return "[]";
+    }
+    public static String followupExpectedV0() {
+        return resourceToString(FollowUpDataHistoryGeneratorJSONFilesTest.class, "V0_followUpDataHistoryExpected.json");
+    }
+    public static String followupEmptyV1() {
+        return resourceToString(FollowUpDataHistoryGeneratorJSONFilesTest.class, "V1_followupDataHistory_empty.json");
+    }
+    public static String followupExpectedV1() {
+        return resourceToString(FollowUpDataHistoryGeneratorJSONFilesTest.class, "V1_followUpDataHistoryExpected.json");
     }
 }

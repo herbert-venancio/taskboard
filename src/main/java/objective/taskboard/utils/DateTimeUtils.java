@@ -21,11 +21,19 @@ import java.time.temporal.ChronoField;
 public class DateTimeUtils {
 
     public static ZonedDateTime parseDate(String yyyymmdd) {
-        return LocalDate.parse(yyyymmdd, DateTimeFormatter.ISO_LOCAL_DATE).atTime(0, 0, 0).atZone(ZoneId.systemDefault());
+        return parseDate(yyyymmdd, ZoneId.systemDefault());
+    }
+
+    public static ZonedDateTime parseDate(String yyyymmdd, ZoneId timezone) {
+        return LocalDate.parse(yyyymmdd, DateTimeFormatter.ISO_LOCAL_DATE).atTime(0, 0, 0).atZone(timezone);
     }
 
     public static ZonedDateTime parseDateTime(String yyyymmdd, String hhmmss) {
-        return LocalDateTime.parse(yyyymmdd + "T" + hhmmss, DateTimeFormatter.ISO_LOCAL_DATE_TIME).atZone(ZoneId.systemDefault());
+        return parseDateTime(yyyymmdd, hhmmss, ZoneId.systemDefault());
+    }
+
+    public static ZonedDateTime parseDateTime(String yyyymmdd, String hhmmss, ZoneId timezone) {
+        return LocalDateTime.parse(yyyymmdd + "T" + hhmmss, DateTimeFormatter.ISO_LOCAL_DATE_TIME).atZone(timezone);
     }
 
     public static ZonedDateTime get(org.joda.time.DateTime dateTime) {

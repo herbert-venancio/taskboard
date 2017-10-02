@@ -27,6 +27,8 @@ import static java.nio.file.Files.createTempDirectory;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.size;
 import static java.util.Arrays.asList;
+import static objective.taskboard.followup.FollowUpHelper.followupEmptyV1;
+import static objective.taskboard.followup.FollowUpHelper.followupExpectedV1;
 import static objective.taskboard.followup.FollowUpHelper.getDefaultFollowupData;
 import static objective.taskboard.followup.FollowUpHelper.getEmptyFollowupData;
 import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.EXTENSION_JSON;
@@ -35,7 +37,6 @@ import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSON
 import static objective.taskboard.issueBuffer.IssueBufferState.ready;
 import static objective.taskboard.utils.IOUtilities.ENCODE_UTF_8;
 import static objective.taskboard.utils.IOUtilities.asResource;
-import static objective.taskboard.utils.IOUtilities.resourceToString;
 import static objective.taskboard.utils.ZipUtils.unzip;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
 import static org.hamcrest.Matchers.greaterThan;
@@ -54,6 +55,7 @@ import org.apache.commons.io.IOUtils;
 import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -63,6 +65,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import objective.taskboard.database.directory.DataBaseDirectory;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
+import objective.taskboard.rules.TimeZoneRule;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FollowUpDataHistoryGeneratorJSONFilesTest {
@@ -71,6 +74,9 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
     private static final String PROJECT_TEST_2 = "PROJECT TEST 2";
     private static final String TODAY = DateTime.now().toString(FILE_NAME_FORMAT);
     private static final String YESTERDAY = DateTime.now().minusDays(1).toString(FILE_NAME_FORMAT);
+
+    @Rule
+    public TimeZoneRule timeZoneRule = new TimeZoneRule("America/Sao_Paulo");
 
     @InjectMocks
     private FollowUpDataHistoryGeneratorJSONFiles subject;
@@ -106,8 +112,7 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
 
         subject.generate();
 
-        String dataHistoryExpected = resourceToString(getClass(), "followUpDataHistoryExpected.json");
-        assertGeneratedFile(PROJECT_TEST, dataHistoryExpected);
+        assertGeneratedFile(PROJECT_TEST, followupExpectedV1());
     }
 
     @Test
@@ -117,7 +122,7 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
 
         subject.generate();
 
-        assertGeneratedFile(PROJECT_TEST, "[]");
+        assertGeneratedFile(PROJECT_TEST, followupEmptyV1());
     }
 
     @Test
@@ -127,9 +132,8 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
 
         subject.generate();
 
-        String dataHistoryExpected = resourceToString(getClass(), "followUpDataHistoryExpected.json");
-        assertGeneratedFile(PROJECT_TEST, dataHistoryExpected);
-        assertGeneratedFile(PROJECT_TEST_2, dataHistoryExpected);
+        assertGeneratedFile(PROJECT_TEST, followupExpectedV1());
+        assertGeneratedFile(PROJECT_TEST_2, followupExpectedV1());
     }
 
     @Test
