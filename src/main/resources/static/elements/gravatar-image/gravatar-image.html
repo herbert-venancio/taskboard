@@ -20,71 +20,71 @@
   -->
 <dom-module id="gravatar-image">
 
-	<template>
-		<style>
-			img {
-				margin: 0;
-				padding: 0;
-			}
-		</style>
+    <template>
+        <style>
+            img {
+                margin: 0;
+                padding: 0;
+            }
+        </style>
 
-		<div id="imagme"></div>
-		<!-- 	<template is="dom-if" if="{{email}}"> -->
-		<img style$="{{applyStyle(imageStyle)}}" id="username_image"/>
-		<!--     </template> -->
-	</template>
+        <div id="imagme"></div>
+        <!--     <template is="dom-if" if="{{email}}"> -->
+        <img style$="{{applyStyle(imageStyle)}}" id="username_image"/>
+        <!--     </template> -->
+    </template>
 
-	<script>
-		(function () {
-			Polymer({
-				is: 'gravatar-image',
+    <script>
+        (function () {
+            Polymer({
+                is: 'gravatar-image',
 
-				properties: {
-					email: {
-						type: String,
-						observer: 'ready'
-					},
+                properties: {
+                    email: {
+                        type: String,
+                        observer: 'ready'
+                    },
 
-					size: String,
-					hash: String,
-					placeholder: String,
+                    size: String,
+                    hash: String,
+                    placeholder: String,
 
-					imageStyle: {
-						type: String,
-						value: ""
-					}
-				},
+                    imageStyle: {
+                        type: String,
+                        value: ""
+                    }
+                },
 
-				ready: function () {
-					this.size = this.size || 80;
-					this.hash = this.hash || "";
+                ready: function () {
+                    this.size = this.size || 80;
+                    this.hash = this.hash || "";
 
-					if (this.email) {
-//         	$("#imagem").append("<img style$='{{applyStyle(imageStyle)}}' id='username_image' />");
+                    if (this.email) {
+//             $("#imagem").append("<img style$='{{applyStyle(imageStyle)}}' id='username_image' />");
 
 
-						this.$.username_image.src = this.email;
-					}
-				},
+                        this.$.username_image.src = this.email;
+                    }
+                },
 
-				imageURL: function (email, size, hash, placeholder) {
-					var avatarString = (hash.length > 0) ? hash : md5(email);
+                imageURL: function (email, size, hash, placeholder) {
+                    var avatarString = (hash.length > 0) ? hash : md5(email);
 
-					var url = email;
+                    var url = email;
 
-					if (placeholder && placeholder.length > 0) {
-						url += '&d=' + placeholder;
-					}
+                    if (placeholder && placeholder.length > 0) {
+                        url += '&d=' + placeholder;
+                    }
 
-					return url;
-				},
+                    return url;
+                },
 
-				applyStyle(imageStyle) {
-					return imageStyle;
-				}
+                applyStyle(imageStyle) {
+                    return imageStyle;
+                }
 
-			});
-		})();
-	</script>
+            });
+        })();
+    </script>
 
 </dom-module>

@@ -23,77 +23,78 @@
 
 <dom-module id='log-in'>
 
-    <style>
-        paper-header-panel {
-            width: 100%;
-        }
-
-        paper-material {
-            width: 280px;
-            height: auto;
-            box-shadow: none !important;
-            
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-        
-        .fields {
-            position: relative;
-            padding: 20px 25px 40px 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
-        }
-        
-        .field {
-        }
-        
-        .incorrect {
-            left: 0;
-            bottom: calc(100% + 10px);
-            position: absolute;
-        }
-        
-        span {
-            color: red;
-        }
-
-        paper-toolbar .app-name {
-            width: 100%;
-            font-size: 30px;
-            font-weight: 300;
-            justify-content: center;
-        }
-
-        paper-input {
-            --paper-input-container-color: #696969;
-            --paper-input-container-focus-color: #3F51B5;
-            --paper-input-container-input-color: #3F3F3F;
-        }
-
-        .content {
-        }
-
-        .button-content {
-            padding-top: 10px;
-            text-align: right;
-        }
-
-        .button {
-            background-color: #3F51B5;
-            color: white;
-        }
-        
-        #loginLoad {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-    </style>
-
     <template>
+
+        <style>
+            paper-header-panel {
+                width: 100%;
+            }
+
+            paper-material {
+                width: 280px;
+                height: auto;
+                box-shadow: none !important;
+
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+
+            .fields {
+                position: relative;
+                padding: 20px 25px 40px 25px;
+                border-radius: 10px;
+                box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
+            }
+
+            .field {
+            }
+
+            .incorrect {
+                left: 0;
+                bottom: calc(100% + 10px);
+                position: absolute;
+            }
+
+            span {
+                color: red;
+            }
+
+            paper-toolbar .app-name {
+                width: 100%;
+                font-size: 30px;
+                font-weight: 300;
+                justify-content: center;
+            }
+
+            paper-input {
+                --paper-input-container-color: #696969;
+                --paper-input-container-focus-color: #3F51B5;
+                --paper-input-container-input-color: #3F3F3F;
+            }
+
+            .content {
+            }
+
+            .button-content {
+                padding-top: 10px;
+                text-align: right;
+            }
+
+            .button {
+                background-color: #3F51B5;
+                color: white;
+            }
+
+            #loginLoad {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+        </style>
+
         <paper-header-panel class="layout vertical">
             <paper-toolbar id="mainToolbar">
                 <div class="middle middle-container horizontal layout app-name">
@@ -168,11 +169,11 @@
                     that.$.login.disable = true;
                     window.location = "/";
                 }).fail(function (jqXHR, textStatus, errorThrown) {
-                    if (jqXHR.status === 401) 
+                    if (jqXHR.status === 401)
                         that.errorMsg = jqXHR.responseJSON.message.replace("Authentication Failed: ","")
-                    else 
+                    else
                         that.errorMsg = "An internal error occurred"
-                    
+
                     that.$.loginLoad.active = false;
                 });
             },
