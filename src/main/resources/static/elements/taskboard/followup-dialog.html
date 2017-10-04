@@ -427,7 +427,7 @@
                     var templateQuery = "template=" + this.template.value;
                     var dateQuery = "date=" + (this.selectedIndexDate > 0 ? this.selectedItemDate.value : "");
 
-                    var timezone = "timezone=" + Intl.DateTimeFormat().resolvedOptions().timeZone;
+                    var timezone = "timezone=" + taskboard.getTimeZoneIdFromBrowser();
 
                     $.ajax({
                         url: '/ws/followup/state?' + dateQuery,

@@ -442,6 +442,10 @@ function Taskboard() {
         return filteredIssues;
     };
 
+    this.getTimeZoneIdFromBrowser = function() {
+        return Intl.DateTimeFormat().resolvedOptions().timeZone || jstz.determine().name();
+    }
+
     function getStepsOfLane(lane) {
         var stepsOfLane = [];
         lane.stages.forEach(function(stage) {

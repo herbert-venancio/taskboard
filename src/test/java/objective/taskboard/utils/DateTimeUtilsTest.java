@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.TimeZone;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
@@ -44,6 +45,28 @@ public class DateTimeUtilsTest {
 
         // then
         assertThat(date, equalTo(expected));
+    }
+
+    @Test
+    public void determineTimeZoneId() {
+        // given
+        String validZoneId1 = "Asia/Riyadh";
+        String validZoneId2 = "Atlantic/Reykjavik";
+        String invalidZoneId = "INVALID_ZONE_ID";
+        String nullZoneId = null;
+
+        // when
+        ZoneId returnOfValidTimeZoneId1 = DateTimeUtils.determineTimeZoneId(validZoneId1);
+        ZoneId returnOfValidTimeZoneId2 = DateTimeUtils.determineTimeZoneId(validZoneId2);
+        ZoneId returnOfInvalidTimeZoneId = DateTimeUtils.determineTimeZoneId(invalidZoneId);
+        ZoneId returnOfNullTimeZoneId = DateTimeUtils.determineTimeZoneId(nullZoneId);
+        ZoneId systemDefault = TimeZone.getDefault().toZoneId();
+
+        //then
+        assertThat(returnOfValidTimeZoneId1.getId(), equalTo(validZoneId1));
+        assertThat(returnOfValidTimeZoneId2.getId(), equalTo(validZoneId2));
+        assertThat(returnOfInvalidTimeZoneId, equalTo(systemDefault));
+        assertThat(returnOfNullTimeZoneId, equalTo(systemDefault));
     }
 
     @Test
