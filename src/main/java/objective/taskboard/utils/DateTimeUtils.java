@@ -36,14 +36,24 @@ public class DateTimeUtils {
         return LocalDateTime.parse(yyyymmdd + "T" + hhmmss, DateTimeFormatter.ISO_LOCAL_DATE_TIME).atZone(timezone);
     }
 
-    public static ZonedDateTime get(org.joda.time.DateTime dateTime) {
-        return get(dateTime, ZoneId.systemDefault());
+    public static ZonedDateTime get(org.joda.time.DateTime dt) {
+        if (dt == null)
+            return null;
+        return ZonedDateTime.of(
+                dt.getYear(),
+                dt.getMonthOfYear(),
+                dt.getDayOfMonth(),
+                dt.getHourOfDay(),
+                dt.getMinuteOfHour(),
+                dt.getSecondOfMinute(),
+                dt.getMillisOfSecond() * 1_000_000,
+                ZoneId.of(dt.getZone().getID(), ZoneId.SHORT_IDS));
     }
 
     public static ZonedDateTime get(org.joda.time.DateTime dateTime, ZoneId zone) {
         return get(dateTime.getMillis(), zone);
     }
-
+    
     public static ZonedDateTime get(long milliseconds, ZoneId zone) {
         return Instant.ofEpochMilli(milliseconds).atZone(zone);
     }

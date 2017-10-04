@@ -23,7 +23,6 @@ package objective.taskboard.issueBuffer;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toList;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,6 +31,8 @@ import java.util.Optional;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang.time.StopWatch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
@@ -47,16 +48,15 @@ import objective.taskboard.issue.IssueUpdate;
 import objective.taskboard.issue.IssueUpdateType;
 import objective.taskboard.issue.IssuesUpdateEvent;
 import objective.taskboard.jira.JiraIssueService;
-import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraService;
-import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.task.IssueEventProcessScheduler;
-import objective.taskboard.utils.LocalDateTimeProviderInterface;
 
 @Service
 public class IssueBufferService {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(IssueBufferService.class);
+    private static final String CACHE_FILENAME = "issues.dat";
+
+    private static final Logger log = LoggerFactory.getLogger(IssueBufferService.class);
 
     @Autowired
     public ApplicationEventPublisher eventPublisher;
@@ -80,15 +80,9 @@ public class IssueBufferService {
     private IssueEventProcessScheduler issueEvents;
     
     @Autowired
-    JiraProperties jiraProperties;
+    private CardRepoService cardsRepoService;
     
-    @Autowired
-    MetadataService metaDataService;
-    
-    @Autowired
-    LocalDateTimeProviderInterface localDateTimeProvider;
-    
-    private CardRepo cardsRepo = new CardRepo();
+    private CardRepo cardsRepo;
     
     private final ParentProvider parentProviderFetchesMissingParents = parentKey -> {
         Issue parent = cardsRepo.get(parentKey);
@@ -113,16 +107,13 @@ public class IssueBufferService {
 
     @PostConstruct
     private synchronized void loadCache() {
-        File cache = new File("data/issues.dat");
-        Optional<CardRepo> repo = CardRepo.from(cache, jiraProperties, metaDataService, localDateTimeProvider);
-        if (repo.isPresent()) {
-            cardsRepo = repo.get();
+        cardsRepo = cardsRepoService.from(CACHE_FILENAME);
+        if (cardsRepo.size() > 0) 
             state = IssueBufferState.ready;
-        }
     }
     
     private synchronized void saveCache() {
-        cardsRepo.writeTo(new File("data/issues.dat"));
+        cardsRepo.commit();
     }
 
     public IssueBufferState getState() {
@@ -141,9 +132,9 @@ public class IssueBufferService {
                 updateState(state.start());
                 
                 IssueBufferServiceSearchVisitor visitor = new IssueBufferServiceSearchVisitor(issueConverter, cardsRepo);
-                jiraIssueService.searchAllWithParents(visitor, cardsRepo.getLastUpdatedDate());
+                jiraIssueService.searchAllWithParents(visitor, cardsRepo);
                 
-                log.info("Issue buffer service - processed " + cardsRepo.size()+ " issues");
+                log.info("Issue buffer - processed " + visitor.getProcessedCount() + " issues");
                 
                 updateState(state.done());
                 saveCache();
@@ -239,6 +230,10 @@ public class IssueBufferService {
                 .collect(toList());
         return collect;
     }
+    
+    public synchronized List<Issue> getAllIssues() {
+        return cardsRepo.values().stream().collect(toList());
+    }
 
     public synchronized Issue getIssueByKey(String key) {
         return cardsRepo.get(key);
@@ -262,17 +257,8 @@ public class IssueBufferService {
         return getIssueByKey(issue.getIssueKey());
     }
 
-    public synchronized void updateIssuesPriorities(List<TaskboardIssue> issuesPriorities) {
-        for (TaskboardIssue taskboardIssue : issuesPriorities) { 
-            Issue issue = cardsRepo.get(taskboardIssue.getProjectKey());
-            issue.setPriorityOrder(taskboardIssue.getPriority());
-            issue.setUpdatedDate(taskboardIssue.getUpdated());
-            issueEvents.add(WebhookEvent.ISSUE_UPDATED, issue.getIssueKey(), null);
-        }
-    }
-
     private void putIssue(Issue issue) {
-        cardsRepo.putOnlyIfNewer(issue.getIssueKey(), issue);
+        cardsRepo.putOnlyIfNewer(issue);
     }
 
     @EventListener
@@ -281,17 +267,6 @@ public class IssueBufferService {
         cardsRepo.get(entity.getProjectKey()).setPriorityOrder(entity.getPriority());
     }
 
-    public void reset() {
-        state = IssueBufferState.uninitialised;
-        cardsRepo.clear();
-        updateIssueBuffer();
-        while (isUpdatingTaskboardIssuesBuffer)
-            try {
-                Thread.sleep(300);
-            } catch (InterruptedException e) {
-                return;
-            }
-    }
 
     public synchronized List<Issue> reorder(String[] issues) {
         List<TaskboardIssue> updated = issuePriorityService.reorder(issues);
@@ -303,5 +278,26 @@ public class IssueBufferService {
         
         return updatedIssues;
     }
-
+    
+    private synchronized void updateIssuesPriorities(List<TaskboardIssue> issuesPriorities) {
+        for (TaskboardIssue taskboardIssue : issuesPriorities) { 
+            Issue issue = cardsRepo.get(taskboardIssue.getProjectKey());
+            issue.setPriorityOrder(taskboardIssue.getPriority());
+            issue.setPriorityUpdatedDate(taskboardIssue.getUpdated());
+            cardsRepo.setChanged(issue.getIssueKey());
+            issueEvents.add(WebhookEvent.ISSUE_UPDATED, issue.getIssueKey(), null);
+        }
+    }
+    
+    public void reset() {
+        state = IssueBufferState.uninitialised;
+        cardsRepo.clear();
+        updateIssueBuffer();
+        while (isUpdatingTaskboardIssuesBuffer)
+            try {
+                Thread.sleep(300);
+            } catch (InterruptedException e) {
+                return;
+            }
+    }
 }

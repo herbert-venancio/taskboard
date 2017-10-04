@@ -36,28 +36,33 @@ import com.google.common.cache.CacheBuilder;
 @Configuration
 @EnableCaching
 public class CacheConfiguration {
-
+    public static final String CONFIGURATION = "configuration";
+    public static final String STATUSES_METADATA = "statusesMetadata";
+    public static final String PRIORITIES_METADATA = "prioritiesMetadata";
+    public static final String ISSUE_TYPE_METADATA = "issueTypeMetadata";
     public static final String CONFIGURED_TEAMS = "configured-teams";
     public static final String TEAMS_VISIBLE_TO_USER = "teams-visible-to-user";
     public static final String PROJECTS = "projects";
     public static final String JIRA_FIELD_METADATA = "jira-field-metadata";
     public static final String HOLIDAYS = "holidays";
     public static final String ISSUE_LINKS_METADATA = "issueLinksMetadata";
+    public static final String JIRA_TIME_ZONE = "jiraTimeZone";
 
     @Bean
     public CacheManager cacheManager() {
         SimpleCacheManager simpleCacheManager = new SimpleCacheManager();
         simpleCacheManager.setCaches(Arrays.asList(
-                new GuavaCache("configuration", CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).concurrencyLevel(1).build()),
-                new GuavaCache("issueTypeMetadata", CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).concurrencyLevel(1).build()),
-                new GuavaCache("prioritiesMetadata", CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).concurrencyLevel(1).build()),
-                new GuavaCache("statusesMetadata", CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).concurrencyLevel(1).build()),
+                new GuavaCache(CONFIGURATION, CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).concurrencyLevel(1).build()),
+                new GuavaCache(ISSUE_TYPE_METADATA, CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).concurrencyLevel(1).build()),
+                new GuavaCache(PRIORITIES_METADATA, CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).concurrencyLevel(1).build()),
+                new GuavaCache(STATUSES_METADATA, CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).concurrencyLevel(1).build()),
                 new GuavaCache(ISSUE_LINKS_METADATA, CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).concurrencyLevel(1).build()),
                 new GuavaCache(CONFIGURED_TEAMS, CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).concurrencyLevel(1).build()),
                 new GuavaCache(TEAMS_VISIBLE_TO_USER, CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).concurrencyLevel(1).build()),
                 new GuavaCache(PROJECTS, CacheBuilder.newBuilder().expireAfterWrite(6, TimeUnit.HOURS).concurrencyLevel(1).build()),
                 new GuavaCache(JIRA_FIELD_METADATA, CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).concurrencyLevel(1).build()),
-                new GuavaCache(HOLIDAYS, CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).concurrencyLevel(1).build())
+                new GuavaCache(HOLIDAYS, CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).concurrencyLevel(1).build()),
+                new GuavaCache(JIRA_TIME_ZONE, CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.DAYS).concurrencyLevel(1).build())
         ));
         return simpleCacheManager;
     }

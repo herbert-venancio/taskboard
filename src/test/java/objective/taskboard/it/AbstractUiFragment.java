@@ -30,6 +30,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentI
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 
 import java.util.List;
+import java.util.function.Function;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -44,7 +45,7 @@ public abstract class AbstractUiFragment {
     }
 
     public void waitUntil(ExpectedCondition<?> condition) {
-        PageWait.wait(webDriver).until(condition);
+        PageWait.wait(webDriver).until((Function<? super WebDriver, ?>) condition);
     }
 
     protected void waitTextInElement(WebElement element, String expected) {

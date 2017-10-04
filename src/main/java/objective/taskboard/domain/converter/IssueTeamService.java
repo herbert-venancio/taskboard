@@ -1,5 +1,3 @@
-package objective.taskboard.domain.converter;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,19 +18,23 @@ package objective.taskboard.domain.converter;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.domain.converter;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
-import static java.util.stream.Collectors.toList;
 import static org.springframework.util.StringUtils.isEmpty;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.google.common.collect.Sets;
 
 import objective.taskboard.data.Issue;
 import objective.taskboard.filterConfiguration.TeamFilterConfigurationService;
@@ -42,6 +44,26 @@ public class IssueTeamService {
 
     @Autowired
     private TeamFilterConfigurationService teamFilterConfigurationService;
+    
+    public Set<String> getTeams(Issue issue) {
+        Set<String> issueTeams = new LinkedHashSet<>();
+        try {
+            for (List<String> teams : getIssueTeams(issue).values())
+                issueTeams.addAll(teams);
+        } catch (InvalidTeamException e) {
+            issueTeams.add(JiraIssueToIssueConverter.INVALID_TEAM);
+        }
+        
+        return issueTeams;
+    }
+    
+    public String getUsersTeam(Issue issue) {
+        try {
+            return String.join(",", getIssueTeams(issue).keySet());
+        } catch (InvalidTeamException e) {
+            return String.join(",", e.getUsersInInvalidTeam());
+        }
+    }
 
     public Map<String, List<String>> getIssueTeams(Issue issue) throws InvalidTeamException {
         Map<String, List<String>> usersTeam = getIssueUsersTeams(issue);
@@ -58,11 +80,11 @@ public class IssueTeamService {
         if (reporter == null)
             return newHashMap();
 
-        return getUsersTeams(newArrayList(reporter), issue.getProjectKey());
+        return getUsersTeams(Sets.newHashSet(reporter), issue.getProjectKey());
     }
 
     private Map<String, List<String>> getIssueUsersTeams(Issue issue) throws InvalidTeamException {
-        List<String> users = newArrayList();
+        Set<String> users = new LinkedHashSet<>();
 
         String assignee = issue.getAssignee();
         if (!isEmpty(assignee))
@@ -70,14 +92,10 @@ public class IssueTeamService {
         for (IssueCoAssignee coAssignee : issue.getCoAssignees())
             users.add(coAssignee.getName());
 
-        users = users.stream()
-                .distinct()
-                .collect(toList());
-
         return getUsersTeams(users, issue.getProjectKey());
     }
 
-    private Map<String, List<String>> getUsersTeams(List<String> users, String projectKey) throws InvalidTeamException {
+    private Map<String, List<String>> getUsersTeams(Set<String> users, String projectKey) throws InvalidTeamException {
         Map<String, List<String>> usersTeams = newHashMap();
 
         boolean foundSomeTeam = false;
@@ -91,7 +109,7 @@ public class IssueTeamService {
         }
 
         if (!users.isEmpty() && !foundSomeTeam)
-            throw new InvalidTeamException(users);
+            throw new InvalidTeamException(new ArrayList<String>(users));
 
         return usersTeams;
     }

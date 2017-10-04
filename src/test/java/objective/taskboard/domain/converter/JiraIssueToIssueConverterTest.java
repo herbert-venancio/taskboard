@@ -20,7 +20,6 @@
  */
 package objective.taskboard.domain.converter;
 
-import static com.google.common.collect.Maps.newHashMap;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
@@ -48,6 +47,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.internal.util.collections.Sets;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.atlassian.jira.rest.client.api.domain.BasicPriority;
@@ -153,7 +153,7 @@ public class JiraIssueToIssueConverterTest {
     @Mock
     private FilterCachedRepository filterRepository;
     @Mock
-    private MaxVisibilityDateCalculatorService maxVisibilityDateCalculatorService;
+    private CardVisibilityEvalService cardVisibilityEvalService;
     
     @Before
     public void before() {
@@ -188,6 +188,8 @@ public class JiraIssueToIssueConverterTest {
         when(priorityService.determinePriority(any())).thenReturn(0L);
         
         when(priorityService.priorityUpdateDate(any())).thenReturn(Optional.empty());
+        
+        when(cardVisibilityEvalService.calculateVisibleUntil(any(), any(), any())).thenReturn(Optional.empty());
     }
 
     @Test
@@ -205,9 +207,8 @@ public class JiraIssueToIssueConverterTest {
         when(issue.getDueDate()).thenReturn(new DateTime(0));
         when(issue.getDescription()).thenReturn("Description");
 
-        Map<String, List<String>> usersTeam = newHashMap();
-        usersTeam.put("assignee", asList("team"));
-        when(issueTeamService.getIssueTeams(any())).thenReturn(usersTeam);
+        when(issueTeamService.getUsersTeam(any())).thenReturn("assignee");
+        when(issueTeamService.getTeams(any())).thenReturn(Sets.newSet("team"));
 
         objective.taskboard.data.Issue converted = subject.convertSingleIssue(issue, buildProvider());
 

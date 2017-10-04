@@ -4,12 +4,10 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
-import java.util.Optional;
 
 import org.junit.Test;
 
@@ -50,12 +48,10 @@ public class IssueTest {
                 new LinkedList<>(), 
                 new CustomField("classOfService", null),
                 new LinkedHashMap<>(),
-                new LinkedList<>(),
-                true,
-                Optional.of(LocalDateTime.now())
+                new LinkedList<>()
                 );
         
-        Issue subject = new Issue(issueScratch, null, null, null);
+        Issue subject = new Issue(issueScratch, null, null, null, null, null);
         
         Field[] declaredFields = IssueScratch.class.getDeclaredFields();
         for (Field field : declaredFields) {

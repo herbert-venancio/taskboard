@@ -10,7 +10,8 @@ public class Changelog implements Serializable{
     public final String field;
     public final String from;
     public final String to;
-    public final ZonedDateTime timestamp;
+    
+    public final ZonedDateTime timestamp;//NOSONAR
     public final String originalTo;
 
     public Changelog(String author, String field, String fromStringVal, String toStringVal, String originalTo, ZonedDateTime timestamp) {

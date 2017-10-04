@@ -24,6 +24,8 @@ import static java.util.stream.Collectors.toList;
 
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang.time.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,8 @@ import objective.taskboard.jira.JiraIssueService;
 
 @Service
 public class AllIssuesBufferService {
+    private static final String ALL_ISSUES_CACHE = "all-issues.dat";
+
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AllIssuesBufferService.class);
 
     @Autowired
@@ -41,15 +45,29 @@ public class AllIssuesBufferService {
 
     @Autowired
     private JiraIssueService jiraIssueService;
+    
+    @Autowired
+    private CardRepoService cardsRepoService;
 
-    private CardRepo allCardsRepo = new CardRepo();
+    private CardRepo allCardsRepo;
 
     private boolean isUpdatingAllIssuesBuffer = false;
 
     private IssueBufferState state = IssueBufferState.uninitialised;
-
+    
     public IssueBufferState getState() {
         return state;
+    }
+    
+    @PostConstruct
+    private synchronized void loadCache() {
+        allCardsRepo = cardsRepoService.from(ALL_ISSUES_CACHE);
+        if (allCardsRepo.size() > 0) 
+            state = IssueBufferState.ready;
+    }
+    
+    private synchronized void saveCache() {
+        allCardsRepo.commit();
     }
 
     public synchronized void updateAllIssuesBuffer() {
@@ -65,12 +83,13 @@ public class AllIssuesBufferService {
                 log.debug("updateAllIssuesBuffer start");
                
                 IssueBufferServiceSearchVisitor searchVisitor = new IssueBufferServiceSearchVisitor(issueConverter, allCardsRepo);
-                jiraIssueService.searchAllProjectIssues(searchVisitor);
+                jiraIssueService.searchAllProjectIssues(searchVisitor, allCardsRepo);
                 
-                log.debug("All issues count: " + allCardsRepo.size());
+                log.debug("All Buffer - Issues processed: " + searchVisitor.getProcessedCount());
                 log.debug("updateAllIssuesBuffer complete");
                 log.debug("updateAllIssuesBuffer time spent " +stopWatch.getTime());
                 state = state.done();
+                saveCache();
             }
             catch (Exception e) {
                 state = state.error();

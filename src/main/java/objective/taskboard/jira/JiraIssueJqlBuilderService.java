@@ -1,18 +1,22 @@
 package objective.taskboard.jira;
 
+import static java.time.format.DateTimeFormatter.ofPattern;
+
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import objective.taskboard.data.IssuesConfiguration;
 import objective.taskboard.domain.Filter;
 import objective.taskboard.domain.ProjectFilterConfiguration;
+import objective.taskboard.issueBuffer.CardRepo;
 import objective.taskboard.repository.FilterCachedRepository;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 
@@ -26,31 +30,64 @@ public class JiraIssueJqlBuilderService {
     
     @Autowired
     private JiraProperties jiraProperties;
+    
+    @Autowired
+    private MetadataCachedService metadataService;
+    
+    public String projectsJql(CardRepo cardsRepo) {
+        String jql = projectsSqlWithoutTimeConstraint();
+        return addTimeConstraintIfPresent(cardsRepo.getLastUpdatedDate(), jql);
+    }
 
-
-    public String projectsJql() {
+    public String projectsSqlWithoutTimeConstraint() {
         List<ProjectFilterConfiguration> projects = projectRepository.getProjects();
         String projectKeys = "'" + projects.stream()
                                            .map(ProjectFilterConfiguration::getProjectKey)
                                            .collect(Collectors.joining("','")) + "'";
-        return String.format("project in (%s) ", projectKeys);
+        String jql = String.format("project in (%s) ", projectKeys);
+        return jql;
     }
 
-    public String buildQueryForIssues(Optional<Date> lastRemoteUpdatedDate) {
+    public String buildQueryForIssues(CardRepo cardsRepo) {
+        String jql = buildQueryForIssuesWithouTimeConstraint();
+        jql = addTimeConstraintIfPresent(cardsRepo.getLastUpdatedDate(), jql);
+        return addNewProjectsIfPresent(cardsRepo, jql);
+    }
+    
+    public String buildQueryForIssuesWithouTimeConstraint() {
         List<Filter> filters = filterRepository.getCache();
         List<IssuesConfiguration> configs = filters.stream().map(x -> IssuesConfiguration.fromFilter(x)).collect(Collectors.toList());
         
-        String projectsJql = projectsJql();
+        String projectsJql = projectsSqlWithoutTimeConstraint();
         String issueTypeAndStatusJql = issueTypeAndStatusAndLimitInDays(configs);
         if (issueTypeAndStatusJql.isEmpty()) 
             return String.format("(%s)", projectsJql);
         
         issueTypeAndStatusJql += " OR (status in ("+StringUtils.join(jiraProperties.getStatusesDeferredIds(),",")+"))";
-        String jql = String.format("(%s) AND (%s)", projectsJql, issueTypeAndStatusJql);
-        if (lastRemoteUpdatedDate.isPresent()) {
-            jql = "("+jql+") AND updated>=" +LocalDateTime.fromDateFields(lastRemoteUpdatedDate.get()).toString("yyyy-MM-dd HH:mm:ss Z");
-        }
-        return jql;
+        return String.format("(%s) AND (%s)", projectsJql, issueTypeAndStatusJql);
+    }
+    
+    private String addNewProjectsIfPresent(CardRepo cardsRepo, String jql) {
+        Set<String> newProjectKeys = projectRepository.getProjects().stream().map(p->p.getProjectKey()).collect(Collectors.toSet());
+        Optional<Set<String>> currentProjects = cardsRepo.getCurrentProjects();
+        if (!currentProjects.isPresent()) 
+            return jql;
+        
+        newProjectKeys.removeAll(currentProjects.get());
+        if (newProjectKeys.size() == 0) 
+            return jql;
+        
+        String newProjects = "'" + newProjectKeys.stream().collect(Collectors.joining("','")) + "'";
+        return "(" + jql + ") OR (project in ("+newProjects+"))";
+    }
+
+    private String addTimeConstraintIfPresent(Optional<Date> lastRemoteUpdatedDate, String jql) {
+        if (!lastRemoteUpdatedDate.isPresent()) return jql;
+            
+        ZonedDateTime timeInJiraTz = ZonedDateTime.ofInstant(lastRemoteUpdatedDate.get().toInstant(), metadataService.getJiraTimeZone());
+        String withTimeConstraint = "("+jql+") AND updated >= '" +ofPattern("yyyy-MM-dd HH:mm").format(timeInJiraTz)+"'";
+        
+        return withTimeConstraint;
     }
 
     private String issueTypeAndStatusAndLimitInDays(List<IssuesConfiguration> configs) {

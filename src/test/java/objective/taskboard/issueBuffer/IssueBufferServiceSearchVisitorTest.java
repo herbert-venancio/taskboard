@@ -29,7 +29,7 @@ import objective.taskboard.database.IssuePriorityService;
 import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.domain.converter.IssueTeamService;
 import objective.taskboard.domain.converter.JiraIssueToIssueConverter;
-import objective.taskboard.domain.converter.MaxVisibilityDateCalculatorService;
+import objective.taskboard.domain.converter.CardVisibilityEvalService;
 import objective.taskboard.domain.converter.StartDateStepService;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraProperties.CustomField;
@@ -55,7 +55,7 @@ public class IssueBufferServiceSearchVisitorTest {
     private FilterCachedRepository filterCachedRepo;
     
     @Mock
-    private MaxVisibilityDateCalculatorService maxVisibilityDateCalculatorService;
+    private CardVisibilityEvalService cardVisibilityEvalService;
     
     @Mock
     private StartDateStepService startDateStepService;
@@ -102,6 +102,8 @@ public class IssueBufferServiceSearchVisitorTest {
         IssueLink issuelink = new IssueLink();
         issuelink.setDependencies(Arrays.asList());
         properties.setIssuelink(issuelink);
+        
+        when(cardVisibilityEvalService.calculateVisibleUntil(any(), any(), any())).thenReturn(Optional.empty());
     }
     
     @Test

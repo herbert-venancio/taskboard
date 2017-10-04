@@ -42,11 +42,9 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -58,15 +56,12 @@ import com.atlassian.jira.rest.client.api.domain.Issue;
 import objective.taskboard.data.IssueScratch;
 import objective.taskboard.data.TaskboardTimeTracking;
 import objective.taskboard.database.IssuePriorityService;
-import objective.taskboard.domain.Filter;
 import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.domain.ParentIssueLink;
-import objective.taskboard.domain.converter.IssueTeamService.InvalidTeamException;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.repository.FilterCachedRepository;
 import objective.taskboard.repository.ParentIssueLinkRepository;
-import objective.taskboard.utils.LocalDateTimeProviderInterface;
 
 @Service
 public class JiraIssueToIssueConverter {
@@ -97,11 +92,8 @@ public class JiraIssueToIssueConverter {
     private FilterCachedRepository filterRepository;
 
     @Autowired
-    private MaxVisibilityDateCalculatorService maxVisibilityDateCalculatorService;
+    private CardVisibilityEvalService cardVisibilityEvalService;
 
-    @Autowired
-    private LocalDateTimeProviderInterface localDateTimeService;
-    
     private List<String> parentIssueLinks = new ArrayList<>();
     
     public void setParentIssueLinks(List<String> parentIssueLinks) {
@@ -126,13 +118,9 @@ public class JiraIssueToIssueConverter {
         
         Long priorityOrder = priorityService.determinePriority(jiraIssue);
         
-        Date cardUpdatedDate = jiraIssue.getUpdateDate() == null? null : jiraIssue.getUpdateDate().toDate();
         Optional<Date> priorityUpdateDate = priorityService.priorityUpdateDate(jiraIssue);
-        if (priorityUpdateDate.isPresent()) {
-            if (cardUpdatedDate == null || priorityUpdateDate.get().after(cardUpdatedDate))
-                cardUpdatedDate = priorityUpdateDate.get();
-        }
         
+        Date remoteIssueUpdatedDate = jiraIssue.getUpdateDate() != null ? jiraIssue.getUpdateDate().toDate() : jiraIssue.getCreationDate().toDate();
         IssueScratch converted = new IssueScratch(
                 jiraIssue.getId(),
                 jiraIssue.getKey(),
@@ -154,8 +142,8 @@ public class JiraIssueToIssueConverter {
                 jiraIssue.getPriority() != null ? jiraIssue.getPriority().getId() : 0l,
                 jiraIssue.getDueDate() != null ? jiraIssue.getDueDate().toDate() : null,
                 jiraIssue.getCreationDate().getMillis(),
-                cardUpdatedDate,
-                jiraIssue.getUpdateDate() != null ? jiraIssue.getUpdateDate().toDate() : jiraIssue.getCreationDate().toDate(),
+                priorityUpdateDate.orElse(new Date()),
+                remoteIssueUpdatedDate,
                 defaultIfNull(jiraIssue.getDescription(), ""),
                 getComments(jiraIssue),
                 extractLabels(jiraIssue),
@@ -167,16 +155,19 @@ public class JiraIssueToIssueConverter {
                 coAssignees,
                 extractClassOfService(jiraProperties, jiraIssue),
                 extractRelease(jiraProperties, jiraIssue),
-                extractChangelog(jiraIssue),
-                isVisible(jiraIssue),
-                maxVisibilityDateCalculatorService.calculateVisibleUntil(jiraIssue.getStatus().getId(), extractChangelog(jiraIssue))
-        );
+                extractChangelog(jiraIssue));
         
         return createIssueFromScratch(converted, provider);
     }
 
     public objective.taskboard.data.Issue createIssueFromScratch(IssueScratch scratch, ParentProvider provider) {
-        objective.taskboard.data.Issue converted = new objective.taskboard.data.Issue(scratch, jiraProperties, metadataService, localDateTimeService);
+        objective.taskboard.data.Issue converted = new objective.taskboard.data.Issue(scratch, 
+                jiraProperties, 
+                metadataService, 
+                issueTeamService, 
+                filterRepository,
+                cardVisibilityEvalService);
+        
     	if (!isEmpty(converted.getParent())) {
     	    Optional<objective.taskboard.data.Issue> parentCard = provider.get(converted.getParent());
     	    if (!parentCard.isPresent())
@@ -185,23 +176,7 @@ public class JiraIssueToIssueConverter {
             converted.setParentCard(parentCard.get());
     	}
     	
-        Set<String> issueTeams = new LinkedHashSet<>();
-        Set<String> usersTeam = new LinkedHashSet<>();
-        try {
-            Map<String, List<String>> mapUsersTeams = issueTeamService.getIssueTeams(converted);
-
-            for (List<String> teams : mapUsersTeams.values())
-                issueTeams.addAll(teams);
-
-            usersTeam.addAll(mapUsersTeams.keySet());
-        } catch (InvalidTeamException e) {
-            issueTeams.add(INVALID_TEAM);
-            usersTeam.addAll(e.getUsersInInvalidTeam());
-        }
-        
-        converted.setTeams(issueTeams);
         converted.setColor(issueColorService.getColor(converted.getClassOfServiceId()));
-        converted.setUsersTeam(String.join(",", usersTeam));
         
         Map<String, Serializable> customFields = converted.getCustomFields();
         customFields.put(jiraProperties.getCustomfield().getClassOfService().getId(), converted.getClassOfServiceValue());
@@ -239,18 +214,5 @@ public class JiraIssueToIssueConverter {
         customFields.putAll(extractTShirtSizes(jiraProperties, issue));
         customFields.putAll(extractAdditionalEstimatedHours(jiraProperties, issue));
         return customFields;
-    }
-    
-    private boolean isVisible(com.atlassian.jira.rest.client.api.domain.Issue issue) {
-        List<Filter> filters = filterRepository.getCache();
-
-        return filters.stream()
-                .filter(f -> isApplicable(f, issue))
-                .count() != 0;
-    }
-
-    private boolean isApplicable(Filter f, Issue issue) {
-        return f.getStatusId() == issue.getStatus().getId() &&
-               f.getIssueTypeId() == issue.getIssueType().getId();
     }
 }

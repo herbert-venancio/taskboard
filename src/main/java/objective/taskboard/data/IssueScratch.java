@@ -1,12 +1,10 @@
 package objective.taskboard.data;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -31,7 +29,7 @@ public class IssueScratch implements Serializable {
     protected String parent;
     protected long parentType;
     protected String parentTypeIconUri;
-    protected List<String> dependencies;
+    protected List<String> dependencies; //NOSONAR
     protected boolean render;
     protected boolean favorite;
     protected boolean hidden;
@@ -39,30 +37,29 @@ public class IssueScratch implements Serializable {
     protected String assignee;
     protected long priority;
     protected Date dueDate;
-    protected Date updatedDate;
+    protected Date priorityUpdatedDate;
     protected Date remoteIssueUpdatedDate;
+    protected Date issuerPriorityUpdatedDate;
 
     protected long created;
     protected String description;
     protected String comments;
-    protected List<String> labels;
-    protected List<String> components;
+    protected List<String> labels;       //NOSONAR
+    protected List<String> components;   //NOSONAR
     protected Long priorityOrder;
     protected TaskboardTimeTracking timeTracking;
-    protected List<Changelog> changelog;
-    protected boolean isVisible;
-    protected LocalDateTime visibleUntil;
+    protected List<Changelog> changelog; //NOSONAR
     
     @JsonIgnore
     protected String reporter;
     @JsonIgnore
-    protected List<IssueCoAssignee> coAssignees = new LinkedList<>();
+    protected List<IssueCoAssignee> coAssignees = new LinkedList<>();//NOSONAR
     @JsonIgnore
     protected CustomField classOfService;
     @JsonIgnore
-    protected Map<String, CustomField> release;
+    protected Map<String, CustomField> release;       //NOSONAR
     @JsonProperty(access = Access.WRITE_ONLY)
-    protected Map<String, Serializable> customFields;
+    protected Map<String, Serializable> customFields; //NOSONAR
 
     public IssueScratch() {
         super();
@@ -89,7 +86,7 @@ public class IssueScratch implements Serializable {
             long priority, 
             Date dueDate, 
             long created,
-            Date updatedDate, 
+            Date priorityUpdatedDate, 
             Date remoteIssueUpdatedDate,
             String description, 
             String comments, 
@@ -102,9 +99,7 @@ public class IssueScratch implements Serializable {
             List<IssueCoAssignee> coAssignees, 
             CustomField classOfService, 
             Map<String, CustomField> release,
-            List<Changelog> changelog,
-            boolean isVisible,
-            Optional<LocalDateTime> visibleUntil) {
+            List<Changelog> changelog) {
         this.id = id;
         this.issueKey = issueKey;
         this.projectKey = projectKey;
@@ -125,7 +120,7 @@ public class IssueScratch implements Serializable {
         this.priority = priority;
         this.dueDate = dueDate;
         this.created = created;
-        this.updatedDate = updatedDate;
+        this.priorityUpdatedDate = priorityUpdatedDate;
         this.remoteIssueUpdatedDate = remoteIssueUpdatedDate;
         this.description = description;
         this.comments = comments;
@@ -139,9 +134,6 @@ public class IssueScratch implements Serializable {
         this.classOfService = classOfService;
         this.release = release;
         this.changelog = changelog;
-        this.isVisible = isVisible;
-        if (visibleUntil.isPresent())
-            this.visibleUntil = visibleUntil.get();
         
         this.render = false;
         this.favorite = false;

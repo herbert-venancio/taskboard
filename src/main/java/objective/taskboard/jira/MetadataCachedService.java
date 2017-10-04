@@ -2,10 +2,12 @@ package objective.taskboard.jira;
 
 import static com.google.common.collect.Lists.newArrayList;
 
+import java.time.ZoneId;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+import objective.taskboard.jira.data.JiraTimezone;
 import objective.taskboard.jira.data.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -24,17 +26,17 @@ public class MetadataCachedService {
     @Autowired
     private JiraEndpointAsMaster jiraEndpointAsMaster;
 
-    @Cacheable("issueTypeMetadata")
+    @Cacheable(CacheConfiguration.ISSUE_TYPE_METADATA)
     public Map<Long, IssueType> getIssueTypeMetadata() throws InterruptedException, ExecutionException {
         return loadIssueTypes();
     }
 
-    @Cacheable("prioritiesMetadata")
+    @Cacheable(CacheConfiguration.PRIORITIES_METADATA)
     public Map<Long, Priority> getPrioritiesMetadata() throws InterruptedException, ExecutionException {
         return loadPriorities();
     }
 
-    @Cacheable("statusesMetadata")
+    @Cacheable(CacheConfiguration.STATUSES_METADATA)
     public Map<Long, Status> getStatusesMetadata() {
         return loadStatuses();
     }
@@ -42,6 +44,11 @@ public class MetadataCachedService {
     @Cacheable(CacheConfiguration.ISSUE_LINKS_METADATA)
     public Map<String, IssuelinksType> getIssueLinksMetadata() {
         return loadIssueLinks();
+    }
+    
+    @Cacheable(CacheConfiguration.JIRA_TIME_ZONE)
+    public ZoneId getJiraTimeZone() {
+        return ZoneId.of(jiraEndpointAsMaster.request(JiraTimezone.Service.class).get().timeZone);
     }
 
     private Map<Long, IssueType> loadIssueTypes() throws InterruptedException, ExecutionException {

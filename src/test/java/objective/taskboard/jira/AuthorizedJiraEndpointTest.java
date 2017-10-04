@@ -1,12 +1,12 @@
 package objective.taskboard.jira;
 
-import objective.taskboard.jira.data.Status;
-import objective.taskboard.jira.data.StatusCategory;
-import objective.taskboard.jira.endpoint.AuthorizedJiraEndpoint;
-import objective.taskboard.jira.endpoint.JiraEndpoint;
-import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
-import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
-import objective.taskboard.testUtils.JiraMockServer;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,13 +20,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.List;
-
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
+import objective.taskboard.jira.data.Status;
+import objective.taskboard.jira.data.StatusCategory;
+import objective.taskboard.jira.endpoint.AuthorizedJiraEndpoint;
+import objective.taskboard.jira.endpoint.JiraEndpoint;
+import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
+import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
+import objective.taskboard.testUtils.JiraMockServer;
 
 
 @RunWith(SpringRunner.class)
@@ -94,7 +94,6 @@ public class AuthorizedJiraEndpointTest {
     public void getStatusCategories() {
         List<StatusCategory> categories = jiraEndpointAsMaster.request(StatusCategory.Service.class).all();
         assertThat(categories.get(0).id, is(1L));
-        assertThat(categories.get(0).self, notNullValue());
         assertThat(categories.get(0).key, is("undefined"));
         assertThat(categories.get(0).name, is("No Category"));
         assertThat(categories.get(0).colorName, is("medium-gray"));

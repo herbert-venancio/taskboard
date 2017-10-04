@@ -1,69 +1,96 @@
 package objective.taskboard.issueBuffer;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import objective.taskboard.data.Issue;
-import objective.taskboard.jira.JiraProperties;
-import objective.taskboard.jira.MetadataService;
-import objective.taskboard.utils.LocalDateTimeProviderInterface;
+import org.apache.commons.lang3.time.StopWatch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class CardRepo implements Serializable {
-    private static final long serialVersionUID = 61443536083475176L;
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(IssueBufferService.class);
+import objective.taskboard.data.Issue;
+
+public class CardRepo  {
+    private static final Logger log = LoggerFactory.getLogger(CardRepo.class);
     
+    private CardStorage db;
     private Date lastRemoteUpdatedDate;
-    private ConcurrentHashMap<String, Issue> cardByKey = new ConcurrentHashMap<>();
-    
+    private Map<String, Issue> cardByKey = new ConcurrentHashMap<>();
+    private Set<String> unsavedCards = new HashSet<>();
+    private Set<String> currentProjects = new HashSet<>();
+       
+    public CardRepo(CardStorage repodb) {
+        this.db = repodb;
+        if (repodb.issues().size() > 0) 
+            cardByKey.putAll(repodb.issues());
+        
+        this.lastRemoteUpdatedDate = repodb.getLastRemoteUpdatedDate();
+        this.currentProjects = repodb.getCurrentProjects();
+    }
+
+    public CardRepo() {
+    }
+
     public Issue get(String key) {
         return cardByKey.get(key);
     }
     
-    public Issue putOnlyIfNewer(String key, Issue value) {
-        Issue old = cardByKey.get(key);
-        if (old == null)
-            return put(key, value);
-        
-        if (old.getUpdatedDate().after(value.getUpdatedDate())) {
-            if (old.getRemoteIssueUpdatedDate().before(value.getRemoteIssueUpdatedDate())) {
-                value.setPriorityOrder(old.getPriorityOrder());
-                value.setUpdatedDate(old.getUpdatedDate());
-                
-                return put(key, value);
-            }
-            return old;
+    public synchronized boolean putOnlyIfNewer(Issue newValue) {
+        Issue current = cardByKey.get(newValue.getIssueKey());
+        if (current == null) {
+            put(newValue.getIssueKey(), newValue);
+            return true;
         }
         
-        return put(key, value);
+        if (current.getPriorityUpdatedDate().after(newValue.getPriorityUpdatedDate()) &&
+            current.getRemoteIssueUpdatedDate().after(newValue.getRemoteIssueUpdatedDate()))
+            return false;
+        
+        if (current.getPriorityUpdatedDate().after(newValue.getPriorityUpdatedDate())) {
+            newValue.setPriorityOrder(current.getPriorityOrder());
+            newValue.setPriorityUpdatedDate(current.getPriorityUpdatedDate());
+        }
+        
+        put(newValue.getIssueKey(), newValue);
+        return true;
     }
     
-    Issue put(String key, Issue value) {
+    synchronized void put(String key, Issue value) {
         if (lastRemoteUpdatedDate == null)
             lastRemoteUpdatedDate = value.getRemoteIssueUpdatedDate();
         
         if (lastRemoteUpdatedDate.before(value.getRemoteIssueUpdatedDate()))
             lastRemoteUpdatedDate = value.getRemoteIssueUpdatedDate();
-        return cardByKey.put(key, value);
+        cardByKey.put(key, value);
+        unsavedCards.add(key);
+        addProject(value.getProjectKey());
     }
     
     public Optional<Date> getLastUpdatedDate() {
         return Optional.ofNullable(lastRemoteUpdatedDate);
     }
-
-    public void clear() {
-        cardByKey.clear();
+    
+    public synchronized Optional<Set<String>> getCurrentProjects() {
+        return Optional.ofNullable(currentProjects);
     }
 
-    public Issue remove(String key) {
+    private void addProject(String projectKey) {
+        if (currentProjects == null)
+            currentProjects = new HashSet<>();
+        currentProjects.add(projectKey);
+    }    
+
+    public synchronized void clear() {
+        cardByKey.clear();
+        lastRemoteUpdatedDate = null;
+    }
+
+    public synchronized Issue remove(String key) {
+        unsavedCards.add(key);
         return cardByKey.remove(key);
     }
 
@@ -79,37 +106,37 @@ public class CardRepo implements Serializable {
         return cardByKey.keySet();
     }
 
-    public static Optional<CardRepo> from(
-            File cache, 
-            JiraProperties jiraProperties, 
-            MetadataService metaDataService, 
-            LocalDateTimeProviderInterface localDateTimeProvider) {
+    public synchronized void commit() {
+        if (db == null)
+            return;
         
-        if (!cache.exists())
-            return Optional.empty();
+        if (unsavedCards.size() == 0)
+            return;
         
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(cache))) {
-            CardRepo repo = (CardRepo)ois.readObject();
-            repo.values().stream().forEach(c-> {
-                c.setJiraProperties(jiraProperties);
-                c.setMetaDataService(metaDataService);
-                c.setLocalDateTimeProvider(localDateTimeProvider);
-                c.setParentCard(repo.get(c.getParent()));
-            });
-            return Optional.of(repo);
-        } catch (ClassNotFoundException | IOException e) {
-            log.warn("Could not load cache. Removing and ignoring", e);
-            cache.delete();
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+        int unsavedIssueCount = unsavedCards.size();
+        try {
+            for (String key : unsavedCards) 
+                if (cardByKey.get(key) == null)
+                    db.removeIssue(key);
+                else
+                    db.storeIssue(key, cardByKey.get(key));
+            
+            db.setLastRemoteUpdatedDate(this.lastRemoteUpdatedDate);
+            db.putProjects(currentProjects);
+            db.commit();
+            unsavedCards.clear();
+        }catch(Exception e) {
+            log.error("Failed to load save issues", e);
+            db.rollback();
+            return;
         }
-        return Optional.empty();
-    }
 
-    public void writeTo(File cache) {
-        try (ObjectOutputStream ois = new ObjectOutputStream(new FileOutputStream(cache))) {
-            ois.writeObject(this);
-        } catch (IOException e) {
-            log.warn("Could not write cache", e);
-            cache.delete();
-        }
+        log.info("Data written in " + stopWatch.getTime() + " ms. Stored issues: " + unsavedIssueCount);
+    }
+    
+    public synchronized void setChanged(String issueKey) {
+        unsavedCards.add(issueKey);
     }
 }

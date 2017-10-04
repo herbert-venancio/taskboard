@@ -304,6 +304,6 @@ public class IssueFieldsExtractor {
     }
 
     private static void logErrorExtractField(Issue issue, IssueField field, JSONException e) {
-        log.error("Error extracting " + field.getName() + " from issue " + issue.getKey() + ": " + e.getMessage(), e);
+        log.error("Error extracting " + field.getName() + " from issue " + issue.getKey() + ": " + e.getMessage());
     }    
 }

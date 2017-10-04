@@ -27,6 +27,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import objective.taskboard.data.Issue;
+
 @Entity
 @Table(name = "filtro")
 public class Filter extends TaskboardEntity implements Serializable {
@@ -73,6 +75,10 @@ public class Filter extends TaskboardEntity implements Serializable {
 
     public void setLimitInDays(final String limitInDays) {
         this.limitInDays = limitInDays;
+    }
+    
+    public boolean isApplicable(Issue issue) {
+        return getStatusId() == issue.getStatus() && getIssueTypeId() == issue.getType();
     }
 
     @Override
