@@ -89,6 +89,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 </head>
 
 <body class="fullbleed layout horizontal">
+
 <div>
     <iron-meta key="issue-width" value="158"></iron-meta>
 </div>
@@ -105,47 +106,49 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <taskboard-home class="fit"></taskboard-home>
 </template>
 <script th:inline="javascript">
-	var CUSTOMFIELD = {
-	    SIZES: [[${jiraCustomfields.tShirtSize.ids}]],
-	    CLASSE_DE_SERVICO: [[${jiraCustomfields.classOfService.id}]],
-	    IMPEDIDO: [[${jiraCustomfields.blocked.id}]],
-	    LAST_BLOCK_REASON: [[${jiraCustomfields.lastBlockReason.id}]],
-	    ADDITIONAL_ESTIMATED_HOURS: [[${jiraCustomfields.additionalEstimatedHours.id}]],
-	    RELEASE: [[${jiraCustomfields.release.id}]]
-	};
-	
-	var TAMANHO = {
-	    PP: [[${jiraCustomfields.tShirtSize.extraSmall}]],
-	    P: [[${jiraCustomfields.tShirtSize.small}]],
-	    M: [[${jiraCustomfields.tShirtSize.medium}]],
-	    G: [[${jiraCustomfields.tShirtSize.large}]],
-	    GG: [[${jiraCustomfields.tShirtSize.extraLarge}]]
-	};
-	
-	var ISSUETYPE_ID = {
-	    DEMANDA: [[${jiraIssuetypes.demand.id}]]
-	};
-	
-	var STATUSES_CANCELED_IDS = JSON.parse([[${jiraStatusesCanceledIds}]]);
-	var STATUSES_COMPLETED_IDS = JSON.parse([[${jiraStatusesCompletedIds}]]).concat(STATUSES_CANCELED_IDS);
-	var TRANSITION_REQUIRED_COMMENT = JSON.parse([[${jiraTransitionsWithRequiredCommentNames}]]);
-	var START_BUSINESS_HOURS = JSON.parse([[${cycleTimeStartBusinessHours}]]);
-	var END_BUSINESS_HOURS = JSON.parse([[${cycleTimeEndBusinessHours}]]);
-	var HOLIDAYS = JSON.parse([[${holidays}]]);
-	var INVALID_TEAM = [[${invalidTeam}]];
+    var CUSTOMFIELD = {
+        SIZES: [[${jiraCustomfields.tShirtSize.ids}]],
+        CLASSE_DE_SERVICO: [[${jiraCustomfields.classOfService.id}]],
+        IMPEDIDO: [[${jiraCustomfields.blocked.id}]],
+        LAST_BLOCK_REASON: [[${jiraCustomfields.lastBlockReason.id}]],
+        ADDITIONAL_ESTIMATED_HOURS: [[${jiraCustomfields.additionalEstimatedHours.id}]],
+        RELEASE: [[${jiraCustomfields.release.id}]]
+    };
 
-	var TYPE_FIELD = {
-		TEXT: "text",
-		TEXTAREA: "textarea"
-	};
+    var TAMANHO = {
+        PP: [[${jiraCustomfields.tShirtSize.extraSmall}]],
+        P: [[${jiraCustomfields.tShirtSize.small}]],
+        M: [[${jiraCustomfields.tShirtSize.medium}]],
+        G: [[${jiraCustomfields.tShirtSize.large}]],
+        GG: [[${jiraCustomfields.tShirtSize.extraLarge}]]
+    };
 
-	var CUSTOM_TEXTAREA = [
-		"com.atlassian.jira.plugin.system.customfieldtypes:textarea"
-	];
-	
-	var GOOGLE_CLIENT_ID = [[${googleClientId}]];
+    var ISSUETYPE_ID = {
+        DEMANDA: [[${jiraIssuetypes.demand.id}]]
+    };
+
+    var STATUSES_CANCELED_IDS = JSON.parse([[${jiraStatusesCanceledIds}]]);
+    var STATUSES_COMPLETED_IDS = JSON.parse([[${jiraStatusesCompletedIds}]]).concat(STATUSES_CANCELED_IDS);
+    var TRANSITION_REQUIRED_COMMENT = JSON.parse([[${jiraTransitionsWithRequiredCommentNames}]]);
+    var START_BUSINESS_HOURS = JSON.parse([[${cycleTimeStartBusinessHours}]]);
+    var END_BUSINESS_HOURS = JSON.parse([[${cycleTimeEndBusinessHours}]]);
+    var HOLIDAYS = JSON.parse([[${holidays}]]);
+    var INVALID_TEAM = [[${invalidTeam}]];
+
+    var TYPE_FIELD = {
+        TEXT: "text",
+        TEXTAREA: "textarea"
+    };
+
+    var CUSTOM_TEXTAREA = [
+        "com.atlassian.jira.plugin.system.customfieldtypes:textarea"
+    ];
+
+    var GOOGLE_CLIENT_ID = [[${googleClientId}]];
 </script>
 <!-- build:js scripts/app.js -->
+<script src="/static/scripts/3rd/jstz.min.js"></script>
+<script src="/static/scripts/3rd/jira2md.js"></script>
 <script src="/static/scripts/app.js"></script>
 <script src="/static/scripts/md5.js"></script>
 <script src="/static/scripts/countIssue.js"></script>
@@ -153,11 +156,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <script src="/static/scripts/taskboard.js"></script>
 <script src="/static/scripts/cycleTime.js"></script>
 <script src="/static/scripts/searchFilter.js"></script>
-<script src="/static/3rd/jira2md.js"></script>
 <!-- endbuild-->
 
 <script async="async" defer="defer" src="https://apis.google.com/js/api.js"
-        onload="this.onload=function(){};" 
+        onload="this.onload=function(){};"
         onreadystatechange="if (this.readyState === 'complete') this.onload()">
 </script>
 

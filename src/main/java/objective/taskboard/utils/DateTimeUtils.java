@@ -1,14 +1,6 @@
 package objective.taskboard.utils;
 
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
-
 import java.lang.reflect.Type;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -17,6 +9,14 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
+
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
 public class DateTimeUtils {
 
@@ -60,6 +60,14 @@ public class DateTimeUtils {
     public static ZonedDateTime roundUp(ZonedDateTime date) {
         ChronoField field = ChronoField.NANO_OF_DAY;
         return date.with(field, field.range().getMaximum());
+    }
+
+    public static ZoneId determineTimeZoneId(String zoneId) {
+        try {
+            return ZoneId.of(zoneId);
+        } catch (Exception e) {
+            return ZoneId.systemDefault();
+        }
     }
 
     public static String toStringExcelFormat(ZonedDateTime date) {

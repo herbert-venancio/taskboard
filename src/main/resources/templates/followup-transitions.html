@@ -75,6 +75,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <link rel="import" href="/static/elements/elements.html"/>
     <!-- endreplace-->
 
+    <!-- build:js scripts/app.js -->
+    <script src="/static/scripts/3rd/jstz.min.js"></script>
+    <script src="/static/scripts/taskboard.js"></script>
+    <!-- endbuild-->
+
     <style type="text/css">
 
         .followup-transitions-page .app-name {
@@ -323,7 +328,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         $.get('/api/projects', function(projects) {
             var timezoneElement = document.getElementById('timezone');
-            timezoneElement.value = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            timezoneElement.value = taskboard.getTimeZoneIdFromBrowser();
 
             var loader = document.getElementById('loader');
             var projectsWrapperElement = document.getElementById('projects-wrapper');
