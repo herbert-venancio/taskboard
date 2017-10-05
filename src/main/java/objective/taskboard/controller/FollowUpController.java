@@ -23,6 +23,7 @@ package objective.taskboard.controller;
 import static objective.taskboard.utils.DateTimeUtils.determineTimeZoneId;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.OK;
 
 import java.time.ZoneId;
 import java.util.Optional;
@@ -91,6 +92,11 @@ public class FollowUpController {
             log.warn("Error while serving genericTemplate", e);
             return new ResponseEntity<>(e.getMessage() == null ? e.toString() : e.getMessage(), INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @RequestMapping("has-generic-template")
+    public ResponseEntity<Boolean> hasGenericTemplate() {
+        return new ResponseEntity<Boolean>(followUpFacade.getGenericTemplate().exists(), OK);
     }
 
     @RequestMapping("generate-history")

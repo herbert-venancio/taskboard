@@ -46,6 +46,8 @@ import objective.taskboard.utils.IOUtilities;
 @Service
 public class FollowUpFacade implements FollowUpFacadeInterface {
 
+    private final static String SAMPLE_FOLLOWUP_TEMPLATE_PATH = "followup-generic/generic-followup-template.xlsm";
+
     @Autowired
     private FollowUpTemplateStorageInterface followUpTemplateStorage;
 
@@ -146,6 +148,6 @@ public class FollowUpFacade implements FollowUpFacadeInterface {
 
     @Override
     public Resource getGenericTemplate() {
-        return IOUtilities.asResource(FollowUpFacade.class.getResource("/followup-template/generic-followup-template.xlsm"));
+        return IOUtilities.asResource(dataBaseDirectory.path(SAMPLE_FOLLOWUP_TEMPLATE_PATH));
     }
 }

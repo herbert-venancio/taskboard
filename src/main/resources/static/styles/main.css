@@ -351,6 +351,17 @@ paper-dialog {
 }
 
 /*
+    Buttons
+*/
+paper-button.tb-button--background_none {
+    background: none;
+}
+
+paper-button.tb-button--background_none[disabled] {
+    background: none;
+}
+
+/*
     Clear button
 */
 .clear-button {
