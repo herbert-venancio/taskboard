@@ -20,13 +20,29 @@
  */
 package objective.taskboard.it;
 
-import objective.taskboard.utils.ZipUtils;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.*;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
@@ -42,21 +58,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import objective.taskboard.utils.ZipUtils;
 
 public class TemplateIT extends AbstractIntegrationTest {
 
@@ -117,20 +119,6 @@ public class TemplateIT extends AbstractIntegrationTest {
         assertEquals("Invalid file, cannot be used as template", json.getString("message"));
     }
 
-    @Test
-    public void sampleTemplate() throws IOException, URISyntaxException {
-        HttpResponse response = downloadSampleTemplate();
-        assertThat(response.getStatusLine().getStatusCode(), is(200));
-
-        List<String> entries;
-        try(Stream<ZipUtils.ZipStreamEntry> stream = ZipUtils.stream(response.getEntity().getContent())) {
-            entries = stream
-                    .map(ze -> ze.getName())
-                    .collect(Collectors.toList());
-        }
-        assertThat(entries, hasItems("xl/sharedStrings.xml", "xl/worksheets/sheet7.xml"));
-    }
-
     private static Header[] doLogin(HttpClient client) throws URISyntaxException, IOException {
         HttpPost post = new HttpPost();
         post.setURI(new URI("http://localhost:8900/login"));
@@ -163,14 +151,6 @@ public class TemplateIT extends AbstractIntegrationTest {
         post.setEntity(entity);
 
         return client.execute(post);
-    }
-
-    private HttpResponse downloadSampleTemplate() throws URISyntaxException, IOException {
-        HttpGet get = new HttpGet();
-        get.setURI(new URI("http://localhost:8900/ws/followup/generic-template"));
-        get.setHeaders(session);
-
-        return client.execute(get);
     }
 
     private static File okTemplate() throws URISyntaxException {

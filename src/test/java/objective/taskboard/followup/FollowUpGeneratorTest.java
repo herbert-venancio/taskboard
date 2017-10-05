@@ -152,7 +152,7 @@ public class FollowUpGeneratorTest {
     }
 
     private FollowUpGenerator getFollowUpGeneratorUsingGenericTemplate() {
-        FollowUpTemplate genericTemplate = new FollowUpTemplate(resolve("followup-template/generic-followup-template.xlsm"));
+        FollowUpTemplate genericTemplate = new FollowUpTemplate(resolve("followup/generic-followup-template.xlsm"));
         return new FollowUpGenerator(provider, new SimpleSpreadsheetEditor(genericTemplate));
     }
 
