@@ -142,7 +142,7 @@ public class FollowUpGenerator {
 
             for (TransitionDataRow transitionDataRow : transitionDataSet.rows) {
                 SheetRow row = sheet.createRow();
-                for (String columnValue : transitionDataRow.getAsStringList())
+                for (Object columnValue : transitionDataRow.getAsObjectList())
                     row.addColumn(columnValue);
                 row.save();
             }

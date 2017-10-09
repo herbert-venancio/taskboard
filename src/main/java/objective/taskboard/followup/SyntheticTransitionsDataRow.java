@@ -25,4 +25,12 @@ public class SyntheticTransitionsDataRow implements TransitionDataRow {
                 .collect(Collectors.toList()));
         return list;
     }
+
+    @Override
+    public List<Object> getAsObjectList() {
+        List<Object> list = new LinkedList<>();
+        list.add(date);
+        list.addAll(amountOfIssueInStatus);
+        return list;
+    }
 }

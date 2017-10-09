@@ -28,4 +28,13 @@ public class AnalyticsTransitionsDataRow implements TransitionDataRow {
                 .collect(Collectors.toList()));
         return list;
     }
+
+    @Override
+    public List<Object> getAsObjectList() {
+        List<Object> list = new LinkedList<>();
+        list.add(issueKey);
+        list.add(issueType);
+        list.addAll(transitionsDates);
+        return list;
+    }
 }

@@ -5,5 +5,6 @@ import java.util.List;
 public interface TransitionDataRow {
 
     public List<String> getAsStringList();
+    public List<Object> getAsObjectList();
 
 }
