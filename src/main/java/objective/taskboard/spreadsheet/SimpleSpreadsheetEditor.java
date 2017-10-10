@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -29,6 +30,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import objective.taskboard.followup.FollowUpTemplate;
+import objective.taskboard.utils.DateTimeUtils;
 import objective.taskboard.utils.IOUtilities;
 import objective.taskboard.utils.XmlUtils;
 
@@ -441,26 +443,19 @@ public class SimpleSpreadsheetEditor implements Closeable {
             column.setAttribute("t", "s");
         }
 
-        public void addColumn(Long value) {
+        public void addColumn(Number value) {
             addColumn(defaultIfNull(value, "").toString(), "v");
         }
-        
-        public void addColumn(Double value) {
-            addColumn(defaultIfNull(value, "").toString(), "v");
+
+        public void addColumn(ZonedDateTime value) {
+            addColumn(DateTimeUtils.toStringExcelFormat(value));
         }
-        
+
         public void addFormula(String formula) {
             Element column = addColumn(formula, "f");
             column.setAttribute("s", "4");
         }
-        
-        public void addColumn(Object value) {
-            if (value instanceof Double)
-                addColumn((Double)value);
-            else
-                addColumn(value.toString());
-        }
-        
+
         private Element addColumn(String colVal, String tagName) {
             Element column = sheetDoc.createElement("c");
             column.setAttribute("r", columnLabel());

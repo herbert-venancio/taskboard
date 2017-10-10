@@ -46,13 +46,13 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
         List<SyntheticTransitionsDataSet> synthetic = jiraData.syntheticsTransitionsDsList;
 
         // then
-        assertThat(analytics.get(0).headers, equalTo(asList("PKEY", "Type", "Open", "To Do", "Doing", "To UAT", "UATing", "Done", "Cancelled")));
-        assertThat(analytics.get(1).headers, equalTo(asList("PKEY", "Type", "Open", "To Do", "Doing", "To Alpha Test", "Alpha Testing", "To Feature Review", "Feature Reviewing", "To QA", "QAing", "Done", "Cancelled")));
-        assertThat(analytics.get(2).headers, equalTo(asList("PKEY", "Type", "Open", "To Do", "Doing", "To Review", "Reviewing", "Done", "Cancelled")));
+        assertThat(analytics.get(0).headers, equalTo(asList("PKEY", "Type", "Cancelled", "Done", "UATing", "To UAT", "Doing", "To Do", "Open")));
+        assertThat(analytics.get(1).headers, equalTo(asList("PKEY", "Type", "Cancelled", "Done", "QAing", "To QA", "Feature Reviewing", "To Feature Review", "Alpha Testing", "To Alpha Test", "Doing", "To Do", "Open")));
+        assertThat(analytics.get(2).headers, equalTo(asList("PKEY", "Type", "Cancelled", "Done", "Reviewing", "To Review", "Doing", "To Do", "Open")));
 
-        assertThat(synthetic.get(0).headers, equalTo(asList("Date", "Open", "To Do", "Doing", "To UAT", "UATing", "Done", "Cancelled")));
-        assertThat(synthetic.get(1).headers, equalTo(asList("Date", "Open", "To Do", "Doing", "To Alpha Test", "Alpha Testing", "To Feature Review", "Feature Reviewing", "To QA", "QAing", "Done", "Cancelled")));
-        assertThat(synthetic.get(2).headers, equalTo(asList("Date", "Open", "To Do", "Doing", "To Review", "Reviewing", "Done", "Cancelled")));
+        assertThat(synthetic.get(0).headers, equalTo(asList("Date", "Cancelled", "Done", "UATing", "To UAT", "Doing", "To Do", "Open")));
+        assertThat(synthetic.get(1).headers, equalTo(asList("Date", "Cancelled", "Done", "QAing", "To QA", "Feature Reviewing", "To Feature Review", "Alpha Testing", "To Alpha Test", "Doing", "To Do", "Open")));
+        assertThat(synthetic.get(2).headers, equalTo(asList("Date", "Cancelled", "Done", "Reviewing", "To Review", "Doing", "To Do", "Open")));
     }
 
     @Test
@@ -75,13 +75,13 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
         // then
         List<ZonedDateTime> subtaskTransitionsDatesFirstRow = dataList.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows.get(0).transitionsDates;
         assertThat(subtaskTransitionsDatesFirstRow.size(), is(7));
-        assertThat(subtaskTransitionsDatesFirstRow.get(0), is(parseDate("2020-01-01")));
-        assertThat(subtaskTransitionsDatesFirstRow.get(1), is(parseDate("2020-01-02")));
-        assertThat(subtaskTransitionsDatesFirstRow.get(2), is(parseDate("2020-01-03")));
+        assertThat(subtaskTransitionsDatesFirstRow.get(0), is(parseDate("2020-01-07")));
+        assertThat(subtaskTransitionsDatesFirstRow.get(1), is(parseDate("2020-01-06")));
+        assertThat(subtaskTransitionsDatesFirstRow.get(2), is(parseDate("2020-01-05")));
         assertThat(subtaskTransitionsDatesFirstRow.get(3), is(parseDate("2020-01-04")));
-        assertThat(subtaskTransitionsDatesFirstRow.get(4), is(parseDate("2020-01-05")));
-        assertThat(subtaskTransitionsDatesFirstRow.get(5), is(parseDate("2020-01-06")));
-        assertThat(subtaskTransitionsDatesFirstRow.get(6), is(parseDate("2020-01-07")));
+        assertThat(subtaskTransitionsDatesFirstRow.get(4), is(parseDate("2020-01-03")));
+        assertThat(subtaskTransitionsDatesFirstRow.get(5), is(parseDate("2020-01-02")));
+        assertThat(subtaskTransitionsDatesFirstRow.get(6), is(parseDate("2020-01-01")));
     }
 
     @Test
@@ -107,13 +107,13 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
         // then
         List<ZonedDateTime> subtaskTransitionsDatesFirstRow = dataList.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows.get(0).transitionsDates;
         assertThat(subtaskTransitionsDatesFirstRow.size(), is(7));
-        assertThat(subtaskTransitionsDatesFirstRow.get(0), is(parseDate("2020-01-03")));
-        assertThat(subtaskTransitionsDatesFirstRow.get(1), is(parseDate("2020-01-04")));
-        assertThat(subtaskTransitionsDatesFirstRow.get(2), is(parseDate("2020-01-05")));
+        assertThat(subtaskTransitionsDatesFirstRow.get(0), nullValue());
+        assertThat(subtaskTransitionsDatesFirstRow.get(1), is(parseDate("2020-01-10")));
+        assertThat(subtaskTransitionsDatesFirstRow.get(2), is(parseDate("2020-01-09")));
         assertThat(subtaskTransitionsDatesFirstRow.get(3), is(parseDate("2020-01-08")));
-        assertThat(subtaskTransitionsDatesFirstRow.get(4), is(parseDate("2020-01-09")));
-        assertThat(subtaskTransitionsDatesFirstRow.get(5), is(parseDate("2020-01-10")));
-        assertThat(subtaskTransitionsDatesFirstRow.get(6), nullValue());
+        assertThat(subtaskTransitionsDatesFirstRow.get(4), is(parseDate("2020-01-05")));
+        assertThat(subtaskTransitionsDatesFirstRow.get(5), is(parseDate("2020-01-04")));
+        assertThat(subtaskTransitionsDatesFirstRow.get(6), is(parseDate("2020-01-03")));
     }
 
     @Test
@@ -134,13 +134,13 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
         // then
         List<ZonedDateTime> subtaskTransitionsDatesFirstRow = dataList.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows.get(0).transitionsDates;
         assertThat(subtaskTransitionsDatesFirstRow.size(), is(7));
-        assertThat(subtaskTransitionsDatesFirstRow.get(0), is(parseDate("2020-01-05")));
+        assertThat(subtaskTransitionsDatesFirstRow.get(0), nullValue());
         assertThat(subtaskTransitionsDatesFirstRow.get(1), nullValue());
         assertThat(subtaskTransitionsDatesFirstRow.get(2), nullValue());
         assertThat(subtaskTransitionsDatesFirstRow.get(3), nullValue());
         assertThat(subtaskTransitionsDatesFirstRow.get(4), nullValue());
         assertThat(subtaskTransitionsDatesFirstRow.get(5), nullValue());
-        assertThat(subtaskTransitionsDatesFirstRow.get(6), nullValue());
+        assertThat(subtaskTransitionsDatesFirstRow.get(6), is(parseDate("2020-01-05")));
     }
 
     @Test
@@ -161,13 +161,13 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
 
         // then
         List<ZonedDateTime> subtaskTransitionsDatesFirstRow = dataList.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows.get(0).transitionsDates;
-        assertThat(subtaskTransitionsDatesFirstRow.get(0), is(parseDate("2020-01-01")));
+        assertThat(subtaskTransitionsDatesFirstRow.get(0), nullValue());
         assertThat(subtaskTransitionsDatesFirstRow.get(1), is(parseDate("2020-01-01")));
         assertThat(subtaskTransitionsDatesFirstRow.get(2), is(parseDate("2020-01-01")));
         assertThat(subtaskTransitionsDatesFirstRow.get(3), is(parseDate("2020-01-01")));
         assertThat(subtaskTransitionsDatesFirstRow.get(4), is(parseDate("2020-01-01")));
         assertThat(subtaskTransitionsDatesFirstRow.get(5), is(parseDate("2020-01-01")));
-        assertThat(subtaskTransitionsDatesFirstRow.get(6), nullValue());
+        assertThat(subtaskTransitionsDatesFirstRow.get(6), is(parseDate("2020-01-01")));
     }
 
     @Test
@@ -184,13 +184,13 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
 
         // then
         List<ZonedDateTime> subtaskTransitionsDatesFirstRow = dataList.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows.get(0).transitionsDates;
-        assertThat(subtaskTransitionsDatesFirstRow.get(0), is(parseDate("2020-01-01")));
+        assertThat(subtaskTransitionsDatesFirstRow.get(0), is(parseDate("2020-01-02")));
         assertThat(subtaskTransitionsDatesFirstRow.get(1), nullValue());
         assertThat(subtaskTransitionsDatesFirstRow.get(2), nullValue());
         assertThat(subtaskTransitionsDatesFirstRow.get(3), nullValue());
         assertThat(subtaskTransitionsDatesFirstRow.get(4), nullValue());
         assertThat(subtaskTransitionsDatesFirstRow.get(5), nullValue());
-        assertThat(subtaskTransitionsDatesFirstRow.get(6), is(parseDate("2020-01-02")));
+        assertThat(subtaskTransitionsDatesFirstRow.get(6), is(parseDate("2020-01-01")));
     }
 
     @Test
@@ -209,7 +209,7 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
         assertThat(rows.size(), is(1));
         SyntheticTransitionsDataRow firstRow = rows.get(0);
         assertThat(firstRow.date, is(parseDate("2017-01-01")));
-        assertThat(firstRow.amountOfIssueInStatus, equalTo(asList(1, 0, 0, 0, 0, 0, 0)));
+        assertThat(firstRow.amountOfIssueInStatus, equalTo(asList(0, 0, 0, 0, 0, 0, 1)));
     }
 
     @Test
@@ -229,9 +229,9 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
         List<SyntheticTransitionsDataRow> rows = sets.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows;
         assertThat(rows.size(), is(2));
         SyntheticTransitionsDataRow firstRow = rows.get(0);
-        assertThat(firstRow.amountOfIssueInStatus, equalTo(asList(1, 0, 0, 0, 0, 0, 0)));
+        assertThat(firstRow.amountOfIssueInStatus, equalTo(asList(0, 0, 0, 0, 0, 0, 1)));
         SyntheticTransitionsDataRow secondRow = rows.get(1);
-        assertThat(secondRow.amountOfIssueInStatus, equalTo(asList(2, 0, 0, 0, 0, 0, 0)));
+        assertThat(secondRow.amountOfIssueInStatus, equalTo(asList(0, 0, 0, 0, 0, 0, 2)));
     }
 
     @Test
@@ -274,16 +274,16 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
         // then
         List<SyntheticTransitionsDataRow> rows = sets.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows;
         assertThat(rows.size(), is(10));
-        assertThat(rows.get(0).amountOfIssueInStatus, equalTo(asList(1, 0, 0, 0, 0, 0, 0)));
-        assertThat(rows.get(1).amountOfIssueInStatus, equalTo(asList(1, 0, 0, 0, 0, 1, 0)));
-        assertThat(rows.get(2).amountOfIssueInStatus, equalTo(asList(2, 0, 0, 0, 0, 1, 0)));
-        assertThat(rows.get(3).amountOfIssueInStatus, equalTo(asList(1, 2, 0, 0, 0, 1, 0)));
-        assertThat(rows.get(4).amountOfIssueInStatus, equalTo(asList(0, 0, 2, 0, 0, 1, 1)));
-        assertThat(rows.get(5).amountOfIssueInStatus, equalTo(asList(0, 0, 1, 1, 0, 1, 1)));
-        assertThat(rows.get(6).amountOfIssueInStatus, equalTo(asList(0, 0, 1, 0, 1, 1, 1)));
-        assertThat(rows.get(7).amountOfIssueInStatus, equalTo(asList(0, 0, 0, 1, 0, 2, 1)));
-        assertThat(rows.get(8).amountOfIssueInStatus, equalTo(asList(0, 0, 0, 0, 1, 2, 1)));
-        assertThat(rows.get(9).amountOfIssueInStatus, equalTo(asList(0, 0, 0, 0, 0, 3, 1)));
+        assertThat(rows.get(0).amountOfIssueInStatus, equalTo(asList(0, 0, 0, 0, 0, 0, 1)));
+        assertThat(rows.get(1).amountOfIssueInStatus, equalTo(asList(0, 1, 0, 0, 0, 0, 1)));
+        assertThat(rows.get(2).amountOfIssueInStatus, equalTo(asList(0, 1, 0, 0, 0, 0, 2)));
+        assertThat(rows.get(3).amountOfIssueInStatus, equalTo(asList(0, 1, 0, 0, 0, 2, 1)));
+        assertThat(rows.get(4).amountOfIssueInStatus, equalTo(asList(1, 1, 0, 0, 2, 0, 0)));
+        assertThat(rows.get(5).amountOfIssueInStatus, equalTo(asList(1, 1, 0, 1, 1, 0, 0)));
+        assertThat(rows.get(6).amountOfIssueInStatus, equalTo(asList(1, 1, 1, 0, 1, 0, 0)));
+        assertThat(rows.get(7).amountOfIssueInStatus, equalTo(asList(1, 2, 0, 1, 0, 0, 0)));
+        assertThat(rows.get(8).amountOfIssueInStatus, equalTo(asList(1, 2, 1, 0, 0, 0, 0)));
+        assertThat(rows.get(9).amountOfIssueInStatus, equalTo(asList(1, 3, 0, 0, 0, 0, 0)));
     }
 
     @Test
@@ -301,13 +301,13 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
         // then
         List<SyntheticTransitionsDataRow> rows = sets.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows;
         assertThat(rows.size(), is(7));
-        assertThat(rows.get(0).amountOfIssueInStatus, equalTo(asList(1, 0, 0, 0, 0, 0, 0)));
-        assertThat(rows.get(1).amountOfIssueInStatus, equalTo(asList(1, 0, 0, 0, 0, 0, 0)));
-        assertThat(rows.get(2).amountOfIssueInStatus, equalTo(asList(1, 0, 0, 0, 0, 0, 0)));
-        assertThat(rows.get(3).amountOfIssueInStatus, equalTo(asList(1, 0, 0, 0, 0, 0, 0)));
-        assertThat(rows.get(4).amountOfIssueInStatus, equalTo(asList(1, 0, 0, 0, 0, 0, 0)));
-        assertThat(rows.get(5).amountOfIssueInStatus, equalTo(asList(1, 0, 0, 0, 0, 0, 0)));
-        assertThat(rows.get(6).amountOfIssueInStatus, equalTo(asList(0, 0, 0, 0, 0, 0, 1)));
+        assertThat(rows.get(0).amountOfIssueInStatus, equalTo(asList(0, 0, 0, 0, 0, 0, 1)));
+        assertThat(rows.get(1).amountOfIssueInStatus, equalTo(asList(0, 0, 0, 0, 0, 0, 1)));
+        assertThat(rows.get(2).amountOfIssueInStatus, equalTo(asList(0, 0, 0, 0, 0, 0, 1)));
+        assertThat(rows.get(3).amountOfIssueInStatus, equalTo(asList(0, 0, 0, 0, 0, 0, 1)));
+        assertThat(rows.get(4).amountOfIssueInStatus, equalTo(asList(0, 0, 0, 0, 0, 0, 1)));
+        assertThat(rows.get(5).amountOfIssueInStatus, equalTo(asList(0, 0, 0, 0, 0, 0, 1)));
+        assertThat(rows.get(6).amountOfIssueInStatus, equalTo(asList(1, 0, 0, 0, 0, 0, 0)));
     }
 
     @Test
@@ -329,12 +329,12 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
         // then
         List<SyntheticTransitionsDataRow> rows = sets.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows;
         assertThat(rows.size(), is(6));
-        assertThat(rows.get(0).amountOfIssueInStatus, equalTo(asList(1, 0, 0, 0, 0, 0, 0)));
-        assertThat(rows.get(1).amountOfIssueInStatus, equalTo(asList(0, 1, 0, 0, 0, 0, 0)));
-        assertThat(rows.get(2).amountOfIssueInStatus, equalTo(asList(0, 0, 1, 0, 0, 0, 0)));
+        assertThat(rows.get(0).amountOfIssueInStatus, equalTo(asList(0, 0, 0, 0, 0, 0, 1)));
+        assertThat(rows.get(1).amountOfIssueInStatus, equalTo(asList(0, 0, 0, 0, 0, 1, 0)));
+        assertThat(rows.get(2).amountOfIssueInStatus, equalTo(asList(0, 0, 0, 0, 1, 0, 0)));
         assertThat(rows.get(3).amountOfIssueInStatus, equalTo(asList(0, 0, 0, 1, 0, 0, 0)));
-        assertThat(rows.get(4).amountOfIssueInStatus, equalTo(asList(0, 0, 0, 0, 1, 0, 0)));
-        assertThat(rows.get(5).amountOfIssueInStatus, equalTo(asList(0, 0, 0, 0, 0, 1, 0)));
+        assertThat(rows.get(4).amountOfIssueInStatus, equalTo(asList(0, 0, 1, 0, 0, 0, 0)));
+        assertThat(rows.get(5).amountOfIssueInStatus, equalTo(asList(0, 1, 0, 0, 0, 0, 0)));
     }
 
     @Test
@@ -367,37 +367,37 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
         List<SyntheticTransitionsDataSet> synthetic = jiraData.syntheticsTransitionsDsList;
 
         // then
-        assertThat(analytics.get(0).headers, equalTo(asList("PKEY", "Type", "Open", "To Do", "Doing", "To UAT", "UATing", "Done", "Cancelled")));
-        assertThat(analytics.get(1).headers, equalTo(asList("PKEY", "Type", "Open", "To Do", "Doing", "To Alpha Test", "Alpha Testing", "To Feature Review", "Feature Reviewing", "To QA", "QAing", "Done", "Cancelled")));
-        assertThat(analytics.get(2).headers, equalTo(asList("PKEY", "Type", "Open", "To Do", "Doing", "To Review", "Reviewing", "Done", "Cancelled")));
+        assertThat(analytics.get(0).headers, equalTo(asList("PKEY", "Type", "Cancelled", "Done", "UATing", "To UAT", "Doing", "To Do", "Open")));
+        assertThat(analytics.get(1).headers, equalTo(asList("PKEY", "Type", "Cancelled", "Done", "QAing", "To QA", "Feature Reviewing", "To Feature Review", "Alpha Testing", "To Alpha Test", "Doing", "To Do", "Open")));
+        assertThat(analytics.get(2).headers, equalTo(asList("PKEY", "Type", "Cancelled", "Done", "Reviewing", "To Review", "Doing", "To Do", "Open")));
 
-        assertThat(synthetic.get(0).headers, equalTo(asList("Date", "Open", "To Do", "Doing", "To UAT", "UATing", "Done/Cancelled")));
-        assertThat(synthetic.get(1).headers, equalTo(asList("Date", "Open", "To Do", "Doing", "To Alpha Test", "Alpha Testing", "To Feature Review", "Feature Reviewing", "To QA", "QAing", "Done/Cancelled")));
-        assertThat(synthetic.get(2).headers, equalTo(asList("Date", "Open", "To Do", "Doing", "To Review", "Reviewing", "Done/Cancelled")));
+        assertThat(synthetic.get(0).headers, equalTo(asList("Date", "Cancelled/Done", "UATing", "To UAT", "Doing", "To Do", "Open")));
+        assertThat(synthetic.get(1).headers, equalTo(asList("Date", "Cancelled/Done", "QAing", "To QA", "Feature Reviewing", "To Feature Review", "Alpha Testing", "To Alpha Test", "Doing", "To Do", "Open")));
+        assertThat(synthetic.get(2).headers, equalTo(asList("Date", "Cancelled/Done", "Reviewing", "To Review", "Doing", "To Do", "Open")));
 
         List<ZonedDateTime> subtaskTransitionsDatesFirstRow = analytics.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows.get(0).transitionsDates;
         assertThat(subtaskTransitionsDatesFirstRow.size(), is(7));
-        assertThat(subtaskTransitionsDatesFirstRow.get(0), is(parseDate("2020-01-01")));
+        assertThat(subtaskTransitionsDatesFirstRow.get(0), nullValue());
         assertThat(subtaskTransitionsDatesFirstRow.get(1), is(parseDate("2020-01-02")));
         assertThat(subtaskTransitionsDatesFirstRow.get(2), is(parseDate("2020-01-02")));
         assertThat(subtaskTransitionsDatesFirstRow.get(3), is(parseDate("2020-01-02")));
         assertThat(subtaskTransitionsDatesFirstRow.get(4), is(parseDate("2020-01-02")));
         assertThat(subtaskTransitionsDatesFirstRow.get(5), is(parseDate("2020-01-02")));
-        assertThat(subtaskTransitionsDatesFirstRow.get(6), nullValue());
+        assertThat(subtaskTransitionsDatesFirstRow.get(6), is(parseDate("2020-01-01")));
         List<ZonedDateTime> subtaskTransitionsDatesSecondRow = analytics.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows.get(1).transitionsDates;
         assertThat(subtaskTransitionsDatesSecondRow.size(), is(7));
-        assertThat(subtaskTransitionsDatesSecondRow.get(0), is(parseDate("2020-01-02")));
+        assertThat(subtaskTransitionsDatesSecondRow.get(0), is(parseDate("2020-01-03")));
         assertThat(subtaskTransitionsDatesSecondRow.get(1), nullValue());
         assertThat(subtaskTransitionsDatesSecondRow.get(2), nullValue());
         assertThat(subtaskTransitionsDatesSecondRow.get(3), nullValue());
         assertThat(subtaskTransitionsDatesSecondRow.get(4), nullValue());
         assertThat(subtaskTransitionsDatesSecondRow.get(5), nullValue());
-        assertThat(subtaskTransitionsDatesSecondRow.get(6), is(parseDate("2020-01-03")));
+        assertThat(subtaskTransitionsDatesSecondRow.get(6), is(parseDate("2020-01-02")));
 
         List<SyntheticTransitionsDataRow> rows = synthetic.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows;
         assertThat(rows.size(), is(3));
-        assertThat(rows.get(0).amountOfIssueInStatus, equalTo(asList(1, 0, 0, 0, 0, 0)));
+        assertThat(rows.get(0).amountOfIssueInStatus, equalTo(asList(0, 0, 0, 0, 0, 1)));
         assertThat(rows.get(1).amountOfIssueInStatus, equalTo(asList(1, 0, 0, 0, 0, 1)));
-        assertThat(rows.get(2).amountOfIssueInStatus, equalTo(asList(0, 0, 0, 0, 0, 2)));
+        assertThat(rows.get(2).amountOfIssueInStatus, equalTo(asList(2, 0, 0, 0, 0, 0)));
     }
 }

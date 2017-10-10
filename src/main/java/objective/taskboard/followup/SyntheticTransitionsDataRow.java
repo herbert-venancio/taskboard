@@ -25,4 +25,5 @@ public class SyntheticTransitionsDataRow implements TransitionDataRow {
                 .collect(Collectors.toList()));
         return list;
     }
+
 }

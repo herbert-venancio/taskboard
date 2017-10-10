@@ -1,5 +1,7 @@
 package objective.taskboard.followup.impl;
 
+import static org.apache.commons.lang.ArrayUtils.INDEX_NOT_FOUND;
+
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -86,18 +88,19 @@ public class FollowUpTransitionsDataProvider {
     }
 
     private Map<String, ZonedDateTime> mapStatusLastTransitionDates(Issue issue, String[] statuses, ZoneId timezone) {
-        final String firstState = statuses[0];
+        final String firstState = statuses[statuses.length - 1];
         Map<String, ZonedDateTime> lastTransitionDate = new LinkedHashMap<>();
         for (String status : statuses)
             lastTransitionDate.put(status, null);
         lastTransitionDate.put(firstState, DateTimeUtils.get(issue.getCreated(), timezone));
         int lastStatusIndex = ArrayUtils.indexOf(statuses, issue.getStatusName());
-        for (Changelog change : issue.getChangelog())
-            if ("status".equals(change.field)) {
-                int statusIndex = ArrayUtils.indexOf(statuses, change.to);
-                if (statusIndex != ArrayUtils.INDEX_NOT_FOUND && statusIndex <= lastStatusIndex)
-                    lastTransitionDate.put(change.to, DateTimeUtils.get(change.timestamp, timezone));
-            }
+        for (Changelog change : issue.getChangelog()) {
+            if (!"status".equals(change.field))
+                continue;
+            int statusIndex = ArrayUtils.indexOf(statuses, change.to);
+            if (lastStatusIndex != INDEX_NOT_FOUND && statusIndex >= lastStatusIndex)
+                lastTransitionDate.put(change.to, DateTimeUtils.get(change.timestamp, timezone));
+        }
         return lastTransitionDate;
     }
 
@@ -161,12 +164,11 @@ public class FollowUpTransitionsDataProvider {
             else
                 statusList.add(status);
         }
-        if (doneList.isEmpty()) {
+        if (doneList.isEmpty())
             return statuses;
-        } else {
-            statusList.add(StringUtils.join(doneList, "/"));
-            return statusList.toArray(new String[0]);
-        }
+
+        statusList.add(0, StringUtils.join(doneList, "/"));
+        return statusList.toArray(new String[0]);
     }
 
     private static int[] mergeDoneStatusesCount(String[] statuses, List<String> doneStatuses, int[] issuesInStatusCount) {
@@ -174,24 +176,23 @@ public class FollowUpTransitionsDataProvider {
             return issuesInStatusCount;
 
         List<Integer> issuesInStatusList = new ArrayList<>();
-        int done = 0;
-        boolean empty = true;
+        int doneStatusesCount = 0;
+        boolean hasCountToMerge = false;
         for (int i = 0; i < statuses.length; ++i) {
             String status = statuses[i];
             int count = issuesInStatusCount[i];
             if (doneStatuses.contains(status)) {
-                empty = false;
-                done += count;
+                hasCountToMerge = true;
+                doneStatusesCount += count;
             } else {
                 issuesInStatusList.add(count);
             }
         }
-        if (empty) {
+        if (!hasCountToMerge)
             return issuesInStatusCount;
-        } else {
-            issuesInStatusList.add(done);
-            return Ints.toArray(issuesInStatusList);
-        }
+
+        issuesInStatusList.add(0, doneStatusesCount);
+        return Ints.toArray(issuesInStatusList);
     }
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -218,7 +219,7 @@ public class FollowUpTransitionsDataProvider {
     private static Optional<Integer> getTransitionIndexByDate(AnalyticsTransitionsDataRow row, ZonedDateTime date) {
         List<ZonedDateTime> transitionsDates = row.transitionsDates;
         Integer index = null;
-        for (int i = 0; i < transitionsDates.size(); ++i) {
+        for (int i = transitionsDates.size() - 1; i >= 0; --i) {
             ZonedDateTime transitionDate = transitionsDates.get(i);
             if (transitionDate == null)
                 continue;

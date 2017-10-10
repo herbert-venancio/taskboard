@@ -157,14 +157,14 @@ public class FollowUpHelper {
         List<String> headers = new LinkedList<>();
         headers.add("PKEY");
         headers.add("ISSUE_TYPE");
-        headers.add("To Do");
-        headers.add("Doing");
         headers.add("Done");
+        headers.add("Doing");
+        headers.add("To Do");
 
         List<ZonedDateTime> lastTransitionsDate = new LinkedList<>();
-        lastTransitionsDate.add(DateTimeUtils.parseDate("2017-09-25"));
-        lastTransitionsDate.add(DateTimeUtils.parseDate("2017-09-26"));
         lastTransitionsDate.add(DateTimeUtils.parseDate("2017-09-27"));
+        lastTransitionsDate.add(DateTimeUtils.parseDate("2017-09-26"));
+        lastTransitionsDate.add(DateTimeUtils.parseDate("2017-09-25"));
         AnalyticsTransitionsDataRow row = new AnalyticsTransitionsDataRow("I-1", "Demand", lastTransitionsDate);
 
         return singletonList(new AnalyticsTransitionsDataSet("Demands", headers, singletonList(row)));
@@ -177,14 +177,14 @@ public class FollowUpHelper {
     public static List<SyntheticTransitionsDataSet> getDefaultSyntheticTransitionsDataSet() {
         List<String> headers = new LinkedList<>();
         headers.add("Date");
-        headers.add("To Do");
-        headers.add("Doing");
         headers.add("Done");
+        headers.add("Doing");
+        headers.add("To Do");
 
         List<SyntheticTransitionsDataRow> rows = new LinkedList<>();
-        rows.add(new SyntheticTransitionsDataRow(DateTimeUtils.parseDate("2017-09-25"), Ints.asList(1, 0, 0)));
+        rows.add(new SyntheticTransitionsDataRow(DateTimeUtils.parseDate("2017-09-25"), Ints.asList(0, 0, 1)));
         rows.add(new SyntheticTransitionsDataRow(DateTimeUtils.parseDate("2017-09-26"), Ints.asList(0, 1, 0)));
-        rows.add(new SyntheticTransitionsDataRow(DateTimeUtils.parseDate("2017-09-27"), Ints.asList(0, 0, 1)));
+        rows.add(new SyntheticTransitionsDataRow(DateTimeUtils.parseDate("2017-09-27"), Ints.asList(1, 0, 0)));
 
         return singletonList(new SyntheticTransitionsDataSet("Demands", headers, rows));
     }

@@ -26,6 +26,7 @@ import objective.taskboard.followup.FollowUpTemplate;
 import objective.taskboard.followup.FromJiraDataRow;
 import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor.Sheet;
 import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor.SheetRow;
+import objective.taskboard.utils.DateTimeUtils;
 import objective.taskboard.utils.IOUtilities;
 import objective.taskboard.utils.XmlUtils;
 
@@ -65,7 +66,7 @@ public class SimpleSpreadsheetEditorTest {
                 addRow(sheet, followUpData);
             sheet.save();
     
-            assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 218, sharedStrings.size());
+            assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 219, sharedStrings.size());
             assertEquals("First new shared string", 204, sharedStrings.get("PROJECT TEST").longValue());
             assertEquals("Any new shared string", 210, sharedStrings.get("Summary Feature").longValue());
             assertEquals("Last new shared string", 217, sharedStrings.get("Full Description Sub-task").longValue());
@@ -117,7 +118,7 @@ public class SimpleSpreadsheetEditorTest {
             
             sheet.save();
             
-            assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 218, sharedStrings.size());
+            assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 219, sharedStrings.size());
     
             String sharedStringsGenerated = subject.generateSharedStrings();
     
@@ -287,7 +288,11 @@ public class SimpleSpreadsheetEditorTest {
         row.addFormula("IF(AllIssues[[#This Row],[SUBTASK_STATUS]]=\"Done\", AllIssues[[#This Row],[EffortDone]],0)");
         row.addFormula("IF(AllIssues[TASK_TYPE]=\"Bug\",AllIssues[EffortEstimate], 0)");
         row.addFormula("IF(AllIssues[TASK_TYPE]=\"Bug\",AllIssues[worklog],0)");
-        
+        row.addColumn(1L);
+        row.addColumn(2);
+        row.addColumn(3D);
+        row.addColumn(DateTimeUtils.parseDate("2017-01-01"));
+
         row.save();
-    }    
+    }
 }

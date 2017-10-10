@@ -28,4 +28,5 @@ public class AnalyticsTransitionsDataRow implements TransitionDataRow {
                 .collect(Collectors.toList()));
         return list;
     }
+
 }
