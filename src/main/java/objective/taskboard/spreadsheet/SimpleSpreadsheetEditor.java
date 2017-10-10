@@ -455,20 +455,7 @@ public class SimpleSpreadsheetEditor implements Closeable {
             Element column = addColumn(formula, "f");
             column.setAttribute("s", "4");
         }
-        
-        public void addColumn(Object value) {
-            if (value instanceof Long)
-                addColumn((Long)value);
-            else if (value instanceof Integer)
-                addColumn((Integer)value);
-            else if (value instanceof Double)
-                addColumn((Double)value);
-            else if (value instanceof ZonedDateTime)
-                addColumn((ZonedDateTime)value);
-            else
-                addColumn(defaultIfNull(value, "").toString());
-        }
-        
+
         private Element addColumn(String colVal, String tagName) {
             Element column = sheetDoc.createElement("c");
             column.setAttribute("r", columnLabel());

@@ -26,11 +26,4 @@ public class SyntheticTransitionsDataRow implements TransitionDataRow {
         return list;
     }
 
-    @Override
-    public List<Object> getAsObjectList() {
-        List<Object> list = new LinkedList<>();
-        list.add(date);
-        list.addAll(amountOfIssueInStatus);
-        return list;
-    }
 }

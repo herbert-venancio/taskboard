@@ -21,6 +21,7 @@
 package objective.taskboard.followup;
 
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -122,28 +123,25 @@ public class FollowUpGenerator {
 
     List<Sheet> generateTransitionsSheets(FollowupData followupData) {
         List<Sheet> sheets = new LinkedList<>();
-        sheets.addAll(generateTransitionsSheets("Analytic - ", followupData.analyticsTransitionsDsList));
-        sheets.addAll(generateTransitionsSheets("Synthetic - ", followupData.syntheticsTransitionsDsList));
+        sheets.addAll(generateAnalyticTransitionsSheets(followupData.analyticsTransitionsDsList));
+        sheets.addAll(generateSyntheticTransitionsSheets(followupData.syntheticsTransitionsDsList));
         return sheets;
     }
 
-    private List<Sheet> generateTransitionsSheets(String prefixSheetName, List<? extends TransitionDataSet<? extends TransitionDataRow>> transitionDataSets) {
+    private List<Sheet> generateAnalyticTransitionsSheets(List<AnalyticsTransitionsDataSet> analyticTransitionDataSets) {
         List<Sheet> sheets = new LinkedList<>();
-        for (TransitionDataSet<? extends TransitionDataRow> transitionDataSet : transitionDataSets) {
-
-            if (transitionDataSet.rows.isEmpty())
+        for (AnalyticsTransitionsDataSet analyticTransitionDataSet : analyticTransitionDataSets) {
+            if (analyticTransitionDataSet.rows.isEmpty())
                 continue;
 
-            Sheet sheet = editor.createSheet(prefixSheetName + transitionDataSet.issueType);
-            SheetRow rowHeader = sheet.createRow();
-            for (String header : transitionDataSet.headers)
-                rowHeader.addColumn(header);
-            rowHeader.save();
+            Sheet sheet = createSheetWithHeader("Analytic - ", analyticTransitionDataSet);
 
-            for (TransitionDataRow transitionDataRow : transitionDataSet.rows) {
+            for (AnalyticsTransitionsDataRow analyticTransitionDataRow : analyticTransitionDataSet.rows) {
                 SheetRow row = sheet.createRow();
-                for (Object columnValue : transitionDataRow.getAsObjectList())
-                    row.addColumn(columnValue);
+                row.addColumn(analyticTransitionDataRow.issueKey);
+                row.addColumn(analyticTransitionDataRow.issueType);
+                for (ZonedDateTime transitionDate : analyticTransitionDataRow.transitionsDates)
+                    row.addColumn(transitionDate);
                 row.save();
             }
 
@@ -153,7 +151,38 @@ public class FollowUpGenerator {
         return sheets;
     }
 
-	public SimpleSpreadsheetEditor getEditor() {
-		return editor;
-	}
+    private List<Sheet> generateSyntheticTransitionsSheets(List<SyntheticTransitionsDataSet> syntheticTransitionDataSets) {
+        List<Sheet> sheets = new LinkedList<>();
+        for (SyntheticTransitionsDataSet syntheticTransitionDataSet : syntheticTransitionDataSets) {
+            if (syntheticTransitionDataSet.rows.isEmpty())
+                continue;
+
+            Sheet sheet = createSheetWithHeader("Synthetic - ", syntheticTransitionDataSet);
+
+            for (SyntheticTransitionsDataRow syntheticTransitionDataRow : syntheticTransitionDataSet.rows) {
+                SheetRow row = sheet.createRow();
+                row.addColumn(syntheticTransitionDataRow.date);
+                for (Integer amountOfIssue : syntheticTransitionDataRow.amountOfIssueInStatus)
+                    row.addColumn(amountOfIssue);
+                row.save();
+            }
+
+            sheet.save();
+            sheets.add(sheet);
+        }
+        return sheets;
+    }
+
+    private Sheet createSheetWithHeader(String prefixSheetName, TransitionDataSet<? extends TransitionDataRow> transitionDataSet) {
+        Sheet sheet = editor.createSheet(prefixSheetName + transitionDataSet.issueType);
+        SheetRow rowHeader = sheet.createRow();
+        for (String header : transitionDataSet.headers)
+            rowHeader.addColumn(header);
+        rowHeader.save();
+        return sheet;
+    }
+
+    public SimpleSpreadsheetEditor getEditor() {
+        return editor;
+    }
 }
