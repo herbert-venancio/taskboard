@@ -22,9 +22,9 @@ package objective.taskboard.issueBuffer;
 
 import static java.util.stream.Collectors.toList;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang.time.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +36,8 @@ import objective.taskboard.jira.JiraIssueService;
 
 @Service
 public class AllIssuesBufferService {
+    private static final String ALL_ISSUES_CACHE = "all-issues.dat";
+
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AllIssuesBufferService.class);
 
     @Autowired
@@ -43,15 +45,29 @@ public class AllIssuesBufferService {
 
     @Autowired
     private JiraIssueService jiraIssueService;
+    
+    @Autowired
+    private CardRepoService cardsRepoService;
 
-    private Map<String, Issue> allIssuesBuffer = new LinkedHashMap<>();
+    private CardRepo allCardsRepo;
 
     private boolean isUpdatingAllIssuesBuffer = false;
 
     private IssueBufferState state = IssueBufferState.uninitialised;
-
+    
     public IssueBufferState getState() {
         return state;
+    }
+    
+    @PostConstruct
+    private synchronized void loadCache() {
+        allCardsRepo = cardsRepoService.from(ALL_ISSUES_CACHE);
+        if (allCardsRepo.size() > 0) 
+            state = IssueBufferState.ready;
+    }
+    
+    private synchronized void saveCache() {
+        allCardsRepo.commit();
     }
 
     public synchronized void updateAllIssuesBuffer() {
@@ -66,15 +82,14 @@ public class AllIssuesBufferService {
                 state = state.start();
                 log.debug("updateAllIssuesBuffer start");
                
-                IssueBufferServiceSearchVisitor searchVisitor = new IssueBufferServiceSearchVisitor(issueConverter);
-                jiraIssueService.searchAllProjectIssues(searchVisitor);
+                IssueBufferServiceSearchVisitor searchVisitor = new IssueBufferServiceSearchVisitor(issueConverter, allCardsRepo);
+                jiraIssueService.searchAllProjectIssues(searchVisitor, allCardsRepo);
                 
-                allIssuesBuffer = searchVisitor.getIssuesByKey();
-
-                log.debug("All issues count: " + allIssuesBuffer.size());
+                log.debug("All Buffer - Issues processed: " + searchVisitor.getProcessedCount());
                 log.debug("updateAllIssuesBuffer complete");
                 log.debug("updateAllIssuesBuffer time spent " +stopWatch.getTime());
                 state = state.done();
+                saveCache();
             }
             catch (Exception e) {
                 state = state.error();
@@ -90,7 +105,7 @@ public class AllIssuesBufferService {
     }
 
     public synchronized List<Issue> getAllIssues() {
-        return allIssuesBuffer.values().stream()
+        return allCardsRepo.values().stream()
                 .collect(toList());
     }
 }

@@ -1,5 +1,7 @@
 package objective.taskboard.it;
 
+import java.util.function.Function;
+
 /*-
  * [LICENSE]
  * Taskboard
@@ -44,7 +46,7 @@ public class LoginPage {
     }
 
     public void login(String username, String password) {
-        PageWait.wait(webDriver).until(ExpectedConditions.visibilityOf(this.username));
+        PageWait.wait(webDriver).until((Function<? super WebDriver, ?>) ExpectedConditions.visibilityOf(this.username));
         
         this.username.sendKeys(username);
         this.password.sendKeys(password);

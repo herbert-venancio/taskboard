@@ -12,7 +12,9 @@ import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 import objective.taskboard.domain.converter.IssueCoAssignee;
 
-public class IssueScratch {
+public class IssueScratch implements Serializable {
+    private static final long serialVersionUID = -8643342601909365442L;
+    
     protected Long id;
     protected String issueKey;
     protected String projectKey;
@@ -27,7 +29,7 @@ public class IssueScratch {
     protected String parent;
     protected long parentType;
     protected String parentTypeIconUri;
-    protected List<String> dependencies;
+    protected List<String> dependencies; //NOSONAR
     protected boolean render;
     protected boolean favorite;
     protected boolean hidden;
@@ -35,26 +37,29 @@ public class IssueScratch {
     protected String assignee;
     protected long priority;
     protected Date dueDate;
-    protected Date updatedDate;
+    protected Date priorityUpdatedDate;
+    protected Date remoteIssueUpdatedDate;
+    protected Date issuerPriorityUpdatedDate;
+
     protected long created;
     protected String description;
     protected String comments;
-    protected List<String> labels;
-    protected List<String> components;
+    protected List<String> labels;       //NOSONAR
+    protected List<String> components;   //NOSONAR
     protected Long priorityOrder;
     protected TaskboardTimeTracking timeTracking;
-    protected List<Changelog> changelog;
+    protected List<Changelog> changelog; //NOSONAR
     
     @JsonIgnore
     protected String reporter;
     @JsonIgnore
-    protected List<IssueCoAssignee> coAssignees = new LinkedList<>();
+    protected List<IssueCoAssignee> coAssignees = new LinkedList<>();//NOSONAR
     @JsonIgnore
     protected CustomField classOfService;
     @JsonIgnore
-    protected Map<String, CustomField> release;
+    protected Map<String, CustomField> release;       //NOSONAR
     @JsonProperty(access = Access.WRITE_ONLY)
-    protected Map<String, Serializable> customFields;
+    protected Map<String, Serializable> customFields; //NOSONAR
 
     public IssueScratch() {
         super();
@@ -81,7 +86,8 @@ public class IssueScratch {
             long priority, 
             Date dueDate, 
             long created,
-            Date updatedDate, 
+            Date priorityUpdatedDate, 
+            Date remoteIssueUpdatedDate,
             String description, 
             String comments, 
             List<String> labels, 
@@ -114,7 +120,8 @@ public class IssueScratch {
         this.priority = priority;
         this.dueDate = dueDate;
         this.created = created;
-        this.updatedDate = updatedDate;
+        this.priorityUpdatedDate = priorityUpdatedDate;
+        this.remoteIssueUpdatedDate = remoteIssueUpdatedDate;
         this.description = description;
         this.comments = comments;
         this.labels = labels;

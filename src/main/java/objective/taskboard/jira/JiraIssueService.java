@@ -32,6 +32,8 @@ import org.springframework.stereotype.Service;
 import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.IssuelinksType;
 
+import objective.taskboard.issueBuffer.CardRepo;
+
 @Service
 public class JiraIssueService {
 
@@ -69,16 +71,16 @@ public class JiraIssueService {
         jiraSearchService.searchIssues(jql, visitor);
     }
 
-    public void searchAllWithParents(SearchIssueVisitor visitor) {
-        jiraSearchService.searchIssuesAndParents(visitor,jqlService.buildQueryForIssues());
+    public void searchAllWithParents(SearchIssueVisitor visitor, CardRepo cardsRepo) {
+        jiraSearchService.searchIssuesAndParents(visitor,jqlService.buildQueryForIssues(cardsRepo));
     }
     
-    public void searchAllProjectIssues(SearchIssueVisitor visitor) {
-        jiraSearchService.searchIssues(jqlService.projectsJql(), visitor);
+    public void searchAllProjectIssues(SearchIssueVisitor visitor, CardRepo cardsRepo) {
+        jiraSearchService.searchIssues(jqlService.projectsJql(cardsRepo), visitor);
     }
 
     private void searchIssues(SearchIssueVisitor visitor, String additionalJqlCondition, String... additionalFields) {
-        String jql = jqlService.buildQueryForIssues();
+        String jql = jqlService.buildQueryForIssuesWithouTimeConstraint();
         if (additionalJqlCondition != null) 
             jql = "(" + additionalJqlCondition + ") AND " + jql;
         

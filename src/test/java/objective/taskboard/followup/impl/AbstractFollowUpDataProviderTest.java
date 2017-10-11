@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -17,8 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import objective.taskboard.jira.data.Status;
-import objective.taskboard.jira.data.StatusCategory;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -36,6 +33,7 @@ import objective.taskboard.data.Changelog;
 import objective.taskboard.data.Issue;
 import objective.taskboard.data.IssueScratch;
 import objective.taskboard.data.TaskboardTimeTracking;
+import objective.taskboard.domain.converter.IssueTeamService;
 import objective.taskboard.issueBuffer.AllIssuesBufferService;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraProperties.BallparkMapping;
@@ -45,6 +43,9 @@ import objective.taskboard.jira.JiraProperties.CustomField.TShirtSize;
 import objective.taskboard.jira.JiraProperties.IssueLink;
 import objective.taskboard.jira.JiraProperties.IssueType.IssueTypeDetails;
 import objective.taskboard.jira.MetadataService;
+import objective.taskboard.jira.data.Status;
+import objective.taskboard.jira.data.StatusCategory;
+import objective.taskboard.utils.Clock;
 
 @RunWith(MockitoJUnitRunner.class)
 public abstract class AbstractFollowUpDataProviderTest {
@@ -57,6 +58,12 @@ public abstract class AbstractFollowUpDataProviderTest {
 
     @Mock
     protected AllIssuesBufferService issueBufferService;
+    
+    @Mock
+    private Clock localDateTimeService;
+    
+    @Mock
+    private IssueTeamService issueTeamService;    
 
     CustomField propertiesCustomField;
     protected TShirtSize tshirtSizeInfo;
@@ -81,26 +88,22 @@ public abstract class AbstractFollowUpDataProviderTest {
     protected static final long statusDone      = 17L;
 
     protected static final StatusCategory CATEGORY_UNDEFINED = new StatusCategory(
-            URI.create("http://localhost:4567/rest/api/2/statuscategory/1")
-            , Long.valueOf(1L)
+            Long.valueOf(1L)
             , "undefined"
             , "medium-gray"
             , "No Category");
     protected static final StatusCategory CATEGORY_NEW = new StatusCategory(
-            URI.create("http://localhost:4567/rest/api/2/statuscategory/2")
-            , 2L
+            2L
             , "new"
             , "blue-gray"
             , "To Do");
     protected static final StatusCategory CATEGORY_IN_PROGRESS = new StatusCategory(
-            URI.create("http://localhost:4567/rest/api/2/statuscategory/4")
-            , 4L
+            4L
             , "indeterminate"
             , "yellow"
             , "In Progress");
     protected static final StatusCategory CATEGORY_DONE = new StatusCategory(
-            URI.create("http://localhost:4567/rest/api/2/statuscategory/3")
-            , 3L
+            3L
             , "done"
             , "green"
             , "Done");
@@ -108,11 +111,11 @@ public abstract class AbstractFollowUpDataProviderTest {
     @Before
     public void before() throws InterruptedException, ExecutionException {
         Map<Long, Status> statusMap = new LinkedHashMap<>();
-        statusMap.put(statusOpen,       new Status(null, statusOpen,       "Open", null, CATEGORY_UNDEFINED));
-        statusMap.put(statusToDo,       new Status(null, statusToDo,       "To Do", null, CATEGORY_UNDEFINED));
-        statusMap.put(statusDoing,      new Status(null, statusDoing,      "Doing", null, CATEGORY_UNDEFINED));
-        statusMap.put(statusCancelled,  new Status(null, statusCancelled,  "Cancelled", null, CATEGORY_UNDEFINED));
-        statusMap.put(statusDone,       new Status(null, statusDone,       "Done", null, CATEGORY_UNDEFINED));
+        statusMap.put(statusOpen,       new Status(statusOpen,       "Open",  CATEGORY_UNDEFINED));
+        statusMap.put(statusToDo,       new Status(statusToDo,       "To Do", CATEGORY_UNDEFINED));
+        statusMap.put(statusDoing,      new Status(statusDoing,      "Doing", CATEGORY_UNDEFINED));
+        statusMap.put(statusCancelled,  new Status(statusCancelled,  "Cancelled", CATEGORY_UNDEFINED));
+        statusMap.put(statusDone,       new Status(statusDone,       "Done",  CATEGORY_UNDEFINED));
         doReturn(statusMap).when(metadataService).getStatusesMetadata();
 
         Map<Long, IssueType> issueTypeMap = new LinkedHashMap<>();
@@ -302,6 +305,7 @@ public abstract class AbstractFollowUpDataProviderTest {
                     null, //dueDate
                     created, //created
                     null,//Date updatedDate,
+                    null,//Date remoteUpdatedDate,
                     null, //description
                     null, //comments
                     null, //labels
@@ -315,7 +319,7 @@ public abstract class AbstractFollowUpDataProviderTest {
                     null, //release
                     buildTransitions()
                     );
-            return new Issue(scratch, jiraProperties, metadataService);
+            return new Issue(scratch, jiraProperties, metadataService, issueTeamService, null, null);
         }
 
         private List<Changelog> buildTransitions() {
@@ -324,7 +328,7 @@ public abstract class AbstractFollowUpDataProviderTest {
             for(Pair<String, ZonedDateTime> t : transitions) {
                 String newState = t.getLeft();
                 ZonedDateTime timestamp = t.getRight();
-                changes.add(new Changelog(null, "status", currentState, newState, timestamp));
+                changes.add(new Changelog(null, "status", currentState, newState, "42",timestamp));
                 currentState = t.getKey();
             }
             return changes;

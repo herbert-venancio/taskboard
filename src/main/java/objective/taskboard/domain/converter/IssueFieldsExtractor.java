@@ -123,7 +123,7 @@ public class IssueFieldsExtractor {
         return coAssignees;
     }
 
-    public  static CustomField extractClassOfService(JiraProperties jiraProperties,Issue issue) {
+    public static CustomField extractClassOfService(JiraProperties jiraProperties,Issue issue) {
         IssueField field = issue.getField(jiraProperties.getCustomfield().getClassOfService().getId());
 
         if (field == null)
@@ -290,7 +290,13 @@ public class IssueFieldsExtractor {
         List<Changelog> result = new LinkedList<>();
         issue.getChangelog().forEach(change -> {
             change.getItems().forEach(item -> {
-                result.add(new Changelog(change.getAuthor().getName(), item.getField(), item.getFromString(), item.getToString(), DateTimeUtils.get(change.getCreated())));
+                result.add(new Changelog(
+                        change.getAuthor().getName(), 
+                        item.getField(), 
+                        item.getFromString(), 
+                        item.getToString(), 
+                        item.getTo(),
+                        DateTimeUtils.get(change.getCreated())));
             });
         });
         result.sort((item1, item2) -> item1.timestamp.compareTo(item2.timestamp));
@@ -298,6 +304,6 @@ public class IssueFieldsExtractor {
     }
 
     private static void logErrorExtractField(Issue issue, IssueField field, JSONException e) {
-        log.error("Error extracting " + field.getName() + " from issue " + issue.getKey() + ": " + e.getMessage(), e);
+        log.error("Error extracting " + field.getName() + " from issue " + issue.getKey() + ": " + e.getMessage());
     }    
 }

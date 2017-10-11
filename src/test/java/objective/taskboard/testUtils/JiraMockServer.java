@@ -1,5 +1,3 @@
-package objective.taskboard.testUtils;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,7 +18,7 @@ package objective.taskboard.testUtils;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
-
+package objective.taskboard.testUtils;
 
 import static spark.Service.ignite;
 
@@ -146,11 +144,8 @@ public class JiraMockServer {
             return loadMockData("mypermissions.response.json");
         });
 
-        get("rest/api/latest/user",  (req, res) ->{
-            String loadMockData = loadMockData("user.response.json");
-            loadMockData = loadMockData.replace("\"displayName\": \"Taskboard\",", "\"displayName\": \"" + username + "\",");
-            return loadMockData;
-        });
+        get("rest/api/latest/user",  (req, res) ->loaduser());
+        get("rest/api/latest/myself",  (req, res) ->loaduser());
         
         get("rest/api/latest/serverInfo",  (req, res) ->{
             String auth = new String(Base64.getDecoder().decode(req.headers("Authorization").replace("Basic ","").getBytes()));
@@ -481,5 +476,11 @@ public class JiraMockServer {
     private void put(String path, Route route) {
         ensureInitialized();
         server.put(path, route);
+    }
+    
+    private String loaduser() {
+        String loadMockData = loadMockData("user.response.json");
+        loadMockData = loadMockData.replace("\"displayName\": \"Taskboard\",", "\"displayName\": \"" + username + "\",");
+        return loadMockData;
     }
 }

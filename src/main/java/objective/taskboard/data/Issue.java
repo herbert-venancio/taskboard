@@ -38,38 +38,46 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.DateDeserializers.DateDeserializer;
 
 import objective.taskboard.config.SpringContextBridge;
+import objective.taskboard.domain.converter.CardVisibilityEvalService;
 import objective.taskboard.domain.converter.IssueCoAssignee;
+import objective.taskboard.domain.converter.IssueTeamService;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraProperties.BallparkMapping;
 import objective.taskboard.jira.MetadataService;
+import objective.taskboard.repository.FilterCachedRepository;
+
 
 @JsonIgnoreProperties({"jiraProperties", "metaDataService"})
 public class Issue extends IssueScratch implements Serializable {
+    private static final long serialVersionUID = 8513934402068368820L;
 
-    private static final long serialVersionUID = 1L;
-
-    private String usersTeam;
-
-    private Set<String> teams;
-
-    private Long priorityOrder;
+    @JsonIgnore
+    private transient Issue parentCard;
     
     @JsonIgnore
-    private Issue parentCard;
+    private transient List<Issue> subtasks = new LinkedList<>();
 
     private transient JiraProperties jiraProperties;
     
     private transient MetadataService metaDataService;
     
-    @JsonIgnore
-    private List<IssueCoAssignee> coAssignees = new LinkedList<>();
-
-    @JsonIgnore
-    private CustomField classOfService;
+    private transient IssueTeamService issueTeamService;
     
-    String color;
+    private transient FilterCachedRepository filterRepository;
     
-    public Issue(IssueScratch scratch, JiraProperties properties, MetadataService metadataService) {
+    private transient CardVisibilityEvalService cardVisibilityEvalService;
+    
+    @JsonIgnore
+    private List<IssueCoAssignee> coAssignees = new LinkedList<>(); //NOSONAR
+    
+    private String color;
+    
+    public Issue(IssueScratch scratch, 
+            JiraProperties properties, 
+            MetadataService metadataService, 
+            IssueTeamService issueTeamService, 
+            FilterCachedRepository filterRepository,
+            CardVisibilityEvalService cardVisibilityEvalService) {
         this.id = scratch.id;
         this.issueKey = scratch.issueKey;
         this.projectKey = scratch.projectKey;
@@ -85,34 +93,37 @@ public class Issue extends IssueScratch implements Serializable {
         this.parentType = scratch.parentType;
         this.parentTypeIconUri = scratch.parentTypeIconUri;
         this.dependencies = scratch.dependencies;
-        this.render = false;
-        this.favorite = false;
-        this.hidden = false;
-        this.color = null;
         this.subResponsaveis = scratch.subResponsaveis;
         this.assignee = scratch.assignee;
-        this.usersTeam = null;
         this.priority = scratch.priority;
         this.dueDate = scratch.dueDate;
         this.created = scratch.created;
-        this.updatedDate = scratch.updatedDate;
         this.description = scratch.description;
-        this.teams = null;
         this.comments = scratch.comments;
         this.labels = scratch.labels;
         this.components = scratch.components;
         this.customFields = scratch.customFields;
         this.priorityOrder = scratch.priorityOrder;
         this.timeTracking = scratch.timeTracking;
-        this.jiraProperties = properties;
-        this.metaDataService = metadataService;
         this.reporter = scratch.reporter;
         this.coAssignees = scratch.coAssignees;
         this.classOfService = scratch.classOfService;
         this.release = scratch.release;
         this.changelog = scratch.changelog;
+        this.priorityUpdatedDate = scratch.priorityUpdatedDate;
+        this.remoteIssueUpdatedDate = scratch.remoteIssueUpdatedDate;
+        
+        this.metaDataService = metadataService;
+        this.jiraProperties = properties;
+        this.issueTeamService = issueTeamService;
+        this.filterRepository = filterRepository;
+        this.cardVisibilityEvalService = cardVisibilityEvalService;        
+        this.render = false;
+        this.favorite = false;
+        this.hidden = false;        
+        this.color = null;
     }
-
+    
     @JsonAnyGetter
     public Map<String, Serializable> getCustomFields() {
         return customFields;
@@ -121,6 +132,8 @@ public class Issue extends IssueScratch implements Serializable {
     public Issue() {
         jiraProperties = SpringContextBridge.getBean(JiraProperties.class);
         metaDataService = SpringContextBridge.getBean(MetadataService.class);
+        issueTeamService = SpringContextBridge.getBean(IssueTeamService.class);
+        filterRepository = SpringContextBridge.getBean(FilterCachedRepository.class);
     }
 
     @JsonIgnore
@@ -182,29 +195,27 @@ public class Issue extends IssueScratch implements Serializable {
     }
 
     public String getUsersTeam() {
-        return this.usersTeam;
+        return issueTeamService.getUsersTeam(this);
     }
 
     public Set<String> getTeams() {
-        return this.teams;
+        return issueTeamService.getTeams(this);
     }
 
     public void setColor(final String color) {
         this.color = color;
     }
 
-    public void setUsersTeam(final String usersTeam) {
-        this.usersTeam = usersTeam;
-    }
-
-    public void setTeams(final Set<String> teams) {
-        this.teams = teams;
-    }
-
     public void setParentCard(Issue parentCard) {
         this.parentCard = parentCard;
+        if (parentCard != null)
+            parentCard.addsubtask(this);
     }
     
+    private void addsubtask(Issue issue) {
+        this.subtasks.add(issue);
+    }
+
     @JsonIgnore
     public Optional<Issue> getParentCard() {
         return Optional.ofNullable(parentCard);
@@ -396,9 +407,21 @@ public class Issue extends IssueScratch implements Serializable {
 
     @JsonDeserialize(using = DateDeserializer.class)
     public Date getUpdatedDate() {
-        return this.updatedDate;
+        if (priorityUpdatedDate == null && remoteIssueUpdatedDate == null)
+            return null;
+        
+        if (remoteIssueUpdatedDate == null)
+            return priorityUpdatedDate;
+                
+        if (priorityUpdatedDate == null)
+            return priorityUpdatedDate;
+        
+        if (priorityUpdatedDate.after(remoteIssueUpdatedDate))
+            return priorityUpdatedDate;
+        
+        return remoteIssueUpdatedDate;
     }
-
+    
     public long getCreated() {
         return this.created;
     }
@@ -523,10 +546,24 @@ public class Issue extends IssueScratch implements Serializable {
         this.dueDate = dueDate;
     }
 
-    public void setUpdatedDate(final Date updatedDate) {
-        this.updatedDate = updatedDate;
+    public void setPriorityUpdatedDate(final Date updatedDate) {
+        this.priorityUpdatedDate = updatedDate;
     }
-
+    
+    public void setRemoteIssueUpdatedDate(final Date remoteIssueUpdatedDate) {
+        this.remoteIssueUpdatedDate = remoteIssueUpdatedDate;
+    }
+    
+    @JsonDeserialize(using = DateDeserializer.class)
+    public Date getRemoteIssueUpdatedDate() {
+        return remoteIssueUpdatedDate;
+    }
+    
+    @JsonDeserialize(using = DateDeserializer.class)
+    public Date getPriorityUpdatedDate() {
+        return priorityUpdatedDate;
+    }
+    
     public void setCreated(final long created) {
         this.created = created;
     }
@@ -539,7 +576,7 @@ public class Issue extends IssueScratch implements Serializable {
         this.comments = comments;
     }
 
-    public void setLabels(final List<String> labels) {
+    public void setLabels(final LinkedList<String> labels) {
         this.labels = labels;
     }
 
@@ -554,16 +591,7 @@ public class Issue extends IssueScratch implements Serializable {
     public void setTimeTracking(final TaskboardTimeTracking timeTracking) {
         this.timeTracking = timeTracking;
     }
-
-    public void setJiraProperties(final JiraProperties jiraProperties) {
-        this.jiraProperties = jiraProperties;
-    }
-
-    public void setMetaDataService(final MetadataService metaDataService) {
-        this.metaDataService = metaDataService;
-    }
-
-    @JsonIgnore
+    
     public String getReporter() {
         return reporter;
     }
@@ -593,139 +621,45 @@ public class Issue extends IssueScratch implements Serializable {
 
     public void setCustomFields(final Map<String, Serializable> customFields) {
         this.customFields = customFields;
-    }    
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Issue issue = (Issue) o;
-
-        if (type != issue.type) return false;
-        if (status != issue.status) return false;
-        if (startDateStepMillis != issue.startDateStepMillis) return false;
-        if (parentType != issue.parentType) return false;
-        if (render != issue.render) return false;
-        if (favorite != issue.favorite) return false;
-        if (hidden != issue.hidden) return false;
-        if (priority != issue.priority) return false;
-        if (created != issue.created) return false;
-        if (id != null ? !id.equals(issue.id) : issue.id != null) return false;
-        if (issueKey != null ? !issueKey.equals(issue.issueKey) : issue.issueKey != null) return false;
-        if (projectKey != null ? !projectKey.equals(issue.projectKey) : issue.projectKey != null) return false;
-        if (project != null ? !project.equals(issue.project) : issue.project != null) return false;
-        if (typeIconUri != null ? !typeIconUri.equals(issue.typeIconUri) : issue.typeIconUri != null) return false;
-        if (summary != null ? !summary.equals(issue.summary) : issue.summary != null) return false;
-        if (subresponsavel1 != null ? !subresponsavel1.equals(issue.subresponsavel1) : issue.subresponsavel1 != null)
+    }
+    
+    public boolean isVisible() {
+        if (isDeferred())
             return false;
-        if (subresponsavel2 != null ? !subresponsavel2.equals(issue.subresponsavel2) : issue.subresponsavel2 != null)
+        
+        boolean isVisible =  filterRepository.getCache().stream().filter(f -> f.isApplicable(this)).count() != 0;
+        if (!isVisible)
             return false;
-        if (parent != null ? !parent.equals(issue.parent) : issue.parent != null) return false;
-        if (parentTypeIconUri != null ? !parentTypeIconUri.equals(issue.parentTypeIconUri) : issue.parentTypeIconUri != null)
-            return false;
-        if (dependencies != null ? !dependencies.equals(issue.dependencies) : issue.dependencies != null) return false;
-        if (color != null ? !color.equals(issue.color) : issue.color != null) return false;
-        if (subResponsaveis != null ? !subResponsaveis.equals(issue.subResponsaveis) : issue.subResponsaveis != null)
-            return false;
-        if (assignee != null ? !assignee.equals(issue.assignee) : issue.assignee != null) return false;
-        if (usersTeam != null ? !usersTeam.equals(issue.usersTeam) : issue.usersTeam != null) return false;
-        if (dueDate != null ? !dueDate.equals(issue.dueDate) : issue.dueDate != null) return false;
-        if (updatedDate != null ? !updatedDate.equals(issue.updatedDate) : issue.updatedDate != null) return false;
-        if (description != null ? !description.equals(issue.description) : issue.description != null) return false;
-        if (teams != null ? !teams.equals(issue.teams) : issue.teams != null) return false;
-        if (comments != null ? !comments.equals(issue.comments) : issue.comments != null) return false;
-        if (labels != null ? !labels.equals(issue.labels) : issue.labels != null) return false;
-        if (components != null ? !components.equals(issue.components) : issue.components != null) return false;
-        if (customFields != null ? !customFields.equals(issue.customFields) : issue.customFields != null) return false;
-        if (priorityOrder != null ? !priorityOrder.equals(issue.priorityOrder) : issue.priorityOrder != null)
-            return false;
-        if (timeTracking != null ? !timeTracking.equals(issue.timeTracking) : issue.timeTracking != null) return false;
-        if (jiraProperties != null ? !jiraProperties.equals(issue.jiraProperties) : issue.jiraProperties != null)
-            return false;
-        return metaDataService != null ? metaDataService.equals(issue.metaDataService) : issue.metaDataService == null;
+        
+        return cardVisibilityEvalService.isStillInVisibleRange(
+                status, 
+                getUpdatedDate().toInstant(), 
+                changelog);
     }
 
-    @Override
-    public int hashCode() {
-        int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + (issueKey != null ? issueKey.hashCode() : 0);
-        result = 31 * result + (projectKey != null ? projectKey.hashCode() : 0);
-        result = 31 * result + (project != null ? project.hashCode() : 0);
-        result = 31 * result + (int) (type ^ (type >>> 32));
-        result = 31 * result + (typeIconUri != null ? typeIconUri.hashCode() : 0);
-        result = 31 * result + (summary != null ? summary.hashCode() : 0);
-        result = 31 * result + (int) (status ^ (status >>> 32));
-        result = 31 * result + (int) (startDateStepMillis ^ (startDateStepMillis >>> 32));
-        result = 31 * result + (subresponsavel1 != null ? subresponsavel1.hashCode() : 0);
-        result = 31 * result + (subresponsavel2 != null ? subresponsavel2.hashCode() : 0);
-        result = 31 * result + (parent != null ? parent.hashCode() : 0);
-        result = 31 * result + (int) (parentType ^ (parentType >>> 32));
-        result = 31 * result + (parentTypeIconUri != null ? parentTypeIconUri.hashCode() : 0);
-        result = 31 * result + (dependencies != null ? dependencies.hashCode() : 0);
-        result = 31 * result + (render ? 1 : 0);
-        result = 31 * result + (favorite ? 1 : 0);
-        result = 31 * result + (hidden ? 1 : 0);
-        result = 31 * result + (color != null ? color.hashCode() : 0);
-        result = 31 * result + (subResponsaveis != null ? subResponsaveis.hashCode() : 0);
-        result = 31 * result + (assignee != null ? assignee.hashCode() : 0);
-        result = 31 * result + (usersTeam != null ? usersTeam.hashCode() : 0);
-        result = 31 * result + (int) (priority ^ (priority >>> 32));
-        result = 31 * result + (dueDate != null ? dueDate.hashCode() : 0);
-        result = 31 * result + (updatedDate != null ? updatedDate.hashCode() : 0);
-        result = 31 * result + (int) (created ^ (created >>> 32));
-        result = 31 * result + (description != null ? description.hashCode() : 0);
-        result = 31 * result + (teams != null ? teams.hashCode() : 0);
-        result = 31 * result + (comments != null ? comments.hashCode() : 0);
-        result = 31 * result + (labels != null ? labels.hashCode() : 0);
-        result = 31 * result + (components != null ? components.hashCode() : 0);
-        result = 31 * result + (customFields != null ? customFields.hashCode() : 0);
-        result = 31 * result + (priorityOrder != null ? priorityOrder.hashCode() : 0);
-        result = 31 * result + (timeTracking != null ? timeTracking.hashCode() : 0);
-        result = 31 * result + (jiraProperties != null ? jiraProperties.hashCode() : 0);
-        result = 31 * result + (metaDataService != null ? metaDataService.hashCode() : 0);
-        return result;
+    public List<Issue> getSubtaskCards() {
+        return subtasks;
+    }
+   
+    public List<Subtask> getSubtasks() {
+        return subtasks.stream().map(s->new Subtask(s.issueKey, s.summary)).collect(Collectors.toList());
+    }
+    
+    private Object readResolve() {
+        this.subtasks = new LinkedList<>();
+        return this;
     }
 
-    @Override
-    public String toString() {
-        return "Issue{" +
-                "id=" + id +
-                ", issueKey='" + issueKey + '\'' +
-                ", projectKey='" + projectKey + '\'' +
-                ", project='" + project + '\'' +
-                ", type=" + type +
-                ", typeIconUri='" + typeIconUri + '\'' +
-                ", summary='" + summary + '\'' +
-                ", status=" + status +
-                ", startDateStepMillis=" + startDateStepMillis +
-                ", subresponsavel1='" + subresponsavel1 + '\'' +
-                ", subresponsavel2='" + subresponsavel2 + '\'' +
-                ", parent='" + parent + '\'' +
-                ", parentType=" + parentType +
-                ", parentTypeIconUri='" + parentTypeIconUri + '\'' +
-                ", dependencies=" + dependencies +
-                ", render=" + render +
-                ", favorite=" + favorite +
-                ", hidden=" + hidden +
-                ", color='" + color + '\'' +
-                ", subResponsaveis='" + subResponsaveis + '\'' +
-                ", assignee='" + assignee + '\'' +
-                ", usersTeam='" + usersTeam + '\'' +
-                ", priority=" + priority +
-                ", dueDate=" + dueDate +
-                ", updatedDate=" + updatedDate +
-                ", created=" + created +
-                ", description='" + description + '\'' +
-                ", teams=" + teams +
-                ", comments='" + comments + '\'' +
-                ", labels=" + labels +
-                ", components=" + components +
-                ", customFields=" + customFields +
-                ", priorityOrder=" + priorityOrder +
-                ", timeTracking=" + timeTracking +
-                ", jiraProperties=" + jiraProperties +
-                ", metaDataService=" + metaDataService +
-                '}';
+    public void restoreServices(
+            JiraProperties jiraProperties, 
+            MetadataService metaDataService,
+            IssueTeamService issueTeamService,
+            FilterCachedRepository filterRepository,
+            CardVisibilityEvalService cardVisibilityEvalService) {
+        this.jiraProperties = jiraProperties;
+        this.metaDataService = metaDataService;
+        this.issueTeamService = issueTeamService;
+        this.filterRepository = filterRepository;
+        this.cardVisibilityEvalService = cardVisibilityEvalService;
     }
 }

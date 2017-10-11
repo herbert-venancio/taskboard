@@ -341,11 +341,11 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
     public void mergeFinalizationStatusOnSyntheticDataSet() {
         // given
         Map<Long, Status> statusMap = new LinkedHashMap<>();
-        statusMap.put(statusOpen,       new Status(null, statusOpen,       "Open", null, CATEGORY_NEW));
-        statusMap.put(statusToDo,       new Status(null, statusToDo,       "To Do", null, CATEGORY_IN_PROGRESS));
-        statusMap.put(statusDoing,      new Status(null, statusDoing,      "Doing", null, CATEGORY_IN_PROGRESS));
-        statusMap.put(statusCancelled,  new Status(null, statusCancelled,  "Cancelled", null, CATEGORY_DONE));
-        statusMap.put(statusDone,       new Status(null, statusDone,       "Done", null, CATEGORY_DONE));
+        statusMap.put(statusOpen,       new Status(statusOpen,       "Open",  CATEGORY_NEW));
+        statusMap.put(statusToDo,       new Status(statusToDo,       "To Do", CATEGORY_IN_PROGRESS));
+        statusMap.put(statusDoing,      new Status(statusDoing,      "Doing", CATEGORY_IN_PROGRESS));
+        statusMap.put(statusCancelled,  new Status(statusCancelled,  "Cancelled", CATEGORY_DONE));
+        statusMap.put(statusDone,       new Status(statusDone,       "Done", CATEGORY_DONE));
         doReturn(statusMap).when(metadataService).getStatusesMetadata();
 
         issues(

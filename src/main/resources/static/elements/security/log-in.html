@@ -169,8 +169,14 @@
                     that.$.login.disable = true;
                     window.location = "/";
                 }).fail(function (jqXHR, textStatus, errorThrown) {
-                    if (jqXHR.status === 401)
-                        that.errorMsg = jqXHR.responseJSON.message.replace("Authentication Failed: ","")
+                    if (jqXHR.status === 401) {
+                        if (jqXHR.responseJSON)
+                            that.errorMsg = jqXHR.responseJSON.message.replace("Authentication Failed: ","")
+                        else {
+                            that.errorMsg = "Authentication error";
+                            console.error(jqXHR);
+                        }
+                    }
                     else
                         that.errorMsg = "An internal error occurred"
 

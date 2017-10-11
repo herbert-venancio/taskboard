@@ -1,5 +1,3 @@
-package objective.taskboard.database;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,6 +18,7 @@ package objective.taskboard.database;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.database;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -28,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.data.LaneConfiguration;
 import objective.taskboard.domain.Lane;
 import objective.taskboard.repository.LaneCachedRepository;
@@ -42,8 +42,9 @@ public class TaskboardDatabaseService {
         return getConfigurations();
     }
 
-    @Cacheable("configuration")
+    @Cacheable(CacheConfiguration.CONFIGURATION)
     private List<LaneConfiguration> getConfigurations() {
+        
         List<Lane> lanes = laneRepository.getCache();
         return TaskboardConfigToLaneConfigurationTransformer.getInstance().transform(lanes);
     }

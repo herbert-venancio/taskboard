@@ -60,8 +60,8 @@ public class IssueTeamServiceTest {
     
     private Issue issue = new Issue();
     
-    @Mock
-    private Issue parentMetadata;
+    
+    private Issue parentCard = new Issue();
     @Mock
     private IssueCoAssignee coAssignee;
 
@@ -109,8 +109,8 @@ public class IssueTeamServiceTest {
 
     @Test
     public void parentIssueWithValidAssignee() throws InvalidTeamException {
-        when(parentMetadata.getAssignee()).thenReturn(NAME_PARENT_ASSIGNEE);
-        issue.setParentCard(parentMetadata);
+        parentCard.setAssignee(NAME_PARENT_ASSIGNEE);
+        issue.setParentCard(parentCard);
 
         Map<String, List<String>> issueTeams = subject.getIssueTeams(issue);
         assertUserTeam(issueTeams, NAME_PARENT_ASSIGNEE);
@@ -119,8 +119,8 @@ public class IssueTeamServiceTest {
     @Test
     public void parentIssueWithValidCoAssignee() throws InvalidTeamException {
         when(coAssignee.getName()).thenReturn(NAME_PARENT_CO_ASSIGNEE);
-        when(parentMetadata.getCoAssignees()).thenReturn(asList(coAssignee));
-        issue.setParentCard(parentMetadata);
+        parentCard.setCoAssignees(asList(coAssignee));
+        issue.setParentCard(parentCard);
 
         Map<String, List<String>> issueTeams = subject.getIssueTeams(issue);
         assertUserTeam(issueTeams, NAME_PARENT_CO_ASSIGNEE);
@@ -129,7 +129,7 @@ public class IssueTeamServiceTest {
     @Test
     public void issueWithValidReporter() throws InvalidTeamException {
         issue.setReporter(NAME_REPORTER);
-        issue.setParentCard(parentMetadata);
+        issue.setParentCard(parentCard);
 
         Map<String, List<String>> issueTeams = subject.getIssueTeams(issue);
         assertUserTeam(issueTeams, NAME_REPORTER);
@@ -137,7 +137,7 @@ public class IssueTeamServiceTest {
 
     @Test
     public void issueWithReporterNull() throws InvalidTeamException {
-        issue.setParentCard(parentMetadata);
+        issue.setParentCard(parentCard);
         Map<String, List<String>> issueTeams = subject.getIssueTeams(issue);
         assertTrue(MSG_USERS_SHOULD_BE_EMPTY, issueTeams.isEmpty());
     }

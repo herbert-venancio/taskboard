@@ -24,6 +24,7 @@ import static com.google.common.collect.Maps.newHashMap;
 import static java.util.stream.Collectors.toList;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractAdditionalEstimatedHours;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractBlocked;
+import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractChangelog;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractClassOfService;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractCoAssignees;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractComments;
@@ -35,18 +36,15 @@ import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractP
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractRealParent;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractRelease;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractTShirtSizes;
-import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractChangelog;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -60,9 +58,9 @@ import objective.taskboard.data.TaskboardTimeTracking;
 import objective.taskboard.database.IssuePriorityService;
 import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.domain.ParentIssueLink;
-import objective.taskboard.domain.converter.IssueTeamService.InvalidTeamException;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.MetadataService;
+import objective.taskboard.repository.FilterCachedRepository;
 import objective.taskboard.repository.ParentIssueLinkRepository;
 
 @Service
@@ -90,6 +88,12 @@ public class JiraIssueToIssueConverter {
     @Autowired
     private MetadataService metadataService;
 
+    @Autowired
+    private FilterCachedRepository filterRepository;
+
+    @Autowired
+    private CardVisibilityEvalService cardVisibilityEvalService;
+
     private List<String> parentIssueLinks = new ArrayList<>();
     
     public void setParentIssueLinks(List<String> parentIssueLinks) {
@@ -114,13 +118,9 @@ public class JiraIssueToIssueConverter {
         
         Long priorityOrder = priorityService.determinePriority(jiraIssue);
         
-        Date issueUpdatedDate = jiraIssue.getUpdateDate() == null? null : jiraIssue.getUpdateDate().toDate();
         Optional<Date> priorityUpdateDate = priorityService.priorityUpdateDate(jiraIssue);
-        if (priorityUpdateDate.isPresent()) {
-            if (issueUpdatedDate == null || priorityUpdateDate.get().after(issueUpdatedDate))
-                issueUpdatedDate = priorityUpdateDate.get();
-        }
         
+        Date remoteIssueUpdatedDate = jiraIssue.getUpdateDate() != null ? jiraIssue.getUpdateDate().toDate() : jiraIssue.getCreationDate().toDate();
         IssueScratch converted = new IssueScratch(
                 jiraIssue.getId(),
                 jiraIssue.getKey(),
@@ -142,7 +142,8 @@ public class JiraIssueToIssueConverter {
                 jiraIssue.getPriority() != null ? jiraIssue.getPriority().getId() : 0l,
                 jiraIssue.getDueDate() != null ? jiraIssue.getDueDate().toDate() : null,
                 jiraIssue.getCreationDate().getMillis(),
-                issueUpdatedDate,
+                priorityUpdateDate.orElse(new Date()),
+                remoteIssueUpdatedDate,
                 defaultIfNull(jiraIssue.getDescription(), ""),
                 getComments(jiraIssue),
                 extractLabels(jiraIssue),
@@ -154,14 +155,19 @@ public class JiraIssueToIssueConverter {
                 coAssignees,
                 extractClassOfService(jiraProperties, jiraIssue),
                 extractRelease(jiraProperties, jiraIssue),
-                extractChangelog(jiraIssue)
-        );
+                extractChangelog(jiraIssue));
         
         return createIssueFromScratch(converted, provider);
     }
 
     public objective.taskboard.data.Issue createIssueFromScratch(IssueScratch scratch, ParentProvider provider) {
-        objective.taskboard.data.Issue converted = new objective.taskboard.data.Issue(scratch, jiraProperties, metadataService);
+        objective.taskboard.data.Issue converted = new objective.taskboard.data.Issue(scratch, 
+                jiraProperties, 
+                metadataService, 
+                issueTeamService, 
+                filterRepository,
+                cardVisibilityEvalService);
+        
     	if (!isEmpty(converted.getParent())) {
     	    Optional<objective.taskboard.data.Issue> parentCard = provider.get(converted.getParent());
     	    if (!parentCard.isPresent())
@@ -170,23 +176,7 @@ public class JiraIssueToIssueConverter {
             converted.setParentCard(parentCard.get());
     	}
     	
-        Set<String> issueTeams = new LinkedHashSet<>();
-        Set<String> usersTeam = new LinkedHashSet<>();
-        try {
-            Map<String, List<String>> mapUsersTeams = issueTeamService.getIssueTeams(converted);
-
-            for (List<String> teams : mapUsersTeams.values())
-                issueTeams.addAll(teams);
-
-            usersTeam.addAll(mapUsersTeams.keySet());
-        } catch (InvalidTeamException e) {
-            issueTeams.add(INVALID_TEAM);
-            usersTeam.addAll(e.getUsersInInvalidTeam());
-        }
-        
-        converted.setTeams(issueTeams);
         converted.setColor(issueColorService.getColor(converted.getClassOfServiceId()));
-        converted.setUsersTeam(String.join(",", usersTeam));
         
         Map<String, Serializable> customFields = converted.getCustomFields();
         customFields.put(jiraProperties.getCustomfield().getClassOfService().getId(), converted.getClassOfServiceValue());
