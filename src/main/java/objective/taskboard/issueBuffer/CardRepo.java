@@ -65,6 +65,10 @@ public class CardRepo  {
         
         if (lastRemoteUpdatedDate.before(value.getRemoteIssueUpdatedDate()))
             lastRemoteUpdatedDate = value.getRemoteIssueUpdatedDate();
+        
+        if (cardByKey.containsKey(key)) 
+            value.getSubtaskCards().addAll(cardByKey.get(key).getSubtaskCards());
+        
         cardByKey.put(key, value);
         unsavedCards.add(key);
         addProject(value.getProjectKey());

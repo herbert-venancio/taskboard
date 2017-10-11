@@ -34,7 +34,7 @@ import objective.taskboard.data.Issue;
 import objective.taskboard.data.IssueScratch;
 import objective.taskboard.data.TaskboardTimeTracking;
 import objective.taskboard.domain.converter.IssueTeamService;
-import objective.taskboard.issueBuffer.AllIssuesBufferService;
+import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraProperties.BallparkMapping;
 import objective.taskboard.jira.JiraProperties.CustomField;
@@ -57,7 +57,7 @@ public abstract class AbstractFollowUpDataProviderTest {
     protected MetadataService metadataService;
 
     @Mock
-    protected AllIssuesBufferService issueBufferService;
+    protected IssueBufferService issueBufferService;
     
     @Mock
     private Clock localDateTimeService;

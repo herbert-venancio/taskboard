@@ -382,14 +382,6 @@
                    headers='{"Content-Type": "application/json"}'
                    last-response="{{transitions}}"
                    on-response="hideSpinnerTransitions"></iron-ajax>
-        <iron-ajax id="ajaxSubtasks"
-                   method="POST"
-                   url="/ws/issues/subtasks"
-                   body="{{item}}"
-                   content-type='application/json'
-                   headers='{"Content-Type": "application/json"}'
-                   last-response="{{subtasks}}"
-                   on-response="subtasksCallback"></iron-ajax>
         <iron-ajax id="ajaxTimetracking"
                    method="POST"
                    url="/ws/issues/timetracking"
@@ -591,7 +583,6 @@
                                                 {{subtask.summary}}
                                             </paper-material>
                                         </template>
-                                        <paper-spinner id="loadSubtasks" active alt="Loading..."></paper-spinner>
                                     </div>
                                 </div>
                             </div>
@@ -787,12 +778,6 @@
                     var min = minutes % 60;
 
                     return (hours > 0 ? hours + 'h ' : '') + (min > 0 ? min + 'm' : '');
-                },
-
-                subtasksCallback: function () {
-                    this.shouldShowSubtasks = this.hasRecords(this.subtasks);
-                    if (this.$$('#loadSubtasks'))
-                        this.$$('#loadSubtasks').active = false;
                 },
 
                 showSpinnerTransitions: function () {
@@ -1043,7 +1028,8 @@
                     this.showSpinnerTransitions();
                     this.$.ajaxTimetracking.generateRequest();
                     this.$.ajaxTransitions.generateRequest();
-                    this.$.ajaxSubtasks.generateRequest();
+                    this.subtasks = item.subtasks;
+                    this.shouldShowSubtasks = typeof this.subtasks !== undefined && this.subtasks.length > 0;
                     
                     this.canBlock = !this.issueBlocked(item) && !this.issueFechada(item);
                     this.canUnblock = this.issueBlocked(item) && !this.issueFechada(item);
@@ -1128,9 +1114,6 @@
 
                     this.shouldShowTimetracking = true;
                     this.shouldShowSubtasks = true;
-
-                    if (this.$$('#loadSubtasks'))
-                        this.$$('#loadSubtasks').active = true;
 
                     if (this.$$('#loadTransitions'))
                         this.$$('#loadTransitions').active = true;

@@ -39,8 +39,8 @@ import objective.taskboard.jira.JiraProperties.CustomField.TShirtSize;
 import objective.taskboard.jira.JiraProperties.IssueLink;
 import objective.taskboard.jira.JiraProperties.IssueType;
 import objective.taskboard.jira.JiraProperties.IssueType.IssueTypeDetails;
-import objective.taskboard.jira.JiraSearchServiceTest;
 import objective.taskboard.repository.FilterCachedRepository;
+import objective.taskboard.utils.IOUtilities;
 
 @RunWith(MockitoJUnitRunner.class)
 public class IssueBufferServiceSearchVisitorTest {
@@ -111,7 +111,7 @@ public class IssueBufferServiceSearchVisitorTest {
         IssueBufferServiceSearchVisitor subject = new IssueBufferServiceSearchVisitor(issueConverter, new CardRepo());
 	    
         SearchResultJsonParser searchResultParser = new SearchResultJsonParser();
-        SearchResult searchResult = searchResultParser.parse(new JSONObject(JiraSearchServiceTest.result("TASKB-685")));
+        SearchResult searchResult = searchResultParser.parse(new JSONObject(IssueBufferServiceSearchVisitorTest.result("TASKB-685")));
         ArrayList<Issue> list = newArrayList(searchResult.getIssues());
         
         list.stream().forEach(subject::processIssue);
@@ -129,7 +129,7 @@ public class IssueBufferServiceSearchVisitorTest {
         IssueBufferServiceSearchVisitor subject = new IssueBufferServiceSearchVisitor(issueConverter, new CardRepo());
         
         SearchResultJsonParser searchResultParser = new SearchResultJsonParser();
-        SearchResult searchResult = searchResultParser.parse(new JSONObject(JiraSearchServiceTest.result("TASKB-686_TASKB-685")));
+        SearchResult searchResult = searchResultParser.parse(new JSONObject(IssueBufferServiceSearchVisitorTest.result("TASKB-686_TASKB-685")));
         ArrayList<Issue> list = newArrayList(searchResult.getIssues());
         
         list.stream().forEach(subject::processIssue);
@@ -148,7 +148,7 @@ public class IssueBufferServiceSearchVisitorTest {
         IssueBufferServiceSearchVisitor subject = new IssueBufferServiceSearchVisitor(issueConverter, new CardRepo());
         
         SearchResultJsonParser searchResultParser = new SearchResultJsonParser();
-        SearchResult searchResult = searchResultParser.parse(new JSONObject(JiraSearchServiceTest.result("TASKB-634_TASKB-630_TASKB-628")));
+        SearchResult searchResult = searchResultParser.parse(new JSONObject(IssueBufferServiceSearchVisitorTest.result("TASKB-634_TASKB-630_TASKB-628")));
         ArrayList<Issue> list = newArrayList(searchResult.getIssues());
         
         list.stream().forEach(subject::processIssue);
@@ -165,7 +165,7 @@ public class IssueBufferServiceSearchVisitorTest {
         IssueBufferServiceSearchVisitor subject = new IssueBufferServiceSearchVisitor(issueConverter, new CardRepo());
         
         SearchResultJsonParser searchResultParser = new SearchResultJsonParser();
-        SearchResult searchResult = searchResultParser.parse(new JSONObject(JiraSearchServiceTest.result("TASKB-685_TASKB-686")));
+        SearchResult searchResult = searchResultParser.parse(new JSONObject(IssueBufferServiceSearchVisitorTest.result("TASKB-685_TASKB-686")));
         ArrayList<Issue> list = newArrayList(searchResult.getIssues());
         
         list.stream().forEach(subject::processIssue);
@@ -175,5 +175,9 @@ public class IssueBufferServiceSearchVisitorTest {
         ArrayList<String> keys = new ArrayList<String>(buffer.keySet());
         assertEquals("TASKB-685,TASKB-686", StringUtils.join(keys,","));
         subject.complete();
+    }
+
+    public static String result(String string) {
+        return IOUtilities.resourceToString(IOUtilities.class, "/objective-jira-teste/"+"search_" + string + ".json");
     }
 }

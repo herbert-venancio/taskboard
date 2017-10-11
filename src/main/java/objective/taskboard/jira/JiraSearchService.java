@@ -23,21 +23,12 @@ package objective.taskboard.jira;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.toList;
-import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractLinkedParentKey;
-import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractRealParent;
-import static org.apache.commons.lang3.StringUtils.join;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.PostConstruct;
-
-import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.commons.lang3.Validate;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -45,19 +36,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 
 import com.atlassian.jira.rest.client.api.RestClientException;
 import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.SearchResult;
 import com.atlassian.jira.rest.client.internal.json.SearchResultJsonParser;
+import com.google.common.util.concurrent.Uninterruptibles;
 
-import objective.taskboard.domain.ParentIssueLink;
-import objective.taskboard.domain.converter.IssueParent;
 import objective.taskboard.jira.JiraService.ParametrosDePesquisaInvalidosException;
 import objective.taskboard.jira.JiraService.PermissaoNegadaException;
 import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
-import objective.taskboard.repository.ParentIssueLinkRepository;
-import org.springframework.web.client.HttpServerErrorException;
 
 @Service
 public class JiraSearchService {
@@ -78,43 +67,6 @@ public class JiraSearchService {
 
     @Autowired
     private JiraEndpointAsMaster jiraEndpointAsMaster;
-    
-    @Autowired
-    private ParentIssueLinkRepository parentIssueLinkRepository;
-    
-    private List<String> parentIssueLinks;
-    
-    @PostConstruct
-    private void loadParentIssueLinks() {
-        parentIssueLinks = parentIssueLinkRepository.findAll().stream()
-                               .map(ParentIssueLink::getDescriptionIssueLink)
-                               .collect(toList());
-    }
-
-    public void searchIssuesAndParents(SearchIssueVisitor visitor, String jql) {
-        Set<String> found = new LinkedHashSet<>();
-        Set<String> missing = new LinkedHashSet<>();
-        
-        String currentJql = jql;
-        do {
-            if (missing.size() > 0) 
-                log.debug("⬣⬣⬣⬣⬣  searchingMissingParents");
-            
-            missing.clear();
-            searchIssues(currentJql, issue -> {
-                    visitor.processIssue(issue);
-                    
-                    missing.remove(issue.getKey());
-                    found.add(issue.getKey());
-                    getParentKey(issue)      .ifPresent(key-> { if (!found.contains(key)) missing.add(key); });
-                    getLinkedParentKey(issue).ifPresent(key-> { if (!found.contains(key)) missing.add(key); });
-            });
-            
-            currentJql = "key in ("+join(missing,",")+")";
-        }
-        while(missing.size() > 0);
-        visitor.complete();
-    }
     
     public void searchIssues(String jql, SearchIssueVisitor visitor, String... additionalFields) {       
         Validate.notNull(jql);
@@ -184,22 +136,6 @@ public class JiraSearchService {
                 throw new ParametrosDePesquisaInvalidosException(e);
             throw new IllegalStateException(e);
         }
-    }
-   
-    private Optional<String> getParentKey(Issue issue) {
-        IssueParent parent = extractRealParent(issue);
-        if (parent == null)
-            return Optional.empty();
-        
-        return Optional.of(parent.getKey());
-    }
-    
-    private Optional<String> getLinkedParentKey(Issue issue) {
-        String linkedParentKey = extractLinkedParentKey(properties, issue, parentIssueLinks);
-        if (linkedParentKey == null)
-            return Optional.empty();
-
-        return Optional.of(linkedParentKey);
     }
 
     private long extractStatusCode(Exception e) {

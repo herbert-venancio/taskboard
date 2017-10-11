@@ -132,8 +132,8 @@ public class IssueBufferService {
                 updateState(state.start());
                 
                 IssueBufferServiceSearchVisitor visitor = new IssueBufferServiceSearchVisitor(issueConverter, cardsRepo);
-                jiraIssueService.searchAllWithParents(visitor, cardsRepo);
-                
+                jiraIssueService.searchAllProjectIssues(visitor, cardsRepo);
+
                 log.info("Issue buffer - processed " + visitor.getProcessedCount() + " issues");
                 
                 updateState(state.done());
@@ -224,11 +224,10 @@ public class IssueBufferService {
     }
 
     public synchronized List<Issue> getIssues() {
-        List<Issue> collect = cardsRepo.values().stream()
+        return cardsRepo.values().stream()
                 .filter(t -> projectService.isProjectVisible(t.getProjectKey()))
                 .filter(t -> t.isVisible())
                 .collect(toList());
-        return collect;
     }
     
     public synchronized List<Issue> getAllIssues() {
@@ -237,13 +236,6 @@ public class IssueBufferService {
 
     public synchronized Issue getIssueByKey(String key) {
         return cardsRepo.get(key);
-    }
-
-    public List<objective.taskboard.data.Issue> getIssueSubTasks(objective.taskboard.data.Issue issue) {
-        List<Issue> subtasks= new ArrayList<>();
-        jiraIssueService.searchIssueSubTasksAndDemandedByKey(issue.getIssueKey(), 
-            jiraIssue -> subtasks.add(issueConverter.convertSingleIssue(jiraIssue, parentProviderRejectsIfMissingParent)));
-        return subtasks;
     }
 
     public synchronized Issue toggleAssignAndSubresponsavelToUser(String issueKey) {
