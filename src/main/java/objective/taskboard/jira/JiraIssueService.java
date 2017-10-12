@@ -30,7 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.atlassian.jira.rest.client.api.domain.Issue;
-import com.atlassian.jira.rest.client.api.domain.IssuelinksType;
 
 import objective.taskboard.issueBuffer.CardRepo;
 
@@ -39,13 +38,7 @@ public class JiraIssueService {
 
     @Autowired
     private JiraSearchService jiraSearchService;
-    
-    @Autowired
-    private MetadataService metadataService;
-
-    @Autowired
-    private JiraProperties properties;
-    
+        
     @Autowired
     private JiraIssueJqlBuilderService jqlService;
 
@@ -63,18 +56,6 @@ public class JiraIssueService {
         return Optional.ofNullable(foundIssue.get());
     }
 
-    public void searchIssueSubTasksAndDemandedByKey(String key, SearchIssueVisitor visitor) {
-        IssuelinksType demandLink = metadataService.getIssueLinksMetadata().get(properties.getIssuelink().getDemandId().toString());
-        String jql = "parent = " + key +  " OR" + 
-                " issuefunction in linkedIssuesOf('key = " + key + "', '" + demandLink.getOutward() + "')";
-
-        jiraSearchService.searchIssues(jql, visitor);
-    }
-
-    public void searchAllWithParents(SearchIssueVisitor visitor, CardRepo cardsRepo) {
-        jiraSearchService.searchIssuesAndParents(visitor,jqlService.buildQueryForIssues(cardsRepo));
-    }
-    
     public void searchAllProjectIssues(SearchIssueVisitor visitor, CardRepo cardsRepo) {
         jiraSearchService.searchIssues(jqlService.projectsJql(cardsRepo), visitor);
     }

@@ -54,7 +54,6 @@ public class Issue extends IssueScratch implements Serializable {
     @JsonIgnore
     private transient Issue parentCard;
     
-    @JsonIgnore
     private transient List<Issue> subtasks = new LinkedList<>();
 
     private transient JiraProperties jiraProperties;

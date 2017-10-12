@@ -22,8 +22,6 @@ package objective.taskboard.testUtils;
 
 import static spark.Service.ignite;
 
-import java.io.File;
-import java.io.IOException;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -32,7 +30,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -40,7 +37,6 @@ import org.codehaus.jettison.json.JSONObject;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import objective.taskboard.RequestBuilder;
 import objective.taskboard.utils.IOUtilities;
 import spark.ExceptionHandler;
 import spark.Route;
@@ -164,10 +160,9 @@ public class JiraMockServer {
             String issueKey = req.params(":issueKey");
             String loadMockData = loadMockData(issueKey+".json");
             
-            if (loadMockData == null) {
-                if (System.getProperty("JiraMockServer.tryFromRealServer") != null)
-                loadMockData = retryFromRealServer(issueKey);
-            }
+            if (loadMockData == null)
+                return null;
+            
             
             JSONObject issueData = new JSONObject(loadMockData);
             String self = issueData.getString("self").replace("54.68.128.117:8100", "localhost:4567");
@@ -333,34 +328,18 @@ public class JiraMockServer {
         return avatarUrls;
     }
     
-    private static String retryFromRealServer(String issueKey) {
-        String issueJsonString = RequestBuilder
-                .url("http://54.68.128.117:8100/rest/api/latest/issue/" + issueKey + "?expand=schema,names,transitions")
-                .credentials("lousa", "objective").get().content;
-        try {
-            System.out.println("Writing data for issueKey: " + issueKey);
-            FileUtils.writeStringToFile(new File("src/test/resources/objective-jira-teste", issueKey + ".json"), issueJsonString, "UTF-8");
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-        return issueJsonString;
-    }
-    
     @SuppressWarnings("rawtypes")
     private static String makeFakeRequest(Map searchData) {
         long startAt = Math.round((Double)searchData.get("startAt"));
         String jql = searchData.get("jql").toString();
         String result = loadSearchFile(startAt, jql);
         if (result == null)
-            return "{\"startAt\":" + startAt + ",\"maxResults\":100,\"total\":288,\"issues\":[]}";
+            return "{\"startAt\":" + startAt + ",\"maxResults\":100,\"total\":316,\"issues\":[]}";
         return result;
     }
 
     private static String loadSearchFile(long startAt, String jql) {
         String datFileName = "search"+startAt+".json";
-        
-        if (jql.toLowerCase().trim().matches("project in [(][^)]*[)]"))
-            datFileName = "search_all"+startAt+".json";
         
         if (jql.toLowerCase().contains("key in")) { 
             String issueKey = jql.replaceAll("(?i).*key in [(]([^)]*)[)].*", "$1");

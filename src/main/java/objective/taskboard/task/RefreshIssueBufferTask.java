@@ -1,13 +1,3 @@
-package objective.taskboard.task;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-
-import objective.taskboard.issueBuffer.AllIssuesBufferService;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -28,20 +18,24 @@ import objective.taskboard.issueBuffer.AllIssuesBufferService;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+package objective.taskboard.task;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import objective.taskboard.issueBuffer.IssueBufferService;
 
 @Component
 public class RefreshIssueBufferTask implements ApplicationListener<ContextRefreshedEvent> {
 
-    private static final long RATE_MILISECONDS = 15 * 60 * 1000; 
+    private static final long RATE_MILISECONDS = 60 * 1000;
 
     @Autowired
     private IssueBufferService issueBufferService;
     
-    @Autowired
-    private AllIssuesBufferService allIssuesBufferService;
-
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
     }
@@ -50,11 +44,5 @@ public class RefreshIssueBufferTask implements ApplicationListener<ContextRefres
     public void updateIssueBuffer() {
         System.out.println("UPDATING ISSUE BUFFER");
         issueBufferService.updateIssueBuffer();
-    }
-    
-    @Scheduled(fixedRate = RATE_MILISECONDS, initialDelay = 0)
-    public void updateAllIssueBuffer() {
-        System.out.println("UPDATING ALL ISSUES BUFFER");
-        allIssuesBufferService.updateAllIssuesBuffer();
     }
 }

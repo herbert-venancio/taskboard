@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import objective.taskboard.issueBuffer.AllIssuesBufferService;
 import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.task.RefreshCacheTask;
 
@@ -39,9 +38,6 @@ public class CacheRefreshController {
     private IssueBufferService issueBufferService;
     
     @Autowired
-    private AllIssuesBufferService allIssuesBufferService;
-
-    @Autowired
     private RefreshCacheTask refreshCacheTask;
 
     @Autowired
@@ -50,7 +46,6 @@ public class CacheRefreshController {
     @RequestMapping("issues")
     public String issues() {
         issueBufferService.updateIssueBuffer();
-        allIssuesBufferService.updateAllIssuesBuffer();
 
         return "ISSUES UPDATE STARTED";
     }

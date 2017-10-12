@@ -40,7 +40,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.atlassian.jira.rest.client.api.domain.Subtask;
 import com.atlassian.jira.rest.client.api.domain.TimeTracking;
 import com.atlassian.jira.rest.client.api.domain.Transition;
 import com.atlassian.jira.rest.client.api.domain.input.ComplexIssueInputFieldValue;
@@ -85,7 +84,7 @@ public class IssueController {
 
     @Autowired
     private IssueBufferService issueBufferService;
-
+    
     @Autowired
     private ProjectService projectService;
 
@@ -154,24 +153,17 @@ public class IssueController {
         return jiraBean.getResolutions(transition);
     }
 
-    @RequestMapping(path = "subtasks", method = RequestMethod.POST)
-    public List<Issue> subtasks(@RequestBody Issue issue) throws SQLException {
-        return issueBufferService.getIssueSubTasks(issue);
-    }
-
     @RequestMapping(path = "timetracking", method = RequestMethod.POST)
     public TimeTracking timetracking(@RequestBody Issue issue) throws JSONException {
         Integer timeEstimateMinutes = 0;
         Integer timeSpentMinutes = 0;
 
-        com.atlassian.jira.rest.client.api.domain.Issue issueJira = jiraBean.getIssueByKey(issue.getIssueKey());
+        Issue main = issueBufferService.getIssueByKey(issue.getIssueKey());
 
-        timeEstimateMinutes += issueJira.getTimeTracking().getOriginalEstimateMinutes() != null ? issueJira.getTimeTracking().getOriginalEstimateMinutes() : 0;
-        timeSpentMinutes += issueJira.getTimeTracking().getTimeSpentMinutes() != null ? issueJira.getTimeTracking().getTimeSpentMinutes() : 0;
+        timeEstimateMinutes += main.getTimeTracking().getOriginalEstimateMinutes() != null ? main.getTimeTracking().getOriginalEstimateMinutes() : 0;
+        timeSpentMinutes += main.getTimeTracking().getTimeSpentMinutes() != null ? main.getTimeTracking().getTimeSpentMinutes() : 0;
 
-        for (Subtask subTask : issueJira.getSubtasks()) {
-            com.atlassian.jira.rest.client.api.domain.Issue subTaskJira = jiraBean.getIssueByKey(subTask.getIssueKey());
-
+        for (Issue subTaskJira : main.getSubtaskCards()) {
             timeEstimateMinutes += subTaskJira.getTimeTracking().getOriginalEstimateMinutes() != null ? subTaskJira.getTimeTracking().getOriginalEstimateMinutes() : 0;
             timeSpentMinutes += subTaskJira.getTimeTracking().getTimeSpentMinutes() != null ? subTaskJira.getTimeTracking().getTimeSpentMinutes() : 0;
         }

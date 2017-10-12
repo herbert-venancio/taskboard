@@ -46,7 +46,7 @@ import objective.taskboard.followup.FollowupDataProvider;
 import objective.taskboard.followup.FromJiraDataRow;
 import objective.taskboard.followup.FromJiraDataSet;
 import objective.taskboard.followup.SyntheticTransitionsDataSet;
-import objective.taskboard.issueBuffer.AllIssuesBufferService;
+import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.issueBuffer.IssueBufferState;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraProperties.BallparkMapping;
@@ -62,7 +62,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
     private MetadataService metadataService;
 
     @Autowired
-    private AllIssuesBufferService issueBufferService;
+    private IssueBufferService issueBufferService;
 
     private Map<String, Issue> demandsByKey;
     private Map<String, Issue> featuresByKey;
