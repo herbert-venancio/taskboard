@@ -377,7 +377,7 @@
         <iron-ajax id="ajaxTransitions"
                    method="POST"
                    url="/ws/issues/transitions"
-                   body="{{item}}"
+                   body="{{item.issueKey}}"
                    content-type='application/json'
                    headers='{"Content-Type": "application/json"}'
                    last-response="{{transitions}}"
@@ -625,7 +625,7 @@
 
                         <template is="dom-if" if="{{hasRecords(transitions)}}">
                             <template id="issueTransitions" is="dom-repeat" items="{{transitions}}" as="transition">
-                                <paper-button data-transition-name$='{{transition.name}}' raised class="colorful" on-tap="requestTransition" data-args={{transition.name}}>
+                                <paper-button data-transition-name$='{{transition.name}}' data-transition-id$='{{transition.id}}' data-transition-to-status-id$='{{transition.to.id}}' raised class="colorful" on-tap="requestTransition">
                                     {{transition.name}}
                                 </paper-button>
                             </template>
@@ -745,7 +745,6 @@
                 },
 
                 observers: [
-                    'doTransitionWithResolution(resolution.*)'
                 ],
 
                 computeTimeTrackingLabel: function () {
@@ -907,14 +906,15 @@
                 requestTransition: function (e) {
                     var self =  this;
                     var issue = self.item;
-                    var transitionName = e.target.dataArgs;
-                    var fieldsTransitions = self.getFieldsTransitions(transitionName);
-                    var text = "Do you want to execute transition \""+ transitionName + "\"?";
+                    var transition = this.getTransitionById(e.target.dataset.transitionId);
+                    var status = taskboard.getStatus(e.target.dataset.transitionToStatusId);
+                    var fieldsTransitions = self.getFieldsTransitions(transition);
+                    var text = "Do you want to execute transition \""+ transition.name + "\"?";
                     var callback = function(issue, transitionValuesRequired){
-                        if(self.hasResolutions(transitionName))
-                            self.doResolution(transitionName, issue);
+                        if(self.hasResolutions(transition))
+                            self.doResolution(transition, issue, status);
                         else
-                            self.doTransition(transitionName, issue);
+                            self.doTransition(transition, issue, status, null);
                     }
                     if(self.showFieldsRequiredDialog)
                         self.$.transitionRequiredDialog.openDialog(fieldsTransitions, transitionName, issue, callback);
@@ -923,50 +923,35 @@
                     self.showFieldsRequiredDialog = false;
                 },
 
-                getFieldsTransitions: function(transitionName){
+                getFieldsTransitions: function(transition){
                     var self = this;
                     var fieldsTransitions = [];
-                    for (var t = 0; t < self.transitions.length; t++) {
-                       if (self.transitions[t].name == transitionName && self.transitions[t].fields.length != []){
-                            for (var f = 0; f < self.transitions[t].fields.length; f++) {
-                                if(self.transitions[t].fields[f].required && self.transitions[t].fields[f].id != "resolution"){
-                                    self.showFieldsRequiredDialog = true;
-                                    fieldsTransitions.push(self.transitions[t].fields[f]);
-                                }
+                    if (transition){
+                        Object.values(transition.fields).forEach( field => {
+                            if(field.required && field.name != "resolution"){
+                                self.showFieldsRequiredDialog = true;
+                                fieldsTransitions.push(field);
                             }
-                            if(TRANSITION_REQUIRED_COMMENT.indexOf(transitionName) != -1)
-                               self.showFieldsRequiredDialog = true;
-                            return fieldsTransitions;
-                        }
+                        });
+                        if(TRANSITION_REQUIRED_COMMENT.indexOf(transition.name) != -1)
+                           self.showFieldsRequiredDialog = true;
                     }
+                    return fieldsTransitions;
                 },
 
-                hasResolutions: function (transitionName) {
-                    for (var t = 0; t < this.transitions.length; t++) {
-                        if (this.transitions[t].name === transitionName) {
-                            for (var f = 0; f < this.transitions[t].fields.length; f++) {
-                                if (this.transitions[t].fields[f].id === "resolution" && this.transitions[t].fields[f].required) {
-                                    return true;
-                                }
-                            }
-                        }
-                    }
-
-                    return false;
+                hasResolutions: function (transition) {
+                    if (!transition)
+                        return false;
+                    var found = Object.values(transition.fields).find( field => field.required && field.name === "resolution" );
+                    return found != undefined;
                 },
 
-                doTransitionWithResolution: function () {
-                    if (this.resolution !== null) {
-                        this.doTransition(this.resolution.transition, this.resolution.resolution);
-                    }
-                },
-
-                doTransition: function (transition, issue, resolution) {
+                doTransition: function (transition, issue, status, resolution) {
                     var self = this;
                     if(issue == null)
                         issue = this.item;
-                    var params = {transition: transition, resolution: resolution, issue: issue};
                     this.showSpinnerTransitions();
+                    var params = {issueKey: issue.issueKey, transitionId: transition.id, resolutionName: resolution};
                     $.ajax({
                         url: '/ws/issues/transition',
                         type: 'post',
@@ -991,13 +976,13 @@
                     });
                 },
 
-                doResolution: function (transition, issue) {
+                doResolution: function (transition, issue, status) {
                     var self = this;
                     $.ajax({
-                        url: '/ws/issues/resolutions/'+transition,
+                        url: '/ws/issues/resolutions/'+transition.name,
                         type: 'get',
                         success: function (data, textStatus, jQxhr) {
-                            self.doTransition(transition, issue, data);
+                            self.doTransition(transition, issue, status, data);
                         },
                         error: function (jqXhr, textStatus, errorThrown) {
                             self.errorMessage = jqXhr.responseJSON.message;
@@ -1020,7 +1005,7 @@
                     this.setCard(item);
                     this.$.modal.open();
                 },
-                
+
                 setCard: function(item) {
                     this.item = item;
                     $(this.$.modal).css('background-color', this.item.color);
@@ -1146,22 +1131,27 @@
                 getStatusName: function(statusId) {
                     return taskboard.getStatusName(statusId);
                 },
-                
+
                 updateIssue: function(event) {
                     if (event.detail.source === 'client')
                         return;
-                    if (this.item != null && event.detail.issue.issueKey !== this.item.issueKey)
+                    else if (this.item != null && event.detail.issue.issueKey !== this.item.issueKey)
                         return;
                     
                     this.isObserving = true;
-                    this.set('updatedIssue', taskboard.convertIssue(event.detail.issue));
+                    this.set('updatedIssue', event.detail.issue);
                     this.set('issueChangeStateClass', 'visible-glasspane');
                 },
-                
+
                 refreshIfUpdated: function() {
                     if (this.updatedIssue) 
                         this.setCard(this.updatedIssue);
+                },
+
+                getTransitionById: function(transitionId) {
+                    return this.transitions.find( transition => transition.id == transitionId );
                 }
+
             });
 
         })();

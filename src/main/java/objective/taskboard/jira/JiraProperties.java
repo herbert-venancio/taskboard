@@ -1122,7 +1122,7 @@ public class JiraProperties {
         private String tShirtSizeSubtaskId;
         @NotNull
         private String tShirtSizeDefaultValue = "M";
-        private Optional<Integer> transitionId;
+        private Optional<Long> transitionId;
 
         public SubtaskCreation() {
         }
@@ -1159,7 +1159,7 @@ public class JiraProperties {
             return this.tShirtSizeDefaultValue;
         }
 
-        public Optional<Integer> getTransitionId() {
+        public Optional<Long> getTransitionId() {
             return this.transitionId;
         }
 
@@ -1195,7 +1195,7 @@ public class JiraProperties {
             this.tShirtSizeDefaultValue = tShirtSizeDefaultValue;
         }
 
-        public void setTransitionId(final Optional<Integer> transitionId) {
+        public void setTransitionId(final Optional<Long> transitionId) {
             this.transitionId = transitionId;
         }
 

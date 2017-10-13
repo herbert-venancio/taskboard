@@ -21,6 +21,7 @@
 package objective.taskboard.jira;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -31,29 +32,28 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
-import com.atlassian.jira.rest.client.api.RestClientException;
 import com.atlassian.jira.rest.client.api.domain.BasicIssue;
-import com.atlassian.jira.rest.client.api.domain.Comment;
 import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.IssueField;
 import com.atlassian.jira.rest.client.api.domain.Resolution;
 import com.atlassian.jira.rest.client.api.domain.ServerInfo;
-import com.atlassian.jira.rest.client.api.domain.Transition;
 import com.atlassian.jira.rest.client.api.domain.User;
 import com.atlassian.jira.rest.client.api.domain.input.ComplexIssueInputFieldValue;
-import com.atlassian.jira.rest.client.api.domain.input.FieldInput;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInput;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder;
-import com.atlassian.jira.rest.client.api.domain.input.TransitionInput;
 import com.google.common.collect.ImmutableList;
 
 import objective.taskboard.auth.CredentialsHolder;
+import objective.taskboard.jira.data.Transition;
+import objective.taskboard.jira.data.Transitions;
 import objective.taskboard.jira.endpoint.JiraEndpoint;
 import objective.taskboard.jira.endpoint.JiraEndpoint.Request;
 import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
@@ -112,14 +112,50 @@ public class JiraService {
         }
     }
 
-    public void doTransitionByName(objective.taskboard.data.Issue issue, String transitionName, String resolution) {
-        String issueKey = issue.getIssueKey();
-        Issue issueByJira = getIssueByKey(issueKey);
-        Transition transitionByName = getTransitionByName(issueByJira, transitionName);
+    public void doTransition(String issueKey, Long transitionId, String resolutionName) {
+        log.debug("⬣⬣⬣⬣⬣  doTransition");
+        try {
+            JSONObject requestJson = buildDoTransitionJson(transitionId, resolutionName);
+            jiraEndpointAsUser.postWithRestTemplate("/rest/api/latest/issue/" + issueKey + "/transitions?expand=transitions.fields", APPLICATION_JSON, requestJson);
+        } catch (HttpClientErrorException e) {
+            throw new FrontEndMessageException(e);
+        } catch(Exception e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
 
-        doTransition(issueByJira, transitionByName, issue, resolution);
+    public void doTransitionAsMaster(String issueKey, Long transitionId) {
+        log.debug("⬣⬣⬣⬣⬣  doTransition (master)");
+        try {
+            JSONObject requestJson = buildDoTransitionJson(transitionId, null);
+            jiraEndpointAsMaster.postWithRestTemplate("/rest/api/latest/issue/" + issueKey + "/transitions?expand=transitions.fields", APPLICATION_JSON, requestJson);
+        } catch (HttpClientErrorException e) {
+            throw new FrontEndMessageException(e);
+        } catch(Exception e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
 
-        assignSubResponsavel(issueByJira.getKey());
+    private JSONObject buildDoTransitionJson(Long transitionId, String resolutionName) {
+        JSONObject requestJson = new JSONObject();
+        try {
+            if (StringUtils.isNotEmpty(resolutionName)) {
+                JSONObject resolutionJson = new JSONObject();
+                resolutionJson.put("name", resolutionName);
+
+                JSONObject fieldsJson = new JSONObject();
+                fieldsJson.put("resolution", resolutionJson);
+
+                requestJson.put("fields", fieldsJson);
+            }
+            JSONObject transitionJson = new JSONObject();
+            transitionJson.put("id", transitionId);
+
+            requestJson.put("transition", transitionJson);
+        } catch (JSONException e) {
+            throw new IllegalArgumentException(e);
+        }
+        return requestJson;
     }
 
     private void assignSubResponsavel(String issueKey) {
@@ -139,27 +175,6 @@ public class JiraService {
         updateIssue(key, new IssueInputBuilder().setAssigneeName(assignee));
     }
 
-    public void doTransition(Issue issueByJira, Transition transition, objective.taskboard.data.Issue issue, String resolution) {
-        log.debug("⬣⬣⬣⬣⬣  doTransition");
-        TransitionInput transitionInput;
-        String issueComment =  issue.getComments();
-        if (resolution == null) {
-            transitionInput = issueComment.isEmpty()? new TransitionInput(transition.getId()) :
-                new TransitionInput(transition.getId(), Comment.valueOf(issueComment));
-        } else {
-            final List<FieldInput> fields = newArrayList(new FieldInput("resolution", ComplexIssueInputFieldValue.with("name", resolution)));
-            transitionInput = issueComment.isEmpty()? new TransitionInput(transition.getId(), fields):
-                new TransitionInput(transition.getId(), fields, Comment.valueOf(issueComment));
-        }
-        jiraEndpointAsUser.executeRequest(client -> client.getIssueClient().transition(issueByJira, transitionInput));
-    }
-
-    public void doTransitionAsMaster(Issue issue, int transitionId) {
-        log.debug("⬣⬣⬣⬣⬣  doTransition (master)");
-        TransitionInput transitionInput = new TransitionInput(transitionId);
-        jiraEndpointAsMaster.executeRequest(client -> client.getIssueClient().transition(issue, transitionInput));
-    }
-
     public String getResolutions(String transitionName) {
         log.debug("⬣⬣⬣⬣⬣  getResolutions");
         Resolution resolutionTransition = null;
@@ -176,15 +191,19 @@ public class JiraService {
         return null;
     }
 
-    public List<Transition> getTransitionsAsMaster(Issue issue) {
-        log.debug("⬣⬣⬣⬣⬣  getTransitions (master)");
-        Iterable<Transition> response = jiraEndpointAsMaster.executeRequest(client -> client.getIssueClient().getTransitions(issue));
+    public List<Transition> getTransitions(String issueKey) {
+        log.debug("⬣⬣⬣⬣⬣  getTransitions");
+        Iterable<Transition> response = jiraEndpointAsUser.request(Transitions.Service.class).get(issueKey).transitions
+                .stream()
+                .collect(Collectors.toList());
         return ImmutableList.copyOf(response);
     }
 
-    public List<Transition> getTransitions(Issue issue) {
-        log.debug("⬣⬣⬣⬣⬣  getTransitions");
-        Iterable<Transition> response = jiraEndpointAsUser.executeRequest(client -> client.getIssueClient().getTransitions(issue));
+    public List<Transition> getTransitionsAsMaster(String issueKey) {
+        log.debug("⬣⬣⬣⬣⬣  getTransitions (master)");
+        Iterable<Transition> response = jiraEndpointAsMaster.request(Transitions.Service.class).get(issueKey).transitions
+                .stream()
+                .collect(Collectors.toList());
         return ImmutableList.copyOf(response);
     }
 
@@ -208,14 +227,6 @@ public class JiraService {
         log.debug("⬣⬣⬣⬣⬣  createIssue (master)");
         BasicIssue issue = jiraEndpointAsMaster.executeRequest(client -> client.getIssueClient().createIssue(issueInput));
         return issue.getKey();
-    }
-
-    public Transition getTransitionByName(Issue issue, String transitionName) {
-        return getTransitions(issue)
-                .stream()
-                .filter(transition -> transition.getName().equals(transitionName))
-                .findFirst()
-                .orElse(null);
     }
 
     public void toggleAssignAndSubresponsavelToUser(String key) {
@@ -242,7 +253,6 @@ public class JiraService {
         assignIssue(key, assignee);
     }
 
-
     private Set<String> getSubResponsaveis(String key) {
         try {
             Set<String> subResponsaveis = new HashSet<>();
@@ -260,18 +270,6 @@ public class JiraService {
             return subResponsaveis;
         } catch (JSONException e) {
             throw new IllegalStateException(e);
-        }
-    }
-
-    public List<Transition> getTransitionsByIssueKey(String issueKey) {
-        try {
-            Issue issue = getIssueByKey(issueKey);
-            return this.getTransitions(issue);
-        } catch (RestClientException e) {
-            if (HttpStatus.FORBIDDEN.value() == e.getStatusCode().or(0))
-                throw new PermissaoNegadaException(e);
-
-            throw e;
         }
     }
 
