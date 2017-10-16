@@ -266,12 +266,19 @@ function Taskboard() {
         return "";
     };
 
+    this.getStatuses = function() {
+        if (this.statuses === undefined)
+            this.statuses = JSON.parse(localStorage.getItem("statuses"));
+        return this.statuses;
+    };
+
+    this.getStatus = function(statusId) {
+        var statusIdNumber = parseInt(statusId);
+        return Object.values(this.getStatuses()).find( s => s.id === statusIdNumber );
+    };
+
     this.getStatusName = function(statusId) {
-        var statuses = JSON.parse(localStorage.getItem("statuses"));
-        for (var i in statuses)
-            if (statuses[i].id == statusId)
-                return statuses[i].name;
-        return "";
+        return this.getStatus(statusId).name;
     };
 
     this.getOnlyOneSize = function(sizes) {

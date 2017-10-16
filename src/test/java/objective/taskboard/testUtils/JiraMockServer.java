@@ -169,19 +169,7 @@ public class JiraMockServer {
             issueData.put("self", self);
             return issueData.toString();
         });
-        
-        get("/rest/api/latest/issue/:issueId/transitions", (req,res) ->{
-            String issueKey = issueKeyByIssueId.get(req.params("issueId"));
-            if (issueKey == null)
-                throw new IllegalArgumentException("Issue id " + req.params("issueId") + " not found");
-            JSONObject issueSearchData = getIssueDataForKey(issueKey);
-            JSONArray issues = issueSearchData.getJSONArray("issues");
-            JSONObject result = new JSONObject();
-            result.put("expand", "transitions");
-            result.put("transitions", issues.getJSONObject(0).getJSONArray("transitions"));
-            return result.toString(); 
-        });
-        
+
         put("/rest/api/latest/issue/:issueKey",  (req, res) ->{
             JSONObject reqData = new JSONObject(req.body());
             String issueKey = req.params(":issueKey");
@@ -214,8 +202,20 @@ public class JiraMockServer {
             return "";
         });
 
+        get("/rest/api/latest/issue/:issueId/transitions", (req,res) ->{
+            String issueKey = issueKeyByIssueId.getOrDefault(req.params("issueId"), req.params("issueId"));
+            if (issueKey == null)
+                throw new IllegalArgumentException("Issue id " + req.params("issueId") + " not found");
+            JSONObject issueSearchData = getIssueDataForKey(issueKey);
+            JSONArray issues = issueSearchData.getJSONArray("issues");
+            JSONObject result = new JSONObject();
+            result.put("expand", "transitions");
+            result.put("transitions", issues.getJSONObject(0).getJSONArray("transitions"));
+            return result.toString();
+        });
+
         post("/rest/api/latest/issue/:issueId/transitions", (req, res)-> {
-            String issueKey = issueKeyByIssueId.get(req.params("issueId"));
+            String issueKey = issueKeyByIssueId.getOrDefault(req.params("issueId"), req.params("issueId"));
             JSONObject issueSearchData = getIssueDataForKey(issueKey);
             JSONObject issue = issueSearchData.getJSONArray("issues").getJSONObject(0);
             JSONArray transitions = issue.getJSONArray("transitions");

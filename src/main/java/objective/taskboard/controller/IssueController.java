@@ -41,7 +41,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.atlassian.jira.rest.client.api.domain.TimeTracking;
-import com.atlassian.jira.rest.client.api.domain.Transition;
 import com.atlassian.jira.rest.client.api.domain.input.ComplexIssueInputFieldValue;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder;
 import com.google.common.collect.Lists;
@@ -61,12 +60,15 @@ import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.JiraService.PermissaoNegadaException;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.ProjectService;
+import objective.taskboard.jira.data.Transition;
 import objective.taskboard.linkgraph.LinkGraphProperties;
 
 @RestController
 @RequestMapping("/ws/issues")
 public class IssueController {
+
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(IssueController.class);
+
     @Autowired
     private TaskboardDatabaseService taskService;
 
@@ -134,15 +136,14 @@ public class IssueController {
     }
 
     @RequestMapping(path = "transition", method = RequestMethod.POST)
-    public Issue transition(@RequestBody TransitionDTO params) throws JSONException {
-        return issueBufferService.doTransitionByName(params.issue, params.transition, params.resolution);
+    public Issue transition(@RequestBody TransitionRequestDTO tr) throws JSONException {
+        return issueBufferService.doTransition(tr.issueKey, tr.transitionId, tr.resolutionName);
     }
 
     @RequestMapping(path = "transitions", method = RequestMethod.POST)
-    public List<Transition> transitions(@RequestBody Issue issue) {
+    public List<Transition> transitions(@RequestBody String issueKey) {
         try {
-            List<Transition> transitionsByIssueKey = jiraBean.getTransitionsByIssueKey(issue.getIssueKey());
-            return transitionsByIssueKey;
+            return jiraBean.getTransitions(issueKey);
         } catch (PermissaoNegadaException e) {
             return Lists.newLinkedList();
         }
@@ -170,12 +171,12 @@ public class IssueController {
 
         return new TimeTracking(timeEstimateMinutes, null, timeSpentMinutes);
     }
-    
+
     @RequestMapping(path = "cacheState")
     public IssueBufferState issueCacheState() {
         return issueBufferService.getState();
     }
-    
+
     @RequestMapping("configuration")
     public Map<String, Object> configuration() throws SQLException, InterruptedException, ExecutionException {
         Map<String, Object> map = new HashMap<>();
@@ -213,7 +214,7 @@ public class IssueController {
     public List<Issue> reorder(@RequestBody String [] issues) {
         return issueBufferService.reorder(issues);
     }
-    
+
     @RequestMapping("issue-buffer-state")
     public String getState() {
         return issueBufferService.getState().name();
@@ -269,9 +270,10 @@ public class IssueController {
         return f1.getName().compareTo(f2.getName());
     }
 
-    public static class TransitionDTO {
-        public String transition;
-        public String resolution;
-        public Issue issue;
+    private static class TransitionRequestDTO {
+        public String issueKey;
+        public Long transitionId;
+        public String resolutionName;
     }
+
 }

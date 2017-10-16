@@ -294,17 +294,17 @@
 
                 getFields: function(){
                     this.getFieldsByFieldsTransitions();
-	                var field = this.fieldsByFieldsTransitions;
-	                var listFilds = [];
+                    var field = this.fieldsByFieldsTransitions;
+                    var listFilds = [];
 
-	                for(var f = 0; f < field.length; f++){
+                    for(var f = 0; f < field.length; f++){
 
                         var typeField = this.getTypeField(field[f]);
                         var listOptions = this.getOptions(field[f]);
                         var showOptions = listOptions.length == 0 ? false : true;
 
                         listFilds.push({
-                            id: field[f].id,
+                            id: field[f].name,
                             name: field[f].name,
                             options: listOptions,
                             showOptions: showOptions,
@@ -345,22 +345,20 @@
                 getOptions: function(field){
                     var listOptions = [];
                     for (x in field.allowedValues){
-                       if(field.allowedValues[x].archived == false || field.allowedValues[x].archived == null){
-                          listOptions.push({
-                              name: field.allowedValues[x].name,
-                              value: field.allowedValues[x].value,
-                              id: field.allowedValues[x].id
-                          });
-                       }
+                        listOptions.push({
+                            name: field.allowedValues[x],
+                            value: field.allowedValues[x],
+                            id: field.allowedValues[x]
+                        });
                     }
                     return listOptions;
                 },
 
                 getFieldsByFieldsTransitions: function(){
                     var issuetype = this.getIssueTypeMetadataById(this.issue.type);
-	                var field = [];
-	                for(ft in this.fieldsTransitions){
-                        var fieldFromIssueType = this.getFieldFromIssueType(issuetype, this.fieldsTransitions[ft].id)
+                    var field = [];
+                    for(ft in this.fieldsTransitions){
+                        var fieldFromIssueType = this.getFieldFromIssueType(issuetype, this.fieldsTransitions[ft].name)
                         if(fieldFromIssueType != null)
                             field.push(fieldFromIssueType);
                     }
@@ -392,8 +390,8 @@
                         this.setIssueValues(values);
                         this.callback(this.issue);
                         values = null;
-		                this.clearProperties();
-		            }
+                        this.clearProperties();
+                    }
                 },
 
                 getValuesFields: function(){
