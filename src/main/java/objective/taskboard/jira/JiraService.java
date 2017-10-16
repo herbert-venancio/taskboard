@@ -21,7 +21,6 @@
 package objective.taskboard.jira;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -32,13 +31,11 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 
 import com.atlassian.jira.rest.client.api.domain.BasicIssue;
 import com.atlassian.jira.rest.client.api.domain.Issue;
@@ -54,10 +51,12 @@ import com.google.common.collect.ImmutableList;
 import objective.taskboard.auth.CredentialsHolder;
 import objective.taskboard.jira.data.Transition;
 import objective.taskboard.jira.data.Transitions;
+import objective.taskboard.jira.data.Transitions.DoTransitionRequestBody;
 import objective.taskboard.jira.endpoint.JiraEndpoint;
 import objective.taskboard.jira.endpoint.JiraEndpoint.Request;
 import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
 import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
+import retrofit.RetrofitError;
 
 @Service
 @EnableConfigurationProperties(JiraProperties.class)
@@ -115,9 +114,9 @@ public class JiraService {
     public void doTransition(String issueKey, Long transitionId, String resolutionName) {
         log.debug("⬣⬣⬣⬣⬣  doTransition");
         try {
-            JSONObject requestJson = buildDoTransitionJson(transitionId, resolutionName);
-            jiraEndpointAsUser.postWithRestTemplate("/rest/api/latest/issue/" + issueKey + "/transitions?expand=transitions.fields", APPLICATION_JSON, requestJson);
-        } catch (HttpClientErrorException e) {
+            DoTransitionRequestBody requestBody = new DoTransitionRequestBody(transitionId, resolutionName);
+            jiraEndpointAsUser.request(Transitions.Service.class).doTransition(issueKey, requestBody);
+        } catch (RetrofitError e) {
             throw new FrontEndMessageException(e);
         } catch(Exception e) {
             throw new IllegalArgumentException(e);
@@ -127,35 +126,13 @@ public class JiraService {
     public void doTransitionAsMaster(String issueKey, Long transitionId) {
         log.debug("⬣⬣⬣⬣⬣  doTransition (master)");
         try {
-            JSONObject requestJson = buildDoTransitionJson(transitionId, null);
-            jiraEndpointAsMaster.postWithRestTemplate("/rest/api/latest/issue/" + issueKey + "/transitions?expand=transitions.fields", APPLICATION_JSON, requestJson);
-        } catch (HttpClientErrorException e) {
+            DoTransitionRequestBody requestBody = new DoTransitionRequestBody(transitionId, null);
+            jiraEndpointAsMaster.request(Transitions.Service.class).doTransition(issueKey, requestBody);
+        } catch (RetrofitError e) {
             throw new FrontEndMessageException(e);
         } catch(Exception e) {
             throw new IllegalArgumentException(e);
         }
-    }
-
-    private JSONObject buildDoTransitionJson(Long transitionId, String resolutionName) {
-        JSONObject requestJson = new JSONObject();
-        try {
-            if (StringUtils.isNotEmpty(resolutionName)) {
-                JSONObject resolutionJson = new JSONObject();
-                resolutionJson.put("name", resolutionName);
-
-                JSONObject fieldsJson = new JSONObject();
-                fieldsJson.put("resolution", resolutionJson);
-
-                requestJson.put("fields", fieldsJson);
-            }
-            JSONObject transitionJson = new JSONObject();
-            transitionJson.put("id", transitionId);
-
-            requestJson.put("transition", transitionJson);
-        } catch (JSONException e) {
-            throw new IllegalArgumentException(e);
-        }
-        return requestJson;
     }
 
     private void assignSubResponsavel(String issueKey) {
@@ -193,17 +170,13 @@ public class JiraService {
 
     public List<Transition> getTransitions(String issueKey) {
         log.debug("⬣⬣⬣⬣⬣  getTransitions");
-        Iterable<Transition> response = jiraEndpointAsUser.request(Transitions.Service.class).get(issueKey).transitions
-                .stream()
-                .collect(Collectors.toList());
+        Iterable<Transition> response = jiraEndpointAsUser.request(Transitions.Service.class).get(issueKey).transitions;
         return ImmutableList.copyOf(response);
     }
 
     public List<Transition> getTransitionsAsMaster(String issueKey) {
         log.debug("⬣⬣⬣⬣⬣  getTransitions (master)");
-        Iterable<Transition> response = jiraEndpointAsMaster.request(Transitions.Service.class).get(issueKey).transitions
-                .stream()
-                .collect(Collectors.toList());
+        Iterable<Transition> response = jiraEndpointAsMaster.request(Transitions.Service.class).get(issueKey).transitions;
         return ImmutableList.copyOf(response);
     }
 

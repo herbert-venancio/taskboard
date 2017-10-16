@@ -52,7 +52,7 @@
                       on-iron-signal-step-update="handleStepUpdate"
                       ></iron-signals>
 
-        <div id="boardStep" class="wrap layout horizontal sortable-board-step" style="width: 100%">
+        <div id="boardStep" boardstepid$="{{stepMetadata.id}}" class="wrap layout horizontal sortable-board-step" style="width: 100%">
 
             <!-- Issue Counter -->
             <template is="dom-if" if="{{showTeamCount(issues, lastPreferenceUpdate)}}">
@@ -64,7 +64,7 @@
             <!-- Issues -->
             <div id="boardStepIssues" class="wrap layout horizontal sortable-board-step" style="width: 100%">
                 <template is="dom-repeat" items="{{filteredIssues}}" as="issue">
-                    <issue-item data-id$="{{issue.issueKey}}" id='{{issue.issueKey}}' item="{{issue}}" boardstepid="{{stepMetadata.id}}" style$="{{getOptimalIssueWidth(columns, issue)}}" hidden="{{showSynthetic(lastPreferenceUpdate)}}"></issue-item>
+                    <issue-item data-id$="{{issue.issueKey}}" id='{{issue.issueKey}}' item="{{issue}}" style$="{{getOptimalIssueWidth(columns, issue)}}" hidden="{{showSynthetic(lastPreferenceUpdate)}}"></issue-item>
                     <issue-item-synthetic item="{{issue}}" parent-type-icon="{{showParentIconInSynthetic(parentLaneConfig)}}" hidden="{{!showSynthetic(lastPreferenceUpdate)}}"></issue-item-synthetic>
                 </template>
             </div>
@@ -319,7 +319,6 @@
                     if (belongsToThisStep && issueIndex == -1) {
                         // issue added to this board step
                         data.issue.__eventInfo.type = 'ADDED'
-                        data.issue.boardstep = issueBoardStep.id;
                         this.issues.push(data.issue)
 
                         this.async(function() {

@@ -245,8 +245,7 @@ public class IssueBufferService {
 
     public synchronized Issue doTransition(String issueKey, Long transitionId, String resolutionName) {
         jiraBean.doTransition(issueKey, transitionId, resolutionName);
-        updateIssueBuffer(issueKey);
-        return getIssueByKey(issueKey);
+        return updateIssueBuffer(issueKey);
     }
 
     private void putIssue(Issue issue) {
