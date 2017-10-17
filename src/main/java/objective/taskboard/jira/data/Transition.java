@@ -20,7 +20,7 @@ public class Transition {
     public static class Field {
         public String name;
         public Boolean required;
-        public List<String> allowedValues;
+        public List<Object> allowedValues;
         public String defaultValue;
         public Boolean hasDefaultValue;
     }
