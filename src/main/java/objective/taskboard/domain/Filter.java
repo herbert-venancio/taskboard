@@ -77,8 +77,12 @@ public class Filter extends TaskboardEntity implements Serializable {
         this.limitInDays = limitInDays;
     }
     
+    public boolean isApplicable(long issueTypeId, long statusId) {
+        return getIssueTypeId() == issueTypeId && getStatusId() == statusId;
+    }
+
     public boolean isApplicable(Issue issue) {
-        return getStatusId() == issue.getStatus() && getIssueTypeId() == issue.getType();
+        return isApplicable(issue.getType(), issue.getStatus()); 
     }
 
     @Override

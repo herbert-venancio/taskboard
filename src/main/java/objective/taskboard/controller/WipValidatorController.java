@@ -20,35 +20,44 @@
  */
 package objective.taskboard.controller;
 
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.PRECONDITION_FAILED;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.ws.rs.QueryParam;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.IssueField;
 
 import objective.taskboard.data.Team;
-import objective.taskboard.data.UserTeam;
+import objective.taskboard.domain.Filter;
 import objective.taskboard.domain.ProjectTeam;
 import objective.taskboard.domain.WipConfiguration;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraSearchService;
 import objective.taskboard.jira.JiraService;
+import objective.taskboard.jira.MetadataCachedService;
+import objective.taskboard.jira.data.Status;
 import objective.taskboard.repository.ProjectTeamRepository;
 import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.repository.UserTeamCachedRepository;
@@ -60,6 +69,7 @@ import objective.taskboard.repository.WipConfigurationRepository;
 public class WipValidatorController {
 
     private static final String CLASS_OF_SERVICE_EXPEDITE = "Expedite";
+    private static final Logger log = LoggerFactory.getLogger(WipValidatorController.class);
 
     @Autowired
     private WipConfigurationRepository wipConfigRepo;
@@ -81,23 +91,28 @@ public class WipValidatorController {
 
     @Autowired
     private JiraProperties jiraProperties;
+    
+    @Autowired
+    private MetadataCachedService metadataService;
 
     @RequestMapping
-    public ResponseEntity<WipValidatorResponse> validate(@QueryParam("issue") String issue,
-            @QueryParam("user") String user, @QueryParam("status") String status) {
+    public ResponseEntity<WipValidatorResponse> validate(
+            @RequestParam("issue") String issueKey,
+            @RequestParam("user") String user, 
+            @RequestParam("status") String newStatusName) {
         WipValidatorResponse response = new WipValidatorResponse();
 
         try {
-            Issue jiraIssue;
+            Issue issue;
             try {
-                jiraIssue = jiraService.getIssueByKeyAsMaster(issue);
+                issue = jiraService.getIssueByKeyAsMaster(issueKey);
             } catch (Exception e) {
-                response.message = "Issue " + issue + " not found (" + (e.getMessage() == null ? e.toString() : e.getMessage()) + ")";
+                response.message = "Issue " + issueKey + " not found (" + (e.getMessage() == null ? e.toString() : e.getMessage()) + ")";
                 return new ResponseEntity<WipValidatorResponse>(response, PRECONDITION_FAILED);
             }
 
-            if (jiraIssue == null) {
-                response.message = "Issue " + issue + " not found";
+            if (issue == null) {
+                response.message = "Issue " + issueKey + " not found";
                 return new ResponseEntity<WipValidatorResponse>(response, PRECONDITION_FAILED);
             }
 
@@ -106,37 +121,47 @@ public class WipValidatorController {
                 return new ResponseEntity<WipValidatorResponse>(response, PRECONDITION_FAILED);
             }
 
-            if (status == null || status.isEmpty()) {
+            if (newStatusName == null || newStatusName.isEmpty()) {
                 response.message = "Query parameter 'status' is required";
                 return new ResponseEntity<WipValidatorResponse>(response, PRECONDITION_FAILED);
             }
 
-            if (isClassOfServiceExpedite(jiraIssue)) {
+            if (isClassOfServiceExpedite(issue)) {
                 response.message = "Class of service is " + CLASS_OF_SERVICE_EXPEDITE;
                 return new ResponseEntity<WipValidatorResponse>(response, OK);
             }
 
-            if (isIssueTypeToIgnore(jiraIssue)) {
-                response.message = "Issue Type " + jiraIssue.getIssueType().getName() + " is ignored on WIP count.";
+            if (isIssueTypeToIgnore(issue)) {
+                response.message = "Issue Type " + issue.getIssueType().getName() + " is ignored on WIP count.";
+                return new ResponseEntity<WipValidatorResponse>(response, OK);
+            }
+            
+            Optional<Status> newStatus = metadataService.getStatusesMetadata().values().stream()
+                    .filter(s -> s.name.equals(newStatusName))
+                    .findFirst();
+            
+            if (!newStatus.isPresent()) {
+                response.message = "Status '" + newStatusName + "' not found";
                 return new ResponseEntity<WipValidatorResponse>(response, OK);
             }
 
-            WipConfiguration wipConfig = getWipConfig(user, jiraIssue.getProject().getKey(), status);
-            if (wipConfig == null) {
+            Optional<WipConfiguration> optionalWipConfig = getWipConfig(user, issue, newStatus.get().id);
+            if (!optionalWipConfig.isPresent()) {
                 response.message = "No wip configuration was found";
                 return new ResponseEntity<WipValidatorResponse>(response, OK);
             }
 
-            List<String> userTeamsWip = userTeamRepo.findByTeam(wipConfig.getTeam()).stream()
+            WipConfiguration wipConfig = optionalWipConfig.get();
+            List<String> teamUsers = userTeamRepo.findByTeam(wipConfig.getTeam()).stream()
                     .map(u -> u.getUserName())
                     .collect(toList());
 
             Team team = teamRepo.findByName(wipConfig.getTeam());
-            List<String> projectTeams = projectTeamRepo.findByIdTeamId(team.getId()).stream()
+            List<String> teamProjects = projectTeamRepo.findByIdTeamId(team.getId()).stream()
                     .map(p -> p.getProjectKey())
                     .collect(toList());
 
-            String query = getWipCountQuery(status, jiraIssue, userTeamsWip, projectTeams);
+            String query = getWipCountQuery(wipConfig.getStep().getFilters(), teamUsers, teamProjects);
 
             AtomicInteger wipActual = new AtomicInteger(0);
             jiraSearchService.searchIssues(query, _i -> wipActual.incrementAndGet());
@@ -151,6 +176,7 @@ public class WipValidatorController {
 
             return new ResponseEntity<WipValidatorResponse>(response, OK);
         } catch (Exception e) {
+            log.error("Wip validation error", e);
             response.message = e.getMessage() == null ? e.toString() : e.getMessage();
             return new ResponseEntity<WipValidatorResponse>(response, INTERNAL_SERVER_ERROR);
         }
@@ -169,42 +195,41 @@ public class WipValidatorController {
         }
     }
 
-    private WipConfiguration getWipConfig(String user, String project, String status) {
-        List<WipConfiguration> wipConfigs = new ArrayList<WipConfiguration>();
-        List<UserTeam> userTeams = userTeamRepo.findByUserName(user);
-        userTeams.stream().forEach((userTeam) -> {
-            Team team = teamRepo.findByName(userTeam.getTeam());
-            if (team == null)
-                return;
+    private Optional<WipConfiguration> getWipConfig(String user, Issue issue, Long newStatusId) {
+        String projectKey = issue.getProject().getKey();
+        long issueTypeId = issue.getIssueType().getId();
+        
+        Set<Long> teamsIdsThatContributeToProject = projectTeamRepo.findByIdProjectKey(projectKey).stream()
+                .map(ProjectTeam::getTeamId)
+                .collect(Collectors.toSet());
+        
+        List<String> userTeamsNames = userTeamRepo.findByUserName(user).stream()
+                .map(userTeam -> teamRepo.findByName(userTeam.getTeam()))
+                .filter(Objects::nonNull)
+                .filter(team -> teamsIdsThatContributeToProject.contains(team.getId()))
+                .map(Team::getName)
+                .collect(toList());
 
-            List<ProjectTeam> projectTeams = projectTeamRepo.findByIdProjectKeyAndIdTeamId(project, team.getId());
+        List<WipConfiguration> wipConfigsApplicableToIssue = wipConfigRepo.findByTeamIn(userTeamsNames).stream()
+                .filter(c -> c.isApplicable(issueTypeId, newStatusId))
+                .collect(toList());
 
-            if (projectTeams.isEmpty())
-                return;
-            wipConfigs.addAll(wipConfigRepo.findByTeamAndStatus(team.getName(), status));
-        });
+        Optional<WipConfiguration> smallestWip = wipConfigsApplicableToIssue.stream()
+                .min(comparing(WipConfiguration::getWip));
 
-        if (wipConfigs.isEmpty())
-            return null;
-
-        List<WipConfiguration> wipsSorted = wipConfigs.stream().sorted((w1, w2) -> {
-            if (w1 == null && w2 == null) return 0;
-            if (w1 == null) return 1;
-            if (w2 == null) return -1;
-            return w1.getWip().compareTo(w2.getWip());
-        }).collect(toList());
-
-        return wipsSorted.get(0);
+        return smallestWip;
     }
 
-    private String getWipCountQuery(String status, Issue jiraIssue, List<String> userTeamsWip, List<String> projectTeams) {
-        String query = "assignee in ('" + String.join("','", userTeamsWip) + "') " +
-                "and project in ('" + String.join("','", projectTeams) + "') " +
-                "and status = '" + status + "' " +
-                (jiraIssue.getIssueType().isSubtask() ?
-                        "and issuetype in subTaskIssueTypes()" :
-                        "and issuetype in standardIssueTypes()") +
+    private String getWipCountQuery(Collection<Filter> stepFilters, List<String> teamUsers, List<String> teamProjects) {
+        String stepQuery = stepFilters.stream()
+                .map(f -> "(issuetype=" + f.getIssueTypeId() + " AND status=" + f.getStatusId() + ")")
+                .collect(joining(" OR ", "(", ")"));
+
+        String query = "assignee in ('" + String.join("','", teamUsers) + "') " +
+                "and project in ('" + String.join("','", teamProjects) + "') " +
+                "and " + stepQuery + " " +
                 getIgnoreIssueTypesToQuery();
+
         return query;
     }
 

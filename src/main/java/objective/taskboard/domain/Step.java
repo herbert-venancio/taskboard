@@ -20,6 +20,9 @@
  */
 package objective.taskboard.domain;
 
+import java.io.Serializable;
+import java.util.Collection;
+
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -28,8 +31,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import java.io.Serializable;
-import java.util.Collection;
 
 import objective.taskboard.domain.converter.BooleanConverter;
 
@@ -40,7 +41,7 @@ public class Step extends TaskboardEntity implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @OneToMany(mappedBy = "step", fetch = FetchType.EAGER)
-    Collection<Filter> filters;
+    private Collection<Filter> filters;
 
     private String name;
 
@@ -114,46 +115,4 @@ public class Step extends TaskboardEntity implements Serializable {
         this.stage = stage;
     }
 
-    @Override
-    public String toString() {
-        return "Step{" +
-                "filters=" + filters +
-                ", name='" + name + '\'' +
-                ", ordem=" + ordem +
-                ", weight=" + weight +
-                ", color='" + color + '\'' +
-                ", showHeader=" + showHeader +
-                ", stage=" + stage +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-
-        Step step = (Step) o;
-
-        if (filters != null ? !filters.equals(step.filters) : step.filters != null) return false;
-        if (name != null ? !name.equals(step.name) : step.name != null) return false;
-        if (ordem != null ? !ordem.equals(step.ordem) : step.ordem != null) return false;
-        if (weight != null ? !weight.equals(step.weight) : step.weight != null) return false;
-        if (color != null ? !color.equals(step.color) : step.color != null) return false;
-        if (showHeader != null ? !showHeader.equals(step.showHeader) : step.showHeader != null) return false;
-        return stage != null ? stage.equals(step.stage) : step.stage == null;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (filters != null ? filters.hashCode() : 0);
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (ordem != null ? ordem.hashCode() : 0);
-        result = 31 * result + (weight != null ? weight.hashCode() : 0);
-        result = 31 * result + (color != null ? color.hashCode() : 0);
-        result = 31 * result + (showHeader != null ? showHeader.hashCode() : 0);
-        result = 31 * result + (stage != null ? stage.hashCode() : 0);
-        return result;
-    }
 }

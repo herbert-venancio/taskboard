@@ -1,101 +1,171 @@
 package objective.taskboard.controller;
 
-/*-
- * [LICENSE]
- * Taskboard
- * ---
- * Copyright (C) 2015 - 2017 Objective Solutions
- * ---
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * [/LICENSE]
- */
+import static java.util.Collections.emptyList;
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 
-import java.util.LinkedHashMap;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import objective.taskboard.data.Team;
+import objective.taskboard.domain.Lane;
+import objective.taskboard.domain.Stage;
+import objective.taskboard.domain.Step;
 import objective.taskboard.domain.WipConfiguration;
+import objective.taskboard.repository.LaneCachedRepository;
+import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.repository.WipConfigurationRepository;
 
 @RestController
 @RequestMapping("/api/wips")
 public class WipController {
+
+    private final WipConfigurationRepository wipConfigRepo;
+    private final LaneCachedRepository laneRepo;
+    private final TeamCachedRepository teamRepo;
+    
+    private final Comparator<WipConfiguration> wipConfigComparatorByOrder = comparing((WipConfiguration c) -> c.getStep().getStage().getLane().getOrdem())
+            .thenComparing(c -> c.getStep().getStage().getOrdem())
+            .thenComparing(c -> c.getStep().getOrdem());
+    
     @Autowired
-    private WipConfigurationRepository wipConfigRepo; 
-    
-    @RequestMapping()
-    public ResponseEntity<Map<String, WipUpdateData>> getWips() {
-        List<WipConfiguration> wipConfigurations = wipConfigRepo.findAll();
+    public WipController(WipConfigurationRepository wipConfigRepo, LaneCachedRepository laneRepo, TeamCachedRepository teamRepo) {
+        this.wipConfigRepo = wipConfigRepo;
+        this.laneRepo = laneRepo;
+        this.teamRepo = teamRepo;
+    }
+
+    @RequestMapping
+    public WipConfigurationsDto getWipConfigurations() {
+        List<Team> allTeams = teamRepo.getCache();
+        List<WipConfiguration> configurations = wipConfigRepo.findAll();
+        Set<Step> configuredSteps = configurations.stream().map(WipConfiguration::getStep).collect(toSet());
+        Set<Lane> configuredLanes = configuredSteps.stream().map(s -> s.getStage().getLane()).collect(toSet());
+
+        Map<String, List<StepWipDto>> wipsByTeam = configurations.stream()
+                .sorted(wipConfigComparatorByOrder)
+                .collect(groupingBy(
+                        WipConfiguration::getTeam, 
+                        TreeMap::new,
+                        mapping(c -> new StepWipDto(c.getStep().getId(), c.getWip()), toList())));
+
+        allTeams.stream().forEach(t -> wipsByTeam.putIfAbsent(t.getName(), emptyList()));
         
-        Map<String, WipUpdateData> response = new LinkedHashMap<>(); 
-        for (WipConfiguration wipConfig : wipConfigurations) {
-            if (!response.containsKey(wipConfig.getTeam())) {
-                WipUpdateData value = new WipUpdateData();
-                value.team = wipConfig.getTeam();
-                response.put(wipConfig.getTeam(), value);
-            }
+        List<LaneDto> lanesDto = configuredLanes.stream()
+                .sorted(comparing(Lane::getOrdem))
+                .map(lane -> {
+                    List<StepDto> stepsDto = lane.getStages().stream()
+                            .sorted(comparing(Stage::getOrdem))
+                            .flatMap(stage -> stage.getSteps().stream())
+                            .filter(configuredSteps::contains)
+                            .sorted(comparing(Step::getOrdem))
+                            .map(step -> new StepDto(step.getId(), step.getName()))
+                            .collect(toList());
+
+                    return new LaneDto(lane.getName(), stepsDto);
+                })
+                .collect(toList());
+
+        return new WipConfigurationsDto(wipsByTeam, lanesDto);
+    }
+
+    @RequestMapping(method = RequestMethod.PUT)
+    public void setWipConfigurations(@RequestBody List<WipConfigurationDto> configsDto) {
+        Map<Long, Step> stepById = laneRepo.getAllSteps().stream().collect(toMap(Step::getId, Function.identity()));
+        List<WipConfiguration> existingConfigs = wipConfigRepo.findAll();
+        Set<WipConfiguration> configsToDelete = new HashSet<>(existingConfigs);
+        
+        for (WipConfigurationDto configDto : configsDto) {
+            Optional<WipConfiguration> existingConfig = existingConfigs.stream()
+                    .filter(c -> c.getTeam().equals(configDto.team) && c.getStep().getId().equals(configDto.stepId))
+                    .findFirst();
             
-            WipUpdateData wud = response.get(wipConfig.getTeam());
-            wud.statusWip.put(wipConfig.getStatus(), wipConfig.getWip());
-        }
-        
-        return new ResponseEntity<Map<String, WipUpdateData>>(response, HttpStatus.OK);
-    }
-    
-    @RequestMapping(path="{teamName}")
-    public ResponseEntity<WipUpdateData> getWip(@PathVariable("teamName") String teamName) {
-        List<WipConfiguration> wipConfigurations = wipConfigRepo.findByTeam(teamName);
-        
-        final WipUpdateData response = new WipUpdateData();
-        response.team = teamName;
-        for (WipConfiguration wipConfiguration : wipConfigurations) 
-            response.statusWip.put(wipConfiguration.getStatus(), wipConfiguration.getWip());
-        
-        return new ResponseEntity<WipUpdateData>(response, HttpStatus.OK);
-    }
-    
-    @RequestMapping(method = RequestMethod.PATCH, consumes="application/json")
-    public ResponseEntity<Void> updateWips(@RequestBody WipUpdateData [] update) {
-        for (WipUpdateData wipUpdateData : update) {
-            updateWip(wipUpdateData.team, wipUpdateData);
-        }
-        return ResponseEntity.ok().build();
-    }
-    
-    protected void updateWip(String teamName, @RequestBody WipUpdateData update) {
-        List<WipConfiguration> wipConfigurations = wipConfigRepo.findByTeam(teamName);
-        for (WipConfiguration wipConfiguration : wipConfigurations) {
-            if (update.statusWip.containsKey(wipConfiguration.getStatus())) {
-                wipConfiguration.setWip(update.statusWip.get(wipConfiguration.getStatus()));
-                wipConfigRepo.save(wipConfiguration);
-                update.statusWip.remove(wipConfiguration.getStatus());
+            if (existingConfig.isPresent()) {
+                configsToDelete.remove(existingConfig.get());
+
+                existingConfig.get().setWip(configDto.wip);
+                wipConfigRepo.save(existingConfig.get());
+            } else {
+                Step step = stepById.get(configDto.stepId);
+                if (step == null)
+                    throw new IllegalArgumentException("Step with id <" + configDto.stepId + "> not found");
+
+                wipConfigRepo.save(new WipConfiguration(configDto.team, step, configDto.wip));
             }
         }
-        // create non existing status
-        for (Entry<String, Integer> newWip : update.statusWip.entrySet()) {
-            WipConfiguration wipConfiguration = new WipConfiguration(teamName, newWip.getKey(), newWip.getValue());
-            wipConfigRepo.save(wipConfiguration);
+
+        if (!configsToDelete.isEmpty())
+            wipConfigRepo.delete(configsToDelete);
+    }
+
+    public static class WipConfigurationsDto {
+        public final Map<String, List<StepWipDto>> wipsByTeam;
+        public final List<LaneDto> lanes;
+
+        public WipConfigurationsDto(Map<String, List<StepWipDto>> wipsByTeam, List<LaneDto> lanes) {
+            this.wipsByTeam = wipsByTeam;
+            this.lanes = lanes;
+        }
+    }
+    
+    public static class StepWipDto {
+        public final Long stepId;
+        public final Integer wip;
+
+        public StepWipDto(Long stepId, Integer wip) {
+            this.stepId = stepId;
+            this.wip = wip;
+        }
+    }
+    
+    public static class LaneDto {
+        public final String name;
+        public final List<StepDto> steps;
+
+        public LaneDto(String name, List<StepDto> steps) {
+            this.name = name;
+            this.steps = steps;
+        }
+    }
+
+    public static class StepDto {
+        public final Long id;
+        public final String name;
+
+        public StepDto(Long id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+    }
+    
+    public static class WipConfigurationDto {
+        public String team;
+        public Long stepId;
+        public Integer wip;
+        
+        public WipConfigurationDto() {
+        }
+        
+        public WipConfigurationDto(String team, Long stepId, Integer wip) {
+            this.team = team;
+            this.stepId = stepId;
+            this.wip = wip;
         }
     }
 }

@@ -30,5 +30,4 @@ import objective.taskboard.domain.ProjectTeam;
 public interface ProjectTeamRepository extends JpaRepository<ProjectTeam, String> {
     public List<ProjectTeam> findByIdProjectKey(String projectKey);
     public List<ProjectTeam> findByIdTeamId(Long teamId);
-    public List<ProjectTeam> findByIdProjectKeyAndIdTeamId(String projectKey, Long teamId);
 }
