@@ -1004,6 +1004,7 @@
                 opendialog: function (item) {
                     this.setCard(item);
                     this.$.modal.open();
+                    this.isOpen = true;
                 },
 
                 setCard: function(item) {
@@ -1075,11 +1076,13 @@
                 openDialogNewTask: function () {
                     this.$.dialogNewTask.opendialog(this.item);
                     this.close();
+                    this.isOpen = false;
                 },
 
                 close: function() {
                     this.$.modal.close();
                     this.isObserving = false;
+                    this.setCard(null);
                 },
 
                 openJira: function (event) {
@@ -1133,9 +1136,13 @@
                 },
 
                 updateIssue: function(event) {
+                    if (!this.isOpen)
+                        return;
+
                     if (event.detail.source === 'client')
                         return;
-                    else if (this.item != null && event.detail.issue.issueKey !== this.item.issueKey)
+
+                    if (this.item != null && event.detail.issue.issueKey !== this.item.issueKey)
                         return;
                     
                     this.isObserving = true;
