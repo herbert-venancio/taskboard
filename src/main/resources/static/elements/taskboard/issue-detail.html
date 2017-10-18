@@ -916,10 +916,7 @@
                         else
                             self.doTransition(transition, issue, status, null);
                     }
-                    if(self.showFieldsRequiredDialog)
-                        self.$.transitionRequiredDialog.openDialog(fieldsTransitions, transitionName, issue, callback);
-                    else
-                        self.$.confirmModal.openDialog("Confirmation", text, callback);
+                    self.$.confirmModal.openDialog("Confirmation", text, callback);
                     self.showFieldsRequiredDialog = false;
                 },
 
