@@ -999,6 +999,7 @@
                 },
 
                 opendialog: function (item) {
+                    this.isObserving = false;
                     this.setCard(item);
                     this.$.modal.open();
                     this.isOpen = true;
