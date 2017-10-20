@@ -9,6 +9,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -85,6 +86,35 @@ public class DateTimeUtils {
             return "";
 
         return DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss").format(date);
+    }
+
+    public static String toDoubleExcelFormat(ZonedDateTime date, boolean date1904) {
+        if(date == null)
+            return "";
+
+        LocalDateTime from;
+        LocalDateTime to = date.toLocalDateTime();
+
+        // Excel has 2 date systems:
+        // - https://support.microsoft.com/pt-br/help/214330/differences-between-the-1900-and-the-1904-date-system-in-excel
+        if(date1904) {
+            from = LocalDateTime.of(1904, 1, 1, 0, 0, 0);
+        } else {
+            from = LocalDateTime.of(1900, 1, 1, 0, 0, 0);
+            // http://polymathprogrammer.com/2009/10/26/the-leap-year-1900-bug-in-excel/
+            if(to.isBefore(LocalDateTime.of(1900, 3, 1, 0, 0, 0))) {
+                from = from.minusDays(1);
+            } else {
+                from = from.minusDays(2);
+            }
+        }
+
+        long millis = from.until(to, ChronoUnit.MILLIS);
+
+        // excel hours are represented as a fraction of a day
+        double dayMillis = 24.0 * 60.0 * 60.0 * 1000.0;
+
+        return Double.toString(millis / dayMillis);
     }
 
     public static class ZonedDateTimeAdapter implements JsonSerializer<ZonedDateTime>, JsonDeserializer<ZonedDateTime> {

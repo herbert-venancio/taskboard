@@ -3,10 +3,17 @@ package objective.taskboard.utils;
 import org.junit.Test;
 
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 import java.util.TimeZone;
 
+import static java.util.Collections.emptyList;
+import static org.hamcrest.Matchers.closeTo;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 public class DateTimeUtilsTest {
@@ -85,5 +92,75 @@ public class DateTimeUtilsTest {
         assertThat(subject1, equalTo("2020-12-31 00:00:00"));
         assertThat(subject2, equalTo("2020-12-31 12:34:56"));
         assertThat(subject3, equalTo("2020-12-31 23:59:59"));
+    }
+
+    @Test
+    public void toDoubleExcelFormat() {
+        boolean EXCEL_1900_DATE_SYSTEM = false;
+        boolean EXCEL_1904_DATE_SYSTEM = true;
+
+        // given
+        ZonedDateTime date1 = ZonedDateTime.of(2017, 9, 20, 10, 05, 48, 0, ZoneOffset.UTC);
+        ZonedDateTime date2 = ZonedDateTime.of(2001, 1, 1, 1, 1, 1, 0, ZoneOffset.UTC);
+        ZonedDateTime date3 = ZonedDateTime.of(1900, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
+        ZonedDateTime date4 = ZonedDateTime.of(2021, 9, 21, 10, 5, 48, 0, ZoneOffset.UTC);
+        ZonedDateTime date5 = ZonedDateTime.of(2005, 1, 2, 1, 1, 1, 0, ZoneOffset.UTC);
+        ZonedDateTime date6 = ZonedDateTime.of(1904, 1, 2, 0, 0, 0, 0, ZoneOffset.UTC);
+
+        // when
+        String actual1 = DateTimeUtils.toDoubleExcelFormat(date1, EXCEL_1900_DATE_SYSTEM);
+        String actual2 = DateTimeUtils.toDoubleExcelFormat(date2, EXCEL_1900_DATE_SYSTEM);
+        String actual3 = DateTimeUtils.toDoubleExcelFormat(date3, EXCEL_1900_DATE_SYSTEM);
+        String actual4 = DateTimeUtils.toDoubleExcelFormat(date4, EXCEL_1904_DATE_SYSTEM);
+        String actual5 = DateTimeUtils.toDoubleExcelFormat(date5, EXCEL_1904_DATE_SYSTEM);
+        String actual6 = DateTimeUtils.toDoubleExcelFormat(date6, EXCEL_1904_DATE_SYSTEM);
+
+        // then
+        assertThat(Double.valueOf(actual1), closeTo(Double.parseDouble("42998.420694444445"), 0.000001));
+        assertThat(Double.valueOf(actual2), closeTo(Double.parseDouble("36892.042372685188"), 0.000001));
+        assertThat(Double.valueOf(actual3), closeTo(Double.parseDouble("1"), 0.000001));
+        assertThat(Double.valueOf(actual4), closeTo(Double.parseDouble("42998.420694444445"), 0.000001));
+        assertThat(Double.valueOf(actual5), closeTo(Double.parseDouble("36892.042372685188"), 0.000001));
+        assertThat(Double.valueOf(actual6), closeTo(Double.parseDouble("1"), 0.000001));
+    }
+
+    @Test
+    public void toDoubleExcelFormat1900() {
+        try (Scanner dates = new Scanner(DateTimeUtilsTest.class.getResourceAsStream("excel-input-dates-1900.csv"))) {
+            try (Scanner expecteds = new Scanner(DateTimeUtilsTest.class.getResourceAsStream("excel-dates-expected.csv"))) {
+                List<String> failedConversions = new ArrayList<>();
+                while (dates.hasNext()) {
+                    ZonedDateTime date = DateTimeUtils.parseDate(dates.next(), ZoneOffset.ofHours(0));
+                    String actual = DateTimeUtils.toDoubleExcelFormat(date, false);
+                    double expected = expecteds.nextDouble();
+                    try {
+                        assertThat(Double.valueOf(actual), closeTo(expected, 0.000001));
+                    } catch (AssertionError e) {
+                        failedConversions.add(date.toLocalDateTime().toString() + " -> expected " + expected + " actual " + actual);
+                    }
+                }
+                assertThat(String.join("\n", failedConversions), failedConversions, is(emptyList()));
+            }
+        }
+    }
+
+    @Test
+    public void toDoubleExcelFormat1904() {
+        try (Scanner dates = new Scanner(DateTimeUtilsTest.class.getResourceAsStream("excel-input-dates-1904.csv"))) {
+            try (Scanner expecteds = new Scanner(DateTimeUtilsTest.class.getResourceAsStream("excel-dates-expected.csv"))) {
+                List<String> failedConversions = new ArrayList<>();
+                while (dates.hasNext()) {
+                    ZonedDateTime date = DateTimeUtils.parseDate(dates.next(), ZoneOffset.ofHours(0));
+                    String actual = DateTimeUtils.toDoubleExcelFormat(date, true);
+                    double expected = expecteds.nextDouble();
+                    try {
+                        assertThat(Double.valueOf(actual), closeTo(expected, 0.000001));
+                    } catch (AssertionError e) {
+                        failedConversions.add(date.toLocalDateTime().toString() + " -> expected " + expected + " actual " + actual);
+                    }
+                }
+                assertThat(String.join("\n", failedConversions), failedConversions, is(emptyList()));
+            }
+        }
     }
 }

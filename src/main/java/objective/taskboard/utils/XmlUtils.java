@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.Iterator;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -148,6 +149,21 @@ public class XmlUtils {
 
     public static String normalizeXml(String s) {
         return XmlUtils.asString(XmlUtils.asDocument(s));
+    }
+
+    public static Iterable<Node> iterable(NodeList nodeList) {
+        return () -> new Iterator<Node>() {
+            private int index = 0;
+            @Override
+            public boolean hasNext() {
+                return index < nodeList.getLength();
+            }
+
+            @Override
+            public Node next() {
+                return nodeList.item(index++);
+            }
+        };
     }
 
     public static class InvalidXPathOperationException extends RuntimeException {
