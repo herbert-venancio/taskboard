@@ -173,13 +173,13 @@ public class IssueBufferService {
         return issue;
     }
 
-    public synchronized Issue updateByEvent(WebhookEvent event, final String key, com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
-        if (event == WebhookEvent.ISSUE_DELETED || jiraIssue == null) {
+    public synchronized Issue updateByEvent(WebhookEvent event, final String key, Optional<com.atlassian.jira.rest.client.api.domain.Issue> issue) {
+        if (event == WebhookEvent.ISSUE_DELETED || !issue.isPresent()) {
             issuesUpdatedByEvent.add(new IssueUpdate(cardsRepo.get(key), IssueUpdateType.DELETED));
             return cardsRepo.remove(key);
         }
 
-        Issue updated = updateIssueBufferFetchParentIfNeeded(jiraIssue);
+        Issue updated = updateIssueBufferFetchParentIfNeeded(issue.get());
 
         IssueUpdateType updateType = IssueUpdateType.UPDATED;
         if (event == WebhookEvent.ISSUE_CREATED)

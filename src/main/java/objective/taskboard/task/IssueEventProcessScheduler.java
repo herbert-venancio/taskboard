@@ -123,12 +123,11 @@ public class IssueEventProcessScheduler {
             return;
         }
         Optional<Issue> issue = fetchIssue(item);
-        if (!issue.isPresent())
-            return;
-        
-        com.atlassian.jira.rest.client.api.domain.Issue jiraIssue = issue.get();
-        webhookSubtaskCreatorService.createSubtaskOnTransition(jiraIssue, item.changelog);
-        issueBufferService.updateByEvent(item.event, item.issueKey, jiraIssue);
+        if (issue.isPresent()) {
+            com.atlassian.jira.rest.client.api.domain.Issue jiraIssue = issue.get();
+            webhookSubtaskCreatorService.createSubtaskOnTransition(jiraIssue, item.changelog);
+        }
+        issueBufferService.updateByEvent(item.event, item.issueKey, issue);
     }
 
     private Optional<Issue> fetchIssue(Item item) {
