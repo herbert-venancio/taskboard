@@ -2,8 +2,10 @@ package objective.taskboard.spreadsheet;
 
 import static objective.taskboard.utils.IOUtilities.resourceToString;
 import static objective.taskboard.utils.XmlUtils.normalizeXml;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -12,11 +14,13 @@ import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import com.google.common.collect.Streams;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 import org.springframework.core.io.Resource;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -66,7 +70,7 @@ public class SimpleSpreadsheetEditorTest {
                 addRow(sheet, followUpData);
             sheet.save();
     
-            assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 219, sharedStrings.size());
+            assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 218, sharedStrings.size());
             assertEquals("First new shared string", 204, sharedStrings.get("PROJECT TEST").longValue());
             assertEquals("Any new shared string", 210, sharedStrings.get("Summary Feature").longValue());
             assertEquals("Last new shared string", 217, sharedStrings.get("Full Description Sub-task").longValue());
@@ -118,7 +122,7 @@ public class SimpleSpreadsheetEditorTest {
             
             sheet.save();
             
-            assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 219, sharedStrings.size());
+            assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 218, sharedStrings.size());
     
             String sharedStringsGenerated = subject.generateSharedStrings();
     
@@ -212,6 +216,38 @@ public class SimpleSpreadsheetEditorTest {
             Node fullCalcOnLoad = calcPr.getAttributes().getNamedItem("fullCalcOnLoad");
             
             assertEquals("1", fullCalcOnLoad.getNodeValue());
+        }
+    }
+
+    @Test
+    public void whenCustomFormatAdded_stylesXmlShouldContainNewFormat() throws IOException {
+        FollowUpTemplate template = new FollowUpTemplate(resolve(PATH_FOLLOWUP_TEMPLATE));
+        try (SimpleSpreadsheetEditor subject = new SimpleSpreadsheetEditor(template)) {
+            subject.open();
+
+            // given
+            String dateFormat = "yyyy/mm/dd\\ hh:mm:ss";
+            String currencyFormat = "[$R$-416]\\ #,##0.00;[RED]\\-[$R$-416]\\ #,##0.00";
+
+            // when
+            subject.stylesEditor.getOrCreateNumberFormat(dateFormat);
+            subject.save();
+            subject.stylesEditor.getOrCreateNumberFormat(currencyFormat);
+            subject.save();
+
+            // then
+            NodeList formatList = XmlUtils.xpath(new File(subject.getExtractedSheetDirectory(), SimpleSpreadsheetEditor.SpreadsheetStylesEditor.PATH_STYLES), "//numFmts/numFmt");
+            assertThat(Streams.stream(XmlUtils.iterable(formatList))
+                    .filter(node -> node instanceof Element)
+                    .map(node -> (Element)node)
+                    .filter(element -> dateFormat.equals(element.getAttribute("formatCode")))
+                    .count(), is(1L));
+
+            assertThat(Streams.stream(XmlUtils.iterable(formatList))
+                    .filter(node -> node instanceof Element)
+                    .map(node -> (Element)node)
+                    .filter(element -> currencyFormat.equals(element.getAttribute("formatCode")))
+                    .count(), is(1L));
         }
     }
 
