@@ -24,6 +24,7 @@ import static com.google.common.collect.Lists.newArrayList;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
@@ -36,6 +37,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import com.atlassian.jira.rest.client.api.RestClientException;
 import com.atlassian.jira.rest.client.api.domain.BasicIssue;
 import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.Resolution;
@@ -166,9 +168,18 @@ public class JiraService {
         return ImmutableList.copyOf(response);
     }
 
-    public Issue getIssueByKey(String key) {
+    public Optional<Issue> getIssueByKey(String key) {
         log.debug("⬣⬣⬣⬣⬣  getIssueByKey");
-        return jiraEndpointAsUser.executeRequest(client -> client.getIssueClient().getIssue(key));
+        try {
+            return Optional.of(jiraEndpointAsUser.executeRequest(client -> client.getIssueClient().getIssue(key)));
+        }catch(JiraServiceException e) {
+            if (e.getCause() instanceof RestClientException) {
+                RestClientException cause = (RestClientException) e.getCause();
+                if (cause.getStatusCode().isPresent() && cause.getStatusCode().get() == 404)
+                    return Optional.empty();
+            }
+            throw e;
+        }
     }
 
     public Issue getIssueByKeyAsMaster(String key) {

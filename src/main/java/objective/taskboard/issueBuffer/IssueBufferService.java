@@ -20,7 +20,6 @@
  */
 package objective.taskboard.issueBuffer;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
@@ -90,13 +89,6 @@ public class IssueBufferService {
             parent = updateIssueBufferFetchParentIfNeeded(jiraBean.getIssueByKeyAsMaster(parentKey));
         return Optional.of(parent);
     };
-    
-    private final ParentProvider parentProviderRejectsIfMissingParent = parentKey ->  {
-        Issue parent = cardsRepo.get(parentKey);
-        if (parent == null)
-            throw new IllegalArgumentException("Parent issue " + parentKey + " not available. This is probably a bug.");
-        return Optional.of(parent);
-    };   
 
     private IssueBufferState state = IssueBufferState.uninitialised;
 
@@ -158,18 +150,30 @@ public class IssueBufferService {
     }
 
     public Issue updateIssueBuffer(final String key) {
-        Optional<com.atlassian.jira.rest.client.api.domain.Issue> foundIssue = jiraIssueService.searchIssueByKey(key);
+        StopWatch watch = new StopWatch();
+        watch.start();
+        Optional<com.atlassian.jira.rest.client.api.domain.Issue> foundIssue =  jiraBean.getIssueByKey(key);
         if (!foundIssue.isPresent()) 
             return cardsRepo.remove(key);
-       return updateIssueBufferFetchParentIfNeeded(foundIssue.get());
+        
+        log.debug("Time to fetch issue: " + watch.getTime());
+
+        return updateIssueBufferFetchParentIfNeeded(foundIssue.get());
     }
 
     public synchronized Issue updateIssueBufferFetchParentIfNeeded(final com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
         final Issue issue = issueConverter.convertSingleIssue(jiraIssue, parentProviderFetchesMissingParents);
         putIssue(issue);
 
-        updateSubtasks(issue.getIssueKey());
+        updateIssueBuffer();// triggers a background update, because this change might affect other issues 
 
+        return issue;
+    }
+    
+    private synchronized Issue putJiraIssue(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
+        final Issue issue = issueConverter.convertSingleIssue(jiraIssue, parentProviderFetchesMissingParents);
+        putIssue(issue);
+        
         return issue;
     }
 
@@ -179,7 +183,7 @@ public class IssueBufferService {
             return cardsRepo.remove(key);
         }
 
-        Issue updated = updateIssueBufferFetchParentIfNeeded(issue.get());
+        Issue updated = putJiraIssue(issue.get());
 
         IssueUpdateType updateType = IssueUpdateType.UPDATED;
         if (event == WebhookEvent.ISSUE_CREATED)
@@ -198,29 +202,6 @@ public class IssueBufferService {
         if (issuesUpdatedByEvent.size() > 0)
             eventPublisher.publishEvent(new IssuesUpdateEvent(this, issuesUpdatedByEvent));
         issuesUpdatedByEvent.clear();
-    }
-
-    private synchronized void updateSubtasks(String key) {
-        List<String> subtasksKeys = getSubtasksKeys(key);
-        jiraIssueService.searchIssuesByKeys(subtasksKeys, 
-            issue -> putIssue(issueConverter.convertSingleIssue(issue, parentProviderRejectsIfMissingParent))                   
-        );
-    }
-
-    private List<String> getSubtasksKeys(String key) {
-        List<String> subtasksKeys = cardsRepo.values().stream()
-            .filter(i -> key.equals(i.getParent()))
-            .map(i -> i.getIssueKey())
-            .collect(toList());
-
-        if (subtasksKeys.isEmpty())
-            return newArrayList();
-
-        List<String> allSubtasksKeys = newArrayList(subtasksKeys);
-        for (String subtaskKey : subtasksKeys)
-            allSubtasksKeys.addAll(getSubtasksKeys(subtaskKey));
-
-        return allSubtasksKeys;
     }
 
     public synchronized List<Issue> getIssues() {
@@ -248,8 +229,14 @@ public class IssueBufferService {
     }
 
     public synchronized Issue doTransition(String issueKey, Long transitionId, String resolutionName) {
+        StopWatch watch = new StopWatch();
+        watch.start();
         jiraBean.doTransition(issueKey, transitionId, resolutionName);
-        return updateIssueBuffer(issueKey);
+        log.debug("Time to perform transition for issue key " +issueKey + " : " +watch.getTime());
+
+        Issue issue = updateIssueBuffer(issueKey);
+        updateIssueBuffer();
+        return issue;
     }
 
     private void putIssue(Issue issue) {
