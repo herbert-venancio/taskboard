@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 import org.codehaus.jettison.json.JSONException;
@@ -115,13 +116,16 @@ public class IssueController {
     @Deprecated
     @RequestMapping(path = "create-issue", method = RequestMethod.POST)
     public Issue createIssue(@RequestBody Issue issue) throws JSONException {
-        com.atlassian.jira.rest.client.api.domain.Issue parent = jiraBean.getIssueByKey(issue.getParent());
-        IssueInputBuilder issueBuilder = new IssueInputBuilder(parent.getProject().getKey(), issue.getType());
+        Optional<com.atlassian.jira.rest.client.api.domain.Issue> parent = jiraBean.getIssueByKey(issue.getParent());
+        if(!parent.isPresent())
+            throw new IllegalStateException("Parent issue not found: " + issue.getParent());
+        
+        IssueInputBuilder issueBuilder = new IssueInputBuilder(parent.get().getProject().getKey(), issue.getType());
         issueBuilder.setPriorityId(issue.getPriority());
         issueBuilder.setDueDate(new DateTime(issue.getDueDate().getTime()));
         issueBuilder.setDescription(issue.getDescription());
         issueBuilder.setSummary(issue.getSummary());
-        issueBuilder.setFieldValue("parent", ComplexIssueInputFieldValue.with("key", parent.getKey()));
+        issueBuilder.setFieldValue("parent", ComplexIssueInputFieldValue.with("key", parent.get().getKey()));
 
         List<String> tSizeIds = jiraProperties.getCustomfield().getTShirtSize().getIds();
         for (String tSizeId : tSizeIds)
@@ -132,7 +136,10 @@ public class IssueController {
         log.info("Creating issue: " + issue);
         String issueKey = jiraBean.createIssue(issueBuilder.build());
         log.info("Created issue " + issueKey);
-        return issueBufferService.updateIssueBufferFetchParentIfNeeded(jiraBean.getIssueByKey(issueKey));
+        Optional<com.atlassian.jira.rest.client.api.domain.Issue> issueByKey = jiraBean.getIssueByKey(issueKey);
+        if (issueByKey.isPresent())
+            return issueBufferService.updateIssueBufferFetchParentIfNeeded(issueByKey.get());
+        throw new IllegalStateException("Issue not found: " + issueKey);
     }
 
     @RequestMapping(path = "transition", method = RequestMethod.POST)
