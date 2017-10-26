@@ -58,7 +58,7 @@ class Flyway implements Serializable {
         script.sh(script: """
             sudo docker stop $CONTAINER_ID
             sudo docker rm $CONTAINER_ID
-        """, returnStatus: true)
+        """, returnStatus: false)
     }
 
     void testMysqlFlywayInstall() {
