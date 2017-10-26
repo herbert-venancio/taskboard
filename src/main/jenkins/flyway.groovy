@@ -33,22 +33,24 @@ class Flyway implements Serializable {
     }
 
     void startMariaDBContainer() {
-        CONTAINER_ID = script.sh(script: '''sudo docker run \
+        CONTAINER_ID = script.sh(script: 'sudo docker run \
             -e MYSQL_ROOT_PASSWORD=my-secret-pw \
             -e MYSQL_DATABASE=taskboard \
             -e MYSQL_USER=taskboard \
             -e MYSQL_PASSWORD=taskboard \
-            -d mariadb:5.5
-        ''', returnStdout: true).trim()
+            -d mariadb:5.5'
+        , returnStdout: true).trim()
         DATABASE_IP = extractIP()
         waitMysqlAcceptConnections()
     }
 
     void startOracleContainer() {
-        CONTAINER_ID = script.sh(script: '''sudo docker run \
-            -e ORACLE_HOME=/u01/app/oracle/product/11.2.0/xe \
-            -d wnameless/oracle-xe-11g:14.04.4
-        ''', returnStdout: true).trim()
+        CONTAINER_ID = script.sh(script: 'sudo docker run \
+            -e ORACLE_HOME=/opt/oracle/product/11.2.0/dbhome_1 \
+            -h oracle11g \
+            --privileged \
+            -d dockercb:5000/ng-oracle'
+        , returnStdout: true).trim()
         DATABASE_IP = extractIP()
         waitOracleAcceptConnections()
         initOracle()
@@ -79,7 +81,7 @@ class Flyway implements Serializable {
         script.lock(resource: 'flyway') {
             script.sh """
                 mvn org.flywaydb:flyway-maven-plugin:4.2.0:migrate \
-                -Dflyway.url="jdbc:oracle:thin:@$DATABASE_IP:1521/xe" \
+                -Dflyway.url="jdbc:oracle:thin:@$DATABASE_IP:1521/orcl" \
                 -Dflyway.user=system \
                 -Dflyway.password=oracle \
                 -Dflyway.schemas=taskboard \
@@ -110,7 +112,7 @@ class Flyway implements Serializable {
         script.echo "Waiting for database ready for connections..."
         try {
             script.timeout(1) {
-                script.sh(script: $/sudo docker exec $CONTAINER_ID bash -c "until ( echo \"select 'oracle is ready' from dual;\" | /u01/app/oracle/product/11.2.0/xe/bin/sqlplus system/oracle@localhost:1521 | grep 'oracle is ready' ); do sleep 1; done"/$
+                script.sh(script: $/sudo docker exec $CONTAINER_ID bash -c "until ( echo \"select 'oracle is ready' from dual;\" | /opt/oracle/product/11.2.0/dbhome_1/bin/sqlplus system/oracle@localhost:1521/orcl | grep 'oracle is ready' ); do sleep 1; done"/$
                         , returnStatus: true)
             }
         } catch (ex) {
@@ -119,7 +121,7 @@ class Flyway implements Serializable {
     }
 
     private initOracle() {
-        script.sh "sudo docker exec -i $CONTAINER_ID bash -c 'echo \"CREATE USER taskboard IDENTIFIED BY taskboard;\" | /u01/app/oracle/product/11.2.0/xe/bin/sqlplus system/oracle@localhost:1521'"
+        script.sh "sudo docker exec -i $CONTAINER_ID bash -c 'echo \"CREATE USER taskboard IDENTIFIED BY taskboard;\" | /opt/oracle/product/11.2.0/dbhome_1/bin/sqlplus system/oracle@localhost:1521/orcl'"
     }
 }
 
