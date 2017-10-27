@@ -87,6 +87,14 @@ public class SimpleSpreadsheetEditor implements Closeable {
         return new Sheet(sheetPath);
     }
 
+    public Sheet getOrCreateSheet(String sheetName) {
+        if(sheetPathByName.containsKey(sheetName)) {
+            return getSheet(sheetName);
+        } else {
+            return createSheet(sheetName);
+        }
+    }
+
     private String addWorkbookRel(int next) {
         Document workbookRelsDoc = getWorkbookRelsDoc();
         
@@ -398,14 +406,15 @@ public class SimpleSpreadsheetEditor implements Closeable {
             NodeList xmlRow = sheetDoc.getElementsByTagName("row");
             
             List<Node> rowsToKeep = new LinkedList<>();
-            for (int i = 0; i < starting; i++) 
+            int rows = Math.min(starting, xmlRow.getLength());
+            for (int i = 0; i < rows; i++)
                 rowsToKeep.add(xmlRow.item(i));
             
             while(sheetData.hasChildNodes()) 
                 sheetData.removeChild(sheetData.getFirstChild());
             
             rowsToKeep.stream().forEach(node->sheetData.appendChild(node));
-            rowCount = starting;
+            rowCount = rows;
         }
         
         public String stringValue() {
@@ -646,7 +655,12 @@ public class SimpleSpreadsheetEditor implements Closeable {
             try (InputStream inputStream = new FileInputStream(new File(extractedSheetDirectory, PATH_STYLES))) {
                 Document doc = XmlUtils.asDocument(inputStream);
 
-                Element numFmts = (Element) doc.getElementsByTagName("numFmts").item(0);
+                Node numFmtsNode = doc.getElementsByTagName("numFmts").item(0);
+                if(numFmtsNode == null) {
+                    numFmtsNode = doc.createElement("numFmts");
+                    doc.getDocumentElement().appendChild(numFmtsNode);
+                }
+                Element numFmts = (Element) numFmtsNode;
                 numberFormat.entrySet().stream()
                         .skip(initialNumberFormatCount)
                         .forEach(entry -> {

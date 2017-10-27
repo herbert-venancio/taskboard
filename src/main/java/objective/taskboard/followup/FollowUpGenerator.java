@@ -174,7 +174,8 @@ public class FollowUpGenerator {
     }
 
     private Sheet createSheetWithHeader(String prefixSheetName, TransitionDataSet<? extends TransitionDataRow> transitionDataSet) {
-        Sheet sheet = editor.createSheet(prefixSheetName + transitionDataSet.issueType);
+        Sheet sheet = editor.getOrCreateSheet(prefixSheetName + transitionDataSet.issueType);
+        sheet.truncate(0);
         SheetRow rowHeader = sheet.createRow();
         for (String header : transitionDataSet.headers)
             rowHeader.addColumn(header);
