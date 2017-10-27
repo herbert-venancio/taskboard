@@ -75,7 +75,7 @@ node("single-executor") {
                 parallel mariadb: {
                     flyway.testMariaDBMigration()
                 }, oracle: {
-                    //flyway.testOracleMigration()
+                    flyway.testOracleMigration()
                 }
                 clearDocker()
             }
