@@ -39,7 +39,6 @@ public class FollowUpTemplateValidator {
             throw new InvalidTemplateException();
         // The following files must exist
         resolve(path, "xl/sharedStrings.xml");
-        resolve(path, "xl/tables/table7.xml");
         Path wbXml = resolve(path, "xl/workbook.xml");
         Path wbRelXml = resolve(path, "xl/_rels/workbook.xml.rels");
 
