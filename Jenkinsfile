@@ -93,12 +93,16 @@ node("single-executor") {
                 }
             }
             stage('Deploy Docker') {
-                def tag = isMasterBranch() ? 'latest' : env.BRANCH_NAME
-                sh 'git clone https://github.com/objective-solutions/liferay-environment-bootstrap.git'
-                dir('liferay-environment-bootstrap/dockers/taskboard') {
-                    sh 'cp ../../../target/taskboard-*-SNAPSHOT.war ./taskboard.war'
-                    sh "sudo docker build -t dockercb:5000/taskboard-snapshot:$tag ."
-                    sh "sudo docker push dockercb:5000/taskboard-snapshot:$tag"
+                if (params.RELEASE) 
+                    print "Skipping deploy during release"
+                else {
+                    def tag = isMasterBranch() ? 'latest' : env.BRANCH_NAME
+                    sh 'git clone https://github.com/objective-solutions/liferay-environment-bootstrap.git'
+                    dir('liferay-environment-bootstrap/dockers/taskboard') {
+                        sh 'cp ../../../target/taskboard-*-SNAPSHOT.war ./taskboard.war'
+                        sh "sudo docker build -t dockercb:5000/taskboard-snapshot:$tag ."
+                        sh "sudo docker push dockercb:5000/taskboard-snapshot:$tag"
+                    }
                 }
             }
             if (params.RELEASE) {
