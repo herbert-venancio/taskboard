@@ -59,7 +59,7 @@ class Flyway implements Serializable {
     void destroyContainer() {
         script.sh(script: """
             sudo docker stop $CONTAINER_ID
-            sudo docker rm $CONTAINER_ID
+            sudo docker rm -f $CONTAINER_ID
         """, returnStatus: false)
     }
 
