@@ -67,8 +67,8 @@ public class IssuePriorityService {
     
     public Long determinePriority(Issue e) {
         TaskboardIssue priorityOrder = cache.get(e.getKey());
-        if (priorityOrder == null) 
-            return e.getId();
+        if (priorityOrder == null)
+            return e.getCreationDate().getMillis();
 
         return priorityOrder.getPriority();
     }
@@ -97,7 +97,7 @@ public class IssuePriorityService {
         
         for (String ti : issueKeys) {
             if (issueByKey.get(ti) == null){
-                TaskboardIssue taskboardIssue = new TaskboardIssue(ti, issueBufferService.getIssueByKey(ti).getId());
+                TaskboardIssue taskboardIssue = new TaskboardIssue(ti, issueBufferService.getIssueByKey(ti).getCreated());
                 issueByKey.put(ti, taskboardIssue);
                 issues.add(taskboardIssue);
             }
@@ -105,10 +105,12 @@ public class IssuePriorityService {
         
         LinkedList<Long> priorities = new LinkedList<Long>(issues.stream().map(e -> e.getPriority()).collect(Collectors.toList()));
         Collections.sort(priorities);
-        
+
+        fixClashingPriorities(priorities);
+
         for (String pkey : issueKeys) {
             TaskboardIssue taskboardIssue = issueByKey.get(pkey);
-            Long previousPriority = taskboardIssue.getPriority(); 
+            Long previousPriority = taskboardIssue.getPriority();
             Long newPriority = priorities.poll();
             if (previousPriority.equals(newPriority))
                 continue;
@@ -117,7 +119,23 @@ public class IssuePriorityService {
         }
         return updatedIssues;
     }
-    
+
+    private void fixClashingPriorities(LinkedList<Long> priorities) {
+        boolean hasRepeatedPriority = priorities.stream().anyMatch(p -> Collections.frequency(priorities, p) > 1);
+        if (!hasRepeatedPriority)
+            return;
+
+        Long previous = priorities.get(0);
+        for (int i = 1; i < priorities.size(); i++) {
+            Long current = priorities.get(i);
+            if (current <= previous) {
+                current = previous + 1;
+                priorities.set(i, current);
+            }
+            previous = current;
+        }
+    }
+
     public synchronized void reset() {
         loadCache();
     }
