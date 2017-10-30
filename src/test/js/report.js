@@ -4,11 +4,15 @@
 
 'use scrict';
 
-var combine = require('istanbul-combine');
-var fs = require("fs");
+try {
+    var combine = require('istanbul-combine');
+    var fs = require("fs");
 
-combineReports();
-convertToRelativePaths();
+    combineReports();
+    convertToRelativePaths();
+}catch(e){
+    console.log("FAILED TO GENERATE JS COVERAGE REPORTS");
+}
 
 // ---
 
