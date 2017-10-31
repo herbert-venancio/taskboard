@@ -396,9 +396,6 @@ function Taskboard() {
     }
 
     this.convertIssue = function(issue) {
-        var startDateStep = new Date(issue.startDateStepMillis);
-        issue.cycletime = cycleTime.getCycleTime(startDateStep, new Date()).toFixed(2);
-
         var listSizes = [];
         CUSTOMFIELD.SIZES.forEach(function(sizeId) {
             if (issue[sizeId])

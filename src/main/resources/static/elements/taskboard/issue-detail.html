@@ -1025,6 +1025,9 @@
                 },
 
                 setCard: function(item) {
+                    var startDateStep = new Date(item.startDateStepMillis);
+                    item.cycletime = cycleTime.getCycleTime(startDateStep, new Date()).toFixed(2);
+                    
                     this.item = item;
                     $(this.$.modal).css('background-color', this.item.color);
                     
