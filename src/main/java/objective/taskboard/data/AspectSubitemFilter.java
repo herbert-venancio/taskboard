@@ -20,6 +20,8 @@
  */
 package objective.taskboard.data;
 
+import objective.taskboard.jira.data.Version;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -32,13 +34,13 @@ public class AspectSubitemFilter implements Serializable {
     private boolean selected;
     private boolean visible;
     private List<String> teams;
-    private List<String> versions;
+    private List<Version> versions;
 
     public static AspectSubitemFilter from(String name, Object value, boolean selected) {
         return new AspectSubitemFilter(name, value, selected, true, null, null);
     }
 
-    public static AspectSubitemFilter from(String name, Object value, boolean selected, List<String> teams, List<String> versions) {
+    public static AspectSubitemFilter from(String name, Object value, boolean selected, List<String> teams, List<Version> versions) {
         return new AspectSubitemFilter(name, value, selected, true, teams, versions);
     }
 
@@ -62,7 +64,7 @@ public class AspectSubitemFilter implements Serializable {
         return this.teams;
     }
 
-    public List<String> getVersions() {
+    public List<Version> getVersions() {
         return this.versions;
     }
 
@@ -86,7 +88,7 @@ public class AspectSubitemFilter implements Serializable {
         this.teams = teams;
     }
 
-    public void setVersions(final List<String> versions) {
+    public void setVersions(final List<Version> versions) {
         this.versions = versions;
     }
 
@@ -132,7 +134,7 @@ public class AspectSubitemFilter implements Serializable {
     }
 
     @java.beans.ConstructorProperties({"name", "value", "selected", "visible", "teams", "versions"})
-    private AspectSubitemFilter(final String name, final Object value, final boolean selected, final boolean visible, final List<String> teams, final List<String> versions) {
+    private AspectSubitemFilter(final String name, final Object value, final boolean selected, final boolean visible, final List<String> teams, final List<Version> versions) {
         this.name = name;
         this.value = value;
         this.selected = selected;

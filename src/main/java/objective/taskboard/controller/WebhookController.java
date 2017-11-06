@@ -35,11 +35,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import objective.taskboard.controller.WebhookController.WebhookBody.Changelog;
 import objective.taskboard.domain.Filter;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.issueBuffer.WebhookEvent;
 import objective.taskboard.jira.JiraProperties;
+import objective.taskboard.jira.data.Version;
 import objective.taskboard.repository.FilterCachedRepository;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.task.IssueEventProcessScheduler;
@@ -71,10 +71,10 @@ public class WebhookController {
         String issueKey = getIssueKeyOrNull(body);
         Long issueTypeId = getIssueTypeIdOrNull(body);
 
-        addItemInTheQueue(webhookEvent, projectKey, issueTypeId, issueKey, body.changelog);
+        addItemInTheQueue(webhookEvent, projectKey, issueTypeId, issueKey, body);
     }
 
-    private void addItemInTheQueue(String webhookEvent, String projectKey, Long issueTypeId, String issueKey, Changelog changelog) {
+    private void addItemInTheQueue(String webhookEvent, String projectKey, Long issueTypeId, String issueKey, WebhookBody eventData) {
         if (!belongsToAnyProjectFilter(projectKey)) {
             log.debug("WEBHOOK PATH: project=" + projectKey + " issueTypeId=" + issueTypeId + " issue=" + issueKey + " doesn't belog to our projects.");
             return;
@@ -90,7 +90,7 @@ public class WebhookController {
         if (event.isTypeVersion() && !isReleaseConfigured())
             return;
 
-        webhookSchedule.add(event, issueKey, changelog);
+        webhookSchedule.add(event, projectKey, issueKey, eventData);
         log.info("WEBHOOK PUT IN QUEUE: (" + webhookEvent +  ") project=" + projectKey + " issue=" + issueKey);
     }
 
@@ -135,6 +135,7 @@ public class WebhookController {
         public String webhookEvent;
         public Map<String, Object> user = new HashMap<>();
         public Map<String, Object> issue = new HashMap<>();
+        public Version version;
         public Changelog changelog = new Changelog();
         public static class Changelog {
             public List<Map<String, Object>> items = new ArrayList<>();

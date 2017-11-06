@@ -32,8 +32,9 @@ function Taskboard() {
         return window.user;
     }
 
-    this.setAspectFilters = function(filters) {
+    this.setAspectFilters = function(taskboardHome, filters) {
         aspectFilters = filters;
+        taskboardHome.fire('iron-signal', {name:'refresh-release-filter'});
     };
 
     this.getAspectFilters = function() {
@@ -310,6 +311,12 @@ function Taskboard() {
                 taskboardHome.fire("iron-signal", {name:"issue-cache-state-updated", data:{
                     newstate: JSON.parse(response.body)
                 }})
+            });
+
+            stompClient.subscribe('/topic/projects/updates', function (response) {
+                taskboardHome.fire('iron-signal', {name:'projects-changed', data:{
+                    projects: JSON.parse(response.body)
+                }});
             });
         });
     }

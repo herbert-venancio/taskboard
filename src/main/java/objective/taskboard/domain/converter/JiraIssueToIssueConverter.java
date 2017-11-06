@@ -36,6 +36,7 @@ import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractP
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractRealParent;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractRelease;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractTShirtSizes;
+import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractVersion;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -154,6 +155,7 @@ public class JiraIssueToIssueConverter {
                 jiraIssue.getReporter() == null ? null : jiraIssue.getReporter().getName(),
                 coAssignees,
                 extractClassOfService(jiraProperties, jiraIssue),
+                extractVersion(jiraProperties, jiraIssue),
                 extractRelease(jiraProperties, jiraIssue),
                 extractChangelog(jiraIssue));
         

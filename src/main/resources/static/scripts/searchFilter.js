@@ -34,7 +34,7 @@ function SearchFilter() {
         else
             matches = matchByString(issue, search.query);
 
-        return matches && filterByRelease(issue, search.release);
+        return matches && filterByVersion(issue, search.version);
     };
 
     var matchByString = function(issue, searchString) {
@@ -74,14 +74,11 @@ function SearchFilter() {
         return false;
     };
 
-    var filterByRelease = function(issue, release) {
-        if (!release || !release.project || !release.version)
+    var filterByVersion = function(issue, versionId) {
+        if (!versionId)
             return true;
 
-        var issueRelease = issue.customfields.release;
-        return issue.projectKey.toUpperCase() == release.project.toUpperCase() &&
-               issueRelease && issueRelease.value &&
-               issueRelease.value.toUpperCase() == release.version.toUpperCase();
+        return issue.versionId && issue.versionId == versionId;
     };
 }
 

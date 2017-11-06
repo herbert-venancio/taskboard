@@ -23,22 +23,26 @@ package objective.taskboard.issueBuffer;
 
 public enum WebhookEvent {
 
-    ISSUE_CREATED("issue"),
-    ISSUE_UPDATED("issue"),
-    ISSUE_DELETED("issue"),
-    WORKLOG_UPDATED("issue"),
-    VERSION_CREATED("version"),
-    VERSION_UPDATED("version"),
-    VERSION_DELETED("version");
+    ISSUE_CREATED(Category.ISSUE),
+    ISSUE_UPDATED(Category.ISSUE),
+    ISSUE_DELETED(Category.ISSUE),
+    WORKLOG_UPDATED(Category.ISSUE),
+    VERSION_CREATED(Category.VERSION),
+    VERSION_UPDATED(Category.VERSION),
+    VERSION_DELETED(Category.VERSION);
 
-    private String type;
+    public final Category category;
 
-    private WebhookEvent(String type) {
-        this.type = type;
+    private WebhookEvent(Category type) {
+        this.category = type;
     }
 
     public boolean isTypeVersion() {
-        return type.equals("version");
+        return category == Category.VERSION;
     }
 
+    public enum Category {
+        ISSUE
+        , VERSION
+        }
 }

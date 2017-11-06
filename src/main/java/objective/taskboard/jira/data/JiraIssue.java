@@ -3,6 +3,7 @@ package objective.taskboard.jira.data;
 import com.google.common.collect.Maps;
 import retrofit.client.Response;
 import retrofit.http.Body;
+import retrofit.http.POST;
 import retrofit.http.PUT;
 import retrofit.http.Path;
 
@@ -15,61 +16,97 @@ import static java.util.Collections.singletonMap;
 
 public class JiraIssue {
 
-    public interface Service {
-        @PUT("/rest/api/latest/issue/{id}")
-        Response update(@Path("id") String id, @Body Update update);
+    public final String key;
+
+    public JiraIssue(String key) {
+        this.key = key;
     }
 
-    public static class Update {
+    public interface Service {
+        @POST("/rest/api/latest/issue")
+        JiraIssue create(@Body Input input);
 
-        public static UpdateBuilder builder() {
-            return new UpdateBuilder();
+        @PUT("/rest/api/latest/issue/{id}")
+        Response update(@Path("id") String id, @Body Input input);
+    }
+
+    public static class Input {
+
+        public static InputBuilder builder() {
+            return new InputBuilder();
         }
 
+        public final String summary;
         public final Map<String, Object> fields;
 
-        public Update(Map<String, Object> fields) {
+        public Input(String summary, Map<String, Object> fields) {
+            this.summary = summary;
             this.fields = fields;
         }
     }
 
-    public static class UpdateBuilder {
+    public static class InputBuilder {
 
-        private UpdateBuilder() {}
+        private InputBuilder() {}
 
+        protected String summary;
         protected final Map<String, Object> fields = Maps.newLinkedHashMap();
+
+        public InputBuilder summary(String summary) {
+            this.summary = summary;
+            return this;
+        }
 
         public FieldBuilder field(String field) {
             return new FieldBuilder(this, field);
         }
 
-        public Update build() {
-            return new Update(fields);
+        public Input build() {
+            return new Input(summary, fields);
         }
     }
 
     public static class FieldBuilder {
-        private final UpdateBuilder builder;
+        private final InputBuilder builder;
         private final String field;
 
-        public FieldBuilder(UpdateBuilder builder, String field) {
+        public FieldBuilder(InputBuilder builder, String field) {
             this.builder = builder;
             this.field = field;
         }
 
-        public UpdateBuilder byName(String name) {
+        public InputBuilder byId(long id) {
+            return byId(Long.toString(id));
+        }
+
+        public InputBuilder byId(String id) {
+            builder.fields.put(field, singletonMap("id", id));
+            return builder;
+        }
+
+        public InputBuilder byKey(String key) {
+            builder.fields.put(field, singletonMap("key", key));
+            return builder;
+        }
+
+        public InputBuilder byName(String name) {
             builder.fields.put(field, singletonMap("name", name));
             return builder;
         }
 
-        public UpdateBuilder byNames(String... names) {
+        public InputBuilder byNames(String... names) {
             return byNames(asList(names));
         }
 
-        public UpdateBuilder byNames(Collection<String> names) {
+        public InputBuilder byNames(Collection<String> names) {
             builder.fields.put(field, names.stream()
                     .map(name -> singletonMap("name", name))
                     .collect(Collectors.toList()));
+            return builder;
+        }
+
+        public InputBuilder value(Object value) {
+            builder.fields.put(field, value);
             return builder;
         }
     }

@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.DateDeserializers.DateDeserializer;
 
@@ -48,11 +47,9 @@ import objective.taskboard.jira.MetadataService;
 import objective.taskboard.repository.FilterCachedRepository;
 
 
-@JsonIgnoreProperties({"jiraProperties", "metaDataService"})
 public class Issue extends IssueScratch implements Serializable {
     private static final long serialVersionUID = 8513934402068368820L;
 
-    @JsonIgnore
     private transient Issue parentCard;
     
     private transient Set<Issue> subtasks = new LinkedHashSet<>();
@@ -67,7 +64,6 @@ public class Issue extends IssueScratch implements Serializable {
     
     private transient CardVisibilityEvalService cardVisibilityEvalService;
     
-    @JsonIgnore
     private List<IssueCoAssignee> coAssignees = new LinkedList<>(); //NOSONAR
     
     private String color;
@@ -108,6 +104,7 @@ public class Issue extends IssueScratch implements Serializable {
         this.reporter = scratch.reporter;
         this.coAssignees = scratch.coAssignees;
         this.classOfService = scratch.classOfService;
+        this.versionId = scratch.versionId;
         this.release = scratch.release;
         this.changelog = scratch.changelog;
         this.priorityUpdatedDate = scratch.priorityUpdatedDate;
@@ -446,16 +443,19 @@ public class Issue extends IssueScratch implements Serializable {
         return this.priorityOrder;
     }
 
+    public String getVersionId() {
+        if(versionId != null)
+            return versionId;
+
+        Optional<Issue> pc = getParentCard();
+        if(pc.isPresent())
+            return pc.get().versionId;
+
+        return null;
+    }
+
     public TaskboardTimeTracking getTimeTracking() {
         return this.timeTracking;
-    }
-
-    public JiraProperties getJiraProperties() {
-        return this.jiraProperties;
-    }
-
-    public MetadataService getMetaDataService() {
-        return this.metaDataService;
     }
 
     public void setId(final Long id) {
@@ -586,6 +586,10 @@ public class Issue extends IssueScratch implements Serializable {
 
     public void setPriorityOrder(final Long priorityOrder) {
         this.priorityOrder = priorityOrder;
+    }
+
+    public void setVersionId(final String versionId) {
+        this.versionId = versionId;
     }
 
     public void setTimeTracking(final TaskboardTimeTracking timeTracking) {

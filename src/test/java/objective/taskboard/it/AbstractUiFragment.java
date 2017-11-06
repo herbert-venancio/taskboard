@@ -36,6 +36,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public abstract class AbstractUiFragment {
     protected WebDriver webDriver;
@@ -51,6 +52,14 @@ public abstract class AbstractUiFragment {
     protected void waitTextInElement(WebElement element, String expected) {
         waitVisibilityOfElement(element);
         waitUntil(textToBePresentInElement(element, expected));
+    }
+
+    protected void waitPaperDropdownMenuSelectedValueToBe(WebElement element, String expected) {
+        waitVisibilityOfElement(element);
+        waitUntil(ExpectedConditions.or(
+                textToBePresentInElement(element, expected)
+                , attributeToBe(element.findElement(By.cssSelector("#labelAndInputContainer input")), "value", expected)
+        ));
     }
 
     protected void waitAttributeValueInElement(WebElement element, String attribute, String expected) {

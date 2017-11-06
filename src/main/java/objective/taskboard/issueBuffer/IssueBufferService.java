@@ -23,9 +23,11 @@ package objective.taskboard.issueBuffer;
 import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -39,6 +41,7 @@ import org.springframework.stereotype.Service;
 
 import objective.taskboard.data.Issue;
 import objective.taskboard.data.IssuePriorityOrderChanged;
+import objective.taskboard.data.ProjectsUpdateEvent;
 import objective.taskboard.data.TaskboardIssue;
 import objective.taskboard.database.IssuePriorityService;
 import objective.taskboard.domain.converter.JiraIssueToIssueConverter;
@@ -96,6 +99,7 @@ public class IssueBufferService {
     private boolean isUpdatingTaskboardIssuesBuffer = false;
 
     private List<IssueUpdate> issuesUpdatedByEvent = new ArrayList<>();
+    private Set<String> projectsUpdatedByEvent = new HashSet<>();
 
     @PostConstruct
     private synchronized void loadCache() {
@@ -178,6 +182,13 @@ public class IssueBufferService {
     }
 
     public synchronized Issue updateByEvent(WebhookEvent event, final String key, Optional<com.atlassian.jira.rest.client.api.domain.Issue> issue) {
+        if(event.category == WebhookEvent.Category.VERSION && issue.isPresent()) {
+            IssueUpdateType updateType = IssueUpdateType.UPDATED;
+            Issue updated = putJiraIssue(issue.get());
+            projectsUpdatedByEvent.add(updated.getProjectKey());
+            issuesUpdatedByEvent.add(new IssueUpdate(updated, updateType));
+            return updated;
+        }
         if (event == WebhookEvent.ISSUE_DELETED || !issue.isPresent()) {
             issuesUpdatedByEvent.add(new IssueUpdate(cardsRepo.get(key), IssueUpdateType.DELETED));
             return cardsRepo.remove(key);
@@ -196,12 +207,17 @@ public class IssueBufferService {
 
     public synchronized void startBatchUpdate() {
         issuesUpdatedByEvent.clear();
+        projectsUpdatedByEvent.clear();
     }
 
     public synchronized void finishBatchUpdate() {
         if (issuesUpdatedByEvent.size() > 0)
             eventPublisher.publishEvent(new IssuesUpdateEvent(this, issuesUpdatedByEvent));
         issuesUpdatedByEvent.clear();
+
+        if (projectsUpdatedByEvent.size() > 0)
+            eventPublisher.publishEvent(new ProjectsUpdateEvent(this, projectsUpdatedByEvent.toArray(new String[0])));
+        projectsUpdatedByEvent.clear();
     }
 
     public synchronized List<Issue> getIssues() {
@@ -267,7 +283,7 @@ public class IssueBufferService {
             issue.setPriorityOrder(taskboardIssue.getPriority());
             issue.setPriorityUpdatedDate(taskboardIssue.getUpdated());
             cardsRepo.setChanged(issue.getIssueKey());
-            issueEvents.add(WebhookEvent.ISSUE_UPDATED, issue.getIssueKey(), null);
+            issueEvents.add(WebhookEvent.ISSUE_UPDATED, issue.getProjectKey(), issue.getIssueKey(), null);
         }
     }
     

@@ -20,28 +20,19 @@
  */
 package objective.taskboard.task;
 
-import static objective.taskboard.config.CacheConfiguration.PROJECTS;
-import static objective.taskboard.issueBuffer.WebhookEvent.VERSION_UPDATED;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
 
+import objective.taskboard.controller.WebhookController;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.CacheManager;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.atlassian.jira.rest.client.api.domain.Issue;
-
-import objective.taskboard.controller.WebhookController.WebhookBody.Changelog;
 import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.issueBuffer.WebhookEvent;
-import objective.taskboard.jira.JiraIssueService;
 import objective.taskboard.jira.JiraServiceUnavailable;
-import objective.taskboard.jira.WebhookSubtaskCreatorService;
 
 @Component
 public class IssueEventProcessScheduler {
@@ -50,52 +41,31 @@ public class IssueEventProcessScheduler {
     private IssueBufferService issueBufferService;
 
     @Autowired
-    private CacheManager cacheManager;
-
-    @Autowired
-    public ApplicationEventPublisher eventPublisher;
-
-    @Autowired
-    private JiraIssueService jiraIssueService;
-
-    @Autowired
-    private WebhookSubtaskCreatorService webhookSubtaskCreatorService;
+    private Set<IssueEventProcessor> issueEventProcessors;
 
     private static final long RATE_MILISECONDS = 1000l;
     
-    List<Item> list = Collections.synchronizedList(new ArrayList<Item>());
+    List<IssueEventProcessor.IssueEvent> list = Collections.synchronizedList(new ArrayList<>());
 
-    private class Item {
-        private WebhookEvent event;
-        private String issueKey;
-        private Changelog changelog;
-
-        public Item(WebhookEvent event, String issueKey, Changelog changelog) {
-            this.event = event;
-            this.issueKey = issueKey;
-            this.changelog = changelog;
-        }
+    private synchronized List<IssueEventProcessor.IssueEvent> getItens() {
+        return new ArrayList<>(list);
     }
 
-    private synchronized List<Item> getItens() {
-        return new ArrayList<Item>(list);
-    }
-
-    private synchronized void removeItens(List<Item> list) {
+    private synchronized void removeItens(List<IssueEventProcessor.IssueEvent> list) {
         this.list.removeAll(list);
     }
 
-    public synchronized void add(WebhookEvent event, String issueKey, Changelog changelog) {
-        Item item = new Item(event, issueKey, changelog);
+    public synchronized void add(WebhookEvent event, String projectKey, String issueKey, WebhookController.WebhookBody eventData) {
+        IssueEventProcessor.IssueEvent item = new IssueEventProcessor.IssueEvent(event, projectKey, issueKey, eventData);
         list.add(item);
     }
 
     @Scheduled(fixedRate = RATE_MILISECONDS)
     public void processItems() {
-        List<Item> toRemove = new ArrayList<Item>();
+        List<IssueEventProcessor.IssueEvent> toRemove = new ArrayList<>();
 
         issueBufferService.startBatchUpdate();
-        for (Item item : getItens()) 
+        for (IssueEventProcessor.IssueEvent item : getItens())
             try {
                 processEvent(item);
 
@@ -115,25 +85,11 @@ public class IssueEventProcessScheduler {
         removeItens(toRemove);
     }
 
-    private void processEvent(Item item) {
-        if (item.event.isTypeVersion()) {
-            cacheManager.getCache(PROJECTS).clear();
-            if (item.event.equals(VERSION_UPDATED))
-                issueBufferService.updateIssueBuffer();
-            return;
+    private void processEvent(IssueEventProcessor.IssueEvent item) {
+        for(IssueEventProcessor eventProcessor : issueEventProcessors) {
+            if(eventProcessor.processEvent(item))
+                break;
         }
-        Optional<Issue> issue = fetchIssue(item);
-        if (issue.isPresent()) {
-            com.atlassian.jira.rest.client.api.domain.Issue jiraIssue = issue.get();
-            webhookSubtaskCreatorService.createSubtaskOnTransition(jiraIssue, item.changelog);
-        }
-        issueBufferService.updateByEvent(item.event, item.issueKey, issue);
-    }
-
-    private Optional<Issue> fetchIssue(Item item) {
-        if (item.event == WebhookEvent.ISSUE_DELETED)
-            return Optional.empty();
-        return jiraIssueService.searchIssueByKey(item.issueKey);
     }
 
 }

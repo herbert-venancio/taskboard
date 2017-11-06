@@ -20,6 +20,7 @@
  */
 package objective.taskboard.it;
 
+import objective.taskboard.RequestBuilder;
 import org.junit.Test;
 
 public class ReleaseFilterIT extends AuthenticatedIntegrationTest {
@@ -40,7 +41,29 @@ public class ReleaseFilterIT extends AuthenticatedIntegrationTest {
     public void whenFilterByRelease_onlyIssueInTheReleaseShowUp() {
         MainPage.produce(webDriver)
                 .filterByRelease("TASKB - 1.0")
-                .assertVisibleIssues("TASKB-186","TASKB-238","TASKB-572");
+                .assertVisibleIssues("TASKB-186", "TASKB-238", "TASKB-572");
     }
 
+    @Test
+    public void whenWebhookProjectVersionUpdate_updateReleaseOfIssues() {
+        emulateVersionUpdate("1.0-edited");
+        MainPage.produce(webDriver)
+                .waitReleaseFilterContains("TASKB - 1.0-edited")
+                .filterByRelease("TASKB - 1.0-edited")
+                .assertVisibleIssues("TASKB-186", "TASKB-238", "TASKB-572");
+
+        emulateVersionUpdate("1.0-changed");
+        MainPage.produce(webDriver)
+                .assertLabelRelease("TASKB - 1.0-changed")
+                .assertVisibleIssues("TASKB-186", "TASKB-238", "TASKB-572");
+    }
+
+    private void emulateVersionUpdate(String newName) {
+        registerWebhook("jira:version_updated");
+
+        RequestBuilder
+                .url("http://localhost:4567/rest/api/latest/version/12550")
+                .body("{\"name\":\"" + newName + "\"}")
+                .put();
+    }
 }

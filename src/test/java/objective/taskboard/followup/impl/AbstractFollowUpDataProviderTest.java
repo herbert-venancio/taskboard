@@ -316,6 +316,7 @@ public abstract class AbstractFollowUpDataProviderTest {
                     null,//reporter
                     null,//coAssignees
                     null,//classOfService
+                    null,//version
                     null, //release
                     buildTransitions()
                     );

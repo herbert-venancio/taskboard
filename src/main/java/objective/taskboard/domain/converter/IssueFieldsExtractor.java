@@ -230,7 +230,7 @@ public class IssueFieldsExtractor {
     }
 
 
-    public  static Map<String, CustomField> extractAdditionalEstimatedHours(JiraProperties jiraProperties, Issue issue) {
+    public static Map<String, CustomField> extractAdditionalEstimatedHours(JiraProperties jiraProperties, Issue issue) {
         String additionalHoursId = jiraProperties.getCustomfield().getAdditionalEstimatedHours().getId();
         IssueField field = issue.getField(additionalHoursId);
         if (field == null || field.getValue() == null)
@@ -243,9 +243,29 @@ public class IssueFieldsExtractor {
         return mapAdditionalHours;
     }
 
-    public  static Map<String, CustomField> extractRelease(JiraProperties jiraProperties, Issue issue) {
-        String releaseId = jiraProperties.getCustomfield().getRelease().getId();
-        IssueField field = issue.getField(releaseId);
+    public static String extractVersion(JiraProperties jiraProperties, Issue issue) {
+        String releaseFieldId = jiraProperties.getCustomfield().getRelease().getId();
+        IssueField field = issue.getField(releaseFieldId);
+
+        if (field == null)
+            return null;
+
+        JSONObject json = (JSONObject) field.getValue();
+
+        if (json == null)
+            return null;
+
+        try {
+            return json.getString("id");
+        } catch (JSONException e) {
+            logErrorExtractField(issue, field, e);
+            return null;
+        }
+    }
+
+    public static Map<String, CustomField> extractRelease(JiraProperties jiraProperties, Issue issue) {
+        String releaseFieldId = jiraProperties.getCustomfield().getRelease().getId();
+        IssueField field = issue.getField(releaseFieldId);
 
         if (field == null)
             return newHashMap();
@@ -259,7 +279,7 @@ public class IssueFieldsExtractor {
             String release = json.getString("name");
             CustomField customFieldRelease = new CustomField(field.getName(), release);
             Map<String, CustomField> mapRelease = newHashMap();
-            mapRelease.put(releaseId, customFieldRelease);
+            mapRelease.put(releaseFieldId, customFieldRelease);
             return mapRelease;
         } catch (JSONException e) {
             logErrorExtractField(issue, field, e);

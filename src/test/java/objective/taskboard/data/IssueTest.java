@@ -47,6 +47,7 @@ public class IssueTest {
                 "reporter",
                 new LinkedList<>(), 
                 new CustomField("classOfService", null),
+                "versionId",
                 new LinkedHashMap<>(),
                 new LinkedList<>()
                 );

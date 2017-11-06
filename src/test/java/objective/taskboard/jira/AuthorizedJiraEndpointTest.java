@@ -121,7 +121,7 @@ public class AuthorizedJiraEndpointTest {
     @Test
     public void updateIssue() {
         // given
-        JiraIssue.Update request = JiraIssue.Update.builder()
+        JiraIssue.Input request = JiraIssue.Input.builder()
                 .field("assignee").byName("foo")
                 .field(jiraProperties.getCustomfield().getCoAssignees().getId()).byNames("bar", "baz")
                 .build();

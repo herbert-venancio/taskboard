@@ -48,6 +48,7 @@ public class IssueScratch implements Serializable {
     protected List<String> components;   //NOSONAR
     protected Long priorityOrder;
     protected TaskboardTimeTracking timeTracking;
+    protected String versionId;
     protected List<Changelog> changelog; //NOSONAR
     
     @JsonIgnore
@@ -98,6 +99,7 @@ public class IssueScratch implements Serializable {
             String reporter, 
             List<IssueCoAssignee> coAssignees, 
             CustomField classOfService, 
+            String versionId,
             Map<String, CustomField> release,
             List<Changelog> changelog) {
         this.id = id;
@@ -132,6 +134,7 @@ public class IssueScratch implements Serializable {
         this.reporter = reporter;
         this.coAssignees = coAssignees;
         this.classOfService = classOfService;
+        this.versionId = versionId;
         this.release = release;
         this.changelog = changelog;
         

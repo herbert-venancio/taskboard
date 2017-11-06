@@ -21,6 +21,7 @@
 package objective.taskboard.it;
 
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -35,6 +36,8 @@ import objective.taskboard.RequestResponse;
 import objective.taskboard.TestMain;
 import objective.taskboard.issueBuffer.IssueBufferState;
 import org.junit.Rule;
+
+import static java.util.stream.Collectors.toList;
 
 public abstract class AbstractIntegrationTest {
 
@@ -88,5 +91,21 @@ public abstract class AbstractIntegrationTest {
 
     protected void resetIssueBuffer() {
         RequestBuilder.url(getSiteBase()+"/test/resetbuffer").credentials("foo", "bar").get();
+    }
+
+    protected static void registerWebhook(String... events) {
+        String eventList = String.join(",", Arrays.stream(events)
+                .map(event -> "\"" + event + "\"")
+                .collect(toList()));
+
+        String registerWebhook = "{" +
+                "  \"name\": \"my webhook via rest\"," +
+                "  \"url\": \"http://localhost:8900/webhook/${project.key}\"," +
+                "  \"events\": [" + eventList + "]" +
+                "}";
+
+        RequestBuilder.url("http://localhost:4567/rest/webhooks/1.0/webhook")
+                .body(registerWebhook)
+                .post();
     }
 }

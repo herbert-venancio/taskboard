@@ -273,7 +273,7 @@ public class JiraService {
             if (alreadyAssignedToUser())
                 return false;
 
-            JiraIssue.Update request = buildRequest();
+            JiraIssue.Input request = buildRequest();
             send(request);
 
             return true;
@@ -283,7 +283,7 @@ public class JiraService {
             return assignee.equals(issue.getAssignee());
         }
 
-        private JiraIssue.Update buildRequest() {
+        private JiraIssue.Input buildRequest() {
             // add last assignee as co-assignee
             final Set<String> coAssignees = issue.getCoAssignees()
                     .stream()
@@ -295,13 +295,13 @@ public class JiraService {
             // build request
             String assigneeField = "assignee";
             String coAssigneeField = properties.getCustomfield().getCoAssignees().getId();
-            return JiraIssue.Update.builder()
+            return JiraIssue.Input.builder()
                     .field(assigneeField).byName(assignee)
                     .field(coAssigneeField).byNames(coAssignees)
                     .build();
         }
 
-        private void send(JiraIssue.Update request) {
+        private void send(JiraIssue.Input request) {
             JiraIssue.Service issueService = jiraEndpointAsUser.request(JiraIssue.Service.class);
             try {
                 Response result = issueService.update(issue.getIssueKey(), request);
