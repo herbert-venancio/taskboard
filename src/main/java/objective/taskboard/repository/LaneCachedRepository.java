@@ -20,6 +20,8 @@
  */
 package objective.taskboard.repository;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -28,9 +30,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 
 import objective.taskboard.domain.Lane;
+import objective.taskboard.domain.Step;
 
 @Service
 public class LaneCachedRepository {
@@ -38,20 +40,29 @@ public class LaneCachedRepository {
     @Autowired
     private LaneRepository laneRepository;
 
-    private List<Lane> cache = Lists.newArrayList();
+    private List<Lane> allLanes;
+    private List<Step> allSteps;
 
     @PostConstruct
     private void load() {
         loadCache();
     }
 
-    public List<Lane> getCache() {
-        return ImmutableList.copyOf(cache);
+    public List<Lane> getAll() {
+        return ImmutableList.copyOf(allLanes);
     }
 
+    public List<Step> getAllSteps() {
+        return ImmutableList.copyOf(allSteps);
+    }
+    
     public void loadCache() {
         log.info("------------------------------ > LaneCachedRepository.loadCache()");
-        this.cache = laneRepository.findAll();
+        
+        allLanes = laneRepository.findAll();
+        allSteps = allLanes.stream()
+                .flatMap(l -> l.getStages().stream())
+                .flatMap(s -> s.getSteps().stream())
+                .collect(toList());
     }
-
 }

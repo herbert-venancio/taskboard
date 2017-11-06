@@ -45,7 +45,7 @@ public class TaskboardDatabaseService {
     @Cacheable(CacheConfiguration.CONFIGURATION)
     private List<LaneConfiguration> getConfigurations() {
         
-        List<Lane> lanes = laneRepository.getCache();
+        List<Lane> lanes = laneRepository.getAll();
         return TaskboardConfigToLaneConfigurationTransformer.getInstance().transform(lanes);
     }
 

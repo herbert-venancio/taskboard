@@ -20,6 +20,8 @@
  */
 package objective.taskboard.domain;
 
+import java.util.Objects;
+
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -47,13 +49,13 @@ public abstract class TaskboardEntity {
         if (o == null || getClass() != o.getClass()) return false;
 
         TaskboardEntity that = (TaskboardEntity) o;
-
-        return id != null ? id.equals(that.id) : that.id == null;
+        return Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return id != null ? id.hashCode() : 0;
+        // https://vladmihalcea.com/2016/06/06/how-to-implement-equals-and-hashcode-using-the-jpa-entity-identifier/
+        return 31;
     }
 
     @Override

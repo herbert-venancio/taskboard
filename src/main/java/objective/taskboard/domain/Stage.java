@@ -119,46 +119,4 @@ public class Stage extends TaskboardEntity implements Serializable {
         this.steps = steps;
     }
 
-    @Override
-    public String toString() {
-        return "Stage{" +
-                "name='" + name + '\'' +
-                ", ordem=" + ordem +
-                ", weight=" + weight +
-                ", showHeader=" + showHeader +
-                ", color='" + color + '\'' +
-                ", lane=" + lane +
-                ", steps=" + steps +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-
-        Stage stage = (Stage) o;
-
-        if (showHeader != stage.showHeader) return false;
-        if (name != null ? !name.equals(stage.name) : stage.name != null) return false;
-        if (ordem != null ? !ordem.equals(stage.ordem) : stage.ordem != null) return false;
-        if (weight != null ? !weight.equals(stage.weight) : stage.weight != null) return false;
-        if (color != null ? !color.equals(stage.color) : stage.color != null) return false;
-        if (lane != null ? !lane.equals(stage.lane) : stage.lane != null) return false;
-        return steps != null ? steps.equals(stage.steps) : stage.steps == null;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (ordem != null ? ordem.hashCode() : 0);
-        result = 31 * result + (weight != null ? weight.hashCode() : 0);
-        result = 31 * result + (showHeader ? 1 : 0);
-        result = 31 * result + (color != null ? color.hashCode() : 0);
-        result = 31 * result + (lane != null ? lane.hashCode() : 0);
-        result = 31 * result + (steps != null ? steps.hashCode() : 0);
-        return result;
-    }
 }

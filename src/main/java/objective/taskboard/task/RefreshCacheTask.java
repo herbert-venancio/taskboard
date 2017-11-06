@@ -103,7 +103,7 @@ public class RefreshCacheTask {
     public void refreshLane() {
         log.info("Refreshing Lane cache...");
         laneRepository.loadCache();
-        List<Lane> lane = laneRepository.getCache();
+        List<Lane> lane = laneRepository.getAll();
         log.info(format("Lane cache refreshed, %d records loaded.", lane.size()));
     }
 

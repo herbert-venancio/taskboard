@@ -30,11 +30,5 @@ public class ProjectCreationData {
     public static class ProjectCreationDataTeam {
         public String name;
         public List<String> members;
-        public List<ProjectCreationDataWip> wipConfigurations;
-    }
-
-    public static class ProjectCreationDataWip {
-        public Long statusId;
-        public Integer wip;
     }
 }
