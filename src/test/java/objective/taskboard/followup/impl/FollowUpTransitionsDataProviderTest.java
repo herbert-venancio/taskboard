@@ -50,9 +50,9 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
         assertThat(analytics.get(1).headers, equalTo(asList("PKEY", "Type", "Cancelled", "Done", "QAing", "To QA", "Feature Reviewing", "To Feature Review", "Alpha Testing", "To Alpha Test", "Doing", "To Do", "Open")));
         assertThat(analytics.get(2).headers, equalTo(asList("PKEY", "Type", "Cancelled", "Done", "Reviewing", "To Review", "Doing", "To Do", "Open")));
 
-        assertThat(synthetic.get(0).headers, equalTo(asList("Date", "Cancelled", "Done", "UATing", "To UAT", "Doing", "To Do", "Open")));
-        assertThat(synthetic.get(1).headers, equalTo(asList("Date", "Cancelled", "Done", "QAing", "To QA", "Feature Reviewing", "To Feature Review", "Alpha Testing", "To Alpha Test", "Doing", "To Do", "Open")));
-        assertThat(synthetic.get(2).headers, equalTo(asList("Date", "Cancelled", "Done", "Reviewing", "To Review", "Doing", "To Do", "Open")));
+        assertThat(synthetic.get(0).headers, equalTo(asList("Date", "Type", "Cancelled", "Done", "UATing", "To UAT", "Doing", "To Do", "Open")));
+        assertThat(synthetic.get(1).headers, equalTo(asList("Date", "Type", "Cancelled", "Done", "QAing", "To QA", "Feature Reviewing", "To Feature Review", "Alpha Testing", "To Alpha Test", "Doing", "To Do", "Open")));
+        assertThat(synthetic.get(2).headers, equalTo(asList("Date", "Type", "Cancelled", "Done", "Reviewing", "To Review", "Doing", "To Do", "Open")));
     }
 
     @Test
@@ -371,9 +371,9 @@ public class FollowUpTransitionsDataProviderTest extends AbstractFollowUpDataPro
         assertThat(analytics.get(1).headers, equalTo(asList("PKEY", "Type", "Cancelled", "Done", "QAing", "To QA", "Feature Reviewing", "To Feature Review", "Alpha Testing", "To Alpha Test", "Doing", "To Do", "Open")));
         assertThat(analytics.get(2).headers, equalTo(asList("PKEY", "Type", "Cancelled", "Done", "Reviewing", "To Review", "Doing", "To Do", "Open")));
 
-        assertThat(synthetic.get(0).headers, equalTo(asList("Date", "Cancelled/Done", "UATing", "To UAT", "Doing", "To Do", "Open")));
-        assertThat(synthetic.get(1).headers, equalTo(asList("Date", "Cancelled/Done", "QAing", "To QA", "Feature Reviewing", "To Feature Review", "Alpha Testing", "To Alpha Test", "Doing", "To Do", "Open")));
-        assertThat(synthetic.get(2).headers, equalTo(asList("Date", "Cancelled/Done", "Reviewing", "To Review", "Doing", "To Do", "Open")));
+        assertThat(synthetic.get(0).headers, equalTo(asList("Date", "Type", "Cancelled/Done", "UATing", "To UAT", "Doing", "To Do", "Open")));
+        assertThat(synthetic.get(1).headers, equalTo(asList("Date", "Type", "Cancelled/Done", "QAing", "To QA", "Feature Reviewing", "To Feature Review", "Alpha Testing", "To Alpha Test", "Doing", "To Do", "Open")));
+        assertThat(synthetic.get(2).headers, equalTo(asList("Date", "Type", "Cancelled/Done", "Reviewing", "To Review", "Doing", "To Do", "Open")));
 
         List<ZonedDateTime> subtaskTransitionsDatesFirstRow = analytics.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows.get(0).transitionsDates;
         assertThat(subtaskTransitionsDatesFirstRow.size(), is(7));

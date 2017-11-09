@@ -21,8 +21,7 @@
 package objective.taskboard.followup;
 
 import static objective.taskboard.followup.FollowUpHelper.getDefaultFollowupData;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertArrayEquals;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
@@ -40,6 +39,9 @@ import java.util.Optional;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.SpreadsheetMLPackage;
 import org.docx4j.openpackaging.parts.SpreadsheetML.WorksheetPart;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -56,6 +58,7 @@ import org.xlsx4j.exceptions.Xlsx4jException;
 import org.xlsx4j.org.apache.poi.ss.usermodel.DataFormatter;
 import org.xlsx4j.sml.Cell;
 import org.xlsx4j.sml.Row;
+import org.xlsx4j.sml.Sheet;
 
 import objective.taskboard.database.directory.DataBaseDirectory;
 import objective.taskboard.followup.data.Template;
@@ -119,7 +122,7 @@ public class FollowUpFacadeTest {
     }
 
     @Test
-    public void generate() throws Exception {
+    public void okTemplateGenerate() throws Exception {
         given(templateService.getTemplate(TEMPLATE_NAME)).willReturn(template);
         given(provider.getJiraData(INCLUDED_PROJECTS, ZoneId.systemDefault())).willReturn(getDefaultFollowupData());
 
@@ -128,14 +131,49 @@ public class FollowUpFacadeTest {
         Resource resource = followupGenerator.generate(INCLUDED_PROJECTS, ZoneId.systemDefault());
 
         // then
-        SpreadsheetMLPackage excelDoc = readFile(resource);
-        String[] expectedRowContent = expectedRowContentOfFromJira();
-        String[] actualRowContent = formattedContentOfFirstRowOfFromJiraWorksheet(excelDoc);
-        assertArrayEquals(expectedRowContent, actualRowContent);
+        assertThat(resource, hasExpectedContent());
+    }
 
-        expectedRowContent = expectedRowContentOfAnalytics();
-        actualRowContent = formattedContentOfFirstRowOfAnalyticsWorksheet(excelDoc);
-        assertArrayEquals(expectedRowContent, actualRowContent);
+    private Matcher<Resource> hasExpectedContent() {
+        return new BaseMatcher<Resource>() {
+
+            public BaseMatcher<String[]> matcherDelegate;
+
+            @Override
+            public void describeTo(Description description) {
+                matcherDelegate.describeTo(description);
+            }
+
+            @Override
+            public void describeMismatch(Object item, Description description) {
+                matcherDelegate.describeMismatch(item, description);
+            }
+
+            @Override
+            public boolean matches(Object o) {
+                Resource resource = (Resource) o;
+                try {
+                    SpreadsheetMLPackage excelDoc = readFile(resource);
+                    String[] expectedRowContent = expectedRowContentOfFromJira();
+                    String[] actualRowContent = formattedContentOfFirstRowOfFromJiraWorksheet(excelDoc);
+                    matcherDelegate = (BaseMatcher<String[]>) equalTo(expectedRowContent);
+                    assertThat(actualRowContent, matcherDelegate);
+
+                    expectedRowContent = expectedRowContentOfAnalytics();
+                    actualRowContent = formattedContentOfFirstRowOfAnalyticsWorksheet(excelDoc);
+                    matcherDelegate = (BaseMatcher<String[]>) equalTo(expectedRowContent);
+                    assertThat(actualRowContent, matcherDelegate);
+
+                    expectedRowContent = expectedRowContentOfSyntetics();
+                    actualRowContent = formattedContentOfFirstRowOfSynteticsWorksheet(excelDoc);
+                    matcherDelegate = (BaseMatcher<String[]>) equalTo(expectedRowContent);
+                    assertThat(actualRowContent, matcherDelegate);
+                    return true;
+                } catch (Exception e) {
+                    throw new AssertionError(e.getMessage());
+                }
+            }
+        };
     }
 
     private String[] expectedRowContentOfFromJira() {
@@ -156,6 +194,10 @@ public class FollowUpFacadeTest {
                 "I-1", "Demand", "9/27/17 0:00", "9/26/17 0:00", "9/25/17 0:00"};
     }
 
+    private String[] expectedRowContentOfSyntetics() {
+        return new String[] {"9/25/17 0:00", "Demand", "0", "0", "1"};
+    }
+
     private SpreadsheetMLPackage readFile(Resource resource) throws IOException, Docx4JException {
         System.setProperty("javax.xml.parsers.SAXParserFactory", "org.apache.xerces.jaxp.SAXParserFactoryImpl");
         System.setProperty("javax.xml.parsers.DocumentBuilderFactory", "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl");
@@ -163,18 +205,29 @@ public class FollowUpFacadeTest {
     }
 
     private String[] formattedContentOfFirstRowOfFromJiraWorksheet(SpreadsheetMLPackage excelDoc) throws Docx4JException, Xlsx4jException {
-        assertThat(excelDoc.getWorkbookPart().getContents().getSheets().getSheet().get(6).getName(), is("From Jira"));
-        WorksheetPart fromJira = excelDoc.getWorkbookPart().getWorksheet(6);
-
-        Row row = fromJira.getContents().getSheetData().getRow().get(1);
-        return extractRowContent(row);
+        return extractRowContent(excelDoc, "From Jira", 1);
     }
 
     private String[] formattedContentOfFirstRowOfAnalyticsWorksheet(SpreadsheetMLPackage excelDoc) throws Docx4JException, Xlsx4jException {
-        assertThat(excelDoc.getWorkbookPart().getContents().getSheets().getSheet().get(9).getName(), is("Analytic - Demand"));
-        WorksheetPart analytics = excelDoc.getWorkbookPart().getWorksheet(9);
+        return extractRowContent(excelDoc, "Analytic - Demand", 1);
+    }
 
-        Row row = analytics.getContents().getSheetData().getRow().get(1);
+    private String[] formattedContentOfFirstRowOfSynteticsWorksheet(SpreadsheetMLPackage excelDoc) throws Docx4JException, Xlsx4jException {
+        return extractRowContent(excelDoc, "Synthetic - Demand", 1);
+    }
+
+    private WorksheetPart getWorksheetByName(SpreadsheetMLPackage excelDoc, String name) throws Docx4JException, Xlsx4jException {
+        for(int i = 0; i < excelDoc.getWorkbookPart().getContents().getSheets().getSheet().size(); ++i) {
+            Sheet sheet = excelDoc.getWorkbookPart().getContents().getSheets().getSheet().get(i);
+            if(name.equals(sheet.getName()))
+                return excelDoc.getWorkbookPart().getWorksheet(i);
+        }
+        throw new RuntimeException("Sheet with name '" + name + "' not found");
+    }
+
+    private String[] extractRowContent(SpreadsheetMLPackage excelDoc, String sheetName, int rowIndex) throws Docx4JException, Xlsx4jException {
+        WorksheetPart analytics = getWorksheetByName(excelDoc, sheetName);
+        Row row = analytics.getContents().getSheetData().getRow().get(rowIndex);
         return extractRowContent(row);
     }
 

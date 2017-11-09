@@ -6,7 +6,8 @@ public class FollowupData {
 
     public enum Version {
 
-        VERSION_1("1");
+        VERSION_1("1")
+        , VERSION_2("2");
 
         public final String value;
 
@@ -21,7 +22,7 @@ public class FollowupData {
     public final List<SyntheticTransitionsDataSet> syntheticsTransitionsDsList;
 
     public FollowupData(FromJiraDataSet fromJiraDs, List<AnalyticsTransitionsDataSet> analyticsTransitionsDsList, List<SyntheticTransitionsDataSet> syntheticsTransitionsDsList) {
-        this(Version.VERSION_1, fromJiraDs, analyticsTransitionsDsList, syntheticsTransitionsDsList);
+        this(Version.VERSION_2, fromJiraDs, analyticsTransitionsDsList, syntheticsTransitionsDsList);
     }
 
     public FollowupData(Version version, FromJiraDataSet fromJiraDs, List<AnalyticsTransitionsDataSet> analyticsTransitionsDsList, List<SyntheticTransitionsDataSet> syntheticsTransitionsDsList) {

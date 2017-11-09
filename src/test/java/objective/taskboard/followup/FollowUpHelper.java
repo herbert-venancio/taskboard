@@ -171,6 +171,12 @@ public class FollowUpHelper {
                         , DateTimeUtils.parseDate("2017-09-26")
                         , DateTimeUtils.parseDate("2017-09-25")));
 
+        AnalyticsTransitionsDataRow rowOs = new AnalyticsTransitionsDataRow("I-4", "OS"
+                , asList(
+                        null
+                        , DateTimeUtils.parseDate("2017-09-26")
+                        , DateTimeUtils.parseDate("2017-09-25")));
+
         AnalyticsTransitionsDataRow rowFeature = new AnalyticsTransitionsDataRow("I-2", "Feature"
                 , asList(
                         null
@@ -183,7 +189,7 @@ public class FollowUpHelper {
                         , null
                         , DateTimeUtils.parseDate("2017-09-25")));
 
-        return asList(new AnalyticsTransitionsDataSet(TYPE_DEMAND, headers, asList(rowDemand)),
+        return asList(new AnalyticsTransitionsDataSet(TYPE_DEMAND, headers, asList(rowDemand, rowOs)),
                 new AnalyticsTransitionsDataSet(TYPE_FEATURES, headers, asList(rowFeature)),
                 new AnalyticsTransitionsDataSet(TYPE_SUBTASKS, headers, asList(rowSubtask)));
     }
@@ -195,21 +201,25 @@ public class FollowUpHelper {
     public static List<SyntheticTransitionsDataSet> getDefaultSyntheticTransitionsDataSet() {
         List<String> headers = new LinkedList<>();
         headers.add("Date");
+        headers.add("Type");
         headers.add("Done");
         headers.add("Doing");
         headers.add("To Do");
 
         List<SyntheticTransitionsDataRow> rowsDemand = new LinkedList<>();
-        rowsDemand.add(new SyntheticTransitionsDataRow(DateTimeUtils.parseDate("2017-09-25"), Ints.asList(0, 0, 1)));
-        rowsDemand.add(new SyntheticTransitionsDataRow(DateTimeUtils.parseDate("2017-09-26"), Ints.asList(0, 1, 0)));
-        rowsDemand.add(new SyntheticTransitionsDataRow(DateTimeUtils.parseDate("2017-09-27"), Ints.asList(1, 0, 0)));
+        rowsDemand.add(new SyntheticTransitionsDataRow(DateTimeUtils.parseDate("2017-09-25"), "Demand", Ints.asList(0, 0, 1)));
+        rowsDemand.add(new SyntheticTransitionsDataRow(DateTimeUtils.parseDate("2017-09-25"), "OS", Ints.asList(0, 0, 1)));
+        rowsDemand.add(new SyntheticTransitionsDataRow(DateTimeUtils.parseDate("2017-09-26"), "Demand", Ints.asList(0, 1, 0)));
+        rowsDemand.add(new SyntheticTransitionsDataRow(DateTimeUtils.parseDate("2017-09-26"), "OS", Ints.asList(0, 1, 0)));
+        rowsDemand.add(new SyntheticTransitionsDataRow(DateTimeUtils.parseDate("2017-09-27"), "Demand", Ints.asList(1, 0, 0)));
+        rowsDemand.add(new SyntheticTransitionsDataRow(DateTimeUtils.parseDate("2017-09-27"), "OS", Ints.asList(0, 1, 0)));
 
         List<SyntheticTransitionsDataRow> rowsFeature = new LinkedList<>();
-        rowsFeature.add(new SyntheticTransitionsDataRow(DateTimeUtils.parseDate("2017-09-25"), Ints.asList(0, 0, 1)));
-        rowsFeature.add(new SyntheticTransitionsDataRow(DateTimeUtils.parseDate("2017-09-26"), Ints.asList(0, 1, 0)));
+        rowsFeature.add(new SyntheticTransitionsDataRow(DateTimeUtils.parseDate("2017-09-25"), "Feature", Ints.asList(0, 0, 1)));
+        rowsFeature.add(new SyntheticTransitionsDataRow(DateTimeUtils.parseDate("2017-09-26"), "Feature", Ints.asList(0, 1, 0)));
 
         List<SyntheticTransitionsDataRow> rowsSubtask = new LinkedList<>();
-        rowsSubtask.add(new SyntheticTransitionsDataRow(DateTimeUtils.parseDate("2017-09-25"), Ints.asList(0, 0, 1)));
+        rowsSubtask.add(new SyntheticTransitionsDataRow(DateTimeUtils.parseDate("2017-09-25"), "Sub-task", Ints.asList(0, 0, 1)));
 
         return asList(new SyntheticTransitionsDataSet(TYPE_DEMAND, headers, rowsDemand),
                 new SyntheticTransitionsDataSet(TYPE_FEATURES, headers, rowsFeature),
@@ -231,5 +241,11 @@ public class FollowUpHelper {
     }
     public static String followupExpectedV1() {
         return resourceToString(FollowUpDataHistoryGeneratorJSONFilesTest.class, "V1_followUpDataHistoryExpected.json");
+    }
+    public static String followupEmptyV2() {
+        return resourceToString(FollowUpDataHistoryGeneratorJSONFilesTest.class, "V2_followupDataHistory_empty.json");
+    }
+    public static String followupExpectedV2() {
+        return resourceToString(FollowUpDataHistoryGeneratorJSONFilesTest.class, "V2_followUpDataHistoryExpected.json");
     }
 }

@@ -143,6 +143,18 @@ public class FollowUpDataProviderFromHistoryTest {
     }
 
     @Test
+    public void testVersion2() throws IOException, URISyntaxException {
+        // given
+        createProjectZipV2(PROJECT_TEST);
+
+        // when
+        FollowupData data = subject.getJiraData(PROJECT_TEST);
+
+        // then
+        assertThat(data).isEqualToComparingFieldByFieldRecursively(getDefaultFollowupData());
+    }
+
+    @Test
     public void whenHasDataHistoryWithCfdAndPassesZoneId_shouldRecalculateAnalyticsAndSynthetics() throws IOException, URISyntaxException {
         // given
         createProjectZipV1(PROJECT_TEST);
@@ -173,18 +185,27 @@ public class FollowUpDataProviderFromHistoryTest {
 
         List<SyntheticTransitionsDataRow> saoPauloSyntheticRows = dataSaoPaulo.syntheticsTransitionsDsList.get(0).rows;
         assertEquals(saoPauloSyntheticRows.get(0).date, DateTimeUtils.parseDate("2017-09-25", saoPauloTZ));
-        assertEquals(saoPauloSyntheticRows.get(1).date, DateTimeUtils.parseDate("2017-09-26", saoPauloTZ));
-        assertEquals(saoPauloSyntheticRows.get(2).date, DateTimeUtils.parseDate("2017-09-27", saoPauloTZ));
+        assertEquals(saoPauloSyntheticRows.get(1).date, DateTimeUtils.parseDate("2017-09-25", saoPauloTZ));
+        assertEquals(saoPauloSyntheticRows.get(2).date, DateTimeUtils.parseDate("2017-09-26", saoPauloTZ));
+        assertEquals(saoPauloSyntheticRows.get(3).date, DateTimeUtils.parseDate("2017-09-26", saoPauloTZ));
+        assertEquals(saoPauloSyntheticRows.get(4).date, DateTimeUtils.parseDate("2017-09-27", saoPauloTZ));
+        assertEquals(saoPauloSyntheticRows.get(5).date, DateTimeUtils.parseDate("2017-09-27", saoPauloTZ));
 
         List<SyntheticTransitionsDataRow> torontoSyntheticRows = dataToronto.syntheticsTransitionsDsList.get(0).rows;
         assertEquals(torontoSyntheticRows.get(0).date, DateTimeUtils.parseDate("2017-09-24", torontoTZ));
-        assertEquals(torontoSyntheticRows.get(1).date, DateTimeUtils.parseDate("2017-09-25", torontoTZ));
-        assertEquals(torontoSyntheticRows.get(2).date, DateTimeUtils.parseDate("2017-09-26", torontoTZ));
+        assertEquals(torontoSyntheticRows.get(1).date, DateTimeUtils.parseDate("2017-09-24", torontoTZ));
+        assertEquals(torontoSyntheticRows.get(2).date, DateTimeUtils.parseDate("2017-09-25", torontoTZ));
+        assertEquals(torontoSyntheticRows.get(3).date, DateTimeUtils.parseDate("2017-09-25", torontoTZ));
+        assertEquals(torontoSyntheticRows.get(4).date, DateTimeUtils.parseDate("2017-09-26", torontoTZ));
+        assertEquals(torontoSyntheticRows.get(5).date, DateTimeUtils.parseDate("2017-09-26", torontoTZ));
 
         List<SyntheticTransitionsDataRow> sydneySyntheticsRows = dataSydney.syntheticsTransitionsDsList.get(0).rows;
         assertEquals(sydneySyntheticsRows.get(0).date, DateTimeUtils.parseDate("2017-09-25", sydneyTZ));
-        assertEquals(sydneySyntheticsRows.get(1).date, DateTimeUtils.parseDate("2017-09-26", sydneyTZ));
-        assertEquals(sydneySyntheticsRows.get(2).date, DateTimeUtils.parseDate("2017-09-27", sydneyTZ));
+        assertEquals(sydneySyntheticsRows.get(1).date, DateTimeUtils.parseDate("2017-09-25", sydneyTZ));
+        assertEquals(sydneySyntheticsRows.get(2).date, DateTimeUtils.parseDate("2017-09-26", sydneyTZ));
+        assertEquals(sydneySyntheticsRows.get(3).date, DateTimeUtils.parseDate("2017-09-26", sydneyTZ));
+        assertEquals(sydneySyntheticsRows.get(4).date, DateTimeUtils.parseDate("2017-09-27", sydneyTZ));
+        assertEquals(sydneySyntheticsRows.get(5).date, DateTimeUtils.parseDate("2017-09-27", sydneyTZ));
     }
 
     @After
@@ -198,6 +219,10 @@ public class FollowUpDataProviderFromHistoryTest {
 
     private Path createProjectZipV1(String project) throws IOException, URISyntaxException {
         return createProjectZip(project, "V1_followUpDataHistoryExpected.json");
+    }
+
+    private Path createProjectZipV2(String project) throws IOException, URISyntaxException {
+        return createProjectZip(project, "V2_followUpDataHistoryExpected.json");
     }
 
     private Path createProjectZip(String project, String contentFile) throws IOException, URISyntaxException {

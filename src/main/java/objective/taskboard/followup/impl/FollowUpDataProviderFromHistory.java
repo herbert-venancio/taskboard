@@ -26,6 +26,7 @@ import static java.util.Arrays.asList;
 import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.EXTENSION_JSON;
 import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.EXTENSION_ZIP;
 import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.PATH_FOLLOWUP_HISTORY;
+import static objective.taskboard.followup.impl.FollowUpTransitionsDataProvider.HEADER_ISSUE_TYPE_COLUMN_NAME;
 import static objective.taskboard.issueBuffer.IssueBufferState.ready;
 import static objective.taskboard.utils.IOUtilities.ENCODE_UTF_8;
 import static objective.taskboard.utils.IOUtilities.asResource;
@@ -49,10 +50,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 
-import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
-import com.google.common.collect.SetMultimap;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -91,7 +90,7 @@ public class FollowUpDataProviderFromHistory implements FollowupDataProvider {
     public FollowupData getJiraData(String[] includeProjects, ZoneId timezone) {
         List<String> projects = asList(includeProjects);
 
-        V1_Loader loader = new V1_Loader(timezone);
+        V2_Loader loader = new V2_Loader(timezone);
         for (String project : projects) {
             String fileZipName = date + EXTENSION_JSON + EXTENSION_ZIP;
             File fileZip = dataBaseDirectory.path(PATH_FOLLOWUP_HISTORY).resolve(project).resolve(fileZipName).toFile();
@@ -121,21 +120,30 @@ public class FollowUpDataProviderFromHistory implements FollowupDataProvider {
         return loader.create();
     }
 
-    private class V1_Loader {
+    private class V2_Loader extends BaseLoader {
 
-        private final ZoneId timezone;
-        private List<FromJiraDataRow> fromJira = new ArrayList<>();
-        private Set<String> types = new LinkedHashSet<>();
-        private SetMultimap<String, String> analyticsHeaders = LinkedHashMultimap.create();
-        private ListMultimap<String, AnalyticsTransitionsDataRow> analytics = LinkedListMultimap.create();
-        private SetMultimap<String, String> syntheticsHeaders = LinkedHashMultimap.create();
+        public V2_Loader(ZoneId timezone) {
+            super(timezone);
+        }
+
+        public V2_Loader load(JsonElement element) {
+            if(matchVersion(element, FollowupData.Version.VERSION_2)) {
+                doLoad(gson.fromJson(element, FollowupData.class));
+            } else {
+                doLoad(new V1_Loader(timezone).load(element).upgrade());
+            }
+            return this;
+        }
+    }
+
+    private class V1_Loader extends BaseLoader {
 
         public V1_Loader(ZoneId timezone) {
-            this.timezone = timezone;
+            super(timezone);
         }
 
         public V1_Loader load(JsonElement element) {
-            if(matchVersion(element)) {
+            if(matchVersion(element, FollowupData.Version.VERSION_1)) {
                 doLoad(gson.fromJson(element, FollowupData.class));
             } else {
                 doLoad(new V0_Loader().load(element).upgrade());
@@ -143,7 +151,28 @@ public class FollowUpDataProviderFromHistory implements FollowupDataProvider {
             return this;
         }
 
-        private boolean matchVersion(JsonElement element) {
+        private FollowupData upgrade() {
+            for(String issueType : syntheticsHeaders.keySet()) {
+                syntheticsHeaders.get(issueType).add(1, HEADER_ISSUE_TYPE_COLUMN_NAME);
+            }
+            return create();
+        }
+    }
+
+    private abstract class BaseLoader {
+
+        protected final ZoneId timezone;
+        protected List<FromJiraDataRow> fromJira = new ArrayList<>();
+        protected Set<String> types = new LinkedHashSet<>();
+        protected ListMultimap<String, String> analyticsHeaders = LinkedListMultimap.create();
+        protected ListMultimap<String, AnalyticsTransitionsDataRow> analytics = LinkedListMultimap.create();
+        protected ListMultimap<String, String> syntheticsHeaders = LinkedListMultimap.create();
+
+        protected BaseLoader(ZoneId timezone) {
+            this.timezone = timezone;
+        }
+
+        protected boolean matchVersion(JsonElement element, FollowupData.Version expectedVersion) {
             if(!element.isJsonObject())
                 return false;
             JsonObject obj = element.getAsJsonObject();
@@ -152,18 +181,18 @@ public class FollowUpDataProviderFromHistory implements FollowupDataProvider {
             JsonElement version = obj.get("followupDataVersion");
             if(!version.isJsonPrimitive() || !version.getAsJsonPrimitive().isString())
                 return false;
-            if(!Objects.equals(FollowupData.Version.VERSION_1.value, version.getAsString()))
+            if(!Objects.equals(expectedVersion.value, version.getAsString()))
                 return false;
             return true;
         }
 
-        private void doLoad(FollowupData data) {
+        protected void doLoad(FollowupData data) {
             fromJira.addAll(data.fromJiraDs.rows);
             if(data.analyticsTransitionsDsList != null) {
                 for (AnalyticsTransitionsDataSet analyticsDs : data.analyticsTransitionsDsList) {
                     final String type = analyticsDs.issueType;
                     types.add(type);
-                    analyticsHeaders.putAll(type, analyticsDs.headers);
+                    addHeaders(analyticsHeaders, type, analyticsDs.headers);
                     analyticsDs.rows.stream()
                             .map(this::convertDates)
                             .forEach(row -> analytics.put(type, row));
@@ -172,7 +201,29 @@ public class FollowUpDataProviderFromHistory implements FollowupDataProvider {
             if(data.syntheticsTransitionsDsList != null) {
                 for (SyntheticTransitionsDataSet syntheticsDs : data.syntheticsTransitionsDsList) {
                     String type = syntheticsDs.issueType;
-                    syntheticsHeaders.putAll(type, syntheticsDs.headers);
+                    addHeaders(syntheticsHeaders, type, syntheticsDs.headers);
+                }
+            }
+        }
+
+        /**
+         * Adds unique headers at most likely index.
+         * E.g.:
+         *   headerMap contains: Done, QA, Doing, To Do
+         *   newHeaders contains: Done, Doing, To Do, Open
+         *
+         *   expected result: Done, QA, Doing, To Do, Open
+         * @param headerMap where headers will be aggregated by type
+         * @param type issue type to be used as key in headerMap
+         * @param newHeaders new headers to be added
+         */
+        protected void addHeaders(ListMultimap<String, String> headerMap, String type, List<String> newHeaders) {
+            int insertIndex = 0;
+            for(String header : newHeaders) {
+                if(headerMap.containsEntry(type, header)) {
+                    insertIndex = headerMap.get(type).indexOf(header) + 1;
+                } else {
+                    headerMap.get(type).add(insertIndex++, header);
                 }
             }
         }
