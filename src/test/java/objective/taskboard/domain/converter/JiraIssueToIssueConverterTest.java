@@ -270,8 +270,6 @@ public class JiraIssueToIssueConverterTest {
         assertIssueWithParent(converted);
         Map<String, Serializable> customFields = converted.getCustomFields();
         assertClassOfService(customFields, CLASS_OF_SERVICE_EXPEDITE);
-        assertTrue("Release should be in custom fields", customFields.containsKey(RELEASE_ID));
-        assertEquals("Release value", RELEASE, ((objective.taskboard.data.CustomField)customFields.get(RELEASE_ID)).getValue());
     }
 
     @Test

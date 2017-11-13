@@ -356,6 +356,19 @@
 								</goals>
 							</execution>
 							<execution>
+								<id>exec-gulp-test</id>
+								<phase>test</phase>
+								<configuration>
+									<executable>gulp</executable>
+									<arguments>
+										<argument>test:local</argument>
+									</arguments>
+								</configuration>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+							</execution>
+							<execution>
 								<id>instrument-javascript</id>
 								<phase>pre-integration-test</phase>
 								<goals>

@@ -721,7 +721,7 @@
                     if (!this.filterByUpdate) {
                         this.refreshText = 'SHOW ALL'
                         this.fire('iron-signal', {name: 'search-filter-changed',
-                            data: { query: this.updatedIssueKeys , version: false, dontSaveQuery: true}});
+                            data: { query: this.updatedIssueKeys , release: false, dontSaveQuery: true}});
                     }
                     else {
                         this.refreshText="SHOW ONLY UPDATED";

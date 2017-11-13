@@ -32,9 +32,10 @@ function Taskboard() {
         return window.user;
     }
 
-    this.setAspectFilters = function(taskboardHome, filters) {
+    this.setAspectFilters = function(source, filters) {
         aspectFilters = filters;
-        taskboardHome.fire('iron-signal', {name:'refresh-release-filter'});
+        if(source)
+            source.fire('iron-signal', {name:'refresh-release-filter'});
     };
 
     this.getAspectFilters = function() {
@@ -327,7 +328,7 @@ function Taskboard() {
         var updateByStep = {};
         updateEvents.forEach(function(anEvent) {
             var previousInstance = getPreviousIssueInstance(anEvent.target.issueKey);
-            if (previousInstance !== null && previousInstance.issue.updatedDate === anEvent.target.updatedDate)
+            if (previousInstance !== null && previousInstance.issue.stateHash === anEvent.target.stateHash)
                 return;
             var converted = self.convertIssue(anEvent.target);
             if (previousInstance === null)

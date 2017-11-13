@@ -52,7 +52,9 @@ import objective.taskboard.issue.IssuesUpdateEvent;
 import objective.taskboard.jira.JiraIssueService;
 import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.ProjectService;
+import objective.taskboard.jira.data.WebhookEvent;
 import objective.taskboard.task.IssueEventProcessScheduler;
+import objective.taskboard.task.JiraEventProcessor;
 
 @Service
 public class IssueBufferService {
@@ -181,17 +183,17 @@ public class IssueBufferService {
         return issue;
     }
 
-    public synchronized Issue updateByEvent(WebhookEvent event, final String key, Optional<com.atlassian.jira.rest.client.api.domain.Issue> issue) {
-        if(event.category == WebhookEvent.Category.VERSION && issue.isPresent()) {
+    public synchronized Issue updateByEvent(WebhookEvent event, final String projectKey, final String issueKey, Optional<com.atlassian.jira.rest.client.api.domain.Issue> issue) {
+        if(event.category == WebhookEvent.Category.VERSION) {
             IssueUpdateType updateType = IssueUpdateType.UPDATED;
-            Issue updated = putJiraIssue(issue.get());
-            projectsUpdatedByEvent.add(updated.getProjectKey());
+            Issue updated = cardsRepo.get(issueKey);
+            projectsUpdatedByEvent.add(projectKey);
             issuesUpdatedByEvent.add(new IssueUpdate(updated, updateType));
             return updated;
         }
         if (event == WebhookEvent.ISSUE_DELETED || !issue.isPresent()) {
-            issuesUpdatedByEvent.add(new IssueUpdate(cardsRepo.get(key), IssueUpdateType.DELETED));
-            return cardsRepo.remove(key);
+            issuesUpdatedByEvent.add(new IssueUpdate(cardsRepo.get(issueKey), IssueUpdateType.DELETED));
+            return cardsRepo.remove(issueKey);
         }
 
         Issue updated = putJiraIssue(issue.get());
@@ -283,7 +285,28 @@ public class IssueBufferService {
             issue.setPriorityOrder(taskboardIssue.getPriority());
             issue.setPriorityUpdatedDate(taskboardIssue.getUpdated());
             cardsRepo.setChanged(issue.getIssueKey());
-            issueEvents.add(WebhookEvent.ISSUE_UPDATED, issue.getProjectKey(), issue.getIssueKey(), null);
+            issueEvents.add(new InternalUpdateIssue(issue.getProjectKey(), issue.getIssueKey()));
+        }
+    }
+
+    private class InternalUpdateIssue implements JiraEventProcessor {
+
+        private final String projectKey;
+        private final String issueKey;
+
+        public InternalUpdateIssue(String projectKey, String issueKey) {
+            this.projectKey = projectKey;
+            this.issueKey = issueKey;
+        }
+
+        @Override
+        public String getDescription() {
+            return "InternalUpdateIssue - projectKey: " + projectKey + " issue: " + issueKey;
+        }
+
+        @Override
+        public void processEvent() {
+            issuesUpdatedByEvent.add(new IssueUpdate(cardsRepo.get(issueKey), IssueUpdateType.UPDATED));
         }
     }
     

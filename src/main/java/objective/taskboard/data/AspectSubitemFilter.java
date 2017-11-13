@@ -20,10 +20,10 @@
  */
 package objective.taskboard.data;
 
-import objective.taskboard.jira.data.Version;
-
 import java.io.Serializable;
 import java.util.List;
+
+import objective.taskboard.jira.data.Version;
 
 public class AspectSubitemFilter implements Serializable {
 
@@ -34,14 +34,14 @@ public class AspectSubitemFilter implements Serializable {
     private boolean selected;
     private boolean visible;
     private List<String> teams;
-    private List<Version> versions;
+    private List<Version> releases;
 
     public static AspectSubitemFilter from(String name, Object value, boolean selected) {
         return new AspectSubitemFilter(name, value, selected, true, null, null);
     }
 
-    public static AspectSubitemFilter from(String name, Object value, boolean selected, List<String> teams, List<Version> versions) {
-        return new AspectSubitemFilter(name, value, selected, true, teams, versions);
+    public static AspectSubitemFilter from(String name, Object value, boolean selected, List<String> teams, List<Version> releases) {
+        return new AspectSubitemFilter(name, value, selected, true, teams, releases);
     }
 
     public String getName() {
@@ -64,8 +64,8 @@ public class AspectSubitemFilter implements Serializable {
         return this.teams;
     }
 
-    public List<Version> getVersions() {
-        return this.versions;
+    public List<Version> getReleases() {
+        return this.releases;
     }
 
     public void setName(final String name) {
@@ -88,8 +88,8 @@ public class AspectSubitemFilter implements Serializable {
         this.teams = teams;
     }
 
-    public void setVersions(final List<Version> versions) {
-        this.versions = versions;
+    public void setReleases(final List<Version> releases) {
+        this.releases = releases;
     }
 
     @Override
@@ -104,7 +104,7 @@ public class AspectSubitemFilter implements Serializable {
         if (name != null ? !name.equals(that.name) : that.name != null) return false;
         if (value != null ? !value.equals(that.value) : that.value != null) return false;
         if (teams != null ? !teams.equals(that.teams) : that.teams != null) return false;
-        return versions != null ? versions.equals(that.versions) : that.versions == null;
+        return releases != null ? releases.equals(that.releases) : that.releases == null;
     }
 
     @Override
@@ -114,7 +114,7 @@ public class AspectSubitemFilter implements Serializable {
         result = 31 * result + (selected ? 1 : 0);
         result = 31 * result + (visible ? 1 : 0);
         result = 31 * result + (teams != null ? teams.hashCode() : 0);
-        result = 31 * result + (versions != null ? versions.hashCode() : 0);
+        result = 31 * result + (releases != null ? releases.hashCode() : 0);
         return result;
     }
 
@@ -126,7 +126,7 @@ public class AspectSubitemFilter implements Serializable {
                 ", selected=" + selected +
                 ", visible=" + visible +
                 ", teams=" + teams +
-                ", versions=" + versions +
+                ", releases=" + releases +
                 '}';
     }
 
@@ -134,12 +134,12 @@ public class AspectSubitemFilter implements Serializable {
     }
 
     @java.beans.ConstructorProperties({"name", "value", "selected", "visible", "teams", "versions"})
-    private AspectSubitemFilter(final String name, final Object value, final boolean selected, final boolean visible, final List<String> teams, final List<Version> versions) {
+    private AspectSubitemFilter(final String name, final Object value, final boolean selected, final boolean visible, final List<String> teams, final List<Version> releases) {
         this.name = name;
         this.value = value;
         this.selected = selected;
         this.visible = visible;
         this.teams = teams;
-        this.versions = versions;
+        this.releases = releases;
     }
 }

@@ -1,6 +1,8 @@
 package objective.taskboard.jira;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -22,6 +24,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import objective.taskboard.jira.data.JiraIssue;
+import objective.taskboard.jira.data.JiraProject;
 import objective.taskboard.jira.data.Status;
 import objective.taskboard.jira.data.StatusCategory;
 import objective.taskboard.jira.endpoint.AuthorizedJiraEndpoint;
@@ -35,10 +38,10 @@ import retrofit.client.Response;
 @ContextConfiguration(classes = AuthorizedJiraEndpointTest.Configuration.class)
 public class AuthorizedJiraEndpointTest {
 
-    private static final String JIRA_MASTER_USERNAME = "master";
-    private static final String JIRA_MASTER_PASSWORD = "password";
-    private static final String JIRA_USER_USERNAME = "user";
-    private static final String JIRA_USER_PASSWORD = "pass";
+    public static final String JIRA_MASTER_USERNAME = "master";
+    public static final String JIRA_MASTER_PASSWORD = "password";
+    public static final String JIRA_USER_USERNAME = "user";
+    public static final String JIRA_USER_PASSWORD = "pass";
 
     public static class Configuration {
         @Bean
@@ -132,5 +135,12 @@ public class AuthorizedJiraEndpointTest {
 
         // then
         assertThat(HttpStatus.valueOf(response.getStatus()), is(HttpStatus.NO_CONTENT));
+    }
+
+    @Test
+    public void getProjectVersions() {
+        JiraProject.Service service = jiraEndpointAsMaster.request(JiraProject.Service.class);
+        JiraProject project = service.get("TASKB");
+        assertThat(project.versions, not(nullValue()));
     }
 }

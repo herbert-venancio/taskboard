@@ -49,43 +49,43 @@
                 border-radius: 3px;
             }
 
-            paper-dropdown-menu.no-versions {
+            paper-dropdown-menu.no-releases {
                 width: 230px;
                 color: gray;
             }
 
             /*
-                Versions dropdown
+                Releases dropdown
             */
-            .versions-dropdown paper-input-container {
+            .releases-dropdown paper-input-container {
                 background: #DDD !important;
                 padding: 0 !important;
                 border-radius: 3px !important;
                 height: 30px !important;
             }
 
-            .versions-dropdown .input-content {
+            .releases-dropdown .input-content {
                 height: 30px !important;
             }
 
-            .versions-dropdown label, .versions-dropdown input {
+            .releases-dropdown label, .releases-dropdown input {
                 color: inherit !important;
                 padding: 0 0 0 10px !important;
             }
 
-            .versions-dropdown iron-dropdown {
+            .releases-dropdown iron-dropdown {
                 top: 35px !important;
             }
 
-            .versions-dropdown .underline {
+            .releases-dropdown .underline {
                 display: none;
             }
 
-            .versions-dropdown paper-listbox {
+            .releases-dropdown paper-listbox {
                 padding: 10px 0;
             }
 
-            .versions-dropdown paper-item {
+            .releases-dropdown paper-item {
                 font-size: 15px;
                 padding: 0 10px;
                 height: 14px;
@@ -96,22 +96,22 @@
         </style>
 
         <iron-signals on-iron-signal-search-filter-reset="searchReset"
-                      on-iron-signal-refresh-release-filter="retrieveVersions"></iron-signals>
+                      on-iron-signal-refresh-release-filter="retrieveReleases"></iron-signals>
 
         <input id="searchIssues" class="input-search" value="{{query::input}}" type="search"
                placeholder="Search Issues" results="5" autocomplete="off"/>
-        <template is="dom-if" if="{{isVersionConfigured()}}">
-            <paper-dropdown-menu class$="versions-dropdown custom {{getClassNoVersions(versions)}}" id="searchVersion"
-                                 label="{{getLabelSearchVersion(versions)}}" no-label-float
-                                 on-value-changed="searchIssue" on-keydown="searchVersionOnKeyDown">
-                <paper-listbox class="dropdown-content" attr-for-selected="value" selected="{{versionSelected}}">
-                    <template is="dom-repeat" items="{{versions}}" as="itemVersion">
-                        <paper-item value="{{itemVersion.id}}">{{getVersionString(itemVersion)}}</paper-item>
+        <template is="dom-if" if="{{isReleaseConfigured()}}">
+            <paper-dropdown-menu class$="releases-dropdown custom {{getClassNoReleases(releases)}}" id="searchRelease"
+                                 label="{{getLabelSearchRelease(releases)}}" no-label-float
+                                 on-value-changed="searchIssue" on-keydown="searchReleaseOnKeyDown">
+                <paper-listbox class="dropdown-content" attr-for-selected="value" selected="{{releaseSelected}}">
+                    <template is="dom-repeat" items="{{releases}}" as="itemRelease">
+                        <paper-item value="{{itemRelease.id}}">{{getReleaseString(itemRelease)}}</paper-item>
                     </template>
                 </paper-listbox>
             </paper-dropdown-menu>
             <div class="clear-button">
-                <paper-icon-button id="clearVersionButton" icon="clear" on-click="clearVersion" hidden></paper-icon-button>
+                <paper-icon-button id="clearReleaseButton" icon="clear" on-click="clearRelease" hidden></paper-icon-button>
             </div>
         </template>
 
@@ -127,18 +127,18 @@
                         type: String,
                         notify: true
                     },
-                    versionSelected: {
+                    releaseSelected: {
                         type: String,
                         notify: true
                     },
-                    versions: {
+                    releases: {
                         type: Array,
                         notify: true
                     }
                 },
 
                 ready: function() {
-                    this.retrieveVersions();
+                    this.retrieveReleases();
                 },
 
                 listeners: {
@@ -147,50 +147,50 @@
                 },
 
                 searchIssue: function () {
-                    if (this.isVersionConfigured())
-                        clearVersionButton.hidden = this.versionSelected ? false : true;
+                    if (this.isReleaseConfigured())
+                        clearReleaseButton.hidden = this.releaseSelected ? false : true;
 
                     this.fire('iron-signal', {name: 'search-filter-changed',
-                                              data: { query: this.query , version: this.versionSelected }});
+                                              data: { query: this.query , release: this.releaseSelected }});
                 },
 
                 searchReset: function() {
                     this.query = "";
-                    this.clearVersion();
+                    this.clearRelease();
                 },
 
-                isVersionConfigured: function() {
-                    return CUSTOMFIELD.RELEASE;
+                isReleaseConfigured: function() {
+                    return CONFIGURATION.USE_RELEASE;
                 },
 
-                retrieveVersions: function() {
-                    var previousSelected = this.versionSelected;
-                    this.clearVersion();
-                    var listVersions = [];
+                retrieveReleases: function() {
+                    var previousSelected = this.releaseSelected;
+                    this.clearRelease();
+                    var listReleases = [];
                     taskboard.getAspectFilters().forEach(function(itemFilter) {
                         if (itemFilter.description !== 'Project')
                             return;
 
                         itemFilter.aspectsSubitemFilter.forEach(function(subitemFilter) {
                             if (!subitemFilter.visible || !subitemFilter.selected ||
-                                subitemFilter.versions == null)
+                                subitemFilter.releases == null)
                                 return;
 
-                            subitemFilter.versions.forEach(function(v) {
-                                listVersions.push({ id: v.id, project: this.value, name: v.name })
+                            subitemFilter.releases.forEach(function(v) {
+                                listReleases.push({ id: v.id, project: this.value, name: v.name })
                             }, subitemFilter);
                         });
                     });
 
-                    if (listVersions.length > 0)
-                        listVersions = [null].concat(listVersions);
+                    if (listReleases.length > 0)
+                        listReleases = [null].concat(listReleases);
 
-                    this.versions = listVersions;
+                    this.releases = listReleases;
                     if (previousSelected) {
-                        var newVersion = _.find(listVersions, function(v) { return v && v.id == previousSelected; });
-                        if(newVersion) {
-                            this.versionSelected = previousSelected;
-                            var paperDropdownMenu = this.$$('#searchVersion');
+                        var newRelease = _.find(listReleases, function(v) { return v && v.id == previousSelected; });
+                        if(newRelease) {
+                            this.releaseSelected = previousSelected;
+                            var paperDropdownMenu = this.$$('#searchRelease');
                             this.async(function() {
                                 // workaround to force label update
                                 paperDropdownMenu._selectedItemChanged(paperDropdownMenu.selectedItem);
@@ -199,36 +199,36 @@
                     }
                 },
 
-                getVersionString: function(version) {
-                    if (!version)
+                getReleaseString: function(release) {
+                    if (!release)
                         return "";
 
-                    return version.project + " - " + version.name;
+                    return release.project + " - " + release.name;
                 },
 
-                clearVersion: function() {
-                    this.versionSelected = "";
+                clearRelease: function() {
+                    this.releaseSelected = "";
                 },
 
-                searchVersionOnKeyDown: function(e) {
+                searchReleaseOnKeyDown: function(e) {
                     if (e.key === 'Escape')
-                        this.clearVersion();
+                        this.clearRelease();
                 },
 
-                getLabelSearchVersion: function(versions) {
-                    if (this.hasVersions(versions))
+                getLabelSearchRelease: function(releases) {
+                    if (this.hasReleases(releases))
                         return 'Release';
                     return 'No releases for visible projects';
                 },
 
-                getClassNoVersions: function(versions) {
-                    if (this.hasVersions(versions))
+                getClassNoReleases: function(releases) {
+                    if (this.hasReleases(releases))
                         return '';
-                    return 'no-versions';
+                    return 'no-releases';
                 },
 
-                hasVersions: function(versions) {
-                    return versions && versions.length > 0;
+                hasReleases: function(releases) {
+                    return releases && releases.length > 0;
                 }
             });
         })();

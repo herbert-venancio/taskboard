@@ -316,11 +316,10 @@ public abstract class AbstractFollowUpDataProviderTest {
                     null,//reporter
                     null,//coAssignees
                     null,//classOfService
-                    null,//version
-                    null, //release
+                    null,//releaseId
                     buildTransitions()
                     );
-            return new Issue(scratch, jiraProperties, metadataService, issueTeamService, null, null);
+            return new Issue(scratch, jiraProperties, metadataService, issueTeamService, null, null, null, null);
         }
 
         private List<Changelog> buildTransitions() {

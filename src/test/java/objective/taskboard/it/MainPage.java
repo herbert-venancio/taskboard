@@ -46,7 +46,7 @@ public class MainPage extends AbstractUiFragment {
     @FindBy(id = "searchIssues")
     private WebElement searchIssuesInput;
 
-    @FindBy(id = "searchVersion")
+    @FindBy(id = "searchRelease")
     private WebElement searchReleaseDropdown;
 
     @FindBy(css = ".menuLink")

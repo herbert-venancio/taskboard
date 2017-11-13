@@ -34,7 +34,7 @@ function SearchFilter() {
         else
             matches = matchByString(issue, search.query);
 
-        return matches && filterByVersion(issue, search.version);
+        return matches && filterByRelease(issue, search.release);
     };
 
     var matchByString = function(issue, searchString) {
@@ -74,11 +74,11 @@ function SearchFilter() {
         return false;
     };
 
-    var filterByVersion = function(issue, versionId) {
-        if (!versionId)
+    var filterByRelease = function(issue, releaseId) {
+        if (!releaseId)
             return true;
 
-        return issue.versionId && issue.versionId == versionId;
+        return issue.releaseId && issue.releaseId == releaseId;
     };
 }
 

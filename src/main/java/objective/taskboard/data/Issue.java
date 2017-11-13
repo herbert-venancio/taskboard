@@ -20,8 +20,6 @@
  */
 package objective.taskboard.data;
 
-import static com.google.common.collect.Maps.newHashMap;
-
 import java.io.Serializable;
 import java.util.Date;
 import java.util.LinkedHashSet;
@@ -38,12 +36,15 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.DateDeserializers.DateDeserializer;
 
 import objective.taskboard.config.SpringContextBridge;
+import objective.taskboard.domain.IssueStateHashCalculator;
 import objective.taskboard.domain.converter.CardVisibilityEvalService;
 import objective.taskboard.domain.converter.IssueCoAssignee;
 import objective.taskboard.domain.converter.IssueTeamService;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraProperties.BallparkMapping;
 import objective.taskboard.jira.MetadataService;
+import objective.taskboard.jira.ProjectBufferService;
+import objective.taskboard.jira.data.Version;
 import objective.taskboard.repository.FilterCachedRepository;
 
 
@@ -63,6 +64,10 @@ public class Issue extends IssueScratch implements Serializable {
     private transient FilterCachedRepository filterRepository;
     
     private transient CardVisibilityEvalService cardVisibilityEvalService;
+
+    private transient ProjectBufferService projectBufferService;
+
+    private transient IssueStateHashCalculator issueStateHashCalculator;
     
     private List<IssueCoAssignee> coAssignees = new LinkedList<>(); //NOSONAR
     
@@ -73,7 +78,9 @@ public class Issue extends IssueScratch implements Serializable {
             MetadataService metadataService, 
             IssueTeamService issueTeamService, 
             FilterCachedRepository filterRepository,
-            CardVisibilityEvalService cardVisibilityEvalService) {
+            CardVisibilityEvalService cardVisibilityEvalService,
+            ProjectBufferService projectBufferService,
+            IssueStateHashCalculator issueStateHashCalculator) {
         this.id = scratch.id;
         this.issueKey = scratch.issueKey;
         this.projectKey = scratch.projectKey;
@@ -104,17 +111,18 @@ public class Issue extends IssueScratch implements Serializable {
         this.reporter = scratch.reporter;
         this.coAssignees = scratch.coAssignees;
         this.classOfService = scratch.classOfService;
-        this.versionId = scratch.versionId;
-        this.release = scratch.release;
+        this.releaseId = scratch.releaseId;
         this.changelog = scratch.changelog;
         this.priorityUpdatedDate = scratch.priorityUpdatedDate;
         this.remoteIssueUpdatedDate = scratch.remoteIssueUpdatedDate;
-        
+
         this.metaDataService = metadataService;
         this.jiraProperties = properties;
         this.issueTeamService = issueTeamService;
         this.filterRepository = filterRepository;
-        this.cardVisibilityEvalService = cardVisibilityEvalService;        
+        this.cardVisibilityEvalService = cardVisibilityEvalService;
+        this.projectBufferService = projectBufferService;
+        this.issueStateHashCalculator = issueStateHashCalculator;
         this.render = false;
         this.favorite = false;
         this.hidden = false;        
@@ -248,21 +256,7 @@ public class Issue extends IssueScratch implements Serializable {
             
         return classOfService;
     }
-    
-    @JsonIgnore
-    public Map<String, CustomField> getRelease() {
-        Map<String, CustomField> release = getLocalRelease();
 
-        if (!release.isEmpty())
-            return release;
-
-        Optional<Issue> pc = getParentCard();
-        if (!pc.isPresent())
-            return newHashMap();
-
-        return pc.get().getRelease();
-    }
-    
     @JsonIgnore
     public List<Changelog> getChangelog() {
         return changelog;
@@ -443,17 +437,6 @@ public class Issue extends IssueScratch implements Serializable {
         return this.priorityOrder;
     }
 
-    public String getVersionId() {
-        if(versionId != null)
-            return versionId;
-
-        Optional<Issue> pc = getParentCard();
-        if(pc.isPresent())
-            return pc.get().versionId;
-
-        return null;
-    }
-
     public TaskboardTimeTracking getTimeTracking() {
         return this.timeTracking;
     }
@@ -588,8 +571,8 @@ public class Issue extends IssueScratch implements Serializable {
         this.priorityOrder = priorityOrder;
     }
 
-    public void setVersionId(final String versionId) {
-        this.versionId = versionId;
+    public void setReleaseId(final String releaseId) {
+        this.releaseId = releaseId;
     }
 
     public void setTimeTracking(final TaskboardTimeTracking timeTracking) {
@@ -618,11 +601,6 @@ public class Issue extends IssueScratch implements Serializable {
         return classOfService;
     }
 
-    @JsonIgnore
-    public Map<String, CustomField> getLocalRelease() {
-        return release;
-    }
-
     public void setCustomFields(final Map<String, Serializable> customFields) {
         this.customFields = customFields;
     }
@@ -648,7 +626,26 @@ public class Issue extends IssueScratch implements Serializable {
     public List<Subtask> getSubtasks() {
         return subtasks.stream().map(s->new Subtask(s.issueKey, s.summary)).collect(Collectors.toList());
     }
-    
+
+    public String getReleaseId() {
+        if(releaseId != null)
+            return releaseId;
+
+        Optional<Issue> pc = getParentCard();
+        if(pc.isPresent())
+            return pc.get().releaseId;
+
+        return null;
+    }
+
+    public Version getRelease() {
+        return projectBufferService.getVersion(getReleaseId());
+    }
+
+    public int getStateHash() {
+        return issueStateHashCalculator.calculateHash(this);
+    }
+
     private Object readResolve() {
         this.subtasks = new LinkedHashSet<>();
         return this;
@@ -659,12 +656,16 @@ public class Issue extends IssueScratch implements Serializable {
             MetadataService metaDataService,
             IssueTeamService issueTeamService,
             FilterCachedRepository filterRepository,
-            CardVisibilityEvalService cardVisibilityEvalService) {
+            CardVisibilityEvalService cardVisibilityEvalService,
+            ProjectBufferService projectBufferService,
+            IssueStateHashCalculator issueStateHashCalculator) {
         this.jiraProperties = jiraProperties;
         this.metaDataService = metaDataService;
         this.issueTeamService = issueTeamService;
         this.filterRepository = filterRepository;
         this.cardVisibilityEvalService = cardVisibilityEvalService;
+        this.projectBufferService = projectBufferService;
+        this.issueStateHashCalculator = issueStateHashCalculator;
     }
     
     @Override

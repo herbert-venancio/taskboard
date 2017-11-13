@@ -23,15 +23,12 @@ package objective.taskboard.task;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
-import objective.taskboard.controller.WebhookController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import objective.taskboard.issueBuffer.IssueBufferService;
-import objective.taskboard.issueBuffer.WebhookEvent;
 import objective.taskboard.jira.JiraServiceUnavailable;
 
 @Component
@@ -40,43 +37,39 @@ public class IssueEventProcessScheduler {
     @Autowired
     private IssueBufferService issueBufferService;
 
-    @Autowired
-    private Set<IssueEventProcessor> issueEventProcessors;
-
     private static final long RATE_MILISECONDS = 1000l;
     
-    List<IssueEventProcessor.IssueEvent> list = Collections.synchronizedList(new ArrayList<>());
+    List<JiraEventProcessor> list = Collections.synchronizedList(new ArrayList<>());
 
-    private synchronized List<IssueEventProcessor.IssueEvent> getItens() {
+    private synchronized List<JiraEventProcessor> getItens() {
         return new ArrayList<>(list);
     }
 
-    private synchronized void removeItens(List<IssueEventProcessor.IssueEvent> list) {
+    private synchronized void removeItens(List<JiraEventProcessor> list) {
         this.list.removeAll(list);
     }
 
-    public synchronized void add(WebhookEvent event, String projectKey, String issueKey, WebhookController.WebhookBody eventData) {
-        IssueEventProcessor.IssueEvent item = new IssueEventProcessor.IssueEvent(event, projectKey, issueKey, eventData);
-        list.add(item);
+    public synchronized void add(JiraEventProcessor eventProcessor) {
+        list.add(eventProcessor);
     }
 
     @Scheduled(fixedRate = RATE_MILISECONDS)
     public void processItems() {
-        List<IssueEventProcessor.IssueEvent> toRemove = new ArrayList<>();
+        List<JiraEventProcessor> toRemove = new ArrayList<>();
 
         issueBufferService.startBatchUpdate();
-        for (IssueEventProcessor.IssueEvent item : getItens())
+        for (JiraEventProcessor item : getItens())
             try {
-                processEvent(item);
+                item.processEvent();
 
                 toRemove.add(item);
             }
             catch(JiraServiceUnavailable ex) {
-                log.warn("WEBHOOK PROCESS FAILED FOR ITEM: (" + item.event.toString() +  ") issue=" + item.issueKey);
+                log.warn("WEBHOOK PROCESS FAILED FOR ITEM: " + item.getDescription());
                 log.warn("Jira was not available. Will retry later", ex);
             }
             catch (Exception ex) {
-                log.warn("WEBHOOK PROCESS FAILED: (" + item.event.toString() +  ") issue=" + item.issueKey);
+                log.warn("WEBHOOK PROCESS FAILED: " + item.getDescription());
                 log.error("WebhookScheduleError, unrecoverable error. Event will be discarded:", ex);
                 toRemove.add(item);
             }
@@ -84,12 +77,4 @@ public class IssueEventProcessScheduler {
         issueBufferService.finishBatchUpdate();
         removeItens(toRemove);
     }
-
-    private void processEvent(IssueEventProcessor.IssueEvent item) {
-        for(IssueEventProcessor eventProcessor : issueEventProcessors) {
-            if(eventProcessor.processEvent(item))
-                break;
-        }
-    }
-
 }

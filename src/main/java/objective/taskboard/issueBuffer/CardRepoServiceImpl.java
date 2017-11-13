@@ -10,10 +10,12 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import objective.taskboard.database.directory.DataBaseDirectory;
-import objective.taskboard.domain.converter.IssueTeamService;
+import objective.taskboard.domain.IssueStateHashCalculator;
 import objective.taskboard.domain.converter.CardVisibilityEvalService;
+import objective.taskboard.domain.converter.IssueTeamService;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.MetadataService;
+import objective.taskboard.jira.ProjectBufferService;
 import objective.taskboard.repository.FilterCachedRepository;
 
 @Component
@@ -38,6 +40,12 @@ public class CardRepoServiceImpl implements CardRepoService {
     
     @Autowired
     private CardVisibilityEvalService cardVisibilityEvalService;
+
+    @Autowired
+    private ProjectBufferService projectBufferService;
+
+    @Autowired
+    private IssueStateHashCalculator issueStateHashCalculator;
     
     public CardRepo from(String cacheName) {
         StopWatch stopWatch = new StopWatch();
@@ -58,7 +66,9 @@ public class CardRepoServiceImpl implements CardRepoService {
                     metaDataService,
                     issueTeamService,
                     filterRepository,
-                    cardVisibilityEvalService);
+                    cardVisibilityEvalService,
+                    projectBufferService,
+                    issueStateHashCalculator);
         });
 
         log.info(cachefile.getAbsolutePath()+ " data read in " + stopWatch.getTime() + " ms. Loaded " + repo.size() + " issues");        

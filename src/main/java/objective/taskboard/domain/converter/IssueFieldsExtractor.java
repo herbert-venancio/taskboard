@@ -30,7 +30,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import objective.taskboard.utils.DateTimeUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -45,6 +44,7 @@ import com.atlassian.jira.rest.client.api.domain.IssueLinkType.Direction;
 import objective.taskboard.data.Changelog;
 import objective.taskboard.data.CustomField;
 import objective.taskboard.jira.JiraProperties;
+import objective.taskboard.utils.DateTimeUtils;
 
 public class IssueFieldsExtractor {
     private static final int REASON_WIDTH_LIMIT = 200;
@@ -243,7 +243,7 @@ public class IssueFieldsExtractor {
         return mapAdditionalHours;
     }
 
-    public static String extractVersion(JiraProperties jiraProperties, Issue issue) {
+    public static String extractReleaseId(JiraProperties jiraProperties, Issue issue) {
         String releaseFieldId = jiraProperties.getCustomfield().getRelease().getId();
         IssueField field = issue.getField(releaseFieldId);
 
@@ -260,30 +260,6 @@ public class IssueFieldsExtractor {
         } catch (JSONException e) {
             logErrorExtractField(issue, field, e);
             return null;
-        }
-    }
-
-    public static Map<String, CustomField> extractRelease(JiraProperties jiraProperties, Issue issue) {
-        String releaseFieldId = jiraProperties.getCustomfield().getRelease().getId();
-        IssueField field = issue.getField(releaseFieldId);
-
-        if (field == null)
-            return newHashMap();
-
-        JSONObject json = (JSONObject) field.getValue();
-
-        if (json == null)
-            return newHashMap();
-
-        try {
-            String release = json.getString("name");
-            CustomField customFieldRelease = new CustomField(field.getName(), release);
-            Map<String, CustomField> mapRelease = newHashMap();
-            mapRelease.put(releaseFieldId, customFieldRelease);
-            return mapRelease;
-        } catch (JSONException e) {
-            logErrorExtractField(issue, field, e);
-            return newHashMap();
         }
     }
 

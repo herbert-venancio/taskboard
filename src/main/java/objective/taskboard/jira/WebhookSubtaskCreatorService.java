@@ -26,8 +26,8 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import objective.taskboard.controller.WebhookController.WebhookBody.Changelog;
 import objective.taskboard.jira.JiraProperties.SubtaskCreation;
+import objective.taskboard.jira.data.WebHookBody;
 
 @Service
 public class WebhookSubtaskCreatorService {
@@ -40,7 +40,7 @@ public class WebhookSubtaskCreatorService {
         this.jiraProperties = jiraProperties;
     }
 
-    public void createSubtaskOnTransition(com.atlassian.jira.rest.client.api.domain.Issue parent, Changelog changelog) {
+    public void createSubtaskOnTransition(com.atlassian.jira.rest.client.api.domain.Issue parent, WebHookBody.Changelog changelog) {
         if (changelog == null || parent == null)
             return;
         
