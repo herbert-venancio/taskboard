@@ -1,6 +1,7 @@
 package objective.taskboard.task;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
@@ -14,27 +15,19 @@ import objective.taskboard.jira.data.WebhookEvent;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
-public class ClearCacheEventProcessorFactory extends BaseJiraEventProcessorFactory implements JiraEventProcessorFactory {
+public class ClearCacheEventProcessorFactory implements JiraEventProcessorFactory {
 
     @Autowired
     private CacheManager cacheManager;
 
     @Override
-    public JiraEventProcessor create(WebHookBody body, String projectKey) {
-        if(!belongsToAnyProject(projectKey))
-            return null;
+    public Optional<JiraEventProcessor> create(WebHookBody body, String projectKey) {
+        if(body.webhookEvent.category != WebhookEvent.Category.VERSION)
+            return Optional.empty();
 
-        if(body.webhookEvent.category == WebhookEvent.Category.PROJECT)
-            return new ClearCacheEventProcessor(
-                    CacheConfiguration.ALL_PROJECTS
-                    , CacheConfiguration.PROJECTS);
-
-        if(body.webhookEvent.category == WebhookEvent.Category.VERSION)
-            return new ClearCacheEventProcessor(
-                    CacheConfiguration.ALL_PROJECTS
-                    , CacheConfiguration.PROJECTS);
-
-        return null;
+        return Optional.of(new ClearCacheEventProcessor(
+                CacheConfiguration.ALL_PROJECTS
+                , CacheConfiguration.PROJECTS));
     }
 
     private class ClearCacheEventProcessor implements JiraEventProcessor {

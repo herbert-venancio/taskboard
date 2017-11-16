@@ -183,14 +183,19 @@ public class IssueBufferService {
         return issue;
     }
 
-    public synchronized Issue updateByEvent(WebhookEvent event, final String projectKey, final String issueKey, Optional<com.atlassian.jira.rest.client.api.domain.Issue> issue) {
-        if(event.category == WebhookEvent.Category.VERSION) {
-            IssueUpdateType updateType = IssueUpdateType.UPDATED;
-            Issue updated = cardsRepo.get(issueKey);
-            projectsUpdatedByEvent.add(projectKey);
-            issuesUpdatedByEvent.add(new IssueUpdate(updated, updateType));
-            return updated;
-        }
+    public synchronized void notifyProjectUpdate(final String projectKey) {
+        projectsUpdatedByEvent.add(projectKey);
+    }
+
+    public synchronized void notifyIssueUpdate(final String issueKey) {
+        notifyIssueUpdate(cardsRepo.get(issueKey));
+    }
+
+    public synchronized void notifyIssueUpdate(final Issue issue) {
+        issuesUpdatedByEvent.add(new IssueUpdate(issue, IssueUpdateType.UPDATED));
+    }
+
+    public synchronized Issue updateByEvent(WebhookEvent event, final String issueKey, Optional<com.atlassian.jira.rest.client.api.domain.Issue> issue) {
         if (event == WebhookEvent.ISSUE_DELETED || !issue.isPresent()) {
             issuesUpdatedByEvent.add(new IssueUpdate(cardsRepo.get(issueKey), IssueUpdateType.DELETED));
             return cardsRepo.remove(issueKey);

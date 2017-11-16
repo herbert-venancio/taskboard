@@ -23,8 +23,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.domain.ProjectFilterConfiguration;
-import objective.taskboard.jira.data.JiraProject;
 import objective.taskboard.jira.data.Version;
+import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.repository.ProjectFilterConfigurationRepository;
 import objective.taskboard.testUtils.JiraMockServer;
 
@@ -32,14 +32,22 @@ import objective.taskboard.testUtils.JiraMockServer;
 @EnableCaching
 @ContextConfiguration(classes = {
         AuthorizedJiraEndpointTest.Configuration.class
-        , ProjectBufferServiceTest.Configuration.class
+        , ProjectServiceTest.Configuration.class
         , CacheConfiguration.class})
-public class ProjectBufferServiceTest {
+public class ProjectServiceTest {
 
     public static class Configuration {
         @Bean
-        public ProjectBufferService projectBufferService() {
-            return new ProjectBufferService();
+        public ProjectFilterConfigurationCachedRepository projectFilterConfigurationCachedRepository() {
+            return new ProjectFilterConfigurationCachedRepository();
+        }
+        @Bean
+        public ProjectCache projectCache() {
+            return new ProjectCache();
+        }
+        @Bean
+        public ProjectService projectService() {
+            return new ProjectService();
         }
     }
 
@@ -50,10 +58,13 @@ public class ProjectBufferServiceTest {
     private JiraProperties jiraProperties;
 
     @MockBean
-    private ProjectFilterConfigurationRepository repository;
+    private ProjectFilterConfigurationRepository projectFilterRepository;
 
     @Autowired
-    private ProjectBufferService projectBufferService;
+    private ProjectFilterConfigurationCachedRepository projectFilterConfigurationCachedRepository;
+
+    @Autowired
+    private ProjectService projectService;
 
     @Autowired
     private CacheManager cacheManager;
@@ -85,31 +96,32 @@ public class ProjectBufferServiceTest {
                 taskb
                 , proj1
                 , proj2);
-        doReturn(projectList).when(repository).findAll();
-    }
-
-    @Test
-    public void cacheGetProjects() {
-        List<JiraProject> all1 = projectBufferService.getAllProjects();
-        List<JiraProject> all2 = projectBufferService.getAllProjects();
-
-        assertTrue(all1 == all2);
-    }
-
-    @Test
-    public void evict() {
-        List<JiraProject> all1 = projectBufferService.getAllProjects();
-        cacheManager.getCache(ALL_PROJECTS).clear();
-        List<JiraProject> all2 = projectBufferService.getAllProjects();
-
-        assertTrue(all1 != all2);
+        doReturn(projectList).when(projectFilterRepository).findAll();
+        projectFilterConfigurationCachedRepository.loadCache();
     }
 
     @Test
     public void getVersion() {
         Version expected = new Version("12550", "1.0");
-        Version actual = projectBufferService.getVersion("12550");
+        Version actual = projectService.getVersion("12550");
 
         assertThat(actual).isEqualToComparingFieldByField(expected);
+    }
+
+    @Test
+    public void cacheGetVersion() {
+        Version version1 = projectService.getVersion("12550");
+        Version version2 = projectService.getVersion("12550");
+
+        assertTrue(version1 == version2);
+    }
+
+    @Test
+    public void evict() {
+        Version version1 = projectService.getVersion("12550");
+        cacheManager.getCache(ALL_PROJECTS).clear();
+        Version version2 = projectService.getVersion("12550");
+
+        assertTrue(version1 != version2);
     }
 }

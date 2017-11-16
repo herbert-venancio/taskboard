@@ -43,7 +43,7 @@ import objective.taskboard.domain.converter.IssueTeamService;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraProperties.BallparkMapping;
 import objective.taskboard.jira.MetadataService;
-import objective.taskboard.jira.ProjectBufferService;
+import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.data.Version;
 import objective.taskboard.repository.FilterCachedRepository;
 
@@ -65,7 +65,7 @@ public class Issue extends IssueScratch implements Serializable {
     
     private transient CardVisibilityEvalService cardVisibilityEvalService;
 
-    private transient ProjectBufferService projectBufferService;
+    private transient ProjectService projectService;
 
     private transient IssueStateHashCalculator issueStateHashCalculator;
     
@@ -79,7 +79,7 @@ public class Issue extends IssueScratch implements Serializable {
             IssueTeamService issueTeamService, 
             FilterCachedRepository filterRepository,
             CardVisibilityEvalService cardVisibilityEvalService,
-            ProjectBufferService projectBufferService,
+            ProjectService projectService,
             IssueStateHashCalculator issueStateHashCalculator) {
         this.id = scratch.id;
         this.issueKey = scratch.issueKey;
@@ -121,7 +121,7 @@ public class Issue extends IssueScratch implements Serializable {
         this.issueTeamService = issueTeamService;
         this.filterRepository = filterRepository;
         this.cardVisibilityEvalService = cardVisibilityEvalService;
-        this.projectBufferService = projectBufferService;
+        this.projectService = projectService;
         this.issueStateHashCalculator = issueStateHashCalculator;
         this.render = false;
         this.favorite = false;
@@ -639,7 +639,7 @@ public class Issue extends IssueScratch implements Serializable {
     }
 
     public Version getRelease() {
-        return projectBufferService.getVersion(getReleaseId());
+        return projectService.getVersion(getReleaseId());
     }
 
     public int getStateHash() {
@@ -657,14 +657,14 @@ public class Issue extends IssueScratch implements Serializable {
             IssueTeamService issueTeamService,
             FilterCachedRepository filterRepository,
             CardVisibilityEvalService cardVisibilityEvalService,
-            ProjectBufferService projectBufferService,
+            ProjectService projectService,
             IssueStateHashCalculator issueStateHashCalculator) {
         this.jiraProperties = jiraProperties;
         this.metaDataService = metaDataService;
         this.issueTeamService = issueTeamService;
         this.filterRepository = filterRepository;
         this.cardVisibilityEvalService = cardVisibilityEvalService;
-        this.projectBufferService = projectBufferService;
+        this.projectService = projectService;
         this.issueStateHashCalculator = issueStateHashCalculator;
     }
     

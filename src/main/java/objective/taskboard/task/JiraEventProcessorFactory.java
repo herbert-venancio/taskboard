@@ -1,9 +1,11 @@
 package objective.taskboard.task;
 
+import java.util.Optional;
+
 import objective.taskboard.jira.data.WebHookBody;
 
 public interface JiraEventProcessorFactory {
 
-    JiraEventProcessor create(WebHookBody body, String projectKey);
+    Optional<JiraEventProcessor> create(WebHookBody body, String projectKey);
 
 }

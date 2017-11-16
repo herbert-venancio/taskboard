@@ -356,13 +356,10 @@
 								</goals>
 							</execution>
 							<execution>
-								<id>exec-gulp-test</id>
+								<id>exec-web-component-tester</id>
 								<phase>test</phase>
 								<configuration>
-									<executable>gulp</executable>
-									<arguments>
-										<argument>test:local</argument>
-									</arguments>
+									<executable>node_modules/.bin/wct</executable>
 								</configuration>
 								<goals>
 									<goal>exec</goal>

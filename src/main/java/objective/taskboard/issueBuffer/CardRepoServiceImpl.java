@@ -15,7 +15,7 @@ import objective.taskboard.domain.converter.CardVisibilityEvalService;
 import objective.taskboard.domain.converter.IssueTeamService;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.MetadataService;
-import objective.taskboard.jira.ProjectBufferService;
+import objective.taskboard.jira.ProjectService;
 import objective.taskboard.repository.FilterCachedRepository;
 
 @Component
@@ -42,7 +42,7 @@ public class CardRepoServiceImpl implements CardRepoService {
     private CardVisibilityEvalService cardVisibilityEvalService;
 
     @Autowired
-    private ProjectBufferService projectBufferService;
+    private ProjectService projectService;
 
     @Autowired
     private IssueStateHashCalculator issueStateHashCalculator;
@@ -67,7 +67,7 @@ public class CardRepoServiceImpl implements CardRepoService {
                     issueTeamService,
                     filterRepository,
                     cardVisibilityEvalService,
-                    projectBufferService,
+                    projectService,
                     issueStateHashCalculator);
         });
 

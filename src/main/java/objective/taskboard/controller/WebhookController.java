@@ -33,6 +33,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import objective.taskboard.jira.data.WebHookBody;
+import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.task.IssueEventProcessScheduler;
 import objective.taskboard.task.JiraEventProcessor;
 import objective.taskboard.task.JiraEventProcessorFactory;
@@ -42,6 +43,9 @@ import objective.taskboard.task.JiraEventProcessorFactory;
 public class WebhookController {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(WebhookController.class);
+
+    @Autowired
+    private ProjectFilterConfigurationCachedRepository projectRepository;
 
     @Autowired
     private IssueEventProcessScheduler webhookSchedule;
@@ -59,13 +63,20 @@ public class WebhookController {
         if(body.webhookEvent == null)
             return;
 
+        if(!belongsToAnyProject(projectKey))
+            return;
+
         for(JiraEventProcessorFactory factory : jiraEventProcessorFactories) {
-            enqueue(factory.create(body, projectKey));
+            factory.create(body, projectKey)
+                    .ifPresent(this::enqueue);
         }
     }
 
     private void enqueue(JiraEventProcessor eventProcessor) {
-        if(eventProcessor != null)
-            webhookSchedule.add(eventProcessor);
+        webhookSchedule.add(eventProcessor);
+    }
+
+    protected boolean belongsToAnyProject(String projectKey) {
+        return projectRepository.exists(projectKey);
     }
 }

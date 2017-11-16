@@ -61,7 +61,7 @@ import objective.taskboard.domain.IssueStateHashCalculator;
 import objective.taskboard.domain.ParentIssueLink;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.MetadataService;
-import objective.taskboard.jira.ProjectBufferService;
+import objective.taskboard.jira.ProjectService;
 import objective.taskboard.repository.FilterCachedRepository;
 import objective.taskboard.repository.ParentIssueLinkRepository;
 
@@ -97,7 +97,7 @@ public class JiraIssueToIssueConverter {
     private CardVisibilityEvalService cardVisibilityEvalService;
 
     @Autowired
-    private ProjectBufferService projectBufferService;
+    private ProjectService projectService;
 
     @Autowired
     private IssueStateHashCalculator issueStateHashCalculator;
@@ -175,7 +175,7 @@ public class JiraIssueToIssueConverter {
                 issueTeamService, 
                 filterRepository,
                 cardVisibilityEvalService,
-                projectBufferService,
+                projectService,
                 issueStateHashCalculator);
         
     	if (!isEmpty(converted.getParent())) {

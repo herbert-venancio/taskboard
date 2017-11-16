@@ -6,19 +6,15 @@ import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.atlassian.jira.rest.client.api.RestClientException;
-import com.atlassian.jira.rest.client.api.domain.Issue;
-
+import objective.taskboard.data.Issue;
 import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.jira.JiraProperties;
-import objective.taskboard.jira.JiraService;
-import objective.taskboard.jira.JiraServiceException;
 import objective.taskboard.jira.data.Version;
 import objective.taskboard.jira.data.WebHookBody;
 import objective.taskboard.jira.data.WebhookEvent;
 
 @Component
-public class VersionTypeEventProcessorFactory extends BaseJiraEventProcessorFactory implements JiraEventProcessorFactory {
+public class VersionTypeEventProcessorFactory implements JiraEventProcessorFactory {
 
     @Autowired
     private JiraProperties jiraProperties;
@@ -26,21 +22,15 @@ public class VersionTypeEventProcessorFactory extends BaseJiraEventProcessorFact
     @Autowired
     private IssueBufferService issueBufferService;
 
-    @Autowired
-    private JiraService jiraBean;
-
     @Override
-    public JiraEventProcessor create(WebHookBody body, String projectKey) {
-        if (!belongsToAnyProject(projectKey))
-            return null;
-
+    public Optional<JiraEventProcessor> create(WebHookBody body, String projectKey) {
         if (body.webhookEvent.category != WebhookEvent.Category.VERSION)
-            return null;
+            return Optional.empty();
 
         if (!isReleaseConfigured())
-            return null;
+            return Optional.empty();
 
-        return new VersionTypeEventProcessor(body.webhookEvent, projectKey, body.version);
+        return Optional.of(new VersionTypeEventProcessor(body.webhookEvent, projectKey, body.version));
     }
 
     private boolean isReleaseConfigured() {
@@ -66,30 +56,14 @@ public class VersionTypeEventProcessorFactory extends BaseJiraEventProcessorFact
 
         @Override
         public void processEvent() {
+            issueBufferService.notifyProjectUpdate(projectKey);
             fetchIssues(version)
-                    .forEach(issueKey -> issueBufferService.updateByEvent(webHook, projectKey, issueKey, null));
+                    .forEach(issue -> issueBufferService.notifyIssueUpdate(issue));
         }
 
-        private Stream<String> fetchIssues(Version version) {
+        private Stream<Issue> fetchIssues(Version version) {
             return issueBufferService.getAllIssues().stream()
-                    .filter(issue -> version.id.equals(issue.getReleaseId())
-                                    || (issue.getParentCard().isPresent()
-                                    && version.id.equals(issue.getParentCard().get().getReleaseId())
-                            )
-                    ).map(issue -> {
-                        try {
-                            return Optional.of(jiraBean.getIssueByKeyAsMaster(issue.getIssueKey()));
-                        } catch (JiraServiceException ex) {
-                            if (ex.getCause() instanceof RestClientException) {
-                                RestClientException cause = (RestClientException) ex.getCause();
-                                if (cause.getStatusCode().isPresent() && cause.getStatusCode().get() == 404)
-                                    return Optional.<Issue>empty();
-                            }
-                            throw ex;
-                        }
-                    })
-                    .filter(Optional::isPresent)
-                    .map(issue -> issue.get().getKey());
+                    .filter(issue -> version.id.equals(issue.getReleaseId()));
         }
     }
 }

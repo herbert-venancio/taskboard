@@ -1,5 +1,6 @@
 package objective.taskboard.task;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -8,14 +9,19 @@ import org.springframework.stereotype.Component;
 
 import com.atlassian.jira.rest.client.api.domain.Issue;
 
+import objective.taskboard.domain.Filter;
 import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.jira.JiraIssueService;
 import objective.taskboard.jira.WebhookSubtaskCreatorService;
 import objective.taskboard.jira.data.WebHookBody;
 import objective.taskboard.jira.data.WebhookEvent;
+import objective.taskboard.repository.FilterCachedRepository;
 
 @Component
-public class IssueTypeEventProcessorFactory extends BaseJiraEventProcessorFactory implements JiraEventProcessorFactory {
+public class IssueTypeEventProcessorFactory implements JiraEventProcessorFactory {
+
+    @Autowired
+    private FilterCachedRepository filterCachedRepository;
 
     @Autowired
     private JiraIssueService jiraIssueService;
@@ -27,18 +33,23 @@ public class IssueTypeEventProcessorFactory extends BaseJiraEventProcessorFactor
     private WebhookSubtaskCreatorService webhookSubtaskCreatorService;
 
     @Override
-    public JiraEventProcessor create(WebHookBody body, String projectKey) {
-        if(!belongsToAnyProject(projectKey))
-            return null;
-
+    public Optional<JiraEventProcessor> create(WebHookBody body, String projectKey) {
         if(!belongsToAnyIssueTypeFilter(getIssueTypeIdOrNull(body)))
-            return null;
+            return Optional.empty();
 
         if(body.webhookEvent.category != WebhookEvent.Category.ISSUE)
-            return null;
+            return Optional.empty();
 
         String issueKey = getIssueKey(body);
-        return new IssueTypeEventProcessor(body.webhookEvent, issueKey, body.changelog);
+        return Optional.of(new IssueTypeEventProcessor(body.webhookEvent, issueKey, body.changelog));
+    }
+
+    protected boolean belongsToAnyIssueTypeFilter(Long issueTypeId) {
+        if(issueTypeId == null)
+            return true;
+
+        List<Filter> filters = filterCachedRepository.getCache();
+        return filters.stream().anyMatch(f -> issueTypeId.equals(f.getIssueTypeId()));
     }
 
     private String getIssueKey(WebHookBody body) {
@@ -78,7 +89,7 @@ public class IssueTypeEventProcessorFactory extends BaseJiraEventProcessorFactor
                 com.atlassian.jira.rest.client.api.domain.Issue jiraIssue = issue.get();
                 webhookSubtaskCreatorService.createSubtaskOnTransition(jiraIssue, changelog);
             }
-            issueBufferService.updateByEvent(webHook, null, issueKey, issue);
+            issueBufferService.updateByEvent(webHook, issueKey, issue);
         }
 
         private Optional<Issue> fetchIssue() {

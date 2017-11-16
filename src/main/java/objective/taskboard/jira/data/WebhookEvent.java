@@ -36,6 +36,5 @@ public enum WebhookEvent {
     public enum Category {
         ISSUE
         , VERSION
-        , PROJECT
     }
 }
