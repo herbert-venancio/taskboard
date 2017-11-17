@@ -3,6 +3,10 @@ package objective.taskboard.sizingImport;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static objective.taskboard.sizingImport.SheetColumnDefinitionProvider.DEMAND;
+import static objective.taskboard.sizingImport.SheetColumnDefinitionProvider.FEATURE;
+import static objective.taskboard.sizingImport.SheetColumnDefinitionProvider.INCLUDE;
+import static objective.taskboard.sizingImport.SheetColumnDefinitionProvider.PHASE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -20,7 +24,6 @@ import com.atlassian.jira.rest.client.api.domain.CimIssueType;
 
 import objective.taskboard.google.GoogleApiService;
 import objective.taskboard.google.SpreadsheetsManager;
-import objective.taskboard.sizingImport.SheetDefinition.SheetStaticColumn;
 import objective.taskboard.sizingImport.SizingImportValidator.ValidationResult;
 
 public class SizingImportValidatorTest {
@@ -29,10 +32,10 @@ public class SizingImportValidatorTest {
     private GoogleApiService googleApiService= mock(GoogleApiService.class);
     private SpreadsheetsManager spreadsheetsManager = mock(SpreadsheetsManager.class);
     private JiraUtils jiraUtils = mock(JiraUtils.class);
-    private SheetStaticColumns sheetStaticColumns = mock(SheetStaticColumns.class);
+    private SheetColumnDefinitionProvider columnDefinitionProvider = mock(SheetColumnDefinitionProvider.class);
     private List<List<Object>> sheetData;
 
-    private SizingImportValidator subject = new SizingImportValidator(config, googleApiService, jiraUtils, sheetStaticColumns);
+    private SizingImportValidator subject = new SizingImportValidator(config, googleApiService, jiraUtils, columnDefinitionProvider);
     
     @Before
     public void setup() {
@@ -57,11 +60,11 @@ public class SizingImportValidatorTest {
         when(spreadsheetsManager.getSheetsTitles("100")).thenReturn(asList("Scope", "Timeline", "Cost"));
         when(spreadsheetsManager.readRange("100", "'Scope'")).thenAnswer((i) -> sheetData);
         
-        when(sheetStaticColumns.get()).thenReturn(asList(
-                new SheetStaticColumn("Phase", "A"),
-                new SheetStaticColumn("Demand", "B"),
-                new SheetStaticColumn("Feature", "C"),
-                new SheetStaticColumn("Include", "D")));
+        when(columnDefinitionProvider.getStaticMappings()).thenReturn(asList(
+                new StaticMappingDefinition(PHASE,   "A"),
+                new StaticMappingDefinition(DEMAND,  "B"),
+                new StaticMappingDefinition(FEATURE, "C"),
+                new StaticMappingDefinition(INCLUDE, "D")));
     }
 
     @Test
@@ -180,11 +183,11 @@ public class SizingImportValidatorTest {
 
     @Test
     public void shouldFailWhenSomeStaticColumnsAreIncorrectlyPositioned() {
-        when(sheetStaticColumns.get()).thenReturn(asList(
-                new SheetStaticColumn("Phase", "A"),
-                new SheetStaticColumn("Demand", "B"),
-                new SheetStaticColumn("Feature", "C"),
-                new SheetStaticColumn("Include", "Z")));
+        when(columnDefinitionProvider.getStaticMappings()).thenReturn(asList(
+                new StaticMappingDefinition(PHASE,   "A"),
+                new StaticMappingDefinition(DEMAND,  "B"),
+                new StaticMappingDefinition(FEATURE, "C"),
+                new StaticMappingDefinition(INCLUDE, "Z")));
         
         sheetData = asList(
                 asList("Phase", "Demand", "Include", "Feature", "Dev"),

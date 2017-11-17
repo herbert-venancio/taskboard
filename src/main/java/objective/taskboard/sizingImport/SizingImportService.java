@@ -14,13 +14,11 @@ import com.atlassian.jira.rest.client.api.domain.CimIssueType;
 import objective.taskboard.google.GoogleApiService;
 import objective.taskboard.google.SpreadsheetsManager;
 import objective.taskboard.jira.JiraProperties;
-import objective.taskboard.sizingImport.SheetDefinition.SheetColumnDefinition;
-import objective.taskboard.sizingImport.SheetDefinition.SheetStaticColumn;
+import objective.taskboard.sizingImport.PreviewBuilder.ImportPreview;
 import objective.taskboard.sizingImport.SizingImportValidator.ValidationResult;
-import objective.taskboard.sizingImport.SizingSheetParser.SheetColumnMapping;
 
 @Component
-public class SizingImportService {
+class SizingImportService {
 
     private static final int PREVIEW_LINES_LIMIT = 5;
 
@@ -28,8 +26,8 @@ public class SizingImportService {
     private final JiraProperties jiraProperties;
     private final GoogleApiService googleApiService;
     private final JiraUtils jiraUtils;
-    private final SizingDataProvider dataProvider;
-    private final SheetStaticColumns sheetStaticColumns;
+    private final SizingSheetParser sheetParser;
+    private final SheetColumnDefinitionProvider columnDefinitionProvider;
     private final SizingImportValidator importValidator;
     private final SimpMessagingTemplate messagingTemplate;
     
@@ -39,8 +37,8 @@ public class SizingImportService {
             JiraProperties jiraProperties,
             GoogleApiService googleApiService, 
             JiraUtils jiraUtils, 
-            SizingDataProvider dataProvider,
-            SheetStaticColumns sheetStaticColumns,
+            SizingSheetParser sheetParser,
+            SheetColumnDefinitionProvider columnDefinitionProvider,
             SizingImportValidator importValidator,
             SimpMessagingTemplate messagingTemplate){
 
@@ -48,8 +46,8 @@ public class SizingImportService {
         this.jiraProperties = jiraProperties;
         this.googleApiService = googleApiService;
         this.jiraUtils = jiraUtils;
-        this.dataProvider = dataProvider;
-        this.sheetStaticColumns = sheetStaticColumns;
+        this.sheetParser = sheetParser;
+        this.columnDefinitionProvider = columnDefinitionProvider;
         this.importValidator = importValidator;
         this.messagingTemplate = messagingTemplate;
     }
@@ -58,73 +56,51 @@ public class SizingImportService {
         return importValidator.validate(projectKey, spreadsheetId);
     }
     
-    public SheetDefinition getSheetDefinition(String projectKey, String spreadsheetId) {
+    public String getSheetLastColumn(String spreadsheetId) {
         SpreadsheetsManager spreadsheetsManager = googleApiService.buildSpreadsheetsManager();
-        String lastColumn = spreadsheetsManager.getLastColumnLetter(spreadsheetId, SHEET_TITLE);
+        return spreadsheetsManager.getLastColumnLetter(spreadsheetId, SHEET_TITLE);
+    }
+    
+    public SheetDefinition getSheetDefinition(String projectKey) {
+        CimIssueType featureCreateIssueMetadata = jiraUtils.requestFeatureCreateIssueMetadata(projectKey);
+        List<CimFieldInfo> featureSizingFields = jiraUtils.getSizingFields(featureCreateIssueMetadata);
+
+        List<StaticMappingDefinition> staticMappings = columnDefinitionProvider.getStaticMappings();
+        List<DynamicMappingDefinition> dynamicMappings = columnDefinitionProvider.getDynamicMappings(featureSizingFields);
         
-        List<SheetStaticColumn> staticColumns = sheetStaticColumns.get();
-        List<SheetColumnDefinition> dynamicColumns = buildDynamicColumnsDefinition(projectKey);
-        
-        return new SheetDefinition(lastColumn, staticColumns, dynamicColumns);
+        return new SheetDefinition(staticMappings, dynamicMappings);
     }
 
-    public ImportPreview getPreview(String projectKey, String spreadsheetId, List<SheetColumnMapping> dynamicColumnsMapping) {
+    public ImportPreview getPreview(String projectKey, String spreadsheetId, List<SheetColumnMapping> columnsMapping) {
         SpreadsheetsManager spreadsheetsManager = googleApiService.buildSpreadsheetsManager();
-        List<SizingImportLine> data = dataProvider.getData(spreadsheetsManager, spreadsheetId, dynamicColumnsMapping);
-        List<SheetColumnDefinition> dynamicColumnsDefinition = buildDynamicColumnsDefinition(projectKey);
+        List<SizingImportLine> data = parseSizingSheet(projectKey, spreadsheetId, columnsMapping, spreadsheetsManager);
         
-        return new PreviewBuilder(dynamicColumnsDefinition, dynamicColumnsMapping)
+        return new PreviewBuilder()
                 .setData(data)
                 .setLinesLimit(PREVIEW_LINES_LIMIT)
                 .build();
     }
 
-    public void importSpreadsheet(String project, String spreadsheetId, List<SheetColumnMapping> dynamicColumnsMapping) {
+    public void importSpreadsheet(String projectKey, String spreadsheetId, List<SheetColumnMapping> columnsMapping) {
         SpreadsheetsManager spreadsheetsManager = googleApiService.buildSpreadsheetsManager();
-
-        List<SizingImportLine> spreedsheetData = dataProvider.getData(
-               spreadsheetsManager, 
-               spreadsheetId, 
-               dynamicColumnsMapping);
+        List<SizingImportLine> spreedsheetData = parseSizingSheet(projectKey, spreadsheetId, columnsMapping, spreadsheetsManager);
 
         SizingImporter importer = new SizingImporter(jiraProperties, jiraUtils);
         
         importer.addListener(new SizingImporterSheetUpdater(spreadsheetId, spreadsheetsManager, importConfig, jiraProperties));
         importer.addListener(new SizingImporterSocketStatusEmmiter(messagingTemplate));
         
-        importer.executeImport(project, spreedsheetData);
+        importer.executeImport(projectKey, spreedsheetData);
     }
 
-    private List<SheetColumnDefinition> buildDynamicColumnsDefinition(String projectKey) {
-        CimIssueType featureCreateIssueMetadata = jiraUtils.requestFeatureCreateIssueMetadata(projectKey);
-        List<CimFieldInfo> tShirtFields = jiraUtils.getSizingFields(featureCreateIssueMetadata);
+    private List<SizingImportLine> parseSizingSheet(
+            String projectKey, 
+            String spreadsheetId, 
+            List<SheetColumnMapping> columnsMapping, 
+            SpreadsheetsManager spreadsheetsManager) {
 
-        return new DynamicColumnsDefinitionBuilder(tShirtFields)
-                .setDefaultColumns(importConfig.getSheetMap().getDefaultColumns())
-                .build();
-    }
-
-    public static class ImportPreview {
-        private final List<String> headers;
-        private final List<List<String>> rows;
-        private final int totalLinesCount;
-
-        public ImportPreview(List<String> headers, List<List<String>> rows, int totalLinesCount) {
-            this.headers = headers;
-            this.rows = rows;
-            this.totalLinesCount = totalLinesCount;
-        }
-        
-        public List<String> getHeaders() {
-            return headers;
-        }
-        
-        public List<List<String>> getRows() {
-            return rows;
-        }
-        
-        public int getTotalLinesCount() {
-            return totalLinesCount;
-        }
+        List<List<Object>> rows = spreadsheetsManager.readRange(spreadsheetId, "'" + SHEET_TITLE + "'");
+        SheetDefinition sheetDefinition = getSheetDefinition(projectKey);
+        return sheetParser.parse(rows, sheetDefinition, columnsMapping);
     }
 }

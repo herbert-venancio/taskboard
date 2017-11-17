@@ -1,29 +1,17 @@
 package objective.taskboard.sizingImport;
 
+import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
-import objective.taskboard.sizingImport.SheetDefinition.SheetColumnDefinition;
-import objective.taskboard.sizingImport.SizingImportService.ImportPreview;
-import objective.taskboard.sizingImport.SizingSheetParser.SheetColumnMapping;
+import objective.taskboard.google.SpreadsheetUtils;
 
 class PreviewBuilder {
     
-    private final List<SheetColumnDefinition> dynamicColumnsDefinition;
-    private final List<SheetColumnMapping> dynamicColumnsMapping;
     private List<SizingImportLine> data = Collections.emptyList();
     private int linesLimit = 10;
-    
-    public PreviewBuilder(List<SheetColumnDefinition> dynamicColumnsDefinition, List<SheetColumnMapping> dynamicColumnsMapping) {
-        this.dynamicColumnsDefinition = dynamicColumnsDefinition;
-        this.dynamicColumnsMapping = dynamicColumnsMapping;
-    }
 
     public PreviewBuilder setData(List<SizingImportLine> data) {
         this.data = data;
@@ -36,40 +24,49 @@ class PreviewBuilder {
     }
     
     public ImportPreview build() {
-        Map<String, String> dynamicColumnsNameByFieldId = dynamicColumnsDefinition.stream()
-                .collect(toMap(SheetColumnDefinition::getFieldId, SheetColumnDefinition::getName));
-        
-        List<SheetColumnMapping> sortedDynamicColumnsMapping = dynamicColumnsMapping.stream()
-                .sorted(Comparator.comparing(SheetColumnMapping::getColumnLetter))
+        List<SheetColumn> allColumns = data.stream()
+                .flatMap(line -> line.getImportValues().stream().map(value -> value.getColumn()))
+                .distinct()
+                .filter(c -> c.getDefinition().isVisibleInPreview())
+                .sorted(comparing(SheetColumn::getLetter, SpreadsheetUtils.COLUMN_LETTER_COMPARATOR))
                 .collect(toList());
         
-        List<String> headers = new ArrayList<>();
-        headers.add(SheetStaticColumns.PHASE_NAME);
-        headers.add(SheetStaticColumns.DEMAND_NAME);
-        headers.add(SheetStaticColumns.FEATURE_NAME);
-        headers.add(SheetStaticColumns.ACCEPTANCE_CRITERIA);
-
-        headers.addAll(sortedDynamicColumnsMapping.stream()
-                .map(m -> dynamicColumnsNameByFieldId.get(m.getFieldId()))
-                .collect(toList()));
+        List<String> headers = allColumns.stream().map(c -> c.getDefinition().getName()).collect(toList());
 
         List<List<String>> rows = data.stream()
                 .limit(linesLimit)
                 .map(line -> {
-                    List<String> linePreview = new ArrayList<>();
-                    linePreview.add(line.getPhase());
-                    linePreview.add(line.getDemand());
-                    linePreview.add(line.getFeature());
-                    linePreview.add(line.getAcceptanceCriteria());
-                    
-                    linePreview.addAll(sortedDynamicColumnsMapping.stream()
-                            .map(cm -> line.getFieldValue(cm.getFieldId()).orElse(""))
-                            .collect(toList()));
-                    
-                    return linePreview;
+                    return allColumns.stream()
+                            .map(col -> line.getValue(col.getDefinition(), ""))
+                            .collect(toList());
                 })
                 .collect(toList());
 
+
         return new ImportPreview(headers, rows, data.size());
+    }
+    
+    static class ImportPreview {
+        private final List<String> headers;
+        private final List<List<String>> rows;
+        private final int totalLinesCount;
+
+        public ImportPreview(List<String> headers, List<List<String>> rows, int totalLinesCount) {
+            this.headers = headers;
+            this.rows = rows;
+            this.totalLinesCount = totalLinesCount;
+        }
+        
+        public List<String> getHeaders() {
+            return headers;
+        }
+        
+        public List<List<String>> getRows() {
+            return rows;
+        }
+        
+        public int getTotalLinesCount() {
+            return totalLinesCount;
+        }
     }
 }

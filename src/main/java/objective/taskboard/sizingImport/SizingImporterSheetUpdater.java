@@ -57,8 +57,8 @@ class SizingImporterSheetUpdater implements SizingImporterListener {
     }
     
     @Override
-    public void onLineImportFinished(SizingImportLine line) {
-        String keyValue = format("=HYPERLINK(\"%s/browse/%s\",\"%s\")", jiraProperties.getUrl(), line.getJiraKey(), line.getJiraKey());
+    public void onLineImportFinished(SizingImportLine line, String featureIssueKey) {
+        String keyValue = format("=HYPERLINK(\"%s/browse/%s\",\"%s\")", jiraProperties.getUrl(), featureIssueKey, featureIssueKey);
         clearHighlightKeyCellAndSetValue(line.getRowIndex(), keyValue);
         
     }

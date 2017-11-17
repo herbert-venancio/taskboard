@@ -791,7 +791,7 @@
                     var customFields = response.dynamicColumns
                         .map( columnsMapping => {
                             return {
-                                fieldId: columnsMapping.fieldId,
+                                columnId: columnsMapping.columnId,
                                 name: columnsMapping.name.replace(" TSize", ""),
                                 required: columnsMapping.required,
                                 columnLetter: columnsMapping.defaultColumnLetter
@@ -860,11 +860,6 @@
                     this.loadingDisable();
                 },
 
-                getFieldNameById: function(fieldId) {
-                    var customField = this.customFields.find( field => fieldId == field.fieldId );
-                    return customField.name;
-                },
-
                 submitStepThree: function() {
                     var self = this;
 
@@ -874,7 +869,7 @@
                         })
                         .map( c => {
                             return {
-                                fieldId: c.fieldId,
+                                columnId: c.columnId,
                                 columnLetter: c.columnLetter
                             }
                         });
@@ -904,6 +899,9 @@
                 },
 
                 statusOfStepFour: function(event) {
+                    if (this.isImportationCompleted)
+                        return;
+
                     var status = event.detail.status;
                     var totalImported = status.importedLines + status.failedLines;
                     var completed = totalImported == status.totalLines;
@@ -927,7 +925,7 @@
                     })
                     .map( c => {
                         return {
-                            fieldId: c.fieldId,
+                            columnId: c.columnId,
                             columnLetter: c.columnLetter
                         }
                     });
@@ -1008,11 +1006,6 @@
                     return false;
                 },
 
-                hasRepeatedFieldName: function() {
-                     var ids = _.map(this.customFields, "fieldId");
-                    return ids.length != _.uniq(ids).length;
-                },
-
                 hasRepeatedColumnLetter: function() {
                     var fixedColumnLetters = _.map(this.fixedFields, "columnLetter");
                     var noBlankCustomFields = _.map(this.getNoBlankCustomFields(), "columnLetter");
@@ -1040,17 +1033,6 @@
 
                 close: function() {
                     this.$.modal.close();
-                },
-
-                columnToLetter: function(column) {
-                    var temp;
-                    var letter = '';
-                    while (column > 0) {
-                        temp = (column - 1) % 26;
-                        letter = String.fromCharCode(temp + 65) + letter;
-                        column = (column - temp - 1) / 26;
-                    }
-                    return letter;
                 },
 
                 letterToColumn: function(letter) {

@@ -4,6 +4,7 @@ import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static objective.taskboard.sizingImport.SheetColumnDefinitionProvider.SIZING_FIELD_ID_TAG;
 import static org.apache.commons.lang.StringUtils.isBlank;
 
 import java.util.ArrayList;
@@ -28,7 +29,6 @@ import com.atlassian.jira.rest.client.api.domain.Version;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder;
 
 import objective.taskboard.jira.JiraProperties;
-import objective.taskboard.sizingImport.SizingImportLine.JiraField;
 
 class SizingImporter {
 
@@ -68,13 +68,14 @@ class SizingImporter {
                 continue;
             }
             
+            String featureIssueKey;
             try {
                 String versionName = line.getPhase();
                 Version release = getOrCreateVersion(projectKey, versionName, importedVersions);
                 ImportedDemand demand = getOrCreateDemand(projectKey, release, line.getDemand(), importedDemands);
                 
                 BasicIssue featureIssue = createFeature(projectKey, release, demand.getIssueKey(), featureMetadata, line);
-                line.setJiraKey(featureIssue.getKey());
+                featureIssueKey = featureIssue.getKey();
 
             } catch (Exception e) {
                 String errorMessage = e.getMessage();
@@ -83,7 +84,7 @@ class SizingImporter {
                 continue;
             }
 
-            notifyLineImportFinished(line);
+            notifyLineImportFinished(line, featureIssueKey);
         }
 
         notifyImportFinished();
@@ -108,7 +109,10 @@ class SizingImporter {
             .filter(CimFieldInfo::isRequired);
         
         List<String> fieldErrors = requiredTShirtFieldsOfFeature
-                .filter(rf -> isBlank(line.getFieldValue(rf.getId()).orElse(null)))
+                .filter(rf -> {
+                    Optional<String> value = line.getValue(columnDefinition -> columnDefinition.hasTag(SIZING_FIELD_ID_TAG, rf.getId()));
+                    return isBlank(value.orElse(null));
+                })
                 .map(rf -> rf.getName() + " should be informed")
                 .collect(toList());
 
@@ -188,12 +192,16 @@ class SizingImporter {
         IssueInputBuilder builder = new IssueInputBuilder(projectKey, featureTypeId)
                 .setSummary(line.getFeature())
                 .setFieldValue(customFieldRelease, release);
-
-        for (JiraField field : line.getFields()) {
-            CustomFieldOption option = jiraUtils.getCustomFieldOption(featureMetadata, field.getId(), field.getValue());
-            builder.setFieldValue(field.getId(), option);
-        }
         
+        line.getImportValues().stream()
+                .filter(importValue -> importValue.getColumnDefinition().hasTag(SIZING_FIELD_ID_TAG))
+                .forEach(importValue -> {
+                    String fieldId = importValue.getColumnDefinition().getTagValue(SIZING_FIELD_ID_TAG);
+                    CustomFieldOption option = jiraUtils.getCustomFieldOption(featureMetadata, fieldId, importValue.getValue());
+
+                    builder.setFieldValue(fieldId, option);
+                });
+
         builder.setFieldValue(jiraProperties.getCustomfield().getAcceptanceCriteria().getId(), line.getAcceptanceCriteria());
 
         BasicIssue issue = jiraUtils.createIssue(builder);
@@ -227,8 +235,8 @@ class SizingImporter {
         listeners.stream().forEach(l -> l.onLineImportStarted(line));
     }
     
-    private void notifyLineImportFinished(SizingImportLine line) {
-        listeners.stream().forEach(l -> l.onLineImportFinished(line));
+    private void notifyLineImportFinished(SizingImportLine line, String featureIssueKey) {
+        listeners.stream().forEach(l -> l.onLineImportFinished(line, featureIssueKey));
     }
 
     private void notifyLineError(SizingImportLine line, List<String> errorMessages) {
@@ -292,7 +300,7 @@ class SizingImporter {
     public interface SizingImporterListener {
         void onImportStarted(int totalLinesCount, int linesToImportCount);
         void onLineImportStarted(SizingImportLine line);
-        void onLineImportFinished(SizingImportLine line);
+        void onLineImportFinished(SizingImportLine line, String featureIssueKey);
         void onLineError(SizingImportLine line, List<String> errorMessages);
         void onImportFinished();
     }
