@@ -24,6 +24,7 @@
 
         <style>
             :host {
+                width: 100%;
                 margin-top: 5px;
                 display: flex;
             }
@@ -238,8 +239,35 @@
                 box-shadow: inset 0 0 10px #acac00
             }
 
+            .issue-UPDATING, .issue-UPDATING.issue-HAS_ERROR {
+                box-shadow:  inset 0 0 10px #b7b102;
+            }
+
             .issue-DELETED {
                 border: 3px solid #c67575
+            }
+
+            .issue-HAS_ERROR {
+                box-shadow: inset 0 0 10px #960000;
+            }
+
+            .condition-icon {
+                width: 20px;
+                height: 20px;
+                padding: 0;
+                top: 50%;
+                left: 50%;
+                margin: -10px 0 0 -10px;
+                position: absolute;
+            }
+
+            .condition-icon--updating {
+                opacity: .7;
+            }
+
+            .condition-icon--has-error {
+                color: #960000;
+                opacity: .5;
             }
         </style>
 
@@ -252,11 +280,11 @@
                        body="{{item}}"
                        headers='{"Content-Type": "application/json"}'>
             </iron-ajax>
-            <iron-signals on-iron-signal-hierarchical-filter-changed="forceRefreshHierarchyMatch" 
+            <iron-signals on-iron-signal-hierarchical-filter-changed="_updateClasses"
                           on-iron-signal-issues-updated="updateIssue"
                           on-iron-signal-clear-highlight="clearHighlight"
                           ></iron-signals>
-            <paper-material id="issueCard" class$="issue {{getClasses(item.hierarchyMatch, item.issueKey)}} {{highlightClass}}" elevation="0" style$="{{getIssueColor(item)}}"
+            <paper-material id="issueCard" class$="issue {{_classes}} {{highlightClass}}" elevation="0" style$="{{getIssueColor(item)}}"
                             on-tap="opendialog" title="Issue details">
 
                 <template is="dom-if" if="{{issueImpedida(item)}}">
@@ -305,6 +333,14 @@
                                        on-tap="hierarchyFilterClick" title="Apply hierarchical filter"></paper-icon-button>
                 </div>
 
+                <template is="dom-if" if="{{isUpdating}}">
+                    <paper-spinner class="condition-icon condition-icon--updating" active="true" alt="Updating..."></paper-spinner>
+                </template>
+
+                <template is="dom-if" if="{{_shouldShowErrorIcon(isUpdating, hasError)}}">
+                    <paper-icon-button class="condition-icon condition-icon--has-error" icon="error" title="Please, click here to see the error details"></paper-icon-button>
+                </template>
+
             </paper-material>
         </div>
     </template>
@@ -323,21 +359,41 @@
                     hidden: {
                         type: Boolean
                     },
+                    _classes: {
+                        type: String
+                    },
+                    isUpdating: {
+                        type: Boolean,
+                        value: false
+                    },
+                    hasError: {
+                        type: Boolean,
+                        value: false
+                    },
                     highlightClass: {
                         type: String
                     },
                     boardstepid: {
                         type: String
+                    },
+                    localStates: {
+                        type: Object,
+                        notify: true
                     }
                 },
 
+                observers: [
+                    '_updateIssueLocalState(localStates.issues.*, item)'
+                ],
+
                 attached: function() {
-                       var self = this;
-                       this.async(function() {
-                           if (typeof self.item === 'undefined')
-                               return;
-                           if (typeof this.item.__eventInfo === 'undefined')
-                               return;
+                    var self = this;
+                    this.async(function() {
+                        if (typeof self.item === 'undefined')
+                            return;
+
+                        if (typeof this.item.__eventInfo === 'undefined')
+                            return;
 
                         self.highlightChangedIssue();
                     });
@@ -356,6 +412,7 @@
 
                 highlightChangedIssue: function() {
                     var self = this;
+
                     var eventInfo = this.item.__eventInfo;
                     delete this.item.__eventInfo;
                     var parent = $(self.$.issueCard.closest(".board-lane.table-wrapper"));
@@ -371,16 +428,49 @@
                                 $(self.$.issueCard).offset().top - $(parent).offset().top - (calcViewportHeight($(parent)) - $(self.$.issueCard).height()) / 2
                             })
                     }
-                    
-                    flash($(this.$.issueCard), "yellow");
+
+                    if (self.isUpdating)
+                        flash($(self.$.issueCard), 'yellow');
+                    else if (self.hasError)
+                        flash($(self.$.issueCard), '#ea3a3a');
+                    else
+                        flash($(self.$.issueCard), 'yellow');
                 },
 
                 clearHighlight: function() {
                     this.set("highlightClass", "")
                 },
 
-                getClasses: function(hierarchyMatch, issueKey) {
-                    return hierarchyMatch == "DEP" ? "dependency" : this.getClassRoot(issueKey);
+                _updateIssueLocalState: function() {
+                    var isUpdating = false;
+                    var hasError = false;
+                    if (this.localStates) {
+                        var issueLocalState = this.localStates.issues[this.item.issueKey];
+                        if (issueLocalState) {
+                            isUpdating = issueLocalState.isUpdating;
+                            hasError = issueLocalState.hasError();
+                        }
+                    }
+                    this.set('isUpdating', isUpdating);
+                    this.set('hasError', hasError);
+                    this._updateClasses();
+                },
+
+                _updateClasses: function() {
+                    var classes = new Array();
+
+                    var depRootClass = this.item.hierarchyMatch == 'DEP' ? 'dependency' : this.getClassRoot(this.item.issueKey);
+                    if (!_.isEmpty(depRootClass))
+                        classes.push(depRootClass);
+
+                    if (this.isUpdating)
+                        classes.push('issue-UPDATING');
+
+                    if (this.hasError)
+                        classes.push('issue-HAS_ERROR');
+
+                    this.set('_classes', []);
+                    this.set('_classes', classes.join(' '));
                 },
 
                 getClassRoot: function(issueKey) {
@@ -421,23 +511,17 @@
                     taskboard.clearHierarchyMatch();
                     taskboard.toggleRootHierarchicalFilter(this.item.issueKey);
                     if (taskboard.getRootHierarchicalFilter()) {
-                        this.fire('iron-signal', {name: 'search-filter-reset'});
                         taskboard.setHierarchyMatch(this.item);
+                        this.fire('iron-signal', {name: 'search-filter-reset'});
                     }
                     this.fire('iron-signal', {name: 'hierarchical-filter-changed'});
                 },
 
-                forceRefreshHierarchyMatch: function () {
-                    var bkp = this.item.hierarchyMatch;
-                    this.set('item.hierarchyMatch', !bkp);
-                    this.set('item.hierarchyMatch', bkp);
-                },
-
                 updateIssue: function(event) {
-                    if (event.detail.issue.issueKey !== this.item.issueKey)
+                    if (!this.item || event.detail.issue.issueKey !== this.item.issueKey)
                         return;
 
-                    this.item = event.detail.issue;
+                    this.set('item', event.detail.issue);
                 },
 
                 getIssueColor: function (issue) {
@@ -475,7 +559,12 @@
 
                 getEllipsis: function(string) {
                     return string.length > 60 ? string.substring(0, 60) + "..." : string;
-                }
+                },
+
+                _shouldShowErrorIcon: function(isUpdating, hasError) {
+                    return !isUpdating && hasError;
+                },
+
             });
 
             function calcViewportHeight($el) {

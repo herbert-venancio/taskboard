@@ -91,4 +91,76 @@ public class IssueTransitionIT extends AuthenticatedIntegrationTest {
                 "TASKB-646"
                 );
     }
+
+    @Test
+    public void whenInvalidTransitionIsPerformed_ShouldGoToTargetStepAndReturnToSourceStep_ShouldShowErrorInIssueAndInMessage() {
+        JiraMockController.emulateTransitionError();
+
+        MainPage mainPage = MainPage.produce(webDriver);
+        mainPage.errorToast().close();
+
+        LaneFragment operational = mainPage.lane("Operational");
+
+        String[] issuesFromTodo = {
+                "TASKB-625",
+                "TASKB-627",
+                "TASKB-643",
+                "TASKB-644",
+                "TASKB-659",
+                "TASKB-661",
+                "TASKB-663",
+                "TASKB-664",
+                "TASKB-680",
+                "TASKB-681",
+                "TASKB-682",
+                "TASKB-683",
+                "TASKB-684",
+                "TASKB-686"
+            };
+
+        String[] issuesFromDoing = {
+                "TASKB-601",
+                "TASKB-572",
+                "TASKB-342",
+                "TASKB-273",
+                "TASKB-646"
+            };
+
+        operational.boardStep("To Do").issueCountBadge(issuesFromTodo.length);
+        operational.boardStep("To Do").assertIssueList(issuesFromTodo);
+        operational.boardStep("Doing").issueCountBadge(issuesFromDoing.length);
+        operational.boardStep("Doing").assertIssueList(issuesFromDoing);
+
+        TestIssue issue = mainPage.issue("TASKB-625");
+        issue
+            .click()
+            .issueDetails()
+            .transitionClick("Doing")
+            .confirm();
+
+        issue.assertHasError(true);
+
+        operational.boardStep("To Do").issueCountBadge(issuesFromTodo.length);
+        operational.boardStep("To Do").assertIssueList(issuesFromTodo);
+        operational.boardStep("Doing").issueCountBadge(issuesFromDoing.length);
+        operational.boardStep("Doing").assertIssueList(issuesFromDoing);
+
+        String errorText = "Transition of issue \"TASKB-625\" to \"Doing\" failed: Assignee is required.";
+
+        IssueErrorToast issueErrorToast = mainPage.issueErrorToast();
+
+        IssueDetails issueDetails = issueErrorToast.
+            assertVisible().
+            clickOpen(1);
+
+        issueDetails
+            .assertHasError(errorText)
+            .closeError()
+            .closeDialog();
+
+        issueErrorToast.assertNotVisible();
+        issue.assertHasError(false);
+
+    }
+
 }

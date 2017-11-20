@@ -101,4 +101,22 @@ class TestIssue extends AbstractUiFragment {
             return false;
         }
     }
+
+    public TestIssue assertHasError(boolean hasError) {
+        WebElement errorElement = getElementWhenItExists(By.className("condition-icon--has-error"));
+        if (hasError)
+            waitVisibilityOfElement(errorElement);
+        else
+            waitInvisibilityOfElement(errorElement);
+        return this;
+    }
+
+    public TestIssue assertIsUpdating(boolean isUpdating) {
+        WebElement updatingElement = getElementWhenItExists(By.className("condition-icon--updating"));
+        if (isUpdating)
+            waitVisibilityOfElement(updatingElement);
+        else
+            waitInvisibilityOfElement(updatingElement);
+        return this;
+    }
 }

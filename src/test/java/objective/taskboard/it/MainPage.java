@@ -142,6 +142,10 @@ public class MainPage extends AbstractUiFragment {
         return initElements(webDriver, ErrorToast.class);
     }
 
+    public IssueErrorToast issueErrorToast() {
+        return initElements(webDriver, IssueErrorToast.class);
+    }
+
     public FollowupDialog openFollowUp() {
         return FollowupDialog.open(webDriver);
     }
