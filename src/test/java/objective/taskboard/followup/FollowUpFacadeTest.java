@@ -64,7 +64,6 @@ import objective.taskboard.database.directory.DataBaseDirectory;
 import objective.taskboard.followup.data.Template;
 import objective.taskboard.followup.impl.FollowUpDataProviderFromCurrentState;
 import objective.taskboard.followup.impl.FollowUpTemplateStorage;
-import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.rules.CleanupDataFolderRule;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -84,9 +83,6 @@ public class FollowUpFacadeTest {
 
     @Mock
     private DataBaseDirectory dataBaseDirectory;
-
-    @Mock
-    private JiraProperties jiraProperties;
 
     @Spy
     @InjectMocks
@@ -112,13 +108,6 @@ public class FollowUpFacadeTest {
         String path = argCaptor.getValue();
         template = mock(Template.class);
         when(template.getPath()).thenReturn(path);
-
-        String[] statusOrder = new String[] { "Done", "Doing", "To Do" };
-        JiraProperties.StatusPriorityOrder statusPriorityOrder = new JiraProperties.StatusPriorityOrder();
-        statusPriorityOrder.setDemands(statusOrder);
-        statusPriorityOrder.setTasks(statusOrder);
-        statusPriorityOrder.setSubtasks(statusOrder);
-        when(jiraProperties.getStatusPriorityOrder()).thenReturn(statusPriorityOrder);
     }
 
     @Test

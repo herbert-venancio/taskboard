@@ -194,6 +194,25 @@ public class FollowUpHelper {
                 new AnalyticsTransitionsDataSet(TYPE_SUBTASKS, headers, asList(rowSubtask)));
     }
 
+    public static List<AnalyticsTransitionsDataSet> getAnalyticsTransitionsDataSetWitNoRow() {
+        List<String> headers = new LinkedList<>();
+        headers.add("PKEY");
+        headers.add("ISSUE_TYPE");
+        headers.add("Done");
+        headers.add("Doing");
+        headers.add("To Do");
+
+        AnalyticsTransitionsDataRow rowSubtask = new AnalyticsTransitionsDataRow("I-4", "Sub-task"
+                , asList(
+                        null
+                        , null
+                        , DateTimeUtils.parseDate("2017-09-25")));
+
+        return asList(new AnalyticsTransitionsDataSet(TYPE_DEMAND, headers, null),
+                new AnalyticsTransitionsDataSet(TYPE_FEATURES, headers, emptyList()),
+                new AnalyticsTransitionsDataSet(TYPE_SUBTASKS, headers, asList(rowSubtask)));
+    }
+
     public static List<AnalyticsTransitionsDataSet> getEmptyAnalyticsTransitionsDataSet() {
         return singletonList(new AnalyticsTransitionsDataSet(TYPE_DEMAND, emptyList(), emptyList()));
     }
@@ -223,6 +242,21 @@ public class FollowUpHelper {
 
         return asList(new SyntheticTransitionsDataSet(TYPE_DEMAND, headers, rowsDemand),
                 new SyntheticTransitionsDataSet(TYPE_FEATURES, headers, rowsFeature),
+                new SyntheticTransitionsDataSet(TYPE_SUBTASKS, headers, rowsSubtask));
+    }
+
+    public static List<SyntheticTransitionsDataSet> getSyntheticTransitionsDataSetWithNoRow() {
+        List<String> headers = new LinkedList<>();
+        headers.add("Date");
+        headers.add("Done");
+        headers.add("Doing");
+        headers.add("To Do");
+
+        List<SyntheticTransitionsDataRow> rowsSubtask = new LinkedList<>();
+        rowsSubtask.add(new SyntheticTransitionsDataRow(DateTimeUtils.parseDate("2017-09-25"), "Sub-task", Ints.asList(0, 0, 1)));
+
+        return asList(new SyntheticTransitionsDataSet(TYPE_DEMAND, headers, null),
+                new SyntheticTransitionsDataSet(TYPE_FEATURES, headers, emptyList()),
                 new SyntheticTransitionsDataSet(TYPE_SUBTASKS, headers, rowsSubtask));
     }
 

@@ -23,13 +23,16 @@ package objective.taskboard.followup;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static objective.taskboard.Constants.FROMJIRA_HEADERS;
+import static objective.taskboard.followup.FollowUpHelper.getAnalyticsTransitionsDataSetWitNoRow;
 import static objective.taskboard.followup.FollowUpHelper.getDefaultAnalyticsTransitionsDataSet;
 import static objective.taskboard.followup.FollowUpHelper.getDefaultFollowupData;
 import static objective.taskboard.followup.FollowUpHelper.getDefaultFromJiraDataRow;
+import static objective.taskboard.followup.FollowUpHelper.getDefaultFromJiraDataRowList;
 import static objective.taskboard.followup.FollowUpHelper.getDefaultSyntheticTransitionsDataSet;
 import static objective.taskboard.followup.FollowUpHelper.getEmptyAnalyticsTransitionsDataSet;
 import static objective.taskboard.followup.FollowUpHelper.getEmptyFollowupData;
 import static objective.taskboard.followup.FollowUpHelper.getEmptySyntheticTransitionsDataSet;
+import static objective.taskboard.followup.FollowUpHelper.getSyntheticTransitionsDataSetWithNoRow;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
@@ -45,7 +48,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.core.io.Resource;
 
-import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor;
 import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor.Sheet;
 import objective.taskboard.utils.IOUtilities;
@@ -59,54 +61,48 @@ public class FollowUpGeneratorTest {
     @Mock
     private FollowupDataProvider provider;
 
-    @Mock
-    private JiraProperties jiraProperties;
-
     @Before
     public void setup() {
-        String[] statusOrder = new String[] { "Done", "Doing", "To Do" };
-        JiraProperties.StatusPriorityOrder statusPriorityOrder = new JiraProperties.StatusPriorityOrder();
-        statusPriorityOrder.setDemands(statusOrder);
-        statusPriorityOrder.setTasks(statusOrder);
-        statusPriorityOrder.setSubtasks(statusOrder);
-        when(jiraProperties.getStatusPriorityOrder()).thenReturn(statusPriorityOrder);
         subject = getFollowUpGeneratorUsingTestTemplate();
     }
 
     @Test
     public void generateJiraDataSheetTest() {
         subject.getEditor().open();
-        String jiraDataSheet = subject.generateFromJiraSheet(getDefaultFollowupData()).stringValue();
+        String fromJiraSheet = subject.generateFromJiraSheet(getDefaultFollowupData()).stringValue();
 
-        String jiraDataSheetExpected = normalizedXmlResource("followup/generateJiraDataSheetTest.xml");
-        assertEquals("Jira data sheet", jiraDataSheetExpected, jiraDataSheet);
+        String fromJiraSheetExpected = normalizedXmlResource("followup/generateJiraDataSheetTest.xml");
+        assertEquals("From Jira sheet", fromJiraSheetExpected, fromJiraSheet);
+        subject.getEditor().close();
     }
 
     @Test
     public void whenGeneratingWithoutData_generatesFromJiraKeepingOnlyHeaders() {
         subject.getEditor().open();
-        String jiraDataSheet = subject.generateFromJiraSheet(getEmptyFollowupData()).stringValue();
+        String fromJiraSheet = subject.generateFromJiraSheet(getEmptyFollowupData()).stringValue();
 
-        String jiraDataSheetExpected = normalizedXmlResource("followup/emptyFromJiraWithGeneratedHeaders.xml");
-        assertEquals("Jira data sheet", jiraDataSheetExpected, jiraDataSheet);
+        String fromJiraSheetExpected = normalizedXmlResource("followup/emptyFromJiraWithGeneratedHeaders.xml");
+        assertEquals("From Jira sheet", fromJiraSheetExpected, fromJiraSheet);
+        subject.getEditor().close();
     }
 
     @Test
-    public void givenEmptyTransitions_whenGenerateFromJiraSheet_thenShouldGenerateEmptyTransitions() {
-        FromJiraDataSet fromJiraDS = new FromJiraDataSet(FROMJIRA_HEADERS, FollowUpHelper.getDefaultFromJiraDataRowList());
-        FollowupData followupData = new FollowupData(fromJiraDS, FollowUpHelper.getEmptyAnalyticsTransitionsDataSet(),
-                FollowUpHelper.getEmptySyntheticTransitionsDataSet());
+    public void givenEmptyTransitions_whenGenerateFromJiraSheet_thenShouldNotGenerateTransitions() {
+        FromJiraDataSet fromJiraDS = new FromJiraDataSet(FROMJIRA_HEADERS, getDefaultFromJiraDataRowList());
+        FollowupData followupData = new FollowupData(fromJiraDS, getEmptyAnalyticsTransitionsDataSet(),
+                getEmptySyntheticTransitionsDataSet());
 
         subject.getEditor().open();
         String fromJiraSheet = subject.generateFromJiraSheet(followupData).stringValue();
 
-        String fromJiraSheetExpected = normalizedXmlResource("followup/fromJiraWithEmptyTransitions.xml");
+        String fromJiraSheetExpected = normalizedXmlResource("followup/fromJiraWithNoTransitions.xml");
         assertEquals("From Jira sheet", fromJiraSheetExpected, fromJiraSheet);
+        subject.getEditor().close();
     }
 
     @Test
     public void givenNoTransitions_whenGenerateFromJiraSheet_thenShouldNotGenerateTransitions() {
-        FromJiraDataSet fromJiraDS = new FromJiraDataSet(FROMJIRA_HEADERS, FollowUpHelper.getDefaultFromJiraDataRowList());
+        FromJiraDataSet fromJiraDS = new FromJiraDataSet(FROMJIRA_HEADERS, getDefaultFromJiraDataRowList());
         FollowupData followupData = new FollowupData(fromJiraDS, null, null);
 
         subject.getEditor().open();
@@ -114,6 +110,20 @@ public class FollowUpGeneratorTest {
 
         String fromJiraSheetExpected = normalizedXmlResource("followup/fromJiraWithNoTransitions.xml");
         assertEquals("From Jira sheet", fromJiraSheetExpected, fromJiraSheet);
+        subject.getEditor().close();
+    }
+
+    @Test
+    public void givenTransitionsDatesOfOtherIssueKey_whenGenerateFromJiraSheet_thenShouldGenerateEmptyTransitionsDates() {
+        FromJiraDataSet fromJiraDS = new FromJiraDataSet(FROMJIRA_HEADERS, getDefaultFromJiraDataRowList());
+        FollowupData followupData = new FollowupData(fromJiraDS, getAnalyticsTransitionsDataSetWitNoRow(), getSyntheticTransitionsDataSetWithNoRow());
+
+        subject.getEditor().open();
+        String fromJiraSheet = subject.generateFromJiraSheet(followupData).stringValue();
+
+        String fromJiraSheetExpected = normalizedXmlResource("followup/fromJiraWithEmptyTransitions.xml");
+        assertEquals("From Jira sheet", fromJiraSheetExpected, fromJiraSheet);
+        subject.getEditor().close();
     }
 
     @Test
@@ -130,10 +140,11 @@ public class FollowUpGeneratorTest {
         FollowupData followupData = new FollowupData(fromJiraDs, emptyList(), emptyList());
 
         subject.getEditor().open();
-        String jiraDataSheet = subject.generateFromJiraSheet(followupData).stringValue();
+        String fromJiraSheet = subject.generateFromJiraSheet(followupData).stringValue();
 
-        String jiraDataSheetExpected = normalizedXmlResource("followup/generateJiraDataSheetWithSomeEmptyAndNullAttributesJiraDataTest.xml");
-        assertEquals("Jira data sheet", jiraDataSheetExpected, jiraDataSheet);
+        String fromJiraSheetExpected = normalizedXmlResource("followup/generateJiraDataSheetWithSomeEmptyAndNullAttributesJiraDataTest.xml");
+        assertEquals("From Jira sheet", fromJiraSheetExpected, fromJiraSheet);
+        subject.getEditor().close();
     }
 
     @Test
@@ -182,6 +193,7 @@ public class FollowUpGeneratorTest {
         assertEquals("Synthetic transitions Feature", syntheticFeatureExpected, transitionsSheets.get(4).stringValue());
         String syntheticSubtaskExpected = normalizedXmlResource("followup/syntheticTransitionsSubtask.xml");
         assertEquals("Synthetic transitions Subtask", syntheticSubtaskExpected, transitionsSheets.get(5).stringValue());
+        subject.getEditor().close();
     }
 
     @Test
@@ -192,16 +204,32 @@ public class FollowUpGeneratorTest {
         FollowupData followupData = new FollowupData(null, getEmptyAnalyticsTransitionsDataSet(), getEmptySyntheticTransitionsDataSet());
         transitionsSheets = subject.generateTransitionsSheets(followupData);
         assertEquals("Transitions sheets quantity", 0, transitionsSheets.size());
+
+        followupData = new FollowupData(null, null, null);
+        transitionsSheets = subject.generateTransitionsSheets(followupData);
+        assertEquals("Transitions sheets quantity", 0, transitionsSheets.size());
+
+        AnalyticsTransitionsDataSet analytic = new AnalyticsTransitionsDataSet("", emptyList(), null);
+        SyntheticTransitionsDataSet synthetic = new SyntheticTransitionsDataSet("", emptyList(), null);
+        followupData = new FollowupData(null, asList(analytic), asList(synthetic));
+        transitionsSheets = subject.generateTransitionsSheets(followupData);
+        assertEquals("Transitions sheets quantity", 0, transitionsSheets.size());
+
+        followupData = new FollowupData(null, getAnalyticsTransitionsDataSetWitNoRow(), getSyntheticTransitionsDataSetWithNoRow());
+        subject.getEditor().open();
+        transitionsSheets = subject.generateTransitionsSheets(followupData);
+        assertEquals("Transitions sheets quantity", 2, transitionsSheets.size());
+        subject.getEditor().close();
     }
 
     private FollowUpGenerator getFollowUpGeneratorUsingGenericTemplate() {
         FollowUpTemplate genericTemplate = new FollowUpTemplate(resolve("followup/generic-followup-template.xlsm"));
-        return new FollowUpGenerator(provider, new SimpleSpreadsheetEditor(genericTemplate), jiraProperties);
+        return new FollowUpGenerator(provider, new SimpleSpreadsheetEditor(genericTemplate));
     }
 
     private FollowUpGenerator getFollowUpGeneratorUsingTestTemplate() {
         FollowUpTemplate testTemplate = new FollowUpTemplate(resolve("followup/Followup-template.xlsm"));
-        return new FollowUpGenerator(provider, new SimpleSpreadsheetEditor(testTemplate), jiraProperties);
+        return new FollowUpGenerator(provider, new SimpleSpreadsheetEditor(testTemplate));
     }
 
     private String normalizedXmlResource(String pathResource) {
