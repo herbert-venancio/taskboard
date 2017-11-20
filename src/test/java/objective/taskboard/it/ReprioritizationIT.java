@@ -98,6 +98,7 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
         switchToFirstTab();
         
         MainPage mainPage = MainPage.produce(webDriver);
+        mainPage.errorToast().close();
         mainPage.refreshToast().assertVisible();
         LaneFragment operational = mainPage.lane("Operational");
         operational.boardStep("To Do").assertIssueList(

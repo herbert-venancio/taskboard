@@ -84,6 +84,7 @@ public class JiraMockServer {
             dirtySearchIssuesByKey.clear();
             username = null;
             searchFailureEnabled = false;
+            transitionFailureEnabled = false;
             return "";
         });
         
@@ -96,7 +97,17 @@ public class JiraMockServer {
             searchFailureEnabled = false;
             return "";
         });
-        
+
+        post("/force-transition-failure", (req, res) -> {
+            transitionFailureEnabled = true;
+            return "";
+        });
+
+        post("/fix-transition-failure", (req, res) -> {
+            transitionFailureEnabled = false;
+            return "";
+        });
+
         get("/rest/api/latest/project",  (req, res) ->{
             return loadMockData("project.response.json");
         });
@@ -222,6 +233,11 @@ public class JiraMockServer {
         });
 
         post("/rest/api/latest/issue/:issueId/transitions", (req, res)-> {
+            if (transitionFailureEnabled) {
+                res.type("application/json");
+                res.status(400);
+                return loadMockData("transition_failure.response.json");
+            }
             String issueKey = issueKeyByIssueId.getOrDefault(req.params("issueId"), req.params("issueId"));
             JSONObject issueSearchData = getIssueDataForKey(issueKey);
             JSONObject issue = issueSearchData.getJSONArray("issues").getJSONObject(0);
@@ -432,6 +448,7 @@ public class JiraMockServer {
     private static Map<String, JSONObject> dirtySearchIssuesByKey = new LinkedHashMap<>();
     private static String username;
     private static boolean searchFailureEnabled = false;
+    private static boolean transitionFailureEnabled = true;
     private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     private void ensureInitialized() {

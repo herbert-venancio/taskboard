@@ -38,6 +38,7 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
 
         emulateAssignToFoo();
 
+        mainPage.errorToast().close();
         mainPage.refreshToast().assertVisible();
         mainPage.typeSearch("TASKB-61");
         mainPage.refreshToast().toggleShowHide();

@@ -23,7 +23,7 @@ public class FrontEndMessageException extends RuntimeException {
     }
 
     public FrontEndMessageException(RetrofitError e) {
-        super(parseExceptionMessage(e), e);
+        super(parseExceptionMessage(e));
     }
 
     private static String parseExceptionMessage(RetrofitError e) {

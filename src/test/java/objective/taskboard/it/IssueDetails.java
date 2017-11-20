@@ -95,4 +95,19 @@ class IssueDetails extends AbstractUiFragment {
         waitUntilElementNotExists(By.cssSelector(".assignee .icon"));
         return this;
     }
+
+    public IssueDetails assertHasError(String text) {
+        WebElement error = getElementWhenItExists(By.className("message-box--error"));
+        waitVisibilityOfElement(error);
+        WebElement errorText = error.findElement(By.className("message-box__message"));
+        waitTextInElement(errorText, text);
+        return this;
+    }
+
+    public IssueDetails closeError() {
+        WebElement error = getElementWhenItExists(By.className("message-box--error"));
+        error.findElement(By.className("message-box__close")).click();
+        waitInvisibilityOfElement(error);
+        return this;
+    }
 }

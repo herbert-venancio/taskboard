@@ -232,7 +232,7 @@
                                 <template is="dom-repeat" items="{{stage.steps}}" as="step">
                                     <td class="cell step-cell">
                                         <board-step parent-lane-id="{{metadata.id}}" parent-lane-config="{{metadata}}"
-                                            data-board-step$="board-step-{{step.step}}"
+                                            data-board-step$="board-step-{{step.step}}" local-states="{{localStates}}"
                                             class$="step-{{step.id}}" step-metadata="{{step}}" issues="{{getIssuesByStep(step.id, issues)}}"></board-step>
                                     </td>
                                 </template>
@@ -273,6 +273,10 @@
                     lastPreferenceUpdate: {
                         type: Date,
                         value: new Date(),
+                        notify: true
+                    },
+                    localStates: {
+                        type: Object,
                         notify: true
                     }
                 },

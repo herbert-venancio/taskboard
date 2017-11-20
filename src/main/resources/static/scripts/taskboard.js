@@ -28,6 +28,10 @@ function Taskboard() {
     var laneConfiguration;
     var rootHierarchicalFilter;
 
+    this.getLoggedUser = function() {
+        return window.user;
+    }
+
     this.setAspectFilters = function(filters) {
         aspectFilters = filters;
     };
@@ -97,7 +101,7 @@ function Taskboard() {
         }
         return null;
     };
-    
+
     this.getIssuesByStep = function(stepId) {
         if (issuesBySteps)
             return issuesBySteps[stepId];
@@ -105,6 +109,12 @@ function Taskboard() {
 
     this.getIssues = function() {
         return this.issues;
+    };
+
+    this.getIssueByKey = function(issueKey) {
+        return findInArray(this.issues, function(i) {
+                return i.issueKey === issueKey
+            });
     };
 
     this.setLaneConfiguration = function(laneConfiguration) {
@@ -123,7 +133,6 @@ function Taskboard() {
                 steps = steps.concat(lane.stages[stageIndex].steps)
             }
         }
-
         return steps;
     }
 
@@ -318,6 +327,7 @@ function Taskboard() {
                 self.issues.push(converted)
             else
                 self.issues[previousInstance.index] = converted; 
+
             updatedIssueKeys.push(anEvent.target.issueKey)
             var stepId = self.getIssueStep(converted).id;
             if (Object.keys(updateByStep).indexOf(stepId) === -1)
@@ -353,13 +363,12 @@ function Taskboard() {
             status: status
         }});
     }
-    
+
     function getPreviousIssueInstance(key) {
         var previousInstance = null;
-        self.issues.forEach(function(anIssue, index) {
-            if (anIssue.issueKey === key)
-                previousInstance = {issue: anIssue, index: index};
-        })
+        var piIndex = findIndexInArray(self.issues, function(i) { return i.issueKey === key });
+        if (piIndex > -1)
+            previousInstance = {issue: self.issues[piIndex], index: piIndex};
         return previousInstance;
     }
 
@@ -411,6 +420,8 @@ function Taskboard() {
             release: issue[CUSTOMFIELD.RELEASE]
         };
 
+        issue.hierarchyMatch = false;
+
         return issue;
     }
 
@@ -457,11 +468,61 @@ function Taskboard() {
         });
         return stepsOfLane;
     }
+
+}
+
+var taskboard = new Taskboard();
+
+function IssueLocalState(issueKey) {
+    this.isUpdating = false;
+    this.errorMessage = null;
+    this.getIssueKey = function() {
+        return issueKey;
+    }
+    this.hasError = function() {
+        return !_.isEmpty(this.errorMessage);
+    }
+}
+
+function IssueLocalStateBuilder(issueKey) {
+    var issueLocalState = new IssueLocalState(issueKey);
+    return {
+        isUpdating: function(isUpdating) {
+            issueLocalState.isUpdating = isUpdating;
+            return this;
+        },
+        errorMessage: function(errorMessage) {
+            issueLocalState.errorMessage = errorMessage;
+            return this;
+        },
+        build: function() {
+            return issueLocalState;
+        }
+    }
+}
+
+function StepLocalState(idOfStep) {
+    var stepId = idOfStep;
+    this.isUpdating = false;
+    this.getStepId = function() {
+        return stepId;
+    }
+}
+
+function StepLocalStateBuilder(idOfStep) {
+    var stepLocalState = new StepLocalState(idOfStep);
+    return {
+        isUpdating: function(isUpdating) {
+            stepLocalState.isUpdating = isUpdating;
+            return this;
+        },
+        build: function() {
+            return stepLocalState;
+        }
+    }
 }
 
 function flash(el, color) {
     var original = el.css('backgroundColor');
     el.animate({backgroundColor:color},300).animate({backgroundColor:original},800)
 }
-
-var taskboard = new Taskboard();

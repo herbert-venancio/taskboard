@@ -27,4 +27,12 @@ public class JiraMockController {
     public static void clearSearchError() {
         RequestBuilder.url(JIRA_MOCK_URL + "/fix-search-failure").post();
     }
+
+    public static void emulateTransitionError() {
+        RequestBuilder.url(JIRA_MOCK_URL + "/force-transition-failure").post();
+    }
+
+    public static void clearTransitionError() {
+        RequestBuilder.url(JIRA_MOCK_URL + "/fix-transition-failure").post();
+    }
 }

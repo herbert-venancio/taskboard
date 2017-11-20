@@ -41,7 +41,8 @@
                       on-iron-signal-show-details="showDetails"
                       on-iron-signal-update-user-preferences="checkIssuesInvalidTeam"
                       on-iron-signal-level-config-changed="checkIssuesInvalidTeam"
-                      on-iron-signal-search-filter-changed="checkIssuesInvalidTeam"></iron-signals>
+                      on-iron-signal-search-filter-changed="checkIssuesInvalidTeam"
+                      on-iron-signal-update-issue-local-state-error="updateIssueLocalStateErrorMessage"></iron-signals>
 
         <div id="lane-container" class="fit layout vertical board">
             <template id="levels" is="dom-repeat" items="{{conf}}" as="level">
@@ -49,11 +50,19 @@
                     <template is="dom-if" if="{{index}}">
                         <lane-resizer parent-lane="{{level.id}}"></lane-resizer>
                     </template>
-                    <board-lane id$="lane-{{level.id}}" metadata="{{level}}" issues="{{issues}}"></board-lane>
+                    <board-lane
+                        id$="lane-{{level.id}}"
+                        metadata="{{level}}"
+                        issues="{{issues}}"
+                        local-states="{{localStates}}"
+                        ></board-lane>
                 </template>
             </template>
         </div>
-        <issue-detail id="issuedialog"></issue-detail>
+        <issue-detail
+            id="issuedialog"
+            local-states="{{localStates}}"
+            ></issue-detail>
 
     </template>
 
@@ -88,6 +97,14 @@
                         type: Date,
                         value: new Date(),
                         notify: true
+                    },
+
+                    localStates: {
+                        type: Object,
+                        value: {
+                            steps: {},
+                            issues: {}
+                        }
                     }
                 },
 
@@ -135,6 +152,10 @@
                         issuesInvalidTeam.push(issue.issueKey + ": " + issue.usersTeam);
                     });
                     return issuesInvalidTeam;
+                },
+
+                updateIssueLocalStateErrorMessage: function(e) {
+                    this.set('localStates.issues.' + e.detail.issueKey + '.errorMessage', e.detail.errorMessage);
                 }
             });
         })();
