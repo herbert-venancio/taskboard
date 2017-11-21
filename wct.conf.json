@@ -2,14 +2,14 @@
   "verbose": false,
   "plugins": {
     "local": {
-      "browsers": ["chrome"]
+      "browsers": ["firefox"]
     }
   },
-  
-  "suites": ["test"],
+
+  "suites": ["test/login-test.html", "test/board-search-test.html"],
   "webserver": {
     "pathMappings": [
-      {"/components/bower_components/": "src/main/resources/static/bower_components"}
+      {"/static": "target/classes/static"}
     ]
   }
 }

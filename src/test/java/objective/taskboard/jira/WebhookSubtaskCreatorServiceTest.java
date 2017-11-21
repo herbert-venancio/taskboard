@@ -21,8 +21,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.IssueType;
 
-import objective.taskboard.controller.WebhookController.WebhookBody.Changelog;
 import objective.taskboard.jira.JiraProperties.SubtaskCreation;
+import objective.taskboard.jira.data.WebHookBody;
 
 @RunWith(MockitoJUnitRunner.class)
 public class WebhookSubtaskCreatorServiceTest {
@@ -39,7 +39,7 @@ public class WebhookSubtaskCreatorServiceTest {
     private SubtaskCreation properties1 = new SubtaskCreation();
     private SubtaskCreation properties2 = new SubtaskCreation();
     
-    private Changelog changelog = new Changelog();
+    private WebHookBody.Changelog changelog = new WebHookBody.Changelog();
     private List<Map<String, Object>> changelogItems = new ArrayList<>();
 
     @Before

@@ -14,28 +14,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 	<meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
 	<title>Login Test</title>
 
-	<script src="../src/main/resources/static/bower_components/webcomponentsjs/webcomponents.min.js"></script>
-	<link rel="import" href="../src/main/resources/static/bower_components/polymer/polymer.html">
-	<script src="../src/main/resources/static/bower_components/web-component-tester/browser.js"></script>
-	<script src="../src/main/resources/static/bower_components/test-fixture/test-fixture-mocha.js"></script>
+	<link rel="import" href="/static/bower_components/polymer/polymer.html">
+	<link rel="import" href="/static/bower_components/test-fixture/test-fixture.html">
 
-  	<!-- Import the element to test -->
-  	<link rel="import" href="../src/main/resources/static/elements/security/log-in.html">
+	<script src="/static/bower_components/webcomponentsjs/webcomponents.min.js"></script>
+	<script src="/static/bower_components/web-component-tester/browser.js"></script>
+	<script src="/static/bower_components/test-fixture/test-fixture-mocha.js"></script>
+
+	<!-- dependencies -->
+	<script src="/static/bower_components/jquery/dist/jquery.js"></script>
+
+	<!-- Import the element to test -->
+  	<link rel="import" href="/static/elements/security/log-in.html">
   	
-	<link rel="import" href="../src/main/resources/static/bower_components/test-fixture/test-fixture.html">
-	<link rel="import" href="../src/main/resources/static/bower_components/iron-ajax/iron-ajax.html">
 </head>
 <body>
 
 	<test-fixture id="login-fixture">
 		<template>
 			<log-in></log-in>
-		</template>
-	</test-fixture>
-	
-	<test-fixture id="simple-post">
-		<template>
-			<iron-ajax method="POST" url="/login"></iron-ajax>
 		</template>
 	</test-fixture>
 
@@ -48,7 +45,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 			setup(function(){
 				server = sinon.fakeServer.create();
-				server.respondWith('POST', '/login', [ 401, responseHeaders.json, '{"error":"Unauthorized"}']);
+				server.respondWith('POST', '/login', [ 401, responseHeaders.json, '{"message":"Unauthorized"}']);
 			});
 
 			teardown(function() {
@@ -60,7 +57,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 	
 				setup(function() {
 					login = fixture('login-fixture');
-					ajax = fixture('simple-post');
 					user = Polymer.dom(login.root).querySelector('paper-input#username');
 					pass = Polymer.dom(login.root).querySelector('paper-input#password');
 					button = Polymer.dom(login.root).querySelector('paper-button#login');
@@ -84,11 +80,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				});
 	
 				test('quando o usuário digita username/password incorretos, ele é avisado?', function() {
-					assert.isDefined(incorrect.attributes['hidden']);
-					button.click();
-					request = ajax.generateRequest();
+					assert.isDefined(incorrect.attributes['hidden$']);
+					Polymer.dom(login.root).querySelector('paper-button#login').click();
 		            server.respond();
-		            expect(request.response).to.be.not.ok;
 					assert.isUndefined(incorrect.attributes['hidden']);
 				});
 			});

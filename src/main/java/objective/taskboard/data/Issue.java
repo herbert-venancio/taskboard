@@ -20,8 +20,6 @@
  */
 package objective.taskboard.data;
 
-import static com.google.common.collect.Maps.newHashMap;
-
 import java.io.Serializable;
 import java.util.Date;
 import java.util.LinkedHashSet;
@@ -34,25 +32,25 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.DateDeserializers.DateDeserializer;
 
 import objective.taskboard.config.SpringContextBridge;
+import objective.taskboard.domain.IssueStateHashCalculator;
 import objective.taskboard.domain.converter.CardVisibilityEvalService;
 import objective.taskboard.domain.converter.IssueCoAssignee;
 import objective.taskboard.domain.converter.IssueTeamService;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraProperties.BallparkMapping;
 import objective.taskboard.jira.MetadataService;
+import objective.taskboard.jira.ProjectService;
+import objective.taskboard.jira.data.Version;
 import objective.taskboard.repository.FilterCachedRepository;
 
 
-@JsonIgnoreProperties({"jiraProperties", "metaDataService"})
 public class Issue extends IssueScratch implements Serializable {
     private static final long serialVersionUID = 8513934402068368820L;
 
-    @JsonIgnore
     private transient Issue parentCard;
     
     private transient Set<Issue> subtasks = new LinkedHashSet<>();
@@ -66,8 +64,11 @@ public class Issue extends IssueScratch implements Serializable {
     private transient FilterCachedRepository filterRepository;
     
     private transient CardVisibilityEvalService cardVisibilityEvalService;
+
+    private transient ProjectService projectService;
+
+    private transient IssueStateHashCalculator issueStateHashCalculator;
     
-    @JsonIgnore
     private List<IssueCoAssignee> coAssignees = new LinkedList<>(); //NOSONAR
     
     private String color;
@@ -77,7 +78,9 @@ public class Issue extends IssueScratch implements Serializable {
             MetadataService metadataService, 
             IssueTeamService issueTeamService, 
             FilterCachedRepository filterRepository,
-            CardVisibilityEvalService cardVisibilityEvalService) {
+            CardVisibilityEvalService cardVisibilityEvalService,
+            ProjectService projectService,
+            IssueStateHashCalculator issueStateHashCalculator) {
         this.id = scratch.id;
         this.issueKey = scratch.issueKey;
         this.projectKey = scratch.projectKey;
@@ -108,16 +111,18 @@ public class Issue extends IssueScratch implements Serializable {
         this.reporter = scratch.reporter;
         this.coAssignees = scratch.coAssignees;
         this.classOfService = scratch.classOfService;
-        this.release = scratch.release;
+        this.releaseId = scratch.releaseId;
         this.changelog = scratch.changelog;
         this.priorityUpdatedDate = scratch.priorityUpdatedDate;
         this.remoteIssueUpdatedDate = scratch.remoteIssueUpdatedDate;
-        
+
         this.metaDataService = metadataService;
         this.jiraProperties = properties;
         this.issueTeamService = issueTeamService;
         this.filterRepository = filterRepository;
-        this.cardVisibilityEvalService = cardVisibilityEvalService;        
+        this.cardVisibilityEvalService = cardVisibilityEvalService;
+        this.projectService = projectService;
+        this.issueStateHashCalculator = issueStateHashCalculator;
         this.render = false;
         this.favorite = false;
         this.hidden = false;        
@@ -251,21 +256,7 @@ public class Issue extends IssueScratch implements Serializable {
             
         return classOfService;
     }
-    
-    @JsonIgnore
-    public Map<String, CustomField> getRelease() {
-        Map<String, CustomField> release = getLocalRelease();
 
-        if (!release.isEmpty())
-            return release;
-
-        Optional<Issue> pc = getParentCard();
-        if (!pc.isPresent())
-            return newHashMap();
-
-        return pc.get().getRelease();
-    }
-    
     @JsonIgnore
     public List<Changelog> getChangelog() {
         return changelog;
@@ -450,14 +441,6 @@ public class Issue extends IssueScratch implements Serializable {
         return this.timeTracking;
     }
 
-    public JiraProperties getJiraProperties() {
-        return this.jiraProperties;
-    }
-
-    public MetadataService getMetaDataService() {
-        return this.metaDataService;
-    }
-
     public void setId(final Long id) {
         this.id = id;
     }
@@ -588,6 +571,10 @@ public class Issue extends IssueScratch implements Serializable {
         this.priorityOrder = priorityOrder;
     }
 
+    public void setReleaseId(final String releaseId) {
+        this.releaseId = releaseId;
+    }
+
     public void setTimeTracking(final TaskboardTimeTracking timeTracking) {
         this.timeTracking = timeTracking;
     }
@@ -612,11 +599,6 @@ public class Issue extends IssueScratch implements Serializable {
     @JsonIgnore
     public CustomField getLocalClassOfServiceCustomField() {
         return classOfService;
-    }
-
-    @JsonIgnore
-    public Map<String, CustomField> getLocalRelease() {
-        return release;
     }
 
     public void setCustomFields(final Map<String, Serializable> customFields) {
@@ -644,7 +626,26 @@ public class Issue extends IssueScratch implements Serializable {
     public List<Subtask> getSubtasks() {
         return subtasks.stream().map(s->new Subtask(s.issueKey, s.summary)).collect(Collectors.toList());
     }
-    
+
+    public String getReleaseId() {
+        if(releaseId != null)
+            return releaseId;
+
+        Optional<Issue> pc = getParentCard();
+        if(pc.isPresent())
+            return pc.get().releaseId;
+
+        return null;
+    }
+
+    public Version getRelease() {
+        return projectService.getVersion(getReleaseId());
+    }
+
+    public int getStateHash() {
+        return issueStateHashCalculator.calculateHash(this);
+    }
+
     private Object readResolve() {
         this.subtasks = new LinkedHashSet<>();
         return this;
@@ -655,12 +656,16 @@ public class Issue extends IssueScratch implements Serializable {
             MetadataService metaDataService,
             IssueTeamService issueTeamService,
             FilterCachedRepository filterRepository,
-            CardVisibilityEvalService cardVisibilityEvalService) {
+            CardVisibilityEvalService cardVisibilityEvalService,
+            ProjectService projectService,
+            IssueStateHashCalculator issueStateHashCalculator) {
         this.jiraProperties = jiraProperties;
         this.metaDataService = metaDataService;
         this.issueTeamService = issueTeamService;
         this.filterRepository = filterRepository;
         this.cardVisibilityEvalService = cardVisibilityEvalService;
+        this.projectService = projectService;
+        this.issueStateHashCalculator = issueStateHashCalculator;
     }
     
     @Override

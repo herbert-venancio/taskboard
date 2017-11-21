@@ -1,0 +1,130 @@
+<!doctype html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+    <title>Exemplo Test</title>
+
+    <link rel="import" href="/static/bower_components/polymer/polymer.html">
+    <link rel="import" href="/static/bower_components/test-fixture/test-fixture.html">
+
+    <script src="/static/bower_components/webcomponentsjs/webcomponents.min.js"></script>
+    <script src="/static/bower_components/web-component-tester/browser.js"></script>
+    <script src="/static/bower_components/test-fixture/test-fixture-mocha.js"></script>
+    <script src="/static/bower_components/iron-test-helpers/mock-interactions.js"></script>
+
+    <!-- dependencies -->
+    <script src="/static/scripts/taskboard.js"></script>
+    <link rel="import" href="/static/bower_components/iron-signals/iron-signals.html">
+    <link rel="import" href="/static/bower_components/paper-item/paper-item.html">
+    <link rel="import" href="/static/bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+    <link rel="import" href="/static/bower_components/paper-listbox/paper-listbox.html">
+
+    <!-- Import the element to test -->
+    <link rel="import" href="/static/elements/taskboard/board-search.html">
+
+
+</head>
+<body>
+
+    <test-fixture id="board-search-fixture">
+        <template>
+            <board-search></board-search>
+        </template>
+    </test-fixture>
+
+    <script>
+        var defaultAspectFilters = [
+            {description:'Project', field:'projectKey', aspectsSubitemFilter: [
+                {name:'Project 1', value:'PROJ1', selected:true, visible:true, teams:[], releases:[]}
+                , {name:'Taskboard', value:'TASKB', selected:true, visible:true
+                    , teams:['TASKBOARD 2', 'TASKBOARD 1']
+                    , releases:[
+                        {id:"12550", name:"1.0"}
+                        , {id:"12551", name:"2.0"}
+                        , {id:"12552", name:"3.0"}
+                    ]
+                }
+            ]}
+        ];
+        var modifiedAspectFilters = [
+            {description:'Project', field:'projectKey', aspectsSubitemFilter: [
+                {name:'Project 1', value:'PROJ1', selected:true, visible:true, teams:[], releases:[]}
+                , {name:'Taskboard', value:'TASKB', selected:true, visible:true
+                    , teams:['TASKBOARD 2', 'TASKBOARD 1']
+                    , releases:[
+                        {id:"12550", name:"1.0-edited"}
+                        , {id:"12551", name:"2.0"}
+                        , {id:"12552", name:"3.0"}
+                    ]
+                }
+            ]}
+        ];
+
+        function async(callback) {
+            Polymer.Base.async(callback, 1);
+        }
+
+        function openMenu(menu) {
+          return new Promise(
+            function(resolve, reject) {
+              menu.$.menuButton.$.dropdown.addEventListener('iron-overlay-opened', function() {
+                async(function() { resolve(menu); });
+              });
+              MockInteractions.tap(menu);
+            }
+          );
+        };
+
+        function selectFirstItem(dropdownMenu) {
+          return new Promise(
+            function(resolve, reject) {
+              var content = Polymer.dom(dropdownMenu).querySelector('.dropdown-content');
+              var firstItem = Polymer.dom(content).querySelectorAll('paper-item')[1];
+
+              MockInteractions.tap(firstItem);
+
+              async(function() { resolve(firstItem); });
+            }
+          );
+        }
+
+        suite('<board-search-test>', function() {
+		    var boardSearch;
+		    setup(function() {
+                window.CONFIGURATION = {
+                    USE_RELEASE: true
+                };
+                taskboard.setAspectFilters(null, defaultAspectFilters);
+                boardSearch = fixture('board-search-fixture');
+            });
+
+            test('component loads correctly', function() {
+                assert.isDefined(boardSearch.root, 'should be defined.');
+            });
+
+            test('selection maintains after aspect-filters update', function(done) {
+                // async because board-search not fully loaded
+                async(function() {
+                    var searchRelease = boardSearch.$$('#searchRelease');
+                    openMenu(searchRelease)
+                      .then(selectFirstItem)
+                      .then(function(firstItem) {
+                        expect(searchRelease.selectedItem).to.be.equal(firstItem);
+                        expect(searchRelease.selectedItem.innerText.trim()).to.be.equal('TASKB - 1.0');
+
+                        var releaseSelectedItem = searchRelease.selectedItem;
+                        taskboard.setAspectFilters(boardSearch, modifiedAspectFilters);
+                        async(function() {
+                            expect(searchRelease.selectedItem).to.be.equal(firstItem);
+                            expect(searchRelease.selectedItem.innerText.trim()).to.be.equal('TASKB - 1.0-edited');
+
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

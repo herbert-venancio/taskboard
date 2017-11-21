@@ -32,8 +32,10 @@ function Taskboard() {
         return window.user;
     }
 
-    this.setAspectFilters = function(filters) {
+    this.setAspectFilters = function(source, filters) {
         aspectFilters = filters;
+        if(source)
+            source.fire('iron-signal', {name:'refresh-release-filter'});
     };
 
     this.getAspectFilters = function() {
@@ -311,6 +313,12 @@ function Taskboard() {
                     newstate: JSON.parse(response.body)
                 }})
             });
+
+            stompClient.subscribe('/topic/projects/updates', function (response) {
+                taskboardHome.fire('iron-signal', {name:'projects-changed', data:{
+                    projects: JSON.parse(response.body)
+                }});
+            });
         });
     }
 
@@ -320,7 +328,7 @@ function Taskboard() {
         var updateByStep = {};
         updateEvents.forEach(function(anEvent) {
             var previousInstance = getPreviousIssueInstance(anEvent.target.issueKey);
-            if (previousInstance !== null && previousInstance.issue.updatedDate === anEvent.target.updatedDate)
+            if (previousInstance !== null && previousInstance.issue.stateHash === anEvent.target.stateHash)
                 return;
             var converted = self.convertIssue(anEvent.target);
             if (previousInstance === null)

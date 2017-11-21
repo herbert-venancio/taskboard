@@ -25,6 +25,7 @@ import org.junit.After;
 import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriverException;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -41,7 +42,14 @@ public abstract class AbstractUIWithCoverageIntegrationTest extends AbstractUIIn
             System.err.println("Can't save javascript coverage because webdriver is null");
             return;
         }
-        String coverageReport = (String) ((JavascriptExecutor)webDriver).executeScript("return JSON.stringify(window.__coverage__);");
+
+        String coverageReport;
+        try {
+            coverageReport = (String) ((JavascriptExecutor) webDriver).executeScript("return JSON.stringify(window.__coverage__);");
+        } catch (WebDriverException ex) {
+            ex.printStackTrace();
+            return;
+        }
         File f = new File("target/istanbul-reports/" + testName.getMethodName() + ".json");
         try {
             if(f.getParentFile() != null)

@@ -74,14 +74,11 @@ function SearchFilter() {
         return false;
     };
 
-    var filterByRelease = function(issue, release) {
-        if (!release || !release.project || !release.version)
+    var filterByRelease = function(issue, releaseId) {
+        if (!releaseId)
             return true;
 
-        var issueRelease = issue.customfields.release;
-        return issue.projectKey.toUpperCase() == release.project.toUpperCase() &&
-               issueRelease && issueRelease.value &&
-               issueRelease.value.toUpperCase() == release.version.toUpperCase();
+        return issue.releaseId && issue.releaseId == releaseId;
     };
 }
 

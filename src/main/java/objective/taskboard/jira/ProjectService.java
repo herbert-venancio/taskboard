@@ -34,8 +34,9 @@ import com.atlassian.jira.rest.client.api.GetCreateIssueMetadataOptions;
 import com.atlassian.jira.rest.client.api.GetCreateIssueMetadataOptionsBuilder;
 import com.atlassian.jira.rest.client.api.domain.CimProject;
 
-import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
 import objective.taskboard.domain.Project;
+import objective.taskboard.jira.data.Version;
+import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
 
 @Service
 public class ProjectService {
@@ -72,5 +73,17 @@ public class ProjectService {
 
     public boolean isProjectVisible(String projectKey) {
         return projectCache.getVisibleProjects().containsKey(projectKey);
+    }
+
+    public Version getVersion(String versionId) {
+        if(versionId == null)
+            return null;
+
+        return projectCache.getAllProjects().stream()
+                .filter(project -> project.versions != null)
+                .flatMap(project -> project.versions.stream())
+                .filter(version -> versionId.equals(version.id))
+                .findFirst()
+                .orElse(null);
     }
 }

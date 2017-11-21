@@ -21,11 +21,14 @@ package objective.taskboard.jira;
  * [/LICENSE]
  */
 
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -36,7 +39,9 @@ import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.config.LoggedInUserKeyGenerator;
 import objective.taskboard.domain.Project;
 import objective.taskboard.domain.ProjectFilterConfiguration;
+import objective.taskboard.jira.data.JiraProject;
 import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
+import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 
 @Component
@@ -46,7 +51,24 @@ class ProjectCache {
     private ProjectFilterConfigurationCachedRepository projectFilterConfiguration;
 
     @Autowired
+    private JiraEndpointAsMaster jiraEndpointAsMaster;
+
+    @Autowired
     private JiraEndpointAsLoggedInUser jiraEndpointAsUser;
+
+    @Cacheable(cacheNames = CacheConfiguration.ALL_PROJECTS)
+    public List<JiraProject> getAllProjects() {
+        Set<String> configuredProjects = projectFilterConfiguration.getProjects().stream()
+                .map(pfc -> pfc.getProjectKey())
+                .collect(toSet());
+
+        JiraProject.Service service = jiraEndpointAsMaster.request(JiraProject.Service.class);
+        return service.all()
+                .stream()
+                .filter(project -> configuredProjects.contains(project.key))
+                .map(project -> service.get(project.key))
+                .collect(toList());
+    }
 
     @Cacheable(cacheNames=CacheConfiguration.PROJECTS, keyGenerator=LoggedInUserKeyGenerator.NAME)
     public Map<String, Project> getVisibleProjects() {

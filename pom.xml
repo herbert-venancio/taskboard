@@ -356,6 +356,16 @@
 								</goals>
 							</execution>
 							<execution>
+								<id>exec-web-component-tester</id>
+								<phase>test</phase>
+								<configuration>
+									<executable>node_modules/.bin/wct</executable>
+								</configuration>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+							</execution>
+							<execution>
 								<id>instrument-javascript</id>
 								<phase>pre-integration-test</phase>
 								<goals>

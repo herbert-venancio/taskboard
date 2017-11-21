@@ -355,6 +355,7 @@
                       on-iron-signal-close-issue-error-message="_closeIssueErrorIronSignal"
                       on-iron-signal-search-filter-changed="searchFilterChanged"
                       on-iron-signal-issue-cache-state-updated="cacheStateUpdated"
+                      on-iron-signal-projects-changed="projectsUpdated"
                       >
         </iron-signals>
 
@@ -514,7 +515,7 @@
 
                 retrieveFilters: function () {
                     $.getJSON("/ws/issues/aspects-filter", $.proxy(function (data) {
-                        taskboard.setAspectFilters(data);
+                        taskboard.setAspectFilters(this, data);
                         taskboard.applyFilterPreferences();
                         this.aspectsFilter = taskboard.getAspectFilters();
                     }, this));
@@ -692,6 +693,10 @@
                     if (data.dontSaveQuery)
                         return;
                     this.currentQueryData = data;
+                },
+
+                projectsUpdated: function(event, data) {
+                    this.retrieveFilters();
                 },
 
                 refreshBoard: function() {

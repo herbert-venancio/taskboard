@@ -23,9 +23,12 @@ package objective.taskboard.domain.converter;
 import static com.atlassian.jira.rest.client.api.domain.IssueLinkType.Direction.INBOUND;
 import static com.atlassian.jira.rest.client.api.domain.IssueLinkType.Direction.OUTBOUND;
 import static java.util.Arrays.asList;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
@@ -498,15 +501,11 @@ public class IssueFieldsExtractorTest {
 
     @Test
     public void extractReleaseValid() throws JSONException {
-        JSONObject jsonRelease = new JSONObject("{name:RELEASE}");
+        JSONObject jsonRelease = new JSONObject("{id:10000, name:RELEASE}");
         mockIssueField(RELEASE_ID, jsonRelease);
 
-        Map<String, objective.taskboard.data.CustomField> release = IssueFieldsExtractor.extractRelease(jiraProperties, issue);
-        assertTrue("Release should have been extracted", release.containsKey(RELEASE_ID));
-
-        objective.taskboard.data.CustomField customFieldRelease = release.get(RELEASE_ID);
-        assertNotNull("Release shouldn't be null", customFieldRelease);
-        assertEquals("Release", "RELEASE", customFieldRelease.getValue());
+        String release = IssueFieldsExtractor.extractReleaseId(jiraProperties, issue);
+        assertThat("Release should have been extracted", release, is("10000"));
     }
 
     @Test
@@ -514,14 +513,14 @@ public class IssueFieldsExtractorTest {
         JSONObject jsonRelease = new JSONObject("{namee:RELEASE}");
         mockIssueField(RELEASE_ID, jsonRelease);
 
-        assertTrue(MSG_RELEASE_SHOULD_BE_EMPTY, IssueFieldsExtractor.extractRelease(jiraProperties, issue).isEmpty());
+        assertThat(MSG_RELEASE_SHOULD_BE_EMPTY, IssueFieldsExtractor.extractReleaseId(jiraProperties, issue), is(nullValue()));
     }
 
     @Test
     public void extractReleaseFieldValueNull() {
         mockIssueField(RELEASE_ID, null);
 
-        assertTrue(MSG_RELEASE_SHOULD_BE_EMPTY, IssueFieldsExtractor.extractRelease(jiraProperties, issue).isEmpty());
+        assertThat(MSG_RELEASE_SHOULD_BE_EMPTY, IssueFieldsExtractor.extractReleaseId(jiraProperties, issue), is(nullValue()));
     }
 
     @Test

@@ -54,7 +54,7 @@ public class ProjectFilterConfigurationCachedRepository {
         return ImmutableList.copyOf(cache);
     }
 
-    public Boolean exists(String projectKey) {
+    public boolean exists(String projectKey) {
         for (ProjectFilterConfiguration projectFilterConfiguration : cache) {
             if (projectFilterConfiguration.getProjectKey().equals(projectKey))
                 return true;

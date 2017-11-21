@@ -20,16 +20,25 @@
  */
 package objective.taskboard.testUtils;
 
+import static java.util.Collections.singletonMap;
 import static spark.Service.ignite;
 
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
+import objective.taskboard.RequestBuilder;
+import org.apache.commons.lang.text.StrSubstitutor;
+import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -85,6 +94,9 @@ public class JiraMockServer {
             username = null;
             searchFailureEnabled = false;
             transitionFailureEnabled = false;
+            webhooks.clear();
+            projectEdits.clear();
+            issueEdits.clear();
             return "";
         });
         
@@ -113,7 +125,8 @@ public class JiraMockServer {
         });
         
         get("/rest/api/latest/project/:projectkey", (req, res) ->{
-            return loadMockData("project_" + req.params(":projectkey") + ".response.json");
+            String project = loadMockData("project_" + req.params(":projectkey") + ".response.json");
+            return applyProjectEdits(project);
         });
         
         get("rest/api/latest/status",  (req, res) ->{
@@ -172,6 +185,7 @@ public class JiraMockServer {
             JSONObject issueDataForKey = getIssueDataForKey(issueKey);
             if (issueDataForKey != null) {
                 JSONObject jsonObject = issueDataForKey.getJSONArray("issues").getJSONObject(0);
+                jsonObject = applyIssueEdits(clone(jsonObject));
                 jsonObject.put("names", issueDataForKey.getJSONObject("names"));
                 jsonObject.put("schema", issueDataForKey.getJSONObject("schema"));
                 return jsonObject.toString();
@@ -267,8 +281,59 @@ public class JiraMockServer {
             return loadMockData("createversion.response.json");
         });
 
+        put("/rest/api/latest/version/:versionId", "application/json", (req,res) -> {
+            JSONObject body = new JSONObject(req.body());
+            final String versionId = req.params(":versionId");
+            final String newName = body.getString("name");
+            projectEdits.add(project -> {
+                try {
+                    if(!"TASKB".equals(project.getString("key")))
+                        return;
+
+                    JSONArray array = project.getJSONArray("versions");
+                    for(int i = 0; i < array.length(); ++i) {
+                        JSONObject version = array.getJSONObject(i);
+                        if(!versionId.equals(version.getString("id")))
+                            continue;
+
+                        version.put("name", newName);
+                    }
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            issueEdits.add(issue -> {
+               try {
+                   JSONObject fields = issue.getJSONObject("fields");
+
+                   JSONObject project = fields.getJSONObject("project");
+                   if(!"TASKB".equals(project.getString("key")))
+                       return;
+
+                   if(fields.isNull("customfield_11455"))
+                       return;
+
+                   JSONObject versionCustomField = fields.getJSONObject("customfield_11455");
+                   if(!versionId.equals(versionCustomField.getString("id")))
+                       return;
+
+                   versionCustomField.put("name", newName);
+               } catch (JSONException e) {
+                   throw new RuntimeException(e);
+               }
+            });
+            sendWebhook("TASKB", "jira:version_updated", "TASKB_version_update.json");
+            // not really correct response
+            return loadMockData("createversion.response.json");
+        });
+
         get("/rest/api/latest/statuscategory", (req, res) -> {
             return loadMockData("status-categories.json");
+        });
+
+        post("/rest/webhooks/1.0/webhook", "application/json", (req,res) -> {
+            WebHookConfiguration webhook = gson.fromJson(req.body(), WebHookConfiguration.class);
+            return webhookRegistration(webhook);
         });
 
         get("*", (req, res) -> {
@@ -279,10 +344,28 @@ public class JiraMockServer {
         });
     }
 
+    private String applyProjectEdits(String project) throws JSONException {
+        if(StringUtils.isEmpty(project) || projectEdits.isEmpty())
+            return project;
+
+        return applyEdits(new JSONObject(project), projectEdits).toString();
+    }
+
+    private static JSONObject applyIssueEdits(JSONObject issue) {
+        return applyEdits(issue, issueEdits);
+    }
+
+    private static JSONObject applyEdits(JSONObject t, List<Consumer<JSONObject>> edits) {
+        for(Consumer<JSONObject> edit : edits) {
+            edit.accept(t);
+        }
+        return t;
+    }
+
     private static JSONObject getIssueDataForKey(String issueKey) throws JSONException {
         JSONObject issueSearchData = dirtySearchIssuesByKey.get(issueKey);
         if (issueSearchData == null) {
-            issueSearchData = clone(searchIssuesByKey.get(issueKey)); 
+            issueSearchData = clone(searchIssuesByKey.get(issueKey));
             dirtySearchIssuesByKey.put(issueKey, issueSearchData);
         }
         return issueSearchData;
@@ -431,7 +514,42 @@ public class JiraMockServer {
         }
         System.out.println("************ DATA LOAD READY ************");
     }
-    
+
+    private static String webhookRegistration(WebHookConfiguration configuration) throws JSONException {
+        webhooks.add(configuration);
+        JSONObject response = new JSONObject();
+        response.put("name", configuration.name);
+        response.put("url", configuration.url);
+        response.put("excludeBody", false);
+        JSONObject filters = new JSONObject();
+        filters.put("issue-related-events-section", "");
+        response.put("filters", filters);
+        response.put("events", configuration.events);
+        response.put("enabled", true);
+        response.put("self", "http://localhost:4567/rest/webhooks/1.0/webhook/" + webhooks.size());
+        response.put("lastUpdatedUser", "admin");
+        response.put("lastUpdatedDisplayName", "admin");
+        response.put("lastUpdated", System.currentTimeMillis());
+        return response.toString();
+    }
+
+    private static void sendWebhook(String projectKey, String eventType, String webhookContentFile) {
+        webhooks.stream()
+                .filter(webhook -> webhook.events.contains(eventType))
+                .map(webhook ->
+                        (Runnable) () -> {
+                            Map<String, String> parameters = singletonMap("project.key", projectKey);
+                            String webhookUrl = StrSubstitutor.replace(webhook.url, parameters);
+                            String body = IOUtilities.resourceToString("webhook/" + webhookContentFile);
+                            RequestBuilder.url(webhookUrl)
+                                    .header("Content-Type", "application/json")
+                                    .body(body)
+                                    .post();
+                        }
+                )
+                .forEach(executorService::submit);
+    }
+
     private static JSONObject clone(JSONObject jsonObject) {
         try {
             if (jsonObject == null) {
@@ -450,6 +568,10 @@ public class JiraMockServer {
     private static boolean searchFailureEnabled = false;
     private static boolean transitionFailureEnabled = true;
     private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    private static List<Consumer<JSONObject>> projectEdits = new ArrayList<>();
+    private static List<Consumer<JSONObject>> issueEdits = new ArrayList<>();
+    private static List<WebHookConfiguration> webhooks = new ArrayList<>();
+    private static ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     private void ensureInitialized() {
         if(server == null)
@@ -481,9 +603,20 @@ public class JiraMockServer {
         server.put(path, route);
     }
 
+    private void put(String path, String acceptType, Route route) {
+        ensureInitialized();
+        server.put(path, acceptType, route);
+    }
+
     private String loaduser() {
         String loadMockData = loadMockData("user.response.json");
         loadMockData = loadMockData.replace("\"displayName\": \"Taskboard\",", "\"displayName\": \"" + username + "\",");
         return loadMockData;
+    }
+
+    private static class WebHookConfiguration {
+        public String name;
+        public String url;
+        public List<String> events;
     }
 }

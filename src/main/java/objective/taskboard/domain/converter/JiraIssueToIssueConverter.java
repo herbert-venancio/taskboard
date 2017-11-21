@@ -34,7 +34,7 @@ import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractL
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractLastBlockReason;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractParentKey;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractRealParent;
-import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractRelease;
+import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractReleaseId;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractTShirtSizes;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -57,9 +57,11 @@ import objective.taskboard.data.IssueScratch;
 import objective.taskboard.data.TaskboardTimeTracking;
 import objective.taskboard.database.IssuePriorityService;
 import objective.taskboard.domain.IssueColorService;
+import objective.taskboard.domain.IssueStateHashCalculator;
 import objective.taskboard.domain.ParentIssueLink;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.MetadataService;
+import objective.taskboard.jira.ProjectService;
 import objective.taskboard.repository.FilterCachedRepository;
 import objective.taskboard.repository.ParentIssueLinkRepository;
 
@@ -93,6 +95,12 @@ public class JiraIssueToIssueConverter {
 
     @Autowired
     private CardVisibilityEvalService cardVisibilityEvalService;
+
+    @Autowired
+    private ProjectService projectService;
+
+    @Autowired
+    private IssueStateHashCalculator issueStateHashCalculator;
 
     private List<String> parentIssueLinks = new ArrayList<>();
     
@@ -154,7 +162,7 @@ public class JiraIssueToIssueConverter {
                 jiraIssue.getReporter() == null ? null : jiraIssue.getReporter().getName(),
                 coAssignees,
                 extractClassOfService(jiraProperties, jiraIssue),
-                extractRelease(jiraProperties, jiraIssue),
+                extractReleaseId(jiraProperties, jiraIssue),
                 extractChangelog(jiraIssue));
         
         return createIssueFromScratch(converted, provider);
@@ -166,7 +174,9 @@ public class JiraIssueToIssueConverter {
                 metadataService, 
                 issueTeamService, 
                 filterRepository,
-                cardVisibilityEvalService);
+                cardVisibilityEvalService,
+                projectService,
+                issueStateHashCalculator);
         
     	if (!isEmpty(converted.getParent())) {
     	    Optional<objective.taskboard.data.Issue> parentCard = provider.get(converted.getParent());
@@ -180,8 +190,7 @@ public class JiraIssueToIssueConverter {
         
         Map<String, Serializable> customFields = converted.getCustomFields();
         customFields.put(jiraProperties.getCustomfield().getClassOfService().getId(), converted.getClassOfServiceValue());
-        customFields.putAll(converted.getRelease());
-        
+
         return converted;
     }
 

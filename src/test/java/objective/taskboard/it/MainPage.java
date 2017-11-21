@@ -20,6 +20,7 @@
  */
 package objective.taskboard.it;
 
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.junit.Assert.assertEquals;
 import static org.openqa.selenium.support.PageFactory.initElements;
@@ -30,10 +31,12 @@ import java.util.List;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class MainPage extends AbstractUiFragment {
@@ -93,6 +96,30 @@ public class MainPage extends AbstractUiFragment {
         return initElements(webDriver, MenuFilters.class);
     }
 
+    public MainPage waitReleaseFilterContains(String release) {
+        String releaseNotNull = defaultIfNull(release, "");
+
+        waitVisibilityOfElement(searchReleaseDropdown);
+        waitUntil(new ExpectedCondition<Boolean>() {
+            @Override
+            public Boolean apply(WebDriver driver) {
+                try {
+                    return driver.findElements(By.tagName("paper-item")).stream()
+                            .filter(paperItem -> releaseNotNull.equals(paperItem.getAttribute("textContent").trim()))
+                            .findFirst().isPresent();
+                } catch (StaleElementReferenceException e) {
+                    return null;
+                }
+            }
+
+            @Override
+            public String toString() {
+                return String.format("Release filter contains ('%s')", releaseNotNull);
+            }
+        });
+        return this;
+    }
+
     public MainPage filterByRelease(String release) {
         String releaseNotNull = release == null ? "" : release;
 
@@ -112,7 +139,7 @@ public class MainPage extends AbstractUiFragment {
     }
 
     public MainPage assertLabelRelease(String expected) {
-        waitTextInElement(searchReleaseDropdown, expected);
+        waitPaperDropdownMenuSelectedValueToBe(searchReleaseDropdown, expected);
         return this;
     }
 

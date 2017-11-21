@@ -119,8 +119,8 @@
                     <div class="button-content">
                         <paper-button id="login" class="button" raised on-click="submit">Login</paper-button>
                     </div>
+                </paper-material>
             </form>
-            </paper-material>
         </paper-header-panel>
     </template>
 </dom-module>
@@ -142,6 +142,11 @@
                 value: function () {
                     return this.$.login;
                 }
+            },
+
+            ready: function() {
+                this.username = "";
+                this.password = "";
             },
 
             submit: function (event) {
