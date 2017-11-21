@@ -8,10 +8,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -41,7 +43,7 @@ public class FollowUpTransitionsDataProvider {
     private static final long STATUS_CATEGORY_DONE = 3L;
 
     private static final String HEADER_ISSUE_KEY_COLUMN_NAME = "PKEY";
-    private static final String HEADER_ISSUE_TYPE_COLUMN_NAME = "Type";
+    public static final String HEADER_ISSUE_TYPE_COLUMN_NAME = "Type";
     private static final String HEADER_DATE_COLUMN_NAME = "Date";
 
     private JiraProperties jiraProperties;
@@ -121,6 +123,7 @@ public class FollowUpTransitionsDataProvider {
     private SyntheticTransitionsDataSet getSyntheticTransitionsDs(String[] statuses, AnalyticsTransitionsDataSet dataset) {
         List<String> headers = new LinkedList<>();
         headers.add(HEADER_DATE_COLUMN_NAME);
+        headers.add(HEADER_ISSUE_TYPE_COLUMN_NAME);
         List<String> doneStatuses = metadataService.getStatusesMetadata().values()
                 .stream()
                 .filter(status -> status.statusCategory.id == STATUS_CATEGORY_DONE)
@@ -134,25 +137,30 @@ public class FollowUpTransitionsDataProvider {
     public static SyntheticTransitionsDataSet getSyntheticTransitionsDs(List<String> headers, String[] statuses, List<String> doneStatuses, AnalyticsTransitionsDataSet dataset) {
         List<SyntheticTransitionsDataRow> dataRows = new LinkedList<>();
         if (!CollectionUtils.isEmpty(dataset.rows)) {
+            Set<String> types = extractIssueTypes(dataset);
             Range<ZonedDateTime> dateRange = calculateInterval(dataset);
             for (ZonedDateTime date = dateRange.getMinimum(); !date.isAfter(dateRange.getMaximum()); date = date.plusDays(1)) {
-                int[] issuesInStatusCount = countIssuesInStatus(statuses, dataset, date);
-                issuesInStatusCount = mergeDoneStatusesCount(statuses, doneStatuses, issuesInStatusCount);
-                dataRows.add(new SyntheticTransitionsDataRow(date, Ints.asList(issuesInStatusCount)));
+                for(String issueType : types) {
+                    int[] issuesInStatusCount = countIssuesInStatus(issueType, statuses, dataset, date);
+                    issuesInStatusCount = mergeDoneStatusesCount(statuses, doneStatuses, issuesInStatusCount);
+                    dataRows.add(new SyntheticTransitionsDataRow(date, issueType, Ints.asList(issuesInStatusCount)));
+                }
             }
         }
 
         return new SyntheticTransitionsDataSet(dataset.issueType, headers, dataRows);
     }
 
-    private static int[] countIssuesInStatus(String[] statuses, AnalyticsTransitionsDataSet dataset, ZonedDateTime date) {
+    private static int[] countIssuesInStatus(String issueType, String[] statuses, AnalyticsTransitionsDataSet dataset, ZonedDateTime date) {
         int[] issuesInStatusCount = new int[statuses.length];
         Arrays.fill(issuesInStatusCount, 0);
-        for (AnalyticsTransitionsDataRow row : dataset.rows) {
-            Optional<Integer> index = getTransitionIndexByDate(row, DateTimeUtils.roundUp(date));
-            if (index.isPresent())
-                issuesInStatusCount[index.get()]++;
-        }
+        dataset.rows.stream()
+                .filter(row -> issueType.equals(row.issueType))
+                .forEach(row -> {
+                    Optional<Integer> index = getTransitionIndexByDate(row, DateTimeUtils.roundUp(date));
+                    if (index.isPresent())
+                        issuesInStatusCount[index.get()]++;
+                });
         return issuesInStatusCount;
     }
 
@@ -197,6 +205,12 @@ public class FollowUpTransitionsDataProvider {
 
         issuesInStatusList.add(0, doneStatusesCount);
         return Ints.toArray(issuesInStatusList);
+    }
+
+    private static Set<String> extractIssueTypes(AnalyticsTransitionsDataSet dataset) {
+        return dataset.rows.stream()
+                .map(row -> row.issueType)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

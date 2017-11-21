@@ -1,5 +1,5 @@
 {
-  "followupDataVersion": "1",
+  "followupDataVersion": "2",
   "fromJiraDs": {
     "rows": [
       {
@@ -120,6 +120,7 @@
       "issueType": "Demand",
       "headers": [
         "Date",
+        "Type",
         "Done",
         "Doing",
         "To Do"
@@ -129,6 +130,7 @@
       "issueType": "Features",
       "headers": [
         "Date",
+        "Type",
         "Done",
         "Doing",
         "To Do"
@@ -138,6 +140,7 @@
       "issueType": "Subtasks",
       "headers": [
         "Date",
+        "Type",
         "Done",
         "Doing",
         "To Do"

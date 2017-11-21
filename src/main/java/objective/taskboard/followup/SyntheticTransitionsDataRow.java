@@ -9,10 +9,12 @@ import java.util.stream.Collectors;
 
 public class SyntheticTransitionsDataRow implements TransitionDataRow {
     public final ZonedDateTime date;
+    public final String issueType;
     public final List<Integer> amountOfIssueInStatus;
     
-    public SyntheticTransitionsDataRow(ZonedDateTime date, List<Integer> amountOfIssueInStatus) {
+    public SyntheticTransitionsDataRow(ZonedDateTime date, String issueType, List<Integer> amountOfIssueInStatus) {
         this.date = date;
+        this.issueType = issueType;
         this.amountOfIssueInStatus = amountOfIssueInStatus;
     }
 
@@ -20,6 +22,7 @@ public class SyntheticTransitionsDataRow implements TransitionDataRow {
     public List<String> getAsStringList() {
         List<String> list = new LinkedList<>();
         list.add(DateTimeUtils.toStringExcelFormat(date));
+        list.add(issueType);
         list.addAll(amountOfIssueInStatus.stream()
                 .map(Object::toString)
                 .collect(Collectors.toList()));

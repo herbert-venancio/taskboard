@@ -216,6 +216,7 @@ public class FollowUpGenerator {
             for (SyntheticTransitionsDataRow syntheticTransitionDataRow : syntheticTransitionDataSet.rows) {
                 SheetRow row = sheet.createRow();
                 row.addColumn(syntheticTransitionDataRow.date);
+                row.addColumn(syntheticTransitionDataRow.issueType);
                 for (Integer amountOfIssue : syntheticTransitionDataRow.amountOfIssueInStatus)
                     row.addColumn(amountOfIssue);
                 row.save();

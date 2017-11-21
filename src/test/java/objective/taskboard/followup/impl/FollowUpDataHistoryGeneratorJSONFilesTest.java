@@ -27,8 +27,8 @@ import static java.nio.file.Files.createTempDirectory;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.size;
 import static java.util.Arrays.asList;
-import static objective.taskboard.followup.FollowUpHelper.followupEmptyV1;
-import static objective.taskboard.followup.FollowUpHelper.followupExpectedV1;
+import static objective.taskboard.followup.FollowUpHelper.followupEmptyV2;
+import static objective.taskboard.followup.FollowUpHelper.followupExpectedV2;
 import static objective.taskboard.followup.FollowUpHelper.getDefaultFollowupData;
 import static objective.taskboard.followup.FollowUpHelper.getEmptyFollowupData;
 import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.EXTENSION_JSON;
@@ -112,7 +112,7 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
 
         subject.generate();
 
-        assertGeneratedFile(PROJECT_TEST, followupExpectedV1());
+        assertGeneratedFile(PROJECT_TEST, followupExpectedV2());
     }
 
     @Test
@@ -122,7 +122,7 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
 
         subject.generate();
 
-        assertGeneratedFile(PROJECT_TEST, followupEmptyV1());
+        assertGeneratedFile(PROJECT_TEST, followupEmptyV2());
     }
 
     @Test
@@ -132,8 +132,8 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
 
         subject.generate();
 
-        assertGeneratedFile(PROJECT_TEST, followupExpectedV1());
-        assertGeneratedFile(PROJECT_TEST_2, followupExpectedV1());
+        assertGeneratedFile(PROJECT_TEST, followupExpectedV2());
+        assertGeneratedFile(PROJECT_TEST_2, followupExpectedV2());
     }
 
     @Test
