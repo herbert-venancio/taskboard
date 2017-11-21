@@ -248,6 +248,7 @@ public class FollowUpHelper {
     public static List<SyntheticTransitionsDataSet> getSyntheticTransitionsDataSetWithNoRow() {
         List<String> headers = new LinkedList<>();
         headers.add("Date");
+        headers.add("Type");
         headers.add("Done");
         headers.add("Doing");
         headers.add("To Do");

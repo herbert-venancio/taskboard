@@ -24,6 +24,7 @@ import static java.util.Optional.empty;
 import static objective.taskboard.followup.impl.FollowUpTransitionsDataProvider.TYPE_DEMAND;
 import static objective.taskboard.followup.impl.FollowUpTransitionsDataProvider.TYPE_FEATURES;
 import static objective.taskboard.followup.impl.FollowUpTransitionsDataProvider.TYPE_SUBTASKS;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -175,17 +176,12 @@ public class FollowUpGenerator {
     }
 
     private Optional<AnalyticsTransitionsDataSet> getAnalyticDataSetWithRowByType(List<AnalyticsTransitionsDataSet> analyticsDataSets, String type) {
-        if (isNullOrEmpty(analyticsDataSets))
+        if (isEmpty(analyticsDataSets))
             return empty();
 
-        Optional<AnalyticsTransitionsDataSet> analyticDataSetOfType = analyticsDataSets.stream()
-            .filter(dataSet -> type.equals(dataSet.issueType))
+        return analyticsDataSets.stream()
+            .filter(dataSet -> type.equals(dataSet.issueType) && !isEmpty(dataSet.rows))
             .findFirst();
-
-        if (!analyticDataSetOfType.isPresent() || isNullOrEmpty(analyticDataSetOfType.get().rows))
-            return empty();
-
-        return analyticDataSetOfType;
     }
 
     List<Sheet> generateTransitionsSheets(FollowupData followupData) {
@@ -198,11 +194,11 @@ public class FollowUpGenerator {
     private List<Sheet> generateAnalyticTransitionsSheets(List<AnalyticsTransitionsDataSet> analyticTransitionDataSets) {
         List<Sheet> sheets = new LinkedList<>();
 
-        if (isNullOrEmpty(analyticTransitionDataSets))
+        if (isEmpty(analyticTransitionDataSets))
             return sheets;
 
         for (AnalyticsTransitionsDataSet analyticTransitionDataSet : analyticTransitionDataSets) {
-            if (isNullOrEmpty(analyticTransitionDataSet.rows))
+            if (isEmpty(analyticTransitionDataSet.rows))
                 continue;
 
             Sheet sheet = createSheetWithHeader("Analytic - ", analyticTransitionDataSet);
@@ -225,11 +221,11 @@ public class FollowUpGenerator {
     private List<Sheet> generateSyntheticTransitionsSheets(List<SyntheticTransitionsDataSet> syntheticTransitionDataSets) {
         List<Sheet> sheets = new LinkedList<>();
 
-        if (isNullOrEmpty(syntheticTransitionDataSets))
+        if (isEmpty(syntheticTransitionDataSets))
             return sheets;
 
         for (SyntheticTransitionsDataSet syntheticTransitionDataSet : syntheticTransitionDataSets) {
-            if (isNullOrEmpty(syntheticTransitionDataSet.rows))
+            if (isEmpty(syntheticTransitionDataSet.rows))
                 continue;
 
             Sheet sheet = createSheetWithHeader("Synthetic - ", syntheticTransitionDataSet);
@@ -247,10 +243,6 @@ public class FollowUpGenerator {
             sheets.add(sheet);
         }
         return sheets;
-    }
-
-    private boolean isNullOrEmpty(List<?> list) {
-        return list == null || list.isEmpty();
     }
 
     private Sheet createSheetWithHeader(String prefixSheetName, TransitionDataSet<? extends TransitionDataRow> transitionDataSet) {
