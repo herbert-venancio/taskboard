@@ -7,4 +7,9 @@ public class AnalyticsTransitionsDataSet extends TransitionDataSet<AnalyticsTran
     public AnalyticsTransitionsDataSet(String issueType, List<String> headers, List<AnalyticsTransitionsDataRow> rows) {
         super(issueType, headers, rows);
     }
+
+    public int getInitialIndexStatusHeaders() {
+        return headers.size() - rows.get(0).transitionsDates.size();
+    }
+
 }

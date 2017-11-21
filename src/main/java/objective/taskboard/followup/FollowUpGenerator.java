@@ -20,9 +20,11 @@
  */
 package objective.taskboard.followup;
 
+import static java.util.Optional.empty;
 import static objective.taskboard.followup.impl.FollowUpTransitionsDataProvider.TYPE_DEMAND;
 import static objective.taskboard.followup.impl.FollowUpTransitionsDataProvider.TYPE_FEATURES;
 import static objective.taskboard.followup.impl.FollowUpTransitionsDataProvider.TYPE_SUBTASKS;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -32,7 +34,6 @@ import java.util.Optional;
 
 import org.springframework.core.io.Resource;
 
-import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor;
 import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor.Sheet;
 import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor.SheetRow;
@@ -45,12 +46,9 @@ public class FollowUpGenerator {
 
 	private SimpleSpreadsheetEditor editor;
 
-    private JiraProperties jiraProperties;
-
-    public FollowUpGenerator(FollowupDataProvider provider, SimpleSpreadsheetEditor editor, JiraProperties jiraProperties) {
+    public FollowUpGenerator(FollowupDataProvider provider, SimpleSpreadsheetEditor editor) {
         this.provider = provider;
         this.editor = editor;
-        this.jiraProperties = jiraProperties;
     }
 
     public Resource generate(String [] includedProjects, ZoneId timezone) {
@@ -78,12 +76,11 @@ public class FollowUpGenerator {
         SheetRow rowHeader = sheet.createRow();
         for (String header : followupData.fromJiraDs.headers)
             rowHeader.addColumn(header);
-        for (String statusDemand : jiraProperties.getStatusPriorityOrder().getDemandsInOrder())
-            rowHeader.addColumn(TYPE_DEMAND + " - " + statusDemand);
-        for (String statusTask : jiraProperties.getStatusPriorityOrder().getTasksInOrder())
-            rowHeader.addColumn(TYPE_FEATURES + " - " + statusTask);
-        for (String statusSubtask : jiraProperties.getStatusPriorityOrder().getSubtasksInOrder())
-            rowHeader.addColumn(TYPE_SUBTASKS + " - " + statusSubtask);
+
+        addAnalyticsHeadersIfExist(followupData.analyticsTransitionsDsList, TYPE_DEMAND, rowHeader);
+        addAnalyticsHeadersIfExist(followupData.analyticsTransitionsDsList, TYPE_FEATURES, rowHeader);
+        addAnalyticsHeadersIfExist(followupData.analyticsTransitionsDsList, TYPE_SUBTASKS, rowHeader);
+
         rowHeader.save();
 
         for (FromJiraDataRow fromJiraDataRow : followupData.fromJiraDs.rows) {
@@ -135,12 +132,9 @@ public class FollowUpGenerator {
             row.addFormula("IF(AllIssues[TASK_TYPE]=\"Bug\",AllIssues[EffortEstimate], 0)");
             row.addFormula("IF(AllIssues[TASK_TYPE]=\"Bug\",AllIssues[worklog],0)");
 
-            addTransitionsDates(followupData.analyticsTransitionsDsList, TYPE_DEMAND, fromJiraDataRow.demandNum, row,
-                    jiraProperties.getStatusPriorityOrder().getDemandsInOrder().length);
-            addTransitionsDates(followupData.analyticsTransitionsDsList, TYPE_FEATURES, fromJiraDataRow.taskNum, row,
-                    jiraProperties.getStatusPriorityOrder().getTasksInOrder().length);
-            addTransitionsDates(followupData.analyticsTransitionsDsList, TYPE_SUBTASKS, fromJiraDataRow.subtaskNum, row,
-                    jiraProperties.getStatusPriorityOrder().getSubtasksInOrder().length);
+            addTransitionsDatesIfExist(followupData.analyticsTransitionsDsList, TYPE_DEMAND, fromJiraDataRow.demandNum, row);
+            addTransitionsDatesIfExist(followupData.analyticsTransitionsDsList, TYPE_FEATURES, fromJiraDataRow.taskNum, row);
+            addTransitionsDatesIfExist(followupData.analyticsTransitionsDsList, TYPE_SUBTASKS, fromJiraDataRow.subtaskNum, row);
 
             row.save();
         }
@@ -149,30 +143,45 @@ public class FollowUpGenerator {
         return sheet;
     }
 
-    private void addTransitionsDates(List<AnalyticsTransitionsDataSet> analyticsTransitionsDsList, String type,
-            String issueKey, SheetRow row, int statusCount) {
-        if (analyticsTransitionsDsList == null)
+    private void addAnalyticsHeadersIfExist(List<AnalyticsTransitionsDataSet> analyticsDataSets, String type, SheetRow rowHeader) {
+        Optional<AnalyticsTransitionsDataSet> analyticDataSetOfType = getAnalyticDataSetWithRowByType(analyticsDataSets, type);
+
+        if (!analyticDataSetOfType.isPresent())
             return;
 
-        Optional<AnalyticsTransitionsDataSet> transitionsDS = analyticsTransitionsDsList.stream()
-            .filter(dataset -> type.equals(dataset.issueType))
-            .findFirst();
+        List<String> headers = analyticDataSetOfType.get().headers;
+        for (int i = analyticDataSetOfType.get().getInitialIndexStatusHeaders(); i < headers.size(); i++)
+            rowHeader.addColumn(analyticDataSetOfType.get().issueType + " - " + headers.get(i));
+    }
 
-        if (!transitionsDS.isPresent())
+    private void addTransitionsDatesIfExist(List<AnalyticsTransitionsDataSet> analyticsDataSets, String type, String issueKey, SheetRow row) {
+        Optional<AnalyticsTransitionsDataSet> analyticDataSetOfType = getAnalyticDataSetWithRowByType(analyticsDataSets, type);
+
+        if (!analyticDataSetOfType.isPresent())
             return;
 
-        Optional<AnalyticsTransitionsDataRow> transitionsRowIssue = transitionsDS.get().rows.stream()
-            .filter(r -> r.issueKey.equals(issueKey))
+        Optional<AnalyticsTransitionsDataRow> analyticRowOfIssue = analyticDataSetOfType.get().rows.stream()
+            .filter(analyticRow -> analyticRow.issueKey.equals(issueKey))
             .findFirst();
 
-        if (transitionsRowIssue.isPresent()) {
-            transitionsRowIssue.get().transitionsDates.stream()
-                .forEach(td -> row.addColumn(td));
+        if (analyticRowOfIssue.isPresent()) {
+            analyticRowOfIssue.get().transitionsDates.stream()
+                .forEachOrdered(transitionDate -> row.addColumn(transitionDate));
         } else {
             ZonedDateTime dateNull = null;
-            for (int i = 0; i < statusCount; i++)
+            List<String> headers = analyticDataSetOfType.get().headers;
+            for (int i = analyticDataSetOfType.get().getInitialIndexStatusHeaders(); i < headers.size(); i++)
                 row.addColumn(dateNull);
         }
+    }
+
+    private Optional<AnalyticsTransitionsDataSet> getAnalyticDataSetWithRowByType(List<AnalyticsTransitionsDataSet> analyticsDataSets, String type) {
+        if (isEmpty(analyticsDataSets))
+            return empty();
+
+        return analyticsDataSets.stream()
+            .filter(dataSet -> type.equals(dataSet.issueType) && !isEmpty(dataSet.rows))
+            .findFirst();
     }
 
     List<Sheet> generateTransitionsSheets(FollowupData followupData) {
@@ -184,8 +193,12 @@ public class FollowUpGenerator {
 
     private List<Sheet> generateAnalyticTransitionsSheets(List<AnalyticsTransitionsDataSet> analyticTransitionDataSets) {
         List<Sheet> sheets = new LinkedList<>();
+
+        if (isEmpty(analyticTransitionDataSets))
+            return sheets;
+
         for (AnalyticsTransitionsDataSet analyticTransitionDataSet : analyticTransitionDataSets) {
-            if (analyticTransitionDataSet.rows.isEmpty())
+            if (isEmpty(analyticTransitionDataSet.rows))
                 continue;
 
             Sheet sheet = createSheetWithHeader("Analytic - ", analyticTransitionDataSet);
@@ -207,8 +220,12 @@ public class FollowUpGenerator {
 
     private List<Sheet> generateSyntheticTransitionsSheets(List<SyntheticTransitionsDataSet> syntheticTransitionDataSets) {
         List<Sheet> sheets = new LinkedList<>();
+
+        if (isEmpty(syntheticTransitionDataSets))
+            return sheets;
+
         for (SyntheticTransitionsDataSet syntheticTransitionDataSet : syntheticTransitionDataSets) {
-            if (syntheticTransitionDataSet.rows.isEmpty())
+            if (isEmpty(syntheticTransitionDataSet.rows))
                 continue;
 
             Sheet sheet = createSheetWithHeader("Synthetic - ", syntheticTransitionDataSet);
