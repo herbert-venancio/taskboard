@@ -566,7 +566,7 @@ public class JiraMockServer {
     private static Map<String, JSONObject> dirtySearchIssuesByKey = new LinkedHashMap<>();
     private static String username;
     private static boolean searchFailureEnabled = false;
-    private static boolean transitionFailureEnabled = true;
+    private static boolean transitionFailureEnabled = false;
     private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private static List<Consumer<JSONObject>> projectEdits = new ArrayList<>();
     private static List<Consumer<JSONObject>> issueEdits = new ArrayList<>();
