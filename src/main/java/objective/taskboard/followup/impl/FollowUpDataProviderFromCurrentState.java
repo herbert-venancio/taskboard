@@ -344,7 +344,10 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         followUpData.tshirtSize = subtask.getTShirtSize();
         followUpData.worklog = timeSpentInHour(subtask);
         followUpData.wrongWorklog = 0.0;
-        followUpData.taskBallpark = originalEstimateInHour(task);
+
+        final Double subtaskOriginalEstimate = originalEstimateInHour(subtask);
+        followUpData.taskBallpark = subtaskOriginalEstimate == 0 ? originalEstimateInHour(task) : subtaskOriginalEstimate;
+
         followUpData.queryType = "SUBTASK PLAN";
         return followUpData;
     }
