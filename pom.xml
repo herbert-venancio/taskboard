@@ -359,7 +359,11 @@
 								<id>exec-web-component-tester</id>
 								<phase>test</phase>
 								<configuration>
-									<executable>node_modules/.bin/wct</executable>
+									<skip>${skipTests}</skip>
+									<executable>node</executable>
+									<arguments>
+										<argument>node_modules/.bin/wct</argument>
+									</arguments>
 								</configuration>
 								<goals>
 									<goal>exec</goal>
