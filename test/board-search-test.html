@@ -15,6 +15,7 @@
 
     <!-- dependencies -->
     <script src="/static/scripts/taskboard.js"></script>
+    <script src="/static/scripts/userPreferences.js"></script>
     <link rel="import" href="/static/bower_components/iron-signals/iron-signals.html">
     <link rel="import" href="/static/bower_components/paper-item/paper-item.html">
     <link rel="import" href="/static/bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
@@ -34,33 +35,6 @@
     </test-fixture>
 
     <script>
-        var defaultAspectFilters = [
-            {description:'Project', field:'projectKey', aspectsSubitemFilter: [
-                {name:'Project 1', value:'PROJ1', selected:true, visible:true, teams:[], releases:[]}
-                , {name:'Taskboard', value:'TASKB', selected:true, visible:true
-                    , teams:['TASKBOARD 2', 'TASKBOARD 1']
-                    , releases:[
-                        {id:"12550", name:"1.0"}
-                        , {id:"12551", name:"2.0"}
-                        , {id:"12552", name:"3.0"}
-                    ]
-                }
-            ]}
-        ];
-        var modifiedAspectFilters = [
-            {description:'Project', field:'projectKey', aspectsSubitemFilter: [
-                {name:'Project 1', value:'PROJ1', selected:true, visible:true, teams:[], releases:[]}
-                , {name:'Taskboard', value:'TASKB', selected:true, visible:true
-                    , teams:['TASKBOARD 2', 'TASKBOARD 1']
-                    , releases:[
-                        {id:"12550", name:"1.0-edited"}
-                        , {id:"12551", name:"2.0"}
-                        , {id:"12552", name:"3.0"}
-                    ]
-                }
-            ]}
-        ];
-
         function async(callback) {
             Polymer.Base.async(callback, 1);
         }
@@ -90,11 +64,53 @@
         }
 
         suite('<board-search-test>', function() {
-		    var boardSearch;
-		    setup(function() {
+            var boardSearch;
+            var defaultAspectFilters;
+            var modifiedAspectFilters;
+            setup(function() {
                 window.CONFIGURATION = {
                     USE_RELEASE: true
                 };
+                window.INVALID_TEAM = "NO PROJECT TEAM";
+                defaultAspectFilters = [
+                    {description:'Project', field:'projectKey', aspectsSubitemFilter: [
+                        {name:'Taskboard', value:'TASKB', selected:true, visible:true
+                            , teams:['TASKBOARD 2', 'TASKBOARD 1']
+                            , releases:[
+                                {id:"12550", name:"1.0"}
+                                , {id:"12551", name:"2.0"}
+                                , {id:"12552", name:"3.0"}
+                            ]
+                        }
+                        , {name:'Project 1', value:'PROJ1', selected:true, visible:true, teams:[]
+                            , releases:[
+                                {id:"20001", name:"1.0"}
+                                , {id:"20002", name:"2.0"}
+                                , {id:"20003", name:"3.0"}
+                            ]
+                        }
+                    ]}
+                ];
+                modifiedAspectFilters = [
+                    {description:'Project', field:'projectKey', aspectsSubitemFilter: [
+                        {name:'Taskboard', value:'TASKB', selected:true, visible:true
+                            , teams:['TASKBOARD 2', 'TASKBOARD 1']
+                            , releases:[
+                                {id:"12550", name:"1.0-edited"}
+                                , {id:"12551", name:"2.0"}
+                                , {id:"12552", name:"3.0"}
+                            ]
+                        }
+                        , {name:'Project 1', value:'PROJ1', selected:true, visible:true, teams:[]
+                            , releases:[
+                                {id:"20001", name:"1.0"}
+                                , {id:"20002", name:"2.0"}
+                                , {id:"20003", name:"3.0"}
+                            ]
+                        }
+                    ]}
+                ];
+                userPreferences.setPreferences({});
                 taskboard.setAspectFilters(null, defaultAspectFilters);
                 boardSearch = fixture('board-search-fixture');
             });
@@ -124,6 +140,28 @@
                     });
                 });
             });
+
+            test('project filter maintains after aspect-filters update', function(done) {
+                userPreferences.setPreferences({filterPreferences:{"TASKB":false}});
+                taskboard.applyFilterPreferences();
+                boardSearch.fire('iron-signal', {name: 'refresh-release-filter'});
+                async(function() {
+                    var searchRelease = boardSearch.$$('#searchRelease');
+                    var content = Polymer.dom(searchRelease).querySelector('.dropdown-content');
+
+                    var items = Polymer.dom(content).querySelectorAll('paper-item');
+                    expect(items.length).to.be.equal(4);
+
+                    taskboard.setAspectFilters(boardSearch, modifiedAspectFilters);
+                    async(function() {
+                        var items = Polymer.dom(content).querySelectorAll('paper-item');
+                        expect(items.length).to.be.equal(4);
+
+                        done();
+                    });
+                });
+            });
+
         });
     </script>
 </body>

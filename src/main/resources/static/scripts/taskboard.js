@@ -34,6 +34,7 @@ function Taskboard() {
 
     this.setAspectFilters = function(source, filters) {
         aspectFilters = filters;
+        this.applyFilterPreferences();
         if(source)
             source.fire('iron-signal', {name:'refresh-release-filter'});
     };
