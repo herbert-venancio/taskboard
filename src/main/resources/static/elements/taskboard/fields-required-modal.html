@@ -267,7 +267,7 @@
                     if (this.errorMessage)
                         return;
 
-                    this.setIssueValues(values);
+                    copyProperties(this.issue, values);
                     this.callback(this.issue);
                     this.clearProperties();
                 },
@@ -304,11 +304,8 @@
 
                 isValidValue: function(value) {
                     return value != 0 && value != null;
-                },
-
-                setIssueValues: function(values) {
-                    $.extend(this.issue, values);
                 }
+
             });
         })();
     </script>

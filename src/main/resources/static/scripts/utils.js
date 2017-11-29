@@ -24,6 +24,14 @@ function findIndexInArray(array, callback) {
     return notFoundValue;
 }
 
+function copyProperties(receiverObject, objectToMarge) {
+    $.extend(receiverObject, objectToMarge);
+}
+
+function isFieldNameEquals(fieldName, anotherFieldName) {
+    return fieldName.toLowerCase === anotherFieldName.toLowerCase;
+}
+
 if (!Object.values) {
     Object.values = function(obj) {
         return Object.keys(obj).map(

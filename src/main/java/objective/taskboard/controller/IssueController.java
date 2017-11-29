@@ -25,6 +25,7 @@ import static objective.taskboard.domain.converter.JiraIssueToIssueConverter.INV
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -144,7 +145,8 @@ public class IssueController {
 
     @RequestMapping(path = "transition", method = RequestMethod.POST)
     public Issue transition(@RequestBody TransitionRequestDTO tr) throws JSONException {
-        return issueBufferService.doTransition(tr.issueKey, tr.transitionId, tr.resolutionName);
+        Map<String, Object> fields = tr.fields == null ? Collections.emptyMap() : tr.fields;
+        return issueBufferService.doTransition(tr.issueKey, tr.transitionId, fields);
     }
 
     @RequestMapping(path = "transitions", method = RequestMethod.POST)
@@ -280,7 +282,7 @@ public class IssueController {
     private static class TransitionRequestDTO {
         public String issueKey;
         public Long transitionId;
-        public String resolutionName;
+        public Map<String, Object> fields;
     }
 
 }

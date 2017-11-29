@@ -24,6 +24,7 @@ import static com.google.common.collect.Lists.newArrayList;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -112,10 +113,10 @@ public class JiraService {
         }
     }
 
-    public void doTransition(String issueKey, Long transitionId, String resolutionName) {
+    public void doTransition(String issueKey, Long transitionId, Map<String, Object> fields) {
         log.debug("⬣⬣⬣⬣⬣  doTransition");
         try {
-            DoTransitionRequestBody requestBody = new DoTransitionRequestBody(transitionId, resolutionName);
+            DoTransitionRequestBody requestBody = new DoTransitionRequestBody(transitionId, fields);
             jiraEndpointAsUser.request(Transitions.Service.class).doTransition(issueKey, requestBody);
         } catch (RetrofitError e) {
             throw new FrontEndMessageException(e);
