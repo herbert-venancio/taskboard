@@ -156,7 +156,9 @@ public class JiraSearchService {
             properties.getCustomfield().getAdditionalEstimatedHours().getId(),
             properties.getCustomfield().getRelease().getId());
         fields.addAll(properties.getCustomfield().getTShirtSize().getIds());
+        fields.addAll(properties.getSubtaskCreatorRequiredFieldsIds());
         fields.addAll(asList(additionalFields));
         return fields;
     }
+
 }

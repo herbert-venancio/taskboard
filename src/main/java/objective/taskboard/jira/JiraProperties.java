@@ -20,6 +20,8 @@
  */
 package objective.taskboard.jira;
 
+import static java.util.stream.Collectors.toSet;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -27,6 +29,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.validation.Valid;
 import javax.validation.constraints.DecimalMin;
@@ -1104,7 +1107,6 @@ public class JiraProperties {
         }
     }
 
-
     public static class SubtaskCreation {
         @NotNull
         private Long statusIdFrom;
@@ -1123,6 +1125,8 @@ public class JiraProperties {
         @NotNull
         private String tShirtSizeDefaultValue = "M";
         private Optional<Long> transitionId;
+        @Valid
+        private CustomFieldCondition customFieldCondition;
 
         public SubtaskCreation() {
         }
@@ -1199,6 +1203,14 @@ public class JiraProperties {
             this.transitionId = transitionId;
         }
 
+        public Optional<CustomFieldCondition> getCustomFieldCondition() {
+            return Optional.ofNullable(customFieldCondition);
+        }
+
+        public void setCustomFieldCondition(CustomFieldCondition customFieldCondition) {
+            this.customFieldCondition = customFieldCondition;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -1208,10 +1220,12 @@ public class JiraProperties {
 
             if (statusIdFrom != null ? !statusIdFrom.equals(that.statusIdFrom) : that.statusIdFrom != null)
                 return false;
-            if (statusIdTo != null ? !statusIdTo.equals(that.statusIdTo) : that.statusIdTo != null) return false;
+            if (statusIdTo != null ? !statusIdTo.equals(that.statusIdTo) : that.statusIdTo != null)
+                return false;
             if (issueTypeParentId != null ? !issueTypeParentId.equals(that.issueTypeParentId) : that.issueTypeParentId != null)
                 return false;
-            if (issueTypeId != null ? !issueTypeId.equals(that.issueTypeId) : that.issueTypeId != null) return false;
+            if (issueTypeId != null ? !issueTypeId.equals(that.issueTypeId) : that.issueTypeId != null)
+                return false;
             if (summaryPrefix != null ? !summaryPrefix.equals(that.summaryPrefix) : that.summaryPrefix != null)
                 return false;
             if (tShirtSizeParentId != null ? !tShirtSizeParentId.equals(that.tShirtSizeParentId) : that.tShirtSizeParentId != null)
@@ -1220,7 +1234,12 @@ public class JiraProperties {
                 return false;
             if (tShirtSizeDefaultValue != null ? !tShirtSizeDefaultValue.equals(that.tShirtSizeDefaultValue) : that.tShirtSizeDefaultValue != null)
                 return false;
-            return transitionId != null ? transitionId.equals(that.transitionId) : that.transitionId == null;
+            if (transitionId != null ? !transitionId.equals(that.transitionId) : that.transitionId == null)
+                return false;
+            if (customFieldCondition != null ? !customFieldCondition.equals(that.customFieldCondition) : that.customFieldCondition == null)
+                return false;
+
+            return true;
         }
 
         @Override
@@ -1234,6 +1253,7 @@ public class JiraProperties {
             result = 31 * result + (tShirtSizeSubtaskId != null ? tShirtSizeSubtaskId.hashCode() : 0);
             result = 31 * result + (tShirtSizeDefaultValue != null ? tShirtSizeDefaultValue.hashCode() : 0);
             result = 31 * result + (transitionId != null ? transitionId.hashCode() : 0);
+            result = 31 * result + (customFieldCondition != null ? customFieldCondition.hashCode() : 0);
             return result;
         }
 
@@ -1249,8 +1269,30 @@ public class JiraProperties {
                     ", tShirtSizeSubtaskId='" + tShirtSizeSubtaskId + '\'' +
                     ", tShirtSizeDefaultValue='" + tShirtSizeDefaultValue + '\'' +
                     ", transitionId=" + transitionId +
+                    ", customFieldCondition='" + customFieldCondition + '\'' +
                     '}';
         }
+
+        public static class CustomFieldCondition {
+            @NotEmpty
+            private String id;
+            @NotNull
+            private String value;
+
+            public String getId() {
+                return id;
+            }
+            public void setId(String id) {
+                this.id = id;
+            }
+            public String getValue() {
+                return value;
+            }
+            public void setValue(String value) {
+                this.value = value;
+            }
+        }
+
     }
 
     public StatusPriorityOrder getStatusPriorityOrder() {
@@ -1385,6 +1427,13 @@ public class JiraProperties {
         this.subtaskCreation = subtaskCreation;
     }
 
+    public Set<String> getSubtaskCreatorRequiredFieldsIds() {
+        return subtaskCreation.stream()
+                .filter(p -> p.getCustomFieldCondition().isPresent())
+                .map(p -> p.getCustomFieldCondition().get().getId())
+                .collect(toSet());
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -1452,4 +1501,5 @@ public class JiraProperties {
                 ", subtaskCreation=" + subtaskCreation +
                 '}';
     }
+
 }

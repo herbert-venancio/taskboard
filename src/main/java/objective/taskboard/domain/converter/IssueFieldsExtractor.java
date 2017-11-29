@@ -144,8 +144,8 @@ public class IssueFieldsExtractor {
         }
     }
 
-    public  static String extractBlocked(JiraProperties jiraProperties, Issue issue) {
-        IssueField field = issue.getField(jiraProperties.getCustomfield().getBlocked().getId());
+    public static String extractSingleValueCheckbox(String customFieldId, Issue issue) {
+        IssueField field = issue.getField(customFieldId);
 
         if (field == null)
             return "";
@@ -161,6 +161,10 @@ public class IssueFieldsExtractor {
             logErrorExtractField(issue, field, e);
             return "";
         }
+    }
+
+    public  static String extractBlocked(JiraProperties jiraProperties, Issue issue) {
+        return extractSingleValueCheckbox(jiraProperties.getCustomfield().getBlocked().getId(), issue);
     }
 
     public  static String extractLastBlockReason(JiraProperties jiraProperties, Issue issue) {
