@@ -21,6 +21,8 @@
 
 package objective.taskboard.jira;
 
+import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractSingleValueCheckbox;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -38,6 +40,7 @@ import com.atlassian.jira.rest.client.api.domain.input.IssueInput;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder;
 
 import objective.taskboard.jira.JiraProperties.SubtaskCreation;
+import objective.taskboard.jira.JiraProperties.SubtaskCreation.CustomFieldCondition;
 import objective.taskboard.jira.data.Transition;
 
 @Service
@@ -54,6 +57,9 @@ public class SubtaskCreatorService {
     }
 
     public void create(Issue parent, SubtaskCreation creationProperties) {
+        if (!hasRequiredValueOrHasNoRequirement(parent, creationProperties))
+            return;
+
         Long typeId = creationProperties.getIssueTypeId();
 
         String subtaskKey = subtaskOfType(parent, typeId);        
@@ -66,6 +72,16 @@ public class SubtaskCreatorService {
         Optional<Long> transitionId = creationProperties.getTransitionId();
         if (transitionId.isPresent())
             executeTransitionIfAvailable(transitionId.get(), subtaskKey);
+    }
+
+    private boolean hasRequiredValueOrHasNoRequirement(Issue parent, SubtaskCreation creationProperties) {
+        final Optional<CustomFieldCondition> customFieldCondition = creationProperties.getCustomFieldCondition();
+        if (customFieldCondition.isPresent()) {
+            final String currentValue = extractSingleValueCheckbox(customFieldCondition.get().getId(), parent);
+            if (!customFieldCondition.get().getValue().equals(currentValue))
+                return false;
+        }
+        return true;
     }
 
     private String subtaskOfType(Issue parent, Long typeId) {

@@ -1,5 +1,3 @@
-package objective.taskboard.jira;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -21,12 +19,13 @@ package objective.taskboard.jira;
  * [/LICENSE]
  */
 
+package objective.taskboard.jira;
+
 import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import objective.taskboard.jira.JiraProperties.SubtaskCreation;
 import objective.taskboard.jira.data.WebHookBody;
 
 @Service
@@ -34,7 +33,7 @@ public class WebhookSubtaskCreatorService {
 
     private final SubtaskCreatorService subtaskCreatorService;
     private final JiraProperties jiraProperties;
-    
+
     public WebhookSubtaskCreatorService(SubtaskCreatorService subtaskCreatorService, JiraProperties jiraProperties) {
         this.subtaskCreatorService = subtaskCreatorService;
         this.jiraProperties = jiraProperties;
@@ -53,17 +52,13 @@ public class WebhookSubtaskCreatorService {
         
         Long statusIdFrom = Long.parseLong((String) statusChangeOpt.get().get("from"));
         Long statusIdTo = Long.parseLong((String) statusChangeOpt.get().get("to"));
-        
-        Optional<SubtaskCreation> properties = propertiesFor(parent.getIssueType().getId(), statusIdFrom, statusIdTo);
-        properties.ifPresent(p -> subtaskCreatorService.create(parent, p));
-    }
-    
-    private Optional<SubtaskCreation> propertiesFor(Long issueTypeId, Long statusIdFrom, Long statusIdTo) {
-        return jiraProperties.getSubtaskCreation().stream()
-                .filter(p -> p.getIssueTypeParentId().equals(issueTypeId)
-                        && p.getStatusIdFrom().equals(statusIdFrom)
-                        && p.getStatusIdTo().equals(statusIdTo))
-                .findFirst();
+        Long issueTypeId = parent.getIssueType().getId();
+
+        jiraProperties.getSubtaskCreation().stream()
+            .filter(p -> p.getIssueTypeParentId().equals(issueTypeId)
+                    && p.getStatusIdFrom().equals(statusIdFrom)
+                    && p.getStatusIdTo().equals(statusIdTo))
+            .forEach(p -> subtaskCreatorService.create(parent, p));
     }
 
 }

@@ -22,8 +22,10 @@
 package objective.taskboard.jira;
 
 import static java.util.Arrays.asList;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -33,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.junit.After;
@@ -43,7 +46,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.atlassian.jira.rest.client.api.domain.Issue;
@@ -57,6 +59,7 @@ import com.atlassian.jira.rest.client.api.domain.input.ComplexIssueInputFieldVal
 import com.atlassian.jira.rest.client.api.domain.input.FieldInput;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInput;
 
+import objective.taskboard.jira.JiraProperties.SubtaskCreation.CustomFieldCondition;
 import objective.taskboard.jira.data.Transition;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -67,7 +70,9 @@ public class SubtaskCreatorServiceTest {
     private final String TSHIRT_PARENT_ID = "customfield_11111";
     private final String TSHIRT_SUBTASK_ID = "customfield_22222";
     private final String CLASSOFSERVICE_ID = "customfield_33333";
-    
+    private final String CUSTOM_FIELD_CONDITION_ID = "customfield_44444";
+    private final String CUSTOM_FIELD_CONDITION_VALUE = "Yes";
+
     @Mock
     private Issue parent;
     @Mock
@@ -96,7 +101,7 @@ public class SubtaskCreatorServiceTest {
         setupProperties();
         setupParentMock();
         
-        when(jiraService.createIssueAsMaster(Mockito.any(IssueInput.class))).thenReturn("TASK-101");
+        when(jiraService.createIssueAsMaster(any(IssueInput.class))).thenReturn("TASK-101");
         when(subtask.getKey()).thenReturn("TASK-101");
     }
 
@@ -131,7 +136,29 @@ public class SubtaskCreatorServiceTest {
                 "customfield_33333=685321"
         );
     }
-    
+
+    @Test
+    public void givenRequiredCustomFieldFilled_whenParentHasNoRequiredValue_thenSubtaskCreationHasToBeSkipped() {
+        properties.setCustomFieldCondition(makeCustomFieldCondition(CUSTOM_FIELD_CONDITION_ID, CUSTOM_FIELD_CONDITION_VALUE));
+
+        JSONArray issueFieldValue = null;
+        when(parent.getField(CUSTOM_FIELD_CONDITION_ID)).thenReturn(new IssueField(null, null, null, issueFieldValue));
+
+        service.create(parent, properties);
+        verifyZeroInteractions(jiraService);
+    }
+
+    @Test
+    public void givenRequiredCustomFieldFilled_whenParentHasRequiredValue_thenCreateSubtask() throws JSONException {
+        properties.setCustomFieldCondition(makeCustomFieldCondition(CUSTOM_FIELD_CONDITION_ID, CUSTOM_FIELD_CONDITION_VALUE));
+
+        JSONArray issueFieldValue = new JSONArray("[{value:Yes}]");
+        when(parent.getField(CUSTOM_FIELD_CONDITION_ID)).thenReturn(new IssueField(null, null, null, issueFieldValue));
+
+        service.create(parent, properties);
+        verify(jiraService, only()).createIssueAsMaster(any());
+    }
+
     @Test
     public void whenParentHaveNoTShirtSize_useTShirtSizeDefaultValue() {
         when(parent.getField(TSHIRT_PARENT_ID)).thenReturn(null);
@@ -203,7 +230,7 @@ public class SubtaskCreatorServiceTest {
         
         service.create(parent, properties);
         
-        verify(jiraService, never()).createIssueAsMaster(Mockito.any());
+        verify(jiraService, never()).createIssueAsMaster(any());
         verify(jiraService).getTransitionsAsMaster(subtask.getKey());
         verify(jiraService).doTransitionAsMaster(subtask.getKey(), 57L);
     }
@@ -215,7 +242,7 @@ public class SubtaskCreatorServiceTest {
         
         service.create(parent, properties);
         
-        verify(jiraService).createIssueAsMaster(Mockito.any(IssueInput.class));
+        verify(jiraService).createIssueAsMaster(any(IssueInput.class));
         verify(jiraService).getTransitionsAsMaster(subtask.getKey());
     }
     
@@ -294,6 +321,13 @@ public class SubtaskCreatorServiceTest {
             transitions.add(transition);
         }
         when(jiraService.getTransitionsAsMaster(subtask.getKey())).thenReturn(transitions);
+    }
+
+    private CustomFieldCondition makeCustomFieldCondition(String id, String value) {
+        CustomFieldCondition customFieldCondition = new CustomFieldCondition();
+        customFieldCondition.setId(id);
+        customFieldCondition.setValue(value);
+        return customFieldCondition;
     }
 
 }
