@@ -996,13 +996,16 @@
                     var status = taskboard.getStatus(e.target.dataset.transitionToStatusId);
                     var fieldsTransitions = self.getFieldsTransitions(transition);
                     var text = "Do you want to execute transition \""+ transition.name + "\"?";
-                    var callback = function(issue, transitionValuesRequired){
-                        if(self.hasResolutions(transition))
-                            self.doResolution(transition, issue, status);
+                    var callback = function(issue, fieldValuesRequired){
+                        if(self.isResolutionRequired(transition))
+                            self.doResolution(transition, issue, status, fieldValuesRequired);
                         else
-                            self.doTransition(transition, issue, status, null);
+                            self.doTransition(transition, issue, status, null, fieldValuesRequired);
                     }
-                    self.$.confirmModal.openDialog("Confirmation", text, callback);
+                    if(self.showFieldsRequiredDialog)
+                        self.$.transitionRequiredDialog.openDialog(fieldsTransitions, transition.name, issue, callback);
+                    else
+                        self.$.confirmModal.openDialog("Confirmation", text, callback);
                     self.showFieldsRequiredDialog = false;
                 },
 
@@ -1011,7 +1014,7 @@
                     var fieldsTransitions = [];
                     if (transition){
                         Object.values(transition.fields).forEach( field => {
-                            if(field.required && field.name != "resolution"){
+                            if(field.required && !isFieldNameEquals(field.name, taskboard.getResolutionFieldName())){
                                 self.showFieldsRequiredDialog = true;
                                 fieldsTransitions.push(field);
                             }
@@ -1022,19 +1025,19 @@
                     return fieldsTransitions;
                 },
 
-                hasResolutions: function (transition) {
+                isResolutionRequired: function (transition) {
                     if (!transition)
                         return false;
-                    var found = Object.values(transition.fields).find( field => field.required && field.name === "resolution" );
+                    var found = Object.values(transition.fields).find( field => field.required && isFieldNameEquals(field.name, taskboard.getResolutionFieldName()) );
                     return found != undefined;
                 },
 
-                doTransition: function (transition, issue, status, resolution) {
+                doTransition: function (transition, issue, status, fieldValuesRequired) {
                     var self = this;
                     if(!issue)
                         issue = this.item;
                     var issueBeforeTransition = clone(issue);
-                    var params = {issueKey: issue.issueKey, transitionId: transition.id, resolutionName: resolution};
+                    var params = {issueKey: issue.issueKey, transitionId: transition.id, fields: fieldValuesRequired};
 
                     $.ajax({
                         url: '/ws/issues/transition',
@@ -1072,13 +1075,14 @@
                     this._setIssueLocalStateAndFireUpdated(clone(issue), true, null, 'TRANSITION');
                 },
 
-                doResolution: function (transition, issue, status) {
+                doResolution: function (transition, issue, status, fieldValuesRequired) {
                     var self = this;
                     $.ajax({
                         url: '/ws/issues/resolutions/'+transition.name,
                         type: 'get',
                         success: function (data, textStatus, jQxhr) {
-                            self.doTransition(transition, issue, status, data);
+                            copyProperties(fieldValuesRequired, {resolution: data});
+                            self.doTransition(transition, issue, status, fieldValuesRequired);
                         },
                         error: function (jqXhr, textStatus, errorThrown) {
                             console.error(jqXhr);

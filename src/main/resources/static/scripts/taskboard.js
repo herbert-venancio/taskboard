@@ -478,6 +478,10 @@ function Taskboard() {
         return stepsOfLane;
     }
 
+    this.getResolutionFieldName = function() {
+        return "resolution";
+    }
+
 }
 
 var taskboard = new Taskboard();

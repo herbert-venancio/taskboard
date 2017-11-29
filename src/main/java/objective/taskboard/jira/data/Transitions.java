@@ -1,10 +1,10 @@
 package objective.taskboard.jira.data;
 
+import static objective.taskboard.jira.IssueFieldsUpdateSchema.makeUpdateSchema;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.lang3.StringUtils;
 
 import retrofit.client.Response;
 import retrofit.http.Body;
@@ -31,26 +31,23 @@ public class Transitions {
     }
 
     public static class DoTransitionRequestBody {
-        public final Map<String, Object> transition;
-        public final Map<String, Object> fields;
+        private final Map<String, Object> transition;
+        private final Map<String, Object> update;
 
-        public DoTransitionRequestBody(Long transitionId, String resolutionName) {
+        public DoTransitionRequestBody(Long transitionId, Map<String, Object> fields) {
             this.transition = new HashMap<>();
-            this.fields = new HashMap<>();
+            this.update = new HashMap<>();
             setTransitionOnRequest(transitionId);
-            if (StringUtils.isNotEmpty(resolutionName)) {
-                setResolutionOnRequest(resolutionName);
-            }
+            if (!fields.isEmpty())
+                setFieldsOnTransitionSchema(fields);
         }
 
         private void setTransitionOnRequest(Long transitionId) {
             this.transition.put("id", transitionId);
         }
 
-        private void setResolutionOnRequest(String resolutionName) {
-            Map<String, String> resolutionMap = new HashMap<>();
-            resolutionMap.put("name", resolutionName);
-            this.fields.put("resolution", resolutionMap);
+        private void setFieldsOnTransitionSchema(Map<String, Object> fields) {
+            this.update.putAll(makeUpdateSchema(fields));
         }
     }
 

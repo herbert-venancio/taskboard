@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -251,11 +252,11 @@ public class IssueBufferService {
         }
     }
 
-    public synchronized Issue doTransition(String issueKey, Long transitionId, String resolutionName) {
+    public synchronized Issue doTransition(String issueKey, Long transitionId, Map<String, Object> fields) {
         StopWatch watch = new StopWatch();
         watch.start();
-        jiraBean.doTransition(issueKey, transitionId, resolutionName);
-        log.debug("Time to perform transition for issue key " +issueKey + " : " +watch.getTime());
+        jiraBean.doTransition(issueKey, transitionId, fields);
+        log.debug("Time to perform transition for issue key " + issueKey + " : " + watch.getTime());
 
         Issue issue = updateIssueBuffer(issueKey);
         updateIssueBuffer();

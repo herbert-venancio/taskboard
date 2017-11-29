@@ -23,6 +23,17 @@
     <template>
 
         <style>
+            paper-dialog#fieldsModal {
+                margin: 0;
+            }
+
+            paper-dialog#fieldsModal paper-card {
+                min-height: auto;
+                min-width: 535px;
+                padding: 16px;
+                margin: 0;
+            }
+
             paper-button {
                 float: right;
                 padding: 10px;
@@ -30,12 +41,16 @@
 
             paper-button.colorful {
                 color: #4285f4;
-                margin-bottom: 6px;
+                margin: 0;
             }
 
             paper-button[raised].colorful {
                 background: #4285f4;
                 color: #fff;
+            }
+
+            paper-button[disabled].colorful {
+                opacity: .6;
             }
 
             .card-custom {
@@ -63,29 +78,22 @@
                 min-height: auto;
                 border-radius: 5px;
                 box-shadow: inset 1px 1px 1px #A5A1A1;
-                padding-top: 6px;
+                padding: 0 16px 16px 16px;
+                position: relative;
             }
 
             .content-row {
                 width: auto;
                 display: flex;
-            }
-
-            #fieldsModal {
-                padding-left: 5px;
-                padding-right: 5px;
+                padding: 16px 0 0 0;
+                margin: 0;
             }
 
              .column-block {
-                display: table-cell;
-                padding-left: 5px;
-                padding-right: 5px;
-                min-height: auto;
             }
 
             .half-button {
                 width: 100%;
-                padding: 10px;
             }
 
             .input-fields {
@@ -125,8 +133,7 @@
             }
 
             .error-message {
-                white-space: pre;
-                margin-left: 10px;
+                margin: 10px 0 0 0;
                 color: red;
                 font-weight: bold;
             }
@@ -146,22 +153,43 @@
             .required {
                 color: red
             }
+
+            paper-spinner {
+                width: 24px;
+                height: 24px;
+                top: 50%;
+                margin-top: -12px;
+                left: 50%;
+                margin-left: -12px;
+                position: absolute;
+                z-index: 999999;
+            }
+
+            paper-spinner[aria-hidden=true] {
+                display: none;
+            }
         </style>
 
-        <paper-dialog id="fieldsModal" entry-animation="scale-up-animation" exit-animation="fade-out-animation" with-backdrop modal>
+        <paper-dialog id="fieldsModal" with-backdrop modal
+                      entry-animation="scale-up-animation" exit-animation="fade-out-animation"
+                      on-iron-overlay-closed="_afterClose">
+
              <paper-card class="card-custom">
                 <div class="card-header-custom">
                     <div class="title">
                         {{transitionName}}
                     </div>
                     <div class="buttons">
-                        <paper-button class="buttonClose" on-tap="clearProperties" >
+                        <paper-button class="buttonClose" on-tap="close">
                             <iron-icon icon="clear"></iron-icon>
                         </paper-button>
                     </div>
                 </div>
                 <div class="content-box">
-                    <template is="dom-if" if="{{hasRecords(fields)}}">
+                    <template is="dom-if" if="{{!_hasRecords(fields)}}">
+                        <paper-spinner active="true" alt="Loading..."></paper-spinner>
+                    </template>
+                    <template is="dom-if" if="{{_hasRecords(fields)}}">
                          <template is="dom-repeat" items="{{fields}}" as="field">
                                <div class="content-row">
                                     <div class="column-block">
@@ -170,16 +198,16 @@
                                         <br/>
                                         <template is="dom-if" if="{{!field.showOptions}}">
                                             <template is="dom-if" if="{{!isTextArea(field.type)}}">
-                                                <input is="iron-input" id$="{{field.name}}" class="input-fields" type="text" required value="{{getValue(field.id)}}"/>
+                                                <input is="iron-input" id$="{{field.name}}" class="input-fields" type="text" required value="{{_getIssueValue(field.id)}}"/>
                                             </template>
                                             <template is="dom-if" if="{{isTextArea(field.type)}}">
-                                                <textarea id$="{{field.name}}" class="input-fields" required>{{getValue(field.id)}}</textarea>
+                                                <textarea id$="{{field.name}}" class="input-fields" required>{{_getIssueValue(field.id)}}</textarea>
                                             </template>
                                         </template>
                                         <template is="dom-if" if="{{field.showOptions}}">
                                              <paper-dropdown-menu-light no-label-float required >
                                                 <paper-menu class="dropdown-content shadow-elevation-8dp" attr-for-selected="fieldid"
-                                                            id$="{{field.name}}" value="{{getValue(field.id)}}">
+                                                            id$="{{field.name}}" value="{{_getIssueValue(field.id)}}">
                                                     <template is="dom-repeat" id="optionsField" items="{{field.options}}" >
                                                         <template is="dom-if" if="{{item.value}}">
                                                             <paper-item  fieldid="[[item.id]]" value="{{item.id}}">{{item.value}}</paper-item>
@@ -191,9 +219,10 @@
                                                 </paper-menu>
                                              </paper-dropdown-menu-light>
                                         </template>
-                                        <template is="dom-if" if="{{errorMessage}}">
-                                            <br/>
-                                            <span class="error-message">{{field.name}} Required</span>
+                                        <template is="dom-if" if="{{hasError}}">
+                                            <p class="error-message">
+                                                {{field.name}} required
+                                            </p>
                                         </template>
                                     </div>
                                 </div>
@@ -201,7 +230,7 @@
                     </template>
                     <div class="content-row">
                         <div class="column-block half-button">
-                            <paper-button class="colorful" on-tap="confirmed" type="submit" raised >{{transitionName}}</paper-button>
+                            <paper-button disabled="{{!_hasRecords(fields)}}" class="colorful" on-tap="onConfirm" type="submit" raised >{{transitionName}}</paper-button>
                         </div>
                     </div>
                 </div>
@@ -215,66 +244,54 @@
                 is: 'transition-required-modal',
 
                 properties: {
-                    fieldsTransitions: {
-                        type: Object,
-                        notify: true
-                    },
 
-                    transitionName:{
-                        type:String
-                    },
-
-                    issue:{
-                        type:Object,
-                    },
-
-                    callback: {
+                    issue: {
                         type: Object
                     },
 
-                    errorMessage: {
-                        type:Boolean,
+                    transitionName: {
+                        type: String
+                    },
+
+                    callback: {
+                    },
+
+                    hasError: {
+                        type: Boolean,
+                        value: false
                     },
 
                     projectMetadata: {
-                        type: Object,
-                        notify: true
+                        type: Object
+                    },
+
+                    fields: {
+                        type: Array,
+                        value: []
+                    },
+
+                    fieldsTransitions: {
+                        type: Array
                     },
 
                     fieldsByFieldsTransitions: {
-                        type: Object,
-                        notify: true,
-                    },
-
-                    fieldsValue: {
-                        type: Object,
-                        notify: true,
-                    },
-
-                    allowedValues: {
-                        type: Object,
-                        notify: true,
-                    },
+                        type: Array
+                    }
 
                 },
 
-                openDialog: function (fieldsTransitions, transitionName, item, callback) {
-                    this.issue = item
-                    $(this.$.fieldsModal).css('background-color', item.color);
+                observers: [
+                    '_resizeModal(fields, hasError)'
+                ],
+
+                openDialog: function(fieldsTransitions, transitionName, issue, callback) {
+                    this.issue = issue;
+                    $(this.$.fieldsModal).css('background-color', issue.color);
                     this.fieldsTransitions = fieldsTransitions;
                     this.callback = callback;
                     this.transitionName = transitionName;
                     this.getProjectMetadata();
-                    this.$.fieldsModal.toggle();
-                },
-
-
-                getValue: function(id) {
-                    return this.issue[id];
-                },
-
-                hasRecords: function (records) {
-                    return records && records.length > 0;
+                    this.$.fieldsModal.open();
                 },
 
                 getProjectMetadata: function () {
@@ -294,18 +311,18 @@
 
                 getFields: function(){
                     this.getFieldsByFieldsTransitions();
-                    var field = this.fieldsByFieldsTransitions;
-                    var listFilds = [];
+                    var fields = this.fieldsByFieldsTransitions;
+                    var listFields = [];
 
-                    for(var f = 0; f < field.length; f++){
+                    for(var f = 0; f < fields.length; f++){
 
-                        var typeField = this.getTypeField(field[f]);
-                        var listOptions = this.getOptions(field[f]);
+                        var typeField = this.getTypeField(fields[f]);
+                        var listOptions = this.getOptions(fields[f]);
                         var showOptions = listOptions.length == 0 ? false : true;
 
-                        listFilds.push({
-                            id: field[f].name,
-                            name: field[f].name,
+                        listFields.push({
+                            id: fields[f].name,
+                            name: fields[f].name,
                             options: listOptions,
                             showOptions: showOptions,
                             required: null,
@@ -316,16 +333,16 @@
 
                     if (TRANSITION_REQUIRED_COMMENT.indexOf(this.transitionName) != -1) {
 
-                        listFilds.push({
-                            id: "comments",
-                            name: "Comments",
+                        listFields.push({
+                            id: "comment",
+                            name: "Comment",
                             options: null,
                             showOptions: false,
                             required: null,
                             type: TYPE_FIELD.TEXTAREA
                         });
                     }
-                    this.fields = listFilds;
+                    this.set('fields', listFields);
                 },
 
                 getTypeField: function(field) {
@@ -356,13 +373,13 @@
 
                 getFieldsByFieldsTransitions: function(){
                     var issuetype = this.getIssueTypeMetadataById(this.issue.type);
-                    var field = [];
+                    var fields = [];
                     for(ft in this.fieldsTransitions){
                         var fieldFromIssueType = this.getFieldFromIssueType(issuetype, this.fieldsTransitions[ft].name)
                         if(fieldFromIssueType != null)
                             field.push(fieldFromIssueType);
                     }
-                    this.fieldsByFieldsTransitions = field;
+                    this.fieldsByFieldsTransitions = fields;
                 },
 
                 getIssueTypeMetadataById: function (id) {
@@ -381,22 +398,19 @@
                     return null;
                 },
 
-                confirmed: function () {
+                onConfirm: function() {
                     var values = this.getValuesFields();
                     for (fv in this.fields) {
-                        this.errorMessage = this.fields[fv].required == true ? true : false;
+                        this.hasError = this.fields[fv].required == true ? true : false;
                     }
-                    if(this.errorMessage == false){
-                        this.setIssueValues(values);
-                        this.callback(this.issue);
-                        values = null;
-                        this.clearProperties();
+                    if(this.hasError == false){
+                        this.callback(this.issue, values);
+                        this.close();
                     }
                 },
 
                 getValuesFields: function(){
                     var jsonCustomField = {};
-                    var jsonComments = {};
                     var jsonField = {};
 
                     for (f in this.fields) {
@@ -421,31 +435,40 @@
                         else if(valueField == 0 || selectefField == null)
                              this.fields[f].required = true;
                     }
-                    return this.fieldsValue = $.extend(jsonField, {"customFields":  jsonCustomField});
+                    copyProperties(jsonField, jsonCustomField);
+                    return jsonField;
                 },
 
-                setIssueValues: function(values){
-                    $.extend(this.issue, values);
-                    this.issue;
+                close: function() {
+                    this.$.fieldsModal.close();
                 },
 
-                clearProperties: function () {
-                    this.transitionName = null;
-                    this.fieldsTransitions = [];
-                    this.issue = [];
-                    this.callback = [];
-                    this.fieldsValue = [];
-                    this.errorMessage = null;
-                    this.cleanFieldsValues();
-                    this.$.fieldsModal.toggle();
+                _afterClose() {
+                    this._clearProperties();
                 },
 
-                cleanFieldsValues: function(){
-                    for (f in this.fields) {
-                        document.getElementById(this.fields[f].name).value = "";
-                        document.getElementById(this.fields[f].name).selected = "";
-                    }
+                _clearProperties: function () {
+                    this.set('transitionName', undefined);
+                    this.set('fieldsTransitions', undefined);
+                    this.set('fieldsByFieldsTransitions', undefined);
+                    this.set('issue', undefined);
+                    this.set('callback', undefined);
+                    this.set('hasError', false);
+                    this.set('fields', []);
+                },
+
+                _getIssueValue: function(property) {
+                    return this.issue[property];
+                },
+
+                _hasRecords: function (records) {
+                    return records && records.length > 0;
+                },
+
+                _resizeModal: function(fields, hasError) {
+                    this.$.fieldsModal.notifyResize();
                 }
+
             });
         })();
     </script>
