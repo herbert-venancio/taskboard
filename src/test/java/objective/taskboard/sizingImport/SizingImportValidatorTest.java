@@ -34,11 +34,11 @@ public class SizingImportValidatorTest {
     private SizingImportConfig config = new SizingImportConfig();
     private GoogleApiService googleApiService= mock(GoogleApiService.class);
     private SpreadsheetsManager spreadsheetsManager = mock(SpreadsheetsManager.class);
-    private JiraUtils jiraUtils = mock(JiraUtils.class);
+    private JiraFacade jiraFacade = mock(JiraFacade.class);
     private SheetColumnDefinitionProvider columnDefinitionProvider = mock(SheetColumnDefinitionProvider.class);
     private List<List<Object>> sheetData;
 
-    private SizingImportValidator subject = new SizingImportValidator(config, googleApiService, jiraUtils, columnDefinitionProvider);
+    private SizingImportValidator subject = new SizingImportValidator(config, googleApiService, jiraFacade, columnDefinitionProvider);
     
     @Before
     public void setup() {
@@ -46,16 +46,16 @@ public class SizingImportValidatorTest {
         config.getSheetMap().getExtraFields().add(new ExtraField("f5", "Assumptions", "T"));
         config.getSheetMap().getExtraFields().add(new ExtraField("f6", "Acceptance Criteria", "R"));
         
-        when(jiraUtils.isAdminOfProject("OBJ")).thenReturn(true);
+        when(jiraFacade.isAdminOfProject("OBJ")).thenReturn(true);
         
         Map<String, CimFieldInfo> featureFields = new HashMap<>();
         featureFields.put("f5", new CimFieldInfo("f5", false, "Assumptions", null, null, null, null));
         featureFields.put("f6", new CimFieldInfo("f6", false, "Acceptance Criteria", null, null, null, null));
         
-        when(jiraUtils.requestFeatureCreateIssueMetadata("OBJ")).thenReturn(
+        when(jiraFacade.requestFeatureCreateIssueMetadata("OBJ")).thenReturn(
                 new CimIssueType(null, 55L, "Task", false, null, null, featureFields));
         
-        when(jiraUtils.getSizingFields(any())).thenReturn(asList(
+        when(jiraFacade.getSizingFields(any())).thenReturn(asList(
                 new CimFieldInfo("cf_2", true, "Dev TSize", null, null, null, null),
                 new CimFieldInfo("cf_3", false, "UX TSize", null, null, null, null)));
 
@@ -84,7 +84,7 @@ public class SizingImportValidatorTest {
 
     @Test
     public void shouldFailWhenUserCantAdminTheProject() {
-        when(jiraUtils.isAdminOfProject("OBJ")).thenReturn(false);
+        when(jiraFacade.isAdminOfProject("OBJ")).thenReturn(false);
         
         ValidationResult result = subject.validate("OBJ", "100");
 
@@ -94,7 +94,7 @@ public class SizingImportValidatorTest {
 
     @Test
     public void shouldFailWhenIssueTypeFeatureHasNoTSizeFieldConfigured() {
-        when(jiraUtils.getSizingFields(any())).thenReturn(emptyList());
+        when(jiraFacade.getSizingFields(any())).thenReturn(emptyList());
 
         ValidationResult result = subject.validate("OBJ", "100");
 
@@ -105,7 +105,7 @@ public class SizingImportValidatorTest {
 
     @Test
     public void shouldFailWhenSomeExtraFieldIsNotConfiguredInIssueTypeFeature() {
-        when(jiraUtils.requestFeatureCreateIssueMetadata("OBJ")).thenReturn(
+        when(jiraFacade.requestFeatureCreateIssueMetadata("OBJ")).thenReturn(
                 new CimIssueType(null, 55L, "Task", false, null, null, emptyMap()));
 
         ValidationResult result = subject.validate("OBJ", "100");

@@ -28,21 +28,21 @@ import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.Project;
 import com.atlassian.jira.rest.client.api.domain.Version;
 
-import objective.taskboard.sizingImport.JiraUtils.IssueCustomFieldOptionValue;
-import objective.taskboard.sizingImport.JiraUtils.IssueFieldObjectValue;
-import objective.taskboard.sizingImport.JiraUtils.IssueFieldValue;
+import objective.taskboard.sizingImport.JiraFacade.IssueCustomFieldOptionValue;
+import objective.taskboard.sizingImport.JiraFacade.IssueFieldObjectValue;
+import objective.taskboard.sizingImport.JiraFacade.IssueFieldValue;
 
 class SizingImporter {
 
     private final Logger log = LoggerFactory.getLogger(SizingImporter.class);
     
     private final SizingImportConfig importConfig;
-    private final JiraUtils jiraUtils;
+    private final JiraFacade jiraFacade;
     private final List<SizingImporterListener> listeners = new ArrayList<>();
     
-    public SizingImporter(SizingImportConfig importConfig, JiraUtils jiraUtils) {
+    public SizingImporter(SizingImportConfig importConfig, JiraFacade jiraFacade) {
         this.importConfig = importConfig;
-        this.jiraUtils = jiraUtils;
+        this.jiraFacade = jiraFacade;
     }
     
     public void addListener(SizingImporterListener listener) {
@@ -56,8 +56,8 @@ class SizingImporter {
         
         notifyImportStarted(allLines.size(), linesToImport.size());
 
-        Project project = jiraUtils.getProject(projectKey);
-        CimIssueType featureMetadata = jiraUtils.requestFeatureCreateIssueMetadata(projectKey);
+        Project project = jiraFacade.getProject(projectKey);
+        CimIssueType featureMetadata = jiraFacade.requestFeatureCreateIssueMetadata(projectKey);
         Map<Name, Version> importedVersions = recoverImportedVersions(project);
         Map<Name, ImportedDemand> importedDemands = recoverImportedDemands(allLines);
 
@@ -104,7 +104,7 @@ class SizingImporter {
         if (StringUtils.isBlank(line.getFeature()))
             errors.add("Feature should be informed;");
         
-        List<CimFieldInfo> sizingFields = jiraUtils.getSizingFields(featureMetadata);
+        List<CimFieldInfo> sizingFields = jiraFacade.getSizingFields(featureMetadata);
 
         errors.addAll(getRequiredFieldErrors(
                 sizingFields, 
@@ -141,7 +141,7 @@ class SizingImporter {
             return previouslyImportedVersion;
         
         log.debug("creating Version: {}", versionName);
-        Version version = jiraUtils.createVersion(projectKey, versionName);
+        Version version = jiraFacade.createVersion(projectKey, versionName);
         importedVersions.put(new Name(versionName), version);
         
         return version;
@@ -173,7 +173,7 @@ class SizingImporter {
         
         log.debug("creating Demand: {}", demandName);
 
-        BasicIssue demandIssue = jiraUtils.createDemand(projectKey, demandName, release);
+        BasicIssue demandIssue = jiraFacade.createDemand(projectKey, demandName, release);
         ImportedDemand importedDemand = new ImportedDemand(demandIssue.getKey(), new Name(demandName));
         importedDemands.put(importedDemand.getName(), importedDemand);
         
@@ -202,14 +202,14 @@ class SizingImporter {
                 })
                 .collect(toList()));
 
-        return jiraUtils.createFeature(projectKey, demandKey, featureName, release, fieldValues);
+        return jiraFacade.createFeature(projectKey, demandKey, featureName, release, fieldValues);
     }
 
     private Optional<String> findFirstDemandKey(List<SizingImportLine> linesOfDemand) {
         return linesOfDemand.stream()
                 .map(line -> {
-                    Issue feature = jiraUtils.getIssue(line.getJiraKey());
-                    return jiraUtils.getDemandKeyGivenFeature(feature);
+                    Issue feature = jiraFacade.getIssue(line.getJiraKey());
+                    return jiraFacade.getDemandKeyGivenFeature(feature);
                 })
                 .filter(Optional::isPresent)
                 .map(Optional::get)

@@ -40,14 +40,14 @@ import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
 import objective.taskboard.utils.ObjectUtils;
 
 @Component
-class JiraUtils {
+class JiraFacade {
 
     private final JiraEndpointAsLoggedInUser jiraEndpoint;
     private final JiraProperties jiraProperties;
     private final MetadataService metadataService;
     
     @Autowired
-    public JiraUtils(JiraEndpointAsLoggedInUser jiraEndpoint, JiraProperties jiraProperties, MetadataService metadataService) {
+    public JiraFacade(JiraEndpointAsLoggedInUser jiraEndpoint, JiraProperties jiraProperties, MetadataService metadataService) {
         this.jiraEndpoint = jiraEndpoint;
         this.jiraProperties = jiraProperties;
         this.metadataService = metadataService;

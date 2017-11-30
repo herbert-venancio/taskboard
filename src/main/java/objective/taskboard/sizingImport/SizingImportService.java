@@ -23,7 +23,7 @@ class SizingImportService {
 
     private final SizingImportConfig importConfig;
     private final GoogleApiService googleApiService;
-    private final JiraUtils jiraUtils;
+    private final JiraFacade jiraFacade;
     private final SizingSheetParser sheetParser;
     private final SheetColumnDefinitionProvider columnDefinitionProvider;
     private final SizingImportValidator importValidator;
@@ -33,7 +33,7 @@ class SizingImportService {
     public SizingImportService(
             SizingImportConfig importConfig,
             GoogleApiService googleApiService, 
-            JiraUtils jiraUtils, 
+            JiraFacade jiraFacade, 
             SizingSheetParser sheetParser,
             SheetColumnDefinitionProvider columnDefinitionProvider,
             SizingImportValidator importValidator,
@@ -41,7 +41,7 @@ class SizingImportService {
 
         this.importConfig = importConfig;
         this.googleApiService = googleApiService;
-        this.jiraUtils = jiraUtils;
+        this.jiraFacade = jiraFacade;
         this.sheetParser = sheetParser;
         this.columnDefinitionProvider = columnDefinitionProvider;
         this.importValidator = importValidator;
@@ -58,8 +58,8 @@ class SizingImportService {
     }
     
     public SheetDefinition getSheetDefinition(String projectKey) {
-        CimIssueType featureCreateIssueMetadata = jiraUtils.requestFeatureCreateIssueMetadata(projectKey);
-        List<CimFieldInfo> featureSizingFields = jiraUtils.getSizingFields(featureCreateIssueMetadata);
+        CimIssueType featureCreateIssueMetadata = jiraFacade.requestFeatureCreateIssueMetadata(projectKey);
+        List<CimFieldInfo> featureSizingFields = jiraFacade.getSizingFields(featureCreateIssueMetadata);
 
         List<StaticMappingDefinition> staticMappings = columnDefinitionProvider.getStaticMappings();
         List<DynamicMappingDefinition> dynamicMappings = columnDefinitionProvider.getDynamicMappings(featureSizingFields);
@@ -81,9 +81,9 @@ class SizingImportService {
         SpreadsheetsManager spreadsheetsManager = googleApiService.buildSpreadsheetsManager();
         List<SizingImportLine> spreedsheetData = parseSizingSheet(projectKey, spreadsheetId, columnsMapping, spreadsheetsManager);
 
-        SizingImporter importer = new SizingImporter(importConfig, jiraUtils);
+        SizingImporter importer = new SizingImporter(importConfig, jiraFacade);
         
-        importer.addListener(new SizingImporterSheetUpdater(spreadsheetId, spreadsheetsManager, importConfig, jiraUtils.getJiraUrl()));
+        importer.addListener(new SizingImporterSheetUpdater(spreadsheetId, spreadsheetsManager, importConfig, jiraFacade.getJiraUrl()));
         importer.addListener(new SizingImporterSocketStatusEmmiter(messagingTemplate));
         
         importer.executeImport(projectKey, spreedsheetData);

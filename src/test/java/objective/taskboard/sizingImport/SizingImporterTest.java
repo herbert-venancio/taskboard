@@ -30,8 +30,8 @@ import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.Project;
 import com.atlassian.jira.rest.client.api.domain.Version;
 
-import objective.taskboard.sizingImport.JiraUtils.IssueCustomFieldOptionValue;
-import objective.taskboard.sizingImport.JiraUtils.IssueFieldObjectValue;
+import objective.taskboard.sizingImport.JiraFacade.IssueCustomFieldOptionValue;
+import objective.taskboard.sizingImport.JiraFacade.IssueFieldObjectValue;
 import objective.taskboard.sizingImport.SheetColumnDefinition.ColumnTag;
 import objective.taskboard.sizingImport.SizingImportConfig.SheetMap.ExtraField;
 import objective.taskboard.sizingImport.SizingImportLine.ImportValue;
@@ -48,19 +48,19 @@ public class SizingImporterTest {
     private static final SheetColumn KEY_COLUMN = new SheetColumn(SheetColumnDefinitionProvider.KEY, "D");
 
     private final SizingImportConfig importConfig = new SizingImportConfig();
-    private final JiraUtils jiraUtils = mock(JiraUtils.class);
+    private final JiraFacade jiraFacade = mock(JiraFacade.class);
     private final SizingImporterRecorder recorder = new SizingImporterRecorder();
     private final Map<String, CimFieldInfo> featureMetadataFields = new HashMap<>();
     
-    private final SizingImporter subject = new SizingImporter(importConfig, jiraUtils);
+    private final SizingImporter subject = new SizingImporter(importConfig, jiraFacade);
 
     @Before
     public void setup() {
-        when(jiraUtils.createVersion(PROJECT_X_KEY, "One")).thenReturn(VERSION_ONE);
-        when(jiraUtils.getProject(PROJECT_X_KEY)).thenReturn(jiraProject(PROJECT_X_KEY, "Project X"));
-        when(jiraUtils.getDemandKeyGivenFeature(any())).thenReturn(Optional.of("PX-1"));
+        when(jiraFacade.createVersion(PROJECT_X_KEY, "One")).thenReturn(VERSION_ONE);
+        when(jiraFacade.getProject(PROJECT_X_KEY)).thenReturn(jiraProject(PROJECT_X_KEY, "Project X"));
+        when(jiraFacade.getDemandKeyGivenFeature(any())).thenReturn(Optional.of("PX-1"));
 
-        when(jiraUtils.requestFeatureCreateIssueMetadata(PROJECT_X_KEY)).thenReturn(
+        when(jiraFacade.requestFeatureCreateIssueMetadata(PROJECT_X_KEY)).thenReturn(
                 new CimIssueType(null, 0L, "Feature", false, null, null, featureMetadataFields));
 
         subject.addListener(recorder);
@@ -76,7 +76,7 @@ public class SizingImporterTest {
                 "Import started - Total lines count: 0 | lines to import: 0",
                 "Import finished");
         
-        verifyJiraUtilsNeverCreateItems();
+        verifyJiraFacadeNeverCreateItems();
     }
     
     @Test
@@ -94,7 +94,7 @@ public class SizingImporterTest {
                 "Import started - Total lines count: 1 | lines to import: 0",
                 "Import finished");
         
-        verifyJiraUtilsNeverCreateItems();
+        verifyJiraFacadeNeverCreateItems();
     }
     
     @Test
@@ -112,12 +112,12 @@ public class SizingImporterTest {
                 "Line error - Row index: 0 | errors: Feature should be informed;",
                 "Import finished");
 
-        verifyJiraUtilsNeverCreateItems();
+        verifyJiraFacadeNeverCreateItems();
     }
 
     @Test
     public void importLineWithEmptyRequiredSizingField() {
-        when(jiraUtils.getSizingFields(any())).thenReturn(asList(
+        when(jiraFacade.getSizingFields(any())).thenReturn(asList(
                 jiraRequiredField("f1", "Dev TSize"),
                 jiraOptionalField("f2", "UAT TSize")));
         
@@ -136,7 +136,7 @@ public class SizingImporterTest {
                 "Line error - Row index: 0 | errors: Dev TSize should be informed;",
                 "Import finished");
         
-        verifyJiraUtilsNeverCreateItems();
+        verifyJiraFacadeNeverCreateItems();
     }
 
     @Test
@@ -159,13 +159,13 @@ public class SizingImporterTest {
                 "Line error - Row index: 0 | errors: Use Cases should be informed;",
                 "Import finished");
         
-        verifyJiraUtilsNeverCreateItems();
+        verifyJiraFacadeNeverCreateItems();
     }
 
     @Test
     public void importLineWithoutSizingAndExtraFields() {
-        when(jiraUtils.createDemand(any(), eq("Blue"), any())).thenReturn(new BasicIssue(null, "PX-1", 0L));
-        when(jiraUtils.createFeature(any(), any(), eq("Banana"), any(), any())).thenReturn(new BasicIssue(null, "PX-15", 0L));
+        when(jiraFacade.createDemand(any(), eq("Blue"), any())).thenReturn(new BasicIssue(null, "PX-1", 0L));
+        when(jiraFacade.createFeature(any(), any(), eq("Banana"), any(), any())).thenReturn(new BasicIssue(null, "PX-15", 0L));
 
         List<SizingImportLine> lines = asList(
                 new SizingImportLine(0, asList(
@@ -182,9 +182,9 @@ public class SizingImporterTest {
                 "Line import finished - Row index: 0 | feature issue key: PX-15",
                 "Import finished");
         
-        verify(jiraUtils).createVersion(PROJECT_X_KEY, "One");
-        verify(jiraUtils).createDemand(PROJECT_X_KEY, "Blue", VERSION_ONE);
-        verify(jiraUtils).createFeature(PROJECT_X_KEY, "PX-1", "Banana", VERSION_ONE, emptyList());
+        verify(jiraFacade).createVersion(PROJECT_X_KEY, "One");
+        verify(jiraFacade).createDemand(PROJECT_X_KEY, "Blue", VERSION_ONE);
+        verify(jiraFacade).createFeature(PROJECT_X_KEY, "PX-1", "Banana", VERSION_ONE, emptyList());
     }
 
     @Test
@@ -197,13 +197,13 @@ public class SizingImporterTest {
         featureMetadataFields.put(uatTSizeField.getId(), uatTSizeField);
         featureMetadataFields.put(useCasesField.getId(), useCasesField);
         
-        when(jiraUtils.getSizingFields(any())).thenReturn(asList(devTSizeField, uatTSizeField));
+        when(jiraFacade.getSizingFields(any())).thenReturn(asList(devTSizeField, uatTSizeField));
         
-        when(jiraUtils.createDemand(any(), eq("Blue"), any())).thenReturn(new BasicIssue(null, "PX-2", 0L));
-        when(jiraUtils.createDemand(any(), eq("Red"), any())).thenReturn(new BasicIssue(null, "PX-3", 0L));
-        when(jiraUtils.createFeature(any(), any(), eq("Banana"), any(), any())).thenReturn(new BasicIssue(null, "PX-15", 0L));
-        when(jiraUtils.createFeature(any(), any(), eq("Lemon"), any(), any())).thenReturn(new BasicIssue(null, "PX-16", 0L));
-        when(jiraUtils.createFeature(any(), any(), eq("Grape"), any(), any())).thenReturn(new BasicIssue(null, "PX-17", 0L));
+        when(jiraFacade.createDemand(any(), eq("Blue"), any())).thenReturn(new BasicIssue(null, "PX-2", 0L));
+        when(jiraFacade.createDemand(any(), eq("Red"), any())).thenReturn(new BasicIssue(null, "PX-3", 0L));
+        when(jiraFacade.createFeature(any(), any(), eq("Banana"), any(), any())).thenReturn(new BasicIssue(null, "PX-15", 0L));
+        when(jiraFacade.createFeature(any(), any(), eq("Lemon"), any(), any())).thenReturn(new BasicIssue(null, "PX-16", 0L));
+        when(jiraFacade.createFeature(any(), any(), eq("Grape"), any(), any())).thenReturn(new BasicIssue(null, "PX-17", 0L));
         
         SheetColumn devTSizeCol = new SheetColumn(new SheetColumnDefinition("Dev TSize", new ColumnTag(SIZING_FIELD_ID_TAG, "f1")), "E");
         SheetColumn uatTSizeCol = new SheetColumn(new SheetColumnDefinition("UAT TSize", new ColumnTag(SIZING_FIELD_ID_TAG, "f2")), "F");
@@ -246,12 +246,12 @@ public class SizingImporterTest {
                 "Line import finished - Row index: 2 | feature issue key: PX-17",
                 "Import finished");
         
-        verify(jiraUtils).createVersion(PROJECT_X_KEY, "One");
-        verify(jiraUtils).createDemand(PROJECT_X_KEY, "Blue", VERSION_ONE);
-        verify(jiraUtils).createDemand(PROJECT_X_KEY, "Red", VERSION_ONE);
-        verify(jiraUtils).createFeature(PROJECT_X_KEY, "PX-2", "Banana", VERSION_ONE, emptyList());
-        verify(jiraUtils).createFeature(PROJECT_X_KEY, "PX-2", "Lemon", VERSION_ONE, emptyList());
-        verify(jiraUtils).createFeature(PROJECT_X_KEY, "PX-3", "Grape", VERSION_ONE, asList(
+        verify(jiraFacade).createVersion(PROJECT_X_KEY, "One");
+        verify(jiraFacade).createDemand(PROJECT_X_KEY, "Blue", VERSION_ONE);
+        verify(jiraFacade).createDemand(PROJECT_X_KEY, "Red", VERSION_ONE);
+        verify(jiraFacade).createFeature(PROJECT_X_KEY, "PX-2", "Banana", VERSION_ONE, emptyList());
+        verify(jiraFacade).createFeature(PROJECT_X_KEY, "PX-2", "Lemon", VERSION_ONE, emptyList());
+        verify(jiraFacade).createFeature(PROJECT_X_KEY, "PX-3", "Grape", VERSION_ONE, asList(
                 new IssueCustomFieldOptionValue("f1", "X", null),
                 new IssueCustomFieldOptionValue("f2", "S", null),
                 new IssueFieldObjectValue("f3", "User picks and eats")));
@@ -259,9 +259,9 @@ public class SizingImporterTest {
 
     @Test
     public void importUsingAlreadyCreatedVersion() {
-        when(jiraUtils.getProject("PY")).thenReturn(jiraProject("PY", "Project Y", asList(jiraVersion("Two"))));
-        when(jiraUtils.createDemand(any(), eq("Blue"), any())).thenReturn(new BasicIssue(null, "PY-1", 0L));
-        when(jiraUtils.createFeature(any(), any(), eq("Banana"), any(), any())).thenReturn(new BasicIssue(null, "PY-15", 0L));
+        when(jiraFacade.getProject("PY")).thenReturn(jiraProject("PY", "Project Y", asList(jiraVersion("Two"))));
+        when(jiraFacade.createDemand(any(), eq("Blue"), any())).thenReturn(new BasicIssue(null, "PY-1", 0L));
+        when(jiraFacade.createFeature(any(), any(), eq("Banana"), any(), any())).thenReturn(new BasicIssue(null, "PY-15", 0L));
 
         List<SizingImportLine> lines = asList(
                 new SizingImportLine(0, asList(
@@ -278,15 +278,15 @@ public class SizingImporterTest {
                 "Line import finished - Row index: 0 | feature issue key: PY-15",
                 "Import finished");
         
-        verify(jiraUtils, never()).createVersion(any(), eq("Two"));
+        verify(jiraFacade, never()).createVersion(any(), eq("Two"));
     }
 
     @Test
     public void recoverDemandFromPreviouslyImportedFeature() {
         Issue bananaIssue = mock(Issue.class);
-        when(jiraUtils.getIssue("PX-10")).thenReturn(bananaIssue);
-        when(jiraUtils.getDemandKeyGivenFeature(bananaIssue)).thenReturn(Optional.of("PX-1"));
-        when(jiraUtils.createFeature(any(), any(), eq("Lemon"), any(), any())).thenReturn(new BasicIssue(null, "PX-15", 0L));
+        when(jiraFacade.getIssue("PX-10")).thenReturn(bananaIssue);
+        when(jiraFacade.getDemandKeyGivenFeature(bananaIssue)).thenReturn(Optional.of("PX-1"));
+        when(jiraFacade.createFeature(any(), any(), eq("Lemon"), any(), any())).thenReturn(new BasicIssue(null, "PX-15", 0L));
 
         List<SizingImportLine> lines = asList(
                 new SizingImportLine(0, asList(
@@ -308,8 +308,8 @@ public class SizingImporterTest {
                 "Line import finished - Row index: 0 | feature issue key: PX-15",
                 "Import finished");
         
-        verify(jiraUtils, never()).createDemand(any(), eq("Blue"), any());
-        verify(jiraUtils).createFeature(PROJECT_X_KEY, "PX-1", "Lemon", VERSION_ONE, emptyList());
+        verify(jiraFacade, never()).createDemand(any(), eq("Blue"), any());
+        verify(jiraFacade).createFeature(PROJECT_X_KEY, "PX-1", "Lemon", VERSION_ONE, emptyList());
     }
 
     private static Project jiraProject(String key, String name, List<Version> versions) {
@@ -332,10 +332,10 @@ public class SizingImporterTest {
         return new Version(null, 0L, name, null, false, false, null);
     }
     
-    private void verifyJiraUtilsNeverCreateItems() {
-        verify(jiraUtils, never()).createVersion(any(), any());
-        verify(jiraUtils, never()).createDemand(any(), any(), any());
-        verify(jiraUtils, never()).createFeature(any(), any(), any(), any(), any());
+    private void verifyJiraFacadeNeverCreateItems() {
+        verify(jiraFacade, never()).createVersion(any(), any());
+        verify(jiraFacade, never()).createDemand(any(), any(), any());
+        verify(jiraFacade, never()).createFeature(any(), any(), any(), any(), any());
     }
     
     private void assertEvents(String... expected) {

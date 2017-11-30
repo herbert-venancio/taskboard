@@ -29,40 +29,40 @@ class SizingImportValidator {
     
     private final SizingImportConfig config;
     private final GoogleApiService googleApiService;
-    private final JiraUtils jiraUtils;
+    private final JiraFacade jiraFacade;
     private final SheetColumnDefinitionProvider columnDefinitionProvider;
 
     @Autowired
     public SizingImportValidator(
             SizingImportConfig config, 
             GoogleApiService googleApiService, 
-            JiraUtils jiraUtils, 
+            JiraFacade jiraFacade, 
             SheetColumnDefinitionProvider columnDefinitionProvider) {
 
         this.config = config;
         this.googleApiService = googleApiService;
-        this.jiraUtils = jiraUtils;
+        this.jiraFacade = jiraFacade;
         this.columnDefinitionProvider = columnDefinitionProvider;
     }
 
     public ValidationResult validate(String projectKey, String spreadsheetId) {
         int headersRowIndex = config.getDataStartingRowIndex() - 1;
         SpreadsheetsManager spreadsheetsManager = googleApiService.buildSpreadsheetsManager();
-        CimIssueType featureIssueMetadata = jiraUtils.requestFeatureCreateIssueMetadata(projectKey);
+        CimIssueType featureIssueMetadata = jiraFacade.requestFeatureCreateIssueMetadata(projectKey);
         ValidationContext context = new ValidationContext(projectKey, spreadsheetId, headersRowIndex, spreadsheetsManager, featureIssueMetadata);
 
         return validateUserIsAdminOfProject(context);
     }
     
     private ValidationResult validateUserIsAdminOfProject(ValidationContext context) {
-        if (!jiraUtils.isAdminOfProject(context.projectKey))
+        if (!jiraFacade.isAdminOfProject(context.projectKey))
             return ValidationResult.fail("You should have permission to admin this project in Jira.");
         
         return validateFeatureHasSizingFields(context);
     }
     
     private ValidationResult validateFeatureHasSizingFields(ValidationContext context) {
-        List<CimFieldInfo> featureSizingFields = jiraUtils.getSizingFields(context.featureIssueMetadata);
+        List<CimFieldInfo> featureSizingFields = jiraFacade.getSizingFields(context.featureIssueMetadata);
 
         if (featureSizingFields.isEmpty()) {
             return ValidationResult.fail(
