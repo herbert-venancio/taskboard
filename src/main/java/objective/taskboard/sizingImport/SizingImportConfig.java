@@ -67,15 +67,15 @@ public class SizingImportConfig {
 
         @NotNull
         private String issueFeature;
-        
-        @NotNull
-        private String issueAcceptanceCriteria;
-        
+
         @NotNull
         private String include;
 
         @Valid
         private List<DefaultColumn> defaultColumns = new ArrayList<>();
+        
+        @Valid
+        private List<ExtraField> extraFields = new ArrayList<>();
         
         public String getIssuePhase() {
             return issuePhase;
@@ -108,14 +108,6 @@ public class SizingImportConfig {
         public void setIssueFeature(String issueFeature) {
             this.issueFeature = issueFeature;
         }
-        
-        public String getIssueAcceptanceCriteria() {
-            return issueAcceptanceCriteria;
-        }
-
-        public void setIssueAcceptanceCriteria(String issueAcceptanceCriteria) {
-            this.issueAcceptanceCriteria = issueAcceptanceCriteria;
-        }
 
         public String getInclude() {
             return include;
@@ -131,6 +123,14 @@ public class SizingImportConfig {
 
         public void setDefaultColumns(List<DefaultColumn> defaultColumns) {
             this.defaultColumns = defaultColumns;
+        }
+
+        public List<ExtraField> getExtraFields() {
+            return extraFields;
+        }
+
+        public void setExtraFields(List<ExtraField> extraFields) {
+            this.extraFields = extraFields;
         }
 
         public static class DefaultColumn {
@@ -154,6 +154,50 @@ public class SizingImportConfig {
 
             public void setColumn(String column) {
                 this.column = column;
+            }
+        }
+        
+        public static class ExtraField {
+            @NotNull
+            private String fieldId;
+            
+            @NotNull
+            private String columnHeader;
+            
+            @NotNull
+            private String columnLetter;
+
+            public ExtraField(String fieldId, String columnHeader, String columnLetter) {
+                this.fieldId = fieldId;
+                this.columnHeader = columnHeader;
+                this.columnLetter = columnLetter;
+            }
+            
+            public ExtraField() {
+            }
+
+            public String getFieldId() {
+                return fieldId;
+            }
+
+            public void setFieldId(String fieldId) {
+                this.fieldId = fieldId;
+            }
+
+            public String getColumnHeader() {
+                return columnHeader;
+            }
+
+            public void setColumnHeader(String columnHeader) {
+                this.columnHeader = columnHeader;
+            }
+
+            public String getColumnLetter() {
+                return columnLetter;
+            }
+
+            public void setColumnLetter(String columnLetter) {
+                this.columnLetter = columnLetter;
             }
         }
     }

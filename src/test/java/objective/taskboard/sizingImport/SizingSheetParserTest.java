@@ -2,7 +2,6 @@ package objective.taskboard.sizingImport;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static objective.taskboard.sizingImport.SheetColumnDefinitionProvider.ACCEPTANCE_CRITERIA;
 import static objective.taskboard.sizingImport.SheetColumnDefinitionProvider.DEMAND;
 import static objective.taskboard.sizingImport.SheetColumnDefinitionProvider.FEATURE;
 import static objective.taskboard.sizingImport.SheetColumnDefinitionProvider.INCLUDE;
@@ -48,7 +47,6 @@ public class SizingSheetParserTest {
                         new StaticMappingDefinition(DEMAND,              "B"),
                         new StaticMappingDefinition(FEATURE,             "C"),
                         new StaticMappingDefinition(KEY,                 "D"),
-                        new StaticMappingDefinition(ACCEPTANCE_CRITERIA, "E"),
                         new StaticMappingDefinition(INCLUDE,             "F")), 
                 asList(
                         new DynamicMappingDefinition(FIELD_1, "f1"),
@@ -66,7 +64,6 @@ public class SizingSheetParserTest {
         assertEquals("VALUE_A_DEMAND", line.getDemand());
         assertEquals("VALUE_A_FEATURE", line.getFeature());
         assertEquals("", line.getJiraKey());
-        assertEquals("VALUE_A_ACCEPCRITER", line.getAcceptanceCriteria());
         assertEquals("VALUE_A1", line.getValue(FIELD_1));
         assertEquals("VALUE_A2", line.getValue(FIELD_2));
 
@@ -75,7 +72,6 @@ public class SizingSheetParserTest {
         assertEquals("VALUE_B_DEMAND", line.getDemand());
         assertEquals("VALUE_B_FEATURE", line.getFeature());
         assertEquals("VALUE_B_KEY", line.getJiraKey());
-        assertEquals("VALUE_B_ACCEPCRITER", line.getAcceptanceCriteria());
         assertEquals("VALUE_B1", line.getValue(FIELD_1));
         assertEquals("VALUE_B2", line.getValue(FIELD_2));
         
@@ -84,7 +80,6 @@ public class SizingSheetParserTest {
         assertEquals("VALUE_F_DEMAND", line.getDemand());
         assertEquals("VALUE_F_FEATURE", line.getFeature());
         assertEquals("", line.getJiraKey());
-        assertEquals("VALUE_F_ACCEPCRITER", line.getAcceptanceCriteria());
         assertEquals("", line.getValue(FIELD_1));
         assertEquals("VALUE_F2", line.getValue(FIELD_2));
     }

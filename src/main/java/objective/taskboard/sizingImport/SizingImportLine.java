@@ -38,9 +38,9 @@ class SizingImportLine {
         return importValue == null ? defaultValue : importValue.getValue();
     }
     
-    public Optional<String> getValue(Predicate<SheetColumnDefinition> columnDefinitionPredicate) {
+    public Optional<String> getValue(Predicate<SheetColumn> columnPredicate) {
         return values.stream()
-                .filter(v -> columnDefinitionPredicate.test(v.column.getDefinition()))
+                .filter(v -> columnPredicate.test(v.column))
                 .findFirst()
                 .map(ImportValue::getValue);
     }
@@ -71,10 +71,6 @@ class SizingImportLine {
     
     public String getFeature() {
         return getValue(SheetColumnDefinitionProvider.FEATURE);
-    }
-
-    public String getAcceptanceCriteria() {
-        return getValue(SheetColumnDefinitionProvider.ACCEPTANCE_CRITERIA);
     }
 
     public boolean isInclude() {

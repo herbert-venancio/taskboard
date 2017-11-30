@@ -22,6 +22,7 @@ import objective.taskboard.google.GoogleApiService;
 import objective.taskboard.google.SpreadsheetUtils;
 import objective.taskboard.google.SpreadsheetsManager;
 import objective.taskboard.google.SpreadsheetsManager.SpreadsheeNotFoundException;
+import objective.taskboard.sizingImport.SizingImportConfig.SheetMap.ExtraField;
 
 @Component
 class SizingImportValidator {
@@ -47,7 +48,8 @@ class SizingImportValidator {
     public ValidationResult validate(String projectKey, String spreadsheetId) {
         int headersRowIndex = config.getDataStartingRowIndex() - 1;
         SpreadsheetsManager spreadsheetsManager = googleApiService.buildSpreadsheetsManager();
-        ValidationContext context = new ValidationContext(projectKey, spreadsheetId, headersRowIndex, spreadsheetsManager);
+        CimIssueType featureIssueMetadata = jiraUtils.requestFeatureCreateIssueMetadata(projectKey);
+        ValidationContext context = new ValidationContext(projectKey, spreadsheetId, headersRowIndex, spreadsheetsManager, featureIssueMetadata);
 
         return validateUserIsAdminOfProject(context);
     }
@@ -60,16 +62,30 @@ class SizingImportValidator {
     }
     
     private ValidationResult validateFeatureHasSizingFields(ValidationContext context) {
-        CimIssueType featureIssueMetadata = jiraUtils.requestFeatureCreateIssueMetadata(context.projectKey);
-        List<CimFieldInfo> featureSizingFields = jiraUtils.getSizingFields(featureIssueMetadata);
+        List<CimFieldInfo> featureSizingFields = jiraUtils.getSizingFields(context.featureIssueMetadata);
 
         if (featureSizingFields.isEmpty()) {
             return ValidationResult.fail(
-                    format("Issue type “%s” should have at least one sizing field configured in it.", featureIssueMetadata.getName()), 
+                    format("Issue type “%s” should have at least one sizing field configured in it.", context.featureIssueMetadata.getName()), 
                     "Please check the configuration of selected project in Jira.");
         }
         
-        return validateSpreadsheetExistence(context);
+        return validateFeatureHasExtraFields(context);
+    }
+
+    private ValidationResult validateFeatureHasExtraFields(ValidationContext context) {
+        List<ExtraField> missingExtraFieldsInFeature = config.getSheetMap().getExtraFields().stream()
+                .filter(f -> !context.featureIssueMetadata.getFields().containsKey(f.getFieldId()))
+                .collect(toList());
+
+        if (missingExtraFieldsInFeature.isEmpty())
+            return validateSpreadsheetExistence(context);
+
+        return ValidationResult.fail(
+                format("Issue type “%s” should have the following fields configured in it: %s", 
+                        context.featureIssueMetadata.getName(),
+                        missingExtraFieldsInFeature.stream().map(f -> f.getColumnHeader()).sorted().collect(joining(", "))), 
+                "Please check the configuration of selected project in Jira.");
     }
     
     private ValidationResult validateSpreadsheetExistence(ValidationContext context) {
@@ -238,12 +254,14 @@ class SizingImportValidator {
         protected final String spreadsheetId;
         protected final int headersRowIndex;
         protected final SpreadsheetsManager spreadsheetsManager;
+        protected final CimIssueType featureIssueMetadata;
 
-        public ValidationContext(String projectKey, String spreadsheetId, int headersRowIndex, SpreadsheetsManager spreadsheetsManager) {
+        public ValidationContext(String projectKey, String spreadsheetId, int headersRowIndex, SpreadsheetsManager spreadsheetsManager, CimIssueType featureIssueMetadata) {
             this.projectKey = projectKey;
             this.spreadsheetId = spreadsheetId;
             this.headersRowIndex = headersRowIndex;
             this.spreadsheetsManager = spreadsheetsManager;
+            this.featureIssueMetadata = featureIssueMetadata;
         }
     }
     
@@ -251,7 +269,7 @@ class SizingImportValidator {
         protected final List<String> sheetsTitles;
         
         public ValidationContextWithSpreadsheet(ValidationContext context, List<String> sheetsTitles) {
-            super(context.projectKey,context. spreadsheetId, context.headersRowIndex, context.spreadsheetsManager);
+            super(context.projectKey,context. spreadsheetId, context.headersRowIndex, context.spreadsheetsManager, context.featureIssueMetadata);
             this.sheetsTitles = sheetsTitles;
         }
     }

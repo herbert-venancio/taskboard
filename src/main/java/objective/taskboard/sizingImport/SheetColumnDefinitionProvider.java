@@ -1,12 +1,13 @@
 package objective.taskboard.sizingImport;
 
+import static java.util.Collections.sort;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.nullsLast;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -28,26 +29,41 @@ class SheetColumnDefinitionProvider {
     public static final SheetColumnDefinition FEATURE  = new SheetColumnDefinition("Feature");
     public static final SheetColumnDefinition KEY      = new SheetColumnDefinition("Key",      PreviewBehavior.HIDE);
     public static final SheetColumnDefinition INCLUDE  = new SheetColumnDefinition("Include",  PreviewBehavior.HIDE);
-    public static final SheetColumnDefinition ACCEPTANCE_CRITERIA = new SheetColumnDefinition("Acceptance Criteria");
     
     public static final String SIZING_FIELD_ID_TAG = "sizing-field";
+    public static final String EXTRA_FIELD_ID_TAG = "extra-field";
 
     private final SizingImportConfig importConfig;
-    private final List<StaticMappingDefinition> staticMappings;
+    private final List<StaticMappingDefinition> staticMappings = new ArrayList<>();
 
     @Autowired
     public SheetColumnDefinitionProvider(SizingImportConfig importConfig) {
         this.importConfig = importConfig;
         
-        this.staticMappings = Arrays.asList(
+        this.staticMappings.addAll(getRegularMappings());
+        this.staticMappings.addAll(getExtraFieldMappings());
+
+        sort(this.staticMappings, comparing(c -> c.getColumnLetter(), SpreadsheetUtils.COLUMN_LETTER_COMPARATOR));
+    }
+
+    private List<StaticMappingDefinition> getRegularMappings() {
+        return Arrays.asList(
                 new StaticMappingDefinition(PHASE,    importConfig.getSheetMap().getIssuePhase()),
                 new StaticMappingDefinition(DEMAND,   importConfig.getSheetMap().getIssueDemand()),
                 new StaticMappingDefinition(FEATURE,  importConfig.getSheetMap().getIssueFeature()),
                 new StaticMappingDefinition(KEY,      importConfig.getSheetMap().getIssueKey()),
-                new StaticMappingDefinition(INCLUDE,  importConfig.getSheetMap().getInclude()),
-                new StaticMappingDefinition(ACCEPTANCE_CRITERIA, importConfig.getSheetMap().getIssueAcceptanceCriteria()));
+                new StaticMappingDefinition(INCLUDE,  importConfig.getSheetMap().getInclude()));
+    }
 
-        Collections.sort(this.staticMappings, comparing(c -> c.getColumnLetter(), SpreadsheetUtils.COLUMN_LETTER_COMPARATOR));
+    private List<StaticMappingDefinition> getExtraFieldMappings() {
+        return importConfig.getSheetMap().getExtraFields().stream()
+                .map(extraField -> {
+                    ColumnTag extraFieldTag = new ColumnTag(EXTRA_FIELD_ID_TAG, extraField.getFieldId());
+                    SheetColumnDefinition columnDefinition = new SheetColumnDefinition(extraField.getColumnHeader(), extraFieldTag);
+
+                    return new StaticMappingDefinition(columnDefinition, extraField.getColumnLetter());
+                })
+                .collect(toList());
     }
 
     public List<StaticMappingDefinition> getStaticMappings() {

@@ -13,7 +13,6 @@ import com.atlassian.jira.rest.client.api.domain.CimIssueType;
 
 import objective.taskboard.google.GoogleApiService;
 import objective.taskboard.google.SpreadsheetsManager;
-import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.sizingImport.PreviewBuilder.ImportPreview;
 import objective.taskboard.sizingImport.SizingImportValidator.ValidationResult;
 
@@ -23,7 +22,6 @@ class SizingImportService {
     private static final int PREVIEW_LINES_LIMIT = 5;
 
     private final SizingImportConfig importConfig;
-    private final JiraProperties jiraProperties;
     private final GoogleApiService googleApiService;
     private final JiraUtils jiraUtils;
     private final SizingSheetParser sheetParser;
@@ -34,7 +32,6 @@ class SizingImportService {
     @Autowired
     public SizingImportService(
             SizingImportConfig importConfig,
-            JiraProperties jiraProperties,
             GoogleApiService googleApiService, 
             JiraUtils jiraUtils, 
             SizingSheetParser sheetParser,
@@ -43,7 +40,6 @@ class SizingImportService {
             SimpMessagingTemplate messagingTemplate){
 
         this.importConfig = importConfig;
-        this.jiraProperties = jiraProperties;
         this.googleApiService = googleApiService;
         this.jiraUtils = jiraUtils;
         this.sheetParser = sheetParser;
@@ -85,9 +81,9 @@ class SizingImportService {
         SpreadsheetsManager spreadsheetsManager = googleApiService.buildSpreadsheetsManager();
         List<SizingImportLine> spreedsheetData = parseSizingSheet(projectKey, spreadsheetId, columnsMapping, spreadsheetsManager);
 
-        SizingImporter importer = new SizingImporter(jiraProperties, jiraUtils);
+        SizingImporter importer = new SizingImporter(importConfig, jiraUtils);
         
-        importer.addListener(new SizingImporterSheetUpdater(spreadsheetId, spreadsheetsManager, importConfig, jiraProperties));
+        importer.addListener(new SizingImporterSheetUpdater(spreadsheetId, spreadsheetsManager, importConfig, jiraUtils.getJiraUrl()));
         importer.addListener(new SizingImporterSocketStatusEmmiter(messagingTemplate));
         
         importer.executeImport(projectKey, spreedsheetData);

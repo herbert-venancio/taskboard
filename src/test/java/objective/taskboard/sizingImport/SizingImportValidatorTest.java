@@ -14,7 +14,9 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -24,6 +26,7 @@ import com.atlassian.jira.rest.client.api.domain.CimIssueType;
 
 import objective.taskboard.google.GoogleApiService;
 import objective.taskboard.google.SpreadsheetsManager;
+import objective.taskboard.sizingImport.SizingImportConfig.SheetMap.ExtraField;
 import objective.taskboard.sizingImport.SizingImportValidator.ValidationResult;
 
 public class SizingImportValidatorTest {
@@ -40,11 +43,17 @@ public class SizingImportValidatorTest {
     @Before
     public void setup() {
         config.setDataStartingRowNumber(2);
+        config.getSheetMap().getExtraFields().add(new ExtraField("f5", "Assumptions", "T"));
+        config.getSheetMap().getExtraFields().add(new ExtraField("f6", "Acceptance Criteria", "R"));
         
         when(jiraUtils.isAdminOfProject("OBJ")).thenReturn(true);
         
+        Map<String, CimFieldInfo> featureFields = new HashMap<>();
+        featureFields.put("f5", new CimFieldInfo("f5", false, "Assumptions", null, null, null, null));
+        featureFields.put("f6", new CimFieldInfo("f6", false, "Acceptance Criteria", null, null, null, null));
+        
         when(jiraUtils.requestFeatureCreateIssueMetadata("OBJ")).thenReturn(
-                new CimIssueType(null, 55L, "Task", false, null, null, emptyMap()));
+                new CimIssueType(null, 55L, "Task", false, null, null, featureFields));
         
         when(jiraUtils.getSizingFields(any())).thenReturn(asList(
                 new CimFieldInfo("cf_2", true, "Dev TSize", null, null, null, null),
@@ -93,7 +102,19 @@ public class SizingImportValidatorTest {
         assertEquals("Issue type “Task” should have at least one sizing field configured in it.", result.errorMessage);
         assertEquals("Please check the configuration of selected project in Jira.", result.errorDetail);
     }
-    
+
+    @Test
+    public void shouldFailWhenSomeExtraFieldIsNotConfiguredInIssueTypeFeature() {
+        when(jiraUtils.requestFeatureCreateIssueMetadata("OBJ")).thenReturn(
+                new CimIssueType(null, 55L, "Task", false, null, null, emptyMap()));
+
+        ValidationResult result = subject.validate("OBJ", "100");
+
+        assertFalse(result.success);
+        assertEquals("Issue type “Task” should have the following fields configured in it: Acceptance Criteria, Assumptions", result.errorMessage);
+        assertEquals("Please check the configuration of selected project in Jira.", result.errorDetail);
+    }
+
     @Test
     public void shouldFailWhenSpreadsheetsHasNoSheetEntitledAsScope() {
         when(spreadsheetsManager.getSheetsTitles("100")).thenReturn(asList("Timeline", "Cost"));
