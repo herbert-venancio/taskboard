@@ -1,21 +1,25 @@
 package objective.taskboard.sizingImport;
 
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 class SizingImportLine {
 
-    private int rowIndex;
-    private String jiraKey;
-    private String phase;
-    private String demand;
-    private String feature;
-    private String acceptanceCriteria;
-    private boolean include;
-    private List<JiraField> fields = new ArrayList<>();
+    private final int rowIndex;
+    private final List<ImportValue> values;
+    private final Map<SheetColumnDefinition, ImportValue> valuesByColumnDefinition;
+
+    public SizingImportLine(int rowIndex, List<ImportValue> values) {
+        this.rowIndex = rowIndex;
+        this.values = values;
+        this.valuesByColumnDefinition = values.stream().collect(toMap(v -> v.getColumnDefinition(), identity()));
+    }
 
     public int getRowIndex() {
         return rowIndex;
@@ -25,35 +29,32 @@ class SizingImportLine {
         return rowIndex + 1;
     }
 
-    public void setIndexRow(int rowIndex) {
-        this.rowIndex = rowIndex;
+    public List<ImportValue> getImportValues() {
+        return values;
     }
 
-    public List<JiraField> getFields() {
-        return fields;
+    public String getValue(SheetColumnDefinition columnDefinition, String defaultValue) {
+        ImportValue importValue = valuesByColumnDefinition.get(columnDefinition);
+        return importValue == null ? defaultValue : importValue.getValue();
     }
     
-    public void addField(JiraField field) {
-        fields.add(field);
-    }
-
-    public Optional<String> getFieldValue(String fieldId) {
-        return fields.stream()
-                .filter(f -> f.getId().equals(fieldId))
+    public Optional<String> getValue(Predicate<SheetColumn> columnPredicate) {
+        return values.stream()
+                .filter(v -> columnPredicate.test(v.column))
                 .findFirst()
-                .map(JiraField::getValue);
+                .map(ImportValue::getValue);
+    }
+    
+    public String getValue(SheetColumnDefinition columnDefinition) {
+        return getValue(columnDefinition, null);
     }
 
     public String getJiraKey() {
-        return jiraKey;
+        return getValue(SheetColumnDefinitionProvider.KEY);
     }
 
-    public void setJiraKey(String key) {
-        this.jiraKey = key;
-    }
-    
     public boolean isImported() {
-        return isNotBlank(jiraKey);
+        return isNotBlank(getJiraKey());
     }
     
     public boolean isNotImported() {
@@ -61,60 +62,41 @@ class SizingImportLine {
     }
     
     public String getPhase() {
-        return phase;
+        return getValue(SheetColumnDefinitionProvider.PHASE);
     }
 
-    public void setPhase(String phase) {
-        this.phase = phase;
-    }
-    
     public String getDemand() {
-        return demand;
-    }
-
-    public void setDemand(String demand) {
-        this.demand = demand;
+        return getValue(SheetColumnDefinitionProvider.DEMAND);
     }
     
     public String getFeature() {
-        return feature;
+        return getValue(SheetColumnDefinitionProvider.FEATURE);
     }
-    
-    public void setAcceptanceCriteria(String acceptanceCriteria) {
-        this.acceptanceCriteria = acceptanceCriteria;
-    }
-    
-    public String getAcceptanceCriteria() {
-        return acceptanceCriteria;
-    }
-    
-    public void setFeature(String feature) {
-        this.feature = feature;
-    }
-    
+
     public boolean isInclude() {
-        return include;
+        return "true".equalsIgnoreCase(getValue(SheetColumnDefinitionProvider.INCLUDE));
     }
-    
-    public void setInclude(boolean include) {
-        this.include = include;
-    }
-    
-    static class JiraField {
-        private final String id;
+
+    static class ImportValue {
+        private final SheetColumn column;
         private final String value;
 
-        public JiraField(String id, String value) {
-            this.id = id;
+        public ImportValue(SheetColumn column, String value) {
+            this.column = column;
             this.value = value;
+        }
+
+        public SheetColumn getColumn() {
+            return column;
+        }
+        
+        public SheetColumnDefinition getColumnDefinition() {
+            return column.getDefinition();
         }
 
         public String getValue() {
             return value;
         }
-
-        public String getId() {
-            return id;
-        }
     }
+
 }

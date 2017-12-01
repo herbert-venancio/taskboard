@@ -1,7 +1,7 @@
 package objective.taskboard.controller;
 
 import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.joining;
+import static objective.taskboard.testUtils.AssertUtils.collectionToString;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -108,28 +108,19 @@ public class WipControllerTest {
 
     private static void assertWipsByTeam(Map<String, List<StepWipDto>> actual, String... expected) {
         Function<StepWipDto, String> wipToString = w -> "step " + w.stepId + ": " + w.wip;
-        Function<String, String> teamToString = t -> "[" + t + "] " + toString(actual.get(t), wipToString, ", ");
-        assertEquals(join(expected, "\n"), toString(actual.keySet(), teamToString, "\n"));
+        Function<String, String> teamToString = t -> "[" + t + "] " + collectionToString(actual.get(t), wipToString, ", ");
+        assertEquals(join(expected, "\n"), collectionToString(actual.keySet(), teamToString, "\n"));
     }
     
     private static void assertLanes(List<LaneDto> actual, String... expected) {
         Function<StepDto, String> stepToString = s -> s.name + " <" + s.id + ">";
-        Function<LaneDto, String> laneToString = l -> l.name + " (steps: " + toString(l.steps, stepToString, ", ") + ")";
-        assertEquals(join(expected, "\n"), toString(actual, laneToString, "\n"));
+        Function<LaneDto, String> laneToString = l -> l.name + " (steps: " + collectionToString(l.steps, stepToString, ", ") + ")";
+        assertEquals(join(expected, "\n"), collectionToString(actual, laneToString, "\n"));
     }
     
     private static void assertConfigurations(List<WipConfiguration> actual, String... expected) {
-        assertEquals(join(expected, "\n"), toString(actual, 
+        assertEquals(join(expected, "\n"), collectionToString(actual, 
                 c -> c.getTeam() + " | step: " + (c.getStep() == null ? "<null>" : c.getStep().getId()) + " | wip: " + c.getWip(), "\n"));
-    }
-
-    private static <T> String toString(Collection<T> list, Function<T, String> itemToString, String delimiter) {
-        if (list == null)
-            return "<null>";
-        else if (list.isEmpty())
-            return "<empty>";
-        else
-            return list.stream().map(itemToString).collect(joining(delimiter));
     }
 
     private static Step step(int id, String name, int order, Lane lane) {

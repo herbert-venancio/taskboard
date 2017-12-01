@@ -23,11 +23,8 @@ import objective.taskboard.domain.Project;
 import objective.taskboard.google.GoogleApiService;
 import objective.taskboard.jira.JiraServiceException;
 import objective.taskboard.jira.ProjectService;
-import objective.taskboard.sizingImport.SheetDefinition.SheetColumnDefinition;
-import objective.taskboard.sizingImport.SheetDefinition.SheetStaticColumn;
-import objective.taskboard.sizingImport.SizingImportService.ImportPreview;
+import objective.taskboard.sizingImport.PreviewBuilder.ImportPreview;
 import objective.taskboard.sizingImport.SizingImportValidator.ValidationResult;
-import objective.taskboard.sizingImport.SizingSheetParser.SheetColumnMapping;
 
 @RestController
 @RequestMapping("ws/sizing-import")
@@ -93,9 +90,10 @@ public class SizingImportController {
     @GetMapping("/spreadsheet-details/{projectKey}/{spreadsheetId}")
     public ResponseEntity<?> spreadsheetDetails(@PathVariable String projectKey, @PathVariable String spreadsheetId) {
         try {
-            SheetDefinition sheetDefinition = sizingImportService.getSheetDefinition(projectKey, spreadsheetId);
+            SheetDefinition sheetDefinition = sizingImportService.getSheetDefinition(projectKey);
+            String lastColumn = sizingImportService.getSheetLastColumn(spreadsheetId);
 
-            return ResponseEntity.ok(new SpreadsheetDefinitionDto(sheetDefinition));
+            return ResponseEntity.ok(new SpreadsheetDetailsDto(sheetDefinition, lastColumn));
 
         } catch (JiraServiceException | RestClientException ex) {
             log.error(null, ex);
@@ -139,29 +137,29 @@ public class SizingImportController {
         }
     }
     
-    protected static class SpreadsheetDefinitionDto {
+    protected static class SpreadsheetDetailsDto {
         public final List<SheetStaticColumnDto> staticColumns;
-        public final List<SheetColumnDefinitionDto> dynamicColumns;
+        public final List<SheetDynamicColumnDto> dynamicColumns;
         public final String lastColumn;
         
-        public SpreadsheetDefinitionDto(SheetDefinition object) {
-            this.staticColumns = object.getStaticColumns().stream().map(SheetStaticColumnDto::new).collect(toList());
-            this.dynamicColumns = object.getDynamicColumns().stream().map(SheetColumnDefinitionDto::new).collect(toList());
-            this.lastColumn = object.getLastColumnLetter();
+        public SpreadsheetDetailsDto(SheetDefinition sheetDefinition, String lastColumn) {
+            this.staticColumns = sheetDefinition.getStaticColumns().stream().map(SheetStaticColumnDto::new).collect(toList());
+            this.dynamicColumns = sheetDefinition.getDynamicColumns().stream().map(SheetDynamicColumnDto::new).collect(toList());
+            this.lastColumn = lastColumn;
         }
     }
     
-    protected static class SheetColumnDefinitionDto {
-        public String fieldId;
+    protected static class SheetDynamicColumnDto {
+        public String columnId;
         public String name;
         public String defaultColumnLetter;
         public boolean required;
         
-        public SheetColumnDefinitionDto(SheetColumnDefinition object) {
-            this.fieldId = object.getFieldId();
-            this.name = object.getName();
-            this.defaultColumnLetter = object.getDefaultColumnLetter();
-            this.required = object.isRequired();
+        public SheetDynamicColumnDto(DynamicMappingDefinition mappingDefinition) {
+            this.columnId = mappingDefinition.getColumnId();
+            this.name = mappingDefinition.getColumnDefinition().getName();
+            this.defaultColumnLetter = mappingDefinition.getDefaultColumnLetter().orElse(null);
+            this.required = mappingDefinition.isMappingRequired();
         }
     }
     
@@ -169,18 +167,18 @@ public class SizingImportController {
         public String name;
         public String columnLetter;
         
-        public SheetStaticColumnDto(SheetStaticColumn staticColumn) {
-            this.name = staticColumn.getName();
-            this.columnLetter = staticColumn.getColumnLetter();
+        public SheetStaticColumnDto(StaticMappingDefinition mappingDefinition) {
+            this.name = mappingDefinition.getColumnDefinition().getName();
+            this.columnLetter = mappingDefinition.getColumnLetter();
         }
     }
     
     protected static class SheetColumnMappingDto {
-        public String fieldId;
+        public String columnId;
         public String columnLetter;
 
         public SheetColumnMapping toObject() {
-            return new SheetColumnMapping(fieldId, columnLetter);
+            return new SheetColumnMapping(columnId, columnLetter);
         }
     }
     protected static class ProjectDto {

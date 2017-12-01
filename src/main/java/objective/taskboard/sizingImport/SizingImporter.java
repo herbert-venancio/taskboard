@@ -4,12 +4,16 @@ import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static objective.taskboard.sizingImport.SheetColumnDefinitionProvider.EXTRA_FIELD_ID_TAG;
+import static objective.taskboard.sizingImport.SheetColumnDefinitionProvider.SIZING_FIELD_ID_TAG;
 import static org.apache.commons.lang.StringUtils.isBlank;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -20,27 +24,25 @@ import org.slf4j.LoggerFactory;
 import com.atlassian.jira.rest.client.api.domain.BasicIssue;
 import com.atlassian.jira.rest.client.api.domain.CimFieldInfo;
 import com.atlassian.jira.rest.client.api.domain.CimIssueType;
-import com.atlassian.jira.rest.client.api.domain.CustomFieldOption;
 import com.atlassian.jira.rest.client.api.domain.Issue;
-import com.atlassian.jira.rest.client.api.domain.IssueLink;
 import com.atlassian.jira.rest.client.api.domain.Project;
 import com.atlassian.jira.rest.client.api.domain.Version;
-import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder;
 
-import objective.taskboard.jira.JiraProperties;
-import objective.taskboard.sizingImport.SizingImportLine.JiraField;
+import objective.taskboard.sizingImport.JiraFacade.IssueCustomFieldOptionValue;
+import objective.taskboard.sizingImport.JiraFacade.IssueFieldObjectValue;
+import objective.taskboard.sizingImport.JiraFacade.IssueFieldValue;
 
 class SizingImporter {
 
     private final Logger log = LoggerFactory.getLogger(SizingImporter.class);
     
-    private final JiraUtils jiraUtils;
-    private final JiraProperties jiraProperties;
+    private final SizingImportConfig importConfig;
+    private final JiraFacade jiraFacade;
     private final List<SizingImporterListener> listeners = new ArrayList<>();
     
-    public SizingImporter(JiraProperties jiraProperties, JiraUtils jiraUtils) {
-        this.jiraProperties = jiraProperties;
-        this.jiraUtils = jiraUtils;
+    public SizingImporter(SizingImportConfig importConfig, JiraFacade jiraFacade) {
+        this.importConfig = importConfig;
+        this.jiraFacade = jiraFacade;
     }
     
     public void addListener(SizingImporterListener listener) {
@@ -54,8 +56,8 @@ class SizingImporter {
         
         notifyImportStarted(allLines.size(), linesToImport.size());
 
-        Project project = jiraUtils.getProject(projectKey);
-        CimIssueType featureMetadata = jiraUtils.requestFeatureCreateIssueMetadata(projectKey);
+        Project project = jiraFacade.getProject(projectKey);
+        CimIssueType featureMetadata = jiraFacade.requestFeatureCreateIssueMetadata(projectKey);
         Map<Name, Version> importedVersions = recoverImportedVersions(project);
         Map<Name, ImportedDemand> importedDemands = recoverImportedDemands(allLines);
 
@@ -68,13 +70,14 @@ class SizingImporter {
                 continue;
             }
             
+            String featureIssueKey;
             try {
                 String versionName = line.getPhase();
                 Version release = getOrCreateVersion(projectKey, versionName, importedVersions);
                 ImportedDemand demand = getOrCreateDemand(projectKey, release, line.getDemand(), importedDemands);
                 
                 BasicIssue featureIssue = createFeature(projectKey, release, demand.getIssueKey(), featureMetadata, line);
-                line.setJiraKey(featureIssue.getKey());
+                featureIssueKey = featureIssue.getKey();
 
             } catch (Exception e) {
                 String errorMessage = e.getMessage();
@@ -83,7 +86,7 @@ class SizingImporter {
                 continue;
             }
 
-            notifyLineImportFinished(line);
+            notifyLineImportFinished(line, featureIssueKey);
         }
 
         notifyImportFinished();
@@ -101,20 +104,29 @@ class SizingImporter {
         if (StringUtils.isBlank(line.getFeature()))
             errors.add("Feature should be informed;");
         
-        List<String> configuredTShirtFieldsId = jiraProperties.getCustomfield().getTShirtSize().getIds();
-        
-        Stream<CimFieldInfo> requiredTShirtFieldsOfFeature = featureMetadata.getFields().values().stream()
-            .filter(f -> configuredTShirtFieldsId.contains(f.getId()))
-            .filter(CimFieldInfo::isRequired);
-        
-        List<String> fieldErrors = requiredTShirtFieldsOfFeature
-                .filter(rf -> isBlank(line.getFieldValue(rf.getId()).orElse(null)))
-                .map(rf -> rf.getName() + " should be informed")
-                .collect(toList());
+        List<CimFieldInfo> sizingFields = jiraFacade.getSizingFields(featureMetadata);
 
-        errors.addAll(fieldErrors);
+        errors.addAll(getRequiredFieldErrors(
+                sizingFields, 
+                field -> line.getValue(c -> c.getDefinition().hasTag(SIZING_FIELD_ID_TAG, field.getId()))));
+
+        List<CimFieldInfo> extraFields = importConfig.getSheetMap().getExtraFields().stream()
+                .map(ef -> featureMetadata.getFields().get(ef.getFieldId()))
+                .collect(toList());
+        
+        errors.addAll(getRequiredFieldErrors(
+                extraFields, 
+                field -> line.getValue(c -> c.getDefinition().hasTag(EXTRA_FIELD_ID_TAG, field.getId()))));
         
         return errors;
+    }
+    
+    private List<String> getRequiredFieldErrors(Collection<CimFieldInfo> fields, Function<CimFieldInfo, Optional<String>> valueSupplier) {
+        return fields.stream()
+                .filter(f -> f.isRequired())
+                .filter(f -> isBlank(valueSupplier.apply(f).orElse(null)))
+                .map(f -> f.getName() + " should be informed;")
+                .collect(toList());
     }
 
     private Map<Name, Version> recoverImportedVersions(Project project) {
@@ -129,7 +141,7 @@ class SizingImporter {
             return previouslyImportedVersion;
         
         log.debug("creating Version: {}", versionName);
-        Version version = jiraUtils.createVersion(projectKey, versionName);
+        Version version = jiraFacade.createVersion(projectKey, versionName);
         importedVersions.put(new Name(versionName), version);
         
         return version;
@@ -159,63 +171,48 @@ class SizingImporter {
         if (previouslyImportedDemand != null)
             return previouslyImportedDemand;
         
-        BasicIssue demandIssue = createDemand(projectKey, release, demandName);
+        log.debug("creating Demand: {}", demandName);
+
+        BasicIssue demandIssue = jiraFacade.createDemand(projectKey, demandName, release);
         ImportedDemand importedDemand = new ImportedDemand(demandIssue.getKey(), new Name(demandName));
         importedDemands.put(importedDemand.getName(), importedDemand);
         
         return importedDemand;
     }
 
-    private BasicIssue createDemand(String projectKey, Version release, String demandName) {
-        log.debug("creating Demand: {}", demandName);
-
-        long demandTypeId = jiraProperties.getIssuetype().getDemand().getId();
-        String releaseFieldId = jiraProperties.getCustomfield().getRelease().getId();
-
-        IssueInputBuilder demandBuilder = new IssueInputBuilder(projectKey, demandTypeId)
-                .setSummary(demandName)
-                .setFieldValue(releaseFieldId, release);
-        
-        return jiraUtils.createIssue(demandBuilder);
-    }
-
     private BasicIssue createFeature(String projectKey, Version release, String demandKey, CimIssueType featureMetadata, SizingImportLine line) {
-        log.debug("creating Feature: {}", line.getFeature());
+        String featureName = line.getFeature();
+        log.debug("creating Feature: {}", featureName);
 
-        long featureTypeId = jiraProperties.getIssuetype().getDefaultFeature().getId();
-        String customFieldRelease = jiraProperties.getCustomfield().getRelease().getId();
+        Collection<IssueFieldValue> fieldValues = new ArrayList<>();
         
-        IssueInputBuilder builder = new IssueInputBuilder(projectKey, featureTypeId)
-                .setSummary(line.getFeature())
-                .setFieldValue(customFieldRelease, release);
+        fieldValues.addAll(line.getImportValues().stream()
+                .filter(importValue -> importValue.getColumnDefinition().hasTag(SIZING_FIELD_ID_TAG))
+                .map(importValue -> {
+                    String fieldId = importValue.getColumnDefinition().getTagValue(SIZING_FIELD_ID_TAG);
+                    return new IssueCustomFieldOptionValue(fieldId, importValue.getValue(), featureMetadata);
+                })
+                .collect(toList()));
 
-        for (JiraField field : line.getFields()) {
-            CustomFieldOption option = jiraUtils.getCustomFieldOption(featureMetadata, field.getId(), field.getValue());
-            builder.setFieldValue(field.getId(), option);
-        }
-        
-        builder.setFieldValue(jiraProperties.getCustomfield().getAcceptanceCriteria().getId(), line.getAcceptanceCriteria());
+        fieldValues.addAll(line.getImportValues().stream()
+                .filter(importValue -> importValue.getColumnDefinition().hasTag(EXTRA_FIELD_ID_TAG))
+                .map(importValue -> {
+                    String fieldId = importValue.getColumnDefinition().getTagValue(EXTRA_FIELD_ID_TAG);
+                    return new IssueFieldObjectValue(fieldId, importValue.getValue());
+                })
+                .collect(toList()));
 
-        BasicIssue issue = jiraUtils.createIssue(builder);
-        jiraUtils.linkToDemand(demandKey, issue.getKey());
-        
-        return issue;
+        return jiraFacade.createFeature(projectKey, demandKey, featureName, release, fieldValues);
     }
 
     private Optional<String> findFirstDemandKey(List<SizingImportLine> linesOfDemand) {
         return linesOfDemand.stream()
-                .map(line -> findDemandKeyOfFeature(line.getJiraKey()))
+                .map(line -> {
+                    Issue feature = jiraFacade.getIssue(line.getJiraKey());
+                    return jiraFacade.getDemandKeyGivenFeature(feature);
+                })
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .findFirst();
-    }
-
-    private Optional<String> findDemandKeyOfFeature(String featureIssueKey) {
-        Issue featureIssue = jiraUtils.getIssue(featureIssueKey);        
-        String demandIssueLinkName = jiraUtils.getDemandLink().getName();
-        return streamOf(featureIssue.getIssueLinks())
-                .filter(link -> link.getIssueLinkType().getName().equals(demandIssueLinkName))
-                .map(IssueLink::getTargetIssueKey)
                 .findFirst();
     }
 
@@ -227,8 +224,8 @@ class SizingImporter {
         listeners.stream().forEach(l -> l.onLineImportStarted(line));
     }
     
-    private void notifyLineImportFinished(SizingImportLine line) {
-        listeners.stream().forEach(l -> l.onLineImportFinished(line));
+    private void notifyLineImportFinished(SizingImportLine line, String featureIssueKey) {
+        listeners.stream().forEach(l -> l.onLineImportFinished(line, featureIssueKey));
     }
 
     private void notifyLineError(SizingImportLine line, List<String> errorMessages) {
@@ -292,7 +289,7 @@ class SizingImporter {
     public interface SizingImporterListener {
         void onImportStarted(int totalLinesCount, int linesToImportCount);
         void onLineImportStarted(SizingImportLine line);
-        void onLineImportFinished(SizingImportLine line);
+        void onLineImportFinished(SizingImportLine line, String featureIssueKey);
         void onLineError(SizingImportLine line, List<String> errorMessages);
         void onImportFinished();
     }

@@ -22,50 +22,70 @@ import objective.taskboard.google.GoogleApiService;
 import objective.taskboard.google.SpreadsheetUtils;
 import objective.taskboard.google.SpreadsheetsManager;
 import objective.taskboard.google.SpreadsheetsManager.SpreadsheeNotFoundException;
-import objective.taskboard.sizingImport.SheetDefinition.SheetStaticColumn;
+import objective.taskboard.sizingImport.SizingImportConfig.SheetMap.ExtraField;
 
 @Component
 class SizingImportValidator {
     
     private final SizingImportConfig config;
     private final GoogleApiService googleApiService;
-    private final JiraUtils jiraUtils;
-    private final SheetStaticColumns sheetStaticColumns;
+    private final JiraFacade jiraFacade;
+    private final SheetColumnDefinitionProvider columnDefinitionProvider;
 
     @Autowired
-    public SizingImportValidator(SizingImportConfig config, GoogleApiService googleApiService, JiraUtils jiraUtils, SheetStaticColumns sheetStaticColumns) {
+    public SizingImportValidator(
+            SizingImportConfig config, 
+            GoogleApiService googleApiService, 
+            JiraFacade jiraFacade, 
+            SheetColumnDefinitionProvider columnDefinitionProvider) {
+
         this.config = config;
         this.googleApiService = googleApiService;
-        this.jiraUtils = jiraUtils;
-        this.sheetStaticColumns = sheetStaticColumns;
+        this.jiraFacade = jiraFacade;
+        this.columnDefinitionProvider = columnDefinitionProvider;
     }
 
     public ValidationResult validate(String projectKey, String spreadsheetId) {
         int headersRowIndex = config.getDataStartingRowIndex() - 1;
         SpreadsheetsManager spreadsheetsManager = googleApiService.buildSpreadsheetsManager();
-        ValidationContext context = new ValidationContext(projectKey, spreadsheetId, headersRowIndex, spreadsheetsManager);
+        CimIssueType featureIssueMetadata = jiraFacade.requestFeatureCreateIssueMetadata(projectKey);
+        ValidationContext context = new ValidationContext(projectKey, spreadsheetId, headersRowIndex, spreadsheetsManager, featureIssueMetadata);
 
         return validateUserIsAdminOfProject(context);
     }
     
     private ValidationResult validateUserIsAdminOfProject(ValidationContext context) {
-        if (!jiraUtils.isAdminOfProject(context.projectKey))
+        if (!jiraFacade.isAdminOfProject(context.projectKey))
             return ValidationResult.fail("You should have permission to admin this project in Jira.");
         
         return validateFeatureHasSizingFields(context);
     }
     
     private ValidationResult validateFeatureHasSizingFields(ValidationContext context) {
-        CimIssueType featureIssueMetadata = jiraUtils.requestFeatureCreateIssueMetadata(context.projectKey);
-        List<CimFieldInfo> featureSizingFields = jiraUtils.getSizingFields(featureIssueMetadata);
+        List<CimFieldInfo> featureSizingFields = jiraFacade.getSizingFields(context.featureIssueMetadata);
 
         if (featureSizingFields.isEmpty()) {
             return ValidationResult.fail(
-                    format("Issue type “%s” should have at least one sizing field configured in it.", featureIssueMetadata.getName()), 
+                    format("Issue type “%s” should have at least one sizing field configured in it.", context.featureIssueMetadata.getName()), 
                     "Please check the configuration of selected project in Jira.");
         }
         
-        return validateSpreadsheetExistence(context);
+        return validateFeatureHasExtraFields(context);
+    }
+
+    private ValidationResult validateFeatureHasExtraFields(ValidationContext context) {
+        List<ExtraField> missingExtraFieldsInFeature = config.getSheetMap().getExtraFields().stream()
+                .filter(f -> !context.featureIssueMetadata.getFields().containsKey(f.getFieldId()))
+                .collect(toList());
+
+        if (missingExtraFieldsInFeature.isEmpty())
+            return validateSpreadsheetExistence(context);
+
+        return ValidationResult.fail(
+                format("Issue type “%s” should have the following fields configured in it: %s", 
+                        context.featureIssueMetadata.getName(),
+                        missingExtraFieldsInFeature.stream().map(f -> f.getColumnHeader()).sorted().collect(joining(", "))), 
+                "Please check the configuration of selected project in Jira.");
     }
     
     private ValidationResult validateSpreadsheetExistence(ValidationContext context) {
@@ -106,9 +126,8 @@ class SizingImportValidator {
                 .map(String::toLowerCase)
                 .collect(toList());
         
-        List<String> staticColumns = sheetStaticColumns.get().stream()
-                .map(SheetStaticColumn::getName)
-                .map(String::toLowerCase)
+        List<String> staticColumns = columnDefinitionProvider.getStaticMappings().stream()
+                .map(md -> md.getColumnDefinition().getName().toLowerCase())
                 .collect(toList());
         
         Optional<String> anyCorrectHeader = spreadsheetHeaders.stream()
@@ -118,8 +137,8 @@ class SizingImportValidator {
         if (!anyCorrectHeader.isPresent())
             return invalidDataStartingRow(context);
 
-        List<StaticColumnOccurrenceReport> occurenceReport = sheetStaticColumns.get().stream()
-                .map(c -> new StaticColumnOccurrenceReport(c, spreadsheetHeaders))
+        List<StaticColumnOccurrenceReport> occurenceReport = columnDefinitionProvider.getStaticMappings().stream()
+                .map(md -> new StaticColumnOccurrenceReport(md, spreadsheetHeaders))
                 .collect(toList());
         
         return validateStaticColumnsExistence(new ValidationContextWithReport(context, occurenceReport));
@@ -128,8 +147,8 @@ class SizingImportValidator {
     private ValidationResult invalidDataStartingRow(ValidationContext context) {
         int headerRowNumber = context.headersRowIndex + 1;
 
-        String expectedHeaders = sheetStaticColumns.get().stream()
-                .map(SheetStaticColumn::getName)
+        String expectedHeaders = columnDefinitionProvider.getStaticMappings().stream()
+                .map(md -> md.getColumnDefinition().getName())
                 .limit(3)
                 .collect(joining(", "));
 
@@ -143,16 +162,15 @@ class SizingImportValidator {
     }
     
     private ValidationResult validateStaticColumnsExistence(ValidationContextWithReport context) {
-        List<SheetStaticColumn> missingColumns = context.occurenceReport.stream()
+        List<StaticColumnOccurrenceReport> missingColumnsReport = context.occurenceReport.stream()
                 .filter(StaticColumnOccurrenceReport::isMissing)
-                .map(StaticColumnOccurrenceReport::getColumn)
                 .collect(toList());
 
-        if (!missingColumns.isEmpty()) {
+        if (!missingColumnsReport.isEmpty()) {
             return ValidationResult.fail(
                     "Invalid spreadsheet format: Missing required columns.", 
-                    missingColumns.stream()
-                        .map(c -> format("“%s” column should be placed at position “%s”", c.getName(), c.getColumnLetter()))
+                    missingColumnsReport.stream()
+                        .map(cr -> format("“%s” column should be placed at position “%s”", cr.getColumnName(), cr.getColumnLetter()))
                         .collect(joining(", ")) + ".");
         }
 
@@ -168,7 +186,7 @@ class SizingImportValidator {
             return ValidationResult.fail(
                     "Invalid spreadsheet format: Duplicate columns found.", 
                     duplicateColumnsReport.stream()
-                        .map(cr -> format("“%s” column is showing up in positions “%s”", cr.getColumn().getName(), join(cr.getOccurrenceLetters(), "”/“")))
+                        .map(cr -> format("“%s” column is showing up in positions “%s”", cr.getColumnName(), join(cr.getOccurrenceLetters(), "”/“")))
                         .collect(joining(", ")) + ".");
         }
         
@@ -176,16 +194,15 @@ class SizingImportValidator {
     }
 
     private ValidationResult validateStaticColumnsPosition(ValidationContextWithReport context) {
-        List<SheetStaticColumn> wronglyPositionedColumns = context.occurenceReport.stream()
+        List<StaticColumnOccurrenceReport> wronglyPositionedColumnsReport = context.occurenceReport.stream()
                 .filter(StaticColumnOccurrenceReport::isWronglyPositioned)
-                .map(StaticColumnOccurrenceReport::getColumn)
                 .collect(toList());
         
-        if (!wronglyPositionedColumns.isEmpty()) {
+        if (!wronglyPositionedColumnsReport.isEmpty()) {
             return ValidationResult.fail(
                     "Invalid spreadsheet format: Incorrectly positioned columns.", 
-                    wronglyPositionedColumns.stream()
-                        .map(c -> format("“%s” column should be moved to position “%s”", c.getName(), c.getColumnLetter()))
+                    wronglyPositionedColumnsReport.stream()
+                        .map(cr -> format("“%s” column should be moved to position “%s”", cr.getColumnName(), cr.getColumnLetter()))
                         .collect(joining(", ")) + ".");
         }
         
@@ -193,22 +210,26 @@ class SizingImportValidator {
     }
 
     private static class StaticColumnOccurrenceReport {
-        private final SheetStaticColumn column;
+        private final StaticMappingDefinition mappingDefinition;
         private final List<String> occurrenceLetters = new ArrayList<>();
 
-        public StaticColumnOccurrenceReport(SheetStaticColumn column, List<String> spreadsheetHeaders) {
-            this.column = column;
+        public StaticColumnOccurrenceReport(StaticMappingDefinition mappingDefinition, List<String> spreadsheetHeaders) {
+            this.mappingDefinition = mappingDefinition;
             
             for (int i = 0; i < spreadsheetHeaders.size(); i++) {
                 String header = spreadsheetHeaders.get(i);
                 
-                if (column.getName().equalsIgnoreCase(header))
+                if (mappingDefinition.getColumnDefinition().getName().equalsIgnoreCase(header))
                     occurrenceLetters.add(SpreadsheetUtils.columnIndexToLetter(i));
             }
         }
         
-        public SheetStaticColumn getColumn() {
-            return column;
+        public String getColumnName() {
+            return mappingDefinition.getColumnDefinition().getName();
+        }
+        
+        public String getColumnLetter() {
+            return mappingDefinition.getColumnLetter();
         }
         
         public List<String> getOccurrenceLetters() {
@@ -220,7 +241,7 @@ class SizingImportValidator {
         }
         
         public boolean isWronglyPositioned() {
-            return !column.getColumnLetter().equals(this.occurrenceLetters.get(0));
+            return !mappingDefinition.getColumnLetter().equals(this.occurrenceLetters.get(0));
         }
         
         public boolean isMissing() {
@@ -233,12 +254,14 @@ class SizingImportValidator {
         protected final String spreadsheetId;
         protected final int headersRowIndex;
         protected final SpreadsheetsManager spreadsheetsManager;
+        protected final CimIssueType featureIssueMetadata;
 
-        public ValidationContext(String projectKey, String spreadsheetId, int headersRowIndex, SpreadsheetsManager spreadsheetsManager) {
+        public ValidationContext(String projectKey, String spreadsheetId, int headersRowIndex, SpreadsheetsManager spreadsheetsManager, CimIssueType featureIssueMetadata) {
             this.projectKey = projectKey;
             this.spreadsheetId = spreadsheetId;
             this.headersRowIndex = headersRowIndex;
             this.spreadsheetsManager = spreadsheetsManager;
+            this.featureIssueMetadata = featureIssueMetadata;
         }
     }
     
@@ -246,7 +269,7 @@ class SizingImportValidator {
         protected final List<String> sheetsTitles;
         
         public ValidationContextWithSpreadsheet(ValidationContext context, List<String> sheetsTitles) {
-            super(context.projectKey,context. spreadsheetId, context.headersRowIndex, context.spreadsheetsManager);
+            super(context.projectKey,context. spreadsheetId, context.headersRowIndex, context.spreadsheetsManager, context.featureIssueMetadata);
             this.sheetsTitles = sheetsTitles;
         }
     }

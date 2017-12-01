@@ -1,17 +1,20 @@
 package objective.taskboard.sizingImport;
 
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import objective.taskboard.google.SpreadsheetUtils;
-import objective.taskboard.sizingImport.SizingImportLine.JiraField;
+import objective.taskboard.sizingImport.SizingImportLine.ImportValue;
 
 @Component
 class SizingSheetParser {
@@ -23,20 +26,21 @@ class SizingSheetParser {
         this.properties = properties;
     }
 
-    public List<SizingImportLine> getSpreedsheetData(List<List<Object>> rows, List<SheetColumnMapping> dynamicColumnsMapping) {
+    public List<SizingImportLine> parse(List<List<Object>> rows, SheetDefinition sheetDefinition, List<SheetColumnMapping> columnMappings) {
         if (rows == null || rows.isEmpty())
             return Collections.emptyList();
 
         List<SizingImportLine> lines = new ArrayList<>();
         int startingRowIndex = properties.getDataStartingRowIndex();
-
+        List<SheetColumn> columns = getSheetColumns(sheetDefinition, columnMappings);
+        
         for (int i = startingRowIndex; i < rows.size(); i++) {
             List<Object> row = rows.get(i);
             
             if (row.isEmpty())
                 continue;
 
-            lines.add(parseRow(row, i, dynamicColumnsMapping));
+            lines.add(parseRow(row, i, columns));
         }
 
         List<SizingImportLine> includedLines = lines.stream()
@@ -46,32 +50,43 @@ class SizingSheetParser {
         return includedLines;
     }
 
-    private SizingImportLine parseRow(List<Object> row, int rowIndex, List<SheetColumnMapping> dynamicColumnsMapping) {
-        String includeColumn = properties.getSheetMap().getInclude();
+    private List<SheetColumn> getSheetColumns(SheetDefinition sheetDefinition, List<SheetColumnMapping> columnMappings) {
         
-        SizingImportLine line = new SizingImportLine();
-        line.setIndexRow(rowIndex);
-        line.setPhase(getValue(row, properties.getSheetMap().getIssuePhase()));
-        line.setDemand(getValue(row, properties.getSheetMap().getIssueDemand()));
-        line.setFeature(getValue(row, properties.getSheetMap().getIssueFeature()));
-        line.setAcceptanceCriteria(getValue(row, properties.getSheetMap().getIssueAcceptanceCriteria()));
-        line.setJiraKey(getValue(row, properties.getSheetMap().getIssueKey()));
-        line.setInclude("true".equalsIgnoreCase(getValue(row, includeColumn)));
+        List<SheetColumn> columns = new ArrayList<>();
+        Map<String, SheetColumnDefinition> dynamicDefinitionsByColumnId = sheetDefinition.getDynamicColumns().stream()
+                .collect(toMap(DynamicMappingDefinition::getColumnId, DynamicMappingDefinition::getColumnDefinition));
+
+        columns.addAll(sheetDefinition.getStaticColumns().stream()
+                .map(md -> new SheetColumn(md.getColumnDefinition(), md.getColumnLetter()))
+                .collect(toList()));
         
-        for (SheetColumnMapping dynamicColumnMapping : dynamicColumnsMapping) {
-            int columnIndex = SpreadsheetUtils.columnLetterToIndex(dynamicColumnMapping.getColumnLetter());
+        columns.addAll(columnMappings.stream()
+                .map(m -> new SheetColumn(dynamicDefinitionsByColumnId.get(m.getColumnId()), m.getColumnLetter()))
+                .collect(toList()));
 
-            if (columnIndex < row.size()) {
-                String value = getValue(row, columnIndex);
-                JiraField jiraValue = new JiraField(dynamicColumnMapping.getFieldId(), value);
-                line.addField(jiraValue);
-            }
-        }
+        return columns;
+    }
 
-        return line;
+    private SizingImportLine parseRow(List<Object> row, int rowIndex, List<SheetColumn> columns) {
+        List<ImportValue> values = columns.stream()
+                .map(column -> {
+                    String value = getValue(row, column.getLetter());
+                    if (value == null)
+                        return null;
+                    
+                    return new ImportValue(column, value);
+                })
+                .filter(Objects::nonNull)
+                .collect(toList());
+        
+        
+        return new SizingImportLine(rowIndex, values);
     }
 
     private String getValue(List<Object> row, int index) {
+        if (index >= row.size())
+            return null;
+        
         String value = (String) row.get(index);
 
         if (value == null || properties.getValueToIgnore().equals(value)) {
@@ -85,22 +100,5 @@ class SizingSheetParser {
         int index = SpreadsheetUtils.columnLetterToIndex(columnLetter);
         return getValue(row, index);
     }
-    
-    static class SheetColumnMapping {
-        private final String fieldId;
-        private final String columnLetter;
-        
-        public SheetColumnMapping(String fieldId, String columnLetter) {
-            this.fieldId = fieldId;
-            this.columnLetter = columnLetter.toUpperCase();
-        }
-        
-        public String getFieldId() {
-            return fieldId;
-        }
-        
-        public String getColumnLetter() {
-            return columnLetter;
-        }
-    }
+
 }

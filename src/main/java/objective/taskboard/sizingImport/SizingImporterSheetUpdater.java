@@ -18,14 +18,13 @@ import com.google.api.services.sheets.v4.model.RepeatCellRequest;
 import com.google.api.services.sheets.v4.model.Request;
 
 import objective.taskboard.google.SpreadsheetsManager;
-import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.sizingImport.SizingImporter.SizingImporterListener;
 
 class SizingImporterSheetUpdater implements SizingImporterListener {
 
     private final String spreadsheetId;
     private final SpreadsheetsManager spreadsheetsManager;
-    private final JiraProperties jiraProperties;
+    private final String jiraUrl;
     
     private final int issueKeyIndex;
     private final int dataStartRowIndex;
@@ -35,11 +34,11 @@ class SizingImporterSheetUpdater implements SizingImporterListener {
             String spreadsheetId,
             SpreadsheetsManager spreadsheetsManager, 
             SizingImportConfig importConfig, 
-            JiraProperties jiraProperties) {
+            String jiraUrl) {
         
         this.spreadsheetId = spreadsheetId;
         this.spreadsheetsManager = spreadsheetsManager;
-        this.jiraProperties = jiraProperties;
+        this.jiraUrl = jiraUrl;
         
         this.issueKeyIndex = columnLetterToIndex(importConfig.getSheetMap().getIssueKey());
         this.dataStartRowIndex = importConfig.getDataStartingRowIndex();
@@ -57,8 +56,8 @@ class SizingImporterSheetUpdater implements SizingImporterListener {
     }
     
     @Override
-    public void onLineImportFinished(SizingImportLine line) {
-        String keyValue = format("=HYPERLINK(\"%s/browse/%s\",\"%s\")", jiraProperties.getUrl(), line.getJiraKey(), line.getJiraKey());
+    public void onLineImportFinished(SizingImportLine line, String featureIssueKey) {
+        String keyValue = format("=HYPERLINK(\"%s/browse/%s\",\"%s\")", jiraUrl, featureIssueKey, featureIssueKey);
         clearHighlightKeyCellAndSetValue(line.getRowIndex(), keyValue);
         
     }

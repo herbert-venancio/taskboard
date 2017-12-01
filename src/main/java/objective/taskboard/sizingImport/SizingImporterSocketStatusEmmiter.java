@@ -33,7 +33,7 @@ class SizingImporterSocketStatusEmmiter implements SizingImporterListener {
     }
     
     @Override
-    public void onLineImportFinished(SizingImportLine line) {
+    public void onLineImportFinished(SizingImportLine line, String featureIssueKey) {
         this.importedLinesCount++;
         emmitStatus();
     }
