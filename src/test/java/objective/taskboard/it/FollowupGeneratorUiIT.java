@@ -36,6 +36,7 @@ import java.nio.file.Paths;
 
 import org.joda.time.DateTime;
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import objective.taskboard.RequestBuilder;
@@ -72,6 +73,7 @@ public class FollowupGeneratorUiIT extends AuthenticatedIntegrationTest {
     }
 
     @Test
+    @Ignore("TOOLS-418")
     public void givenProjectsWithHistory_whenSelectTheseProjects_thenTheDateFieldAppears() throws IOException {
         createTempAndSetRootDataDirectory();
 

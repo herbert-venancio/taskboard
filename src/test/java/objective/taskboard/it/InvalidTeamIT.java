@@ -21,6 +21,7 @@
 
 package objective.taskboard.it;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class InvalidTeamIT extends AuthenticatedIntegrationTest {
@@ -33,6 +34,7 @@ public class InvalidTeamIT extends AuthenticatedIntegrationTest {
     private static final String FILTER_TEAM = "Team";
 
     @Test
+    @Ignore("TOOLS-419")
     public void givenIssueWithInvalidTeam_whenChangeFilters_thenIssueShouldBeFiltered() {
         MainPage mainPage = MainPage.produce(webDriver);
         mainPage.typeSearch(ISSUE_KEY_INVALID_TEAM)

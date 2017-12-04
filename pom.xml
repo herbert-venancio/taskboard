@@ -207,9 +207,6 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<configuration>
-					<rerunFailingTestsCount>1</rerunFailingTestsCount>
-				</configuration>
 				<executions>
 					<execution>
 						<goals>
