@@ -31,14 +31,16 @@ public class Transitions {
     }
 
     public static class DoTransitionRequestBody {
-        private final Map<String, Object> transition;
-        private final Map<String, Object> update;
+        private final Map<String, Object> transition = new HashMap<>();
+        private final Map<String, Object> update = new HashMap<>();
+
+        public DoTransitionRequestBody(Long transitionId) {
+            setTransitionOnRequest(transitionId);
+        }
 
         public DoTransitionRequestBody(Long transitionId, Map<String, Object> fields) {
-            this.transition = new HashMap<>();
-            this.update = new HashMap<>();
             setTransitionOnRequest(transitionId);
-            if (!fields.isEmpty())
+            if (fields != null && !fields.isEmpty())
                 setFieldsOnTransitionSchema(fields);
         }
 

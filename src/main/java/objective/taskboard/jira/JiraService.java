@@ -128,7 +128,7 @@ public class JiraService {
     public void doTransitionAsMaster(String issueKey, Long transitionId) {
         log.debug("⬣⬣⬣⬣⬣  doTransition (master)");
         try {
-            DoTransitionRequestBody requestBody = new DoTransitionRequestBody(transitionId, null);
+            DoTransitionRequestBody requestBody = new DoTransitionRequestBody(transitionId);
             jiraEndpointAsMaster.request(Transitions.Service.class).doTransition(issueKey, requestBody);
         } catch (RetrofitError e) {
             throw new FrontEndMessageException(e);
