@@ -96,6 +96,7 @@
         </style>
 
         <iron-signals on-iron-signal-search-filter-reset="searchReset"
+                      on-iron-signal-search-filter-restore="searchRestore"
                       on-iron-signal-refresh-release-filter="retrieveReleases"></iron-signals>
 
         <input id="searchIssues" class="input-search" value="{{query::input}}" type="search"
@@ -134,6 +135,9 @@
                     releases: {
                         type: Array,
                         notify: true
+                    },
+                    memento: {
+                        type: Object
                     }
                 },
 
@@ -150,13 +154,26 @@
                     if (this.isReleaseConfigured())
                         clearReleaseButton.hidden = this.releaseSelected ? false : true;
 
-                    this.fire('iron-signal', {name: 'search-filter-changed',
-                                              data: { query: this.query , release: this.releaseSelected }});
+                    searchFilter.updateFilter(this, {
+                        query: this.query
+                        , release: this.releaseSelected
+                    });
                 },
 
                 searchReset: function() {
+                    this.memento = {query: this.query, releaseSelected: this.releaseSelected};
                     this.query = "";
                     this.clearRelease();
+                },
+
+                searchRestore: function() {
+                    if(this.memento && !this.query && !this.releaseSelected) {
+                        var query = this.memento.query;
+                        var releaseSelected = this.memento.releaseSelected;
+                        this.query = query;
+                        this.releaseSelected = releaseSelected;
+                    }
+                    this.memento = null;
                 },
 
                 isReleaseConfigured: function() {

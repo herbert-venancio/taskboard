@@ -416,7 +416,7 @@
                     var eventInfo = this.item.__eventInfo;
                     delete this.item.__eventInfo;
                     var parent = $(self.$.issueCard.closest(".board-lane.table-wrapper"));
-                    
+
                     if (eventInfo.source === 'server') {
                         // when an issue update comes from server, we just make sure the user can identify them easily
                         this.set("highlightClass", "issue-UPDATED")
@@ -459,9 +459,10 @@
                 _updateClasses: function() {
                     var classes = new Array();
 
-                    var depRootClass = this.item.hierarchyMatch == 'DEP' ? 'dependency' : this.getClassRoot(this.item.issueKey);
-                    if (!_.isEmpty(depRootClass))
-                        classes.push(depRootClass);
+                    if(searchFilter.isHierarchyRoot(this.item.issueKey))
+                        classes.push('root');
+                    else if(searchFilter.isDependency(this.item.issueKey))
+                        classes.push('dependency');
 
                     if (this.isUpdating)
                         classes.push('issue-UPDATING');
@@ -471,10 +472,6 @@
 
                     this.set('_classes', []);
                     this.set('_classes', classes.join(' '));
-                },
-
-                getClassRoot: function(issueKey) {
-                    return taskboard.getRootHierarchicalFilter() == issueKey ? "root" : "";
                 },
 
                 getUriImage: function (issue) {
@@ -508,13 +505,7 @@
                 },
 
                 applyFilter: function (event) {
-                    taskboard.clearHierarchyMatch();
-                    taskboard.toggleRootHierarchicalFilter(this.item.issueKey);
-                    if (taskboard.getRootHierarchicalFilter()) {
-                        taskboard.setHierarchyMatch(this.item);
-                        this.fire('iron-signal', {name: 'search-filter-reset'});
-                    }
-                    this.fire('iron-signal', {name: 'hierarchical-filter-changed'});
+                    searchFilter.toggleRootHierarchicalFilter(this, this.item.issueKey);
                 },
 
                 updateIssue: function(event) {

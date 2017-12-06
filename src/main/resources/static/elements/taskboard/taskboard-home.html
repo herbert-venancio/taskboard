@@ -608,7 +608,6 @@
                 },
 
                 showErrorMessage: function(event) {
-                    this.filterByUpdate = false;
                     this.set('errorMessage', event.detail);
                     if (this.issueErrorMessages.length === 0 && !this.infoMessage) {
                         if(!_.isEmpty(this.errorMessage))
@@ -708,7 +707,7 @@
                     this.infoMessage = "";
                     toastIssueUpdated.close();
                     if (this.filterByUpdate)
-                        this.fire('iron-signal', {name: 'search-filter-changed', data: this.currentQueryData});
+                        searchFilter.updateFilter(this, {updatedIssues: null});
                     this.fire('iron-signal', {name: 'clear-highlight'});
 
                     if (this.issueErrorMessages.length > 0)
@@ -720,12 +719,11 @@
                 toggleFilterChangedIssues: function(args) {
                     if (!this.filterByUpdate) {
                         this.refreshText = 'SHOW ALL'
-                        this.fire('iron-signal', {name: 'search-filter-changed',
-                            data: { query: this.updatedIssueKeys , release: false, dontSaveQuery: true}});
+                        searchFilter.updateFilter(this, {updatedIssues: this.updatedIssueKeys});
                     }
                     else {
                         this.refreshText="SHOW ONLY UPDATED";
-                        this.fire('iron-signal', {name: 'search-filter-changed', data: this.currentQueryData, dontSaveQuery: true});
+                        searchFilter.updateFilter(this, {updatedIssues: null});
                     }
                     this.filterByUpdate = !this.filterByUpdate;
                 },

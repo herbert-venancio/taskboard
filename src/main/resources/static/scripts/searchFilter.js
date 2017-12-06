@@ -20,22 +20,26 @@
  */
 
 function SearchFilter() {
-    this.match = function(issue, search) {
-        if (!issue || !search)
-            return true;
-        
-        var matches = false;
-        if (typeof search.query === 'object') {
-            for(var index=0; index < search.query.length; index++) {
-                matches = matchByString(issue, search.query[index]);
-                if (matches) break;
-            }
-        }
-        else
-            matches = matchByString(issue, search.query);
 
-        return matches && filterByRelease(issue, search.release);
+    var searchData = {
+        query: undefined
+        , release: undefined
+        , updatedIssues: undefined
+        , hierarchy: undefined
+        , dependencies: undefined
     };
+    var rootHierarchicalFilter;
+
+    var hasAnyFilter = function() {
+        if(searchData.query || searchData.release)
+            return true;
+        if(searchData.updatedIssues && searchData.updatedIssues.length)
+            return true;
+        if(searchData.hierarchy && searchData.hierarchy.length)
+            return true;
+        if(searchData.dependencies && searchData.dependencies.length)
+            return true;
+    }
 
     var matchByString = function(issue, searchString) {
         if (!searchString)
@@ -74,11 +78,69 @@ function SearchFilter() {
         return false;
     };
 
-    var filterByRelease = function(issue, releaseId) {
+    var matchByRelease = function(issue, releaseId) {
         if (!releaseId)
             return true;
 
         return issue.releaseId && issue.releaseId == releaseId;
+    };
+
+    var matchByKey = function(issue, keys) {
+        if(!keys || !keys.length)
+            return true;
+
+        return _.contains(keys, issue.issueKey);
+    };
+
+    this.updateFilter = function(source, change) {
+        jQuery.extend(searchData, change)
+        source.fire('iron-signal', {name:'search-filter-changed', data:searchData});
+    }
+
+    this.match = function(issue) {
+        if (!issue || !hasAnyFilter())
+            return true;
+
+        if(searchData.updatedIssues && searchData.updatedIssues.length)
+            return matchByKey(issue, searchData.updatedIssues);
+
+        return matchByString(issue, searchData.query)
+            && matchByRelease(issue, searchData.release)
+            && matchByKey(issue, searchData.hierarchy)
+            && matchByKey(issue, searchData.dependencies);
+    };
+
+    this.isHierarchyRoot = function(issueKey) {
+        return rootHierarchicalFilter === issueKey;
+    }
+
+    this.isDependency = function(issueKey) {
+        if(!searchData.dependencies || !searchData.dependencies.length)
+            return false;
+
+        return _.contains(searchData.dependencies, issueKey);
+    };
+
+    this.getRootHierarchicalFilter = function() {
+        return rootHierarchicalFilter;
+    };
+
+    this.toggleRootHierarchicalFilter = function(source, issueKey) {
+        rootHierarchicalFilter = rootHierarchicalFilter == issueKey ? null : issueKey;
+        source.fire('iron-signal', {name: 'hierarchical-filter-changed'});
+
+        if (rootHierarchicalFilter) {
+            source.fire('iron-signal', {name: 'search-filter-reset'});
+        } else {
+            source.fire('iron-signal', {name: 'search-filter-restore'});
+        }
+
+        var hierarchy = taskboard.getHierarchyMatch(rootHierarchicalFilter);
+        var dependencies = taskboard.getDependenciesMatch(hierarchy);
+        this.updateFilter(source, {
+            hierarchy: hierarchy
+            , dependencies: dependencies
+        });
     };
 }
 
