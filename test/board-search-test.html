@@ -3,7 +3,7 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-    <title>Exemplo Test</title>
+    <title>Board Search Test</title>
 
     <link rel="import" href="/static/bower_components/polymer/polymer.html">
     <link rel="import" href="/static/bower_components/test-fixture/test-fixture.html">
@@ -14,8 +14,10 @@
     <script src="/static/bower_components/iron-test-helpers/mock-interactions.js"></script>
 
     <!-- dependencies -->
+    <script src="/static/bower_components/jquery/dist/jquery.js"></script>
     <script src="/static/scripts/taskboard.js"></script>
     <script src="/static/scripts/userPreferences.js"></script>
+    <script src="/static/scripts/searchFilter.js"></script>
     <link rel="import" href="/static/bower_components/iron-signals/iron-signals.html">
     <link rel="import" href="/static/bower_components/paper-item/paper-item.html">
     <link rel="import" href="/static/bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
@@ -162,6 +164,38 @@
                 });
             });
 
+            test('query reset restore', function(done) {
+                async(function() {
+                    boardSearch.query = 'abc';
+                    boardSearch.fire('iron-signal', {name:'search-filter-reset'});
+                    expect(boardSearch.query).to.be.equal('');
+                    boardSearch.fire('iron-signal', {name:'search-filter-restore'});
+                    expect(boardSearch.query).to.be.equal('abc');
+                    done();
+                });
+            });
+
+            test('release reset restore', function(done) {
+                async(function() {
+                    boardSearch.releaseSelected = '12550';
+                    boardSearch.fire('iron-signal', {name:'search-filter-reset'});
+                    expect(boardSearch.releaseSelected).to.be.equal('');
+                    boardSearch.fire('iron-signal', {name:'search-filter-restore'});
+                    expect(boardSearch.releaseSelected).to.be.equal('12550');
+                    done();
+                });
+            });
+
+            test("query reset, change, don't restore", function(done) {
+                async(function() {
+                    boardSearch.query = 'abc';
+                    boardSearch.fire('iron-signal', {name:'search-filter-reset'});
+                    boardSearch.query = 'def';
+                    boardSearch.fire('iron-signal', {name:'search-filter-restore'});
+                    expect(boardSearch.query).to.be.equal('def');
+                    done();
+                });
+            });
         });
     </script>
 </body>

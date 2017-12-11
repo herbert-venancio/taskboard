@@ -23,10 +23,8 @@ function Taskboard() {
     var self = this;
 
     var aspectFilters;
-    var issues;
     var issuesBySteps;
     var laneConfiguration;
-    var rootHierarchicalFilter;
 
     this.getLoggedUser = function() {
         return window.user;
@@ -188,53 +186,74 @@ function Taskboard() {
         $('table').floatThead('reflow');
     };
 
-    this.getRootHierarchicalFilter = function() {
-        return rootHierarchicalFilter;
-    };
+    this.getHierarchyMatch = function(rootIssueKey) {
+        if(!rootIssueKey)
+            return null;
 
-    this.toggleRootHierarchicalFilter = function(issueKey) {
-        rootHierarchicalFilter = rootHierarchicalFilter == issueKey ? null : issueKey;
-    };
+        var queue = [];
+        var issue = this.getIssueByKey(rootIssueKey);
+        queue.push({issue:issue, parents:true, children:true});
 
-    this.clearHierarchyMatch = function() {
-        this.issues.forEach(function(i) {
-            i.hierarchyMatch = false;
-        });
-    };
-
-    this.setHierarchyMatch = function(issue) {
-        issue.hierarchyMatch = true;
-        setParentHierarchyMatch(issue);
-        setChildrenHierarchyMatch(issue);
-        setDependencyHierarchyMatch(issue);
-    };
-
-    var setParentHierarchyMatch = function(issue) {
-        self.issues.forEach(function(i) {
-            if (i.issueKey !== issue.parent)
+        function enqueueParent(item) {
+            var parents = item.parents;
+            var issue = item.issue;
+            if(!parents || !issue.parent)
                 return;
-            i.hierarchyMatch = true;
-            setParentHierarchyMatch(i);
-            setDependencyHierarchyMatch(i);
-        });
-    };
 
-    var setChildrenHierarchyMatch = function(issue) {
-        self.issues.forEach(function(i) {
-            if (i.parent !== issue.issueKey)
+            // enqueue parent
+            queue.push({issue:self.getIssueByKey(issue.parent), parents:true});
+        }
+
+        function enqueueChildren(item) {
+            var children = item.children;
+            var issue = item.issue;
+            if(!children)
                 return;
-            i.hierarchyMatch = true;
-            setChildrenHierarchyMatch(i);
-            setDependencyHierarchyMatch(i);
-        });
+
+            for(var i = 0; i < self.issues.length; ++i) {
+                var child = self.issues[i];
+                // enqueue all children
+                if(child.parent === issue.issueKey)
+                    queue.push({issue:child, children:true});
+            }
+        }
+
+        var hierarchyIssueKeys = [];
+        while(queue.length > 0) {
+            var next = queue.shift();
+            issue = next.issue;
+            if(_.contains(hierarchyIssueKeys, issue.issueKey))
+                continue;
+
+            hierarchyIssueKeys.push(issue.issueKey);
+
+            enqueueParent(next);
+            enqueueChildren(next);
+        }
+        return hierarchyIssueKeys;
     };
 
-    var setDependencyHierarchyMatch = function(issue) {
-        self.issues.forEach(function(i) {
-            if (issue.dependencies.indexOf(i.issueKey) >= 0 && i.hierarchyMatch !== true)
-                i.hierarchyMatch = "DEP";
+    this.getDependenciesMatch = function(hierarchyIssueKeys) {
+        if(!hierarchyIssueKeys)
+            return null;
+
+        var dependencies = [];
+        var hierarchyIssues = hierarchyIssueKeys.map(function(key) {
+            return self.getIssueByKey(key);
         });
-    };
+        for(var i = 0; i < this.issues.length; ++i) {
+            var issue = this.issues[i];
+            if(_.contains(hierarchyIssueKeys, issue.issueKey))
+                continue;
+
+            for(var h = 0; h < hierarchyIssues.length; ++h) {
+                var hierarchyIssue = hierarchyIssues[h];
+                if(_.contains(hierarchyIssue.dependencies, issue.issueKey))
+                    dependencies.push(issue.issueKey);
+            }
+        }
+        return dependencies;
+    }
 
     this.isInvalidTeam = function(teams) {
         return teams.indexOf(INVALID_TEAM) != -1;
@@ -428,8 +447,6 @@ function Taskboard() {
             additionalEstimatedHours: issue[CUSTOMFIELD.ADDITIONAL_ESTIMATED_HOURS],
             release: issue[CUSTOMFIELD.RELEASE]
         };
-
-        issue.hierarchyMatch = false;
 
         return issue;
     }
