@@ -14,7 +14,6 @@ import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import com.google.common.collect.Streams;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -25,26 +24,26 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com.google.common.collect.Streams;
+
 import objective.taskboard.followup.FollowUpHelper;
 import objective.taskboard.followup.FollowUpTemplate;
 import objective.taskboard.followup.FromJiraDataRow;
-import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor.Sheet;
-import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor.SheetRow;
+import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor.SimpleSheet;
 import objective.taskboard.utils.DateTimeUtils;
 import objective.taskboard.utils.IOUtilities;
 import objective.taskboard.utils.XmlUtils;
 
-public class SimpleSpreadsheetEditorTest { 
+public class SpreadsheetEditorTest {
     private static final String PATH_FOLLOWUP_TEMPLATE = "followup/Followup-template.xlsm";
 
     private static final String MSG_ASSERT_SHARED_STRINGS_SIZE = "Shared strings size";
-    
 
     @Test
     public void getSharedStringsInitialTest() throws ParserConfigurationException, SAXException, IOException {
         try (SimpleSpreadsheetEditor subject = new SimpleSpreadsheetEditor(getBasicTemplate())) {
             subject.open();
-            
+
             Map<String, Long> sharedStrings = subject.getSharedStrings();
             assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 204, sharedStrings.size());
             assertEquals("First shared string", 0, sharedStrings.get("project").longValue());
@@ -59,48 +58,48 @@ public class SimpleSpreadsheetEditorTest {
         FollowUpTemplate template = getBasicTemplate();
         try (SimpleSpreadsheetEditor subject = new SimpleSpreadsheetEditor(template)) {
             subject.open();
-            
+
             Map<String, Long> sharedStrings = subject.getSharedStrings();
             assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 204, sharedStrings.size());
             assertEquals("First shared string", 0, sharedStrings.get("project").longValue());
             assertEquals("Last shared string", 203, sharedStrings.get("BALLPARK").longValue());
-    
+
             Sheet sheet = subject.getSheet("From Jira");
             for (FromJiraDataRow followUpData : FollowUpHelper.getDefaultFromJiraDataRowList()) 
                 addRow(sheet, followUpData);
             sheet.save();
-    
+
             assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 218, sharedStrings.size());
             assertEquals("First new shared string", 204, sharedStrings.get("PROJECT TEST").longValue());
             assertEquals("Any new shared string", 210, sharedStrings.get("Summary Feature").longValue());
             assertEquals("Last new shared string", 217, sharedStrings.get("Full Description Sub-task").longValue());
         }
     }
-    
+
     @Test
-    public void addOneRowToSpreadSheet() {
+    public void addOneRowToSpreadSheet() throws IOException {
         FollowUpTemplate template = getBasicTemplate();
         try (SimpleSpreadsheetEditor subject = new SimpleSpreadsheetEditor(template)) {
             subject.open();
-            
-            Sheet sheet = subject.getSheet("From Jira");
+
+            SimpleSheet sheet = subject.getSheet("From Jira");
             sheet.truncate(1);
             addRow(sheet, FollowUpHelper.getDefaultFromJiraDataRow());
             sheet.save();
-    
+
             String jiraDataSheet = subject.getSheet("From Jira").stringValue();
             String jiraDataSheetExpected = normalizeXml(resourceToString("followup/fromJiraWithOneRow.xml"));
-            assertEquals("Jira data sheet", jiraDataSheetExpected, jiraDataSheet);        
+            assertEquals("Jira data sheet", jiraDataSheetExpected, jiraDataSheet);
         }
     }
-    
+
     @Test
     public void generateSharedStringsInOrderTest() throws ParserConfigurationException, SAXException, IOException {
         try (SimpleSpreadsheetEditor subject = new SimpleSpreadsheetEditor(getBasicTemplate())) {
             subject.open();
-            
+
             String sharedStringsGenerated = subject.generateSharedStrings();
-    
+
             String sharedStringsExpected = resourceToString("followup/generateSharedStringsInOrderTest.xml");
             assertEquals("Shared strings", sharedStringsExpected, sharedStringsGenerated);
         }
@@ -111,49 +110,49 @@ public class SimpleSpreadsheetEditorTest {
         FollowUpTemplate template = getBasicTemplate();
         try (SimpleSpreadsheetEditor subject = new SimpleSpreadsheetEditor(template)) {
             subject.open();
-            
+
             Map<String, Long> sharedStrings = subject.getSharedStrings();
-    
+
             assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 204, sharedStrings.size());
-            
+
             Sheet sheet = subject.getSheet("From Jira");
             for (FromJiraDataRow followUpData : FollowUpHelper.getDefaultFromJiraDataRowList()) 
                 addRow(sheet, followUpData);
-            
+
             sheet.save();
-            
+
             assertEquals(MSG_ASSERT_SHARED_STRINGS_SIZE, 218, sharedStrings.size());
-    
+
             String sharedStringsGenerated = subject.generateSharedStrings();
-    
+
             String sharedStringsExpected = resourceToString("followup/generateSharedStringsInOrderAfterAddNewSharedStringTest.xml");
             assertEquals("Shared strings", sharedStringsExpected, sharedStringsGenerated);
         }
     }
-    
+
     @Test
     public void truncateFromJira() throws ParserConfigurationException, SAXException, IOException {
         FollowUpTemplate template = getBasicTemplate();
         try (SimpleSpreadsheetEditor subject = new SimpleSpreadsheetEditor(template)) {
             subject.open();
-            
-            Sheet sheet = subject.getSheet("From Jira");
+
+            SimpleSheet sheet = subject.getSheet("From Jira");
             sheet.truncate(1);
             String jiraDataSheet = sheet.stringValue();
-    
+
             String jiraDataSheetExpected = normalizeXml(resourceToString("followup/emptyFromJiraOnlyWithHeaders.xml"));
-            
+
             assertEquals("Jira data sheet", jiraDataSheetExpected, jiraDataSheet);
         }
     }
-    
+
     @Test
-    public void getSheetByName_shouldFindTheSheetPart() {
+    public void getSheetByName_shouldFindTheSheetPart() throws IOException {
         try(SimpleSpreadsheetEditor subject = new SimpleSpreadsheetEditor(getBasicTemplate())) {
             subject.open();
             Sheet sheet = subject.getSheet("T-shirt Size");
             String path = sheet.getSheetPath();
-            
+
             assertEquals("xl/worksheets/sheet6.xml", path);
         }
     }
@@ -163,38 +162,38 @@ public class SimpleSpreadsheetEditorTest {
         FollowUpTemplate template = new FollowUpTemplate(resolve(PATH_FOLLOWUP_TEMPLATE));
         try (SimpleSpreadsheetEditor subject = new SimpleSpreadsheetEditor(template)) {
             subject.open();
-            
+
             Sheet sheet = subject.createSheet("A New Sheet");
             assertEquals("xl/worksheets/sheet10.xml", sheet.getSheetPath());
-            
+
             Sheet sheetAgain = subject.getSheet("A New Sheet");
-            
+
             assertNotNull(sheetAgain);
-            
+
             checkXmlElementInSpreadsheetFile(subject, 
                     "xl/_rels/workbook.xml.rels", 
                     "/Relationships/Relationship[@Id=\"rId20\"]", 
                     expectedAttributeValue("Target", "worksheets/sheet10.xml"));
-            
+
             checkXmlElementInSpreadsheetFile(subject, 
                     "xl/workbook.xml", 
                     "/workbook/sheets/sheet[@sheetId=\"22\"]", 
                     expectedAttributeValue("name", "A New Sheet"),
                     expectedAttributeValue("r:id", "rId20"));
-            
+
             checkXmlElementInSpreadsheetFile(subject, 
                     "[Content_Types].xml", 
                     "/Types/Override[@PartName=\"/xl/worksheets/sheet10.xml\"]", 
                     expectedAttributeValue("ContentType", "application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"));
         }
-    } 
+    }
 
     @Test
     public void generateLotsOfLines() throws FileNotFoundException, IOException {
         FollowUpTemplate template = new FollowUpTemplate(resolve(PATH_FOLLOWUP_TEMPLATE));
         try (SimpleSpreadsheetEditor subject = new SimpleSpreadsheetEditor(template)) {
             subject.open();
-            
+
             Sheet sheet = subject.createSheet("A New Sheet");
 
             for (int i = 0; i < 5000; i++) {
@@ -203,18 +202,18 @@ public class SimpleSpreadsheetEditorTest {
             sheet.save();
         }
     }
-    
+
     @Test
     public void openSpreadsheetShouldHaveFullRecalcOnLoadSet() throws IOException {
         FollowUpTemplate template = new FollowUpTemplate(resolve(PATH_FOLLOWUP_TEMPLATE));
         try (SimpleSpreadsheetEditor subject = new SimpleSpreadsheetEditor(template)) {
             subject.open();
             subject.save();
-            
+
             NodeList calcPrList = XmlUtils.xpath(new File(subject.getExtractedSheetDirectory(), "xl/workbook.xml"), "/workbook/calcPr");
             Node calcPr = calcPrList.item(0);
             Node fullCalcOnLoad = calcPr.getAttributes().getNamedItem("fullCalcOnLoad");
-            
+
             assertEquals("1", fullCalcOnLoad.getNodeValue());
         }
     }
@@ -230,13 +229,13 @@ public class SimpleSpreadsheetEditorTest {
             String currencyFormat = "[$R$-416]\\ #,##0.00;[RED]\\-[$R$-416]\\ #,##0.00";
 
             // when
-            subject.stylesEditor.getOrCreateNumberFormat(dateFormat);
+            subject.getStylesEditor().getOrCreateNumberFormat(dateFormat);
             subject.save();
-            subject.stylesEditor.getOrCreateNumberFormat(currencyFormat);
+            subject.getStylesEditor().getOrCreateNumberFormat(currencyFormat);
             subject.save();
 
             // then
-            NodeList formatList = XmlUtils.xpath(new File(subject.getExtractedSheetDirectory(), SimpleSpreadsheetEditor.SpreadsheetStylesEditor.PATH_STYLES), "//numFmts/numFmt");
+            NodeList formatList = XmlUtils.xpath(new File(subject.getExtractedSheetDirectory(), subject.getStylesEditor().getPathStyles()), "//numFmts/numFmt");
             assertThat(Streams.stream(XmlUtils.iterable(formatList))
                     .filter(node -> node instanceof Element)
                     .map(node -> (Element)node)
@@ -257,28 +256,28 @@ public class SimpleSpreadsheetEditorTest {
 
     @SafeVarargs
     private final void checkXmlElementInSpreadsheetFile(SimpleSpreadsheetEditor subject, 
-            String xmlPath, 
+            String xmlPath,
             String locator,
             Pair<String, String> ...attributeExpectations) throws IOException {
         String workbookRelContent = FileUtils.readFileToString(new File(subject.getExtractedSheetDirectory(), xmlPath),"UTF-8");
         NodeList list = XmlUtils.xpath(workbookRelContent, locator);
         assertEquals(1, list.getLength());
-        for (Pair<String, String> pair : attributeExpectations) 
+        for (Pair<String, String> pair : attributeExpectations)
             assertEquals(pair.getValue(), list.item(0).getAttributes().getNamedItem(pair.getKey()).getNodeValue());
-        
+
     }
-    
+
     private FollowUpTemplate getBasicTemplate() {
         return new FollowUpTemplate(resolve(PATH_FOLLOWUP_TEMPLATE));
     }
 
     private static Resource resolve(String resourceName) {
-        return IOUtilities.asResource(SimpleSpreadsheetEditorTest.class.getClassLoader().getResource(resourceName));
+        return IOUtilities.asResource(SpreadsheetEditorTest.class.getClassLoader().getResource(resourceName));
     }
 
     private void addRow(Sheet sheet, FromJiraDataRow followUpData) {
         SheetRow row = sheet.createRow();
-        
+
         row.addColumn(followUpData.project);
         row.addColumn(followUpData.demandType);
         row.addColumn(followUpData.demandStatus);

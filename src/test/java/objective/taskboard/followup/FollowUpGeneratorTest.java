@@ -37,21 +37,21 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.time.ZoneId;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.core.io.Resource;
 
+import objective.taskboard.spreadsheet.Sheet;
 import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor;
-import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor.Sheet;
+import objective.taskboard.spreadsheet.SimpleSpreadsheetEditorMock;
 import objective.taskboard.utils.IOUtilities;
-import objective.taskboard.utils.XmlUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FollowUpGeneratorTest {
@@ -61,73 +61,88 @@ public class FollowUpGeneratorTest {
     @Mock
     private FollowupDataProvider provider;
 
-    @Before
-    public void setup() {
-        subject = getFollowUpGeneratorUsingTestTemplate();
-    }
+    private SimpleSpreadsheetEditorMock editor;
 
     @Test
-    public void generateJiraDataSheetTest() {
+    public void generateJiraDataSheetTest() throws IOException {
+        editor = new SimpleSpreadsheetEditorMock();
+        subject = new FollowUpGenerator(provider, editor);
+
         subject.getEditor().open();
-        String fromJiraSheet = subject.generateFromJiraSheet(getDefaultFollowupData()).stringValue();
-
-        String fromJiraSheetExpected = normalizedXmlResource("followup/generateJiraDataSheetTest.xml");
-        assertEquals("From Jira sheet", fromJiraSheetExpected, fromJiraSheet);
+        subject.generateFromJiraSheet(getDefaultFollowupData());
         subject.getEditor().close();
+
+        String fromJiraSheetExpected = txtResourceAsString("followup/generateJiraDataSheetTest.txt");
+        assertEquals("From Jira sheet", fromJiraSheetExpected, editor.loggerString());
     }
 
     @Test
-    public void whenGeneratingWithoutData_generatesFromJiraKeepingOnlyHeaders() {
+    public void whenGeneratingWithoutData_generatesFromJiraKeepingOnlyHeaders() throws IOException {
+        editor = new SimpleSpreadsheetEditorMock();
+        subject = new FollowUpGenerator(provider, editor);
+
         subject.getEditor().open();
-        String fromJiraSheet = subject.generateFromJiraSheet(getEmptyFollowupData()).stringValue();
-
-        String fromJiraSheetExpected = normalizedXmlResource("followup/emptyFromJiraWithGeneratedHeaders.xml");
-        assertEquals("From Jira sheet", fromJiraSheetExpected, fromJiraSheet);
+        subject.generateFromJiraSheet(getEmptyFollowupData());
         subject.getEditor().close();
+
+        String fromJiraSheetExpected = txtResourceAsString("followup/emptyFromJiraWithGeneratedHeaders.txt");
+        assertEquals("From Jira sheet", fromJiraSheetExpected, editor.loggerString());
     }
 
     @Test
-    public void givenEmptyTransitions_whenGenerateFromJiraSheet_thenShouldNotGenerateTransitions() {
+    public void givenEmptyTransitions_whenGenerateFromJiraSheet_thenShouldNotGenerateTransitions() throws IOException {
+        editor = new SimpleSpreadsheetEditorMock();
+        subject = new FollowUpGenerator(provider, editor);
+
         FromJiraDataSet fromJiraDS = new FromJiraDataSet(FROMJIRA_HEADERS, getDefaultFromJiraDataRowList());
         FollowupData followupData = new FollowupData(fromJiraDS, getEmptyAnalyticsTransitionsDataSet(),
                 getEmptySyntheticTransitionsDataSet());
 
         subject.getEditor().open();
-        String fromJiraSheet = subject.generateFromJiraSheet(followupData).stringValue();
-
-        String fromJiraSheetExpected = normalizedXmlResource("followup/fromJiraWithNoTransitions.xml");
-        assertEquals("From Jira sheet", fromJiraSheetExpected, fromJiraSheet);
+        subject.generateFromJiraSheet(followupData);
         subject.getEditor().close();
+
+        String fromJiraSheetExpected = txtResourceAsString("followup/fromJiraWithNoTransitions.txt");
+        assertEquals("From Jira sheet", fromJiraSheetExpected, editor.loggerString());
     }
 
     @Test
-    public void givenNoTransitions_whenGenerateFromJiraSheet_thenShouldNotGenerateTransitions() {
+    public void givenNoTransitions_whenGenerateFromJiraSheet_thenShouldNotGenerateTransitions() throws IOException {
+        editor = new SimpleSpreadsheetEditorMock();
+        subject = new FollowUpGenerator(provider, editor);
+
         FromJiraDataSet fromJiraDS = new FromJiraDataSet(FROMJIRA_HEADERS, getDefaultFromJiraDataRowList());
         FollowupData followupData = new FollowupData(fromJiraDS, null, null);
 
         subject.getEditor().open();
-        String fromJiraSheet = subject.generateFromJiraSheet(followupData).stringValue();
-
-        String fromJiraSheetExpected = normalizedXmlResource("followup/fromJiraWithNoTransitions.xml");
-        assertEquals("From Jira sheet", fromJiraSheetExpected, fromJiraSheet);
+        subject.generateFromJiraSheet(followupData);
         subject.getEditor().close();
+
+        String fromJiraSheetExpected = txtResourceAsString("followup/fromJiraWithNoTransitions.txt");
+        assertEquals("From Jira sheet", fromJiraSheetExpected, editor.loggerString());
     }
 
     @Test
-    public void givenTransitionsDatesOfOtherIssueKey_whenGenerateFromJiraSheet_thenShouldGenerateEmptyTransitionsDates() {
+    public void givenTransitionsDatesOfOtherIssueKey_whenGenerateFromJiraSheet_thenShouldGenerateEmptyTransitionsDates() throws IOException {
+        editor = new SimpleSpreadsheetEditorMock();
+        subject = new FollowUpGenerator(provider, editor);
+
         FromJiraDataSet fromJiraDS = new FromJiraDataSet(FROMJIRA_HEADERS, getDefaultFromJiraDataRowList());
         FollowupData followupData = new FollowupData(fromJiraDS, getAnalyticsTransitionsDataSetWitNoRow(), getSyntheticTransitionsDataSetWithNoRow());
 
         subject.getEditor().open();
-        String fromJiraSheet = subject.generateFromJiraSheet(followupData).stringValue();
-
-        String fromJiraSheetExpected = normalizedXmlResource("followup/fromJiraWithEmptyTransitions.xml");
-        assertEquals("From Jira sheet", fromJiraSheetExpected, fromJiraSheet);
+        subject.generateFromJiraSheet(followupData);
         subject.getEditor().close();
+
+        String fromJiraSheetExpected = txtResourceAsString("followup/fromJiraWithEmptyTransitions.txt");
+        assertEquals("From Jira sheet", fromJiraSheetExpected, editor.loggerString());
     }
 
     @Test
-    public void generateJiraDataSheetWithSomeEmptyAndNullAttributesJiraDataTest() {
+    public void generateJiraDataSheetWithSomeEmptyAndNullAttributesJiraDataTest() throws IOException {
+        editor = new SimpleSpreadsheetEditorMock();
+        subject = new FollowUpGenerator(provider, editor);
+
         FromJiraDataRow fromJiraDefault = getDefaultFromJiraDataRow();
         fromJiraDefault.project = "";
         fromJiraDefault.demandType = null;
@@ -140,30 +155,40 @@ public class FollowUpGeneratorTest {
         FollowupData followupData = new FollowupData(fromJiraDs, emptyList(), emptyList());
 
         subject.getEditor().open();
-        String fromJiraSheet = subject.generateFromJiraSheet(followupData).stringValue();
-
-        String fromJiraSheetExpected = normalizedXmlResource("followup/generateJiraDataSheetWithSomeEmptyAndNullAttributesJiraDataTest.xml");
-        assertEquals("From Jira sheet", fromJiraSheetExpected, fromJiraSheet);
+        subject.generateFromJiraSheet(followupData);
         subject.getEditor().close();
+
+        String fromJiraSheetExpected = txtResourceAsString("followup/generateJiraDataSheetWithSomeEmptyAndNullAttributesJiraDataTest.txt");
+        assertEquals("From Jira sheet", fromJiraSheetExpected, editor.loggerString());
     }
 
     @Test
-    public void generateTest() {
+    public void generateTest() throws IOException {
+        FollowUpTemplate testTemplate = new FollowUpTemplate(resolve("followup/Followup-template.xlsm"));
+        subject = new FollowUpGenerator(provider, new SimpleSpreadsheetEditor(testTemplate));
+
         when(provider.getJiraData(emptyArray(), ZoneId.systemDefault())).thenReturn(getDefaultFollowupData());
+
         Resource resource = subject.generate(emptyArray(), ZoneId.systemDefault());
         assertNotNull("Resource shouldn't be null", resource);
     }
 
     @Test
-    public void generateUsingGenericTemplateTest() {
+    public void generateUsingGenericTemplateTest() throws IOException {
+        FollowUpTemplate testTemplate = new FollowUpTemplate(resolve("followup/Followup-template.xlsm"));
+        subject = new FollowUpGenerator(provider, new SimpleSpreadsheetEditor(testTemplate));
+
         when(provider.getJiraData(emptyArray(), ZoneId.systemDefault())).thenReturn(getDefaultFollowupData());
-        subject = getFollowUpGeneratorUsingGenericTemplate();
+
         Resource resource = subject.generate(emptyArray(), ZoneId.systemDefault());
         assertNotNull("Resource shouldn't be null", resource);
     }
 
     @Test
-    public void generateLotsOfLines() {
+    public void generateLotsOfLines() throws IOException {
+        FollowUpTemplate testTemplate = new FollowUpTemplate(resolve("followup/Followup-template.xlsm"));
+        subject = new FollowUpGenerator(provider, new SimpleSpreadsheetEditor(testTemplate));
+
         List<FromJiraDataRow> fromJiraDataRowList = new LinkedList<>();
         for (int i=0; i < 5000; i++)
             fromJiraDataRowList.add(getDefaultFromJiraDataRow());
@@ -176,28 +201,23 @@ public class FollowUpGeneratorTest {
     }
 
     @Test
-    public void givenIssues_whenGenerateTransitionsSheets_thenSheetsShouldBeGenerated() {
-        subject.getEditor().open();
-        List<Sheet> transitionsSheets = subject.generateTransitionsSheets(getDefaultFollowupData());
-        assertEquals("Transitions sheets quantity", 6, transitionsSheets.size());
+    public void givenIssues_whenGenerateTransitionsSheets_thenSheetsShouldBeGenerated() throws IOException {
+        editor = new SimpleSpreadsheetEditorMock();
+        subject = new FollowUpGenerator(provider, editor);
 
-        String analyticDemandExpected = normalizedXmlResource("followup/analyticTransitionsDemand.xml");
-        assertEquals("Analytic transitions Demand", analyticDemandExpected, transitionsSheets.get(0).stringValue());
-        String analyticFeatureExpected = normalizedXmlResource("followup/analyticTransitionsFeature.xml");
-        assertEquals("Analytic transitions Feature", analyticFeatureExpected, transitionsSheets.get(1).stringValue());
-        String analyticSubtaskExpected = normalizedXmlResource("followup/analyticTransitionsSubtask.xml");
-        assertEquals("Analytic transitions Subtask", analyticSubtaskExpected, transitionsSheets.get(2).stringValue());
-        String syntheticDemandExpected = normalizedXmlResource("followup/syntheticTransitionsDemand.xml");
-        assertEquals("Synthetic transitions Demand", syntheticDemandExpected, transitionsSheets.get(3).stringValue());
-        String syntheticFeatureExpected = normalizedXmlResource("followup/syntheticTransitionsFeature.xml");
-        assertEquals("Synthetic transitions Feature", syntheticFeatureExpected, transitionsSheets.get(4).stringValue());
-        String syntheticSubtaskExpected = normalizedXmlResource("followup/syntheticTransitionsSubtask.xml");
-        assertEquals("Synthetic transitions Subtask", syntheticSubtaskExpected, transitionsSheets.get(5).stringValue());
+        subject.getEditor().open();
+        subject.generateTransitionsSheets(getDefaultFollowupData());
         subject.getEditor().close();
+
+        String transitionsSheetsExpected = txtResourceAsString("followup/transitionsSheets.txt");
+        assertEquals("From Jira sheet", transitionsSheetsExpected, editor.loggerString());
     }
 
     @Test
-    public void givenNoIssue_whenGenerateTransitionsSheets_thenSheetsShouldNotBeGenerated() {
+    public void givenNoIssue_whenGenerateTransitionsSheets_thenSheetsShouldNotBeGenerated() throws IOException {
+        FollowUpTemplate testTemplate = new FollowUpTemplate(resolve("followup/Followup-template.xlsm"));
+        subject = new FollowUpGenerator(provider, new SimpleSpreadsheetEditor(testTemplate));
+
         List<Sheet> transitionsSheets = subject.generateTransitionsSheets(getEmptyFollowupData());
         assertEquals("Transitions sheets quantity", 0, transitionsSheets.size());
 
@@ -222,18 +242,8 @@ public class FollowUpGeneratorTest {
         subject.getEditor().close();
     }
 
-    private FollowUpGenerator getFollowUpGeneratorUsingGenericTemplate() {
-        FollowUpTemplate genericTemplate = new FollowUpTemplate(resolve("followup/generic-followup-template.xlsm"));
-        return new FollowUpGenerator(provider, new SimpleSpreadsheetEditor(genericTemplate));
-    }
-
-    private FollowUpGenerator getFollowUpGeneratorUsingTestTemplate() {
-        FollowUpTemplate testTemplate = new FollowUpTemplate(resolve("followup/Followup-template.xlsm"));
-        return new FollowUpGenerator(provider, new SimpleSpreadsheetEditor(testTemplate));
-    }
-
-    private String normalizedXmlResource(String pathResource) {
-        return XmlUtils.normalizeXml(IOUtilities.resourceToString(pathResource));
+    private String txtResourceAsString(String pathResource) {
+        return IOUtilities.resourceToString(pathResource);
     }
 
     private static Resource resolve(String resourceName) {
@@ -243,4 +253,5 @@ public class FollowUpGeneratorTest {
     private String[] emptyArray() {
         return new String[0];
     }
+
 }
