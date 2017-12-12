@@ -26,6 +26,7 @@ import static objective.taskboard.followup.impl.FollowUpTransitionsDataProvider.
 import static objective.taskboard.followup.impl.FollowUpTransitionsDataProvider.TYPE_SUBTASKS;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
+import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.LinkedList;
@@ -34,9 +35,9 @@ import java.util.Optional;
 
 import org.springframework.core.io.Resource;
 
-import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor;
-import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor.Sheet;
-import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor.SheetRow;
+import objective.taskboard.spreadsheet.Sheet;
+import objective.taskboard.spreadsheet.SheetRow;
+import objective.taskboard.spreadsheet.SpreadsheetEditor;
 import objective.taskboard.utils.IOUtilities;
 
 public class FollowUpGenerator {
@@ -44,14 +45,14 @@ public class FollowUpGenerator {
 
     private final FollowupDataProvider provider;
 
-	private SimpleSpreadsheetEditor editor;
+    private SpreadsheetEditor editor;
 
-    public FollowUpGenerator(FollowupDataProvider provider, SimpleSpreadsheetEditor editor) {
+    public FollowUpGenerator(FollowupDataProvider provider, SpreadsheetEditor editor) {
         this.provider = provider;
         this.editor = editor;
     }
 
-    public Resource generate(String [] includedProjects, ZoneId timezone) {
+    public Resource generate(String [] includedProjects, ZoneId timezone) throws IOException {
         try {
             editor.open();
 
@@ -255,7 +256,7 @@ public class FollowUpGenerator {
         return sheet;
     }
 
-    public SimpleSpreadsheetEditor getEditor() {
+    public SpreadsheetEditor getEditor() {
         return editor;
     }
 }

@@ -1,0 +1,104 @@
+Spreadsheet Open
+Sheet Create: From Jira
+Sheet "From Jira" Row Create: 1
+Sheet "From Jira" Row "1" AddColumn "A1": project
+Sheet "From Jira" Row "1" AddColumn "B1": demand_type
+Sheet "From Jira" Row "1" AddColumn "C1": demand_status
+Sheet "From Jira" Row "1" AddColumn "D1": demand_num
+Sheet "From Jira" Row "1" AddColumn "E1": DEMAND_SUMMARY
+Sheet "From Jira" Row "1" AddColumn "F1": demand_description
+Sheet "From Jira" Row "1" AddColumn "G1": TASK_TYPE
+Sheet "From Jira" Row "1" AddColumn "H1": TASK_STATUS
+Sheet "From Jira" Row "1" AddColumn "I1": TASK_NUM
+Sheet "From Jira" Row "1" AddColumn "J1": TASK_SUMMARY
+Sheet "From Jira" Row "1" AddColumn "K1": TASK_DESCRIPTION
+Sheet "From Jira" Row "1" AddColumn "L1": TASK_FULL_DESCRIPTION
+Sheet "From Jira" Row "1" AddColumn "M1": SUBTASK_TYPE
+Sheet "From Jira" Row "1" AddColumn "N1": SUBTASK_STATUS
+Sheet "From Jira" Row "1" AddColumn "O1": SUBTASK_NUM
+Sheet "From Jira" Row "1" AddColumn "P1": SUBTASK_SUMMARY
+Sheet "From Jira" Row "1" AddColumn "Q1": SUBTASK_DESCRIPTION
+Sheet "From Jira" Row "1" AddColumn "R1": SUBTASK_FULL_DESCRIPTION
+Sheet "From Jira" Row "1" AddColumn "S1": DEMAND_ID
+Sheet "From Jira" Row "1" AddColumn "T1": TASK_ID
+Sheet "From Jira" Row "1" AddColumn "U1": SUBTASK_ID
+Sheet "From Jira" Row "1" AddColumn "V1": planning_type
+Sheet "From Jira" Row "1" AddColumn "W1": task_release
+Sheet "From Jira" Row "1" AddColumn "X1": worklog
+Sheet "From Jira" Row "1" AddColumn "Y1": wrong_worklog
+Sheet "From Jira" Row "1" AddColumn "Z1": Demand_ballpark
+Sheet "From Jira" Row "1" AddColumn "AA1": TASK_BALLPARK
+Sheet "From Jira" Row "1" AddColumn "AB1": tshirt_size
+Sheet "From Jira" Row "1" AddColumn "AC1": Query_Type
+Sheet "From Jira" Row "1" AddColumn "AD1": EffortEstimate
+Sheet "From Jira" Row "1" AddColumn "AE1": CycleEstimate
+Sheet "From Jira" Row "1" AddColumn "AF1": EffortOnBacklog
+Sheet "From Jira" Row "1" AddColumn "AG1": CycleOnBacklog
+Sheet "From Jira" Row "1" AddColumn "AH1": BallparkEffort
+Sheet "From Jira" Row "1" AddColumn "AI1": PlannedEffort
+Sheet "From Jira" Row "1" AddColumn "AJ1": EffortDone
+Sheet "From Jira" Row "1" AddColumn "AK1": CycleDone
+Sheet "From Jira" Row "1" AddColumn "AL1": WorklogDone
+Sheet "From Jira" Row "1" AddColumn "AM1": WorklogDoing
+Sheet "From Jira" Row "1" AddColumn "AN1": CountTasks
+Sheet "From Jira" Row "1" AddColumn "AO1": CountDemands
+Sheet "From Jira" Row "1" AddColumn "AP1": CountSubtasks
+Sheet "From Jira" Row "1" AddColumn "AQ1": SubtaskEstimativeForEEPCalculation
+Sheet "From Jira" Row "1" AddColumn "AR1": PlannedEffortOnBug
+Sheet "From Jira" Row "1" AddColumn "AS1": WorklogOnBug
+Sheet "From Jira" Row "1" AddColumn "AT1": Subtasks - Done
+Sheet "From Jira" Row "1" AddColumn "AU1": Subtasks - Doing
+Sheet "From Jira" Row "1" AddColumn "AV1": Subtasks - To Do
+Sheet "From Jira" Row "1" Save
+Sheet "From Jira" Row Create: 2
+Sheet "From Jira" Row "2" AddColumn "A2": PROJECT TEST
+Sheet "From Jira" Row "2" AddColumn "B2": Demand
+Sheet "From Jira" Row "2" AddColumn "C2": Doing
+Sheet "From Jira" Row "2" AddColumn "D2": I-1
+Sheet "From Jira" Row "2" AddColumn "E2": Summary Demand
+Sheet "From Jira" Row "2" AddColumn "F2": Description Demand
+Sheet "From Jira" Row "2" AddColumn "G2": Feature
+Sheet "From Jira" Row "2" AddColumn "H2": Doing
+Sheet "From Jira" Row "2" AddColumn "I2": I-2
+Sheet "From Jira" Row "2" AddColumn "J2": Summary Feature
+Sheet "From Jira" Row "2" AddColumn "K2": Description Feature
+Sheet "From Jira" Row "2" AddColumn "L2": Full Description Feature
+Sheet "From Jira" Row "2" AddColumn "M2": Sub-task
+Sheet "From Jira" Row "2" AddColumn "N2": Doing
+Sheet "From Jira" Row "2" AddColumn "O2": I-3
+Sheet "From Jira" Row "2" AddColumn "P2": Summary Sub-task
+Sheet "From Jira" Row "2" AddColumn "Q2": Description Sub-task
+Sheet "From Jira" Row "2" AddColumn "R2": Full Description Sub-task
+Sheet "From Jira" Row "2" AddColumn "S2": 1
+Sheet "From Jira" Row "2" AddColumn "T2": 2
+Sheet "From Jira" Row "2" AddColumn "U2": 3
+Sheet "From Jira" Row "2" AddColumn "V2": Ballpark
+Sheet "From Jira" Row "2" AddColumn "W2": Release
+Sheet "From Jira" Row "2" AddColumn "X2": 1.0
+Sheet "From Jira" Row "2" AddColumn "Y2": 1.0
+Sheet "From Jira" Row "2" AddColumn "Z2": 1.0
+Sheet "From Jira" Row "2" AddColumn "AA2": 1.0
+Sheet "From Jira" Row "2" AddColumn "AB2": M
+Sheet "From Jira" Row "2" AddColumn "AC2": Type
+Sheet "From Jira" Row "2" AddFormula "AD2": IF(AllIssues[[#This Row],[TASK_BALLPARK]]>0,AllIssues[[#This Row],[TASK_BALLPARK]],SUMIFS(Clusters[Effort],Clusters[Cluster Name],AllIssues[[#This Row],[SUBTASK_TYPE]],Clusters[T-Shirt Size],AllIssues[tshirt_size]))
+Sheet "From Jira" Row "2" AddFormula "AE2": IF(AllIssues[[#This Row],[TASK_BALLPARK]]>0,AllIssues[[#This Row],[TASK_BALLPARK]]*1.3,SUMIFS(Clusters[Cycle],Clusters[Cluster Name],AllIssues[[#This Row],[SUBTASK_TYPE]],Clusters[T-Shirt Size],AllIssues[tshirt_size]))
+Sheet "From Jira" Row "2" AddFormula "AF2": AllIssues[EffortEstimate]-AllIssues[EffortDone]
+Sheet "From Jira" Row "2" AddFormula "AG2": AllIssues[CycleEstimate]-AllIssues[CycleDone]
+Sheet "From Jira" Row "2" AddFormula "AH2": IF(AllIssues[[#This Row],[planning_type]]="Ballpark",AllIssues[EffortEstimate],0)
+Sheet "From Jira" Row "2" AddFormula "AI2": IF(AllIssues[[#This Row],[planning_type]]="Plan",AllIssues[EffortEstimate],0)
+Sheet "From Jira" Row "2" AddFormula "AJ2": IF(OR(AllIssues[SUBTASK_STATUS]="Done",AllIssues[SUBTASK_STATUS]="Cancelled"),AllIssues[EffortEstimate],0)
+Sheet "From Jira" Row "2" AddFormula "AK2": IF(OR(AllIssues[SUBTASK_STATUS]="Done",AllIssues[SUBTASK_STATUS]="Cancelled"),AllIssues[CycleEstimate],0)
+Sheet "From Jira" Row "2" AddFormula "AL2": IF(OR(AllIssues[SUBTASK_STATUS]="Done",AllIssues[SUBTASK_STATUS]="Cancelled"),AllIssues[worklog],0)
+Sheet "From Jira" Row "2" AddFormula "AM2": IF(OR(AllIssues[SUBTASK_STATUS]="Done",AllIssues[SUBTASK_STATUS]="Cancelled"),0, AllIssues[worklog])
+Sheet "From Jira" Row "2" AddFormula "AN2": IF(COUNTIFS(AllIssues[TASK_ID],AllIssues[TASK_ID],AllIssues[TASK_ID],">0")=0,0,1/COUNTIFS(AllIssues[TASK_ID],AllIssues[TASK_ID],AllIssues[TASK_ID],">0"))
+Sheet "From Jira" Row "2" AddFormula "AO2": IF(COUNTIFS(AllIssues[demand_description],AllIssues[demand_description])=0,0,1/COUNTIFS(AllIssues[demand_description],AllIssues[demand_description]))
+Sheet "From Jira" Row "2" AddFormula "AP2": IF(AllIssues[planning_type]="Plan",1,0)
+Sheet "From Jira" Row "2" AddFormula "AQ2": IF(AllIssues[[#This Row],[SUBTASK_STATUS]]="Done", AllIssues[[#This Row],[EffortDone]],0)
+Sheet "From Jira" Row "2" AddFormula "AR2": IF(AllIssues[TASK_TYPE]="Bug",AllIssues[EffortEstimate], 0)
+Sheet "From Jira" Row "2" AddFormula "AS2": IF(AllIssues[TASK_TYPE]="Bug",AllIssues[worklog],0)
+Sheet "From Jira" Row "2" AddColumn "AT2": null
+Sheet "From Jira" Row "2" AddColumn "AU2": null
+Sheet "From Jira" Row "2" AddColumn "AV2": null
+Sheet "From Jira" Row "2" Save
+Sheet "From Jira" Save
+Spreadsheet Close
