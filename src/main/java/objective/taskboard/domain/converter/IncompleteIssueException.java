@@ -22,7 +22,7 @@ public class IncompleteIssueException extends RuntimeException {
 
     @Override
     public String toString() {
-        return "IncompleteConversionException [incompleteIssue=" + incompleteIssue + ", missingParentKey="
+        return "IncompleteIssueException [incompleteIssue=" + incompleteIssue + ", missingParentKey="
                 + missingParentKey + "]";
     }
 

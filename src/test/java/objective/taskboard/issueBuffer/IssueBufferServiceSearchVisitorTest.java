@@ -2,15 +2,15 @@ package objective.taskboard.issueBuffer;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Optional;
 
-import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.junit.Before;
@@ -65,7 +65,13 @@ public class IssueBufferServiceSearchVisitorTest {
     
     @Mock
     private IssueColorService issueColorService;
-    
+
+    @Mock
+    private IssueBufferService issueBufferService;
+
+    @Mock
+    private objective.taskboard.data.Issue issue;
+
     @InjectMocks
     JiraIssueToIssueConverter issueConverter ;
     
@@ -108,73 +114,113 @@ public class IssueBufferServiceSearchVisitorTest {
     
     @Test
 	public void whenProcessingIssueWithoutParent() throws JSONException {
-        IssueBufferServiceSearchVisitor subject = new IssueBufferServiceSearchVisitor(issueConverter, new CardRepo());
+        IssueBufferServiceSearchVisitor subject = new IssueBufferServiceSearchVisitor(issueConverter, issueBufferService);
 	    
         SearchResultJsonParser searchResultParser = new SearchResultJsonParser();
-        SearchResult searchResult = searchResultParser.parse(new JSONObject(IssueBufferServiceSearchVisitorTest.result("TASKB-685")));
+        SearchResult searchResult = searchResultParser.parse(new JSONObject(result("TASKB-685")));
         ArrayList<Issue> list = newArrayList(searchResult.getIssues());
         
         list.stream().forEach(subject::processIssue);
         
-        CardRepo buffer = subject.getIssuesByKey();
-        
-        ArrayList<String> keys = new ArrayList<String>(buffer.keySet());
-        Collections.sort(keys);
-        assertEquals("TASKB-685", keys.get(0));
+        assertEquals(1, subject.getProcessedCount());
         subject.complete();
 	}
     
     @Test
     public void whenIssuesAreReturnedOutOfOrder() throws JSONException {
-        IssueBufferServiceSearchVisitor subject = new IssueBufferServiceSearchVisitor(issueConverter, new CardRepo());
+        IssueBufferServiceSearchVisitor subject = new IssueBufferServiceSearchVisitor(issueConverter, issueBufferService);
         
         SearchResultJsonParser searchResultParser = new SearchResultJsonParser();
-        SearchResult searchResult = searchResultParser.parse(new JSONObject(IssueBufferServiceSearchVisitorTest.result("TASKB-686_TASKB-685")));
+        SearchResult searchResult = searchResultParser.parse(new JSONObject(result("TASKB-686_TASKB-685")));
         ArrayList<Issue> list = newArrayList(searchResult.getIssues());
-        
-        list.stream().forEach(subject::processIssue);
-        
-        CardRepo buffer = subject.getIssuesByKey();
-        
-        ArrayList<String> keys = new ArrayList<String>(buffer.keySet());
-        assertEquals("TASKB-685,TASKB-686", StringUtils.join(keys,","));
+
+        list.stream().forEach(jiraIssue -> {
+            if ("TASKB-685".equals(jiraIssue.getKey())) {
+                when(issueBufferService.getIssueByKey("TASKB-685")).thenReturn(issue);
+                assertEquals(0, subject.getProcessedCount());
+            }
+            subject.processIssue(jiraIssue);
+        });
+
+        assertEquals(2, subject.getProcessedCount());
         subject.complete();
     }
     
     @Test
     public void whenIssuesAreReturnedOutOfOrderWithNestedDependencies() throws JSONException {
+        when(issueBufferService.updateIssue(any())).thenReturn(true);
         issueConverter.setParentIssueLinks(Arrays.asList("is demanded by"));
         
-        IssueBufferServiceSearchVisitor subject = new IssueBufferServiceSearchVisitor(issueConverter, new CardRepo());
+        IssueBufferServiceSearchVisitor subject = new IssueBufferServiceSearchVisitor(issueConverter, issueBufferService);
         
         SearchResultJsonParser searchResultParser = new SearchResultJsonParser();
-        SearchResult searchResult = searchResultParser.parse(new JSONObject(IssueBufferServiceSearchVisitorTest.result("TASKB-634_TASKB-630_TASKB-628")));
+        SearchResult searchResult = searchResultParser.parse(new JSONObject(result("TASKB-634_TASKB-630_TASKB-628")));
         ArrayList<Issue> list = newArrayList(searchResult.getIssues());
-        
-        list.stream().forEach(subject::processIssue);
-        
-        CardRepo buffer = subject.getIssuesByKey();
-        
-        ArrayList<String> keys = new ArrayList<String>(buffer.keySet());
-        assertEquals("TASKB-628,TASKB-630,TASKB-634", StringUtils.join(keys,","));
+
+        list.stream().forEach(jiraIssue -> {
+            if ("TASKB-628".equals(jiraIssue.getKey())) {
+                when(issueBufferService.getIssueByKey("TASKB-628")).thenReturn(issue);
+                when(issueBufferService.getIssueByKey("TASKB-630")).thenReturn(issue);
+                assertEquals(0, subject.getProcessedCount());
+            }
+            subject.processIssue(jiraIssue);
+        });
+
+        assertEquals(3, subject.getProcessedCount());
         subject.complete();
     }
     
     @Test
     public void whenIssuesAreReturnedInOrder() throws JSONException {
-        IssueBufferServiceSearchVisitor subject = new IssueBufferServiceSearchVisitor(issueConverter, new CardRepo());
+        when(issue.getCustomFields()).thenReturn(new HashMap<>());
+        when(issueBufferService.getAllIssues()).thenReturn(newArrayList(issue));
+        when(issueBufferService.getIssueByKey("TASKB-685")).thenReturn(issue);
+
+        IssueBufferServiceSearchVisitor subject = new IssueBufferServiceSearchVisitor(issueConverter, issueBufferService);
         
         SearchResultJsonParser searchResultParser = new SearchResultJsonParser();
-        SearchResult searchResult = searchResultParser.parse(new JSONObject(IssueBufferServiceSearchVisitorTest.result("TASKB-685_TASKB-686")));
+        SearchResult searchResult = searchResultParser.parse(new JSONObject(result("TASKB-685_TASKB-686")));
         ArrayList<Issue> list = newArrayList(searchResult.getIssues());
         
         list.stream().forEach(subject::processIssue);
         
-        CardRepo buffer = subject.getIssuesByKey();
-        
-        ArrayList<String> keys = new ArrayList<String>(buffer.keySet());
-        assertEquals("TASKB-685,TASKB-686", StringUtils.join(keys,","));
+        assertEquals(2, subject.getProcessedCount());
         subject.complete();
+    }
+
+    @Test
+    public void whenProcessingIssueWithMissingParent_ShouldThrowIllegalStateException() throws JSONException {
+        IssueBufferServiceSearchVisitor subject = new IssueBufferServiceSearchVisitor(issueConverter, issueBufferService);
+
+        SearchResultJsonParser searchResultParser = new SearchResultJsonParser();
+        SearchResult searchResult = searchResultParser.parse(new JSONObject(result("TASKB-686")));
+        ArrayList<Issue> list = newArrayList(searchResult.getIssues());
+
+        list.stream().forEach(subject::processIssue);
+
+        assertEquals(0, subject.getProcessedCount());
+        try {
+            subject.complete();
+            fail("Should throw an IllegalStateException");
+        } catch (IllegalStateException e) {
+            assertEquals("Some parents were never found: TASKB-685", e.getMessage());
+        }
+    }
+
+    @Test
+    public void whenHasIssueWithNullFields_ShouldThrowIllegalStateException() throws JSONException {
+        when(issue.getIssueKey()).thenReturn("TASKB-1");
+        when(issue.getCustomFields()).thenReturn(null);
+        when(issueBufferService.getAllIssues()).thenReturn(newArrayList(issue));
+
+        IssueBufferServiceSearchVisitor subject = new IssueBufferServiceSearchVisitor(issueConverter, issueBufferService);
+
+        try {
+            subject.complete();
+            fail("Should throw an IllegalStateException");
+        } catch (IllegalStateException e) {
+            assertEquals("issue TASKB-1 has invalid null fields", e.getMessage());
+        }
     }
 
     public static String result(String string) {

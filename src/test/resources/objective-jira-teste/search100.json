@@ -3687,7 +3687,7 @@
                                 "from": null,
                                 "fromString": null,
                                 "to": "SOD-645",
-                                "toString": "This issue \u00e9 demandado por SOD-645"
+                                "toString": "This issue is demanded by SOD-645"
                             }
                         ]
                     },
@@ -4274,11 +4274,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/2/issueLink/143658",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10350"
                         }
                     }
                 ],
@@ -4418,7 +4418,7 @@
                                 "from": null,
                                 "fromString": null,
                                 "to": "SOD-645",
-                                "toString": "This issue \u00e9 demandado por SOD-645"
+                                "toString": "This issue is demanded by SOD-645"
                             }
                         ]
                     },
@@ -5069,11 +5069,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/2/issueLink/143661",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10350"
                         }
                     }
                 ],
@@ -5213,7 +5213,7 @@
                                 "from": null,
                                 "fromString": null,
                                 "to": "SOD-647",
-                                "toString": "This issue \u00e9 demandado por SOD-647"
+                                "toString": "This issue is demanded by SOD-647"
                             }
                         ]
                     },
@@ -5780,11 +5780,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/2/issueLink/143726",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10350"
                         }
                     }
                 ],
@@ -5942,7 +5942,7 @@
                                 "from": null,
                                 "fromString": null,
                                 "to": "SOD-645",
-                                "toString": "This issue \u00e9 demandado por SOD-645"
+                                "toString": "This issue is demanded by SOD-645"
                             }
                         ]
                     },
@@ -6515,11 +6515,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/2/issueLink/143656",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10350"
                         }
                     }
                 ],
@@ -6677,7 +6677,7 @@
                                 "from": null,
                                 "fromString": null,
                                 "to": "SOD-645",
-                                "toString": "This issue \u00e9 demandado por SOD-645"
+                                "toString": "This issue is demanded by SOD-645"
                             }
                         ]
                     },
@@ -7308,11 +7308,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/2/issueLink/143664",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10350"
                         }
                     }
                 ],
@@ -7452,7 +7452,7 @@
                                 "from": null,
                                 "fromString": null,
                                 "to": "SOD-645",
-                                "toString": "This issue \u00e9 demandado por SOD-645"
+                                "toString": "This issue is demanded by SOD-645"
                             }
                         ]
                     },
@@ -8167,11 +8167,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/2/issueLink/143673",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10350"
                         }
                     }
                 ],
@@ -8311,7 +8311,7 @@
                                 "from": null,
                                 "fromString": null,
                                 "to": "SOD-648",
-                                "toString": "This issue \u00e9 demandado por SOD-648"
+                                "toString": "This issue is demanded by SOD-648"
                             }
                         ]
                     },
@@ -8814,11 +8814,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/2/issueLink/143734",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10350"
                         }
                     }
                 ],
@@ -8958,7 +8958,7 @@
                                 "from": null,
                                 "fromString": null,
                                 "to": "SOD-645",
-                                "toString": "This issue \u00e9 demandado por SOD-645"
+                                "toString": "This issue is demanded by SOD-645"
                             }
                         ]
                     },
@@ -9601,11 +9601,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/2/issueLink/143680",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10350"
                         }
                     }
                 ],
@@ -9745,7 +9745,7 @@
                                 "from": null,
                                 "fromString": null,
                                 "to": "SOD-645",
-                                "toString": "This issue \u00e9 demandado por SOD-645"
+                                "toString": "This issue is demanded by SOD-645"
                             }
                         ]
                     },
@@ -10312,11 +10312,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/2/issueLink/143679",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10350"
                         }
                     }
                 ],
@@ -10456,7 +10456,7 @@
                                 "from": null,
                                 "fromString": null,
                                 "to": "SOD-647",
-                                "toString": "This issue \u00e9 demandado por SOD-647"
+                                "toString": "This issue is demanded by SOD-647"
                             }
                         ]
                     },
@@ -11043,11 +11043,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/2/issueLink/143727",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10350"
                         }
                     }
                 ],
@@ -11187,7 +11187,7 @@
                                 "from": null,
                                 "fromString": null,
                                 "to": "SOD-645",
-                                "toString": "This issue \u00e9 demandado por SOD-645"
+                                "toString": "This issue is demanded by SOD-645"
                             }
                         ]
                     },
@@ -12402,11 +12402,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/2/issueLink/143667",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10350"
                         }
                     }
                 ],
@@ -12546,7 +12546,7 @@
                                 "from": null,
                                 "fromString": null,
                                 "to": "SOD-647",
-                                "toString": "This issue \u00e9 demandado por SOD-647"
+                                "toString": "This issue is demanded by SOD-647"
                             }
                         ]
                     },
@@ -13141,11 +13141,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/2/issueLink/143716",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10350"
                         }
                     }
                 ],
@@ -13285,7 +13285,7 @@
                                 "from": null,
                                 "fromString": null,
                                 "to": "SOD-645",
-                                "toString": "This issue \u00e9 demandado por SOD-645"
+                                "toString": "This issue is demanded by SOD-645"
                             }
                         ]
                     },
@@ -14012,11 +14012,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/2/issueLink/143674",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10350"
                         }
                     }
                 ],
@@ -14156,7 +14156,7 @@
                                 "from": null,
                                 "fromString": null,
                                 "to": "SOD-647",
-                                "toString": "This issue \u00e9 demandado por SOD-647"
+                                "toString": "This issue is demanded by SOD-647"
                             }
                         ]
                     },
@@ -14743,11 +14743,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/2/issueLink/143715",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10350"
                         }
                     }
                 ],
@@ -14887,7 +14887,7 @@
                                 "from": null,
                                 "fromString": null,
                                 "to": "SDXMIGO6-189",
-                                "toString": "This issue \u00e9 demandado por SDXMIGO6-189"
+                                "toString": "This issue is demanded by SDXMIGO6-189"
                             }
                         ]
                     },
@@ -15266,11 +15266,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/2/issueLink/150782",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10350"
                         }
                     }
                 ],
@@ -15413,7 +15413,7 @@
                                 "from": null,
                                 "fromString": null,
                                 "to": "SOD-645",
-                                "toString": "This issue \u00e9 demandado por SOD-645"
+                                "toString": "This issue is demanded by SOD-645"
                             }
                         ]
                     },
@@ -15924,11 +15924,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/2/issueLink/143681",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10350"
                         }
                     }
                 ],
@@ -16068,7 +16068,7 @@
                                 "from": null,
                                 "fromString": null,
                                 "to": "SOD-645",
-                                "toString": "This issue \u00e9 demandado por SOD-645"
+                                "toString": "This issue is demanded by SOD-645"
                             }
                         ]
                     },
@@ -16627,11 +16627,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/2/issueLink/143659",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10350"
                         }
                     }
                 ],
@@ -16771,7 +16771,7 @@
                                 "from": null,
                                 "fromString": null,
                                 "to": "SOD-647",
-                                "toString": "This issue \u00e9 demandado por SOD-647"
+                                "toString": "This issue is demanded by SOD-647"
                             }
                         ]
                     },
@@ -17458,11 +17458,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/2/issueLink/143721",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10350"
                         }
                     }
                 ],
@@ -17602,7 +17602,7 @@
                                 "from": null,
                                 "fromString": null,
                                 "to": "SOD-645",
-                                "toString": "This issue \u00e9 demandado por SOD-645"
+                                "toString": "This issue is demanded by SOD-645"
                             }
                         ]
                     },
@@ -18133,11 +18133,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/2/issueLink/143670",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10350"
                         }
                     }
                 ],
@@ -18277,7 +18277,7 @@
                                 "from": null,
                                 "fromString": null,
                                 "to": "SOD-645",
-                                "toString": "This issue \u00e9 demandado por SOD-645"
+                                "toString": "This issue is demanded by SOD-645"
                             }
                         ]
                     },
@@ -18920,11 +18920,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/2/issueLink/143662",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10350"
                         }
                     }
                 ],

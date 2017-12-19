@@ -1,0 +1,1039 @@
+{
+    "expand": "names,schema",
+    "issues": [
+        {
+            "changelog": {
+                "histories": [
+                    {
+                        "author": {
+                            "active": true,
+                            "avatarUrls": {
+                                "16x16": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=16",
+                                "24x24": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=24",
+                                "32x32": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=32",
+                                "48x48": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=48"
+                            },
+                            "displayName": "Jhony Gomes",
+                            "key": "jhony.gomes",
+                            "name": "jhony.gomes",
+                            "self": "http://localhost:4567/rest/api/latest/user?username=jhony.gomes",
+                            "timeZone": "America/Sao_Paulo"
+                        },
+                        "created": "2017-05-30T20:46:59.000+0000",
+                        "id": "2125912",
+                        "items": [
+                            {
+                                "field": "Link",
+                                "fieldtype": "jira",
+                                "from": null,
+                                "fromString": null,
+                                "to": "TASKB-628",
+                                "toString": "This issue is cloned by TASKB-628"
+                            }
+                        ]
+                    },
+                    {
+                        "author": {
+                            "active": true,
+                            "avatarUrls": {
+                                "16x16": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=16",
+                                "24x24": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=24",
+                                "32x32": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=32",
+                                "48x48": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=48"
+                            },
+                            "displayName": "Jhony Gomes",
+                            "key": "jhony.gomes",
+                            "name": "jhony.gomes",
+                            "self": "http://localhost:4567/rest/api/latest/user?username=jhony.gomes",
+                            "timeZone": "America/Sao_Paulo"
+                        },
+                        "created": "2017-05-30T21:53:46.000+0000",
+                        "id": "2125921",
+                        "items": [
+                            {
+                                "field": "Link",
+                                "fieldtype": "jira",
+                                "from": null,
+                                "fromString": null,
+                                "to": "TASKB-628",
+                                "toString": "This issue is demanded by TASKB-628"
+                            }
+                        ]
+                    },
+                    {
+                        "author": {
+                            "active": true,
+                            "avatarUrls": {
+                                "16x16": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=16",
+                                "24x24": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=24",
+                                "32x32": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=32",
+                                "48x48": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=48"
+                            },
+                            "displayName": "Jhony Gomes",
+                            "key": "jhony.gomes",
+                            "name": "jhony.gomes",
+                            "self": "http://localhost:4567/rest/api/latest/user?username=jhony.gomes",
+                            "timeZone": "America/Sao_Paulo"
+                        },
+                        "created": "2017-05-30T21:54:08.000+0000",
+                        "id": "2125925",
+                        "items": [
+                            {
+                                "field": "Link",
+                                "fieldtype": "jira",
+                                "from": "TASKB-628",
+                                "fromString": "This issue is cloned by TASKB-628",
+                                "to": null,
+                                "toString": null
+                            }
+                        ]
+                    },
+                    {
+                        "author": {
+                            "active": true,
+                            "avatarUrls": {
+                                "16x16": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=16",
+                                "24x24": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=24",
+                                "32x32": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=32",
+                                "48x48": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=48"
+                            },
+                            "displayName": "Jhony Gomes",
+                            "key": "jhony.gomes",
+                            "name": "jhony.gomes",
+                            "self": "http://localhost:4567/rest/api/latest/user?username=jhony.gomes",
+                            "timeZone": "America/Sao_Paulo"
+                        },
+                        "created": "2017-05-30T23:32:19.000+0000",
+                        "id": "2125931",
+                        "items": [
+                            {
+                                "field": "assignee",
+                                "fieldtype": "jira",
+                                "from": null,
+                                "fromString": null,
+                                "to": "lousa",
+                                "toString": "Lousa Virtual"
+                            }
+                        ]
+                    },
+                    {
+                        "author": {
+                            "active": true,
+                            "avatarUrls": {
+                                "16x16": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=16",
+                                "24x24": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=24",
+                                "32x32": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=32",
+                                "48x48": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=48"
+                            },
+                            "displayName": "Jhony Gomes",
+                            "key": "jhony.gomes",
+                            "name": "jhony.gomes",
+                            "self": "http://localhost:4567/rest/api/latest/user?username=jhony.gomes",
+                            "timeZone": "America/Sao_Paulo"
+                        },
+                        "created": "2017-05-31T00:37:02.000+0000",
+                        "id": "2125942",
+                        "items": [
+                            {
+                                "field": "assignee",
+                                "fieldtype": "jira",
+                                "from": "lousa",
+                                "fromString": "Lousa Virtual",
+                                "to": "taskboard",
+                                "toString": "Taskboard"
+                            }
+                        ]
+                    }
+                ],
+                "maxResults": 5,
+                "startAt": 0,
+                "total": 5
+            },
+            "expand": "operations,versionedRepresentations,editmeta,changelog,transitions,renderedFields",
+            "fields": {
+                "assignee": {
+                    "active": true,
+                    "avatarUrls": {
+                        "16x16": "http://54.68.128.117:8100/secure/useravatar?size=xsmall&avatarId=11670",
+                        "24x24": "http://54.68.128.117:8100/secure/useravatar?size=small&avatarId=11670",
+                        "32x32": "http://54.68.128.117:8100/secure/useravatar?size=medium&avatarId=11670",
+                        "48x48": "http://54.68.128.117:8100/secure/useravatar?avatarId=11670"
+                    },
+                    "displayName": "Taskboard",
+                    "key": "taskboard",
+                    "name": "taskboard",
+                    "self": "http://localhost:4567/rest/api/latest/user?username=taskboard",
+                    "timeZone": "America/Sao_Paulo"
+                },
+                "created": "2017-05-30T20:46:26.000+0000",
+                "customfield_11440": {
+                    "id": "12606",
+                    "self": "http://localhost:4567/rest/api/latest/customFieldOption/12606",
+                    "value": "Standard"
+                },
+                "customfield_11441": {
+                    "id": "12611",
+                    "self": "http://localhost:4567/rest/api/latest/customFieldOption/12611",
+                    "value": "S"
+                },
+                "customfield_11442": {
+                    "id": "12616",
+                    "self": "http://localhost:4567/rest/api/latest/customFieldOption/12616",
+                    "value": "S"
+                },
+                "customfield_11443": {
+                    "id": "12621",
+                    "self": "http://localhost:4567/rest/api/latest/customFieldOption/12621",
+                    "value": "S"
+                },
+                "customfield_11444": null,
+                "customfield_11445": null,
+                "customfield_11446": null,
+                "customfield_11447": null,
+                "customfield_11449": null,
+                "customfield_11450": null,
+                "customfield_11451": null,
+                "customfield_11452": null,
+                "customfield_11455": null,
+                "customfield_11456": null,
+                "description": null,
+                "issuelinks": [],
+                "issuetype": {
+                    "avatarId": 12251,
+                    "description": "Taskboard",
+                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
+                    "id": "10601",
+                    "name": "Feature",
+                    "self": "http://localhost:4567/rest/api/latest/issuetype/10601",
+                    "subtask": false
+                },
+                "labels": [],
+                "priority": {
+                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
+                    "id": "9",
+                    "name": "M\u00e9dia",
+                    "self": "http://localhost:4567/rest/api/latest/priority/9"
+                },
+                "project": {
+                    "avatarUrls": {
+                        "16x16": "http://54.68.128.117:8100/secure/projectavatar?size=xsmall&avatarId=11653",
+                        "24x24": "http://54.68.128.117:8100/secure/projectavatar?size=small&avatarId=11653",
+                        "32x32": "http://54.68.128.117:8100/secure/projectavatar?size=medium&avatarId=11653",
+                        "48x48": "http://54.68.128.117:8100/secure/projectavatar?avatarId=11653"
+                    },
+                    "id": "11315",
+                    "key": "TASKB",
+                    "name": "Taskboard",
+                    "projectCategory": {
+                        "id": "10001",
+                        "name": "Externo",
+                        "self": "http://localhost:4567/rest/api/latest/projectCategory/10001"
+                    },
+                    "self": "http://localhost:4567/rest/api/latest/project/11315"
+                },
+                "reporter": {
+                    "active": true,
+                    "avatarUrls": {
+                        "16x16": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=16",
+                        "24x24": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=24",
+                        "32x32": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=32",
+                        "48x48": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=48"
+                    },
+                    "displayName": "Jhony Gomes",
+                    "key": "jhony.gomes",
+                    "name": "jhony.gomes",
+                    "self": "http://localhost:4567/rest/api/latest/user?username=jhony.gomes",
+                    "timeZone": "America/Sao_Paulo"
+                },
+                "status": {
+                    "description": "Taskboard",
+                    "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
+                    "id": "10651",
+                    "name": "Open",
+                    "self": "http://localhost:4567/rest/api/latest/status/10651",
+                    "statusCategory": {
+                        "colorName": "blue-gray",
+                        "id": 2,
+                        "key": "new",
+                        "name": "To Do",
+                        "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
+                    }
+                },
+                "summary": "Feature 2 que ficar\u00e1 como deferred",
+                "timetracking": {},
+                "updated": "2017-06-01T00:37:02.000+0000"
+            },
+            "id": "225885",
+            "key": "TASKB-630",
+            "self": "http://localhost:4567/rest/api/latest/issue/225885",
+            "transitions": [
+                {
+                    "id": "11",
+                    "name": "To Do",
+                    "to": {
+                        "description": "",
+                        "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/open.png",
+                        "id": "10052",
+                        "name": "To Do",
+                        "self": "http://localhost:4567/rest/api/latest/status/10052",
+                        "statusCategory": {
+                            "colorName": "blue-gray",
+                            "id": 2,
+                            "key": "new",
+                            "name": "To Do",
+                            "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
+                        }
+                    }
+                },
+                {
+                    "id": "111",
+                    "name": "Deferred",
+                    "to": {
+                        "description": "Taskboard",
+                        "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
+                        "id": "10655",
+                        "name": "Deferred",
+                        "self": "http://localhost:4567/rest/api/latest/status/10655",
+                        "statusCategory": {
+                            "colorName": "blue-gray",
+                            "id": 2,
+                            "key": "new",
+                            "name": "To Do",
+                            "self": "http://localhost:4567/rest/api/latest/statuscategory/2"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "changelog": {
+                "histories": [
+                    {
+                        "author": {
+                            "active": true,
+                            "avatarUrls": {
+                                "16x16": "http://www.gravatar.com/avatar/a17a154522ed4cbaa37e0315a1eacd38?d=mm&s=16",
+                                "24x24": "http://www.gravatar.com/avatar/a17a154522ed4cbaa37e0315a1eacd38?d=mm&s=24",
+                                "32x32": "http://www.gravatar.com/avatar/a17a154522ed4cbaa37e0315a1eacd38?d=mm&s=32",
+                                "48x48": "http://www.gravatar.com/avatar/a17a154522ed4cbaa37e0315a1eacd38?d=mm&s=48"
+                            },
+                            "displayName": "Lousa Virtual",
+                            "key": "lousa",
+                            "name": "lousa",
+                            "self": "http://localhost:4567/rest/api/2/user?username=lousa",
+                            "timeZone": "America/Sao_Paulo"
+                        },
+                        "created": "2017-05-30T20:43:07.000+0000",
+                        "id": "2125906",
+                        "items": [
+                            {
+                                "field": "assignee",
+                                "fieldtype": "jira",
+                                "from": null,
+                                "fromString": null,
+                                "to": "jhony.gomes",
+                                "toString": "Jhony Gomes"
+                            }
+                        ]
+                    },
+                    {
+                        "author": {
+                            "active": true,
+                            "avatarUrls": {
+                                "16x16": "http://www.gravatar.com/avatar/a17a154522ed4cbaa37e0315a1eacd38?d=mm&s=16",
+                                "24x24": "http://www.gravatar.com/avatar/a17a154522ed4cbaa37e0315a1eacd38?d=mm&s=24",
+                                "32x32": "http://www.gravatar.com/avatar/a17a154522ed4cbaa37e0315a1eacd38?d=mm&s=32",
+                                "48x48": "http://www.gravatar.com/avatar/a17a154522ed4cbaa37e0315a1eacd38?d=mm&s=48"
+                            },
+                            "displayName": "Lousa Virtual",
+                            "key": "lousa",
+                            "name": "lousa",
+                            "self": "http://localhost:4567/rest/api/2/user?username=lousa",
+                            "timeZone": "America/Sao_Paulo"
+                        },
+                        "created": "2017-05-30T20:43:20.000+0000",
+                        "id": "2125907",
+                        "items": [
+                            {
+                                "field": "reporter",
+                                "fieldtype": "jira",
+                                "from": "lousa",
+                                "fromString": "Lousa Virtual",
+                                "to": "jhony.gomes",
+                                "toString": "Jhony Gomes"
+                            }
+                        ]
+                    },
+                    {
+                        "author": {
+                            "active": true,
+                            "avatarUrls": {
+                                "16x16": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=16",
+                                "24x24": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=24",
+                                "32x32": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=32",
+                                "48x48": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=48"
+                            },
+                            "displayName": "Jhony Gomes",
+                            "key": "jhony.gomes",
+                            "name": "jhony.gomes",
+                            "self": "http://localhost:4567/rest/api/2/user?username=jhony.gomes",
+                            "timeZone": "America/Sao_Paulo"
+                        },
+                        "created": "2017-05-30T20:45:35.000+0000",
+                        "id": "2125908",
+                        "items": [
+                            {
+                                "field": "Link",
+                                "fieldtype": "jira",
+                                "from": null,
+                                "fromString": null,
+                                "to": "TASKB-629",
+                                "toString": "This issue clones TASKB-629"
+                            }
+                        ]
+                    },
+                    {
+                        "author": {
+                            "active": true,
+                            "avatarUrls": {
+                                "16x16": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=16",
+                                "24x24": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=24",
+                                "32x32": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=32",
+                                "48x48": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=48"
+                            },
+                            "displayName": "Jhony Gomes",
+                            "key": "jhony.gomes",
+                            "name": "jhony.gomes",
+                            "self": "http://localhost:4567/rest/api/2/user?username=jhony.gomes",
+                            "timeZone": "America/Sao_Paulo"
+                        },
+                        "created": "2017-05-30T20:46:58.000+0000",
+                        "id": "2125911",
+                        "items": [
+                            {
+                                "field": "Link",
+                                "fieldtype": "jira",
+                                "from": null,
+                                "fromString": null,
+                                "to": "TASKB-630",
+                                "toString": "This issue clones TASKB-630"
+                            }
+                        ]
+                    },
+                    {
+                        "author": {
+                            "active": true,
+                            "avatarUrls": {
+                                "16x16": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=16",
+                                "24x24": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=24",
+                                "32x32": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=32",
+                                "48x48": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=48"
+                            },
+                            "displayName": "Jhony Gomes",
+                            "key": "jhony.gomes",
+                            "name": "jhony.gomes",
+                            "self": "http://localhost:4567/rest/api/2/user?username=jhony.gomes",
+                            "timeZone": "America/Sao_Paulo"
+                        },
+                        "created": "2017-05-30T21:22:46.000+0000",
+                        "id": "2125913",
+                        "items": [
+                            {
+                                "field": "status",
+                                "fieldtype": "jira",
+                                "from": "10651",
+                                "fromString": "Open",
+                                "to": "10052",
+                                "toString": "To Do"
+                            }
+                        ]
+                    },
+                    {
+                        "author": {
+                            "active": true,
+                            "avatarUrls": {
+                                "16x16": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=16",
+                                "24x24": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=24",
+                                "32x32": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=32",
+                                "48x48": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=48"
+                            },
+                            "displayName": "Jhony Gomes",
+                            "key": "jhony.gomes",
+                            "name": "jhony.gomes",
+                            "self": "http://localhost:4567/rest/api/2/user?username=jhony.gomes",
+                            "timeZone": "America/Sao_Paulo"
+                        },
+                        "created": "2017-05-30T21:28:33.000+0000",
+                        "id": "2125915",
+                        "items": [
+                            {
+                                "field": "status",
+                                "fieldtype": "jira",
+                                "from": "10052",
+                                "fromString": "To Do",
+                                "to": "10655",
+                                "toString": "Deferred"
+                            }
+                        ]
+                    },
+                    {
+                        "author": {
+                            "active": true,
+                            "avatarUrls": {
+                                "16x16": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=16",
+                                "24x24": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=24",
+                                "32x32": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=32",
+                                "48x48": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=48"
+                            },
+                            "displayName": "Jhony Gomes",
+                            "key": "jhony.gomes",
+                            "name": "jhony.gomes",
+                            "self": "http://localhost:4567/rest/api/2/user?username=jhony.gomes",
+                            "timeZone": "America/Sao_Paulo"
+                        },
+                        "created": "2017-05-30T21:28:45.000+0000",
+                        "id": "2125916",
+                        "items": [
+                            {
+                                "field": "status",
+                                "fieldtype": "jira",
+                                "from": "10655",
+                                "fromString": "Deferred",
+                                "to": "10651",
+                                "toString": "Open"
+                            }
+                        ]
+                    },
+                    {
+                        "author": {
+                            "active": true,
+                            "avatarUrls": {
+                                "16x16": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=16",
+                                "24x24": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=24",
+                                "32x32": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=32",
+                                "48x48": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=48"
+                            },
+                            "displayName": "Jhony Gomes",
+                            "key": "jhony.gomes",
+                            "name": "jhony.gomes",
+                            "self": "http://localhost:4567/rest/api/2/user?username=jhony.gomes",
+                            "timeZone": "America/Sao_Paulo"
+                        },
+                        "created": "2017-05-30T21:28:55.000+0000",
+                        "id": "2125917",
+                        "items": [
+                            {
+                                "field": "status",
+                                "fieldtype": "jira",
+                                "from": "10651",
+                                "fromString": "Open",
+                                "to": "10052",
+                                "toString": "To Do"
+                            }
+                        ]
+                    },
+                    {
+                        "author": {
+                            "active": true,
+                            "avatarUrls": {
+                                "16x16": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=16",
+                                "24x24": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=24",
+                                "32x32": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=32",
+                                "48x48": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=48"
+                            },
+                            "displayName": "Jhony Gomes",
+                            "key": "jhony.gomes",
+                            "name": "jhony.gomes",
+                            "self": "http://localhost:4567/rest/api/2/user?username=jhony.gomes",
+                            "timeZone": "America/Sao_Paulo"
+                        },
+                        "created": "2017-05-30T21:53:42.000+0000",
+                        "id": "2125918",
+                        "items": [
+                            {
+                                "field": "Link",
+                                "fieldtype": "jira",
+                                "from": null,
+                                "fromString": null,
+                                "to": "TASKB-629",
+                                "toString": "This issue demands TASKB-629"
+                            }
+                        ]
+                    },
+                    {
+                        "author": {
+                            "active": true,
+                            "avatarUrls": {
+                                "16x16": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=16",
+                                "24x24": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=24",
+                                "32x32": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=32",
+                                "48x48": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=48"
+                            },
+                            "displayName": "Jhony Gomes",
+                            "key": "jhony.gomes",
+                            "name": "jhony.gomes",
+                            "self": "http://localhost:4567/rest/api/2/user?username=jhony.gomes",
+                            "timeZone": "America/Sao_Paulo"
+                        },
+                        "created": "2017-05-30T21:53:46.000+0000",
+                        "id": "2125920",
+                        "items": [
+                            {
+                                "field": "Link",
+                                "fieldtype": "jira",
+                                "from": null,
+                                "fromString": null,
+                                "to": "TASKB-630",
+                                "toString": "This issue demands TASKB-630"
+                            }
+                        ]
+                    },
+                    {
+                        "author": {
+                            "active": true,
+                            "avatarUrls": {
+                                "16x16": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=16",
+                                "24x24": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=24",
+                                "32x32": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=32",
+                                "48x48": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=48"
+                            },
+                            "displayName": "Jhony Gomes",
+                            "key": "jhony.gomes",
+                            "name": "jhony.gomes",
+                            "self": "http://localhost:4567/rest/api/2/user?username=jhony.gomes",
+                            "timeZone": "America/Sao_Paulo"
+                        },
+                        "created": "2017-05-30T21:54:00.000+0000",
+                        "id": "2125922",
+                        "items": [
+                            {
+                                "field": "Link",
+                                "fieldtype": "jira",
+                                "from": "TASKB-629",
+                                "fromString": "This issue clones TASKB-629",
+                                "to": null,
+                                "toString": null
+                            }
+                        ]
+                    },
+                    {
+                        "author": {
+                            "active": true,
+                            "avatarUrls": {
+                                "16x16": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=16",
+                                "24x24": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=24",
+                                "32x32": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=32",
+                                "48x48": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=48"
+                            },
+                            "displayName": "Jhony Gomes",
+                            "key": "jhony.gomes",
+                            "name": "jhony.gomes",
+                            "self": "http://localhost:4567/rest/api/2/user?username=jhony.gomes",
+                            "timeZone": "America/Sao_Paulo"
+                        },
+                        "created": "2017-05-30T21:54:08.000+0000",
+                        "id": "2125924",
+                        "items": [
+                            {
+                                "field": "Link",
+                                "fieldtype": "jira",
+                                "from": "TASKB-630",
+                                "fromString": "This issue clones TASKB-630",
+                                "to": null,
+                                "toString": null
+                            }
+                        ]
+                    },
+                    {
+                        "author": {
+                            "active": true,
+                            "avatarUrls": {
+                                "16x16": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=16",
+                                "24x24": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=24",
+                                "32x32": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=32",
+                                "48x48": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=48"
+                            },
+                            "displayName": "Jhony Gomes",
+                            "key": "jhony.gomes",
+                            "name": "jhony.gomes",
+                            "self": "http://localhost:4567/rest/api/2/user?username=jhony.gomes",
+                            "timeZone": "America/Sao_Paulo"
+                        },
+                        "created": "2017-05-30T23:31:11.000+0000",
+                        "id": "2125927",
+                        "items": [
+                            {
+                                "field": "assignee",
+                                "fieldtype": "jira",
+                                "from": "jhony.gomes",
+                                "fromString": "Jhony Gomes",
+                                "to": "lousa",
+                                "toString": "Lousa Virtual"
+                            }
+                        ]
+                    },
+                    {
+                        "author": {
+                            "active": true,
+                            "avatarUrls": {
+                                "16x16": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=16",
+                                "24x24": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=24",
+                                "32x32": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=32",
+                                "48x48": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=48"
+                            },
+                            "displayName": "Jhony Gomes",
+                            "key": "jhony.gomes",
+                            "name": "jhony.gomes",
+                            "self": "http://localhost:4567/rest/api/2/user?username=jhony.gomes",
+                            "timeZone": "America/Sao_Paulo"
+                        },
+                        "created": "2017-05-31T00:04:25.000+0000",
+                        "id": "2125941",
+                        "items": [
+                            {
+                                "field": "assignee",
+                                "fieldtype": "jira",
+                                "from": "lousa",
+                                "fromString": "Lousa Virtual",
+                                "to": "taskboard",
+                                "toString": "Taskboard"
+                            }
+                        ]
+                    },
+                    {
+                        "author": {
+                            "active": true,
+                            "avatarUrls": {
+                                "16x16": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=16",
+                                "24x24": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=24",
+                                "32x32": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=32",
+                                "48x48": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=48"
+                            },
+                            "displayName": "Jhony Gomes",
+                            "key": "jhony.gomes",
+                            "name": "jhony.gomes",
+                            "self": "http://localhost:4567/rest/api/2/user?username=jhony.gomes",
+                            "timeZone": "America/Sao_Paulo"
+                        },
+                        "created": "2017-05-31T00:39:35.000+0000",
+                        "id": "2125945",
+                        "items": [
+                            {
+                                "field": "status",
+                                "fieldtype": "jira",
+                                "from": "10052",
+                                "fromString": "To Do",
+                                "to": "10655",
+                                "toString": "Deferred"
+                            }
+                        ]
+                    }
+                ],
+                "maxResults": 15,
+                "startAt": 0,
+                "total": 15
+            },
+            "expand": "operations,versionedRepresentations,editmeta,changelog,transitions,renderedFields",
+            "fields": {
+                "assignee": {
+                    "active": true,
+                    "avatarUrls": {
+                        "16x16": "http://localhost:4567/secure/useravatar?size=xsmall&avatarId=11670",
+                        "24x24": "http://localhost:4567/secure/useravatar?size=small&avatarId=11670",
+                        "32x32": "http://localhost:4567/secure/useravatar?size=medium&avatarId=11670",
+                        "48x48": "http://localhost:4567/secure/useravatar?avatarId=11670"
+                    },
+                    "displayName": "Taskboard",
+                    "key": "taskboard",
+                    "name": "taskboard",
+                    "self": "http://localhost:4567/rest/api/2/user?username=taskboard",
+                    "timeZone": "America/Sao_Paulo"
+                },
+                "created": "2017-05-30T20:42:11.000+0000",
+                "customfield_11440": {
+                    "id": "12606",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12606",
+                    "value": "Standard"
+                },
+                "customfield_11451": null,
+                "customfield_11452": null,
+                "customfield_11455": null,
+                "customfield_11456": null,
+                "description": null,
+                "issuelinks": [
+                    {
+                        "id": "151626",
+                        "outwardIssue": {
+                            "fields": {
+                                "issuetype": {
+                                    "avatarId": 12251,
+                                    "description": "Taskboard",
+                                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
+                                    "id": "10601",
+                                    "name": "Feature",
+                                    "self": "http://localhost:4567/rest/api/2/issuetype/10601",
+                                    "subtask": false
+                                },
+                                "priority": {
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/minor.svg",
+                                    "id": "9",
+                                    "name": "M\u00e9dia",
+                                    "self": "http://localhost:4567/rest/api/2/priority/9"
+                                },
+                                "status": {
+                                    "description": "Taskboard",
+                                    "iconUrl": "http://localhost:4567/images/icons/statuses/generic.png",
+                                    "id": "10651",
+                                    "name": "Open",
+                                    "self": "http://localhost:4567/rest/api/2/status/10651",
+                                    "statusCategory": {
+                                        "colorName": "blue-gray",
+                                        "id": 2,
+                                        "key": "new",
+                                        "name": "To Do",
+                                        "self": "http://localhost:4567/rest/api/2/statuscategory/2"
+                                    }
+                                },
+                                "summary": "Feature 1 que ficar\u00e1 como deferred"
+                            },
+                            "id": "225884",
+                            "key": "TASKB-629",
+                            "self": "http://localhost:4567/rest/api/2/issue/225884"
+                        },
+                        "self": "http://localhost:4567/rest/api/2/issueLink/151626",
+                        "type": {
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/2/issueLinkType/10350"
+                        }
+                    }
+                ],
+                "issuetype": {
+                    "avatarId": 12250,
+                    "description": "Taskboard",
+                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12250&avatarType=issuetype",
+                    "id": "10600",
+                    "name": "Demand",
+                    "self": "http://localhost:4567/rest/api/2/issuetype/10600",
+                    "subtask": false
+                },
+                "labels": [],
+                "priority": {
+                    "iconUrl": "http://localhost:4567/images/icons/priorities/minor.svg",
+                    "id": "9",
+                    "name": "M\u00e9dia",
+                    "self": "http://localhost:4567/rest/api/2/priority/9"
+                },
+                "project": {
+                    "avatarUrls": {
+                        "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+                        "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+                        "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653",
+                        "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653"
+                    },
+                    "id": "11315",
+                    "key": "TASKB",
+                    "name": "Taskboard",
+                    "projectCategory": {
+                        "id": "10001",
+                        "name": "Externo",
+                        "self": "http://localhost:4567/rest/api/2/projectCategory/10001"
+                    },
+                    "self": "http://localhost:4567/rest/api/2/project/11315"
+                },
+                "reporter": {
+                    "active": true,
+                    "avatarUrls": {
+                        "16x16": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=16",
+                        "24x24": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=24",
+                        "32x32": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=32",
+                        "48x48": "http://www.gravatar.com/avatar/24de25b38442d4a726f1f1fa06535bb2?d=mm&s=48"
+                    },
+                    "displayName": "Jhony Gomes",
+                    "key": "jhony.gomes",
+                    "name": "jhony.gomes",
+                    "self": "http://localhost:4567/rest/api/2/user?username=jhony.gomes",
+                    "timeZone": "America/Sao_Paulo"
+                },
+                "status": {
+                    "description": "Taskboard",
+                    "iconUrl": "http://localhost:4567/images/icons/statuses/generic.png",
+                    "id": "10655",
+                    "name": "Deferred",
+                    "self": "http://localhost:4567/rest/api/2/status/10655",
+                    "statusCategory": {
+                        "colorName": "blue-gray",
+                        "id": 2,
+                        "key": "new",
+                        "name": "To Do",
+                        "self": "http://localhost:4567/rest/api/2/statuscategory/2"
+                    }
+                },
+                "summary": "Demanda que ficar\u00e1 como deferred",
+                "timetracking": {},
+                "updated": "2017-06-01T00:39:35.000+0000"
+            },
+            "id": "225883",
+            "key": "TASKB-628",
+            "self": "http://localhost:4567/rest/api/latest/issue/225883",
+            "transitions": [
+                {
+                    "id": "121",
+                    "name": "Deferred to Open",
+                    "to": {
+                        "description": "Taskboard",
+                        "iconUrl": "http://localhost:4567/images/icons/statuses/generic.png",
+                        "id": "10651",
+                        "name": "Open",
+                        "self": "http://localhost:4567/rest/api/2/status/10651",
+                        "statusCategory": {
+                            "colorName": "blue-gray",
+                            "id": 2,
+                            "key": "new",
+                            "name": "To Do",
+                            "self": "http://localhost:4567/rest/api/2/statuscategory/2"
+                        }
+                    }
+                },
+                {
+                    "id": "131",
+                    "name": "Deferred to To Do",
+                    "to": {
+                        "description": "",
+                        "iconUrl": "http://localhost:4567/images/icons/statuses/open.png",
+                        "id": "10052",
+                        "name": "To Do",
+                        "self": "http://localhost:4567/rest/api/2/status/10052",
+                        "statusCategory": {
+                            "colorName": "blue-gray",
+                            "id": 2,
+                            "key": "new",
+                            "name": "To Do",
+                            "self": "http://localhost:4567/rest/api/2/statuscategory/2"
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "maxResults": 100,
+    "names": {
+        "assignee": "Assignee",
+        "created": "Created",
+        "customfield_11440": "Class of Service",
+        "customfield_11451": "Blocked",
+        "customfield_11452": "Last Block Reason",
+        "customfield_11455": "Release",
+        "customfield_11456": "Co-Assignees",
+        "customfield_11457": "T-Shirt Size",
+        "description": "Description",
+        "issuelinks": "Linked Issues",
+        "issuetype": "Issue Type",
+        "labels": "Labels",
+        "parent": "Parent",
+        "priority": "Priority",
+        "project": "Project",
+        "reporter": "Reporter",
+        "status": "Status",
+        "summary": "Summary",
+        "timetracking": "Time Tracking",
+        "updated": "Updated"
+    },
+    "schema": {
+        "assignee": {
+            "system": "assignee",
+            "type": "user"
+        },
+        "created": {
+            "system": "created",
+            "type": "datetime"
+        },
+        "customfield_11440": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:select",
+            "customId": 11440,
+            "type": "option"
+        },
+        "customfield_11451": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:multicheckboxes",
+            "customId": 11451,
+            "items": "option",
+            "type": "array"
+        },
+        "customfield_11452": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textarea",
+            "customId": 11452,
+            "type": "string"
+        },
+        "customfield_11455": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:version",
+            "customId": 11455,
+            "type": "version"
+        },
+        "customfield_11456": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:multiuserpicker",
+            "customId": 11456,
+            "items": "user",
+            "type": "array"
+        },
+        "customfield_11457": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:select",
+            "customId": 11457,
+            "type": "option"
+        },
+        "description": {
+            "system": "description",
+            "type": "string"
+        },
+        "issuelinks": {
+            "items": "issuelinks",
+            "system": "issuelinks",
+            "type": "array"
+        },
+        "issuetype": {
+            "system": "issuetype",
+            "type": "issuetype"
+        },
+        "labels": {
+            "items": "string",
+            "system": "labels",
+            "type": "array"
+        },
+        "parent": {
+            "items": "issuelinks",
+            "system": "parent",
+            "type": "array"
+        },
+        "priority": {
+            "system": "priority",
+            "type": "priority"
+        },
+        "project": {
+            "system": "project",
+            "type": "project"
+        },
+        "reporter": {
+            "system": "reporter",
+            "type": "user"
+        },
+        "status": {
+            "system": "status",
+            "type": "status"
+        },
+        "summary": {
+            "system": "summary",
+            "type": "string"
+        },
+        "timetracking": {
+            "system": "timetracking",
+            "type": "timetracking"
+        },
+        "updated": {
+            "system": "updated",
+            "type": "datetime"
+        }
+    },
+    "startAt": 0,
+    "total": 2
+}

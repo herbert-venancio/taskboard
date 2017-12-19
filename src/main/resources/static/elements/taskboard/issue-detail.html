@@ -512,8 +512,8 @@
 
                         <div class="column-block half-column">
                             <div class="sub-header">Class of Service</div>
-                            <div class="sub-content">
-                                {{item.customfields.classeDeServico}}
+                            <div id="classOfServiceValue" class="sub-content">
+                                {{item.classOfServiceValue}}
                             </div>
                         </div>
 
@@ -1178,10 +1178,6 @@
 
                 getTimeTrackingColor: function() {
                     return this.timetrackerBlown ? 'red' : 'green';
-                },
-
-                getIssueColor: function (issue) {
-                    return 'background: ' + issue.color;
                 },
 
                 openDialogNewTask: function () {

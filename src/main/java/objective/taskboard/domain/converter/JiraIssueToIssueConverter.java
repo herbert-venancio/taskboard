@@ -176,20 +176,14 @@ public class JiraIssueToIssueConverter {
                 filterRepository,
                 cardVisibilityEvalService,
                 projectService,
-                issueStateHashCalculator);
+                issueStateHashCalculator,
+                issueColorService);
         
     	if (!isEmpty(converted.getParent())) {
     	    Optional<objective.taskboard.data.Issue> parentCard = provider.get(converted.getParent());
     	    if (!parentCard.isPresent())
     	        throw new IncompleteIssueException(scratch, converted.getParent());
-    	    
-            converted.setParentCard(parentCard.get());
-    	}
-    	
-        converted.setColor(issueColorService.getColor(converted.getClassOfServiceId()));
-        
-        Map<String, Serializable> customFields = converted.getCustomFields();
-        customFields.put(jiraProperties.getCustomfield().getClassOfService().getId(), converted.getClassOfServiceValue());
+        }
 
         return converted;
     }

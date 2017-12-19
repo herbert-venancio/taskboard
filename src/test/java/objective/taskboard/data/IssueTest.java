@@ -51,7 +51,7 @@ public class IssueTest {
                 new LinkedList<>()
                 );
         
-        Issue subject = new Issue(issueScratch, null, null, null, null, null, null, null);
+        Issue subject = new Issue(issueScratch, null, null, null, null, null, null, null, null);
         
         Field[] declaredFields = IssueScratch.class.getDeclaredFields();
         for (Field field : declaredFields) {

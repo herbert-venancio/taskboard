@@ -19845,11 +19845,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143787",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -19893,11 +19893,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143792",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -19941,11 +19941,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143785",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -19989,11 +19989,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143780",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -20037,11 +20037,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143772",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -20085,11 +20085,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143778",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -20133,11 +20133,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143779",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -20181,11 +20181,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143777",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -20229,11 +20229,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143776",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -20277,11 +20277,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143790",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -20325,11 +20325,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143788",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -20373,11 +20373,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143791",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -20421,11 +20421,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143771",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -20469,11 +20469,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143774",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -20517,11 +20517,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143775",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -20565,11 +20565,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143784",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -20613,11 +20613,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143773",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -20661,11 +20661,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143789",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -20709,11 +20709,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/149802",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -20757,11 +20757,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143782",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -20805,11 +20805,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143781",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -20853,11 +20853,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143783",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     }
                 ],
@@ -22203,11 +22203,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143639",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -22251,11 +22251,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143627",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -22299,11 +22299,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143638",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -22347,11 +22347,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143635",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -22395,11 +22395,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143632",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -22443,11 +22443,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143630",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -22491,11 +22491,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143645",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -22539,11 +22539,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143641",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -22587,11 +22587,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143634",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -22635,11 +22635,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143626",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -22683,11 +22683,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143628",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -22731,11 +22731,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143629",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -22779,11 +22779,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143646",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -22827,11 +22827,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143636",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -22875,11 +22875,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143644",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -22923,11 +22923,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143633",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -22971,11 +22971,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143643",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -23019,11 +23019,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143640",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -23067,11 +23067,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143642",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -23115,11 +23115,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143631",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -23163,11 +23163,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143637",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     }
                 ],
@@ -25015,11 +25015,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143601",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -25063,11 +25063,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143617",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -25111,11 +25111,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143599",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -25159,11 +25159,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143614",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -25207,11 +25207,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143622",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -25255,11 +25255,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143625",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -25303,11 +25303,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143624",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -25351,11 +25351,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143612",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -25399,11 +25399,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143623",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -25447,11 +25447,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143607",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -25495,11 +25495,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143604",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -25543,11 +25543,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143610",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -25591,11 +25591,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143613",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -25639,11 +25639,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143602",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -25687,11 +25687,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143620",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -25735,11 +25735,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143609",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -25783,11 +25783,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143615",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -25831,11 +25831,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143608",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -25879,11 +25879,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143603",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -25927,11 +25927,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143611",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -25975,11 +25975,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143618",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -26023,11 +26023,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143606",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -26885,11 +26885,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/147748",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -26933,11 +26933,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/145147",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -26981,11 +26981,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/144383",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -27029,11 +27029,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/145723",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -27077,11 +27077,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/150887",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -27125,11 +27125,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/148110",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     }
                 ],
@@ -28466,11 +28466,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143767",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -28514,11 +28514,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143766",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -28562,11 +28562,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143770",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -28610,11 +28610,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143758",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -28658,11 +28658,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143760",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -28706,11 +28706,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143755",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -28754,11 +28754,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143761",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -28802,11 +28802,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143764",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -28850,11 +28850,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143756",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -28898,11 +28898,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143747",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -28946,11 +28946,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143754",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -28994,11 +28994,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143751",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -29042,11 +29042,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143752",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -29090,11 +29090,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143750",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -29138,11 +29138,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143762",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -29186,11 +29186,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143763",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -29234,11 +29234,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143757",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -29282,11 +29282,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143769",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -29330,11 +29330,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143768",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -29378,11 +29378,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143749",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -29426,11 +29426,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143753",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -29474,11 +29474,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143765",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -29522,11 +29522,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143748",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -29570,11 +29570,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143759",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     }
                 ],
@@ -30912,11 +30912,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143683",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -30960,11 +30960,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143684",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -31008,11 +31008,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143704",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -31056,11 +31056,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143703",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -31104,11 +31104,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143690",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -31152,11 +31152,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143695",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -31200,11 +31200,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143697",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -31248,11 +31248,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143688",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -31296,11 +31296,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143694",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -31344,11 +31344,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143700",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -31392,11 +31392,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143699",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -31440,11 +31440,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143691",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -31488,11 +31488,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143685",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -31536,11 +31536,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143693",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -31584,11 +31584,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143687",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -31632,11 +31632,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143692",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -31680,11 +31680,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143698",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -31728,11 +31728,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143696",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -31776,11 +31776,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143686",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -31824,11 +31824,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143702",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -31872,11 +31872,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143689",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -31920,11 +31920,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143701",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     }
                 ],
@@ -32982,11 +32982,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/146668",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -33030,11 +33030,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/144463",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -33078,11 +33078,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/146000",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -33126,11 +33126,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/146227",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -33174,11 +33174,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/146781",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -33222,11 +33222,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/147704",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -33270,11 +33270,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/144459",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -33318,11 +33318,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/150782",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -33366,11 +33366,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/150798",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -33414,11 +33414,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/149212",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -33462,11 +33462,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/150267",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -33510,11 +33510,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/150663",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -33558,11 +33558,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/146353",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -33606,11 +33606,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/146327",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     }
                 ],
@@ -35100,11 +35100,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143682",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -35148,11 +35148,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143672",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -35196,11 +35196,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143662",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -35244,11 +35244,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143670",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -35292,11 +35292,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143675",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -35340,11 +35340,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/148706",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -35388,11 +35388,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143659",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -35436,11 +35436,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143655",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -35484,11 +35484,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143663",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -35532,11 +35532,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143677",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -35580,11 +35580,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143681",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -35628,11 +35628,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143674",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -35676,11 +35676,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143668",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -35724,11 +35724,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143669",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -35772,11 +35772,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143679",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -35820,11 +35820,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143680",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -35868,11 +35868,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143678",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -35916,11 +35916,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143673",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -35964,11 +35964,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143664",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -36012,11 +36012,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143656",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -36060,11 +36060,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143660",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -36108,11 +36108,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143661",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -36156,11 +36156,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143658",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -36204,11 +36204,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143657",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -36252,11 +36252,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143667",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -36300,11 +36300,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143671",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -36348,11 +36348,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143676",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -36396,11 +36396,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143666",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -36444,11 +36444,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143665",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     }
                 ],
@@ -37530,11 +37530,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143746",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -37578,11 +37578,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143741",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -37626,11 +37626,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143737",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -37674,11 +37674,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143743",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -37722,11 +37722,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143738",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -37770,11 +37770,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143736",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -37818,11 +37818,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143735",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -37866,11 +37866,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143742",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -37914,11 +37914,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143732",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -37962,11 +37962,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143729",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -38010,11 +38010,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143731",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -38058,11 +38058,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143744",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -38106,11 +38106,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143745",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -38154,11 +38154,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143734",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -38202,11 +38202,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143730",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -38250,11 +38250,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143740",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -38298,11 +38298,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143733",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     }
                 ],
@@ -39540,11 +39540,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143720",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -39588,11 +39588,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143719",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -39636,11 +39636,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143726",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -39684,11 +39684,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143714",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -39732,11 +39732,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143717",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -39780,11 +39780,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143715",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -39828,11 +39828,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143716",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -39876,11 +39876,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143727",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -39924,11 +39924,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143728",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -39972,11 +39972,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143707",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -40020,11 +40020,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143706",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -40068,11 +40068,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143721",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -40116,11 +40116,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143722",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -40164,11 +40164,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143710",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -40212,11 +40212,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143709",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -40260,11 +40260,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143713",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -40308,11 +40308,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143723",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -40356,11 +40356,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143725",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -40404,11 +40404,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143718",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -40452,11 +40452,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143708",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -40500,11 +40500,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143712",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -40548,11 +40548,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143724",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {
@@ -40596,11 +40596,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143711",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     }
                 ],
@@ -55889,7 +55889,7 @@
                                 "from": null,
                                 "fromString": null,
                                 "to": "SOD-647",
-                                "toString": "This issue \u00e9 demandado por SOD-647"
+                                "toString": "This issue is demanded by SOD-647"
                             }
                         ]
                     },
@@ -56450,11 +56450,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143711",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     }
                 ],
@@ -56630,7 +56630,7 @@
                                 "from": null,
                                 "fromString": null,
                                 "to": "SOD-643",
-                                "toString": "This issue \u00e9 demandado por SOD-643"
+                                "toString": "This issue is demanded by SOD-643"
                             }
                         ]
                     },
@@ -57325,11 +57325,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143606",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     }
                 ],
@@ -57505,7 +57505,7 @@
                                 "from": null,
                                 "fromString": null,
                                 "to": "SOD-649",
-                                "toString": "This issue \u00e9 demandado por SOD-649"
+                                "toString": "This issue is demanded by SOD-649"
                             }
                         ]
                     },
@@ -57988,11 +57988,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143759",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     }
                 ],
@@ -58150,7 +58150,7 @@
                                 "from": null,
                                 "fromString": null,
                                 "to": "SOD-645",
-                                "toString": "This issue \u00e9 demandado por SOD-645"
+                                "toString": "This issue is demanded by SOD-645"
                             }
                         ]
                     },
@@ -58737,11 +58737,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143657",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     }
                 ],
@@ -58881,7 +58881,7 @@
                                 "from": null,
                                 "fromString": null,
                                 "to": "SOD-647",
-                                "toString": "This issue \u00e9 demandado por SOD-647"
+                                "toString": "This issue is demanded by SOD-647"
                             }
                         ]
                     },
@@ -59540,11 +59540,11 @@
                         },
                         "self": "http://localhost:4567/rest/api/latest/issueLink/143724",
                         "type": {
-                            "id": "10150",
-                            "inward": "\u00e9 demandado por",
-                            "name": "Demanda",
-                            "outward": "demandou",
-                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10150"
+                            "id": "10350",
+                            "inward": "is demanded by",
+                            "name": "Demand",
+                            "outward": "demands",
+                            "self": "http://localhost:4567/rest/api/latest/issueLinkType/10350"
                         }
                     },
                     {

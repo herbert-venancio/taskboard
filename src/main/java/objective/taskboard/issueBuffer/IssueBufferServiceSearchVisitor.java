@@ -26,30 +26,26 @@ public class IssueBufferServiceSearchVisitor implements SearchIssueVisitor {
     private static final Logger log = LoggerFactory.getLogger(IssueBufferService.class);
     
     private final JiraIssueToIssueConverter issueConverter;
-    private final CardRepo issueByKey;
+    private final IssueBufferService issueBufferService;
     private final Map<String, List<IssueScratch>> pending = new LinkedHashMap<>();
 
     private final ParentProvider provider;
     private int processedCount = 0;
     
-    public IssueBufferServiceSearchVisitor(JiraIssueToIssueConverter issueConverter, CardRepo issueBuffer) {
+    public IssueBufferServiceSearchVisitor(JiraIssueToIssueConverter issueConverter, IssueBufferService issueBufferService) {
         this.issueConverter = issueConverter;
-        issueByKey = issueBuffer;
-        
+        this.issueBufferService = issueBufferService;
+
         provider = parentKey -> {
-            return Optional.ofNullable(issueByKey.get(parentKey));
+            return Optional.ofNullable(this.issueBufferService.getIssueByKey(parentKey));
         };
     }
-    
-    CardRepo getIssuesByKey() {
-        return issueByKey;
-    }
-    
+
     @Override
     public void processIssue(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
         String currentIssueKey = jiraIssue.getKey();
         try {
-            if (!issueByKey.putOnlyIfNewer(issueConverter.convertSingleIssue(jiraIssue, provider)))
+            if (!issueBufferService.updateIssue(issueConverter.convertSingleIssue(jiraIssue, provider)))
                 log.debug("Issue key " + currentIssueKey + " fetched, but current copy is newer. Ignoring.");
             processedCount++;
         }catch(IncompleteIssueException e) {
@@ -72,7 +68,7 @@ public class IssueBufferServiceSearchVisitor implements SearchIssueVisitor {
         
         while (issuesToConvert.size() > 0) {
             IssueScratch scratch = issuesToConvert.poll();
-            if (!issueByKey.putOnlyIfNewer(issueConverter.createIssueFromScratch(scratch, provider)))
+            if (!issueBufferService.updateIssue(issueConverter.createIssueFromScratch(scratch, provider)))
                 log.debug("Issue key " + scratch.getIssueKey() + " fetched, but current copy is newer. Ignoring.");
             
             processedCount++;
@@ -98,8 +94,8 @@ public class IssueBufferServiceSearchVisitor implements SearchIssueVisitor {
         if (missingParents.size() > 0)
             throw new IllegalStateException("Some parents were never found: " + StringUtils.join(missingParents,","));
         
-        for (Issue each : issueByKey.values()) {
-            if (each.getCustomFields() == null || each.getColor() == null) {
+        for (Issue each : issueBufferService.getAllIssues()) {
+            if (each.getCustomFields() == null) {
                 throw new IllegalStateException("issue " + each.getIssueKey() + " has invalid null fields");
             }
         }

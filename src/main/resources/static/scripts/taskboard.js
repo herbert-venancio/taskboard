@@ -446,7 +446,6 @@ function Taskboard() {
 
         issue.customfields = {
             sizes: listSizes,
-            classeDeServico: issue[CUSTOMFIELD.CLASSE_DE_SERVICO],
             impedido: issue[CUSTOMFIELD.IMPEDIDO],
             lastBlockReason: issue[CUSTOMFIELD.LAST_BLOCK_REASON],
             additionalEstimatedHours: issue[CUSTOMFIELD.ADDITIONAL_ESTIMATED_HOURS],

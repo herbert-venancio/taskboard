@@ -40,8 +40,9 @@ public class RefreshToast extends AbstractUiFragment {
         super(webDriver);
     }
     
-    public void assertVisible() {
+    public RefreshToast assertVisible() {
         waitVisibilityOfElement(issueToast);
+        return this;
     }
 
     public void toggleShowHide() {

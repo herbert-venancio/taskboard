@@ -52,6 +52,7 @@ public class IssueStateHashCalculator {
                 , issue.getSubtasks()
                 , issue.getReleaseId()
                 , issue.getRelease()
+                , issue.getClassOfServiceValue()
         );
     }
 }

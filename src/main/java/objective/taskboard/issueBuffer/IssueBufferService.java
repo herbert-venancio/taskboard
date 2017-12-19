@@ -130,7 +130,7 @@ public class IssueBufferService {
             try {
                 updateState(state.start());
                 
-                IssueBufferServiceSearchVisitor visitor = new IssueBufferServiceSearchVisitor(issueConverter, cardsRepo);
+                IssueBufferServiceSearchVisitor visitor = new IssueBufferServiceSearchVisitor(issueConverter, this);
                 jiraIssueService.searchAllProjectIssues(visitor, cardsRepo);
 
                 log.info("Issue buffer - processed " + visitor.getProcessedCount() + " issues");
@@ -209,6 +209,8 @@ public class IssueBufferService {
             updateType = IssueUpdateType.CREATED;
 
         issuesUpdatedByEvent.add(new IssueUpdate(updated, updateType));
+
+        scheduleNotificationSubtasksUpdate(updated);
 
         return updated;
     }
@@ -292,6 +294,26 @@ public class IssueBufferService {
             issue.setPriorityUpdatedDate(taskboardIssue.getUpdated());
             cardsRepo.setChanged(issue.getIssueKey());
             issueEvents.add(new InternalUpdateIssue(issue.getProjectKey(), issue.getIssueKey()));
+        }
+    }
+
+    /**
+     * Update issue in buffer and notify the taskboard
+     * @param issue to update
+     * @return if issue is updated in buffer and notified the taskboard successfully
+     */
+    public synchronized boolean updateIssue(Issue issue) {
+        if (!cardsRepo.putOnlyIfNewer(issue))
+            return false;
+        issueEvents.add(new InternalUpdateIssue(issue.getProjectKey(), issue.getIssueKey()));
+        scheduleNotificationSubtasksUpdate(issue);
+        return true;
+    }
+
+    private synchronized void scheduleNotificationSubtasksUpdate(Issue parent) {
+        for (Issue subtask : parent.getSubtaskCards()) {
+            issueEvents.add(new InternalUpdateIssue(subtask.getProjectKey(), subtask.getIssueKey()));
+            scheduleNotificationSubtasksUpdate(subtask);
         }
     }
 

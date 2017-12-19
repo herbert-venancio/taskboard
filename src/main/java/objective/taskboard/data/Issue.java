@@ -36,6 +36,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.DateDeserializers.DateDeserializer;
 
 import objective.taskboard.config.SpringContextBridge;
+import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.domain.IssueStateHashCalculator;
 import objective.taskboard.domain.converter.CardVisibilityEvalService;
 import objective.taskboard.domain.converter.IssueCoAssignee;
@@ -68,11 +69,11 @@ public class Issue extends IssueScratch implements Serializable {
     private transient ProjectService projectService;
 
     private transient IssueStateHashCalculator issueStateHashCalculator;
-    
+
+    private transient IssueColorService issueColorService;
+
     private List<IssueCoAssignee> coAssignees = new LinkedList<>(); //NOSONAR
-    
-    private String color;
-    
+
     public Issue(IssueScratch scratch, 
             JiraProperties properties, 
             MetadataService metadataService, 
@@ -80,7 +81,8 @@ public class Issue extends IssueScratch implements Serializable {
             FilterCachedRepository filterRepository,
             CardVisibilityEvalService cardVisibilityEvalService,
             ProjectService projectService,
-            IssueStateHashCalculator issueStateHashCalculator) {
+            IssueStateHashCalculator issueStateHashCalculator,
+            IssueColorService issueColorService) {
         this.id = scratch.id;
         this.issueKey = scratch.issueKey;
         this.projectKey = scratch.projectKey;
@@ -123,10 +125,10 @@ public class Issue extends IssueScratch implements Serializable {
         this.cardVisibilityEvalService = cardVisibilityEvalService;
         this.projectService = projectService;
         this.issueStateHashCalculator = issueStateHashCalculator;
+        this.issueColorService = issueColorService;
         this.render = false;
         this.favorite = false;
-        this.hidden = false;        
-        this.color = null;
+        this.hidden = false;
     }
     
     @JsonAnyGetter
@@ -196,7 +198,7 @@ public class Issue extends IssueScratch implements Serializable {
     }
 
     public String getColor() {
-        return this.color;
+        return issueColorService.getColor(getClassOfServiceId());
     }
 
     public String getUsersTeam() {
@@ -207,10 +209,6 @@ public class Issue extends IssueScratch implements Serializable {
         return issueTeamService.getTeams(this);
     }
 
-    public void setColor(final String color) {
-        this.color = color;
-    }
-
     public void setParentCard(Issue parentCard) {
         this.parentCard = parentCard;
         if (parentCard != null)
@@ -218,6 +216,7 @@ public class Issue extends IssueScratch implements Serializable {
     }
     
     private void addsubtask(Issue issue) {
+        this.subtasks.remove(issue);
         this.subtasks.add(issue);
     }
 
@@ -226,7 +225,6 @@ public class Issue extends IssueScratch implements Serializable {
         return Optional.ofNullable(parentCard);
     }
 
-    @JsonIgnore
     public String getClassOfServiceValue() {
         String defaultClassOfService = jiraProperties.getCustomfield().getClassOfService().getDefaultValue();
         CustomField classOfService = getClassOfServiceCustomField();
@@ -658,7 +656,8 @@ public class Issue extends IssueScratch implements Serializable {
             FilterCachedRepository filterRepository,
             CardVisibilityEvalService cardVisibilityEvalService,
             ProjectService projectService,
-            IssueStateHashCalculator issueStateHashCalculator) {
+            IssueStateHashCalculator issueStateHashCalculator,
+            IssueColorService issueColorService) {
         this.jiraProperties = jiraProperties;
         this.metaDataService = metaDataService;
         this.issueTeamService = issueTeamService;
@@ -666,6 +665,7 @@ public class Issue extends IssueScratch implements Serializable {
         this.cardVisibilityEvalService = cardVisibilityEvalService;
         this.projectService = projectService;
         this.issueStateHashCalculator = issueStateHashCalculator;
+        this.issueColorService = issueColorService;
     }
     
     @Override
