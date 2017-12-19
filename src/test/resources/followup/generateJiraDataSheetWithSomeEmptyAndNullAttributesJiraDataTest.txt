@@ -77,8 +77,8 @@ Sheet "From Jira" Row "2" AddColumn "Z2": 1.0
 Sheet "From Jira" Row "2" AddColumn "AA2": 1.0
 Sheet "From Jira" Row "2" AddColumn "AB2": M
 Sheet "From Jira" Row "2" AddColumn "AC2": Type
-Sheet "From Jira" Row "2" AddFormula "AD2": IF(AllIssues[[#This Row],[TASK_BALLPARK]]>0,AllIssues[[#This Row],[TASK_BALLPARK]],SUMIFS(Clusters[Effort],Clusters[Cluster Name],AllIssues[[#This Row],[SUBTASK_TYPE]],Clusters[T-Shirt Size],AllIssues[tshirt_size]))
-Sheet "From Jira" Row "2" AddFormula "AE2": IF(AllIssues[[#This Row],[TASK_BALLPARK]]>0,AllIssues[[#This Row],[TASK_BALLPARK]]*1.3,SUMIFS(Clusters[Cycle],Clusters[Cluster Name],AllIssues[[#This Row],[SUBTASK_TYPE]],Clusters[T-Shirt Size],AllIssues[tshirt_size]))
+Sheet "From Jira" Row "2" AddFormula "AD2": IF(AND(AllIssues[[#This Row],[TASK_BALLPARK]]>0,AllIssues[[#This Row],[Query_Type]]<>"SUBTASK PLAN"),AllIssues[[#This Row],[TASK_BALLPARK]],SUMIFS(Clusters[Effort],Clusters[Cluster Name],AllIssues[[#This Row],[SUBTASK_TYPE]],Clusters[T-Shirt Size],AllIssues[tshirt_size]))
+Sheet "From Jira" Row "2" AddFormula "AE2": IF(AND(AllIssues[[#This Row],[TASK_BALLPARK]]>0,AllIssues[[#This Row],[Query_Type]]<>"SUBTASK PLAN"),AllIssues[[#This Row],[TASK_BALLPARK]]*1.3,SUMIFS(Clusters[Cycle],Clusters[Cluster Name],AllIssues[[#This Row],[SUBTASK_TYPE]],Clusters[T-Shirt Size],AllIssues[tshirt_size]))
 Sheet "From Jira" Row "2" AddFormula "AF2": AllIssues[EffortEstimate]-AllIssues[EffortDone]
 Sheet "From Jira" Row "2" AddFormula "AG2": AllIssues[CycleEstimate]-AllIssues[CycleDone]
 Sheet "From Jira" Row "2" AddFormula "AH2": IF(AllIssues[[#This Row],[planning_type]]="Ballpark",AllIssues[EffortEstimate],0)
