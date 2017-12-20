@@ -91,4 +91,9 @@ public class TestExtraControllers {
     public void setRootDataDirectory(@RequestParam("root") String root) {
         taskboardProperties.setRootDataDirectory(root);
     }
+
+    @RequestMapping("force-update-issue-buffer")
+    public void updateIssueBuffer() {
+        issueBuffer.updateIssueBuffer();
+    }
 }

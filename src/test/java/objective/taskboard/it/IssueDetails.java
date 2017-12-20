@@ -69,8 +69,9 @@ class IssueDetails extends AbstractUiFragment {
         return this;
     }
 
-    public void closeDialog() {
+    public IssueDetails closeDialog() {
         issueDetailRoot.findElement(By.className("buttonClose")).click();
+        return this;
     }
 
     public IssueDetails assertRefreshWarnIsOpen() {
@@ -108,6 +109,20 @@ class IssueDetails extends AbstractUiFragment {
         WebElement error = getElementWhenItExists(By.className("message-box--error"));
         error.findElement(By.className("message-box__close")).click();
         waitInvisibilityOfElement(error);
+        return this;
+    }
+
+    public IssueDetails assertClassOfService(String classOfServiceExpected) {
+        waitVisibilityOfElement(issueDetailRoot);
+        WebElement classOfServiceValue = issueDetailRoot.findElement(By.id("classOfServiceValue"));
+        waitTextInElement(classOfServiceValue, classOfServiceExpected);
+        return this;
+    }
+
+    public IssueDetails assertColor(String colorExpected) {
+        WebElement paperDialog = webDriver.findElement(By.cssSelector("paper-dialog.issue-detail"));
+        waitVisibilityOfElement(paperDialog);
+        waitAttributeValueInElement(paperDialog, "background-color", colorExpected);
         return this;
     }
 }

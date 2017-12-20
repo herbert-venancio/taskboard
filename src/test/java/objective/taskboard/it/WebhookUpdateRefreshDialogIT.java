@@ -22,21 +22,22 @@ package objective.taskboard.it;
 
 import static java.lang.Thread.sleep;
 
-import java.io.IOException;
-
 import org.junit.Test;
 
 import objective.taskboard.RequestBuilder;
 import objective.taskboard.utils.IOUtilities;
 
 public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
+    private static final String STANDARD_COLOR = "rgb(238, 238, 238)";
+    private static final String FIXED_DATE_COLOR = "rgb(254, 229, 188)";
+
     @Test
-    public void whenUpdateHappensViaWebHook_RefreshToastShouldShowUP() throws IOException {
+    public void whenUpdateHappensViaWebHook_RefreshToastShouldShowUP() {
         MainPage mainPage = MainPage.produce(webDriver);
         mainPage.issue("TASKB-625")
             .assertHasFirstAssignee();
 
-        emulateAssignToFoo();
+        emulateUpdateIssue("TASKB-625", "{\"assignee\":{\"name\":\"foo\"}},\"properties\":[]");
 
         mainPage.errorToast().close();
         mainPage.refreshToast().assertVisible();
@@ -55,8 +56,7 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
     }
 
     @Test
-    public void whenUpdateHappensViaWebHookAndUpdatedIssueIsOpen_ShouldWarnUser() throws IOException {
-        
+    public void whenUpdateHappensViaWebHookAndUpdatedIssueIsOpen_ShouldWarnUser() {
         MainPage mainPage = MainPage.produce(webDriver);
         mainPage.errorToast().close();
         IssueDetails issueDetails = mainPage
@@ -64,7 +64,7 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
             .click()
             .issueDetails();
         
-        emulateAssignToFoo();
+        emulateUpdateIssue("TASKB-625", "{\"assignee\":{\"name\":\"foo\"}},\"properties\":[]");
         
         issueDetails
             .assertRefreshWarnIsOpen()
@@ -73,7 +73,7 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
     }
 
     @Test
-    public void givenAnIssueNotVisible_whenUpdateHappensViaWebHook_RefreshToastShouldNotShowUP() throws IOException, InterruptedException {
+    public void givenAnIssueNotVisible_whenUpdateHappensViaWebHook_RefreshToastShouldNotShowUP() throws InterruptedException {
         MainPage mainPage = MainPage.produce(webDriver);
         mainPage.typeSearch("TASKB-625");
 
@@ -84,7 +84,7 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
         mainPage.typeSearch("TASKB-61")
             .assertVisibleIssues("TASKB-611", "TASKB-612", "TASKB-613", "TASKB-610", "TASKB-614");
 
-        emulateTransitionIssue();
+        emulateUpdateIssue("TASKB-625", "{\"status\":{\"id\": \"10652\",\"name\": \"Doing\"}}");
         sleep(3000);
 
         mainPage.refreshToast().assertNotVisible();
@@ -95,27 +95,75 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
             .assertIssueList("TASKB-625");
     }
 
-    private static void emulateAssignToFoo() {
-        RequestBuilder
-            .url("http://localhost:4567/rest/api/latest/issue/TASKB-625")
-            .body("{\"fields\":{\"assignee\":{\"name\":\"foo\"}},\"properties\":[]}")
-            .put();
-        
-        String body = IOUtilities.resourceToString("webhook/TASKB_625_updatePayload.json");
-        RequestBuilder
-            .url(getSiteBase()+"/webhook/TASKB")
-            .header("Content-Type", "application/json")
-            .body(body)
-            .post();
+    @Test
+    public void givenVisibleIssuesWithChildren_whenParentGoToDeferred_thenAllChildrenShouldDisappear() throws InterruptedException {
+        MainPage mainPage = MainPage.produce(webDriver);
+        mainPage.issue("TASKB-606")
+            .enableHierarchicalFilter();
+        mainPage.assertVisibleIssues("TASKB-606", "TASKB-186", "TASKB-235", "TASKB-601", "TASKB-572");
+        mainPage.issue("TASKB-606")
+            .enableHierarchicalFilter();
+
+        emulateUpdateIssue("TASKB-606", "{\"status\":{\"id\": \"10655\",\"name\": \"Deferred\"}}");
+        sleep(3000);
+
+        mainPage.errorToast().close();
+        mainPage.refreshToast().assertNotVisible();
+        mainPage.typeSearch("TASKB-606").assertVisibleIssues()
+            .typeSearch("TASKB-186").assertVisibleIssues()
+            .typeSearch("TASKB-235").assertVisibleIssues()
+            .typeSearch("TASKB-601").assertVisibleIssues()
+            .typeSearch("TASKB-572").assertVisibleIssues();
     }
 
-    private static void emulateTransitionIssue() {
+    @Test
+    public void givenIssuesWithChildren_whenParentChangeTheClassOfService_thenAllChildrenShouldUpdate() throws InterruptedException {
+        MainPage mainPage = MainPage.produce(webDriver);
+        mainPage.issue("TASKB-606").click().issueDetails()
+            .assertClassOfService("Standard").assertColor(STANDARD_COLOR)
+            .closeDialog().assertIsHidden();
+        mainPage.issue("TASKB-186").click().issueDetails()
+            .assertClassOfService("Standard").assertColor(STANDARD_COLOR)
+            .closeDialog().assertIsHidden();
+        mainPage.issue("TASKB-235").click().issueDetails()
+            .assertClassOfService("Standard").assertColor(STANDARD_COLOR)
+            .closeDialog().assertIsHidden();
+        mainPage.issue("TASKB-601").click().issueDetails()
+            .assertClassOfService("Standard").assertColor(STANDARD_COLOR)
+            .closeDialog().assertIsHidden();
+        mainPage.issue("TASKB-572").click().issueDetails()
+            .assertClassOfService("Standard").assertColor(STANDARD_COLOR)
+            .closeDialog().assertIsHidden();
+
+        emulateUpdateIssue("TASKB-606", "{\"customfield_11440\":{\"id\": \"12607\",\"value\": \"Fixed Date\"}}");
+        sleep(2000);
+
+        mainPage.errorToast().close();
+        mainPage.refreshToast().assertVisible().toggleShowHide();
+        mainPage.assertVisibleIssues("TASKB-606", "TASKB-186", "TASKB-235", "TASKB-601", "TASKB-572");
+        mainPage.issue("TASKB-606").click().issueDetails()
+            .assertClassOfService("Fixed Date").assertColor(FIXED_DATE_COLOR)
+            .closeDialog().assertIsHidden();
+        mainPage.issue("TASKB-186").click().issueDetails()
+            .assertClassOfService("Fixed Date").assertColor(FIXED_DATE_COLOR)
+            .closeDialog().assertIsHidden();
+        mainPage.issue("TASKB-235").click().issueDetails()
+            .assertClassOfService("Fixed Date").assertColor(FIXED_DATE_COLOR)
+            .closeDialog().assertIsHidden();
+        mainPage.issue("TASKB-601").click().issueDetails()
+            .assertClassOfService("Fixed Date").assertColor(FIXED_DATE_COLOR)
+            .closeDialog().assertIsHidden();
+        mainPage.issue("TASKB-572").click().issueDetails()
+            .assertClassOfService("Fixed Date").assertColor(FIXED_DATE_COLOR);
+    }
+
+    private static void emulateUpdateIssue(String issueKey, String fieldsJson) {
         RequestBuilder
-            .url("http://localhost:4567/rest/api/latest/issue/TASKB-625")
-            .body("{\"fields\":{\"status\":{\"id\": \"10652\",\"name\": \"Doing\"}}}")
+            .url("http://localhost:4567/rest/api/latest/issue/" + issueKey)
+            .body("{\"fields\":" + fieldsJson + "}")
             .put();
 
-        String body = IOUtilities.resourceToString("webhook/TASKB_625_updatePayload.json");
+        String body = IOUtilities.resourceToString("webhook/" + issueKey + "_updatePayload.json");
         RequestBuilder
             .url(getSiteBase()+"/webhook/TASKB")
             .header("Content-Type", "application/json")
@@ -124,6 +172,6 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
     }
 
     public static void main(String[] args) {
-        emulateAssignToFoo();
+        emulateUpdateIssue("TASKB-625", "{\"assignee\":{\"name\":\"foo\"}},\"properties\":[]");
     }
 }

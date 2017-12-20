@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,8 +47,9 @@ public class CardRepo  {
             return true;
         }
         
-        if (current.getPriorityUpdatedDate().after(newValue.getPriorityUpdatedDate()) &&
-            current.getRemoteIssueUpdatedDate().after(newValue.getRemoteIssueUpdatedDate()))
+        if ((current.getPriorityOrder().equals(newValue.getPriorityOrder()) ||
+            current.getPriorityUpdatedDate().compareTo(newValue.getPriorityUpdatedDate()) >= 0) &&
+            current.getRemoteIssueUpdatedDate().compareTo(newValue.getRemoteIssueUpdatedDate()) >= 0)
             return false;
         
         if (current.getPriorityUpdatedDate().after(newValue.getPriorityUpdatedDate())) {
@@ -65,10 +67,19 @@ public class CardRepo  {
         
         if (lastRemoteUpdatedDate.before(value.getRemoteIssueUpdatedDate()))
             lastRemoteUpdatedDate = value.getRemoteIssueUpdatedDate();
-        
-        if (cardByKey.containsKey(key)) 
-            value.getSubtaskCards().addAll(cardByKey.get(key).getSubtaskCards());
-        
+
+        if (!StringUtils.isEmpty(value.getParent())) {
+            value.setParentCard(cardByKey.get(value.getParent()));
+            unsavedCards.add(value.getParent());
+        }
+
+        cardByKey.values().stream()
+            .filter(issue -> value.getIssueKey().equals(issue.getParent()))
+            .forEach(subtask -> {
+                subtask.setParentCard(value);
+                unsavedCards.add(subtask.getIssueKey());
+            });
+
         cardByKey.put(key, value);
         unsavedCards.add(key);
         addProject(value.getProjectKey());

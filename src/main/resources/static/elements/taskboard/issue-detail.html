@@ -512,8 +512,8 @@
 
                         <div class="column-block half-column">
                             <div class="sub-header">Class of Service</div>
-                            <div class="sub-content">
-                                {{item.customfields.classeDeServico}}
+                            <div id="classOfServiceValue" class="sub-content">
+                                {{item.classOfServiceValue}}
                             </div>
                         </div>
 
@@ -1180,10 +1180,6 @@
                     return this.timetrackerBlown ? 'red' : 'green';
                 },
 
-                getIssueColor: function (issue) {
-                    return 'background: ' + issue.color;
-                },
-
                 openDialogNewTask: function () {
                     this.$.dialogNewTask.opendialog(this.item);
                     this.close();
@@ -1302,9 +1298,11 @@
                     }
 
                     var step = taskboard.getIssueStep(this.item);
-                    var stepLocalState = this.localStates.steps[step.id];
-                    if (stepLocalState)
-                        isUpdating = isUpdating || stepLocalState.isUpdating;
+                    if (step !== null) {
+                        var stepLocalState = this.localStates.steps[step.id];
+                        if (stepLocalState)
+                            isUpdating = isUpdating || stepLocalState.isUpdating;
+                    }
 
                     this.set('isUpdating', isUpdating);
                     this.set('errorMessage', errorMessage);

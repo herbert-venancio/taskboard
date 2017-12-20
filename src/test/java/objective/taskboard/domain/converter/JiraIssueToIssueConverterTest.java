@@ -25,6 +25,7 @@ import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -80,7 +81,6 @@ public class JiraIssueToIssueConverterTest {
     private static final String TYPE_ICON_URI = "iconURI";
     private static final String CLASS_OF_SERVICE_EXPEDITE = "Expedite";
     private static final String CLASS_OF_SERVICE_STANDARD = "Standard";
-    private static final String RELEASE = "RELEASE";
 
     private static final String JSON_PARENT = "{key:'%s', fields:{issuetype:{id:1, iconUrl:'%s'}}}";
     private static final String JSON_CLASS_OF_SERVICE = "{id:1, value:'%s'}";
@@ -237,9 +237,9 @@ public class JiraIssueToIssueConverterTest {
         assertEquals("Team name", "team", converted.getTeams().iterator().next());
         assertEquals("Comments", "", converted.getComments());
         Map<String, Serializable> customFields = converted.getCustomFields();
-        assertTrue("Class of service should be in custom fields", customFields.containsKey(CLASS_OF_SERVICE_ID));
         assertTrue("Blocked should be in custom fields", customFields.containsKey(BLOCKED_ID));
         assertTrue("Last block reason should be in custom fields", customFields.containsKey(LAST_BLOCK_REASON_ID));
+        assertEquals("Class of Service", null, converted.getLocalClassOfServiceCustomField());
         assertEquals("Color", null, converted.getColor());
         assertEquals("Priority order", 0L, converted.getPriorityOrder().longValue());
     }
@@ -256,11 +256,12 @@ public class JiraIssueToIssueConverterTest {
         mockIssue(parent, PARENT_ISSUE_KEY);
 
         mockIssueField(parent, classOfServiceField, CLASS_OF_SERVICE_ID, format(JSON_CLASS_OF_SERVICE, CLASS_OF_SERVICE_EXPEDITE));
-        mockIssueField(parent, releaseField, RELEASE_ID, format("{name:%s}", RELEASE));
+        mockIssueField(parent, releaseField, RELEASE_ID, "{id: 100}");
         mockIssueField(issue, parentField, PARENT_ID, format(JSON_PARENT, PARENT_ISSUE_KEY, TYPE_ICON_URI));
 
         objective.taskboard.data.Issue parentIssue = subject.convertSingleIssue(parent, buildProvider());
         objective.taskboard.data.Issue childIssue = subject.convertSingleIssue(issue, parentKey -> Optional.of(parentIssue));
+        childIssue.setParentCard(parentIssue);
         List<objective.taskboard.data.Issue> issuesConverted = Arrays.asList(parentIssue, childIssue);
 
         assertEquals("Issues converted quantity", 2, issuesConverted.size());
@@ -268,8 +269,8 @@ public class JiraIssueToIssueConverterTest {
                 .filter(i -> i.getIssueKey().equals(ISSUE_KEY))
                 .findFirst().orElse(null);
         assertIssueWithParent(converted);
-        Map<String, Serializable> customFields = converted.getCustomFields();
-        assertClassOfService(customFields, CLASS_OF_SERVICE_EXPEDITE);
+        assertEquals("Class of service", CLASS_OF_SERVICE_EXPEDITE, converted.getClassOfServiceValue());
+        assertEquals("Release", "100", converted.getReleaseId());
     }
 
     @Test
@@ -288,13 +289,13 @@ public class JiraIssueToIssueConverterTest {
 
         objective.taskboard.data.Issue converted = subject.convertSingleIssue(issue, buildProvider());
 
-        assertClassOfService(converted.getCustomFields(), CLASS_OF_SERVICE_EXPEDITE);
+        assertEquals("Class of service", converted.getClassOfServiceValue(), CLASS_OF_SERVICE_EXPEDITE);
 
         mockIssueField(issue, classOfServiceField, CLASS_OF_SERVICE_ID, format(JSON_CLASS_OF_SERVICE, CLASS_OF_SERVICE_STANDARD));
 
         objective.taskboard.data.Issue issueUpdated = subject.convertSingleIssue(issue, buildProvider());
         assertNotNull("Issue updated converted", issueUpdated);
-        assertClassOfService(issueUpdated.getCustomFields(), CLASS_OF_SERVICE_STANDARD);
+        assertEquals("Class of service", issueUpdated.getClassOfServiceValue(), CLASS_OF_SERVICE_STANDARD);
     }
     
     @Test
@@ -320,11 +321,13 @@ public class JiraIssueToIssueConverterTest {
         };
         try {
             subject.convertSingleIssue(A, provider);
+            fail("Should throw an IncompleteIssueException");
         }catch(IncompleteIssueException e) {
             assertEquals("PARENT-1", e.getMissingParentKey());
         }
         try {
             subject.convertSingleIssue(B, provider);
+            fail("Should throw an IncompleteIssueException");
         }catch(IncompleteIssueException e) {
             assertEquals("PARENT-2", e.getMissingParentKey());
         }
@@ -354,11 +357,6 @@ public class JiraIssueToIssueConverterTest {
         assertEquals("Parent key", PARENT_ISSUE_KEY, converted.getParent());
         assertEquals("Parent type id", 1L, converted.getParentType());
         assertEquals("Parent type icon URI", TYPE_ICON_URI, converted.getParentTypeIconUri());
-    }
-
-    private void assertClassOfService(Map<String, Serializable> customFields, String classOfServiceExpected) {
-        assertTrue("Class of service should be in custom fields", customFields.containsKey(CLASS_OF_SERVICE_ID));
-        assertEquals("Class of service value", classOfServiceExpected, customFields.get(CLASS_OF_SERVICE_ID));
     }
 
 }

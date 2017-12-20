@@ -28,6 +28,14 @@ public class JiraMockController {
         RequestBuilder.url(JIRA_MOCK_URL + "/fix-search-failure").post();
     }
 
+    public static void enableSearchAfterInit() {
+        RequestBuilder.url(JIRA_MOCK_URL + "/enable-search-after-init").post();
+    }
+
+    public static void disableSearchAfterInit() {
+        RequestBuilder.url(JIRA_MOCK_URL + "/disable-search-after-init").post();
+    }
+
     public static void emulateTransitionError() {
         RequestBuilder.url(JIRA_MOCK_URL + "/force-transition-failure").post();
     }

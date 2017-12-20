@@ -93,6 +93,7 @@ public class JiraMockServer {
             dirtySearchIssuesByKey.clear();
             username = null;
             searchFailureEnabled = false;
+            searchAfterInitEnabled = false;
             transitionFailureEnabled = false;
             webhooks.clear();
             projectEdits.clear();
@@ -107,6 +108,16 @@ public class JiraMockServer {
         
         post("/fix-search-failure", (req, res) ->{
             searchFailureEnabled = false;
+            return "";
+        });
+
+        post("/enable-search-after-init", (req, res) -> {
+            searchAfterInitEnabled = true;
+            return "";
+        });
+
+        post("/disable-search-after-init", (req, res) -> {
+            searchAfterInitEnabled = false;
             return "";
         });
 
@@ -176,6 +187,10 @@ public class JiraMockServer {
         post("/rest/api/latest/search", "application/json", (req,res) -> {
             if (searchFailureEnabled)
                 throw new IllegalStateException("Emulated error");
+
+            if (searchAfterInitEnabled)
+                return loadMockData("search_after_init.json");
+
             Map searchData = gson.fromJson(req.body(), java.util.Map.class);
             return makeFakeRequest(searchData);
         });
@@ -224,6 +239,9 @@ public class JiraMockServer {
                         break;
                     case "status":
                         setStatus(fields, reqFields.getJSONObject(aKey));
+                        break;
+                    case "customfield_11440"://Class Of Service
+                        setClassOfService(fields, aKey, reqFields.getJSONObject(aKey));
                         break;
                     default:
                         throw new IllegalStateException("Unsupported Field in Mock : " + aKey);
@@ -372,6 +390,22 @@ public class JiraMockServer {
     }
 
     private static int countIssueCreated;
+
+    private static void setClassOfService(JSONObject fields, String aKey, JSONObject newClassOfService) throws JSONException {
+        JSONObject makeClassOfService = createEmptyClassOfService();
+        makeClassOfService.put("id", newClassOfService.get("id"));
+        makeClassOfService.put("value", newClassOfService.get("value"));
+        fields.put(aKey, newClassOfService);
+        fields.put("updated", nowIso8601());
+    }
+
+    private static JSONObject createEmptyClassOfService() throws JSONException {
+        JSONObject classOfService = new JSONObject();
+        classOfService.put("id", "");
+        classOfService.put("self", "");
+        classOfService.put("value", "");
+        return classOfService;
+    }
 
     private static void setStatus(JSONObject fields, JSONObject newStatus) throws JSONException {
         JSONObject makeStatus = createEmptyStatus();
@@ -566,6 +600,7 @@ public class JiraMockServer {
     private static Map<String, JSONObject> dirtySearchIssuesByKey = new LinkedHashMap<>();
     private static String username;
     private static boolean searchFailureEnabled = false;
+    private static boolean searchAfterInitEnabled = false;
     private static boolean transitionFailureEnabled = false;
     private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private static List<Consumer<JSONObject>> projectEdits = new ArrayList<>();

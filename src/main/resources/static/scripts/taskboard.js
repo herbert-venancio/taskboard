@@ -88,6 +88,8 @@ function Taskboard() {
     }
 
     this.getIssueStep = function(issue) {
+        if (!issue.visible) return null;
+
         var steps = self.getAllSteps()
         for (s in steps) {
             var step = steps[s]
@@ -357,11 +359,14 @@ function Taskboard() {
                 self.issues[previousInstance.index] = converted; 
 
             updatedIssueKeys.push(anEvent.target.issueKey)
-            var stepId = self.getIssueStep(converted).id;
-            if (Object.keys(updateByStep).indexOf(stepId) === -1)
-                updateByStep[stepId] = [];
+            var issueStep = self.getIssueStep(converted);
+            if (issueStep !== null) {
+                var stepId = issueStep.id;
+                if (Object.keys(updateByStep).indexOf(stepId) === -1)
+                     updateByStep[stepId] = [];
 
-            updateByStep[stepId].push(anEvent.target);
+                updateByStep[stepId].push(anEvent.target);
+            }
 
             self.fireIssueUpdated('server', taskboardHome, anEvent.target, anEvent.updateType);
         });
@@ -441,7 +446,6 @@ function Taskboard() {
 
         issue.customfields = {
             sizes: listSizes,
-            classeDeServico: issue[CUSTOMFIELD.CLASSE_DE_SERVICO],
             impedido: issue[CUSTOMFIELD.IMPEDIDO],
             lastBlockReason: issue[CUSTOMFIELD.LAST_BLOCK_REASON],
             additionalEstimatedHours: issue[CUSTOMFIELD.ADDITIONAL_ESTIMATED_HOURS],
