@@ -246,6 +246,23 @@ public class SubtaskCreatorServiceTest {
         verify(jiraService).getTransitionsAsMaster(subtask.getKey());
     }
     
+    @Test
+    public void givenSkipCreationConfiguredWithTrue_whenParentTShirtSizeIsNull_thenDontCreateSubTask() {
+        properties.setSkipCreationWhenTShirtParentIsAbsent(true);
+        when(parent.getField(TSHIRT_PARENT_ID)).thenReturn(null);
+        
+        service.create(parent, properties);
+        verifyZeroInteractions(jiraService);
+    }
+    
+    @Test
+    public void givenSkipCreationConfiguredWithTrue_whenParentTShirtSizeIsPresent_thenCreateSubTask() {
+        properties.setSkipCreationWhenTShirtParentIsAbsent(true);
+        
+        service.create(parent, properties);
+        verify(jiraService).createIssueAsMaster(any(IssueInput.class));
+    }
+    
     private void assertIssueInput(IssueInput input, String... expecteds) {
         List<String> representations = new ArrayList<>();
         representations.add(getFieldRepresentation(input, "project", "key"));
