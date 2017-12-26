@@ -59,6 +59,9 @@ public class SubtaskCreatorService {
     public void create(Issue parent, SubtaskCreation creationProperties) {
         if (!hasRequiredValueOrHasNoRequirement(parent, creationProperties))
             return;
+        
+        if(skipCreationWhenTShirtSizeParentIsAbsent(parent, creationProperties))
+            return;
 
         Long typeId = creationProperties.getIssueTypeId();
 
@@ -82,6 +85,12 @@ public class SubtaskCreatorService {
                 return false;
         }
         return true;
+    }
+    
+    private boolean skipCreationWhenTShirtSizeParentIsAbsent(Issue parent, SubtaskCreation creationProperties) {
+        IssueField parentTShirtSize = parent.getField(creationProperties.getTShirtSizeParentId());
+        Boolean skipCreation = creationProperties.getSkipCreationWhenTShirtParentIsAbsent();
+        return (parentTShirtSize == null || parentTShirtSize.getValue() == null) && skipCreation;
     }
 
     private String subtaskOfType(Issue parent, Long typeId) {

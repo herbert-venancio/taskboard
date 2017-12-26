@@ -1117,6 +1117,8 @@ public class JiraProperties {
         private Optional<Long> transitionId;
         @Valid
         private CustomFieldCondition customFieldCondition;
+        @NotNull
+        private Boolean skipCreationWhenTShirtParentIsAbsent = false;
 
         public SubtaskCreation() {
         }
@@ -1200,6 +1202,14 @@ public class JiraProperties {
         public void setCustomFieldCondition(CustomFieldCondition customFieldCondition) {
             this.customFieldCondition = customFieldCondition;
         }
+        
+        public Boolean getSkipCreationWhenTShirtParentIsAbsent() {
+            return this.skipCreationWhenTShirtParentIsAbsent;
+        }
+        
+        public void setSkipCreationWhenTShirtParentIsAbsent(Boolean skipCreationWhenTShirtParentIsAbsent) {
+            this.skipCreationWhenTShirtParentIsAbsent = skipCreationWhenTShirtParentIsAbsent;
+        }
 
         @Override
         public boolean equals(Object o) {
@@ -1228,6 +1238,8 @@ public class JiraProperties {
                 return false;
             if (customFieldCondition != null ? !customFieldCondition.equals(that.customFieldCondition) : that.customFieldCondition == null)
                 return false;
+            if (skipCreationWhenTShirtParentIsAbsent != null ? !skipCreationWhenTShirtParentIsAbsent.equals(that.skipCreationWhenTShirtParentIsAbsent) : that.skipCreationWhenTShirtParentIsAbsent == null)
+                return false;
 
             return true;
         }
@@ -1244,6 +1256,7 @@ public class JiraProperties {
             result = 31 * result + (tShirtSizeDefaultValue != null ? tShirtSizeDefaultValue.hashCode() : 0);
             result = 31 * result + (transitionId != null ? transitionId.hashCode() : 0);
             result = 31 * result + (customFieldCondition != null ? customFieldCondition.hashCode() : 0);
+            result = 31 * result + (skipCreationWhenTShirtParentIsAbsent != null ? skipCreationWhenTShirtParentIsAbsent.hashCode() : 0);
             return result;
         }
 
@@ -1260,6 +1273,7 @@ public class JiraProperties {
                     ", tShirtSizeDefaultValue='" + tShirtSizeDefaultValue + '\'' +
                     ", transitionId=" + transitionId +
                     ", customFieldCondition='" + customFieldCondition + '\'' +
+                    ", skipCreationWhenTShirtParentIsAbsent='" + skipCreationWhenTShirtParentIsAbsent + '\'' +
                     '}';
         }
 
