@@ -426,8 +426,11 @@
 
         <iron-signals on-iron-signal-issues-updated="updateIssue"></iron-signals>
         <paper-dialog id="modal" with-backdrop modal
-                      entry-animation="scale-up-animation" exit-animation="fade-out-animation"
-                      on-iron-overlay-closed="_afterClose">
+                      entry-animation="scale-up-animation"
+                      exit-animation="fade-out-animation"
+                      on-iron-overlay-opened="_afterOpen"
+                      on-iron-overlay-closed="_afterClose"
+                      data-status$="{{_modalStatus}}">
 
                 <div class$="glasspane {{issueChangeStateClass}}" on-tap="refreshIfUpdated">
                     <span>This issue has been updated. <br>Click to refresh its contents.</span>
@@ -806,6 +809,18 @@
                     localStates: {
                         type: Object,
                         notify: true
+                    },
+
+                    _modalStatus: {
+                        type: String
+                    },
+
+                    _modalStatuses: {
+                        type: Object,
+                        value: {
+                            OPENED: 'opened',
+                            CLOSED: 'closed'
+                        }
                     }
 
                 },
@@ -830,7 +845,9 @@
                                flash($(mutation.target), 'yellow')
                         });
                         self.isObserving = false;
-                    }).observe(Polymer.dom(this).node, {subtree: true, childList: true, characterData: true})
+                    }).observe(Polymer.dom(this).node, {subtree: true, childList: true, characterData: true});
+
+                    this.set('_modalStatus', this._modalStatuses.CLOSED);
                 },
 
                 computeTimeTrackingLabel: function () {
@@ -1192,6 +1209,10 @@
                     var win = window.open(window.urlJira + '/browse/' + issueKey, '_blank');
                 },
 
+                _afterOpen: function() {
+                    this.set('_modalStatus', this._modalStatuses.OPENED);
+                },
+
                 close: function() {
                     this._beforeClose();
                     this.$.modal.close();
@@ -1215,6 +1236,7 @@
 
                     this.isUpdating = false;
                     this.errorMessage = null;
+                    this.set('_modalStatus', this._modalStatuses.CLOSED);
                 },
 
                 issueFechada: function (item) {

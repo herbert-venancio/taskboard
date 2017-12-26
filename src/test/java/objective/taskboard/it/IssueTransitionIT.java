@@ -20,7 +20,12 @@
  */
 package objective.taskboard.it;
 
+import static java.lang.Thread.sleep;
+
 import org.junit.Test;
+
+import objective.taskboard.RequestBuilder;
+import objective.taskboard.utils.IOUtilities;
 
 public class IssueTransitionIT extends AuthenticatedIntegrationTest {
     
@@ -62,7 +67,7 @@ public class IssueTransitionIT extends AuthenticatedIntegrationTest {
             .transitionClick("Doing")
             .confirm();
         
-        mainPage.issueDetails().assertIsHidden();
+        mainPage.issueDetails().assertIsClosed();
 
         operational.boardStep("To Do").issueCountBadge(6);
         operational.boardStep("To Do").assertIssueList(
@@ -161,6 +166,34 @@ public class IssueTransitionIT extends AuthenticatedIntegrationTest {
         issueErrorToast.assertNotVisible();
         issue.assertHasError(false);
 
+    }
+
+    @Test
+    public void givenIssueWithClassOfServiceFromParent_whenTransitionIssueAndWebhookIsEnabled_thenIssueShouldKeepClassOfServiceFromParent() throws InterruptedException {
+        MainPage mainPage = MainPage.produce(webDriver);
+        mainPage.errorToast().close();
+
+        mainPage.issue("TASKB-237").click()
+            .issueDetails().transitionClick("Done").confirm()
+            .assertIsClosed();
+
+        LaneFragment deployable = mainPage.lane("Deployable");
+        deployable.boardStep("QAing").assertIssueList();
+        deployable.boardStep("Done").assertIssueList("TASKB-237");
+
+        TestIssue issue = mainPage.issue("TASKB-237");
+        issue.assertCardColor("rgb(254, 229, 188)");
+
+        String body = IOUtilities.resourceToString("webhook/TASKB-237_updatePayload.json");
+        RequestBuilder
+            .url(getSiteBase()+"/webhook/TASKB")
+            .header("Content-Type", "application/json")
+            .body(body)
+            .post();
+        sleep(3000);
+
+        mainPage.refreshToast().assertNotVisible();
+        issue.assertCardColor("rgb(254, 229, 188)");
     }
 
 }

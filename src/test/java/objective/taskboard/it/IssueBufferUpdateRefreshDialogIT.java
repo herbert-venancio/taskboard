@@ -34,13 +34,12 @@ public class IssueBufferUpdateRefreshDialogIT extends AuthenticatedIntegrationTe
             .typeSearch("TASKB-630").assertVisibleIssues()
             .typeSearch("TASKB-633").assertVisibleIssues()
             .typeSearch("TASKB-634").assertVisibleIssues()
-            .clearSearch();
+            .clearSearch().errorToast().close();
 
         JiraMockController.enableSearchAfterInit();
         forceUpdateIssueBuffer();
 
         MainPage mainPage = MainPage.produce(webDriver);
-        mainPage.errorToast().close();
         mainPage.refreshToast().assertVisible();
         mainPage.typeSearch("TASKB-628").assertVisibleIssues()
             .clearSearch();

@@ -3,12 +3,12 @@
         "id": "2127211",
         "items": [
             {
-                "field": "assignee",
+                "field": "status",
                 "fieldtype": "jira",
-                "from": "taskboard",
-                "fromString": "Taskboard",
-                "to": "foo",
-                "toString": "foo"
+                "from": "10662",
+                "fromString": "QAing",
+                "to": "10053",
+                "toString": "Done"
             }
         ]
     },
@@ -24,15 +24,15 @@
             "assignee": {
                 "active": true,
                 "avatarUrls": {
-                    "16x16": "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=16",
-                    "24x24": "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=24",
-                    "32x32": "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=32",
-                    "48x48": "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=48"
+                    "16x16": "http://54.68.128.117:8100/secure/useravatar?size=xsmall&avatarId=11670",
+                    "24x24": "http://54.68.128.117:8100/secure/useravatar?size=small&avatarId=11670",
+                    "32x32": "http://54.68.128.117:8100/secure/useravatar?size=medium&avatarId=11670",
+                    "48x48": "http://54.68.128.117:8100/secure/useravatar?avatarId=11670"
                 },
-                "displayName": "Foo",
-                "key": "foo",
-                "name": "foo",
-                "self": "http://54.68.128.117:8100/rest/api/2/user?username=foo",
+                "displayName": "Taskboard",
+                "key": "taskboard",
+                "name": "taskboard",
+                "self": "http://localhost:4567/rest/api/latest/user?username=taskboard",
                 "timeZone": "America/Sao_Paulo"
             },
             "attachment": [],
@@ -42,7 +42,7 @@
                 "startAt": 0,
                 "total": 0
             },
-            "created": "2016-10-03T16:32:13.000+0000",
+            "created": "2016-10-03T15:32:32.000+0000",
             "creator": {
                 "active": true,
                 "avatarUrls": {
@@ -102,12 +102,12 @@
                 "self": "http://localhost:4567/rest/api/latest/customFieldOption/12651",
                 "value": "S"
             },
-            "description": "List\r\n* item 0\r\n* item 1\r\n** item 1.0\r\n** item 1.1\r\n\r\n{code}\r\n  function helloWorld() {\r\n    console.log(\"Hello World!\")\r\n  }\r\n{code}",
+            "description": "Vide Tarefas",
             "duedate": null,
             "environment": null,
             "issuelinks": [
                 {
-                    "id": "143657",
+                    "id": "143606",
                     "inwardIssue": {
                         "fields": {
                             "issuetype": {
@@ -139,13 +139,13 @@
                                     "self": "http://localhost:4567/rest/api/latest/statuscategory/4"
                                 }
                             },
-                            "summary": "Onda 6 - Pacote 3"
+                            "summary": "Onda 6 - Pacote 1"
                         },
-                        "id": "214710",
-                        "key": "TASKB-606",
-                        "self": "http://localhost:4567/rest/api/latest/issue/214710"
+                        "id": "214708",
+                        "key": "TASKB-611",
+                        "self": "http://localhost:4567/rest/api/latest/issue/214708"
                     },
-                    "self": "http://localhost:4567/rest/api/latest/issueLink/143657",
+                    "self": "http://localhost:4567/rest/api/latest/issueLink/143606",
                     "type": {
                         "id": "10350",
                         "inward": "is demanded by",
@@ -212,26 +212,26 @@
             "resolution": null,
             "resolutiondate": null,
             "status": {
-                "description": "Taskboard",
-                "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
-                "id": "10652",
-                "name": "Doing",
-                "self": "http://localhost:4567/rest/api/latest/status/10652",
+                "description": "",
+                "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/closed.png",
+                "id": "10053",
+                "name": "Done",
+                "self": "http://localhost:4567/rest/api/latest/status/10053",
                 "statusCategory": {
-                    "colorName": "yellow",
-                    "id": 4,
-                    "key": "indeterminate",
-                    "name": "In Progress",
-                    "self": "http://localhost:4567/rest/api/latest/statuscategory/4"
+                    "colorName": "green",
+                    "id": 3,
+                    "key": "done",
+                    "name": "Done",
+                    "self": "http://localhost:4567/rest/api/latest/statuscategory/3"
                 }
             },
             "subtasks": [],
-            "summary": "P3 - A1H0020F - Consulta habilita\u00e7\u00e3o afiliado clientes",
+            "summary": "P1 - A500100F - Informe de Rendimentos - Laser",
             "timeestimate": null,
             "timeoriginalestimate": null,
             "timespent": null,
             "timetracking": {},
-            "updated": "2017-04-05T14:09:01.000+0000",
+            "updated": "2017-04-05T14:25:37.000+0000",
             "votes": {
                 "hasVoted": false,
                 "self": "http://localhost:4567/rest/api/latest/issue/TASKB-606/votes",
@@ -250,9 +250,9 @@
             },
             "workratio": -1
         },
-        "id": "214792",
-        "key": "TASKB-235",
-        "self": "http://localhost:4567/rest/api/latest/issue/214792"
+        "id": "214737",
+        "key": "TASKB-237",
+        "self": "http://localhost:4567/rest/api/latest/issue/214737"
     },
     "timestamp": 1498649741301,
     "user": {

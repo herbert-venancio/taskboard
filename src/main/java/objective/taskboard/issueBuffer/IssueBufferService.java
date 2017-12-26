@@ -174,14 +174,14 @@ public class IssueBufferService {
 
         updateIssueBuffer();// triggers a background update, because this change might affect other issues 
 
-        return issue;
+        return getIssueByKey(issue.getIssueKey());
     }
     
     private synchronized Issue putJiraIssue(com.atlassian.jira.rest.client.api.domain.Issue jiraIssue) {
         final Issue issue = issueConverter.convertSingleIssue(jiraIssue, parentProviderFetchesMissingParents);
         putIssue(issue);
-        
-        return issue;
+
+        return getIssueByKey(issue.getIssueKey());
     }
 
     public synchronized void notifyProjectUpdate(final String projectKey) {
