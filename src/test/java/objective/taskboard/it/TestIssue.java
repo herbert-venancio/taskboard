@@ -39,7 +39,7 @@ class TestIssue extends AbstractUiFragment {
     }
     
     public static TestIssue forKey(WebDriver webDriver, String issueKey) {
-        List<WebElement> issues = webDriver.findElements(By.cssSelector("paper-material.issue")).stream()
+        List<WebElement> issues = webDriver.findElements(By.className("sortable-issue-item")).stream()
                 .filter(webEl -> hasChildThatMatches(webEl, By.cssSelector("[data-issue-key='"+issueKey+"']")))
                 .collect(toList());
             
@@ -117,6 +117,12 @@ class TestIssue extends AbstractUiFragment {
             waitVisibilityOfElement(updatingElement);
         else
             waitInvisibilityOfElement(updatingElement);
+        return this;
+    }
+
+    public TestIssue assertCardColor(String colorExpected) {
+        waitVisibilityOfElement(issueElement);
+        waitAttributeValueInElement(issueElement, "background-color", colorExpected);
         return this;
     }
 }

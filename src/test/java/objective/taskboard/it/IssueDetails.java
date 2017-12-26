@@ -20,46 +20,50 @@
  */
 package objective.taskboard.it;
 
+import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 class IssueDetails extends AbstractUiFragment {
+
     WebElement issueDetailRoot;
     public IssueDetails(WebDriver driver) {
         super(driver);
-        issueDetailRoot = webDriver.findElement(By.cssSelector("paper-card.issue-detail"));
+        issueDetailRoot = webDriver.findElement(By.cssSelector("paper-dialog.issue-detail"));
     }
-    
+
     public IssueDetails assignToMe() {
-        waitVisibilityOfElement(issueDetailRoot);
+        assertIsOpened();
         WebElement assignButton = issueDetailRoot.findElement(By.id("assignButton"));
         waitVisibilityOfElement(assignButton);
         assignButton.click();
         return this;
     }
-    
+
     public IssueDetails assertAssigneeIs(String name) {
+        assertIsOpened();
         waitUntilElementExists(By.className("assignee"));
         WebElement assigneeElement = issueDetailRoot.findElement(By.className("assignee"));
         waitTextInElement(assigneeElement, name);
         return this;
     }
-    
-    public void assertIsHidden() {
+
+    public void assertIsClosed() {
+        waitUntil(attributeToBe(issueDetailRoot, "data-status", "closed"));
         waitInvisibilityOfElement(issueDetailRoot);
     }
 
     public IssueDetails transitionClick(String transitionName) {
-        waitVisibilityOfElement(issueDetailRoot);
+        assertIsOpened();
         waitUntilElementExists(By.cssSelector("[data-transition-name='"+transitionName+"']"));
         WebElement transitionButton = issueDetailRoot.findElement(By.cssSelector("[data-transition-name='"+transitionName+"']"));
         waitVisibilityOfElement(transitionButton);
         transitionButton.click();
-        
         return this;
-    }        
-    
+    }
+
     public IssueDetails confirm() {
         WebElement confirmationModal = webDriver.findElement(By.id("confirmModal"));
         waitVisibilityOfElement(confirmationModal);
@@ -70,11 +74,14 @@ class IssueDetails extends AbstractUiFragment {
     }
 
     public IssueDetails closeDialog() {
+        assertIsOpened();
         issueDetailRoot.findElement(By.className("buttonClose")).click();
+        assertIsClosed();
         return this;
     }
 
     public IssueDetails assertRefreshWarnIsOpen() {
+        assertIsOpened();
         waitUntilElementExists(By.className("glasspane"));
         return this;
     }
@@ -113,16 +120,19 @@ class IssueDetails extends AbstractUiFragment {
     }
 
     public IssueDetails assertClassOfService(String classOfServiceExpected) {
-        waitVisibilityOfElement(issueDetailRoot);
+        assertIsOpened();
         WebElement classOfServiceValue = issueDetailRoot.findElement(By.id("classOfServiceValue"));
         waitTextInElement(classOfServiceValue, classOfServiceExpected);
         return this;
     }
 
     public IssueDetails assertColor(String colorExpected) {
-        WebElement paperDialog = webDriver.findElement(By.cssSelector("paper-dialog.issue-detail"));
-        waitVisibilityOfElement(paperDialog);
-        waitAttributeValueInElement(paperDialog, "background-color", colorExpected);
+        assertIsOpened();
+        waitAttributeValueInElement(issueDetailRoot, "background-color", colorExpected);
         return this;
+    }
+
+    private void assertIsOpened() {
+        waitAttributeValueInElement(issueDetailRoot, "data-status", "opened");
     }
 }
