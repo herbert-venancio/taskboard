@@ -44,6 +44,7 @@ import org.apache.xalan.processor.TransformerFactoryImpl;
 import org.apache.xerces.jaxp.DocumentBuilderFactoryImpl;
 import org.apache.xpath.jaxp.XPathFactoryImpl;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -58,15 +59,15 @@ public class XmlUtils {
         return xpath(asDocument(xmlString), locator);
     }
 
-    public static NodeList xpath(Document doc, String locator) {
+    public static NodeList xpath(Node node, String locator) {
         try {
             // create XPath
             XPathFactory xPathfactory = new XPathFactoryImpl();
             XPath xpath = xPathfactory.newXPath();
             XPathExpression expr = xpath.compile(locator);
 
-            // searches Document using XPath
-            return (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
+            // searches using XPath
+            return (NodeList) expr.evaluate(node, XPathConstants.NODESET);
         } catch (Exception e) {
             throw new InvalidXPathOperationException(e);
         }
@@ -130,25 +131,44 @@ public class XmlUtils {
                 Node node = nodeList.item(i);
                 if (i > 0)
                     writer.append("\n");
-                switch (node.getNodeType()) {
-                    case Node.ATTRIBUTE_NODE:
-                    case Node.TEXT_NODE:
-                        writer.append(node.getNodeValue());
-                        break;
-                    default:
-                        TransformerFactoryImpl factory = new TransformerFactoryImpl();
-                        Transformer transformer = factory.newTransformer();
-                        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-                        transformer.transform(new DOMSource(node), new StreamResult(writer));
-                }
+                asString(writer, node);
             }
             return writer.toString();
         }
         return "";
     }
 
+    public static String asString(Node node) throws TransformerException {
+        if(node instanceof Document)
+            return asString((Document) node);
+
+        StringWriter writer = new StringWriter();
+        asString(writer, node);
+        return writer.toString();
+    }
+
+    private static void asString(StringWriter writer, Node node) throws TransformerException {
+        switch (node.getNodeType()) {
+            case Node.ATTRIBUTE_NODE:
+            case Node.TEXT_NODE:
+                writer.append(node.getNodeValue());
+                break;
+            default:
+                TransformerFactoryImpl factory = new TransformerFactoryImpl();
+                Transformer transformer = factory.newTransformer();
+                transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+                transformer.transform(new DOMSource(node), new StreamResult(writer));
+        }
+    }
+
     public static String normalizeXml(String s) {
         return XmlUtils.asString(XmlUtils.asDocument(s));
+    }
+
+    public static void removeChildrenAfter(Element element, int index) {
+        NodeList nodes = element.getChildNodes();
+        while(nodes.getLength() > index)
+            element.removeChild(nodes.item(index));
     }
 
     public static Iterable<Node> iterable(NodeList nodeList) {

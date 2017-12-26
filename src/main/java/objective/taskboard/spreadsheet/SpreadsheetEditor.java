@@ -29,4 +29,5 @@ public interface SpreadsheetEditor extends Closeable {
 
     SpreadsheetStylesEditor getStylesEditor();
 
+    TableEditor getTableEditor(String tableName);
 }
