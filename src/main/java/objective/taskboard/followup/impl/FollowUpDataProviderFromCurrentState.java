@@ -1,5 +1,3 @@
-package objective.taskboard.followup.impl;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,6 +18,8 @@ package objective.taskboard.followup.impl;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+
+package objective.taskboard.followup.impl;
 
 import static org.apache.commons.lang.ObjectUtils.defaultIfNull;
 
@@ -81,7 +81,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
                 .filter(issue -> i.contains(issue.getProjectKey()))
                 .collect(Collectors.toList());
 
-        FromJiraDataSet fromJiraDs = getFromJiraDs(issuesVisibleToUser);
+        FromJiraDataSet fromJiraDs = getFromJiraDs(issuesVisibleToUser, timezone);
 
         FollowUpTransitionsDataProvider transitions = new FollowUpTransitionsDataProvider(jiraProperties, metadataService);
         List<AnalyticsTransitionsDataSet> analyticsTransitionsDsList = transitions.getAnalyticsTransitionsDsList(issuesVisibleToUser, timezone);
@@ -90,14 +90,14 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         return new FollowupData(fromJiraDs, analyticsTransitionsDsList, syntheticsTransitionsDsList);
     }
 
-    private FromJiraDataSet getFromJiraDs(List<Issue> issuesVisibleToUser) {
+    private FromJiraDataSet getFromJiraDs(List<Issue> issuesVisibleToUser, ZoneId timezone) {
         LinkedList<Issue> issues = new LinkedList<>(issuesVisibleToUser);
 
         followUpBallparks = new LinkedHashMap<String, FromJiraDataRow>();
-        demandsByKey = makeDemandBallparks(issues);
-        featuresByKey = makeFeatureBallparks(issues);
+        demandsByKey = makeDemandBallparks(issues, timezone);
+        featuresByKey = makeFeatureBallparks(issues, timezone);
 
-        final List<FromJiraDataRow> result = makeSubtasks(issues);
+        final List<FromJiraDataRow> result = makeSubtasks(issues, timezone);
 
         result.addAll(followUpBallparks.values());
 
@@ -115,13 +115,13 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         return !jiraProperties.getFollowup().getStatusExcludedFromFollowup().contains(status);
     }
 
-    private Map<String, Issue> makeDemandBallparks(LinkedList<Issue> issues) {
+    private Map<String, Issue> makeDemandBallparks(LinkedList<Issue> issues, ZoneId timezone) {
         Map<String, Issue> demands = new LinkedHashMap<>();
         Iterator<Issue> it = issues.iterator();
         while(it.hasNext()) {
             Issue issue = it.next();
             if (issue.isDemand()) {
-                followUpBallparks.put(issue.getIssueKey(), createBallparkDemand(issue));
+                followUpBallparks.put(issue.getIssueKey(), createBallparkDemand(issue, timezone));
                 demands.put(issue.getIssueKey(), issue);
                 it.remove();
             }
@@ -129,7 +129,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         return demands;
     }
 
-    private Map<String, Issue> makeFeatureBallparks(LinkedList<Issue> issues) {
+    private Map<String, Issue> makeFeatureBallparks(LinkedList<Issue> issues, ZoneId timezone) {
         Map<String, Issue> features = new LinkedHashMap<String, Issue>();
 
         Iterator<Issue> it = issues.iterator();
@@ -152,13 +152,13 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
 
             for (BallparkMapping mapping : mappingList) {
                 String issueKeyAndTShirtSize = feature.getIssueKey()+mapping.getTshirtCustomFieldId();
-                followUpBallparks.put( issueKeyAndTShirtSize, createBallparkFeature(demand, feature, mapping));
+                followUpBallparks.put( issueKeyAndTShirtSize, createBallparkFeature(demand, feature, mapping, timezone));
             }
         }
         return features;
     }
 
-    private List<FromJiraDataRow> makeSubtasks(LinkedList<Issue> issues) {
+    private List<FromJiraDataRow> makeSubtasks(LinkedList<Issue> issues, ZoneId timezone) {
 
         final List<FromJiraDataRow> subtasksFollowups = new LinkedList<FromJiraDataRow>();
         Iterator<Issue> it = issues.iterator();
@@ -172,7 +172,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
             if (demand != null)
                 followUpBallparks.remove(demand.getIssueKey());
 
-            subtasksFollowups.add(createSubTaskFollowup(demand, feature, issue));
+            subtasksFollowups.add(createSubTaskFollowup(demand, feature, issue, timezone));
 
             if (jiraProperties.getFollowup().getSubtaskStatusThatDontPreventBallparkGeneration().contains(issue.getStatus()))
                 continue;
@@ -198,19 +198,19 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         return mappings;
     }
 
-    private FromJiraDataRow createBallparkDemand(Issue demand) {
+    private FromJiraDataRow createBallparkDemand(Issue demand, ZoneId timezone) {
         FromJiraDataRow followUpData = new FromJiraDataRow();
+
+        setDemandFields(followUpData, demand, timezone);
+
         followUpData.planningType = "Ballpark";
         followUpData.project = demand.getProject();
+        followUpData.tshirtSize = "M";
+        followUpData.worklog = 0.0;
+        followUpData.wrongWorklog = timeSpentInHour(demand);
+        followUpData.queryType = "DEMAND BALLPARK";
 
-        followUpData.demandId = demand.getId();
-        followUpData.demandType = demand.getIssueTypeName();
-        followUpData.demandStatus= demand.getStatusName();
-        followUpData.demandNum = demand.getIssueKey();
-        followUpData.demandSummary = demand.getSummary();
         followUpData.demandDescription = issueDescription("M", demand);
-        followUpData.demandStatusPriority = demand.getStatusPriority();
-        followUpData.demandPriorityOrder = demand.getPriorityOrder();
 
         followUpData.taskType = "BALLPARK - Demand";
         followUpData.taskStatus = getBallparkStatus();
@@ -220,6 +220,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         followUpData.taskDescription = issueDescription(0, demand.getSummary());
         followUpData.taskFullDescription = issueFullDescription("BALLPARK - Demand", "M", 0, demand.getSummary());
         followUpData.taskRelease = (String) defaultIfNull(getRelease(demand), "No release set");
+        followUpData.taskBallpark = 0.0;
 
         followUpData.subtaskType = "BALLPARK - Demand";
         followUpData.subtaskStatus = followUpData.demandStatus;
@@ -228,12 +229,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         followUpData.subtaskSummary = followUpData.demandSummary;
         followUpData.subtaskDescription = issueDescription("M", 0, demand.getSummary());
         followUpData.subtaskFullDescription = issueFullDescription("BALLPARK - Demand", "M", 0, demand.getSummary());
-        followUpData.tshirtSize = "M";
-        followUpData.worklog = 0.0;
-        followUpData.wrongWorklog = timeSpentInHour(demand);
-        followUpData.demandBallpark = originalEstimateInHour(demand);
-        followUpData.taskBallpark = 0.0;
-        followUpData.queryType = "DEMAND BALLPARK";
+
         return followUpData;
     }
 
@@ -255,32 +251,25 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         return issue.getTimeTracking().getOriginalEstimateMinutes()/60.0;
     }
 
-    private FromJiraDataRow createBallparkFeature(Issue demand, Issue task, BallparkMapping ballparkMapping) {
+    private FromJiraDataRow createBallparkFeature(Issue demand, Issue task, BallparkMapping ballparkMapping, ZoneId timezone) {
         FromJiraDataRow followUpData = new FromJiraDataRow();
+
+        setDemandFields(followUpData, demand, timezone);
+        setTaskFields(followUpData, task, timezone);
+
         followUpData.planningType = "Ballpark";
         followUpData.project = task.getProject();
+        followUpData.tshirtSize = task.getTshirtSizeOfSubtaskForBallpark(ballparkMapping);
+        followUpData.worklog = 0.0;
+        followUpData.wrongWorklog = timeSpentInHour(task);
+        followUpData.queryType = "FEATURE BALLPARK";
 
         if (demand != null) {
-            followUpData.demandType = demand.getIssueTypeName();
-            followUpData.demandStatus= demand.getStatusName();
-            followUpData.demandId = demand.getId();
-            followUpData.demandNum = demand.getIssueKey();
-            followUpData.demandSummary = demand.getSummary();
             followUpData.demandDescription = issueDescription("", demand);
-            followUpData.demandStatusPriority = demand.getStatusPriority();
-            followUpData.demandPriorityOrder = demand.getPriorityOrder();
         }
 
-        followUpData.taskType = task.getIssueTypeName();
-        followUpData.taskStatus = task.getStatusName();
-        followUpData.taskId = task.getId();
-        followUpData.taskNum = task.getIssueKey();
-        followUpData.taskSummary=task.getSummary();
-        followUpData.taskDescription = issueDescription(task);
-        followUpData.taskFullDescription = issueFullDescription(task);
         followUpData.taskRelease = coalesce(getRelease(task), getRelease(demand) ,"No release set");
-        followUpData.taskStatusPriority = task.getStatusPriority();
-        followUpData.taskPriorityOrder = task.getPriorityOrder();
+        followUpData.taskBallpark = originalEstimateInHour(task);
 
         followUpData.subtaskType = ballparkMapping.getIssueType();
         followUpData.subtaskStatus = getBallparkStatus();
@@ -289,12 +278,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         followUpData.subtaskSummary = ballparkMapping.getIssueType();
         followUpData.subtaskDescription = issueDescription(0, task.getSummary());
         followUpData.subtaskFullDescription = issueFullDescription(ballparkMapping.getIssueType(), "", 0, task.getSummary());
-        followUpData.tshirtSize = task.getTshirtSizeOfSubtaskForBallpark(ballparkMapping);
-        followUpData.worklog = 0.0;
-        followUpData.wrongWorklog = timeSpentInHour(task);
-        followUpData.demandBallpark = originalEstimateInHour(demand);
-        followUpData.taskBallpark = originalEstimateInHour(task);
-        followUpData.queryType = "FEATURE BALLPARK";
+
         return followUpData;
     }
 
@@ -302,56 +286,107 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         return metadataService.getStatusById(jiraProperties.getFollowup().getBallparkDefaultStatus()).name;
     }
 
-    private FromJiraDataRow createSubTaskFollowup(Issue demand, Issue task, Issue subtask) {
+    private FromJiraDataRow createSubTaskFollowup(Issue demand, Issue task, Issue subtask, ZoneId timezone) {
         FromJiraDataRow followUpData = new FromJiraDataRow();
+
+        setDemandFields(followUpData, demand, timezone);
+        setTaskFields(followUpData, task, timezone);
+
         followUpData.planningType = "Plan";
         followUpData.project = task.getProject();
-
-        if (demand != null) {
-            followUpData.demandId = demand.getId();
-            followUpData.demandType = demand.getIssueTypeName();
-            followUpData.demandStatus= demand.getStatusName();
-            followUpData.demandNum = demand.getIssueKey();
-            followUpData.demandSummary = demand.getSummary();
-            followUpData.demandDescription = issueDescription("",demand);
-            followUpData.demandBallpark = originalEstimateInHour(demand);
-            followUpData.demandStatusPriority = demand.getStatusPriority();
-            followUpData.demandPriorityOrder = demand.getPriorityOrder();
-        }
-
-        followUpData.taskType = task.getIssueTypeName();
-        followUpData.taskStatus = task.getStatusName();
-        followUpData.taskId = task.getId();
-        followUpData.taskNum = task.getIssueKey();
-        followUpData.taskSummary=task.getSummary();
-        followUpData.taskDescription = issueDescription(task);
-        followUpData.taskFullDescription = issueFullDescription(task);
-        followUpData.taskRelease = coalesce(getRelease(subtask), getRelease(task), getRelease(demand), "No release set");
-        followUpData.taskStatusPriority = task.getStatusPriority();
-        followUpData.taskPriorityOrder = task.getPriorityOrder();
-
-        followUpData.subtaskType = subtask.getIssueTypeName();
-        followUpData.subtaskStatus = subtask.getStatusName();
-        followUpData.subtaskId = subtask.getId();
-        followUpData.subtaskNum = subtask.getIssueKey();
-        followUpData.subtaskSummary = subtask.getSummary();
-        followUpData.subtaskStatusPriority = subtask.getStatusPriority();
-        followUpData.subtaskPriorityOrder = subtask.getPriorityOrder();
-
-        followUpData.subtaskDescription = issueDescription(subtask);
-        followUpData.subtaskFullDescription = subtask.getStatusName() + " > " + issueFullDescription(subtask);
         followUpData.tshirtSize = subtask.getTShirtSize() == null? "": subtask.getTShirtSize();
         followUpData.worklog = timeSpentInHour(subtask);
         followUpData.wrongWorklog = 0.0;
-        
-        if (StringUtils.isEmpty(followUpData.tshirtSize)) { 
+        followUpData.queryType = "SUBTASK PLAN";
+
+        if (demand != null) {
+            followUpData.demandDescription = issueDescription("",demand);
+        }
+
+        followUpData.taskRelease = coalesce(getRelease(subtask), getRelease(task), getRelease(demand), "No release set");
+
+        if (StringUtils.isEmpty(followUpData.tshirtSize)) {
             followUpData.taskBallpark = originalEstimateInHour(subtask);
             if (followUpData.taskBallpark == 0)
                 followUpData.taskBallpark = originalEstimateInHour(task);
         }
 
-        followUpData.queryType = "SUBTASK PLAN";
+        followUpData.subtaskId = subtask.getId();
+        followUpData.subtaskType = subtask.getIssueTypeName();
+        followUpData.subtaskStatus = subtask.getStatusName();
+        followUpData.subtaskNum = subtask.getIssueKey();
+        followUpData.subtaskSummary = subtask.getSummary();
+        followUpData.subtaskStatusPriority = subtask.getStatusPriority();
+        followUpData.subtaskPriorityOrder = subtask.getPriorityOrder();
+        followUpData.subtaskDescription = issueDescription(subtask);
+        followUpData.subtaskFullDescription = subtask.getStatusName() + " > " + issueFullDescription(subtask);
+        followUpData.subtaskStartDateStepMillis = subtask.getStartDateStepMillis();
+        followUpData.subtaskAssignee = subtask.getAssignee();
+        followUpData.subtaskDueDate = subtask.getDueDateByTimezoneId(timezone);
+        followUpData.subtaskCreated = subtask.getCreatedDateByTimezoneId(timezone);
+        followUpData.subtaskLabels = subtask.getLabels() != null ? subtask.getLabels().stream().collect(Collectors.joining(",")) : "";
+        followUpData.subtaskComponents = subtask.getComponents() != null ? subtask.getComponents().stream().collect(Collectors.joining(",")) : "";
+        followUpData.subtaskReporter = subtask.getReporter();
+        followUpData.subtaskCoAssignees = subtask.getCoAssignees() != null ? subtask.getCoAssignees().stream().map(c -> c.getName()).collect(Collectors.joining(",")) : "";
+        followUpData.subtaskClassOfService = subtask.getClassOfServiceValue();
+        followUpData.subtaskUpdatedDate = subtask.getUpdatedDateByTimezoneId(timezone);
+        followUpData.subtaskCycletime = subtask.getCycleTime(timezone);
+        followUpData.subtaskIsBlocked = subtask.isBlocked();
+        followUpData.subtaskLastBlockReason = subtask.getLastBlockReason();
+
         return followUpData;
+    }
+
+    private void setDemandFields(FromJiraDataRow followUpData, Issue demand, ZoneId timezone) {
+        if (demand == null) return;
+
+        followUpData.demandId = demand.getId();
+        followUpData.demandType = demand.getIssueTypeName();
+        followUpData.demandStatus = demand.getStatusName();
+        followUpData.demandNum = demand.getIssueKey();
+        followUpData.demandSummary = demand.getSummary();
+        followUpData.demandStatusPriority = demand.getStatusPriority();
+        followUpData.demandPriorityOrder = demand.getPriorityOrder();
+        followUpData.demandUpdatedDate = demand.getUpdatedDateByTimezoneId(timezone);
+        followUpData.demandBallpark = originalEstimateInHour(demand);
+        followUpData.demandStartDateStepMillis = demand.getStartDateStepMillis();
+        followUpData.demandAssignee = demand.getAssignee();
+        followUpData.demandDueDate = demand.getDueDateByTimezoneId(timezone);
+        followUpData.demandCreated = demand.getCreatedDateByTimezoneId(timezone);
+        followUpData.demandLabels = demand.getLabels() != null ? demand.getLabels().stream().collect(Collectors.joining(",")) : "";
+        followUpData.demandComponents = demand.getComponents() != null ? demand.getComponents().stream().collect(Collectors.joining(",")) : "";
+        followUpData.demandReporter = demand.getReporter();
+        followUpData.demandCoAssignees = demand.getCoAssignees() != null ? demand.getCoAssignees().stream().map(c -> c.getName()).collect(Collectors.joining(",")) : "";
+        followUpData.demandClassOfService = demand.getClassOfServiceValue();
+        followUpData.demandCycletime = demand.getCycleTime(timezone);
+        followUpData.demandIsBlocked = demand.isBlocked();
+        followUpData.demandLastBlockReason = demand.getLastBlockReason();
+    }
+
+    private void setTaskFields(FromJiraDataRow followUpData, Issue task, ZoneId timezone) {
+        followUpData.taskId = task.getId();
+        followUpData.taskType = task.getIssueTypeName();
+        followUpData.taskStatus = task.getStatusName();
+        followUpData.taskNum = task.getIssueKey();
+        followUpData.taskSummary = task.getSummary();
+        followUpData.taskStatusPriority = task.getStatusPriority();
+        followUpData.taskPriorityOrder = task.getPriorityOrder();
+        followUpData.taskDescription = issueDescription(task);
+        followUpData.taskFullDescription = issueFullDescription(task);
+        followUpData.taskAdditionalEstimatedHours = task.getAdditionalEstimatedHours();
+        followUpData.taskStartDateStepMillis = task.getStartDateStepMillis();
+        followUpData.taskAssignee = task.getAssignee();
+        followUpData.taskDueDate = task.getDueDateByTimezoneId(timezone);
+        followUpData.taskCreated = task.getCreatedDateByTimezoneId(timezone);
+        followUpData.taskLabels = task.getLabels() != null ? task.getLabels().stream().collect(Collectors.joining(",")) : "";
+        followUpData.taskComponents = task.getComponents() != null ? task.getComponents().stream().collect(Collectors.joining(",")) : "";
+        followUpData.taskReporter = task.getReporter();
+        followUpData.taskCoAssignees = task.getCoAssignees() != null ? task.getCoAssignees().stream().map(c -> c.getName()).collect(Collectors.joining(",")) : "";
+        followUpData.taskClassOfService = task.getClassOfServiceValue();
+        followUpData.taskUpdatedDate = task.getUpdatedDateByTimezoneId(timezone);
+        followUpData.taskCycletime = task.getCycleTime(timezone);
+        followUpData.taskIsBlocked = task.isBlocked();
+        followUpData.taskLastBlockReason = task.getLastBlockReason();
     }
 
     private String getTshirtSize(Issue i) {
@@ -363,7 +398,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
     private String getRelease(Issue i) {
         if (i == null || i.getRelease() == null)
             return null;
-        
+
         return i.getRelease().name; 
     }
 

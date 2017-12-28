@@ -100,7 +100,7 @@ public class CycleTimeProperties {
         }
 
         @java.beans.ConstructorProperties({"hour", "minute", "period"})
-        private Time(final Integer hour, final Integer minute, final String period) {
+        public Time(final Integer hour, final Integer minute, final String period) {
             this.hour = hour;
             this.minute = minute;
             this.period = period;

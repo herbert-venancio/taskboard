@@ -157,6 +157,12 @@ public class SimpleSpreadsheetEditorMock implements SpreadsheetEditor {
         }
 
         @Override
+        public void addColumn(Boolean value) {
+            logger.append("Sheet \"" + sheetname + "\" Row \""+ rowNum +"\" AddColumn \""+ columnIndexToLetter(columIndex) + rowNum +"\": " + String.valueOf(value) + "\n");
+            columIndex++;
+        }
+
+        @Override
         public void addColumn(ZonedDateTime value) {
             logger.append("Sheet \"" + sheetname + "\" Row \""+ rowNum +"\" AddColumn \""+ columnIndexToLetter(columIndex) + rowNum +"\": " + value + "\n");
             columIndex++;

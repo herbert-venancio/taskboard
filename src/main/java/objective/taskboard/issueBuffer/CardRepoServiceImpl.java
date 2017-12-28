@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import objective.taskboard.cycletime.CycleTime;
 import objective.taskboard.database.directory.DataBaseDirectory;
 import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.domain.IssueStateHashCalculator;
@@ -38,7 +39,10 @@ public class CardRepoServiceImpl implements CardRepoService {
     
     @Autowired
     private FilterCachedRepository filterRepository;
-    
+
+    @Autowired
+    private CycleTime cycleTime;
+
     @Autowired
     private CardVisibilityEvalService cardVisibilityEvalService;
 
@@ -70,6 +74,7 @@ public class CardRepoServiceImpl implements CardRepoService {
                     metaDataService,
                     issueTeamService,
                     filterRepository,
+                    cycleTime,
                     cardVisibilityEvalService,
                     projectService,
                     issueStateHashCalculator,

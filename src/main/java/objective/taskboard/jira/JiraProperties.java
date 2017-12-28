@@ -62,10 +62,10 @@ public class JiraProperties {
 
     @NotNull
     @NotEmpty
-    private List<Integer> statusesCompletedIds;
+    private List<Long> statusesCompletedIds;
     @NotNull
     @NotEmpty
-    private List<Integer> statusesCanceledIds;
+    private List<Long> statusesCanceledIds;
     @NotNull
     @NotEmpty
     private List<Long> statusesDeferredIds;
@@ -1327,11 +1327,11 @@ public class JiraProperties {
         return this.issuetype;
     }
 
-    public List<Integer> getStatusesCompletedIds() {
+    public List<Long> getStatusesCompletedIds() {
         return this.statusesCompletedIds;
     }
 
-    public List<Integer> getStatusesCanceledIds() {
+    public List<Long> getStatusesCanceledIds() {
         return this.statusesCanceledIds;
     }
     
@@ -1391,11 +1391,11 @@ public class JiraProperties {
         this.issuetype = issuetype;
     }
 
-    public void setStatusesCompletedIds(final List<Integer> statusesCompletedIds) {
+    public void setStatusesCompletedIds(final List<Long> statusesCompletedIds) {
         this.statusesCompletedIds = statusesCompletedIds;
     }
 
-    public void setStatusesCanceledIds(final List<Integer> statusesCanceledIds) {
+    public void setStatusesCanceledIds(final List<Long> statusesCanceledIds) {
         this.statusesCanceledIds = statusesCanceledIds;
     }
     

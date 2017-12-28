@@ -6,8 +6,8 @@ public class FollowupData {
 
     public enum Version {
 
-        VERSION_1("1")
-        , VERSION_2("2");
+        VERSION_1("1"),
+        VERSION_2("2");
 
         public final String value;
 

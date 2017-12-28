@@ -12,6 +12,8 @@ public interface SheetRow {
 
     void addColumn(Number value);
 
+    void addColumn(Boolean value);
+
     void addColumn(ZonedDateTime value);
 
     void addFormula(String formula);

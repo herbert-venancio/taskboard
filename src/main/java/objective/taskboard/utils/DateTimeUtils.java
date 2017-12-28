@@ -1,7 +1,9 @@
 package objective.taskboard.utils;
 
-
 import java.lang.reflect.Type;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -10,6 +12,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -51,10 +54,10 @@ public class DateTimeUtils {
                 ZoneId.of(dt.getZone().getID(), ZoneId.SHORT_IDS));
     }
 
-    public static ZonedDateTime get(org.joda.time.DateTime dateTime, ZoneId zone) {
-        return get(dateTime.getMillis(), zone);
+    public static ZonedDateTime get(Date date, ZoneId zone) {
+        return date == null ? null : get(date.getTime(), zone);
     }
-    
+
     public static ZonedDateTime get(long milliseconds, ZoneId zone) {
         return Instant.ofEpochMilli(milliseconds).atZone(zone);
     }
@@ -128,4 +131,15 @@ public class DateTimeUtils {
             return ZonedDateTime.parse(json.getAsString());
         }
     }
+
+    public static Date parseStringToDate(String yyyymmdd) {
+        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            return (Date)formatter.parse(yyyymmdd);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }
