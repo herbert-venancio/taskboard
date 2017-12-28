@@ -44,7 +44,7 @@ import objective.taskboard.data.Team;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.domain.ProjectTeam;
 import objective.taskboard.domain.TeamFilterConfiguration;
-import objective.taskboard.followup.FollowUpDataHistoryGenerator;
+import objective.taskboard.followup.FollowUpFacade;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.repository.ProjectTeamRepository;
@@ -71,7 +71,7 @@ public class ProjectController {
     private ProjectService projectService;
 
     @Autowired
-    private FollowUpDataHistoryGenerator followUpDataHistoryGenerator;
+    private FollowUpFacade followUpFacade;
 
     @RequestMapping
     public List<ProjectData> get() {
@@ -107,7 +107,7 @@ public class ProjectController {
 
         for (ProjectData projectData : response) {
             String projectKey = projectData.projectKey;
-            projectData.followUpDataHistory = followUpDataHistoryGenerator.getHistoryByProject(projectKey);
+            projectData.followUpDataHistory = followUpFacade.getHistoryGivenProjects(projectKey);
         }
 
         return response;

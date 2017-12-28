@@ -21,19 +21,17 @@
 
 package objective.taskboard.followup.impl;
 
-import static java.nio.file.Files.createDirectories;
-import static java.nio.file.Files.createFile;
 import static java.nio.file.Files.createTempDirectory;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.size;
 import static java.util.Arrays.asList;
+import static objective.taskboard.followup.FollowUpDataHistoryRepository.EXTENSION_JSON;
+import static objective.taskboard.followup.FollowUpDataHistoryRepository.EXTENSION_ZIP;
+import static objective.taskboard.followup.FollowUpDataHistoryRepository.FILE_NAME_FORMAT;
 import static objective.taskboard.followup.FollowUpHelper.followupEmptyV2;
 import static objective.taskboard.followup.FollowUpHelper.followupExpectedV2;
 import static objective.taskboard.followup.FollowUpHelper.getDefaultFollowupData;
 import static objective.taskboard.followup.FollowUpHelper.getEmptyFollowupData;
-import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.EXTENSION_JSON;
-import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.EXTENSION_ZIP;
-import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.FILE_NAME_FORMAT;
 import static objective.taskboard.issueBuffer.IssueBufferState.ready;
 import static objective.taskboard.utils.IOUtilities.ENCODE_UTF_8;
 import static objective.taskboard.utils.IOUtilities.asResource;
@@ -45,11 +43,11 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.joda.time.DateTime;
@@ -57,44 +55,33 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import objective.taskboard.database.directory.DataBaseDirectory;
 import objective.taskboard.domain.ProjectFilterConfiguration;
+import objective.taskboard.followup.FollowUpDataHistoryRepository;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.rules.TimeZoneRule;
 
-@RunWith(MockitoJUnitRunner.class)
 public class FollowUpDataHistoryGeneratorJSONFilesTest {
 
     private static final String PROJECT_TEST = "PROJECT TEST";
     private static final String PROJECT_TEST_2 = "PROJECT TEST 2";
     private static final String TODAY = DateTime.now().toString(FILE_NAME_FORMAT);
-    private static final String YESTERDAY = DateTime.now().minusDays(1).toString(FILE_NAME_FORMAT);
 
     @Rule
     public TimeZoneRule timeZoneRule = new TimeZoneRule("America/Sao_Paulo");
 
-    @InjectMocks
-    private FollowUpDataHistoryGeneratorJSONFiles subject;
+    private FollowUpDataProviderFromCurrentState providerFromCurrentState = mock(FollowUpDataProviderFromCurrentState.class);
+    private ProjectFilterConfigurationCachedRepository projectFilterCacheRepo = mock(ProjectFilterConfigurationCachedRepository.class);
+    private ProjectFilterConfiguration projectFilter = mock(ProjectFilterConfiguration.class);
+    private ProjectFilterConfiguration projectFilter2 = mock(ProjectFilterConfiguration.class);
+    private DataBaseDirectory dataBaseDirectory = mock(DataBaseDirectory.class);
+    private FollowUpDataHistoryRepository historyRepository = new FollowUpDataHistoryRepository(dataBaseDirectory); //TODO mockar o repo
 
-    @Mock
-    private FollowUpDataProviderFromCurrentState providerFromCurrentState;
-
-    @Mock
-    private ProjectFilterConfigurationCachedRepository projectFilterCacheRepo;
-
-    @Mock
-    private ProjectFilterConfiguration projectFilter;
-
-    @Mock
-    private ProjectFilterConfiguration projectFilter2;
-
-    @Mock
-    private DataBaseDirectory dataBaseDirectory;
+    private FollowUpDataHistoryGeneratorJSONFiles subject = new FollowUpDataHistoryGeneratorJSONFiles(
+            projectFilterCacheRepo, 
+            providerFromCurrentState, 
+            historyRepository);
 
     @Before
     public void before() throws IOException {
@@ -134,37 +121,6 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
 
         assertGeneratedFile(PROJECT_TEST, followupExpectedV2());
         assertGeneratedFile(PROJECT_TEST_2, followupExpectedV2());
-    }
-
-    @Test
-    public void givenProjectWithNoHistory_whenGetHistoryByProject_thenReturnNoData() {
-        List<String> history = subject.getHistoryByProject(PROJECT_TEST);
-        assertTrue("History should be empty", history.isEmpty());
-    }
-
-    @Test
-    public void givenProjectWithTodaysHistory_whenGetHistoryByProject_thenReturnNoData() throws IOException {
-        Path pathProject = dataBaseDirectory.path(anyString()).resolve(PROJECT_TEST);
-        createDirectories(pathProject);
-        Path pathZip = pathProject.resolve(TODAY + EXTENSION_JSON + EXTENSION_ZIP);
-        createFile(pathZip);
-        assertTrue("File should be exist", exists(pathZip));
-
-        List<String> history = subject.getHistoryByProject(PROJECT_TEST);
-        assertTrue("History should be empty", history.isEmpty());
-    }
-
-    @Test
-    public void givenProjectWithYesterdaysHistory_whenGetHistoryByProject_thenReturnData() throws IOException {
-        Path pathProject = dataBaseDirectory.path(anyString()).resolve(PROJECT_TEST);
-        createDirectories(pathProject);
-        Path pathZip = pathProject.resolve(YESTERDAY + EXTENSION_JSON + EXTENSION_ZIP);
-        createFile(pathZip);
-        assertTrue("File should be exist", exists(pathZip));
-
-        List<String> history = subject.getHistoryByProject(PROJECT_TEST);
-        assertEquals("History size", 1, history.size());
-        assertEquals("First history", YESTERDAY, history.get(0));
     }
 
     @After

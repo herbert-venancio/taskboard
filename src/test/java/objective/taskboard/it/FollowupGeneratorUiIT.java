@@ -24,10 +24,10 @@ package objective.taskboard.it;
 import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.createFile;
 import static java.nio.file.Files.createTempDirectory;
-import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.EXTENSION_JSON;
-import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.EXTENSION_ZIP;
-import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.FILE_NAME_FORMAT;
-import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.PATH_FOLLOWUP_HISTORY;
+import static objective.taskboard.followup.FollowUpDataHistoryRepository.EXTENSION_JSON;
+import static objective.taskboard.followup.FollowUpDataHistoryRepository.EXTENSION_ZIP;
+import static objective.taskboard.followup.FollowUpDataHistoryRepository.FILE_NAME_FORMAT;
+import static objective.taskboard.followup.FollowUpDataHistoryRepository.PATH_FOLLOWUP_HISTORY;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
 
 import java.io.IOException;

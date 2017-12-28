@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import objective.taskboard.followup.FollowUpDataHistoryGenerator;
-import objective.taskboard.followup.FollowUpFacadeInterface;
+import objective.taskboard.followup.FollowUpFacade;
 import objective.taskboard.followup.FollowUpGenerator;
 import objective.taskboard.issueBuffer.IssueBufferState;
 
@@ -46,7 +46,7 @@ import objective.taskboard.issueBuffer.IssueBufferState;
 public class FollowUpController {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FollowUpController.class);
     @Autowired
-    private FollowUpFacadeInterface followUpFacade;
+    private FollowUpFacade followUpFacade;
 
     @Autowired
     private FollowUpDataHistoryGenerator followUpDataHistoryGenerator;
