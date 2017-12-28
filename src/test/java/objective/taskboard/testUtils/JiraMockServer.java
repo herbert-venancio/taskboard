@@ -175,8 +175,8 @@ public class JiraMockServer {
             return loadMockData("mypermissions.response.json");
         });
 
-        get("rest/api/latest/user",  (req, res) ->loaduser());
-        get("rest/api/latest/myself",  (req, res) ->loaduser());
+        get("rest/api/latest/user",  (req, res) ->loaduser(req.queryParams("username")));
+        get("rest/api/latest/myself",  (req, res) ->loaduser(username));
         
         get("rest/api/latest/serverInfo",  (req, res) ->{
             String auth = new String(Base64.getDecoder().decode(req.headers("Authorization").replace("Basic ","").getBytes()));
@@ -643,7 +643,7 @@ public class JiraMockServer {
         server.put(path, acceptType, route);
     }
 
-    private String loaduser() {
+    private String loaduser(String username) {
         String loadMockData = loadMockData("user.response.json");
         loadMockData = loadMockData.replace("\"displayName\": \"Taskboard\",", "\"displayName\": \"" + username + "\",");
         return loadMockData;
