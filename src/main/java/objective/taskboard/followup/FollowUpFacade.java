@@ -44,7 +44,7 @@ import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor;
 import objective.taskboard.utils.IOUtilities;
 
 @Service
-public class FollowUpFacade implements FollowUpFacadeInterface {
+public class FollowUpFacade {
 
     private final static String SAMPLE_FOLLOWUP_TEMPLATE_PATH = "followup-generic/generic-followup-template.xlsm";
 
@@ -65,26 +65,25 @@ public class FollowUpFacade implements FollowUpFacadeInterface {
 
     @Autowired
     private DataBaseDirectory dataBaseDirectory;
+    
+    @Autowired
+    private FollowUpDataHistoryRepository historyRepository;
 
-    @Override
     public FollowUpGenerator getGenerator(String templateName, Optional<String> date) {
         Template template = templateService.getTemplate(templateName);
         return new FollowUpGenerator(getProvider(date), new SimpleSpreadsheetEditor(followUpTemplateStorage.getTemplate(template.getPath())));
     }
 
-    @Override
     public FollowupDataProvider getProvider(Optional<String> date) {
         if (!date.isPresent() || date.get().isEmpty())
             return providerFromCurrentState;
-        return new FollowUpDataProviderFromHistory(date.get(), dataBaseDirectory);
+        return new FollowUpDataProviderFromHistory(date.get(), historyRepository);
     }
 
-    @Override
     public IssueBufferState getFollowUpState(Optional<String> date) {
         return getProvider(date).getFollowupState();
     }
 
-    @Override
     public List<TemplateData> getTemplatesForCurrentUser() {
         List<String> projectKeys = projectService.getVisibleProjects()
                 .stream()
@@ -99,9 +98,7 @@ public class FollowUpFacade implements FollowUpFacadeInterface {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public void createTemplate(String templateName, String projects,
-                               MultipartFile file) throws IOException {
+    public void createTemplate(String templateName, String projects, MultipartFile file) throws IOException {
         List<String> projectKeys = Arrays.asList(projects.split(","));
         
         if (templateService.getTemplate(templateName) != null)
@@ -146,8 +143,11 @@ public class FollowUpFacade implements FollowUpFacadeInterface {
         }
     }
 
-    @Override
     public Resource getGenericTemplate() {
         return IOUtilities.asResource(dataBaseDirectory.path(SAMPLE_FOLLOWUP_TEMPLATE_PATH));
+    }
+
+    public List<String> getHistoryGivenProjects(String... projectsKey) {
+        return historyRepository.getHistoryGivenProjects(projectsKey);
     }
 }

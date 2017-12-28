@@ -20,73 +20,49 @@
  */
 package objective.taskboard.followup.impl;
 
-import static java.nio.file.Files.createDirectories;
-import static java.nio.file.Files.walk;
 import static java.util.Arrays.asList;
 import static objective.taskboard.issueBuffer.IssueBufferState.ready;
 import static objective.taskboard.issueBuffer.IssueBufferState.updateError;
 import static objective.taskboard.issueBuffer.IssueBufferState.updating;
-import static objective.taskboard.utils.IOUtilities.write;
-import static objective.taskboard.utils.ZipUtils.zip;
-import static org.apache.commons.io.FileUtils.deleteQuietly;
-import static org.springframework.util.CollectionUtils.isEmpty;
 
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import objective.taskboard.database.directory.DataBaseDirectory;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.FollowUpDataHistoryGenerator;
+import objective.taskboard.followup.FollowUpDataHistoryRepository;
 import objective.taskboard.followup.FollowupData;
-import objective.taskboard.followup.FromJiraDataSet;
-import objective.taskboard.followup.SyntheticTransitionsDataSet;
 import objective.taskboard.issueBuffer.IssueBufferState;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
-import objective.taskboard.utils.DateTimeUtils;
 
 @Component
 public class FollowUpDataHistoryGeneratorJSONFiles implements FollowUpDataHistoryGenerator {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FollowUpDataHistoryGeneratorJSONFiles.class);
-    public static final String PATH_FOLLOWUP_HISTORY = "followup-history";
-    public static final String FILE_NAME_FORMAT = "yyyyMMdd";
-    public static final String EXTENSION_JSON = ".json";
-    public static final String EXTENSION_ZIP = ".zip";
-
     private static final List<IssueBufferState> ISSUE_BUFFER_STATES_READY = asList(ready, updating, updateError);
     private static final long MINUTE = 60 * 1000L;
     private static final long SLEEP_TIME_IN_MINUTES = 5L;
 
-    @Autowired
-    private ProjectFilterConfigurationCachedRepository projectFilterCacheRepo;
-
-    @Autowired
-    private FollowUpDataProviderFromCurrentState providerFromCurrentState;
-
-    @Autowired
-    private DataBaseDirectory dataBaseDirectory;
-
-    private Gson gson = new GsonBuilder()
-            .registerTypeAdapter(ZonedDateTime.class, new DateTimeUtils.ZonedDateTimeAdapter())
-            .setPrettyPrinting()
-            .create();
+    private final ProjectFilterConfigurationCachedRepository projectFilterCacheRepo;
+    private final FollowUpDataProviderFromCurrentState providerFromCurrentState;
+    private final FollowUpDataHistoryRepository historyRepository;
 
     private boolean isExecutingDataHistoryGenerate = false;
+    
+    @Autowired
+    public FollowUpDataHistoryGeneratorJSONFiles(
+            ProjectFilterConfigurationCachedRepository projectFilterCacheRepo,
+            FollowUpDataProviderFromCurrentState providerFromCurrentState,
+            FollowUpDataHistoryRepository historyRepository) {
+        this.projectFilterCacheRepo = projectFilterCacheRepo;
+        this.providerFromCurrentState = providerFromCurrentState;
+        this.historyRepository = historyRepository;
+    }
 
     @PostConstruct
     public void initialize() {
@@ -124,83 +100,14 @@ public class FollowUpDataHistoryGeneratorJSONFiles implements FollowUpDataHistor
         for (ProjectFilterConfiguration pf : projectFilterCacheRepo.getProjects()) {
             String projectKey = pf.getProjectKey();
 
-            Path pathProject = dataBaseDirectory.path(PATH_FOLLOWUP_HISTORY).resolve(projectKey);
-            if (!pathProject.toFile().exists())
-                createDirectories(pathProject);
-
-            String today = DateTime.now().toString(FILE_NAME_FORMAT);
-            Path pathJSON = pathProject.resolve(today + EXTENSION_JSON);
-
             log.info("Generating history of project " + projectKey);
-            try {
-                FollowupData jiraData = providerFromCurrentState.getJiraData(projectKey);
-                jiraData = new FollowupData(
-                        nullIfEmpty(jiraData.fromJiraDs)
-                        , nullIfEmpty(jiraData.analyticsTransitionsDsList)
-                        , headerOnly(jiraData.syntheticsTransitionsDsList));
-                write(pathJSON.toFile(), gson.toJson(jiraData));
+            FollowupData jiraData = providerFromCurrentState.getJiraData(projectKey);
 
-                Path pathZIP = Paths.get(pathJSON.toString() + EXTENSION_ZIP);
-                deleteQuietly(pathZIP.toFile());
-                zip(pathJSON, pathZIP);
-                log.info("History generated: " + pathZIP.toString());
-            } finally {
-                deleteQuietly(pathJSON.toFile());
-            }
+            historyRepository.save(projectKey, jiraData);
+            
+            log.info("History of project " + projectKey + " generated");
+
         }
         log.info(getClass().getSimpleName() + " complete");
     }
-
-    private static FromJiraDataSet nullIfEmpty(FromJiraDataSet fromJiraDs) {
-        if(isEmpty(fromJiraDs.rows)) {
-            return null;
-        }
-        return new FromJiraDataSet(null, fromJiraDs.rows);
-    }
-
-    private static <T> List<T> nullIfEmpty(List<T> list) {
-        return isEmpty(list) ? null : list;
-    }
-
-    /**
-     * Should not persist data, only headers
-     * @param syntheticsDsList
-     * @return
-     */
-    private static List<SyntheticTransitionsDataSet> headerOnly(List<SyntheticTransitionsDataSet> syntheticsDsList) {
-        if(isEmpty(syntheticsDsList))
-            return null;
-        return syntheticsDsList.stream()
-                .map(s -> new SyntheticTransitionsDataSet(s.issueType, s.headers, null))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<String> getHistoryByProject(String project) {
-        List<String> history = new ArrayList<String>();
-
-        Path pathProject = dataBaseDirectory.path(PATH_FOLLOWUP_HISTORY).resolve(project);
-        if (!pathProject.toFile().exists())
-            return history;
-
-        try {
-            Iterable<Path> paths = walk(pathProject)::iterator;
-            for (Path path : paths) {
-                if (path.toFile().isDirectory())
-                    continue;
-
-                String fileName = path.toFile().getName().replace(EXTENSION_JSON + EXTENSION_ZIP, "");
-                String today = DateTime.now().toString(FILE_NAME_FORMAT);
-                if (today.equals(fileName))
-                    continue;
-
-                history.add(fileName);
-            }
-            Collections.sort(history);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return history;
-    }
-
 }

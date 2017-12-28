@@ -21,12 +21,8 @@
 
 package objective.taskboard.followup;
 
-import java.util.List;
-
 public interface FollowUpDataHistoryGenerator {
 
     public void scheduledGenerate();
-
-    public List<String> getHistoryByProject(String project);
 
 }
