@@ -264,13 +264,16 @@ function Taskboard() {
     this.applyFilterPreferences = function() {
         var filterPreferences = userPreferences.getFilters();
 
+        if (_.isEmpty(filterPreferences))
+            return;
+
         var filterTeams = [INVALID_TEAM];
         aspectFilters.forEach(function(item) {
             if (item.description !== 'Project')
                 return;
 
             item.aspectsSubitemFilter.forEach(function(subitem) {
-                if (filterPreferences[subitem.value] == true || filterPreferences[subitem.value] == null)
+                if (filterPreferences[subitem.value] == true)
                     filterTeams = filterTeams.concat(subitem.teams);
             });
         });
@@ -283,6 +286,8 @@ function Taskboard() {
                 } else {
                     if (filterPreferences[subitem.value] != null)
                         subitem.selected = filterPreferences[subitem.value];
+                    else if (this.description === 'Project')
+                        subitem.selected = false;
                     subitem.visible = true;
                     if (this.description === 'Team' && filterTeams.indexOf(subitem.value) == -1)
                         subitem.visible = false;
