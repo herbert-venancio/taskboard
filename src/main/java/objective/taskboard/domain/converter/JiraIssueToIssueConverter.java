@@ -53,6 +53,7 @@ import org.springframework.stereotype.Service;
 
 import com.atlassian.jira.rest.client.api.domain.Issue;
 
+import objective.taskboard.cycletime.CycleTime;
 import objective.taskboard.data.IssueScratch;
 import objective.taskboard.data.TaskboardTimeTracking;
 import objective.taskboard.database.IssuePriorityService;
@@ -92,6 +93,9 @@ public class JiraIssueToIssueConverter {
 
     @Autowired
     private FilterCachedRepository filterRepository;
+
+    @Autowired
+    private CycleTime cycleTime;
 
     @Autowired
     private CardVisibilityEvalService cardVisibilityEvalService;
@@ -174,6 +178,7 @@ public class JiraIssueToIssueConverter {
                 metadataService, 
                 issueTeamService, 
                 filterRepository,
+                cycleTime,
                 cardVisibilityEvalService,
                 projectService,
                 issueStateHashCalculator,

@@ -73,7 +73,7 @@ import objective.taskboard.utils.DateTimeUtils;
 
 public class FollowUpDataProviderFromHistory implements FollowupDataProvider {
 
-    private Gson gson = new GsonBuilder()
+    private static Gson gson = new GsonBuilder()
             .registerTypeAdapter(ZonedDateTime.class, new DateTimeUtils.ZonedDateTimeAdapter())
             .setPrettyPrinting()
             .create();
@@ -134,6 +134,7 @@ public class FollowUpDataProviderFromHistory implements FollowupDataProvider {
             }
             return this;
         }
+
     }
 
     private class V1_Loader extends BaseLoader {
@@ -170,20 +171,6 @@ public class FollowUpDataProviderFromHistory implements FollowupDataProvider {
 
         protected BaseLoader(ZoneId timezone) {
             this.timezone = timezone;
-        }
-
-        protected boolean matchVersion(JsonElement element, FollowupData.Version expectedVersion) {
-            if(!element.isJsonObject())
-                return false;
-            JsonObject obj = element.getAsJsonObject();
-            if(!obj.has("followupDataVersion"))
-                return false;
-            JsonElement version = obj.get("followupDataVersion");
-            if(!version.isJsonPrimitive() || !version.getAsJsonPrimitive().isString())
-                return false;
-            if(!Objects.equals(expectedVersion.value, version.getAsString()))
-                return false;
-            return true;
         }
 
         protected void doLoad(FollowupData data) {
@@ -274,9 +261,22 @@ public class FollowUpDataProviderFromHistory implements FollowupDataProvider {
         }
     }
 
+    private static boolean matchVersion(JsonElement element, FollowupData.Version expectedVersion) {
+        if(!element.isJsonObject())
+            return false;
+        JsonObject obj = element.getAsJsonObject();
+        if(!obj.has("followupDataVersion"))
+            return false;
+        JsonElement version = obj.get("followupDataVersion");
+        if(!version.isJsonPrimitive() || !version.getAsJsonPrimitive().isString())
+            return false;
+        if(!Objects.equals(expectedVersion.value, version.getAsString()))
+            return false;
+        return true;
+    }
+
     @Override
     public IssueBufferState getFollowupState() {
         return ready;
     }
-
 }

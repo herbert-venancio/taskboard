@@ -34,11 +34,13 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.ZoneId;
+import java.util.Locale;
 import java.util.Optional;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.SpreadsheetMLPackage;
 import org.docx4j.openpackaging.parts.SpreadsheetML.WorksheetPart;
+import org.docx4j.org.apache.poi.util.LocaleUtil;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -73,7 +75,6 @@ public class FollowUpFacadeTest {
     public CleanupDataFolderRule clean = new CleanupDataFolderRule(Paths.get("data/followup-templates"));
 
     private static final String FORMULA = "someFormula";
-    private static final String DATE_NULL = "12/31/99 0:00";
 
     @Mock
     private TemplateService templateService;
@@ -108,6 +109,11 @@ public class FollowUpFacadeTest {
         String path = argCaptor.getValue();
         template = mock(Template.class);
         when(template.getPath()).thenReturn(path);
+    }
+
+    @Before
+    public void setLocale() {
+        LocaleUtil.setUserLocale(new Locale("PT", "br"));
     }
 
     @Test
@@ -167,15 +173,15 @@ public class FollowUpFacadeTest {
 
     private String[] expectedRowContentOfFromJira() {
         return new String[]{
-                "PROJECT TEST", "Demand", "Doing", "I-1", "Summary Demand"
-                , "Description Demand", "Feature", "Doing", "I-2", "Summary Feature"
-                , "Description Feature", "Full Description Feature", "Sub-task", "Doing"
-                , "I-3", "Summary Sub-task", "Description Sub-task", "Full Description Sub-task"
-                , "1", "2", "3", "Ballpark", "Release", "1", "1", "1", "1", "M", "Type"
-                , FORMULA, FORMULA, FORMULA, FORMULA, FORMULA, FORMULA, FORMULA
-                , FORMULA, FORMULA, FORMULA, FORMULA, FORMULA, FORMULA, FORMULA
-                , FORMULA, FORMULA, "9/27/17 0:00", "9/26/17 0:00", "9/25/17 0:00"
-                , DATE_NULL, "9/26/17 0:00", "9/25/17 0:00", DATE_NULL, DATE_NULL, "9/25/17 0:00"};
+                "PROJECT TEST", "Demand", "Doing", "I-1", "Summary Demand" , "Description Demand",
+                "0", "assignee.demand.test", "5/25/25 0:00", "1/1/12 0:00", "", "", "reporter.demand.test", "", "Standard", "2/1/12 0:00", "1,111111", "false", "Demand last block reason",
+                "Feature", "Doing", "I-2", "Summary Feature", "Description Feature", "Full Description Feature", "80",
+                "0", "assignee.task.test", "5/24/25 0:00", "1/2/12 0:00", "", "", "reporter.demand.test", "", "Standard", "2/2/12 0:00", "2,222222", "false", "Task last block reason",
+                "Sub-task", "Doing", "I-3", "Summary Sub-task", "Description Sub-task", "Full Description Sub-task",
+                "0", "assignee.subtask.test", "5/23/25 0:00", "1/3/12 0:00", "", "", "reporter.subtask.test", "", "Standard", "2/3/12 0:00", "3,333333", "false", "Subtask last block reason",
+                "1", "2", "3", "Ballpark", "Release", "1", "1", "1", "1", "M", "Type",
+                FORMULA, FORMULA, FORMULA, FORMULA, FORMULA, FORMULA, FORMULA, FORMULA, FORMULA, FORMULA, FORMULA, FORMULA, FORMULA, FORMULA, FORMULA, FORMULA,
+                "9/27/17 0:00", "9/26/17 0:00", "9/25/17 0:00", "", "9/26/17 0:00", "9/25/17 0:00", "", "", "9/25/17 0:00"};
     }
 
     private String[] expectedRowContentOfAnalytics() {

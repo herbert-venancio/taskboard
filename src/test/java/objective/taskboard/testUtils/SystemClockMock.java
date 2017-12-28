@@ -11,8 +11,11 @@ import objective.taskboard.utils.Clock;
 @Component
 public class SystemClockMock implements Clock {
 
+    private Instant now = ZonedDateTime.of(2017, 6, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant();
+
     @Override
     public Instant now() {
-        return ZonedDateTime.of(2017, 6, 1, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant();
+        return now;
     }
+
 }

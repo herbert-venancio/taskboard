@@ -25,6 +25,7 @@ import static java.nio.file.Files.copy;
 import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.createTempDirectory;
 import static objective.taskboard.followup.FollowUpHelper.assertFollowUpDataDefault;
+import static objective.taskboard.followup.FollowUpHelper.assertFollowUpDataV0;
 import static objective.taskboard.followup.FollowUpHelper.getDefaultFollowupData;
 import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.EXTENSION_JSON;
 import static objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles.EXTENSION_ZIP;
@@ -85,13 +86,23 @@ public class FollowUpDataProviderFromHistoryTest {
     }
 
     @Test
+    public void whenHasDataHistoryUsingV3_ShouldReturnSomeData() throws IOException, URISyntaxException {
+        createProjectZipV2(PROJECT_TEST);
+
+        List<FromJiraDataRow> jiraData = subject.getJiraData(PROJECT_TEST).fromJiraDs.rows;
+
+        assertEquals("Jira data size", jiraData.size(), 1);
+        assertFollowUpDataDefault(jiraData.get(0));
+    }
+
+    @Test
     public void whenHasDataHistory_ShouldReturnSomeData() throws IOException, URISyntaxException {
         createProjectZipV0(PROJECT_TEST);
 
         List<FromJiraDataRow> jiraData = subject.getJiraData(PROJECT_TEST).fromJiraDs.rows;
 
         assertEquals("Jira data size", jiraData.size(), 1);
-        assertFollowUpDataDefault(jiraData.get(0));
+        assertFollowUpDataV0(jiraData.get(0));
     }
 
     @Test
@@ -126,14 +137,14 @@ public class FollowUpDataProviderFromHistoryTest {
         List<FromJiraDataRow> jiraData = subject.getJiraData(PROJECT_TEST, PROJECT_TEST_2).fromJiraDs.rows;
 
         assertEquals("Jira data size", jiraData.size(), 2);
-        assertFollowUpDataDefault(jiraData.get(0));
-        assertFollowUpDataDefault(jiraData.get(1));
+        assertFollowUpDataV0(jiraData.get(0));
+        assertFollowUpDataV0(jiraData.get(1));
     }
 
     @Test
     public void whenHasDataHistoryWithCfd_shouldRestoreSyntheticsDataSources() throws IOException, URISyntaxException {
         // given
-        createProjectZipV1(PROJECT_TEST);
+        createProjectZipV2(PROJECT_TEST);
 
         // when
         FollowupData data = subject.getJiraData(PROJECT_TEST);

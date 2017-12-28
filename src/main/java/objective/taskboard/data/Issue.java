@@ -21,6 +21,9 @@
 package objective.taskboard.data;
 
 import java.io.Serializable;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -30,12 +33,15 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.DateDeserializers.DateDeserializer;
 
 import objective.taskboard.config.SpringContextBridge;
+import objective.taskboard.cycletime.CycleTime;
 import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.domain.IssueStateHashCalculator;
 import objective.taskboard.domain.converter.CardVisibilityEvalService;
@@ -47,23 +53,24 @@ import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.data.Version;
 import objective.taskboard.repository.FilterCachedRepository;
+import objective.taskboard.utils.DateTimeUtils;
 
 
 public class Issue extends IssueScratch implements Serializable {
     private static final long serialVersionUID = 8513934402068368820L;
 
     private transient Issue parentCard;
-    
+
     private transient Set<Issue> subtasks = new LinkedHashSet<>();
 
     private transient JiraProperties jiraProperties;
-    
+
     private transient MetadataService metaDataService;
-    
+
     private transient IssueTeamService issueTeamService;
-    
+
     private transient FilterCachedRepository filterRepository;
-    
+
     private transient CardVisibilityEvalService cardVisibilityEvalService;
 
     private transient ProjectService projectService;
@@ -72,6 +79,8 @@ public class Issue extends IssueScratch implements Serializable {
 
     private transient IssueColorService issueColorService;
 
+    private transient CycleTime cycleTime;
+
     private List<IssueCoAssignee> coAssignees = new LinkedList<>(); //NOSONAR
 
     public Issue(IssueScratch scratch, 
@@ -79,6 +88,7 @@ public class Issue extends IssueScratch implements Serializable {
             MetadataService metadataService, 
             IssueTeamService issueTeamService, 
             FilterCachedRepository filterRepository,
+            CycleTime cycleTime,
             CardVisibilityEvalService cardVisibilityEvalService,
             ProjectService projectService,
             IssueStateHashCalculator issueStateHashCalculator,
@@ -122,6 +132,7 @@ public class Issue extends IssueScratch implements Serializable {
         this.jiraProperties = properties;
         this.issueTeamService = issueTeamService;
         this.filterRepository = filterRepository;
+        this.cycleTime = cycleTime;
         this.cardVisibilityEvalService = cardVisibilityEvalService;
         this.projectService = projectService;
         this.issueStateHashCalculator = issueStateHashCalculator;
@@ -130,7 +141,7 @@ public class Issue extends IssueScratch implements Serializable {
         this.favorite = false;
         this.hidden = false;
     }
-    
+
     @JsonAnyGetter
     public Map<String, Serializable> getCustomFields() {
         return customFields;
@@ -141,6 +152,7 @@ public class Issue extends IssueScratch implements Serializable {
         metaDataService = SpringContextBridge.getBean(MetadataService.class);
         issueTeamService = SpringContextBridge.getBean(IssueTeamService.class);
         filterRepository = SpringContextBridge.getBean(FilterCachedRepository.class);
+        cycleTime = SpringContextBridge.getBean(CycleTime.class);
     }
 
     @JsonIgnore
@@ -305,6 +317,33 @@ public class Issue extends IssueScratch implements Serializable {
         return r;
     }
 
+    @JsonIgnore
+    public Double getCycleTime(ZoneId timezone) {
+        return cycleTime.getCycleTime(Instant.ofEpochMilli(startDateStepMillis), timezone, status);
+    }
+
+    @JsonIgnore
+    public Double getAdditionalEstimatedHours() {
+        String additionalEstimatedHoursFieldId = jiraProperties.getCustomfield().getAdditionalEstimatedHours().getId();
+        CustomField additionalEstimatedHours = (CustomField) getCustomFields().get(additionalEstimatedHoursFieldId);
+        if (additionalEstimatedHours != null)
+            return (Double) additionalEstimatedHours.getValue();
+        return null;
+    }
+
+    @JsonIgnore
+    public Boolean isBlocked() {
+        String blockedFieldId = jiraProperties.getCustomfield().getBlocked().getId();
+        String blockedValue = (String) getCustomFields().get(blockedFieldId);
+        return StringUtils.isNotEmpty(blockedValue);
+    }
+
+    @JsonIgnore
+    public String getLastBlockReason() {
+        String lastBlockReasonFieldId = jiraProperties.getCustomfield().getLastBlockReason().getId();
+        return (String) getCustomFields().get(lastBlockReasonFieldId);
+    }
+
     public Long getId() {
         return this.id;
     }
@@ -394,6 +433,11 @@ public class Issue extends IssueScratch implements Serializable {
         return this.dueDate;
     }
 
+    @JsonIgnore
+    public ZonedDateTime getDueDateByTimezoneId(ZoneId timezone) {
+        return DateTimeUtils.get(dueDate, timezone);
+    }
+
     @JsonDeserialize(using = DateDeserializer.class)
     public Date getUpdatedDate() {
         if (priorityUpdatedDate == null && remoteIssueUpdatedDate == null)
@@ -410,9 +454,19 @@ public class Issue extends IssueScratch implements Serializable {
         
         return remoteIssueUpdatedDate;
     }
-    
+
+    @JsonIgnore
+    public ZonedDateTime getUpdatedDateByTimezoneId(ZoneId timezone) {
+        return DateTimeUtils.get(getUpdatedDate(), timezone);
+    }
+
     public long getCreated() {
         return this.created;
+    }
+
+    @JsonIgnore
+    public ZonedDateTime getCreatedDateByTimezoneId(ZoneId timezone) {
+        return DateTimeUtils.get(this.created, timezone);
     }
 
     public String getDescription() {
@@ -654,6 +708,7 @@ public class Issue extends IssueScratch implements Serializable {
             MetadataService metaDataService,
             IssueTeamService issueTeamService,
             FilterCachedRepository filterRepository,
+            CycleTime cycleTime,
             CardVisibilityEvalService cardVisibilityEvalService,
             ProjectService projectService,
             IssueStateHashCalculator issueStateHashCalculator,
@@ -662,6 +717,7 @@ public class Issue extends IssueScratch implements Serializable {
         this.metaDataService = metaDataService;
         this.issueTeamService = issueTeamService;
         this.filterRepository = filterRepository;
+        this.cycleTime = cycleTime;
         this.cardVisibilityEvalService = cardVisibilityEvalService;
         this.projectService = projectService;
         this.issueStateHashCalculator = issueStateHashCalculator;

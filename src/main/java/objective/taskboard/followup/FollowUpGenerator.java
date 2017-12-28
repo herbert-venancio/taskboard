@@ -33,14 +33,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
-import objective.taskboard.Constants;
-import objective.taskboard.spreadsheet.CellRange;
-import objective.taskboard.spreadsheet.TableEditor;
 import org.springframework.core.io.Resource;
 
+import objective.taskboard.Constants;
+import objective.taskboard.spreadsheet.CellRange;
 import objective.taskboard.spreadsheet.Sheet;
 import objective.taskboard.spreadsheet.SheetRow;
 import objective.taskboard.spreadsheet.SpreadsheetEditor;
+import objective.taskboard.spreadsheet.TableEditor;
 import objective.taskboard.utils.IOUtilities;
 
 public class FollowUpGenerator {
@@ -96,18 +96,61 @@ public class FollowUpGenerator {
             row.addColumn(fromJiraDataRow.demandNum);
             row.addColumn(fromJiraDataRow.demandSummary);
             row.addColumn(fromJiraDataRow.demandDescription);
+            row.addColumn(fromJiraDataRow.demandStartDateStepMillis);
+            row.addColumn(fromJiraDataRow.demandAssignee);
+            row.addColumn(fromJiraDataRow.demandDueDate);
+            row.addColumn(fromJiraDataRow.demandCreated);
+            row.addColumn(fromJiraDataRow.demandLabels);
+            row.addColumn(fromJiraDataRow.demandComponents);
+            row.addColumn(fromJiraDataRow.demandReporter);
+            row.addColumn(fromJiraDataRow.demandCoAssignees);
+            row.addColumn(fromJiraDataRow.demandClassOfService);
+            row.addColumn(fromJiraDataRow.demandUpdatedDate);
+            row.addColumn(fromJiraDataRow.demandCycletime);
+            row.addColumn(fromJiraDataRow.demandIsBlocked);
+            row.addColumn(fromJiraDataRow.demandLastBlockReason);
+
             row.addColumn(fromJiraDataRow.taskType);
             row.addColumn(fromJiraDataRow.taskStatus);
             row.addColumn(fromJiraDataRow.taskNum);
             row.addColumn(fromJiraDataRow.taskSummary);
             row.addColumn(fromJiraDataRow.taskDescription);
             row.addColumn(fromJiraDataRow.taskFullDescription);
+            row.addColumn(fromJiraDataRow.taskAdditionalEstimatedHours);
+            row.addColumn(fromJiraDataRow.taskStartDateStepMillis);
+            row.addColumn(fromJiraDataRow.taskAssignee);
+            row.addColumn(fromJiraDataRow.taskDueDate);
+            row.addColumn(fromJiraDataRow.taskCreated);
+            row.addColumn(fromJiraDataRow.taskLabels);
+            row.addColumn(fromJiraDataRow.taskComponents);
+            row.addColumn(fromJiraDataRow.taskReporter);
+            row.addColumn(fromJiraDataRow.taskCoAssignees);
+            row.addColumn(fromJiraDataRow.taskClassOfService);
+            row.addColumn(fromJiraDataRow.taskUpdatedDate);
+            row.addColumn(fromJiraDataRow.taskCycletime);
+            row.addColumn(fromJiraDataRow.taskIsBlocked);
+            row.addColumn(fromJiraDataRow.taskLastBlockReason);
+
             row.addColumn(fromJiraDataRow.subtaskType);
             row.addColumn(fromJiraDataRow.subtaskStatus);
             row.addColumn(fromJiraDataRow.subtaskNum);
             row.addColumn(fromJiraDataRow.subtaskSummary);
             row.addColumn(fromJiraDataRow.subtaskDescription);
             row.addColumn(fromJiraDataRow.subtaskFullDescription);
+            row.addColumn(fromJiraDataRow.subtaskStartDateStepMillis);
+            row.addColumn(fromJiraDataRow.subtaskAssignee);
+            row.addColumn(fromJiraDataRow.subtaskDueDate);
+            row.addColumn(fromJiraDataRow.subtaskCreated);
+            row.addColumn(fromJiraDataRow.subtaskLabels);
+            row.addColumn(fromJiraDataRow.subtaskComponents);
+            row.addColumn(fromJiraDataRow.subtaskReporter);
+            row.addColumn(fromJiraDataRow.subtaskCoAssignees);
+            row.addColumn(fromJiraDataRow.subtaskClassOfService);
+            row.addColumn(fromJiraDataRow.subtaskUpdatedDate);
+            row.addColumn(fromJiraDataRow.subtaskCycletime);
+            row.addColumn(fromJiraDataRow.subtaskIsBlocked);
+            row.addColumn(fromJiraDataRow.subtaskLastBlockReason);
+
             row.addColumn(fromJiraDataRow.demandId);
             row.addColumn(fromJiraDataRow.taskId);
             row.addColumn(fromJiraDataRow.subtaskId);
@@ -119,21 +162,37 @@ public class FollowUpGenerator {
             row.addColumn(fromJiraDataRow.taskBallpark);
             row.addColumn(fromJiraDataRow.tshirtSize);
             row.addColumn(fromJiraDataRow.queryType);
+            //EffortEstimate
             row.addFormula("IF(AND(AllIssues[[#This Row],[TASK_BALLPARK]]>0,AllIssues[[#This Row],[Query_Type]]<>\"SUBTASK PLAN\"),AllIssues[[#This Row],[TASK_BALLPARK]],SUMIFS(Clusters[Effort],Clusters[Cluster Name],AllIssues[[#This Row],[SUBTASK_TYPE]],Clusters[T-Shirt Size],AllIssues[tshirt_size]))");
+            //CycleEstimate            
             row.addFormula("IF(AND(AllIssues[[#This Row],[TASK_BALLPARK]]>0,AllIssues[[#This Row],[Query_Type]]<>\"SUBTASK PLAN\"),AllIssues[[#This Row],[TASK_BALLPARK]]*1.3,SUMIFS(Clusters[Cycle],Clusters[Cluster Name],AllIssues[[#This Row],[SUBTASK_TYPE]],Clusters[T-Shirt Size],AllIssues[tshirt_size]))");
+            // EffortOnBacklog
             row.addFormula("AllIssues[EffortEstimate]-AllIssues[EffortDone]");
+            // CycleOnBacklog
             row.addFormula("AllIssues[CycleEstimate]-AllIssues[CycleDone]");
+            // BallparkEffort
             row.addFormula("IF(AllIssues[[#This Row],[planning_type]]=\"Ballpark\",AllIssues[EffortEstimate],0)");
+            // PlannedEffort
             row.addFormula("IF(AllIssues[[#This Row],[planning_type]]=\"Plan\",AllIssues[EffortEstimate],0)");
+            // EffortDone
             row.addFormula("IF(OR(AllIssues[SUBTASK_STATUS]=\"Done\",AllIssues[SUBTASK_STATUS]=\"Cancelled\"),AllIssues[EffortEstimate],0)");
+            // CycleDone
             row.addFormula("IF(OR(AllIssues[SUBTASK_STATUS]=\"Done\",AllIssues[SUBTASK_STATUS]=\"Cancelled\"),AllIssues[CycleEstimate],0)");
+            // WorklogDone
             row.addFormula("IF(OR(AllIssues[SUBTASK_STATUS]=\"Done\",AllIssues[SUBTASK_STATUS]=\"Cancelled\"),AllIssues[worklog],0)");
+            // WorklogDoing
             row.addFormula("IF(OR(AllIssues[SUBTASK_STATUS]=\"Done\",AllIssues[SUBTASK_STATUS]=\"Cancelled\"),0, AllIssues[worklog])");
+            // CountTasks
             row.addFormula("IF(COUNTIFS(AllIssues[TASK_ID],AllIssues[TASK_ID],AllIssues[TASK_ID],\">0\")=0,0,1/COUNTIFS(AllIssues[TASK_ID],AllIssues[TASK_ID],AllIssues[TASK_ID],\">0\"))");
+            // CountDemands
             row.addFormula("IF(COUNTIFS(AllIssues[demand_description],AllIssues[demand_description])=0,0,1/COUNTIFS(AllIssues[demand_description],AllIssues[demand_description]))");
+            // CountSubtasks
             row.addFormula("IF(AllIssues[planning_type]=\"Plan\",1,0)");
+            // SubtaskEstimativeForEEPCalculation
             row.addFormula("IF(AllIssues[[#This Row],[SUBTASK_STATUS]]=\"Done\", AllIssues[[#This Row],[EffortDone]],0)");
+            // PlannedEffortOnBug
             row.addFormula("IF(AllIssues[TASK_TYPE]=\"Bug\",AllIssues[EffortEstimate], 0)");
+            // WorklogOnBug
             row.addFormula("IF(AllIssues[TASK_TYPE]=\"Bug\",AllIssues[worklog],0)");
 
             addTransitionsDatesIfExist(followupData.analyticsTransitionsDsList, TYPE_DEMAND, fromJiraDataRow.demandNum, row);

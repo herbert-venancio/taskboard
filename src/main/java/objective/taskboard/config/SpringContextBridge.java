@@ -1,5 +1,3 @@
-package objective.taskboard.config;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,6 +18,8 @@ package objective.taskboard.config;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+
+package objective.taskboard.config;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;

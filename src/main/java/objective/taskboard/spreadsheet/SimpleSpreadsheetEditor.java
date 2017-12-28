@@ -24,6 +24,7 @@ import java.util.Optional;
 
 import objective.taskboard.google.SpreadsheetUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -484,20 +485,40 @@ public class SimpleSpreadsheetEditor implements SpreadsheetEditor {
 
         @Override
         public void addColumn(String value) {
-            Element column = addColumn(getOrSetIndexInSharedStrings(value), "v");
-            column.setAttribute("t", "s");
+            if(StringUtils.isEmpty(value)) {
+                addBlankColumn();
+            } else {
+                Element column = addColumn(getOrSetIndexInSharedStrings(value), "v");
+                column.setAttribute("t", "s");
+            }
         }
 
         @Override
         public void addColumn(Number value) {
-            addColumn(defaultIfNull(value, "").toString(), "v");
+            if (value == null)
+                addBlankColumn();
+            else
+                addColumn(defaultIfNull(value, "").toString(), "v");
+        }
+
+        @Override
+        public void addColumn(Boolean value) {
+            if (value == null)
+                addBlankColumn();
+            else {
+                Element column = addColumn(String.valueOf(value), "v");
+                column.setAttribute("t", "b");
+            }
         }
 
         @Override
         public void addColumn(ZonedDateTime value) {
-            Element column = addColumn(toDoubleExcelFormat(value, workbookEditor.isDate1904()), "v");
-            column.setAttribute("s", Integer.toString(
-                    stylesEditor.getOrCreateNumberFormat("m/d/yy h:mm")));
+            if (value == null) {
+                addBlankColumn();
+            } else {
+                Element column = addColumn(toDoubleExcelFormat(value, workbookEditor.isDate1904()), "v");
+                column.setAttribute("s", Integer.toString(stylesEditor.getOrCreateNumberFormat("m/d/yy h:mm")));
+            }
         }
 
         @Override
@@ -512,6 +533,13 @@ public class SimpleSpreadsheetEditor implements SpreadsheetEditor {
             Element valueNode = sheetDoc.createElement(tagName);
             valueNode.appendChild(sheetDoc.createTextNode(colVal));
             column.appendChild(valueNode);
+            row.appendChild(column);
+            columnIndex++;
+            return column;
+        }
+
+        private Element addBlankColumn() {
+            Element column = sheetDoc.createElement("c");
             row.appendChild(column);
             columnIndex++;
             return column;
@@ -664,7 +692,6 @@ public class SimpleSpreadsheetEditor implements SpreadsheetEditor {
                     NodeList numFmts = XmlUtils.xpath(doc, "//numFmts/numFmt");
                     for (Node node : XmlUtils.iterable(numFmts)) {
                         Element numFmt = (Element) node;
-
                         numberFormat.put(Integer.valueOf(numFmt.getAttribute("numFmtId")), numFmt.getAttribute("formatCode"));
                     }
                     initialNumberFormatCount = numberFormat.size();

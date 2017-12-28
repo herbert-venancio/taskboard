@@ -3,6 +3,9 @@ package objective.taskboard.followup.impl;
 import static java.util.Arrays.asList;
 import static objective.taskboard.utils.DateTimeUtils.parseDate;
 import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
+import static objective.taskboard.utils.DateTimeUtils.parseStringToDate;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
@@ -10,6 +13,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,15 +33,18 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
+import objective.taskboard.cycletime.CycleTime;
 import objective.taskboard.data.Changelog;
 import objective.taskboard.data.Issue;
 import objective.taskboard.data.IssueScratch;
 import objective.taskboard.data.TaskboardTimeTracking;
+import objective.taskboard.domain.converter.IssueCoAssignee;
 import objective.taskboard.domain.converter.IssueTeamService;
 import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraProperties.BallparkMapping;
 import objective.taskboard.jira.JiraProperties.CustomField;
+import objective.taskboard.jira.JiraProperties.CustomField.Blocked;
 import objective.taskboard.jira.JiraProperties.CustomField.CustomFieldDetails;
 import objective.taskboard.jira.JiraProperties.CustomField.TShirtSize;
 import objective.taskboard.jira.JiraProperties.IssueLink;
@@ -66,7 +73,10 @@ public abstract class AbstractFollowUpDataProviderTest {
 
     @Mock
     private IssueTeamService issueTeamService;
-    
+
+    @Mock
+    private CycleTime cycleTime;
+
     @Mock
     private ProjectService projectService;
 
@@ -91,6 +101,10 @@ public abstract class AbstractFollowUpDataProviderTest {
     protected static final long statusDoing     = 15L;
     protected static final long statusCancelled = 16L;
     protected static final long statusDone      = 17L;
+
+    private static final String BLOCKED_ID = "1";
+    private static final String LAST_BLOCK_REASON_ID = "2";
+    private static final String ADDITIONAL_ESTIMATED_HOURS_ID = "3";
 
     protected static final StatusCategory CATEGORY_UNDEFINED = new StatusCategory(
             Long.valueOf(1L)
@@ -135,6 +149,19 @@ public abstract class AbstractFollowUpDataProviderTest {
         tshirtSizeInfo.setMainTShirtSizeFieldId("MAINID");
         propertiesCustomField = new CustomField();
         propertiesCustomField.setTShirtSize(tshirtSizeInfo);
+
+        Blocked blocked = new Blocked();
+        blocked.setId(BLOCKED_ID);
+        propertiesCustomField.setBlocked(blocked);
+
+        CustomFieldDetails additionalEstimatedHours = new CustomFieldDetails();
+        additionalEstimatedHours.setId(ADDITIONAL_ESTIMATED_HOURS_ID);
+        propertiesCustomField.setAdditionalEstimatedHours(additionalEstimatedHours);
+
+        CustomFieldDetails lastBlockReason = new CustomFieldDetails();
+        lastBlockReason.setId(LAST_BLOCK_REASON_ID);
+        propertiesCustomField.setLastBlockReason(lastBlockReason);
+
         when(jiraProperties.getCustomfield()).thenReturn(propertiesCustomField);
 
         IssueLink issueLink = new IssueLink();
@@ -158,6 +185,12 @@ public abstract class AbstractFollowUpDataProviderTest {
         statusOrder.setTasks(tasksOrder);
         statusOrder.setSubtasks(subtaskOrder);
         when(jiraProperties.getStatusPriorityOrder()).thenReturn(statusOrder);
+
+        when(jiraProperties.getStatusesCompletedIds()).thenReturn(asList(10001L));
+        when(jiraProperties.getStatusesCanceledIds()).thenReturn(asList(10101L));
+        when(jiraProperties.getStatusesDeferredIds()).thenReturn(asList(10102L));
+
+        when(cycleTime.getCycleTime(any(), any(), anyLong())).thenReturn(1D);
     }
 
     public String[] defaultProjects() {
@@ -181,15 +214,23 @@ public abstract class AbstractFollowUpDataProviderTest {
         private String project;
         private String key;
         private String summary;
+        private String assignee;
+        private List<IssueCoAssignee> coAssignees;
         private Long status = statusToDo;
+        private long startDateStepMillis;
         private Integer originalEstimateMinutes;
         private Integer timeSpentMinutes;
+        private Date priorityUpdatedDate;
         private String parent;
         private Map<String, Serializable> customFields = new LinkedHashMap<>();
         private Long priorityOrder;
         private List<Pair<String, ZonedDateTime>> transitions = new LinkedList<>();
         private Long created = 0L;
+        private Date dueDate;
         private String releaseId;
+        private List<String> labels;
+        private String reporter;
+        private List<String> components;
 
         public IssueBuilder id(int id) {
             this.id = (long) id;
@@ -212,8 +253,28 @@ public abstract class AbstractFollowUpDataProviderTest {
             return this;
         }
 
+        public IssueBuilder startDateStepMillis(long startDateStepMillis) {
+            this.startDateStepMillis = startDateStepMillis;
+            return this;
+        }
+
         public IssueBuilder tshirt(String tshirtId, String tshirtSize) {
             customFields.put(tshirtId, new objective.taskboard.data.CustomField(tshirtId, tshirtSize));
+            return this;
+        }
+
+        public IssueBuilder isBlocked(String yesNoValue) {
+            customFields.put(BLOCKED_ID, yesNoValue);
+            return this;
+        }
+
+        public IssueBuilder lastBlockReason(String lastBlockReason) {
+            customFields.put(LAST_BLOCK_REASON_ID, lastBlockReason);
+            return this;
+        }
+
+        public IssueBuilder additionalEstimatedHours(Double additionalEstimatedHours) {
+            customFields.put(ADDITIONAL_ESTIMATED_HOURS_ID, new objective.taskboard.data.CustomField(ADDITIONAL_ESTIMATED_HOURS_ID, additionalEstimatedHours));
             return this;
         }
 
@@ -243,6 +304,26 @@ public abstract class AbstractFollowUpDataProviderTest {
 
         public IssueBuilder summary(String summary) {
             this.summary = summary;
+            return this;
+        }
+
+        public IssueBuilder assignee(String assignee) {
+            this.assignee = assignee;
+            return this;
+        }
+
+        public IssueBuilder coAssignees(String... coAssigneesNames) {
+            if (coAssigneesNames != null && coAssigneesNames.length > 0) {
+                List<IssueCoAssignee> coAssignees = new ArrayList<>();
+                for (int i = 0 ; i < coAssigneesNames.length; i++)
+                    coAssignees.add(new IssueCoAssignee(coAssigneesNames[i], "avatarUrl-" + coAssigneesNames[i]));
+                this.coAssignees = coAssignees;
+            }
+            return this;
+        }
+
+        public IssueBuilder reporter(String reporter) {
+            this.reporter = reporter;
             return this;
         }
 
@@ -285,6 +366,28 @@ public abstract class AbstractFollowUpDataProviderTest {
             return created(parseDateTime(date, time));
         }
 
+        public IssueBuilder dueDate(String dueDate) {
+            this.dueDate = parseStringToDate(dueDate);
+            return this;
+        }
+
+        public IssueBuilder priorityUpdatedDate(String priorityUpdatedDate) {
+            this.priorityUpdatedDate = parseStringToDate(priorityUpdatedDate);
+            return this;
+        }
+
+        public IssueBuilder labels(String... labels) {
+            if (labels != null && labels.length > 0)
+                this.labels = new ArrayList<String>(asList(labels));
+            return this;
+        }
+
+        public IssueBuilder components(String... components) {
+            if (components != null && components.length > 0)
+                this.components = new ArrayList<String>(asList(components));
+            return this;
+        }
+
         public Issue build() {
             TaskboardTimeTracking timeTracking = new TaskboardTimeTracking(originalEstimateMinutes, timeSpentMinutes);
             if (originalEstimateMinutes == null && timeSpentMinutes == null)
@@ -298,7 +401,7 @@ public abstract class AbstractFollowUpDataProviderTest {
                     null, //typeIconUri
                     summary,
                     status,
-                    0L, //startDateStepMillis
+                    startDateStepMillis, //startDateStepMillis
                     null, //subresponsavel1
                     null, //subresponsavel2
                     parent,
@@ -306,26 +409,26 @@ public abstract class AbstractFollowUpDataProviderTest {
                     null, //parentTypeIconUri
                     new ArrayList<String>(),//dependencies
                     null, //subResponsaveis
-                    null, //assignee
+                    assignee,
                     0L, //priority
-                    null, //dueDate
-                    created, //created
-                    null,//Date updatedDate,
+                    dueDate,
+                    created,
+                    priorityUpdatedDate,
                     null,//Date remoteUpdatedDate,
                     null, //description
                     null, //comments
-                    null, //labels
-                    null, //components
+                    labels,
+                    components,
                     customFields,
                     priorityOrder,
                     timeTracking,
-                    null,//reporter
-                    null,//coAssignees
+                    reporter,
+                    coAssignees,
                     null,//classOfService
                     releaseId,
                     buildTransitions()
                     );
-            return new Issue(scratch, jiraProperties, metadataService, issueTeamService, null, null, projectService, null, null);
+            return new Issue(scratch, jiraProperties, metadataService, issueTeamService, null, cycleTime, null, projectService, null, null);
         }
 
         private List<Changelog> buildTransitions() {

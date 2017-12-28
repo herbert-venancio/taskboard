@@ -20,7 +20,7 @@
  */
 package objective.taskboard.followup;
 
-import static org.apache.commons.lang.ObjectUtils.defaultIfNull;
+import java.time.ZonedDateTime;
 
 public class FromJiraDataRow {
     public String planningType;
@@ -33,6 +33,19 @@ public class FromJiraDataRow {
     public String demandDescription = "";
     public Integer demandStatusPriority = 0;
     public Long demandPriorityOrder = 0l;
+    public Long demandStartDateStepMillis;
+    public String demandAssignee;
+    public ZonedDateTime demandDueDate;
+    public ZonedDateTime demandCreated;
+    public String demandLabels;
+    public String demandComponents;
+    public String demandReporter;
+    public String demandCoAssignees;
+    public String demandClassOfService;
+    public ZonedDateTime demandUpdatedDate;
+    public Double demandCycletime;
+    public Boolean demandIsBlocked;
+    public String demandLastBlockReason;
 
     public String taskType = "";
     public String taskStatus = "";
@@ -41,9 +54,23 @@ public class FromJiraDataRow {
     public String taskSummary = "";
     public String taskDescription = "";
     public String taskFullDescription = "";
+    public Double taskAdditionalEstimatedHours;
     public String taskRelease = "";
     public Integer taskStatusPriority = 0;
     public Long taskPriorityOrder = 0l;
+    public Long taskStartDateStepMillis;
+    public String taskAssignee;
+    public ZonedDateTime taskDueDate;
+    public ZonedDateTime taskCreated;
+    public String taskLabels;
+    public String taskComponents;
+    public String taskReporter;
+    public String taskCoAssignees;
+    public String taskClassOfService;
+    public ZonedDateTime taskUpdatedDate;
+    public Double taskCycletime;
+    public Boolean taskIsBlocked;
+    public String taskLastBlockReason;
 
     public String subtaskType;
     public String subtaskStatus;
@@ -52,48 +79,26 @@ public class FromJiraDataRow {
     public String subtaskSummary;
     public String subtaskDescription;
     public String subtaskFullDescription;
-    public String tshirtSize;
     public Integer subtaskStatusPriority = 0;
     public Long subtaskPriorityOrder = 0l;
-    
+    public Long subtaskStartDateStepMillis;
+    public String subtaskAssignee;
+    public ZonedDateTime subtaskDueDate;
+    public ZonedDateTime subtaskCreated;
+    public String subtaskLabels;
+    public String subtaskComponents;
+    public String subtaskReporter;
+    public String subtaskCoAssignees;
+    public String subtaskClassOfService;
+    public ZonedDateTime subtaskUpdatedDate;
+    public Double subtaskCycletime;
+    public Boolean subtaskIsBlocked;
+    public String subtaskLastBlockReason;
+
+    public String tshirtSize;
     public Double worklog;
     public Double wrongWorklog;
     public Double demandBallpark = 0.0;
     public Double taskBallpark = 0.0;
-
     public String queryType;
-    
-    @Override
-    public String toString() {
-        return
-                   " planningType           : " + planningType
-                +"\n project                : "+ project
-                +"\n demandType             : "+ demandType
-                +"\n demandStatus           : "+ demandStatus
-                +"\n demandId               : "+ defaultIfNull(demandId,"")
-                +"\n demandNum              : "+ demandNum
-                +"\n demandSummary          : "+ demandSummary
-                +"\n demandDescription      : "+ demandDescription
-                +"\n taskType               : "+ taskType
-                +"\n taskStatus             : "+ taskStatus
-                +"\n taskId                 : "+ taskId
-                +"\n taskNum                : "+ taskNum
-                +"\n taskSummary            : "+ taskSummary
-                +"\n taskDescription        : "+ taskDescription
-                +"\n taskFullDescription    : "+ taskFullDescription
-                +"\n taskRelease            : "+ taskRelease
-                +"\n subtaskType            : "+ subtaskType
-                +"\n subtaskStatus          : "+ subtaskStatus
-                +"\n subtaskId              : "+ subtaskId
-                +"\n subtaskNum             : "+ subtaskNum
-                +"\n subtaskSummary         : "+ subtaskSummary
-                +"\n subtaskDescription     : "+ subtaskDescription
-                +"\n subtaskFullDescription : "+ subtaskFullDescription
-                +"\n tshirtSize             : "+ tshirtSize
-                +"\n worklog                : "+ worklog
-                +"\n wrongWorklog           : "+ wrongWorklog
-                +"\n demandBallpark         : "+ demandBallpark
-                +"\n taskBallpark           : "+ taskBallpark
-                +"\n queryType              : "+ queryType;
-    }
 }

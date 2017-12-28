@@ -27,6 +27,7 @@ import static objective.taskboard.followup.impl.FollowUpTransitionsDataProvider.
 import static objective.taskboard.followup.impl.FollowUpTransitionsDataProvider.TYPE_FEATURES;
 import static objective.taskboard.followup.impl.FollowUpTransitionsDataProvider.TYPE_SUBTASKS;
 import static objective.taskboard.utils.IOUtilities.resourceToString;
+import static org.apache.commons.lang.ObjectUtils.defaultIfNull;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
@@ -37,9 +38,13 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UncheckedIOException;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang.StringUtils;
 
 import com.google.common.primitives.Ints;
 import com.google.gson.Gson;
@@ -52,6 +57,8 @@ import objective.taskboard.utils.DateTimeUtils.ZonedDateTimeAdapter;
 
 public class FollowUpHelper {
 
+    private static final String TIMEZONE_ID = "America/Sao_Paulo";
+
     public static FromJiraDataRow getDefaultFromJiraDataRow() {
         FromJiraDataRow followUpData = new FromJiraDataRow();
         followUpData.planningType = "Ballpark";
@@ -62,6 +69,22 @@ public class FollowUpHelper {
         followUpData.demandNum = "I-1";
         followUpData.demandSummary = "Summary Demand";
         followUpData.demandDescription = "Description Demand";
+        followUpData.demandStatusPriority = 0;
+        followUpData.demandPriorityOrder = 0l;
+        followUpData.demandStartDateStepMillis = 0L;
+        followUpData.demandAssignee = "assignee.demand.test";
+        followUpData.demandDueDate = DateTimeUtils.get(DateTimeUtils.parseDate("2025-05-25"), ZoneId.of(TIMEZONE_ID));
+        followUpData.demandCreated = DateTimeUtils.get(DateTimeUtils.parseDate("2012-01-01"), ZoneId.of(TIMEZONE_ID));
+        followUpData.demandLabels = "";
+        followUpData.demandComponents = "";
+        followUpData.demandReporter = "reporter.demand.test";
+        followUpData.demandCoAssignees = "";
+        followUpData.demandClassOfService = "Standard";
+        followUpData.demandUpdatedDate = DateTimeUtils.get(DateTimeUtils.parseDate("2012-02-01"), ZoneId.of(TIMEZONE_ID));
+        followUpData.demandCycletime = 1.111111;
+        followUpData.demandIsBlocked = false;
+        followUpData.demandLastBlockReason = "Demand last block reason";
+
         followUpData.taskType = "Feature";
         followUpData.taskStatus = "Doing";
         followUpData.taskId = 2L;
@@ -69,7 +92,24 @@ public class FollowUpHelper {
         followUpData.taskSummary = "Summary Feature";
         followUpData.taskDescription = "Description Feature";
         followUpData.taskFullDescription = "Full Description Feature";
+        followUpData.taskAdditionalEstimatedHours = 80.0;
         followUpData.taskRelease = "Release";
+        followUpData.taskStatusPriority = 0;
+        followUpData.taskPriorityOrder = 0l;
+        followUpData.taskStartDateStepMillis = 0L;
+        followUpData.taskAssignee = "assignee.task.test";
+        followUpData.taskDueDate = DateTimeUtils.get(DateTimeUtils.parseDate("2025-05-24"), ZoneId.of(TIMEZONE_ID));
+        followUpData.taskCreated = DateTimeUtils.get(DateTimeUtils.parseDate("2012-01-02"), ZoneId.of(TIMEZONE_ID));
+        followUpData.taskLabels = "";
+        followUpData.taskComponents = "";
+        followUpData.taskReporter = "reporter.demand.test";
+        followUpData.taskCoAssignees = "";
+        followUpData.taskClassOfService = "Standard";
+        followUpData.taskUpdatedDate = DateTimeUtils.get(DateTimeUtils.parseDate("2012-02-02"), ZoneId.of(TIMEZONE_ID));
+        followUpData.taskCycletime = 2.222222;
+        followUpData.taskIsBlocked = false;
+        followUpData.taskLastBlockReason = "Task last block reason";
+
         followUpData.subtaskType = "Sub-task";
         followUpData.subtaskStatus = "Doing";
         followUpData.subtaskId = 3L;
@@ -77,12 +117,29 @@ public class FollowUpHelper {
         followUpData.subtaskSummary = "Summary Sub-task";
         followUpData.subtaskDescription = "Description Sub-task";
         followUpData.subtaskFullDescription = "Full Description Sub-task";
+        followUpData.subtaskStatusPriority = 0;
+        followUpData.subtaskPriorityOrder = 0l;
+        followUpData.subtaskStartDateStepMillis = 0L;
+        followUpData.subtaskAssignee = "assignee.subtask.test";
+        followUpData.subtaskDueDate = DateTimeUtils.get(DateTimeUtils.parseDate("2025-05-23"), ZoneId.of(TIMEZONE_ID));
+        followUpData.subtaskCreated = DateTimeUtils.get(DateTimeUtils.parseDate("2012-01-03"), ZoneId.of(TIMEZONE_ID));
+        followUpData.subtaskLabels = "";
+        followUpData.subtaskComponents = "";
+        followUpData.subtaskReporter = "reporter.subtask.test";
+        followUpData.subtaskCoAssignees = "";
+        followUpData.subtaskClassOfService = "Standard";
+        followUpData.subtaskUpdatedDate = DateTimeUtils.get(DateTimeUtils.parseDate("2012-02-03"), ZoneId.of(TIMEZONE_ID));
+        followUpData.subtaskCycletime = 3.333333;
+        followUpData.subtaskIsBlocked = false;
+        followUpData.subtaskLastBlockReason = "Subtask last block reason";
+
         followUpData.tshirtSize = "M";
         followUpData.worklog = 1D;
         followUpData.wrongWorklog = 1D;
         followUpData.demandBallpark = 1D;
         followUpData.taskBallpark = 1D;
         followUpData.queryType = "Type";
+
         return followUpData;
     }
 
@@ -134,6 +191,87 @@ public class FollowUpHelper {
         assertEquals("demandNum", expected.demandNum, actual.demandNum);
         assertEquals("demandSummary", expected.demandSummary, actual.demandSummary);
         assertEquals("demandDescription", expected.demandDescription, actual.demandDescription);
+        assertEquals("demandStatusPriority", expected.demandStatusPriority, actual.demandStatusPriority);
+        assertEquals("demandPriorityOrder", expected.demandPriorityOrder, actual.demandPriorityOrder);
+        assertEquals("demandStartDateStepMillis", expected.demandStartDateStepMillis, actual.demandStartDateStepMillis);
+        assertEquals("demandAssignee", expected.demandAssignee, actual.demandAssignee);
+        assertEquals("demandDueDate", expected.demandDueDate, actual.demandDueDate);
+        assertEquals("demandCreated", expected.demandCreated, actual.demandCreated);
+        assertEquals("demandLabels", expected.demandLabels, actual.demandLabels);
+        assertEquals("demandComponents", expected.demandComponents, actual.demandComponents);
+        assertEquals("demandReporter", expected.demandReporter, actual.demandReporter);
+        assertEquals("demandCoAssignees", expected.demandCoAssignees, actual.demandCoAssignees);
+        assertEquals("demandClassOfService", expected.demandClassOfService, actual.demandClassOfService);
+        assertEquals("demandUpdatedDate", expected.demandUpdatedDate, actual.demandUpdatedDate);
+        assertEquals("demandCycletime", expected.demandCycletime, actual.demandCycletime);
+        assertEquals("demandIsBlocked", expected.demandIsBlocked, actual.demandIsBlocked);
+        assertEquals("demandLastBlockReason", expected.demandLastBlockReason, actual.demandLastBlockReason);
+        assertEquals("taskType", expected.taskType, actual.taskType);
+        assertEquals("taskStatus", expected.taskStatus, actual.taskStatus);
+        assertEquals("taskId", expected.taskId, actual.taskId);
+        assertEquals("taskNum", expected.taskNum, actual.taskNum);
+        assertEquals("taskSummary", expected.taskSummary, actual.taskSummary);
+        assertEquals("taskDescription", expected.taskDescription, actual.taskDescription);
+        assertEquals("taskFullDescription", expected.taskFullDescription, actual.taskFullDescription);
+        assertEquals("taskAdditionalEstimatedHours", expected.taskAdditionalEstimatedHours, actual.taskAdditionalEstimatedHours);
+        assertEquals("taskRelease", expected.taskRelease, actual.taskRelease);
+        assertEquals("taskStatusPriority", expected.taskStatusPriority, actual.taskStatusPriority);
+        assertEquals("taskPriorityOrder", expected.taskPriorityOrder, actual.taskPriorityOrder);
+        assertEquals("taskStartDateStepMillis", expected.taskStartDateStepMillis, actual.taskStartDateStepMillis);
+        assertEquals("taskAssignee", expected.taskAssignee, actual.taskAssignee);
+        assertEquals("taskDueDate", expected.taskDueDate, actual.taskDueDate);
+        assertEquals("taskCreated", expected.taskCreated, actual.taskCreated);
+        assertEquals("taskLabels", expected.taskLabels, actual.taskLabels);
+        assertEquals("taskComponents", expected.taskComponents, actual.taskComponents);
+        assertEquals("taskReporter", expected.taskReporter, actual.taskReporter);
+        assertEquals("taskCoAssignees", expected.taskCoAssignees, actual.taskCoAssignees);
+        assertEquals("taskClassOfService", expected.taskClassOfService, actual.taskClassOfService);
+        assertEquals("taskUpdatedDate", expected.taskUpdatedDate, actual.taskUpdatedDate);
+        assertEquals("taskCycletime", expected.taskCycletime, actual.taskCycletime);
+        assertEquals("taskIsBlocked", expected.taskIsBlocked, actual.taskIsBlocked);
+        assertEquals("taskLastBlockReason", expected.taskLastBlockReason, actual.taskLastBlockReason);
+        assertEquals("subtaskType", expected.subtaskType, actual.subtaskType);
+        assertEquals("subtaskStatus", expected.subtaskStatus, actual.subtaskStatus);
+        assertEquals("subtaskId", expected.subtaskId, actual.subtaskId);
+        assertEquals("subtaskNum", expected.subtaskNum, actual.subtaskNum);
+        assertEquals("subtaskSummary", expected.subtaskSummary, actual.subtaskSummary);
+        assertEquals("subtaskDescription", expected.subtaskDescription, actual.subtaskDescription);
+        assertEquals("subtaskFullDescription", expected.subtaskFullDescription, actual.subtaskFullDescription);
+        assertEquals("subtaskStatusPriority", expected.subtaskStatusPriority, actual.subtaskStatusPriority);
+        assertEquals("subtaskPriorityOrder", expected.subtaskPriorityOrder, actual.subtaskPriorityOrder);
+        assertEquals("subtaskStartDateStepMillis", expected.subtaskStartDateStepMillis, actual.subtaskStartDateStepMillis);
+        assertEquals("subtaskAssignee", expected.subtaskAssignee, actual.subtaskAssignee);
+        assertEquals("subtaskDueDate", expected.subtaskDueDate, actual.subtaskDueDate);
+        assertEquals("subtaskCreated", expected.subtaskCreated, actual.subtaskCreated);
+        assertEquals("subtaskLabels", expected.subtaskLabels, actual.subtaskLabels);
+        assertEquals("subtaskComponents", expected.subtaskComponents, actual.subtaskComponents);
+        assertEquals("subtaskReporter", expected.subtaskReporter, actual.subtaskReporter);
+        assertEquals("subtaskCoAssignees", expected.subtaskCoAssignees, actual.subtaskCoAssignees);
+        assertEquals("subtaskClassOfService", expected.subtaskClassOfService, actual.subtaskClassOfService);
+        assertEquals("subtaskUpdatedDate", expected.subtaskUpdatedDate, actual.subtaskUpdatedDate);
+        assertEquals("subtaskCycletime", expected.subtaskCycletime, actual.subtaskCycletime);
+        assertEquals("subtaskIsBlocked", expected.subtaskIsBlocked, actual.subtaskIsBlocked);
+        assertEquals("subtaskLastBlockReason", expected.subtaskLastBlockReason, actual.subtaskLastBlockReason);
+        assertEquals("tshirtSize", expected.tshirtSize, actual.tshirtSize);
+        assertEquals("worklog", expected.worklog, actual.worklog);
+        assertEquals("wrongWorklog", expected.wrongWorklog, actual.wrongWorklog);
+        assertEquals("demandBallpark", expected.demandBallpark, actual.demandBallpark);
+        assertEquals("taskBallpark", expected.taskBallpark, actual.taskBallpark);
+        assertEquals("queryType", expected.queryType, actual.queryType);
+    }
+
+    public static void assertFollowUpDataV0(FromJiraDataRow actual) {
+        FromJiraDataRow expected = getDefaultFromJiraDataRow();
+        assertEquals("planningType", expected.planningType, actual.planningType);
+        assertEquals("project", expected.project, actual.project);
+        assertEquals("demandType", expected.demandType, actual.demandType);
+        assertEquals("demandStatus", expected.demandStatus, actual.demandStatus);
+        assertEquals("demandId", expected.demandId, actual.demandId);
+        assertEquals("demandNum", expected.demandNum, actual.demandNum);
+        assertEquals("demandSummary", expected.demandSummary, actual.demandSummary);
+        assertEquals("demandDescription", expected.demandDescription, actual.demandDescription);
+        assertEquals("demandStatusPriority", expected.demandStatusPriority, actual.demandStatusPriority);
+        assertEquals("demandPriorityOrder", expected.demandPriorityOrder, actual.demandPriorityOrder);
         assertEquals("taskType", expected.taskType, actual.taskType);
         assertEquals("taskStatus", expected.taskStatus, actual.taskStatus);
         assertEquals("taskId", expected.taskId, actual.taskId);
@@ -142,6 +280,8 @@ public class FollowUpHelper {
         assertEquals("taskDescription", expected.taskDescription, actual.taskDescription);
         assertEquals("taskFullDescription", expected.taskFullDescription, actual.taskFullDescription);
         assertEquals("taskRelease", expected.taskRelease, actual.taskRelease);
+        assertEquals("taskStatusPriority", expected.taskStatusPriority, actual.taskStatusPriority);
+        assertEquals("taskPriorityOrder", expected.taskPriorityOrder, actual.taskPriorityOrder);
         assertEquals("subtaskType", expected.subtaskType, actual.subtaskType);
         assertEquals("subtaskStatus", expected.subtaskStatus, actual.subtaskStatus);
         assertEquals("subtaskId", expected.subtaskId, actual.subtaskId);
@@ -149,6 +289,8 @@ public class FollowUpHelper {
         assertEquals("subtaskSummary", expected.subtaskSummary, actual.subtaskSummary);
         assertEquals("subtaskDescription", expected.subtaskDescription, actual.subtaskDescription);
         assertEquals("subtaskFullDescription", expected.subtaskFullDescription, actual.subtaskFullDescription);
+        assertEquals("subtaskStatusPriority", expected.subtaskStatusPriority, actual.subtaskStatusPriority);
+        assertEquals("subtaskPriorityOrder", expected.subtaskPriorityOrder, actual.subtaskPriorityOrder);
         assertEquals("tshirtSize", expected.tshirtSize, actual.tshirtSize);
         assertEquals("worklog", expected.worklog, actual.worklog);
         assertEquals("wrongWorklog", expected.wrongWorklog, actual.wrongWorklog);
@@ -282,5 +424,89 @@ public class FollowUpHelper {
     }
     public static String followupExpectedV2() {
         return resourceToString(FollowUpDataHistoryGeneratorJSONFilesTest.class, "V2_followUpDataHistoryExpected.json");
+    }
+
+    public static String fromJiraRowstoString(List<FromJiraDataRow> rows, String separation) {
+        List<String> stringRows = rows.stream().map(r -> fromJiraDataRowtoString(r)).collect(Collectors.toList());
+        return StringUtils.join(stringRows, separation);
+    }
+
+    private static String fromJiraDataRowtoString(FromJiraDataRow row) {
+        return
+                " planningType                  : " + row.planningType
+             +"\n project                       : " + row.project
+             +"\n demandType                    : " + row.demandType
+             +"\n demandStatus                  : " + row.demandStatus
+             +"\n demandId                      : " + defaultIfNull(row.demandId, "")
+             +"\n demandNum                     : " + row.demandNum
+             +"\n demandSummary                 : " + row.demandSummary
+             +"\n demandDescription             : " + row.demandDescription
+             +"\n demandStatusPriority          : " + row.demandStatusPriority
+             +"\n demandPriorityOrder           : " + row.demandPriorityOrder
+             +"\n demandStartDateStepMillis     : " + row.demandStartDateStepMillis
+             +"\n demandAssignee                : " + row.demandAssignee
+             +"\n demandDueDate                 : " + row.demandDueDate
+             +"\n demandCreated                 : " + row.demandCreated
+             +"\n demandLabels                  : " + row.demandLabels
+             +"\n demandComponents              : " + row.demandComponents
+             +"\n demandReporter                : " + row.demandReporter
+             +"\n demandCoAssignees             : " + row.demandCoAssignees
+             +"\n demandClassOfService          : " + row.demandClassOfService
+             +"\n demandUpdatedDate             : " + row.demandUpdatedDate
+             +"\n demandCycletime               : " + row.demandCycletime
+             +"\n demandIsBlocked               : " + row.demandIsBlocked
+             +"\n demandLastBlockReason         : " + row.demandLastBlockReason
+             +"\n taskType                      : " + row.taskType
+             +"\n taskStatus                    : " + row.taskStatus
+             +"\n taskId                        : " + row.taskId
+             +"\n taskNum                       : " + row.taskNum
+             +"\n taskSummary                   : " + row.taskSummary
+             +"\n taskDescription               : " + row.taskDescription
+             +"\n taskFullDescription           : " + row.taskFullDescription
+             +"\n taskAdditionalEstimatedHours  : " + row.taskAdditionalEstimatedHours
+             +"\n taskRelease                   : " + row.taskRelease
+             +"\n taskStatusPriority            : " + row.taskStatusPriority
+             +"\n taskPriorityOrder             : " + row.taskPriorityOrder
+             +"\n taskStartDateStepMillis       : " + row.taskStartDateStepMillis
+             +"\n taskAssignee                  : " + row.taskAssignee
+             +"\n taskDueDate                   : " + row.taskDueDate
+             +"\n taskCreated                   : " + row.taskCreated
+             +"\n taskLabels                    : " + row.taskLabels
+             +"\n taskComponents                : " + row.taskComponents
+             +"\n taskReporter                  : " + row.taskReporter
+             +"\n taskCoAssignees               : " + row.taskCoAssignees
+             +"\n taskClassOfService            : " + row.taskClassOfService
+             +"\n taskUpdatedDate               : " + row.taskUpdatedDate
+             +"\n taskCycletime                 : " + row.taskCycletime
+             +"\n taskIsBlocked                 : " + row.taskIsBlocked
+             +"\n taskLastBlockReason           : " + row.taskLastBlockReason
+             +"\n subtaskType                   : " + row.subtaskType
+             +"\n subtaskStatus                 : " + row.subtaskStatus
+             +"\n subtaskId                     : " + row.subtaskId
+             +"\n subtaskNum                    : " + row.subtaskNum
+             +"\n subtaskSummary                : " + row.subtaskSummary
+             +"\n subtaskDescription            : " + row.subtaskDescription
+             +"\n subtaskFullDescription        : " + row.subtaskFullDescription
+             +"\n subtaskStatusPriority         : " + row.subtaskStatusPriority
+             +"\n subtaskPriorityOrder          : " + row.subtaskPriorityOrder
+             +"\n subtaskStartDateStepMillis    : " + row.subtaskStartDateStepMillis
+             +"\n subtaskAssignee               : " + row.subtaskAssignee
+             +"\n subtaskDueDate                : " + row.subtaskDueDate
+             +"\n subtaskCreated                : " + row.subtaskCreated
+             +"\n subtaskLabels                 : " + row.subtaskLabels
+             +"\n subtaskComponents             : " + row.subtaskComponents
+             +"\n subtaskReporter               : " + row.subtaskReporter
+             +"\n subtaskCoAssignees            : " + row.subtaskCoAssignees
+             +"\n subtaskClassOfService         : " + row.subtaskClassOfService
+             +"\n subtaskUpdatedDate            : " + row.subtaskUpdatedDate
+             +"\n subtaskCycletime              : " + row.subtaskCycletime
+             +"\n subtaskIsBlocked              : " + row.subtaskIsBlocked
+             +"\n subtaskLastBlockReason        : " + row.subtaskLastBlockReason
+             +"\n tshirtSize                    : " + row.tshirtSize
+             +"\n worklog                       : " + row.worklog
+             +"\n wrongWorklog                  : " + row.wrongWorklog
+             +"\n demandBallpark                : " + row.demandBallpark
+             +"\n taskBallpark                  : " + row.taskBallpark
+             +"\n queryType                     : " + row.queryType;
     }
 }

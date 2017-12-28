@@ -448,8 +448,7 @@ function Taskboard() {
             sizes: listSizes,
             impedido: issue[CUSTOMFIELD.IMPEDIDO],
             lastBlockReason: issue[CUSTOMFIELD.LAST_BLOCK_REASON],
-            additionalEstimatedHours: issue[CUSTOMFIELD.ADDITIONAL_ESTIMATED_HOURS],
-            release: issue[CUSTOMFIELD.RELEASE]
+            additionalEstimatedHours: issue[CUSTOMFIELD.ADDITIONAL_ESTIMATED_HOURS]
         };
 
         return issue;
