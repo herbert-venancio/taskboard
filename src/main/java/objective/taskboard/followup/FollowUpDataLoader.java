@@ -95,7 +95,9 @@ public class FollowUpDataLoader {
         }
 
         protected void doLoad(FollowupData data) {
-            fromJira.addAll(data.fromJiraDs.rows);
+            if (data.fromJiraDs != null)
+                fromJira.addAll(data.fromJiraDs.rows);
+
             if(data.analyticsTransitionsDsList != null) {
                 for (AnalyticsTransitionsDataSet analyticsDs : data.analyticsTransitionsDsList) {
                     final String type = analyticsDs.issueType;
