@@ -20,16 +20,24 @@
  */
 package objective.taskboard.followup;
 
+import java.time.ZoneId;
+import java.util.List;
+import java.util.function.Consumer;
+
 import objective.taskboard.issueBuffer.IssueBufferState;
 
-import java.time.ZoneId;
-
 public interface FollowupDataProvider {
-    FollowupData getJiraData(String[] includeProjects, ZoneId timezone);
+    FollowUpDataEntry getJiraData(String[] includeProjects, ZoneId timezone);
 
-    default FollowupData getJiraData(String... includeProjects) {
+    default FollowUpDataEntry getJiraData(String... includeProjects) {
         return getJiraData(includeProjects, ZoneId.systemDefault());
     }
 
     IssueBufferState getFollowupState();
+    
+    /**
+    * Iterate from oldest entry through current date (exclusive).
+    * 
+    */
+    void forEachHistoryEntry(List<String> projectsKey, ZoneId timezone, Consumer<FollowUpDataEntry> action);
 }

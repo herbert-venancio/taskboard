@@ -3137,12 +3137,12 @@ public class FollowUpDataProviderFromCurrentStateTest extends AbstractFollowUpDa
     }
 
     private void assertFollowupsForIssuesEqualsOrdered(String expectedFollowupList) {
-        List<FromJiraDataRow> actual = subject.getJiraData(defaultProjects()).fromJiraDs.rows;
+        List<FromJiraDataRow> actual = subject.getJiraData(defaultProjects()).getData().fromJiraDs.rows;
         assertEquals(expectedFollowupList, fromJiraRowstoString(actual, "\n\n"));
     }
 
     private void assertFollowupsForIssuesEquals(String expectedFollowupList) {
-        List<FromJiraDataRow> actual = sortJiraDataByIssuesKeys(subject.getJiraData(defaultProjects()).fromJiraDs.rows);
+        List<FromJiraDataRow> actual = sortJiraDataByIssuesKeys(subject.getJiraData(defaultProjects()).getData().fromJiraDs.rows);
 
         assertEquals(
             expectedFollowupList,

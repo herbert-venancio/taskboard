@@ -2,8 +2,9 @@ package objective.taskboard.followup;
 
 import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.createTempDirectory;
-import static java.nio.file.Files.walk;
+import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static objective.taskboard.utils.IOUtilities.ENCODE_UTF_8;
 import static objective.taskboard.utils.IOUtilities.asResource;
 import static objective.taskboard.utils.IOUtilities.write;
@@ -15,14 +16,18 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
@@ -42,6 +47,7 @@ import objective.taskboard.utils.DateTimeUtils;
 public class FollowUpDataHistoryRepository {
     public static final String PATH_FOLLOWUP_HISTORY = "followup-history";
     public static final String FILE_NAME_FORMAT = "yyyyMMdd";
+    public static final DateTimeFormatter FILE_NAME_FORMATTER = DateTimeFormatter.ofPattern(FILE_NAME_FORMAT);
     public static final String EXTENSION_JSON = ".json";
     public static final String EXTENSION_ZIP = ".zip";
 
@@ -57,17 +63,17 @@ public class FollowUpDataHistoryRepository {
         this.dataBaseDirectory = dataBaseDirectory;
     }
 
-    public void save(String projectKey, FollowupData data) throws IOException {
+    public void save(String projectKey, LocalDate date, FollowupData data) throws IOException {
         Path pathProject = dataBaseDirectory.path(PATH_FOLLOWUP_HISTORY).resolve(projectKey);
         if (!pathProject.toFile().exists())
             createDirectories(pathProject);
 
-        String today = DateTime.now().toString(FILE_NAME_FORMAT);
-        Path pathJSON = pathProject.resolve(today + EXTENSION_JSON);
+        String dateString = date.format(FILE_NAME_FORMATTER);
+        Path pathJSON = pathProject.resolve(dateString + EXTENSION_JSON);
 
         try {
             String json = gson.toJson(sanitizeData(data));
-			write(pathJSON.toFile(), json);
+            write(pathJSON.toFile(), json);
 
             Path pathZIP = Paths.get(pathJSON.toString() + EXTENSION_ZIP);
             deleteQuietly(pathZIP.toFile());
@@ -84,7 +90,11 @@ public class FollowUpDataHistoryRepository {
                 headerOnly(data.syntheticsTransitionsDsList));
     }
 
-    public FollowupData get(String date, ZoneId timezone, String... projectsKey) {
+    public FollowUpDataEntry get(String date, ZoneId timezone, String... projectsKey) {
+        return get(date, timezone, asList(projectsKey));
+    }
+
+    public FollowUpDataEntry get(String date, ZoneId timezone, List<String> projectsKey) {
         FollowUpDataLoader loader = new FollowUpDataLoader(gson, timezone);
 
         for (String project : projectsKey) {
@@ -113,11 +123,16 @@ public class FollowUpDataHistoryRepository {
                     deleteQuietly(temp.toFile());
             }
         }
-        return loader.create();
+
+        return new FollowUpDataEntry(LocalDate.parse(date, FILE_NAME_FORMATTER), loader.create());
     }
     
     public List<String> getHistoryGivenProjects(String... projectsKey) {
-        if (projectsKey.length == 0)
+        return getHistoryGivenProjects(asList(projectsKey));
+    }
+    
+    public List<String> getHistoryGivenProjects(List<String> projectsKey) {
+        if (projectsKey.isEmpty())
             return Collections.emptyList();
 
         Set<String> history = null;
@@ -139,30 +154,25 @@ public class FollowUpDataHistoryRepository {
     }
 
     private Set<String> getHistoryByProject(String projectKey) {
-        Set<String> history = new HashSet<String>();
-
         Path pathProject = dataBaseDirectory.path(PATH_FOLLOWUP_HISTORY).resolve(projectKey);
         if (!pathProject.toFile().exists())
-            return history;
+            return Collections.emptySet();
 
+        String fileExtension = EXTENSION_JSON + EXTENSION_ZIP;
+        String today = DateTime.now().toString(FILE_NAME_FORMAT);
+        
         try {
-            Iterable<Path> paths = walk(pathProject)::iterator;
-            for (Path path : paths) {
-                if (path.toFile().isDirectory())
-                    continue;
+            return Files.walk(pathProject)
+                    .map(Path::toFile)
+                    .filter(file -> file.isFile())
+                    .filter(file -> file.getName().toLowerCase().endsWith(fileExtension))
+                    .map(file -> file.getName().replace(fileExtension, ""))
+                    .filter(fileName -> !today.equals(fileName))
+                    .collect(toSet());
 
-                String fileName = path.toFile().getName().replace(EXTENSION_JSON + EXTENSION_ZIP, "");
-                String today = DateTime.now().toString(FILE_NAME_FORMAT);
-                if (today.equals(fileName))
-                    continue;
-
-                history.add(fileName);
-            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        return history;
     }
 
     private static FromJiraDataSet nullIfEmpty(FromJiraDataSet fromJiraDs) {
@@ -187,5 +197,32 @@ public class FollowUpDataHistoryRepository {
         return syntheticsDsList.stream()
                 .map(s -> new SyntheticTransitionsDataSet(s.issueType, s.headers, null))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Iterate from oldest entry through <code>endDate</code> (exclusive).
+     * 
+     */
+    public void forEachHistoryEntry(
+            List<String> projectsKey, 
+            String endDate, ZoneId timezone,
+            Consumer<FollowUpDataEntry> action) {
+
+        getHistoryGivenProjects(projectsKey).stream()
+                .filter(d -> endDate == null ? true : d.compareTo(endDate) < 0)
+                .map(d -> get(d, timezone, projectsKey))
+                .forEach(action);
+    }
+
+    /**
+     * Iterate from oldest entry through generated today (exclusive).
+     * 
+     */
+    public void forEachHistoryEntry(
+            List<String> projectsKey, 
+            ZoneId timezone,
+            Consumer<FollowUpDataEntry> action) {
+
+        forEachHistoryEntry(projectsKey, null, timezone, action);
     }
 }

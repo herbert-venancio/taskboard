@@ -1,11 +1,10 @@
 package objective.taskboard.jira.data;
 
-import retrofit.http.GET;
-import retrofit.http.Path;
-import retrofit.http.Query;
-
 import java.net.URI;
 import java.util.Map;
+
+import retrofit.http.GET;
+import retrofit.http.Query;
 
 public class JiraUser {
 

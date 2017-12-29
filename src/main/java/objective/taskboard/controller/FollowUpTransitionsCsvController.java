@@ -61,7 +61,7 @@ public class FollowUpTransitionsCsvController {
 
         try {
             FollowupDataProvider provider = followUpFacade.getProvider(Optional.empty());
-            FollowupData jiraData = provider.getJiraData(projects.split(","), timezone);
+            FollowupData jiraData = provider.getJiraData(projects.split(","), timezone).getData();
 
             Stream<ZipStreamEntry> stream = Stream.concat(
                     jiraData.analyticsTransitionsDsList.stream()

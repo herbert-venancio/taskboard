@@ -35,9 +35,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import objective.taskboard.domain.ProjectFilterConfiguration;
+import objective.taskboard.followup.FollowUpDataEntry;
 import objective.taskboard.followup.FollowUpDataHistoryGenerator;
 import objective.taskboard.followup.FollowUpDataHistoryRepository;
-import objective.taskboard.followup.FollowupData;
 import objective.taskboard.issueBuffer.IssueBufferState;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 
@@ -101,9 +101,8 @@ public class FollowUpDataHistoryGeneratorJSONFiles implements FollowUpDataHistor
             String projectKey = pf.getProjectKey();
 
             log.info("Generating history of project " + projectKey);
-            FollowupData jiraData = providerFromCurrentState.getJiraData(projectKey);
-
-            historyRepository.save(projectKey, jiraData);
+            FollowUpDataEntry followUpDataEntry = providerFromCurrentState.getJiraData(projectKey);
+            historyRepository.save(projectKey, followUpDataEntry.getDate(), followUpDataEntry.getData());
             
             log.info("History of project " + projectKey + " generated");
 

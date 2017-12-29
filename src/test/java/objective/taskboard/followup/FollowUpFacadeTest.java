@@ -31,6 +31,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Locale;
 import java.util.Optional;
@@ -60,6 +61,7 @@ import org.xlsx4j.sml.Row;
 import org.xlsx4j.sml.Sheet;
 
 import objective.taskboard.database.directory.DataBaseDirectory;
+import objective.taskboard.followup.cluster.FollowUpClusterItemRepository;
 import objective.taskboard.followup.data.Template;
 import objective.taskboard.followup.impl.FollowUpDataProviderFromCurrentState;
 import objective.taskboard.followup.impl.FollowUpTemplateStorage;
@@ -85,6 +87,9 @@ public class FollowUpFacadeTest {
 
     @Mock
     private DataBaseDirectory dataBaseDirectory;
+    
+    @Mock
+    private FollowUpClusterItemRepository clusterItemRepository;
 
     @Spy
     @InjectMocks
@@ -120,7 +125,8 @@ public class FollowUpFacadeTest {
     @Test
     public void okTemplateGenerate() throws Exception {
         given(templateService.getTemplate(TEMPLATE_NAME)).willReturn(template);
-        given(provider.getJiraData(INCLUDED_PROJECTS, ZoneId.systemDefault())).willReturn(getDefaultFollowupData());
+        given(provider.getJiraData(INCLUDED_PROJECTS, ZoneId.systemDefault()))
+            .willReturn(new FollowUpDataEntry(LocalDate.parse("2017-10-01"), getDefaultFollowupData()));
 
         // when
         FollowUpGenerator followupGenerator = followUpFacade.getGenerator(TEMPLATE_NAME, Optional.empty());

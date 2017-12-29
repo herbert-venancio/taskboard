@@ -20,6 +20,7 @@
  */
 package objective.taskboard.followup;
 
+import static java.util.Arrays.asList;
 import static java.util.Optional.empty;
 import static objective.taskboard.followup.impl.FollowUpTransitionsDataProvider.TYPE_DEMAND;
 import static objective.taskboard.followup.impl.FollowUpTransitionsDataProvider.TYPE_FEATURES;
@@ -27,14 +28,18 @@ import static objective.taskboard.followup.impl.FollowUpTransitionsDataProvider.
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.core.io.Resource;
 
+import objective.taskboard.followup.FromJiraRowCalculator.FromJiraRowCalculation;
 import objective.taskboard.spreadsheet.Sheet;
 import objective.taskboard.spreadsheet.SheetRow;
 import objective.taskboard.spreadsheet.SpreadsheetEditor;
@@ -44,22 +49,25 @@ public class FollowUpGenerator {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FollowUpGenerator.class);
 
     private final FollowupDataProvider provider;
+    private final SpreadsheetEditor editor;
+    private final FromJiraRowCalculator rowCalculator;
 
-    private SpreadsheetEditor editor;
-
-    public FollowUpGenerator(FollowupDataProvider provider, SpreadsheetEditor editor) {
+    public FollowUpGenerator(FollowupDataProvider provider, SpreadsheetEditor editor, FromJiraRowCalculator rowCalculator) {
         this.provider = provider;
         this.editor = editor;
+        this.rowCalculator = rowCalculator;
     }
 
     public Resource generate(String [] includedProjects, ZoneId timezone) throws IOException {
         try {
             editor.open();
 
-            FollowupData followupData = provider.getJiraData(includedProjects, timezone);
+            FollowUpDataEntry followupDataEntry = provider.getJiraData(includedProjects, timezone);
+            FollowupData followupData = followupDataEntry.getData();
 
             generateFromJiraSheet(followupData);
             generateTransitionsSheets(followupData);
+            generateEffortHistory(followupDataEntry, asList(includedProjects), timezone);
 
             return IOUtilities.asResource(editor.toBytes());
         } catch (Exception e) {
@@ -313,6 +321,60 @@ public class FollowUpGenerator {
             rowHeader.addColumn(header);
         rowHeader.save();
         return sheet;
+    }
+    
+    void generateEffortHistory(FollowUpDataEntry followUpDataEntry, List<String> includedProjects, ZoneId timezone) {
+        Sheet sheet = editor.getOrCreateSheet("Effort History");
+        sheet.truncate(0);
+        
+        SheetRow rowHeader = sheet.createRow();
+        rowHeader.addColumn("Date");
+        rowHeader.addColumn("SumEffortDone");
+        rowHeader.addColumn("SumEffortBacklog");
+        rowHeader.save();
+        
+        List<EffortHistoryRow> historyRows = new ArrayList<>();
+        
+        provider.forEachHistoryEntry(includedProjects, timezone, historyEntry -> {
+            historyRows.add(generateEffortHistoryRow(historyEntry));
+        });
+        
+        historyRows.add(generateEffortHistoryRow(followUpDataEntry));
+        
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        
+        for (EffortHistoryRow historyRow : historyRows) {
+            SheetRow row = sheet.createRow();
+            row.addColumn(historyRow.date.format(dateFormatter));
+            row.addColumn(historyRow.sumEffortDone);
+            row.addColumn(historyRow.sumEffortBacklog);
+            row.save();
+        }
+        
+        sheet.save();
+    }
+
+    private EffortHistoryRow generateEffortHistoryRow(FollowUpDataEntry followupDataEntry) {
+        EffortHistoryRow historyRow = new EffortHistoryRow(followupDataEntry.getDate());
+
+        followupDataEntry.getData().fromJiraDs.rows.stream().forEach(fromJiraRow -> {
+            FromJiraRowCalculation fromJiraRowCalculation = rowCalculator.calculate(fromJiraRow);
+            
+            historyRow.sumEffortDone += fromJiraRowCalculation.getEffortDone();
+            historyRow.sumEffortBacklog += fromJiraRowCalculation.getEffortOnBacklog();
+        });
+
+        return historyRow;
+    }
+    
+    private static class EffortHistoryRow {
+        private final LocalDate date;
+        private double sumEffortDone = 0;
+        private double sumEffortBacklog = 0;
+
+        public EffortHistoryRow(LocalDate date) {
+            this.date = date;
+        }
     }
 
     public SpreadsheetEditor getEditor() {

@@ -24,9 +24,11 @@ package objective.taskboard.followup.impl;
 import static objective.taskboard.issueBuffer.IssueBufferState.ready;
 
 import java.time.ZoneId;
+import java.util.List;
+import java.util.function.Consumer;
 
+import objective.taskboard.followup.FollowUpDataEntry;
 import objective.taskboard.followup.FollowUpDataHistoryRepository;
-import objective.taskboard.followup.FollowupData;
 import objective.taskboard.followup.FollowupDataProvider;
 import objective.taskboard.issueBuffer.IssueBufferState;
 
@@ -41,12 +43,21 @@ public class FollowUpDataProviderFromHistory implements FollowupDataProvider {
     }
 
     @Override
-    public FollowupData getJiraData(String[] includeProjects, ZoneId timezone) {
+    public FollowUpDataEntry getJiraData(String[] includeProjects, ZoneId timezone) {
         return historyRepository.get(date, timezone, includeProjects);
     }
 
     @Override
     public IssueBufferState getFollowupState() {
         return ready;
+    }
+
+    @Override
+    public void forEachHistoryEntry(
+            List<String> projectsKey, 
+            ZoneId timezone,
+            Consumer<FollowUpDataEntry> action) {
+
+        historyRepository.forEachHistoryEntry(projectsKey, date, timezone, action);
     }
 }

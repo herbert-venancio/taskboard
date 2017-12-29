@@ -1,5 +1,6 @@
 package objective.taskboard.controller;
 
+import objective.taskboard.followup.FollowUpDataEntry;
 import objective.taskboard.followup.FollowUpFacade;
 import objective.taskboard.followup.FollowUpHelper;
 import objective.taskboard.followup.FollowupDataProvider;
@@ -37,7 +38,7 @@ public class FollowUpTransitionsCsvControllerTest {
     @Before
     public void setupProvider() {
         willReturn(provider).given(followUpFacade).getProvider(any());
-        willReturn(FollowUpHelper.getFromFile()).given(provider).getJiraData(any(), any());
+        willReturn(new FollowUpDataEntry(null, FollowUpHelper.getFromFile())).given(provider).getJiraData(any(), any());
     }
 
     @Test
