@@ -110,6 +110,13 @@
                                 , {id:"20003", name:"3.0"}
                             ]
                         }
+                        , {name:'Project 2', value:'PROJ2', selected:true, visible:true, teams:[]
+                            , releases:[
+                                {id:"20004", name:"1.0"}
+                                , {id:"20005", name:"2.0"}
+                                , {id:"20006", name:"3.0"}
+                            ]
+                        }
                     ]}
                 ];
                 userPreferences.setPreferences({});
@@ -144,7 +151,7 @@
             });
 
             test('project filter maintains after aspect-filters update', function(done) {
-                userPreferences.setPreferences({filterPreferences:{"TASKB":false}});
+                userPreferences.setPreferences({filterPreferences:{"TASKB":false, "PROJ1":true}});
                 taskboard.applyFilterPreferences();
                 boardSearch.fire('iron-signal', {name: 'refresh-release-filter'});
                 async(function() {
