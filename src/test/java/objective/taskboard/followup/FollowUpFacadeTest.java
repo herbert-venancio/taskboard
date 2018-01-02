@@ -21,8 +21,6 @@
 package objective.taskboard.followup;
 
 import static objective.taskboard.followup.FollowUpHelper.getDefaultFollowupData;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -37,13 +35,12 @@ import java.time.ZoneId;
 import java.util.Locale;
 import java.util.Optional;
 
+import org.assertj.core.api.AbstractAssert;
+import org.assertj.core.api.Assertions;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.SpreadsheetMLPackage;
 import org.docx4j.openpackaging.parts.SpreadsheetML.WorksheetPart;
 import org.docx4j.org.apache.poi.util.LocaleUtil;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -70,6 +67,10 @@ import objective.taskboard.rules.CleanupDataFolderRule;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FollowUpFacadeTest {
+
+    private static final String FROM_JIRA = "From Jira";
+    private static final String ANALYTIC_DEMAND = "Analytic - Demand";
+    private static final String SYNTHETIC_DEMAND = "Synthetic - Demand";
 
     @Rule
     public CleanupDataFolderRule clean = new CleanupDataFolderRule(Paths.get("data/followup-templates"));
@@ -126,54 +127,21 @@ public class FollowUpFacadeTest {
         Resource resource = followupGenerator.generate(INCLUDED_PROJECTS, ZoneId.systemDefault());
 
         // then
-        assertThat(resource, hasExpectedContent());
+        SpreadsheetMLPackage excelDoc = readFile(resource);
+        assertThat(excelDoc).sheet(FROM_JIRA).row(1).has(expectedRowContentOfFromJira());
+        assertThat(excelDoc).sheet(ANALYTIC_DEMAND).row(1).has(expectedRowContentOfAnalytics());
+        assertThat(excelDoc).sheet(SYNTHETIC_DEMAND).row(1).has(expectedRowContentOfSyntetics());
     }
 
-    private Matcher<Resource> hasExpectedContent() {
-        return new BaseMatcher<Resource>() {
-
-            public BaseMatcher<String[]> matcherDelegate;
-
-            @Override
-            public void describeTo(Description description) {
-                matcherDelegate.describeTo(description);
-            }
-
-            @Override
-            public void describeMismatch(Object item, Description description) {
-                matcherDelegate.describeMismatch(item, description);
-            }
-
-            @Override
-            public boolean matches(Object o) {
-                Resource resource = (Resource) o;
-                try {
-                    SpreadsheetMLPackage excelDoc = readFile(resource);
-                    String[] expectedRowContent = expectedRowContentOfFromJira();
-                    String[] actualRowContent = formattedContentOfFirstRowOfFromJiraWorksheet(excelDoc);
-                    matcherDelegate = (BaseMatcher<String[]>) equalTo(expectedRowContent);
-                    assertThat(actualRowContent, matcherDelegate);
-
-                    expectedRowContent = expectedRowContentOfAnalytics();
-                    actualRowContent = formattedContentOfFirstRowOfAnalyticsWorksheet(excelDoc);
-                    matcherDelegate = (BaseMatcher<String[]>) equalTo(expectedRowContent);
-                    assertThat(actualRowContent, matcherDelegate);
-
-                    expectedRowContent = expectedRowContentOfSyntetics();
-                    actualRowContent = formattedContentOfFirstRowOfSynteticsWorksheet(excelDoc);
-                    matcherDelegate = (BaseMatcher<String[]>) equalTo(expectedRowContent);
-                    assertThat(actualRowContent, matcherDelegate);
-                    return true;
-                } catch (Exception e) {
-                    throw new AssertionError(e.getMessage());
-                }
-            }
-        };
+    private static SpreadsheetMLPackage readFile(Resource resource) throws IOException, Docx4JException {
+        System.setProperty("javax.xml.parsers.SAXParserFactory", "org.apache.xerces.jaxp.SAXParserFactoryImpl");
+        System.setProperty("javax.xml.parsers.DocumentBuilderFactory", "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl");
+        return SpreadsheetMLPackage.load(resource.getInputStream());
     }
 
-    private String[] expectedRowContentOfFromJira() {
+    private static String[] expectedRowContentOfFromJira() {
         return new String[]{
-                "PROJECT TEST", "Demand", "Doing", "I-1", "Summary Demand" , "Description Demand",
+                "PROJECT TEST", "Demand", "Doing", "I-1", "Summary Demand", "Description Demand",
                 "0", "assignee.demand.test", "5/25/25 0:00", "1/1/12 0:00", "", "", "reporter.demand.test", "", "Standard", "2/1/12 0:00", "1,111111", "false", "Demand last block reason",
                 "Feature", "Doing", "I-2", "Summary Feature", "Description Feature", "Full Description Feature", "80",
                 "0", "assignee.task.test", "5/24/25 0:00", "1/2/12 0:00", "", "", "reporter.demand.test", "", "Standard", "2/2/12 0:00", "2,222222", "false", "Task last block reason",
@@ -184,59 +152,83 @@ public class FollowUpFacadeTest {
                 "9/27/17 0:00", "9/26/17 0:00", "9/25/17 0:00", "", "9/26/17 0:00", "9/25/17 0:00", "", "", "9/25/17 0:00"};
     }
 
-    private String[] expectedRowContentOfAnalytics() {
+    private static String[] expectedRowContentOfAnalytics() {
         return new String[]{
                 "I-1", "Demand", "9/27/17 0:00", "9/26/17 0:00", "9/25/17 0:00"};
     }
 
-    private String[] expectedRowContentOfSyntetics() {
-        return new String[] {"9/25/17 0:00", "Demand", "0", "0", "1"};
+    private static String[] expectedRowContentOfSyntetics() {
+        return new String[]{"9/25/17 0:00", "Demand", "0", "0", "1"};
     }
 
-    private SpreadsheetMLPackage readFile(Resource resource) throws IOException, Docx4JException {
-        System.setProperty("javax.xml.parsers.SAXParserFactory", "org.apache.xerces.jaxp.SAXParserFactoryImpl");
-        System.setProperty("javax.xml.parsers.DocumentBuilderFactory", "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl");
-        return SpreadsheetMLPackage.load(resource.getInputStream());
+    public SpreadsheetAssert assertThat(SpreadsheetMLPackage actual) {
+        return new SpreadsheetAssert(actual);
     }
 
-    private String[] formattedContentOfFirstRowOfFromJiraWorksheet(SpreadsheetMLPackage excelDoc) throws Docx4JException, Xlsx4jException {
-        return extractRowContent(excelDoc, "From Jira", 1);
-    }
+    public static class SpreadsheetAssert extends AbstractAssert<SpreadsheetAssert, SpreadsheetMLPackage> {
 
-    private String[] formattedContentOfFirstRowOfAnalyticsWorksheet(SpreadsheetMLPackage excelDoc) throws Docx4JException, Xlsx4jException {
-        return extractRowContent(excelDoc, "Analytic - Demand", 1);
-    }
-
-    private String[] formattedContentOfFirstRowOfSynteticsWorksheet(SpreadsheetMLPackage excelDoc) throws Docx4JException, Xlsx4jException {
-        return extractRowContent(excelDoc, "Synthetic - Demand", 1);
-    }
-
-    private WorksheetPart getWorksheetByName(SpreadsheetMLPackage excelDoc, String name) throws Docx4JException, Xlsx4jException {
-        for(int i = 0; i < excelDoc.getWorkbookPart().getContents().getSheets().getSheet().size(); ++i) {
-            Sheet sheet = excelDoc.getWorkbookPart().getContents().getSheets().getSheet().get(i);
-            if(name.equals(sheet.getName()))
-                return excelDoc.getWorkbookPart().getWorksheet(i);
+        public SpreadsheetAssert(SpreadsheetMLPackage actual) {
+            super(actual, SpreadsheetAssert.class);
         }
-        throw new RuntimeException("Sheet with name '" + name + "' not found");
-    }
 
-    private String[] extractRowContent(SpreadsheetMLPackage excelDoc, String sheetName, int rowIndex) throws Docx4JException, Xlsx4jException {
-        WorksheetPart analytics = getWorksheetByName(excelDoc, sheetName);
-        Row row = analytics.getContents().getSheetData().getRow().get(rowIndex);
-        return extractRowContent(row);
-    }
+        public SheetAssert sheet(String name) {
+            WorksheetPart sheet = getWorksheetByName(actual, name);
+            return new SheetAssert(sheet);
+        }
 
-    private String[] extractRowContent(Row row) {
-        DataFormatter formatter = new DataFormatter();
-        String[] actualRowContent = new String[row.getC().size()];
-        for(int i = 0; i < actualRowContent.length; ++i) {
-            Cell c = row.getC().get(i);
-            if(c.getF() != null) {
-                actualRowContent[i] = FORMULA;
-            } else {
-                actualRowContent[i] = formatter.formatCellValue(c);
+        private WorksheetPart getWorksheetByName(SpreadsheetMLPackage excelDoc, String name) {
+            try {
+                for (int i = 0; i < excelDoc.getWorkbookPart().getContents().getSheets().getSheet().size(); ++i) {
+                    Sheet sheet = excelDoc.getWorkbookPart().getContents().getSheets().getSheet().get(i);
+                    if (name.equals(sheet.getName()))
+                        return excelDoc.getWorkbookPart().getWorksheet(i);
+                }
+                failWithMessage("Sheet with name <%s> not found", name);
+            } catch (Docx4JException | Xlsx4jException e) {
+                throw new RuntimeException(e);
             }
+            return null;
         }
-        return actualRowContent;
+    }
+
+    public static class SheetAssert extends AbstractAssert<SheetAssert, WorksheetPart> {
+        private SheetAssert(WorksheetPart actual) {
+            super(actual, SheetAssert.class);
+        }
+
+        public RowAssert row(int index) throws Docx4JException {
+            Row row = actual.getContents().getSheetData().getRow().get(index);
+            return new RowAssert(row);
+        }
+    }
+
+    public static class RowAssert extends AbstractAssert<RowAssert, Row> {
+        private RowAssert(Row actual) {
+            super(actual, RowAssert.class);
+        }
+
+        public RowAssert has(String[] expectedRowContent) {
+            String[] actualRowContent = extractRowContent();
+            Assertions.assertThat(actualRowContent).isEqualTo(expectedRowContent);
+            return this;
+        }
+
+        private String[] extractRowContent() {
+            return extractRowContent(actual);
+        }
+
+        private static String[] extractRowContent(Row row) {
+            DataFormatter formatter = new DataFormatter();
+            String[] actualRowContent = new String[row.getC().size()];
+            for (int i = 0; i < actualRowContent.length; ++i) {
+                Cell c = row.getC().get(i);
+                if (c.getF() != null) {
+                    actualRowContent[i] = FORMULA;
+                } else {
+                    actualRowContent[i] = formatter.formatCellValue(c);
+                }
+            }
+            return actualRowContent;
+        }
     }
 }

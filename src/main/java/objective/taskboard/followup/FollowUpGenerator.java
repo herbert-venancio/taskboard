@@ -35,12 +35,9 @@ import java.util.Optional;
 
 import org.springframework.core.io.Resource;
 
-import objective.taskboard.Constants;
-import objective.taskboard.spreadsheet.CellRange;
 import objective.taskboard.spreadsheet.Sheet;
 import objective.taskboard.spreadsheet.SheetRow;
 import objective.taskboard.spreadsheet.SpreadsheetEditor;
-import objective.taskboard.spreadsheet.TableEditor;
 import objective.taskboard.utils.IOUtilities;
 
 public class FollowUpGenerator {
