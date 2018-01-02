@@ -30,10 +30,13 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
+import objective.taskboard.data.User;
 import objective.taskboard.jira.data.JiraIssue;
+import objective.taskboard.jira.data.JiraUser;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -43,7 +46,6 @@ import com.atlassian.jira.rest.client.api.domain.BasicIssue;
 import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.Resolution;
 import com.atlassian.jira.rest.client.api.domain.ServerInfo;
-import com.atlassian.jira.rest.client.api.domain.User;
 import com.atlassian.jira.rest.client.api.domain.input.ComplexIssueInputFieldValue;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInput;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder;
@@ -78,6 +80,9 @@ public class JiraService {
 
     @Autowired
     private JiraEndpointAsMaster jiraEndpointAsMaster;
+
+    @Autowired
+    private Converter<JiraUser, User> userConverter;
 
     public void authenticate(String username, String password) {
         log.debug("⬣⬣⬣⬣⬣  authenticate");
@@ -200,9 +205,9 @@ public class JiraService {
         return issue.getKey();
     }
 
-    public User getLoggedUser() {
+    public JiraUser getLoggedUser() {
         log.debug("⬣⬣⬣⬣⬣  getLoggedUser");
-        return jiraEndpointAsUser.executeRequest(client -> client.getUserClient().getUser(CredentialsHolder.username()));
+        return jiraEndpointAsUser.request(JiraUser.Service.class).get(CredentialsHolder.username());
     }
 
     public void block(String issueKey, String lastBlockReason) {
@@ -231,10 +236,9 @@ public class JiraService {
         }
     }
 
-    public objective.taskboard.data.User getUser() {
+    public User getUser() {
         try {
-            com.atlassian.jira.rest.client.api.domain.User jiraUser = getLoggedUser();
-            return objective.taskboard.data.User.from(jiraUser.getDisplayName(), jiraUser.getName(), jiraUser.getEmailAddress(), jiraUser.getAvatarUri());
+            return userConverter.convert(getLoggedUser());
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             return null;

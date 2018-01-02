@@ -417,14 +417,16 @@
                                 <iron-icon class="menu-icon" icon="settings" paper-drawer-toggle></iron-icon>
                             </paper-toolbar>
                         </div>
-                        <div>
-                            <paper-icon-button icon="file-download" title="Download Followup Spreadsheet"
-                                               class="followup-button" on-tap="openFollowupDialog"></paper-icon-button>
-                        </div>
-                        <div>
-                            <paper-icon-button icon="file-upload" title="Followup Template"
-                                               class="template-followup-button" on-tap="openFollowupCrudModal"></paper-icon-button>
-                        </div>
+                        <template is="dom-if" if="{{!user.isCustomer}}">
+                            <div>
+                                <paper-icon-button icon="file-download" title="Download Followup Spreadsheet"
+                                                   class="followup-button" on-tap="openFollowupDialog"></paper-icon-button>
+                            </div>
+                            <div>
+                                <paper-icon-button icon="file-upload" title="Followup Template"
+                                                   class="template-followup-button" on-tap="openFollowupCrudModal"></paper-icon-button>
+                            </div>
+                        </template>
                         <div>
                             <paper-icon-button icon="save" title="Import Sizing Spreadsheet"
                                                class="sizing-button" on-tap="openSizingImport"></paper-icon-button>
@@ -511,6 +513,7 @@
                     taskboard.connectToWebsocket(this)
                     this.retrieveBoardFeatures();
                     this.updatedIssueKeys = [];
+                    this.user = taskboard.getLoggedUser();
                 },
 
                 retrieveFilters: function () {

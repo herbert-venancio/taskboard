@@ -9,6 +9,7 @@ import static org.mockito.Mockito.mock;
 
 import java.util.List;
 
+import objective.taskboard.jira.data.JiraUser;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -142,5 +143,14 @@ public class AuthorizedJiraEndpointTest {
         JiraProject.Service service = jiraEndpointAsMaster.request(JiraProject.Service.class);
         JiraProject project = service.get("TASKB");
         assertThat(project.versions, not(nullValue()));
+    }
+
+    @Test
+    public void getUser() {
+        JiraUser.Service service = jiraEndpointAsMaster.request(JiraUser.Service.class);
+        JiraUser user = service.get("taskboard");
+
+        assertThat(user.name, is("taskboard"));
+        assertThat(user.displayName, is("taskboard"));
     }
 }
