@@ -33,7 +33,6 @@ import static objective.taskboard.followup.FollowUpHelper.getEmptyAnalyticsTrans
 import static objective.taskboard.followup.FollowUpHelper.getEmptyFollowupData;
 import static objective.taskboard.followup.FollowUpHelper.getEmptySyntheticTransitionsDataSet;
 import static objective.taskboard.followup.FollowUpHelper.getSyntheticTransitionsDataSetWithNoRow;
-import static objective.taskboard.testUtils.Resources.resolve;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
@@ -245,6 +244,10 @@ public class FollowUpGeneratorTest {
 
     private String txtResourceAsString(String pathResource) {
         return IOUtilities.resourceToString(pathResource);
+    }
+
+    private static Resource resolve(String resourceName) {
+        return IOUtilities.asResource(FollowUpGenerator.class.getClassLoader().getResource(resourceName));
     }
 
     private String[] emptyArray() {

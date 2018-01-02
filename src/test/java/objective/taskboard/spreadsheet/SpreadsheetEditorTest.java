@@ -1,6 +1,5 @@
 package objective.taskboard.spreadsheet;
 
-import static objective.taskboard.testUtils.Resources.resolve;
 import static objective.taskboard.utils.IOUtilities.resourceToString;
 import static objective.taskboard.utils.XmlUtils.normalizeXml;
 import static org.hamcrest.Matchers.is;
@@ -19,6 +18,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
+import org.springframework.core.io.Resource;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -31,6 +31,7 @@ import objective.taskboard.followup.FollowUpTemplate;
 import objective.taskboard.followup.FromJiraDataRow;
 import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor.SimpleSheet;
 import objective.taskboard.utils.DateTimeUtils;
+import objective.taskboard.utils.IOUtilities;
 import objective.taskboard.utils.XmlUtils;
 
 public class SpreadsheetEditorTest {
@@ -268,6 +269,10 @@ public class SpreadsheetEditorTest {
 
     private FollowUpTemplate getBasicTemplate() {
         return new FollowUpTemplate(resolve(PATH_FOLLOWUP_TEMPLATE));
+    }
+
+    private static Resource resolve(String resourceName) {
+        return IOUtilities.asResource(SpreadsheetEditorTest.class.getClassLoader().getResource(resourceName));
     }
 
     private void addRow(Sheet sheet, FromJiraDataRow followUpData) {

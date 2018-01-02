@@ -3,6 +3,7 @@ package objective.taskboard.controller;
 import objective.taskboard.followup.FollowUpFacade;
 import objective.taskboard.followup.FollowUpHelper;
 import objective.taskboard.followup.FollowupDataProvider;
+
 import org.junit.Before;
 import org.junit.Test;
 
