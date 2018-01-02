@@ -25,7 +25,11 @@ function CycleTime() {
     var SUNDAY = 0;
     var SATURDAY = 6;
 
-    this.getCycleTime = function(startDate, endDate) {
+    this.getCycleTime = function(startDate, endDate, status) {
+
+        if (!isIssueOnCalculableStatus(status))
+            return 0;
+
         var startWorkDay = getStartWorkDay(startDate);
         var endWorkDay = getEndWorkDay(endDate);
 
@@ -121,6 +125,10 @@ function CycleTime() {
 
     function toWorkedDays(milliseconds) {
         return milliseconds / getOneWorkedDayInMillis();
+    }
+
+    function isIssueOnCalculableStatus(status) {
+        return !_.contains(STATUSES_COMPLETED_IDS, status);
     }
 }
 

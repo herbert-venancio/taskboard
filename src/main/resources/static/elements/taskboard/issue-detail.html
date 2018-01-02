@@ -120,6 +120,7 @@
 
             .column-block {
                 flex: 1;
+                margin-top: 20px;
                 margin-left: 10px;
                 margin-right: 10px;
             }
@@ -1045,14 +1046,17 @@
                             <hr class="people--separator"/>
                             <div class="subtitle">Tracking</div>
 
-                            <div class="details-row">
-                                <div class="datailsColumn">
-                                    <div class="subsubtitle">Cycle Time</div>
-                                    <div class="sub-content">
-                                        {{item.cycletime}} days
+                            <template is="dom-if" if="{{_shouldShowCycleTime(item.status)}}">
+                                <div class="details-row">
+                                    <div class="datailsColumn">
+                                        <div class="subsubtitle">Cycle Time</div>
+                                        <div class="sub-content">
+                                            {{item.cycletime}} days
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            </template>
+                            
                             <template is="dom-if" if="{{item.additionalEstimatedHoursField}}">
                                 <div class="details-row">
                                     <div class="datailsColumn">
@@ -1937,6 +1941,10 @@
 
                 _stopPropagation: function (e) {
                     e.stopPropagation();
+                },
+
+                _shouldShowCycleTime: function(status) {
+                    return !_.contains(STATUSES_COMPLETED_IDS, status);
                 }
             });
         })();
