@@ -16,13 +16,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import objective.taskboard.google.SpreadsheetUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Attr;
@@ -46,13 +46,12 @@ public class SimpleSpreadsheetEditor implements SpreadsheetEditor {
     private static final String TAG_T_IN_SHARED_STRINGS = "t";
     private static final String PATH_SHARED_STRINGS = "xl/sharedStrings.xml";
 
-    public BiMap<String, Long> sharedStrings;
+    public Map<String, Long> sharedStrings;
     FollowUpTemplate template;
     private File extractedSheetDirectory;
     private Map<String,String> sheetPathByName = new LinkedHashMap<>();
     private int initialSharedStringCount;
-    protected WorkbookEditor workbookEditor = new WorkbookEditor();
-    protected final TableEditorCache tableEditorCache = new TableEditorCache(this);
+    private WorkbookEditor workbookEditor = new WorkbookEditor();
     private SpreadsheetStylesEditor stylesEditor = new SimpleSpreadsheetStylesEditor();
 
     @Override
@@ -74,11 +73,6 @@ public class SimpleSpreadsheetEditor implements SpreadsheetEditor {
     @Override
     public SimpleSheet getSheet(String sheetName) {
         return new SimpleSheet(sheetPathByName.get(sheetName));
-    }
-
-    @Override
-    public SimpleTableEditor getTableEditor(String tableName) {
-        return tableEditorCache.get(tableName);
     }
 
     @Override
@@ -368,10 +362,10 @@ public class SimpleSpreadsheetEditor implements SpreadsheetEditor {
         return new File(extractedSheetDirectory, "xl/_rels/workbook.xml.rels");
     }
 
-    private BiMap<String, Long> initializeSharedStrings() {
+    private Map<String, Long> initializeSharedStrings() {
         InputStream inputStream = getSharedStringsInputStream();
 
-        BiMap<String, Long> sharedStrings = HashBiMap.create();
+        Map<String, Long> sharedStrings = new HashMap<>();
         Document doc = XmlUtils.asDocument(inputStream);
         doc.getDocumentElement().normalize();
         NodeList nodes = doc.getElementsByTagName(TAG_T_IN_SHARED_STRINGS);
@@ -388,6 +382,7 @@ public class SimpleSpreadsheetEditor implements SpreadsheetEditor {
     }
 
     public class SimpleSheet implements Sheet {
+        List<SimpleSheetRow> rowsList = new LinkedList<>();
         private File sheetFile;
         int maxCol = 0;
         private Document sheetDoc;
@@ -450,17 +445,10 @@ public class SimpleSpreadsheetEditor implements SpreadsheetEditor {
             sheetData.appendChild(r.buildNode());
             rowCount++;
         }
-
-        private void saveRow() {
-            save();
-        }
-
-        public SheetRowEditor editRow(int index) {
-            return new SheetRowEditor(this, index, sheetDoc);
-        }
     }
     
     public class SimpleSheetRow implements SheetRow {
+        public StringBuilder rowString = new StringBuilder();
         private int rowNumber;
         private int columnIndex = 0;
         private SimpleSheet sheet;
@@ -557,63 +545,6 @@ public class SimpleSpreadsheetEditor implements SpreadsheetEditor {
         @Override
         public void save() {
             sheet.addRow(this);
-        }
-    }
-
-    public class SheetRowEditor {
-        private final SimpleSheet sheet;
-        private final int rowNumber;
-        private final Document sheetDoc;
-        private final Element row;
-
-        private boolean modified = false;
-
-        public SheetRowEditor(SimpleSheet sheet, int index, Document sheetDoc) {
-            this.sheet = sheet;
-            this.rowNumber = index + 1;
-            this.sheetDoc = sheetDoc;
-            row = (Element) sheetDoc.getElementsByTagName("row").item(index);
-        }
-
-        private Element getCell(int columnIndex) {
-            String cell = SpreadsheetUtils.columnIndexToLetter(columnIndex) + rowNumber;
-            return (Element) XmlUtils.xpath(row, "c[@r='" + cell + "']").item(0);
-        }
-
-        public String getCellValue(int columnIndex) {
-            Element c = getCell(columnIndex);
-            if(c == null)
-                return null;
-            Element v = (Element) c.getElementsByTagName("v").item(0);
-            if(v == null)
-                return null;
-            return sharedStrings.inverse().get(Long.valueOf(v.getTextContent().trim()));
-        }
-
-        public void setCellValue(int columnIndex, String value) {
-            Element c = getCell(columnIndex);
-            if(c == null) {
-                c = sheetDoc.createElement("c");
-                c.setAttribute("r", columnLabel(columnIndex));
-                c.setAttribute("t", "s");
-                row.appendChild(c);
-            }
-            Element v = (Element) c.getElementsByTagName("v").item(0);
-            if(v == null) {
-                v = sheetDoc.createElement("v");
-                c.appendChild(v);
-            }
-            modified = true;
-            v.setTextContent(getOrSetIndexInSharedStrings(value));
-        }
-
-        private String columnLabel(int columnIndex) {
-            return columnIndexToLetter(columnIndex)+rowNumber;
-        }
-
-        public void save() {
-            if(modified)
-                sheet.saveRow();
         }
     }
 

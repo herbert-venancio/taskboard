@@ -30,10 +30,6 @@ public class SimpleSpreadsheetEditorMock implements SpreadsheetEditor {
         return new SheetMock(sheetName);
     }
 
-    public TableEditor getTableEditor(String tableName) {
-        return new SimpleTableEditorMock();
-    }
-
     public String loggerString() {
         return logger.toString();
     }
@@ -183,17 +179,6 @@ public class SimpleSpreadsheetEditorMock implements SpreadsheetEditor {
         public void save() {
             logger.append("Sheet \"" + sheetname + "\" Row \""+ rowNum +"\" Save\n");
         }
-    }
-
-    public class SimpleTableEditorMock implements TableEditor {
-        @Override
-        public CellRange getRange() {
-            return CellRange.fromZeroBased(0, 0, 0, 0);
-        }
-        @Override
-        public void recreate(CellRange range) {}
-        @Override
-        public void save() {}
     }
 
     protected class SimpleSpreadsheetStylesEditorMock implements SpreadsheetStylesEditor {

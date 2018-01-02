@@ -203,24 +203,7 @@ public class FollowUpGenerator {
         }
         sheet.save();
 
-        updateAllIssuesTable(followupData);
-
         return sheet;
-    }
-
-    private void updateAllIssuesTable(FollowupData followupData) {
-        TableEditor allIssues = editor.getTableEditor("AllIssues");
-        CellRange current = allIssues.getRange();
-        int columnCount = Constants.FROMJIRA_HEADERS.size();
-        int rowCount = followupData.fromJiraDs.rows.size();
-        CellRange range = CellRange.fromZeroBased(
-                current.minColumnIndex
-                , current.minRowIndex
-                , Math.max(current.maxColumnIndex, current.minColumnIndex + columnCount - 1)
-                , Math.max(current.maxRowIndex, current.minRowIndex + rowCount - 1)
-        );
-        allIssues.recreate(range);
-        allIssues.save();
     }
 
     private void addAnalyticsHeadersIfExist(List<AnalyticsTransitionsDataSet> analyticsDataSets, String type, SheetRow rowHeader) {
