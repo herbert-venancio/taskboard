@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -341,11 +340,9 @@ public class FollowUpGenerator {
         
         historyRows.add(generateEffortHistoryRow(followUpDataEntry));
         
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        
         for (EffortHistoryRow historyRow : historyRows) {
             SheetRow row = sheet.createRow();
-            row.addColumn(historyRow.date.format(dateFormatter));
+            row.addColumn(historyRow.date.atStartOfDay(timezone));
             row.addColumn(historyRow.sumEffortDone);
             row.addColumn(historyRow.sumEffortBacklog);
             row.save();

@@ -295,7 +295,7 @@ public class FollowUpGeneratorTest {
         subject = new FollowUpGenerator(provider, editor, rowCalculator);
 
         subject.getEditor().open();
-        subject.generateEffortHistory(followUpDataEntry3, projects, null);
+        subject.generateEffortHistory(followUpDataEntry3, projects, ZoneId.of("Z"));
         subject.getEditor().close();
 
         String expectedEditorLogger = 
@@ -307,17 +307,17 @@ public class FollowUpGeneratorTest {
                 "Sheet \"Effort History\" Row \"1\" AddColumn \"C1\": SumEffortBacklog\n" + 
                 "Sheet \"Effort History\" Row \"1\" Save\n" + 
                 "Sheet \"Effort History\" Row Create: 2\n" + 
-                "Sheet \"Effort History\" Row \"2\" AddColumn \"A2\": 2017-10-01\n" + 
+                "Sheet \"Effort History\" Row \"2\" AddColumn \"A2\": 2017-10-01T00:00Z\n" + 
                 "Sheet \"Effort History\" Row \"2\" AddColumn \"B2\": 4.0\n" + 
                 "Sheet \"Effort History\" Row \"2\" AddColumn \"C2\": 6.0\n" + 
                 "Sheet \"Effort History\" Row \"2\" Save\n" + 
                 "Sheet \"Effort History\" Row Create: 3\n" + 
-                "Sheet \"Effort History\" Row \"3\" AddColumn \"A3\": 2017-10-02\n" + 
+                "Sheet \"Effort History\" Row \"3\" AddColumn \"A3\": 2017-10-02T00:00Z\n" + 
                 "Sheet \"Effort History\" Row \"3\" AddColumn \"B3\": 13.0\n" + 
                 "Sheet \"Effort History\" Row \"3\" AddColumn \"C3\": 20.4\n" + 
                 "Sheet \"Effort History\" Row \"3\" Save\n" + 
                 "Sheet \"Effort History\" Row Create: 4\n" + 
-                "Sheet \"Effort History\" Row \"4\" AddColumn \"A4\": 2017-10-03\n" + 
+                "Sheet \"Effort History\" Row \"4\" AddColumn \"A4\": 2017-10-03T00:00Z\n" + 
                 "Sheet \"Effort History\" Row \"4\" AddColumn \"B4\": 3.9\n" + 
                 "Sheet \"Effort History\" Row \"4\" AddColumn \"C4\": 4.5\n" + 
                 "Sheet \"Effort History\" Row \"4\" Save\n" + 
