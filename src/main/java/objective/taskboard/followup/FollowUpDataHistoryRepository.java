@@ -90,11 +90,11 @@ public class FollowUpDataHistoryRepository {
                 headerOnly(data.syntheticsTransitionsDsList));
     }
 
-    public FollowUpDataEntry get(String date, ZoneId timezone, String... projectsKey) {
+    public FollowUpDataSnapshot get(String date, ZoneId timezone, String... projectsKey) {
         return get(date, timezone, asList(projectsKey));
     }
 
-    public FollowUpDataEntry get(String date, ZoneId timezone, List<String> projectsKey) {
+    public FollowUpDataSnapshot get(String date, ZoneId timezone, List<String> projectsKey) {
         FollowUpDataLoader loader = new FollowUpDataLoader(gson, timezone);
 
         for (String project : projectsKey) {
@@ -124,7 +124,7 @@ public class FollowUpDataHistoryRepository {
             }
         }
 
-        return new FollowUpDataEntry(LocalDate.parse(date, FILE_NAME_FORMATTER), loader.create());
+        return new FollowUpDataSnapshot(LocalDate.parse(date, FILE_NAME_FORMATTER), loader.create());
     }
     
     public List<String> getHistoryGivenProjects(String... projectsKey) {
@@ -206,7 +206,7 @@ public class FollowUpDataHistoryRepository {
     public void forEachHistoryEntry(
             List<String> projectsKey, 
             String endDate, ZoneId timezone,
-            Consumer<FollowUpDataEntry> action) {
+            Consumer<FollowUpDataSnapshot> action) {
 
         getHistoryGivenProjects(projectsKey).stream()
                 .filter(d -> endDate == null ? true : d.compareTo(endDate) < 0)
@@ -221,7 +221,7 @@ public class FollowUpDataHistoryRepository {
     public void forEachHistoryEntry(
             List<String> projectsKey, 
             ZoneId timezone,
-            Consumer<FollowUpDataEntry> action) {
+            Consumer<FollowUpDataSnapshot> action) {
 
         forEachHistoryEntry(projectsKey, null, timezone, action);
     }

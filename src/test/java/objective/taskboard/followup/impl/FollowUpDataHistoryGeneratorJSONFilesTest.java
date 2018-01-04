@@ -58,7 +58,7 @@ import org.junit.Test;
 
 import objective.taskboard.database.directory.DataBaseDirectory;
 import objective.taskboard.domain.ProjectFilterConfiguration;
-import objective.taskboard.followup.FollowUpDataEntry;
+import objective.taskboard.followup.FollowUpDataSnapshot;
 import objective.taskboard.followup.FollowUpDataHistoryRepository;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.rules.TimeZoneRule;
@@ -98,7 +98,7 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
     @Test
     public void whenHasOneProject_thenOneFileShouldBeGenerated() throws IOException, InterruptedException {
         when(projectFilterCacheRepo.getProjects()).thenReturn(asList(projectFilter));
-        when(providerFromCurrentState.getJiraData(any())).thenReturn(new FollowUpDataEntry(TODAY_DATE, getDefaultFollowupData()));
+        when(providerFromCurrentState.getJiraData(any())).thenReturn(new FollowUpDataSnapshot(TODAY_DATE, getDefaultFollowupData()));
 
         subject.generate();
 
@@ -108,7 +108,7 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
     @Test
     public void whenProjectDoesNotHaveData_thenNoDataShouldBeGenerated() throws IOException, InterruptedException {
         when(projectFilterCacheRepo.getProjects()).thenReturn(asList(projectFilter));
-        when(providerFromCurrentState.getJiraData(any())).thenReturn(new FollowUpDataEntry(TODAY_DATE, getEmptyFollowupData()));
+        when(providerFromCurrentState.getJiraData(any())).thenReturn(new FollowUpDataSnapshot(TODAY_DATE, getEmptyFollowupData()));
 
         subject.generate();
 
@@ -118,7 +118,7 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
     @Test
     public void whenHasTwoProjects_thenTwoFilesShouldBeGenerated() throws IOException, InterruptedException {
         when(projectFilterCacheRepo.getProjects()).thenReturn(asList(projectFilter, projectFilter2));
-        when(providerFromCurrentState.getJiraData(any())).thenReturn(new FollowUpDataEntry(TODAY_DATE, getDefaultFollowupData()));
+        when(providerFromCurrentState.getJiraData(any())).thenReturn(new FollowUpDataSnapshot(TODAY_DATE, getDefaultFollowupData()));
 
         subject.generate();
 

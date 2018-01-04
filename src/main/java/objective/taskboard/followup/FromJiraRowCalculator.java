@@ -2,23 +2,20 @@ package objective.taskboard.followup;
 
 import static objective.taskboard.followup.FromJiraDataRow.QUERY_TYPE_SUBTASK_PLAN;
 
-import java.util.List;
 import java.util.Optional;
 
 import objective.taskboard.followup.cluster.FollowUpClusterItem;
 
-class FromJiraRowCalculator {
+public class FromJiraRowCalculator {
 
-    private final List<FollowUpClusterItem> clusterItems;
+    private final FollowupCluster followupCluster;
 
-    public FromJiraRowCalculator(List<FollowUpClusterItem> clusterItems) {
-        this.clusterItems = clusterItems;
+    public FromJiraRowCalculator(FollowupCluster cluster) {
+        this.followupCluster = cluster;
     }
 
     public FromJiraRowCalculation calculate(FromJiraDataRow row) {
-        Optional<FollowUpClusterItem> clusterItem = clusterItems.stream()
-                .filter(i -> matchingCluster(i, row))
-                .findFirst();
+        Optional<FollowUpClusterItem> clusterItem = followupCluster.getClusterFor(row.subtaskType, row.tshirtSize); 
         
         FromJiraRowCalculation result = new FromJiraRowCalculation();
         
@@ -50,11 +47,6 @@ class FromJiraRowCalculator {
     }
 
     
-    private static boolean matchingCluster(FollowUpClusterItem clusterItem, FromJiraDataRow row) {
-        return clusterItem.getSubtaskTypeName().equals(row.subtaskType)
-                && clusterItem.getSizing().equals(row.tshirtSize);
-    }
-
     public static class FromJiraRowCalculation {
         
         public FromJiraRowCalculation(double effortEstimate, double effortDone, double effortOnBacklog) {

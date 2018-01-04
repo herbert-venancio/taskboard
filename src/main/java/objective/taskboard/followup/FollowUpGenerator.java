@@ -28,17 +28,14 @@ import static objective.taskboard.followup.impl.FollowUpTransitionsDataProvider.
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.core.io.Resource;
 
-import objective.taskboard.followup.FromJiraRowCalculator.FromJiraRowCalculation;
 import objective.taskboard.spreadsheet.Sheet;
 import objective.taskboard.spreadsheet.SheetRow;
 import objective.taskboard.spreadsheet.SpreadsheetEditor;
@@ -49,24 +46,24 @@ public class FollowUpGenerator {
 
     private final FollowupDataProvider provider;
     private final SpreadsheetEditor editor;
-    private final FromJiraRowCalculator rowCalculator;
+    private final FollowupCluster followupCluster;
 
-    public FollowUpGenerator(FollowupDataProvider provider, SpreadsheetEditor editor, FromJiraRowCalculator rowCalculator) {
+    public FollowUpGenerator(FollowupDataProvider provider, SpreadsheetEditor editor, FollowupCluster cluster) {
         this.provider = provider;
         this.editor = editor;
-        this.rowCalculator = rowCalculator;
+        this.followupCluster = cluster;
     }
 
     public Resource generate(String [] includedProjects, ZoneId timezone) throws IOException {
         try {
             editor.open();
 
-            FollowUpDataEntry followupDataEntry = provider.getJiraData(includedProjects, timezone);
+            FollowUpDataSnapshot followupDataEntry = provider.getJiraData(followupCluster, includedProjects, timezone);
             FollowupData followupData = followupDataEntry.getData();
 
             generateFromJiraSheet(followupData);
             generateTransitionsSheets(followupData);
-            generateEffortHistory(followupDataEntry, asList(includedProjects), timezone);
+            generateEffortHistory(followupDataEntry, timezone);
 
             return IOUtilities.asResource(editor.toBytes());
         } catch (Exception e) {
@@ -322,7 +319,7 @@ public class FollowUpGenerator {
         return sheet;
     }
     
-    void generateEffortHistory(FollowUpDataEntry followUpDataEntry, List<String> includedProjects, ZoneId timezone) {
+    void generateEffortHistory(FollowUpDataSnapshot followUpDataEntry, ZoneId timezone) {
         Sheet sheet = editor.getOrCreateSheet("Effort History");
         sheet.truncate(0);
         
@@ -332,15 +329,12 @@ public class FollowUpGenerator {
         rowHeader.addColumn("SumEffortBacklog");
         rowHeader.save();
         
-        List<EffortHistoryRow> historyRows = new ArrayList<>();
+        Optional<FollowUpDataSnapshotHistory> history = followUpDataEntry.getHistory();
         
-        provider.forEachHistoryEntry(includedProjects, timezone, historyEntry -> {
-            historyRows.add(generateEffortHistoryRow(historyEntry));
-        });
-        
-        historyRows.add(generateEffortHistoryRow(followUpDataEntry));
-        
-        for (EffortHistoryRow historyRow : historyRows) {
+        if (!history.isPresent())
+            return;
+               
+        for (FollowUpDataSnapshotHistory.EffortHistoryRow historyRow : history.get().getHistoryRows()) {
             SheetRow row = sheet.createRow();
             row.addColumn(historyRow.date.atStartOfDay(timezone));
             row.addColumn(historyRow.sumEffortDone);
@@ -351,29 +345,7 @@ public class FollowUpGenerator {
         sheet.save();
     }
 
-    private EffortHistoryRow generateEffortHistoryRow(FollowUpDataEntry followupDataEntry) {
-        EffortHistoryRow historyRow = new EffortHistoryRow(followupDataEntry.getDate());
-
-        followupDataEntry.getData().fromJiraDs.rows.stream().forEach(fromJiraRow -> {
-            FromJiraRowCalculation fromJiraRowCalculation = rowCalculator.calculate(fromJiraRow);
-            
-            historyRow.sumEffortDone += fromJiraRowCalculation.getEffortDone();
-            historyRow.sumEffortBacklog += fromJiraRowCalculation.getEffortOnBacklog();
-        });
-
-        return historyRow;
-    }
     
-    private static class EffortHistoryRow {
-        private final LocalDate date;
-        private double sumEffortDone = 0;
-        private double sumEffortBacklog = 0;
-
-        public EffortHistoryRow(LocalDate date) {
-            this.date = date;
-        }
-    }
-
     public SpreadsheetEditor getEditor() {
         return editor;
     }

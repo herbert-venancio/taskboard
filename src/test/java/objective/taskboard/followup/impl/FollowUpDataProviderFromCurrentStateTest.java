@@ -1640,7 +1640,7 @@ public class FollowUpDataProviderFromCurrentStateTest extends AbstractFollowUpDa
         );
 
         try {
-            subject.getJiraData(defaultProjects());
+            subject.getJiraData(null, defaultProjects());
             fail("Should fail when trying to generate ballbark without mapping for given issue type");
         } catch(IllegalStateException e) {
             assertEquals("Ballpark mapping for issue type 'Task' (id 12) missing in configuration", e.getMessage());
@@ -2516,7 +2516,7 @@ public class FollowUpDataProviderFromCurrentStateTest extends AbstractFollowUpDa
                 .issueStatus(statusOpen)
         );
 
-        subject.getJiraData(defaultProjects());
+        subject.getJiraData(null, defaultProjects());
     }
 
     @Test
@@ -2537,7 +2537,7 @@ public class FollowUpDataProviderFromCurrentStateTest extends AbstractFollowUpDa
             demand().id(2).key("PROJ-2").summary("Smry 2").timeSpentInHours(0).originalEstimateInHours(null)
         );
 
-        subject.getJiraData(defaultProjects());
+        subject.getJiraData(null, defaultProjects());
     }
 
     @Test
@@ -3137,12 +3137,12 @@ public class FollowUpDataProviderFromCurrentStateTest extends AbstractFollowUpDa
     }
 
     private void assertFollowupsForIssuesEqualsOrdered(String expectedFollowupList) {
-        List<FromJiraDataRow> actual = subject.getJiraData(defaultProjects()).getData().fromJiraDs.rows;
+        List<FromJiraDataRow> actual = subject.getJiraData(null, defaultProjects()).getData().fromJiraDs.rows;
         assertEquals(expectedFollowupList, fromJiraRowstoString(actual, "\n\n"));
     }
 
     private void assertFollowupsForIssuesEquals(String expectedFollowupList) {
-        List<FromJiraDataRow> actual = sortJiraDataByIssuesKeys(subject.getJiraData(defaultProjects()).getData().fromJiraDs.rows);
+        List<FromJiraDataRow> actual = sortJiraDataByIssuesKeys(subject.getJiraData(null, defaultProjects()).getData().fromJiraDs.rows);
 
         assertEquals(
             expectedFollowupList,

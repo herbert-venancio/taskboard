@@ -51,6 +51,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.core.io.Resource;
 
@@ -69,19 +70,18 @@ public class FollowUpGeneratorTest {
     private FollowupDataProvider provider;
     
     @Mock
-    private FromJiraRowCalculator rowCalculator;
+    private FollowupCluster followupCluster;
 
     private SimpleSpreadsheetEditorMock editor = new SimpleSpreadsheetEditorMock();
     private LocalDate followUpDate = LocalDate.parse("2007-12-03");
 
     @Before
     public void setup() {
-        when(rowCalculator.calculate(any())).thenReturn(new FromJiraRowCalculation(0, 0, 0));
     }
     
     @Test
     public void generateJiraDataSheetTest() throws IOException {
-        subject = new FollowUpGenerator(provider, editor, rowCalculator);
+        subject = new FollowUpGenerator(provider, editor, followupCluster);
 
         subject.getEditor().open();
         subject.generateFromJiraSheet(getDefaultFollowupData());
@@ -93,7 +93,7 @@ public class FollowUpGeneratorTest {
 
     @Test
     public void whenGeneratingWithoutData_generatesFromJiraKeepingOnlyHeaders() throws IOException {
-        subject = new FollowUpGenerator(provider, editor, rowCalculator);
+        subject = new FollowUpGenerator(provider, editor, followupCluster);
 
         subject.getEditor().open();
         subject.generateFromJiraSheet(getEmptyFollowupData());
@@ -105,7 +105,7 @@ public class FollowUpGeneratorTest {
 
     @Test
     public void givenEmptyTransitions_whenGenerateFromJiraSheet_thenShouldNotGenerateTransitions() throws IOException {
-        subject = new FollowUpGenerator(provider, editor, rowCalculator);
+        subject = new FollowUpGenerator(provider, editor, followupCluster);
 
         FromJiraDataSet fromJiraDS = new FromJiraDataSet(FROMJIRA_HEADERS, getDefaultFromJiraDataRowList());
         FollowupData followupData = new FollowupData(fromJiraDS, getEmptyAnalyticsTransitionsDataSet(),
@@ -121,7 +121,7 @@ public class FollowUpGeneratorTest {
 
     @Test
     public void givenNoTransitions_whenGenerateFromJiraSheet_thenShouldNotGenerateTransitions() throws IOException {
-        subject = new FollowUpGenerator(provider, editor, rowCalculator);
+        subject = new FollowUpGenerator(provider, editor, followupCluster);
 
         FromJiraDataSet fromJiraDS = new FromJiraDataSet(FROMJIRA_HEADERS, getDefaultFromJiraDataRowList());
         FollowupData followupData = new FollowupData(fromJiraDS, null, null);
@@ -136,7 +136,7 @@ public class FollowUpGeneratorTest {
 
     @Test
     public void givenTransitionsDatesOfOtherIssueKey_whenGenerateFromJiraSheet_thenShouldGenerateEmptyTransitionsDates() throws IOException {
-        subject = new FollowUpGenerator(provider, editor, rowCalculator);
+        subject = new FollowUpGenerator(provider, editor, followupCluster);
 
         FromJiraDataSet fromJiraDS = new FromJiraDataSet(FROMJIRA_HEADERS, getDefaultFromJiraDataRowList());
         FollowupData followupData = new FollowupData(fromJiraDS, getAnalyticsTransitionsDataSetWitNoRow(), getSyntheticTransitionsDataSetWithNoRow());
@@ -151,7 +151,7 @@ public class FollowUpGeneratorTest {
 
     @Test
     public void generateJiraDataSheetWithSomeEmptyAndNullAttributesJiraDataTest() throws IOException {
-        subject = new FollowUpGenerator(provider, editor, rowCalculator);
+        subject = new FollowUpGenerator(provider, editor, followupCluster);
 
         FromJiraDataRow fromJiraDefault = getDefaultFromJiraDataRow();
         fromJiraDefault.project = "";
@@ -175,9 +175,9 @@ public class FollowUpGeneratorTest {
     @Test
     public void generateTest() throws IOException {
         FollowUpTemplate testTemplate = new FollowUpTemplate(resolve("followup/Followup-template.xlsm"));
-        subject = new FollowUpGenerator(provider, new SimpleSpreadsheetEditor(testTemplate), rowCalculator);
+        subject = new FollowUpGenerator(provider, new SimpleSpreadsheetEditor(testTemplate), followupCluster);
 
-        when(provider.getJiraData(emptyArray(), ZoneId.systemDefault())).thenReturn(new FollowUpDataEntry(followUpDate, getDefaultFollowupData()));
+        when(provider.getJiraData(followupCluster, emptyArray(), ZoneId.systemDefault())).thenReturn(new FollowUpDataSnapshot(followUpDate, getDefaultFollowupData()));
 
         Resource resource = subject.generate(emptyArray(), ZoneId.systemDefault());
         assertNotNull("Resource shouldn't be null", resource);
@@ -186,9 +186,9 @@ public class FollowUpGeneratorTest {
     @Test
     public void generateUsingGenericTemplateTest() throws IOException {
         FollowUpTemplate testTemplate = new FollowUpTemplate(resolve("followup/Followup-template.xlsm"));
-        subject = new FollowUpGenerator(provider, new SimpleSpreadsheetEditor(testTemplate), rowCalculator);
+        subject = new FollowUpGenerator(provider, new SimpleSpreadsheetEditor(testTemplate), followupCluster);
 
-        when(provider.getJiraData(emptyArray(), ZoneId.systemDefault())).thenReturn(new FollowUpDataEntry(followUpDate, getDefaultFollowupData()));
+        when(provider.getJiraData(followupCluster, emptyArray(), ZoneId.systemDefault())).thenReturn(new FollowUpDataSnapshot(followUpDate, getDefaultFollowupData()));
 
         Resource resource = subject.generate(emptyArray(), ZoneId.systemDefault());
         assertNotNull("Resource shouldn't be null", resource);
@@ -197,7 +197,7 @@ public class FollowUpGeneratorTest {
     @Test
     public void generateLotsOfLines() throws IOException {
         FollowUpTemplate testTemplate = new FollowUpTemplate(resolve("followup/Followup-template.xlsm"));
-        subject = new FollowUpGenerator(provider, new SimpleSpreadsheetEditor(testTemplate), rowCalculator);
+        subject = new FollowUpGenerator(provider, new SimpleSpreadsheetEditor(testTemplate), followupCluster);
 
         List<FromJiraDataRow> fromJiraDataRowList = new LinkedList<>();
         for (int i=0; i < 5000; i++)
@@ -205,16 +205,16 @@ public class FollowUpGeneratorTest {
 
         FromJiraDataSet fromJiraDs = new FromJiraDataSet(FROMJIRA_HEADERS, fromJiraDataRowList);
         FollowupData followupData = new FollowupData(fromJiraDs, getDefaultAnalyticsTransitionsDataSet(), getDefaultSyntheticTransitionsDataSet());
-        FollowUpDataEntry followUpDataEntry = new FollowUpDataEntry(followUpDate, followupData);
+        FollowUpDataSnapshot followUpDataEntry = new FollowUpDataSnapshot(followUpDate, followupData);
 
-        when(provider.getJiraData(emptyArray(), ZoneId.systemDefault())).thenReturn(followUpDataEntry);
+        when(provider.getJiraData(followupCluster, emptyArray(), ZoneId.systemDefault())).thenReturn(followUpDataEntry);
         Resource resource = subject.generate(emptyArray(), ZoneId.systemDefault());
         assertNotNull("Resource shouldn't be null", resource);
     }
 
     @Test
     public void givenIssues_whenGenerateTransitionsSheets_thenSheetsShouldBeGenerated() throws IOException {
-        subject = new FollowUpGenerator(provider, editor, rowCalculator);
+        subject = new FollowUpGenerator(provider, editor, followupCluster);
 
         subject.getEditor().open();
         subject.generateTransitionsSheets(getDefaultFollowupData());
@@ -227,7 +227,7 @@ public class FollowUpGeneratorTest {
     @Test
     public void givenNoIssue_whenGenerateTransitionsSheets_thenSheetsShouldNotBeGenerated() throws IOException {
         FollowUpTemplate testTemplate = new FollowUpTemplate(resolve("followup/Followup-template.xlsm"));
-        subject = new FollowUpGenerator(provider, new SimpleSpreadsheetEditor(testTemplate), rowCalculator);
+        subject = new FollowUpGenerator(provider, new SimpleSpreadsheetEditor(testTemplate), followupCluster);
 
         List<Sheet> transitionsSheets = subject.generateTransitionsSheets(getEmptyFollowupData());
         assertEquals("Transitions sheets quantity", 0, transitionsSheets.size());
@@ -255,16 +255,15 @@ public class FollowUpGeneratorTest {
 
     @Test
     public void generateJiraDataSheetTest2() throws IOException {
-        
         //Data 1
         FromJiraDataRow data1row1 = getDefaultFromJiraDataRow();
         FromJiraDataRow data1row2 = getDefaultFromJiraDataRow();
-        FromJiraDataRow data1row3 = getDefaultFromJiraDataRow();
         
+        FromJiraRowCalculator rowCalculator = Mockito.mock(FromJiraRowCalculator.class);
         when(rowCalculator.calculate(data1row1)).thenReturn(new FromJiraRowCalculation(0, 2, 3));
         when(rowCalculator.calculate(data1row2)).thenReturn(new FromJiraRowCalculation(0, 2, 3));
 
-        FollowUpDataEntry followUpDataEntry1 = followUpDataEntry(LocalDate.of(2017, 10, 1), asList(data1row1, data1row2, data1row3));
+        FollowUpDataSnapshot followUpDataEntry1 = followUpDataEntry(LocalDate.of(2017, 10, 1), asList(data1row1, data1row2));
         
         //Data 2
         FromJiraDataRow data2row1 = getDefaultFromJiraDataRow();
@@ -275,7 +274,7 @@ public class FollowUpGeneratorTest {
         when(rowCalculator.calculate(data2row2)).thenReturn(new FromJiraRowCalculation(0, 6, 8.2));
         when(rowCalculator.calculate(data2row3)).thenReturn(new FromJiraRowCalculation(0, 2, 4.1));
 
-        FollowUpDataEntry followUpDataEntry2 = followUpDataEntry(LocalDate.of(2017, 10, 2), asList(data2row1, data2row2, data2row3));
+        FollowUpDataSnapshot followUpDataEntry2 = followUpDataEntry(LocalDate.of(2017, 10, 2), asList(data2row1, data2row2, data2row3));
 
         //Data 3
         FromJiraDataRow data3row1 = getDefaultFromJiraDataRow();
@@ -285,17 +284,27 @@ public class FollowUpGeneratorTest {
         when(rowCalculator.calculate(data3row1)).thenReturn(new FromJiraRowCalculation(0, 1.9, 1.5));
         when(rowCalculator.calculate(data3row2)).thenReturn(new FromJiraRowCalculation(0,   0,   3));
         when(rowCalculator.calculate(data3row3)).thenReturn(new FromJiraRowCalculation(0,   2,   0));
-
-        FollowUpDataEntry followUpDataEntry3 = followUpDataEntry(LocalDate.of(2017, 10, 3), asList(data3row1, data3row2, data3row3));
+        
+        FollowUpDataHistoryRepository historyRepository = Mockito.mock(FollowUpDataHistoryRepository.class);
+        
+        FollowUpDataSnapshot followUpDataEntry3 = followUpDataEntry(LocalDate.of(2017, 10, 3), asList(data3row1, data3row2, data3row3));
         
         List<String> projects = asList("P1", "P2");
-        List<FollowUpDataEntry> entries = asList(followUpDataEntry1, followUpDataEntry2);
-        mockProviderForEachHistoryEntry(projects, entries);
+        List<FollowUpDataSnapshot> entries = asList(followUpDataEntry1, followUpDataEntry2);
+        mockProviderForEachHistoryEntry(historyRepository, projects, entries);
+        
+        FollowUpDataSnapshotHistory snapshotHistory = new FollowUpDataSnapshotHistory(historyRepository, 
+                projects.toArray(new String[0]), 
+                ZoneId.of("Z"), 
+                followUpDataEntry3, 
+                rowCalculator);
+        
+        followUpDataEntry3.setFollowUpDataEntryHistory(snapshotHistory);
 
-        subject = new FollowUpGenerator(provider, editor, rowCalculator);
+        subject = new FollowUpGenerator(provider, editor, followupCluster);
 
         subject.getEditor().open();
-        subject.generateEffortHistory(followUpDataEntry3, projects, ZoneId.of("Z"));
+        subject.generateEffortHistory(followUpDataEntry3, ZoneId.of("Z"));
         subject.getEditor().close();
 
         String expectedEditorLogger = 
@@ -327,22 +336,22 @@ public class FollowUpGeneratorTest {
         assertEquals(expectedEditorLogger, editor.loggerString());
     }
 
-    private FollowUpDataEntry followUpDataEntry(LocalDate data, List<FromJiraDataRow> rows) {
+    private FollowUpDataSnapshot followUpDataEntry(LocalDate data, List<FromJiraDataRow> rows) {
         FromJiraDataSet dataSet = new FromJiraDataSet(FROMJIRA_HEADERS, rows);
         FollowupData followupData = new FollowupData(dataSet, emptyList(), emptyList());
-        return new FollowUpDataEntry(data, followupData);
-    }
-
-    private void mockProviderForEachHistoryEntry(List<String> projects, List<FollowUpDataEntry> entriesToReturn) {
-        doAnswer(invocation -> {
-            @SuppressWarnings("unchecked")
-            Consumer<FollowUpDataEntry> action = (Consumer<FollowUpDataEntry>) invocation.getArguments()[2];
-            entriesToReturn.stream().forEach(action);
-            return null;
-        })
-        .when(provider).forEachHistoryEntry(eq(projects), any(), any());
+        return new FollowUpDataSnapshot(data, followupData);
     }
     
+    private void mockProviderForEachHistoryEntry(FollowUpDataHistoryRepository historyRepository, List<String> projects, List<FollowUpDataSnapshot> entriesToReturn) {
+            doAnswer(invocation -> {
+                @SuppressWarnings("unchecked")
+                Consumer<FollowUpDataSnapshot> action = (Consumer<FollowUpDataSnapshot>) invocation.getArguments()[2];
+                entriesToReturn.stream().forEach(action);
+                return null;
+            })
+            .when(historyRepository).forEachHistoryEntry(eq(projects), any(), any());
+    }    
+
     private String txtResourceAsString(String pathResource) {
         return IOUtilities.resourceToString(pathResource);
     }

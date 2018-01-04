@@ -23,7 +23,9 @@ package objective.taskboard.followup;
 import static objective.taskboard.followup.FollowUpHelper.getDefaultFollowupData;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -89,7 +91,7 @@ public class FollowUpFacadeTest {
     private DataBaseDirectory dataBaseDirectory;
     
     @Mock
-    private FollowUpClusterItemRepository clusterItemRepository;
+    private FollowupClusterProvider clusterProvider;
 
     @Spy
     @InjectMocks
@@ -125,8 +127,8 @@ public class FollowUpFacadeTest {
     @Test
     public void okTemplateGenerate() throws Exception {
         given(templateService.getTemplate(TEMPLATE_NAME)).willReturn(template);
-        given(provider.getJiraData(INCLUDED_PROJECTS, ZoneId.systemDefault()))
-            .willReturn(new FollowUpDataEntry(LocalDate.parse("2017-10-01"), getDefaultFollowupData()));
+        given(provider.getJiraData(anyObject(), eq(INCLUDED_PROJECTS), eq(ZoneId.systemDefault())))
+            .willReturn(new FollowUpDataSnapshot(LocalDate.parse("2017-10-01"), getDefaultFollowupData()));
 
         // when
         FollowUpGenerator followupGenerator = followUpFacade.getGenerator(TEMPLATE_NAME, Optional.empty());

@@ -32,7 +32,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,12 +41,15 @@ import org.springframework.util.StringUtils;
 import objective.taskboard.Constants;
 import objective.taskboard.data.Issue;
 import objective.taskboard.followup.AnalyticsTransitionsDataSet;
-import objective.taskboard.followup.FollowUpDataEntry;
+import objective.taskboard.followup.FollowUpDataSnapshot;
 import objective.taskboard.followup.FollowUpDataHistoryRepository;
+import objective.taskboard.followup.FollowUpDataSnapshotHistory;
+import objective.taskboard.followup.FollowupCluster;
 import objective.taskboard.followup.FollowupData;
 import objective.taskboard.followup.FollowupDataProvider;
 import objective.taskboard.followup.FromJiraDataRow;
 import objective.taskboard.followup.FromJiraDataSet;
+import objective.taskboard.followup.FromJiraRowCalculator;
 import objective.taskboard.followup.SyntheticTransitionsDataSet;
 import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.issueBuffer.IssueBufferState;
@@ -80,7 +82,8 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
     }
 
     @Override
-    public FollowUpDataEntry getJiraData(String[] includeProjects, ZoneId timezone) {
+    public FollowUpDataSnapshot getJiraData(FollowupCluster cluster, String[] includeProjects, ZoneId timezone) {
+        FromJiraRowCalculator rowCalculator = new FromJiraRowCalculator(cluster);
         LocalDate date = LocalDate.now();
         List<String> i = Arrays.asList(includeProjects);
 
@@ -96,7 +99,14 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         List<SyntheticTransitionsDataSet> syntheticsTransitionsDsList = transitions.getSyntheticTransitionsDsList(analyticsTransitionsDsList);
         FollowupData followupData = new FollowupData(fromJiraDs, analyticsTransitionsDsList, syntheticsTransitionsDsList);
 
-        return new FollowUpDataEntry(date, followupData);
+        FollowUpDataSnapshot followUpDataEntry = new FollowUpDataSnapshot(date, followupData);
+        followUpDataEntry.setFollowUpDataEntryHistory(new FollowUpDataSnapshotHistory(
+                historyRepository,
+                includeProjects,
+                timezone,
+                followUpDataEntry, 
+                rowCalculator));
+        return followUpDataEntry;
     }
 
     private FromJiraDataSet getFromJiraDs(List<Issue> issuesVisibleToUser, ZoneId timezone) {
@@ -441,14 +451,4 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         for(T i : items) if(i != null) return i;
         return null;
     }
-
-    @Override
-    public void forEachHistoryEntry(
-            List<String> projectsKey, 
-            ZoneId timezone,
-            Consumer<FollowUpDataEntry> action) {
-
-        historyRepository.forEachHistoryEntry(projectsKey, timezone, action);
-    }
-
 }

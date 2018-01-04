@@ -35,8 +35,6 @@ import org.springframework.web.multipart.MultipartFile;
 import objective.taskboard.controller.TemplateData;
 import objective.taskboard.database.directory.DataBaseDirectory;
 import objective.taskboard.domain.Project;
-import objective.taskboard.followup.cluster.FollowUpClusterItem;
-import objective.taskboard.followup.cluster.FollowUpClusterItemRepository;
 import objective.taskboard.followup.data.Template;
 import objective.taskboard.followup.impl.FollowUpDataProviderFromCurrentState;
 import objective.taskboard.followup.impl.FollowUpDataProviderFromHistory;
@@ -69,10 +67,10 @@ public class FollowUpFacade {
     private DataBaseDirectory dataBaseDirectory;
     
     @Autowired
-    private FollowUpClusterItemRepository clusterItemRepository;
+    private FollowUpDataHistoryRepository historyRepository;
     
     @Autowired
-    private FollowUpDataHistoryRepository historyRepository;
+    private FollowupClusterProvider clusterProvider;
 
     public FollowUpGenerator getGenerator(String templateName, Optional<String> date) {
         Template followUpConfiguration = templateService.getTemplate(templateName);
@@ -80,10 +78,9 @@ public class FollowUpFacade {
         FollowUpTemplate template = followUpTemplateStorage.getTemplate(followUpConfiguration.getPath());
         SimpleSpreadsheetEditor spreadsheetEditor = new SimpleSpreadsheetEditor(template);
 
-        List<FollowUpClusterItem> clusterItems = clusterItemRepository.findByFollowUpConfiguration(followUpConfiguration);
-        FromJiraRowCalculator rowCalculator = new FromJiraRowCalculator(clusterItems);
+        FollowupCluster cluster = clusterProvider.getFor(followUpConfiguration);
 
-        return new FollowUpGenerator(getProvider(date), spreadsheetEditor, rowCalculator);
+        return new FollowUpGenerator(getProvider(date), spreadsheetEditor, cluster);
     }
 
     public FollowupDataProvider getProvider(Optional<String> date) {
