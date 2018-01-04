@@ -20,7 +20,6 @@
  */
 package objective.taskboard.followup;
 
-import static java.util.Arrays.asList;
 import static java.util.Optional.empty;
 import static objective.taskboard.followup.impl.FollowUpTransitionsDataProvider.TYPE_DEMAND;
 import static objective.taskboard.followup.impl.FollowUpTransitionsDataProvider.TYPE_FEATURES;

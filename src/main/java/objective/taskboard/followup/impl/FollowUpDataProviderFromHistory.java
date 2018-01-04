@@ -53,7 +53,8 @@ public class FollowUpDataProviderFromHistory implements FollowupDataProvider {
                 includeProjects,
                 timezone,
                 followUpDataEntry, 
-                rowCalculator));
+                rowCalculator,
+                date));
         
         return followUpDataEntry;
     }

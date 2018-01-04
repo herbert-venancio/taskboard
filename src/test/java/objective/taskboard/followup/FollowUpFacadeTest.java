@@ -63,7 +63,6 @@ import org.xlsx4j.sml.Row;
 import org.xlsx4j.sml.Sheet;
 
 import objective.taskboard.database.directory.DataBaseDirectory;
-import objective.taskboard.followup.cluster.FollowUpClusterItemRepository;
 import objective.taskboard.followup.data.Template;
 import objective.taskboard.followup.impl.FollowUpDataProviderFromCurrentState;
 import objective.taskboard.followup.impl.FollowUpTemplateStorage;
