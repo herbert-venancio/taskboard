@@ -20,6 +20,7 @@
  */
 package objective.taskboard.followup;
 
+import static java.util.Arrays.asList;
 import static java.util.Optional.empty;
 import static objective.taskboard.followup.impl.FollowUpTransitionsDataProvider.TYPE_DEMAND;
 import static objective.taskboard.followup.impl.FollowUpTransitionsDataProvider.TYPE_FEATURES;
@@ -44,22 +45,25 @@ public class FollowUpGenerator {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FollowUpGenerator.class);
 
     private final FollowupDataProvider provider;
+    private final SpreadsheetEditor editor;
+    private final FollowupCluster followupCluster;
 
-    private SpreadsheetEditor editor;
-
-    public FollowUpGenerator(FollowupDataProvider provider, SpreadsheetEditor editor) {
+    public FollowUpGenerator(FollowupDataProvider provider, SpreadsheetEditor editor, FollowupCluster cluster) {
         this.provider = provider;
         this.editor = editor;
+        this.followupCluster = cluster;
     }
 
     public Resource generate(String [] includedProjects, ZoneId timezone) throws IOException {
         try {
             editor.open();
 
-            FollowupData followupData = provider.getJiraData(includedProjects, timezone);
+            FollowUpDataSnapshot followupDataEntry = provider.getJiraData(followupCluster, includedProjects, timezone);
+            FollowupData followupData = followupDataEntry.getData();
 
             generateFromJiraSheet(followupData);
             generateTransitionsSheets(followupData);
+            generateEffortHistory(followupDataEntry, timezone);
 
             return IOUtilities.asResource(editor.toBytes());
         } catch (Exception e) {
@@ -314,7 +318,34 @@ public class FollowUpGenerator {
         rowHeader.save();
         return sheet;
     }
+    
+    void generateEffortHistory(FollowUpDataSnapshot followUpDataEntry, ZoneId timezone) {
+        Sheet sheet = editor.getOrCreateSheet("Effort History");
+        sheet.truncate(0);
+        
+        SheetRow rowHeader = sheet.createRow();
+        rowHeader.addColumn("Date");
+        rowHeader.addColumn("SumEffortDone");
+        rowHeader.addColumn("SumEffortBacklog");
+        rowHeader.save();
+        
+        Optional<FollowUpDataSnapshotHistory> history = followUpDataEntry.getHistory();
+        
+        if (!history.isPresent())
+            return;
+               
+        for (FollowUpDataSnapshotHistory.EffortHistoryRow historyRow : history.get().getHistoryRows()) {
+            SheetRow row = sheet.createRow();
+            row.addColumn(historyRow.date.atStartOfDay(timezone));
+            row.addColumn(historyRow.sumEffortDone);
+            row.addColumn(historyRow.sumEffortBacklog);
+            row.save();
+        }
+        
+        sheet.save();
+    }
 
+    
     public SpreadsheetEditor getEditor() {
         return editor;
     }

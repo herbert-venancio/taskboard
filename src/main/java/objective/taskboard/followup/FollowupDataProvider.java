@@ -20,15 +20,23 @@
  */
 package objective.taskboard.followup;
 
-import objective.taskboard.issueBuffer.IssueBufferState;
-
 import java.time.ZoneId;
 
-public interface FollowupDataProvider {
-    FollowupData getJiraData(String[] includeProjects, ZoneId timezone);
+import objective.taskboard.issueBuffer.IssueBufferState;
 
-    default FollowupData getJiraData(String... includeProjects) {
-        return getJiraData(includeProjects, ZoneId.systemDefault());
+public interface FollowupDataProvider {
+    FollowUpDataSnapshot getJiraData(FollowupCluster followupCluster, String[] includeProjects, ZoneId timezone);
+
+    default FollowUpDataSnapshot getJiraData(FollowupCluster followupCluster, String... includeProjects) {
+        return getJiraData(followupCluster, includeProjects, ZoneId.systemDefault());
+    }
+
+    default FollowUpDataSnapshot getJiraData(String... includeProjects) {
+        return getJiraData(null, includeProjects, ZoneId.systemDefault());
+    }
+
+    default FollowUpDataSnapshot getJiraData(String[] includeProjects, ZoneId timezone) {
+        return getJiraData(null, includeProjects, timezone);
     }
 
     IssueBufferState getFollowupState();

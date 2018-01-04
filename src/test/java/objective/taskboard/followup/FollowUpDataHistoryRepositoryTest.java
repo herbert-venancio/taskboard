@@ -23,13 +23,14 @@ package objective.taskboard.followup;
 
 import static java.nio.file.Files.copy;
 import static java.nio.file.Files.createDirectories;
-import static java.nio.file.Files.createFile;
 import static java.nio.file.Files.createTempDirectory;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.size;
+import static java.util.Arrays.asList;
 import static objective.taskboard.followup.FollowUpDataHistoryRepository.EXTENSION_JSON;
 import static objective.taskboard.followup.FollowUpDataHistoryRepository.EXTENSION_ZIP;
 import static objective.taskboard.followup.FollowUpDataHistoryRepository.FILE_NAME_FORMAT;
+import static objective.taskboard.followup.FollowUpDataHistoryRepository.FILE_NAME_FORMATTER;
 import static objective.taskboard.followup.FollowUpHelper.assertFollowUpDataV0;
 import static objective.taskboard.followup.FollowUpHelper.followupEmptyV2;
 import static objective.taskboard.followup.FollowUpHelper.followupExpectedV2;
@@ -40,6 +41,7 @@ import static objective.taskboard.utils.IOUtilities.asResource;
 import static objective.taskboard.utils.ZipUtils.unzip;
 import static objective.taskboard.utils.ZipUtils.zip;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
+import static org.apache.commons.lang3.StringUtils.join;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertEquals;
@@ -55,12 +57,14 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -75,45 +79,50 @@ public class FollowUpDataHistoryRepositoryTest {
     private static final ZoneId TIMEZONE = ZoneId.systemDefault();
     private static final String PROJECT_TEST = "PROJECT TEST";
     private static final String PROJECT_TEST_2 = "PROJECT TEST 2";
-    private static final String TODAY = DateTime.now().toString(FILE_NAME_FORMAT);
-    private static final String YESTERDAY = DateTime.now().minusDays(1).toString(FILE_NAME_FORMAT);
-    private static final String BEFORE_YESTERDAY = DateTime.now().minusDays(2).toString(FILE_NAME_FORMAT);
+    private static final LocalDate TODAY_DATE = LocalDate.now();
+    private static final String TODAY = TODAY_DATE.format(FILE_NAME_FORMATTER);
+    private static final String YESTERDAY = TODAY_DATE.minusDays(1).format(FILE_NAME_FORMATTER);
+    private static final String BEFORE_YESTERDAY = TODAY_DATE.minusDays(2).format(FILE_NAME_FORMATTER);
 
-    private final DataBaseDirectory dataBaseDirectory = mock(DataBaseDirectory.class);
-    private final FollowUpDataHistoryRepository subject = new FollowUpDataHistoryRepository(dataBaseDirectory);
+    private Path dataPath;
+    private FollowUpDataHistoryRepository subject;
     
     @Rule
     public TimeZoneRule timeZoneRule = new TimeZoneRule("America/Sao_Paulo");
     
     @Before
     public void before() throws IOException {
-        Path pathHistoryTemp = createTempDirectory(getClass().getSimpleName());
-        when(dataBaseDirectory.path(anyString())).thenReturn(pathHistoryTemp);
+        dataPath = createTempDirectory(getClass().getSimpleName());
+        
+        DataBaseDirectory dataBaseDirectory = mock(DataBaseDirectory.class);
+        when(dataBaseDirectory.path(anyString())).thenReturn(dataPath);
+        
+        subject = new FollowUpDataHistoryRepository(dataBaseDirectory);
     }
     
     @After
     public void after() {
-        deleteQuietly(dataBaseDirectory.path(anyString()).toFile());
+        deleteQuietly(dataPath.toFile());
     }
 
     @Test
     public void whenSaveOneProject_thenOneFileShouldBeGenerated() throws IOException, InterruptedException {
-        subject.save(PROJECT_TEST, getDefaultFollowupData());
+        subject.save(PROJECT_TEST, TODAY_DATE, getDefaultFollowupData());
 
         assertGeneratedFile(PROJECT_TEST, followupExpectedV2());
     }
 
     @Test
     public void whenSaveEmptyData_thenNoDataShouldBeGenerated() throws IOException, InterruptedException {
-        subject.save(PROJECT_TEST, getEmptyFollowupData());
+        subject.save(PROJECT_TEST, TODAY_DATE, getEmptyFollowupData());
 
         assertGeneratedFile(PROJECT_TEST, followupEmptyV2());
     }
 
     @Test
     public void whenSaveTwoProjects_thenTwoFilesShouldBeGenerated() throws IOException, InterruptedException {
-        subject.save(PROJECT_TEST, getDefaultFollowupData());
-        subject.save(PROJECT_TEST_2, getDefaultFollowupData());
+        subject.save(PROJECT_TEST, TODAY_DATE, getDefaultFollowupData());
+        subject.save(PROJECT_TEST_2, TODAY_DATE, getDefaultFollowupData());
 
         assertGeneratedFile(PROJECT_TEST, followupExpectedV2());
         assertGeneratedFile(PROJECT_TEST_2, followupExpectedV2());
@@ -126,12 +135,8 @@ public class FollowUpDataHistoryRepositoryTest {
     }
 
     @Test
-    public void givenProjectWithTodaysHistory_whenGetHistoryGivenProjects_thenReturnNoData() throws IOException {
-        Path pathProject = dataBaseDirectory.path(anyString()).resolve(PROJECT_TEST);
-        createDirectories(pathProject);
-        Path pathZip = pathProject.resolve(TODAY + EXTENSION_JSON + EXTENSION_ZIP);
-        createFile(pathZip);
-        assertTrue("File should be exist", exists(pathZip));
+    public void givenProjectWithTodaysHistory_whenGetHistoryGivenProjects_thenReturnNoData() {
+        createProjectZip(PROJECT_TEST, TODAY);
 
         List<String> history = subject.getHistoryGivenProjects(PROJECT_TEST);
         assertTrue("History should be empty", history.isEmpty());
@@ -139,11 +144,7 @@ public class FollowUpDataHistoryRepositoryTest {
 
     @Test
     public void givenProjectWithYesterdaysHistory_whenGetHistoryGivenProjects_thenReturnData() throws IOException {
-        Path pathProject = dataBaseDirectory.path(anyString()).resolve(PROJECT_TEST);
-        createDirectories(pathProject);
-        Path pathZip = pathProject.resolve(YESTERDAY + EXTENSION_JSON + EXTENSION_ZIP);
-        createFile(pathZip);
-        assertTrue("File should be exist", exists(pathZip));
+        createProjectZip(PROJECT_TEST, YESTERDAY);
 
         List<String> history = subject.getHistoryGivenProjects(PROJECT_TEST);
         assertEquals("History size", 1, history.size());
@@ -158,14 +159,9 @@ public class FollowUpDataHistoryRepositoryTest {
 
     @Test
     public void givenProjectsWithVariedHistory_whenGetHistoryGivenProjects_thenReturnOnlyIntersection() throws IOException {
-        Path pathProject = dataBaseDirectory.path(anyString()).resolve(PROJECT_TEST);
-        createDirectories(pathProject);
-        createFile(pathProject.resolve(YESTERDAY + EXTENSION_JSON + EXTENSION_ZIP));
-        createFile(pathProject.resolve(BEFORE_YESTERDAY + EXTENSION_JSON + EXTENSION_ZIP));
-        
-        Path pathProject2 = dataBaseDirectory.path(anyString()).resolve(PROJECT_TEST_2);
-        createDirectories(pathProject2);
-        createFile(pathProject2.resolve(BEFORE_YESTERDAY + EXTENSION_JSON + EXTENSION_ZIP));
+        createProjectZip(PROJECT_TEST, YESTERDAY);
+        createProjectZip(PROJECT_TEST, BEFORE_YESTERDAY);
+        createProjectZip(PROJECT_TEST_2, BEFORE_YESTERDAY);
 
         List<String> history = subject.getHistoryGivenProjects(PROJECT_TEST, PROJECT_TEST_2);
         assertEquals("History size", 1, history.size());
@@ -174,13 +170,8 @@ public class FollowUpDataHistoryRepositoryTest {
     
     @Test
     public void givenProjectsWithDistinctHistory_whenGetHistoryGivenProjects_thenReturnNoData() throws IOException {
-        Path pathProject = dataBaseDirectory.path(anyString()).resolve(PROJECT_TEST);
-        createDirectories(pathProject);
-        createFile(pathProject.resolve(YESTERDAY + EXTENSION_JSON + EXTENSION_ZIP));
-        
-        Path pathProject2 = dataBaseDirectory.path(anyString()).resolve(PROJECT_TEST_2);
-        createDirectories(pathProject2);
-        createFile(pathProject2.resolve(BEFORE_YESTERDAY + EXTENSION_JSON + EXTENSION_ZIP));
+        createProjectZip(PROJECT_TEST, YESTERDAY);
+        createProjectZip(PROJECT_TEST_2, BEFORE_YESTERDAY);
 
         List<String> history = subject.getHistoryGivenProjects(PROJECT_TEST, PROJECT_TEST_2);
         assertTrue("History should be empty", history.isEmpty());
@@ -191,7 +182,7 @@ public class FollowUpDataHistoryRepositoryTest {
     public void whenHasDataHistory_GetShouldReturnSomeData() throws IOException, URISyntaxException {
         createProjectZipV0(PROJECT_TEST);
 
-        List<FromJiraDataRow> jiraData = subject.get(YESTERDAY, TIMEZONE, PROJECT_TEST).fromJiraDs.rows;
+        List<FromJiraDataRow> jiraData = subject.get(YESTERDAY, TIMEZONE, PROJECT_TEST).getData().fromJiraDs.rows;
 
         assertEquals("Jira data size", jiraData.size(), 1);
         assertFollowUpDataV0(jiraData.get(0));
@@ -211,7 +202,7 @@ public class FollowUpDataHistoryRepositoryTest {
     public void whenHasInvalidDataHistory_GetShouldThrowAnIllegalStateException() throws URISyntaxException {
         try {
             Path pathJSON = Paths.get(getClass().getResource("impl/V1_followUpDataHistoryExpected.json").toURI());
-            Path zipFile = dataBaseDirectory.path(anyString()).resolve(PROJECT_TEST).resolve(YESTERDAY + EXTENSION_JSON + EXTENSION_ZIP);
+            Path zipFile = dataPath.resolve(PROJECT_TEST).resolve(YESTERDAY + EXTENSION_JSON + EXTENSION_ZIP);
             zip(pathJSON, zipFile);
 
             subject.get(YESTERDAY, TIMEZONE, PROJECT_TEST);
@@ -226,7 +217,8 @@ public class FollowUpDataHistoryRepositoryTest {
         createProjectZipV0(PROJECT_TEST);
         createProjectZipV0(PROJECT_TEST_2);
 
-        List<FromJiraDataRow> jiraData = subject.get(YESTERDAY, TIMEZONE, PROJECT_TEST, PROJECT_TEST_2).fromJiraDs.rows;
+        FollowupData followupData = subject.get(YESTERDAY, TIMEZONE, PROJECT_TEST, PROJECT_TEST_2).getData();
+        List<FromJiraDataRow> jiraData = followupData.fromJiraDs.rows;
 
         assertEquals("Jira data size", jiraData.size(), 2);
         assertFollowUpDataV0(jiraData.get(0));
@@ -239,7 +231,7 @@ public class FollowUpDataHistoryRepositoryTest {
         createProjectZipV2(PROJECT_TEST);
 
         // when
-        FollowupData data = subject.get(YESTERDAY, TIMEZONE, PROJECT_TEST);
+        FollowupData data = subject.get(YESTERDAY, TIMEZONE, PROJECT_TEST).getData();
 
         // then
         assertThat(data).isEqualToComparingFieldByFieldRecursively(getDefaultFollowupData());
@@ -251,7 +243,7 @@ public class FollowUpDataHistoryRepositoryTest {
         createProjectZipV2(PROJECT_TEST);
 
         // when
-        FollowupData data = subject.get(YESTERDAY, TIMEZONE, PROJECT_TEST);
+        FollowupData data = subject.get(YESTERDAY, TIMEZONE, PROJECT_TEST).getData();
 
         // then
         assertThat(data).isEqualToComparingFieldByFieldRecursively(getDefaultFollowupData());
@@ -266,9 +258,9 @@ public class FollowUpDataHistoryRepositoryTest {
         ZoneId sydneyTZ = ZoneId.of("Australia/Sydney"); // +10:00, same day, different hours
 
         // when
-        FollowupData dataSaoPaulo = subject.get(YESTERDAY, saoPauloTZ, PROJECT_TEST);
-        FollowupData dataToronto = subject.get(YESTERDAY, torontoTZ, PROJECT_TEST);
-        FollowupData dataSydney = subject.get(YESTERDAY, sydneyTZ, PROJECT_TEST);
+        FollowupData dataSaoPaulo = subject.get(YESTERDAY, saoPauloTZ, PROJECT_TEST).getData();
+        FollowupData dataToronto = subject.get(YESTERDAY, torontoTZ, PROJECT_TEST).getData();
+        FollowupData dataSydney = subject.get(YESTERDAY, sydneyTZ, PROJECT_TEST).getData();
 
         // then
         List<ZonedDateTime> saoPauloAnalyticsDates = dataSaoPaulo.analyticsTransitionsDsList.get(0).rows.get(0).transitionsDates;
@@ -310,9 +302,68 @@ public class FollowUpDataHistoryRepositoryTest {
         assertEquals(sydneySyntheticsRows.get(4).date, DateTimeUtils.parseDate("2017-09-27", sydneyTZ));
         assertEquals(sydneySyntheticsRows.get(5).date, DateTimeUtils.parseDate("2017-09-27", sydneyTZ));
     }
+    
+    @Test
+    public void forEachHistoryEntry_happyDay() {
+        createProjectZip(PROJECT_TEST,   "20161201");
+        createProjectZip(PROJECT_TEST_2, "20161201");
+        createProjectZip(PROJECT_TEST,   "20170125");
+        createProjectZip(PROJECT_TEST,   "20170126");
+        createProjectZip(PROJECT_TEST,   "20170127");
+        createProjectZip(PROJECT_TEST,   "20170128");
 
+        List<String> entryDates = new ArrayList<>();
+        subject.forEachHistoryEntry(asList(PROJECT_TEST), "20170127", TIMEZONE, entry -> {
+            entryDates.add(entry.getDate().toString());
+            assertThat(entry.getData()).isEqualToComparingFieldByFieldRecursively(getDefaultFollowupData());
+        });
+
+        assertEquals("2016-12-01, 2017-01-25, 2017-01-26", join(entryDates, ", "));
+    }
+    
+    @Test
+    public void forEachHistoryEntry_noData() {
+        List<String> entryDates = new ArrayList<>();
+        subject.forEachHistoryEntry(asList(PROJECT_TEST), "20170127", TIMEZONE, e -> entryDates.add(e.getDate().toString()));
+
+        assertEquals("", join(entryDates, ", "));
+    }
+
+    @Test
+    public void forEachHistoryEntry_multiProject() {
+        createProjectZip(PROJECT_TEST_2, "20161115");
+        createProjectZip(PROJECT_TEST,   "20161201");
+        createProjectZip(PROJECT_TEST_2, "20161201");
+        createProjectZip(PROJECT_TEST,   "20170125");
+        createProjectZip(PROJECT_TEST,   "20170126");
+        createProjectZip(PROJECT_TEST_2, "20170126");
+        createProjectZip(PROJECT_TEST,   "20170127");
+
+        List<String> entryDates = new ArrayList<>();
+        subject.forEachHistoryEntry(asList(PROJECT_TEST, PROJECT_TEST_2), "20170127", TIMEZONE, 
+                e -> entryDates.add(e.getDate().toString()));
+
+        assertEquals("2016-12-01, 2017-01-26", join(entryDates, ", "));
+    }
+    
+    @Test
+    public void forEachHistoryEntry_noEndDate() {
+        createProjectZip(PROJECT_TEST, BEFORE_YESTERDAY);
+        createProjectZip(PROJECT_TEST, YESTERDAY);
+        createProjectZip(PROJECT_TEST, TODAY);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(FILE_NAME_FORMAT);
+        
+        List<String> entryDates = new ArrayList<>();
+        subject.forEachHistoryEntry(asList(PROJECT_TEST), TIMEZONE, e -> {
+            entryDates.add(e.getDate().format(formatter));
+        });
+
+        assertEquals(BEFORE_YESTERDAY + ", " + YESTERDAY, join(entryDates, ", "));
+    }
+    
     private void assertGeneratedFile(String project, String dataHistoryExpected) throws IOException {
-        Path source = dataBaseDirectory.path(anyString()).resolve(project).resolve(TODAY + EXTENSION_JSON + EXTENSION_ZIP);
+        Path source = dataPath.resolve(project).resolve(TODAY + EXTENSION_JSON + EXTENSION_ZIP);
 
         assertTrue("File should be exist", exists(source));
         assertThat(size(source), greaterThan(0L));
@@ -330,27 +381,35 @@ public class FollowUpDataHistoryRepositoryTest {
     }
 
     private Path createProjectZipV0(String project) throws IOException, URISyntaxException {
-        return createProjectZip(project, "V0_followUpDataHistoryExpected.json");
+        return createProjectZip(project, YESTERDAY, "V0_followUpDataHistoryExpected.json");
     }
 
     private Path createProjectZipV1(String project) throws IOException, URISyntaxException {
-        return createProjectZip(project, "V1_followUpDataHistoryExpected.json");
+        return createProjectZip(project, YESTERDAY, "V1_followUpDataHistoryExpected.json");
     }
 
     private Path createProjectZipV2(String project) throws IOException, URISyntaxException {
-        return createProjectZip(project, "V2_followUpDataHistoryExpected.json");
+        return createProjectZip(project, YESTERDAY, "V2_followUpDataHistoryExpected.json");
     }
+    
+    private Path createProjectZip(String project, String date) {
+        return createProjectZip(project, date, "V2_followUpDataHistoryExpected.json");
+    }
+    
+    private Path createProjectZip(String projectKey, String date, String file) {
+        try {
+            Path pathProject = dataPath.resolve(projectKey);
+            createDirectories(pathProject);
 
-    private Path createProjectZip(String project, String contentFile) throws IOException, URISyntaxException {
-        Path pathProject = dataBaseDirectory.path(anyString()).resolve(project);
-        createDirectories(pathProject);
+            Path pathInputJSON = Paths.get(getClass().getResource("impl/" + file).toURI());
+            Path pathOutputJSON = pathProject.resolve(date + EXTENSION_JSON);
+            copy(pathInputJSON, pathOutputJSON);
 
-        Path pathInputJSON = Paths.get(getClass().getResource("impl/" + contentFile).toURI());
-        Path pathOutputJSON = pathProject.resolve(YESTERDAY + EXTENSION_JSON);
-        copy(pathInputJSON, pathOutputJSON);
-
-        Path zipFile = Paths.get(pathOutputJSON.toString() + EXTENSION_ZIP);
-        zip(pathOutputJSON, zipFile);
-        return pathProject;
+            Path zipFile = Paths.get(pathOutputJSON.toString() + EXTENSION_ZIP);
+            zip(pathOutputJSON, zipFile);
+            return pathProject;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

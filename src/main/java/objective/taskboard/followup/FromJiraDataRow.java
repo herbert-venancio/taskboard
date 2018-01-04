@@ -23,6 +23,10 @@ package objective.taskboard.followup;
 import java.time.ZonedDateTime;
 
 public class FromJiraDataRow {
+    public static final String QUERY_TYPE_SUBTASK_PLAN = "SUBTASK PLAN";
+    public static final String QUERY_TYPE_DEMAND_BALLPARK = "DEMAND BALLPARK";
+    public static final String QUERY_TYPE_FEATURE_BALLPARK = "FEATURE BALLPARK";
+    
     public String planningType;
     public String project;
     public String demandType = "";

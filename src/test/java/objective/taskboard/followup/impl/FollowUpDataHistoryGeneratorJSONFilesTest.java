@@ -27,7 +27,7 @@ import static java.nio.file.Files.size;
 import static java.util.Arrays.asList;
 import static objective.taskboard.followup.FollowUpDataHistoryRepository.EXTENSION_JSON;
 import static objective.taskboard.followup.FollowUpDataHistoryRepository.EXTENSION_ZIP;
-import static objective.taskboard.followup.FollowUpDataHistoryRepository.FILE_NAME_FORMAT;
+import static objective.taskboard.followup.FollowUpDataHistoryRepository.FILE_NAME_FORMATTER;
 import static objective.taskboard.followup.FollowUpHelper.followupEmptyV2;
 import static objective.taskboard.followup.FollowUpHelper.followupExpectedV2;
 import static objective.taskboard.followup.FollowUpHelper.getDefaultFollowupData;
@@ -48,9 +48,9 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.LocalDate;
 
 import org.apache.commons.io.IOUtils;
-import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -58,6 +58,7 @@ import org.junit.Test;
 
 import objective.taskboard.database.directory.DataBaseDirectory;
 import objective.taskboard.domain.ProjectFilterConfiguration;
+import objective.taskboard.followup.FollowUpDataSnapshot;
 import objective.taskboard.followup.FollowUpDataHistoryRepository;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.rules.TimeZoneRule;
@@ -66,7 +67,8 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
 
     private static final String PROJECT_TEST = "PROJECT TEST";
     private static final String PROJECT_TEST_2 = "PROJECT TEST 2";
-    private static final String TODAY = DateTime.now().toString(FILE_NAME_FORMAT);
+    private static final LocalDate TODAY_DATE = LocalDate.now();
+    private static final String TODAY = TODAY_DATE.format(FILE_NAME_FORMATTER);
 
     @Rule
     public TimeZoneRule timeZoneRule = new TimeZoneRule("America/Sao_Paulo");
@@ -77,7 +79,8 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
     private ProjectFilterConfiguration projectFilter2 = mock(ProjectFilterConfiguration.class);
     private DataBaseDirectory dataBaseDirectory = mock(DataBaseDirectory.class);
     private FollowUpDataHistoryRepository historyRepository = new FollowUpDataHistoryRepository(dataBaseDirectory); //TODO mockar o repo
-
+    private Path pathHistory;
+    
     private FollowUpDataHistoryGeneratorJSONFiles subject = new FollowUpDataHistoryGeneratorJSONFiles(
             projectFilterCacheRepo, 
             providerFromCurrentState, 
@@ -88,14 +91,14 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
         when(providerFromCurrentState.getFollowupState()).thenReturn(ready);
         when(projectFilter.getProjectKey()).thenReturn(PROJECT_TEST);
         when(projectFilter2.getProjectKey()).thenReturn(PROJECT_TEST_2);
-        Path pathHistoryTemp = createTempDirectory(getClass().getSimpleName());
-        when(dataBaseDirectory.path(anyString())).thenReturn(pathHistoryTemp);
+        pathHistory = createTempDirectory(getClass().getSimpleName());
+        when(dataBaseDirectory.path(anyString())).thenReturn(pathHistory);
     }
 
     @Test
     public void whenHasOneProject_thenOneFileShouldBeGenerated() throws IOException, InterruptedException {
         when(projectFilterCacheRepo.getProjects()).thenReturn(asList(projectFilter));
-        when(providerFromCurrentState.getJiraData(any())).thenReturn(getDefaultFollowupData());
+        when(providerFromCurrentState.getJiraData(any())).thenReturn(new FollowUpDataSnapshot(TODAY_DATE, getDefaultFollowupData()));
 
         subject.generate();
 
@@ -105,7 +108,7 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
     @Test
     public void whenProjectDoesNotHaveData_thenNoDataShouldBeGenerated() throws IOException, InterruptedException {
         when(projectFilterCacheRepo.getProjects()).thenReturn(asList(projectFilter));
-        when(providerFromCurrentState.getJiraData(any())).thenReturn(getEmptyFollowupData());
+        when(providerFromCurrentState.getJiraData(any())).thenReturn(new FollowUpDataSnapshot(TODAY_DATE, getEmptyFollowupData()));
 
         subject.generate();
 
@@ -115,7 +118,7 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
     @Test
     public void whenHasTwoProjects_thenTwoFilesShouldBeGenerated() throws IOException, InterruptedException {
         when(projectFilterCacheRepo.getProjects()).thenReturn(asList(projectFilter, projectFilter2));
-        when(providerFromCurrentState.getJiraData(any())).thenReturn(getDefaultFollowupData());
+        when(providerFromCurrentState.getJiraData(any())).thenReturn(new FollowUpDataSnapshot(TODAY_DATE, getDefaultFollowupData()));
 
         subject.generate();
 
@@ -125,11 +128,11 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
 
     @After
     public void after() {
-        deleteQuietly(dataBaseDirectory.path(anyString()).toFile());
+        deleteQuietly(pathHistory.toFile());
     }
 
     private void assertGeneratedFile(String project, String dataHistoryExpected) throws IOException {
-        Path source = dataBaseDirectory.path(anyString()).resolve(project).resolve(TODAY + EXTENSION_JSON + EXTENSION_ZIP);
+        Path source = pathHistory.resolve(project).resolve(TODAY + EXTENSION_JSON + EXTENSION_ZIP);
 
         assertTrue("File should be exist", exists(source));
         assertThat(size(source), greaterThan(0L));

@@ -23,6 +23,7 @@ package objective.taskboard.followup.impl;
 
 import static org.apache.commons.lang.ObjectUtils.defaultIfNull;
 
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -40,10 +41,15 @@ import org.springframework.util.StringUtils;
 import objective.taskboard.Constants;
 import objective.taskboard.data.Issue;
 import objective.taskboard.followup.AnalyticsTransitionsDataSet;
+import objective.taskboard.followup.FollowUpDataSnapshot;
+import objective.taskboard.followup.FollowUpDataHistoryRepository;
+import objective.taskboard.followup.FollowUpDataSnapshotHistory;
+import objective.taskboard.followup.FollowupCluster;
 import objective.taskboard.followup.FollowupData;
 import objective.taskboard.followup.FollowupDataProvider;
 import objective.taskboard.followup.FromJiraDataRow;
 import objective.taskboard.followup.FromJiraDataSet;
+import objective.taskboard.followup.FromJiraRowCalculator;
 import objective.taskboard.followup.SyntheticTransitionsDataSet;
 import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.issueBuffer.IssueBufferState;
@@ -62,6 +68,9 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
 
     @Autowired
     private IssueBufferService issueBufferService;
+    
+    @Autowired
+    private FollowUpDataHistoryRepository historyRepository;
 
     private Map<String, Issue> demandsByKey;
     private Map<String, Issue> featuresByKey;
@@ -73,7 +82,9 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
     }
 
     @Override
-    public FollowupData getJiraData(String[] includeProjects, ZoneId timezone) {
+    public FollowUpDataSnapshot getJiraData(FollowupCluster cluster, String[] includeProjects, ZoneId timezone) {
+        FromJiraRowCalculator rowCalculator = new FromJiraRowCalculator(cluster);
+        LocalDate date = LocalDate.now();
         List<String> i = Arrays.asList(includeProjects);
 
         List<Issue> issuesVisibleToUser = issueBufferService.getAllIssues().stream()
@@ -86,8 +97,16 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         FollowUpTransitionsDataProvider transitions = new FollowUpTransitionsDataProvider(jiraProperties, metadataService);
         List<AnalyticsTransitionsDataSet> analyticsTransitionsDsList = transitions.getAnalyticsTransitionsDsList(issuesVisibleToUser, timezone);
         List<SyntheticTransitionsDataSet> syntheticsTransitionsDsList = transitions.getSyntheticTransitionsDsList(analyticsTransitionsDsList);
+        FollowupData followupData = new FollowupData(fromJiraDs, analyticsTransitionsDsList, syntheticsTransitionsDsList);
 
-        return new FollowupData(fromJiraDs, analyticsTransitionsDsList, syntheticsTransitionsDsList);
+        FollowUpDataSnapshot followUpDataEntry = new FollowUpDataSnapshot(date, followupData);
+        followUpDataEntry.setFollowUpDataEntryHistory(new FollowUpDataSnapshotHistory(
+                historyRepository,
+                includeProjects,
+                timezone,
+                followUpDataEntry, 
+                rowCalculator));
+        return followUpDataEntry;
     }
 
     private FromJiraDataSet getFromJiraDs(List<Issue> issuesVisibleToUser, ZoneId timezone) {
@@ -208,7 +227,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         followUpData.tshirtSize = "M";
         followUpData.worklog = 0.0;
         followUpData.wrongWorklog = timeSpentInHour(demand);
-        followUpData.queryType = "DEMAND BALLPARK";
+        followUpData.queryType = FromJiraDataRow.QUERY_TYPE_DEMAND_BALLPARK;
 
         followUpData.demandDescription = issueDescription("M", demand);
 
@@ -262,7 +281,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         followUpData.tshirtSize = task.getTshirtSizeOfSubtaskForBallpark(ballparkMapping);
         followUpData.worklog = 0.0;
         followUpData.wrongWorklog = timeSpentInHour(task);
-        followUpData.queryType = "FEATURE BALLPARK";
+        followUpData.queryType = FromJiraDataRow.QUERY_TYPE_FEATURE_BALLPARK;
 
         if (demand != null) {
             followUpData.demandDescription = issueDescription("", demand);
@@ -297,7 +316,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         followUpData.tshirtSize = subtask.getTShirtSize() == null? "": subtask.getTShirtSize();
         followUpData.worklog = timeSpentInHour(subtask);
         followUpData.wrongWorklog = 0.0;
-        followUpData.queryType = "SUBTASK PLAN";
+        followUpData.queryType = FromJiraDataRow.QUERY_TYPE_SUBTASK_PLAN;
 
         if (demand != null) {
             followUpData.demandDescription = issueDescription("",demand);
@@ -432,5 +451,4 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         for(T i : items) if(i != null) return i;
         return null;
     }
-
 }
