@@ -29,7 +29,7 @@ public class FromJiraRowCalculatorTest {
             new FollowUpClusterItem(followUpConfig, "Backend Dev",  "unused", "M", 6d, 6.5d),
             new FollowUpClusterItem(followUpConfig, "Backend Dev",  "unused", "L", 7d, 7.5d));
     
-    private FromJiraRowCalculator subject = new FromJiraRowCalculator(new FollowupCluster(clusterItems));
+    private FromJiraRowCalculator subject = new FromJiraRowCalculator(new FollowupClusterImpl(clusterItems));
 
     @Test
     public void calculateEffortEstimate_fromBallpark() {

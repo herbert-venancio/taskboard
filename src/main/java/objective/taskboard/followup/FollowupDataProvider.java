@@ -32,11 +32,11 @@ public interface FollowupDataProvider {
     }
 
     default FollowUpDataSnapshot getJiraData(String... includeProjects) {
-        return getJiraData(null, includeProjects, ZoneId.systemDefault());
+        return getJiraData(new EmptyFollowupCluster(), includeProjects, ZoneId.systemDefault());
     }
 
     default FollowUpDataSnapshot getJiraData(String[] includeProjects, ZoneId timezone) {
-        return getJiraData(null, includeProjects, timezone);
+        return getJiraData(new EmptyFollowupCluster(), includeProjects, timezone);
     }
 
     IssueBufferState getFollowupState();
