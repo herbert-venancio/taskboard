@@ -30,12 +30,22 @@ public class TaskboardProperties {
 
     private String rootDataDirectory = "";
 
+    private String logo = "";
+
     public String getRootDataDirectory() {
         return rootDataDirectory;
     }
 
     public void setRootDataDirectory(String rootDataDirectory) {
         this.rootDataDirectory = rootDataDirectory;
+    }
+
+    public String getLogo() {
+        return logo;
+    }
+
+    public void setLogo(String logo) {
+        this.logo = logo;
     }
 
 }

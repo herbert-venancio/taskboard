@@ -398,12 +398,7 @@
                 },
 
                 getLocaleDate: function(item) {
-                    if (!item || item.length != 8)
-                        return item + " (invalid date format)";
-                    var year = item.substr(0, 4);
-                    var month = item.substr(4, 2) - 1;
-                    var day = item.substr(6, 2);
-                    return new Date(year, month, day).toLocaleDateString();
+                    return getDateFromYYYYMMDD(item).toLocaleDateString();
                 },
 
                 downloadFollowup: function() {

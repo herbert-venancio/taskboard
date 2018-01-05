@@ -294,7 +294,8 @@
             .followup-button,
             .template-followup-button,
             .sizing-button,
-            .about-button {
+            .about-button,
+            .dashboard-button {
                 width: 35px;
                 height: 35px;
                 padding: 4px;
@@ -305,7 +306,8 @@
             .followup-button:hover,
             .template-followup-button:hover,
             .sizing-button:hover,
-            .about-button:hover {
+            .about-button:hover,
+            .dashboard-button:hover {
                 background: #CCC;
                 opacity: 0.8;
                 -webkit-transition: all .5s;
@@ -425,6 +427,10 @@
                             <div>
                                 <paper-icon-button icon="file-upload" title="Followup Template"
                                                    class="template-followup-button" on-tap="openFollowupCrudModal"></paper-icon-button>
+                            </div>
+                            <div>
+                                <paper-icon-button icon="taskboard-icons:dashboard" title="Followup Dashboard"
+                                                   class="dashboard-button" on-tap="openDashboard"></paper-icon-button>
                             </div>
                         </template>
                         <div>
@@ -685,6 +691,11 @@
 
                 openFollowupCrudModal: function() {
                     this.$.followupCrudModal.open();
+                },
+
+                openDashboard: function(event) {
+                    event.stopPropagation();
+                    var win = window.open('/followup-dashboard/');
                 },
 
                 openAbout: function() {

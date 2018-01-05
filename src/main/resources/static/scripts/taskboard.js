@@ -30,6 +30,12 @@ function Taskboard() {
         return window.user;
     }
 
+    this.getTaskboardLogoUrl = function() {
+        var logoUrlExistis = window.logo !== null && window.logo !== undefined && window.logo !== '';
+        var logoUrlDefault = '/static/images/touch/icon-128x128.png';
+        return logoUrlExistis ? window.logo : logoUrlDefault;
+    }
+
     this.setAspectFilters = function(source, filters) {
         aspectFilters = filters;
         this.applyFilterPreferences();

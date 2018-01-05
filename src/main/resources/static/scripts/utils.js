@@ -6,6 +6,12 @@ function sortByProperty(property) {
     return function(a,b) { return a[property] - b[property] };
 }
 
+function forEachInArray(array, callback) {
+    var arrayLength = array.length;
+    for (var i = 0; i < arrayLength; i++)
+        callback(array[i])
+}
+
 function findInArray(array, callback) {
     var notFoundValue = undefined;
     var arrayLength = array.length;
@@ -30,6 +36,15 @@ function copyProperties(receiverObject, objectToMarge) {
 
 function isFieldNameEquals(fieldName, anotherFieldName) {
     return fieldName.toLowerCase === anotherFieldName.toLowerCase;
+}
+
+function getDateFromYYYYMMDD(yyyymmdd) {
+    if (!yyyymmdd || yyyymmdd.length != 8)
+        return yyyymmdd + " (invalid date format)";
+    var year = yyyymmdd.substr(0, 4);
+    var month = yyyymmdd.substr(4, 2) - 1;
+    var day = yyyymmdd.substr(6, 2);
+    return new Date(year, month, day);
 }
 
 if (!Object.values) {
