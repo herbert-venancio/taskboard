@@ -1,0 +1,359 @@
+<!--
+  [LICENSE]
+  Taskboard
+  ---
+  Copyright (C) 2015 - 2016 Objective Solutions
+  ---
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  [/LICENSE]
+  -->
+<dom-module id="kpis-dashboard">
+
+    <template>
+
+        <style>
+            :host {
+                display: flex;
+                flex-direction: column;
+
+                background: #555;
+                width: 100%;
+                height: 100%;
+            }
+
+            .kpis {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 100%;
+            }
+
+            .kpis__categories-wrapper {
+                display: flex;
+                align-items: center;
+
+                background: #333;
+                padding-right: 16px;
+                padding-left: 16px;
+            }
+
+            .kpis__categories {
+                display: flex;
+
+                padding: 0;
+                margin: 0;
+                list-style: none;
+            }
+
+            .kpis__category {
+                flex: 0 0 auto;
+            }
+
+            .kpis__category:first-child {
+                margin-left: 0;
+            }
+
+            .kpis__category-link {
+                display: flex;
+                align-items: center;
+
+                height: 40px;
+                padding: 0 20px;
+                color: #AAA;
+                cursor: pointer;
+
+                transition: all .4s ease;
+            }
+
+            .kpis__category-link.active, .kpis__category-link:hover {
+                background: #555;
+                color: #FFF;
+                transition: all .4s ease;
+            }
+
+            .kpis__selector {
+                flex: 0;
+                display: flex;
+
+                margin-left: auto;
+            }
+
+            .kpis__select-project-wrapper {
+                width: 200px;
+            }
+
+            .kpis__select-project {
+                width: 100%;
+            }
+
+            .kpis__select-date-wrapper {
+                width: 150px;
+                margin-left: 16px;
+            }
+
+            .kpis__select-date {
+                width: 100%;
+            }
+
+            .kpis__content {
+                width: 100%;
+                height: 100%;
+            }
+
+            /*
+                Widgets
+            */
+            .kpis__widgets {
+                display: flex;
+                flex-wrap: wrap;
+
+                height: calc(100vh - 104px);
+                padding: 8px;
+                overflow-y: auto;
+            }
+
+            .kpis__widget {
+                flex: 0 0 auto;
+                width: calc(33.3333% - 16px);
+                min-height: 300px;
+                margin: 8px;
+            }
+
+            .kpis__widget[data-category] {
+                display: none;
+            }
+
+            .kpis__widget[data-category].active {
+                display: initial;
+            }
+
+            .kpis__widget--full {
+                width: calc(100% - 16px);
+            }
+        </style>
+
+        <kpis-header user="{{user}}"></kpis-header>
+
+        <div class="kpis">
+
+            <template is="dom-if" if="{{_showProjectSelector}}">
+                <kpis-project-select projects="{{projects}}" user="{{user}}" selected-project-key="{{selectedProjectKey}}"></kpis-project-select>
+            </template>
+
+            <template id="dashboard-view" is="dom-if" if="{{_showDashboard}}">
+                <section class="kpis__content">
+
+                    <nav class="kpis__categories-wrapper">
+                        <ul class="kpis__categories">
+                            <li class="kpis__category">
+                                <a class="kpis__category-link"
+                                   data-category="tactical"
+                                   on-tap="_onClickCategory">
+                                   Tactical
+                                </a>
+                            </li>
+                            <li class="kpis__category">
+                                <a class="kpis__category-link"
+                                   data-category="operational"
+                                   on-tap="_onClickCategory">
+                                   Operational
+                                </a>
+                            </li>
+                        </ul>
+                        <section class="kpis__selector">
+                            <div class="kpis__select-project-wrapper">
+                                <paper-dropdown-menu class="kpis__select-project"
+                                                     label="Select the project to see the KPIs"
+                                                     no-label-float>
+                                    <paper-listbox class="dropdown-content"
+                                                   attr-for-selected="value"
+                                                   selected="{{selectedProjectKey}}">
+                                        <template is="dom-repeat" items="{{projects}}" as="project">
+                                            <paper-item value="{{project.projectKey}}">{{project.projectKey}}</paper-item>
+                                        </template>
+                                    </paper-listbox>
+                                </paper-dropdown-menu>
+                            </div>
+                            <div class="kpis__select-date-wrapper">
+                                <paper-dropdown-menu class="kpis__select-date"
+                                                     label="Select the date"
+                                                     no-label-float>
+                                    <paper-listbox class="dropdown-content"
+                                                   attr-for-selected="value"
+                                                   selected="{{selectedDate}}">
+                                        <paper-item value="">Today</paper-item>
+                                        <template is="dom-repeat" items="{{_projectDates}}" as="date">
+                                            <paper-item value="{{date}}">{{_getLocaleDate(date)}}</paper-item>
+                                        </template>
+                                    </paper-listbox>
+                                </paper-dropdown-menu>
+                            </div>
+                        </section><!-- .kpis__selector -->
+                    </nav><!-- .kpis__categories-wrapper -->
+
+                    <section class="kpis__widgets">
+
+                        <widget-cfd class="kpis__widget kpis__widget--full"
+                                selected-project-key="{{selectedProjectKey}}"
+                                selected-date="{{selectedDate}}"
+                                ></widget-cfd>
+
+                        <widget-progress-chart class="kpis__widget"
+                                data-category="tactical"
+                                selected-project-key="{{selectedProjectKey}}"
+                                selected-date="{{selectedDate}}"
+                                ></widget-progress-chart>
+
+                        <widget-scope-by-type class="kpis__widget"
+                                data-category="tactical"
+                                selected-project-key="{{selectedProjectKey}}"
+                                selected-date="{{selectedDate}}"
+                                ></widget-scope-by-type>
+
+                        <widget-scope-progress class="kpis__widget"
+                                data-category="tactical"
+                                selected-project-key="{{selectedProjectKey}}"
+                                selected-date="{{selectedDate}}"
+                                ></widget-scope-progress>
+
+                        <widget-planned-x-ballpark class="kpis__widget"
+                                data-category="operational"
+                                selected-project-key="{{selectedProjectKey}}"
+                                selected-date="{{selectedDate}}"
+                                ></widget-planned-x-ballpark>
+
+                    </section><!-- .kpis__widgets -->
+
+                </section><!-- .kpis__content -->
+
+            </template>
+
+        </div>
+
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'kpis-dashboard',
+
+                properties: {
+                    projects: {
+                        type: Array,
+                        notify: true
+                    },
+                    user: {
+                        type: Object
+                    },
+                    selectedCategory: {
+                        type: String,
+                        value: 'tactical'
+                    },
+                    selectedProjectKey: {
+                        type: String,
+                        notify: true
+                    },
+                    selectedDate: {
+                        type: String,
+                        notify: true,
+                        value: '',
+                    },
+                    _projectDates: {
+                        type: Array
+                    },
+                    _showProjectSelector: {
+                        type: Boolean,
+                        value: true
+                    },
+                    _showDashboard: {
+                        type: Boolean,
+                        value: false
+                    },
+                    _activeClass: {
+                        type: String,
+                        value: 'active'
+                    },
+                },
+
+                observers: [
+                    '_setupScreen(selectedProjectKey)',
+                    '_onShowDashboard(_showDashboard)',
+                ],
+
+                ready: function () {
+                    this.populateProjects();
+                    this.set('user', taskboard.getLoggedUser());
+                    this._setupScreen(this.selectedProjectKey);
+                },
+
+                populateProjects: function() {
+                    var self = this;
+                    $.get('/api/projects', function(projects) {
+                        self.set('projects', projects);
+                    })
+                },
+
+                _setupScreen: function(selectedProjectKey) {
+                    var hasProjectSelected = !_.isEmpty(selectedProjectKey);
+                    var projectSelectorVisibility = !hasProjectSelected && !this.user.isCustomer;
+                    var dashboardVisibility = hasProjectSelected && !this.user.isCustomer;
+                    this.set('_showProjectSelector', projectSelectorVisibility);
+                    this.set('_showDashboard', dashboardVisibility);
+
+                    var projectDates = hasProjectSelected ? this._getDatesFromProject(selectedProjectKey) : undefined;
+                    this.set('_projectDates', projectDates);
+                },
+
+                _getDatesFromProject: function(projectKey) {
+                    var selectedProject = findInArray(this.projects, function(p) {
+                        return p.projectKey === projectKey;
+                    })
+                    return selectedProject.followUpDataHistory.sort().reverse();
+                },
+
+                _onShowDashboard: function(showDashboard) {
+                    if (showDashboard) {
+                        this.$$('#dashboard-view').render();
+                        this._activeCategory(this.selectedCategory);
+                    }
+                },
+
+                _activeCategory: function(category) {
+                    var activeClass = this._activeClass;
+                    var newActiveElements = document.querySelectorAll('[data-category="' + category + '"]');
+                    forEachInArray(newActiveElements, function(el) {
+                        el.classList.add(activeClass);
+                    })
+                    this.set('selectedCategory', category);
+                },
+
+                _onClickCategory: function(event) {
+                    var activeClass = this._activeClass;
+                    var allCategoryElements = document.querySelectorAll('[data-category="' + this.selectedCategory  + '"]');
+                    forEachInArray(allCategoryElements, function(el) {
+                        el.classList.remove(activeClass);
+                    })
+
+                    var categoryClicked = event.target.dataset.category;
+                    this._activeCategory(categoryClicked);
+                },
+
+                _getLocaleDate: function(yyyymmdd) {
+                    return getDateFromYYYYMMDD(yyyymmdd).toLocaleDateString();
+                },
+
+            });
+        })();
+    </script>
+</dom-module>

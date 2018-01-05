@@ -1,0 +1,227 @@
+<!--
+  [LICENSE]
+  Taskboard
+  ---
+  Copyright (C) 2015 - 2016 Objective Solutions
+  ---
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  [/LICENSE]
+  -->
+<dom-module id="kpis-header">
+
+    <template>
+
+        <style>
+            :host {
+                width: 100%;
+            }
+
+            .menu-header {
+                display: flex;
+                align-items: center;
+                height: 64px;
+                padding: 0 16px;
+                position: relative;
+                z-index: 10;
+                background-color: #EFEFEF;
+                color: #333;
+                box-shadow: none;
+            }
+
+            .logo {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .logo__image {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                width: 32px;
+                height: 32px;
+                margin-right: 8px;
+            }
+
+            .logo__image iron-image {
+                width: 32px;
+                height: 32px;
+            }
+
+            .logo__text {
+                font-size: 14px;
+                text-transform: uppercase;
+                font-family: 'ptsans-bold', Verdana, Arial, Helvetica, sans-serif;
+            }
+
+            .header-icon__link {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                background: none;
+                border-radius: 50%;
+                width: 32px;
+                height: 32px;
+                color: inherit;
+
+                transition: all .4s;
+            }
+
+            .header-icon__link:hover {
+                background: #555;
+                transition: all .4s;
+                color: #FFF;
+            }
+
+            .header-icon__icon {
+                width: 24px;
+                height: 24px;
+                padding: 4px;
+                display: flex;
+            }
+
+            .back-to-taskboard {
+                margin-left: auto;
+            }
+
+            .back-to-taskboard__link {
+            }
+
+            .back-to-taskboard__icon {
+            }
+
+            .user {
+                margin-top: 4px;
+                margin-left: 16px;
+            }
+
+            .openMenu {
+                margin-left: 10px;
+            }
+
+            .menuLink {
+                background: transparent;
+                font-size: 15px;
+                font-weight: bold;
+                color: inherit;
+            }
+
+            .menuLink:hover {
+                -webkit-transition: all .4s;
+                -moz-transition: all .4s;
+                transition: all .4s;
+                opacity: 0.9;
+                background: #CCC;
+                border-radius: 3px;
+            }
+
+            paper-toolbar {
+                height: 35px;
+                cursor: pointer;
+            }
+
+            paper-toolbar ::shadow #topBar {
+                height: 35px;
+                padding: 0px 3px 0px;
+            }
+
+            .menu-icon {
+                height: 31px;
+                width: 31px;
+            }
+
+            .followup-button,
+            .template-followup-button,
+            .sizing-button,
+            .about-button {
+                width: 32px;
+                height: 32px;
+                padding: 4px;
+                margin-left: 16px;
+                display: block;
+                border-radius: 50%;
+                opacity: 1;
+                transition: all .4s;
+            }
+
+            .followup-button:hover,
+            .template-followup-button:hover,
+            .sizing-button:hover,
+            .about-button:hover {
+                background: #555;
+                color:#FFF;
+                transition: all .4s;
+            }
+        </style>
+
+        <paper-material class="menu-header u-clearfix">
+
+            <section class="logo">
+                <div class="logo__image">
+                    <iron-image src="{{logoUrl}}" sizing="cover"></iron-image>
+                </div>
+                <h1 class="logo__text">
+                    FollowUp Dashboard
+                </h1>
+            </section>
+
+            <div class="back-to-taskboard">
+                <a href="/"  class="back-to-taskboard__link header-icon__link">
+                    <paper-icon-button class="back-to-taskboard__icon header-icon__icon" icon="taskboard-icons:taskboard" title="Back to Taskboard"></paper-icon-button>
+                </a>
+            </div>
+
+            <div class="user">
+                <user-account></user-account>
+            </div>
+
+            <div>
+                <paper-icon-button icon="info" title="Taskboard About"
+                                   class="about-button" on-tap="openAbout"></paper-icon-button>
+            </div>
+
+        </paper-material>
+
+        <about-modal id="aboutModal"></about-modal>
+
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'kpis-header',
+
+                properties: {
+                    user: {
+                        type: Object
+                    },
+                    logoUrl: {
+                        type: String
+                    }
+                },
+
+                ready: function () {
+                    this.set('logoUrl', taskboard.getTaskboardLogoUrl());
+                },
+
+                openAbout: function() {
+                    this.$.aboutModal.open();
+                },
+
+            });
+        })();
+    </script>
+</dom-module>

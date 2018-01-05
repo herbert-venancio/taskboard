@@ -1,0 +1,133 @@
+<!--
+  [LICENSE]
+  Taskboard
+  ---
+  Copyright (C) 2015 - 2016 Objective Solutions
+  ---
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  [/LICENSE]
+  -->
+<dom-module id="kpis-project-select">
+
+    <template>
+
+        <style>
+            :host {
+                color: #FFF;
+            }
+
+            .loader {
+                width: 28px;
+                height: 28px;
+                position: absolute;
+                top: 50%;
+                margin-top: -14px;
+                left: 50%;
+                margin-left: -14px;
+                opacity: 0;
+                transition: opacity .4s ease;
+            }
+
+            .loader.active {
+                opacity: 1;
+                pointer-events: none;
+            }
+
+            .project-select {
+                width: 400px;
+                opacity: 0.3;
+            }
+
+            .project-select.active {
+                opacity: 1;
+                transition: opacity .4s ease;
+            }
+
+            .kpis__text h1 {
+                padding-top: 0;
+                font-size: 25px;
+                font-weight: normal;
+            }
+            .select-project__input {
+                width: 100%;
+                color: #333;
+            }
+        </style>
+
+        <paper-spinner class="loader active" active="true"></paper-spinner>
+
+        <section class="project-select">
+
+            <header class="kpis__text tb-text">
+                <h1>Select the project to see the KPIs</h1>
+            </header>
+
+            <form id="form" class="kpis__form tb-form" action="/ws/followup/kpis" method="post">
+                <div class="tb-form__row">
+                    <paper-dropdown-menu class="select-project__input"
+                                         label="Select here"
+                                         no-label-float>
+                        <paper-listbox class="dropdown-content"
+                                       attr-for-selected="value"
+                                       selected="{{selectedProjectKey}}">
+                            <template is="dom-repeat" items="{{projects}}" as="project">
+                                <paper-item value="{{project.projectKey}}">{{project.projectKey}}</paper-item>
+                            </template>
+                        </paper-listbox>
+                    </paper-dropdown-menu>
+                </div>
+            </form>
+
+        </section>
+
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'kpis-project-select',
+
+                properties: {
+                    projects: {
+                        type: Array,
+                        notify: true
+                    },
+                    user: {
+                        type: Object
+                    },
+                    selectedProjectKey: {
+                        type: String,
+                        notify: true
+                    },
+                },
+
+                observers: [
+                    '_onProjectsLoaded(projects)',
+                ],
+
+                ready: function() {
+                },
+
+                _onProjectsLoaded: function(projects) {
+                    var showLoader = _.isEmpty(this.projects);
+                    if(!showLoader) {
+                        this.$$('.loader').classList.remove('active');
+                        this.$$('.project-select').classList.add('active');
+                    }
+                },
+
+            });
+        })();
+    </script>
+</dom-module>
