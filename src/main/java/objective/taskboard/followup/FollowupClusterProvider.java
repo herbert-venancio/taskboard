@@ -16,7 +16,7 @@ public class FollowupClusterProvider {
     
     public FollowupCluster getFor(Template followUpConfiguration) {
         List<FollowUpClusterItem> clusterItems = clusterItemRepository.findByFollowUpConfiguration(followUpConfiguration);
-        return new FollowupCluster(clusterItems);
+        return new FollowupClusterImpl(clusterItems);
     }
 
 }

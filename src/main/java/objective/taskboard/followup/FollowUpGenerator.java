@@ -333,7 +333,7 @@ public class FollowUpGenerator {
         if (!history.isPresent())
             return;
                
-        for (FollowUpDataSnapshotHistory.EffortHistoryRow historyRow : history.get().getHistoryRows()) {
+        for (EffortHistoryRow historyRow : history.get().getHistoryRows()) {
             SheetRow row = sheet.createRow();
             row.addColumn(historyRow.date.atStartOfDay(timezone));
             row.addColumn(historyRow.sumEffortDone);
