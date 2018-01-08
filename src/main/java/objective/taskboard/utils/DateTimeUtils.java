@@ -12,7 +12,10 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -29,7 +32,15 @@ public class DateTimeUtils {
     }
 
     public static ZonedDateTime parseDate(String yyyymmdd, ZoneId timezone) {
+        if(yyyymmdd == null)
+            return null;
         return LocalDate.parse(yyyymmdd, DateTimeFormatter.ISO_LOCAL_DATE).atTime(0, 0, 0).atZone(timezone);
+    }
+
+    public static List<ZonedDateTime> parseDateList(String... yyyymmdd) {
+        return Arrays.stream(yyyymmdd)
+                .map(DateTimeUtils::parseDate)
+                .collect(Collectors.toList());
     }
 
     public static ZonedDateTime parseDateTime(String yyyymmdd, String hhmmss) {

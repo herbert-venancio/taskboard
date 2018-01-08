@@ -8,12 +8,12 @@
   it under the terms of the GNU Affero General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
-  
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
   [/LICENSE]
@@ -25,9 +25,9 @@
         <style>
         </style>
 
-        <widget-wrap title="CFD" is-ready="{{isReady}}">
+        <widget-wrap title="CFD" is-ready="{{isReady}}" chart="{{chart}}">
 
-            CONTENT HERE
+            <div id="cfd" class="tb-chart"></div>
 
         </widget-wrap>
 
@@ -53,6 +53,11 @@
                         notify: true,
                         value: false
                     },
+                    chart: {
+                        type: Object,
+                        readOnly: true,
+                        notify: true
+                    }
                 },
 
                 observers: [
@@ -60,13 +65,134 @@
                 ],
 
                 ready: function() {
+                    this.dateFormat = d3.time.format('%Y-%m-%d');
                 },
 
                 _onProjectSelected: function(selectedProjectKey, selectedDate) {
-                    console.log(selectedProjectKey);
-                    console.log(selectedDate);
+                    this.loadCfdChart(selectedProjectKey);
                 },
 
+                loadCfdChart: function(project) {
+                    var self = this;
+                    this.isReady = false;
+
+                    d3.json("/api/project/"+ project + "/followup/cfd", function(error, cfdData) {
+                        if(error) {
+                            console.log(error);
+                            return;
+                        }
+
+                        self.setCfdData(cfdData);
+
+                        if(!self.isChartInitialized())
+                            self.createChart();
+
+                        self.updateChart();
+                        self.isReady = true;
+                    });
+                },
+
+                setCfdData: function(cfdData) {
+                    // convert dates
+                    for(var i = 0; i < cfdData.dates.length; ++i) {
+                        cfdData.dates[i] = this.dateFormat.parse(cfdData.dates[i]);
+                    }
+
+                    this.cfdData = cfdData;
+
+                    this.ndx = crossfilter(this.cfdData.data);
+                    this.cfdDim = this.ndx.dimension(function(d) {
+                        return [d.label, d.index];
+                    });
+                    this.cfdGroup = this.cfdDim.group()
+                        .reduceSum(function(d) {
+                            return d.count;
+                        });
+                },
+
+                isChartInitialized: function() {
+                    return this.chart ? true : false;
+                },
+
+                createChart: function() {
+                    var self = this;
+
+                    this._setChart(dc.seriesChart("#cfd"));
+
+                    var LABEL_INDEX = 0;
+                    var DATE_INDEX = 1;
+
+                    // basic chart configuration
+                    this.chart
+                        .margins({top: 10, right: 0, bottom: 30, left: 30})
+                        .legend(dc.legend()
+                            .x(50)
+                            .y(10)
+                            .itemHeight(13)
+                            .gap(8)
+                            .horizontal(1)
+                            .legendWidth(140)
+                            .itemWidth(70)
+                        )
+                        .transitionDuration(0);
+
+                    // mouse interactions
+                    this.chart
+                        .brushOn(false)       // don't select with drag-n-drop
+                        .mouseZoomable(true)  // zoom with mouse wheel
+                        .title(function (d){  // popup text on mouse over data points
+                            return self.cfdData.labels[d.key[LABEL_INDEX]] + ": " + d.value + " (" + self.dateFormat(self.cfdData.dates[d.key[DATE_INDEX]]) + ")";
+                        });
+
+                    // chart data definition
+                    this.chart
+                        .chart(function(c) {
+                            return dc.lineChart(c)
+                                .renderArea(true)
+                                .renderDataPoints(true);
+                        })
+                        .seriesAccessor(function(d) {
+                            return (d.key[LABEL_INDEX] + 1) + ": " + self.cfdData.labels[d.key[LABEL_INDEX]];
+                        })
+                        .keyAccessor(function(d) {
+                            return d.key[DATE_INDEX];
+                        })
+                        .valueAccessor(function(d) {
+                            return d.value;
+                        });
+
+                    this.chart.on('preRender', function() {
+                        self.chart
+                            .xAxis()
+                                .ticks(Math.max(self.chart.width()/80, 2))
+
+                    });
+                },
+
+                updateChart: function() {
+                    var self = this;
+                    var topPadding = 10;
+                    var xScale = d3.scale.linear()
+                            .domain([0, this.cfdData.dates.length - 1]);
+                    var yScale = d3.scale.linear()
+                            .domain([0, this.cfdGroup.top(1)[0].value + topPadding]);
+
+                    var dateScale = d3.time.scale()
+                            .domain([this.cfdData.dates[0], this.cfdData.dates[this.cfdData.dates.length - 1]])
+                            .range([0, this.cfdData.dates.length - 1]);
+
+                    this.chart
+                        .dimension(this.cfdDim)
+                        .group(this.cfdGroup)
+                        .x(xScale)
+                        .y(yScale)
+                        .xAxis()
+                            .tickFormat(function(v) {
+                                return self.dateFormat(dateScale.invert(v));
+                            });
+
+                    this.chart.render();
+                }
             });
         })();
     </script>

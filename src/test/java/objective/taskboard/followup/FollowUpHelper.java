@@ -26,6 +26,7 @@ import static java.util.Collections.singletonList;
 import static objective.taskboard.followup.impl.FollowUpTransitionsDataProvider.TYPE_DEMAND;
 import static objective.taskboard.followup.impl.FollowUpTransitionsDataProvider.TYPE_FEATURES;
 import static objective.taskboard.followup.impl.FollowUpTransitionsDataProvider.TYPE_SUBTASKS;
+import static objective.taskboard.utils.DateTimeUtils.parseDateList;
 import static objective.taskboard.utils.IOUtilities.resourceToString;
 import static org.apache.commons.lang.ObjectUtils.defaultIfNull;
 import static org.junit.Assert.assertEquals;
@@ -51,6 +52,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import objective.taskboard.Constants;
+import objective.taskboard.followup.impl.FollowUpTransitionsDataProvider;
 import objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFilesTest;
 import objective.taskboard.utils.DateTimeUtils;
 import objective.taskboard.utils.DateTimeUtils.ZonedDateTimeAdapter;
@@ -146,6 +148,11 @@ public class FollowUpHelper {
     public static FollowupData getDefaultFollowupData() {
         return new FollowupData(new FromJiraDataSet(Constants.FROMJIRA_HEADERS, getDefaultFromJiraDataRowList()),
                 getDefaultAnalyticsTransitionsDataSet(), getDefaultSyntheticTransitionsDataSet());
+    }
+
+    public static FollowupData getBiggerFollowupData() {
+        return new FollowupData(new FromJiraDataSet(Constants.FROMJIRA_HEADERS, getDefaultFromJiraDataRowList()),
+                getBiggerAnalyticsTransitionsDataSet(), getBiggerSyntheticTransitionsDataSet());
     }
 
     public static FollowupData getEmptyFollowupData() {
@@ -336,6 +343,88 @@ public class FollowUpHelper {
                 new AnalyticsTransitionsDataSet(TYPE_SUBTASKS, headers, asList(rowSubtask)));
     }
 
+    public static List<AnalyticsTransitionsDataSet> getBiggerAnalyticsTransitionsDataSet() {
+        List<String> demandHeaders = new LinkedList<>();
+        demandHeaders.add("PKEY");
+        demandHeaders.add("ISSUE_TYPE");
+        demandHeaders.add("Done");
+        demandHeaders.add("Doing");
+        demandHeaders.add("To Do");
+
+        List<String> featureHeaders = new LinkedList<>();
+        featureHeaders.add("PKEY");
+        featureHeaders.add("ISSUE_TYPE");
+        featureHeaders.add("Done");
+        featureHeaders.add("QA");
+        featureHeaders.add("Doing");
+        featureHeaders.add("To Do");
+
+        List<String> subTaskHeaders = new LinkedList<>();
+        subTaskHeaders.add("PKEY");
+        subTaskHeaders.add("ISSUE_TYPE");
+        subTaskHeaders.add("Done");
+        subTaskHeaders.add("UAT");
+        subTaskHeaders.add("Reviewing");
+        subTaskHeaders.add("Doing");
+        subTaskHeaders.add("To Do");
+
+        AnalyticsTransitionsDataRow[] demands = new AnalyticsTransitionsDataRow[6];
+        AnalyticsTransitionsDataRow[] features = new AnalyticsTransitionsDataRow[5];
+        AnalyticsTransitionsDataRow[] subTasks = new AnalyticsTransitionsDataRow[12];
+        demands[0] = new AnalyticsTransitionsDataRow("TASKB-1", "Demand"
+                , parseDateList("2000-01-05", "2000-01-03", "2000-01-01"));
+        demands[1] = new AnalyticsTransitionsDataRow("TASKB-2", "Demand"
+                , parseDateList("2000-01-06", "2000-01-04", "2000-01-02"));
+        demands[2] = new AnalyticsTransitionsDataRow("TASKB-3", "Demand"
+                , parseDateList(null, "2000-01-04", "2000-01-01"));
+        demands[3] = new AnalyticsTransitionsDataRow("TASKB-4", "OS"
+                , parseDateList("2000-01-07", "2000-01-05", "2000-01-03"));
+        demands[4] = new AnalyticsTransitionsDataRow("TASKB-5", "OS"
+                , parseDateList("2000-01-08", "2000-01-06", "2000-01-04"));
+        demands[5] = new AnalyticsTransitionsDataRow("TASKB-6", "OS"
+                , parseDateList(null, "2000-01-06", "2000-01-03"));
+
+        features[0] = new AnalyticsTransitionsDataRow("TASKB-7", "Feature"
+                , parseDateList(null, "2000-01-04", "2000-01-03", "2000-01-02"));
+        features[1] = new AnalyticsTransitionsDataRow("TASKB-8", "Feature"
+                , parseDateList(null, null, "2000-01-04", "2000-01-03"));
+        features[2] = new AnalyticsTransitionsDataRow("TASKB-9", "Feature"
+                , parseDateList("2000-01-07", "2000-01-06", "2000-01-05", "2000-01-04"));
+        features[3] = new AnalyticsTransitionsDataRow("TASKB-10", "Feature"
+                , parseDateList(null, "2000-01-06", "2000-01-05", "2000-01-04"));
+        features[4] = new AnalyticsTransitionsDataRow("TASKB-11", "Feature"
+                , parseDateList("2000-01-08", "2000-01-07", "2000-01-06", "2000-01-05"));
+
+        subTasks[0] = new AnalyticsTransitionsDataRow("TASKB-12", "Development"
+                , parseDateList("2000-01-09", "2000-01-08", "2000-01-07", "2000-01-06", "2000-01-05"));
+        subTasks[1] = new AnalyticsTransitionsDataRow("TASKB-13", "Development"
+                , parseDateList("2000-01-11", "2000-01-10", "2000-01-09", "2000-01-07", "2000-01-05"));
+        subTasks[2] = new AnalyticsTransitionsDataRow("TASKB-14", "Development"
+                , parseDateList(null, null, "2000-01-08", "2000-01-08", "2000-01-06"));
+        subTasks[3] = new AnalyticsTransitionsDataRow("TASKB-15", "Development"
+                , parseDateList(null, null, null, null, "2000-01-06"));
+        subTasks[4] = new AnalyticsTransitionsDataRow("TASKB-16", "Review"
+                , parseDateList(null, null, null, "2000-01-09", "2000-01-07"));
+        subTasks[5] = new AnalyticsTransitionsDataRow("TASKB-17", "Review"
+                , parseDateList("2000-01-07", null, null, "2000-01-07", "2000-01-07"));
+        subTasks[6] = new AnalyticsTransitionsDataRow("TASKB-18", "Review"
+                , parseDateList("2000-01-10", null, null, "2000-01-09", "2000-01-08"));
+        subTasks[7] = new AnalyticsTransitionsDataRow("TASKB-19", "Review"
+                , parseDateList("2000-01-11", null, null, "2000-01-08", "2000-01-08"));
+        subTasks[8] = new AnalyticsTransitionsDataRow("TASKB-20", "Sub-Task"
+                , parseDateList("2000-01-08", null, "2000-01-07", "2000-01-06", "2000-01-04"));
+        subTasks[9] = new AnalyticsTransitionsDataRow("TASKB-21", "Sub-Task"
+                , parseDateList("2000-01-07", null, "2000-01-07", "2000-01-07", "2000-01-06"));
+        subTasks[10] = new AnalyticsTransitionsDataRow("TASKB-22", "Sub-Task"
+                , parseDateList(null, null, null, "2000-01-09", "2000-01-08"));
+        subTasks[11] = new AnalyticsTransitionsDataRow("TASKB-23", "Sub-Task"
+                , parseDateList("2000-01-12", null, "2000-01-11", "2000-01-11", "2000-01-10"));
+
+        return asList(new AnalyticsTransitionsDataSet(TYPE_DEMAND, demandHeaders, asList(demands))
+                , new AnalyticsTransitionsDataSet(TYPE_FEATURES, featureHeaders, asList(features))
+                , new AnalyticsTransitionsDataSet(TYPE_SUBTASKS, subTaskHeaders, asList(subTasks)));
+    }
+
     public static List<AnalyticsTransitionsDataSet> getAnalyticsTransitionsDataSetWitNoRow() {
         List<String> headers = new LinkedList<>();
         headers.add("PKEY");
@@ -385,6 +474,47 @@ public class FollowUpHelper {
         return asList(new SyntheticTransitionsDataSet(TYPE_DEMAND, headers, rowsDemand),
                 new SyntheticTransitionsDataSet(TYPE_FEATURES, headers, rowsFeature),
                 new SyntheticTransitionsDataSet(TYPE_SUBTASKS, headers, rowsSubtask));
+    }
+
+    public static List<SyntheticTransitionsDataSet> getBiggerSyntheticTransitionsDataSet() {
+        List<String> demandHeanders = new LinkedList<>();
+        demandHeanders.add("PKEY");
+        demandHeanders.add("ISSUE_TYPE");
+        demandHeanders.add("Done");
+        demandHeanders.add("Doing");
+        demandHeanders.add("To Do");
+        String[] demandStatuses = new String[] {"Done", "Doing", "To Do"};
+
+        List<String> featureHeaders = new LinkedList<>();
+        featureHeaders.add("PKEY");
+        featureHeaders.add("ISSUE_TYPE");
+        featureHeaders.add("Done");
+        featureHeaders.add("QA");
+        featureHeaders.add("Doing");
+        featureHeaders.add("To Do");
+        String[] featureStatuses = new String[] {"Done", "QA", "Doing", "To Do"};
+
+        List<String> subTaskHeaders = new LinkedList<>();
+        subTaskHeaders.add("PKEY");
+        subTaskHeaders.add("ISSUE_TYPE");
+        subTaskHeaders.add("Done");
+        subTaskHeaders.add("UAT");
+        subTaskHeaders.add("Reviewing");
+        subTaskHeaders.add("Doing");
+        subTaskHeaders.add("To Do");
+        String[] subTaskStatuses = new String[] {"Done", "UAT", "Reviewing", "Doing", "To Do"};
+
+        List<String> doneStatuses = singletonList("Done");
+
+        List<AnalyticsTransitionsDataSet> analytics = getBiggerAnalyticsTransitionsDataSet();
+        AnalyticsTransitionsDataSet demands = analytics.get(0);
+        AnalyticsTransitionsDataSet features = analytics.get(1);
+        AnalyticsTransitionsDataSet subTasks = analytics.get(2);
+
+        return asList(
+                FollowUpTransitionsDataProvider.getSyntheticTransitionsDs(demandHeanders, demandStatuses, doneStatuses, demands)
+                , FollowUpTransitionsDataProvider.getSyntheticTransitionsDs(featureHeaders, featureStatuses, doneStatuses, features)
+                , FollowUpTransitionsDataProvider.getSyntheticTransitionsDs(subTaskHeaders, subTaskStatuses, doneStatuses, subTasks));
     }
 
     public static List<SyntheticTransitionsDataSet> getSyntheticTransitionsDataSetWithNoRow() {
