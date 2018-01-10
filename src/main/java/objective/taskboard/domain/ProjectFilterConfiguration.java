@@ -1,6 +1,7 @@
 package objective.taskboard.domain;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /*-
  * [LICENSE]
@@ -47,6 +48,9 @@ public class ProjectFilterConfiguration implements Serializable {
 
     @Column
     private String projectKey;
+    
+    @Column
+    private Date deliveryDate;
 
     public String getProjectKey() {
         return projectKey;
@@ -54,6 +58,10 @@ public class ProjectFilterConfiguration implements Serializable {
 
     public void setProjectKey(String projectKey) {
         this.projectKey = projectKey;
+    }
+    
+    public Date getDeliveryDate() {
+        return deliveryDate;
     }
 
     @OneToMany(fetch=FetchType.EAGER)

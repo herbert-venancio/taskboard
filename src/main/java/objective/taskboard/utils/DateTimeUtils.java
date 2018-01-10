@@ -153,4 +153,11 @@ public class DateTimeUtils {
         return null;
     }
 
+    public static Date toDate(LocalDate finalProjectDate, ZoneId zone) {
+        return Date.from(finalProjectDate.atStartOfDay().atZone(zone).toInstant());
+    }
+    
+    public static LocalDate toLocalDate(Date date, ZoneId zone) {
+        return date.toInstant().atZone(zone).toLocalDate();
+    }
 }
