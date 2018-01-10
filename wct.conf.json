@@ -9,7 +9,8 @@
   "suites": [
     "test/login-test.html",
     "test/board-search-test.html",
-    "test/searchFilter-test.html"
+    "test/searchFilter-test.html",
+    "test/widget-cfd-test.html"
   ],
   "webserver": {
     "pathMappings": [
