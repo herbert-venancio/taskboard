@@ -25,9 +25,9 @@
         <style>
         </style>
 
-        <widget-wrap title="Planned X Ballpark" is-ready="{{isReady}}">
-
-            CONTENT HERE
+        <widget-wrap title="Planned X Ballpark" is-ready="{{isReady}}" error-message="{{errorMessage}}" chart="{{chart}}" >
+			
+           	<div id="planned-x-ballpark" class="tb-chart"></div>
 
         </widget-wrap>
 
@@ -53,19 +53,98 @@
                         notify: true,
                         value: false
                     },
+                    selectedCategory: {
+                        type: String
+                    },
+                    dataCategory: {
+                    	type: String
+                    },
+                    _isChartRendered: {
+                    	type: Boolean,
+                    	value: false
+                    },
+                    errorMessage: {
+                    	type: String,
+                    	notify: true
+                    },
+                    chart:  {
+                    	type: Object,
+                    	notify: true
+                    }
                 },
 
                 observers: [
                     '_onProjectSelected(selectedProjectKey, selectedDate)',
+                    '_onCategorySelected(selectedCategory)'
                 ],
 
-                ready: function() {
-                },
+                ready: function() {},
 
                 _onProjectSelected: function(selectedProjectKey, selectedDate) {
-                    console.log(selectedProjectKey);
-                    console.log(selectedDate);
+                	this.set('_isChartRendered', false);
+                	if(this.isSelectedCategory())
+						this.drawPlannedBallparkChart(selectedProjectKey);
                 },
+                
+                _onCategorySelected: function(selectedCategory) {
+                	if(this.isSelectedCategory())
+                		this.drawPlannedBallparkChart(this.selectedProjectKey);
+                },
+                
+                isSelectedCategory: function() {
+                	return this.dataCategory === this.selectedCategory;
+                },
+                
+                drawPlannedBallparkChart: function(projectKey) {
+                	if(this._isChartRendered)
+                		return;
+                	
+                	var self = this;
+
+                    self.set('isReady', false);
+                     
+           			d3.json("/api/projects/" + projectKey + "/followup/planned-ballpark", function(error, data) {
+           				if(error) {
+           					self._handleError(error);           					
+           					return;
+           				}
+           				
+                    	var chart = dc.pieChart("#planned-x-ballpark");
+                 		
+             			var plannedXBallpark = crossfilter(data);
+             			
+             			var plannedXBallparkDimension = plannedXBallpark.dimension(function(d) { return d.type; });
+             			var plannedXBallparkGroup = plannedXBallparkDimension.group().reduceSum(function(d){ return d.totalEffort;});
+             			var all = plannedXBallparkDimension.groupAll().reduceSum(function(d){return d.totalEffort;});
+             			
+             			var numberFormat = d3.format('.1f');
+             			
+             			chart
+             				.dimension(plannedXBallparkDimension)
+             				.group(plannedXBallparkGroup)
+             				.label(function(data) {
+             					var label = data.key;
+             					if(all.value()) {
+             						label += ' (' + numberFormat(data.value / all.value() * 100) + '%)';
+             					}
+             					return label;
+             				})
+             				.title(function(data) {
+             					return "Total Effort for " + data.key + ": " + data.value + " of " + all.value();
+             				})
+             				.legend(dc.legend().gap(8));
+             			
+             			chart.render();
+             			self.set('isReady', true);
+             			self.set('_isChartRendered', true);
+             			self.set('chart', chart);
+             		});
+                },
+                
+                _handleError: function(error) {
+                	console.log(error);
+                	this.set('errorMessage', error.responseText);
+                }
 
             });
         })();
