@@ -210,7 +210,6 @@ public class JiraProperties {
         }
     }
 
-
     public static class CustomField {
         @NotNull
         @Valid
@@ -1334,7 +1333,7 @@ public class JiraProperties {
     public List<Long> getStatusesCanceledIds() {
         return this.statusesCanceledIds;
     }
-    
+
     public List<Long> getStatusesDeferredIds() {
         return this.statusesDeferredIds;
     }

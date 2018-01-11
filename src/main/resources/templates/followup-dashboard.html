@@ -143,6 +143,40 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         kpis-header .avatar.user-account {
             margin: 0;
         }
+        .tb-chart.dc-chart {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            width: 100%;
+            height: 100%;
+            padding: 5px;
+            overflow: hidden;
+        }
+        .tb-chart.dc-chart > svg {
+                overflow: visible;
+        }
+        .tb-chart.dc-chart .dc-legend .dc-legend-item {
+            fill: #EFEFEF;
+            font-size: 15px;
+        }
+        .tb-chart.dc-chart .pie-label {
+            font-size: 15px;
+        }
+        .tb-chart.dc-chart .empty-chart .pie-slice path {
+            fill: #333;
+        }
+        .tb-chart.dc-chart .empty-chart .pie-label {
+            fill: #FFF;
+            font-size: 20px;
+        }
+        .tb-chart.dc-chart g.axis text {
+            fill: #FFF;
+            font-size: 15px;
+        }
+        .tb-chart.dc-chart .axis path, .dc-chart .axis line {
+            stroke: #FFF;
+        }
     </style>
 </head>
 
@@ -157,6 +191,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     window.user = JSON.parse(/*[[${user}]]*/ null);
     window.logo = JSON.parse(/*[[${logo}]]*/ null);
     /*]]>*/
+    window.addEventListener('resize', function() {
+        dc.renderAll();
+    });
 </script>
 
 <template is="dom-bind" id="app">
