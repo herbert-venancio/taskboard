@@ -23,14 +23,16 @@
     <template>
 
         <style>
+        .tb-chart {
+            width: 100%;
+            height: 100%
+        }
         </style>
 
-        <widget-wrap title="Progress Chart" is-ready="{{isReady}}">
-
-            CONTENT HERE
-
+        <widget-wrap title="Progress Chart" is-ready="{{isReady}}" error-message="{{errorMessage}}" chart="{{chart}}">
+            <div id="progress-chart" class="tb-chart"></div>
         </widget-wrap>
-
+        
     </template>
 
     <script>
@@ -53,20 +55,110 @@
                         notify: true,
                         value: false
                     },
+                    errorMessage: {
+                        type: String,
+                        notify: true,
+                        value: '',
+                    },
+                    chart: {
+                    	type: Object,
+                    	notify: true
+                    }
                 },
 
                 observers: [
                     '_onProjectSelected(selectedProjectKey, selectedDate)',
                 ],
 
-                ready: function() {
-                },
-
                 _onProjectSelected: function(selectedProjectKey, selectedDate) {
-                    console.log(selectedProjectKey);
-                    console.log(selectedDate);
+                	this.chart = this.createChart();
+                	
+                    var self = this;
+                    self.set('isReady', false);
+                    self.set('errorMessage', '');
+                    d3.json("/api/projects/"+selectedProjectKey+"/followup/progress?timezone=" + taskboard.getTimeZoneIdFromBrowser(), function(req, data) {
+                    	(function(){
+                            if (req != null && req.status >= 400) {
+                                var msg = 'Impossible to generate progress chart. '+ req.responseText;
+                                self.set('errorMessage', msg);
+                                console.log(msg);
+                                if (self.ndx) 
+                                    self.ndx.remove();
+                                return;
+                            }
+    
+                            function plotCallback(type) { 
+                            	return function(d, index) {
+                                	graphData.push({
+                                        date   : new Date(d.date),
+                                        value  : d.progress * 100,
+                                        type   : type
+                                    })}
+                            }
+    
+                            var graphData = []
+                            data.actual.forEach(plotCallback("Actual"));
+                            data.actualProjection.forEach(plotCallback("Projection"));
+                            data.expected.forEach(plotCallback("Expected"));
+                            
+                            if (self.ndx == null)
+                            	self.ndx = crossfilter(graphData);
+                            else {
+                            	self.chart
+                                	.x(d3.time.scale().domain([new Date(data.startingDate), new Date(data.endingDate)]))
+                            	self.ndx.remove();
+                            	self.ndx.add(graphData);
+                            	dc.redrawAll();
+                            	return;
+                            }
+                            
+                            var dateDimension = self.ndx.dimension(function (d) {
+                                return [d.type, d.date];
+                            });
+    
+                            var effortDoneByDayGroup = dateDimension.group().reduceSum(function(d) { 
+                                return d.value 
+                            })
+    
+                            self.chart
+                                .x(d3.time.scale().domain([new Date(data.startingDate), new Date(data.endingDate)]))
+                                .dimension(dateDimension)
+                                .group(effortDoneByDayGroup)
+    
+                            self.chart.render();
+                    	})();
+
+                        self.set('isReady', true);
+                    })
                 },
 
+                createChart: function() {
+                	if (this.chart)
+                		return this.chart;
+                	
+                	var chart = dc.seriesChart(this.$$("#progress-chart"));
+                    chart
+                        .brushOn(false)
+                        .seriesAccessor(function(d) {return d.key[0];})
+                        .keyAccessor(function(d) {return d.key[1];})
+                        .title(function(d) {return d.key[1].toLocaleDateString() + " : " + d.value + " %";})
+                        .elasticY(false)
+                        .yAxisLabel("Progress %")
+                        .xAxisLabel("Timeline")
+                        .legend(dc
+                        		.legend()
+                        		.x(100).y(20)
+                        		.itemHeight(13)
+                        		.itemWidth(90)
+                        		.gap(8)
+                        		.horizontal(1)
+                        		.legendWidth(180))
+
+                    chart.margins().left += 20;
+                    chart.margins().bottom += 20;
+                    
+                    return chart;
+                }
             });
         })();
     </script>

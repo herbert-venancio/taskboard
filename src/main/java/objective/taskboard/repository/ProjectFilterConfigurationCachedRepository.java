@@ -22,6 +22,7 @@ package objective.taskboard.repository;
  */
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 
@@ -52,6 +53,14 @@ public class ProjectFilterConfigurationCachedRepository {
 
     public List<ProjectFilterConfiguration> getProjects() {
         return ImmutableList.copyOf(cache);
+    }
+    
+    public Optional<ProjectFilterConfiguration> getProjectByKey(String projectKey) {
+        for (ProjectFilterConfiguration projectFilterConfiguration : cache) {
+            if (projectFilterConfiguration.getProjectKey().equals(projectKey))
+                return Optional.of(projectFilterConfiguration);
+        }
+        return Optional.empty();
     }
 
     public boolean exists(String projectKey) {

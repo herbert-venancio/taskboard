@@ -10,4 +10,18 @@ public class EffortHistoryRow {
     public EffortHistoryRow(LocalDate date) {
         this.date = date;
     }
+    
+    public EffortHistoryRow(LocalDate date, double sumEffortDone, double sumEffortBacklog) {
+        this.date = date;
+        this.sumEffortDone = sumEffortDone;
+        this.sumEffortBacklog = sumEffortBacklog;
+    }
+    
+    public double progress() {
+        double total = sumEffortDone + sumEffortBacklog;
+        double d = sumEffortDone / total;
+        if (Double.isNaN(d))
+            return 0.0;
+        return d;
+    }
 }
