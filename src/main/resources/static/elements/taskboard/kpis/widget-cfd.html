@@ -76,7 +76,7 @@
                     var self = this;
                     this.isReady = false;
 
-                    d3.json("/api/project/"+ project + "/followup/cfd", function(error, cfdData) {
+                    d3.json("/api/projects/"+ project + "/followup/cfd", function(error, cfdData) {
                         if(error) {
                             console.log(error);
                             return;

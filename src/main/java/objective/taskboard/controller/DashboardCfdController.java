@@ -14,7 +14,7 @@ public class DashboardCfdController {
     @Autowired
     private CumulativeFlowDiagramDataProvider cumulativeFlowDiagramDataProvider;
 
-    @RequestMapping(value = "/api/project/{project}/followup/cfd", produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/api/projects/{project}/followup/cfd", produces = MediaType.APPLICATION_JSON_VALUE)
     public CumulativeFlowDiagramDataSet data(@PathVariable("project") String project) {
         return cumulativeFlowDiagramDataProvider.getCumulativeFlowDiagramDataSet(project);
     }
