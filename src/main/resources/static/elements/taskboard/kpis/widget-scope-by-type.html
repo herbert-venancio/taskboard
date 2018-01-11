@@ -25,9 +25,9 @@
         <style>
         </style>
 
-        <widget-wrap title="Scope By Type" is-ready="{{isReady}}">
+        <widget-wrap title="Scope By Type" is-ready="{{isReady}}" chart="{{chart}}" error-message="{{errorMessage}}">
 
-            CONTENT HERE
+            <div id="scope-by-type-chart" class="tb-chart"></div>
 
         </widget-wrap>
 
@@ -53,6 +53,15 @@
                         notify: true,
                         value: false
                     },
+                    chart: {
+                        type: Object,
+                        notify: true,
+                        value: function() { return {}; }
+                    },
+                    errorMessage: {
+                        type: String,
+                        notify: true
+                    }
                 },
 
                 observers: [
@@ -63,9 +72,72 @@
                 },
 
                 _onProjectSelected: function(selectedProjectKey, selectedDate) {
-                    console.log(selectedProjectKey);
-                    console.log(selectedDate);
+
+                    var self = this;
+
+                    self._resetChartAndWidget();
+
+                    var url = "/api/projects/"+ selectedProjectKey +"/followup/scope-by-type?date="+ selectedDate +"&timezone="+ taskboard.getTimeZoneIdFromBrowser();
+
+                    d3.json(url, function(error, data) {
+
+                        if (error) {
+                            self.set('errorMessage', error.response);
+                            return;
+                        }
+
+                        var chart = dc.pieChart("#scope-by-type-chart");
+
+                        var ndx = crossfilter(data.values);
+                        var chartDimension = ndx.dimension(function (d) {
+                            return d.type;
+                        });
+                        var chartGroup = chartDimension.group().reduceSum(function(d) {
+                            return d.effortEstimate;
+                        });
+
+                        var numberFormat = d3.format('.1f');
+
+                        chart
+                            .dimension(chartDimension)
+                            .group(chartGroup)
+                            .label(function(d) {
+                                if (d.key === 'empty')
+                                    return 'Empty';
+
+                                var value = findInArray(data.values, function(v) {
+                                    return v.type === d.key;
+                                })
+                                return d.key + ' (' + numberFormat(value.percent) + '%)';
+                            })
+                            .title(function(d) {
+                                if (d.key === 'empty')
+                                    return 'Empty';
+
+                                return d.key + ': ' + d.value;
+                            })
+                            .legend(
+                                dc.legend().gap(8)
+                            )
+                            .turnOnControls(true);
+
+                        chart.render();
+
+                        self.set('chart', chart);
+                        self.set('isReady', true);
+                    });
+
                 },
+
+                _resetChartAndWidget: function() {
+                    this.set('errorMessage', null);
+                    this.set('isReady', false);
+
+                    if (!_.isEmpty(this.chart)) {
+                        dc.deregisterChart(this.chart);
+                        this.set('chart', {});
+                    }
+                }
 
             });
         })();

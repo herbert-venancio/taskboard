@@ -84,17 +84,56 @@
                 font-family: 'ptsans-bold', Verdana, Arial, Helvetica, sans-serif;
             }
 
-            .widget__content {
+            .widget__reset {
+                margin-left: auto;
+                cursor: pointer;
+                color: inherit;
+                display: block;
+
+                transition: color .4s ease;
+            }
+
+            .widget__reset:hover {
+                color: #FFF;
+            }
+
+            .widget__body {
                 flex: 1;
 
                 padding: 16px;
+                position: relative;
                 opacity: 0;
                 transition: opacity .4s ease;
             }
 
-            .widget.active .widget__content {
+            .widget.active .widget__body {
                 opacity: 1;
                 transition: opacity .4s ease;
+            }
+
+            .widget__content {
+                display: flex;
+                height: 100%;
+            }
+
+            .widget__content.temp-deactivate {
+                display: none;
+            }
+
+            .widget__error-message {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                top: 0;
+                left: 0;
+                position: absolute;
+                font-size: 30px;
+                text-align: center;
+                color: #f77c7c;
             }
         </style>
 
@@ -102,10 +141,22 @@
 
         <section class="widget">
             <header class="widget__header">
-	           <h3 class="widget__title">[[title]]</h3>
+                <h3 class="widget__title">[[title]]</h3>
+                <template is="dom-if" if="{{_isChartFiltered}}">
+                    <a class="widget__reset" on-tap="_onTapReset">Reset</a>
+                </template>
             </header>
-            <div class="widget__content">
-                <content></content>
+            <div class="widget__body">
+                <template is="dom-if" if="{{!errorMessage}}">
+                    <div class="widget__content">
+                        <content></content>
+                    </div>
+                </template>
+                <template is="dom-if" if="{{errorMessage}}">
+                    <p class="widget__error-message">
+                        {{errorMessage}}
+                    </p>
+                </template>
             </div>
         </section>
 
@@ -125,10 +176,25 @@
                         notify: true,
                         value: false
                     },
+                    chart: {
+                        type: Object,
+                        notify: true
+                    },
+                    _isChartFiltered: {
+                        type: Boolean,
+                        value: false
+                    },
+                    errorMessage: {
+                        type: String,
+                        notify: true,
+                        value: ''
+                    }
                 },
 
                 observers: [
                     '_onReadyChanged(isReady)',
+                    '_onChartChanged(chart)',
+                    '_onErrorMessageChanged(errorMessage)',
                 ],
 
                 _onReadyChanged: function(isReady) {
@@ -141,6 +207,48 @@
                         loader.classList.add('active');
                         widget.classList.remove('active');
                     }
+                },
+
+                _onTapReset: function() {
+                    dc.refocusAll();
+                    dc.filterAll();
+                    dc.renderAll();
+                    dc.redrawAll();
+                },
+
+                _onChartChanged: function(chart) {
+                    this.set('_isChartFiltered', false);
+
+                    if(_.isEmpty(chart))
+                        return;
+
+                    var registerChartFiltered = function(chartFiltered, filter) {
+                        if (chartFiltered.anchorName() === chart.anchorName()) {
+                            this.set('_isChartFiltered', chart.hasFilter());
+                        }
+                    }.bind(this);
+
+                    chart.on('filtered.monitor', registerChartFiltered);
+                },
+
+                _onErrorMessageChanged: function(errorMessage) {
+                    if (_.isEmpty(errorMessage)) {
+                        this._temporarilyDeactivateContent();
+                    } else {
+                        this.set('isReady', true);
+                    }
+                },
+
+                _temporarilyDeactivateContent: function() {
+                    var content = this.$$('.widget__content');
+                    if (!content)
+                        return;
+
+                    var tempDeactivateClass = "temp-deactivate"; 
+                    content.classList.add(tempDeactivateClass);
+                    setTimeout(function() {
+                        content.classList.remove(tempDeactivateClass);
+                    }, 300);
                 },
 
             });
