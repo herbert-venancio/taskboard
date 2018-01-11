@@ -51,7 +51,7 @@
                     server = sinon.fakeServer.create();
                     server.respondWith(
                         'GET',
-                        '/api/project/MOCK/followup/cfd', [
+                        '/api/projects/MOCK/followup/cfd', [
                             200,
                             responseHeaders.json,
                             '{"lanes": ["Sub-Task"]'
@@ -85,7 +85,7 @@
                     );
                     server.respondWith(
                         'GET',
-                        '/api/project/STUB/followup/cfd', [
+                        '/api/projects/STUB/followup/cfd', [
                             200,
                             responseHeaders.json,
                             '{"lanes": ["Sub-Task"]'
