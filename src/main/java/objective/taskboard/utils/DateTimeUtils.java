@@ -1,5 +1,6 @@
 package objective.taskboard.utils;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -17,6 +18,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -24,6 +28,11 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import javax.servlet.http.HttpServletRequest;
 
 public class DateTimeUtils {
 
@@ -140,6 +149,29 @@ public class DateTimeUtils {
         @Override
         public ZonedDateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
             return ZonedDateTime.parse(json.getAsString());
+        }
+    }
+
+    public static class LocalDateTimeStampSerializer extends com.fasterxml.jackson.databind.JsonSerializer<LocalDate> {
+
+        public static final LocalDateTimeStampSerializer INSTANCE = new LocalDateTimeStampSerializer();
+
+        protected LocalDateTimeStampSerializer(){}
+
+        private static ZoneId getTimezone() {
+            RequestAttributes ra = RequestContextHolder.getRequestAttributes();
+            if (ra instanceof ServletRequestAttributes) {
+                HttpServletRequest request = ((ServletRequestAttributes)ra).getRequest();
+                String zoneId = request.getParameter("timezone");
+                if(zoneId != null)
+                    return determineTimeZoneId(zoneId);
+            }
+            return ZoneId.systemDefault();
+        }
+
+        @Override
+        public void serialize(LocalDate value, JsonGenerator gen, SerializerProvider serializers) throws IOException, JsonProcessingException {
+            gen.writeNumber(value.atStartOfDay().atZone(getTimezone()).toInstant().toEpochMilli());
         }
     }
 

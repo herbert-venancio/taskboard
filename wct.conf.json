@@ -10,7 +10,8 @@
     "test/login-test.html",
     "test/board-search-test.html",
     "test/searchFilter-test.html",
-    "test/widget-cfd-test.html"
+    "test/widget-cfd-test.html",
+    "test/widget-scope-progress-test.html"
   ],
   "webserver": {
     "pathMappings": [
