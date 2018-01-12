@@ -44,6 +44,7 @@
             });
 
             suite('<load-project>', function() {
+                var server;
                 var responseHeaders = {
                     json: { 'Content-Type': 'application/json' }
                 };
@@ -127,7 +128,7 @@
                     widgetCfd.selectedProjectKey = 'MOCK';
                     server.respond();
                     var svg = widgetCfd.$$('#cfd > svg');
-                    assert.isDefined(svg, 'svg tag created');
+                    assert.isNotNull(svg, 'svg tag not created');
                     expect(widgetCfd.isReady).to.be.true;
                 });
 

@@ -25,7 +25,7 @@
         <style>
         </style>
 
-        <widget-wrap title="CFD" is-ready="{{isReady}}" chart="{{chart}}">
+        <widget-wrap title="CFD" is-ready="{{isReady}}" chart="{{chart}}" error-message="{{errorMessage}}">
 
             <div id="cfd" class="tb-chart"></div>
 
@@ -53,6 +53,11 @@
                         notify: true,
                         value: false
                     },
+                    errorMessage: {
+                        type: String,
+                        notify: true,
+                        value: ''
+                    },
                     chart: {
                         type: Object,
                         readOnly: true,
@@ -73,14 +78,12 @@
                 },
 
                 loadCfdChart: function(project) {
-                    var self = this;
-                    this.isReady = false;
+                    this.reset();
 
+                    var self = this;
                     d3.json("/api/projects/"+ project + "/followup/cfd", function(error, cfdData) {
-                        if(error) {
-                            console.log(error);
+                        if(self.handleErrors(error, cfdData))
                             return;
-                        }
 
                         self.setCfdData(cfdData);
 
@@ -90,6 +93,24 @@
                         self.updateChart();
                         self.isReady = true;
                     });
+                },
+
+                reset: function() {
+                    this.isReady = false;
+                    this.errorMessage = '';
+                },
+
+                handleErrors(error, cfdData) {
+                    if(error) {
+                        this.errorMessage = error.message;
+                        return true;
+                    }
+                    if(!cfdData.data.length) {
+                        this.errorMessage = 'cfd has no data';
+                        return true;
+                    }
+
+                    return false;
                 },
 
                 setCfdData: function(cfdData) {

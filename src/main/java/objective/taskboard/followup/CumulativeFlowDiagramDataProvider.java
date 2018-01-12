@@ -60,7 +60,7 @@ public class CumulativeFlowDiagramDataProvider {
                 continue;
             SyntheticTransitionsDataSet ds = followupData.syntheticsTransitionsDsList.get(i);
             lanes.add(ds.issueType);
-            int initial = ds.headers.size() - ds.rows.get(0).amountOfIssueInStatus.size();
+            int initial = ds.getInitialIndexStatusHeaders();
             for (int headerIndex = ds.headers.size() - 1; headerIndex >= initial; --headerIndex) {
                 labels.add(ds.headers.get(headerIndex));
             }
@@ -80,7 +80,7 @@ public class CumulativeFlowDiagramDataProvider {
             if(!selectedLane.includeLane(i))
                 continue;
             SyntheticTransitionsDataSet ds = followupData.syntheticsTransitionsDsList.get(i);
-            int initial = ds.headers.size() - ds.rows.get(0).amountOfIssueInStatus.size();
+            int initial = ds.getInitialIndexStatusHeaders();
             int lane = laneList.indexOf(ds.issueType);
             for (SyntheticTransitionsDataRow row : ds.rows) {
                 int type = typeList.indexOf(row.issueType);

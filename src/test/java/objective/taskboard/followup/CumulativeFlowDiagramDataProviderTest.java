@@ -1,6 +1,7 @@
 package objective.taskboard.followup;
 
 import com.google.common.collect.Sets;
+import objective.taskboard.Constants;
 import objective.taskboard.followup.impl.FollowUpDataProviderFromCurrentState;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import org.apache.commons.lang3.tuple.Pair;
@@ -13,6 +14,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +23,7 @@ import java.util.Set;
 
 import static com.google.common.collect.Sets.newLinkedHashSet;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static objective.taskboard.followup.impl.FollowUpTransitionsDataProvider.TYPE_SUBTASKS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -50,6 +53,19 @@ public class CumulativeFlowDiagramDataProviderTest {
         FollowUpDataSnapshot snapshot = new FollowUpDataSnapshot(TODAY_DATE, followupData);
         doReturn(snapshot).when(followUpDataProviderFromCurrentState).getJiraData(eq("TASKB"));
         doReturn(true).when(projectRepository).exists(eq("TASKB"));
+
+        FollowupData emptyFollowupData = new FollowupData(new FromJiraDataSet(Constants.FROMJIRA_HEADERS, emptyList()), emptyList(), emptySynthetics());
+        FollowUpDataSnapshot emptySnapshot = new FollowUpDataSnapshot(TODAY_DATE, emptyFollowupData);
+        doReturn(emptySnapshot).when(followUpDataProviderFromCurrentState).getJiraData(eq("EMPTY"));
+        doReturn(true).when(projectRepository).exists(eq("EMPTY"));
+    }
+
+    private List<SyntheticTransitionsDataSet> emptySynthetics() {
+        List<SyntheticTransitionsDataSet> synthetics = FollowUpHelper.getBiggerSyntheticTransitionsDataSet();
+        return synthetics
+                .stream()
+                .map(ds -> new SyntheticTransitionsDataSet(ds.issueType, ds.headers, Collections.emptyList()))
+                .collect(toList());
     }
 
     @Test
@@ -152,6 +168,19 @@ public class CumulativeFlowDiagramDataProviderTest {
         } catch (IllegalArgumentException e) {
             assertThat(e).hasMessage("Unknown project <INVALID>");
         }
+    }
+
+    @Test
+    public void givenEmptyFollowupData_whenGenerateSubTaskCfdData_shouldGenerateDataWithLabels() {
+        // when
+        CumulativeFlowDiagramDataSet cfd = subject.getCumulativeFlowDiagramDataSet("EMPTY");
+
+        // then
+        assertThat(cfd.lanes).containsExactly(TYPE_SUBTASKS);
+        assertThat(cfd.types).isEmpty();
+        assertThat(cfd.labels).containsExactly("To Do", "Doing", "Reviewing", "UAT", "Done");
+        assertThat(cfd.dates).isEmpty();
+        assertThat(cfd.data).isEmpty();
     }
 
     private Date getMinDate(AnalyticsTransitionsDataSet analytics) {
