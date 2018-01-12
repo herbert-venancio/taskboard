@@ -61,8 +61,8 @@
                         value: '',
                     },
                     chart: {
-                    	type: Object,
-                    	notify: true
+                        type: Object,
+                        notify: true
                     }
                 },
 
@@ -71,13 +71,13 @@
                 ],
 
                 _onProjectSelected: function(selectedProjectKey, selectedDate) {
-                	this.chart = this.createChart();
-                	
+                    this.chart = this.createChart();
+                    
                     var self = this;
                     self.set('isReady', false);
                     self.set('errorMessage', '');
                     d3.json("/api/projects/"+selectedProjectKey+"/followup/progress?timezone=" + taskboard.getTimeZoneIdFromBrowser(), function(req, data) {
-                    	(function(){
+                        (function(){
                             if (req != null && req.status >= 400) {
                                 var msg = 'Impossible to generate progress chart. '+ req.responseText;
                                 self.set('errorMessage', msg);
@@ -88,8 +88,8 @@
                             }
     
                             function plotCallback(type) { 
-                            	return function(d, index) {
-                                	graphData.push({
+                                return function(d, index) {
+                                    graphData.push({
                                         date   : new Date(d.date),
                                         value  : d.progress * 100,
                                         type   : type
@@ -102,14 +102,14 @@
                             data.expected.forEach(plotCallback("Expected"));
                             
                             if (self.ndx == null)
-                            	self.ndx = crossfilter(graphData);
+                                self.ndx = crossfilter(graphData);
                             else {
-                            	self.chart
-                                	.x(d3.time.scale().domain([new Date(data.startingDate), new Date(data.endingDate)]))
-                            	self.ndx.remove();
-                            	self.ndx.add(graphData);
-                            	dc.redrawAll();
-                            	return;
+                                self.chart
+                                    .x(d3.time.scale().domain([new Date(data.startingDate), new Date(data.endingDate)]))
+                                self.ndx.remove();
+                                self.ndx.add(graphData);
+                                dc.redrawAll();
+                                return;
                             }
                             
                             var dateDimension = self.ndx.dimension(function (d) {
@@ -126,36 +126,50 @@
                                 .group(effortDoneByDayGroup)
     
                             self.chart.render();
-                    	})();
+                        })();
 
                         self.set('isReady', true);
                     })
                 },
 
                 createChart: function() {
-                	if (this.chart)
-                		return this.chart;
-                	
-                	var chart = dc.seriesChart(this.$$("#progress-chart"));
+                    if (this.chart)
+                        return this.chart;
+                    
+                    var chart = dc.seriesChart(this.$$("#progress-chart"));
                     chart
                         .brushOn(false)
                         .seriesAccessor(function(d) {return d.key[0];})
                         .keyAccessor(function(d) {return d.key[1];})
-                        .title(function(d) {return d.key[1].toLocaleDateString() + " : " + d.value + " %";})
+                        .title(function(d) {
+                            var numberFormat = d3.format('.2f');
+                            return d.key[1].toLocaleDateString() + " : " + numberFormat(d.value) + " %";}
+                        )
                         .elasticY(false)
                         .yAxisLabel("Progress %")
                         .xAxisLabel("Timeline")
                         .legend(dc
-                        		.legend()
-                        		.x(100).y(20)
-                        		.itemHeight(13)
-                        		.itemWidth(90)
-                        		.gap(8)
-                        		.horizontal(1)
-                        		.legendWidth(180))
+                                .legend()
+                                .x(100).y(20)
+                                .itemHeight(13)
+                                .itemWidth(90)
+                                .gap(8)
+                                .horizontal(1)
+                                .legendWidth(180));
 
+                    chart.xAxis().tickFormat(function (v) {
+                        var dtFmt = d3.time.format("%b %y");
+                        return dtFmt(v);
+                    })
+                    chart.xAxisPadding(50);
+                    
                     chart.margins().left += 20;
                     chart.margins().bottom += 20;
+                    chart.renderlet(function (chart) {
+                           // rotate x-axis labels
+                           chart.selectAll('g.x text')
+                             .attr('transform', 'translate(-10,10) rotate(315)')
+                    });
                     
                     return chart;
                 }

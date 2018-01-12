@@ -65,6 +65,24 @@ public class FollowupProgressCalculatorTest {
         assertEquals(1.0, expected.get(expected.size()-1).progress, 0.001);
     }
     
+    @Test
+    public void calculate_whenDeliveryDateIsInThePast_ExpectedProgressPastDeliveryIsAlways100percent() {
+        FollowupProgressCalculator subject = new FollowupProgressCalculator(zone);
+        
+        FollowUpDataSnapshot followupData = makeSnapshotForHistory(
+                new EffortHistoryRow(localDate(2018, 1, 1, zone),  1,       10),
+                new EffortHistoryRow(localDate(2018, 1, 11, zone), 1,       10)
+                );
+        
+        ProgressData progressData = subject.calculate(followupData, localDate(2018, 1, 10, zone));
+        
+        List<ProgressDataPoint> expected = progressData.expected;
+        assertEquals(11, expected.size());
+        assertEquals(1.0, expected.get(expected.size()-2).progress, 0.001);
+        assertEquals(1.0, expected.get(expected.size()-1).progress, 0.001);
+    }
+    
+    
     
     @Test
     public void calculateWithOneSample_shouldCalculateProjectionBasedOnAvgOfLastEffort() {
@@ -103,6 +121,28 @@ public class FollowupProgressCalculatorTest {
         
         assertEquals(1, progressData.actualProjection.size());
         assertEquals(date(2018, 1, 3, zone), progressData.endingDate);
+    }
+    
+    
+    @Test
+    public void calculate_givenProjectionSize_shouldCalculateProjectionWithGivenSize() {
+        FollowupProgressCalculator subject = new FollowupProgressCalculator(zone);
+        
+        FollowUpDataSnapshot followupData = makeSnapshotForHistory(
+                new EffortHistoryRow(localDate(2018, 1, 1, zone),      0,       10),
+                new EffortHistoryRow(localDate(2018, 1, 2, zone),      0.7,     9.3),
+                new EffortHistoryRow(localDate(2018, 1, 3, zone),      1.8,     8.2)
+                );
+        
+        ProgressData progressData = subject.calculate(followupData, localDate(2018, 1, 10, zone), 2);
+        
+        assertEquals(.07, progressData.actual.get(1).progress, 0.001);
+        assertEquals(8, progressData.actualProjection.size());
+        assertEquals(localDate(2018, 1, 4, zone), localDate(progressData.actualProjection.get(1).date, zone));
+        assertEquals(localDate(2018, 1, 6, zone), localDate(progressData.actualProjection.get(3).date, zone));
+        assertEquals(progressData.actual.get(2).progress,  progressData.actualProjection.get(0).progress, 0.001);
+        
+        assertEquals(.29,  progressData.actualProjection.get(1).progress, 0.001);
     }
     
 

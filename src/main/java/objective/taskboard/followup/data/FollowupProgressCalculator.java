@@ -20,8 +20,12 @@ public class FollowupProgressCalculator {
     public FollowupProgressCalculator(ZoneId zone) {
         this.zone = zone;
     }
-
-    public ProgressData calculate(FollowUpDataSnapshot followupData, LocalDate projectionLocalDate) {
+    
+    public ProgressData calculate(FollowUpDataSnapshot followupData, LocalDate projectDeliveryDate) {
+        return calculate(followupData, projectDeliveryDate, 20);
+    }
+    
+    public ProgressData calculate(FollowUpDataSnapshot followupData, LocalDate projectDeliveryDate, int projectionSampleSize) {
         ProgressData progressData = new ProgressData();
 
         if (!followupData.getHistory().isPresent())
@@ -37,10 +41,10 @@ public class FollowupProgressCalculator {
         EffortHistoryRow lastRow = historyRows.get(historyRows.size()-1);
         
         LocalDate startingDate = firstRow.date;
-        LocalDate finalProjectDate = projectionLocalDate.isBefore(lastRow.date) ? lastRow.date : projectionLocalDate;
+        LocalDate finalProjectDate = projectDeliveryDate.isBefore(lastRow.date) ? lastRow.date : projectDeliveryDate;
         
-        addExpectedProgress(progressData, startingDate, finalProjectDate);
-        addProjectionData(progressData, historyRows, startingDate, finalProjectDate);
+        addExpectedProgress(progressData, startingDate, projectDeliveryDate, finalProjectDate);
+        addProjectionData(progressData, historyRows, startingDate, finalProjectDate, projectionSampleSize);
         
         progressData.startingDate = toDate(firstRow.date, zone);
         progressData.endingDate = toDate(finalProjectDate, zone);
@@ -51,13 +55,14 @@ public class FollowupProgressCalculator {
             ProgressData progressData, 
             List<EffortHistoryRow> historyRows,
             LocalDate startingDate, 
-            LocalDate finalProjectDate) 
+            LocalDate finalProjectDate,
+            int progressSampleSize) 
     {
         LocalDate startingDateIt = startingDate;
         long totalDayCount = ChronoUnit.DAYS.between(startingDateIt.atStartOfDay(), finalProjectDate.atStartOfDay());
         EffortHistoryRow firstRow = historyRows.get(0);
         EffortHistoryRow lastRow = historyRows.get(historyRows.size()-1);        
-        double projectedProgressFactor = calculateProgressFactor(historyRows);
+        double projectedProgressFactor = calculateProgressFactor(historyRows, progressSampleSize);
         LocalDateTime firstActualDate = firstRow.date.atStartOfDay();
         LocalDateTime lastActualDate = lastRow.date.atStartOfDay();
         long countOfExistingDays = ChronoUnit.DAYS.between(firstActualDate, lastActualDate) + 1;
@@ -73,14 +78,15 @@ public class FollowupProgressCalculator {
         }
     }
 
-    private void addExpectedProgress(ProgressData progressData, LocalDate startingDate, LocalDate finalProjectDate) {
+    private void addExpectedProgress(ProgressData progressData, LocalDate startingDate, LocalDate expectedDeliveryDate, LocalDate finalProjectDate) {
         LocalDate startingDateIt = startingDate;
         
-        long totalDayCount = ChronoUnit.DAYS.between(startingDateIt.atStartOfDay(), finalProjectDate.atStartOfDay());
+        long expectedProjectDuration = ChronoUnit.DAYS.between(startingDateIt.atStartOfDay(), expectedDeliveryDate.atStartOfDay());
         
         double dayNumber = 0;
         while(startingDateIt.isBefore(finalProjectDate) || startingDateIt.equals(finalProjectDate)) {
-            progressData.expected.add(new ProgressDataPoint(toDate(startingDateIt, zone), dayNumber/totalDayCount));
+            double progress = Math.min(dayNumber/expectedProjectDuration, 1.0);
+            progressData.expected.add(new ProgressDataPoint(toDate(startingDateIt, zone), progress));
             startingDateIt = startingDateIt.plus(Period.ofDays(1));
             dayNumber++;
         }
@@ -99,17 +105,18 @@ public class FollowupProgressCalculator {
         return historyRows;
     }
 
-    private double calculateProgressFactor(List<EffortHistoryRow> historyRows) {
-        List<EffortHistoryRow> upToLastFour = historyRows.subList(historyRows.size() - Math.min(4, historyRows.size()), historyRows.size());
+    private double calculateProgressFactor(List<EffortHistoryRow> historyRows, int progressSampleSize) {
+        List<EffortHistoryRow> samplesToUseForProjection = 
+                historyRows.subList(historyRows.size() - Math.min(progressSampleSize, historyRows.size()), historyRows.size());
         double projectedProgressFactor = 0;
         
-        if (upToLastFour.size() == 1)
-            return upToLastFour.get(0).progress();
+        if (samplesToUseForProjection.size() == 1)
+            return samplesToUseForProjection.get(0).progress();
         
-        for (int i = 1; i < upToLastFour.size(); i++) {
-            projectedProgressFactor += upToLastFour.get(i).progress() - upToLastFour.get(i-1).progress();
+        for (int i = 1; i < samplesToUseForProjection.size(); i++) {
+            projectedProgressFactor += samplesToUseForProjection.get(i).progress() - samplesToUseForProjection.get(i-1).progress();
         }
-        projectedProgressFactor = projectedProgressFactor / (upToLastFour.size()-1);
+        projectedProgressFactor = projectedProgressFactor / (samplesToUseForProjection.size()-1);
         return projectedProgressFactor;
     }
 }
