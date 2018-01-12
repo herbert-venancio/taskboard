@@ -61,7 +61,8 @@
                     chart: {
                         type: Object,
                         readOnly: true,
-                        notify: true
+                        notify: true,
+                        value: function() { return {}; }
                     }
                 },
 
@@ -97,7 +98,7 @@
 
                 reset: function() {
                     this.isReady = false;
-                    this.errorMessage = '';
+                    this.set('errorMessage', '');
                 },
 
                 handleErrors(error, cfdData) {
@@ -106,7 +107,7 @@
                         return true;
                     }
                     if(!cfdData.data.length) {
-                        this.errorMessage = 'cfd has no data';
+                        this.set('errorMessage', 'Impossible to generate CFD. No data for this project.');
                         return true;
                     }
 
@@ -132,7 +133,7 @@
                 },
 
                 isChartInitialized: function() {
-                    return this.chart ? true : false;
+                    return !_.isEmpty(this.chart) ? true : false;
                 },
 
                 createChart: function() {
@@ -145,17 +146,10 @@
 
                     // basic chart configuration
                     this.chart
-                        .margins({top: 10, right: 0, bottom: 30, left: 30})
+                        .margins({top: 0, right: 0, bottom: 15, left: 200})
                         .legend(dc.legend()
-                            .x(50)
-                            .y(10)
-                            .itemHeight(13)
                             .gap(8)
-                            .horizontal(1)
-                            .legendWidth(140)
-                            .itemWidth(70)
                         )
-                        .transitionDuration(0);
 
                     // mouse interactions
                     this.chart
@@ -185,7 +179,7 @@
                     this.chart.on('preRender', function() {
                         self.chart
                             .xAxis()
-                                .ticks(Math.max(self.chart.width()/80, 2))
+                                .ticks(Math.max(self.chart.width()/100, 2))
 
                     });
                 },

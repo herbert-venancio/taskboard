@@ -53,16 +53,16 @@ public class DashboardProjectProgressController {
         Optional<ProjectFilterConfiguration> project = projects.getProjectByKey(projectKey);
         
         if (!project.isPresent())
-            return new ResponseEntity<>("Project not found: " + projectKey, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Project not found: " + projectKey + ".", HttpStatus.NOT_FOUND);
         
         Optional<FollowupCluster> cluster = clusterProvider.getFor(project.get());
         if (!cluster.isPresent())
-            return new ResponseEntity<>("No cluster configuration found for project " + projectKey, INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("No cluster configuration found for project " + projectKey + ".", INTERNAL_SERVER_ERROR);
         
         ZoneId timezone = determineTimeZoneId(zoneId);
                 
         if (project.get().getDeliveryDate() == null)
-            return new ResponseEntity<>("The project " + projectKey + " has no delivery date. ", INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("The project " + projectKey + " has no delivery date.", INTERNAL_SERVER_ERROR);
         
         LocalDate deliveryDate = toLocalDate(project.get().getDeliveryDate(), timezone);
         

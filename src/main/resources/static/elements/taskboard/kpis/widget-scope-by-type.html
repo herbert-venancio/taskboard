@@ -82,7 +82,7 @@
                     d3.json(url, function(error, data) {
 
                         if (error) {
-                            self.set('errorMessage', error.response);
+                            self.set('errorMessage', 'Impossible to generate Scope By Type. '+ error.responseText);
                             return;
                         }
 

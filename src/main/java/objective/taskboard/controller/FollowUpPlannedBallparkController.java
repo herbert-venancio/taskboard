@@ -1,5 +1,7 @@
 package objective.taskboard.controller;
 
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,11 +34,11 @@ public class FollowUpPlannedBallparkController {
     @RequestMapping(value = "/api/projects/{projectKey}/followup/planned-ballpark", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> data(@PathVariable("projectKey") String projectKey) {
         if (!projects.exists(projectKey))
-            return new ResponseEntity<>("Project not found", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Project not found: " + projectKey + ".", HttpStatus.NOT_FOUND);
         
         Optional<FollowupCluster> followupCluster = followupClusterProvider.getForProject(projectKey);
         if (!followupCluster.isPresent())
-            return new ResponseEntity<>("No follow-up cluster configuration available", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("No cluster configuration found for project " + projectKey + ".", INTERNAL_SERVER_ERROR);
         
         final PlannedVsBallparkDataAccumulator accumulator = new PlannedVsBallparkDataAccumulator();
         followUpDataProviderFromCurrentState.getJiraData(followupCluster.get(), projectKey).forEachRow(accumulator::accumulate);
