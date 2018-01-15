@@ -25,6 +25,6 @@ public class JiraUserToUserConverter implements Converter<JiraUser, User> {
         List<UserTeam> teams = userTeamRepo.findByUserName(jiraUser.name);
         return teams.isEmpty() ||
                 teams.stream()
-                .anyMatch(userTeam -> userTeam.getTeam().endsWith("_CUSTOMER"));
+                .anyMatch(userTeam -> userTeam.getTeam() != null && userTeam.getTeam().endsWith("_CUSTOMER"));
     }
 }
