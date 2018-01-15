@@ -16,7 +16,7 @@ import objective.taskboard.jira.MetadataService;
 public class FromJiraRowService {
 
     public static final String INTANGIBLE = "Intangible";
-    public static final String NEW_SCOPE = "New Scope";
+    public static final String NEW_SCOPE = "new_scope";
     public static final String BUG = "Bug";
 
     @Autowired
@@ -27,11 +27,11 @@ public class FromJiraRowService {
 
     public boolean isIntangible(FromJiraDataRow row) {
         if (!isEmpty(row.subtaskClassOfService))
-            return row.subtaskClassOfService == INTANGIBLE;
+            return INTANGIBLE.equals(row.subtaskClassOfService);
         else if (!isEmpty(row.taskClassOfService))
-            return row.taskClassOfService == INTANGIBLE;
+            return INTANGIBLE.equals(row.taskClassOfService);
         else if (!isEmpty(row.demandClassOfService))
-            return row.demandClassOfService == INTANGIBLE;
+            return INTANGIBLE.equals(row.demandClassOfService);
         else
             return false;
     }
