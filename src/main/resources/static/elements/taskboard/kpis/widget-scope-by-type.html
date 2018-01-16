@@ -46,7 +46,7 @@
                     selectedDate: {
                         type: String,
                         notify: true,
-                        value: '',
+                        value: ''
                     },
                     isReady: {
                         type: Boolean,
@@ -61,7 +61,7 @@
                     errorMessage: {
                         type: String,
                         notify: true
-                    }
+                    },
                 },
 
                 observers: [
@@ -96,8 +96,6 @@
                             return d.effortEstimate;
                         });
 
-                        var numberFormat = d3.format('.1f');
-
                         chart
                             .dimension(chartDimension)
                             .group(chartGroup)
@@ -107,8 +105,8 @@
 
                                 var value = findInArray(data.values, function(v) {
                                     return v.type === d.key;
-                                })
-                                return d.key + ' (' + numberFormat(value.percent) + '%)';
+                                });
+                                return d.key + ' (' + dcUtils.percentFormat(value.percent) + '%)';
                             })
                             .title(function(d) {
                                 if (d.key === 'empty')
@@ -117,7 +115,10 @@
                                 return d.key + ': ' + d.value;
                             })
                             .legend(
-                                dc.legend().gap(8)
+                                dcUtils.getDefaultLegend()
+                            )
+                            .colors(
+                                self._getChartColors()
                             )
                             .turnOnControls(true);
 
@@ -137,6 +138,15 @@
                         dc.deregisterChart(this.chart);
                         this.set('chart', {});
                     }
+                },
+
+                _getChartColors: function() {
+                    var baselineBacklog = '#909',
+                        baselineDone = '#2ca02c',
+                        intangible = '#dc3912',
+                        newScope = '#1f77b4',
+                        rework = '#ff7f0e';
+                    return dcUtils.getChartColorsFromArray([baselineBacklog, baselineDone, intangible, newScope, rework]);
                 }
 
             });

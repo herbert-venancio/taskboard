@@ -78,8 +78,7 @@
                             if (req != null && req.status >= 400) {
                                 var msg = 'Impossible to generate Progress Chart. '+ req.responseText;
                                 self.set('errorMessage', msg);
-                                console.log(msg);
-                                if (self.ndx) 
+                                if (self.ndx)
                                     self.ndx.remove();
                                 return;
                             }
@@ -93,7 +92,7 @@
                                     })}
                             }
     
-                            var graphData = []
+                            var graphData = [];
                             data.actual.forEach(plotCallback("Actual"));
                             data.actualProjection.forEach(plotCallback("Projection"));
                             data.expected.forEach(plotCallback("Expected"));
@@ -115,13 +114,13 @@
     
                             var effortDoneByDayGroup = dateDimension.group().reduceSum(function(d) { 
                                 return d.value 
-                            })
+                            });
     
                             self.chart
                                 .x(d3.time.scale().domain([new Date(data.startingDate), new Date(data.endingDate)]))
                                 .dimension(dateDimension)
-                                .group(effortDoneByDayGroup)
-    
+                                .group(effortDoneByDayGroup);
+
                             self.chart.render();
                         })();
 
@@ -132,44 +131,56 @@
                 createChart: function() {
                     if (!_.isEmpty(this.chart))
                         return this.chart;
+
+                    self = this;
                     
                     var chart = dc.seriesChart(this.$$("#progress-chart"));
                     chart
+                        .chart(function(c) { return dc.lineChart(c).interpolate('monotone'); })
+                        //.interpolate('basis')
                         .brushOn(false)
                         .seriesAccessor(function(d) {return d.key[0];})
                         .keyAccessor(function(d) {return d.key[1];})
                         .title(function(d) {
-                            var numberFormat = d3.format('.2f');
-                            return d.key[1].toLocaleDateString() + " : " + numberFormat(d.value) + " %";}
+                            return d.key[1].toLocaleDateString() + " : " + dcUtils.percentFormat(d.value) + " %";}
                         )
                         .elasticY(false)
                         .yAxisLabel("Progress %")
                         .xAxisLabel("Timeline")
-                        .legend(dc
-                                .legend()
+                        .legend(dcUtils
+                                .getDefaultLegend()
                                 .x(100).y(20)
                                 .itemHeight(13)
                                 .itemWidth(90)
-                                .gap(8)
                                 .horizontal(1)
-                                .legendWidth(180));
+                                .legendWidth(180))
+                        .colors(
+                            self._getChartColors()
+                        );
 
                     chart.xAxis().tickFormat(function (v) {
-                        var dtFmt = d3.time.format("%b %y");
-                        return dtFmt(v);
-                    })
+                        return dcUtils.monthAndYearFormat(v);
+                    });
                     chart.xAxisPadding(50);
                     
                     chart.margins().left += 20;
                     chart.margins().bottom += 20;
                     chart.renderlet(function (chart) {
                            // rotate x-axis labels
-                           chart.selectAll('g.x text')
-                             .attr('transform', 'translate(-10,10) rotate(315)')
+                        chart.selectAll('g.x text')
+                            .attr('transform', 'translate(-10,10) rotate(315)');
                     });
                     
                     return chart;
-                }
+                },
+
+                _getChartColors: function() {
+                    var actual = '#2ca02c',
+                        projection = '#ff7f0e',
+                        expected = '#1f77b4';
+                    return dcUtils.getChartColorsFromArray([actual, expected, projection]);
+                },
+
             });
         })();
     </script>
