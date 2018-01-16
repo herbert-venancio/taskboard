@@ -76,25 +76,22 @@
                     this.loadCfdChart(selectedProjectKey);
                 },
                 
-                reduceCFDdata: function(cfdData) {
-                	var status = Object.keys(cfdData.dataByStatus).reverse();
-                    var graphData = {};
-                    // reducing the data here, grouping by date
+                groupByDate: function(cfdData) {
+                    var status = Object.keys(cfdData.dataByStatus).reverse();
+                    var graphData = [];
+                    // regroup based on date
                     status.forEach(function(stat) { 
                         cfdData.dataByStatus[stat].forEach(function(d) {
-                            d.date = new Date(d.date);
-                            if (!graphData[d.date])
-                                graphData[d.date] = {
-                                    date: d.date,
-                                    plotData: {}
-                                };
-                            if (!graphData[d.date].plotData[stat])
-                                graphData[d.date].plotData[stat]=0;
-                            graphData[d.date].plotData[stat] += d.count;
+                            graphData.push({
+                                date: new Date(d.date),
+                                status: stat,
+                                count: d.count,
+                                issueType: d.type
+                            });
                         })
                     });
-					// we don't need the keys, we want an array for crossfilter
-                    return Object.values(graphData);
+
+                    return graphData;
                 },
 
                 loadCfdChart: function(project) {
@@ -108,7 +105,7 @@
 
                         var status = Object.keys(cfdData.dataByStatus).reverse();
 
-                        self.cfdData = self.reduceCFDdata(cfdData);
+                        self.cfdData = self.groupByDate(cfdData);
                         var minDate = self.cfdData[0].date;
                         var maxDate = self.cfdData[self.cfdData.length-1].date;
                         
@@ -118,15 +115,26 @@
                             return d.date;
                         });
                         
+                        function compose(p, v, signal){
+                            if (!p.plotData)
+                                p.plotData = {}
+                            
+                            if (!p.plotData[v.status])
+                                p.plotData[v.status] = 0;
+                            
+                            p.plotData[v.status] += signal * v.count;
+                            return p; 
+                        }
+                        
                         self.cfdGroup = self.cfdDim.group()
                             .reduce(function(p, v) {
-                                    return v; // we just keep the original data, because we reduced before
+                                    return compose(p, v, 1) 
                                 },
                                 function(p, v) {
-                                    return v;
+                                    return compose(p, v, -1)
                                 },
                                 function() {
-                                    return {};
+                                    return {plotData:{}};
                                 }
                             );
                         
@@ -165,7 +173,7 @@
                         
                         // add the other stacks, one for each remaining status
                         status.forEach(function(stat) {
-                        	// stack the status data; stackAccessor(stat) generates a callback that tells dc how to read this stack data
+                            // stack the status data; stackAccessor(stat) generates a callback that tells dc how to read this stack data
                             self.chart.stack(self.cfdGroup, stat, stackAccessor(stat))
                         });
                             
