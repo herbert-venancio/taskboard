@@ -1,13 +1,12 @@
 package objective.taskboard.followup.data;
 
-import static objective.taskboard.utils.DateTimeUtils.toDate;
+import static objective.taskboard.utils.NumberUtils.linearInterpolation;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 import objective.taskboard.followup.EffortHistoryRow;
@@ -15,12 +14,7 @@ import objective.taskboard.followup.FollowUpDataSnapshot;
 import objective.taskboard.followup.FollowUpDataSnapshotHistory;
 
 public class FollowupProgressCalculator {
-    private ZoneId zone;
 
-    public FollowupProgressCalculator(ZoneId zone) {
-        this.zone = zone;
-    }
-    
     public ProgressData calculate(FollowUpDataSnapshot followupData, LocalDate projectDeliveryDate) {
         return calculate(followupData, projectDeliveryDate, 20);
     }
@@ -36,18 +30,19 @@ public class FollowupProgressCalculator {
             return progressData;
 
         addActualProgress(progressData, historyRows);
+        interpolateMissingDays(progressData);
 
         EffortHistoryRow firstRow = historyRows.get(0);
         EffortHistoryRow lastRow = historyRows.get(historyRows.size()-1);
-        
+
         LocalDate startingDate = firstRow.date;
         LocalDate finalProjectDate = projectDeliveryDate.isBefore(lastRow.date) ? lastRow.date : projectDeliveryDate;
         
         addExpectedProgress(progressData, startingDate, projectDeliveryDate, finalProjectDate);
         addProjectionData(progressData, historyRows, startingDate, finalProjectDate, projectionSampleSize);
         
-        progressData.startingDate = toDate(firstRow.date, zone);
-        progressData.endingDate = toDate(finalProjectDate, zone);
+        progressData.startingDate = firstRow.date;
+        progressData.endingDate = finalProjectDate;
         return progressData;
     }
 
@@ -67,13 +62,15 @@ public class FollowupProgressCalculator {
         LocalDateTime lastActualDate = lastRow.date.atStartOfDay();
         long countOfExistingDays = ChronoUnit.DAYS.between(firstActualDate, lastActualDate) + 1;
         double projectedProgress = lastRow.progress();
+        double total = lastRow.sumEffortDone + lastRow.sumEffortBacklog;
         progressData.actualProjection.add(progressData.actual.get(progressData.actual.size()-1));
         startingDateIt = firstRow.date.plusDays(countOfExistingDays);
         
         for (long i = countOfExistingDays; i <= totalDayCount; i++) {
-            projectedProgress += projectedProgressFactor;
-            Date date = toDate(startingDateIt, zone);
-            progressData.actualProjection.add(new ProgressDataPoint(date, projectedProgress));
+            projectedProgress = Math.min(1.0, projectedProgress + projectedProgressFactor);
+            double projectedActual = total * projectedProgress;
+            double projectedBacklog = total * (1 - projectedProgress);
+            progressData.actualProjection.add(new ProgressDataPoint(startingDateIt, projectedProgress, projectedActual, projectedBacklog));
             startingDateIt = startingDateIt.plus(Period.ofDays(1));
         }
     }
@@ -86,7 +83,7 @@ public class FollowupProgressCalculator {
         double dayNumber = 0;
         while(startingDateIt.isBefore(finalProjectDate) || startingDateIt.equals(finalProjectDate)) {
             double progress = Math.min(dayNumber/expectedProjectDuration, 1.0);
-            progressData.expected.add(new ProgressDataPoint(toDate(startingDateIt, zone), progress));
+            progressData.expected.add(new ProgressDataPoint(startingDateIt, progress));
             startingDateIt = startingDateIt.plus(Period.ofDays(1));
             dayNumber++;
         }
@@ -94,9 +91,39 @@ public class FollowupProgressCalculator {
 
     private void addActualProgress(ProgressData progressData, List<EffortHistoryRow> historyRows) {
         historyRows.stream().forEach(h -> {
-            Date date = Date.from(h.date.atStartOfDay().atZone(zone).toInstant());
-            progressData.actual.add(new ProgressDataPoint(date, h.progress()));
+            progressData.actual.add(new ProgressDataPoint(h.date, h.progress(), h.sumEffortDone, h.sumEffortBacklog));
         });
+    }
+
+    private void interpolateMissingDays(ProgressData progressData) {
+        List<ProgressDataPoint> original = progressData.actual;
+        List<ProgressDataPoint> interpolated = new ArrayList<>();
+
+        interpolated.add(original.get(0));
+
+        for (int i = 1; i < original.size(); ++i) {
+            ProgressDataPoint lower = original.get(i - 1);
+            ProgressDataPoint upper = original.get(i);
+            LocalDate lowerDate = lower.date;
+            LocalDate upperDate = upper.date;
+
+            long days = ChronoUnit.DAYS.between(lowerDate, upperDate);
+            if(days > 1) {
+                for(int day = 1; day < days; ++day) {
+                    LocalDate date = lowerDate.plus(day, ChronoUnit.DAYS);
+
+                    double factor = day / (double) days;
+                    double interpolatedProgress = linearInterpolation(lower.progress, upper.progress, factor);
+                    double interpolatedSumEffortDone = linearInterpolation(lower.sumEffortDone, upper.sumEffortDone, factor);
+                    double interpolatedSumEffortBacklog = linearInterpolation(lower.sumEffortBacklog, upper.sumEffortBacklog, factor);
+
+                    interpolated.add(new ProgressDataPoint(date, interpolatedProgress, interpolatedSumEffortDone, interpolatedSumEffortBacklog));
+                }
+            }
+            interpolated.add(upper);
+        }
+
+        progressData.actual = interpolated;
     }
 
     private List<EffortHistoryRow> getSortedHistory(FollowUpDataSnapshotHistory effortHistory) {

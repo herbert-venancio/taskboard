@@ -1,7 +1,7 @@
 package objective.taskboard.domain;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDate;
 
 /*-
  * [LICENSE]
@@ -50,7 +50,7 @@ public class ProjectFilterConfiguration implements Serializable {
     private String projectKey;
     
     @Column
-    private Date deliveryDate;
+    private LocalDate deliveryDate;
 
     public String getProjectKey() {
         return projectKey;
@@ -60,8 +60,12 @@ public class ProjectFilterConfiguration implements Serializable {
         this.projectKey = projectKey;
     }
     
-    public Date getDeliveryDate() {
+    public LocalDate getDeliveryDate() {
         return deliveryDate;
+    }
+
+    public void setDeliveryDate(LocalDate deliveryDate) {
+        this.deliveryDate = deliveryDate;
     }
 
     @OneToMany(fetch=FetchType.EAGER)

@@ -7,31 +7,22 @@ import java.util.Date;
 
 public class DateTimeUtilSupport {
     public static Date date(int year, int month, int date) {
-        return new Date(ZonedDateTime.of(year, month, date, 0, 0, 0, 0, ZoneId.systemDefault()).toInstant().toEpochMilli());
+        return date(year, month, date, ZoneId.systemDefault());
     }
     
     public static Date date(int year, int month, int date, ZoneId zone) {
-        return new Date(ZonedDateTime.of(year, month, date, 0, 0, 0, 0, zone).toInstant().toEpochMilli());
+        return date(year, month, date, 0, 0, zone);
     }
     
     public static Date date(int year, int month, int date, int hour, int min) {
-        return new Date(ZonedDateTime.of(year, month, date, hour, min, 0, 0, ZoneId.systemDefault()).toInstant().toEpochMilli());
+        return date(year, month, date, hour, min, ZoneId.systemDefault());
     }
-    
-    
-    public static LocalDate localDate(int year, int month, int date) {
-        return ZonedDateTime.of(year, month, date, 0, 0, 0, 0, ZoneId.systemDefault()).toLocalDate();
-    }
-    
-    public static LocalDate localDate(int year, int month, int date, ZoneId zone) {
-        return ZonedDateTime.of(year, month, date, 0, 0, 0, 0, zone).toLocalDate();
+
+    public static Date date(int year, int month, int date, int hour, int min, ZoneId zone) {
+        return Date.from(ZonedDateTime.of(year, month, date, hour, min, 0, 0, zone).toInstant());
     }
     
     public static Date date(LocalDate d, ZoneId zone) {
         return Date.from(d.atStartOfDay().atZone(zone).toInstant());
-    }
-    
-    public static LocalDate localDate(Date date, ZoneId zone) {
-        return date.toInstant().atZone(zone).toLocalDate();
     }
 }

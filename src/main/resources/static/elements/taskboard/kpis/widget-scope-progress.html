@@ -25,9 +25,9 @@
         <style>
         </style>
 
-        <widget-wrap title="Scope Progress" is-ready="{{isReady}}">
+        <widget-wrap title="Scope Progress" is-ready="{{isReady}}" error-message="{{errorMessage}}" chart="{{chart}}">
 
-            CONTENT HERE
+            <div id="scope-progress" class="tb-chart"></div>
 
         </widget-wrap>
 
@@ -35,6 +35,17 @@
 
     <script>
         (function () {
+            var DONE_INDEX = 0;
+            var BACKLOG_INDEX = 1;
+            var DONE_PROJECTION_INDEX = 2;
+            var BACKLOG_PROJECTION_INDEX = 3;
+            var LAYERS = ["Done", "Backlog", "Done Projection", "Backlog Projection"];
+            var INDICES = {
+                "Done": DONE_INDEX
+                , "Backlog": BACKLOG_INDEX
+                , "Done Projection": DONE_PROJECTION_INDEX
+                , "Backlog Projection": BACKLOG_PROJECTION_INDEX};
+
             Polymer({
                 is: 'widget-scope-progress',
 
@@ -53,6 +64,15 @@
                         notify: true,
                         value: false
                     },
+                    errorMessage: {
+                        type: String,
+                        notify: true
+                    },
+                    chart: {
+                        type: Object,
+                        readOnly: true,
+                        notify: true
+                    }
                 },
 
                 observers: [
@@ -63,10 +83,167 @@
                 },
 
                 _onProjectSelected: function(selectedProjectKey, selectedDate) {
-                    console.log(selectedProjectKey);
-                    console.log(selectedDate);
+                    this.reset();
+
+                    var self = this;
+                    this.xhr = d3.json("/api/projects/"+selectedProjectKey+"/followup/progress?timezone=" + taskboard.getTimeZoneIdFromBrowser(), function(error, data) {
+                        if(self.handleError(error, data))
+                            return;
+
+                        self.setData(data);
+                        self.createChart();
+                        self.updateChart();
+
+                        self.set('isReady', true);
+                    });
                 },
 
+                reset: function() {
+                    this.set('isReady', false);
+                    this.set('errorMessage', '');
+                    if(this.xhr) {
+                        this.xhr.abort();
+                        this.xhr = null;
+                    }
+                    if(this.chart) {
+                        dc.deregisterChart(this.chart);
+                        this._setChart(null);
+                    }
+                },
+
+                handleError: function(error, data) {
+                    if(error) {
+                        this.set('errorMessage', error.responseText);
+                        return true;
+                    }
+
+                    if(!data.actual.length && !data.actualProjection.length && !data.expected.length) {
+                        this.set('errorMessage', 'Scope Progress has no data');
+                        return true;
+                    }
+
+                    return false;
+                },
+
+                setData: function(data) {
+                    var self = this;
+
+                    this.chartData = {
+                        types: ["Actual", "Projection"]
+                        , dateRange: [new Date(data.startingDate), new Date(data.endingDate)]
+                        , data: []
+                    };
+
+                    // remove first element of projection, since it repeats last actual element
+                    data.actualProjection.shift();
+
+                    var series = [data.actual, data.actualProjection];
+                    for(var i = 0; i < series.length; ++i) {
+                        series[i].forEach(function(d, index) {
+                            self.chartData.data.push({
+                                type         : i,
+                                date         : new Date(d.date),
+                                value        : d.progress * 100,
+                                sumDone      : d.sumEffortDone,
+                                sumBacklog   : d.sumEffortBacklog
+                            })
+                        });
+                    }
+
+                    this.ndx = crossfilter(this.chartData.data);
+                    this.dimension = this.ndx.dimension(function(d) {
+                        return d.date;
+                    });
+
+                    function fAdd(p, d) {
+                        if(d.type == 0) {
+                            p[DONE_INDEX] += d.sumDone;
+                            p[BACKLOG_INDEX] += d.sumBacklog;
+                        } else {
+                            p[DONE_PROJECTION_INDEX] += d.sumDone;
+                            p[BACKLOG_PROJECTION_INDEX] += d.sumBacklog;
+                        }
+                        return p;
+                    }
+                    function fRemove(p, d) {
+                        if(d.type == 0) {
+                            p[DONE_INDEX] -= d.sumDone;
+                            p[BACKLOG_INDEX] -= d.sumBacklog;
+                        } else {
+                            p[DONE_PROJECTION_INDEX] -= d.sumDone;
+                            p[BACKLOG_PROJECTION_INDEX] -= d.sumBacklog;
+                        }
+                        return p;
+                    }
+                    function fInit() {
+                        return [0, 0, 0, 0];
+                    }
+                    this.group = this.dimension.group().reduce(fAdd, fRemove, fInit);
+                },
+
+                createChart: function() {
+                    if(this.chart)
+                        return;
+
+                    var chart = dc.barChart("#scope-progress");
+
+                    // chart configuration
+                    chart
+                        .margins({top: 10, right: 0, bottom: 50, left: 50})
+                        .legend(dcUtils
+                                .getDefaultLegend()
+                                .x(80).y(10)
+                                .itemHeight(13)
+                                .itemWidth(90)
+                                .horizontal(true)
+                                .legendWidth(180)
+                        )
+                        .colors(
+                            dcUtils.getDefaultColors()
+                        )
+                        .renderlet(function (chart) {
+                            // rotate x-axis labels
+                            chart.selectAll('g.x text')
+                                .attr('transform', 'translate(-10,10) rotate(315)')
+                        });
+
+                    // axis
+                    chart
+                        .xAxisLabel("Timeline")
+                        .yAxisLabel("Effort (hours)")
+                        .xAxisPadding(50)
+                        .elasticY(true)       // y axis will adjust to the data
+                        .xAxis().tickFormat(function (v) {
+                            return dcUtils.monthAndYearFormat(v);
+                        });
+
+                    // mouse interaction
+                    chart
+                        .brushOn(false)       // don't select with drag-n-drop
+                        .title(function(d) {  // popup text on mouse over data points
+                            return this.layer + ": " + dcUtils.percentFormat(d.value[INDICES[this.layer]]) + " h (" + d.key.toLocaleDateString() + ")";
+                        });
+
+                    this._setChart(chart);
+                },
+
+                updateChart: function() {
+                    function selectStack(index) {
+                        return function(d) {
+                            return d.value[index];
+                        }
+                    }
+
+                    this.chart
+                        .x(d3.time.scale().domain(this.chartData.dateRange))
+                        .dimension(this.dimension)
+                        .group(this.group, LAYERS[DONE_INDEX], selectStack(DONE_INDEX))
+                        .stack(this.group, LAYERS[DONE_PROJECTION_INDEX], selectStack(DONE_PROJECTION_INDEX))
+                        .stack(this.group, LAYERS[BACKLOG_INDEX], selectStack(BACKLOG_INDEX))
+                        .stack(this.group, LAYERS[BACKLOG_PROJECTION_INDEX], selectStack(BACKLOG_PROJECTION_INDEX));
+
+                    this.chart.render();
+                },
             });
         })();
     </script>

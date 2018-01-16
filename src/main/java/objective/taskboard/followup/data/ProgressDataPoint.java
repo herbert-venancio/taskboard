@@ -1,16 +1,29 @@
 package objective.taskboard.followup.data;
 
-import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import objective.taskboard.utils.NumberUtils;
 
+import java.time.LocalDate;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProgressDataPoint {
-    public Date date;
-    public double progress;
-    
-    public ProgressDataPoint(){}
-    
-    public ProgressDataPoint(Date date, double progress) {
+    public final LocalDate date;
+    public final double progress;
+    @JsonSerialize(using = NumberUtils.FormattedNumberSerializer.class)
+    public final Double sumEffortDone;
+    @JsonSerialize(using = NumberUtils.FormattedNumberSerializer.class)
+    public final Double sumEffortBacklog;
+
+    public ProgressDataPoint(LocalDate date, double progress) {
+        this(date, progress, null, null);
+    }
+
+    public ProgressDataPoint(LocalDate date, double progress, Double sumEffortDone, Double sumEffortBacklog) {
         this.date = date;
         this.progress = progress;
+        this.sumEffortDone = sumEffortDone;
+        this.sumEffortBacklog = sumEffortBacklog;
     }
     
     @Override
