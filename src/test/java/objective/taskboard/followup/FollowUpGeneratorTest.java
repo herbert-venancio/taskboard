@@ -56,6 +56,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.core.io.Resource;
 
 import objective.taskboard.followup.FromJiraRowCalculator.FromJiraRowCalculation;
+import objective.taskboard.followup.cluster.FollowUpClusterItem;
+import objective.taskboard.followup.data.Template;
 import objective.taskboard.spreadsheet.Sheet;
 import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor;
 import objective.taskboard.spreadsheet.SimpleSpreadsheetEditorMock;
@@ -334,6 +336,77 @@ public class FollowUpGeneratorTest {
                 "Spreadsheet Close\n";
 
         assertEquals(expectedEditorLogger, editor.loggerString());
+    }
+
+    @Test
+    public void givenFollowUpClusterItems_whenGenerateTShirtSizeSheet_thenSheetShouldContainsItems() throws IOException {
+        Template template = Mockito.mock(Template.class);
+
+        List<FollowUpClusterItem> clusterItems = asList(
+            new FollowUpClusterItem(template, "Alpha Bug", "notused", "L", 12.0, 14.4),
+            new FollowUpClusterItem(template, "Alpha Test", "notused", "M", 6.0, 7.2),
+            new FollowUpClusterItem(template, "UAT", "notused", "S", 4.0, 4.8));
+
+        when(followupCluster.getClusterItems()).thenReturn(clusterItems);
+
+        subject = new FollowUpGenerator(provider, editor, followupCluster);
+
+        subject.getEditor().open();
+        subject.generateTShirtSizeSheet();
+        subject.getEditor().close();
+
+        String expectedEditorLogger =
+                "Spreadsheet Open\n" +
+                "Sheet Create: T-shirt Size\n" +
+                "Sheet \"T-shirt Size\" Row Create: 1\n" +
+                "Sheet \"T-shirt Size\" Row \"1\" AddColumn \"A1\": Cluster Name\n" +
+                "Sheet \"T-shirt Size\" Row \"1\" AddColumn \"B1\": T-Shirt Size\n" +
+                "Sheet \"T-shirt Size\" Row \"1\" AddColumn \"C1\": Type\n" +
+                "Sheet \"T-shirt Size\" Row \"1\" AddColumn \"D1\": Effort\n" +
+                "Sheet \"T-shirt Size\" Row \"1\" AddColumn \"E1\": Cycle\n" +
+                "Sheet \"T-shirt Size\" Row \"1\" Save\n" +
+                "Sheet \"T-shirt Size\" Row Create: 2\n" +
+                "Sheet \"T-shirt Size\" Row \"2\" AddColumn \"A2\": Alpha Bug\n" +
+                "Sheet \"T-shirt Size\" Row \"2\" AddColumn \"B2\": L\n" +
+                "Sheet \"T-shirt Size\" Row \"2\" AddColumn \"C2\": Hours\n" +
+                "Sheet \"T-shirt Size\" Row \"2\" AddColumn \"D2\": 12.0\n" +
+                "Sheet \"T-shirt Size\" Row \"2\" AddColumn \"E2\": 14.4\n" +
+                "Sheet \"T-shirt Size\" Row \"2\" Save\n" +
+                "Sheet \"T-shirt Size\" Row Create: 3\n" +
+                "Sheet \"T-shirt Size\" Row \"3\" AddColumn \"A3\": Alpha Test\n" +
+                "Sheet \"T-shirt Size\" Row \"3\" AddColumn \"B3\": M\n" +
+                "Sheet \"T-shirt Size\" Row \"3\" AddColumn \"C3\": Hours\n" +
+                "Sheet \"T-shirt Size\" Row \"3\" AddColumn \"D3\": 6.0\n" +
+                "Sheet \"T-shirt Size\" Row \"3\" AddColumn \"E3\": 7.2\n" +
+                "Sheet \"T-shirt Size\" Row \"3\" Save\n" +
+                "Sheet \"T-shirt Size\" Row Create: 4\n" +
+                "Sheet \"T-shirt Size\" Row \"4\" AddColumn \"A4\": UAT\n" +
+                "Sheet \"T-shirt Size\" Row \"4\" AddColumn \"B4\": S\n" +
+                "Sheet \"T-shirt Size\" Row \"4\" AddColumn \"C4\": Hours\n" +
+                "Sheet \"T-shirt Size\" Row \"4\" AddColumn \"D4\": 4.0\n" +
+                "Sheet \"T-shirt Size\" Row \"4\" AddColumn \"E4\": 4.8\n" +
+                "Sheet \"T-shirt Size\" Row \"4\" Save\n" +
+                "Sheet \"T-shirt Size\" Save\n" +
+                "Spreadsheet Close\n";
+
+        assertEquals("T-shirt Size Sheet", expectedEditorLogger, editor.loggerString());
+    }
+
+    @Test
+    public void givenNoFollowUpClusterItems_whenGenerateTShirtSize_thenShouldNotGenerateSheet() throws IOException {
+        when(followupCluster.getClusterItems()).thenReturn(emptyList());
+
+        subject = new FollowUpGenerator(provider, editor, followupCluster);
+
+        subject.getEditor().open();
+        subject.generateTShirtSizeSheet();
+        subject.getEditor().close();
+
+        String expectedEditorLogger =
+                "Spreadsheet Open\n" +
+                "Spreadsheet Close\n";
+
+        assertEquals("T-shirt Size Sheet", expectedEditorLogger, editor.loggerString());
     }
 
     private FollowUpDataSnapshot followUpDataEntry(LocalDate data, List<FromJiraDataRow> rows) {

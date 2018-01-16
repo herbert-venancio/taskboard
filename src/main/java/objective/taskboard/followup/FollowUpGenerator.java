@@ -35,6 +35,7 @@ import java.util.Optional;
 
 import org.springframework.core.io.Resource;
 
+import objective.taskboard.followup.cluster.FollowUpClusterItem;
 import objective.taskboard.spreadsheet.Sheet;
 import objective.taskboard.spreadsheet.SheetRow;
 import objective.taskboard.spreadsheet.SpreadsheetEditor;
@@ -63,6 +64,7 @@ public class FollowUpGenerator {
             generateFromJiraSheet(followupData);
             generateTransitionsSheets(followupData);
             generateEffortHistory(followupDataEntry, timezone);
+            generateTShirtSizeSheet();
 
             return IOUtilities.asResource(editor.toBytes());
         } catch (Exception e) {
@@ -341,6 +343,34 @@ public class FollowUpGenerator {
             row.save();
         }
         
+        sheet.save();
+    }
+
+    void generateTShirtSizeSheet() {
+        if (followupCluster == null || followupCluster.getClusterItems().isEmpty())
+            return;
+
+        Sheet sheet = editor.getOrCreateSheet("T-shirt Size");
+        sheet.truncate(0);
+
+        SheetRow rowHeader = sheet.createRow();
+        rowHeader.addColumn("Cluster Name");
+        rowHeader.addColumn("T-Shirt Size");
+        rowHeader.addColumn("Type");
+        rowHeader.addColumn("Effort");
+        rowHeader.addColumn("Cycle");
+        rowHeader.save();
+
+        for (FollowUpClusterItem cluster : followupCluster.getClusterItems()) {
+            SheetRow row = sheet.createRow();
+            row.addColumn(cluster.getSubtaskTypeName());
+            row.addColumn(cluster.getSizing());
+            row.addColumn("Hours");
+            row.addColumn(cluster.getEffort());
+            row.addColumn(cluster.getCycle());
+            row.save();
+        }
+
         sheet.save();
     }
 
