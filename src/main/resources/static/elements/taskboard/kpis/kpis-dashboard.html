@@ -115,9 +115,7 @@
                 Widgets
             */
             .kpis__widgets {
-                /*
                 display: flex;
-                */
                 flex-wrap: wrap;
 
                 height: calc(100vh - 104px);
@@ -127,7 +125,6 @@
 
             .kpis__widget {
                 flex: 0 0 auto;
-                float: left;
                 width: calc(33.3333% - 16px);
                 min-height: 300px;
                 max-height: 450px;
@@ -142,20 +139,20 @@
                 display: initial;
             }
 
+            .kpis__widget--1-2 {
+                width: calc(50% - 16px);
+            }
+
             .kpis__widget--2-3 {
                 width: calc(66.6666% - 16px);
             }
 
             .kpis__widget--height-full {
                 height: calc(100% - 16px);
-                min-height: calc(100% - 16px);
-                max-height: calc(100% - 16px);
             }
 
             .kpis__widget--height-half {
                 height: calc(50% - 16px);
-                min-height: calc(50% - 16px);
-                max-height: calc(50% - 16px);
             }
         </style>
 
@@ -222,16 +219,10 @@
 
                     <section class="kpis__widgets">
 
-                        <widget-cfd class="kpis__widget kpis__widget--2-3 kpis__widget--height-full"
+                        <widget-cfd class="kpis__widget kpis__widget--2-3 kpis__widget--height-half"
                                 selected-project-key="{{selectedProjectKey}}"
                                 selected-date="{{selectedDate}}"
                                 ></widget-cfd>
-
-                        <widget-progress-chart class="kpis__widget kpis__widget--height-half"
-                                data-category="tactical"
-                                selected-project-key="{{selectedProjectKey}}"
-                                selected-date="{{selectedDate}}"
-                                ></widget-progress-chart>
 
                         <widget-scope-by-type class="kpis__widget kpis__widget--height-half"
                                 data-category="tactical"
@@ -239,13 +230,19 @@
                                 selected-date="{{selectedDate}}"
                                 ></widget-scope-by-type>
 
-                        <widget-scope-progress class="kpis__widget"
+                        <widget-progress-chart class="kpis__widget kpis__widget--height-half kpis__widget--1-2"
+                                data-category="tactical"
+                                selected-project-key="{{selectedProjectKey}}"
+                                selected-date="{{selectedDate}}"
+                                ></widget-progress-chart>
+
+                        <widget-scope-progress class="kpis__widget kpis__widget--height-half kpis__widget--1-2"
                                 data-category="tactical"
                                 selected-project-key="{{selectedProjectKey}}"
                                 selected-date="{{selectedDate}}"
                                 ></widget-scope-progress>
 
-                        <widget-planned-x-ballpark class="kpis__widget kpis__widget--height-full"
+                        <widget-planned-x-ballpark class="kpis__widget kpis__widget--height-half"
                                 data-category="operational"
                                 selected-project-key="{{selectedProjectKey}}"
                                 selected-date="{{selectedDate}}"

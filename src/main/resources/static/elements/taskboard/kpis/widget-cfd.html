@@ -23,9 +23,6 @@
     <template>
 
         <style>
-            #cfd {
-                max-height: 420px;
-            }
         </style>
 
         <widget-wrap title="CFD" is-ready="{{isReady}}" chart="{{chart}}" error-message="{{errorMessage}}">
@@ -206,7 +203,7 @@
 
                     // basic chart configuration
                     chart
-                        .margins({top: 0, right: 0, bottom: 60, left: 200})
+                        .margins({top: 20, right: 20, bottom: 60, left: 200})
                         .legend(
                             dcUtils.getDefaultLegend()
                         )
@@ -222,11 +219,7 @@
                                 return dcUtils.dateFormat(v);
                             });
 
-                    chart.renderlet(function (chart) {
-                        // rotate x-axis labels
-                        chart.selectAll('g.x text')
-                            .attr('transform', 'translate(-10,20) rotate(315)');
-                    });
+                    dcUtils.rotateDateFormattedXAxis(chart);
 
                     this.set('chart', chart);
                 }

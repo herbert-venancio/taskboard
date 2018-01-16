@@ -156,7 +156,7 @@
                     });
 
                     function fAdd(p, d) {
-                        if(d.type == 0) {
+                        if(d.type === 0) {
                             p[DONE_INDEX] += d.sumDone;
                             p[BACKLOG_INDEX] += d.sumBacklog;
                         } else {
@@ -166,7 +166,7 @@
                         return p;
                     }
                     function fRemove(p, d) {
-                        if(d.type == 0) {
+                        if(d.type === 0) {
                             p[DONE_INDEX] -= d.sumDone;
                             p[BACKLOG_INDEX] -= d.sumBacklog;
                         } else {
@@ -185,36 +185,35 @@
                     if(this.chart)
                         return;
 
+                    var self = this;
+
                     var chart = dc.barChart("#scope-progress");
 
                     // chart configuration
                     chart
-                        .margins({top: 10, right: 0, bottom: 50, left: 50})
+                        .margins({top: 20, right: 20, bottom: 60, left: 50})
                         .legend(dcUtils
                                 .getDefaultLegend()
-                                .x(80).y(10)
+                                .x(95).y(20)
                                 .itemHeight(13)
                                 .itemWidth(90)
                                 .horizontal(true)
                                 .legendWidth(180)
                         )
                         .colors(
-                            dcUtils.getDefaultColors()
-                        )
-                        .renderlet(function (chart) {
-                            // rotate x-axis labels
-                            chart.selectAll('g.x text')
-                                .attr('transform', 'translate(-10,10) rotate(315)')
-                        });
+                            self._getChartColors()
+                        );
+
+                    dcUtils.rotateDateFormattedXAxis(chart);
 
                     // axis
                     chart
-                        .xAxisLabel("Timeline")
+                        //.xAxisLabel("Timeline")
                         .yAxisLabel("Effort (hours)")
                         .xAxisPadding(50)
                         .elasticY(true)       // y axis will adjust to the data
                         .xAxis().tickFormat(function (v) {
-                            return dcUtils.monthAndYearFormat(v);
+                            return dcUtils.dateFormat(v);
                         });
 
                     // mouse interaction
@@ -244,6 +243,16 @@
 
                     this.chart.render();
                 },
+
+                _getChartColors: function() {
+                    return dcUtils.getChartColorsFromArray([
+                        dcUtils.colors.DONE,
+                        dcUtils.colors.DONE_PROJECTION,
+                        dcUtils.colors.BACKLOG,
+                        dcUtils.colors.BACKLOG_PROJECTION
+                    ]);
+                },
+
             });
         })();
     </script>

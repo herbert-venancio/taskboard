@@ -137,7 +137,6 @@
                     var chart = dc.seriesChart(this.$$("#progress-chart"));
                     chart
                         .chart(function(c) { return dc.lineChart(c).interpolate('monotone'); })
-                        //.interpolate('basis')
                         .brushOn(false)
                         .seriesAccessor(function(d) {return d.key[0];})
                         .keyAccessor(function(d) {return d.key[1];})
@@ -146,10 +145,10 @@
                         )
                         .elasticY(false)
                         .yAxisLabel("Progress %")
-                        .xAxisLabel("Timeline")
+                        //.xAxisLabel("Timeline")
                         .legend(dcUtils
                                 .getDefaultLegend()
-                                .x(100).y(20)
+                                .x(80).y(20)
                                 .itemHeight(13)
                                 .itemWidth(90)
                                 .horizontal(1)
@@ -159,24 +158,19 @@
                         );
 
                     chart.xAxis().tickFormat(function (v) {
-                        return dcUtils.monthAndYearFormat(v);
+                        return dcUtils.dateFormat(v);
                     });
                     chart.xAxisPadding(50);
-                    
-                    chart.margins().left += 20;
-                    chart.margins().bottom += 20;
-                    chart.renderlet(function (chart) {
-                           // rotate x-axis labels
-                        chart.selectAll('g.x text')
-                            .attr('transform', 'translate(-10,10) rotate(315)');
-                    });
-                    
+                    chart.margins({top: 20, right: 20, bottom: 60, left: 50});
+
+                    dcUtils.rotateDateFormattedXAxis(chart);
+
                     return chart;
                 },
 
                 _getChartColors: function() {
-                    var actual = '#2ca02c',
-                        projection = '#ff7f0e',
+                    var actual = dcUtils.colors.DONE,
+                        projection = dcUtils.colors.DONE_PROJECTION,
                         expected = '#1f77b4';
                     return dcUtils.getChartColorsFromArray([actual, expected, projection]);
                 },
