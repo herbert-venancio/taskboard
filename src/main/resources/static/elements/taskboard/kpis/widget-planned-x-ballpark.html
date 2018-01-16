@@ -118,22 +118,25 @@
                         var plannedXBallparkGroup = plannedXBallparkDimension.group().reduceSum(function(d){ return d.totalEffort;});
                         var all = plannedXBallparkDimension.groupAll().reduceSum(function(d){return d.totalEffort;});
 
-                        var numberFormat = d3.format('.1f');
-
                         chart
                             .dimension(plannedXBallparkDimension)
                             .group(plannedXBallparkGroup)
                             .label(function(data) {
                                 var label = data.key;
                                 if(all.value()) {
-                                    label += ' (' + numberFormat(data.value / all.value() * 100) + '%)';
+                                    label += ' (' + dcUtils.percentFormat(data.value / all.value() * 100) + '%)';
                                 }
                                 return label;
                             })
                             .title(function(data) {
                                 return "Total Effort for " + data.key + ": " + data.value + " of " + all.value();
                             })
-                            .legend(dc.legend().gap(8));
+                            .legend(
+                                dcUtils.getDefaultLegend()
+                            )
+                            .colors(
+                                dcUtils.getDefaultColors()
+                            );
 
                         chart.render();
 
@@ -144,7 +147,6 @@
                 },
 
                 _handleError: function(error) {
-                    console.log(error);
                     this.set('errorMessage', 'Impossible to generate Planned x Ballpark. '+ error.responseText);
                 },
 
