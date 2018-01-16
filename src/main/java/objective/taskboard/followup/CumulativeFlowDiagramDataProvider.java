@@ -1,19 +1,14 @@
 package objective.taskboard.followup;
 
-import objective.taskboard.followup.impl.FollowUpDataProviderFromCurrentState;
-import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-import java.time.ZonedDateTime;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-
-import static java.util.stream.Collectors.toList;
+import objective.taskboard.followup.impl.FollowUpDataProviderFromCurrentState;
+import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 
 @Component
 public class CumulativeFlowDiagramDataProvider {
@@ -50,56 +45,27 @@ public class CumulativeFlowDiagramDataProvider {
     }
 
     private CumulativeFlowDiagramDataSet transform(FollowupData followupData, Lane selectedLane) {
-        Set<String> lanes = new LinkedHashSet<>();
-        Set<String> types = new LinkedHashSet<>();
-        Set<String> labels = new LinkedHashSet<>();
-        Set<ZonedDateTime> dates = new TreeSet<>();
-
-        for (int i = 0; i < followupData.syntheticsTransitionsDsList.size(); ++i) {
-            if(!selectedLane.includeLane(i))
-                continue;
-            SyntheticTransitionsDataSet ds = followupData.syntheticsTransitionsDsList.get(i);
-            lanes.add(ds.issueType);
-            int initial = ds.getInitialIndexStatusHeaders();
-            for (int headerIndex = ds.headers.size() - 1; headerIndex >= initial; --headerIndex) {
-                labels.add(ds.headers.get(headerIndex));
-            }
-            for (SyntheticTransitionsDataRow row : ds.rows) {
-                types.add(row.issueType);
-                dates.add(row.date);
-            }
-        }
-
-        List<String> laneList = new LinkedList<>(lanes);
-        List<String> typeList = new LinkedList<>(types);
-        List<String> labelList = new LinkedList<>(labels);
-        List<ZonedDateTime> dateList = new LinkedList<>(dates);
-        List<CumulativeFlowDiagramDataPoint> data = new LinkedList<>();
+        LinkedHashMap<String, List<CumulativeFlowDiagramDataPoint>> dataByStatus = new LinkedHashMap<>();
 
         for (int i = 0; i < followupData.syntheticsTransitionsDsList.size(); ++i) {
             if(!selectedLane.includeLane(i))
                 continue;
             SyntheticTransitionsDataSet ds = followupData.syntheticsTransitionsDsList.get(i);
             int initial = ds.getInitialIndexStatusHeaders();
-            int lane = laneList.indexOf(ds.issueType);
+            
             for (SyntheticTransitionsDataRow row : ds.rows) {
-                int type = typeList.indexOf(row.issueType);
-                int index = dateList.indexOf(row.date);
-
                 for (int rowIndex = row.amountOfIssueInStatus.size() - 1; rowIndex >= 0; --rowIndex) {
-                    int label = labelList.indexOf(ds.headers.get(rowIndex + initial));
+                    String status = ds.headers.get(rowIndex + initial);
+                    if (!dataByStatus.containsKey(status))
+                        dataByStatus.put(status, new LinkedList<CumulativeFlowDiagramDataPoint>());
+                    
                     int count = sum(row.amountOfIssueInStatus, 0, rowIndex);
-                    data.add(new CumulativeFlowDiagramDataPoint(lane, type, label, index, count));
+                    dataByStatus.get(status).add(new CumulativeFlowDiagramDataPoint(row.issueType, row.date, count));
                 }
             }
         }
 
-        return new CumulativeFlowDiagramDataSet(
-                laneList
-                , typeList
-                , labelList
-                , dateList.stream().map(zdt -> Date.from(zdt.toInstant())).collect(toList())
-                , data);
+        return new CumulativeFlowDiagramDataSet(dataByStatus);
     }
 
     private boolean belongsToAnyProject(String projectKey) {
