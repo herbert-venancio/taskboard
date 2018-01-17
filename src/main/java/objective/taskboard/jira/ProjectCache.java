@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -45,7 +47,7 @@ import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 
 @Component
-class ProjectCache {
+public class ProjectCache {
 
     @Autowired
     private ProjectFilterConfigurationCachedRepository projectFilterConfiguration;
@@ -95,5 +97,30 @@ class ProjectCache {
                 return null;
             throw e;
         }
+    }
+
+    @Cacheable(cacheNames=CacheConfiguration.ALL_PROJECTS_ROLES)
+    public Map<String, List<JiraProject.Role>> getAllProjectsRoles() {
+        JiraProject.Service projectService = jiraEndpointAsMaster.request(JiraProject.Service.class);
+        return getAllProjects()
+                .stream()
+                .collect(toMap(
+                        project -> project.key
+                        , project -> getProjectRoles(projectService, project.key)));
+    }
+
+    private static List<JiraProject.Role> getProjectRoles(JiraProject.Service projectService, String projectId) {
+        Pattern roleUrlRegex = Pattern.compile(".+/(\\d+)/role/(\\d+)$");
+        return projectService
+                .getRoles(projectId)
+                .values()
+                .stream()
+                .map(uri -> roleUrlRegex.matcher(uri.toString()))
+                .filter(Matcher::matches)
+                .map(m -> {
+                    String roleId = m.group(2);
+                    return projectService.getRole(projectId, roleId);
+                })
+                .collect(toList());
     }
 }

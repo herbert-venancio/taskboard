@@ -31,12 +31,12 @@ import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 import objective.taskboard.data.User;
+import objective.taskboard.data.converter.JiraUserToUserConverter;
 import objective.taskboard.jira.data.JiraIssue;
 import objective.taskboard.jira.data.JiraUser;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -82,7 +82,7 @@ public class JiraService {
     private JiraEndpointAsMaster jiraEndpointAsMaster;
 
     @Autowired
-    private Converter<JiraUser, User> userConverter;
+    private JiraUserToUserConverter userConverter;
 
     public void authenticate(String username, String password) {
         log.debug("⬣⬣⬣⬣⬣  authenticate");

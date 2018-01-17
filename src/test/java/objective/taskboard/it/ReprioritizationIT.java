@@ -73,7 +73,7 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
         createAndSwitchToNewTab();
         
         MainPage secondTabPage = MainPage.to(webDriver);
-        secondTabPage.waitUserLabelToBe("foo");
+        secondTabPage.waitUserLabelToBe("Foo");
         secondTabPage.errorToast().close();
         
         LaneFragment operationalInSecondTab = secondTabPage.lane("Operational");

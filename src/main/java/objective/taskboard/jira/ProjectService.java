@@ -23,8 +23,10 @@ package objective.taskboard.jira;
 
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +37,7 @@ import com.atlassian.jira.rest.client.api.GetCreateIssueMetadataOptionsBuilder;
 import com.atlassian.jira.rest.client.api.domain.CimProject;
 
 import objective.taskboard.domain.Project;
+import objective.taskboard.jira.data.JiraProject;
 import objective.taskboard.jira.data.Version;
 import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
 
@@ -85,5 +88,21 @@ public class ProjectService {
                 .filter(version -> versionId.equals(version.id))
                 .findFirst()
                 .orElse(null);
+    }
+
+    public Map<String, List<JiraProject.Role>> getUserRoles(String username) {
+        Map<String, List<JiraProject.Role>> allProjectRoles = projectCache.getAllProjectsRoles();
+        return allProjectRoles.entrySet()
+                .stream()
+                .peek(entry ->
+                        entry.setValue(
+                                entry.getValue()
+                                        .stream()
+                                        .filter(p -> p.actors.stream().anyMatch(actor -> username.equals(actor.name)))
+                                        .collect(toList())
+                        )
+                )
+                .filter(entry -> !entry.getValue().isEmpty())
+                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

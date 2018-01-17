@@ -21,6 +21,7 @@
 package objective.taskboard.testUtils;
 
 import static java.util.Collections.singletonMap;
+import static org.apache.commons.lang3.StringUtils.capitalize;
 import static spark.Service.ignite;
 
 import java.time.Instant;
@@ -349,6 +350,46 @@ public class JiraMockServer {
             return loadMockData("status-categories.json");
         });
 
+        get("/rest/api/latest/project/:projectId/role", (req, res) -> {
+            final String projectId = req.params("projectId");
+            if("11315".equals(projectId) || "TASKB".equals(projectId)) {
+                return loadMockData("project_TASKB_roles.response.json");
+            } else {
+                return "{}";
+            }
+        });
+
+        get("rest/api/latest/project/:projectId/role/:roleId", (req, res) -> {
+            final String projectId = req.params("projectId");
+            if(!"11315".equals(projectId) && !"TASKB".equals(projectId)) {
+                res.status(404);
+                return unknownProject(projectId);
+            }
+
+            final int roleId = Integer.parseInt(req.params(":roleId"));
+            String mockData;
+            switch(roleId) {
+                case 10200:
+                    mockData = loadMockData("project_TASKB_role_customer.response.json");
+                    break;
+                case 10100:
+                    mockData = loadMockData("project_TASKB_role_developers.response.json");
+                    break;
+                case 10209:
+                    mockData = loadMockData("project_TASKB_role_reviewer.response.json");
+                    break;
+                default:
+                    res.status(404);
+                    return unknownRole();
+            }
+            if(username != null) {
+                mockData = mockData
+                        .replace("\"name\": \"foo\"", "\"name\": \"" + username + "\"")
+                        .replace("\"displayName\": \"Foo\"", "\"displayName\": \"" + capitalize(username) + "\"");
+            }
+            return mockData;
+        });
+
         post("/rest/webhooks/1.0/webhook", "application/json", (req,res) -> {
             WebHookConfiguration webhook = gson.fromJson(req.body(), WebHookConfiguration.class);
             return webhookRegistration(webhook);
@@ -507,6 +548,24 @@ public class JiraMockServer {
     private static String environment() {
         return "objective-jira-teste";
     }
+
+    private static String unknownProject(String projectId) {
+        return errorMessage("No project could be found with key '" + projectId + "'.");
+    }
+
+    private static String unknownRole() {
+        return errorMessage(
+                "We don't seem to be able to find the role you're trying to use. Check it still exists and try again."
+                , "The user does not have the JIRA Administrator permission, or is not running Enterprise and does not have the Project admin permission."
+        );
+    }
+
+    private static String errorMessage(String... messages) {
+        for(int i = 0; i < messages.length; ++i) {
+            messages[i] = "\"" + messages[i] + "\"";
+        }
+        return "{\"errorMessages\":[" + String.join(",", messages) + "],\"errors\":{}}";
+    }
     
     private static void loadMap() {
         long startAt = 0;
@@ -645,7 +704,10 @@ public class JiraMockServer {
 
     private String loaduser(String username) {
         String loadMockData = loadMockData("user.response.json");
-        loadMockData = loadMockData.replace("\"displayName\": \"Taskboard\",", "\"displayName\": \"" + username + "\",");
+        loadMockData = loadMockData
+                .replace("\"key\": \"taskboard\"", "\"key\": \"" + username + "\"")
+                .replace("\"name\": \"taskboard\"", "\"name\": \"" + username + "\"")
+                .replace("\"displayName\": \"Taskboard\",", "\"displayName\": \"" + capitalize(username) + "\",");
         return loadMockData;
     }
 

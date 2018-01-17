@@ -1,0 +1,5 @@
+{
+  "Customer": "http://localhost:4567/rest/api/latest/project/11315/role/10200",
+  "Reviewer": "http://localhost:4567/rest/api/latest/project/11315/role/10209",
+  "Developers": "http://localhost:4567/rest/api/latest/project/11315/role/10100"
+}

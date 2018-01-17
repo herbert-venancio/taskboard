@@ -66,7 +66,7 @@ public class MainPage extends AbstractUiFragment {
 
     public MainPage reload() {
         webDriver.navigate().refresh();
-        waitUserLabelToBe("foo");
+        waitUserLabelToBe("Foo");
         return this;
     }
 

@@ -1,0 +1,22 @@
+{
+  "self": "http://localhost:4567/rest/api/latest/project/11315/role/10209",
+  "name": "Reviewer",
+  "id": 10209,
+  "description": "A project role that represents users with code review responsibilities",
+  "actors": [
+    {
+      "id": 10280,
+      "displayName": "Graham Reviewer",
+      "type": "atlassian-user-role-actor",
+      "name": "graham.reviewer",
+      "avatarUrl": "http://localhost:4567/secure/useravatar?size=xsmall&avatarId=10122"
+    },
+    {
+      "id": 10000,
+      "displayName": "Foo",
+      "type": "atlassian-user-role-actor",
+      "name": "foo",
+      "avatarUrl": "http://localhost:4567/secure/useravatar?size=xsmall&avatarId=10122"
+    }
+  ]
+}

@@ -9,7 +9,6 @@ import static org.mockito.Mockito.mock;
 
 import java.util.List;
 
-import objective.taskboard.jira.data.JiraUser;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,6 +25,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import objective.taskboard.jira.data.JiraIssue;
 import objective.taskboard.jira.data.JiraProject;
+import objective.taskboard.jira.data.JiraUser;
 import objective.taskboard.jira.data.Status;
 import objective.taskboard.jira.data.StatusCategory;
 import objective.taskboard.jira.endpoint.AuthorizedJiraEndpoint;
@@ -151,6 +151,6 @@ public class AuthorizedJiraEndpointTest {
         JiraUser user = service.get("taskboard");
 
         assertThat(user.name, is("taskboard"));
-        assertThat(user.displayName, is("taskboard"));
+        assertThat(user.displayName, is("Taskboard"));
     }
 }
