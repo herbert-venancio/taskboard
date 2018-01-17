@@ -59,7 +59,7 @@ public class CumulativeFlowDiagramDataProvider {
                     if (!dataByStatus.containsKey(status))
                         dataByStatus.put(status, new LinkedList<CumulativeFlowDiagramDataPoint>());
                     
-                    int count = sum(row.amountOfIssueInStatus, 0, rowIndex);
+                    int count = row.amountOfIssueInStatus.get(rowIndex);
                     dataByStatus.get(status).add(new CumulativeFlowDiagramDataPoint(row.issueType, row.date, count));
                 }
             }
@@ -70,13 +70,5 @@ public class CumulativeFlowDiagramDataProvider {
 
     private boolean belongsToAnyProject(String projectKey) {
         return projectRepository.exists(projectKey);
-    }
-
-    private static int sum(List<Integer> amountOfIssueInStatus, int start, int end) {
-        int sum = 0;
-        for(int i = start; i <= end; ++i) {
-            sum += amountOfIssueInStatus.get(i);
-        }
-        return sum;
     }
 }
