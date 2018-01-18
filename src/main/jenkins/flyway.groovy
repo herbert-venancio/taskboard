@@ -1,3 +1,5 @@
+import java.util.concurrent.TimeUnit
+
 void testMariaDBMigration() {
     def flyway = new Flyway(this)
     try {
@@ -57,10 +59,9 @@ class Flyway implements Serializable {
     }
 
     void destroyContainer() {
-        script.sh(script: """
-            sudo docker stop $CONTAINER_ID
-            sudo docker rm -f $CONTAINER_ID
-        """, returnStatus: false)
+        def dockerStop = script.sh(script: "sudo docker stop $CONTAINER_ID", returnStatus: true)
+        def dockerRm = script.sh(script: "sudo docker rm -f $CONTAINER_ID", returnStatus: true)
+        script.echo "'docker stop' exit code: $dockerStop, 'docker rm' exit code: $dockerRm"
     }
 
     void testMysqlFlywayInstall() {
@@ -121,7 +122,13 @@ class Flyway implements Serializable {
     }
 
     private initOracle() {
-        script.sh "sudo docker exec -i $CONTAINER_ID bash -c 'echo \"CREATE USER taskboard IDENTIFIED BY taskboard;\" | /opt/oracle/product/11.2.0/dbhome_1/bin/sqlplus system/oracle@localhost:1521/orcl'"
+        try {
+            script.timeout(10, TimeUnit.SECONDS) {
+                script.sh "sudo docker exec $CONTAINER_ID bash -c 'echo \"CREATE USER taskboard IDENTIFIED BY taskboard;\" | /opt/oracle/product/11.2.0/dbhome_1/bin/sqlplus system/oracle@localhost:1521/orcl'"
+            }
+        } catch (ex) {
+            // ignore
+        }
     }
 }
 
