@@ -22,5 +22,10 @@ public class FollowupClusterImpl implements FollowupCluster {
     private static boolean matchingCluster(FollowUpClusterItem clusterItem, String subtaskType, String tshirtSize) {
         return clusterItem.getSubtaskTypeName().equals(subtaskType)
                 && clusterItem.getSizing().equals(tshirtSize);
+    }
+
+    @Override
+    public List<FollowUpClusterItem> getClusterItems() {
+        return clusterItems;
     }    
 }
