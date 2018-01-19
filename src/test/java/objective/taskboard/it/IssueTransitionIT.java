@@ -20,8 +20,6 @@
  */
 package objective.taskboard.it;
 
-import static java.lang.Thread.sleep;
-
 import org.junit.Test;
 
 import objective.taskboard.RequestBuilder;
@@ -155,7 +153,7 @@ public class IssueTransitionIT extends AuthenticatedIntegrationTest {
         IssueErrorToast issueErrorToast = mainPage.issueErrorToast();
 
         IssueDetails issueDetails = issueErrorToast.
-            assertVisible().
+            assertOpened().
             clickOpen(1);
 
         issueDetails
@@ -163,7 +161,7 @@ public class IssueTransitionIT extends AuthenticatedIntegrationTest {
             .closeError()
             .closeDialog();
 
-        issueErrorToast.assertNotVisible();
+        issueErrorToast.assertClosed();
         issue.assertHasError(false);
 
     }
@@ -190,7 +188,6 @@ public class IssueTransitionIT extends AuthenticatedIntegrationTest {
             .header("Content-Type", "application/json")
             .body(body)
             .post();
-        sleep(3000);
 
         mainPage.refreshToast().assertNotVisible();
         issue.assertCardColor("rgb(254, 229, 188)");

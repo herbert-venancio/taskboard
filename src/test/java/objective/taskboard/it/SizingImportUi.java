@@ -47,7 +47,7 @@ public class SizingImportUi extends AbstractUiFragment {
     }
 
     private SizingImportUi open() {
-        buttonOpenSizing.click();
+        waitForClick(buttonOpenSizing);
         waitVisibilityOfElement(sizing);
         return this;
     }
@@ -138,15 +138,15 @@ public class SizingImportUi extends AbstractUiFragment {
         }
 
         public void cancel() {
-            buttonCancel.click();
+            waitForClick(buttonCancel);
         }
 
         public void backStep() {
-            buttonBack.click();
+            waitForClick(buttonBack);
         }
 
         public void submitStep() {
-            buttonSubmit.click();
+            waitForClick(buttonSubmit);
         }
     }
 
@@ -175,11 +175,11 @@ public class SizingImportUi extends AbstractUiFragment {
         }
 
         protected void cancel() {
-            buttonCancel.click();
+            waitForClick(buttonCancel);
         }
 
         public void submitStep() {
-            buttonSubmit.click();
+            waitForClick(buttonSubmit);
         }
     }
 
@@ -232,7 +232,7 @@ public class SizingImportUi extends AbstractUiFragment {
         }
 
         public SizingStepTwo openAdvancedMapping() {
-            buttonAdvancedMapping.click();
+            waitForClick(buttonAdvancedMapping);
             WebElement advancedMapping = webDriver.findElement(By.cssSelector("#sizingimport .sizing__advanced-mapping"));
             waitVisibilityOfElement(advancedMapping);
             return this;
@@ -264,7 +264,7 @@ public class SizingImportUi extends AbstractUiFragment {
         }
 
         public void returnToTaskboard() {
-            buttonReturnToTaskboard.click();
+            waitForClick(buttonReturnToTaskboard);
         }
     }
 }

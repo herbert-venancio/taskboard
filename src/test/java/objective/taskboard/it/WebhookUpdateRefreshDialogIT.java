@@ -20,8 +20,6 @@
  */
 package objective.taskboard.it;
 
-import static java.lang.Thread.sleep;
-
 import org.junit.Test;
 
 import objective.taskboard.RequestBuilder;
@@ -85,7 +83,6 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
             .assertVisibleIssues("TASKB-611", "TASKB-612", "TASKB-613", "TASKB-610", "TASKB-614");
 
         emulateUpdateIssue("TASKB-625", "{\"status\":{\"id\": \"10652\",\"name\": \"Doing\"}}");
-        sleep(3000);
 
         mainPage.refreshToast().assertNotVisible();
         mainPage.typeSearch("TASKB-625");
@@ -105,7 +102,6 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
             .enableHierarchicalFilter();
 
         emulateUpdateIssue("TASKB-606", "{\"status\":{\"id\": \"10655\",\"name\": \"Deferred\"}}");
-        sleep(3000);
 
         mainPage.errorToast().close();
         mainPage.refreshToast().assertNotVisible();
@@ -119,6 +115,7 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
     @Test
     public void givenIssuesWithChildren_whenParentChangeTheClassOfService_thenAllChildrenShouldUpdate() throws InterruptedException {
         MainPage mainPage = MainPage.produce(webDriver);
+
         mainPage.issue("TASKB-606").assertCardColor(STANDARD_COLOR).click().issueDetails()
             .assertClassOfService("Standard").assertColor(STANDARD_COLOR)
             .closeDialog();
@@ -136,11 +133,14 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
             .closeDialog();
 
         emulateUpdateIssue("TASKB-606", "{\"customfield_11440\":{\"id\": \"12607\",\"value\": \"Fixed Date\"}}");
-        sleep(2000);
 
         mainPage.errorToast().close();
+
+        String[] updatedIssues = {"TASKB-606", "TASKB-186", "TASKB-235", "TASKB-601", "TASKB-572"};
+        mainPage.assertUpdatedIssues(updatedIssues);
         mainPage.refreshToast().assertVisible().toggleShowHide();
-        mainPage.assertVisibleIssues("TASKB-606", "TASKB-186", "TASKB-235", "TASKB-601", "TASKB-572");
+        mainPage.assertVisibleIssues(updatedIssues);
+
         mainPage.issue("TASKB-606").assertCardColor(FIXED_DATE_COLOR).click().issueDetails()
             .assertClassOfService("Fixed Date").assertColor(FIXED_DATE_COLOR)
             .closeDialog();

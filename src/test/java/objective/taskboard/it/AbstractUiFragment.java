@@ -1,10 +1,3 @@
-package objective.taskboard.it;
-
-import static org.openqa.selenium.support.ui.ExpectedConditions.not;
-import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
-import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOf;
-import static org.openqa.selenium.support.ui.ExpectedConditions.attributeContains;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -26,13 +19,23 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.attributeContain
  * [/LICENSE]
  */
 
+package objective.taskboard.it;
+
+import static org.openqa.selenium.support.ui.ExpectedConditions.attributeContains;
+import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
+import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
+import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOf;
+import static org.openqa.selenium.support.ui.ExpectedConditions.not;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElement;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 
 import java.util.List;
 import java.util.function.Function;
 
+import org.apache.commons.lang.ObjectUtils;
 import org.openqa.selenium.By;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
@@ -52,14 +55,6 @@ public abstract class AbstractUiFragment {
     protected void waitTextInElement(WebElement element, String expected) {
         waitVisibilityOfElement(element);
         waitUntil(textToBePresentInElement(element, expected));
-    }
-
-    protected void waitPaperDropdownMenuSelectedValueToBe(WebElement element, String expected) {
-        waitVisibilityOfElement(element);
-        waitUntil(ExpectedConditions.or(
-                textToBePresentInElement(element, expected)
-                , attributeToBe(element.findElement(By.cssSelector("#labelAndInputContainer input")), "value", expected)
-        ));
     }
 
     protected void waitAttributeValueInElement(WebElement element, String attribute, String expected) {
@@ -88,8 +83,12 @@ public abstract class AbstractUiFragment {
 
     protected void waitVisibilityOfElements(WebElement... elements) {
         for (int i = 0; i < elements.length; ++i) {
-    	    waitVisibilityOfElement(elements[i]);
-    	}  
+            waitVisibilityOfElement(elements[i]);
+        }
+    }
+
+    protected void waitVisibilityOfElementList(List<WebElement> elementList) {
+        waitUntil(visibilityOfAllElements(elementList));
     }
 
     protected void waitInvisibilityOfElement(WebElement element) {
@@ -116,12 +115,65 @@ public abstract class AbstractUiFragment {
 
     protected WebElement getElementWhenItExists(By by) {
         waitUntilElementExists(by);
-    	return webDriver.findElement(by);
+        return webDriver.findElement(by);
     }
 
     protected List<WebElement> getElementsWhenTheyExists(By by) {
         waitUntilElementExists(by);
-    	return webDriver.findElements(by);
+        return webDriver.findElements(by);
+    }
+
+    protected void waitForClick(WebElement element) {
+        waitVisibilityOfElement(element);
+        waitUntil(elementToBeClickable(element));
+        element.click();
+    }
+
+    protected void waitPaperDropdownMenuSelectedValueToBe(WebElement element, String expected) {
+        waitVisibilityOfElement(element);
+        waitUntil(ExpectedConditions.or(
+                textToBePresentInElement(element, expected)
+                , attributeToBe(element.findElement(By.cssSelector("#labelAndInputContainer input")), "value", expected)
+        ));
+    }
+
+    protected void waitPaperDropdownMenuContains(WebElement dropDownMenu, String expected) {
+        waitUntil(new ExpectedCondition<Boolean>() {
+            @Override
+            public Boolean apply(WebDriver driver) {
+                try {
+                    return dropDownMenu.findElements(By.tagName("paper-item")).stream()
+                            .filter(paperItem -> expected.equals(paperItem.getAttribute("textContent").trim()))
+                            .findFirst().isPresent();
+                } catch (StaleElementReferenceException e) {
+                    return null;
+                }
+            }
+
+            @Override
+            public String toString() {
+                return String.format("Release filter contains ('%s')", expected);
+            }
+        });
+    }
+
+    protected WebElement getPaperDropdownMenuItemByValue(WebElement dropDownMenu, String itemValue) {
+        WebElement menuItem = dropDownMenu.findElements(By.tagName("paper-item")).stream()
+                .filter(paperItem -> ObjectUtils.equals(itemValue, paperItem.getAttribute("value")))
+                .findFirst().orElse(null);
+
+        if (menuItem == null)
+            throw new IllegalArgumentException("Element \"" + itemValue + "\" not found");
+
+        return menuItem;
+    }
+
+    protected void waitPaperDropdownMenuItemIsSelected(WebElement dropDownMenuItem, Boolean selected) {
+        waitUntil(attributeToBe(dropDownMenuItem, "aria-selected", String.valueOf(selected)));
+    }
+
+    protected void waitUntilPaperCheckboxSelectionStateToBe(WebElement element, Boolean selected) {
+        waitUntil(attributeToBe(element, "aria-checked", String.valueOf(selected)));
     }
 
 }

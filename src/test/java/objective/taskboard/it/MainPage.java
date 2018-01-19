@@ -21,23 +21,22 @@
 package objective.taskboard.it;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
-import static org.apache.commons.lang3.StringUtils.join;
-import static org.junit.Assert.assertEquals;
+import static org.openqa.selenium.By.className;
+import static org.openqa.selenium.By.cssSelector;
+import static org.openqa.selenium.By.tagName;
 import static org.openqa.selenium.support.PageFactory.initElements;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementValue;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class MainPage extends AbstractUiFragment {
     @FindBy(css=".nameButton.user-account")
@@ -51,20 +50,20 @@ public class MainPage extends AbstractUiFragment {
 
     @FindBy(css = ".menuLink")
     private WebElement menuFiltersButton;
-    
+
     public MainPage(WebDriver webDriver) {
         super(webDriver);
     }
-    
+
     public static MainPage produce(WebDriver webDriver) {
         return initElements(webDriver, MainPage.class);
     }
-    
+
     public static MainPage to(WebDriver webDriver) {
         webDriver.get(AbstractUIIntegrationTest.getSiteBase()+"/");
         return initElements(webDriver, MainPage.class);
     }
-    
+
     public MainPage reload() {
         webDriver.navigate().refresh();
         waitUserLabelToBe("foo");
@@ -74,7 +73,7 @@ public class MainPage extends AbstractUiFragment {
     public void waitUserLabelToBe(String expected) {
         waitTextInElement(userLabelButton, expected);
     }
-    
+
     public MainPage typeSearch(String searchValue) {
         searchIssuesInput.sendKeys(Keys.CONTROL,"a");
         searchIssuesInput.sendKeys(Keys.DELETE);
@@ -82,7 +81,7 @@ public class MainPage extends AbstractUiFragment {
         waitUntil(textToBePresentInElementValue(searchIssuesInput, searchValue));
         return this;
     }
-    
+
     public MainPage clearSearch() {
         searchIssuesInput.sendKeys(Keys.CONTROL,"a");
         searchIssuesInput.sendKeys(Keys.DELETE);
@@ -91,8 +90,7 @@ public class MainPage extends AbstractUiFragment {
     }
 
     public MenuFilters openMenuFilters() {
-        waitVisibilityOfElement(menuFiltersButton);
-        menuFiltersButton.click();
+        waitForClick(menuFiltersButton);
         return initElements(webDriver, MenuFilters.class);
     }
 
@@ -100,41 +98,26 @@ public class MainPage extends AbstractUiFragment {
         String releaseNotNull = defaultIfNull(release, "");
 
         waitVisibilityOfElement(searchReleaseDropdown);
-        waitUntil(new ExpectedCondition<Boolean>() {
-            @Override
-            public Boolean apply(WebDriver driver) {
-                try {
-                    return driver.findElements(By.tagName("paper-item")).stream()
-                            .filter(paperItem -> releaseNotNull.equals(paperItem.getAttribute("textContent").trim()))
-                            .findFirst().isPresent();
-                } catch (StaleElementReferenceException e) {
-                    return null;
-                }
-            }
+        waitUntilElementExists(cssSelector("#searchRelease paper-item"));
+        waitPaperDropdownMenuContains(searchReleaseDropdown, releaseNotNull);
 
-            @Override
-            public String toString() {
-                return String.format("Release filter contains ('%s')", releaseNotNull);
-            }
-        });
         return this;
     }
 
     public MainPage filterByRelease(String release) {
         String releaseNotNull = release == null ? "" : release;
 
-        waitVisibilityOfElement(searchReleaseDropdown);
-        searchReleaseDropdown.click();
+        waitForClick(searchReleaseDropdown);
+        waitUntilElementExists(cssSelector("#searchRelease paper-item"));
 
-        WebElement releaseElement = searchReleaseDropdown.findElements(By.tagName("paper-item")).stream()
+        WebElement releaseElement = searchReleaseDropdown.findElements(tagName("paper-item")).stream()
             .filter(paperItem -> releaseNotNull.equals(paperItem.getText()))
             .findFirst().orElse(null);
 
         if (releaseElement == null)
             throw new IllegalArgumentException("Element \"" + releaseNotNull + "\" of Release filter not found");
 
-        waitVisibilityOfElement(releaseElement);
-        releaseElement.click();
+        waitForClick(releaseElement);
         return this;
     }
 
@@ -143,22 +126,18 @@ public class MainPage extends AbstractUiFragment {
         return this;
     }
 
-    public MainPage assertVisibleIssues(String ... expectedIssueKeyList) {
-        try {
-            waitUntil(ExpectedConditions.numberOfElementsToBe(By.cssSelector("paper-material.issue"), expectedIssueKeyList.length));
-        }catch(TimeoutException te) {
-            // let the assert show the differences
-        }
-        List<WebElement> findElements = webDriver.findElements(By.cssSelector("paper-material.issue"));
-        ArrayList<String> actualIssueKeyList = new ArrayList<String>(); 
-        for (WebElement webElement : findElements) 
-            actualIssueKeyList.add( webElement.findElement(By.cssSelector(".key.issue-item")).getText().trim());
-        assertEquals(join(expectedIssueKeyList,"\n"), join(actualIssueKeyList,"\n"));
+    public MainPage assertUpdatedIssues(String ... expectedIssueKeyList) {
+        assertIssues(cssSelector("paper-material.issue.issue-UPDATED"), expectedIssueKeyList);
+        return this;
+    }
+
+    public MainPage assertVisibleIssues(String... expectedIssueKeyList) {
+        assertIssues(cssSelector("paper-material.issue"), expectedIssueKeyList);
         return this;
     }
 
     public TestIssue issue(String issueKey) {
-        return TestIssue.forKey(webDriver, issueKey);
+        return new TestIssue(webDriver, issueKey);
     }
 
     public RefreshToast refreshToast() {
@@ -190,14 +169,37 @@ public class MainPage extends AbstractUiFragment {
     }
 
     public void assertOkIcon() {
-        waitVisibilityOfElement(webDriver.findElement(By.className("issue-state-ready")));
+        waitVisibilityOfElement(webDriver.findElement(className("issue-state-ready")));
     }
-    
+
     public SizingImportUi openSizingImport() {
         return SizingImportUi.open(webDriver);
     }
 
     public void assertStatusIconIsInitialisationError() {
-        waitVisibilityOfElement(webDriver.findElement(By.className("issue-state-initialisationError")));
+        waitVisibilityOfElement(webDriver.findElement(className("issue-state-initialisationError")));
+    }
+
+    private void assertIssues(By by, String... expectedIssueKeyList) {
+        waitUntil(new ExpectedCondition<Boolean>() {
+            private String[] actualIssueKeyList;
+            @Override
+            public Boolean apply(WebDriver driver) {
+                try {
+                    actualIssueKeyList = driver.findElements(by).stream()
+                        .map(i -> i.findElement(cssSelector(".key.issue-item")).getText().trim())
+                        .toArray(String[]::new);
+                    return Arrays.equals(expectedIssueKeyList, actualIssueKeyList);
+                } catch (StaleElementReferenceException e) {
+                    return null;
+                }
+            }
+            @Override
+            public String toString() {
+                return String.format("issue key list to be \"%s\". Current issue key list: \"%s\"",
+                        StringUtils.join(expectedIssueKeyList, ","),
+                        StringUtils.join(actualIssueKeyList, ","));
+            }
+        });
     }
 }

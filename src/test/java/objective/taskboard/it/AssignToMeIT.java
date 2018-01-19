@@ -28,13 +28,14 @@ public class AssignToMeIT extends AuthenticatedIntegrationTest {
     public void whenAssignToMeIsClicked_ShouldUpdateIssueImmediatlyWithAssignedUser(){
         MainPage mainPage = MainPage.produce(webDriver);
         mainPage.errorToast().close();
-        mainPage.issue("TASKB-625")
+        TestIssue issue = mainPage.issue("TASKB-625");
+        issue
             .click()
             .issueDetails()
             .assignToMe()
             .assertAssigneeIs("foo")
             .closeDialog();
-        
-        mainPage.issue("TASKB-625").assertHasFirstAssignee();
+
+        issue.assertHasFirstAssignee();
     }
 }

@@ -37,15 +37,13 @@ class IssueDetails extends AbstractUiFragment {
     public IssueDetails assignToMe() {
         assertIsOpened();
         WebElement assignButton = issueDetailRoot.findElement(By.id("assignButton"));
-        waitVisibilityOfElement(assignButton);
-        assignButton.click();
+        waitForClick(assignButton);
         return this;
     }
 
     public IssueDetails assertAssigneeIs(String name) {
         assertIsOpened();
-        waitUntilElementExists(By.className("assignee"));
-        WebElement assigneeElement = issueDetailRoot.findElement(By.className("assignee"));
+        WebElement assigneeElement = getElementWhenItExists(By.className("assignee"));
         waitTextInElement(assigneeElement, name);
         return this;
     }
@@ -59,8 +57,7 @@ class IssueDetails extends AbstractUiFragment {
         assertIsOpened();
         waitUntilElementExists(By.cssSelector("[data-transition-name='"+transitionName+"']"));
         WebElement transitionButton = issueDetailRoot.findElement(By.cssSelector("[data-transition-name='"+transitionName+"']"));
-        waitVisibilityOfElement(transitionButton);
-        transitionButton.click();
+        waitForClick(transitionButton);
         return this;
     }
 
@@ -68,14 +65,15 @@ class IssueDetails extends AbstractUiFragment {
         WebElement confirmationModal = webDriver.findElement(By.id("confirmModal"));
         waitVisibilityOfElement(confirmationModal);
         WebElement confirmButton = confirmationModal.findElement(By.id("confirm"));
-        waitVisibilityOfElement(confirmButton);
-        confirmButton.click();
+        waitForClick(confirmButton);
+        assertIsClosed();
         return this;
     }
 
     public IssueDetails closeDialog() {
         assertIsOpened();
-        issueDetailRoot.findElement(By.className("buttonClose")).click();
+        WebElement close = issueDetailRoot.findElement(By.className("buttonClose"));
+        waitForClick(close);
         assertIsClosed();
         return this;
     }
@@ -88,8 +86,7 @@ class IssueDetails extends AbstractUiFragment {
 
     public IssueDetails clickOnWarning() {
         WebElement glasspane = webDriver.findElement(By.className("glasspane"));
-        waitVisibilityOfElement(glasspane);
-        glasspane.click();
+        waitForClick(glasspane);
         return this;
     }
 
@@ -114,7 +111,8 @@ class IssueDetails extends AbstractUiFragment {
 
     public IssueDetails closeError() {
         WebElement error = getElementWhenItExists(By.className("message-box--error"));
-        error.findElement(By.className("message-box__close")).click();
+        WebElement closeError = error.findElement(By.className("message-box__close"));
+        waitForClick(closeError);
         waitInvisibilityOfElement(error);
         return this;
     }

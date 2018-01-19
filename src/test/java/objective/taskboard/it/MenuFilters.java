@@ -43,8 +43,7 @@ public class MenuFilters extends AbstractUiFragment {
     }
 
     public MenuFilters openAspectsFilter() {
-        waitVisibilityOfElement(aspectsFilterButton);
-        aspectsFilterButton.click();
+        waitForClick(aspectsFilterButton);
         return this;
     }
 
@@ -57,8 +56,7 @@ public class MenuFilters extends AbstractUiFragment {
         if (checkAll == null)
             throw new IllegalArgumentException("Element \"checkAll\" of " + filterName + " filter  not found");
 
-        waitVisibilityOfElement(checkAll);
-        checkAll.click();
+        waitForClick(checkAll);
         return this;
     }
 
@@ -70,8 +68,7 @@ public class MenuFilters extends AbstractUiFragment {
         if (aspectItemFilter == null)
             throw new IllegalArgumentException(filterName + " filter  not found");
 
-        waitVisibilityOfElement(aspectItemFilter);
-        aspectItemFilter.click();
+        waitForClick(aspectItemFilter);
 
         WebElement aspectSubitemFilter = aspectSubitemFilters.stream()
             .filter(subitem -> subitemFilterName.equals(subitem.getText()))
@@ -80,14 +77,13 @@ public class MenuFilters extends AbstractUiFragment {
         if (aspectSubitemFilter == null)
             throw new IllegalArgumentException(subitemFilterName + " filter  not found");
 
-        waitVisibilityOfElement(aspectSubitemFilter);
-        aspectSubitemFilter.click();
+        waitForClick(aspectSubitemFilter);
         return this;
     }
 
     public void closeMenuFilters() {
         WebElement title = webDriver.findElement(By.className("title"));
-        title.click();
+        waitForClick(title);
         waitInvisibilityOfElement(aspectsFilterButton);
     }
 }
