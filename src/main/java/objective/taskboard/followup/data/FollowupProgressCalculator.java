@@ -12,6 +12,7 @@ import java.util.List;
 import objective.taskboard.followup.EffortHistoryRow;
 import objective.taskboard.followup.FollowUpDataSnapshot;
 import objective.taskboard.followup.FollowUpDataSnapshotHistory;
+import objective.taskboard.utils.NumberUtils;
 
 public class FollowupProgressCalculator {
 
@@ -58,6 +59,7 @@ public class FollowupProgressCalculator {
         EffortHistoryRow firstRow = historyRows.get(0);
         EffortHistoryRow lastRow = historyRows.get(historyRows.size()-1);        
         double projectedProgressFactor = calculateProgressFactor(historyRows, progressSampleSize);
+        NumberUtils.LineModel backlogProjection = calculateBacklogProjection(historyRows, progressSampleSize);
         LocalDateTime firstActualDate = firstRow.date.atStartOfDay();
         LocalDateTime lastActualDate = lastRow.date.atStartOfDay();
         long countOfExistingDays = ChronoUnit.DAYS.between(firstActualDate, lastActualDate) + 1;
@@ -69,7 +71,7 @@ public class FollowupProgressCalculator {
         for (long i = countOfExistingDays; i <= totalDayCount; i++) {
             projectedProgress = Math.min(1.0, projectedProgress + projectedProgressFactor);
             double projectedActual = total * projectedProgress;
-            double projectedBacklog = total * (1 - projectedProgress);
+            double projectedBacklog = Math.max(0.0, backlogProjection.y(i));
             progressData.actualProjection.add(new ProgressDataPoint(startingDateIt, projectedProgress, projectedActual, projectedBacklog));
             startingDateIt = startingDateIt.plus(Period.ofDays(1));
         }
@@ -145,5 +147,19 @@ public class FollowupProgressCalculator {
         }
         projectedProgressFactor = projectedProgressFactor / (samplesToUseForProjection.size()-1);
         return projectedProgressFactor;
+    }
+
+    private NumberUtils.LineModel calculateBacklogProjection(List<EffortHistoryRow> historyRows, int progressSampleSize) {
+        LocalDate firstDay = historyRows.get(0).date;
+        int length = Math.min(progressSampleSize, historyRows.size());
+        List<EffortHistoryRow> sampledRows = historyRows.subList(historyRows.size() - length, historyRows.size());
+        NumberUtils.Point2D[] samples = new NumberUtils.Point2D[length];
+        for (int i = 0; i < length; ++i) {
+            EffortHistoryRow row = sampledRows.get(i);
+            double x = ChronoUnit.DAYS.between(firstDay, row.date);
+            double y = row.sumEffortBacklog;
+            samples[i] = new NumberUtils.Point2D(x, y);
+        }
+        return NumberUtils.linearRegression(samples);
     }
 }
