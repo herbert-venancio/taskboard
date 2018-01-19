@@ -37,6 +37,7 @@ public class TemplateFollowupDialog extends AbstractUiFragment {
     private WebElement newTemplateItem;
     private WebElement createButton;
     private WebElement templateNameInput;
+    private WebElement templateFileLabel;
     private WebElement templateFileInput;
     private List<WebElement> projectsCheckbox;
     
@@ -58,18 +59,23 @@ public class TemplateFollowupDialog extends AbstractUiFragment {
     }
     
     private TemplateFollowupDialog open() {
-        teplateFollowupButton.click();
-        waitVisibilityOfElement(dialog);
+        waitForClick(teplateFollowupButton);
+
         newTemplateItem = dialog.findElement(By.id("newTemplateItem"));
         createButton = dialog.findElement(By.id("createTemplate"));
         templateNameInput = dialog.findElement(By.id("templateNameInputl"));
+        templateFileLabel = dialog.findElement(By.cssSelector("label[for=inputTemplate]"));
         projectsCheckbox = dialog.findElements(By.cssSelector("paper-checkbox"));
-        templateFileInput = dialog.findElement(By.id("inputTemplate"));
+        waitVisibilityOfElements(newTemplateItem, createButton, templateNameInput, templateFileLabel);
+        waitVisibilityOfElementList(projectsCheckbox);
+
+        templateFileInput = dialog.findElement(By.id("inputTemplate")); // isInvisible
         return this;
     }
     
     public TemplateFollowupDialog close() {
-        dialog.findElement(By.cssSelector(".button-close")).click();
+        WebElement close = dialog.findElement(By.cssSelector(".button-close"));
+        waitForClick(close);
         return this;
     }
 
@@ -78,8 +84,8 @@ public class TemplateFollowupDialog extends AbstractUiFragment {
     }
     
     public TemplateFollowupDialog tryToCreateATemplateWithoutName() {
-        newTemplateItem.click();
-        createButton.click();
+        waitForClick(newTemplateItem);
+        waitForClick(createButton);
         System.out.println("antes do asser error message");
         assertErrorMessage(DEFAUT_ERROR_MESSAGE);
         System.out.println("depois do asser error message");
@@ -89,18 +95,18 @@ public class TemplateFollowupDialog extends AbstractUiFragment {
     }
     
     public TemplateFollowupDialog tryToCreateATemplateWithoutSelectAProject() {
-        newTemplateItem.click();
+        waitForClick(newTemplateItem);
         templateNameInput.sendKeys("Template test");
-        createButton.click();
+        waitForClick(createButton);
         assertErrorMessage(DEFAUT_ERROR_MESSAGE);
         closeAlertDialog();
         return this;
     }
     
     public TemplateFollowupDialog tryToCreateATemplateWithoutSelectAFile() {
-        newTemplateItem.click();
-        projectsCheckbox.get(0).click();
-        createButton.click();
+        waitForClick(newTemplateItem);
+        waitForClick(projectsCheckbox.get(0));
+        waitForClick(createButton);
         assertErrorMessage(DEFAUT_ERROR_MESSAGE);
         closeAlertDialog();
         return this;
@@ -117,12 +123,13 @@ public class TemplateFollowupDialog extends AbstractUiFragment {
         
         close();
         open();
-        newTemplateItem.click();
+        waitForClick(newTemplateItem);
         templateNameInput.sendKeys(templateName);
         for (Integer projectIndex : projectsIndex)
-            projectsCheckbox.get(projectIndex).click();
+            waitForClick(projectsCheckbox.get(projectIndex));
+
         templateFileInput.sendKeys(file.toString());
-        createButton.click();
+        waitForClick(createButton);
         
         waitUntil(new ExpectedCondition<Boolean>() {
             @Override
@@ -153,7 +160,8 @@ public class TemplateFollowupDialog extends AbstractUiFragment {
     }
     
     private void closeAlertDialog() {
-        dialog.findElement(By.cssSelector("#alertModalTemplate #ok")).click();
+        WebElement closeAlertDialog = dialog.findElement(By.cssSelector("#alertModalTemplate #ok"));
+        waitForClick(closeAlertDialog);
     }
 
 }

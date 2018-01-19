@@ -25,7 +25,6 @@ import static org.openqa.selenium.support.PageFactory.initElements;
 
 import java.util.List;
 
-import org.apache.commons.lang.ObjectUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -50,7 +49,7 @@ public class FollowupDialog extends AbstractUiFragment {
     }
     
     private FollowupDialog open() {
-        followupButton.click();
+        waitForClick(followupButton);
         waitVisibilityOfElement(dialog);
         generateButton = dialog.findElement(By.id("generate"));
         dateDropdown = dialog.findElement(By.name("date"));
@@ -62,37 +61,27 @@ public class FollowupDialog extends AbstractUiFragment {
     
     public FollowupDialog selectAProject(int projectIndex) {
         List<WebElement> projectsCheckbox = dialog.findElements(By.cssSelector("paper-checkbox"));
-        WebElement webElement = projectsCheckbox.get(projectIndex);
-        waitVisibilityOfElement(webElement);
-        webElement.click();
+        WebElement projectToSelect = projectsCheckbox.get(projectIndex);
+        waitForClick(projectToSelect);
+        waitUntilPaperCheckboxSelectionStateToBe(projectToSelect, true);
         return this;
     }
 
     public FollowupDialog selectADate(String date) {
-        waitVisibilityOfElement(dateDropdown);
-        dateDropdown.click();
-
-        WebElement dateElement = dateDropdown.findElements(By.tagName("paper-item")).stream()
-            .filter(dateItem -> ObjectUtils.equals(date, dateItem.getAttribute("value")))
-            .findFirst().orElse(null);
-
-        if (dateElement == null)
-            throw new IllegalArgumentException("Element \"" + date + "\" not found");
-
-        waitVisibilityOfElement(dateElement);
-        dateElement.click();
+        waitForClick(dateDropdown);
+        WebElement dateElement = getPaperDropdownMenuItemByValue(dateDropdown, date);
+        waitForClick(dateElement);
+        waitPaperDropdownMenuItemIsSelected(dateElement, true);
         return this;
     }
 
     public FollowupDialog clickClearDate() {
-        waitVisibilityOfElement(clearDateButton);
-        clearDateButton.click();
+        waitForClick(clearDateButton);
         return this;
     }
 
     public TemplateFollowupDialog clickSetTemplateLink() {
-        waitVisibilityOfElement(setTemplateLink);
-        setTemplateLink.click();
+        waitForClick(setTemplateLink);
         return TemplateFollowupDialog.produce(webDriver);
     }
 
@@ -137,7 +126,8 @@ public class FollowupDialog extends AbstractUiFragment {
     }
 
     public FollowupDialog close() {
-        dialog.findElement(By.cssSelector(".buttonClose")).click();
+        WebElement close = dialog.findElement(By.cssSelector(".buttonClose"));
+        waitForClick(close);
         return this;
     }
 

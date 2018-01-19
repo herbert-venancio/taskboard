@@ -40,16 +40,18 @@ public class ErrorToast extends AbstractUiFragment {
     public void assertErrorMessage(String errorMessage) {
         waitVisibilityOfElement(errorToast);
         WebElement spanErrorMessage = errorToast.findElement(By.cssSelector("span.taskboard-home"));
+        waitVisibilityOfElement(spanErrorMessage);
         assertEquals("Error message", errorMessage, spanErrorMessage.getText());
     }
 
-    public void assertErrorToastIsInvisible() {
+    public void assertErrorToastIsClosed() {
         waitInvisibilityOfElement(errorToast);
     }
 
     public void close() {
-        waitVisibilityOfElement(errorToast);
-        errorToast.findElement(By.tagName("paper-button")).click();
+        WebElement closeButton = errorToast.findElement(By.tagName("paper-button"));
+        waitForClick(closeButton);
+        assertErrorToastIsClosed();
     }
 
 }

@@ -14,25 +14,26 @@ public class IssueErrorToast extends AbstractUiFragment {
         super(webDriver);
     }
 
-    public IssueErrorToast assertVisible() {
+    public IssueErrorToast assertOpened() {
         waitVisibilityOfElement(toast);
         return this;
     }
 
-    public IssueErrorToast assertNotVisible() {
+    public IssueErrorToast assertClosed() {
         waitInvisibilityOfElement(toast);
         return this;
     }
 
     public IssueDetails clickOpen(int positionFromBottomToTop) {
-        WebElement dismiss = toast.findElement(By.cssSelector(".issue-error:nth-child(" + positionFromBottomToTop + ") .issue-error__open"));
-        dismiss.click();
+        WebElement open = toast.findElement(By.cssSelector(".issue-error:nth-child(" + positionFromBottomToTop + ") .issue-error__open"));
+        waitForClick(open);
         return new IssueDetails(webDriver);
     }
 
     public IssueErrorToast clickDismiss(int positionFromBottomToTop) {
         WebElement dismiss = toast.findElement(By.cssSelector(".issue-error:nth-child(" + positionFromBottomToTop + ") .issue-error__close"));
-        dismiss.click();
+        waitForClick(dismiss);
+        assertClosed();
         return this;
     }
 

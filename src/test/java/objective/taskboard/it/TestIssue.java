@@ -20,12 +20,9 @@
  */
 package objective.taskboard.it;
 
-import static java.util.stream.Collectors.toList;
-
 import java.util.List;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -33,27 +30,13 @@ import org.openqa.selenium.interactions.Actions;
 class TestIssue extends AbstractUiFragment {
     private WebElement issueElement;
 
-    public TestIssue(WebDriver driver, WebElement webElement) {
+    public TestIssue(WebDriver driver, String issueKey) {
         super(driver);
-        this.issueElement = webElement;
-    }
-    
-    public static TestIssue forKey(WebDriver webDriver, String issueKey) {
-        List<WebElement> issues = webDriver.findElements(By.className("sortable-issue-item")).stream()
-                .filter(webEl -> hasChildThatMatches(webEl, By.cssSelector("[data-issue-key='"+issueKey+"']")))
-                .collect(toList());
-            
-        if (issues.size() > 1)
-            throw new IllegalArgumentException("More than a single match was found");
-        
-        if (issues.size() == 0)
-            throw new IllegalArgumentException("Issue " + issueKey + " not found.");
-        
-        return new TestIssue(webDriver, issues.get(0));
+        this.issueElement = getIssueByKey(issueKey);
     }
 
     public TestIssue click() {
-        issueElement.click();
+        waitForClick(issueElement);
         return this;
     }
 
@@ -61,10 +44,9 @@ class TestIssue extends AbstractUiFragment {
         Actions builder = new Actions(webDriver);
         builder.moveToElement(issueElement).build().perform();
         WebElement applyFilterButton = issueElement.findElement(By.cssSelector("[alt='Apply Filter']"));
-        waitVisibilityOfElement(applyFilterButton);
-        applyFilterButton.click();;
+        waitForClick(applyFilterButton);
     }
-    
+
     public IssueDetails issueDetails() {
         return new IssueDetails(webDriver);
     }
@@ -84,22 +66,13 @@ class TestIssue extends AbstractUiFragment {
     public void dragOver(String targetKey) {
         waitVisibilityOfElement(issueElement);
         Actions actions = new Actions(webDriver);
-        WebElement targetIssue = TestIssue.forKey(webDriver, targetKey).issueElement.findElement(By.className("module"));
+        WebElement targetIssue = new TestIssue(webDriver, targetKey).issueElement.findElement(By.className("module"));
         waitVisibilityOfElement(targetIssue);
         actions
             .clickAndHold(issueElement)
             .moveToElement(targetIssue)
             .release(targetIssue)
             .perform();
-    }
-    
-    private static Boolean hasChildThatMatches(WebElement webEl, By selector) {
-        try {
-            webEl.findElement(selector);
-            return true;
-        }catch (NoSuchElementException e) {
-            return false;
-        }
     }
 
     public TestIssue assertHasError(boolean hasError) {
@@ -122,7 +95,20 @@ class TestIssue extends AbstractUiFragment {
 
     public TestIssue assertCardColor(String colorExpected) {
         waitVisibilityOfElement(issueElement);
-        waitAttributeValueInElement(issueElement, "background-color", colorExpected);
+        WebElement issueCard = issueElement.findElement(By.id("issueCard"));
+        waitAttributeValueInElement(issueCard, "background-color", colorExpected);
         return this;
+    }
+
+    private WebElement getIssueByKey(String issueKey) {
+        List<WebElement> issues = getElementsWhenTheyExists(By.cssSelector("issue-item#"+issueKey));
+
+        if (issues.size() > 1)
+            throw new IllegalArgumentException("More than a single match was found");
+
+        if (issues.size() == 0)
+            throw new IllegalArgumentException("Issue " + issueKey + " not found.");
+
+        return issues.get(0);
     }
 }
