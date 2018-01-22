@@ -9,6 +9,8 @@ import java.time.LocalDate;
 @Component
 public class TaskboardJacksonModule extends SimpleModule {
 
+    private static final long serialVersionUID = 2909812564335308120L;
+
     public TaskboardJacksonModule() {
         super(TaskboardJacksonModule.class.getName());
 
