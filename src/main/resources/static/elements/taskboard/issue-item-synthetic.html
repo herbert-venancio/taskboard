@@ -128,11 +128,10 @@
 
         <paper-material on-tap="opendialog" elevation="0">
             <div>
-                <img id$="[[item.issueKey]]"
+                <span id$="[[item.issueKey]]"
                     title$="{{item.issueKey}} - {{getIssueTypeName(item.type)}} - {{getStatusName(item.status)}}"
-                    alt$="{{item.issueKey}} - {{getIssueTypeName(item.type)}} - {{getStatusName(item.status)}}"
                     class$="image {{getItemClass(item)}}" id="[[item.issueKey]]"
-                    style$="{{getIssueColor(item)}} -webkit-mask-image:url({{getIssueTypeImage(item, parentTypeIcon)}}); -moz-mask-image:url({{getIssueTypeImage(item, parentTypeIcon)}}); mask-image:url({{getIssueTypeImage(item, parentTypeIcon)}});">
+                    style$="{{getIssueColor(item)}} -webkit-mask-image:url({{getIssueTypeImage(item, parentTypeIcon)}}); -moz-mask-image:url({{getIssueTypeImage(item, parentTypeIcon)}}); mask-image:url({{getIssueTypeImage(item, parentTypeIcon)}});"></span>
             </div>
 
             <template is="dom-if" if="{{issueImpedida(item)}}">
