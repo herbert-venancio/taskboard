@@ -20,8 +20,8 @@
  */
 package objective.taskboard.domain;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 
 @Entity
@@ -30,7 +30,7 @@ public class UserPreferences extends TaskboardEntity {
 
     private String jiraUser;
 
-    @Column(length = 2000)
+    @Lob
     private String preferences;
 
     public String getJiraUser() {
