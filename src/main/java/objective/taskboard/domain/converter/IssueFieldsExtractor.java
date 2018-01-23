@@ -306,5 +306,4 @@ public class IssueFieldsExtractor {
     private static void logErrorExtractField(JiraIssueDto issue, JiraIssueFieldDto field, JSONException e) {
         log.error("Error extracting " + field.getName() + " from issue " + issue.getKey() + ": " + e.getMessage());
     }
-
 }

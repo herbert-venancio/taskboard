@@ -31,7 +31,6 @@ import java.util.Set;
 import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.client.JiraIssueDtoSearch;
 import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
@@ -76,6 +75,7 @@ public class JiraSearchService {
 
     private JiraIssueDtoSearch searchRequest(String jql, int startFrom, String[] additionalFields) {
         Set<String> fields = getFields(additionalFields);
+
         Map<String, Object> input = new LinkedHashMap<>();
         input.put(JQL_ATTRIBUTE, jql);
         input.put(EXPAND_ATTRIBUTE, EXPAND);

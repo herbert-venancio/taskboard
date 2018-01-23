@@ -176,6 +176,7 @@ public class JiraService {
 
     public Optional<JiraIssueDto> getIssueByKey(String key) {
         log.debug("⬣⬣⬣⬣⬣  getIssueByKey");
+
         
         return Optional.of(jiraEndpointAsUser.request(JiraIssueDto.Service.class).get(key));
     }

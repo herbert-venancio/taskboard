@@ -1,7 +1,6 @@
 package objective.taskboard.jira.data;
 
 import java.io.Serializable;
-
 import retrofit.http.Body;
 import retrofit.http.POST;
 
