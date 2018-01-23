@@ -1,0 +1,22 @@
+{
+  "self": "http://localhost:4567/rest/api/latest/project/11315/role/10100",
+  "name": "Developers",
+  "id": 10100,
+  "description": "A project role that represents developers in a project",
+  "actors": [
+    {
+      "id": 10427,
+      "displayName": "Thomas Developer",
+      "type": "atlassian-user-role-actor",
+      "name": "thomas.developer",
+      "avatarUrl": "http://localhost:4567/secure/useravatar?size=xsmall&avatarId=10122"
+    },
+    {
+      "id": 10000,
+      "displayName": "Foo",
+      "type": "atlassian-user-role-actor",
+      "name": "foo",
+      "avatarUrl": "http://localhost:4567/secure/useravatar?size=xsmall&avatarId=10122"
+    }
+  ]
+}

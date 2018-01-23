@@ -1,0 +1,15 @@
+{
+  "self": "http://localhost:4567/rest/api/latest/project/11315/role/10200",
+  "name": "Customer",
+  "id": 10200,
+  "description": "Customer",
+  "actors": [
+    {
+      "id": 10277,
+      "displayName": "Albert Customer",
+      "type": "atlassian-user-role-actor",
+      "name": "albert.customer",
+      "avatarUrl": "http://localhost:4567/secure/useravatar?size=xsmall&avatarId=10122"
+    }
+  ]
+}
