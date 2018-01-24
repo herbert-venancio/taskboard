@@ -6,10 +6,10 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
-import objective.taskboard.jira.data.JiraUser;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,8 +26,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import objective.taskboard.jira.data.JiraIssue;
 import objective.taskboard.jira.data.JiraProject;
+import objective.taskboard.jira.data.JiraUser;
 import objective.taskboard.jira.data.Status;
 import objective.taskboard.jira.data.StatusCategory;
+import objective.taskboard.jira.data.plugin.UserDetail;
 import objective.taskboard.jira.endpoint.AuthorizedJiraEndpoint;
 import objective.taskboard.jira.endpoint.JiraEndpoint;
 import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
@@ -151,6 +153,19 @@ public class AuthorizedJiraEndpointTest {
         JiraUser user = service.get("taskboard");
 
         assertThat(user.name, is("taskboard"));
-        assertThat(user.displayName, is("taskboard"));
+        assertThat(user.displayName, is("Taskboard"));
+    }
+
+    @Test
+    public void pluginUser() {
+        UserDetail.Service service = jiraEndpointAsMaster.request(UserDetail.Service.class);
+
+        UserDetail developerUser = service.get("thomas.developer");
+        assertThat(developerUser.userData.name).isEqualTo("thomas.developer");
+        assertThat(developerUser.roles).allMatch(role -> "Developers".equals(role.name));
+
+        UserDetail customerUser = service.get("albert.customer");
+        assertThat(customerUser.userData.name).isEqualTo("albert.customer");
+        assertThat(customerUser.roles).allMatch(role -> "Customer".equals(role.name));
     }
 }

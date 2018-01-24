@@ -21,6 +21,7 @@
 package objective.taskboard.testUtils;
 
 import static java.util.Collections.singletonMap;
+import static org.apache.commons.lang3.StringUtils.capitalize;
 import static spark.Service.ignite;
 
 import java.time.Instant;
@@ -73,6 +74,11 @@ public class JiraMockServer {
     public JiraMockServer port(int port) {
         ensureInitialized();
         server.port(port);
+        return this;
+    }
+
+    public JiraMockServer loadPlugins(boolean flag) {
+        this.loadPlugin = flag;
         return this;
     }
 
@@ -354,11 +360,14 @@ public class JiraMockServer {
             return webhookRegistration(webhook);
         });
 
+        if(loadPlugin) {
+            new JiraPluginMock().load(server);
+        }
+
         get("*", (req, res) -> {
             res.type("application/json");
             res.status(404);
-            return "{errorMessages: [\"Jira endpoint '" + req.pathInfo() + "' not found in the mock server. "
-                    + "See JiraMockServer.java to configure a new rote.\"]}";
+            return "{\"message\":\"null for uri: " + req.url() + "\",\"status-code\":404}";
         });
     }
 
@@ -500,7 +509,7 @@ public class JiraMockServer {
         return loadMockData(datFileName);
     }
 
-    private static String loadMockData(String name) {
+    static String loadMockData(String name) {
         return IOUtilities.resourceToString(JiraMockServer.class,"/"+environment() +"/" + name);
     }
     
@@ -607,13 +616,14 @@ public class JiraMockServer {
     private static List<Consumer<JSONObject>> issueEdits = new ArrayList<>();
     private static List<WebHookConfiguration> webhooks = new ArrayList<>();
     private static ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private boolean loadPlugin = true;
 
     private void ensureInitialized() {
         if(server == null)
             server = ignite();
     }
 
-	private <T extends Exception> void exception(Class<T> exceptionClass, ExceptionHandler<? super T> handler) {
+    private <T extends Exception> void exception(Class<T> exceptionClass, ExceptionHandler<? super T> handler) {
         ensureInitialized();
         server.exception(exceptionClass, handler);
     }
@@ -645,7 +655,10 @@ public class JiraMockServer {
 
     private String loaduser(String username) {
         String loadMockData = loadMockData("user.response.json");
-        loadMockData = loadMockData.replace("\"displayName\": \"Taskboard\",", "\"displayName\": \"" + username + "\",");
+        loadMockData = loadMockData
+                .replace("\"key\": \"taskboard\"", "\"key\": \"" + username + "\"")
+                .replace("\"name\": \"taskboard\"", "\"name\": \"" + username + "\"")
+                .replace("\"displayName\": \"Taskboard\",", "\"displayName\": \"" + capitalize(username) + "\",");
         return loadMockData;
     }
 

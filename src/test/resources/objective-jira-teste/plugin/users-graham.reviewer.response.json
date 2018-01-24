@@ -1,0 +1,14 @@
+{
+  "userData": {
+    "displayName": "Graham Reviewer",
+    "emailAddress": "graham.reviewer@mail.com",
+    "name": "graham.reviewer"
+  },
+  "roles": [
+    {
+      "projectKey": "TASKB",
+      "name": "Reviewer",
+      "id": 10209
+    }
+  ]
+}
