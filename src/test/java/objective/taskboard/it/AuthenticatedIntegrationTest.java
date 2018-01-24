@@ -31,6 +31,6 @@ public abstract class AuthenticatedIntegrationTest extends AbstractUIWithCoverag
         loginPage.login("foo", "bar");
         
         MainPage mainPage = MainPage.produce(webDriver);
-        mainPage.waitUserLabelToBe("Foo");
+        mainPage.waitUserLabelToBe("foo");
     }
 }

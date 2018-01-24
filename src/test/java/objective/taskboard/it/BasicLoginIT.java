@@ -29,6 +29,6 @@ public class BasicLoginIT extends AbstractUIWithCoverageIntegrationTest {
         loginPage.login("foo", "bar");
         
         MainPage mainPage = MainPage.produce(webDriver);
-        mainPage.waitUserLabelToBe("Foo");
+        mainPage.waitUserLabelToBe("foo");
     }
 }
