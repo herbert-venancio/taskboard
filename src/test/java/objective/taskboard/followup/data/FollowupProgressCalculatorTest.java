@@ -140,7 +140,7 @@ public class FollowupProgressCalculatorTest {
         assertEquals(LocalDate.of(2018, 1, 4), progressData.actualProjection.get(1).date);
         assertEquals(LocalDate.of(2018, 1, 6), progressData.actualProjection.get(3).date);
         assertEquals(progressData.actual.get(2).progress,  progressData.actualProjection.get(0).progress, 0.001);
-        
+
         assertEquals(.29,  progressData.actualProjection.get(1).progress, 0.001);
     }
 
@@ -180,6 +180,22 @@ public class FollowupProgressCalculatorTest {
                         , LocalDate.of(2017, 10, 15)
                         , LocalDate.of(2017, 10, 16)
                 );
+    }
+
+    @Test
+    public void whenCalculate_backlogProjectionShouldBeMeanOfSamplesDelta() {
+        FollowupProgressCalculator subject = new FollowupProgressCalculator();
+
+        FollowUpDataSnapshot followupData = makeSnapshotForHistory(
+                new EffortHistoryRow(LocalDate.of(2018, 1, 1), 0, 7)
+                , new EffortHistoryRow(LocalDate.of(2018, 1, 2), 0, 8)
+                , new EffortHistoryRow(LocalDate.of(2018, 1, 3), 0, 10)
+        );
+
+        ProgressData progressData = subject.calculate(followupData, LocalDate.of(2018, 1, 7), 3);
+
+        assertThat(progressData.actualProjection).extracting(p -> p.sumEffortBacklog)
+                .containsExactly(10.0, 11.5, 13.0, 14.5, 16.0);
     }
 
     private FollowUpDataSnapshot makeSnapshotForHistory(EffortHistoryRow... rows) {

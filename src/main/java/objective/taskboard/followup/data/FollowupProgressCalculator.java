@@ -8,11 +8,13 @@ import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.OptionalDouble;
+import java.util.function.ToDoubleFunction;
+import java.util.stream.IntStream;
 
 import objective.taskboard.followup.EffortHistoryRow;
 import objective.taskboard.followup.FollowUpDataSnapshot;
 import objective.taskboard.followup.FollowUpDataSnapshotHistory;
-import objective.taskboard.utils.NumberUtils;
 
 public class FollowupProgressCalculator {
 
@@ -54,24 +56,28 @@ public class FollowupProgressCalculator {
             LocalDate finalProjectDate,
             int progressSampleSize) 
     {
-        LocalDate startingDateIt = startingDate;
-        long totalDayCount = ChronoUnit.DAYS.between(startingDateIt.atStartOfDay(), finalProjectDate.atStartOfDay());
+        long totalDayCount = ChronoUnit.DAYS.between(startingDate.atStartOfDay(), finalProjectDate.atStartOfDay());
         EffortHistoryRow firstRow = historyRows.get(0);
-        EffortHistoryRow lastRow = historyRows.get(historyRows.size()-1);        
-        double projectedProgressFactor = calculateProgressFactor(historyRows, progressSampleSize);
-        NumberUtils.LineModel backlogProjection = calculateBacklogProjection(historyRows, progressSampleSize);
+        EffortHistoryRow lastRow = historyRows.get(historyRows.size()-1);
+        CalculateFactors calculate = new CalculateFactors(historyRows, progressSampleSize);
+        double projectedProgressFactor = calculate.progressFactor();
+        double actualProjectionFactor = calculate.actualFactor();
+        double backlogProjectionFactor = calculate.backlogFactor();
         LocalDateTime firstActualDate = firstRow.date.atStartOfDay();
         LocalDateTime lastActualDate = lastRow.date.atStartOfDay();
         long countOfExistingDays = ChronoUnit.DAYS.between(firstActualDate, lastActualDate) + 1;
         double projectedProgress = lastRow.progress();
-        double total = lastRow.sumEffortDone + lastRow.sumEffortBacklog;
+        double projectedActual = lastRow.sumEffortDone;
+        double projectedBacklog = lastRow.sumEffortBacklog;
         progressData.actualProjection.add(progressData.actual.get(progressData.actual.size()-1));
-        startingDateIt = firstRow.date.plusDays(countOfExistingDays);
-        
+        LocalDate startingDateIt = firstRow.date.plusDays(countOfExistingDays);
+
         for (long i = countOfExistingDays; i <= totalDayCount; i++) {
-            projectedProgress = Math.min(1.0, projectedProgress + projectedProgressFactor);
-            double projectedActual = total * projectedProgress;
-            double projectedBacklog = Math.max(0.0, backlogProjection.y(i));
+            if(projectedProgress < 1.0 || projectedBacklog > 0.0) {
+                projectedProgress = Math.min(1.0, projectedProgress + projectedProgressFactor);
+                projectedActual += actualProjectionFactor;
+                projectedBacklog = Math.max(0.0, projectedBacklog + backlogProjectionFactor);
+            }
             progressData.actualProjection.add(new ProgressDataPoint(startingDateIt, projectedProgress, projectedActual, projectedBacklog));
             startingDateIt = startingDateIt.plus(Period.ofDays(1));
         }
@@ -134,32 +140,36 @@ public class FollowupProgressCalculator {
         return historyRows;
     }
 
-    private double calculateProgressFactor(List<EffortHistoryRow> historyRows, int progressSampleSize) {
-        List<EffortHistoryRow> samplesToUseForProjection = 
-                historyRows.subList(historyRows.size() - Math.min(progressSampleSize, historyRows.size()), historyRows.size());
-        double projectedProgressFactor = 0;
-        
-        if (samplesToUseForProjection.size() == 1)
-            return samplesToUseForProjection.get(0).progress();
-        
-        for (int i = 1; i < samplesToUseForProjection.size(); i++) {
-            projectedProgressFactor += samplesToUseForProjection.get(i).progress() - samplesToUseForProjection.get(i-1).progress();
-        }
-        projectedProgressFactor = projectedProgressFactor / (samplesToUseForProjection.size()-1);
-        return projectedProgressFactor;
-    }
+    private static class CalculateFactors {
+        private final List<EffortHistoryRow> historyRows;
+        private final int progressSampleSize;
 
-    private NumberUtils.LineModel calculateBacklogProjection(List<EffortHistoryRow> historyRows, int progressSampleSize) {
-        LocalDate firstDay = historyRows.get(0).date;
-        int length = Math.min(progressSampleSize, historyRows.size());
-        List<EffortHistoryRow> sampledRows = historyRows.subList(historyRows.size() - length, historyRows.size());
-        NumberUtils.Point2D[] samples = new NumberUtils.Point2D[length];
-        for (int i = 0; i < length; ++i) {
-            EffortHistoryRow row = sampledRows.get(i);
-            double x = ChronoUnit.DAYS.between(firstDay, row.date);
-            double y = row.sumEffortBacklog;
-            samples[i] = new NumberUtils.Point2D(x, y);
+        private CalculateFactors(List<EffortHistoryRow> historyRows, int progressSampleSize) {
+            this.historyRows = historyRows;
+            this.progressSampleSize = progressSampleSize;
         }
-        return NumberUtils.linearRegression(samples);
+
+        double progressFactor() {
+            return averageDelta(row -> row.progress())
+                    .orElse(historyRows.get(0).progress());
+        }
+
+        double actualFactor() {
+            return averageDelta(row -> row.sumEffortDone)
+                    .orElse(0.0);
+        }
+
+        double backlogFactor() {
+            return averageDelta(row -> row.sumEffortBacklog)
+                    .orElse(0.0);
+        }
+
+        private OptionalDouble averageDelta(ToDoubleFunction<EffortHistoryRow> deltaFunction) {
+            int samples = Math.min(progressSampleSize, historyRows.size());
+            int firstIndex = historyRows.size() - samples + 1;
+            return IntStream.range(firstIndex, historyRows.size())
+                    .mapToDouble(i -> deltaFunction.applyAsDouble(historyRows.get(i)) - deltaFunction.applyAsDouble(historyRows.get(i - 1)))
+                    .average();
+        }
     }
 }
