@@ -72,6 +72,10 @@ class SizingImportLine {
     public String getFeature() {
         return getValue(SheetColumnDefinitionProvider.FEATURE);
     }
+    
+    public String getType() {
+        return getValue(SheetColumnDefinitionProvider.TYPE);
+    }
 
     public boolean isInclude() {
         return "true".equalsIgnoreCase(getValue(SheetColumnDefinitionProvider.INCLUDE));

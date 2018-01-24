@@ -10,7 +10,6 @@ import static objective.taskboard.sizingImport.SheetColumnDefinitionProvider.PHA
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -26,7 +25,6 @@ import com.atlassian.jira.rest.client.api.domain.CimIssueType;
 
 import objective.taskboard.google.GoogleApiService;
 import objective.taskboard.google.SpreadsheetsManager;
-import objective.taskboard.sizingImport.SizingImportConfig.SheetMap.ExtraField;
 import objective.taskboard.sizingImport.SizingImportValidator.ValidationResult;
 
 public class SizingImportValidatorTest {
@@ -43,28 +41,23 @@ public class SizingImportValidatorTest {
     @Before
     public void setup() {
         config.setDataStartingRowNumber(2);
-        config.getSheetMap().getExtraFields().add(new ExtraField("f5", "Assumptions", "T"));
-        config.getSheetMap().getExtraFields().add(new ExtraField("f6", "Acceptance Criteria", "R"));
-        
+
         when(jiraFacade.isAdminOfProject("OBJ")).thenReturn(true);
         
         Map<String, CimFieldInfo> featureFields = new HashMap<>();
         featureFields.put("f5", new CimFieldInfo("f5", false, "Assumptions", null, null, null, null));
         featureFields.put("f6", new CimFieldInfo("f6", false, "Acceptance Criteria", null, null, null, null));
         
-        when(jiraFacade.requestFeatureCreateIssueMetadata("OBJ")).thenReturn(
-                new CimIssueType(null, 55L, "Task", false, null, null, featureFields));
-        
-        when(jiraFacade.getSizingFields(any())).thenReturn(asList(
-                new CimFieldInfo("cf_2", true, "Dev TSize", null, null, null, null),
-                new CimFieldInfo("cf_3", false, "UX TSize", null, null, null, null)));
+        when(jiraFacade.requestFeatureTypes("OBJ")).thenReturn(asList(
+                new CimIssueType(null, 55L, "Feature", false, null, null, featureFields),
+                new CimIssueType(null, 55L, "Task", false, null, null, emptyMap())));
 
         when(googleApiService.buildSpreadsheetsManager()).thenReturn(spreadsheetsManager);
         
         sheetData = asList(
-                asList("Phase", "Demand", "Feature", "Include", "Dev", "UX"),
-                asList("P1",    "MVP",    "Login",   "true",    "M",   "L"),
-                asList("P1",    "MVP",    "Home",    "true",    "S",   "L"));
+                asList("Phase", "Demand", "Feature / Task",  "Include", "Dev", "UX"),
+                asList("P1",    "MVP",    "Login",           "true",    "M",   "L"),
+                asList("P1",    "MVP",    "Home",            "true",    "S",   "L"));
 
         when(spreadsheetsManager.getSheetsTitles("100")).thenReturn(asList("Scope", "Timeline", "Cost"));
         when(spreadsheetsManager.readRange("100", "'Scope'")).thenAnswer((i) -> sheetData);
@@ -93,29 +86,6 @@ public class SizingImportValidatorTest {
     }
 
     @Test
-    public void shouldFailWhenIssueTypeFeatureHasNoTSizeFieldConfigured() {
-        when(jiraFacade.getSizingFields(any())).thenReturn(emptyList());
-
-        ValidationResult result = subject.validate("OBJ", "100");
-
-        assertFalse(result.success);
-        assertEquals("Issue type “Task” should have at least one sizing field configured in it.", result.errorMessage);
-        assertEquals("Please check the configuration of selected project in Jira.", result.errorDetail);
-    }
-
-    @Test
-    public void shouldFailWhenSomeExtraFieldIsNotConfiguredInIssueTypeFeature() {
-        when(jiraFacade.requestFeatureCreateIssueMetadata("OBJ")).thenReturn(
-                new CimIssueType(null, 55L, "Task", false, null, null, emptyMap()));
-
-        ValidationResult result = subject.validate("OBJ", "100");
-
-        assertFalse(result.success);
-        assertEquals("Issue type “Task” should have the following fields configured in it: Acceptance Criteria, Assumptions", result.errorMessage);
-        assertEquals("Please check the configuration of selected project in Jira.", result.errorDetail);
-    }
-
-    @Test
     public void shouldFailWhenSpreadsheetsHasNoSheetEntitledAsScope() {
         when(spreadsheetsManager.getSheetsTitles("100")).thenReturn(asList("Timeline", "Cost"));
         
@@ -136,7 +106,7 @@ public class SizingImportValidatorTest {
         ValidationResult result = subject.validate("OBJ", "100");
 
         assertFalse(result.success);
-        assertEquals("Invalid spreadsheet format: Row 1 of sheet “Scope” should contain the headers (e.g. Phase, Demand, Feature).", result.errorMessage);
+        assertEquals("Invalid spreadsheet format: Row 1 of sheet “Scope” should contain the headers (e.g. Phase, Demand, Feature / Task).", result.errorMessage);
         assertEquals("Activities to import should start at row 2.", result.errorDetail);
     }
 
@@ -148,7 +118,7 @@ public class SizingImportValidatorTest {
         ValidationResult result = subject.validate("OBJ", "100");
 
         assertFalse(result.success);
-        assertEquals("Invalid spreadsheet format: Row 1 of sheet “Scope” should contain the headers (e.g. Phase, Demand, Feature).", result.errorMessage);
+        assertEquals("Invalid spreadsheet format: Row 1 of sheet “Scope” should contain the headers (e.g. Phase, Demand, Feature / Task).", result.errorMessage);
         assertEquals("Activities to import should start at row 2.", result.errorDetail);
     }
     
@@ -161,7 +131,7 @@ public class SizingImportValidatorTest {
         ValidationResult result = subject.validate("OBJ", "100");
 
         assertFalse(result.success);
-        assertEquals("Invalid spreadsheet format: Row 1 of sheet “Scope” should contain the headers (e.g. Phase, Demand, Feature).", result.errorMessage);
+        assertEquals("Invalid spreadsheet format: Row 1 of sheet “Scope” should contain the headers (e.g. Phase, Demand, Feature / Task).", result.errorMessage);
         assertEquals("Activities to import should start at row 2.", result.errorDetail);
     }
     
@@ -172,15 +142,15 @@ public class SizingImportValidatorTest {
         ValidationResult result = subject.validate("OBJ", "100");
 
         assertFalse(result.success);
-        assertEquals("Invalid spreadsheet format: Row 1 of sheet “Scope” should contain the headers (e.g. Phase, Demand, Feature).", result.errorMessage);
+        assertEquals("Invalid spreadsheet format: Row 1 of sheet “Scope” should contain the headers (e.g. Phase, Demand, Feature / Task).", result.errorMessage);
         assertEquals("Activities to import should start at row 2.", result.errorDetail);
     }
     
     @Test
     public void shouldFailWhenSomeStaticColumnsAreMissing() {
         sheetData = asList(
-                asList("Demand", "Feature", "Dev", "UX"),
-                asList("MVP",    "Login",   "M",   "L"));
+                asList("Demand", "Feature / Task", "Dev", "UX"),
+                asList("MVP",    "Login",          "M",   "L"));
         
         ValidationResult result = subject.validate("OBJ", "100");
 
@@ -192,8 +162,8 @@ public class SizingImportValidatorTest {
     @Test
     public void shouldFailWhenStaticColumnsAreDuplicated() {
         sheetData = asList(
-                asList("Phase", "Demand", "Include", "Feature", "Include", "Dev", "Dev"),
-                asList("P1",    "MVP",    "true",    "Login",   "true",    "M",   "L"));
+                asList("Phase", "Demand", "Include", "Feature / Task", "Include", "Dev", "Dev"),
+                asList("P1",    "MVP",    "true",    "Login",          "true",    "M",   "L"));
         
         ValidationResult result = subject.validate("OBJ", "100");
 
@@ -211,13 +181,13 @@ public class SizingImportValidatorTest {
                 new StaticMappingDefinition(INCLUDE, "Z")));
         
         sheetData = asList(
-                asList("Phase", "Demand", "Include", "Feature", "Dev"),
-                asList("P1",    "MVP",    "true",    "Login",   "L"));
+                asList("Phase", "Demand", "Include", "Feature / Task", "Dev"),
+                asList("P1",    "MVP",    "true",    "Login",          "L"));
         
         ValidationResult result = subject.validate("OBJ", "100");
 
         assertFalse(result.success);
         assertEquals("Invalid spreadsheet format: Incorrectly positioned columns.", result.errorMessage);
-        assertEquals("“Feature” column should be moved to position “C”, “Include” column should be moved to position “Z”.", result.errorDetail);
+        assertEquals("“Feature / Task” column should be moved to position “C”, “Include” column should be moved to position “Z”.", result.errorDetail);
     }
 }

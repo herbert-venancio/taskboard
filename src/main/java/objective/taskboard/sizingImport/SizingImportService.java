@@ -8,9 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
-import com.atlassian.jira.rest.client.api.domain.CimFieldInfo;
-import com.atlassian.jira.rest.client.api.domain.CimIssueType;
-
 import objective.taskboard.google.GoogleApiService;
 import objective.taskboard.google.SpreadsheetsManager;
 import objective.taskboard.sizingImport.PreviewBuilder.ImportPreview;
@@ -58,11 +55,8 @@ class SizingImportService {
     }
     
     public SheetDefinition getSheetDefinition(String projectKey) {
-        CimIssueType featureCreateIssueMetadata = jiraFacade.requestFeatureCreateIssueMetadata(projectKey);
-        List<CimFieldInfo> featureSizingFields = jiraFacade.getSizingFields(featureCreateIssueMetadata);
-
         List<StaticMappingDefinition> staticMappings = columnDefinitionProvider.getStaticMappings();
-        List<DynamicMappingDefinition> dynamicMappings = columnDefinitionProvider.getDynamicMappings(featureSizingFields);
+        List<DynamicMappingDefinition> dynamicMappings = columnDefinitionProvider.getDynamicMappings(projectKey);
         
         return new SheetDefinition(staticMappings, dynamicMappings);
     }

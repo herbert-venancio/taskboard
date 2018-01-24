@@ -87,13 +87,13 @@ class SizingSheetParser {
         if (index >= row.size())
             return null;
         
-        String value = (String) row.get(index);
+        String value = StringUtils.trim((String) row.get(index));
 
-        if (value == null || properties.getValueToIgnore().equals(value)) {
+        if (StringUtils.isBlank(value) || properties.getValueToIgnore().equals(value)) {
             return null;
         }
 
-        return StringUtils.trimToEmpty(value);
+        return value;
     }
     
     private String getValue(List<Object> row, String columnLetter) {

@@ -64,7 +64,7 @@ class SizingImporterSheetUpdater implements SizingImporterListener {
 
     @Override
     public void onLineError(SizingImportLine line, List<String> errorMessages) {
-        String errorMessage = "- " + errorMessages.stream().collect(joining("\n- "));
+        String errorMessage = errorMessages.stream().collect(joining(";\n- ", "- ", "."));
         addError(line, errorMessage);
     }
 

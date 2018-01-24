@@ -8,6 +8,7 @@ import static objective.taskboard.sizingImport.SheetColumnDefinitionProvider.INC
 import static objective.taskboard.sizingImport.SheetColumnDefinitionProvider.KEY;
 import static objective.taskboard.sizingImport.SheetColumnDefinitionProvider.PHASE;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
 import java.util.List;
@@ -35,10 +36,10 @@ public class SizingSheetParserTest {
         List<List<Object>> rows = asList(
                 //     A                B                 C                  D              E                       F           G           H
                 asList("Phase",         "Demand",         "Feature",         "Key",         "Acceptance",           "Include",  "Field 1",  "Field 2"),
-                asList("VALUE_A_PHASE", "VALUE_A_DEMAND", "VALUE_A_FEATURE", "",            "VALUE_A_ACCEPCRITER",  "TRUE",     "VALUE_A1", "VALUE_A2"),
-                asList("VALUE_B_PHASE", "VALUE_B_DEMAND", "VALUE_B_FEATURE", "VALUE_B_KEY", "VALUE_B_ACCEPCRITER",  "TRUE",     "VALUE_B1", "VALUE_B2"),
+                asList("VALUE_A_PHASE", "VALUE_A_DEMAND", "VALUE_A_FEATURE", "",            "VALUE_A_ACCEPCRITER",  "TRUE",     "VALUE_A1", "<NA>"),
+                asList("VALUE_B_PHASE", "VALUE_B_DEMAND", "VALUE_B_FEATURE", "VALUE_B_KEY", "VALUE_B_ACCEPCRITER",  "TRUE",     "VALUE_B1", "   VALUE_B2   "),
                 asList("VALUE_E_PHASE", "VALUE_E_DEMAND", "VALUE_E_FEATURE", "",            "VALUE_E_ACCEPCRITER",  "FALSE",    "VALUE_E1", "VALUE_E2"),
-                asList("VALUE_F_PHASE", "VALUE_F_DEMAND", "VALUE_F_FEATURE", "",            "VALUE_F_ACCEPCRITER",  "TRUE",     "",         "VALUE_F2"),
+                asList("VALUE_F_PHASE", "VALUE_F_DEMAND", "VALUE_F_FEATURE", null,          "VALUE_F_ACCEPCRITER",  "TRUE",     "",         "VALUE_F2"),
                 emptyList());
 
         SheetDefinition sheetDefinition = new SheetDefinition(
@@ -63,9 +64,9 @@ public class SizingSheetParserTest {
         assertEquals("VALUE_A_PHASE", line.getPhase());
         assertEquals("VALUE_A_DEMAND", line.getDemand());
         assertEquals("VALUE_A_FEATURE", line.getFeature());
-        assertEquals("", line.getJiraKey());
+        assertNull(line.getJiraKey());
         assertEquals("VALUE_A1", line.getValue(FIELD_1));
-        assertEquals("VALUE_A2", line.getValue(FIELD_2));
+        assertNull(line.getValue(FIELD_2));
 
         line = result.get(1);
         assertEquals("VALUE_B_PHASE", line.getPhase());
@@ -79,8 +80,8 @@ public class SizingSheetParserTest {
         assertEquals("VALUE_F_PHASE", line.getPhase());
         assertEquals("VALUE_F_DEMAND", line.getDemand());
         assertEquals("VALUE_F_FEATURE", line.getFeature());
-        assertEquals("", line.getJiraKey());
-        assertEquals("", line.getValue(FIELD_1));
+        assertNull(line.getJiraKey());
+        assertNull(line.getValue(FIELD_1));
         assertEquals("VALUE_F2", line.getValue(FIELD_2));
     }
 
