@@ -69,6 +69,9 @@ public class SizingImportConfig {
         private String issueFeature;
 
         @NotNull
+        private String type;
+        
+        @NotNull
         private String include;
 
         @Valid
@@ -109,6 +112,14 @@ public class SizingImportConfig {
             this.issueFeature = issueFeature;
         }
 
+        public String getType() {
+            return type;
+        }
+        
+        public void setType(String type) {
+            this.type = type;
+        }
+        
         public String getInclude() {
             return include;
         }

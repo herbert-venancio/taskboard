@@ -5,6 +5,7 @@ import static java.util.Comparator.comparing;
 import static java.util.Comparator.nullsLast;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static objective.taskboard.utils.StreamUtils.distinctByKey;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.atlassian.jira.rest.client.api.domain.CimFieldInfo;
+import com.atlassian.jira.rest.client.api.domain.CimIssueType;
 
 import objective.taskboard.google.SpreadsheetUtils;
 import objective.taskboard.sizingImport.SheetColumnDefinition.ColumnTag;
@@ -26,7 +28,8 @@ import objective.taskboard.sizingImport.SizingImportConfig.SheetMap.DefaultColum
 class SheetColumnDefinitionProvider {
     public static final SheetColumnDefinition PHASE    = new SheetColumnDefinition("Phase");
     public static final SheetColumnDefinition DEMAND   = new SheetColumnDefinition("Demand");
-    public static final SheetColumnDefinition FEATURE  = new SheetColumnDefinition("Feature");
+    public static final SheetColumnDefinition FEATURE  = new SheetColumnDefinition("Feature / Task");
+    public static final SheetColumnDefinition TYPE     = new SheetColumnDefinition("Type");
     public static final SheetColumnDefinition KEY      = new SheetColumnDefinition("Key",      PreviewBehavior.HIDE);
     public static final SheetColumnDefinition INCLUDE  = new SheetColumnDefinition("Include",  PreviewBehavior.HIDE);
     
@@ -34,11 +37,13 @@ class SheetColumnDefinitionProvider {
     public static final String EXTRA_FIELD_ID_TAG = "extra-field";
 
     private final SizingImportConfig importConfig;
+    private final JiraFacade jiraFacade;
     private final List<StaticMappingDefinition> staticMappings = new ArrayList<>();
 
     @Autowired
-    public SheetColumnDefinitionProvider(SizingImportConfig importConfig) {
+    public SheetColumnDefinitionProvider(SizingImportConfig importConfig, JiraFacade jiraFacade) {
         this.importConfig = importConfig;
+        this.jiraFacade = jiraFacade;
         
         this.staticMappings.addAll(getRegularMappings());
         this.staticMappings.addAll(getExtraFieldMappings());
@@ -51,6 +56,7 @@ class SheetColumnDefinitionProvider {
                 new StaticMappingDefinition(PHASE,    importConfig.getSheetMap().getIssuePhase()),
                 new StaticMappingDefinition(DEMAND,   importConfig.getSheetMap().getIssueDemand()),
                 new StaticMappingDefinition(FEATURE,  importConfig.getSheetMap().getIssueFeature()),
+                new StaticMappingDefinition(TYPE,     importConfig.getSheetMap().getType()),
                 new StaticMappingDefinition(KEY,      importConfig.getSheetMap().getIssueKey()),
                 new StaticMappingDefinition(INCLUDE,  importConfig.getSheetMap().getInclude()));
     }
@@ -70,11 +76,9 @@ class SheetColumnDefinitionProvider {
         return staticMappings;
     }
     
-    public List<DynamicMappingDefinition> getDynamicMappings(List<CimFieldInfo> sizingFields) {
-        return getSizingColumns(sizingFields);
-    }
+    public List<DynamicMappingDefinition> getDynamicMappings(String projectKey) {
+        List<CimFieldInfo> sizingFields = getConfiguredSizingFields(projectKey);
 
-    private List<DynamicMappingDefinition> getSizingColumns(List<CimFieldInfo> sizingFields) {
         List<DefaultColumn> defaultColumns = importConfig.getSheetMap().getDefaultColumns();
         Map<String, String> defaultColumnByFieldId = defaultColumns.stream().collect(toMap(DefaultColumn::getFieldId, DefaultColumn::getColumn));
 
@@ -90,6 +94,18 @@ class SheetColumnDefinitionProvider {
                     return new DynamicMappingDefinition(columnDefinition, columnId, mappingRequired, defaultColumnLetter);
                 })
                 .sorted(comparing(md -> md.getDefaultColumnLetter().orElse(null), nullsLast(SpreadsheetUtils.COLUMN_LETTER_COMPARATOR)))
+                .collect(toList());
+    }
+
+    private List<CimFieldInfo> getConfiguredSizingFields(String projectKey) {
+        List<CimIssueType> featureTypes = jiraFacade.requestFeatureTypes(projectKey);
+        List<String> configuredSizingFieldIds = jiraFacade.getSizingFieldIds();
+
+        return featureTypes.stream()
+                .flatMap(featureType -> featureType.getFields().values().stream())
+                .filter(field -> configuredSizingFieldIds.contains(field.getId()))
+                .filter(distinctByKey(CimFieldInfo::getId))
+                .sorted(comparing(CimFieldInfo::getName))
                 .collect(toList());
     }
 }

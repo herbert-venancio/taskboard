@@ -9,7 +9,7 @@ public class SizingImportIT extends AuthenticatedIntegrationTest {
     private final static String SPREADSHEET_URL_INVALID = "https://docs.google.com/spreadsheets/d/";
 
     private final static String LAST_COLUMN = "AB";
-    private final static String INVALID_COLUMN = "AAAA";
+    private final static String INVALID_COLUMN = "ZZZZ";
     
     private MainPage mainPage;
     

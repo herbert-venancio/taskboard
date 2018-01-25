@@ -9,8 +9,6 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
-import static java.util.Arrays.stream;
-
 public class NumberUtils {
 
     public static double cap(double value, double min, double max) {

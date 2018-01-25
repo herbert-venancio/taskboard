@@ -2,6 +2,7 @@ package objective.taskboard.sizingImport;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static objective.taskboard.sizingImport.SheetColumnDefinitionProvider.EXTRA_FIELD_ID_TAG;
 import static objective.taskboard.sizingImport.SheetColumnDefinitionProvider.SIZING_FIELD_ID_TAG;
 import static objective.taskboard.testUtils.AssertUtils.collectionToString;
@@ -41,16 +42,20 @@ public class SizingImporterTest {
 
     private static final String PROJECT_X_KEY = "PX";
     private static final Version VERSION_ONE = jiraVersion("One");
+    private static final Long FEATURE_TYPE_ID = 30L;
+    private static final Long TASK_TYPE_ID = 31L;
     
     private static final SheetColumn PHASE_COLUMN = new SheetColumn(SheetColumnDefinitionProvider.PHASE, "A");
     private static final SheetColumn DEMAND_COLUMN = new SheetColumn(SheetColumnDefinitionProvider.DEMAND, "B");
     private static final SheetColumn FEATURE_COLUMN = new SheetColumn(SheetColumnDefinitionProvider.FEATURE, "C");
-    private static final SheetColumn KEY_COLUMN = new SheetColumn(SheetColumnDefinitionProvider.KEY, "D");
+    private static final SheetColumn TYPE_COLUMN = new SheetColumn(SheetColumnDefinitionProvider.TYPE, "D");
+    private static final SheetColumn KEY_COLUMN = new SheetColumn(SheetColumnDefinitionProvider.KEY, "C");
 
     private final SizingImportConfig importConfig = new SizingImportConfig();
     private final JiraFacade jiraFacade = mock(JiraFacade.class);
     private final SizingImporterRecorder recorder = new SizingImporterRecorder();
     private final Map<String, CimFieldInfo> featureMetadataFields = new HashMap<>();
+    private final Map<String, CimFieldInfo> taskMetadataFields = new HashMap<>();
     
     private final SizingImporter subject = new SizingImporter(importConfig, jiraFacade);
 
@@ -60,8 +65,9 @@ public class SizingImporterTest {
         when(jiraFacade.getProject(PROJECT_X_KEY)).thenReturn(jiraProject(PROJECT_X_KEY, "Project X"));
         when(jiraFacade.getDemandKeyGivenFeature(any())).thenReturn(Optional.of("PX-1"));
 
-        when(jiraFacade.requestFeatureCreateIssueMetadata(PROJECT_X_KEY)).thenReturn(
-                new CimIssueType(null, 0L, "Feature", false, null, null, featureMetadataFields));
+        when(jiraFacade.requestFeatureTypes(PROJECT_X_KEY)).thenReturn(asList(
+                new CimIssueType(null, FEATURE_TYPE_ID, "Feature", false, null, null, featureMetadataFields),
+                new CimIssueType(null, TASK_TYPE_ID,    "Task",    false, null, null, taskMetadataFields)));
 
         subject.addListener(recorder);
     }
@@ -86,6 +92,7 @@ public class SizingImporterTest {
                         new ImportValue(PHASE_COLUMN, "One"), 
                         new ImportValue(DEMAND_COLUMN, "Blue"), 
                         new ImportValue(FEATURE_COLUMN, "Banana"),
+                        new ImportValue(TYPE_COLUMN, "Feature"),
                         new ImportValue(KEY_COLUMN, "PX-10"))));
         
         subject.executeImport(PROJECT_X_KEY, lines);
@@ -102,38 +109,60 @@ public class SizingImporterTest {
         List<SizingImportLine> lines = asList(
                 new SizingImportLine(0, asList(
                         new ImportValue(PHASE_COLUMN, "One"), 
-                        new ImportValue(DEMAND_COLUMN, "Blue"))));
+                        new ImportValue(DEMAND_COLUMN, "Blue"),
+                        new ImportValue(TYPE_COLUMN, "Feature"))));
         
         subject.executeImport(PROJECT_X_KEY, lines);
         
         assertEvents(
                 "Import started - Total lines count: 1 | lines to import: 1",
                 "Line import started - Row index: 0",
-                "Line error - Row index: 0 | errors: Feature should be informed;",
+                "Line error - Row index: 0 | errors: Feature should be informed",
                 "Import finished");
 
         verifyJiraFacadeNeverCreateItems();
     }
 
     @Test
-    public void importLineWithEmptyRequiredSizingField() {
-        when(jiraFacade.getSizingFields(any())).thenReturn(asList(
-                jiraRequiredField("f1", "Dev TSize"),
-                jiraOptionalField("f2", "UAT TSize")));
-        
-        
+    public void importLineWithInvalidType() {
         List<SizingImportLine> lines = asList(
                 new SizingImportLine(0, asList(
                         new ImportValue(PHASE_COLUMN, "One"), 
                         new ImportValue(DEMAND_COLUMN, "Blue"),
-                        new ImportValue(FEATURE_COLUMN, "Banana"))));
+                        new ImportValue(FEATURE_COLUMN, "Banana"),
+                        new ImportValue(TYPE_COLUMN, "Bug"))));
         
         subject.executeImport(PROJECT_X_KEY, lines);
         
         assertEvents(
                 "Import started - Total lines count: 1 | lines to import: 1",
                 "Line import started - Row index: 0",
-                "Line error - Row index: 0 | errors: Dev TSize should be informed;",
+                "Line error - Row index: 0 | errors: Type should be one of the following: Feature, Task",
+                "Import finished");
+        
+        verifyJiraFacadeNeverCreateItems();
+    }
+
+    @Test
+    public void importLineWithEmptyRequiredSizingField() {
+        featureMetadataFields.put("f1", jiraRequiredField("f1", "Dev TSize"));
+        featureMetadataFields.put("f2", jiraOptionalField("f2", "UAT TSize"));
+
+        when(jiraFacade.getSizingFieldIds()).thenReturn(asList("f1", "f2"));
+
+        List<SizingImportLine> lines = asList(
+                new SizingImportLine(0, asList(
+                        new ImportValue(PHASE_COLUMN, "One"), 
+                        new ImportValue(DEMAND_COLUMN, "Blue"),
+                        new ImportValue(FEATURE_COLUMN, "Banana"),
+                        new ImportValue(TYPE_COLUMN, "Feature"))));
+        
+        subject.executeImport(PROJECT_X_KEY, lines);
+        
+        assertEvents(
+                "Import started - Total lines count: 1 | lines to import: 1",
+                "Line import started - Row index: 0",
+                "Line error - Row index: 0 | errors: Dev TSize should be informed",
                 "Import finished");
         
         verifyJiraFacadeNeverCreateItems();
@@ -149,14 +178,15 @@ public class SizingImporterTest {
                 new SizingImportLine(0, asList(
                         new ImportValue(PHASE_COLUMN, "One"), 
                         new ImportValue(DEMAND_COLUMN, "Blue"),
-                        new ImportValue(FEATURE_COLUMN, "Banana"))));
+                        new ImportValue(FEATURE_COLUMN, "Banana"),
+                        new ImportValue(TYPE_COLUMN, "Feature"))));
         
         subject.executeImport(PROJECT_X_KEY, lines);
         
         assertEvents(
                 "Import started - Total lines count: 1 | lines to import: 1",
                 "Line import started - Row index: 0",
-                "Line error - Row index: 0 | errors: Use Cases should be informed;",
+                "Line error - Row index: 0 | errors: Use Cases should be informed",
                 "Import finished");
         
         verifyJiraFacadeNeverCreateItems();
@@ -165,13 +195,14 @@ public class SizingImporterTest {
     @Test
     public void importLineWithoutSizingAndExtraFields() {
         when(jiraFacade.createDemand(any(), eq("Blue"), any())).thenReturn(new BasicIssue(null, "PX-1", 0L));
-        when(jiraFacade.createFeature(any(), any(), eq("Banana"), any(), any())).thenReturn(new BasicIssue(null, "PX-15", 0L));
+        when(jiraFacade.createFeature(any(), any(), any(), eq("Banana"), any(), any())).thenReturn(new BasicIssue(null, "PX-15", 0L));
 
         List<SizingImportLine> lines = asList(
                 new SizingImportLine(0, asList(
                         new ImportValue(PHASE_COLUMN,   "One"), 
                         new ImportValue(DEMAND_COLUMN,  "Blue"), 
                         new ImportValue(FEATURE_COLUMN, "Banana"),
+                        new ImportValue(TYPE_COLUMN,    "Feature"),
                         new ImportValue(KEY_COLUMN,     ""))));
 
         subject.executeImport(PROJECT_X_KEY, lines);
@@ -184,46 +215,54 @@ public class SizingImporterTest {
         
         verify(jiraFacade).createVersion(PROJECT_X_KEY, "One");
         verify(jiraFacade).createDemand(PROJECT_X_KEY, "Blue", VERSION_ONE);
-        verify(jiraFacade).createFeature(PROJECT_X_KEY, "PX-1", "Banana", VERSION_ONE, emptyList());
+        verify(jiraFacade).createFeature(PROJECT_X_KEY, "PX-1", FEATURE_TYPE_ID, "Banana", VERSION_ONE, emptyList());
     }
 
     @Test
     public void importHappyDay() {
         CimFieldInfo devTSizeField = jiraOptionalField("f1", "Dev TSize");
         CimFieldInfo uatTSizeField = jiraOptionalField("f2", "UAT TSize");
+        CimFieldInfo taskTSizeField = jiraOptionalField("f5", "Task TSize");
         CimFieldInfo useCasesField = jiraOptionalField("f3", "Use Cases");
         
         featureMetadataFields.put(devTSizeField.getId(), devTSizeField);
         featureMetadataFields.put(uatTSizeField.getId(), uatTSizeField);
         featureMetadataFields.put(useCasesField.getId(), useCasesField);
+        taskMetadataFields.put(taskTSizeField.getId(), taskTSizeField);
         
-        when(jiraFacade.getSizingFields(any())).thenReturn(asList(devTSizeField, uatTSizeField));
+        when(jiraFacade.getSizingFieldIds()).thenReturn(asList(devTSizeField.getId(), uatTSizeField.getId(), taskTSizeField.getId()));
+        importConfig.getSheetMap().getExtraFields().add(new ExtraField(useCasesField.getId(), "Use Cases", "H"));
         
         when(jiraFacade.createDemand(any(), eq("Blue"), any())).thenReturn(new BasicIssue(null, "PX-2", 0L));
         when(jiraFacade.createDemand(any(), eq("Red"), any())).thenReturn(new BasicIssue(null, "PX-3", 0L));
-        when(jiraFacade.createFeature(any(), any(), eq("Banana"), any(), any())).thenReturn(new BasicIssue(null, "PX-15", 0L));
-        when(jiraFacade.createFeature(any(), any(), eq("Lemon"), any(), any())).thenReturn(new BasicIssue(null, "PX-16", 0L));
-        when(jiraFacade.createFeature(any(), any(), eq("Grape"), any(), any())).thenReturn(new BasicIssue(null, "PX-17", 0L));
+        when(jiraFacade.createFeature(any(), any(), any(), eq("Banana"), any(), any())).thenReturn(new BasicIssue(null, "PX-15", 0L));
+        when(jiraFacade.createFeature(any(), any(), any(), eq("Lemon"), any(), any())).thenReturn(new BasicIssue(null, "PX-16", 0L));
+        when(jiraFacade.createFeature(any(), any(), any(), eq("Grape"), any(), any())).thenReturn(new BasicIssue(null, "PX-17", 0L));
         
         SheetColumn devTSizeCol = new SheetColumn(new SheetColumnDefinition("Dev TSize", new ColumnTag(SIZING_FIELD_ID_TAG, "f1")), "E");
         SheetColumn uatTSizeCol = new SheetColumn(new SheetColumnDefinition("UAT TSize", new ColumnTag(SIZING_FIELD_ID_TAG, "f2")), "F");
-        SheetColumn useCasesCol = new SheetColumn(new SheetColumnDefinition("Use Cases", new ColumnTag(EXTRA_FIELD_ID_TAG,  "f3")), "G");
+        SheetColumn taskTSizeCol = new SheetColumn(new SheetColumnDefinition("Task TSize", new ColumnTag(SIZING_FIELD_ID_TAG, "f5")), "G");
+        SheetColumn useCasesCol = new SheetColumn(new SheetColumnDefinition("Use Cases", new ColumnTag(EXTRA_FIELD_ID_TAG,  "f3")), "H");
         
         List<SizingImportLine> lines = asList(
                 new SizingImportLine(0, asList(
                         new ImportValue(PHASE_COLUMN,   "One"), 
                         new ImportValue(DEMAND_COLUMN,  "Blue"), 
                         new ImportValue(FEATURE_COLUMN, "Banana"),
+                        new ImportValue(TYPE_COLUMN,    "Feature"),
                         new ImportValue(KEY_COLUMN,     ""))),
                 new SizingImportLine(1, asList(
                         new ImportValue(PHASE_COLUMN,   "One"), 
                         new ImportValue(DEMAND_COLUMN,  "Blue"), 
                         new ImportValue(FEATURE_COLUMN, "Lemon"),
-                        new ImportValue(KEY_COLUMN,     ""))),
+                        new ImportValue(TYPE_COLUMN,    "Task"),
+                        new ImportValue(KEY_COLUMN,     ""),
+                        new ImportValue(taskTSizeCol,   "M"))),
                 new SizingImportLine(2, asList(
                         new ImportValue(PHASE_COLUMN,   "One"), 
                         new ImportValue(DEMAND_COLUMN,  "Red"), 
                         new ImportValue(FEATURE_COLUMN, "Grape"),
+                        new ImportValue(TYPE_COLUMN,    "Feature"),
                         new ImportValue(KEY_COLUMN,     ""),
                         new ImportValue(devTSizeCol,    "X"),
                         new ImportValue(uatTSizeCol,    "S"),
@@ -232,6 +271,7 @@ public class SizingImporterTest {
                         new ImportValue(PHASE_COLUMN,   "One"), 
                         new ImportValue(DEMAND_COLUMN,  "White"), 
                         new ImportValue(FEATURE_COLUMN, "Jackfruit"),
+                        new ImportValue(TYPE_COLUMN,    "Feature"),
                         new ImportValue(KEY_COLUMN,     "PX-1"))));
 
         subject.executeImport(PROJECT_X_KEY, lines);
@@ -249,25 +289,66 @@ public class SizingImporterTest {
         verify(jiraFacade).createVersion(PROJECT_X_KEY, "One");
         verify(jiraFacade).createDemand(PROJECT_X_KEY, "Blue", VERSION_ONE);
         verify(jiraFacade).createDemand(PROJECT_X_KEY, "Red", VERSION_ONE);
-        verify(jiraFacade).createFeature(PROJECT_X_KEY, "PX-2", "Banana", VERSION_ONE, emptyList());
-        verify(jiraFacade).createFeature(PROJECT_X_KEY, "PX-2", "Lemon", VERSION_ONE, emptyList());
-        verify(jiraFacade).createFeature(PROJECT_X_KEY, "PX-3", "Grape", VERSION_ONE, asList(
+        verify(jiraFacade).createFeature(PROJECT_X_KEY, "PX-2", FEATURE_TYPE_ID, "Banana", VERSION_ONE, emptyList());
+        verify(jiraFacade).createFeature(PROJECT_X_KEY, "PX-2", TASK_TYPE_ID, "Lemon", VERSION_ONE, asList(
+                new IssueCustomFieldOptionValue("f5", "M", null)));
+        verify(jiraFacade).createFeature(PROJECT_X_KEY, "PX-3", FEATURE_TYPE_ID, "Grape", VERSION_ONE, asList(
                 new IssueCustomFieldOptionValue("f1", "X", null),
                 new IssueCustomFieldOptionValue("f2", "S", null),
                 new IssueFieldObjectValue("f3", "User picks and eats")));
     }
 
     @Test
+    public void importLineWithUnsupportedFields() {
+        CimFieldInfo devTSizeField = jiraOptionalField("f1", "Dev TSize");
+        CimFieldInfo uatTSizeField = jiraOptionalField("f2", "UAT TSize");
+        
+        featureMetadataFields.put(devTSizeField.getId(), devTSizeField);
+        
+        when(jiraFacade.getSizingFieldIds()).thenReturn(asList(devTSizeField.getId(), uatTSizeField.getId()));
+        when(jiraFacade.createDemand(any(), eq("Blue"), any())).thenReturn(new BasicIssue(null, "PX-1", 0L));
+        when(jiraFacade.createFeature(any(), any(), any(), eq("Banana"), any(), any())).thenReturn(new BasicIssue(null, "PX-15", 0L));
+        
+        SheetColumn devTSizeCol = new SheetColumn(new SheetColumnDefinition("Dev TSize", new ColumnTag(SIZING_FIELD_ID_TAG, "f1")), "E");
+        SheetColumn uatTSizeCol = new SheetColumn(new SheetColumnDefinition("UAT TSize", new ColumnTag(SIZING_FIELD_ID_TAG, "f2")), "F");
+        SheetColumn useCasesCol = new SheetColumn(new SheetColumnDefinition("Use Cases", new ColumnTag(EXTRA_FIELD_ID_TAG,  "f3")), "G");
+
+        List<SizingImportLine> lines = asList(
+                new SizingImportLine(0, asList(
+                        new ImportValue(PHASE_COLUMN,   "One"), 
+                        new ImportValue(DEMAND_COLUMN,  "Blue"), 
+                        new ImportValue(FEATURE_COLUMN, "Banana"),
+                        new ImportValue(TYPE_COLUMN,    "Feature"),
+                        new ImportValue(devTSizeCol,    "X"),
+                        new ImportValue(uatTSizeCol,    "S"),
+                        new ImportValue(useCasesCol,    "User picks and eats"))));
+
+        subject.executeImport(PROJECT_X_KEY, lines);
+        
+        assertEvents(
+                "Import started - Total lines count: 1 | lines to import: 1",
+                "Line import started - Row index: 0",
+                "Line error - Row index: 0 | errors: " + 
+                        "Column “UAT TSize” is not valid for the type Feature and should be left blank; " + 
+                        "Column “Use Cases” is not valid for the type Feature and should be left blank",
+                "Import finished");
+        
+        verifyJiraFacadeNeverCreateItems();
+    }
+    
+    @Test
     public void importUsingAlreadyCreatedVersion() {
         when(jiraFacade.getProject("PY")).thenReturn(jiraProject("PY", "Project Y", asList(jiraVersion("Two"))));
         when(jiraFacade.createDemand(any(), eq("Blue"), any())).thenReturn(new BasicIssue(null, "PY-1", 0L));
-        when(jiraFacade.createFeature(any(), any(), eq("Banana"), any(), any())).thenReturn(new BasicIssue(null, "PY-15", 0L));
+        when(jiraFacade.createFeature(any(), any(), any(), eq("Banana"), any(), any())).thenReturn(new BasicIssue(null, "PY-15", 0L));
+        when(jiraFacade.requestFeatureTypes("PY")).thenReturn(asList(new CimIssueType(null, FEATURE_TYPE_ID, "Feature", false, null, null, emptyMap())));
 
         List<SizingImportLine> lines = asList(
                 new SizingImportLine(0, asList(
                         new ImportValue(PHASE_COLUMN,   "Two"), 
                         new ImportValue(DEMAND_COLUMN,  "Blue"), 
                         new ImportValue(FEATURE_COLUMN, "Banana"),
+                        new ImportValue(TYPE_COLUMN,    "Feature"),
                         new ImportValue(KEY_COLUMN,     ""))));
 
         subject.executeImport("PY", lines);
@@ -286,18 +367,20 @@ public class SizingImporterTest {
         Issue bananaIssue = mock(Issue.class);
         when(jiraFacade.getIssue("PX-10")).thenReturn(bananaIssue);
         when(jiraFacade.getDemandKeyGivenFeature(bananaIssue)).thenReturn(Optional.of("PX-1"));
-        when(jiraFacade.createFeature(any(), any(), eq("Lemon"), any(), any())).thenReturn(new BasicIssue(null, "PX-15", 0L));
+        when(jiraFacade.createFeature(any(), any(), any(), eq("Lemon"), any(), any())).thenReturn(new BasicIssue(null, "PX-15", 0L));
 
         List<SizingImportLine> lines = asList(
                 new SizingImportLine(0, asList(
                         new ImportValue(PHASE_COLUMN,   "One"), 
                         new ImportValue(DEMAND_COLUMN,  "Blue"), 
                         new ImportValue(FEATURE_COLUMN, "Banana"),
+                        new ImportValue(TYPE_COLUMN,    "Feature"),
                         new ImportValue(KEY_COLUMN,     "PX-10"))),
                 new SizingImportLine(0, asList(
                         new ImportValue(PHASE_COLUMN,   "One"), 
                         new ImportValue(DEMAND_COLUMN,  "Blue"), 
                         new ImportValue(FEATURE_COLUMN, "Lemon"),
+                        new ImportValue(TYPE_COLUMN,    "Feature"),
                         new ImportValue(KEY_COLUMN,     ""))));
 
         subject.executeImport(PROJECT_X_KEY, lines);
@@ -309,7 +392,7 @@ public class SizingImporterTest {
                 "Import finished");
         
         verify(jiraFacade, never()).createDemand(any(), eq("Blue"), any());
-        verify(jiraFacade).createFeature(PROJECT_X_KEY, "PX-1", "Lemon", VERSION_ONE, emptyList());
+        verify(jiraFacade).createFeature(PROJECT_X_KEY, "PX-1", FEATURE_TYPE_ID, "Lemon", VERSION_ONE, emptyList());
     }
 
     private static Project jiraProject(String key, String name, List<Version> versions) {
@@ -335,7 +418,7 @@ public class SizingImporterTest {
     private void verifyJiraFacadeNeverCreateItems() {
         verify(jiraFacade, never()).createVersion(any(), any());
         verify(jiraFacade, never()).createDemand(any(), any(), any());
-        verify(jiraFacade, never()).createFeature(any(), any(), any(), any(), any());
+        verify(jiraFacade, never()).createFeature(any(), any(), any(), any(), any(), any());
     }
     
     private void assertEvents(String... expected) {
@@ -362,7 +445,7 @@ public class SizingImporterTest {
 
         @Override
         public void onLineError(SizingImportLine line, List<String> errorMessages) {
-            events.add("Line error - Row index: " + line.getRowIndex() + " | errors: " + collectionToString(errorMessages, " "));
+            events.add("Line error - Row index: " + line.getRowIndex() + " | errors: " + collectionToString(errorMessages, "; "));
         }
 
         @Override

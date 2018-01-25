@@ -36,6 +36,7 @@ import com.atlassian.jira.rest.client.api.domain.input.VersionInput;
 
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.MetadataService;
+import objective.taskboard.jira.JiraProperties.IssueType.IssueTypeDetails;
 import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
 import objective.taskboard.utils.ObjectUtils;
 
@@ -69,8 +70,7 @@ class JiraFacade {
         return createIssue(demandInput);
     }
 
-    public BasicIssue createFeature(String projectKey, String demandKey, String summary, Version release, Collection<IssueFieldValue> fieldValues) {
-        long featureTypeId = jiraProperties.getIssuetype().getDefaultFeature().getId();
+    public BasicIssue createFeature(String projectKey, String demandKey, Long featureTypeId, String summary, Version release, Collection<IssueFieldValue> fieldValues) {
         String customFieldRelease = jiraProperties.getCustomfield().getRelease().getId();
         
         IssueInputBuilder builder = new IssueInputBuilder(projectKey, featureTypeId)
@@ -102,18 +102,16 @@ class JiraFacade {
         return metadataService.getIssueLinksMetadata().get(jiraProperties.getIssuelink().getDemandId().toString());
     }
 
-    public CimIssueType requestFeatureCreateIssueMetadata(String projectKey) {
-        long featureTypeId = jiraProperties.getIssuetype().getDefaultFeature().getId();
-        return requestCreateIssueMetadata(projectKey, featureTypeId);
+    public List<CimIssueType> requestFeatureTypes(String projectKey) {
+        List<Long> featureTypeIds = jiraProperties.getIssuetype().getFeatures().stream()
+                .map(IssueTypeDetails::getId)
+                .collect(toList());
+
+        return requestCreateIssueMetadata(projectKey, featureTypeIds);
     }
 
-    public List<CimFieldInfo> getSizingFields(CimIssueType createIssueMetadata) {
-        List<String> configuredSizingFieldsId = jiraProperties.getCustomfield().getTShirtSize().getIds();
-        Collection<CimFieldInfo> issueFields = createIssueMetadata.getFields().values();
-        
-        return issueFields.stream()
-                .filter(f -> configuredSizingFieldsId.contains(f.getId()))
-                .collect(toList());
+    public List<String> getSizingFieldIds() {
+        return jiraProperties.getCustomfield().getTShirtSize().getIds();
     }
     
     public Project getProject(String projectKey) {
@@ -152,24 +150,19 @@ class JiraFacade {
         return permissions.havePermission("PROJECT_ADMIN");
     }
 
-    private CimIssueType requestCreateIssueMetadata(String projectKey, Long issueTypeId) {
+    private List<CimIssueType> requestCreateIssueMetadata(String projectKey, List<Long> issueTypeIds) {
         GetCreateIssueMetadataOptions options = new GetCreateIssueMetadataOptionsBuilder()
                 .withExpandedIssueTypesFields()
                 .withProjectKeys(projectKey)
-                .withIssueTypeIds(issueTypeId)
+                .withIssueTypeIds(issueTypeIds)
                 .build();
         
         Iterable<CimProject> projects = jiraEndpoint
                 .executeRequest(client -> client.getIssueClient().getCreateIssueMetadata(options));
         
-        for (CimProject projectMetaData : projects) {
-            for (CimIssueType issueTypeMetaData : projectMetaData.getIssueTypes()) {
-                if (issueTypeMetaData.getId().equals(issueTypeId))
-                    return issueTypeMetaData;
-            }
-        }
-
-        throw new RuntimeException("Issue type not found: " + issueTypeId);
+        return streamOf(projects)
+                .flatMap(p -> streamOf(p.getIssueTypes()))
+                .collect(toList());
     }
 
     public Issue getIssue(String issueKey) {
