@@ -13,9 +13,9 @@ public class JiraTimeTrackingDto {
     
     public JiraTimeTrackingDto(){}
 
-    public JiraTimeTrackingDto(Integer timeEstimateMinutes, Object object, Integer timeSpentMinutes) {
+    public JiraTimeTrackingDto(Integer timeEstimateMinutes, Integer timeSpentMinutes) {
         this.originalEstimateSeconds = timeEstimateMinutes * 60;
-        this.timeSpentSeconds = timeEstimateMinutes * 60;
+        this.timeSpentSeconds = timeSpentMinutes * 60;
     }
 
     public Integer getOriginalEstimateMinutes() {

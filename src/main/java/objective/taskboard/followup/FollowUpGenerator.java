@@ -39,6 +39,7 @@ import objective.taskboard.followup.cluster.FollowUpClusterItem;
 import objective.taskboard.spreadsheet.Sheet;
 import objective.taskboard.spreadsheet.SheetRow;
 import objective.taskboard.spreadsheet.SpreadsheetEditor;
+import objective.taskboard.utils.DateTimeUtils;
 import objective.taskboard.utils.IOUtilities;
 
 public class FollowUpGenerator {
@@ -65,6 +66,7 @@ public class FollowUpGenerator {
             generateTransitionsSheets(followupData);
             generateEffortHistory(followupDataEntry, timezone);
             generateTShirtSizeSheet();
+            generateWorklogSheet(followupData, timezone);
 
             return IOUtilities.asResource(editor.toBytes());
         } catch (Exception e) {
@@ -73,6 +75,31 @@ public class FollowUpGenerator {
         } finally {
             editor.close();
         }
+    }
+
+    void generateWorklogSheet(FollowupData followupData, ZoneId timezone) {
+        Sheet sheet = editor.getOrCreateSheet("Worklogs");
+        sheet.truncate(0);
+        SheetRow rowHeader = sheet.createRow();
+        rowHeader.addColumn("AUTHOR");
+        rowHeader.addColumn("ISSUE");
+        rowHeader.addColumn("STARTED");
+        rowHeader.addColumn("TIMESPENT");
+        rowHeader.save();
+        
+        followupData.fromJiraDs.rows.stream().forEach(row -> {
+            if (row.worklogs == null) return;
+            String issueKey = row.subtaskNum;
+            row.worklogs.forEach(worklog -> {
+                SheetRow worklogRow = sheet.createRow();
+                worklogRow.addColumn(worklog.author);
+                worklogRow.addColumn(issueKey);
+                worklogRow.addColumn(DateTimeUtils.get(worklog.started, timezone));
+                worklogRow.addColumn(worklog.timeSpentSeconds/3600);
+                worklogRow.save();
+            });
+        });
+        sheet.save();
     }
 
     Sheet generateFromJiraSheet(FollowupData followupData) {

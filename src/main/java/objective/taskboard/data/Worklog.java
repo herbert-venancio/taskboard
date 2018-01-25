@@ -1,7 +1,6 @@
 package objective.taskboard.data;
 
 import java.io.Serializable;
-import java.time.Instant;
 import java.util.Date;
 
 import objective.taskboard.jira.client.JiraWorklogDto;
@@ -9,13 +8,13 @@ import objective.taskboard.jira.client.JiraWorklogDto;
 public class Worklog implements Serializable {
     private static final long serialVersionUID = -9146377115189042747L;
     
-    public Instant started;
+    public Date started;
     public int timeSpentSeconds;
     public String author;
     
     public Worklog(String author, Date started, int timeSpentSeconds) {
         this.author = author;
-        this.started = started.toInstant();
+        this.started = started;
         this.timeSpentSeconds = timeSpentSeconds;
     }
 

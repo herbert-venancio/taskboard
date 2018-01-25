@@ -186,12 +186,6 @@ public class JiraService {
         return jiraEndpointAsMaster.request(JiraIssueDto.Service.class).get(key); 
     }
 
-    public String createIssue(IssueInput issueInput) {
-        log.debug("⬣⬣⬣⬣⬣  createIssue");
-        BasicIssue issue = jiraEndpointAsUser.executeRequest(client -> client.getIssueClient().createIssue(issueInput));
-        return issue.getKey();
-    }
-
     public String createIssueAsMaster(IssueInput issueInput) {
         log.debug("⬣⬣⬣⬣⬣  createIssue (master)");
         BasicIssue issue = jiraEndpointAsMaster.executeRequest(client -> client.getIssueClient().createIssue(issueInput));

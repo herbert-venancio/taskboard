@@ -3151,7 +3151,7 @@ public class FollowUpDataProviderFromCurrentStateTest extends AbstractFollowUpDa
 
         assertEquals("john", worklog.author);
         assertEquals(300, worklog.timeSpentSeconds);
-        assertEquals("2018-11-27T02:00:00Z", worklog.started.toString());
+        assertEquals("2018-11-27T02:00:00Z", worklog.started.toInstant().toString());
     }
 
     private List<FromJiraDataRow> sortJiraDataByIssuesKeys(List<FromJiraDataRow> actual) {

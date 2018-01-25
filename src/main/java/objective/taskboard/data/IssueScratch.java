@@ -60,7 +60,7 @@ public class IssueScratch implements Serializable {
     @JsonProperty(access = Access.WRITE_ONLY)
     protected Map<String, Serializable> customFields; //NOSONAR
     @JsonIgnore
-    protected List<Worklog> worklogs;
+    protected List<Worklog> worklogs; //NOSONAR
     
     public IssueScratch() {
         super();
