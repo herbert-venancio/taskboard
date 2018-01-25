@@ -31,6 +31,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import objective.taskboard.data.Worklog;
 import objective.taskboard.followup.FromJiraDataRow;
 
 public class FollowUpDataProviderFromCurrentStateTest extends AbstractFollowUpDataProviderTest {
@@ -3124,6 +3125,33 @@ public class FollowUpDataProviderFromCurrentStateTest extends AbstractFollowUpDa
             " demandBallpark                : 1.0\n" +
             " taskBallpark                  : 0.0\n" +
             " queryType                     : SUBTASK PLAN");
+    }
+
+    @Test
+    public void worklogDataWhouldBeSet() {
+        configureBallparkMappings(
+                taskIssueType + " : \n" +
+                "  - issueType : BALLPARK - Development\n" +
+                "    tshirtCustomFieldId: Dev_Tshirt\n" +
+                "    jiraIssueTypes:\n" +
+                "      - " + devIssueType + "\n" +
+
+                "  - issueType : BALLPARK - Alpha\n" +
+                "    tshirtCustomFieldId: Alpha_TestTshirt\n" +
+                "    jiraIssueTypes:\n" +
+                "      - " + alphaIssueType + "\n"
+                );
+        issues(
+                task().id(3).key("PROJ-3"),
+                subtask().id(4).key("PROJ-4").parent("PROJ-3").worklog("john", "2018-11-27", 300).issueType(devIssueType)
+            );
+
+        List<FromJiraDataRow> rows = subject.getJiraData(null, defaultProjects()).getData().fromJiraDs.rows;
+        Worklog worklog = rows.get(0).worklogs.get(0);
+
+        assertEquals("john", worklog.author);
+        assertEquals(300, worklog.timeSpentSeconds);
+        assertEquals("2018-11-27T02:00:00Z", worklog.started.toString());
     }
 
     private List<FromJiraDataRow> sortJiraDataByIssuesKeys(List<FromJiraDataRow> actual) {

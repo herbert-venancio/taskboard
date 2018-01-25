@@ -38,6 +38,7 @@ import objective.taskboard.data.Changelog;
 import objective.taskboard.data.Issue;
 import objective.taskboard.data.IssueScratch;
 import objective.taskboard.data.TaskboardTimeTracking;
+import objective.taskboard.data.Worklog;
 import objective.taskboard.domain.converter.IssueCoAssignee;
 import objective.taskboard.domain.converter.IssueTeamService;
 import objective.taskboard.issueBuffer.IssueBufferService;
@@ -231,6 +232,7 @@ public abstract class AbstractFollowUpDataProviderTest {
         private List<String> labels;
         private String reporter;
         private List<String> components;
+        private List<Worklog> worklogs = new LinkedList<>();
 
         public IssueBuilder id(int id) {
             this.id = (long) id;
@@ -426,7 +428,8 @@ public abstract class AbstractFollowUpDataProviderTest {
                     coAssignees,
                     null,//classOfService
                     releaseId,
-                    buildTransitions()
+                    buildTransitions(),
+                    worklogs
                     );
             return new Issue(scratch, jiraProperties, metadataService, issueTeamService, null, cycleTime, null, projectService, null, null);
         }
@@ -441,6 +444,11 @@ public abstract class AbstractFollowUpDataProviderTest {
                 currentState = t.getKey();
             }
             return changes;
+        }
+
+        public IssueBuilder worklog(String author, String startedStr, int timeSpentSeconds) {
+            worklogs.add(new Worklog(author, parseStringToDate(startedStr), timeSpentSeconds));
+            return this;
         }
     }
 

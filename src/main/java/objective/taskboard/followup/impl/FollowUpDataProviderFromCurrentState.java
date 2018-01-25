@@ -352,6 +352,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         followUpData.subtaskCycletime = subtask.getCycleTime(timezone);
         followUpData.subtaskIsBlocked = subtask.isBlocked();
         followUpData.subtaskLastBlockReason = subtask.getLastBlockReason();
+        followUpData.worklogs = subtask.getWorklogs();
 
         return followUpData;
     }
