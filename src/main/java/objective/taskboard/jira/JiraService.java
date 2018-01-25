@@ -30,9 +30,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-import objective.taskboard.data.User;
-import objective.taskboard.jira.data.JiraIssue;
-import objective.taskboard.jira.data.JiraUser;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -41,9 +38,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import com.atlassian.jira.rest.client.api.RestClientException;
 import com.atlassian.jira.rest.client.api.domain.BasicIssue;
-import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.Resolution;
 import com.atlassian.jira.rest.client.api.domain.ServerInfo;
 import com.atlassian.jira.rest.client.api.domain.input.ComplexIssueInputFieldValue;
@@ -52,6 +47,11 @@ import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder;
 import com.google.common.collect.ImmutableList;
 
 import objective.taskboard.auth.CredentialsHolder;
+import objective.taskboard.data.Issue;
+import objective.taskboard.data.User;
+import objective.taskboard.jira.client.JiraIssueDto;
+import objective.taskboard.jira.data.JiraIssue;
+import objective.taskboard.jira.data.JiraUser;
 import objective.taskboard.jira.data.Transition;
 import objective.taskboard.jira.data.Transitions;
 import objective.taskboard.jira.data.Transitions.DoTransitionRequestBody;
@@ -142,7 +142,7 @@ public class JiraService {
         }
     }
 
-    public boolean assignToMe(objective.taskboard.data.Issue issue) {
+    public boolean assignToMe(Issue issue) {
         return new AssignIssueToUserAction(issue, CredentialsHolder.username()).call();
     }
 
@@ -174,23 +174,15 @@ public class JiraService {
         return ImmutableList.copyOf(response);
     }
 
-    public Optional<Issue> getIssueByKey(String key) {
+    public Optional<JiraIssueDto> getIssueByKey(String key) {
         log.debug("⬣⬣⬣⬣⬣  getIssueByKey");
-        try {
-            return Optional.of(jiraEndpointAsUser.executeRequest(client -> client.getIssueClient().getIssue(key)));
-        }catch(JiraServiceException e) {
-            if (e.getCause() instanceof RestClientException) {
-                RestClientException cause = (RestClientException) e.getCause();
-                if (cause.getStatusCode().isPresent() && cause.getStatusCode().get() == 404)
-                    return Optional.empty();
-            }
-            throw e;
-        }
+        
+        return Optional.of(jiraEndpointAsUser.request(JiraIssueDto.Service.class).get(key));
     }
 
-    public Issue getIssueByKeyAsMaster(String key) {
+    public JiraIssueDto getIssueByKeyAsMaster(String key) {
         log.debug("⬣⬣⬣⬣⬣  getIssueByKeyAsMaster");
-        return jiraEndpointAsMaster.executeRequest(client -> client.getIssueClient().getIssue(key));
+        return jiraEndpointAsMaster.request(JiraIssueDto.Service.class).get(key); 
     }
 
     public String createIssue(IssueInput issueInput) {
