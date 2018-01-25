@@ -55,12 +55,14 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.core.io.Resource;
 
+import objective.taskboard.data.Worklog;
 import objective.taskboard.followup.FromJiraRowCalculator.FromJiraRowCalculation;
 import objective.taskboard.followup.cluster.FollowUpClusterItem;
 import objective.taskboard.followup.data.Template;
 import objective.taskboard.spreadsheet.Sheet;
 import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor;
 import objective.taskboard.spreadsheet.SimpleSpreadsheetEditorMock;
+import objective.taskboard.utils.DateTimeUtils;
 import objective.taskboard.utils.IOUtilities;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -407,6 +409,35 @@ public class FollowUpGeneratorTest {
                 "Spreadsheet Close\n";
 
         assertEquals("T-shirt Size Sheet", expectedEditorLogger, editor.loggerString());
+    }
+    
+    
+    @Test
+    public void whenThereAreWorklogs_ShouldGenerateWorklogSheet() {
+        subject = new FollowUpGenerator(provider, editor, followupCluster);
+        FollowupData followupData = getDefaultFollowupData();
+        List<Worklog> worklogs = new LinkedList<>();
+        worklogs.add(new Worklog("john.doe", DateTimeUtils.parseStringToDate("2018-12-12"), 18000));
+        followupData.fromJiraDs.rows.get(0).worklogs = worklogs;
+        subject.generateWorklogSheet(followupData, ZoneId.of("Z"));
+        
+        String loggerString = editor.loggerString();
+        
+        String expected = "Sheet Create: Worklogs\n" + 
+                "Sheet \"Worklogs\" Row Create: 1\n" + 
+                "Sheet \"Worklogs\" Row \"1\" AddColumn \"A1\": AUTHOR\n" + 
+                "Sheet \"Worklogs\" Row \"1\" AddColumn \"B1\": ISSUE\n" + 
+                "Sheet \"Worklogs\" Row \"1\" AddColumn \"C1\": STARTED\n" + 
+                "Sheet \"Worklogs\" Row \"1\" AddColumn \"D1\": TIMESPENT\n" + 
+                "Sheet \"Worklogs\" Row \"1\" Save\n" + 
+                "Sheet \"Worklogs\" Row Create: 2\n" + 
+                "Sheet \"Worklogs\" Row \"2\" AddColumn \"A2\": john.doe\n" + 
+                "Sheet \"Worklogs\" Row \"2\" AddColumn \"B2\": I-3\n" + 
+                "Sheet \"Worklogs\" Row \"2\" AddColumn \"C2\": 2018-12-12T02:00Z\n" + 
+                "Sheet \"Worklogs\" Row \"2\" AddColumn \"D2\": 5\n" + 
+                "Sheet \"Worklogs\" Row \"2\" Save\n" + 
+                "Sheet \"Worklogs\" Save\n";
+        assertEquals(expected, loggerString);
     }
 
     private FollowUpDataSnapshot followUpDataEntry(LocalDate data, List<FromJiraDataRow> rows) {

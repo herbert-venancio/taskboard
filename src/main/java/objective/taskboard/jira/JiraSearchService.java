@@ -31,9 +31,9 @@ import java.util.Set;
 import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.client.JiraIssueDtoSearch;
+import objective.taskboard.jira.client.JiraWorklogResultSetDto;
 import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
 
 @Service
@@ -87,6 +87,15 @@ public class JiraSearchService {
                 jiraEndpointAsMaster
                         .request(JiraIssueDtoSearch.Service.class)
                         .search(input);
+        
+        searchResult.getIssues().stream().forEach(issue -> {
+            JiraWorklogResultSetDto worklogs = issue.getWorklogs();
+            if (worklogs.total > worklogs.maxResults) {
+                log.debug("⬣⬣⬣⬣⬣  issue " + issue.getKey() +" has more more worklogs. Total of: " + worklogs.total);
+                JiraWorklogResultSetDto worklogsForIssue = jiraEndpointAsMaster.request(JiraWorklogResultSetDto.Service.class).worklogsForIssue(issue.getKey());
+                issue.setWorklogs(worklogsForIssue);
+            }
+        });
         
         log.debug("⬣⬣⬣⬣⬣  searchIssues... ongoing..." + (searchResult.getStartAt() + searchResult.getMaxResults())+ "/" + searchResult.getTotal());
         return searchResult;

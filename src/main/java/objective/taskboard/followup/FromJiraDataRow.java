@@ -21,6 +21,9 @@
 package objective.taskboard.followup;
 
 import java.time.ZonedDateTime;
+import java.util.List;
+
+import objective.taskboard.data.Worklog;
 
 public class FromJiraDataRow {
     public static final String QUERY_TYPE_SUBTASK_PLAN = "SUBTASK PLAN";
@@ -105,4 +108,5 @@ public class FromJiraDataRow {
     public Double demandBallpark = 0.0;
     public Double taskBallpark = 0.0;
     public String queryType;
+    public List<Worklog> worklogs;
 }

@@ -176,6 +176,7 @@ public class JiraService {
 
     public Optional<JiraIssueDto> getIssueByKey(String key) {
         log.debug("⬣⬣⬣⬣⬣  getIssueByKey");
+
         
         return Optional.of(jiraEndpointAsUser.request(JiraIssueDto.Service.class).get(key));
     }
@@ -183,12 +184,6 @@ public class JiraService {
     public JiraIssueDto getIssueByKeyAsMaster(String key) {
         log.debug("⬣⬣⬣⬣⬣  getIssueByKeyAsMaster");
         return jiraEndpointAsMaster.request(JiraIssueDto.Service.class).get(key); 
-    }
-
-    public String createIssue(IssueInput issueInput) {
-        log.debug("⬣⬣⬣⬣⬣  createIssue");
-        BasicIssue issue = jiraEndpointAsUser.executeRequest(client -> client.getIssueClient().createIssue(issueInput));
-        return issue.getKey();
     }
 
     public String createIssueAsMaster(IssueInput issueInput) {

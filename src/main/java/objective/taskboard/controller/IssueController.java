@@ -142,7 +142,7 @@ public class IssueController {
             timeSpentMinutes += subTaskJira.getTimeTracking().getTimeSpentMinutes() != null ? subTaskJira.getTimeTracking().getTimeSpentMinutes() : 0;
         }
 
-        return new JiraTimeTrackingDto(timeEstimateMinutes, null, timeSpentMinutes);
+        return new JiraTimeTrackingDto(timeEstimateMinutes, timeSpentMinutes);
     }
 
     @RequestMapping(path = "cacheState")
