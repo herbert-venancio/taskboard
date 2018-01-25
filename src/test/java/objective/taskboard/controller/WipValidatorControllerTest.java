@@ -163,7 +163,6 @@ public class WipValidatorControllerTest {
         when(project.getKey()).thenReturn(PROJECT_KEY);
         when(issue.getProject()).thenReturn(project);
 
-        when(issueType.isSubtask()).thenReturn(true);
         when(issueType.getId()).thenReturn(99L);
         when(issue.getIssueType()).thenReturn(issueType);
 
@@ -317,7 +316,6 @@ public class WipValidatorControllerTest {
 
     @Test
     public void standardIssueType() {
-        when(issueType.isSubtask()).thenReturn(false);
         ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("", USER, STATUS.name);
         assertTrue(MSG_ASSERT_WIP_SHOULD_HAVE_EXCEEDED, responseEntity.getBody().isWipExceeded);
         assertEquals(MSG_ASSERT_RESPONSE_MESSAGE, MSG_EXPECTED_WIP_EXCEEDED, responseEntity.getBody().message);

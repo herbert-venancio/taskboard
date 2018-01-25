@@ -30,14 +30,8 @@ import java.util.Set;
 
 import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 
-import com.atlassian.jira.rest.client.api.RestClientException;
-
-import objective.taskboard.jira.JiraService.ParametrosDePesquisaInvalidosException;
-import objective.taskboard.jira.JiraService.PermissaoNegadaException;
 import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.client.JiraIssueDtoSearch;
 import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
@@ -82,42 +76,20 @@ public class JiraSearchService {
 
     private JiraIssueDtoSearch searchRequest(String jql, int startFrom, String[] additionalFields) {
         Set<String> fields = getFields(additionalFields);
-        try {
-            Map<String, Object> input = new LinkedHashMap<>();
-            input.put(JQL_ATTRIBUTE, jql);
-            input.put(EXPAND_ATTRIBUTE, EXPAND);
-            input.put(MAX_RESULTS_ATTRIBUTE, MAX_RESULTS);
-            input.put(START_AT_ATTRIBUTE, startFrom * MAX_RESULTS);
-            input.put(FIELDS_ATTRIBUTE, fields);
-            
-            JiraIssueDtoSearch searchResult = 
-                    jiraEndpointAsMaster
-                            .request(JiraIssueDtoSearch.Service.class)
-                            .search(input);
-            
-            log.debug("⬣⬣⬣⬣⬣  searchIssues... ongoing..." + (searchResult.getStartAt() + searchResult.getMaxResults())+ "/" + searchResult.getTotal());
-            return searchResult;
-        }
-        catch (RestClientException|HttpClientErrorException e) {
-            long statusCode = extractStatusCode(e);
-            
-            log.error("Request failed: " + jql);
-            if (HttpStatus.SERVICE_UNAVAILABLE.value() == statusCode)
-                throw new JiraServiceUnavailable(e);
-            
-            if (HttpStatus.FORBIDDEN.value() == statusCode)
-                throw new PermissaoNegadaException(e);
-            
-            if (HttpStatus.BAD_REQUEST.value() == statusCode)
-                throw new ParametrosDePesquisaInvalidosException(e);
-            throw new IllegalStateException(e);
-        }
-    }
-
-    private long extractStatusCode(Exception e) {
-        if (e instanceof RestClientException)
-            return ((RestClientException) e).getStatusCode().or(0);
-        return ((HttpClientErrorException)e).getRawStatusCode();
+        Map<String, Object> input = new LinkedHashMap<>();
+        input.put(JQL_ATTRIBUTE, jql);
+        input.put(EXPAND_ATTRIBUTE, EXPAND);
+        input.put(MAX_RESULTS_ATTRIBUTE, MAX_RESULTS);
+        input.put(START_AT_ATTRIBUTE, startFrom * MAX_RESULTS);
+        input.put(FIELDS_ATTRIBUTE, fields);
+        
+        JiraIssueDtoSearch searchResult = 
+                jiraEndpointAsMaster
+                        .request(JiraIssueDtoSearch.Service.class)
+                        .search(input);
+        
+        log.debug("⬣⬣⬣⬣⬣  searchIssues... ongoing..." + (searchResult.getStartAt() + searchResult.getMaxResults())+ "/" + searchResult.getTotal());
+        return searchResult;
     }
 
     private Set<String> getFields(String[] additionalFields) {

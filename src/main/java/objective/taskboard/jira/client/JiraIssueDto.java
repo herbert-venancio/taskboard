@@ -128,10 +128,6 @@ public class JiraIssueDto {
         return new JiraIssueFieldDto(field, jsonObjectAdapter.object);
     }
     
-    public Map<String, JSONObjectAdapter> fields() {
-        return fields.other;
-    }
-    
     @JsonIgnoreProperties(ignoreUnknown = true)
     private static class JiraIssueDtoFields {
         public JiraTimeTrackingDto timetracking;

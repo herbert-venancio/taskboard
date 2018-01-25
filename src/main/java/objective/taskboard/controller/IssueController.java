@@ -40,7 +40,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.atlassian.jira.rest.client.api.domain.TimeTracking;
 import com.google.common.collect.Lists;
 
 import objective.taskboard.data.AspectItemFilter;
@@ -58,6 +57,7 @@ import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.JiraService.PermissaoNegadaException;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.ProjectService;
+import objective.taskboard.jira.client.JiraTimeTrackingDto;
 import objective.taskboard.jira.data.Transition;
 import objective.taskboard.linkgraph.LinkGraphProperties;
 
@@ -128,7 +128,7 @@ public class IssueController {
     }
 
     @RequestMapping(path = "timetracking", method = RequestMethod.POST)
-    public TimeTracking timetracking(@RequestBody Issue issue) throws JSONException {
+    public JiraTimeTrackingDto timetracking(@RequestBody Issue issue) throws JSONException {
         Integer timeEstimateMinutes = 0;
         Integer timeSpentMinutes = 0;
 
@@ -142,7 +142,7 @@ public class IssueController {
             timeSpentMinutes += subTaskJira.getTimeTracking().getTimeSpentMinutes() != null ? subTaskJira.getTimeTracking().getTimeSpentMinutes() : 0;
         }
 
-        return new TimeTracking(timeEstimateMinutes, null, timeSpentMinutes);
+        return new JiraTimeTrackingDto(timeEstimateMinutes, null, timeSpentMinutes);
     }
 
     @RequestMapping(path = "cacheState")

@@ -24,6 +24,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.stream.Collectors.toList;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -306,7 +307,4 @@ public class IssueFieldsExtractor {
         log.error("Error extracting " + field.getName() + " from issue " + issue.getKey() + ": " + e.getMessage());
     }
 
-    private static boolean isEmpty(List<JiraLinkDto> issueLinks) {
-        return issueLinks == null || issueLinks.isEmpty();
-    }
 }

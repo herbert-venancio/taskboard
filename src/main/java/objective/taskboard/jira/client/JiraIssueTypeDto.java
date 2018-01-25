@@ -24,11 +24,4 @@ public class JiraIssueTypeDto {
     public String getName() {
         return name;
     }
-
-    public boolean isSubtask() {
-        throw new RuntimeException("NOT IMPLEMENTED");
-    }
-
-    
-
 }

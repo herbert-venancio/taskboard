@@ -38,7 +38,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import com.atlassian.jira.rest.client.api.RestClientException;
 import com.atlassian.jira.rest.client.api.domain.BasicIssue;
 import com.atlassian.jira.rest.client.api.domain.Resolution;
 import com.atlassian.jira.rest.client.api.domain.ServerInfo;
@@ -177,16 +176,8 @@ public class JiraService {
 
     public Optional<JiraIssueDto> getIssueByKey(String key) {
         log.debug("⬣⬣⬣⬣⬣  getIssueByKey");
-        try {
-            return Optional.of(jiraEndpointAsUser.request(JiraIssueDto.Service.class).get(key));
-        }catch(JiraServiceException e) {
-            if (e.getCause() instanceof RestClientException) {
-                RestClientException cause = (RestClientException) e.getCause();
-                if (cause.getStatusCode().isPresent() && cause.getStatusCode().get() == 404)
-                    return Optional.empty();
-            }
-            throw e;
-        }
+        
+        return Optional.of(jiraEndpointAsUser.request(JiraIssueDto.Service.class).get(key));
     }
 
     public JiraIssueDto getIssueByKeyAsMaster(String key) {

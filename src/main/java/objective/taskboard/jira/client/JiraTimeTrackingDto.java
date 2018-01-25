@@ -10,6 +10,13 @@ public class JiraTimeTrackingDto {
     public Integer originalEstimateSeconds;
     @JsonProperty
     public Integer timeSpentSeconds;
+    
+    public JiraTimeTrackingDto(){}
+
+    public JiraTimeTrackingDto(Integer timeEstimateMinutes, Object object, Integer timeSpentMinutes) {
+        this.originalEstimateSeconds = timeEstimateMinutes * 60;
+        this.timeSpentSeconds = timeEstimateMinutes * 60;
+    }
 
     public Integer getOriginalEstimateMinutes() {
         return originalEstimateSeconds == null? null:
