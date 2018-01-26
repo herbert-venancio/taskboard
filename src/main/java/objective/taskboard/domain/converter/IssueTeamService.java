@@ -21,10 +21,10 @@
 package objective.taskboard.domain.converter;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static java.util.Collections.singletonList;
+import static objective.taskboard.domain.converter.JiraIssueToIssueConverter.INVALID_TEAM;
 import static org.springframework.util.StringUtils.isEmpty;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -44,32 +44,24 @@ public class IssueTeamService {
 
     @Autowired
     private TeamFilterConfigurationService teamFilterConfigurationService;
-    
+
     public Set<String> getTeams(Issue issue) {
         Set<String> issueTeams = new LinkedHashSet<>();
-        try {
-            for (List<String> teams : getIssueTeams(issue).values())
-                issueTeams.addAll(teams);
-        } catch (InvalidTeamException e) {
-            issueTeams.add(JiraIssueToIssueConverter.INVALID_TEAM);
-        }
-        
+        for (List<String> teams : getIssueTeams(issue).values())
+            issueTeams.addAll(teams);
+
         return issueTeams;
     }
-    
+
     public String getUsersTeam(Issue issue) {
-        try {
-            return String.join(",", getIssueTeams(issue).keySet());
-        } catch (InvalidTeamException e) {
-            return String.join(",", e.getUsersInInvalidTeam());
-        }
+        return String.join(",", getIssueTeams(issue).keySet());
     }
 
-    public Map<String, List<String>> getIssueTeams(Issue issue) throws InvalidTeamException {
+    Map<String, List<String>> getIssueTeams(Issue issue) {
         Map<String, List<String>> usersTeam = getIssueUsersTeams(issue);
         if (!usersTeam.isEmpty())
             return usersTeam;
-        
+
         Optional<Issue> parent = issue.getParentCard();
 
         Map<String, List<String>> parentUsersTeam = parent.isPresent()? getIssueUsersTeams(parent.get()):newHashMap();
@@ -80,10 +72,10 @@ public class IssueTeamService {
         if (reporter == null)
             return newHashMap();
 
-        return getUsersTeams(Sets.newHashSet(reporter), issue.getProjectKey());
+        return getUsersTeams(Sets.newHashSet(reporter), issue.getProjectKey(), false);
     }
 
-    private Map<String, List<String>> getIssueUsersTeams(Issue issue) throws InvalidTeamException {
+    private Map<String, List<String>> getIssueUsersTeams(Issue issue) {
         Set<String> users = new LinkedHashSet<>();
 
         String assignee = issue.getAssignee();
@@ -92,40 +84,21 @@ public class IssueTeamService {
         for (IssueCoAssignee coAssignee : issue.getCoAssignees())
             users.add(coAssignee.getName());
 
-        return getUsersTeams(users, issue.getProjectKey());
+        return getUsersTeams(users, issue.getProjectKey(), true);
     }
 
-    private Map<String, List<String>> getUsersTeams(Set<String> users, String projectKey) throws InvalidTeamException {
+    private Map<String, List<String>> getUsersTeams(Set<String> users, String projectKey, boolean useInvalidTeam) {
         Map<String, List<String>> usersTeams = newHashMap();
 
-        boolean foundSomeTeam = false;
         for (String user : users) {
             List<String> teams = teamFilterConfigurationService.getConfiguredTeamsNamesByUserAndProject(user, projectKey);
 
-            if (!teams.isEmpty())
-                foundSomeTeam = true;
+            if (teams.isEmpty() && useInvalidTeam)
+                teams = singletonList(INVALID_TEAM);
 
             usersTeams.put(user, teams);
         }
 
-        if (!users.isEmpty() && !foundSomeTeam)
-            throw new InvalidTeamException(new ArrayList<String>(users));
-
         return usersTeams;
     }
-
-    public static class InvalidTeamException extends Exception {
-        private static final long serialVersionUID = 1L;
-
-        private final List<String> usersInInvalidTeam;
-
-        public InvalidTeamException(List<String> usersInInvalidTeam) {
-            this.usersInInvalidTeam = Collections.unmodifiableList(usersInInvalidTeam);
-        }
-
-        public List<String> getUsersInInvalidTeam() {
-            return usersInInvalidTeam;
-        }
-    }
-
 }

@@ -33,8 +33,8 @@ import static org.mockito.Mockito.when;
 
 import java.io.Serializable;
 import java.net.URI;
-import java.sql.Date;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,13 +53,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import objective.taskboard.database.IssuePriorityService;
 import objective.taskboard.domain.IssueColorService;
-import objective.taskboard.domain.converter.IssueTeamService.InvalidTeamException;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraProperties.CustomField;
 import objective.taskboard.jira.JiraProperties.CustomField.Blocked;
 import objective.taskboard.jira.JiraProperties.CustomField.ClassOfServiceDetails;
 import objective.taskboard.jira.JiraProperties.CustomField.CustomFieldDetails;
 import objective.taskboard.jira.JiraProperties.CustomField.TShirtSize;
+import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.client.JiraCommentDto;
 import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.client.JiraIssueFieldDto;
@@ -69,7 +69,6 @@ import objective.taskboard.jira.client.JiraProjectDto;
 import objective.taskboard.jira.client.JiraStatusDto;
 import objective.taskboard.jira.client.JiraUserDto;
 import objective.taskboard.jira.client.JiraWorklogResultSetDto;
-import objective.taskboard.jira.JiraService;
 import objective.taskboard.repository.FilterCachedRepository;
 import objective.taskboard.repository.ParentIssueLinkRepository;
 
@@ -193,7 +192,7 @@ public class JiraIssueToIssueConverterTest {
     }
 
     @Test
-    public void simpleIssueConvert() throws InvalidTeamException {
+    public void simpleIssueConvert() {
         when(project.getKey()).thenReturn("ISSUE");
         when(project.getName()).thenReturn("PROJECT");
         when(issueType.getId()).thenReturn(1L);
