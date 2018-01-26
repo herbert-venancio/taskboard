@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -55,6 +54,7 @@ import objective.taskboard.jira.data.JiraUser;
 import objective.taskboard.jira.data.Transition;
 import objective.taskboard.jira.data.Transitions;
 import objective.taskboard.jira.data.Transitions.DoTransitionRequestBody;
+import objective.taskboard.jira.data.plugin.UserDetail;
 import objective.taskboard.jira.endpoint.JiraEndpoint;
 import objective.taskboard.jira.endpoint.JiraEndpoint.Request;
 import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
@@ -66,8 +66,9 @@ import retrofit.client.Response;
 @EnableConfigurationProperties(JiraProperties.class)
 public class JiraService {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JiraService.class);
-    private static String MSG_UNAUTHORIZED = "Incorrect user or password";
-    private static String MSG_FORBIDDEN = "The jira account is requesting a captcha challenge. Try logging in jira";
+    private static final String MSG_UNAUTHORIZED = "Incorrect user or password";
+    private static final String MSG_FORBIDDEN = "The jira account is requesting a captcha challenge. Try logging in jira";
+    private static final String CUSTOMER_ROLE_NAME = "Customer";
 
     @Autowired
     private JiraProperties properties;
@@ -80,9 +81,6 @@ public class JiraService {
 
     @Autowired
     private JiraEndpointAsMaster jiraEndpointAsMaster;
-
-    @Autowired
-    private Converter<JiraUser, User> userConverter;
 
     public void authenticate(String username, String password) {
         log.debug("⬣⬣⬣⬣⬣  authenticate");
@@ -177,13 +175,12 @@ public class JiraService {
     public Optional<JiraIssueDto> getIssueByKey(String key) {
         log.debug("⬣⬣⬣⬣⬣  getIssueByKey");
 
-        
         return Optional.of(jiraEndpointAsUser.request(JiraIssueDto.Service.class).get(key));
     }
 
     public JiraIssueDto getIssueByKeyAsMaster(String key) {
         log.debug("⬣⬣⬣⬣⬣  getIssueByKeyAsMaster");
-        return jiraEndpointAsMaster.request(JiraIssueDto.Service.class).get(key); 
+        return jiraEndpointAsMaster.request(JiraIssueDto.Service.class).get(key);
     }
 
     public String createIssueAsMaster(IssueInput issueInput) {
@@ -225,10 +222,30 @@ public class JiraService {
 
     public User getUser() {
         try {
-            return userConverter.convert(getLoggedUser());
+            JiraUser jiraUser = getLoggedUser();
+
+            List<UserDetail.Role> allUserRoles = getUserRoles(jiraUser.name);
+            boolean isCustomer = allUserRoles.isEmpty() ||
+                    allUserRoles.stream()
+                            .anyMatch(role -> CUSTOMER_ROLE_NAME.equals(role.name));
+
+            return new User(jiraUser.displayName, jiraUser.name, jiraUser.emailAddress, jiraUser.getAvatarUri(), isCustomer);
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             return null;
+        }
+    }
+
+    public List<UserDetail.Role> getUserRoles(String userName) {
+        UserDetail.Service service = jiraEndpointAsMaster.request(UserDetail.Service.class);
+        try {
+            return service.get(userName).roles;
+        } catch (RetrofitError ex) {
+            if(ex.getResponse().getStatus() == 404) {
+                throw new RuntimeException("Unknown user", ex);
+            } else {
+                throw ex;
+            }
         }
     }
 

@@ -1,0 +1,59 @@
+{
+  "userData": {
+    "displayName": "Foo",
+    "emailAddress": "foo@mail.com",
+    "name": "foo"
+  },
+  "roles": [
+    {
+      "projectKey": "TASKB",
+      "name": "Developers",
+      "id": 10100
+    },
+    {
+      "projectKey": "TASKB",
+      "name": "Reviewer",
+      "id": 10209
+    },
+    {
+      "projectKey": "PROJ1",
+      "name": "Developers",
+      "id": 10100
+    },
+    {
+      "projectKey": "PROJ2",
+      "name": "Developers",
+      "id": 10100
+    },
+    {
+      "projectKey": "PROJ3",
+      "name": "Developers",
+      "id": 10100
+    },
+    {
+      "projectKey": "PROJ4",
+      "name": "Developers",
+      "id": 10100
+    },
+    {
+      "projectKey": "PROJ5",
+      "name": "Developers",
+      "id": 10100
+    },
+    {
+      "projectKey": "PROJ6",
+      "name": "Developers",
+      "id": 10100
+    },
+    {
+      "projectKey": "PROJ7",
+      "name": "Developers",
+      "id": 10100
+    },
+    {
+      "projectKey": "PROJ8",
+      "name": "Developers",
+      "id": 10100
+    }
+  ]
+}

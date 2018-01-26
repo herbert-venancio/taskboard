@@ -1,0 +1,14 @@
+{
+  "userData": {
+    "displayName": "Thomas Developer",
+    "emailAddress": "thomas.developer@mail.com",
+    "name": "thomas.developer"
+  },
+  "roles": [
+    {
+      "projectKey": "TASKB",
+      "name": "Developers",
+      "id": 10100
+    }
+  ]
+}
