@@ -52,29 +52,24 @@ class SizingImporterSheetUpdater implements SizingImporterListener {
 
     @Override
     public void onLineImportStarted(SizingImportLine line) {
-        highlightKeyCell(line.getRowIndex());
     }
     
     @Override
     public void onLineImportFinished(SizingImportLine line, String featureIssueKey) {
         String keyValue = format("=HYPERLINK(\"%s/browse/%s\",\"%s\")", jiraUrl, featureIssueKey, featureIssueKey);
-        clearHighlightKeyCellAndSetValue(line.getRowIndex(), keyValue);
-        
+        setValue(line.getRowIndex(), keyValue);
     }
 
     @Override
     public void onLineError(SizingImportLine line, List<String> errorMessages) {
-        String errorMessage = errorMessages.stream().collect(joining(";\n- ", "- ", "."));
-        addError(line, errorMessage);
+        addError(line, "[Import Error]\n\n" + errorMessages.stream().collect(joining(";\n- ", "- ", ".")));
     }
 
     @Override
     public void onImportFinished() {
     }
 
-    private void highlightKeyCell(int rowIndex) {
-        Color backgroundColor = new Color().setRed(1f).setGreen(0.875f).setBlue(0f);
-
+    private void setValue(int rowIndex, String formulaValue) {
         GridRange range = new GridRange()
                 .setSheetId(sheetId)
                 .setStartRowIndex(rowIndex)
@@ -83,35 +78,12 @@ class SizingImporterSheetUpdater implements SizingImporterListener {
                 .setEndColumnIndex(issueKeyIndex + 1);
 
         CellData cell = new CellData()
-                .setUserEnteredFormat(new CellFormat().setBackgroundColor(backgroundColor));
+                .setUserEnteredValue(new ExtendedValue().setFormulaValue(formulaValue));
         
         RepeatCellRequest repeatCell = new RepeatCellRequest()
                 .setRange(range)
                 .setCell(cell)
-                .setFields("userEnteredFormat(backgroundColor)");
-        
-        BatchUpdateSpreadsheetRequest content = new BatchUpdateSpreadsheetRequest()
-                .setRequests(asList(new Request().setRepeatCell(repeatCell)));
-
-        spreadsheetsManager.batchUpdate(spreadsheetId, content);
-    }
-    
-    private void clearHighlightKeyCellAndSetValue(int rowIndex, String formulaValue) {
-        GridRange range = new GridRange()
-                .setSheetId(sheetId)
-                .setStartRowIndex(rowIndex)
-                .setEndRowIndex(rowIndex + 1)
-                .setStartColumnIndex(issueKeyIndex)
-                .setEndColumnIndex(issueKeyIndex + 1);
-
-        CellData cell = new CellData()
-                .setUserEnteredValue(new ExtendedValue().setFormulaValue(formulaValue))
-                .setUserEnteredFormat(new CellFormat().setBackgroundColor(null));
-        
-        RepeatCellRequest repeatCell = new RepeatCellRequest()
-                .setRange(range)
-                .setCell(cell)
-                .setFields("userEnteredValue(formulaValue),userEnteredFormat(backgroundColor)");
+                .setFields("userEnteredValue(formulaValue)");
         
         BatchUpdateSpreadsheetRequest content = new BatchUpdateSpreadsheetRequest()
                 .setRequests(asList(new Request().setRepeatCell(repeatCell)));
