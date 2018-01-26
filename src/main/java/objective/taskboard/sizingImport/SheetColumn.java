@@ -1,5 +1,7 @@
 package objective.taskboard.sizingImport;
 
+import objective.taskboard.utils.ObjectUtils;
+
 class SheetColumn {
     private final SheetColumnDefinition definition;
     private final String letter;
@@ -24,13 +26,6 @@ class SheetColumn {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-
-        if (obj == null || getClass() != obj.getClass())
-            return false;
-        
-        SheetColumn other = (SheetColumn) obj;
-        return letter.equals(other.letter);
+        return ObjectUtils.equals(this, obj, other -> letter.equals(other.letter));
     }
 }
