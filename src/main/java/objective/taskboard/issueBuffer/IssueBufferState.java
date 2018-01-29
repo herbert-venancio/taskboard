@@ -22,12 +22,22 @@ package objective.taskboard.issueBuffer;
  */
 
 public enum IssueBufferState {
-    uninitialised,
-    initialising,
-    updating,
-    ready,
-    updateError,
-    initialisationError;
+    uninitialised(false),
+    initialising(false),
+    updating(true),
+    ready(true),
+    updateError(false),
+    initialisationError(false);
+    
+    private boolean initialized;
+
+    private IssueBufferState(boolean initialized) {
+        this.initialized = initialized;
+    }
+    
+    public boolean isInitialized() {
+        return initialized;
+    }
     
     public IssueBufferState start() {
         if (this == uninitialised || this == initialisationError) 

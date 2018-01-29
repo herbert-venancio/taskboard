@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
@@ -39,6 +40,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
+
+import com.google.common.util.concurrent.Uninterruptibles;
 
 import objective.taskboard.data.Issue;
 import objective.taskboard.data.IssuePriorityOrderChanged;
@@ -104,12 +107,24 @@ public class IssueBufferService {
 
     private List<IssueUpdate> issuesUpdatedByEvent = new ArrayList<>();
     private Set<String> projectsUpdatedByEvent = new HashSet<>();
+    private boolean constructionComplete = false;
 
     @PostConstruct
-    private synchronized void loadCache() {
+    private void loadCache() {
         cardsRepo = cardsRepoService.from(CACHE_FILENAME);
         if (cardsRepo.size() > 0) 
             state = IssueBufferState.ready;
+        else
+            updateIssueBuffer();
+
+        if (!getState().isInitialized())
+            log.info("Card repo is not initialized. This might take some time..");
+        
+        while(!getState().isInitialized()) {
+            Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
+        }
+        constructionComplete = true;
+        log.info("Card repo initialized");
     }
     
     private synchronized void saveCache() {
@@ -154,7 +169,8 @@ public class IssueBufferService {
 
     private void updateState(IssueBufferState state) {
         this.state = state;
-        eventPublisher.publishEvent(new IssueCacheUpdateEvent(this, state));
+        if (constructionComplete)
+            eventPublisher.publishEvent(new IssueCacheUpdateEvent(this, state));
     }
 
     public Issue updateIssueBuffer(final String key) {
