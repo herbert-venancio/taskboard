@@ -20,13 +20,7 @@
  */
 package objective.taskboard.followup.impl;
 
-import static java.util.Arrays.asList;
-import static objective.taskboard.issueBuffer.IssueBufferState.ready;
-import static objective.taskboard.issueBuffer.IssueBufferState.updateError;
-import static objective.taskboard.issueBuffer.IssueBufferState.updating;
-
 import java.io.IOException;
-import java.util.List;
 
 import javax.annotation.PostConstruct;
 
@@ -38,15 +32,11 @@ import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.FollowUpDataHistoryGenerator;
 import objective.taskboard.followup.FollowUpDataHistoryRepository;
 import objective.taskboard.followup.FollowUpDataSnapshot;
-import objective.taskboard.issueBuffer.IssueBufferState;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 
 @Component
 public class FollowUpDataHistoryGeneratorJSONFiles implements FollowUpDataHistoryGenerator {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FollowUpDataHistoryGeneratorJSONFiles.class);
-    private static final List<IssueBufferState> ISSUE_BUFFER_STATES_READY = asList(ready, updating, updateError);
-    private static final long MINUTE = 60 * 1000L;
-    private static final long SLEEP_TIME_IN_MINUTES = 5L;
 
     private final ProjectFilterConfigurationCachedRepository projectFilterCacheRepo;
     private final FollowUpDataProviderFromCurrentState providerFromCurrentState;
@@ -91,11 +81,6 @@ public class FollowUpDataHistoryGeneratorJSONFiles implements FollowUpDataHistor
     }
 
     protected void generate() throws IOException, InterruptedException {
-        while (!ISSUE_BUFFER_STATES_READY.contains(providerFromCurrentState.getFollowupState())) {
-            log.debug("Waiting for updateAllIssuesBuffer...");
-            Thread.sleep(SLEEP_TIME_IN_MINUTES * MINUTE);
-        }
-
         log.info(getClass().getSimpleName() + " start");
         for (ProjectFilterConfiguration pf : projectFilterCacheRepo.getProjects()) {
             String projectKey = pf.getProjectKey();

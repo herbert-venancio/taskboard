@@ -39,7 +39,6 @@ import org.springframework.web.bind.annotation.RestController;
 import objective.taskboard.followup.FollowUpDataHistoryGenerator;
 import objective.taskboard.followup.FollowUpFacade;
 import objective.taskboard.followup.FollowUpGenerator;
-import objective.taskboard.issueBuffer.IssueBufferState;
 
 @RestController
 @RequestMapping("/ws/followup")
@@ -73,11 +72,6 @@ public class FollowUpController {
             log.warn("Error generating followup spreadsheet", e);
             return new ResponseEntity<>(e.getMessage() == null ? e.toString() : e.getMessage(), INTERNAL_SERVER_ERROR);
         }
-    }
-
-    @RequestMapping("state")
-    public IssueBufferState getState(@RequestParam("date") Optional<String> date) {
-        return followUpFacade.getFollowUpState(date);
     }
 
     @RequestMapping("generic-template")

@@ -424,27 +424,7 @@
 
                     var timezone = "timezone=" + taskboard.getTimeZoneIdFromBrowser();
 
-                    $.ajax({
-                        url: '/ws/followup/state?' + dateQuery,
-                        success: function (data) {
-                            switch(data) {
-                                case "uninitialised":
-                                case "initialising":
-                                    self.errorMessage = "Followup data not ready... try again in a few minutes"
-                                    return;
-
-                                case "initialisationError":
-                                    self.errorMessage = "Followup data failed to initialise. Will retry later"
-                                    return;
-                            }
-                            self.close();
-                            window.location = "ws/followup?"+projectQuery + "&" + templateQuery + "&" + dateQuery + "&" + timezone;
-                        },
-                        error: function (jqXhr, textStatus, errorThrown) {
-                            self.errorMessage = errorThrown;
-                        },
-                        async: true
-                    });
+                    window.location = "ws/followup?"+projectQuery + "&" + templateQuery + "&" + dateQuery + "&" + timezone;
                 }
             });
         })();

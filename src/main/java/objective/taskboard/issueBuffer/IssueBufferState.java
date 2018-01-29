@@ -24,10 +24,10 @@ package objective.taskboard.issueBuffer;
 public enum IssueBufferState {
     uninitialised(false),
     initialising(false),
+    initialisationError(false),
     updating(true),
     ready(true),
-    updateError(false),
-    initialisationError(false);
+    updateError(true);
     
     private boolean initialized;
 

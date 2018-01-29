@@ -41,8 +41,8 @@ import org.springframework.util.StringUtils;
 import objective.taskboard.Constants;
 import objective.taskboard.data.Issue;
 import objective.taskboard.followup.AnalyticsTransitionsDataSet;
-import objective.taskboard.followup.FollowUpDataSnapshot;
 import objective.taskboard.followup.FollowUpDataHistoryRepository;
+import objective.taskboard.followup.FollowUpDataSnapshot;
 import objective.taskboard.followup.FollowUpDataSnapshotHistory;
 import objective.taskboard.followup.FollowupCluster;
 import objective.taskboard.followup.FollowupData;
@@ -52,7 +52,6 @@ import objective.taskboard.followup.FromJiraDataSet;
 import objective.taskboard.followup.FromJiraRowCalculator;
 import objective.taskboard.followup.SyntheticTransitionsDataSet;
 import objective.taskboard.issueBuffer.IssueBufferService;
-import objective.taskboard.issueBuffer.IssueBufferState;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraProperties.BallparkMapping;
 import objective.taskboard.jira.MetadataService;
@@ -75,11 +74,6 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
     private Map<String, Issue> demandsByKey;
     private Map<String, Issue> featuresByKey;
     private Map<String, FromJiraDataRow> followUpBallparks;
-
-    @Override
-    public IssueBufferState getFollowupState() {
-        return issueBufferService.getState();
-    }
 
     @Override
     public FollowUpDataSnapshot getJiraData(FollowupCluster cluster, String[] includeProjects, ZoneId timezone) {

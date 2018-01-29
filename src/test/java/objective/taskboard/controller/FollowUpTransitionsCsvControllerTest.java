@@ -21,7 +21,6 @@ import objective.taskboard.followup.FollowUpFacade;
 import objective.taskboard.followup.FollowUpHelper;
 import objective.taskboard.followup.FollowupCluster;
 import objective.taskboard.followup.FollowupDataProvider;
-import objective.taskboard.issueBuffer.IssueBufferState;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FollowUpTransitionsCsvControllerTest {
@@ -41,11 +40,6 @@ public class FollowUpTransitionsCsvControllerTest {
             public FollowUpDataSnapshot getJiraData(FollowupCluster cluster, String[] includeProjects,
                     ZoneId timezone) {
                 return new FollowUpDataSnapshot(null, FollowUpHelper.getFromFile());
-            }
-            
-            @Override
-            public IssueBufferState getFollowupState() {
-                throw new RuntimeException("NOT IMPLEMENTED");
             }
         };
         willReturn(provider).given(followUpFacade).getProvider(any());
