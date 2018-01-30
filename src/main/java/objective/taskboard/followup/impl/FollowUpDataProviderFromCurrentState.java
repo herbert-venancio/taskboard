@@ -253,6 +253,8 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
     }
 
     private Double timeSpentInHour(Issue issue) {
+        if (issue == null)
+            return 0.0;
         if (issue.getTimeTracking() == null)
             return 0.0;
         if (issue.getTimeTracking().getTimeSpentMinutes() == null)
@@ -280,7 +282,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         followUpData.project = task.getProject();
         followUpData.tshirtSize = task.getTshirtSizeOfSubtaskForBallpark(ballparkMapping);
         followUpData.worklog = 0.0;
-        followUpData.wrongWorklog = timeSpentInHour(task);
+        followUpData.wrongWorklog = timeSpentInHour(demand) + timeSpentInHour(task);
         followUpData.queryType = FromJiraDataRow.QUERY_TYPE_FEATURE_BALLPARK;
 
         if (demand != null) {
@@ -315,7 +317,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         followUpData.project = task.getProject();
         followUpData.tshirtSize = subtask.getTShirtSize() == null? "": subtask.getTShirtSize();
         followUpData.worklog = timeSpentInHour(subtask);
-        followUpData.wrongWorklog = 0.0;
+        followUpData.wrongWorklog = timeSpentInHour(demand) + timeSpentInHour(task);
         followUpData.queryType = FromJiraDataRow.QUERY_TYPE_SUBTASK_PLAN;
 
         if (demand != null) {
