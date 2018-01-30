@@ -332,6 +332,11 @@ function Taskboard() {
     this.connectToWebsocket = function(taskboardHome) {
         var socket = new SockJS('/taskboard-websocket');
         stompClient = Stomp.over(socket);
+        stompClient.debug = function(message) {
+            if(!message || message.indexOf('PING') > -1 || message.indexOf('PONG') > -1)
+                return;
+            console.log(message);
+        };
         stompClient.connect({}, function (frame) {
             stompClient.subscribe('/topic/issues/updates', function (issues) {
                 handleIssueUpdate(taskboardHome, issues)
