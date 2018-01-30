@@ -659,7 +659,7 @@ public class FollowUpDataProviderFromCurrentStateTest extends AbstractFollowUpDa
             " taskBallpark                  : 2.0\n" +
             " queryType                     : FEATURE BALLPARK");
     }
-
+    
     @Test
     public void featureWithOneSubtask_ShouldCreateOnlyDummyFeatureForMissingSubtask() {
         configureBallparkMappings(
@@ -850,7 +850,7 @@ public class FollowUpDataProviderFromCurrentStateTest extends AbstractFollowUpDa
             " subtaskLastBlockReason        : null\n" +
             " tshirtSize                    : XL\n" +
             " worklog                       : 5.0\n" +
-            " wrongWorklog                  : 0.0\n" +
+            " wrongWorklog                  : 1.0\n" +
             " demandBallpark                : 1.0\n" +
             " taskBallpark                  : 0.0\n" +
             " queryType                     : SUBTASK PLAN");
@@ -876,7 +876,7 @@ public class FollowUpDataProviderFromCurrentStateTest extends AbstractFollowUpDa
         issues( 
             demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1).priorityOrder(1l),
 
-            task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2).timeSpentInHours(1)
+            task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2)
                     .tshirt("Dev_Tshirt", "L")
                     .tshirt("Alpha_TestTshirt", "S")
                     .priorityOrder(1l),
@@ -1154,7 +1154,7 @@ public class FollowUpDataProviderFromCurrentStateTest extends AbstractFollowUpDa
         issues( 
             demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1),
 
-            task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2).timeSpentInHours(1)
+            task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2)
                     .tshirt("Dev_Tshirt", "L").release("release 66"),
 
             subtask().id(4).key("PROJ-4").summary("Smry 4").timeSpentInHours(5).parent("PROJ-3").issueType(devIssueType).tshirtSize("XL")
@@ -1254,7 +1254,7 @@ public class FollowUpDataProviderFromCurrentStateTest extends AbstractFollowUpDa
         issues( 
             demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1),
 
-            task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2).timeSpentInHours(1)
+            task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2)
                     .tshirt("Dev_Tshirt", "L").release("release 66"),
 
             subtask().id(4).key("PROJ-4").summary("Smry 4").timeSpentInHours(5).parent("PROJ-3").issueType(devIssueType)
@@ -1470,7 +1470,7 @@ public class FollowUpDataProviderFromCurrentStateTest extends AbstractFollowUpDa
         issues( 
             demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1).priorityOrder(1l),
 
-            task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2).timeSpentInHours(1)
+            task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2)
                     .tshirt("Dev_Tshirt", "L").priorityOrder(1l),
 
             subtask().id(4).key("PROJ-4").summary("Smry 4").timeSpentInHours(5).parent("PROJ-3").issueType(devIssueType).tshirtSize("XL")
@@ -1549,7 +1549,7 @@ public class FollowUpDataProviderFromCurrentStateTest extends AbstractFollowUpDa
             " subtaskLastBlockReason        : null\n" +
             " tshirtSize                    : L\n" +
             " worklog                       : 0.0\n" +
-            " wrongWorklog                  : 1.0\n" +
+            " wrongWorklog                  : 0.0\n" +
             " demandBallpark                : 1.0\n" +
             " taskBallpark                  : 2.0\n" +
             " queryType                     : FEATURE BALLPARK"+
@@ -1857,7 +1857,7 @@ public class FollowUpDataProviderFromCurrentStateTest extends AbstractFollowUpDa
         issues( 
             demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1).release("Demand Release #1").priorityOrder(1l),
 
-            task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2).timeSpentInHours(1)
+            task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2)
                     .tshirt("Dev_Tshirt", "L")
                     .tshirt("Alpha_TestTshirt", "S")
                     .priorityOrder(1l)
@@ -2042,7 +2042,7 @@ public class FollowUpDataProviderFromCurrentStateTest extends AbstractFollowUpDa
         issues( 
             demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1).release("Demand Release #1"),
 
-            task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2).timeSpentInHours(1)
+            task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2)
                     .tshirt("Dev_Tshirt", "L")
                     .tshirt("Alpha_TestTshirt", "S"),
 
@@ -2740,7 +2740,7 @@ public class FollowUpDataProviderFromCurrentStateTest extends AbstractFollowUpDa
         issues( 
             demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1).priorityOrder(1l),
 
-            task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2).timeSpentInHours(1)
+            task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2)
                     .tshirt("Dev_Tshirt", "L")
                     .tshirt("Alpha_TestTshirt", "S")
                     .priorityOrder(1l),
@@ -2925,7 +2925,7 @@ public class FollowUpDataProviderFromCurrentStateTest extends AbstractFollowUpDa
         issues( 
             demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1).priorityOrder(1l),
 
-            task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2).timeSpentInHours(1)
+            task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2)
                     .tshirt("Dev_Tshirt", "L")
                     .priorityOrder(1l),
 
@@ -3037,7 +3037,7 @@ public class FollowUpDataProviderFromCurrentStateTest extends AbstractFollowUpDa
             task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3")
                     .assignee("task.assignee").coAssignees("task.coassignee.1", "task.coassignee.2").reporter("task.reporter")
                     .labels("task-label-1","task-label-2").components("task-component-1","task-component-2")
-                    .created("2016-10-26").priorityUpdatedDate("2018-11-27").dueDate("2020-12-28").originalEstimateInHours(2).timeSpentInHours(1)
+                    .created("2016-10-26").priorityUpdatedDate("2018-11-27").dueDate("2020-12-28").originalEstimateInHours(2)
                     .tshirt("Dev_Tshirt", "L").priorityOrder(1l)
                     .startDateStepMillis(1513101243000L).additionalEstimatedHours(80D).lastBlockReason("Task Last BLock Reason"),
 
@@ -3126,9 +3126,101 @@ public class FollowUpDataProviderFromCurrentStateTest extends AbstractFollowUpDa
             " taskBallpark                  : 0.0\n" +
             " queryType                     : SUBTASK PLAN");
     }
+    
+    @Test
+    public void whenThereAreWrongWorklogInDemand_ShouldShowupInFeatureBallparks() {
+        configureBallparkMappings(
+            taskIssueType + " : \n" +
+            "  - issueType : BALLPARK - Development\n" +
+            "    tshirtCustomFieldId: Dev_Tshirt\n" +
+            "    jiraIssueTypes:\n" +
+            "      - "+ devIssueType + "\n" +
+
+            "  - issueType : BALLPARK - Alpha\n" +
+            "    tshirtCustomFieldId: Alpha_TestTshirt\n" +
+            "    jiraIssueTypes:\n" +
+            "      - " + alphaIssueType + " # UX\n");
+
+        tshirtSizeInfo.setIds(asList("Dev_Tshirt","Alpha_TestTshirt"));
+
+        issues( 
+            demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1).timeSpentInHours(10).priorityOrder(1l),
+
+            task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2).timeSpentInHours(1)
+                .tshirt("Dev_Tshirt","L")
+                .tshirt("Alpha_TestTshirt","S")
+                .priorityOrder(1l)
+        );
+
+        List<FromJiraDataRow> rows = subject.getJiraData(null, defaultProjects()).getData().fromJiraDs.rows;
+        assertEquals((Double)11.0, rows.get(0).wrongWorklog);
+        assertEquals((Double)11.0, rows.get(1).wrongWorklog);
+    }
+    
+    @Test
+    public void ifFeatureHasWorklog_SubtaskShouldHaveWrongWorklog() {
+        configureBallparkMappings(
+                taskIssueType + " : \n" +
+                "  - issueType : BALLPARK - Development\n" +
+                "    tshirtCustomFieldId: Dev_Tshirt\n" +
+                "    jiraIssueTypes:\n" +
+                "      - " + devIssueType + "\n" +
+
+                "  - issueType : BALLPARK - Alpha\n" +
+                "    tshirtCustomFieldId: Alpha_TestTshirt\n" +
+                "    jiraIssueTypes:\n" +
+                "      - " + alphaIssueType + "\n"
+                );
+
+        tshirtSizeInfo.setIds(asList("Dev_Tshirt","Alpha_TestTshirt","Review_Tshirt"));
+
+        issues( 
+            demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1).priorityOrder(1l),
+
+            task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2).timeSpentInHours(3)
+                    .tshirt("Dev_Tshirt", "L")
+                    .priorityOrder(1l),
+
+            subtask().id(4).key("PROJ-4").summary("Smry 4").timeSpentInHours(5).parent("PROJ-3").issueType(devIssueType).tshirtSize("XL").priorityOrder(1l).originalEstimateInHours(7)
+        );
+
+        List<FromJiraDataRow> rows = subject.getJiraData(null, defaultProjects()).getData().fromJiraDs.rows;
+        assertEquals((Double)3.0, rows.get(0).wrongWorklog);
+    }
+    
+    @Test
+    public void ifDemandAndFeatureHasWorklog_SubtaskShouldHaveSumOfWrongWorklog() {
+        configureBallparkMappings(
+                taskIssueType + " : \n" +
+                "  - issueType : BALLPARK - Development\n" +
+                "    tshirtCustomFieldId: Dev_Tshirt\n" +
+                "    jiraIssueTypes:\n" +
+                "      - " + devIssueType + "\n" +
+
+                "  - issueType : BALLPARK - Alpha\n" +
+                "    tshirtCustomFieldId: Alpha_TestTshirt\n" +
+                "    jiraIssueTypes:\n" +
+                "      - " + alphaIssueType + "\n"
+                );
+
+        tshirtSizeInfo.setIds(asList("Dev_Tshirt","Alpha_TestTshirt","Review_Tshirt"));
+
+        issues( 
+            demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1).priorityOrder(1l).timeSpentInHours(4),
+
+            task()  .id(3).key("PROJ-3").parent("PROJ-2").summary("Smry 3").originalEstimateInHours(2).timeSpentInHours(3)
+                    .tshirt("Dev_Tshirt", "L")
+                    .priorityOrder(1l),
+
+            subtask().id(4).key("PROJ-4").summary("Smry 4").timeSpentInHours(5).parent("PROJ-3").issueType(devIssueType).tshirtSize("XL").priorityOrder(1l).originalEstimateInHours(7)
+        );
+
+        List<FromJiraDataRow> rows = subject.getJiraData(null, defaultProjects()).getData().fromJiraDs.rows;
+        assertEquals((Double)7.0, rows.get(0).wrongWorklog);
+    }
 
     @Test
-    public void worklogDataWhouldBeSet() {
+    public void worklogDataShouldBeSet() {
         configureBallparkMappings(
                 taskIssueType + " : \n" +
                 "  - issueType : BALLPARK - Development\n" +
