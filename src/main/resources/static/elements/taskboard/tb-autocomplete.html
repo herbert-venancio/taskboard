@@ -1,0 +1,155 @@
+<!--
+  [LICENSE]
+  Taskboard
+  - - -
+  Copyright (C) 2015 - 2016 Objective Solutions
+  - - -
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  [/LICENSE]
+  -->
+<dom-module id="tb-autocomplete">
+
+    <template>
+
+        <style>
+        </style>
+
+        <paper-autocomplete class="tb-autocomplete__input"
+
+                            no-label-float="[[noLabelFloat]]"
+                            label="{{label}}"
+                            source="[[_getSource(items, valueProperty, textProperty)]]"
+                            value="{{selected}}"
+                            text="{{text}}"
+                            disable-show-clear="{{disableClear}}"
+
+                            min-length="0"
+                            highlight-first="true"
+                            show-results-on-focus="true">
+            <template is="dom-if" if="{{_showNotFound}}">
+                <paper-icon-button class="tb-autocomplete__icon"
+                                   slot="suffix" suffix icon="error"
+                ></paper-icon-button>
+            </template>
+            <template is="dom-if" if="{{showSearchIcon}}">
+                <paper-icon-button class="tb-autocomplete__icon"
+                                   slot="suffix" suffix icon="search"
+                ></paper-icon-button>
+            </template>
+        </paper-autocomplete>
+
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'tb-autocomplete',
+
+                properties: {
+                    items: {
+                        type: Array,
+                        value: function() { return []; }
+                    },
+                    selected: {
+                        type: String,
+                        notify: true
+                    },
+                    label: {
+                        type: String,
+                        value: ''
+                    },
+                    noLabelFloat: {
+                        type: Boolean,
+                        value: true
+                    },
+                    valueProperty: {
+                        type: String,
+                        value: 'value'
+                    },
+                    textProperty: {
+                        type: String,
+                        value: 'text'
+                    },
+                    showSearchIcon: {
+                        type: Boolean,
+                        value: true
+                    },
+                    _showNotFound: {
+                        type: Boolean,
+                        value: false
+                    },
+                    text: {
+                        type: String,
+                        value: '',
+                        notify: true
+                    },
+                    disableClear: {
+                        type: Boolean,
+                        value: false
+                    }
+                },
+
+                observers: [
+                    '_onChangeText(text)',
+                ],
+
+                attached: function() {
+                    this.$$('paper-autocomplete').queryFn = function(source, query) {
+                        if (!_.isEmpty(this.selected) && this.selected.toLowerCase() === query.toLowerCase()) {
+                            var suggestionsEl = this.$$('paper-autocomplete').$$('paper-autocomplete-suggestions');
+                            suggestionsEl._onSuggestionsChanged();
+                            return source;
+                        }
+
+                        var suggestions = source.filter(function (item) {
+                            return item.text.toLowerCase().includes(query.toLowerCase())
+                        });
+                        this.set('_showNotFound', _.isEmpty(suggestions));
+                        return suggestions;
+                    }.bind(this);
+                },
+
+                _getSource: function(items, valueProperty, textProperty) {
+                    if (_.isEmpty(items) || _.isEmpty(valueProperty) || _.isEmpty(textProperty))
+                        return [];
+
+                    return items.map(function (item) {
+                        var text, value;
+
+                        if (typeof item === 'object') {
+                            text = item[valueProperty];
+                            value = item[textProperty];
+                        } else {
+                            text = item.toString();
+                            value = item.toString();
+                        }
+
+                        return {
+                            text: text,
+                            value: value
+                        };
+                    });
+
+                },
+
+                _onChangeText: function(text) {
+                    if (_.isEmpty(text))
+                        this.set('_showNotFound', false);
+                },
+
+            });
+        })();
+    </script>
+
+</dom-module>

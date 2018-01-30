@@ -60,7 +60,7 @@
                         type: Object,
                         notify: true,
                         value: function() { return {}; }
-                    }
+                    },
                 },
 
                 observers: [
@@ -68,22 +68,18 @@
                 ],
 
                 _onProjectSelected: function(selectedProjectKey, selectedDate) {
-                    this.chart = this.createChart();
-                    
                     var self = this;
-                    self.set('isReady', false);
-                    self.set('errorMessage', '');
-                    d3.json("/api/projects/"+selectedProjectKey+"/followup/progress?timezone=" + taskboard.getTimeZoneIdFromBrowser(), function(req, data) {
+                    self.reset();
+
+                    self.xhr = d3.json("/api/projects/"+selectedProjectKey+"/followup/progress?timezone=" + taskboard.getTimeZoneIdFromBrowser(), function(req, data) {
                         (function(){
                             if (req != null && req.status >= 400) {
                                 var msg = 'Impossible to generate Progress Chart. '+ req.responseText;
                                 self.set('errorMessage', msg);
-                                if (self.ndx)
-                                    self.ndx.remove();
                                 return;
                             }
-    
-                            function plotCallback(type) { 
+
+                            function plotCallback(type) {
                                 return function(d, index) {
                                     graphData.push({
                                         date   : new Date(d.date),
@@ -91,47 +87,42 @@
                                         type   : type
                                     })}
                             }
-    
+
                             var graphData = [];
                             data.actual.forEach(plotCallback("Actual"));
                             data.actualProjection.forEach(plotCallback("Projection"));
                             data.expected.forEach(plotCallback("Expected"));
-                            
-                            if (self.ndx == null)
-                                self.ndx = crossfilter(graphData);
-                            else {
-                                self.chart
-                                    .x(d3.time.scale().domain([new Date(data.startingDate), new Date(data.endingDate)]))
-                                self.ndx.remove();
-                                self.ndx.add(graphData);
-                                self.chart.redraw();
-                                return;
-                            }
-                            
-                            var dateDimension = self.ndx.dimension(function (d) {
+
+                            ndx = crossfilter(graphData);
+
+                            var dateDimension = ndx.dimension(function (d) {
                                 return [d.type, d.date];
                             });
-    
-                            var effortDoneByDayGroup = dateDimension.group().reduceSum(function(d) { 
-                                return d.value 
+
+                            var effortDoneByDayGroup = dateDimension.group().reduceSum(function(d) {
+                                return d.value
                             });
-    
-                            self.chart
-                                .x(d3.time.scale().domain([new Date(data.startingDate), new Date(data.endingDate)]))
+
+                            var startDate = new Date(data.startingDate);
+                            var endDate = new Date(data.endingDate);
+
+                            var chart = self.createChart(startDate, endDate);
+
+                            chart
+                                .x(d3.time.scale().domain([startDate, endDate]))
                                 .dimension(dateDimension)
                                 .group(effortDoneByDayGroup);
 
-                            self.chart.render();
+                            chart.render();
+
+                            self.set('chart', chart);
                         })();
 
                         self.set('isReady', true);
                     })
                 },
 
-                createChart: function() {
-                    if (!_.isEmpty(this.chart))
-                        return this.chart;
-
+                createChart: function(startDate, endDate) {
                     self = this;
                     
                     var chart = dc.seriesChart(this.$$("#progress-chart"));
@@ -157,11 +148,14 @@
                             self._getChartColors()
                         );
 
-                    chart.xAxis().tickFormat(function (v) {
-                        return dcUtils.dateFormat(v);
-                    });
-                    chart.xAxisPadding(50);
-                    chart.margins({top: 20, right: 20, bottom: 60, left: 50});
+                    chart.xAxis()
+                        .tickValues(
+                            dcUtils.getDateTicks(startDate, endDate, 14)
+                        )
+                        .tickFormat(function (v) {
+                            return dcUtils.dateFormat(v);
+                        });
+                    chart.margins({top: 20, right: 30, bottom: 60, left: 50});
 
                     dcUtils.rotateDateFormattedXAxis(chart);
 
@@ -171,8 +165,22 @@
                 _getChartColors: function() {
                     var actual = dcUtils.colors.DONE,
                         projection = dcUtils.colors.DONE_PROJECTION,
-                        expected = '#1f77b4';
+                        expected = dcUtils.colors.EXPECTED;
                     return dcUtils.getChartColorsFromArray([actual, expected, projection]);
+                },
+
+                reset: function() {
+                    this.set('isReady', false);
+                    this.set('errorMessage', '');
+
+                    if (this.xhr) {
+                        this.xhr.abort();
+                        this.xhr = null;
+                    }
+                    if (!_.isEmpty(this.chart)) {
+                        dc.deregisterChart(this.chart);
+                        this.set('chart', {});
+                    }
                 },
 
             });

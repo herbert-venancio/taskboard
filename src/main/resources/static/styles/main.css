@@ -321,6 +321,39 @@ paper-button.tb-button--background_none[disabled] {
 }
 
 /*
+    Autocomplete
+*/
+tb-autocomplete #suggestionsWrapper {
+    margin-top: -8px;
+    color: #333;
+}
+tb-autocomplete #labelAndInputContainer input {
+    color: #FFF !important;
+}
+tb-autocomplete paper-input-container .input-wrapper {
+    display: flex;
+}
+tb-autocomplete paper-input-container .input-wrapper .suffix {
+    display: flex;
+    flex: 0 0 auto;
+}
+tb-autocomplete paper-input-container .input-wrapper .tb-autocomplete__input {
+    color: #FFF !important;
+}
+tb-autocomplete paper-input-container .input-wrapper paper-icon-button {
+    width: 24px;
+    height: 24px;
+    padding: 2px;
+    color: #FFF !important;
+}
+tb-autocomplete paper-input-container .input-wrapper paper-icon-button iron-icon {
+    display: block;
+}
+tb-autocomplete[disable-clear="true"] .input-wrapper paper-icon-button#clear {
+    display: none !important;
+}
+
+/*
     Clear button
 */
 .clear-button {

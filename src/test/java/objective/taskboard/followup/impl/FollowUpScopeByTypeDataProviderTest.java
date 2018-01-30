@@ -5,9 +5,12 @@ import static java.util.Collections.emptyList;
 import static objective.taskboard.Constants.FROMJIRA_HEADERS;
 import static objective.taskboard.followup.impl.FollowUpScopeByTypeDataProvider.BASELINE_BACKLOG;
 import static objective.taskboard.followup.impl.FollowUpScopeByTypeDataProvider.BASELINE_DONE;
-import static objective.taskboard.followup.impl.FollowUpScopeByTypeDataProvider.INTANGIBLE;
-import static objective.taskboard.followup.impl.FollowUpScopeByTypeDataProvider.NEW_SCOPE;
-import static objective.taskboard.followup.impl.FollowUpScopeByTypeDataProvider.REWORK;
+import static objective.taskboard.followup.impl.FollowUpScopeByTypeDataProvider.INTANGIBLE_DONE;
+import static objective.taskboard.followup.impl.FollowUpScopeByTypeDataProvider.INTANGIBLE_BACKLOG;
+import static objective.taskboard.followup.impl.FollowUpScopeByTypeDataProvider.NEW_SCOPE_DONE;
+import static objective.taskboard.followup.impl.FollowUpScopeByTypeDataProvider.NEW_SCOPE_BACKLOG;
+import static objective.taskboard.followup.impl.FollowUpScopeByTypeDataProvider.REWORK_DONE;
+import static objective.taskboard.followup.impl.FollowUpScopeByTypeDataProvider.REWORK_BACKLOG;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -81,9 +84,12 @@ public class FollowUpScopeByTypeDataProviderTest {
         data = subject.getScopeByTypeData(PROJECT_KEY, DATE, ZONE_ID);
 
         Double expectedOthers = 0D;
-        assertEffortEstimateByType(INTANGIBLE, expectedOthers);
-        assertEffortEstimateByType(NEW_SCOPE, expectedOthers);
-        assertEffortEstimateByType(REWORK, expectedOthers);
+        assertEffortEstimateByType(INTANGIBLE_DONE, expectedOthers);
+        assertEffortEstimateByType(INTANGIBLE_BACKLOG, expectedOthers);
+        assertEffortEstimateByType(NEW_SCOPE_DONE, expectedOthers);
+        assertEffortEstimateByType(NEW_SCOPE_BACKLOG, expectedOthers);
+        assertEffortEstimateByType(REWORK_DONE, expectedOthers);
+        assertEffortEstimateByType(REWORK_BACKLOG, expectedOthers);
         assertEffortEstimateByType(BASELINE_DONE, expectedOthers);
         assertEffortEstimateByType(BASELINE_BACKLOG, EFFORT_ESTIMATE);
     }
@@ -95,37 +101,102 @@ public class FollowUpScopeByTypeDataProviderTest {
         data = subject.getScopeByTypeData(PROJECT_KEY, DATE, ZONE_ID);
 
         Double expectedOthers = 0D;
-        assertEffortEstimateByType(INTANGIBLE, expectedOthers);
-        assertEffortEstimateByType(NEW_SCOPE, expectedOthers);
-        assertEffortEstimateByType(REWORK, expectedOthers);
+        assertEffortEstimateByType(INTANGIBLE_DONE, expectedOthers);
+        assertEffortEstimateByType(INTANGIBLE_BACKLOG, expectedOthers);
+        assertEffortEstimateByType(NEW_SCOPE_DONE, expectedOthers);
+        assertEffortEstimateByType(NEW_SCOPE_BACKLOG, expectedOthers);
+        assertEffortEstimateByType(REWORK_DONE, expectedOthers);
+        assertEffortEstimateByType(REWORK_BACKLOG, expectedOthers);
         assertEffortEstimateByType(BASELINE_DONE, EFFORT_ESTIMATE);
         assertEffortEstimateByType(BASELINE_BACKLOG, expectedOthers);
     }
 
     @Test
-    public void ifIsRework_thenSumRework() {
+    public void ifIsReworkDone_thenSumReworkDone() {
         when(rowService.isRework(row)).thenReturn(true);
+        when(rowService.isDone(row)).thenReturn(true);
 
         data = subject.getScopeByTypeData(PROJECT_KEY, DATE, ZONE_ID);
 
         Double expectedOthers = 0D;
-        assertEffortEstimateByType(INTANGIBLE, expectedOthers);
-        assertEffortEstimateByType(NEW_SCOPE, expectedOthers);
-        assertEffortEstimateByType(REWORK, EFFORT_ESTIMATE);
+        assertEffortEstimateByType(INTANGIBLE_DONE, expectedOthers);
+        assertEffortEstimateByType(INTANGIBLE_BACKLOG, expectedOthers);
+        assertEffortEstimateByType(NEW_SCOPE_DONE, expectedOthers);
+        assertEffortEstimateByType(NEW_SCOPE_BACKLOG, expectedOthers);
+        assertEffortEstimateByType(REWORK_DONE, EFFORT_ESTIMATE);
+        assertEffortEstimateByType(REWORK_BACKLOG, expectedOthers);
         assertEffortEstimateByType(BASELINE_DONE, expectedOthers);
         assertEffortEstimateByType(BASELINE_BACKLOG, expectedOthers);
     }
 
     @Test
-    public void ifIsNewScope_thenSumNewScope() {
-        when(rowService.isNewScope(row)).thenReturn(true);
+    public void ifIsReworkBacklog_thenSumReworkBacklog() {
+        when(rowService.isRework(row)).thenReturn(true);
+        when(rowService.isBacklog(row)).thenReturn(true);
 
         data = subject.getScopeByTypeData(PROJECT_KEY, DATE, ZONE_ID);
 
         Double expectedOthers = 0D;
-        assertEffortEstimateByType(INTANGIBLE, expectedOthers);
-        assertEffortEstimateByType(NEW_SCOPE, EFFORT_ESTIMATE);
-        assertEffortEstimateByType(REWORK, expectedOthers);
+        assertEffortEstimateByType(INTANGIBLE_DONE, expectedOthers);
+        assertEffortEstimateByType(INTANGIBLE_BACKLOG, expectedOthers);
+        assertEffortEstimateByType(NEW_SCOPE_DONE, expectedOthers);
+        assertEffortEstimateByType(NEW_SCOPE_BACKLOG, expectedOthers);
+        assertEffortEstimateByType(REWORK_DONE, expectedOthers);
+        assertEffortEstimateByType(REWORK_BACKLOG, EFFORT_ESTIMATE);
+        assertEffortEstimateByType(BASELINE_DONE, expectedOthers);
+        assertEffortEstimateByType(BASELINE_BACKLOG, expectedOthers);
+    }
+
+    @Test
+    public void ifIsNewScopeDone_thenSumNewScopeDone() {
+        when(rowService.isNewScope(row)).thenReturn(true);
+        when(rowService.isDone(row)).thenReturn(true);
+
+        data = subject.getScopeByTypeData(PROJECT_KEY, DATE, ZONE_ID);
+
+        Double expectedOthers = 0D;
+        assertEffortEstimateByType(INTANGIBLE_DONE, expectedOthers);
+        assertEffortEstimateByType(INTANGIBLE_BACKLOG, expectedOthers);
+        assertEffortEstimateByType(NEW_SCOPE_DONE, EFFORT_ESTIMATE);
+        assertEffortEstimateByType(NEW_SCOPE_BACKLOG, expectedOthers);
+        assertEffortEstimateByType(REWORK_DONE, expectedOthers);
+        assertEffortEstimateByType(REWORK_BACKLOG, expectedOthers);
+        assertEffortEstimateByType(BASELINE_DONE, expectedOthers);
+        assertEffortEstimateByType(BASELINE_BACKLOG, expectedOthers);
+    }
+
+    @Test
+    public void ifIsNewScopeBacklog_thenSumNewScopeBacklog() {
+        when(rowService.isNewScope(row)).thenReturn(true);
+        when(rowService.isBacklog(row)).thenReturn(true);
+
+        data = subject.getScopeByTypeData(PROJECT_KEY, DATE, ZONE_ID);
+
+        Double expectedOthers = 0D;
+        assertEffortEstimateByType(INTANGIBLE_DONE, expectedOthers);
+        assertEffortEstimateByType(INTANGIBLE_BACKLOG, expectedOthers);
+        assertEffortEstimateByType(NEW_SCOPE_DONE, expectedOthers);
+        assertEffortEstimateByType(NEW_SCOPE_BACKLOG, EFFORT_ESTIMATE);
+        assertEffortEstimateByType(REWORK_DONE, expectedOthers);
+        assertEffortEstimateByType(REWORK_BACKLOG, expectedOthers);
+        assertEffortEstimateByType(BASELINE_DONE, expectedOthers);
+        assertEffortEstimateByType(BASELINE_BACKLOG, expectedOthers);
+    }
+
+    @Test
+    public void ifIsIntangibleDone_thenSumIntangibleDone() {
+        when(rowService.isIntangible(row)).thenReturn(true);
+        when(rowService.isDone(row)).thenReturn(true);
+
+        data = subject.getScopeByTypeData(PROJECT_KEY, DATE, ZONE_ID);
+
+        Double expectedOthers = 0D;
+        assertEffortEstimateByType(INTANGIBLE_DONE, EFFORT_ESTIMATE);
+        assertEffortEstimateByType(INTANGIBLE_BACKLOG, expectedOthers);
+        assertEffortEstimateByType(NEW_SCOPE_DONE, expectedOthers);
+        assertEffortEstimateByType(NEW_SCOPE_BACKLOG, expectedOthers);
+        assertEffortEstimateByType(REWORK_DONE, expectedOthers);
+        assertEffortEstimateByType(REWORK_BACKLOG, expectedOthers);
         assertEffortEstimateByType(BASELINE_DONE, expectedOthers);
         assertEffortEstimateByType(BASELINE_BACKLOG, expectedOthers);
     }
@@ -133,13 +204,17 @@ public class FollowUpScopeByTypeDataProviderTest {
     @Test
     public void ifIsIntangible_thenSumIntangible() {
         when(rowService.isIntangible(row)).thenReturn(true);
+        when(rowService.isBacklog(row)).thenReturn(true);
 
         data = subject.getScopeByTypeData(PROJECT_KEY, DATE, ZONE_ID);
 
         Double expectedOthers = 0D;
-        assertEffortEstimateByType(INTANGIBLE, EFFORT_ESTIMATE);
-        assertEffortEstimateByType(NEW_SCOPE, expectedOthers);
-        assertEffortEstimateByType(REWORK, expectedOthers);
+        assertEffortEstimateByType(INTANGIBLE_DONE, expectedOthers);
+        assertEffortEstimateByType(INTANGIBLE_BACKLOG, EFFORT_ESTIMATE);
+        assertEffortEstimateByType(NEW_SCOPE_DONE, expectedOthers);
+        assertEffortEstimateByType(NEW_SCOPE_BACKLOG, expectedOthers);
+        assertEffortEstimateByType(REWORK_DONE, expectedOthers);
+        assertEffortEstimateByType(REWORK_BACKLOG, expectedOthers);
         assertEffortEstimateByType(BASELINE_DONE, expectedOthers);
         assertEffortEstimateByType(BASELINE_BACKLOG, expectedOthers);
     }
@@ -154,9 +229,12 @@ public class FollowUpScopeByTypeDataProviderTest {
 
         Double expectedOthers = 0D;
         Double expectedTwoRows = EFFORT_ESTIMATE * rows.size();
-        assertEffortEstimateByType(INTANGIBLE, expectedOthers);
-        assertEffortEstimateByType(NEW_SCOPE, expectedOthers);
-        assertEffortEstimateByType(REWORK, expectedOthers);
+        assertEffortEstimateByType(INTANGIBLE_DONE, expectedOthers);
+        assertEffortEstimateByType(INTANGIBLE_BACKLOG, expectedOthers);
+        assertEffortEstimateByType(NEW_SCOPE_DONE, expectedOthers);
+        assertEffortEstimateByType(NEW_SCOPE_BACKLOG, expectedOthers);
+        assertEffortEstimateByType(REWORK_DONE, expectedOthers);
+        assertEffortEstimateByType(REWORK_BACKLOG, expectedOthers);
         assertEffortEstimateByType(BASELINE_DONE, expectedOthers);
         assertEffortEstimateByType(BASELINE_BACKLOG, expectedTwoRows);
     }

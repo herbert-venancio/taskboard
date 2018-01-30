@@ -315,6 +315,10 @@
                 transition: all .5s;
             }
 
+            .link-icon {
+                color: inherit;
+            }
+
             @keyframes fade-in {
                 from {opacity: 0;}
                 to {opacity: 1;}
@@ -429,8 +433,10 @@
                                                    class="template-followup-button" on-tap="openFollowupCrudModal"></paper-icon-button>
                             </div>
                             <div>
-                                <paper-icon-button icon="taskboard-icons:dashboard" title="Followup Dashboard"
-                                                   class="dashboard-button" on-tap="openDashboard"></paper-icon-button>
+                                <a href="/followup-dashboard/" class="link-icon">
+                                    <paper-icon-button icon="taskboard-icons:dashboard" title="Followup Dashboard"
+                                                   class="dashboard-button"></paper-icon-button>
+                                </a>
                             </div>
                         </template>
                         <div>
@@ -539,7 +545,7 @@
                         url: '/ws/user-preferences/update'
                     }).fail(function (jqXHR, textStatus, errorThrown) {
                         console.error(errorThrown);
-                        this.set('errorMessage', 'An unexpected error ocurred. Could not save your preferences on server.');
+                        self.set('errorMessage', 'An unexpected error ocurred. Could not save your preferences on server.');
                         toastError.open();
                     });
                 },
@@ -691,11 +697,6 @@
 
                 openFollowupCrudModal: function() {
                     this.$.followupCrudModal.open();
-                },
-
-                openDashboard: function(event) {
-                    event.stopPropagation();
-                    var win = window.open('/followup-dashboard/');
                 },
 
                 openAbout: function() {

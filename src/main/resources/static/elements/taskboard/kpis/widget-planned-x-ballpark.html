@@ -104,13 +104,13 @@
 
                     self._resetChartAndWidget();
 
-                    d3.json("/api/projects/" + projectKey + "/followup/planned-ballpark", function(error, data) {
+                    this.xhr = d3.json("/api/projects/" + projectKey + "/followup/planned-ballpark", function(error, data) {
                         if(error) {
                             self._handleError(error);
                             return;
                         }
 
-                        var chart = dc.pieChart("#planned-x-ballpark");
+                        var chart = dc.tbPieChart("#planned-x-ballpark");
 
                         var plannedXBallpark = crossfilter(data);
 
@@ -131,12 +131,11 @@
                             .title(function(data) {
                                 return "Total Effort for " + data.key + ": " + data.value + " of " + all.value();
                             })
-                            .legend(
-                                dcUtils.getDefaultLegend()
-                            )
                             .colors(
                                 dcUtils.getDefaultColors()
                             );
+
+                        dcUtils.defaultPieChartConfiguration(chart);
 
                         chart.render();
 
@@ -155,6 +154,10 @@
                     this.set('errorMessage', null);
                     this.set('isReady', false);
 
+                    if (this.xhr) {
+                        this.xhr.abort();
+                        this.xhr = null;
+                    }
                     if (!_.isEmpty(this.chart)) {
                         dc.deregisterChart(this.chart);
                         this.set('chart', {});
