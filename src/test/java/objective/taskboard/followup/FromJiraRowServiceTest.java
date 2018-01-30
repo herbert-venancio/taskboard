@@ -1,6 +1,7 @@
 package objective.taskboard.followup;
 
 import static java.util.Arrays.asList;
+import static objective.taskboard.followup.FromJiraDataRow.QUERY_TYPE_SUBTASK_PLAN;
 import static objective.taskboard.followup.FromJiraRowService.BUG;
 import static objective.taskboard.followup.FromJiraRowService.INTANGIBLE;
 import static objective.taskboard.followup.FromJiraRowService.NEW_SCOPE;
@@ -186,6 +187,28 @@ public class FromJiraRowServiceTest {
         row = new FromJiraDataRow();
         row.demandStatus = DONE_NAME;
         assertFalse(subject.isBaselineBacklog(row));
+    }
+
+    @Test
+    public void givenQueryTypeSubtaskPlan_returnIsPlannedTrue_elseReturnFalse() {
+        row = new FromJiraDataRow();
+        row.queryType = QUERY_TYPE_SUBTASK_PLAN;
+        assertTrue(subject.isPlanned(row));
+
+        row = new FromJiraDataRow();
+        row.queryType = WRONG_VALUE;
+        assertFalse(subject.isPlanned(row));
+    }
+
+    @Test
+    public void givenQueryTypeSubtaskPlan_returnIsBallparkFalse_elseReturnTrue() {
+        row = new FromJiraDataRow();
+        row.queryType = QUERY_TYPE_SUBTASK_PLAN;
+        assertFalse(subject.isBallpark(row));
+
+        row = new FromJiraDataRow();
+        row.queryType = WRONG_VALUE;
+        assertTrue(subject.isBallpark(row));
     }
 
     private String asString(String... values) {

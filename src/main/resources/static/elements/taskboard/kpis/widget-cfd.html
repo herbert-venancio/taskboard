@@ -98,16 +98,16 @@
                     this.reset();
 
                     var self = this;
-                    
-                    d3.json("/api/projects/"+ project + "/followup/cfd", function(error, cfdData) {
+
+                    self.xhr = d3.json("/api/projects/"+ project + "/followup/cfd", function(error, cfdData) {
                         if(self.handleErrors(error, cfdData))
                             return;
 
                         var status = Object.keys(cfdData.dataByStatus).reverse();
 
                         self.cfdData = self.groupByDate(cfdData);
-                        var minDate = self.cfdData[0].date;
-                        var maxDate = self.cfdData[self.cfdData.length-1].date;
+                        var startDate = self.cfdData[0].date;
+                        var endDate = self.cfdData[self.cfdData.length-1].date;
                         
                         self.ndx = crossfilter(self.cfdData);
                         // the (run) dimension is the dimension on which dc will iterate and will become the "X" axis
@@ -138,7 +138,7 @@
                                 }
                             );
                         
-                        self.createChart();
+                        self.createChart(startDate, endDate);
                         
                         // function to access correct data for each stack
                         function stackAccessor(status) { 
@@ -147,7 +147,7 @@
                             };
                         }
                         
-                        var xScale = d3.time.scale().domain([minDate, maxDate]);
+                        var xScale = d3.time.scale().domain([startDate, endDate]);
                         self.chart
                             .dimension(self.cfdDim)
                             .group(self.cfdGroup, status[0], stackAccessor(status[0])) // the first stack must be added as a group
@@ -187,6 +187,10 @@
                     this.set('isReady', false);
                     this.set('errorMessage', '');
 
+                    if (this.xhr) {
+                        this.xhr.abort();
+                        this.xhr = null;
+                    }
                     if (!_.isEmpty(this.chart)) {
                         dc.deregisterChart(this.chart);
                         this.set('chart', {});
@@ -206,12 +210,12 @@
                     return false;
                 },
                 
-                createChart: function() {
+                createChart: function(startDate, endDate) {
                     var chart = dc.lineChart("#cfd");
 
                     // basic chart configuration
                     chart
-                        .margins({top: 20, right: 20, bottom: 60, left: 200})
+                        .margins({top: 20, right: 30, bottom: 60, left: 200})
                         .legend(
                             dcUtils.getDefaultLegend()
                         )
@@ -220,10 +224,13 @@
                         )
                         .renderArea(true)
                         .brushOn(false)       // don't select with drag-n-drop
-                        .mouseZoomable(true)  // zoom with mouse wheel
+                        .mouseZoomable(false)  // zoom with mouse wheel
                         .elasticY(true)       // y axis will adjust to the data
-                        .xAxis()               
-                            .tickFormat(function(v) { // formats the data in the X axis
+                        .xAxis()
+                            .tickValues(
+                                dcUtils.getDateTicks(startDate, endDate, 14)
+                            )
+                            .tickFormat(function(v) {
                                 return dcUtils.dateFormat(v);
                             });
 

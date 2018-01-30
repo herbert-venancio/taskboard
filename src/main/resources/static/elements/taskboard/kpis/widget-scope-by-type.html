@@ -27,7 +27,7 @@
 
         <widget-wrap title="Scope By Type" is-ready="{{isReady}}" chart="{{chart}}" error-message="{{errorMessage}}">
 
-            <div id="scope-by-type-chart" class="tb-chart"></div>
+            <div id="scope-by-type" class="tb-chart"></div>
 
         </widget-wrap>
 
@@ -75,18 +75,18 @@
 
                     var self = this;
 
-                    self._resetChartAndWidget();
+                    self._reset();
 
                     var url = "/api/projects/"+ selectedProjectKey +"/followup/scope-by-type?date="+ selectedDate +"&timezone="+ taskboard.getTimeZoneIdFromBrowser();
 
-                    d3.json(url, function(error, data) {
+                    self.xhr = d3.json(url, function(error, data) {
 
                         if (error) {
                             self.set('errorMessage', 'Impossible to generate Scope By Type. '+ error.responseText);
                             return;
                         }
 
-                        var chart = dc.pieChart("#scope-by-type-chart");
+                        var chart = dc.tbPieChart("#scope-by-type");
 
                         var ndx = crossfilter(data.values);
                         var chartDimension = ndx.dimension(function (d) {
@@ -114,13 +114,11 @@
 
                                 return d.key + ': ' + d.value;
                             })
-                            .legend(
-                                dcUtils.getDefaultLegend()
-                            )
                             .colors(
                                 self._getChartColors()
-                            )
-                            .turnOnControls(true);
+                            );
+
+                        dcUtils.defaultPieChartConfiguration(chart);
 
                         chart.render();
 
@@ -130,10 +128,14 @@
 
                 },
 
-                _resetChartAndWidget: function() {
+                _reset: function() {
                     this.set('errorMessage', null);
                     this.set('isReady', false);
 
+                    if (this.xhr) {
+                        this.xhr.abort();
+                        this.xhr = null;
+                    }
                     if (!_.isEmpty(this.chart)) {
                         dc.deregisterChart(this.chart);
                         this.set('chart', {});
@@ -141,12 +143,15 @@
                 },
 
                 _getChartColors: function() {
-                    var baselineBacklog = '#909',
-                        baselineDone = '#2ca02c',
-                        intangible = '#dc3912',
-                        newScope = '#1f77b4',
-                        rework = '#ff7f0e';
-                    return dcUtils.getChartColorsFromArray([baselineBacklog, baselineDone, intangible, newScope, rework]);
+                    var baselineBacklog = dcUtils.colors.BASELINE_BACKLOG,
+                        baselineDone = dcUtils.colors.BASELINE_DONE,
+                        intangibleBacklog = dcUtils.colors.INTANGIBLE_BACKLOG,
+                        intangibleDone = dcUtils.colors.INTANGIBLE_DONE,
+                        newScopeBacklog = dcUtils.colors.NEWSCOPE_BACKLOG,
+                        newScopeDone = dcUtils.colors.NEWSCOPE_DONE,
+                        reworkBacklog = dcUtils.colors.REWORK_BACKLOG,
+                        reworkDone = dcUtils.colors.REWORK_DONE;
+                    return dcUtils.getChartColorsFromArray([baselineBacklog, baselineDone, intangibleBacklog, intangibleDone, newScopeBacklog, newScopeDone, reworkBacklog, reworkDone]);
                 }
 
             });

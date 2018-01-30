@@ -77,8 +77,9 @@ public class ProjectController {
     public List<ProjectData> get() {
         List<ProjectTeam> projects = projectTeamRepo.findAll().stream()
                 .filter(t -> projectService.isProjectVisible(t.getProjectKey()))
+                .sorted((p1, p2) -> p1.getProjectKey().compareTo(p2.getProjectKey()))
                 .collect(toList());
-                
+
         List<ProjectData> response = new ArrayList<>();
         Map<String, ProjectData> projectXData = new LinkedHashMap<>();
         for (ProjectTeam projectTeam : projects) {   

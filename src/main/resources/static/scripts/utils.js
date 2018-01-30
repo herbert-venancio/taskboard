@@ -39,12 +39,18 @@ function isFieldNameEquals(fieldName, anotherFieldName) {
 }
 
 function getDateFromYYYYMMDD(yyyymmdd) {
-    if (!yyyymmdd || yyyymmdd.length != 8)
+    if (!yyyymmdd || yyyymmdd.length !== 8)
         return yyyymmdd + " (invalid date format)";
     var year = yyyymmdd.substr(0, 4);
     var month = yyyymmdd.substr(4, 2) - 1;
     var day = yyyymmdd.substr(6, 2);
     return new Date(year, month, day);
+}
+
+function addDaysToDate(date, days) {
+    var newDate = new Date(date.valueOf());
+    newDate.setDate(newDate.getDate() + days);
+    return newDate;
 }
 
 if (!Object.values) {

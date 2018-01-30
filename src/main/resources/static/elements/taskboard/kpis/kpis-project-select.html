@@ -63,7 +63,6 @@
             }
             .select-project__input {
                 width: 100%;
-                color: #333;
             }
         </style>
 
@@ -75,21 +74,17 @@
                 <h1>Select the project to see the KPIs</h1>
             </header>
 
-            <form id="form" class="kpis__form tb-form" action="/ws/followup/kpis" method="post">
+            <div class="kpis__form tb-form">
                 <div class="tb-form__row">
-                    <paper-dropdown-menu class="select-project__input"
-                                         label="Select here"
-                                         no-label-float>
-                        <paper-listbox class="dropdown-content"
-                                       attr-for-selected="value"
-                                       selected="{{selectedProjectKey}}">
-                            <template is="dom-repeat" items="{{projects}}" as="project">
-                                <paper-item value="{{project.projectKey}}">{{project.projectKey}}</paper-item>
-                            </template>
-                        </paper-listbox>
-                    </paper-dropdown-menu>
+                    <tb-autocomplete class="select-project__input"
+                                     selected="{{selectedProjectKey}}"
+                                     items="[[projects]]"
+                                     value-property="projectKey"
+                                     text-property="projectKey"
+                                     label="Select here"
+                    ></tb-autocomplete>
                 </div>
-            </form>
+            </div>
 
         </section>
 

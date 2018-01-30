@@ -1,6 +1,7 @@
 package objective.taskboard.followup;
 
 import static java.util.Arrays.asList;
+import static objective.taskboard.followup.FromJiraDataRow.QUERY_TYPE_SUBTASK_PLAN;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.util.List;
@@ -32,8 +33,8 @@ public class FromJiraRowService {
             return INTANGIBLE.equals(row.taskClassOfService);
         else if (!isEmpty(row.demandClassOfService))
             return INTANGIBLE.equals(row.demandClassOfService);
-        else
-            return false;
+
+        return false;
     }
 
     public boolean isNewScope(FromJiraDataRow row) {
@@ -46,8 +47,8 @@ public class FromJiraRowService {
             return asList(row.taskLabels.split(",")).contains(NEW_SCOPE);
         else if (!isEmpty(row.demandLabels))
             return asList(row.demandLabels.split(",")).contains(NEW_SCOPE);
-        else
-            return false;
+
+        return false;
     }
 
     public boolean isRework(FromJiraDataRow row) {
@@ -61,6 +62,17 @@ public class FromJiraRowService {
         if (isIntangible(row) || isNewScope(row) || isRework(row))
             return false;
 
+        return isDone(row);
+    }
+
+    public boolean isBaselineBacklog(FromJiraDataRow row) {
+        if (isIntangible(row) || isNewScope(row) || isRework(row) || isBaselineDone(row))
+            return false;
+
+        return true;
+    }
+
+    public boolean isDone(FromJiraDataRow row) {
         List<String> doneStatusesNames = getDoneStatusesNames();
 
         if (!isEmpty(row.subtaskStatus))
@@ -69,15 +81,20 @@ public class FromJiraRowService {
             return doneStatusesNames.contains(row.taskStatus);
         else if (!isEmpty(row.demandStatus))
             return doneStatusesNames.contains(row.demandStatus);
-        else 
-            return false;
+
+        return false;
     }
 
-    public boolean isBaselineBacklog(FromJiraDataRow row) {
-        if (isIntangible(row) || isNewScope(row) || isRework(row) || isBaselineDone(row))
-            return false;
+    public boolean isBacklog(FromJiraDataRow row) {
+        return !isDone(row);
+    }
 
-        return true;
+    public boolean isPlanned(FromJiraDataRow row) {
+        return QUERY_TYPE_SUBTASK_PLAN.equals(row.queryType);
+    }
+
+    public boolean isBallpark(FromJiraDataRow row) {
+        return !isPlanned(row);
     }
 
     private List<String> getDoneStatusesNames() {

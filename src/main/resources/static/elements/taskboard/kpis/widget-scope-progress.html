@@ -91,7 +91,7 @@
                             return;
 
                         self.setData(data);
-                        self.createChart();
+                        self.createChart(new Date(data.startingDate), new Date(data.endingDate));
                         self.updateChart();
 
                         self.set('isReady', true);
@@ -181,17 +181,14 @@
                     this.group = this.dimension.group().reduce(fAdd, fRemove, fInit);
                 },
 
-                createChart: function() {
-                    if(this.chart)
-                        return;
-
+                createChart: function(startDate, endDate) {
                     var self = this;
 
                     var chart = dc.barChart("#scope-progress");
 
                     // chart configuration
                     chart
-                        .margins({top: 20, right: 20, bottom: 60, left: 50})
+                        .margins({top: 20, right: 30, bottom: 60, left: 50})
                         .legend(dcUtils
                                 .getDefaultLegend()
                                 .x(95).y(20)
@@ -210,11 +207,14 @@
                     chart
                         //.xAxisLabel("Timeline")
                         .yAxisLabel("Effort (hours)")
-                        .xAxisPadding(50)
                         .elasticY(true)       // y axis will adjust to the data
-                        .xAxis().tickFormat(function (v) {
-                            return dcUtils.dateFormat(v);
-                        });
+                        .xAxis()
+                            .tickValues(
+                                dcUtils.getDateTicks(startDate, endDate, 14)
+                            )
+                            .tickFormat(function (v) {
+                                return dcUtils.dateFormat(v);
+                            });
 
                     // mouse interaction
                     chart
