@@ -2,21 +2,21 @@ package objective.taskboard.followup.cluster;
 
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.Validate;
 
+import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.domain.TaskboardEntity;
-import objective.taskboard.followup.data.Template;
 
 @Entity
 @Table(name = "followup_cluster_item")
 public class FollowUpClusterItem extends TaskboardEntity {
 
-    @OneToOne(optional = false)
-    @JoinColumn(name = "followup_config", nullable = false)
-    private Template followUpConfiguration;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "project_key", referencedColumnName = "projectKey", nullable = false)
+    private ProjectFilterConfiguration project;
 
     private String subtaskTypeName;
     private String parentTypeName;
@@ -25,14 +25,14 @@ public class FollowUpClusterItem extends TaskboardEntity {
     private Double cycle;
 
     public FollowUpClusterItem(
-            Template followUpConfiguration, 
-            String subtaskTypeName, 
+            ProjectFilterConfiguration project,
+            String subtaskTypeName,
             String parentTypeName,
-            String sizing, 
-            Double effort, 
+            String sizing,
+            Double effort,
             Double cycle) {
-        
-        setFollowUpConfiguration(followUpConfiguration);
+
+        setProject(project);
         setSubtaskTypeName(subtaskTypeName);
         setParentTypeName(parentTypeName);
         setSizing(sizing);
@@ -44,13 +44,13 @@ public class FollowUpClusterItem extends TaskboardEntity {
         //JPA
     }
 
-    public Template getFollowUpConfiguration() {
-        return followUpConfiguration;
+    public ProjectFilterConfiguration getProject() {
+        return project;
     }
 
-    public void setFollowUpConfiguration(Template followUpConfiguration) {
-        Validate.notNull(followUpConfiguration);
-        this.followUpConfiguration = followUpConfiguration;
+    public void setProject(ProjectFilterConfiguration project) {
+        Validate.notNull(project);
+        this.project = project;
     }
 
     public String getSubtaskTypeName() {

@@ -8,9 +8,8 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
-import com.google.common.base.Objects;
-import com.google.common.cache.Cache;
-import objective.taskboard.config.CacheConfiguration;
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpStatus;
@@ -21,6 +20,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.common.base.Objects;
+import com.google.common.cache.Cache;
+
+import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.FollowUpDataSnapshot;
 import objective.taskboard.followup.FollowupCluster;
@@ -29,8 +32,6 @@ import objective.taskboard.followup.data.FollowupProgressCalculator;
 import objective.taskboard.followup.data.ProgressData;
 import objective.taskboard.followup.impl.FollowUpDataProviderFromCurrentState;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
-
-import javax.annotation.PostConstruct;
 
 @RestController
 public class DashboardProjectProgressController {
@@ -75,8 +76,8 @@ public class DashboardProjectProgressController {
         if (!project.isPresent())
             return new ResponseEntity<>("Project not found: " + projectKey + ".", HttpStatus.NOT_FOUND);
 
-        Optional<FollowupCluster> cluster = clusterProvider.getFor(project.get());
-        if (!cluster.isPresent())
+        FollowupCluster cluster = clusterProvider.getFor(project.get());
+        if(cluster.getClusterItems().isEmpty())
             return new ResponseEntity<>("No cluster configuration found for project " + projectKey + ".", INTERNAL_SERVER_ERROR);
 
         ZoneId timezone = determineTimeZoneId(zoneId);
@@ -86,7 +87,7 @@ public class DashboardProjectProgressController {
 
         LocalDate deliveryDate = project.get().getDeliveryDate();
 
-        FollowUpDataSnapshot snapshot = providerFromCurrentState.getJiraData(cluster.get(), new String[]{projectKey}, timezone);
+        FollowUpDataSnapshot snapshot = providerFromCurrentState.getJiraData(cluster, new String[]{projectKey}, timezone);
         if (!snapshot.getHistory().isPresent())
             return new ResponseEntity<>("No progress history found for project " + projectKey, INTERNAL_SERVER_ERROR);
 
