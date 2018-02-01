@@ -21,6 +21,7 @@ import com.atlassian.jira.rest.client.api.RestClientException;
 
 import objective.taskboard.domain.Project;
 import objective.taskboard.google.GoogleApiService;
+import objective.taskboard.google.SpreadsheetsManager.SpreadsheetException;
 import objective.taskboard.jira.JiraServiceException;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.sizingImport.PreviewBuilder.ImportPreview;
@@ -117,10 +118,11 @@ public class SizingImportController {
         try {
             sizingImportService.importSpreadsheet(projectKey, spreadsheetId, dynamicColumnsMapping);
             return ResponseEntity.ok().build();
-            
         } catch (JiraServiceException | RestClientException ex) {
             log.error(null, ex);
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch(SpreadsheetException ex) {
+            throw ex;
         } catch (Exception ex) {
             log.error(null, ex);
             return new ResponseEntity<>("Internal Error", HttpStatus.INTERNAL_SERVER_ERROR);
