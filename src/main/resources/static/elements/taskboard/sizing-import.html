@@ -864,10 +864,10 @@
                     var self = this;
 
                     var data = this.customFields
-                        .filter( c => {
+                        .filter( function(c) {
                             return !self.isInvalidValue(c.columnLetter)
                         })
-                        .map( c => {
+                        .map( function(c) {
                             return {
                                 columnId: c.columnId,
                                 columnLetter: c.columnLetter
@@ -881,8 +881,8 @@
                         contentType: 'application/json',
                         success: function () {},
                         error: function (jqXhr, textStatus, errorThrown) {
-                            self.statusMessage = 'Failed to import';
-                            self.isImportationCompleted = true;
+                            self.set('statusMessage', jqXhr.responseJSON.message);
+                            self.set('isImportationCompleted', true);
                         }
                     });
 
