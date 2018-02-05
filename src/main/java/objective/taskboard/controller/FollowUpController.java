@@ -20,12 +20,17 @@
  */
 package objective.taskboard.controller;
 
+import static java.time.temporal.ChronoField.HOUR_OF_DAY;
+import static java.time.temporal.ChronoField.MINUTE_OF_HOUR;
 import static objective.taskboard.utils.DateTimeUtils.determineTimeZoneId;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +49,15 @@ import objective.taskboard.followup.FollowUpGenerator;
 @RequestMapping("/ws/followup")
 public class FollowUpController {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FollowUpController.class);
+    private static final DateTimeFormatter formatter = new DateTimeFormatterBuilder()
+            .parseCaseInsensitive()
+            .append(DateTimeFormatter.ISO_LOCAL_DATE)
+            .appendLiteral(' ')
+            .appendValue(HOUR_OF_DAY, 2)
+            .appendLiteral(':')
+            .appendValue(MINUTE_OF_HOUR, 2)
+            .toFormatter();
+    
     @Autowired
     private FollowUpFacade followUpFacade;
 
@@ -64,14 +78,21 @@ public class FollowUpController {
         try {
             FollowUpGenerator followupGenerator = followUpFacade.getGenerator(template, date);
             Resource resource = followupGenerator.generate(includedProjects, timezone);
+            String filename = "Followup_"+template+"_" + templateDate(date, timezone);
             return ResponseEntity.ok()
                   .contentLength(resource.contentLength())
-                  .header("Content-Disposition","attachment; filename=Followup.xlsm")
+                  .header("Content-Disposition","attachment; filename=" + filename + ".xlsm")
                   .body(resource);
         } catch (Exception e) {
             log.warn("Error generating followup spreadsheet", e);
             return new ResponseEntity<>(e.getMessage() == null ? e.toString() : e.getMessage(), INTERNAL_SERVER_ERROR);
         }
+    }
+
+    private String templateDate(Optional<String> date, ZoneId timezone) {
+        if (date.isPresent() && !date.get().isEmpty())
+            return date.get();
+        return ZonedDateTime.now(timezone).format(formatter);
     }
 
     @RequestMapping("generic-template")
