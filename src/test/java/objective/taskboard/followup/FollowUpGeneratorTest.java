@@ -340,6 +340,55 @@ public class FollowUpGeneratorTest {
 
         assertEquals(expectedEditorLogger, editor.loggerString());
     }
+    
+    @Test
+    public void whenClusteIsEmpty_ShouldOnlyTruncateTab() throws IOException {
+        //Data 1
+        FromJiraDataRow data1row1 = getDefaultFromJiraDataRow();
+        FromJiraDataRow data1row2 = getDefaultFromJiraDataRow();
+        
+        FromJiraRowCalculator rowCalculator = Mockito.mock(FromJiraRowCalculator.class);
+        when(rowCalculator.calculate(data1row1)).thenReturn(new FromJiraRowCalculation(0, 2, 3));
+        when(rowCalculator.calculate(data1row2)).thenReturn(new FromJiraRowCalculation(0, 2, 3));
+
+        FollowUpDataSnapshot followUpDataEntry1 = followUpDataEntry(LocalDate.of(2017, 10, 1), asList(data1row1, data1row2));
+        
+        //Data 2
+        FromJiraDataRow data2row1 = getDefaultFromJiraDataRow();
+        FromJiraDataRow data2row2 = getDefaultFromJiraDataRow();
+        FromJiraDataRow data2row3 = getDefaultFromJiraDataRow();
+
+        FollowUpDataSnapshot followUpDataEntry2 = followUpDataEntry(LocalDate.of(2017, 10, 2), asList(data2row1, data2row2, data2row3));
+
+        FollowUpDataHistoryRepository historyRepository = Mockito.mock(FollowUpDataHistoryRepository.class);
+        
+        List<String> projects = asList("P1", "P2");
+        List<FollowUpDataSnapshot> entries = asList(followUpDataEntry1, followUpDataEntry2);
+        mockProviderForEachHistoryEntry(historyRepository, projects, entries);
+        
+        FollowUpDataSnapshotHistory snapshotHistory = new FollowUpDataSnapshotHistory(historyRepository, 
+                projects.toArray(new String[0]), 
+                ZoneId.of("Z"), 
+                followUpDataEntry2, 
+                rowCalculator);
+        
+        followUpDataEntry2.setFollowUpDataEntryHistory(snapshotHistory);
+
+        subject = new FollowUpGenerator(provider, editor, new EmptyFollowupCluster());
+
+        subject.getEditor().open();
+        subject.generateEffortHistory(followUpDataEntry2, ZoneId.of("Z"));
+        subject.getEditor().close();
+
+        String expectedEditorLogger = 
+                "Spreadsheet Open\n" + 
+                "Sheet Create: Effort History\n" +  
+                "Sheet \"Effort History\" Save\n" + 
+                "Spreadsheet Close\n";
+
+        assertEquals(expectedEditorLogger, editor.loggerString());
+    }
+    
 
     @Test
     public void givenFollowUpClusterItems_whenGenerateTShirtSizeSheet_thenSheetShouldContainsItems() throws IOException {

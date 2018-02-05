@@ -17,4 +17,9 @@ public class EmptyFollowupCluster implements FollowupCluster {
     public List<FollowUpClusterItem> getClusterItems() {
         return Collections.emptyList();
     }
+
+    @Override
+    public boolean isEmpty() {
+        return true;
+    }
 }
