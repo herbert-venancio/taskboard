@@ -21,8 +21,6 @@
 
 package objective.taskboard.followup.impl;
 
-import static objective.taskboard.issueBuffer.IssueBufferState.ready;
-
 import java.time.ZoneId;
 
 import objective.taskboard.followup.FollowUpDataHistoryRepository;
@@ -31,7 +29,6 @@ import objective.taskboard.followup.FollowUpDataSnapshotHistory;
 import objective.taskboard.followup.FollowupCluster;
 import objective.taskboard.followup.FollowupDataProvider;
 import objective.taskboard.followup.FromJiraRowCalculator;
-import objective.taskboard.issueBuffer.IssueBufferState;
 
 public class FollowUpDataProviderFromHistory implements FollowupDataProvider {
 
@@ -57,10 +54,5 @@ public class FollowUpDataProviderFromHistory implements FollowupDataProvider {
                 date));
         
         return followUpDataEntry;
-    }
-
-    @Override
-    public IssueBufferState getFollowupState() {
-        return ready;
     }
 }

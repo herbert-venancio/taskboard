@@ -38,7 +38,6 @@ import objective.taskboard.domain.Project;
 import objective.taskboard.followup.data.Template;
 import objective.taskboard.followup.impl.FollowUpDataProviderFromCurrentState;
 import objective.taskboard.followup.impl.FollowUpDataProviderFromHistory;
-import objective.taskboard.issueBuffer.IssueBufferState;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor;
 import objective.taskboard.utils.IOUtilities;
@@ -87,10 +86,6 @@ public class FollowUpFacade {
         if (!date.isPresent() || date.get().isEmpty())
             return providerFromCurrentState;
         return new FollowUpDataProviderFromHistory(date.get(), historyRepository);
-    }
-
-    public IssueBufferState getFollowUpState(Optional<String> date) {
-        return getProvider(date).getFollowupState();
     }
 
     public List<TemplateData> getTemplatesForCurrentUser() {

@@ -32,7 +32,6 @@ import static objective.taskboard.followup.FollowUpHelper.followupEmptyV2;
 import static objective.taskboard.followup.FollowUpHelper.followupExpectedV2;
 import static objective.taskboard.followup.FollowUpHelper.getDefaultFollowupData;
 import static objective.taskboard.followup.FollowUpHelper.getEmptyFollowupData;
-import static objective.taskboard.issueBuffer.IssueBufferState.ready;
 import static objective.taskboard.utils.IOUtilities.ENCODE_UTF_8;
 import static objective.taskboard.utils.IOUtilities.asResource;
 import static objective.taskboard.utils.ZipUtils.unzip;
@@ -58,8 +57,8 @@ import org.junit.Test;
 
 import objective.taskboard.database.directory.DataBaseDirectory;
 import objective.taskboard.domain.ProjectFilterConfiguration;
-import objective.taskboard.followup.FollowUpDataSnapshot;
 import objective.taskboard.followup.FollowUpDataHistoryRepository;
+import objective.taskboard.followup.FollowUpDataSnapshot;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.rules.TimeZoneRule;
 
@@ -88,7 +87,6 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
 
     @Before
     public void before() throws IOException {
-        when(providerFromCurrentState.getFollowupState()).thenReturn(ready);
         when(projectFilter.getProjectKey()).thenReturn(PROJECT_TEST);
         when(projectFilter2.getProjectKey()).thenReturn(PROJECT_TEST_2);
         pathHistory = createTempDirectory(getClass().getSimpleName());

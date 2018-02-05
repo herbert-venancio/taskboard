@@ -107,23 +107,22 @@ public class IssueBufferService {
 
     private List<IssueUpdate> issuesUpdatedByEvent = new ArrayList<>();
     private Set<String> projectsUpdatedByEvent = new HashSet<>();
-    private boolean constructionComplete = false;
 
     @PostConstruct
     private void loadCache() {
         cardsRepo = cardsRepoService.from(CACHE_FILENAME);
-        if (cardsRepo.size() > 0) 
+        if (cardsRepo.size() > 0) {
             state = IssueBufferState.ready;
-        else
-            updateIssueBuffer();
-
-        if (!getState().isInitialized())
-            log.info("Card repo is not initialized. This might take some time..");
-        
-        while(!getState().isInitialized()) {
-            Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
+            return;
         }
-        constructionComplete = true;
+        
+        updateIssueBuffer();
+
+        log.info("Card repo is not initialized. This might take some time..");
+        
+        while(!getState().isInitialized()) 
+            Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
+        
         log.info("Card repo initialized");
     }
     
@@ -169,7 +168,7 @@ public class IssueBufferService {
 
     private void updateState(IssueBufferState state) {
         this.state = state;
-        if (constructionComplete)
+        if (state.isInitialized())
             eventPublisher.publishEvent(new IssueCacheUpdateEvent(this, state));
     }
 
