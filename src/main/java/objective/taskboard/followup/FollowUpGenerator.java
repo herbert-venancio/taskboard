@@ -386,6 +386,7 @@ public class FollowUpGenerator {
         rowHeader.addColumn("Type");
         rowHeader.addColumn("Effort");
         rowHeader.addColumn("Cycle");
+        rowHeader.addColumn("Project");
         rowHeader.save();
 
         for (FollowUpClusterItem cluster : followupCluster.getClusterItems()) {
@@ -395,6 +396,7 @@ public class FollowUpGenerator {
             row.addColumn("Hours");
             row.addColumn(cluster.getEffort());
             row.addColumn(cluster.getCycle());
+            row.addColumn(cluster.getProject().getProjectKey());
             row.save();
         }
 

@@ -1,6 +1,7 @@
 package objective.taskboard.followup;
 
-import java.util.Arrays;
+import static org.springframework.util.CollectionUtils.isEmpty;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -11,29 +12,29 @@ import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.cluster.FollowUpClusterItem;
 import objective.taskboard.followup.cluster.FollowUpClusterItemRepository;
 import objective.taskboard.followup.data.Template;
+import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 
 @Component
 public class FollowupClusterProvider {
+
     @Autowired
     private FollowUpClusterItemRepository clusterItemRepository;
-    
     @Autowired
-    private TemplateService templateService;
-    
+    private ProjectFilterConfigurationCachedRepository projectRepository;
+
     public FollowupCluster getFor(Template followUpConfiguration) {
-        List<FollowUpClusterItem> clusterItems = clusterItemRepository.findByFollowUpConfiguration(followUpConfiguration);
-        return new FollowupClusterImpl(clusterItems);
+        return getFor(followUpConfiguration.getProjects().get(0));
     }
     
     public Optional<FollowupCluster> getForProject(String projectKey) {
-        Template followUpConfiguration = templateService.findATemplateOnlyMatchedWithThisProjectKey(Arrays.asList(projectKey));
-        if (followUpConfiguration == null)
-            return Optional.empty();
-        
-        return Optional.of(getFor(followUpConfiguration));
+        Optional<ProjectFilterConfiguration> project = projectRepository.getProjectByKey(projectKey);
+        return project.map(this::getFor);
     }
 
-    public Optional<FollowupCluster> getFor(ProjectFilterConfiguration project) {
-        return getForProject(project.getProjectKey());
+    public FollowupCluster getFor(ProjectFilterConfiguration project) {
+        List<FollowUpClusterItem> clusterItems = clusterItemRepository.findByProject(project);
+        if(isEmpty(clusterItems))
+            return new EmptyFollowupCluster();
+        return new FollowupClusterImpl(clusterItems);
     }
 }

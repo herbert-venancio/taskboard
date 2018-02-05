@@ -38,6 +38,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -56,9 +57,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.core.io.Resource;
 
 import objective.taskboard.data.Worklog;
+import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.FromJiraRowCalculator.FromJiraRowCalculation;
 import objective.taskboard.followup.cluster.FollowUpClusterItem;
-import objective.taskboard.followup.data.Template;
 import objective.taskboard.spreadsheet.Sheet;
 import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor;
 import objective.taskboard.spreadsheet.SimpleSpreadsheetEditorMock;
@@ -72,7 +73,7 @@ public class FollowUpGeneratorTest {
 
     @Mock
     private FollowupDataProvider provider;
-    
+
     @Mock
     private FollowupCluster followupCluster;
 
@@ -342,12 +343,13 @@ public class FollowUpGeneratorTest {
 
     @Test
     public void givenFollowUpClusterItems_whenGenerateTShirtSizeSheet_thenSheetShouldContainsItems() throws IOException {
-        Template template = Mockito.mock(Template.class);
+        ProjectFilterConfiguration project = Mockito.mock(ProjectFilterConfiguration.class);
+        doReturn("PROJ").when(project).getProjectKey();
 
         List<FollowUpClusterItem> clusterItems = asList(
-            new FollowUpClusterItem(template, "Alpha Bug", "notused", "L", 12.0, 14.4),
-            new FollowUpClusterItem(template, "Alpha Test", "notused", "M", 6.0, 7.2),
-            new FollowUpClusterItem(template, "UAT", "notused", "S", 4.0, 4.8));
+            new FollowUpClusterItem(project, "Alpha Bug", "notused", "L", 12.0, 14.4),
+            new FollowUpClusterItem(project, "Alpha Test", "notused", "M", 6.0, 7.2),
+            new FollowUpClusterItem(project, "UAT", "notused", "S", 4.0, 4.8));
 
         when(followupCluster.getClusterItems()).thenReturn(clusterItems);
 
@@ -366,6 +368,7 @@ public class FollowUpGeneratorTest {
                 "Sheet \"T-shirt Size\" Row \"1\" AddColumn \"C1\": Type\n" +
                 "Sheet \"T-shirt Size\" Row \"1\" AddColumn \"D1\": Effort\n" +
                 "Sheet \"T-shirt Size\" Row \"1\" AddColumn \"E1\": Cycle\n" +
+                "Sheet \"T-shirt Size\" Row \"1\" AddColumn \"F1\": Project\n" +
                 "Sheet \"T-shirt Size\" Row \"1\" Save\n" +
                 "Sheet \"T-shirt Size\" Row Create: 2\n" +
                 "Sheet \"T-shirt Size\" Row \"2\" AddColumn \"A2\": Alpha Bug\n" +
@@ -373,6 +376,7 @@ public class FollowUpGeneratorTest {
                 "Sheet \"T-shirt Size\" Row \"2\" AddColumn \"C2\": Hours\n" +
                 "Sheet \"T-shirt Size\" Row \"2\" AddColumn \"D2\": 12.0\n" +
                 "Sheet \"T-shirt Size\" Row \"2\" AddColumn \"E2\": 14.4\n" +
+                "Sheet \"T-shirt Size\" Row \"2\" AddColumn \"F2\": PROJ\n" +
                 "Sheet \"T-shirt Size\" Row \"2\" Save\n" +
                 "Sheet \"T-shirt Size\" Row Create: 3\n" +
                 "Sheet \"T-shirt Size\" Row \"3\" AddColumn \"A3\": Alpha Test\n" +
@@ -380,6 +384,7 @@ public class FollowUpGeneratorTest {
                 "Sheet \"T-shirt Size\" Row \"3\" AddColumn \"C3\": Hours\n" +
                 "Sheet \"T-shirt Size\" Row \"3\" AddColumn \"D3\": 6.0\n" +
                 "Sheet \"T-shirt Size\" Row \"3\" AddColumn \"E3\": 7.2\n" +
+                "Sheet \"T-shirt Size\" Row \"3\" AddColumn \"F3\": PROJ\n" +
                 "Sheet \"T-shirt Size\" Row \"3\" Save\n" +
                 "Sheet \"T-shirt Size\" Row Create: 4\n" +
                 "Sheet \"T-shirt Size\" Row \"4\" AddColumn \"A4\": UAT\n" +
@@ -387,6 +392,7 @@ public class FollowUpGeneratorTest {
                 "Sheet \"T-shirt Size\" Row \"4\" AddColumn \"C4\": Hours\n" +
                 "Sheet \"T-shirt Size\" Row \"4\" AddColumn \"D4\": 4.0\n" +
                 "Sheet \"T-shirt Size\" Row \"4\" AddColumn \"E4\": 4.8\n" +
+                "Sheet \"T-shirt Size\" Row \"4\" AddColumn \"F4\": PROJ\n" +
                 "Sheet \"T-shirt Size\" Row \"4\" Save\n" +
                 "Sheet \"T-shirt Size\" Save\n" +
                 "Spreadsheet Close\n";

@@ -4,10 +4,10 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import objective.taskboard.followup.data.Template;
+import objective.taskboard.domain.ProjectFilterConfiguration;
 
 public interface FollowUpClusterItemRepository extends JpaRepository<FollowUpClusterItem, String> {
 
-    List<FollowUpClusterItem> findByFollowUpConfiguration(Template followUpConfiguration);
+    List<FollowUpClusterItem> findByProject(ProjectFilterConfiguration project);
 
 }

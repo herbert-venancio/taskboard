@@ -8,26 +8,26 @@ import java.util.List;
 
 import org.junit.Test;
 
+import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.FromJiraRowCalculator.FromJiraRowCalculation;
 import objective.taskboard.followup.cluster.FollowUpClusterItem;
-import objective.taskboard.followup.data.Template;
 
 public class FromJiraRowCalculatorTest {
     
-    private Template followUpConfig = mock(Template.class);
+    private ProjectFilterConfiguration project = mock(ProjectFilterConfiguration.class);
 
     private List<FollowUpClusterItem> clusterItems = asList(
-            new FollowUpClusterItem(followUpConfig, "Alpha Test",   "unused", "S", 1d, 1.5d),
-            new FollowUpClusterItem(followUpConfig, "Alpha Test",   "unused", "M", 2d, 2.5d),
-            new FollowUpClusterItem(followUpConfig, "Alpha Test",   "unused", "L", 3d, 3.5d),
+            new FollowUpClusterItem(project, "Alpha Test",   "unused", "S", 1d, 1.5d),
+            new FollowUpClusterItem(project, "Alpha Test",   "unused", "M", 2d, 2.5d),
+            new FollowUpClusterItem(project, "Alpha Test",   "unused", "L", 3d, 3.5d),
             
-            new FollowUpClusterItem(followUpConfig, "Alpha Test",   "unused",    "S", 2d, 2.5d),
-            new FollowUpClusterItem(followUpConfig, "Alpha Test",   "unused",    "M", 3d, 3.5d),
-            new FollowUpClusterItem(followUpConfig, "Alpha Test",   "unused",    "L", 4d, 4.5d),
+            new FollowUpClusterItem(project, "Alpha Test",   "unused",    "S", 2d, 2.5d),
+            new FollowUpClusterItem(project, "Alpha Test",   "unused",    "M", 3d, 3.5d),
+            new FollowUpClusterItem(project, "Alpha Test",   "unused",    "L", 4d, 4.5d),
             
-            new FollowUpClusterItem(followUpConfig, "Backend Dev",  "unused", "S", 5d, 5.5d),
-            new FollowUpClusterItem(followUpConfig, "Backend Dev",  "unused", "M", 6d, 6.5d),
-            new FollowUpClusterItem(followUpConfig, "Backend Dev",  "unused", "L", 7d, 7.5d));
+            new FollowUpClusterItem(project, "Backend Dev",  "unused", "S", 5d, 5.5d),
+            new FollowUpClusterItem(project, "Backend Dev",  "unused", "M", 6d, 6.5d),
+            new FollowUpClusterItem(project, "Backend Dev",  "unused", "L", 7d, 7.5d));
     
     private FromJiraRowCalculator subject = new FromJiraRowCalculator(new FollowupClusterImpl(clusterItems));
 
