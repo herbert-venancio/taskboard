@@ -350,6 +350,10 @@ public class FollowUpGenerator {
     void generateEffortHistory(FollowUpDataSnapshot followUpDataEntry, ZoneId timezone) {
         Sheet sheet = editor.getOrCreateSheet("Effort History");
         sheet.truncate(0);
+        if (followupCluster == null || followupCluster.isEmpty()) {
+            sheet.save();
+            return;
+        }
         
         SheetRow rowHeader = sheet.createRow();
         rowHeader.addColumn("Date");

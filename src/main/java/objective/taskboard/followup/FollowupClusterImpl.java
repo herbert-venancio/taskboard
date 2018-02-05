@@ -27,5 +27,10 @@ public class FollowupClusterImpl implements FollowupCluster {
     @Override
     public List<FollowUpClusterItem> getClusterItems() {
         return clusterItems;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return clusterItems.isEmpty();
     }    
 }

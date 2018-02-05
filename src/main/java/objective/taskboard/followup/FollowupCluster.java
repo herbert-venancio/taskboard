@@ -10,4 +10,5 @@ public interface FollowupCluster {
 
     List<FollowUpClusterItem> getClusterItems();
 
+    boolean isEmpty();
 }
