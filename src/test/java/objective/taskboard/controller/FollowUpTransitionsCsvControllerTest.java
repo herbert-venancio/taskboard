@@ -19,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 import objective.taskboard.followup.FollowUpDataSnapshot;
 import objective.taskboard.followup.FollowUpFacade;
 import objective.taskboard.followup.FollowUpHelper;
-import objective.taskboard.followup.FollowupCluster;
 import objective.taskboard.followup.FollowupDataProvider;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -37,8 +36,7 @@ public class FollowUpTransitionsCsvControllerTest {
     public void setupProvider() {
         provider = new FollowupDataProvider() {
             @Override
-            public FollowUpDataSnapshot getJiraData(FollowupCluster cluster, String[] includeProjects,
-                    ZoneId timezone) {
+            public FollowUpDataSnapshot getJiraData(String[] includeProjects, ZoneId timezone) {
                 return new FollowUpDataSnapshot(null, FollowUpHelper.getFromFile());
             }
         };

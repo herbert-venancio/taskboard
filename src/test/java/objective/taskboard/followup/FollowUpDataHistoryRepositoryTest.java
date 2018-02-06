@@ -97,7 +97,8 @@ public class FollowUpDataHistoryRepositoryTest {
         DataBaseDirectory dataBaseDirectory = mock(DataBaseDirectory.class);
         when(dataBaseDirectory.path(anyString())).thenReturn(dataPath);
         
-        subject = new FollowUpDataHistoryRepository(dataBaseDirectory);
+        FollowupClusterProvider clusterProvider = mock(FollowupClusterProvider.class);
+        subject = new FollowUpDataHistoryRepository(dataBaseDirectory, clusterProvider);
     }
     
     @After
@@ -313,7 +314,7 @@ public class FollowUpDataHistoryRepositoryTest {
         createProjectZip(PROJECT_TEST,   "20170128");
 
         List<String> entryDates = new ArrayList<>();
-        subject.forEachHistoryEntry(asList(PROJECT_TEST), "20170127", TIMEZONE, entry -> {
+        subject.forEachSnapshot(asList(PROJECT_TEST), "20170127", TIMEZONE, entry -> {
             entryDates.add(entry.getDate().toString());
             assertThat(entry.getData()).isEqualToComparingFieldByFieldRecursively(getDefaultFollowupData());
         });
@@ -324,7 +325,7 @@ public class FollowUpDataHistoryRepositoryTest {
     @Test
     public void forEachHistoryEntry_noData() {
         List<String> entryDates = new ArrayList<>();
-        subject.forEachHistoryEntry(asList(PROJECT_TEST), "20170127", TIMEZONE, e -> entryDates.add(e.getDate().toString()));
+        subject.forEachSnapshot(asList(PROJECT_TEST), "20170127", TIMEZONE, e -> entryDates.add(e.getDate().toString()));
 
         assertEquals("", join(entryDates, ", "));
     }
@@ -340,7 +341,7 @@ public class FollowUpDataHistoryRepositoryTest {
         createProjectZip(PROJECT_TEST,   "20170127");
 
         List<String> entryDates = new ArrayList<>();
-        subject.forEachHistoryEntry(asList(PROJECT_TEST, PROJECT_TEST_2), "20170127", TIMEZONE, 
+        subject.forEachSnapshot(asList(PROJECT_TEST, PROJECT_TEST_2), "20170127", TIMEZONE, 
                 e -> entryDates.add(e.getDate().toString()));
 
         assertEquals("2016-12-01, 2017-01-26", join(entryDates, ", "));
@@ -355,7 +356,7 @@ public class FollowUpDataHistoryRepositoryTest {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(FILE_NAME_FORMAT);
         
         List<String> entryDates = new ArrayList<>();
-        subject.forEachHistoryEntry(asList(PROJECT_TEST), TIMEZONE, e -> {
+        subject.forEachSnapshot(asList(PROJECT_TEST), TIMEZONE, e -> {
             entryDates.add(e.getDate().format(formatter));
         });
 

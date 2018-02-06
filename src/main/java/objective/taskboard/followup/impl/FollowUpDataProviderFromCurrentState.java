@@ -45,6 +45,7 @@ import objective.taskboard.followup.FollowUpDataHistoryRepository;
 import objective.taskboard.followup.FollowUpDataSnapshot;
 import objective.taskboard.followup.FollowUpDataSnapshotHistory;
 import objective.taskboard.followup.FollowupCluster;
+import objective.taskboard.followup.FollowupClusterProvider;
 import objective.taskboard.followup.FollowupData;
 import objective.taskboard.followup.FollowupDataProvider;
 import objective.taskboard.followup.FromJiraDataRow;
@@ -70,13 +71,17 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
     
     @Autowired
     private FollowUpDataHistoryRepository historyRepository;
-
+    
+    @Autowired
+    private FollowupClusterProvider clusterProvider;
+    
     private Map<String, Issue> demandsByKey;
     private Map<String, Issue> featuresByKey;
     private Map<String, FromJiraDataRow> followUpBallparks;
 
     @Override
-    public FollowUpDataSnapshot getJiraData(FollowupCluster cluster, String[] includeProjects, ZoneId timezone) {
+    public FollowUpDataSnapshot getJiraData(String[] includeProjects, ZoneId timezone) {
+        FollowupCluster cluster = clusterProvider.getForProject(includeProjects[0]);
         FromJiraRowCalculator rowCalculator = new FromJiraRowCalculator(cluster);
         LocalDate date = LocalDate.now();
         List<String> i = Arrays.asList(includeProjects);

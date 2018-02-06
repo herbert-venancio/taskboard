@@ -11,15 +11,21 @@ public class FollowUpDataSnapshot {
     private final LocalDate date;
     private final FollowupData followupData;
     private FollowUpDataSnapshotHistory history;
+    private FollowupCluster followupCluster;
 
-    public FollowUpDataSnapshot(LocalDate date, FollowupData followupData, FollowUpDataSnapshotHistory history) {
+    public FollowUpDataSnapshot(LocalDate date, FollowupData followupData, FollowUpDataSnapshotHistory history, FollowupCluster followupCluster) {
         this.date = date;
         this.followupData = followupData;
         this.history = history;
+        this.followupCluster = followupCluster;
     }
 
+    public FollowUpDataSnapshot(LocalDate date, FollowupData followupData, FollowupCluster followupCluster) {
+        this(date, followupData, null, followupCluster);
+    }
+    
     public FollowUpDataSnapshot(LocalDate date, FollowupData followupData) {
-        this(date, followupData, null);
+        this(date, followupData, null, new EmptyFollowupCluster());
     }
 
     public LocalDate getDate() {
@@ -71,5 +77,22 @@ public class FollowUpDataSnapshot {
             this.calcutatedData = calculate;
         }
         
+    }
+
+    public EffortHistoryRow getEffortHistoryRow(FromJiraRowCalculator rowCalculator) {
+        EffortHistoryRow historyRow = new EffortHistoryRow(getDate());
+
+        getData().fromJiraDs.rows.stream().forEach(fromJiraRow -> {
+            FromJiraRowCalculation fromJiraRowCalculation = rowCalculator.calculate(fromJiraRow);
+
+            historyRow.sumEffortDone += fromJiraRowCalculation.getEffortDone();
+            historyRow.sumEffortBacklog += fromJiraRowCalculation.getEffortOnBacklog();
+        });
+
+        return historyRow;
+    }
+
+    public FollowupCluster getCluster() {
+        return followupCluster;
     }
 }

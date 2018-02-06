@@ -68,18 +68,13 @@ public class FollowUpFacade {
     @Autowired
     private FollowUpDataHistoryRepository historyRepository;
     
-    @Autowired
-    private FollowupClusterProvider clusterProvider;
-
     public FollowUpGenerator getGenerator(String templateName, Optional<String> date) {
         Template followUpConfiguration = templateService.getTemplate(templateName);
 
         FollowUpTemplate template = followUpTemplateStorage.getTemplate(followUpConfiguration.getPath());
         SimpleSpreadsheetEditor spreadsheetEditor = new SimpleSpreadsheetEditor(template);
 
-        FollowupCluster cluster = clusterProvider.getFor(followUpConfiguration);
-
-        return new FollowUpGenerator(getProvider(date), spreadsheetEditor, cluster);
+        return new FollowUpGenerator(getProvider(date), spreadsheetEditor);
     }
 
     public FollowupDataProvider getProvider(Optional<String> date) {

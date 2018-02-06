@@ -14,10 +14,9 @@ import objective.taskboard.followup.FollowUpDataSnapshot;
 import objective.taskboard.followup.FollowUpFacade;
 import objective.taskboard.followup.FollowUpScopeByTypeDataItem;
 import objective.taskboard.followup.FollowUpScopeByTypeDataSet;
-import objective.taskboard.followup.FollowupCluster;
-import objective.taskboard.followup.FollowupClusterProvider;
 import objective.taskboard.followup.FollowupDataProvider;
 import objective.taskboard.followup.FromJiraRowService;
+import objective.taskboard.jira.FrontEndMessageException;
 
 @Service
 public class FollowUpScopeByTypeDataProvider {
@@ -35,9 +34,6 @@ public class FollowUpScopeByTypeDataProvider {
     private FollowUpFacade followUpFacade;
 
     @Autowired
-    private FollowupClusterProvider followUpClusterProvider;
-
-    @Autowired
     private FromJiraRowService rowService;
 
     public FollowUpScopeByTypeDataSet getScopeByTypeData(String projectKey, String date, ZoneId zoneId) {
@@ -45,6 +41,9 @@ public class FollowUpScopeByTypeDataProvider {
         final Map<String, Double> map = initTypes();
 
         FollowUpDataSnapshot snapshot = getSnapshot(projectKey, date, zoneId);
+        if (snapshot.getCluster().isEmpty())
+            throw new FrontEndMessageException("No cluster configuration found for project " + projectKey + ".");
+        
         snapshot.forEachRow(r -> {
             Double effortEstimate = r.calcutatedData.getEffortEstimate();
             if (rowService.isIntangible(r.rowData) && rowService.isDone(r.rowData))
@@ -109,10 +108,7 @@ public class FollowUpScopeByTypeDataProvider {
     private FollowUpDataSnapshot getSnapshot(String projectKey, String date, ZoneId zoneId) {
         FollowupDataProvider provider = followUpFacade.getProvider(Optional.of(date));
         String[] projects = {projectKey};
-        Optional<FollowupCluster> cluster = followUpClusterProvider.getForProject(projectKey);
-        if (cluster.isPresent())
-            return provider.getJiraData(cluster.get(), projects, zoneId);
-        throw new IllegalArgumentException("Cluster for project " + projectKey + " not found.");
+        return provider.getJiraData(projects, zoneId);
     }
 
 }
