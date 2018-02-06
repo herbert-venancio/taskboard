@@ -33,6 +33,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import objective.taskboard.jira.client.JiraIssueDto;
+import objective.taskboard.jira.client.JiraUserDto;
 import objective.taskboard.jira.data.WebHookBody;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.task.IssueEventProcessScheduler;
@@ -59,9 +61,9 @@ public class WebhookController {
         log.debug("Incoming Webhook request: type " + 
                 body.webhookEvent.typeName +
                 " / timestamp " + body.timestamp +
-                " / issue: " +   ofNullable(body.issue).map(i->i.get("key")).orElse("N/A") +
+                " / issue: " +   ofNullable(body.issue).map(JiraIssueDto::getKey).orElse("N/A") +
                 " / version: " + ofNullable(body.version).map(t->t.name).orElse("N/A") +
-                " / user: " +    ofNullable(body.user).map(u->u.get("name")).orElse("N/A"));
+                " / user: " +    ofNullable(body.user).map(JiraUserDto::getName).orElse("N/A"));
 
         if(body.webhookEvent == null)
             return;

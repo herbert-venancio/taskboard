@@ -12,12 +12,15 @@ import org.joda.time.DateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 import retrofit.http.GET;
 import retrofit.http.Path;
@@ -35,7 +38,7 @@ public class JiraIssueDto {
     
     @JsonProperty
     private JiraIssueDtoFields fields;
-    
+
     public String getKey() {
         return key;
     }
@@ -140,6 +143,7 @@ public class JiraIssueDto {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonDeserialize(using = JSONObjectAdapterDeserializer.class)
+    @JsonSerialize(using = JSONObjectAdapterSerializer.class)
     public static class JSONObjectAdapter {
         public Object object;
         public JSONObjectAdapter() {
@@ -164,7 +168,7 @@ public class JiraIssueDto {
 
         @Override
         public JSONObjectAdapter deserialize(JsonParser jp, DeserializationContext ctxt)
-                throws IOException, JsonProcessingException {
+                throws IOException {
             JsonNode node = jp.getCodec().readTree(jp);
             switch (node.getNodeType()) {
             case OBJECT:
@@ -192,6 +196,36 @@ public class JiraIssueDto {
             case NULL:
             }
             return new JSONObjectAdapter();
+        }
+    }
+
+    public static class JSONObjectAdapterSerializer extends StdSerializer<JSONObjectAdapter> {
+        private static final long serialVersionUID = 1667967913205418977L;
+
+        public JSONObjectAdapterSerializer() {
+            this(JSONObjectAdapter.class);
+        }
+
+        protected JSONObjectAdapterSerializer(Class<JSONObjectAdapter> t) {
+            super(t);
+        }
+
+        @Override
+        public void serialize(JSONObjectAdapter value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+            if (value.object == null) {
+                gen.writeNull();
+            } else if (value.object instanceof String) {
+                gen.writeString((String) value.object);
+            } else if (value.object instanceof Number) {
+                gen.writeNumber(((Number)value.object).doubleValue());
+            } else if (value.object instanceof Boolean) {
+                gen.writeBoolean((Boolean)value.object);
+            } else if (value.object instanceof JSONArray
+                    || value.object instanceof JSONObject) {
+                gen.writeRawValue(value.object.toString());
+            } else {
+                throw new IllegalStateException("Unsupported type exception");
+            }
         }
     }
 }

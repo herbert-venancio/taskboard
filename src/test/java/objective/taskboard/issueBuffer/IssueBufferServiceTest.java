@@ -13,9 +13,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.junit.After;
@@ -48,7 +47,6 @@ import objective.taskboard.jira.JiraProperties.CustomField.ClassOfServiceDetails
 import objective.taskboard.jira.JiraProperties.CustomField.TShirtSize;
 import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.MetadataService;
-import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.client.JiraIssueTypeDto;
 import objective.taskboard.jira.data.Status;
 import objective.taskboard.jira.data.WebHookBody;
@@ -62,18 +60,18 @@ public class IssueBufferServiceTest {
 
     public static class Configuration {
         @Bean
-        private FactoryBean<JiraIssueToIssueConverter> jiraIssueToIssueConverter() {
+        private FactoryBean<JiraIssueToIssueConverter> jiraIssueToIssueConverter(IssueTeamService issueTeamService, MetadataService metaDataService) {
             return new JiraIssueToIssueConverterMockFactory(
-                    issueTeamService, 
-                    metaDataService(), 
-                    colorService(), 
-                    getJiraProperties(), 
+                    issueTeamService,
+                    metaDataService,
+                    colorService(),
+                    getJiraProperties(),
                     getIssuePriorityService());
         }
 
         @MockBean
         public JiraIssueService jiraIssueService;
-        
+
         @Bean
         public CardRepoService cardRepoService() {
             return new CardRepoServiceMock();
@@ -83,10 +81,10 @@ public class IssueBufferServiceTest {
         public IssueBufferService issueBufferService() {
             return new IssueBufferService();
         }
-        
+
         @MockBean
         public IssueTeamService issueTeamService;
-        
+
         @Bean
         public MetadataService metaDataService() {
             MetadataService metadataService = mock(MetadataService.class);
@@ -100,26 +98,26 @@ public class IssueBufferServiceTest {
             }
             return metadataService;
         }
-        
+
         public IssueColorService colorService() {
             return mock(IssueColorService.class);
         }
-        
+
         private JiraProperties getJiraProperties() {
             JiraProperties jiraProperties = mock(JiraProperties.class);
             CustomField cf = mock(CustomField.class);
             when(cf.getClassOfService()).thenReturn(new ClassOfServiceDetails());
             TShirtSize ts = mock(TShirtSize.class);
-            when(ts.getIds()).thenReturn(Arrays.asList());
+            when(ts.getIds()).thenReturn(Collections.emptyList());
             when(cf.getTShirtSize()).thenReturn(ts);
             when(jiraProperties.getCustomfield()).thenReturn(cf );
             return jiraProperties;
         }
-        
+
         private IssuePriorityService getIssuePriorityService() {
             return mock(IssuePriorityService.class,Mockito.RETURNS_DEEP_STUBS);
         }
-        
+
         @Bean
         public TeamCachedRepository teamRepo() {
             TeamCachedRepository teamrepo = Mockito.mock(TeamCachedRepository.class);
@@ -128,10 +126,10 @@ public class IssueBufferServiceTest {
             when(teamrepo.findById(13L)).thenReturn(Optional.of(team));
             return teamrepo;
         }
-        
+
         @MockBean
         private JiraService jiraBean;
-        
+
         @Bean
         public ProjectFilterConfigurationCachedRepository getProjectRepo() {
             ProjectFilterConfigurationCachedRepository mock = mock(ProjectFilterConfigurationCachedRepository.class);
@@ -155,52 +153,52 @@ public class IssueBufferServiceTest {
     private IssueBufferService issueBufferService;
 
     @After
-    public void removeAllIssues() {
+    public void resetIssueBuffer() {
         issueBufferService.reset();
     }
 
     @Test
-    public void createThenConvert() throws IOException {
+    public void createThenConvert() {
         WebHookBody payload1 = payload("create-TASKB-1.json");
         WebHookBody payload2 = payload("create-TASKB-2-subtaskof-TASKB-1.json");
         WebHookBody payload3 = payload("update-TASKB-2-converttotask.json");
         WebHookBody payload4 = payload("update-TASKB-2-converttosubtaskof-TASKB-1.json");
 
         // create parent
-        issueBufferService.updateByEvent(payload1.webhookEvent, "TASKB-1", asJiraIssue(payload1.issue));
+        issueBufferService.updateByEvent(payload1.webhookEvent, "TASKB-1", Optional.of(payload1.issue));
         assertThat(issueBufferService.getAllIssues()).hasSize(1);
 
         // create child
-        issueBufferService.updateByEvent(payload2.webhookEvent, "TASKB-2", asJiraIssue(payload2.issue));
+        issueBufferService.updateByEvent(payload2.webhookEvent, "TASKB-2", Optional.of(payload2.issue));
         assertThat(issueBufferService.getAllIssues()).hasSize(2);
         assertThat(issueBufferService.getIssueByKey("TASKB-1").getSubtasks()).hasSize(1);
         assertThat(issueBufferService.getIssueByKey("TASKB-2").getParent()).isEqualTo("TASKB-1");
 
         // convert child to task
-        issueBufferService.updateByEvent(payload3.webhookEvent, "TASKB-2", asJiraIssue(payload3.issue));
+        issueBufferService.updateByEvent(payload3.webhookEvent, "TASKB-2", Optional.of(payload3.issue));
         assertThat(issueBufferService.getAllIssues()).hasSize(2);
         assertThat(issueBufferService.getIssueByKey("TASKB-1").getSubtasks()).isEmpty();
         assertThat(issueBufferService.getIssueByKey("TASKB-2").getParent()).isNullOrEmpty();
 
         // undo convert
-        issueBufferService.updateByEvent(payload4.webhookEvent, "TASKB-2", asJiraIssue(payload4.issue));
+        issueBufferService.updateByEvent(payload4.webhookEvent, "TASKB-2", Optional.of(payload4.issue));
         assertThat(issueBufferService.getAllIssues()).hasSize(2);
         assertThat(issueBufferService.getIssueByKey("TASKB-1").getSubtasks()).hasSize(1);
         assertThat(issueBufferService.getIssueByKey("TASKB-2").getParent()).isEqualTo("TASKB-1");
     }
 
     @Test
-    public void deleteIssue() throws IOException {
+    public void deleteIssue() {
         WebHookBody payload1 = payload("create-TASKB-1.json");
         WebHookBody payload2 = payload("create-TASKB-2-subtaskof-TASKB-1.json");
         WebHookBody payload3 = payload("delete-TASKB-2.json");
 
         // create parent
-        issueBufferService.updateByEvent(payload1.webhookEvent, "TASKB-1", asJiraIssue(payload1.issue));
+        issueBufferService.updateByEvent(payload1.webhookEvent, "TASKB-1", Optional.of(payload1.issue));
         assertThat(issueBufferService.getAllIssues()).hasSize(1);
 
         // create child
-        issueBufferService.updateByEvent(payload2.webhookEvent, "TASKB-2", asJiraIssue(payload2.issue));
+        issueBufferService.updateByEvent(payload2.webhookEvent, "TASKB-2", Optional.of(payload2.issue));
         assertThat(issueBufferService.getAllIssues()).hasSize(2);
         assertThat(issueBufferService.getIssueByKey("TASKB-1").getSubtasks()).hasSize(1);
         assertThat(issueBufferService.getIssueByKey("TASKB-2").getParent()).isEqualTo("TASKB-1");
@@ -211,17 +209,17 @@ public class IssueBufferServiceTest {
         assertThat(issueBufferService.getIssueByKey("TASKB-1").getSubtasks()).isEmpty();
         assertThat(issueBufferService.getIssueByKey("TASKB-2")).isNull();
     }
-    
+
     @SuppressWarnings("unchecked")
     @Test
-    public void addTeamToIssue_ShouldAddTeamToIssueAndSendToJira() throws IOException {
+    public void addTeamToIssue_ShouldAddTeamToIssueAndSendToJira() {
         WebHookBody payload1 = payload("create-TASKB-1.json");
-        issueBufferService.updateByEvent(payload1.webhookEvent, "TASKB-1", asJiraIssue(payload1.issue));
-        when(jiraBean.getIssueByKey("TASKB-1")).thenReturn(asJiraIssue(payload1.issue));
+        issueBufferService.updateByEvent(payload1.webhookEvent, "TASKB-1", Optional.of(payload1.issue));
+        when(jiraBean.getIssueByKey("TASKB-1")).thenReturn(Optional.of(payload1.issue));
         when(issueTeamService.getDefaultTeamId(Mockito.any())).thenReturn(1L);
-        
+
         issueBufferService.addTeamToIssue("TASKB-1", 13L);
-        
+
         ArgumentCaptor<String> issueKeyCaptor = ArgumentCaptor.forClass(String.class);
         @SuppressWarnings("rawtypes")
         ArgumentCaptor<List> teamIdsCaptor = ArgumentCaptor.forClass(List.class);
@@ -236,7 +234,7 @@ public class IssueBufferServiceTest {
     @Test
     public void addAssigneeToIssueWithoutAssignee_ShouldSendAListWithOneAssignee() {
         WebHookBody payload1 = payload("create-TASKB-1.json");
-        issueBufferService.updateByEvent(payload1.webhookEvent, "TASKB-1", asJiraIssue(payload1.issue));
+        issueBufferService.updateByEvent(payload1.webhookEvent, "TASKB-1", Optional.of(payload1.issue));
 
         issueBufferService.addAssigneeToIssue("TASKB-1", "johan");
         ArgumentCaptor<String> issueCaptor = ArgumentCaptor.forClass(String.class);
@@ -252,19 +250,19 @@ public class IssueBufferServiceTest {
     @Test
     public void addAssigneeToIssueWithThatHasAssignee_ShouldNotInvokeService() {
         WebHookBody payload1 = payload("create-TASKB-1.json");
-        issueBufferService.updateByEvent(payload1.webhookEvent, "TASKB-1", asJiraIssue(payload1.issue));
+        issueBufferService.updateByEvent(payload1.webhookEvent, "TASKB-1", Optional.of(payload1.issue));
         Issue issue = issueBufferService.getIssueByKey("TASKB-1");
         issue.setAssignee(new User("johan"));
 
         issueBufferService.addAssigneeToIssue("TASKB-1", "johan");
         verifyNoMoreInteractions(jiraBean);
     }
-  
+
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void removeAssigneeFromIssueWithItAsMainAssignee_AssigneeShouldBeUnassigned() {
         WebHookBody payload1 = payload("create-TASKB-1.json");
-        issueBufferService.updateByEvent(payload1.webhookEvent, "TASKB-1", asJiraIssue(payload1.issue));
+        issueBufferService.updateByEvent(payload1.webhookEvent, "TASKB-1", Optional.of(payload1.issue));
         Issue issue = issueBufferService.getIssueByKey("TASKB-1");
         issue.setAssignee(new User("johan"));
         issue.getCoAssignees().add(new User("albert"));
@@ -278,14 +276,6 @@ public class IssueBufferServiceTest {
         List<User> assigneeList = usernameCaptor.getValue();
         assertEquals("TASKB-1", actualIssue);
         assertEquals("albert", assigneeList.stream().map(a->a.name).collect(joining(",")));
-    }
-
-    public static Optional<JiraIssueDto> asJiraIssue(Map<String, Object> jsonObject) {
-        try {
-            return Optional.of(objectMapper.readValue(objectMapper.writeValueAsString(jsonObject), JiraIssueDto.class));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public static WebHookBody payload(String file)  {
