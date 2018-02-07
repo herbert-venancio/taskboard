@@ -25,7 +25,7 @@
         <style>
         </style>
 
-        <widget-wrap title="CFD" is-ready="{{isReady}}" chart="{{chart}}" error-message="{{errorMessage}}">
+        <widget-wrap title="CFD" is-ready="{{isReady}}" has-select="true" chart="{{chart}}" error-message="{{errorMessage}}">
 
             <div id="cfd" class="tb-chart"></div>
 
@@ -75,12 +75,12 @@
                 _onProjectSelected: function(selectedProjectKey, selectedDate) {
                     this.loadCfdChart(selectedProjectKey);
                 },
-                
+
                 groupByDate: function(cfdData) {
                     var status = Object.keys(cfdData.dataByStatus).reverse();
                     var graphData = [];
                     // regroup based on date
-                    status.forEach(function(stat) { 
+                    status.forEach(function(stat) {
                         cfdData.dataByStatus[stat].forEach(function(d) {
                             graphData.push({
                                 date: new Date(d.date),
@@ -108,27 +108,27 @@
                         self.cfdData = self.groupByDate(cfdData);
                         var startDate = self.cfdData[0].date;
                         var endDate = self.cfdData[self.cfdData.length-1].date;
-                        
+
                         self.ndx = crossfilter(self.cfdData);
                         // the (run) dimension is the dimension on which dc will iterate and will become the "X" axis
                         self.cfdDim = self.ndx.dimension(function(d) {
                             return d.date;
                         });
-                        
+
                         function compose(p, v, signal){
                             if (!p.plotData)
                                 p.plotData = {}
-                            
+
                             if (!p.plotData[v.status])
                                 p.plotData[v.status] = 0;
-                            
+
                             p.plotData[v.status] += signal * v.count;
-                            return p; 
+                            return p;
                         }
-                        
+
                         self.cfdGroup = self.cfdDim.group()
                             .reduce(function(p, v) {
-                                    return compose(p, v, 1) 
+                                    return compose(p, v, 1)
                                 },
                                 function(p, v) {
                                     return compose(p, v, -1)
@@ -137,16 +137,17 @@
                                     return {plotData:{}};
                                 }
                             );
-                        
+
                         self.createChart(startDate, endDate);
-                        
+                        self.createSelect();
+
                         // function to access correct data for each stack
-                        function stackAccessor(status) { 
+                        function stackAccessor(status) {
                             return function(d) {
                                 return d.value.plotData[status];
                             };
                         }
-                        
+
                         var xScale = d3.time.scale().domain([startDate, endDate]);
                         self.chart
                             .dimension(self.cfdDim)
@@ -155,7 +156,7 @@
 
                         status.forEach(function(stat) {
                             // stackTitle(stat) generates a callback to generate the label for points in this stack
-                            self.chart.title(stat, function (d){  
+                            self.chart.title(stat, function (d){
                                 var label = d.key.toLocaleDateString() + "\n\n";
                                 var total = 0;
                                 label +="** " + stat +": "+d.value.plotData[stat]+ " **\n";
@@ -167,18 +168,18 @@
                                 return label+="\nTotal: " + total;
                             });
                         });
-                        
+
                         // remove the first status because it was already added in the "group" invocation above
                         status = status.splice(1);
-                        
+
                         // add the other stacks, one for each remaining status
                         status.forEach(function(stat) {
                             // stack the status data; stackAccessor(stat) generates a callback that tells dc how to read this stack data
                             self.chart.stack(self.cfdGroup, stat, stackAccessor(stat))
                         });
-                            
+
                         self.chart.render();
-                        
+
                         self.isReady = true;
                     });
                 },
@@ -195,6 +196,10 @@
                         dc.deregisterChart(this.chart);
                         this.set('chart', {});
                     }
+                    if (this.select) {
+                        dc.deregisterChart(this.select);
+                        delete this.select;
+                    }
                 },
 
                 handleErrors: function(error, cfdData) {
@@ -209,7 +214,7 @@
 
                     return false;
                 },
-                
+
                 createChart: function(startDate, endDate) {
                     var chart = dc.lineChart("#cfd");
 
@@ -237,6 +242,28 @@
                     dcUtils.rotateDateFormattedXAxis(chart);
 
                     this.set('chart', chart);
+                },
+
+                createSelect: function() {
+                    var div = this.$$('widget-wrap').$$('.widget__select');
+                    var select = dc.selectMenu(div);
+
+                    this.typeDim = this.ndx.dimension(function(d) {
+                        return d.issueType;
+                    });
+                    this.typeGroup = this.typeDim.group();
+
+                    select
+                        .dimension(this.typeDim)
+                        .group(this.typeGroup)
+                        .title(function(d) {
+                            return d.key;
+                        })
+                        .promptText('All Issues');
+
+                    select.render();
+
+                    this.select = select;
                 }
             });
         })();

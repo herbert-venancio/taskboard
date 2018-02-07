@@ -89,8 +89,11 @@
                 display: flex;
             }
 
+            .widget__option {
+                margin-left:16px;
+            }
+
             .widget__reset {
-                margin-left: auto;
                 cursor: pointer;
                 color: inherit;
                 display: block;
@@ -162,10 +165,9 @@
                             on-tap="_onTapOptions"></paper-icon-button>
                     </template>
                     <template is="dom-if" if="{{_isChartFiltered}}">
-                        <a class="widget__reset" on-tap="_onTapReset">Reset</a>
+                        <a class="widget__reset widget__option" on-tap="_onTapReset">Reset</a>
                     </template>
                 </div>
-
             </header>
             <div class="widget__body">
                 <template is="dom-if" if="{{!errorMessage}}">
@@ -202,6 +204,10 @@
                         notify: true
                     },
                     _isChartFiltered: {
+                        type: Boolean,
+                        value: false
+                    },
+                    hasSelect: {
                         type: Boolean,
                         value: false
                     },
