@@ -41,6 +41,8 @@ import objective.taskboard.data.TaskboardTimeTracking;
 import objective.taskboard.data.Worklog;
 import objective.taskboard.domain.converter.IssueCoAssignee;
 import objective.taskboard.domain.converter.IssueTeamService;
+import objective.taskboard.followup.EmptyFollowupCluster;
+import objective.taskboard.followup.FollowupClusterProvider;
 import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraProperties.BallparkMapping;
@@ -80,6 +82,9 @@ public abstract class AbstractFollowUpDataProviderTest {
 
     @Mock
     private ProjectService projectService;
+    
+    @Mock
+    private FollowupClusterProvider clusterProvider;
 
     CustomField propertiesCustomField;
     protected TShirtSize tshirtSizeInfo;
@@ -130,6 +135,7 @@ public abstract class AbstractFollowUpDataProviderTest {
 
     @Before
     public void before() throws InterruptedException, ExecutionException {
+        when(clusterProvider.getForProject(any())).thenReturn(new EmptyFollowupCluster());
         Map<Long, Status> statusMap = new LinkedHashMap<>();
         statusMap.put(statusOpen,       new Status(statusOpen,       "Open",  CATEGORY_UNDEFINED));
         statusMap.put(statusToDo,       new Status(statusToDo,       "To Do", CATEGORY_UNDEFINED));

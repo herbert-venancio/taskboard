@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import objective.taskboard.followup.FromJiraRowCalculator.FromJiraRowCalculation;
-
 public class FollowUpDataSnapshotHistory {
 
     private List<EffortHistoryRow> historyRows;
@@ -57,28 +55,15 @@ public class FollowUpDataSnapshotHistory {
         this.historyRows = new ArrayList<>();
         
         if (endDate.isPresent())
-            historyRepository.forEachHistoryEntry(includeProjects, endDate.get(), timezone, historyEntry -> {
-                historyRows.add(generateEffortHistoryRow(rowCalculator, historyEntry));
+            historyRepository.forEachSnapshot(includeProjects, endDate.get(), timezone, snapshot -> {
+                historyRows.add(snapshot.getEffortHistoryRow(rowCalculator));
             });
         else
-            historyRepository.forEachHistoryEntry(includeProjects, timezone, historyEntry -> {
-                historyRows.add(generateEffortHistoryRow(rowCalculator, historyEntry));
+            historyRepository.forEachSnapshot(includeProjects, timezone, snapshot -> {
+                historyRows.add(snapshot.getEffortHistoryRow(rowCalculator));
             });
         
-        historyRows.add(generateEffortHistoryRow(rowCalculator, lastSnapshot));
-    }
-    
-    private EffortHistoryRow generateEffortHistoryRow(FromJiraRowCalculator rowCalculator, FollowUpDataSnapshot followupDataEntry) {
-        EffortHistoryRow historyRow = new EffortHistoryRow(followupDataEntry.getDate());
-
-        followupDataEntry.getData().fromJiraDs.rows.stream().forEach(fromJiraRow -> {
-            FromJiraRowCalculation fromJiraRowCalculation = rowCalculator.calculate(fromJiraRow);
-            
-            historyRow.sumEffortDone += fromJiraRowCalculation.getEffortDone();
-            historyRow.sumEffortBacklog += fromJiraRowCalculation.getEffortOnBacklog();
-        });
-
-        return historyRow;
+        historyRows.add(lastSnapshot.getEffortHistoryRow(rowCalculator));
     }
 
     public List<EffortHistoryRow> getHistoryRows() {

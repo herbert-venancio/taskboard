@@ -34,14 +34,14 @@ public class FollowUpDataProviderFromHistory implements FollowupDataProvider {
 
     private final String date;
     private final FollowUpDataHistoryRepository historyRepository;
-
     public FollowUpDataProviderFromHistory(String date, FollowUpDataHistoryRepository historyRepository) {
         this.date = date;
         this.historyRepository = historyRepository;
     }
 
     @Override
-    public FollowUpDataSnapshot getJiraData(FollowupCluster cluster, String[] includeProjects, ZoneId timezone) {
+    public FollowUpDataSnapshot getJiraData(String[] includeProjects, ZoneId timezone) {
+        FollowupCluster cluster = historyRepository.getClusterForProject(includeProjects[0]);
         FromJiraRowCalculator rowCalculator = new FromJiraRowCalculator(cluster);
         FollowUpDataSnapshot followUpDataEntry = historyRepository.get(date, timezone, includeProjects);
 

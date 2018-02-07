@@ -23,17 +23,9 @@ package objective.taskboard.followup;
 import java.time.ZoneId;
 
 public interface FollowupDataProvider {
-    FollowUpDataSnapshot getJiraData(FollowupCluster followupCluster, String[] includeProjects, ZoneId timezone);
-
-    default FollowUpDataSnapshot getJiraData(FollowupCluster followupCluster, String... includeProjects) {
-        return getJiraData(followupCluster, includeProjects, ZoneId.systemDefault());
-    }
-
-    default FollowUpDataSnapshot getJiraData(String... includeProjects) {
-        return getJiraData(new EmptyFollowupCluster(), includeProjects, ZoneId.systemDefault());
-    }
-
-    default FollowUpDataSnapshot getJiraData(String[] includeProjects, ZoneId timezone) {
-        return getJiraData(new EmptyFollowupCluster(), includeProjects, timezone);
+    FollowUpDataSnapshot getJiraData(String[] includeProjects, ZoneId timezone);
+    
+    default FollowUpDataSnapshot getJiraData(String includeProject) {
+        return getJiraData(new String[]{includeProject}, ZoneId.systemDefault());
     }
 }

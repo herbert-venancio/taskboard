@@ -26,8 +26,6 @@ import com.google.common.cache.Cache;
 import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.FollowUpDataSnapshot;
-import objective.taskboard.followup.FollowupCluster;
-import objective.taskboard.followup.FollowupClusterProvider;
 import objective.taskboard.followup.data.FollowupProgressCalculator;
 import objective.taskboard.followup.data.ProgressData;
 import objective.taskboard.followup.impl.FollowUpDataProviderFromCurrentState;
@@ -37,9 +35,6 @@ import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository
 public class DashboardProjectProgressController {
     @Autowired
     private FollowUpDataProviderFromCurrentState providerFromCurrentState;
-    
-    @Autowired
-    private FollowupClusterProvider clusterProvider;
     
     @Autowired
     private ProjectFilterConfigurationCachedRepository projects;
@@ -76,10 +71,6 @@ public class DashboardProjectProgressController {
         if (!project.isPresent())
             return new ResponseEntity<>("Project not found: " + projectKey + ".", HttpStatus.NOT_FOUND);
 
-        FollowupCluster cluster = clusterProvider.getFor(project.get());
-        if(cluster.getClusterItems().isEmpty())
-            return new ResponseEntity<>("No cluster configuration found for project " + projectKey + ".", INTERNAL_SERVER_ERROR);
-
         ZoneId timezone = determineTimeZoneId(zoneId);
 
         if (project.get().getDeliveryDate() == null)
@@ -87,7 +78,10 @@ public class DashboardProjectProgressController {
 
         LocalDate deliveryDate = project.get().getDeliveryDate();
 
-        FollowUpDataSnapshot snapshot = providerFromCurrentState.getJiraData(cluster, new String[]{projectKey}, timezone);
+        FollowUpDataSnapshot snapshot = providerFromCurrentState.getJiraData(new String[]{projectKey}, timezone);
+        if (snapshot.getCluster().isEmpty())
+            return new ResponseEntity<>("No cluster configuration found for project " + projectKey + ".", INTERNAL_SERVER_ERROR);
+        
         if (!snapshot.getHistory().isPresent())
             return new ResponseEntity<>("No progress history found for project " + projectKey, INTERNAL_SERVER_ERROR);
 

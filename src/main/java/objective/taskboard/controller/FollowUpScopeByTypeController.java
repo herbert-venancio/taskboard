@@ -8,7 +8,6 @@ import static org.springframework.http.HttpStatus.OK;
 import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
 import java.time.zone.ZoneRulesException;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,9 +19,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import objective.taskboard.followup.FollowupCluster;
-import objective.taskboard.followup.FollowupClusterProvider;
 import objective.taskboard.followup.impl.FollowUpScopeByTypeDataProvider;
+import objective.taskboard.jira.FrontEndMessageException;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 
 @RestController
@@ -36,9 +34,6 @@ public class FollowUpScopeByTypeController {
     @Autowired
     private ProjectFilterConfigurationCachedRepository projectRepository;
 
-    @Autowired
-    private FollowupClusterProvider followUpClusterProvider;
-
     @RequestMapping(value = "/api/projects/{projectKey}/followup/scope-by-type", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> scopeByTypeData(@PathVariable("projectKey") String projectKey, @RequestParam("date") String date, @RequestParam("timezone") String timezone) {
         if (isEmpty(projectKey))
@@ -47,9 +42,6 @@ public class FollowUpScopeByTypeController {
         if (!projectRepository.exists(projectKey))
             return new ResponseEntity<>("Project not found: " + projectKey + ".", HttpStatus.NOT_FOUND);
 
-        if (!clusterExistis(projectKey))
-            return new ResponseEntity<>("No cluster configuration found for project " + projectKey + ".", INTERNAL_SERVER_ERROR);
-
         if (!isValidDate(date))
             return new ResponseEntity<>("Invalid date: " + date + ".", HttpStatus.BAD_REQUEST);
 
@@ -57,12 +49,11 @@ public class FollowUpScopeByTypeController {
             return new ResponseEntity<>("Invalid timezone: " + timezone + ".", HttpStatus.BAD_REQUEST);
 
         ZoneId zoneId = isEmpty(timezone) ? ZoneId.systemDefault() : ZoneId.of(timezone);
-        return new ResponseEntity<>(provider.getScopeByTypeData(projectKey, date, zoneId), OK);
-    }
-
-    private boolean clusterExistis(String projectKey) {
-        Optional<FollowupCluster> cluster = followUpClusterProvider.getForProject(projectKey);
-        return cluster.isPresent();
+        try {
+            return new ResponseEntity<>(provider.getScopeByTypeData(projectKey, date, zoneId), OK);
+        }catch(FrontEndMessageException e) {
+            return new ResponseEntity<>(e.getMessage(), INTERNAL_SERVER_ERROR);
+        }
     }
 
     private boolean isValidDate(String yyyymmdd) {

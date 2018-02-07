@@ -47,25 +47,23 @@ public class FollowUpGenerator {
 
     private final FollowupDataProvider provider;
     private final SpreadsheetEditor editor;
-    private final FollowupCluster followupCluster;
 
-    public FollowUpGenerator(FollowupDataProvider provider, SpreadsheetEditor editor, FollowupCluster cluster) {
+    public FollowUpGenerator(FollowupDataProvider provider, SpreadsheetEditor editor) {
         this.provider = provider;
         this.editor = editor;
-        this.followupCluster = cluster;
     }
 
     public Resource generate(String [] includedProjects, ZoneId timezone) throws IOException {
         try {
             editor.open();
 
-            FollowUpDataSnapshot followupDataEntry = provider.getJiraData(followupCluster, includedProjects, timezone);
+            FollowUpDataSnapshot followupDataEntry = provider.getJiraData(includedProjects, timezone);
             FollowupData followupData = followupDataEntry.getData();
 
             generateFromJiraSheet(followupData);
             generateTransitionsSheets(followupData);
             generateEffortHistory(followupDataEntry, timezone);
-            generateTShirtSizeSheet();
+            generateTShirtSizeSheet(followupDataEntry);
             generateWorklogSheet(followupData, timezone);
 
             return IOUtilities.asResource(editor.toBytes());
@@ -350,16 +348,15 @@ public class FollowUpGenerator {
     void generateEffortHistory(FollowUpDataSnapshot followUpDataEntry, ZoneId timezone) {
         Sheet sheet = editor.getOrCreateSheet("Effort History");
         sheet.truncate(0);
-        if (followupCluster == null || followupCluster.isEmpty()) {
-            sheet.save();
-            return;
-        }
         
         SheetRow rowHeader = sheet.createRow();
         rowHeader.addColumn("Date");
         rowHeader.addColumn("SumEffortDone");
         rowHeader.addColumn("SumEffortBacklog");
         rowHeader.save();
+        
+        if (followUpDataEntry.getCluster().isEmpty())
+            return;
         
         Optional<FollowUpDataSnapshotHistory> history = followUpDataEntry.getHistory();
         
@@ -377,7 +374,8 @@ public class FollowUpGenerator {
         sheet.save();
     }
 
-    void generateTShirtSizeSheet() {
+    void generateTShirtSizeSheet(FollowUpDataSnapshot followupDataEntry) {
+        FollowupCluster followupCluster= followupDataEntry.getCluster();
         if (followupCluster == null || followupCluster.getClusterItems().isEmpty())
             return;
 

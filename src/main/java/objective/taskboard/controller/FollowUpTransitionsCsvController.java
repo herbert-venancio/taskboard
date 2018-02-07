@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import objective.taskboard.followup.FollowUpFacade;
 import objective.taskboard.followup.FollowupData;
 import objective.taskboard.followup.FollowupDataProvider;
-import objective.taskboard.followup.EmptyFollowupCluster;
 import objective.taskboard.followup.TransitionDataRow;
 import objective.taskboard.followup.TransitionDataSet;
 import objective.taskboard.utils.DateTimeUtils;
@@ -62,7 +61,7 @@ public class FollowUpTransitionsCsvController {
 
         try {
             FollowupDataProvider provider = followUpFacade.getProvider(Optional.empty());
-            FollowupData jiraData = provider.getJiraData(new EmptyFollowupCluster(), projects.split(","), timezone).getData();
+            FollowupData jiraData = provider.getJiraData(projects.split(","), timezone).getData();
 
             Stream<ZipStreamEntry> stream = Stream.concat(
                     jiraData.analyticsTransitionsDsList.stream()

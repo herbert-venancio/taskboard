@@ -26,9 +26,9 @@ public class FollowupClusterProvider {
         return getFor(followUpConfiguration.getProjects().get(0));
     }
     
-    public Optional<FollowupCluster> getForProject(String projectKey) {
+    public FollowupCluster getForProject(String projectKey) {
         Optional<ProjectFilterConfiguration> project = projectRepository.getProjectByKey(projectKey);
-        return project.map(this::getFor);
+        return project.map(this::getFor).orElse(new EmptyFollowupCluster());
     }
 
     public FollowupCluster getFor(ProjectFilterConfiguration project) {

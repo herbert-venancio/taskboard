@@ -5,21 +5,21 @@ import static java.util.Collections.emptyList;
 import static objective.taskboard.Constants.FROMJIRA_HEADERS;
 import static objective.taskboard.followup.impl.FollowUpScopeByTypeDataProvider.BASELINE_BACKLOG;
 import static objective.taskboard.followup.impl.FollowUpScopeByTypeDataProvider.BASELINE_DONE;
-import static objective.taskboard.followup.impl.FollowUpScopeByTypeDataProvider.INTANGIBLE_DONE;
 import static objective.taskboard.followup.impl.FollowUpScopeByTypeDataProvider.INTANGIBLE_BACKLOG;
-import static objective.taskboard.followup.impl.FollowUpScopeByTypeDataProvider.NEW_SCOPE_DONE;
+import static objective.taskboard.followup.impl.FollowUpScopeByTypeDataProvider.INTANGIBLE_DONE;
 import static objective.taskboard.followup.impl.FollowUpScopeByTypeDataProvider.NEW_SCOPE_BACKLOG;
-import static objective.taskboard.followup.impl.FollowUpScopeByTypeDataProvider.REWORK_DONE;
+import static objective.taskboard.followup.impl.FollowUpScopeByTypeDataProvider.NEW_SCOPE_DONE;
 import static objective.taskboard.followup.impl.FollowUpScopeByTypeDataProvider.REWORK_BACKLOG;
+import static objective.taskboard.followup.impl.FollowUpScopeByTypeDataProvider.REWORK_DONE;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -28,17 +28,20 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.FollowUpDataSnapshot;
 import objective.taskboard.followup.FollowUpFacade;
 import objective.taskboard.followup.FollowUpScopeByTypeDataItem;
 import objective.taskboard.followup.FollowUpScopeByTypeDataSet;
 import objective.taskboard.followup.FollowupCluster;
+import objective.taskboard.followup.FollowupClusterImpl;
 import objective.taskboard.followup.FollowupClusterProvider;
 import objective.taskboard.followup.FollowupData;
 import objective.taskboard.followup.FollowupDataProvider;
 import objective.taskboard.followup.FromJiraDataRow;
 import objective.taskboard.followup.FromJiraDataSet;
 import objective.taskboard.followup.FromJiraRowService;
+import objective.taskboard.followup.cluster.FollowUpClusterItem;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FollowUpScopeByTypeDataProviderTest {
@@ -71,10 +74,12 @@ public class FollowUpScopeByTypeDataProviderTest {
     @Before
     public void setup() {
         row.taskBallpark = EFFORT_ESTIMATE;
+        FollowupCluster fc = mock(FollowupCluster.class);
+        when(fc.isEmpty()).thenReturn(false);
 
-        when(clusterProvider.getForProject(any())).thenReturn(Optional.of(mock(FollowupCluster.class)));
+        when(clusterProvider.getForProject(any())).thenReturn(fc);
         when(followUpFacade.getProvider(any())).thenReturn(dataProvider);
-        when(dataProvider.getJiraData(any(), any(), any())).thenReturn(getSnapshot(LocalDate.of(2018, 1, 1), asList(row)));
+        when(dataProvider.getJiraData(any(String[].class), any())).thenReturn(getSnapshot(LocalDate.of(2018, 1, 1), asList(row)));
     }
 
     @Test
@@ -222,7 +227,7 @@ public class FollowUpScopeByTypeDataProviderTest {
     @Test
     public void ifMultipleRows_thenSumAllRows() {
         List<FromJiraDataRow> rows = asList(row, row, row);
-        when(dataProvider.getJiraData(any(), any(), any())).thenReturn(getSnapshot(LocalDate.of(2018, 1, 1), rows));
+        when(dataProvider.getJiraData(any(String[].class), any())).thenReturn(getSnapshot(LocalDate.of(2018, 1, 1), rows));
         when(rowService.isBaselineBacklog(row)).thenReturn(true);
 
         data = subject.getScopeByTypeData(PROJECT_KEY, DATE, ZONE_ID);
@@ -242,7 +247,7 @@ public class FollowUpScopeByTypeDataProviderTest {
     @Test
     public void ifHasValues_thenTotalIsTheSumOfAllEffortEstimateValues() {
         List<FromJiraDataRow> rows = asList(row, row, row);
-        when(dataProvider.getJiraData(any(), any(), any())).thenReturn(getSnapshot(LocalDate.of(2018, 1, 1), rows));
+        when(dataProvider.getJiraData(anyString())).thenReturn(getSnapshot(LocalDate.of(2018, 1, 1), rows));
         when(rowService.isBaselineBacklog(row)).thenReturn(true);
 
         data = subject.getScopeByTypeData(PROJECT_KEY, DATE, ZONE_ID);
@@ -262,7 +267,9 @@ public class FollowUpScopeByTypeDataProviderTest {
     private FollowUpDataSnapshot getSnapshot(LocalDate data, List<FromJiraDataRow> rows) {
         FromJiraDataSet dataSet = new FromJiraDataSet(FROMJIRA_HEADERS, rows);
         FollowupData followupData = new FollowupData(dataSet, emptyList(), emptyList());
-        return new FollowUpDataSnapshot(data, followupData);
+        FollowupCluster fc = new FollowupClusterImpl(
+                asList(new FollowUpClusterItem(mock(ProjectFilterConfiguration.class), "a", "a", "a", 1.0, 1.0)));
+        return new FollowUpDataSnapshot(data, followupData, fc);
     }
 
     private void assertEffortEstimateByType(String type, Double exceptedValue) {

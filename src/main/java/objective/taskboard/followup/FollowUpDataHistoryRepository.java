@@ -52,6 +52,7 @@ public class FollowUpDataHistoryRepository {
     public static final String EXTENSION_ZIP = ".zip";
 
     private final DataBaseDirectory dataBaseDirectory;
+    private FollowupClusterProvider clusterProvider;
 
     private final Gson gson = new GsonBuilder()
             .registerTypeAdapter(ZonedDateTime.class, new DateTimeUtils.ZonedDateTimeAdapter())
@@ -59,8 +60,9 @@ public class FollowUpDataHistoryRepository {
             .create();
     
     @Autowired
-    public FollowUpDataHistoryRepository(DataBaseDirectory dataBaseDirectory) {
+    public FollowUpDataHistoryRepository(DataBaseDirectory dataBaseDirectory, FollowupClusterProvider clusterProvider) {
         this.dataBaseDirectory = dataBaseDirectory;
+        this.clusterProvider = clusterProvider;
     }
 
     public void save(String projectKey, LocalDate date, FollowupData data) throws IOException {
@@ -91,10 +93,10 @@ public class FollowUpDataHistoryRepository {
     }
 
     public FollowUpDataSnapshot get(String date, ZoneId timezone, String... projectsKey) {
-        return get(date, timezone, asList(projectsKey));
+        return load(date, timezone, asList(projectsKey));
     }
 
-    public FollowUpDataSnapshot get(String date, ZoneId timezone, List<String> projectsKey) {
+    private FollowUpDataSnapshot load(String date, ZoneId timezone, List<String> projectsKey) {
         FollowUpDataLoader loader = new FollowUpDataLoader(gson, timezone);
 
         for (String project : projectsKey) {
@@ -203,14 +205,14 @@ public class FollowUpDataHistoryRepository {
      * Iterate from oldest entry through <code>endDate</code> (exclusive).
      * 
      */
-    public void forEachHistoryEntry(
+    public void forEachSnapshot(
             List<String> projectsKey, 
             String endDate, ZoneId timezone,
             Consumer<FollowUpDataSnapshot> action) {
 
         getHistoryGivenProjects(projectsKey).stream()
                 .filter(d -> endDate == null ? true : d.compareTo(endDate) < 0)
-                .map(d -> get(d, timezone, projectsKey))
+                .map(d -> load(d, timezone, projectsKey))
                 .forEach(action);
     }
 
@@ -218,11 +220,15 @@ public class FollowUpDataHistoryRepository {
      * Iterate from oldest entry through generated today (exclusive).
      * 
      */
-    public void forEachHistoryEntry(
+    public void forEachSnapshot(
             List<String> projectsKey, 
             ZoneId timezone,
             Consumer<FollowUpDataSnapshot> action) {
 
-        forEachHistoryEntry(projectsKey, null, timezone, action);
+        forEachSnapshot(projectsKey, null, timezone, action);
+    }
+
+    public FollowupCluster getClusterForProject(String projectKey) {
+        return clusterProvider.getForProject(projectKey);
     }
 }
