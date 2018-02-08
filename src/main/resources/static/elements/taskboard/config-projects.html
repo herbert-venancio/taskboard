@@ -1,0 +1,119 @@
+<!--
+  [LICENSE]
+  Taskboard
+  - - -
+  Copyright (C) 2015 - 2016 Objective Solutions
+  - - -
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  [/LICENSE]
+  -->
+<dom-module id="config-projects">
+
+    <template>
+
+        <style>
+            paper-toolbar {
+                height: 40px;
+            }
+
+            paper-toolbar ::shadow #topBar {
+                height: 40px;
+            }
+
+            .config-item {
+                display: flex;
+                align-items: center;
+            }
+
+            .config-icon {
+                flex: 0 0 auto;
+            }
+
+            .config-title {
+                flex: 1;
+            }
+
+            paper-button {
+                padding: 0;
+                display: inline-block;
+                width: 100%;
+                text-align: left;
+                font-size: 12px;
+            }
+
+            paper-icon-button {
+                margin: 0px 6px 0px 10px;
+                padding: 5px;
+                width: 35px;
+                height: 35px;
+            }
+        </style>
+        
+        <iron-ajax id="ajaxProjects"
+                   method="GET"
+                   url="/api/projects"
+                   content-type='application/json'
+                   last-response="{{projects}}"
+                   auto></iron-ajax>
+
+        <paper-material>
+            <paper-toolbar on-tap="collapseMenuTap">
+                <paper-material class="config-item flex layout horizontal" elevation=0>
+                    <iron-icon id="toggleIcon" class="config-icon icon-small" icon="chevron-right"></iron-icon>
+                    <paper-material class="config-title" elevation=0>Projects Configuration</paper-material>
+                </paper-material>
+            </paper-toolbar>
+            <iron-collapse id="collapseMenu">
+                <template is="dom-repeat" items="{{projects}}">
+                    <paper-button class="config-item-project" elevation="0" on-tap="openProjectConfigurationModal">
+                        <paper-icon-button icon="settings"></paper-icon-button>
+                        {{item.projectKey}}
+                    </paper-button>
+                </template>
+            </iron-collapse>
+        </paper-material>
+
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'config-projects',
+
+                properties: {
+                    projects: {
+                        type: Array
+                    }
+                },
+
+                collapseMenuTap: function (e) {
+                    this.$.collapseMenu.toggle();
+
+                    if (this.$.collapseMenu.opened) {
+                        this.$.toggleIcon.icon = 'expand-more';
+                    } else {
+                        this.$.toggleIcon.icon = 'chevron-right';
+                    }
+                },
+
+                openProjectConfigurationModal: function(e) {
+                    var projectKey = e.model.item.projectKey;
+                    this.fire('iron-signal', {name: 'open-project-configuration-modal', data: {projectKey: projectKey}})
+                },
+
+            });
+        })();
+    </script>
+
+</dom-module>

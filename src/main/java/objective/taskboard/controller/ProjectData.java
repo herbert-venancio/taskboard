@@ -37,4 +37,10 @@ public class ProjectData {
     public ProjectData(ProjectTeam project) {
         this.projectKey = project.getProjectKey();
     }
+
+    public static class ProjectConfigurationData {
+        public String startDate;
+        public String deliveryDate;
+        public Integer projectionTimespan;
+    }
 }

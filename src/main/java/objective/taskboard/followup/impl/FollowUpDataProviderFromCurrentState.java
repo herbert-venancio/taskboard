@@ -98,7 +98,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
         List<SyntheticTransitionsDataSet> syntheticsTransitionsDsList = transitions.getSyntheticTransitionsDsList(analyticsTransitionsDsList);
         FollowupData followupData = new FollowupData(fromJiraDs, analyticsTransitionsDsList, syntheticsTransitionsDsList);
 
-        FollowUpDataSnapshot followUpDataEntry = new FollowUpDataSnapshot(date, followupData);
+        FollowUpDataSnapshot followUpDataEntry = new FollowUpDataSnapshot(date, followupData, cluster);
         followUpDataEntry.setFollowUpDataEntryHistory(new FollowUpDataSnapshotHistory(
                 historyRepository,
                 includeProjects,
