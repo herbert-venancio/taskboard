@@ -40,13 +40,12 @@ public class IssueBufferUpdateRefreshDialogIT extends AuthenticatedIntegrationTe
         forceUpdateIssueBuffer();
 
         MainPage mainPage = MainPage.produce(webDriver);
-        mainPage.refreshToast().assertVisible();
-        mainPage.typeSearch("TASKB-628").assertVisibleIssues()
-            .clearSearch();
-        mainPage.lane("Deployable").boardStep("Open").assertIssueList("TASKB-236", "TASKB-630", "TASKB-640");
-        mainPage.lane("Operational").boardStep("Open").assertIssueList("TASKB-633", "TASKB-634", "TASKB-647");
-        mainPage.refreshToast().toggleShowHide();
-        mainPage.assertVisibleIssues("TASKB-630", "TASKB-633", "TASKB-634");
+        String[] updatedIssues = {"TASKB-630", "TASKB-633", "TASKB-634"};
+        mainPage.assertUpdatedIssues(updatedIssues);
+        mainPage.refreshToast().assertVisible().showOnlyUpdated();
+        mainPage.assertVisibleIssues(updatedIssues);
+        mainPage.refreshToast().close();
+        mainPage.typeSearch("TASKB-628").assertVisibleIssues();
     }
 
     private void forceUpdateIssueBuffer() {

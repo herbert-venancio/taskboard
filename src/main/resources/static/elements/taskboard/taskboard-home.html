@@ -168,12 +168,43 @@
                 color: #eeff41;
             }
 
-            #toastIssueUpdated .yellow-button {
-                text-transform: none;
-                color: #ff9800;
+            .issue-updated {
+                --paper-toast-background-color: #FFFFFF;
+                --paper-toast-color: #8E8E8E;
+                padding: 5px;
+                margin: 8px;
+                min-width: 192px;
+                min-height: 55px;
+                display: flex;
+            }
+
+            .issue-updated__icon {
+                flex: 0 0 auto;
+                padding: 2px;
+            }
+
+            .issue-updated__center {
+                flex: 1;
+                margin-left: 14px;
+            }
+
+            .issue-updated__message {
+                margin: 5px 0px;
+                color: #000000;
                 font-weight: bold;
-                --paper-toast-background-color: #EEEEEE;
-                --paper-toast-color: black;
+            }
+
+            .issue-updated__show-only-updated {
+                font-size: 12px;
+                cursor: pointer;
+            }
+
+            .issue-updated__show-only-updated:hover {
+                text-decoration: underline;
+            }
+
+            .issue-updated__show-only-updated:active {
+                color: gray;
             }
 
             .issue-errors {
@@ -355,7 +386,6 @@
                       on-iron-signal-config-visibility-synthetic-changed="updateUserPreferences"
                       on-iron-signal-update-user-preferences="updateUserPreferences"
                       on-iron-signal-show-error-message="showErrorMessage"
-                      on-iron-signal-show-error-message-top="showErrorMessage"
                       on-iron-signal-show-issue-updated-message="showIssueUpdatedMessage"
                       on-iron-signal-show-issue-error-message="_showIssueErrorMessage"
                       on-iron-signal-close-issue-error-message="_closeIssueErrorIronSignal"
@@ -377,23 +407,19 @@
         <paper-drawer-panel disable-swipe right-drawer force-narrow drawer-width="350px">
             <template is="dom-if" if={{done}}>
                 <div main>
-                    <paper-toast duration="0" id="toastError">
+                    <paper-toast duration="0" id="toastError" on-iron-overlay-closed="_onToastErrorClosed">
                         <iron-icon icon="icons:error"></iron-icon>
                         <span>{{errorMessage}}</span>
                         <paper-button on-tap="_closeToastError" class="yellow-button">Close</paper-button>
                     </paper-toast>
-                    <paper-toast duration="0" id="toastIssueUpdated" horizontal-align='right' vertical-align='bottom'>
-                        <iron-icon icon="icons:info"></iron-icon>
-                        <span>{{infoMessage}}</span>
-                        <paper-button on-tap="refreshBoard" class="yellow-button">
-                            REFRESH
-                        </paper-button>
-                        <paper-button data-toast="issue-updated" id='dismissToast' on-tap="dismiss" class="yellow-button">
-                            DISMISS
-                        </paper-button>
-                        <paper-button id='toggleFilterChangedIssues' on-tap="toggleFilterChangedIssues" class="yellow-button">
-                            {{refreshText}}
-                        </paper-button>
+                    <paper-toast duration="5000" id="toastIssueUpdated" class="issue-updated" horizontal-align='right' vertical-align='bottom'
+                                 on-iron-overlay-closed="_onIssueUpdatedClosed">
+                        <iron-icon class="issue-updated__icon" icon="icons:info"></iron-icon>
+                        <div class="issue-updated__center">
+                            <div class="issue-updated__message">{{infoMessage}}</div>
+                            <div><span id="showOnlyUpdatedOrDismiss" on-tap="_showOnlyUpdatedOrDismiss" class="issue-updated__show-only-updated">{{refreshText}}</span></div>
+                        </div>
+                        <paper-icon-button id="closeIssueUpdated" icon="clear" on-click="_closeIssueUpdated" class="clear-button"></paper-icon-button>
                     </paper-toast>
                     <paper-toast duration="0" id="toastIssueError" class="issue-errors">
                         <iron-icon class="issue-errors__icon" icon="icons:error"></iron-icon>
@@ -628,7 +654,7 @@
                         if(!_.isEmpty(this.errorMessage))
                             toastError.open();
                         else
-                            this._closeToastError();
+                            toastError.close();
                     }
                 },
 
@@ -650,13 +676,16 @@
                         toastIssueError.open();
                 },
 
-                _closeToastError: function() {
-                    toastError.close();
+                _onToastErrorClosed: function() {
                     this.set('errorMessage', null);
                     if (this.issueErrorMessages.length > 0)
                         toastIssueError.open();
                     else if (this.infoMessage)
                         toastIssueUpdated.open();
+                },
+
+                _closeToastError: function() {
+                    toastError.close();
                 },
 
                 _openIssue: function(e) {
@@ -713,16 +742,14 @@
                     this.retrieveFilters();
                 },
 
-                refreshBoard: function() {
-                    window.location.reload();
-                },
-
-                dismiss: function() {
+                _onIssueUpdatedClosed: function(event) {
+                    toastIssueUpdated.duration = 5000;
                     this.updatedIssueKeys = [];
                     this.infoMessage = "";
-                    toastIssueUpdated.close();
-                    if (this.filterByUpdate)
+                    if (this.filterByUpdate) {
                         searchFilter.updateFilter(this, {updatedIssues: null});
+                        this.filterByUpdate = false;
+                    }
                     this.fire('iron-signal', {name: 'clear-highlight'});
 
                     if (this.issueErrorMessages.length > 0)
@@ -731,16 +758,20 @@
                         toastError.open();
                 },
 
-                toggleFilterChangedIssues: function(args) {
+                _closeIssueUpdated: function() {
+                    toastIssueUpdated.close();
+                },
+
+                _showOnlyUpdatedOrDismiss: function() {
+                    toastIssueUpdated.close();
+                    toastIssueUpdated.show({duration: 0});
+
                     if (!this.filterByUpdate) {
-                        this.refreshText = 'SHOW ALL'
+                        this.refreshText = 'DISMISS'
                         searchFilter.updateFilter(this, {updatedIssues: this.updatedIssueKeys});
-                    }
-                    else {
-                        this.refreshText="SHOW ONLY UPDATED";
-                        searchFilter.updateFilter(this, {updatedIssues: null});
-                    }
-                    this.filterByUpdate = !this.filterByUpdate;
+                        this.filterByUpdate = true;
+                    } else
+                        toastIssueUpdated.close();
                 },
 
                 cacheStateUpdated: function(data) {

@@ -357,15 +357,20 @@ tb-autocomplete[disable-clear="true"] .input-wrapper paper-icon-button#clear {
     Clear button
 */
 .clear-button {
-    width: 17px;
-    height: 17px;
+    display: inline-flex;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    width: 15px;
+    height: 15px;
+    padding: 0;
 }
 
-.clear-button paper-icon-button {
-    float: right;
-    padding: 0;
-    width: 17px;
-    height: 17px;
+.clear-button:hover {
+    background: #CCC;
+    opacity: 0.8;
+    -webkit-transition: all .5s;
+    -moz-transition: all .5s;
+    transition: all .5s;
 }
 
 /*

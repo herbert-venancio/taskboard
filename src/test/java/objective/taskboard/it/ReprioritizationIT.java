@@ -118,7 +118,7 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
                 "TASKB-686"
                 );
         
-        mainPage.refreshToast().dismiss();
+        mainPage.refreshToast().close();
         // makes sure the model is correctly updated
         mainPage.typeSearch("TASKB-625");
         mainPage.clearSearch();

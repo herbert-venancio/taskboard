@@ -53,7 +53,7 @@ public class FollowupDialog extends AbstractUiFragment {
         waitVisibilityOfElement(dialog);
         generateButton = dialog.findElement(By.id("generate"));
         dateDropdown = dialog.findElement(By.name("date"));
-        clearDateButton = dialog.findElement(By.cssSelector(".clear-button paper-icon-button"));
+        clearDateButton = dialog.findElement(By.cssSelector(".clear-button"));
         noMatchingTemplateWarning = dialog.findElement(By.id("noTemplateWarning"));
         setTemplateLink = dialog.findElement(By.className("set-template-link"));
         return this;

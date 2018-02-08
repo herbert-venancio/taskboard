@@ -225,10 +225,8 @@
                                 </template>
                             </paper-menu>
                         </paper-dropdown-menu>
-                        <div class="clear-button">
-                            <paper-icon-button icon="clear" on-click="clearSelectedDate" hidden$={{!showClearDate}}>
-                            </paper-icon-button>
-                        </div>
+                        <paper-icon-button icon="clear" on-click="clearSelectedDate" hidden$={{!showClearDate}} class="clear-button">
+                        </paper-icon-button>
                     </div>
 
                     <div class="error-message" hidden$="{{!errorMessage}}">{{errorMessage}}</div>
