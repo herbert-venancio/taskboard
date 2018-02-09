@@ -401,7 +401,7 @@ function Taskboard() {
             return;
 
         taskboardHome.fire("iron-signal", {name:"show-issue-updated-message", data:{
-            message: "Jira issues have been updated.",
+            message: "Issues updated",
             updatedIssueKeys: updatedIssueKeys
         }})
     }

@@ -81,6 +81,12 @@ public abstract class AbstractUiFragment {
         waitUntil(visibilityOf(element));
     }
 
+    protected void ensureVisibilityOfElementDuringMilliseconds(WebElement element, Long milliseconds) {
+        Long end = System.currentTimeMillis() + milliseconds;
+        while (System.currentTimeMillis() < end)
+            waitUntil(visibilityOf(element));
+    }
+
     protected void waitVisibilityOfElements(WebElement... elements) {
         for (int i = 0; i < elements.length; ++i) {
             waitVisibilityOfElement(elements[i]);

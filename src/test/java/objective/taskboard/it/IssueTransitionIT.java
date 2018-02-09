@@ -167,7 +167,7 @@ public class IssueTransitionIT extends AuthenticatedIntegrationTest {
     }
 
     @Test
-    public void givenIssueWithClassOfServiceFromParent_whenTransitionIssueAndWebhookIsEnabled_thenIssueShouldKeepClassOfServiceFromParent() throws InterruptedException {
+    public void givenIssueWithClassOfServiceFromParent_whenTransitionIssueAndWebhookIsEnabled_thenIssueShouldKeepClassOfServiceFromParent() {
         MainPage mainPage = MainPage.produce(webDriver);
         mainPage.errorToast().close();
 

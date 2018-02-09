@@ -30,27 +30,43 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
     private static final String FIXED_DATE_COLOR = "rgb(254, 229, 188)";
 
     @Test
-    public void whenUpdateHappensViaWebHook_RefreshToastShouldShowUP() {
+    public void whenUpdateHappensViaWebHook_RefreshToastShouldShowUPDuring5Seconds() {
         MainPage mainPage = MainPage.produce(webDriver);
         mainPage.issue("TASKB-625")
             .assertHasFirstAssignee();
 
         emulateUpdateIssue("TASKB-625", "{\"assignee\":{\"name\":\"foo\"}},\"properties\":[]");
 
+        String[] updatedIssues = {"TASKB-625"};
+        mainPage.assertUpdatedIssues(updatedIssues);
         mainPage.errorToast().close();
+        mainPage.refreshToast()
+            .assertVisibleDuringMilliseconds(4500L)
+            .assertNotVisible();
+        mainPage.assertUpdatedIssues(new String[0]);
+
+        emulateUpdateIssue("TASKB-625", "{\"assignee\":{\"name\":\"foo\"}},\"properties\":[]");
+
         mainPage.refreshToast().assertVisible();
-        mainPage.typeSearch("TASKB-61");
-        mainPage.refreshToast().toggleShowHide();
+        mainPage.typeSearch("TASKB-61")
+            .assertVisibleIssues("TASKB-611", "TASKB-612", "TASKB-613", "TASKB-610", "TASKB-614");
+        mainPage.refreshToast().showOnlyUpdated()
+            .assertVisibleDuringMilliseconds(5500L);
         mainPage.assertVisibleIssues("TASKB-625");
         mainPage.issue("TASKB-625")
             .assertHasFirstAssignee()
             .assertHasSecondAssignee();
-        mainPage.refreshToast().toggleShowHide();
+
+        mainPage.refreshToast().dismiss()
+            .assertNotVisible();
         mainPage.assertVisibleIssues("TASKB-611", "TASKB-612", "TASKB-613", "TASKB-610", "TASKB-614");
-        mainPage.refreshToast().toggleShowHide();
-        mainPage.refreshToast().dismiss();
-        mainPage.refreshToast().assertNotVisible();
-        mainPage.assertVisibleIssues("TASKB-611", "TASKB-612", "TASKB-613", "TASKB-610", "TASKB-614");
+        mainPage.clearSearch().errorToast().close();
+
+        emulateUpdateIssue("TASKB-625", "{\"assignee\":{\"name\":\"foo\"}},\"properties\":[]");
+
+        mainPage.refreshToast()
+            .assertVisibleDuringMilliseconds(4500L)
+            .assertNotVisible();
     }
 
     @Test
@@ -71,7 +87,7 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
     }
 
     @Test
-    public void givenAnIssueNotVisible_whenUpdateHappensViaWebHook_RefreshToastShouldNotShowUP() throws InterruptedException {
+    public void givenAnIssueNotVisible_whenUpdateHappensViaWebHook_RefreshToastShouldNotShowUP() {
         MainPage mainPage = MainPage.produce(webDriver);
         mainPage.typeSearch("TASKB-625");
 
@@ -93,7 +109,7 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
     }
 
     @Test
-    public void givenVisibleIssuesWithChildren_whenParentGoToDeferred_thenAllChildrenShouldDisappear() throws InterruptedException {
+    public void givenVisibleIssuesWithChildren_whenParentGoToDeferred_thenAllChildrenShouldDisappear() {
         MainPage mainPage = MainPage.produce(webDriver);
         mainPage.issue("TASKB-606")
             .enableHierarchicalFilter();
@@ -113,7 +129,7 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
     }
 
     @Test
-    public void givenIssuesWithChildren_whenParentChangeTheClassOfService_thenAllChildrenShouldUpdate() throws InterruptedException {
+    public void givenIssuesWithChildren_whenParentChangeTheClassOfService_thenAllChildrenShouldUpdate() {
         MainPage mainPage = MainPage.produce(webDriver);
 
         mainPage.issue("TASKB-606").assertCardColor(STANDARD_COLOR).click().issueDetails()
@@ -138,7 +154,7 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
 
         String[] updatedIssues = {"TASKB-606", "TASKB-186", "TASKB-235", "TASKB-601", "TASKB-572"};
         mainPage.assertUpdatedIssues(updatedIssues);
-        mainPage.refreshToast().assertVisible().toggleShowHide();
+        mainPage.refreshToast().assertVisible().showOnlyUpdated();
         mainPage.assertVisibleIssues(updatedIssues);
 
         mainPage.issue("TASKB-606").assertCardColor(FIXED_DATE_COLOR).click().issueDetails()

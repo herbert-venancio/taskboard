@@ -29,11 +29,11 @@ public class RefreshToast extends AbstractUiFragment {
     @FindBy(id="toastIssueUpdated")
     private WebElement issueToast;
 
-    @FindBy(id="toggleFilterChangedIssues")
-    private WebElement toggleFilterChangedIssues;
+    @FindBy(id="showOnlyUpdatedOrDismiss")
+    private WebElement showOnlyUpdatedOrDismiss;
 
-    @FindBy(id="dismissToast")
-    private WebElement dismissToast;
+    @FindBy(id="closeIssueUpdated")
+    private WebElement closeIssueUpdated;
 
     public RefreshToast(WebDriver webDriver) {
         super(webDriver);
@@ -44,16 +44,29 @@ public class RefreshToast extends AbstractUiFragment {
         return this;
     }
 
-    public void toggleShowHide() {
-        waitForClick(toggleFilterChangedIssues);
+    public RefreshToast assertVisibleDuringMilliseconds(Long milliseconds) {
+        ensureVisibilityOfElementDuringMilliseconds(issueToast, milliseconds);
+        return this;
+    }
+
+    public RefreshToast showOnlyUpdated() {
+        waitTextInElement(showOnlyUpdatedOrDismiss, "SHOW ONLY UPDATED");
+        waitForClick(showOnlyUpdatedOrDismiss);
+        return this;
+    }
+
+    public RefreshToast dismiss() {
+        waitTextInElement(showOnlyUpdatedOrDismiss, "DISMISS");
+        waitForClick(showOnlyUpdatedOrDismiss);
+        return this;
     }
 
     public void assertNotVisible() {
         waitInvisibilityOfElement(issueToast);
     }
 
-    public void dismiss() {
-        waitForClick(dismissToast);
+    public void close() {
+        waitForClick(closeIssueUpdated);
         assertNotVisible();
     }
 }
