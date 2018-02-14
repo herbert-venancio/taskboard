@@ -392,11 +392,14 @@
                       on-iron-signal-search-filter-changed="searchFilterChanged"
                       on-iron-signal-issue-cache-state-updated="cacheStateUpdated"
                       on-iron-signal-projects-changed="projectsUpdated"
+                      on-iron-signal-open-project-configuration-modal="openProjectConfigurationModal"
                       >
         </iron-signals>
 
         <followup-dialog id="followupdialog"></followup-dialog>
         <followup-crud-modal id="followupCrudModal"></followup-crud-modal>
+
+        <config-project-modal id="projectConfigurationModal"></config-project-modal>
 
         <sizing-import id="sizingimport"></sizing-import>
 
@@ -478,11 +481,12 @@
                 </div>
                 <paper-header-panel drawer>
                     <paper-material class="app-name">
-                        <div class="filters-title">Filters</div>
+                        <div class="filters-title">Configurations</div>
                     </paper-material>
                     <paper-material class="layout vertical">
                         <aspects-filter aspects-filter="{{aspectsFilter}}"></aspects-filter>
                         <config-table config={{conf}}></config-table>
+                        <config-projects></config-projects>
                     </paper-material>
 <!--                     <paper-material class="bottom"> -->
 <!--                         <paper-material class="legendas flex layout horizontal"> -->
@@ -730,6 +734,10 @@
 
                 openAbout: function() {
                     this.$.aboutModal.open();
+                },
+
+                openProjectConfigurationModal: function(event, data) {
+                    this.$.projectConfigurationModal.open(data.projectKey);
                 },
 
                 searchFilterChanged: function(event, data) {

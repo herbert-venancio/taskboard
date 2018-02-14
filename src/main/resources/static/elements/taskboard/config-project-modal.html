@@ -1,0 +1,182 @@
+<dom-module id="config-project-modal">
+
+    <template>
+
+        <style>
+            .error-message {
+                color: red;
+                font-weight: bold;
+                margin-top: 5px;
+                margin-bottom: 15px;
+            }
+
+            .configuration-form {
+                width: 400px;
+                padding: 15px;
+            }
+        </style>
+
+        <alert-modal id="alertModalConfiguration"></alert-modal>
+        <wrap-modal id="modal" title="Project Configuration for {{projectKey}}">
+            <div class="modal-content">
+                
+                <form class="configuration-form">
+                    <div class="error-message" hidden$="{{!errorMessage}}">{{errorMessage}}</div>
+                    <paper-input id="projectStartDate" always-float-label 
+                        label="Project Start Date" 
+                        placeholder="{{dateFormatPlaceholder}}" 
+                        value="{{projectConfiguration.startDate}}"
+                        tabindex="1"
+                        maxlength="10"
+                        required
+                        pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}"></paper-input>
+
+                    <paper-input id="projectDeliveryDate" always-float-label 
+                        label="Project End Date" 
+                        placeholder="{{dateFormatPlaceholder}}" 
+                        value="{{projectConfiguration.deliveryDate}}"
+                        maxlength="10"
+                        required
+                        pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}"></paper-input>
+
+                    <paper-input id="projectProjectionTimespan" always-float-label 
+                        label="Projection Timespan (in days)" 
+                        value="{{projectConfiguration.projectionTimespan}}"
+                        type="number"
+                        min="0"></paper-input>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <paper-spinner active hidden$="{{!showLoadingSpinner}}">...</paper-spinner>
+                <paper-button id="updateProjectConfiguration" raised class="colorful" title="Update Configuration" on-tap="updateConfiguration">
+                    Update
+                </paper-button>
+            </div>
+        </wrap-modal>
+
+    </template>
+    <script src="/static/bower_components/moment/min/moment-with-locales.js"></script>
+    <script src="/static/bower_components/jquery.maskedinput/dist/jquery.maskedinput.min.js"></script>
+    <script>
+        (function () {
+            Polymer({
+                is: 'config-project-modal',
+
+                properties: {
+                    projectKey: {
+                        type: String
+                    },
+                    projectConfiguration: {
+                        type: Object,
+                        notify: true
+                    },
+                    showLoadingSpinner: {
+                        type: Boolean
+                    },
+                    dateFormatPlaceholder: {
+                        type: String
+                    }
+                },
+
+                open: function(projectKey) {
+                    var self = this;
+
+                    moment.locale(self._getLocale());
+                    self.set("dateFormatPlaceholder", moment.localeData().longDateFormat("L").toLowerCase());
+
+                    self.errorMessage = "";
+                    self.set("projectConfiguration", {startDate: "", deliveryDate: "", projectionTimespan: ""}); // set just {} was not enough
+                    self.set("projectKey", projectKey);
+                    self.$.projectStartDate.invalid = false;
+                    self.$.projectDeliveryDate.invalid = false;
+
+                    $.ajax({
+                        url: "/api/projects/"+projectKey+"/configuration",
+                        dataType: "json",
+                        success: function (data) {
+                            var projectConfiguration = {
+                                startDate: self._getLocaleDate(data.startDate), 
+                                deliveryDate: self._getLocaleDate(data.deliveryDate), 
+                                projectionTimespan: data.projectionTimespan
+                            };
+                            self.set("projectConfiguration", projectConfiguration);
+                            self.showLoading(false);
+                        }
+                    });
+                    this.$.modal.open();
+                    self.$.projectStartDate.$.input.focus();
+
+                    // after set this mask, polymer binding will not work properly
+                    $(self.$.projectStartDate.$.input).mask("99/99/9999", {placeholder:" "});
+                    $(self.$.projectDeliveryDate.$.input).mask("99/99/9999", {placeholder:" "});
+                },
+
+                updateConfiguration: function() {
+                    console.log("update project configuration.");
+                    var self = this;
+
+                    if (!self._isValid())
+                        return;
+
+                    self.showLoading(true);
+
+                    // get directly from component because the polymer binding is not working after set the mask on input
+                    var data = {
+                        startDate: self._getISODate(self.$.projectStartDate.$.input.value),
+                        deliveryDate: self._getISODate(self.$.projectDeliveryDate.$.input.value),
+                        projectionTimespan: self.projectConfiguration.projectionTimespan
+                    };
+
+                    $.ajax({
+                        data: JSON.stringify(data),
+                        type: 'POST',
+                        contentType: "application/json; charset=utf-8",
+                        url: '/api/projects/' + self.projectKey + '/configuration'
+                    }).done(function () {
+                        self.showLoading(false);
+                        self.$.alertModalConfiguration.open("Configuration Updated", "Configuration for project " + self.projectKey + " has been updated.");
+                        self.$.modal.close();
+                    }).fail(function (jqXHR, textStatus, errorThrown) {
+                        console.error(errorThrown);
+                        self.showError(jqXHR, self);
+                    });
+                },
+
+                showLoading: function(show) {
+                    this.showLoadingSpinner = show;
+                },
+
+                showError: function(jqXHR, self) {
+                    self.showLoading(false);
+                    if  (jqXHR && jqXHR.responseText) {
+                        var responseError = JSON.parse(jqXHR.responseText);
+                        self.errorMessage = responseError.message;
+                        $(".error-message").show().delay(3000).fadeOut();
+                    } else {
+                        self.errorMessage = "The request has failed";
+                        $(".error-message").show().delay(3000).fadeOut();
+                    }
+                },
+
+                _isValid: function() {
+                    return this.$.projectStartDate.validate() & this.$.projectDeliveryDate.validate();
+                 },
+
+                _getLocaleDate: function(date) {
+                    if (date)
+                        return moment(date).format("L");
+                },
+
+                _getISODate: function(date) {
+                    if(date)
+                        return moment(date, "L").format("YYYY-MM-DD");
+                 },
+
+                _getLocale: function() {
+                    return window.navigator.userLanguage || window.navigator.language;
+                 }
+
+            });
+        })();
+    </script>
+</dom-module>

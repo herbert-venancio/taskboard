@@ -18,11 +18,13 @@ import objective.taskboard.followup.FollowUpDataSnapshotHistory;
 
 public class FollowupProgressCalculator {
 
-    public ProgressData calculate(FollowUpDataSnapshot followupData, LocalDate projectDeliveryDate) {
-        return calculate(followupData, projectDeliveryDate, 20);
+    public static final int DEFAULT_PROJECTION_SAMPLE_SIZE = 20;
+
+    public ProgressData calculate(FollowUpDataSnapshot followupData, LocalDate projectStartDate, LocalDate projectDeliveryDate) {
+        return calculate(followupData, projectStartDate, projectDeliveryDate, DEFAULT_PROJECTION_SAMPLE_SIZE);
     }
     
-    public ProgressData calculate(FollowUpDataSnapshot followupData, LocalDate projectDeliveryDate, int projectionSampleSize) {
+    public ProgressData calculate(FollowUpDataSnapshot followupData, LocalDate projectStartDate, LocalDate projectDeliveryDate, int projectionSampleSize) {
         ProgressData progressData = new ProgressData();
 
         if (!followupData.getHistory().isPresent())
@@ -41,10 +43,10 @@ public class FollowupProgressCalculator {
         LocalDate startingDate = firstRow.date;
         LocalDate finalProjectDate = projectDeliveryDate.isBefore(lastRow.date) ? lastRow.date : projectDeliveryDate;
         
-        addExpectedProgress(progressData, startingDate, projectDeliveryDate, finalProjectDate);
+        addExpectedProgress(progressData, projectStartDate, projectDeliveryDate, finalProjectDate);
         addProjectionData(progressData, historyRows, startingDate, finalProjectDate, projectionSampleSize);
         
-        progressData.startingDate = firstRow.date;
+        progressData.startingDate = projectStartDate;
         progressData.endingDate = finalProjectDate;
         return progressData;
     }

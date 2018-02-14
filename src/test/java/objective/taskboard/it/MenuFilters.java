@@ -38,12 +38,23 @@ public class MenuFilters extends AbstractUiFragment {
     @FindBy(tagName = "aspect-subitem-filter")
     private List<WebElement> aspectSubitemFilters;
 
+    @FindBy(tagName = "config-projects")
+    private WebElement projectsConfigurationButton;
+
+    @FindBy(css = ".config-projects.config-item-project")
+    private List<WebElement> projectsConfigurationItem;
+
     public MenuFilters(WebDriver webDriver) {
         super(webDriver);
     }
 
     public MenuFilters openAspectsFilter() {
         waitForClick(aspectsFilterButton);
+        return this;
+    }
+
+    public MenuFilters openProjectsConfiguration() {
+        waitForClick(projectsConfigurationButton);
         return this;
     }
 
@@ -58,6 +69,15 @@ public class MenuFilters extends AbstractUiFragment {
 
         waitForClick(checkAll);
         return this;
+    }
+
+    public ProjectConfigurationDialog openProjectConfigurationModal(String projectKey) {
+        WebElement projectItemButton = projectsConfigurationItem.stream().filter(el -> projectKey.equals(el.getText())).findFirst().orElse(null);
+
+        if (projectItemButton == null)
+            throw new IllegalArgumentException("Element  for project key " + projectKey + " filter  not found");
+
+        return ProjectConfigurationDialog.open(webDriver, projectItemButton);
     }
 
     public MenuFilters clickAspectSubitemFilter(String filterName, String subitemFilterName) {

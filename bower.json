@@ -17,7 +17,9 @@
     "underscore": "1.8.3",
     "marked-element": "^1.0.0",
     "dcjs": "^2.1.9",
-    "paper-autocomplete": "ellipticaljs/paper-autocomplete#^3.4.0"
+    "paper-autocomplete": "ellipticaljs/paper-autocomplete#^3.4.0",
+    "moment": "^2.20.1",
+    "jquery.maskedinput": "^1.4.1"
   },
   "devDependencies": {
     "web-component-tester": "^5.0.1"

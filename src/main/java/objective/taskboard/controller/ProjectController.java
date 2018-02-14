@@ -23,6 +23,7 @@ package objective.taskboard.controller;
 
 import static java.util.stream.Collectors.toList;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -32,6 +33,7 @@ import java.util.Optional;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,7 +41,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.controller.ProjectCreationData.ProjectCreationDataTeam;
+import objective.taskboard.controller.ProjectData.ProjectConfigurationData;
 import objective.taskboard.data.Team;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.domain.ProjectTeam;
@@ -50,6 +54,7 @@ import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository
 import objective.taskboard.repository.ProjectTeamRepository;
 import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.repository.TeamFilterConfigurationCachedRepository;
+import objective.taskboard.utils.DateTimeUtils;
 
 @RestController
 @RequestMapping("/api/projects")
@@ -72,6 +77,9 @@ public class ProjectController {
 
     @Autowired
     private FollowUpFacade followUpFacade;
+
+    @Autowired
+    private CacheManager cacheManager;
 
     @RequestMapping
     public List<ProjectData> get() {
@@ -178,6 +186,54 @@ public class ProjectController {
         data.teams.forEach(team -> {
             createTeamAndConfigurations(data.projectKey, team.name, data.teamLeader, data.teamLeader, team.members);
         });
+    }
+
+    @RequestMapping(value = "{projectKey}/configuration", method = RequestMethod.POST, consumes = "application/json")
+    public ResponseEntity<Object> updateProjectConfiguration(@PathVariable("projectKey") String projectKey, @RequestBody ProjectConfigurationData data) {
+        Optional<ProjectFilterConfiguration> configuration = projectRepository.getProjectByKey(projectKey);
+        if (!configuration.isPresent())
+            ResponseEntity.notFound().build();
+
+        if (data.startDate == null || data.deliveryDate == null)
+            return ResponseEntity.badRequest().body("{\"message\" : \"The dates are required\"}");
+
+        if (!DateTimeUtils.isValidDate(data.startDate))
+            return ResponseEntity.badRequest().body("{\"message\" : \"Invalid Start Date\"}");
+
+        if (!DateTimeUtils.isValidDate(data.deliveryDate))
+            return ResponseEntity.badRequest().body("{\"message\" : \"Invalid End Date\"}");
+
+        LocalDate startDate = DateTimeUtils.parseDate(data.startDate).toLocalDate();
+        LocalDate deliveryDate = DateTimeUtils.parseDate(data.deliveryDate).toLocalDate();
+        if (startDate.isAfter(deliveryDate))
+            return ResponseEntity.badRequest().body("{\"message\" : \"End Date should be greater than Start Date\"}");
+
+        if (data.projectionTimespan != null && data.projectionTimespan < 0)
+            return ResponseEntity.badRequest().body("{\"message\" : \"Projection timespan should be a positive number\"}");
+
+        configuration.get().setStartDate(startDate);
+        configuration.get().setDeliveryDate(deliveryDate);
+        configuration.get().setProjectionTimespan(data.projectionTimespan);
+
+        projectRepository.save(configuration.get());
+
+        cacheManager.getCache(CacheConfiguration.DASHBOARD_PROGRESS_DATA).clear();
+
+        return ResponseEntity.ok().build();
+    }
+
+    @RequestMapping(value = "{projectKey}/configuration", method = RequestMethod.GET)
+    public ResponseEntity<ProjectConfigurationData> getProjectConfiguration(@PathVariable("projectKey") String projectKey) {
+        Optional<ProjectFilterConfiguration> configuration = projectRepository.getProjectByKey(projectKey);
+        if (!configuration.isPresent())
+            ResponseEntity.notFound().build();
+
+        ProjectConfigurationData data = new ProjectConfigurationData();
+        data.startDate = configuration.get().getStartDate() != null ? configuration.get().getStartDate().toString() : "";
+        data.deliveryDate = configuration.get().getDeliveryDate() != null ? configuration.get().getDeliveryDate().toString() : "";
+        data.projectionTimespan = configuration.get().getProjectionTimespan();
+
+        return ResponseEntity.ok(data);
     }
 
     private void validateTeamsAndWipConfigurations(List<ProjectCreationDataTeam> pcdTeams) {

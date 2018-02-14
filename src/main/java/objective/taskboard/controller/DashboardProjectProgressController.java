@@ -78,16 +78,22 @@ public class DashboardProjectProgressController {
 
         LocalDate deliveryDate = project.get().getDeliveryDate();
 
+        if (project.get().getStartDate() == null)
+            return new ResponseEntity<>("The project " + projectKey + " has no start date.", INTERNAL_SERVER_ERROR);
+
+        LocalDate projectStartDate = project.get().getStartDate();
+
+        int projectionSampleSize = Optional.ofNullable(project.get().getProjectionTimespan()).orElse(FollowupProgressCalculator.DEFAULT_PROJECTION_SAMPLE_SIZE);
+
         FollowUpDataSnapshot snapshot = providerFromCurrentState.getJiraData(new String[]{projectKey}, timezone);
         if (snapshot.getCluster().isEmpty())
             return new ResponseEntity<>("No cluster configuration found for project " + projectKey + ".", INTERNAL_SERVER_ERROR);
-        
+
         if (!snapshot.getHistory().isPresent())
             return new ResponseEntity<>("No progress history found for project " + projectKey, INTERNAL_SERVER_ERROR);
 
         FollowupProgressCalculator calculator = new FollowupProgressCalculator();
-
-        ProgressData progressData = calculator.calculate(snapshot, deliveryDate);
+        ProgressData progressData = calculator.calculate(snapshot, projectStartDate, deliveryDate, projectionSampleSize);
 
         return ResponseEntity.ok().body(progressData);
     }
