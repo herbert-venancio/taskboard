@@ -354,7 +354,7 @@
 							</execution>
 							<execution>
 								<id>exec-web-component-tester</id>
-								<phase>test</phase>
+								<phase>verify</phase>
 								<configuration>
 									<skip>${skipTests}</skip>
 									<executable>node</executable>

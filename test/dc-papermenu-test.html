@@ -1,0 +1,245 @@
+<!doctype html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+    <title>dc.js Paper Dropdown Menu Test</title>
+
+    <link rel="import" href="/static/bower_components/polymer/polymer.html">
+    <link rel="import" href="/static/bower_components/test-fixture/test-fixture.html">
+
+    <script src="/static/bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
+    <script src="/static/bower_components/web-component-tester/browser.js"></script>
+    <script src="/static/bower_components/test-fixture/test-fixture-mocha.js"></script>
+    <script src="/static/bower_components/iron-test-helpers/mock-interactions.js"></script>
+
+    <script src="/static/bower_components/jquery/dist/jquery.js"></script>
+
+    <!-- dependencies -->
+    <link rel="import" href="/static/bower_components/paper-item/paper-item.html">
+    <link rel="import" href="/static/bower_components/paper-menu/paper-menu.html">
+    <link rel="import" href="/static/bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+    <link rel="import" href="/static/bower_components/neon-animation/neon-animations.html">
+    <script src="/static/bower_components/crossfilter2/crossfilter.js"></script>
+    <script src="/static/bower_components/d3/d3.js"></script>
+    <script src="/static/bower_components/dcjs/dc.js"></script>
+
+    <!-- Import the element to test -->
+    <script src="/static/scripts/dc-papermenu.js"></script>
+
+</head>
+<body>
+
+    <test-fixture id="dc-menu">
+        <template>
+            <div></div>
+        </template>
+    </test-fixture>
+
+    <script>
+
+        var async = function(callback, timeout) {
+            Polymer.Base.async(callback, timeout);
+        }
+
+        function findPaperDropdownMenu(div) {
+            return $(div).find('paper-dropdown-menu')[0]
+        }
+
+        function openMenu(menu) {
+            return new Promise(
+                function(resolve, reject) {
+                    menu.$.menuButton.$.dropdown.addEventListener('iron-overlay-opened', function() {
+                        async(function() { resolve(menu); }, 1);
+                    });
+                    MockInteractions.tap(menu);
+                }
+            );
+        };
+
+        function selectFirstItem(dropdownMenu) {
+            return new Promise(
+                function(resolve, reject) {
+                    var content = Polymer.dom(dropdownMenu).querySelector('.dropdown-content');
+                    var firstItem = Polymer.dom(content).querySelectorAll('paper-item')[1];
+
+                    MockInteractions.tap(firstItem);
+
+                    async(function() { resolve(firstItem); }, 1);
+                }
+            );
+        }
+
+        function selectSecondItem(dropdownMenu) {
+            return new Promise(
+                function(resolve, reject) {
+                    var content = Polymer.dom(dropdownMenu).querySelector('.dropdown-content');
+                    var secondItem = Polymer.dom(content).querySelectorAll('paper-item')[2];
+
+                    MockInteractions.tap(secondItem);
+
+                    async(function() { resolve(secondItem); }, 1);
+                }
+            );
+        }
+
+        suite('<dc-papermenu>', function() {
+
+            var div;
+            var ndx;
+            var dimension;
+            var group;
+            var dcPaperMenu;
+
+            teardown(function() {
+                if(dcPaperMenu) {
+                    dc.deregisterChart(dcPaperMenu);
+                }
+            });
+
+            suite('<sanity check>', function() {
+
+                setup(function() {
+                    div = fixture('dc-menu');
+                    ndx = crossfilter(['a', 'b', 'c']);
+                    dimension = ndx.dimension(function(d) { return d; });
+                    group = dimension.group();
+                    dcPaperMenu = dc.paperMenu(div);
+                    dcPaperMenu.dimension(dimension);
+                    dcPaperMenu.group(group);
+                    dcPaperMenu.render();
+                });
+
+                test('dc.paperMenu loads correctly', function() {
+                    var menu = findPaperDropdownMenu(div);
+                    assert.isNotNull(menu, 'paper-dropdown-menu not found.');
+                    assert.isDefined(menu.root, 'component should be defined.');
+                });
+
+            });
+
+            suite('<basic data binding>', function() {
+
+                setup(function() {
+                    div = fixture('dc-menu');
+                    ndx = crossfilter(['a', 'a', 'b', 'c', 'c', 'c']);
+                    dimension = ndx.dimension(function(d) { return d; });
+                    group = dimension.group();
+                    dcPaperMenu = dc.paperMenu(div);
+                    dcPaperMenu.dimension(dimension);
+                    dcPaperMenu.group(group);
+                    dcPaperMenu.render();
+                });
+
+                test('dc.paperMenu create menu items', function(done) {
+                    var menu = findPaperDropdownMenu(div);
+
+                    openMenu(menu)
+                        .then(function() {
+                            var items = menu.querySelectorAll('paper-item');
+                            expect(items.length).to.be.equal(4);
+                            expect(items[0].innerText.trim()).to.be.equal('Select all');
+                            expect(items[1].innerText.trim()).to.be.equal('a: 2');
+                            expect(items[2].innerText.trim()).to.be.equal('b: 1');
+                            expect(items[3].innerText.trim()).to.be.equal('c: 3');
+                            done();
+                        });
+                });
+
+                test('dc.paperMenu select invokes filtered', function(done) {
+                    var menu = findPaperDropdownMenu(div);
+
+                    var called = false;
+                    dcPaperMenu.on("filtered", function(a, b, c) {
+                        called = true;
+                    });
+
+                    openMenu(menu)
+                        .then(selectFirstItem)
+                        .then(function(firstItem) {
+                            expect(menu.selectedItem).to.be.equal(firstItem);
+                            expect(menu.value).to.be.equal('a: 2');
+                            expect(called).to.be.true;
+                            done();
+                        });
+                });
+
+                test('dc.paperMenu crossfilter.add reflects into menu items', function(done) {
+                    var menu = findPaperDropdownMenu(div);
+
+                    ndx.add(['d']);
+
+                    dcPaperMenu.redraw();
+
+                    openMenu(menu)
+                        .then(function() {
+                            var items = menu.querySelectorAll('paper-item');
+                            expect(items.length).to.be.equal(5);
+                            expect(items[0].innerText.trim()).to.be.equal('Select all');
+                            expect(items[1].innerText.trim()).to.be.equal('a: 2');
+                            expect(items[2].innerText.trim()).to.be.equal('b: 1');
+                            expect(items[3].innerText.trim()).to.be.equal('c: 3');
+                            expect(items[4].innerText.trim()).to.be.equal('d: 1');
+                            done();
+                        });
+                });
+
+                test('dc.paperMenu crossfilter.remove reflects into menu items', function(done) {
+                    var menu = findPaperDropdownMenu(div);
+
+                    async(function() {
+                        ndx.remove();
+
+                        dcPaperMenu.redraw();
+
+                        openMenu(menu)
+                            .then(function() {
+                                var items = menu.querySelectorAll('paper-item');
+                                expect(items.length).to.be.equal(1);
+                                expect(items[0].innerText.trim()).to.be.equal('Select all');
+                                done();
+                            });
+                    });
+                });
+            });
+
+            suite('multi-select', function() {
+                setup(function() {
+                    div = fixture('dc-menu');
+                    ndx = crossfilter(['a', 'a', 'b', 'c', 'c', 'c']);
+                    dimension = ndx.dimension(function(d) { return d; });
+                    group = dimension.group();
+                    dcPaperMenu = dc.paperMenu(div);
+                    dcPaperMenu.dimension(dimension);
+                    dcPaperMenu.group(group);
+                    dcPaperMenu.multiple(true);
+                    dcPaperMenu.render();
+                });
+
+                test('dc.paperMenu select first + second', function(done) {
+                    var menu = findPaperDropdownMenu(div);
+
+                    openMenu(menu)
+                        .then(selectFirstItem)
+                        .then(function() {return openMenu(menu);})
+                        .then(selectSecondItem)
+                        .then(function() {
+                            var expected = JSON.stringify(['a', 'b']);
+                            var actual = JSON.stringify(dcPaperMenu.filters());
+                            expect(actual).to.be.equal(expected);
+
+                            dcPaperMenu.redraw();
+
+                            var content = Polymer.dom(menu).querySelector('.dropdown-content');
+                            var actual = JSON.stringify(content.selectedValues);
+                            expect(actual).to.be.equal(expected);
+                            done();
+                        });
+                });
+
+            });
+        });
+    </script>
+
+</body>
+</html>

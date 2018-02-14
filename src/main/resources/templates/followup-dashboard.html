@@ -82,6 +82,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <script src="/static/bower_components/dcjs/dc.js"></script>
 
     <script src="/static/scripts/tb-pie-chart.js"></script>
+    <script src="/static/scripts/dc-papermenu.js"></script>
 
     <script src="/static/scripts/utils.js"></script>
     <script src="/static/scripts/dc-utils.js"></script>
@@ -218,18 +219,37 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             stroke: #8E8E8E;
         }
 
-        .widget__select select {
-            background: transparent;
-            border: 1px solid rgba(142,142,142, 0.2);
-            color: inherit;
-            font-size: 12px;
-            outline: none;
-            text-align: right;
-            padding: 2px 5px;
+        /*
+         Dropdown
+        */
+        .widget__select paper-item {
+            min-height: auto;
+            font-size: 14px;
+            cursor: pointer;
+            line-height: 16px;
+            padding: 0 10px;
+            margin-top: 8px;
         }
 
-        .widget__select option {
-            background: #444444;
+        .widget__select paper-item:first-child {
+            margin-top: 0px;
+        }
+
+        .widget__select paper-item:hover {
+            background: #DDD;
+        }
+
+        .widget__select paper-input-container {
+            border-radius: 3px !important;
+        }
+
+        .widget__select paper-menu {
+            min-width: 105px;
+        }
+
+        .widget__select .dc-paper-menu .input-content.paper-input-container > input {
+            color: #FFF;
+            font-size: 14px;
         }
 
         /*
