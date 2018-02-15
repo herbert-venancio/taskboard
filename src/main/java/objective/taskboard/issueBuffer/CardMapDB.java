@@ -57,7 +57,7 @@ public class CardMapDB implements CardStorage {
 
     @Override
     public void removeIssue(String key) {
-        issues.get(key);
+        issues.remove(key);
     }
 
     @Override
@@ -78,5 +78,5 @@ public class CardMapDB implements CardStorage {
             metadataPersistence.put("currentProjects", new LinkedHashSet<>(currentProjects));
         else 
             m.addAll(currentProjects);
-    }    
+    }
 }
