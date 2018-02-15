@@ -267,23 +267,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <body class="fullbleed layout vertical followup-kpis-page">
 
-<div>
-    <iron-meta key="issue-width" value="158"></iron-meta>
-</div>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        window.user = JSON.parse(/*[[${user}]]*/ null);
+        window.logo = JSON.parse(/*[[${logo}]]*/ null);
+        /*]]>*/
+        window.addEventListener('resize', function() {
+            dc.renderAll();
+        });
+    </script>
 
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    window.user = JSON.parse(/*[[${user}]]*/ null);
-    window.logo = JSON.parse(/*[[${logo}]]*/ null);
-    /*]]>*/
-    window.addEventListener('resize', function() {
-        dc.renderAll();
-    });
-</script>
-
-<template is="dom-bind" id="app">
-    <kpis-dashboard></kpis-dashboard>
-</template>
+    <template is="dom-bind" id="app">
+        <kpis-dashboard></kpis-dashboard>
+    </template>
 
 </body>
 

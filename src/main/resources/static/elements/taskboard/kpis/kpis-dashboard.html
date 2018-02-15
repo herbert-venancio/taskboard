@@ -131,12 +131,21 @@
                 margin: 8px;
             }
 
-            .kpis__widget[data-category] {
-                display: none;
-            }
-
-            .kpis__widget[data-category].active {
-                display: initial;
+            .kpis__widget[data-category]:not(.active) {
+                /* Must not use display: none in this case: "getBBox" firefox bug */
+                opacity: 0;
+                z-index: -9000;
+                pointer-events: none;
+                width: 0;
+                min-width: 0;
+                height: 0;
+                min-height: 0;
+                top: 0;
+                left: 0;
+                position: absolute;
+                overflow: hidden;
+                margin: 0;
+                flex: 0 0 auto;
             }
 
             .kpis__widget--1-2 {
