@@ -160,7 +160,7 @@
                                 var label = d.key.toLocaleDateString() + "\n\n";
                                 var total = 0;
                                 label +="** " + stat +": "+d.value.plotData[stat]+ " **\n";
-                                Object.keys(d.value.plotData).forEach(function(key) {
+                                Object.keys(d.value.plotData).reverse().forEach(function(key) {
                                     if (key !== stat)
                                         label += key+": "+d.value.plotData[key]+ "\n";
                                     total += d.value.plotData[key];
@@ -177,6 +177,12 @@
                             // stack the status data; stackAccessor(stat) generates a callback that tells dc how to read this stack data
                             self.chart.stack(self.cfdGroup, stat, stackAccessor(stat))
                         });
+
+                        self.chart.__legendables = self.chart.legendables;
+                        self.chart.legendables = function() {
+                            var items = self.chart.__legendables();
+                            return items.reverse();
+                        };
 
                         self.chart.render();
 
