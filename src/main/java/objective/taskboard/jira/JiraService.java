@@ -174,8 +174,15 @@ public class JiraService {
 
     public Optional<JiraIssueDto> getIssueByKey(String key) {
         log.debug("⬣⬣⬣⬣⬣  getIssueByKey");
-
-        return Optional.of(jiraEndpointAsUser.request(JiraIssueDto.Service.class).get(key));
+        try {
+            Optional<JiraIssueDto> optional = Optional.of(jiraEndpointAsUser.request(JiraIssueDto.Service.class).get(key));
+            return optional;
+        }catch(retrofit.RetrofitError e) {
+            if (e.getResponse().getStatus() == 404)
+                return Optional.empty();
+            throw e;
+        }
+        
     }
 
     public JiraIssueDto getIssueByKeyAsMaster(String key) {

@@ -237,6 +237,8 @@ public class IssueBufferService {
     }
 
     public synchronized void finishBatchUpdate() {
+        saveCache();
+        
         if (issuesUpdatedByEvent.size() > 0)
             eventPublisher.publishEvent(new IssuesUpdateEvent(this, issuesUpdatedByEvent));
         issuesUpdatedByEvent.clear();
