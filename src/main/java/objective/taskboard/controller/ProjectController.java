@@ -208,12 +208,8 @@ public class ProjectController {
         if (startDate.isAfter(deliveryDate))
             return ResponseEntity.badRequest().body("{\"message\" : \"End Date should be greater than Start Date\"}");
 
-        if (data.projectionTimespan != null && data.projectionTimespan < 0)
-            return ResponseEntity.badRequest().body("{\"message\" : \"Projection timespan should be a positive number\"}");
-
         configuration.get().setStartDate(startDate);
         configuration.get().setDeliveryDate(deliveryDate);
-        configuration.get().setProjectionTimespan(data.projectionTimespan);
 
         projectRepository.save(configuration.get());
 
@@ -231,7 +227,6 @@ public class ProjectController {
         ProjectConfigurationData data = new ProjectConfigurationData();
         data.startDate = configuration.get().getStartDate() != null ? configuration.get().getStartDate().toString() : "";
         data.deliveryDate = configuration.get().getDeliveryDate() != null ? configuration.get().getDeliveryDate().toString() : "";
-        data.projectionTimespan = configuration.get().getProjectionTimespan();
 
         return ResponseEntity.ok(data);
     }

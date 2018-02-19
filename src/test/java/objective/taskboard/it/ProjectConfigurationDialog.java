@@ -24,8 +24,6 @@ public class ProjectConfigurationDialog extends AbstractUiFragment {
 
     private WebElement deliveryDateInput;
 
-    private WebElement projectionTimespanInput;
-
     private WebElement updateButton;
 
     public ProjectConfigurationDialog(WebDriver driver) {
@@ -43,9 +41,8 @@ public class ProjectConfigurationDialog extends AbstractUiFragment {
         
         startDateInput = dialog.findElement(By.id("projectStartDate"));
         deliveryDateInput = dialog.findElement(By.id("projectDeliveryDate"));
-        projectionTimespanInput = dialog.findElement(By.id("projectProjectionTimespan"));
         updateButton = dialog.findElement(By.id("updateProjectConfiguration"));
-        waitVisibilityOfElements(startDateInput, deliveryDateInput, projectionTimespanInput, updateButton);
+        waitVisibilityOfElements(startDateInput, deliveryDateInput, updateButton);
 
         return this;
     }
@@ -56,41 +53,46 @@ public class ProjectConfigurationDialog extends AbstractUiFragment {
         return this;
     }
 
-    public ProjectConfigurationDialog updateConfiguration(String startDate, String deliveryDate, Integer projection) {
-        // clean-up dialog
+    public ProjectConfigurationDialog updateConfiguration(String startDate, String deliveryDate) {
         open(projectItemButton);
 
         startDateInput.sendKeys(startDate);
         deliveryDateInput.sendKeys(deliveryDate);
-        projectionTimespanInput.sendKeys(projection.toString());
         waitForClick(updateButton);
         assertSuccessMessage(MessageFormat.format(SUCCESS_MESSAGE, projectItemButton.getText()));
         closeAlertDialog();
         return this;
     }
 
-    public ProjectConfigurationDialog tryUpdateWithInvalidProjectionTimespan() {
-        // clean-up dialog
-        open(projectItemButton);
-
-        startDateInput.sendKeys("01/01/2018");
-        deliveryDateInput.sendKeys("02/01/2018");
-        projectionTimespanInput.sendKeys(Integer.valueOf(-1).toString());
-        waitForClick(updateButton);
-        assertErrorMessage("Projection timespan should be a positive number");
-        close();
-        return this;
-    }
-
     public ProjectConfigurationDialog tryUpdateWithInvalidDateRange() {
-        // clean-up dialog
         open(projectItemButton);
 
         startDateInput.sendKeys("04/01/2018");
         deliveryDateInput.sendKeys("02/01/2018");
-        projectionTimespanInput.sendKeys(Integer.valueOf(1).toString());
         waitForClick(updateButton);
         assertErrorMessage("End Date should be greater than Start Date");
+        close();
+        return this;
+    }
+
+    public ProjectConfigurationDialog tryUpdateWithInvalidStartDate() {
+        open(projectItemButton);
+
+        startDateInput.sendKeys("22/22/2222");
+        deliveryDateInput.sendKeys("02/01/2018");
+        waitForClick(updateButton);
+        assertErrorMessage("Invalid Start Date");
+        close();
+        return this;
+    }
+
+    public ProjectConfigurationDialog tryUpdateWithInvalidEndDate() {
+        open(projectItemButton);
+
+        startDateInput.sendKeys("01/01/2018");
+        deliveryDateInput.sendKeys("22/22/2222");
+        waitForClick(updateButton);
+        assertErrorMessage("Invalid End Date");
         close();
         return this;
     }

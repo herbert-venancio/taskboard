@@ -84,6 +84,11 @@
                 font-family: 'ptsans-bold', Verdana, Arial, Helvetica, sans-serif;
             }
 
+            .widget__options {
+                margin-left: auto;
+                display: flex;
+            }
+
             .widget__reset {
                 margin-left: auto;
                 cursor: pointer;
@@ -137,6 +142,11 @@
                 text-align: center;
                 color: #8E8E8E;
             }
+
+            .widget__options .icon {
+                height: 36px;
+                width: 36px;
+            }
         </style>
 
         <paper-spinner class="loader active" active="true"></paper-spinner>
@@ -144,9 +154,18 @@
         <section class="widget">
             <header class="widget__header">
                 <h3 class="widget__title">[[title]]</h3>
-                <template is="dom-if" if="{{_isChartFiltered}}">
-                    <a class="widget__reset" on-tap="_onTapReset">Reset</a>
-                </template>
+                <div class="widget__options">
+                    <template is="dom-if" if="{{options}}">
+                        <paper-icon-button icon="taskboard-icons:settings"
+                            title="Chart settings"
+                            class="widget__settings icon"
+                            on-tap="_onTapOptions"></paper-icon-button>
+                    </template>
+                    <template is="dom-if" if="{{_isChartFiltered}}">
+                        <a class="widget__reset" on-tap="_onTapReset">Reset</a>
+                    </template>
+                </div>
+
             </header>
             <div class="widget__body">
                 <template is="dom-if" if="{{!errorMessage}}">
@@ -190,6 +209,8 @@
                         type: String,
                         notify: true,
                         value: ''
+                    },
+                    options: {
                     }
                 },
 
@@ -217,6 +238,10 @@
                     dc.renderAll();
                     dc.redrawAll();
                 },
+
+                _onTapOptions: function() {
+                    this.options.tap();
+                 },
 
                 _onChartChanged: function(chart) {
                     this.set('_isChartFiltered', false);

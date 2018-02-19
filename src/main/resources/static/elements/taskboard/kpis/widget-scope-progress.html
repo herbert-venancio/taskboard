@@ -25,11 +25,28 @@
         <style>
         </style>
 
-        <widget-wrap title="Scope Progress" is-ready="{{isReady}}" error-message="{{errorMessage}}" chart="{{chart}}">
+        <widget-wrap title="Scope Progress" is-ready="{{isReady}}" error-message="{{errorMessage}}" options="{{options}}" chart="{{chart}}">
 
             <div id="scope-progress" class="tb-chart"></div>
 
         </widget-wrap>
+        <wrap-modal id="modal" title="Scope Progress Settings">
+            <div class="modal-content">
+                <form class="progress-chart-modal" style="width: 250px">
+                    <paper-input id="projectProjectionTimespan"
+                        label="Projection Timespan (in days)"
+                        value="{{projectionTimespan}}"
+                        type="number"
+                        min="0"
+                        auto-validate></paper-input>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <paper-button id="update" raised class="colorful" title="Save" on-tap="updateSettings">
+                    Save
+                </paper-button>
+            </div>
+        </wrap-modal>
 
     </template>
 
@@ -72,12 +89,30 @@
                         type: Object,
                         readOnly: true,
                         notify: true
+                    },
+                    options: {
+                        type: Object,
+                        value: function() { return {}; }
+                    },
+                    projectionTimespan: {
+                        type: Number,
+                        notify: true
                     }
                 },
 
                 observers: [
                     '_onProjectSelected(selectedProjectKey, selectedDate)',
                 ],
+
+                attached: function() {
+                    var self = this;
+                    this.options = {
+                        tap: function() {
+                            self.projectionTimespan = self._getSavedProjection(self.selectedProjectKey);
+                            self.$.modal.open();
+                        }
+                    };
+                },
 
                 ready: function() {
                 },
@@ -86,7 +121,9 @@
                     this.reset();
 
                     var self = this;
-                    this.xhr = d3.json("/api/projects/"+selectedProjectKey+"/followup/progress?timezone=" + taskboard.getTimeZoneIdFromBrowser(), function(error, data) {
+                    self.projectionTimespan = self._getSavedProjection(self.selectedProjectKey);
+                    var url = "/api/projects/"+selectedProjectKey+"/followup/progress?timezone=" + taskboard.getTimeZoneIdFromBrowser() + "&projection=" + self.projectionTimespan;
+                    this.xhr = d3.json(url, function(error, data) {
                         if(self.handleError(error, data))
                             return;
 
@@ -252,6 +289,23 @@
                         dcUtils.colors.BACKLOG_PROJECTION
                     ]);
                 },
+
+                updateSettings: function() {
+                    this._saveProjectionTimespan(this.projectionTimespan, this.selectedProjectKey);
+                    this.$.modal.close();
+                    this._onProjectSelected(this.selectedProjectKey, this.selectedDate);
+                },
+
+                _saveProjectionTimespan: function(projection, projectKey) {
+                   localStorage.setItem("dashboard.scope-progress." + projectKey + ".projection", projection);
+                },
+
+                _getSavedProjection: function(projectKey) {
+                    var projection = localStorage.getItem("dashboard.scope-progress." + projectKey + ".projection");
+                    if (!projection)
+                        return 20;
+                    return Number(projection);
+                }
 
             });
         })();
