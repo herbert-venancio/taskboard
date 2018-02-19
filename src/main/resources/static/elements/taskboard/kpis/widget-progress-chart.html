@@ -79,8 +79,8 @@
                         value: function() { return {}; }
                     },
                     options: {
-                        type: Object,
-                        value: function() { return {}; }
+                        type: Array,
+                        value: []
                     },
                     projectionTimespan: {
                         type: Number,
@@ -94,12 +94,14 @@
 
                 attached: function() {
                     var self = this;
-                    this.options = {
-                        tap: function() {
+                    this.options = [{
+                        icon:'taskboard-icons:settings'
+                        , title: 'Chart settings'
+                        , tap: function() {
                             self.projectionTimespan = self._getSavedProjection(self.selectedProjectKey);
                             self.$.modal.open();
                         }
-                    };
+                    }];
                 },
 
                 _onProjectSelected: function(selectedProjectKey, selectedDate) {

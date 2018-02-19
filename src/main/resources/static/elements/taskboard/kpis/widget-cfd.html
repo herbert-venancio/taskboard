@@ -25,9 +25,15 @@
         <style>
         </style>
 
-        <widget-wrap title="CFD" is-ready="{{isReady}}" has-select="true" chart="{{chart}}" error-message="{{errorMessage}}">
+        <widget-wrap title="CFD" is-ready="{{isReady}}" options="{{options}}" chart="{{chart}}" error-message="{{errorMessage}}">
 
             <div id="cfd" class="tb-chart"></div>
+
+            <wrap-modal title="Filters" class="filters-modal">
+                <h3 class="tb-label">Issue Types</h3>
+                <div class="config-slot-0 dc-chart--no-float"></div>
+                <paper-button class="ok-button" on-tap="_closeFiltersModal">OK</paper-button>
+            </wrap-modal>
 
         </widget-wrap>
 
@@ -62,6 +68,10 @@
                         type: Object,
                         notify: true,
                         value: function() { return {}; }
+                    },
+                    options: {
+                        type: Array,
+                        readOnly: true
                     }
                 },
 
@@ -70,6 +80,14 @@
                 ],
 
                 ready: function() {
+                    this._setOptions([
+                        {
+                            icon:'taskboard-icons:dashboard-filter'
+                            , title: 'Filters'
+                            , tap: this._openFiltersModal.bind(this)
+                            , cssClasses: ''
+                        }
+                    ]);
                 },
 
                 _onProjectSelected: function(selectedProjectKey, selectedDate) {
@@ -139,7 +157,7 @@
                             );
 
                         self.createChart(startDate, endDate);
-                        self.createSelect();
+                        self.createIssueListFilter();
 
                         // function to access correct data for each stack
                         function stackAccessor(status) {
@@ -193,6 +211,7 @@
                 reset: function() {
                     this.set('isReady', false);
                     this.set('errorMessage', '');
+                    this.set('options.0.cssClasses', '');
 
                     if (this.xhr) {
                         this.xhr.abort();
@@ -202,9 +221,9 @@
                         dc.deregisterChart(this.chart);
                         this.set('chart', {});
                     }
-                    if (this.select) {
-                        dc.deregisterChart(this.select);
-                        delete this.select;
+                    if (this.issueListFilter) {
+                        dc.deregisterChart(this.issueListFilter);
+                        delete this.issueListFilter;
                     }
                 },
 
@@ -250,26 +269,44 @@
                     this.set('chart', chart);
                 },
 
-                createSelect: function() {
-                    var div = this.$$('widget-wrap').$$('.widget__select');
-                    var select = dc.paperMenu(div);
+                createIssueListFilter: function() {
+                    var div = this.$$('.config-slot-0');
+                    var list = dc.paperList(div);
 
                     this.typeDim = this.ndx.dimension(function(d) {
                         return d.issueType;
                     });
                     this.typeGroup = this.typeDim.group();
 
-                    select
+                    list
                         .dimension(this.typeDim)
                         .group(this.typeGroup)
+                        .multiple(true)
                         .title(function(d) {
                             return d.key;
                         })
+                        .promptValue('-none-')
                         .promptText('All Issues');
 
-                    select.render();
+                    var all = list.data().map(list.keyAccessor());
+                    list.replaceFilter([all]);
 
-                    this.select = select;
+                    list.render();
+
+                    var highlightButton = function() {
+                        this.set('options.0.cssClasses', list.isAllSelected() ? '' : 'widget__button_highlighted');
+                    }.bind(this);
+                    list.on('filtered', highlightButton);
+
+                    this.issueListFilter = list;
+                },
+
+                _openFiltersModal: function() {
+                    this.$$('.filters-modal').open();
+                },
+
+                _closeFiltersModal: function() {
+                    this.$$('.filters-modal').close();
                 }
             });
         })();

@@ -1,15 +1,15 @@
-dc.paperMenu = function (parent, chartGroup) {
-    var SELECT_CSS_CLASS = 'dc-paper-menu';
+dc.paperList = function (parent, chartGroup) {
+    var SELECT_CSS_CLASS = 'dc-paper-list';
     var OPTION_CSS_CLASS = 'dc-paper-item';
+    var ALL_CSS_CLASS = 'dc-paper-item--all';
 
     var _chart = dc.baseMixin({});
 
-    var _select;
-    var _menu;
+    var _selectAll;
+    var _list;
     var _promptText = 'Select all';
     var _multiple = false;
     var _promptValue = null;
-    var _numberVisible = null;
     var _order = function (a, b) {
         return _chart.keyAccessor()(a) > _chart.keyAccessor()(b) ?
              1 : _chart.keyAccessor()(b) > _chart.keyAccessor()(a) ?
@@ -24,79 +24,117 @@ dc.paperMenu = function (parent, chartGroup) {
         return group.all().filter(_filterDisplayed);
     });
 
+    _chart.toggleSelectAll = function(event) {
+        if(!_multiple)
+            return;
+        var checked = event.detail.value;
+        if(checked) {
+            var all = _chart.data().map(_chart.keyAccessor());
+            _chart.onChange(all);
+        } else {
+            _chart.onChange(_promptValue);
+        }
+    };
+
     _chart._doRender = function () {
         var anchor = Polymer.dom(_chart.anchor());
         // remove old
-        var hselect = anchor.querySelector('paper-dropdown-menu');
+        var hselect = anchor.querySelector('paper-listbox');
         if(hselect)
             anchor.removeChild(hselect);
-
-        // add new
-        _select = Polymer.dom(document.createElement('paper-dropdown-menu'));
-        _select.node.noLabelFloat = true;
-        _select.classList.add(SELECT_CSS_CLASS);
-
-        _menu = Polymer.dom(document.createElement('paper-menu'));
-        _menu.setAttribute('slot', 'dropdown-content');
-        _menu.classList.add('dropdown-content');
-        _menu.node.attrForSelected = 'value';
-
-        var item = Polymer.dom(document.createElement('paper-item'));
-        item.classList.add(OPTION_CSS_CLASS);
-        item.setAttribute('value', _promptValue || '');
-        item.textContent = _promptText;
-
-        _menu.appendChild(item.node);
-        _select.appendChild(_menu.node);
-        anchor.appendChild(_select.node);
-
-        _chart._doRedraw();
+        var selectAll = anchor.querySelector('paper-checkbox');
+        if(selectAll)
+            anchor.removeChild(selectAll);
 
         if(_multiple) {
-            _menu.node.selectedValues = _chart.filters();
-        } else {
-            _menu.node.selected = _chart.filter() || '';
+            _selectAll = Polymer.dom(document.createElement('paper-checkbox'));
+            _selectAll.classList.add(OPTION_CSS_CLASS);
+            _selectAll.classList.add(ALL_CSS_CLASS);
+            _selectAll.textContent = _promptText;
+            anchor.appendChild(_selectAll.node);
         }
 
-        _menu.node.addEventListener('selected-changed', onChange);
-        _menu.node.addEventListener('selected-values-changed', onChange);
+        // add new
+        _list = Polymer.dom(document.createElement('paper-listbox'));
+        _list.classList.add(SELECT_CSS_CLASS);
+        _list.node.attrForSelected = 'value';
+        _list.node.selectedAttribute = 'checked';
+
+        anchor.appendChild(_list.node);
+
+        _chart._doRedraw();
 
         return _chart;
     };
 
     _chart._doRedraw = function () {
+        _list.node.removeEventListener('selected-changed', onChange);
+        _list.node.removeEventListener('selected-values-changed', onChange);
+        if(_selectAll) {
+            _selectAll.node.removeEventListener('checked-changed', _chart.toggleSelectAll);
+        }
+
         setAttributes();
         renderOptions();
         Polymer.dom.flush();
+
+        if(_multiple) {
+            _list.node.selectedValues = _chart.filters();
+            _list.node.addEventListener('selected-values-changed', onChange);
+            _selectAll.node.checked = _chart.isAllSelected();
+            _selectAll.node.addEventListener('checked-changed', _chart.toggleSelectAll);
+        } else {
+            _list.node.selected = _chart.filter() || '';
+            _list.node.addEventListener('selected-changed', onChange);
+        }
+
         return _chart;
     };
 
+    _chart.isAllSelected = function() {
+        if (!_multiple)
+            return !_chart.hasFilter();
+        return _chart.filters().length == _chart.data().length;
+    };
+
     function renderOptions () {
-        var item = _menu.firstChild;
+        var index = 0;
+        var item;
+
+        if(!_multiple) {
+            item = getOrCreateItem(index++);
+            item.classList.add(OPTION_CSS_CLASS);
+            item.setAttribute('value', _promptValue || '');
+            item.textContent = _promptText;
+        }
+
         var data = _chart.data();
         for(var i = 0; i < data.length; ++i) {
-            item = getOrCreateNext(item);
-            item = Polymer.dom(item);
+            item = getOrCreateItem(index++);
             item.classList.add(OPTION_CSS_CLASS);
             item.setAttribute('value', _chart.keyAccessor()(data[i]));
             item.textContent = _chart.title()(data[i]);
         }
 
         var max = data.length + 1;
-        while(_menu.children.length > max) {
-            _menu.removeChild(_menu.children[max]);
+        while(_list.children.length > max) {
+            _list.removeChild(_list.children[max]);
         }
     }
 
-    function getOrCreateNext(paperItem) {
-        return Polymer.dom(paperItem).nextSibling || _menu.appendChild(document.createElement('paper-item'));
+    function getOrCreateItem(index) {
+        var type = _multiple ? 'paper-checkbox' : 'paper-radio-button';
+        while(_list.children.length <= index) {
+            _list.appendChild(document.createElement(type));
+        }
+        return Polymer.dom(_list.children[index]);
     }
 
     function onChange (event) {
-        _menu.node.debounce('value-changed', function() {
+        _list.node.debounce('value-changed', function() {
             if(_multiple) {
-                var values = event.target.selectedValues;
-                _chart.onChange(values.length > 0 ? values : null);
+                var values = event.target.selectedValues.filter(function(v) { return v != _promptValue; });
+                _chart.onChange(values.length > 0 ? values : _promptValue);
             } else {
                 _chart.onChange(event.target.selected);
             }
@@ -117,22 +155,15 @@ dc.paperMenu = function (parent, chartGroup) {
     };
 
     function setAttributes () {
-        if(_multiple) {
-            _menu.node.multi = true;
-        } else {
-            _menu.node.multi = false;
-        }
-        if (_numberVisible !== null) {
-            // not implemented yet
-        }
+        _list.node.multi = _multiple;
     }
 
     /**
      * Get or set the function that controls the ordering of option tags in the
-     * select menu. By default options are ordered by the group key in ascending
+     * paper list. By default options are ordered by the group key in ascending
      * order.
      * @name order
-     * @memberof dc.selectMenu
+     * @memberof dc.paperList
      * @instance
      * @param {Function} [order]
      * @example
@@ -152,7 +183,7 @@ dc.paperMenu = function (parent, chartGroup) {
     /**
      * Get or set the text displayed in the options used to prompt selection.
      * @name promptText
-     * @memberof dc.selectMenu
+     * @memberof dc.paperList
      * @instance
      * @param {String} [promptText='Select all']
      * @example
@@ -170,7 +201,7 @@ dc.paperMenu = function (parent, chartGroup) {
      * Get or set the function that filters option tags prior to display. By default options
      * with a value of < 1 are not displayed.
      * @name filterDisplayed
-     * @memberof dc.selectMenu
+     * @memberof dc.paperList
      * @instance
      * @param {function} [filterDisplayed]
      * @example
@@ -188,10 +219,10 @@ dc.paperMenu = function (parent, chartGroup) {
     };
 
     /**
-     * Controls the type of select menu. Setting it to true converts the underlying
+     * Controls the type of paper list. Setting it to true converts the underlying
      * HTML tag into a multiple select.
      * @name multiple
-     * @memberof dc.selectMenu
+     * @memberof dc.paperList
      * @instance
      * @param {boolean} [multiple=false]
      * @example
@@ -212,7 +243,7 @@ dc.paperMenu = function (parent, chartGroup) {
      * when only the prompt value is selected. If `null` (the default), no filtering will occur when
      * just the prompt is selected.
      * @name promptValue
-     * @memberof dc.selectMenu
+     * @memberof dc.paperList
      * @instance
      * @param {?*} [promptValue=null]
      **/
@@ -224,28 +255,6 @@ dc.paperMenu = function (parent, chartGroup) {
 
         return _chart;
     };
-
-    /**
-     * Controls the number of items to show in the select menu, when `.multiple()` is true. This
-     * controls the [`size` attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select#Attributes) of
-     * the `select` element. If `null` (the default), uses the browser's default height.
-     * @name numberItems
-     * @memberof dc.selectMenu
-     * @instance
-     * @param {?number} [numberVisible=null]
-     * @example
-     * chart.numberVisible(10);
-     **/
-    _chart.numberVisible = function (numberVisible) {
-        if (!arguments.length) {
-            return _numberVisible;
-        }
-        _numberVisible = numberVisible;
-
-        return _chart;
-    };
-
-    _chart.size = dc.logger.deprecate(_chart.numberVisible, 'selectMenu.size is ambiguous - use numberVisible instead');
 
     return _chart.anchor(parent, chartGroup);
 };
