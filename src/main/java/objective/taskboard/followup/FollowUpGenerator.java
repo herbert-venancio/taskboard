@@ -27,6 +27,7 @@ import static objective.taskboard.followup.impl.FollowUpTransitionsDataProvider.
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.LinkedList;
@@ -60,6 +61,7 @@ public class FollowUpGenerator {
             FollowUpDataSnapshot followupDataEntry = provider.getJiraData(includedProjects, timezone);
             FollowupData followupData = followupDataEntry.getData();
 
+            updateTimelineDates(followupDataEntry.getDate());
             generateFromJiraSheet(followupData);
             generateTransitionsSheets(followupData);
             generateEffortHistory(followupDataEntry, timezone);
@@ -75,15 +77,20 @@ public class FollowUpGenerator {
         }
     }
 
+    void updateTimelineDates(LocalDate followupDate) {
+        Sheet sheet = editor.getSheet("Timeline");
+        sheet.getOrCreateRow(6).setValue("B", followupDate);
+        sheet.save();
+    }
+
     void generateWorklogSheet(FollowupData followupData, ZoneId timezone) {
         Sheet sheet = editor.getOrCreateSheet("Worklogs");
-        sheet.truncate(0);
+        sheet.truncate();
         SheetRow rowHeader = sheet.createRow();
         rowHeader.addColumn("AUTHOR");
         rowHeader.addColumn("ISSUE");
         rowHeader.addColumn("STARTED");
         rowHeader.addColumn("TIMESPENT");
-        rowHeader.save();
         
         followupData.fromJiraDs.rows.stream().forEach(row -> {
             if (row.worklogs == null) return;
@@ -94,7 +101,6 @@ public class FollowUpGenerator {
                 worklogRow.addColumn(issueKey);
                 worklogRow.addColumn(DateTimeUtils.get(worklog.started, timezone));
                 worklogRow.addColumn(worklog.timeSpentSeconds/3600.0);
-                worklogRow.save();
             });
         });
         sheet.save();
@@ -102,7 +108,7 @@ public class FollowUpGenerator {
 
     Sheet generateFromJiraSheet(FollowupData followupData) {
         Sheet sheet = editor.getSheet("From Jira");
-        sheet.truncate(0);
+        sheet.truncate();
 
         SheetRow rowHeader = sheet.createRow();
         for (String header : followupData.fromJiraDs.headers)
@@ -111,8 +117,6 @@ public class FollowUpGenerator {
         addAnalyticsHeadersIfExist(followupData.analyticsTransitionsDsList, TYPE_DEMAND, rowHeader);
         addAnalyticsHeadersIfExist(followupData.analyticsTransitionsDsList, TYPE_FEATURES, rowHeader);
         addAnalyticsHeadersIfExist(followupData.analyticsTransitionsDsList, TYPE_SUBTASKS, rowHeader);
-
-        rowHeader.save();
 
         for (FromJiraDataRow fromJiraDataRow : followupData.fromJiraDs.rows) {
             SheetRow row = sheet.createRow();
@@ -225,8 +229,6 @@ public class FollowUpGenerator {
             addTransitionsDatesIfExist(followupData.analyticsTransitionsDsList, TYPE_DEMAND, fromJiraDataRow.demandNum, row);
             addTransitionsDatesIfExist(followupData.analyticsTransitionsDsList, TYPE_FEATURES, fromJiraDataRow.taskNum, row);
             addTransitionsDatesIfExist(followupData.analyticsTransitionsDsList, TYPE_SUBTASKS, fromJiraDataRow.subtaskNum, row);
-
-            row.save();
         }
         sheet.save();
 
@@ -299,7 +301,6 @@ public class FollowUpGenerator {
                 row.addColumn(analyticTransitionDataRow.issueType);
                 for (ZonedDateTime transitionDate : analyticTransitionDataRow.transitionsDates)
                     row.addColumn(transitionDate);
-                row.save();
             }
 
             sheet.save();
@@ -326,7 +327,6 @@ public class FollowUpGenerator {
                 row.addColumn(syntheticTransitionDataRow.issueType);
                 for (Integer amountOfIssue : syntheticTransitionDataRow.amountOfIssueInStatus)
                     row.addColumn(amountOfIssue);
-                row.save();
             }
 
             sheet.save();
@@ -337,23 +337,22 @@ public class FollowUpGenerator {
 
     private Sheet createSheetWithHeader(String prefixSheetName, TransitionDataSet<? extends TransitionDataRow> transitionDataSet) {
         Sheet sheet = editor.getOrCreateSheet(prefixSheetName + transitionDataSet.issueType);
-        sheet.truncate(0);
+        sheet.truncate();
         SheetRow rowHeader = sheet.createRow();
         for (String header : transitionDataSet.headers)
             rowHeader.addColumn(header);
-        rowHeader.save();
+
         return sheet;
     }
     
     void generateEffortHistory(FollowUpDataSnapshot followUpDataEntry, ZoneId timezone) {
         Sheet sheet = editor.getOrCreateSheet("Effort History");
-        sheet.truncate(0);
+        sheet.truncate();
         
         SheetRow rowHeader = sheet.createRow();
         rowHeader.addColumn("Date");
         rowHeader.addColumn("SumEffortDone");
         rowHeader.addColumn("SumEffortBacklog");
-        rowHeader.save();
         
         if (followUpDataEntry.getCluster().isEmpty())
             return;
@@ -368,7 +367,6 @@ public class FollowUpGenerator {
             row.addColumn(historyRow.date.atStartOfDay(timezone));
             row.addColumn(historyRow.sumEffortDone);
             row.addColumn(historyRow.sumEffortBacklog);
-            row.save();
         }
         
         sheet.save();
@@ -380,7 +378,7 @@ public class FollowUpGenerator {
             return;
 
         Sheet sheet = editor.getOrCreateSheet("T-shirt Size");
-        sheet.truncate(0);
+        sheet.truncate();
 
         SheetRow rowHeader = sheet.createRow();
         rowHeader.addColumn("Cluster Name");
@@ -389,7 +387,6 @@ public class FollowUpGenerator {
         rowHeader.addColumn("Effort");
         rowHeader.addColumn("Cycle");
         rowHeader.addColumn("Project");
-        rowHeader.save();
 
         for (FollowUpClusterItem cluster : followupCluster.getClusterItems()) {
             SheetRow row = sheet.createRow();
@@ -399,7 +396,6 @@ public class FollowUpGenerator {
             row.addColumn(cluster.getEffort());
             row.addColumn(cluster.getCycle());
             row.addColumn(cluster.getProject().getProjectKey());
-            row.save();
         }
 
         sheet.save();

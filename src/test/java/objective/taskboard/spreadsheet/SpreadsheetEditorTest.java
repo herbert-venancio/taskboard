@@ -10,6 +10,8 @@ import static org.junit.Assert.assertThat;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -30,7 +32,6 @@ import objective.taskboard.followup.FollowUpHelper;
 import objective.taskboard.followup.FollowUpTemplate;
 import objective.taskboard.followup.FromJiraDataRow;
 import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor.SimpleSheet;
-import objective.taskboard.utils.DateTimeUtils;
 import objective.taskboard.utils.IOUtilities;
 import objective.taskboard.utils.XmlUtils;
 
@@ -83,13 +84,54 @@ public class SpreadsheetEditorTest {
             subject.open();
 
             SimpleSheet sheet = subject.getSheet("From Jira");
-            sheet.truncate(1);
+            sheet.truncate();
+            
+            SheetRow header = sheet.createRow();
+            header.addColumn("project");
+            header.addColumn("Backend Development");
+            header.addColumn("Done");
+            header.addColumn("To Review");
+            header.addColumn("Cycle Hours per Role With Risk");
+            header.addColumn("demand_type");
+
             addRow(sheet, FollowUpHelper.getDefaultFromJiraDataRow());
             sheet.save();
 
             String jiraDataSheet = subject.getSheet("From Jira").stringValue();
             String jiraDataSheetExpected = normalizeXml(resourceToString("followup/fromJiraWithOneRow.xml"));
             assertEquals("Jira data sheet", jiraDataSheetExpected, jiraDataSheet);
+        }
+    }
+    
+    @Test
+    public void editRows() throws IOException {
+        FollowUpTemplate template = getBasicTemplate();
+        try (SimpleSpreadsheetEditor subject = new SimpleSpreadsheetEditor(template)) {
+            subject.open();
+
+            SimpleSheet sheet = subject.getSheet("Activities");
+
+            SheetRow row = sheet.getOrCreateRow(1);
+            row.setValue("A", "New Header");
+            row.setValue("C", true);
+            row.setValue("D", (String) null);
+            
+            row = sheet.getOrCreateRow(5);
+            row.setValue("E", 50);
+            row.setValue("J", 60);
+            row.setValue("F", 51);
+            row.addColumn(false);
+            
+            row = sheet.getOrCreateRow(3);
+            row.setFormula("B", "NOW()");
+            row.setValue("C", LocalDateTime.parse("2018-02-15T16:01"));
+            row.setValue("D", LocalDate.parse("2018-02-15"));
+            
+            sheet.save();
+
+            assertEquals(
+                    normalizeXml(resourceToString("followup/activitiesEdited.xml")), 
+                    subject.getSheet("Activities").stringValue());
         }
     }
 
@@ -137,10 +179,10 @@ public class SpreadsheetEditorTest {
             subject.open();
 
             SimpleSheet sheet = subject.getSheet("From Jira");
-            sheet.truncate(1);
+            sheet.truncate();
             String jiraDataSheet = sheet.stringValue();
 
-            String jiraDataSheetExpected = normalizeXml(resourceToString("followup/emptyFromJiraOnlyWithHeaders.xml"));
+            String jiraDataSheetExpected = normalizeXml(resourceToString("followup/emptyFromJira.xml"));
 
             assertEquals("Jira data sheet", jiraDataSheetExpected, jiraDataSheet);
         }
@@ -326,8 +368,6 @@ public class SpreadsheetEditorTest {
         row.addColumn(1L);
         row.addColumn(2);
         row.addColumn(3D);
-        row.addColumn(DateTimeUtils.parseDate("2017-01-01"));
-
-        row.save();
+        row.addColumn(LocalDate.parse("2017-01-01").atStartOfDay());
     }
 }

@@ -6,21 +6,18 @@ Sheet "Analytic - Demand" Row "1" AddColumn "B1": ISSUE_TYPE
 Sheet "Analytic - Demand" Row "1" AddColumn "C1": Done
 Sheet "Analytic - Demand" Row "1" AddColumn "D1": Doing
 Sheet "Analytic - Demand" Row "1" AddColumn "E1": To Do
-Sheet "Analytic - Demand" Row "1" Save
 Sheet "Analytic - Demand" Row Create: 2
 Sheet "Analytic - Demand" Row "2" AddColumn "A2": I-1
 Sheet "Analytic - Demand" Row "2" AddColumn "B2": Demand
 Sheet "Analytic - Demand" Row "2" AddColumn "C2": 2017-09-27T00:00-03:00[America/Sao_Paulo]
 Sheet "Analytic - Demand" Row "2" AddColumn "D2": 2017-09-26T00:00-03:00[America/Sao_Paulo]
 Sheet "Analytic - Demand" Row "2" AddColumn "E2": 2017-09-25T00:00-03:00[America/Sao_Paulo]
-Sheet "Analytic - Demand" Row "2" Save
 Sheet "Analytic - Demand" Row Create: 3
 Sheet "Analytic - Demand" Row "3" AddColumn "A3": I-4
 Sheet "Analytic - Demand" Row "3" AddColumn "B3": OS
 Sheet "Analytic - Demand" Row "3" AddColumn "C3": null
 Sheet "Analytic - Demand" Row "3" AddColumn "D3": 2017-09-26T00:00-03:00[America/Sao_Paulo]
 Sheet "Analytic - Demand" Row "3" AddColumn "E3": 2017-09-25T00:00-03:00[America/Sao_Paulo]
-Sheet "Analytic - Demand" Row "3" Save
 Sheet "Analytic - Demand" Save
 Sheet Create: Analytic - Features
 Sheet "Analytic - Features" Row Create: 1
@@ -29,14 +26,12 @@ Sheet "Analytic - Features" Row "1" AddColumn "B1": ISSUE_TYPE
 Sheet "Analytic - Features" Row "1" AddColumn "C1": Done
 Sheet "Analytic - Features" Row "1" AddColumn "D1": Doing
 Sheet "Analytic - Features" Row "1" AddColumn "E1": To Do
-Sheet "Analytic - Features" Row "1" Save
 Sheet "Analytic - Features" Row Create: 2
 Sheet "Analytic - Features" Row "2" AddColumn "A2": I-2
 Sheet "Analytic - Features" Row "2" AddColumn "B2": Feature
 Sheet "Analytic - Features" Row "2" AddColumn "C2": null
 Sheet "Analytic - Features" Row "2" AddColumn "D2": 2017-09-26T00:00-03:00[America/Sao_Paulo]
 Sheet "Analytic - Features" Row "2" AddColumn "E2": 2017-09-25T00:00-03:00[America/Sao_Paulo]
-Sheet "Analytic - Features" Row "2" Save
 Sheet "Analytic - Features" Save
 Sheet Create: Analytic - Subtasks
 Sheet "Analytic - Subtasks" Row Create: 1
@@ -45,14 +40,12 @@ Sheet "Analytic - Subtasks" Row "1" AddColumn "B1": ISSUE_TYPE
 Sheet "Analytic - Subtasks" Row "1" AddColumn "C1": Done
 Sheet "Analytic - Subtasks" Row "1" AddColumn "D1": Doing
 Sheet "Analytic - Subtasks" Row "1" AddColumn "E1": To Do
-Sheet "Analytic - Subtasks" Row "1" Save
 Sheet "Analytic - Subtasks" Row Create: 2
 Sheet "Analytic - Subtasks" Row "2" AddColumn "A2": I-3
 Sheet "Analytic - Subtasks" Row "2" AddColumn "B2": Sub-task
 Sheet "Analytic - Subtasks" Row "2" AddColumn "C2": null
 Sheet "Analytic - Subtasks" Row "2" AddColumn "D2": null
 Sheet "Analytic - Subtasks" Row "2" AddColumn "E2": 2017-09-25T00:00-03:00[America/Sao_Paulo]
-Sheet "Analytic - Subtasks" Row "2" Save
 Sheet "Analytic - Subtasks" Save
 Sheet Create: Synthetic - Demand
 Sheet "Synthetic - Demand" Row Create: 1
@@ -61,49 +54,42 @@ Sheet "Synthetic - Demand" Row "1" AddColumn "B1": Type
 Sheet "Synthetic - Demand" Row "1" AddColumn "C1": Done
 Sheet "Synthetic - Demand" Row "1" AddColumn "D1": Doing
 Sheet "Synthetic - Demand" Row "1" AddColumn "E1": To Do
-Sheet "Synthetic - Demand" Row "1" Save
 Sheet "Synthetic - Demand" Row Create: 2
 Sheet "Synthetic - Demand" Row "2" AddColumn "A2": 2017-09-25T00:00-03:00[America/Sao_Paulo]
 Sheet "Synthetic - Demand" Row "2" AddColumn "B2": Demand
 Sheet "Synthetic - Demand" Row "2" AddColumn "C2": 0
 Sheet "Synthetic - Demand" Row "2" AddColumn "D2": 0
 Sheet "Synthetic - Demand" Row "2" AddColumn "E2": 1
-Sheet "Synthetic - Demand" Row "2" Save
 Sheet "Synthetic - Demand" Row Create: 3
 Sheet "Synthetic - Demand" Row "3" AddColumn "A3": 2017-09-25T00:00-03:00[America/Sao_Paulo]
 Sheet "Synthetic - Demand" Row "3" AddColumn "B3": OS
 Sheet "Synthetic - Demand" Row "3" AddColumn "C3": 0
 Sheet "Synthetic - Demand" Row "3" AddColumn "D3": 0
 Sheet "Synthetic - Demand" Row "3" AddColumn "E3": 1
-Sheet "Synthetic - Demand" Row "3" Save
 Sheet "Synthetic - Demand" Row Create: 4
 Sheet "Synthetic - Demand" Row "4" AddColumn "A4": 2017-09-26T00:00-03:00[America/Sao_Paulo]
 Sheet "Synthetic - Demand" Row "4" AddColumn "B4": Demand
 Sheet "Synthetic - Demand" Row "4" AddColumn "C4": 0
 Sheet "Synthetic - Demand" Row "4" AddColumn "D4": 1
 Sheet "Synthetic - Demand" Row "4" AddColumn "E4": 0
-Sheet "Synthetic - Demand" Row "4" Save
 Sheet "Synthetic - Demand" Row Create: 5
 Sheet "Synthetic - Demand" Row "5" AddColumn "A5": 2017-09-26T00:00-03:00[America/Sao_Paulo]
 Sheet "Synthetic - Demand" Row "5" AddColumn "B5": OS
 Sheet "Synthetic - Demand" Row "5" AddColumn "C5": 0
 Sheet "Synthetic - Demand" Row "5" AddColumn "D5": 1
 Sheet "Synthetic - Demand" Row "5" AddColumn "E5": 0
-Sheet "Synthetic - Demand" Row "5" Save
 Sheet "Synthetic - Demand" Row Create: 6
 Sheet "Synthetic - Demand" Row "6" AddColumn "A6": 2017-09-27T00:00-03:00[America/Sao_Paulo]
 Sheet "Synthetic - Demand" Row "6" AddColumn "B6": Demand
 Sheet "Synthetic - Demand" Row "6" AddColumn "C6": 1
 Sheet "Synthetic - Demand" Row "6" AddColumn "D6": 0
 Sheet "Synthetic - Demand" Row "6" AddColumn "E6": 0
-Sheet "Synthetic - Demand" Row "6" Save
 Sheet "Synthetic - Demand" Row Create: 7
 Sheet "Synthetic - Demand" Row "7" AddColumn "A7": 2017-09-27T00:00-03:00[America/Sao_Paulo]
 Sheet "Synthetic - Demand" Row "7" AddColumn "B7": OS
 Sheet "Synthetic - Demand" Row "7" AddColumn "C7": 0
 Sheet "Synthetic - Demand" Row "7" AddColumn "D7": 1
 Sheet "Synthetic - Demand" Row "7" AddColumn "E7": 0
-Sheet "Synthetic - Demand" Row "7" Save
 Sheet "Synthetic - Demand" Save
 Sheet Create: Synthetic - Features
 Sheet "Synthetic - Features" Row Create: 1
@@ -112,21 +98,18 @@ Sheet "Synthetic - Features" Row "1" AddColumn "B1": Type
 Sheet "Synthetic - Features" Row "1" AddColumn "C1": Done
 Sheet "Synthetic - Features" Row "1" AddColumn "D1": Doing
 Sheet "Synthetic - Features" Row "1" AddColumn "E1": To Do
-Sheet "Synthetic - Features" Row "1" Save
 Sheet "Synthetic - Features" Row Create: 2
 Sheet "Synthetic - Features" Row "2" AddColumn "A2": 2017-09-25T00:00-03:00[America/Sao_Paulo]
 Sheet "Synthetic - Features" Row "2" AddColumn "B2": Feature
 Sheet "Synthetic - Features" Row "2" AddColumn "C2": 0
 Sheet "Synthetic - Features" Row "2" AddColumn "D2": 0
 Sheet "Synthetic - Features" Row "2" AddColumn "E2": 1
-Sheet "Synthetic - Features" Row "2" Save
 Sheet "Synthetic - Features" Row Create: 3
 Sheet "Synthetic - Features" Row "3" AddColumn "A3": 2017-09-26T00:00-03:00[America/Sao_Paulo]
 Sheet "Synthetic - Features" Row "3" AddColumn "B3": Feature
 Sheet "Synthetic - Features" Row "3" AddColumn "C3": 0
 Sheet "Synthetic - Features" Row "3" AddColumn "D3": 1
 Sheet "Synthetic - Features" Row "3" AddColumn "E3": 0
-Sheet "Synthetic - Features" Row "3" Save
 Sheet "Synthetic - Features" Save
 Sheet Create: Synthetic - Subtasks
 Sheet "Synthetic - Subtasks" Row Create: 1
@@ -135,13 +118,11 @@ Sheet "Synthetic - Subtasks" Row "1" AddColumn "B1": Type
 Sheet "Synthetic - Subtasks" Row "1" AddColumn "C1": Done
 Sheet "Synthetic - Subtasks" Row "1" AddColumn "D1": Doing
 Sheet "Synthetic - Subtasks" Row "1" AddColumn "E1": To Do
-Sheet "Synthetic - Subtasks" Row "1" Save
 Sheet "Synthetic - Subtasks" Row Create: 2
 Sheet "Synthetic - Subtasks" Row "2" AddColumn "A2": 2017-09-25T00:00-03:00[America/Sao_Paulo]
 Sheet "Synthetic - Subtasks" Row "2" AddColumn "B2": Sub-task
 Sheet "Synthetic - Subtasks" Row "2" AddColumn "C2": 0
 Sheet "Synthetic - Subtasks" Row "2" AddColumn "D2": 0
 Sheet "Synthetic - Subtasks" Row "2" AddColumn "E2": 1
-Sheet "Synthetic - Subtasks" Row "2" Save
 Sheet "Synthetic - Subtasks" Save
 Spreadsheet Close

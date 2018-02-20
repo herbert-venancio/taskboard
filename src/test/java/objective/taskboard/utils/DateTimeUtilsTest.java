@@ -1,15 +1,16 @@
 package objective.taskboard.utils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import objective.taskboard.testUtils.DateTimeUtilSupport;
-import org.junit.Test;
+import static java.util.Collections.emptyList;
+import static org.hamcrest.Matchers.closeTo;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 import java.text.ParseException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -17,12 +18,13 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.TimeZone;
 
-import static java.util.Collections.emptyList;
-import static org.hamcrest.Matchers.closeTo;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import org.junit.Test;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+
+import objective.taskboard.testUtils.DateTimeUtilSupport;
 
 public class DateTimeUtilsTest {
 
@@ -108,12 +110,12 @@ public class DateTimeUtilsTest {
         boolean EXCEL_1904_DATE_SYSTEM = true;
 
         // given
-        ZonedDateTime date1 = ZonedDateTime.of(2017, 9, 20, 10, 05, 48, 0, ZoneOffset.UTC);
-        ZonedDateTime date2 = ZonedDateTime.of(2001, 1, 1, 1, 1, 1, 0, ZoneOffset.UTC);
-        ZonedDateTime date3 = ZonedDateTime.of(1900, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
-        ZonedDateTime date4 = ZonedDateTime.of(2021, 9, 21, 10, 5, 48, 0, ZoneOffset.UTC);
-        ZonedDateTime date5 = ZonedDateTime.of(2005, 1, 2, 1, 1, 1, 0, ZoneOffset.UTC);
-        ZonedDateTime date6 = ZonedDateTime.of(1904, 1, 2, 0, 0, 0, 0, ZoneOffset.UTC);
+        LocalDateTime date1 = LocalDateTime.of(2017, 9, 20, 10, 05, 48, 0);
+        LocalDateTime date2 = LocalDateTime.of(2001, 1, 1, 1, 1, 1, 0);
+        LocalDateTime date3 = LocalDateTime.of(1900, 1, 1, 0, 0, 0, 0);
+        LocalDateTime date4 = LocalDateTime.of(2021, 9, 21, 10, 5, 48, 0);
+        LocalDateTime date5 = LocalDateTime.of(2005, 1, 2, 1, 1, 1, 0);
+        LocalDateTime date6 = LocalDateTime.of(1904, 1, 2, 0, 0, 0, 0);
 
         // when
         String actual1 = DateTimeUtils.toDoubleExcelFormat(date1, EXCEL_1900_DATE_SYSTEM);
@@ -138,13 +140,13 @@ public class DateTimeUtilsTest {
             try (Scanner expecteds = new Scanner(DateTimeUtilsTest.class.getResourceAsStream("excel-dates-expected.csv"))) {
                 List<String> failedConversions = new ArrayList<>();
                 while (dates.hasNext()) {
-                    ZonedDateTime date = DateTimeUtils.parseDate(dates.next(), ZoneOffset.ofHours(0));
+                    LocalDateTime date = LocalDate.parse(dates.next()).atStartOfDay();
                     String actual = DateTimeUtils.toDoubleExcelFormat(date, false);
                     double expected = expecteds.nextDouble();
                     try {
                         assertThat(Double.valueOf(actual), closeTo(expected, 0.000001));
                     } catch (AssertionError e) {
-                        failedConversions.add(date.toLocalDateTime().toString() + " -> expected " + expected + " actual " + actual);
+                        failedConversions.add(date.toString() + " -> expected " + expected + " actual " + actual);
                     }
                 }
                 assertThat(String.join("\n", failedConversions), failedConversions, is(emptyList()));
@@ -158,13 +160,13 @@ public class DateTimeUtilsTest {
             try (Scanner expecteds = new Scanner(DateTimeUtilsTest.class.getResourceAsStream("excel-dates-expected.csv"))) {
                 List<String> failedConversions = new ArrayList<>();
                 while (dates.hasNext()) {
-                    ZonedDateTime date = DateTimeUtils.parseDate(dates.next(), ZoneOffset.ofHours(0));
+                    LocalDateTime date = LocalDate.parse(dates.next()).atStartOfDay();
                     String actual = DateTimeUtils.toDoubleExcelFormat(date, true);
                     double expected = expecteds.nextDouble();
                     try {
                         assertThat(Double.valueOf(actual), closeTo(expected, 0.000001));
                     } catch (AssertionError e) {
-                        failedConversions.add(date.toLocalDateTime().toString() + " -> expected " + expected + " actual " + actual);
+                        failedConversions.add(date.toString() + " -> expected " + expected + " actual " + actual);
                     }
                 }
                 assertThat(String.join("\n", failedConversions), failedConversions, is(emptyList()));

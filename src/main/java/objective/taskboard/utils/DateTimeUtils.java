@@ -113,12 +113,11 @@ public class DateTimeUtils {
         return DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss").format(date);
     }
 
-    public static String toDoubleExcelFormat(ZonedDateTime date, boolean date1904) {
+    public static String toDoubleExcelFormat(LocalDateTime date, boolean date1904) {
         if(date == null)
             return "";
 
         LocalDateTime from;
-        LocalDateTime to = date.toLocalDateTime();
 
         // Excel has 2 date systems:
         // - https://support.microsoft.com/pt-br/help/214330/differences-between-the-1900-and-the-1904-date-system-in-excel
@@ -127,14 +126,14 @@ public class DateTimeUtils {
         } else {
             from = LocalDateTime.of(1900, 1, 1, 0, 0, 0);
             // http://polymathprogrammer.com/2009/10/26/the-leap-year-1900-bug-in-excel/
-            if(to.isBefore(LocalDateTime.of(1900, 3, 1, 0, 0, 0))) {
+            if(date.isBefore(LocalDateTime.of(1900, 3, 1, 0, 0, 0))) {
                 from = from.minusDays(1);
             } else {
                 from = from.minusDays(2);
             }
         }
 
-        long millis = from.until(to, ChronoUnit.MILLIS);
+        long millis = from.until(date, ChronoUnit.MILLIS);
 
         // excel hours are represented as a fraction of a day
         double dayMillis = 24.0 * 60.0 * 60.0 * 1000.0;

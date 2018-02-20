@@ -1,12 +1,15 @@
 package objective.taskboard.spreadsheet;
 
+import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 import static objective.taskboard.google.SpreadsheetUtils.columnIndexToLetter;
-import static objective.taskboard.utils.DateTimeUtils.toDoubleExcelFormat;
+import static objective.taskboard.google.SpreadsheetUtils.columnLetterToIndex;
 import static objective.taskboard.utils.IOUtilities.write;
+import static objective.taskboard.utils.XmlUtils.getAttributeValue;
+import static objective.taskboard.utils.XmlUtils.getAttributeValueOrCry;
 import static objective.taskboard.utils.ZipUtils.unzip;
 import static objective.taskboard.utils.ZipUtils.zip;
-import static org.apache.commons.lang.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.StringUtils.join;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,17 +17,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -38,6 +40,8 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 
 import objective.taskboard.followup.FollowUpTemplate;
+import objective.taskboard.google.SpreadsheetUtils;
+import objective.taskboard.google.SpreadsheetUtils.SpreadsheetA1;
 import objective.taskboard.utils.IOUtilities;
 import objective.taskboard.utils.XmlUtils;
 
@@ -272,19 +276,6 @@ public class SimpleSpreadsheetEditor implements SpreadsheetEditor {
         return XmlUtils.asString(sharedStringsDoc);
     }
 
-    private String getOrSetIndexInSharedStrings(String followUpDataAttrValue) {
-        if (followUpDataAttrValue == null || followUpDataAttrValue.isEmpty())
-            return "";
-
-        Long index = sharedStrings.get(followUpDataAttrValue);
-        if (index != null)
-            return index+"";
-
-        index = Long.valueOf(sharedStrings.size());
-        sharedStrings.put(followUpDataAttrValue, index);
-        return index+"";
-    }
-
     private Path decompressTemplate() {
         Path pathFollowup;
         try {
@@ -382,21 +373,51 @@ public class SimpleSpreadsheetEditor implements SpreadsheetEditor {
     }
 
     public class SimpleSheet implements Sheet {
-        List<SimpleSheetRow> rowsList = new LinkedList<>();
-        private File sheetFile;
-        int maxCol = 0;
-        private Document sheetDoc;
-        private Node sheetData;
-        int rowCount;
+        private final File sheetFile;
+        private final Document sheetDoc;
+        private final Element sheetData;
+
+        private int lastRowNumber;
 
         public SimpleSheet(String sheetPath) {
             sheetFile = new File(extractedSheetDirectory, sheetPath);
             sheetDoc = XmlUtils.asDocument(sheetFile);
+            sheetData = getSheetData();
+
+            validateReferences();
+            
+            lastRowNumber = XmlUtils.stream(getRows()).mapToInt(this::getRowNumber).max().orElse(0);
+        }
+
+        private Element getSheetData() {
             NodeList sheetDataTags = sheetDoc.getElementsByTagName("sheetData");
             if (sheetDataTags.getLength() == 0)
                 throw new IllegalArgumentException("Malformed sheet part found. Missing sheetData");
-            sheetData = sheetDataTags.item(0);
-            rowCount = sheetDoc.getElementsByTagName("row").getLength();
+
+            return (Element) sheetDataTags.item(0);
+        }
+
+        private void validateReferences() {
+            List<String> invalidElements = new ArrayList<>();
+            
+            NodeList rows = getRows();
+            for (int rowIndex = 0; rowIndex < rows.getLength(); rowIndex++) {
+                Element row = (Element) rows.item(rowIndex);
+                
+                if (!getAttributeValue(row, "r").isPresent())
+                    invalidElements.add("row index " + rowIndex);
+                
+                NodeList cells = row.getElementsByTagName("c");
+                for (int cellIndex = 0; cellIndex < cells.getLength(); cellIndex++) {
+                    Element cell = (Element) cells.item(cellIndex);
+                    
+                    if (!getAttributeValue(cell, "r").isPresent())
+                        invalidElements.add("row index " + rowIndex + " > cell index " + cellIndex);
+                }
+            }
+            
+            if (!invalidElements.isEmpty())
+                throw new IllegalArgumentException("Malformed sheet part found. Elements without reference (attribute 'r'):\n -" + join(invalidElements, "\n -"));
         }
 
         public String stringValue() {
@@ -410,141 +431,197 @@ public class SimpleSpreadsheetEditor implements SpreadsheetEditor {
 
         @Override
         public SimpleSheetRow createRow() {
-            int nextRowNumber = getRowCount() + 1;
-            return new SimpleSheetRow(this, nextRowNumber, sheetDoc);
+            return createRow(lastRowNumber + 1);
         }
+        
+        private SimpleSheetRow createRow(int rowNumber) {
+            Element rowElement = sheetDoc.createElement("row");
+            rowElement.setAttribute("r", Integer.toString(rowNumber));
+            rowElement.setAttribute("x14ac:dyDescent", "0.25");
 
-        private int getRowCount() {
-            return rowCount;
+            if (rowNumber > lastRowNumber) {
+                sheetData.appendChild(rowElement);
+                lastRowNumber = rowNumber;
+            } else {
+                Node nextRowElement = getNextRowElement(rowNumber);
+                sheetData.insertBefore(rowElement, nextRowElement);
+            }
+
+            return new SimpleSheetRow(rowNumber, rowElement, sheetDoc);
         }
 
         @Override
-        public void truncate(int starting) {
-            NodeList xmlRow = sheetDoc.getElementsByTagName("row");
+        public SheetRow getOrCreateRow(int rowNumber) {
+            Optional<Element> existingRowElement = getRowElementByNumber(rowNumber);
 
-            List<Node> rowsToKeep = new LinkedList<>();
-            int rows = Math.min(starting, xmlRow.getLength());
-            for (int i = 0; i < rows; i++)
-                rowsToKeep.add(xmlRow.item(i));
+            return existingRowElement.isPresent() 
+                    ? new SimpleSheetRow(rowNumber, existingRowElement.get(), sheetDoc) 
+                    : createRow(rowNumber);
+        }
 
-            while(sheetData.hasChildNodes()) 
-                sheetData.removeChild(sheetData.getFirstChild());
+        private NodeList getRows() {
+            return sheetData.getElementsByTagName("row");
+        }
 
-            rowsToKeep.stream().forEach(node->sheetData.appendChild(node));
-            rowCount = rows;
+        private Optional<Element> getRowElementByNumber(int rowNumber) {
+            return XmlUtils.stream(getRows())
+                    .filter(row -> getRowNumber(row) == rowNumber)
+                    .map(row -> (Element) row)
+                    .findFirst();
+        }
+        
+        private int getRowNumber(Node row) {
+            return Integer.parseInt(getAttributeValueOrCry(row, "r"));
+        }
+
+        private Node getNextRowElement(int rowNumber) {
+            return XmlUtils.stream(getRows())
+                    .filter(row -> getRowNumber(row) > rowNumber)
+                    .sorted(comparing(this::getRowNumber))
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        @Override
+        public void truncate() {
+            XmlUtils.removeAllChildren(sheetData);
+            lastRowNumber = 0;
         }
 
         @Override
         public String getSheetPath() {
             return sheetFile.getPath().replace(extractedSheetDirectory.getPath()+File.separator, "");
         }
-
-        private void addRow(SimpleSheetRow r) {
-            if (r.getColumnIndex() > maxCol)
-                maxCol = r.getColumnIndex();
-            sheetData.appendChild(r.buildNode());
-            rowCount++;
-        }
     }
     
-    public class SimpleSheetRow implements SheetRow {
-        public StringBuilder rowString = new StringBuilder();
-        private int rowNumber;
-        private int columnIndex = 0;
-        private SimpleSheet sheet;
-        private Document sheetDoc;
-        private Element row;
+    private class SimpleSheetRow implements SheetRow {
+        private final int rowNumber;
+        private final Document sheetDoc;
+        private final Element row;
 
-        public SimpleSheetRow(SimpleSheet sheet, int rowNumber, Document sheetDoc) {
-            this.sheet = sheet;
+        private int lastColumnIndex;
+
+        private SimpleSheetRow(int rowNumber, Element rowElement, Document sheetDoc) {
             this.rowNumber = rowNumber;
             this.sheetDoc = sheetDoc;
-            this.row = sheetDoc.createElement("row");
+            this.row = rowElement;
+            this.lastColumnIndex = XmlUtils.stream(getCells()).mapToInt(this::getColumnIndex).max().orElse(-1);
         }
-
-        @Override
-        public Node buildNode() {
-            row.setAttribute("r", Integer.toString(rowNumber));
-            row.setAttribute("spans", "1:"+columnIndex);
-            row.setAttribute("x14ac:dyDescent", "0.25");
-            
-            return row;
-        }
-
+        
         @Override
         public void addColumn(String value) {
-            if(StringUtils.isEmpty(value)) {
-                addBlankColumn();
-            } else {
-                Element column = addColumn(getOrSetIndexInSharedStrings(value), "v");
-                column.setAttribute("t", "s");
-            }
+            addColumn(CellValues.string(value, sharedStrings));
         }
 
         @Override
         public void addColumn(Number value) {
-            if (value == null)
-                addBlankColumn();
-            else
-                addColumn(defaultIfNull(value, "").toString(), "v");
+            addColumn(CellValues.number(value));
         }
 
         @Override
         public void addColumn(Boolean value) {
-            if (value == null)
-                addBlankColumn();
-            else {
-                Element column = addColumn(String.valueOf(value), "v");
-                column.setAttribute("t", "b");
-            }
+            addColumn(CellValues.bool(value));
         }
 
         @Override
-        public void addColumn(ZonedDateTime value) {
-            if (value == null) {
-                addBlankColumn();
-            } else {
-                Element column = addColumn(toDoubleExcelFormat(value, workbookEditor.isDate1904()), "v");
-                column.setAttribute("s", Integer.toString(stylesEditor.getOrCreateNumberFormat("m/d/yy h:mm")));
-            }
+        public void addColumn(LocalDateTime value) {
+            addColumn(CellValues.dateTime(value, workbookEditor.isDate1904(), stylesEditor));
+        }
+
+        @Override
+        public void addColumn(LocalDate value) {
+            addColumn(CellValues.date(value, workbookEditor.isDate1904(), stylesEditor)); 
         }
 
         @Override
         public void addFormula(String formula) {
-            Element column = addColumn(formula, "f");
-            column.setAttribute("s", "4");
-        }
-
-        private Element addColumn(String colVal, String tagName) {
-            Element column = sheetDoc.createElement("c");
-            column.setAttribute("r", columnLabel());
-            Element valueNode = sheetDoc.createElement(tagName);
-            valueNode.appendChild(sheetDoc.createTextNode(colVal));
-            column.appendChild(valueNode);
-            row.appendChild(column);
-            columnIndex++;
-            return column;
-        }
-
-        private Element addBlankColumn() {
-            Element column = sheetDoc.createElement("c");
-            row.appendChild(column);
-            columnIndex++;
-            return column;
-        }
-
-        private String columnLabel() {
-            return columnIndexToLetter(columnIndex)+rowNumber;
+            addColumn(CellValues.formula(formula));
         }
 
         @Override
-        public int getColumnIndex() {
-            return columnIndex;
+        public void setValue(String columnLetter, String value) {
+            setValue(columnLetter, CellValues.string(value, sharedStrings));
         }
 
         @Override
-        public void save() {
-            sheet.addRow(this);
+        public void setValue(String columnLetter, Number value) {
+            setValue(columnLetter, CellValues.number(value));
+        }
+
+        @Override
+        public void setValue(String columnLetter, Boolean value) {
+            setValue(columnLetter, CellValues.bool(value));
+        }
+
+        @Override
+        public void setValue(String columnLetter, LocalDateTime value) {
+            setValue(columnLetter, CellValues.dateTime(value, workbookEditor.isDate1904(), stylesEditor));
+        }
+
+        @Override
+        public void setValue(String columnLetter, LocalDate value) {
+            setValue(columnLetter, CellValues.date(value, workbookEditor.isDate1904(), stylesEditor));
+        }
+
+        @Override
+        public void setFormula(String columnLetter, String value) {
+            setValue(columnLetter, CellValues.formula(value));
+        }
+
+        private void addColumn(CellValue cellValue) {
+            Element cellElement = createCell(lastColumnIndex + 1);
+            cellValue.writeValue(cellElement, sheetDoc);
+        }
+
+        private void setValue(String columnLetter, CellValue value) {
+            Optional<Element> existingCellElement = getCellElementByColumnLetter(columnLetter);
+            Element cellElement = existingCellElement.orElseGet(() -> createCell(columnLetterToIndex(columnLetter)));
+
+            value.writeValue(cellElement, sheetDoc);
+        }
+
+        private Element createCell(int columnIndex) {
+            Element cellElement = sheetDoc.createElement("c");
+            cellElement.setAttribute("r", columnIndexToLetter(columnIndex) + rowNumber);
+            
+            if (columnIndex > lastColumnIndex) {
+                row.appendChild(cellElement);
+                row.setAttribute("spans", "1:" + (columnIndex + 1));
+
+                lastColumnIndex = columnIndex;
+            } else {
+                Node nextCelllement = getNextCellElement(columnIndex);
+                row.insertBefore(cellElement, nextCelllement);
+            }
+
+            return cellElement;
+        }
+
+        private NodeList getCells() {
+            return row.getElementsByTagName("c");
+        }
+        
+        private Optional<Element> getCellElementByColumnLetter(String columnLetter) {
+            return XmlUtils.stream(getCells())
+                    .filter(cell -> columnLetter.equals(getCellReference(cell).getColumnLetter()))
+                    .map(cell -> (Element) cell)
+                    .findFirst();
+        }
+        
+        private SpreadsheetA1 getCellReference(Node cell) {
+            return SpreadsheetUtils.parseA1(getAttributeValueOrCry(cell, "r"));
+        }
+        
+        private int getColumnIndex(Node cell) {
+            return getCellReference(cell).getColumnIndex();
+        }
+
+        private Node getNextCellElement(int columnIndex) {
+            return XmlUtils.stream(getCells())
+                    .filter(cell -> getColumnIndex(cell) > columnIndex)
+                    .sorted(comparing(this::getColumnIndex))
+                    .findFirst()
+                    .orElse(null);
         }
     }
 

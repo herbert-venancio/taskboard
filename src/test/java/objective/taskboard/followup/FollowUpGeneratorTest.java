@@ -260,7 +260,7 @@ public class FollowUpGeneratorTest {
     }
 
     @Test
-    public void generateJiraDataSheetTest2() throws IOException {
+    public void generateEffortHistoryTest() throws IOException {
         //Data 1
         FromJiraDataRow data1row1 = getDefaultFromJiraDataRow();
         FromJiraDataRow data1row2 = getDefaultFromJiraDataRow();
@@ -320,28 +320,43 @@ public class FollowUpGeneratorTest {
                 "Sheet \"Effort History\" Row \"1\" AddColumn \"A1\": Date\n" + 
                 "Sheet \"Effort History\" Row \"1\" AddColumn \"B1\": SumEffortDone\n" + 
                 "Sheet \"Effort History\" Row \"1\" AddColumn \"C1\": SumEffortBacklog\n" + 
-                "Sheet \"Effort History\" Row \"1\" Save\n" + 
                 "Sheet \"Effort History\" Row Create: 2\n" + 
                 "Sheet \"Effort History\" Row \"2\" AddColumn \"A2\": 2017-10-01T00:00Z\n" + 
                 "Sheet \"Effort History\" Row \"2\" AddColumn \"B2\": 4.0\n" + 
                 "Sheet \"Effort History\" Row \"2\" AddColumn \"C2\": 6.0\n" + 
-                "Sheet \"Effort History\" Row \"2\" Save\n" + 
                 "Sheet \"Effort History\" Row Create: 3\n" + 
                 "Sheet \"Effort History\" Row \"3\" AddColumn \"A3\": 2017-10-02T00:00Z\n" + 
                 "Sheet \"Effort History\" Row \"3\" AddColumn \"B3\": 13.0\n" + 
                 "Sheet \"Effort History\" Row \"3\" AddColumn \"C3\": 20.4\n" + 
-                "Sheet \"Effort History\" Row \"3\" Save\n" + 
                 "Sheet \"Effort History\" Row Create: 4\n" + 
                 "Sheet \"Effort History\" Row \"4\" AddColumn \"A4\": 2017-10-03T00:00Z\n" + 
                 "Sheet \"Effort History\" Row \"4\" AddColumn \"B4\": 3.9\n" + 
                 "Sheet \"Effort History\" Row \"4\" AddColumn \"C4\": 4.5\n" + 
-                "Sheet \"Effort History\" Row \"4\" Save\n" + 
                 "Sheet \"Effort History\" Save\n" + 
                 "Spreadsheet Close\n";
 
         assertEquals(expectedEditorLogger, editor.loggerString());
     }
-    
+
+    @Test
+    public void updateTimelineDatesTest() throws IOException {
+        subject = new FollowUpGenerator(provider, editor);
+
+        subject.getEditor().open();
+        subject.updateTimelineDates(LocalDate.parse("2017-10-03"));
+        subject.getEditor().close();
+
+        String expectedEditorLogger = 
+                "Spreadsheet Open\n" + 
+                "Sheet Create: Timeline\n" + 
+                "Sheet \"Timeline\" Row Get/Create: 6\n" + 
+                "Sheet \"Timeline\" Row \"6\" SetValue (date) \"B6\": 2017-10-03\n" + 
+                "Sheet \"Timeline\" Save\n" + 
+                "Spreadsheet Close\n";
+
+        assertEquals(expectedEditorLogger, editor.loggerString());
+    }
+
     @Test
     public void whenClusteIsEmpty_ShouldOnlyTruncateTab() throws IOException {
         //Data 1
@@ -391,7 +406,6 @@ public class FollowUpGeneratorTest {
                 "Sheet \"Effort History\" Row \"1\" AddColumn \"A1\": Date\n" + 
                 "Sheet \"Effort History\" Row \"1\" AddColumn \"B1\": SumEffortDone\n" + 
                 "Sheet \"Effort History\" Row \"1\" AddColumn \"C1\": SumEffortBacklog\n" + 
-                "Sheet \"Effort History\" Row \"1\" Save\n" + 
                 "Spreadsheet Close\n" + 
                 "";
 
@@ -427,7 +441,6 @@ public class FollowUpGeneratorTest {
                 "Sheet \"T-shirt Size\" Row \"1\" AddColumn \"D1\": Effort\n" +
                 "Sheet \"T-shirt Size\" Row \"1\" AddColumn \"E1\": Cycle\n" +
                 "Sheet \"T-shirt Size\" Row \"1\" AddColumn \"F1\": Project\n" +
-                "Sheet \"T-shirt Size\" Row \"1\" Save\n" +
                 "Sheet \"T-shirt Size\" Row Create: 2\n" +
                 "Sheet \"T-shirt Size\" Row \"2\" AddColumn \"A2\": Alpha Bug\n" +
                 "Sheet \"T-shirt Size\" Row \"2\" AddColumn \"B2\": L\n" +
@@ -435,7 +448,6 @@ public class FollowUpGeneratorTest {
                 "Sheet \"T-shirt Size\" Row \"2\" AddColumn \"D2\": 12.0\n" +
                 "Sheet \"T-shirt Size\" Row \"2\" AddColumn \"E2\": 14.4\n" +
                 "Sheet \"T-shirt Size\" Row \"2\" AddColumn \"F2\": PROJ\n" +
-                "Sheet \"T-shirt Size\" Row \"2\" Save\n" +
                 "Sheet \"T-shirt Size\" Row Create: 3\n" +
                 "Sheet \"T-shirt Size\" Row \"3\" AddColumn \"A3\": Alpha Test\n" +
                 "Sheet \"T-shirt Size\" Row \"3\" AddColumn \"B3\": M\n" +
@@ -443,7 +455,6 @@ public class FollowUpGeneratorTest {
                 "Sheet \"T-shirt Size\" Row \"3\" AddColumn \"D3\": 6.0\n" +
                 "Sheet \"T-shirt Size\" Row \"3\" AddColumn \"E3\": 7.2\n" +
                 "Sheet \"T-shirt Size\" Row \"3\" AddColumn \"F3\": PROJ\n" +
-                "Sheet \"T-shirt Size\" Row \"3\" Save\n" +
                 "Sheet \"T-shirt Size\" Row Create: 4\n" +
                 "Sheet \"T-shirt Size\" Row \"4\" AddColumn \"A4\": UAT\n" +
                 "Sheet \"T-shirt Size\" Row \"4\" AddColumn \"B4\": S\n" +
@@ -451,7 +462,6 @@ public class FollowUpGeneratorTest {
                 "Sheet \"T-shirt Size\" Row \"4\" AddColumn \"D4\": 4.0\n" +
                 "Sheet \"T-shirt Size\" Row \"4\" AddColumn \"E4\": 4.8\n" +
                 "Sheet \"T-shirt Size\" Row \"4\" AddColumn \"F4\": PROJ\n" +
-                "Sheet \"T-shirt Size\" Row \"4\" Save\n" +
                 "Sheet \"T-shirt Size\" Save\n" +
                 "Spreadsheet Close\n";
 
@@ -494,13 +504,11 @@ public class FollowUpGeneratorTest {
                 "Sheet \"Worklogs\" Row \"1\" AddColumn \"B1\": ISSUE\n" + 
                 "Sheet \"Worklogs\" Row \"1\" AddColumn \"C1\": STARTED\n" + 
                 "Sheet \"Worklogs\" Row \"1\" AddColumn \"D1\": TIMESPENT\n" + 
-                "Sheet \"Worklogs\" Row \"1\" Save\n" + 
                 "Sheet \"Worklogs\" Row Create: 2\n" + 
                 "Sheet \"Worklogs\" Row \"2\" AddColumn \"A2\": john.doe\n" + 
                 "Sheet \"Worklogs\" Row \"2\" AddColumn \"B2\": I-3\n" + 
                 "Sheet \"Worklogs\" Row \"2\" AddColumn \"C2\": 2018-12-12T02:00Z\n" + 
                 "Sheet \"Worklogs\" Row \"2\" AddColumn \"D2\": 5.0\n" + 
-                "Sheet \"Worklogs\" Row \"2\" Save\n" + 
                 "Sheet \"Worklogs\" Save\n";
         assertEquals(expected, loggerString);
     }

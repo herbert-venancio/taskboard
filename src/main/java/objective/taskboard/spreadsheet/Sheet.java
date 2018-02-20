@@ -5,8 +5,10 @@ public interface Sheet {
     void save();
 
     SheetRow createRow();
+    
+    SheetRow getOrCreateRow(int rowNumber);
 
-    void truncate(int starting);
+    void truncate();
 
     String getSheetPath();
 
