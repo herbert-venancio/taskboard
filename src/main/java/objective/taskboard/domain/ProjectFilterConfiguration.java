@@ -55,6 +55,10 @@ public class ProjectFilterConfiguration implements Serializable {
     @Column
     private LocalDate deliveryDate;
 
+    public Integer getId() {
+        return id;
+    }
+
     public String getProjectKey() {
         return projectKey;
     }

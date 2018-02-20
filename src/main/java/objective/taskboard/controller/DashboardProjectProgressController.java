@@ -92,7 +92,7 @@ public class DashboardProjectProgressController {
         LocalDate projectStartDate = project.get().getStartDate();
 
         FollowUpDataSnapshot snapshot = providerFromCurrentState.getJiraData(new String[]{projectKey}, timezone);
-        if (snapshot.getCluster().isEmpty())
+        if (!snapshot.hasClusterConfiguration())
             return new ResponseEntity<>("No cluster configuration found for project " + projectKey + ".", INTERNAL_SERVER_ERROR);
 
         if (!snapshot.getHistory().isPresent())

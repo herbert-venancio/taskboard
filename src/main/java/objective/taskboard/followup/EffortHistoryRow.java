@@ -2,6 +2,8 @@ package objective.taskboard.followup;
 
 import java.time.LocalDate;
 
+import objective.taskboard.domain.FollowupDailySynthesis;
+
 public class EffortHistoryRow {
     public final LocalDate date;
     public double sumEffortDone = 0;
@@ -23,5 +25,9 @@ public class EffortHistoryRow {
         if (Double.isNaN(d))
             return 0.0;
         return d;
+    }
+
+    public static EffortHistoryRow from(FollowupDailySynthesis dailySynthesis) {
+        return new EffortHistoryRow(dailySynthesis.getFollowupDate(), dailySynthesis.getSumEffortDone(), dailySynthesis.getSumEffortBacklog());
     }
 }

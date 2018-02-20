@@ -16,6 +16,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import objective.taskboard.followup.EmptyFollowupCluster;
 import objective.taskboard.followup.FollowUpDataSnapshot;
 import objective.taskboard.followup.FollowUpFacade;
 import objective.taskboard.followup.FollowUpHelper;
@@ -37,7 +38,7 @@ public class FollowUpTransitionsCsvControllerTest {
         provider = new FollowupDataProvider() {
             @Override
             public FollowUpDataSnapshot getJiraData(String[] includeProjects, ZoneId timezone) {
-                return new FollowUpDataSnapshot(null, FollowUpHelper.getFromFile());
+                return new FollowUpDataSnapshot(null, FollowUpHelper.getFromFile(), new EmptyFollowupCluster());
             }
         };
         willReturn(provider).given(followUpFacade).getProvider(any());

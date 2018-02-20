@@ -24,10 +24,6 @@ public class FollowUpDataSnapshot {
         this(date, followupData, null, followupCluster);
     }
     
-    public FollowUpDataSnapshot(LocalDate date, FollowupData followupData) {
-        this(date, followupData, null, new EmptyFollowupCluster());
-    }
-
     public LocalDate getDate() {
         return date;
     }
@@ -61,10 +57,7 @@ public class FollowUpDataSnapshot {
     }
 
     private FromJiraRowCalculator getCalculator() {
-        if (getHistory().isPresent())
-            return getHistory().get().getCalculator();
-        
-        return new FromJiraRowCalculator(new EmptyFollowupCluster());
+        return new FromJiraRowCalculator(followupCluster);
     }
     
     public static class SnapshotRow {
@@ -79,17 +72,22 @@ public class FollowUpDataSnapshot {
         
     }
 
-    public EffortHistoryRow getEffortHistoryRow(FromJiraRowCalculator rowCalculator) {
+    public EffortHistoryRow getEffortHistoryRow() {
+        FromJiraRowCalculator rowCalculator = getCalculator();
         EffortHistoryRow historyRow = new EffortHistoryRow(getDate());
 
         getData().fromJiraDs.rows.stream().forEach(fromJiraRow -> {
             FromJiraRowCalculation fromJiraRowCalculation = rowCalculator.calculate(fromJiraRow);
 
-            historyRow.sumEffortDone += fromJiraRowCalculation.getEffortDone();
+            historyRow.sumEffortDone    += fromJiraRowCalculation.getEffortDone();
             historyRow.sumEffortBacklog += fromJiraRowCalculation.getEffortOnBacklog();
         });
 
         return historyRow;
+    }
+
+    public boolean hasClusterConfiguration() {
+        return followupCluster !=null && !followupCluster.isEmpty();
     }
 
     public FollowupCluster getCluster() {

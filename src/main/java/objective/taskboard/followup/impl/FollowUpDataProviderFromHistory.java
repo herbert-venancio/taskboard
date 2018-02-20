@@ -26,9 +26,7 @@ import java.time.ZoneId;
 import objective.taskboard.followup.FollowUpDataHistoryRepository;
 import objective.taskboard.followup.FollowUpDataSnapshot;
 import objective.taskboard.followup.FollowUpDataSnapshotHistory;
-import objective.taskboard.followup.FollowupCluster;
 import objective.taskboard.followup.FollowupDataProvider;
-import objective.taskboard.followup.FromJiraRowCalculator;
 
 public class FollowUpDataProviderFromHistory implements FollowupDataProvider {
 
@@ -41,16 +39,12 @@ public class FollowUpDataProviderFromHistory implements FollowupDataProvider {
 
     @Override
     public FollowUpDataSnapshot getJiraData(String[] includeProjects, ZoneId timezone) {
-        FollowupCluster cluster = historyRepository.getClusterForProject(includeProjects[0]);
-        FromJiraRowCalculator rowCalculator = new FromJiraRowCalculator(cluster);
         FollowUpDataSnapshot followUpDataEntry = historyRepository.get(date, timezone, includeProjects);
 
         followUpDataEntry.setFollowUpDataEntryHistory(new FollowUpDataSnapshotHistory(
                 historyRepository,
                 includeProjects,
-                timezone,
                 followUpDataEntry, 
-                rowCalculator,
                 date));
         
         return followUpDataEntry;

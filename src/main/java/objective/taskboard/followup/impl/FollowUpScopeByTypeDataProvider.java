@@ -41,7 +41,7 @@ public class FollowUpScopeByTypeDataProvider {
         final Map<String, Double> map = initTypes();
 
         FollowUpDataSnapshot snapshot = getSnapshot(projectKey, date, zoneId);
-        if (snapshot.getCluster().isEmpty())
+        if (!snapshot.hasClusterConfiguration())
             throw new FrontEndMessageException("No cluster configuration found for project " + projectKey + ".");
         
         snapshot.forEachRow(r -> {

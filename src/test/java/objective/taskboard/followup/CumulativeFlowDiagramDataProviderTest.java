@@ -45,12 +45,12 @@ public class CumulativeFlowDiagramDataProviderTest {
     @Before
     public void setup() {
         followupData = FollowUpHelper.getBiggerFollowupData();
-        FollowUpDataSnapshot snapshot = new FollowUpDataSnapshot(TODAY_DATE, followupData);
+        FollowUpDataSnapshot snapshot = new FollowUpDataSnapshot(TODAY_DATE, followupData, new EmptyFollowupCluster());
         doReturn(snapshot).when(followUpDataProviderFromCurrentState).getJiraData(eq("TASKB"));
         doReturn(true).when(projectRepository).exists(eq("TASKB"));
 
         FollowupData emptyFollowupData = new FollowupData(new FromJiraDataSet(Constants.FROMJIRA_HEADERS, emptyList()), emptyList(), emptySynthetics());
-        FollowUpDataSnapshot emptySnapshot = new FollowUpDataSnapshot(TODAY_DATE, emptyFollowupData);
+        FollowUpDataSnapshot emptySnapshot = new FollowUpDataSnapshot(TODAY_DATE, emptyFollowupData, new EmptyFollowupCluster());
         doReturn(emptySnapshot).when(followUpDataProviderFromCurrentState).getJiraData(eq("EMPTY"));
         doReturn(true).when(projectRepository).exists(eq("EMPTY"));
     }

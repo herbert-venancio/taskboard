@@ -126,7 +126,7 @@ public class FollowUpFacadeTest {
     public void okTemplateGenerate() throws Exception {
         given(templateService.getTemplate(TEMPLATE_NAME)).willReturn(template);
         given(provider.getJiraData(eq(INCLUDED_PROJECTS), eq(ZoneId.systemDefault())))
-            .willReturn(new FollowUpDataSnapshot(LocalDate.parse("2017-10-01"), getDefaultFollowupData()));
+            .willReturn(new FollowUpDataSnapshot(LocalDate.parse("2017-10-01"), getDefaultFollowupData(), new EmptyFollowupCluster()));
 
         // when
         FollowUpGenerator followupGenerator = followUpFacade.getGenerator(TEMPLATE_NAME, Optional.empty());

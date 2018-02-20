@@ -32,7 +32,7 @@ public class FollowUpPlannedBallparkController {
         
         final PlannedVsBallparkDataAccumulator accumulator = new PlannedVsBallparkDataAccumulator();
         FollowUpDataSnapshot snapshot = followUpDataProviderFromCurrentState.getJiraData(projectKey);
-        if (snapshot.getCluster().isEmpty())
+        if (!snapshot.hasClusterConfiguration())
             return new ResponseEntity<>("No cluster configuration found for project " + projectKey + ".", INTERNAL_SERVER_ERROR);
         
         snapshot.forEachRow(accumulator::accumulate);

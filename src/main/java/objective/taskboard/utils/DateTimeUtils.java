@@ -61,7 +61,7 @@ public class DateTimeUtils {
     public static ZonedDateTime parseDateTime(String yyyymmdd, String hhmmss, ZoneId timezone) {
         return LocalDateTime.parse(yyyymmdd + "T" + hhmmss, DateTimeFormatter.ISO_LOCAL_DATE_TIME).atZone(timezone);
     }
-
+    
     public static ZonedDateTime get(org.joda.time.DateTime dt) {
         if (dt == null)
             return null;

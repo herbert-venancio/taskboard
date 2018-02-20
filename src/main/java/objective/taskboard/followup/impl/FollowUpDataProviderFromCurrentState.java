@@ -50,7 +50,6 @@ import objective.taskboard.followup.FollowupData;
 import objective.taskboard.followup.FollowupDataProvider;
 import objective.taskboard.followup.FromJiraDataRow;
 import objective.taskboard.followup.FromJiraDataSet;
-import objective.taskboard.followup.FromJiraRowCalculator;
 import objective.taskboard.followup.SyntheticTransitionsDataSet;
 import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.jira.JiraProperties;
@@ -89,7 +88,6 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
 
         public FollowUpDataSnapshot getJiraData(String[] includeProjects, ZoneId timezone) {
             FollowupCluster cluster = clusterProvider.getForProject(includeProjects[0]);
-            FromJiraRowCalculator rowCalculator = new FromJiraRowCalculator(cluster);
             LocalDate date = LocalDate.now();
             List<String> i = Arrays.asList(includeProjects);
 
@@ -109,9 +107,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
             followUpDataEntry.setFollowUpDataEntryHistory(new FollowUpDataSnapshotHistory(
                     historyRepository,
                     includeProjects,
-                    timezone,
-                    followUpDataEntry, 
-                    rowCalculator));
+                    followUpDataEntry));
             return followUpDataEntry;
         }
 

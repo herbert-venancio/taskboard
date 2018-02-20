@@ -354,7 +354,7 @@ public class FollowUpGenerator {
         rowHeader.addColumn("SumEffortDone");
         rowHeader.addColumn("SumEffortBacklog");
         
-        if (followUpDataEntry.getCluster().isEmpty())
+        if (!followUpDataEntry.hasClusterConfiguration())
             return;
         
         Optional<FollowUpDataSnapshotHistory> history = followUpDataEntry.getHistory();
@@ -374,8 +374,6 @@ public class FollowUpGenerator {
 
     void generateTShirtSizeSheet(FollowUpDataSnapshot followupDataEntry) {
         FollowupCluster followupCluster= followupDataEntry.getCluster();
-        if (followupCluster == null || followupCluster.getClusterItems().isEmpty())
-            return;
 
         Sheet sheet = editor.getOrCreateSheet("T-shirt Size");
         sheet.truncate();
@@ -387,17 +385,17 @@ public class FollowUpGenerator {
         rowHeader.addColumn("Effort");
         rowHeader.addColumn("Cycle");
         rowHeader.addColumn("Project");
-
-        for (FollowUpClusterItem cluster : followupCluster.getClusterItems()) {
-            SheetRow row = sheet.createRow();
-            row.addColumn(cluster.getSubtaskTypeName());
-            row.addColumn(cluster.getSizing());
-            row.addColumn("Hours");
-            row.addColumn(cluster.getEffort());
-            row.addColumn(cluster.getCycle());
-            row.addColumn(cluster.getProject().getProjectKey());
-        }
-
+        
+        if (followupDataEntry.hasClusterConfiguration())
+            for (FollowUpClusterItem cluster : followupCluster.getClusterItems()) {
+                SheetRow row = sheet.createRow();
+                row.addColumn(cluster.getSubtaskTypeName());
+                row.addColumn(cluster.getSizing());
+                row.addColumn("Hours");
+                row.addColumn(cluster.getEffort());
+                row.addColumn(cluster.getCycle());
+                row.addColumn(cluster.getProject().getProjectKey());
+            }
         sheet.save();
     }
 
