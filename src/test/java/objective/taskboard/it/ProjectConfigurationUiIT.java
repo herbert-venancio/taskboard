@@ -11,8 +11,9 @@ public class ProjectConfigurationUiIT extends AuthenticatedIntegrationTest {
             .openMenuFilters()
             .openProjectsConfiguration()
             .openProjectConfigurationModal("TASKB")
-            .tryUpdateWithInvalidProjectionTimespan()
+            .tryUpdateWithInvalidStartDate()
+            .tryUpdateWithInvalidEndDate()
             .tryUpdateWithInvalidDateRange()
-            .updateConfiguration("01/01/2018", "03/03/2018", 1);
+            .updateConfiguration("01/01/2018", "03/03/2018");
     }
 }

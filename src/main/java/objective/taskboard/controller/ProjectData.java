@@ -41,6 +41,5 @@ public class ProjectData {
     public static class ProjectConfigurationData {
         public String startDate;
         public String deliveryDate;
-        public Integer projectionTimespan;
     }
 }

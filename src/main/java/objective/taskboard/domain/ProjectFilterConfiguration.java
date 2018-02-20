@@ -55,9 +55,6 @@ public class ProjectFilterConfiguration implements Serializable {
     @Column
     private LocalDate deliveryDate;
 
-    @Column
-    private Integer projectionTimespan;
-
     public String getProjectKey() {
         return projectKey;
     }
@@ -80,14 +77,6 @@ public class ProjectFilterConfiguration implements Serializable {
 
     public void setDeliveryDate(LocalDate deliveryDate) {
         this.deliveryDate = deliveryDate;
-    }
-
-    public Integer getProjectionTimespan() {
-        return projectionTimespan;
-    }
-
-    public void setProjectionTimespan(Integer projectionTimespan) {
-        this.projectionTimespan = projectionTimespan;
     }
 
     @OneToMany(fetch=FetchType.EAGER)

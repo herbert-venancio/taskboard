@@ -51,9 +51,13 @@ public class DashboardProjectProgressController {
     }
     
     @RequestMapping(value = "/api/projects/{project}/followup/progress", method = RequestMethod.GET)
-    public ResponseEntity<Object> progress(@PathVariable("project") String projectKey, @RequestParam("timezone") String zoneId) {
+    public ResponseEntity<Object> progress(
+            @PathVariable("project") String projectKey,
+            @RequestParam("timezone") String zoneId,
+            @RequestParam(value = "projection", defaultValue = "20") Integer projectionTimespan) {
+
         String today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
-        Key cacheKey = new Key(projectKey, zoneId, today);
+        Key cacheKey = new Key(projectKey, zoneId, today, projectionTimespan);
 
         try {
             return cache.get(cacheKey, () -> load(cacheKey));
@@ -65,6 +69,10 @@ public class DashboardProjectProgressController {
     private ResponseEntity<Object> load(Key key) throws Exception {
         String projectKey = key.projectKey;
         String zoneId = key.zoneId;
+        Integer projectionSampleSize = key.projection;
+
+        if (projectionSampleSize < 0)
+            return new ResponseEntity<>("The projection timespan should be a positive number.", INTERNAL_SERVER_ERROR);
 
         Optional<ProjectFilterConfiguration> project = projects.getProjectByKey(projectKey);
 
@@ -83,8 +91,6 @@ public class DashboardProjectProgressController {
 
         LocalDate projectStartDate = project.get().getStartDate();
 
-        int projectionSampleSize = Optional.ofNullable(project.get().getProjectionTimespan()).orElse(FollowupProgressCalculator.DEFAULT_PROJECTION_SAMPLE_SIZE);
-
         FollowUpDataSnapshot snapshot = providerFromCurrentState.getJiraData(new String[]{projectKey}, timezone);
         if (snapshot.getCluster().isEmpty())
             return new ResponseEntity<>("No cluster configuration found for project " + projectKey + ".", INTERNAL_SERVER_ERROR);
@@ -102,11 +108,13 @@ public class DashboardProjectProgressController {
         public final String projectKey;
         public final String zoneId;
         public final String today;
+        public final Integer projection;
 
-        public Key(String projectKey, String zoneId, String today) {
+        public Key(String projectKey, String zoneId, String today, Integer projection) {
             this.projectKey = projectKey;
             this.zoneId = zoneId;
             this.today = today;
+            this.projection = projection;
         }
 
         @Override
@@ -116,12 +124,13 @@ public class DashboardProjectProgressController {
             Key key = (Key) o;
             return Objects.equal(projectKey, key.projectKey) &&
                     Objects.equal(zoneId, key.zoneId) &&
-                    Objects.equal(today, key.today);
+                    Objects.equal(today, key.today) &&
+                    Objects.equal(projection, key.projection);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(projectKey, zoneId, today);
+            return Objects.hashCode(projectKey, zoneId, today, projection);
         }
     }
 }

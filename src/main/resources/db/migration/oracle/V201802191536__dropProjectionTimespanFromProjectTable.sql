@@ -1,0 +1,1 @@
+ALTER TABLE project_filter_configuration DROP column projection_timespan;
