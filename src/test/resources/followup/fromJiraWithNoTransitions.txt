@@ -86,7 +86,6 @@ Sheet "From Jira" Row "1" AddColumn "CD1": CountSubtasks
 Sheet "From Jira" Row "1" AddColumn "CE1": SubtaskEstimativeForEEPCalculation
 Sheet "From Jira" Row "1" AddColumn "CF1": PlannedEffortOnBug
 Sheet "From Jira" Row "1" AddColumn "CG1": WorklogOnBug
-Sheet "From Jira" Row "1" Save
 Sheet "From Jira" Row Create: 2
 Sheet "From Jira" Row "2" AddColumn "A2": PROJECT TEST
 Sheet "From Jira" Row "2" AddColumn "B2": Demand
@@ -173,6 +172,5 @@ Sheet "From Jira" Row "2" AddFormula "CD2": IF(AllIssues[planning_type]="Plan",1
 Sheet "From Jira" Row "2" AddFormula "CE2": IF(AllIssues[[#This Row],[SUBTASK_STATUS]]="Done", AllIssues[[#This Row],[EffortDone]],0)
 Sheet "From Jira" Row "2" AddFormula "CF2": IF(AllIssues[TASK_TYPE]="Bug",AllIssues[EffortEstimate], 0)
 Sheet "From Jira" Row "2" AddFormula "CG2": IF(AllIssues[TASK_TYPE]="Bug",AllIssues[worklog],0)
-Sheet "From Jira" Row "2" Save
 Sheet "From Jira" Save
 Spreadsheet Close

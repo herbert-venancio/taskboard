@@ -26,6 +26,9 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
+import java.util.Optional;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -164,6 +167,28 @@ public class XmlUtils {
                 return nodeList.item(index++);
             }
         };
+    }
+    
+    public static Stream<Node> stream(NodeList list) {
+        return IntStream.range(0, list.getLength()).mapToObj(list::item);
+    }
+    
+    public static Optional<String> getAttributeValue(Node node, String attributeName) {
+        Node attributeNode = node.getAttributes().getNamedItem(attributeName);
+
+        return attributeNode == null 
+                ? Optional.empty() 
+                : Optional.ofNullable(attributeNode.getNodeValue());
+    }
+    
+    public static String getAttributeValueOrCry(Node node, String attributeName) {
+        return getAttributeValue(node, attributeName)
+                .orElseThrow(() -> new RuntimeException("Attribute '" + attributeName + "' without value in node " + node));
+    }
+    
+    public static void removeAllChildren(Node node) {
+        while (node.hasChildNodes())
+            node.removeChild(node.getFirstChild());
     }
 
     public static class InvalidXPathOperationException extends RuntimeException {

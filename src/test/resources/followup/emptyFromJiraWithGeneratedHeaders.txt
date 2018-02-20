@@ -86,6 +86,5 @@ Sheet "From Jira" Row "1" AddColumn "CD1": CountSubtasks
 Sheet "From Jira" Row "1" AddColumn "CE1": SubtaskEstimativeForEEPCalculation
 Sheet "From Jira" Row "1" AddColumn "CF1": PlannedEffortOnBug
 Sheet "From Jira" Row "1" AddColumn "CG1": WorklogOnBug
-Sheet "From Jira" Row "1" Save
 Sheet "From Jira" Save
 Spreadsheet Close

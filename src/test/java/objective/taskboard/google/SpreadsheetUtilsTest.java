@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.junit.Test;
 
+import objective.taskboard.google.SpreadsheetUtils.SpreadsheetA1;
+
 public class SpreadsheetUtilsTest {
 
     @Test
@@ -35,5 +37,20 @@ public class SpreadsheetUtilsTest {
         letters.sort(SpreadsheetUtils.COLUMN_LETTER_COMPARATOR);
         
         assertEquals(asList("A", "R", "Z", "AB", "AZ"), letters);
+    }
+    
+    @Test
+    public void parseA1() {
+        SpreadsheetA1 a1 = SpreadsheetUtils.parseA1("A1");
+
+        assertEquals("A", a1.getColumnLetter());
+        assertEquals(0, a1.getColumnIndex());
+        assertEquals(1, a1.getRowNumber());
+        
+        a1 = SpreadsheetUtils.parseA1("AZ199");
+
+        assertEquals("AZ", a1.getColumnLetter());
+        assertEquals(51, a1.getColumnIndex());
+        assertEquals(199, a1.getRowNumber());
     }
 }

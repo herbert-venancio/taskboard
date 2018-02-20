@@ -95,7 +95,6 @@ Sheet "From Jira" Row "1" AddColumn "CM1": Features - To Do
 Sheet "From Jira" Row "1" AddColumn "CN1": Subtasks - Done
 Sheet "From Jira" Row "1" AddColumn "CO1": Subtasks - Doing
 Sheet "From Jira" Row "1" AddColumn "CP1": Subtasks - To Do
-Sheet "From Jira" Row "1" Save
 Sheet "From Jira" Row Create: 2
 Sheet "From Jira" Row "2" AddColumn "A2": PROJECT TEST
 Sheet "From Jira" Row "2" AddColumn "B2": Demand
@@ -191,6 +190,5 @@ Sheet "From Jira" Row "2" AddColumn "CM2": 2017-09-25T00:00-03:00[America/Sao_Pa
 Sheet "From Jira" Row "2" AddColumn "CN2": null
 Sheet "From Jira" Row "2" AddColumn "CO2": null
 Sheet "From Jira" Row "2" AddColumn "CP2": 2017-09-25T00:00-03:00[America/Sao_Paulo]
-Sheet "From Jira" Row "2" Save
 Sheet "From Jira" Save
 Spreadsheet Close

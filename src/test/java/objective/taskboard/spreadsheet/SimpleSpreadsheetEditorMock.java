@@ -1,16 +1,18 @@
 package objective.taskboard.spreadsheet;
 
+import static objective.taskboard.google.SpreadsheetUtils.columnIndexToLetter;
+import static objective.taskboard.google.SpreadsheetUtils.columnLetterToIndex;
+
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.w3c.dom.Node;
-
 import objective.taskboard.followup.FollowUpTemplate;
-import static objective.taskboard.google.SpreadsheetUtils.columnIndexToLetter;
 
 public class SimpleSpreadsheetEditorMock implements SpreadsheetEditor {
 
@@ -111,11 +113,19 @@ public class SimpleSpreadsheetEditorMock implements SpreadsheetEditor {
         @Override
         public SheetRowMock createRow() {
             rowNumber++;
+            logger.append("Sheet \"" + sheetName + "\" Row Create: "+ rowNumber +"\n");
             return new SheetRowMock(sheetName, rowNumber);
         }
 
         @Override
-        public void truncate(int starting) {
+        public SheetRow getOrCreateRow(int rowNumber) {
+            this.rowNumber = Math.max(this.rowNumber, rowNumber);
+            logger.append("Sheet \"" + sheetName + "\" Row Get/Create: "+ rowNumber +"\n");
+            return new SheetRowMock(sheetName, rowNumber);
+        }
+
+        @Override
+        public void truncate() {
         }
 
         @Override
@@ -132,12 +142,6 @@ public class SimpleSpreadsheetEditorMock implements SpreadsheetEditor {
         public SheetRowMock(String sheetname, int rowNum) {
             this.sheetname = sheetname;
             this.rowNum = rowNum;
-            logger.append("Sheet \"" + sheetname + "\" Row Create: "+ rowNum +"\n");
-        }
-
-        @Override
-        public Node buildNode() {
-            return null;
         }
 
         @Override
@@ -163,21 +167,58 @@ public class SimpleSpreadsheetEditorMock implements SpreadsheetEditor {
             logger.append("Sheet \"" + sheetname + "\" Row \""+ rowNum +"\" AddColumn \""+ columnIndexToLetter(columIndex) + rowNum +"\": " + value + "\n");
             columIndex++;
         }
+        
+        @Override
+        public void addColumn(LocalDateTime value) {
+            logger.append("Sheet \"" + sheetname + "\" Row \""+ rowNum +"\" AddColumn \""+ columnIndexToLetter(columIndex) + rowNum +"\": " + value + "\n");
+            columIndex++;
+        }
+
+        @Override
+        public void addColumn(LocalDate value) {
+            logger.append("Sheet \"" + sheetname + "\" Row \""+ rowNum +"\" AddColumn \""+ columnIndexToLetter(columIndex) + rowNum +"\": " + value + "\n");
+            columIndex++;
+        }
 
         @Override
         public void addFormula(String formula) {
             logger.append("Sheet \"" + sheetname + "\" Row \""+ rowNum +"\" AddFormula \""+ columnIndexToLetter(columIndex) + rowNum +"\": " + formula + "\n");
             columIndex++;
         }
-
+        
         @Override
-        public int getColumnIndex() {
-            return 0;
+        public void setValue(String columnLetter, String value) {
+            internalSetValue(columnLetter, value, "string");
         }
 
         @Override
-        public void save() {
-            logger.append("Sheet \"" + sheetname + "\" Row \""+ rowNum +"\" Save\n");
+        public void setValue(String columnLetter, Number value) {
+            internalSetValue(columnLetter, value, "number");
+        }
+
+        @Override
+        public void setValue(String columnLetter, Boolean value) {
+            internalSetValue(columnLetter, value, "boolean");
+        }
+
+        @Override
+        public void setValue(String columnLetter, LocalDateTime value) {
+            internalSetValue(columnLetter, value, "date-time");
+        }
+
+        @Override
+        public void setValue(String columnLetter, LocalDate value) {
+            internalSetValue(columnLetter, value, "date");
+        }
+
+        @Override
+        public void setFormula(String columnLetter, String value) {
+            internalSetValue(columnLetter, value, "formula");
+        }
+
+        private void internalSetValue(String columnLetter, Object value, String type) {
+            logger.append(String.format("Sheet \"%s\" Row \"%s\" SetValue (%s) \"%s\": %s\n", sheetname, rowNum, type, columnLetter + rowNum, value));
+            columIndex = Math.max(columIndex, columnLetterToIndex(columnLetter));
         }
     }
 
