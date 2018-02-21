@@ -52,7 +52,7 @@ public class FollowUpController {
     private static final DateTimeFormatter formatter = new DateTimeFormatterBuilder()
             .parseCaseInsensitive()
             .append(DateTimeFormatter.ISO_LOCAL_DATE)
-            .appendLiteral(' ')
+            .appendLiteral('_')
             .appendValue(HOUR_OF_DAY, 2)
             .appendLiteral(':')
             .appendValue(MINUTE_OF_HOUR, 2)
@@ -78,10 +78,10 @@ public class FollowUpController {
         try {
             FollowUpGenerator followupGenerator = followUpFacade.getGenerator(template, date);
             Resource resource = followupGenerator.generate(includedProjects, timezone);
-            String filename = "Followup_"+template+"_" + templateDate(date, timezone);
+            String filename = "Followup_"+template+"_" + templateDate(date, timezone)+".xlsm";
             return ResponseEntity.ok()
                   .contentLength(resource.contentLength())
-                  .header("Content-Disposition","attachment; filename=" + filename + ".xlsm")
+                  .header("Content-Disposition","attachment; filename=" + filename)
                   .body(resource);
         } catch (Exception e) {
             log.warn("Error generating followup spreadsheet", e);

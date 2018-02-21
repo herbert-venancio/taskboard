@@ -56,6 +56,7 @@ public class FollowUpDataHistoryGeneratorJSONFiles implements FollowUpDataHistor
 
     @PostConstruct
     public void initialize() {
+        syncProjectsHistoryOnDatabase();
         scheduledGenerate();
     }
 
@@ -80,6 +81,16 @@ public class FollowUpDataHistoryGeneratorJSONFiles implements FollowUpDataHistor
         thread.start();
     }
 
+    private void syncProjectsHistoryOnDatabase() {
+        log.info(getClass().getSimpleName() + ".syncProjectsHistoryOnDatabase start");
+        for (ProjectFilterConfiguration pf : projectFilterCacheRepo.getProjects()) {
+            log.info("Synching history of project " + pf.getProjectKey());
+            historyRepository.syncEffortHistory(pf.getProjectKey());
+            log.info("Synching history of project " + pf.getProjectKey() + " complete");
+        }
+        log.info(getClass().getSimpleName() + ".syncProjectsHistoryOnDatabase complete");
+    }
+
     protected void generate() throws IOException, InterruptedException {
         log.info(getClass().getSimpleName() + " start");
         for (ProjectFilterConfiguration pf : projectFilterCacheRepo.getProjects()) {
@@ -87,10 +98,9 @@ public class FollowUpDataHistoryGeneratorJSONFiles implements FollowUpDataHistor
 
             log.info("Generating history of project " + projectKey);
             FollowUpDataSnapshot followUpDataEntry = providerFromCurrentState.getJiraData(projectKey);
-            historyRepository.save(projectKey, followUpDataEntry.getDate(), followUpDataEntry.getData());
+            historyRepository.save(projectKey, followUpDataEntry);
             
             log.info("History of project " + projectKey + " generated");
-
         }
         log.info(getClass().getSimpleName() + " complete");
     }

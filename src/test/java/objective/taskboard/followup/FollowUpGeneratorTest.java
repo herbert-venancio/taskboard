@@ -33,11 +33,11 @@ import static objective.taskboard.followup.FollowUpHelper.getEmptyAnalyticsTrans
 import static objective.taskboard.followup.FollowUpHelper.getEmptyFollowupData;
 import static objective.taskboard.followup.FollowUpHelper.getEmptySyntheticTransitionsDataSet;
 import static objective.taskboard.followup.FollowUpHelper.getSyntheticTransitionsDataSetWithNoRow;
+import static objective.taskboard.followup.FromJiraDataRow.QUERY_TYPE_SUBTASK_PLAN;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -47,7 +47,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Consumer;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -59,7 +58,6 @@ import org.springframework.core.io.Resource;
 
 import objective.taskboard.data.Worklog;
 import objective.taskboard.domain.ProjectFilterConfiguration;
-import objective.taskboard.followup.FromJiraRowCalculator.FromJiraRowCalculation;
 import objective.taskboard.followup.cluster.FollowUpClusterItem;
 import objective.taskboard.spreadsheet.Sheet;
 import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor;
@@ -183,7 +181,7 @@ public class FollowUpGeneratorTest {
         FollowUpTemplate testTemplate = new FollowUpTemplate(resolve("followup/Followup-template.xlsm"));
         subject = new FollowUpGenerator(provider, new SimpleSpreadsheetEditor(testTemplate));
 
-        when(provider.getJiraData(emptyArray(), ZoneId.systemDefault())).thenReturn(new FollowUpDataSnapshot(followUpDate, getDefaultFollowupData()));
+        when(provider.getJiraData(emptyArray(), ZoneId.systemDefault())).thenReturn(new FollowUpDataSnapshot(followUpDate, getDefaultFollowupData(), new EmptyFollowupCluster()));
 
         Resource resource = subject.generate(emptyArray(), ZoneId.systemDefault());
         assertNotNull("Resource shouldn't be null", resource);
@@ -194,7 +192,7 @@ public class FollowUpGeneratorTest {
         FollowUpTemplate testTemplate = new FollowUpTemplate(resolve("followup/Followup-template.xlsm"));
         subject = new FollowUpGenerator(provider, new SimpleSpreadsheetEditor(testTemplate));
 
-        when(provider.getJiraData(emptyArray(), ZoneId.systemDefault())).thenReturn(new FollowUpDataSnapshot(followUpDate, getDefaultFollowupData()));
+        when(provider.getJiraData(emptyArray(), ZoneId.systemDefault())).thenReturn(new FollowUpDataSnapshot(followUpDate, getDefaultFollowupData(), new EmptyFollowupCluster()));
 
         Resource resource = subject.generate(emptyArray(), ZoneId.systemDefault());
         assertNotNull("Resource shouldn't be null", resource);
@@ -211,7 +209,7 @@ public class FollowUpGeneratorTest {
 
         FromJiraDataSet fromJiraDs = new FromJiraDataSet(FROMJIRA_HEADERS, fromJiraDataRowList);
         FollowupData followupData = new FollowupData(fromJiraDs, getDefaultAnalyticsTransitionsDataSet(), getDefaultSyntheticTransitionsDataSet());
-        FollowUpDataSnapshot followUpDataEntry = new FollowUpDataSnapshot(followUpDate, followupData);
+        FollowUpDataSnapshot followUpDataEntry = new FollowUpDataSnapshot(followUpDate, followupData, new EmptyFollowupCluster());
 
         when(provider.getJiraData(emptyArray(), ZoneId.systemDefault())).thenReturn(followUpDataEntry);
         Resource resource = subject.generate(emptyArray(), ZoneId.systemDefault());
@@ -260,50 +258,30 @@ public class FollowUpGeneratorTest {
     }
 
     @Test
+
     public void generateEffortHistoryTest() throws IOException {
-        //Data 1
-        FromJiraDataRow data1row1 = getDefaultFromJiraDataRow();
-        FromJiraDataRow data1row2 = getDefaultFromJiraDataRow();
-        
-        FromJiraRowCalculator rowCalculator = Mockito.mock(FromJiraRowCalculator.class);
-        when(rowCalculator.calculate(data1row1)).thenReturn(new FromJiraRowCalculation(0, 2, 3));
-        when(rowCalculator.calculate(data1row2)).thenReturn(new FromJiraRowCalculation(0, 2, 3));
-
-        FollowUpDataSnapshot followUpDataEntry1 = followUpDataEntry(LocalDate.of(2017, 10, 1), asList(data1row1, data1row2));
-        
-        //Data 2
-        FromJiraDataRow data2row1 = getDefaultFromJiraDataRow();
-        FromJiraDataRow data2row2 = getDefaultFromJiraDataRow();
-        FromJiraDataRow data2row3 = getDefaultFromJiraDataRow();
-        
-        when(rowCalculator.calculate(data2row1)).thenReturn(new FromJiraRowCalculation(0, 5, 8.1));
-        when(rowCalculator.calculate(data2row2)).thenReturn(new FromJiraRowCalculation(0, 6, 8.2));
-        when(rowCalculator.calculate(data2row3)).thenReturn(new FromJiraRowCalculation(0, 2, 4.1));
-
-        FollowUpDataSnapshot followUpDataEntry2 = followUpDataEntry(LocalDate.of(2017, 10, 2), asList(data2row1, data2row2, data2row3));
+        ProjectFilterConfiguration project = Mockito.mock(ProjectFilterConfiguration.class);
+        doReturn("PROJ").when(project).getProjectKey();
 
         //Data 3
-        FromJiraDataRow data3row1 = getDefaultFromJiraDataRow();
-        FromJiraDataRow data3row2 = getDefaultFromJiraDataRow();
-        FromJiraDataRow data3row3 = getDefaultFromJiraDataRow();
+        FromJiraDataRow data3row1 = getDefaultFromJiraDataRow("Done", null, "XS", QUERY_TYPE_SUBTASK_PLAN);
+        FromJiraDataRow data3row2 = getDefaultFromJiraDataRow("Done", null, "XXS", QUERY_TYPE_SUBTASK_PLAN);
+        FromJiraDataRow data3row3 = getDefaultFromJiraDataRow("Doing", null, "S", QUERY_TYPE_SUBTASK_PLAN);
         
-        when(rowCalculator.calculate(data3row1)).thenReturn(new FromJiraRowCalculation(0, 1.9, 1.5));
-        when(rowCalculator.calculate(data3row2)).thenReturn(new FromJiraRowCalculation(0,   0,   3));
-        when(rowCalculator.calculate(data3row3)).thenReturn(new FromJiraRowCalculation(0,   2,   0));
         
         FollowUpDataHistoryRepository historyRepository = Mockito.mock(FollowUpDataHistoryRepository.class);
         
         FollowUpDataSnapshot followUpDataEntry3 = followUpDataEntry(LocalDate.of(2017, 10, 3), asList(data3row1, data3row2, data3row3));
         
         List<String> projects = asList("P1", "P2");
-        List<FollowUpDataSnapshot> entries = asList(followUpDataEntry1, followUpDataEntry2);
-        mockProviderForEachHistoryEntry(historyRepository, projects, entries);
+        when(historyRepository.getHistoryRows(eq(projects), any(), any())).thenReturn(asList(
+               new EffortHistoryRow(LocalDate.of(2017, 10, 1), 4.0, 6.0),
+               new EffortHistoryRow(LocalDate.of(2017, 10, 2), 13.0, 20.4),
+               new EffortHistoryRow(LocalDate.of(2017, 10, 3), 3.9, 4.0)));
         
         FollowUpDataSnapshotHistory snapshotHistory = new FollowUpDataSnapshotHistory(historyRepository, 
                 projects.toArray(new String[0]), 
-                ZoneId.of("Z"), 
-                followUpDataEntry3, 
-                rowCalculator);
+                followUpDataEntry3);
         
         followUpDataEntry3.setFollowUpDataEntryHistory(snapshotHistory);
 
@@ -331,7 +309,7 @@ public class FollowUpGeneratorTest {
                 "Sheet \"Effort History\" Row Create: 4\n" + 
                 "Sheet \"Effort History\" Row \"4\" AddColumn \"A4\": 2017-10-03T00:00Z\n" + 
                 "Sheet \"Effort History\" Row \"4\" AddColumn \"B4\": 3.9\n" + 
-                "Sheet \"Effort History\" Row \"4\" AddColumn \"C4\": 4.5\n" + 
+                "Sheet \"Effort History\" Row \"4\" AddColumn \"C4\": 4.0\n" + 
                 "Sheet \"Effort History\" Save\n" + 
                 "Spreadsheet Close\n";
 
@@ -359,17 +337,6 @@ public class FollowUpGeneratorTest {
 
     @Test
     public void whenClusteIsEmpty_ShouldOnlyTruncateTab() throws IOException {
-        //Data 1
-        FromJiraDataRow data1row1 = getDefaultFromJiraDataRow();
-        FromJiraDataRow data1row2 = getDefaultFromJiraDataRow();
-        
-        FromJiraRowCalculator rowCalculator = Mockito.mock(FromJiraRowCalculator.class);
-        when(rowCalculator.calculate(data1row1)).thenReturn(new FromJiraRowCalculation(0, 2, 3));
-        when(rowCalculator.calculate(data1row2)).thenReturn(new FromJiraRowCalculation(0, 2, 3));
-
-        FollowUpDataSnapshot followUpDataEntry1 = followUpDataEntry(LocalDate.of(2017, 10, 1), asList(data1row1, data1row2));
-        
-        //Data 2
         FromJiraDataRow data2row1 = getDefaultFromJiraDataRow();
         FromJiraDataRow data2row2 = getDefaultFromJiraDataRow();
         FromJiraDataRow data2row3 = getDefaultFromJiraDataRow();
@@ -382,14 +349,14 @@ public class FollowUpGeneratorTest {
         FollowUpDataHistoryRepository historyRepository = Mockito.mock(FollowUpDataHistoryRepository.class);
         
         List<String> projects = asList("P1", "P2");
-        List<FollowUpDataSnapshot> entries = asList(followUpDataEntry1, followUpDataEntry2);
-        mockProviderForEachHistoryEntry(historyRepository, projects, entries);
+        when(historyRepository.getHistoryRows(eq(projects), any(), any())).thenReturn(asList(
+                new EffortHistoryRow(LocalDate.of(2017, 10, 1), 4.0, 6.0),
+                new EffortHistoryRow(LocalDate.of(2017, 10, 2), 13.0, 20.4),
+                new EffortHistoryRow(LocalDate.of(2017, 10, 3), 3.9, 4.0)));
         
         FollowUpDataSnapshotHistory snapshotHistory = new FollowUpDataSnapshotHistory(historyRepository, 
                 projects.toArray(new String[0]), 
-                ZoneId.of("Z"), 
-                followUpDataEntry2, 
-                rowCalculator);
+                followUpDataEntry2);
         
         followUpDataEntry2.setFollowUpDataEntryHistory(snapshotHistory);
 
@@ -428,7 +395,7 @@ public class FollowUpGeneratorTest {
 
         subject.getEditor().open();
         FollowUpDataSnapshot s = new FollowUpDataSnapshot(null, null, followupCluster);
-        subject.generateTShirtSizeSheet(s );
+        subject.generateTShirtSizeSheet(s);
         subject.getEditor().close();
 
         String expectedEditorLogger =
@@ -481,7 +448,16 @@ public class FollowUpGeneratorTest {
         subject.getEditor().close();
 
         String expectedEditorLogger =
-                "Spreadsheet Open\n" +
+                "Spreadsheet Open\n" + 
+                "Sheet Create: T-shirt Size\n" + 
+                "Sheet \"T-shirt Size\" Row Create: 1\n" + 
+                "Sheet \"T-shirt Size\" Row \"1\" AddColumn \"A1\": Cluster Name\n" + 
+                "Sheet \"T-shirt Size\" Row \"1\" AddColumn \"B1\": T-Shirt Size\n" + 
+                "Sheet \"T-shirt Size\" Row \"1\" AddColumn \"C1\": Type\n" + 
+                "Sheet \"T-shirt Size\" Row \"1\" AddColumn \"D1\": Effort\n" + 
+                "Sheet \"T-shirt Size\" Row \"1\" AddColumn \"E1\": Cycle\n" + 
+                "Sheet \"T-shirt Size\" Row \"1\" AddColumn \"F1\": Project\n" + 
+                "Sheet \"T-shirt Size\" Save\n" + 
                 "Spreadsheet Close\n";
 
         assertEquals("T-shirt Size Sheet", expectedEditorLogger, editor.loggerString());
@@ -522,16 +498,6 @@ public class FollowUpGeneratorTest {
         FollowupData followupData = new FollowupData(dataSet, emptyList(), emptyList());
         return new FollowUpDataSnapshot(data, followupData, followupCluster);
     }
-    
-    private void mockProviderForEachHistoryEntry(FollowUpDataHistoryRepository historyRepository, List<String> projects, List<FollowUpDataSnapshot> entriesToReturn) {
-            doAnswer(invocation -> {
-                @SuppressWarnings("unchecked")
-                Consumer<FollowUpDataSnapshot> action = (Consumer<FollowUpDataSnapshot>) invocation.getArguments()[2];
-                entriesToReturn.stream().forEach(action);
-                return null;
-            })
-            .when(historyRepository).forEachSnapshot(eq(projects), any(), any());
-    }    
 
     private String txtResourceAsString(String pathResource) {
         return IOUtilities.resourceToString(pathResource);

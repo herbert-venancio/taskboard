@@ -60,8 +60,12 @@ import objective.taskboard.utils.DateTimeUtils.ZonedDateTimeAdapter;
 public class FollowUpHelper {
 
     private static final String TIMEZONE_ID = "America/Sao_Paulo";
-
+    
     public static FromJiraDataRow getDefaultFromJiraDataRow() {
+        return getDefaultFromJiraDataRow("Doing", 1D, "M", "Type");
+    }
+    
+    public static FromJiraDataRow getDefaultFromJiraDataRow(String subtaskStatus, Double taskballpark, String tshirtSize, String queryPlan) {
         FromJiraDataRow followUpData = new FromJiraDataRow();
         followUpData.planningType = "Ballpark";
         followUpData.project = "PROJECT TEST";
@@ -88,7 +92,7 @@ public class FollowUpHelper {
         followUpData.demandLastBlockReason = "Demand last block reason";
 
         followUpData.taskType = "Feature";
-        followUpData.taskStatus = "Doing";
+        followUpData.taskStatus = subtaskStatus;
         followUpData.taskId = 2L;
         followUpData.taskNum = "I-2";
         followUpData.taskSummary = "Summary Feature";
@@ -113,7 +117,7 @@ public class FollowUpHelper {
         followUpData.taskLastBlockReason = "Task last block reason";
 
         followUpData.subtaskType = "Sub-task";
-        followUpData.subtaskStatus = "Doing";
+        followUpData.subtaskStatus = subtaskStatus;
         followUpData.subtaskId = 3L;
         followUpData.subtaskNum = "I-3";
         followUpData.subtaskSummary = "Summary Sub-task";
@@ -135,12 +139,12 @@ public class FollowUpHelper {
         followUpData.subtaskIsBlocked = false;
         followUpData.subtaskLastBlockReason = "Subtask last block reason";
 
-        followUpData.tshirtSize = "M";
+        followUpData.tshirtSize = tshirtSize;
         followUpData.worklog = 1D;
         followUpData.wrongWorklog = 1D;
         followUpData.demandBallpark = 1D;
-        followUpData.taskBallpark = 1D;
-        followUpData.queryType = "Type";
+        followUpData.taskBallpark = taskballpark;
+        followUpData.queryType = queryPlan;
 
         return followUpData;
     }
