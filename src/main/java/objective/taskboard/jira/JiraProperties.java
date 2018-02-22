@@ -1233,7 +1233,7 @@ public class JiraProperties {
                 return false;
             if (tShirtSizeDefaultValue != null ? !tShirtSizeDefaultValue.equals(that.tShirtSizeDefaultValue) : that.tShirtSizeDefaultValue != null)
                 return false;
-            if (transitionId != null ? !transitionId.equals(that.transitionId) : that.transitionId == null)
+            if (transitionId != null ? !transitionId.equals(that.transitionId) : that.transitionId == null)//NOSONAR
                 return false;
             if (customFieldCondition != null ? !customFieldCondition.equals(that.customFieldCondition) : that.customFieldCondition == null)
                 return false;
@@ -1253,7 +1253,7 @@ public class JiraProperties {
             result = 31 * result + (tShirtSizeParentId != null ? tShirtSizeParentId.hashCode() : 0);
             result = 31 * result + (tShirtSizeSubtaskId != null ? tShirtSizeSubtaskId.hashCode() : 0);
             result = 31 * result + (tShirtSizeDefaultValue != null ? tShirtSizeDefaultValue.hashCode() : 0);
-            result = 31 * result + (transitionId != null ? transitionId.hashCode() : 0);
+            result = 31 * result + (transitionId != null ? transitionId.hashCode() : 0);//NOSONAR
             result = 31 * result + (customFieldCondition != null ? customFieldCondition.hashCode() : 0);
             result = 31 * result + (skipCreationWhenTShirtParentIsAbsent != null ? skipCreationWhenTShirtParentIsAbsent.hashCode() : 0);
             return result;

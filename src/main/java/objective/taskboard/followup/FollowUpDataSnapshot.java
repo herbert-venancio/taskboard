@@ -37,10 +37,11 @@ public class FollowUpDataSnapshot {
     }
     
     public Optional<EffortHistoryRow> getLatestEffortRow() {
-        if (!getHistory().isPresent())
+        Optional<FollowUpDataSnapshotHistory> optHistory = getHistory();
+        if (!optHistory.isPresent())
             return Optional.empty();
         
-        List<EffortHistoryRow> historyRows = getHistory().get().getHistoryRows();
+        List<EffortHistoryRow> historyRows = optHistory.get().getHistoryRows();
         return Optional.of(historyRows.get(historyRows.size()-1));
     }
 

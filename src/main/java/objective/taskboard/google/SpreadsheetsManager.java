@@ -102,7 +102,7 @@ public class SpreadsheetsManager {
         while(true) {
             try {
                 return request.execute();
-            } catch (IOException e) {
+            } catch (IOException e) {//NOSONAR
                 long timeToWait = exec.nextBackOff();
                 if (timeToWait == BackOffExecution.STOP)
                     throw new SpreadsheeBackendException();

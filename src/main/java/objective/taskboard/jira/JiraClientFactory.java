@@ -71,7 +71,7 @@ public class JiraClientFactory {
         try {
             return new URI(jiraUrl);
         } catch (URISyntaxException e) {
-            throw new IllegalArgumentException(String.format("Jira URL '%s' is not valid.", jiraUrl));
+            throw new IllegalArgumentException(String.format("Jira URL '%s' is not valid.", jiraUrl), e);
         }
     }
 

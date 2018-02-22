@@ -90,7 +90,7 @@ public class JiraEndpoint {
     private void closeClient(JiraRestClient client) {
         try {
             client.close();
-        } catch (Exception e) {}
+        } catch (Exception e) { log.debug("Error when trying to close client. Ignored" ,e);}
     }
 
     public <S> S request(Class<S> service, String username, String password) {

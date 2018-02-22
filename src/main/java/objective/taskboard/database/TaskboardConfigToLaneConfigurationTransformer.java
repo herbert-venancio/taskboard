@@ -67,9 +67,7 @@ public class TaskboardConfigToLaneConfigurationTransformer {
                     step.setColor(stage.getColor());
                     final StepConfiguration stepConfiguration = getStepConfiguration(stageConfiguration, step);
 
-                    for (Filter filter : step.getFilters()) {
-                        issuesConfiguration(stepConfiguration, filter);
-                    }
+                    step.getFilters().stream().forEach(filter->issuesConfiguration(stepConfiguration, filter));
                 }
             }
         }
@@ -86,7 +84,7 @@ public class TaskboardConfigToLaneConfigurationTransformer {
                     Integer ordem = o2.getOrdem();
                     Integer ordem2 = o1.getOrdem();
                     return ordem2.compareTo(ordem);
-                } catch (Exception e) {
+                } catch (Exception e) {//NOSONAR
                     return 0;
                 }
 

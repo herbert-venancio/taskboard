@@ -32,6 +32,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import org.codehaus.jettison.json.JSONException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -63,7 +65,10 @@ import objective.taskboard.linkgraph.LinkGraphProperties;
 
 @RestController
 @RequestMapping("/ws/issues")
-public class IssueController {
+public class IssueController 
+{
+    private static final Logger log = LoggerFactory.getLogger(IssueController.class);
+    
     @Autowired
     private TaskboardDatabaseService taskService;
 
@@ -118,6 +123,7 @@ public class IssueController {
         try {
             return jiraBean.getTransitions(issueKey);
         } catch (PermissaoNegadaException e) {
+            log.debug("Could not fetch transitions", e);
             return Lists.newLinkedList();
         }
     }

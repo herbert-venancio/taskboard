@@ -89,7 +89,7 @@ public class StartDateStepService {
         List<ChangelogGroupDto> changelogStatus = newArrayList();
         for (ChangelogGroupDto changelogGroup : changelog)
             for (ChangelogItemDto changelogItem : changelogGroup.getItems())
-                if (changelogItem.getField().equals("status"))
+                if ("status".equals(changelogItem.getField()))
                     changelogStatus.add(new ChangelogGroupDto(changelogGroup.getAuthor(),
                                                            changelogGroup.getCreated(),
                                                            newArrayList(changelogItem)));

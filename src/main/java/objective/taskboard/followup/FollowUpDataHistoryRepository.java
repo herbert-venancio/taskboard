@@ -190,6 +190,8 @@ public class FollowUpDataHistoryRepository {
             if (history.isEmpty())
                 return Collections.emptyList();
         }
+        if (history == null)
+            return Collections.emptyList();
         
         return history.stream().sorted().collect(toList());
     }
@@ -201,7 +203,7 @@ public class FollowUpDataHistoryRepository {
         return new FromJiraDataSet(null, fromJiraDs.rows);
     }
 
-    private static <T> List<T> nullIfEmpty(List<T> list) {
+    private static <T> List<T> nullIfEmpty(List<T> list) {//NOSONAR - sonar has bug and thinks this method is not used
         return isEmpty(list) ? null : list;
     }
 

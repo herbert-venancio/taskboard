@@ -8,6 +8,7 @@ import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.IntStream;
@@ -27,10 +28,11 @@ public class FollowupProgressCalculator {
     public ProgressData calculate(FollowUpDataSnapshot followupData, LocalDate projectStartDate, LocalDate projectDeliveryDate, int projectionSampleSize) {
         ProgressData progressData = new ProgressData();
 
-        if (!followupData.getHistory().isPresent())
+        Optional<FollowUpDataSnapshotHistory> optHistory = followupData.getHistory();
+        if (!optHistory.isPresent())
             return progressData;
 
-        List<EffortHistoryRow> historyRows = getSortedHistory(followupData.getHistory().get());
+        List<EffortHistoryRow> historyRows = getSortedHistory(optHistory.get());
         if (historyRows.isEmpty()) 
             return progressData;
 

@@ -225,7 +225,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
             setDemandFields(followUpData, demand, timezone);
 
             followUpData.planningType = "Ballpark";
-            followUpData.project = demand.getProject();
+            followUpData.project = demand.getProject();//NOSONAR demand is never null here
             followUpData.tshirtSize = "M";
             followUpData.worklog = 0.0;
             followUpData.wrongWorklog = timeSpentInHour(demand);

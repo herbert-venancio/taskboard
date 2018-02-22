@@ -106,6 +106,7 @@ public class WipValidatorController {
             try {
                 issue = jiraService.getIssueByKeyAsMaster(issueKey);
             } catch (Exception e) {
+                log.error("Failed to fetch issue key to validate", e);
                 response.message = "Issue " + issueKey + " not found (" + (e.getMessage() == null ? e.toString() : e.getMessage()) + ")";
                 return new ResponseEntity<WipValidatorResponse>(response, PRECONDITION_FAILED);
             }
@@ -175,7 +176,7 @@ public class WipValidatorController {
 
             return new ResponseEntity<WipValidatorResponse>(response, OK);
         } catch (Exception e) {
-            log.error("Wip validation error", e);
+            log.error("Wip validation failed", e);
             response.message = e.getMessage() == null ? e.toString() : e.getMessage();
             return new ResponseEntity<WipValidatorResponse>(response, INTERNAL_SERVER_ERROR);
         }
@@ -190,6 +191,7 @@ public class WipValidatorController {
             JSONObject json = (JSONObject) fieldClassOfService.getValue();
             return json.getString("value").equals(CLASS_OF_SERVICE_EXPEDITE);
         } catch (JSONException e) {
+            log.error("Failure trying to check expedite class of service", e);
             return false;
         }
     }

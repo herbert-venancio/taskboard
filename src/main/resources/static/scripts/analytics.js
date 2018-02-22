@@ -26,7 +26,6 @@ function Analytics() {
     var CD_USER = 1;
 
     this.init = function (trackingSite, siteId) {
-        var self = this;
         (function () {
             var u = "//" + trackingSite + "/piwik/";
             _paq.push(['setTrackerUrl', u + 'piwik.php']);

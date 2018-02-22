@@ -51,4 +51,9 @@ public class FollowupDailySynthesis extends TaskboardEntity{
         return "FollowupDailySynthesis [id=" + id + ", projectId=" + projectId + ", followupDate=" + followupDate
                 + ", sumEffortDone=" + sumEffortDone + ", sumEffortBacklog=" + sumEffortBacklog + "]";
     }
+    
+    @Override
+    public boolean equals(Object o) {
+        return super.equals(o);
+    }
 }
