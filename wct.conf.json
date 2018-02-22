@@ -11,7 +11,8 @@
     "test/board-search-test.html",
     "test/searchFilter-test.html",
     "test/widget-cfd-test.html",
-    "test/widget-scope-progress-test.html"
+    "test/widget-scope-progress-test.html",
+    "test/dc-paperlist-test.html"
   ],
   "webserver": {
     "pathMappings": [

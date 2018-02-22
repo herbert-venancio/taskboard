@@ -1,0 +1,250 @@
+<!doctype html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+    <title>dc.js Paper Dropdown Menu Test</title>
+
+    <link rel="import" href="/static/bower_components/polymer/polymer.html">
+    <link rel="import" href="/static/bower_components/test-fixture/test-fixture.html">
+
+    <script src="/static/bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
+    <script src="/static/bower_components/web-component-tester/browser.js"></script>
+    <script src="/static/bower_components/test-fixture/test-fixture-mocha.js"></script>
+    <script src="/static/bower_components/iron-test-helpers/mock-interactions.js"></script>
+
+    <script src="/static/bower_components/jquery/dist/jquery.js"></script>
+
+    <!-- dependencies -->
+    <link rel="import" href="/static/bower_components/paper-radio-button/paper-radio-button.html">
+    <link rel="import" href="/static/bower_components/paper-checkbox/paper-checkbox.html">
+    <link rel="import" href="/static/bower_components/paper-listbox/paper-listbox.html">
+    <link rel="import" href="/static/bower_components/neon-animation/neon-animations.html">
+    <script src="/static/bower_components/crossfilter2/crossfilter.js"></script>
+    <script src="/static/bower_components/d3/d3.js"></script>
+    <script src="/static/bower_components/dcjs/dc.js"></script>
+
+    <!-- Import the element to test -->
+    <script src="/static/scripts/dc-paperlist.js"></script>
+
+</head>
+<body>
+
+    <test-fixture id="dc-list">
+        <template>
+            <div></div>
+        </template>
+    </test-fixture>
+
+    <script>
+
+        var async = function(callback, timeout) {
+            Polymer.Base.async(callback, timeout);
+        }
+
+        function findSelectAll(div) {
+            return $(div).find('paper-checkbox')[0];
+        }
+
+        function findPaperListBox(div) {
+            return $(div).find('paper-listbox.dc-paper-list')[0];
+        }
+
+        suite('<dc-paperlist>', function() {
+
+            function selectItem(paperListBox, index) {
+                return new Promise(
+                    function(resolve, reject) {
+                        var item = dcPaperList.multiple()
+                            ? Polymer.dom(paperListBox).querySelectorAll('paper-checkbox')[index]
+                            : Polymer.dom(paperListBox).querySelectorAll('paper-radio-button')[index]
+
+                        MockInteractions.tap(item);
+
+                        async(function() { resolve(item); }, 1);
+                    }
+                );
+            }
+
+            var div;
+            var ndx;
+            var dimension;
+            var group;
+            var dcPaperList;
+
+            teardown(function() {
+                if(dcPaperList) {
+                    dc.deregisterChart(dcPaperList);
+                }
+            });
+
+            suite('<sanity check>', function() {
+
+                setup(function() {
+                    div = fixture('dc-list');
+                    ndx = crossfilter(['a', 'b', 'c']);
+                    dimension = ndx.dimension(function(d) { return d; });
+                    group = dimension.group();
+                    dcPaperList = dc.paperList(div);
+                    dcPaperList.dimension(dimension);
+                    dcPaperList.group(group);
+                    dcPaperList.render();
+                });
+
+                test('dc.paperList loads correctly', function() {
+                    var list = findPaperListBox(div);
+                    assert.isNotNull(list, 'paper-listbox not found.');
+                    assert.isDefined(list.root, 'component should be defined.');
+                });
+
+            });
+
+            suite('<basic data binding>', function() {
+
+                setup(function() {
+                    div = fixture('dc-list');
+                    ndx = crossfilter(['a', 'a', 'b', 'c', 'c', 'c']);
+                    dimension = ndx.dimension(function(d) { return d; });
+                    group = dimension.group();
+                    dcPaperList = dc.paperList(div);
+                    dcPaperList.dimension(dimension);
+                    dcPaperList.group(group);
+                    dcPaperList.render();
+                });
+
+                test('dc.paperList create list items', function() {
+                    var list = findPaperListBox(div);
+
+                    var items = list.querySelectorAll('paper-radio-button');
+                    expect(items.length).to.be.equal(4);
+                    expect(items[0].innerText.trim()).to.be.equal('Select all');
+                    expect(items[1].innerText.trim()).to.be.equal('a: 2');
+                    expect(items[2].innerText.trim()).to.be.equal('b: 1');
+                    expect(items[3].innerText.trim()).to.be.equal('c: 3');
+                });
+
+                test('dc.paperList select invokes filtered', function(done) {
+                    var list = findPaperListBox(div);
+
+                    var called = false;
+                    dcPaperList.on("filtered", function(a, b, c) {
+                        called = true;
+                    });
+
+                    selectItem(list, 1)
+                        .then(function(firstItem) {
+                            expect(list.selectedItem).to.be.equal(firstItem);
+                            expect(list.selected).to.be.equal('a');
+                            expect(called).to.be.true;
+                            done();
+                        });
+                });
+
+                test('dc.paperList crossfilter.add reflects into list items', function() {
+                    var list = findPaperListBox(div);
+
+                    ndx.add(['d']);
+
+                    dcPaperList.redraw();
+
+                    var items = list.querySelectorAll('paper-radio-button');
+                    expect(items.length).to.be.equal(5);
+                    expect(items[0].innerText.trim()).to.be.equal('Select all');
+                    expect(items[1].innerText.trim()).to.be.equal('a: 2');
+                    expect(items[2].innerText.trim()).to.be.equal('b: 1');
+                    expect(items[3].innerText.trim()).to.be.equal('c: 3');
+                    expect(items[4].innerText.trim()).to.be.equal('d: 1');
+                });
+
+                test('dc.paperList crossfilter.remove reflects into list items', function() {
+                    var list = findPaperListBox(div);
+
+                    ndx.remove();
+
+                    dcPaperList.redraw();
+
+                    var items = list.querySelectorAll('paper-radio-button');
+                    expect(items.length).to.be.equal(1);
+                    expect(items[0].innerText.trim()).to.be.equal('Select all');
+                });
+            });
+
+            suite('multi-select', function() {
+                setup(function() {
+                    div = fixture('dc-list');
+                    ndx = crossfilter(['a', 'a', 'b', 'c', 'c', 'c']);
+                    dimension = ndx.dimension(function(d) { return d; });
+                    group = dimension.group();
+                    dcPaperList = dc.paperList(div);
+                    dcPaperList.dimension(dimension);
+                    dcPaperList.group(group);
+                    dcPaperList.multiple(true);
+                    dcPaperList.render();
+                });
+
+                test('dc.paperList select first + second', function(done) {
+                    var list = findPaperListBox(div);
+
+                    selectItem(list, 0)
+                        .then(selectItem(list, 1))
+                        .then(function() {
+                            expect(dcPaperList.filters().sort()).to.deep.equal(['a', 'b']);
+
+                            dcPaperList.redraw();
+
+                            expect(list.selectedValues.sort()).to.deep.equal(['a', 'b']);
+                            done();
+                        });
+                });
+
+                test('dc.paperList selectAll', function() {
+                    var selectAll = findSelectAll(div);
+                    var list = findPaperListBox(div);
+
+                    MockInteractions.tap(selectAll);
+
+                    expect(dcPaperList.filters().sort()).to.deep.equal(['a', 'b', 'c']);
+
+                    var items = list.querySelectorAll('paper-checkbox');
+                    expect(items.length).to.be.equal(3);
+                    expect(items[0].checked).to.be.true;
+                    expect(items[1].checked).to.be.true;
+                    expect(items[2].checked).to.be.true;
+
+                    MockInteractions.tap(selectAll);
+
+                    expect(dcPaperList.filters().sort()).to.deep.equal([]);
+
+                    var items = list.querySelectorAll('paper-checkbox');
+                    expect(items.length).to.be.equal(3);
+                    expect(items[0].checked).to.be.false;
+                    expect(items[1].checked).to.be.false;
+                    expect(items[2].checked).to.be.false;
+                });
+
+                test('dc.paperList change multiple then render should change list items', function() {
+                    var selectAll = findSelectAll(div);
+                    var list = findPaperListBox(div);
+                    var radio = list.querySelectorAll('paper-radio-button');
+                    var check = list.querySelectorAll('paper-checkbox');
+                    expect(selectAll).to.be.defined;
+                    expect(radio.length).to.be.equal(0);
+                    expect(check.length).to.be.equal(3);
+
+                    dcPaperList.multiple(false);
+                    dcPaperList.render();
+
+                    selectAll = findSelectAll(div);
+                    list = findPaperListBox(div);
+                    radio = list.querySelectorAll('paper-radio-button');
+                    check = list.querySelectorAll('paper-checkbox');
+                    expect(selectAll).to.be.undefined;
+                    expect(radio.length).to.be.equal(4);
+                    expect(check.length).to.be.equal(0);
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

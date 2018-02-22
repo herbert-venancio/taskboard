@@ -82,6 +82,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <script src="/static/bower_components/dcjs/dc.js"></script>
 
     <script src="/static/scripts/tb-pie-chart.js"></script>
+    <script src="/static/scripts/dc-paperlist.js"></script>
 
     <script src="/static/scripts/utils.js"></script>
     <script src="/static/scripts/dc-utils.js"></script>
@@ -216,6 +217,84 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         .tb-chart.dc-chart .axis path, .dc-chart .axis line,
         .tb-chart.dc-chart .pie-path {
             stroke: #8E8E8E;
+        }
+
+        /*
+         Issue List Filter
+        */
+        .tb-label {
+            color: #8E8E8E;
+            font-size: 14px;
+            font-weight: normal;
+            line-height: 18px;
+            margin-top: 0px;
+            margin-bottom: 16px;
+        }
+
+        .dc-chart--no-float {
+            float: none !important;
+        }
+
+        .filters-modal .dc-paper-list {
+            display: flex;
+            flex-direction: column;
+            background: transparent !important;
+        }
+
+        .filters-modal .dc-paper-item {
+            min-height: auto;
+            cursor: pointer;
+            padding: 0 10px;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .filters-modal .dc-paper-item--all {
+            padding-left: 0;
+        }
+
+        .filters-modal .dc-paper-item:first-child {
+            margin-top: 0px;
+        }
+
+        .filters-modal .dc-paper-item:hover {
+            background: #EEE;
+        }
+
+        .filters-modal .dc-paper-item #checkboxContainer {
+            width: 16px;
+            height: 16px;
+            min-width: initial;
+            flex: 0 0 auto;
+        }
+
+        .filters-modal .dc-paper-item #checkbox.paper-checkbox {
+            background-color: transparent;
+            border-color: #E4E4E4;
+            border-width: 1px;
+        }
+
+        .filters-modal .dc-paper-item #checkmark.paper-checkbox {
+            border-color: #000;
+            left: 2px;
+            top: 4px;
+            width: 18%;
+            height: 35%;
+        }
+
+        .filters-modal .dc-paper-item #checkboxLabel.paper-checkbox {
+            line-height: 20px;
+            font-size: 14px;
+            flex: 1;
+        }
+
+        .filters-modal .ok-button {
+            float: right;
+            background-color: #5DAFFF;
+            color: #FFFFFF;
+            font-size: 12px;
+            line-height: 15px;
         }
 
         /*

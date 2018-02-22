@@ -25,9 +25,15 @@
         <style>
         </style>
 
-        <widget-wrap title="CFD" is-ready="{{isReady}}" chart="{{chart}}" error-message="{{errorMessage}}">
+        <widget-wrap title="CFD" is-ready="{{isReady}}" options="{{options}}" chart="{{chart}}" error-message="{{errorMessage}}">
 
             <div id="cfd" class="tb-chart"></div>
+
+            <wrap-modal title="Filters" class="filters-modal">
+                <h3 class="tb-label">Issue Types</h3>
+                <div class="config-slot-0 dc-chart--no-float"></div>
+                <paper-button class="ok-button" on-tap="_closeFiltersModal">OK</paper-button>
+            </wrap-modal>
 
         </widget-wrap>
 
@@ -62,6 +68,10 @@
                         type: Object,
                         notify: true,
                         value: function() { return {}; }
+                    },
+                    options: {
+                        type: Array,
+                        readOnly: true
                     }
                 },
 
@@ -70,17 +80,25 @@
                 ],
 
                 ready: function() {
+                    this._setOptions([
+                        {
+                            icon:'taskboard-icons:dashboard-filter'
+                            , title: 'Filters'
+                            , tap: this._openFiltersModal.bind(this)
+                            , cssClasses: ''
+                        }
+                    ]);
                 },
 
                 _onProjectSelected: function(selectedProjectKey, selectedDate) {
                     this.loadCfdChart(selectedProjectKey);
                 },
-                
+
                 groupByDate: function(cfdData) {
                     var status = Object.keys(cfdData.dataByStatus).reverse();
                     var graphData = [];
                     // regroup based on date
-                    status.forEach(function(stat) { 
+                    status.forEach(function(stat) {
                         cfdData.dataByStatus[stat].forEach(function(d) {
                             graphData.push({
                                 date: new Date(d.date),
@@ -108,27 +126,27 @@
                         self.cfdData = self.groupByDate(cfdData);
                         var startDate = self.cfdData[0].date;
                         var endDate = self.cfdData[self.cfdData.length-1].date;
-                        
+
                         self.ndx = crossfilter(self.cfdData);
                         // the (run) dimension is the dimension on which dc will iterate and will become the "X" axis
                         self.cfdDim = self.ndx.dimension(function(d) {
                             return d.date;
                         });
-                        
+
                         function compose(p, v, signal){
                             if (!p.plotData)
                                 p.plotData = {}
-                            
+
                             if (!p.plotData[v.status])
                                 p.plotData[v.status] = 0;
-                            
+
                             p.plotData[v.status] += signal * v.count;
-                            return p; 
+                            return p;
                         }
-                        
+
                         self.cfdGroup = self.cfdDim.group()
                             .reduce(function(p, v) {
-                                    return compose(p, v, 1) 
+                                    return compose(p, v, 1)
                                 },
                                 function(p, v) {
                                     return compose(p, v, -1)
@@ -137,16 +155,17 @@
                                     return {plotData:{}};
                                 }
                             );
-                        
+
                         self.createChart(startDate, endDate);
-                        
+                        self.createIssueListFilter();
+
                         // function to access correct data for each stack
-                        function stackAccessor(status) { 
+                        function stackAccessor(status) {
                             return function(d) {
                                 return d.value.plotData[status];
                             };
                         }
-                        
+
                         var xScale = d3.time.scale().domain([startDate, endDate]);
                         self.chart
                             .dimension(self.cfdDim)
@@ -155,11 +174,11 @@
 
                         status.forEach(function(stat) {
                             // stackTitle(stat) generates a callback to generate the label for points in this stack
-                            self.chart.title(stat, function (d){  
+                            self.chart.title(stat, function (d){
                                 var label = d.key.toLocaleDateString() + "\n\n";
                                 var total = 0;
                                 label +="** " + stat +": "+d.value.plotData[stat]+ " **\n";
-                                Object.keys(d.value.plotData).forEach(function(key) {
+                                Object.keys(d.value.plotData).reverse().forEach(function(key) {
                                     if (key !== stat)
                                         label += key+": "+d.value.plotData[key]+ "\n";
                                     total += d.value.plotData[key];
@@ -167,18 +186,24 @@
                                 return label+="\nTotal: " + total;
                             });
                         });
-                        
+
                         // remove the first status because it was already added in the "group" invocation above
                         status = status.splice(1);
-                        
+
                         // add the other stacks, one for each remaining status
                         status.forEach(function(stat) {
                             // stack the status data; stackAccessor(stat) generates a callback that tells dc how to read this stack data
                             self.chart.stack(self.cfdGroup, stat, stackAccessor(stat))
                         });
-                            
+
+                        self.chart.__legendables = self.chart.legendables;
+                        self.chart.legendables = function() {
+                            var items = self.chart.__legendables();
+                            return items.reverse();
+                        };
+
                         self.chart.render();
-                        
+
                         self.isReady = true;
                     });
                 },
@@ -186,6 +211,7 @@
                 reset: function() {
                     this.set('isReady', false);
                     this.set('errorMessage', '');
+                    this.set('options.0.cssClasses', '');
 
                     if (this.xhr) {
                         this.xhr.abort();
@@ -194,6 +220,10 @@
                     if (!_.isEmpty(this.chart)) {
                         dc.deregisterChart(this.chart);
                         this.set('chart', {});
+                    }
+                    if (this.issueListFilter) {
+                        dc.deregisterChart(this.issueListFilter);
+                        delete this.issueListFilter;
                     }
                 },
 
@@ -209,7 +239,7 @@
 
                     return false;
                 },
-                
+
                 createChart: function(startDate, endDate) {
                     var chart = dc.lineChart("#cfd");
 
@@ -237,6 +267,46 @@
                     dcUtils.rotateDateFormattedXAxis(chart);
 
                     this.set('chart', chart);
+                },
+
+                createIssueListFilter: function() {
+                    var div = this.$$('.config-slot-0');
+                    var list = dc.paperList(div);
+
+                    this.typeDim = this.ndx.dimension(function(d) {
+                        return d.issueType;
+                    });
+                    this.typeGroup = this.typeDim.group();
+
+                    list
+                        .dimension(this.typeDim)
+                        .group(this.typeGroup)
+                        .multiple(true)
+                        .title(function(d) {
+                            return d.key;
+                        })
+                        .promptValue('-none-')
+                        .promptText('All Issues');
+
+                    var all = list.data().map(list.keyAccessor());
+                    list.replaceFilter([all]);
+
+                    list.render();
+
+                    var highlightButton = function() {
+                        this.set('options.0.cssClasses', list.isAllSelected() ? '' : 'widget__button_highlighted');
+                    }.bind(this);
+                    list.on('filtered', highlightButton);
+
+                    this.issueListFilter = list;
+                },
+
+                _openFiltersModal: function() {
+                    this.$$('.filters-modal').open();
+                },
+
+                _closeFiltersModal: function() {
+                    this.$$('.filters-modal').close();
                 }
             });
         })();

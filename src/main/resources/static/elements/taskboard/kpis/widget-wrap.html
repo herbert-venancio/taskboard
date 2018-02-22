@@ -89,8 +89,21 @@
                 display: flex;
             }
 
+            .widget__option {
+                margin-left: 16px;
+            }
+
+            .widget__button {
+                display: flex;
+                width: 32px;
+                height: 32px;
+            }
+
+            .widget__button_highlighted {
+                color: #FFF;
+            }
+
             .widget__reset {
-                margin-left: auto;
                 cursor: pointer;
                 color: inherit;
                 display: block;
@@ -142,11 +155,6 @@
                 text-align: center;
                 color: #8E8E8E;
             }
-
-            .widget__options .icon {
-                height: 36px;
-                width: 36px;
-            }
         </style>
 
         <paper-spinner class="loader active" active="true"></paper-spinner>
@@ -155,17 +163,18 @@
             <header class="widget__header">
                 <h3 class="widget__title">[[title]]</h3>
                 <div class="widget__options">
-                    <template is="dom-if" if="{{options}}">
-                        <paper-icon-button icon="taskboard-icons:settings"
-                            title="Chart settings"
-                            class="widget__settings icon"
-                            on-tap="_onTapOptions"></paper-icon-button>
+                    <template is="dom-if" if="{{!errorMessage}}">
+	                    <template is="dom-repeat" items="{{options}}" as="option">
+	                        <paper-icon-button icon="{{option.icon}}"
+	                            title="{{option.title}}"
+	                            class$="widget__button widget__option {{option.cssClasses}}"
+	                            on-tap="_onOptionTap"></paper-icon-button>
+	                    </template>
                     </template>
                     <template is="dom-if" if="{{_isChartFiltered}}">
-                        <a class="widget__reset" on-tap="_onTapReset">Reset</a>
+                        <a class="widget__reset widget__option" on-tap="_onTapReset">Reset</a>
                     </template>
                 </div>
-
             </header>
             <div class="widget__body">
                 <template is="dom-if" if="{{!errorMessage}}">
@@ -180,7 +189,6 @@
                 </template>
             </div>
         </section>
-
     </template>
 
     <script>
@@ -205,12 +213,19 @@
                         type: Boolean,
                         value: false
                     },
+                    hasFilter: {
+                        type: Boolean,
+                        value: false,
+                        readOnly: true,
+                        notify: true
+                    },
                     errorMessage: {
                         type: String,
                         notify: true,
                         value: ''
                     },
                     options: {
+                        type: Array
                     }
                 },
 
@@ -233,15 +248,10 @@
                 },
 
                 _onTapReset: function() {
-                    dc.refocusAll();
-                    dc.filterAll();
+                    this.chart.filterAll();
                     dc.renderAll();
                     dc.redrawAll();
                 },
-
-                _onTapOptions: function() {
-                    this.options.tap();
-                 },
 
                 _onChartChanged: function(chart) {
                     this.set('_isChartFiltered', false);
@@ -278,6 +288,10 @@
                     }, 300);
                 },
 
+                _onOptionTap: function(event) {
+                    var callback = event.model.get('option.tap');
+                    callback();
+                }
             });
         })();
     </script>
