@@ -61,7 +61,7 @@ class SizingImportValidator {
 
         try {
             sheetsTitles = context.spreadsheetsManager.getSheetsTitles(context.spreadsheetId);
-        } catch (SpreadsheeNotFoundException ex) {
+        } catch (SpreadsheeNotFoundException ex) {//NOSONAR
             return ValidationResult.fail("Spreadsheet canot be found. Please check the URL.");
         }
 

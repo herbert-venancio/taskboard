@@ -33,17 +33,17 @@ public class JiraServiceException extends RuntimeException {
 
     private static final long serialVersionUID = 4426760513185384513L;
     
-    private final Optional<HttpStatus> statusCode;
+    private final HttpStatus statusCode;
 
     public JiraServiceException(RestClientException cause) {
         super(trataMensagemRestClientException(cause), cause);
         this.statusCode = cause.getStatusCode().isPresent() ? 
-                Optional.of(HttpStatus.valueOf(cause.getStatusCode().get())) : 
-                Optional.empty();
+                HttpStatus.valueOf(cause.getStatusCode().get()) : 
+                null;
     }
 
     public Optional<HttpStatus> getStatusCode() {
-        return statusCode;
+        return Optional.ofNullable(statusCode);
     }
     
     private static String trataMensagemRestClientException(RestClientException ex) {

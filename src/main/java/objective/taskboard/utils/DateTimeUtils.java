@@ -101,7 +101,7 @@ public class DateTimeUtils {
     public static ZoneId determineTimeZoneId(String zoneId) {
         try {
             return ZoneId.of(zoneId);
-        } catch (Exception e) {
+        } catch (Exception e) {//NOSONAR
             return ZoneId.systemDefault();
         }
     }

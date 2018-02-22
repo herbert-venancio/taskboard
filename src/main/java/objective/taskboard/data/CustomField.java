@@ -28,17 +28,17 @@ public class CustomField implements Serializable {
 
     private String name;
 
-    private Object value;
+    private Serializable value;
 
     private Long optionId;
 
-    public CustomField(String name, Object value, Long optionId) {
+    public CustomField(String name, Serializable value, Long optionId) {
         this.name = name;
         this.value = value;
         this.optionId = optionId;
     }
 
-    public CustomField(String name, Object value) {
+    public CustomField(String name, Serializable value) {
         this.name = name;
         this.value = value;
     }
@@ -59,7 +59,7 @@ public class CustomField implements Serializable {
         this.name = name;
     }
 
-    public void setValue(final Object value) {
+    public void setValue(final Serializable value) {
         this.value = value;
     }
 

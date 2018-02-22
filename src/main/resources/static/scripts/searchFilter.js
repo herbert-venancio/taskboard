@@ -41,7 +41,7 @@ function SearchFilter() {
             return true;
     }
 
-    var matchByString = function(issue, searchString) {
+    function matchByString(issue, searchString) {//NOSONAR
         if (!searchString)
             return true;
 
@@ -64,9 +64,9 @@ function SearchFilter() {
             return true;
 
         return false;
-    };
+    }
 
-    var matchByAttribute = function(attribute, search) {
+    function matchByAttribute(attribute, search) {
         if (!Array.isArray(attribute))
             attribute = [ attribute ];
 
@@ -76,16 +76,16 @@ function SearchFilter() {
                 return true;
         }
         return false;
-    };
+    }
 
-    var matchByRelease = function(issue, releaseId) {
+    function matchByRelease(issue, releaseId) {
         if (!releaseId)
             return true;
 
         return issue.releaseId && issue.releaseId == releaseId;
-    };
+    }
 
-    var matchByKey = function(issue) {
+    function matchByKey(issue) {
         var allEmpty = true;
         // may receive an arbitrary number of arguments
         for (var i = 1; i < arguments.length; ++i) {
@@ -99,7 +99,7 @@ function SearchFilter() {
         }
         // if all keys are empty, return as matched
         return allEmpty;
-    };
+    }
 
     this.updateFilter = function(source, change) {
         jQuery.extend(searchData, change)

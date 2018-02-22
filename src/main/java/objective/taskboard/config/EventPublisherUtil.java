@@ -41,7 +41,7 @@ public class EventPublisherUtil implements ApplicationContextAware {
     public ApplicationEventPublisher ep;
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+    public synchronized void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         staticEventPublisher = ep;
     }
 

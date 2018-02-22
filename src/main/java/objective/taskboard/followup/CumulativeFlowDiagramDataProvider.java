@@ -56,7 +56,7 @@ public class CumulativeFlowDiagramDataProvider {
             for (SyntheticTransitionsDataRow row : ds.rows) {
                 for (int rowIndex = row.amountOfIssueInStatus.size() - 1; rowIndex >= 0; --rowIndex) {
                     String status = ds.headers.get(rowIndex + initial);
-                    if (!dataByStatus.containsKey(status))
+                    if (!dataByStatus.containsKey(status))//NOSONAR
                         dataByStatus.put(status, new LinkedList<CumulativeFlowDiagramDataPoint>());
                     
                     int count = row.amountOfIssueInStatus.get(rowIndex);

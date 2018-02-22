@@ -31,7 +31,7 @@ import objective.taskboard.issueBuffer.IssueBufferService;
 @Component
 public class RefreshIssueBufferTask implements ApplicationListener<ContextRefreshedEvent> {
 
-    private static final long RATE_MILISECONDS = 60 * 1000;
+    private static final long RATE_MILISECONDS = 60 * 1000L;
 
     @Autowired
     private IssueBufferService issueBufferService;

@@ -66,11 +66,11 @@ public class DefaultTemplateService implements TemplateService{
             template.setPath(path);
 
         Template templateWithSameName = getTemplate(template.getName());
-        if (templateWithSameName != null && templateWithSameName.getId() != template.getId())
+        if (templateWithSameName != null && !templateWithSameName.getId().equals(template.getId()))
             throw new RuntimeException("This template name is already in use");
         
         Template templateWithTheSameProjectKey = findATemplateOnlyMatchedWithThisProjectKey(projectKeys);
-        if (templateWithTheSameProjectKey != null && templateWithTheSameProjectKey.getId() != template.getId())
+        if (templateWithTheSameProjectKey != null && !templateWithTheSameProjectKey.getId().equals(template.getId()))
             throw new RuntimeException("This match of projects is already used by other template");
         
         templateRepository.save(template);

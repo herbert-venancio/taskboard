@@ -138,7 +138,7 @@ public class ProjectController {
                     continue;
                 }
                 Optional<ProjectTeam> projectXteam = projectTeamsThatAreNotInTheRequest.stream()
-                        .filter(pt -> pt.getTeamId() == team.getId())
+                        .filter(pt -> pt.getTeamId().equals(team.getId()))
                         .findFirst();
                 
                 if (projectXteam.isPresent()) 
@@ -190,9 +190,10 @@ public class ProjectController {
 
     @RequestMapping(value = "{projectKey}/configuration", method = RequestMethod.POST, consumes = "application/json")
     public ResponseEntity<Object> updateProjectConfiguration(@PathVariable("projectKey") String projectKey, @RequestBody ProjectConfigurationData data) {
-        Optional<ProjectFilterConfiguration> configuration = projectRepository.getProjectByKey(projectKey);
-        if (!configuration.isPresent())
-            ResponseEntity.notFound().build();
+        Optional<ProjectFilterConfiguration> optConfiguration = projectRepository.getProjectByKey(projectKey);
+        if (!optConfiguration.isPresent())
+            return ResponseEntity.notFound().build();
+        ProjectFilterConfiguration configuration = optConfiguration.get();
 
         if (data.startDate == null || data.deliveryDate == null)
             return ResponseEntity.badRequest().body("{\"message\" : \"The dates are required\"}");
@@ -208,10 +209,10 @@ public class ProjectController {
         if (startDate.isAfter(deliveryDate))
             return ResponseEntity.badRequest().body("{\"message\" : \"End Date should be greater than Start Date\"}");
 
-        configuration.get().setStartDate(startDate);
-        configuration.get().setDeliveryDate(deliveryDate);
+        configuration.setStartDate(startDate);
+        configuration.setDeliveryDate(deliveryDate);
 
-        projectRepository.save(configuration.get());
+        projectRepository.save(configuration);
 
         cacheManager.getCache(CacheConfiguration.DASHBOARD_PROGRESS_DATA).clear();
 
@@ -220,13 +221,14 @@ public class ProjectController {
 
     @RequestMapping(value = "{projectKey}/configuration", method = RequestMethod.GET)
     public ResponseEntity<ProjectConfigurationData> getProjectConfiguration(@PathVariable("projectKey") String projectKey) {
-        Optional<ProjectFilterConfiguration> configuration = projectRepository.getProjectByKey(projectKey);
-        if (!configuration.isPresent())
-            ResponseEntity.notFound().build();
+        Optional<ProjectFilterConfiguration> optConfiguration = projectRepository.getProjectByKey(projectKey);
+        if (!optConfiguration.isPresent())
+            return ResponseEntity.notFound().build();
 
+        ProjectFilterConfiguration projectFilterConfiguration = optConfiguration.get();
         ProjectConfigurationData data = new ProjectConfigurationData();
-        data.startDate = configuration.get().getStartDate() != null ? configuration.get().getStartDate().toString() : "";
-        data.deliveryDate = configuration.get().getDeliveryDate() != null ? configuration.get().getDeliveryDate().toString() : "";
+        data.startDate = projectFilterConfiguration.getStartDate() != null ? projectFilterConfiguration.getStartDate().toString() : "";
+        data.deliveryDate = projectFilterConfiguration.getDeliveryDate() != null ? projectFilterConfiguration.getDeliveryDate().toString() : "";
 
         return ResponseEntity.ok(data);
     }

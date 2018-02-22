@@ -51,7 +51,7 @@ public class FollowUpScopeByTypeController {
         ZoneId zoneId = isEmpty(timezone) ? ZoneId.systemDefault() : ZoneId.of(timezone);
         try {
             return new ResponseEntity<>(provider.getScopeByTypeData(projectKey, date, zoneId), OK);
-        }catch(FrontEndMessageException e) {
+        }catch(FrontEndMessageException e) {//NOSONAR
             return new ResponseEntity<>(e.getMessage(), INTERNAL_SERVER_ERROR);
         }
     }

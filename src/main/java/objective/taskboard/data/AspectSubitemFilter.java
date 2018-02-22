@@ -25,10 +25,7 @@ import java.util.List;
 
 import objective.taskboard.jira.data.Version;
 
-public class AspectSubitemFilter implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
+public class AspectSubitemFilter {
     private String name;
     private Object value;
     private boolean selected;
@@ -72,7 +69,7 @@ public class AspectSubitemFilter implements Serializable {
         this.name = name;
     }
 
-    public void setValue(final Object value) {
+    public void setValue(final Serializable value) {
         this.value = value;
     }
 

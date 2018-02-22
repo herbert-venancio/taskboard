@@ -74,17 +74,17 @@ function Taskboard() {
         issuesBySteps = new Object()
 
         var steps = self.getAllSteps()
-        for (s in steps) {
+        for (var s in steps) {
             var step = steps[s]
             var filters = step.issuesConfiguration
-            var issuesByStep = new Array()
+            var issuesByStep = []
 
-            for (f in filters) {
+            for (var f in filters) {
                 var filter = filters[f]
 
-                for (i in issues) {
+                for (var i in issues) {
                     var issue = issues[i]
-                    if (filter.issueType == issue.type && filter.status == issue.status)
+                    if (filter.issueType == issue.type && filter.status == issue.status)//NOSONAR
                         issuesByStep.push(issue)
                 }
             }
@@ -97,11 +97,11 @@ function Taskboard() {
         if (!issue.visible) return null;
 
         var steps = self.getAllSteps()
-        for (s in steps) {
+        for (var s in steps) {
             var step = steps[s]
             var filters = step.issuesConfiguration
 
-            for (f in filters) {
+            for (var f in filters) {
                 var filter = filters[f]
 
                 if (filter.issueType == issue.type && filter.status == issue.status)
@@ -136,9 +136,9 @@ function Taskboard() {
 
     this.getAllSteps = function() {
         var steps = new Array()
-        for(laneIndex in this.laneConfiguration) {
+        for(var laneIndex in this.laneConfiguration) {
             var lane = this.laneConfiguration[laneIndex]
-            for(stageIndex in lane.stages) {
+            for(var stageIndex in lane.stages) {
                 steps = steps.concat(lane.stages[stageIndex].steps)
             }
         }
@@ -150,7 +150,7 @@ function Taskboard() {
             for(var stage = 0; stage < this.laneConfiguration[lane].stages.length; stage++)
                 for(var step = 0; step < this.laneConfiguration[lane].stages[stage].steps.length; step++) {
                     var cStep = this.laneConfiguration[lane].stages[stage].steps[step];
-                    if(cStep.id == stepId)
+                    if(cStep.id == stepId)//NOSONAR
                         return cStep.issuesConfiguration;
                 }
         return null;
@@ -331,13 +331,13 @@ function Taskboard() {
 
     this.connectToWebsocket = function(taskboardHome) {
         var socket = new SockJS('/taskboard-websocket');
-        stompClient = Stomp.over(socket);
+        var stompClient = Stomp.over(socket);
         stompClient.debug = function(message) {
             if(!message || message.indexOf('PING') > -1 || message.indexOf('PONG') > -1)
                 return;
             console.log(message);
         };
-        stompClient.connect({}, function (frame) {
+        stompClient.connect({}, function () {
             stompClient.subscribe('/topic/issues/updates', function (issues) {
                 handleIssueUpdate(taskboardHome, issues)
             });

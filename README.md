@@ -84,6 +84,12 @@ There are many ways to do that. See [Spring Boot External Config](http://docs.sp
 2. Execute main on class `objective.taskboard.Application`.  
 The application will be available on: [http://localhost:8080/](http://localhost:8080/)
 
+### Sonar
+
+To generate the sonar report locally, run the following command:
+
+mvn sonar:sonar -Dsonar.host.url=http://sonar-sdlc -Dsonar.analysis.mode=preview -Dsonar.issuesReport.html.enable=true -Dsonar.issuesReport.console.enable=true
+
 #### Production Mode
 
 1. Configure the empty properties on `src/main/resources/application-prod.properties`.\

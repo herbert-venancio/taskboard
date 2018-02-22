@@ -33,6 +33,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+
 import com.google.common.collect.Lists;
 
 import objective.taskboard.jira.JiraService;
@@ -41,7 +42,6 @@ import objective.taskboard.jira.JiraService;
 @Configuration
 @Order(SecurityProperties.ACCESS_OVERRIDE_ORDER)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
-
     @Autowired
     private RESTAuthenticationFailureHandler authenticationFailureHandler;
     @Autowired
@@ -77,7 +77,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
                 try {
                     jiraService.authenticate(name, password);
-                }catch(Exception e) {
+                }catch(Exception e) {//NOSONAR
                     throw new BadCredentialsException(e.getMessage());
                 }
                 return new UsernamePasswordAuthenticationToken(name, password, Lists.newArrayList());

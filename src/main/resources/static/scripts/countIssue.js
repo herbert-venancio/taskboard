@@ -19,8 +19,6 @@
  * [/LICENSE]
  */
 function CountIssue() {
-    var self = this;
-
     function getElementsName(obj) {
         var result = [];
         for (var elementName in obj) {

@@ -53,7 +53,7 @@ public class ProjectFilterConfiguration implements Serializable {
     private LocalDate startDate;
 
     @Column
-    private LocalDate deliveryDate;
+    private LocalDate deliveryDate;//NOSONAR
 
     public Integer getId() {
         return id;
