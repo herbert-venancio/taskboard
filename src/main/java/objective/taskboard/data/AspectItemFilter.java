@@ -29,7 +29,7 @@ public class AspectItemFilter implements Serializable {
 
     private String description;
     private String field;
-    private List<AspectSubitemFilter> aspectsSubitemFilter;
+    private List<AspectSubitemFilter> aspectsSubitemFilter;//NOSONAR
 
     public static AspectItemFilter from(String description, String field, List<AspectSubitemFilter> aspectsSubitemFilter) {
         return new AspectItemFilter(description, field, aspectsSubitemFilter);

@@ -50,7 +50,7 @@ public class ProjectFilterConfiguration implements Serializable {
     private String projectKey;
     
     @Column
-    private LocalDate startDate;
+    private LocalDate startDate;//NOSONAR
 
     @Column
     private LocalDate deliveryDate;//NOSONAR
