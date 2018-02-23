@@ -84,13 +84,18 @@
                 font-family: 'ptsans-bold', Verdana, Arial, Helvetica, sans-serif;
             }
 
+            .widget__tag {
+                background-color: #666;
+                color: #FFF;
+                border-radius: 4px;
+                font-size: 10px;
+                padding: 2px 6px;
+                margin-left: 12px;
+            }
+
             .widget__options {
                 margin-left: auto;
                 display: flex;
-            }
-
-            .widget__option {
-                margin-left: 16px;
             }
 
             .widget__button {
@@ -162,14 +167,17 @@
         <section class="widget">
             <header class="widget__header">
                 <h3 class="widget__title">[[title]]</h3>
+                <template is="dom-repeat" items="{{tags}}" as="tag">
+                    <span class="widget__tag">[[tag]]</span>
+                </template>
                 <div class="widget__options">
-                    <template is="dom-if" if="{{!errorMessage}}">
-	                    <template is="dom-repeat" items="{{options}}" as="option">
-	                        <paper-icon-button icon="{{option.icon}}"
-	                            title="{{option.title}}"
-	                            class$="widget__button widget__option {{option.cssClasses}}"
-	                            on-tap="_onOptionTap"></paper-icon-button>
-	                    </template>
+                    <template is="dom-repeat" items="{{options}}" as="option">
+                        <template is="dom-if" if="{{!option.hidden}}">
+                            <paper-icon-button icon="{{option.icon}}"
+                                title="{{option.title}}"
+                                class$="widget__button {{option.cssClasses}}"
+                                on-tap="_onOptionTap"></paper-icon-button>
+                        </template>
                     </template>
                     <template is="dom-if" if="{{_isChartFiltered}}">
                         <a class="widget__reset widget__option" on-tap="_onTapReset">Reset</a>
@@ -223,6 +231,9 @@
                         type: String,
                         notify: true,
                         value: ''
+                    },
+                    tags: {
+                        type: Array
                     },
                     options: {
                         type: Array
