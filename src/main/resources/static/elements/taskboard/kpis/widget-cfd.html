@@ -27,7 +27,7 @@
 
         <widget-wrap title="CFD" is-ready="{{isReady}}" tags="{{tags}}" options="{{options}}" chart="{{chart}}" error-message="{{errorMessage}}">
 
-            <div id="cfd" class="tb-chart"></div>
+            <div id="cfd" title="Double click to enter selection mode" class="tb-chart"></div>
 
             <wrap-modal title="Filters" class="filters-modal">
                 <h3 class="tb-label">Issue Types</h3>
@@ -107,6 +107,12 @@
                 ready: function() {
                     this._setOptions([
                         {
+                            icon:'taskboard-icons:dashboard-view-mode'
+                            , title: 'Toggle View/Selection mode'
+                            , tap: this.toggleSelectionViewMode.bind(this)
+                            , cssClasses: ''
+                        },
+                        {
                             icon:'taskboard-icons:dashboard-filter'
                             , title: 'Filters'
                             , tap: this._openFiltersModal.bind(this)
@@ -116,8 +122,10 @@
                             icon: 'taskboard-icons:settings'
                             , title: 'Settings'
                             , tap: this._openSettingsModal.bind(this)
+                            , cssClasses: ''
                         }
                     ]);
+                    this.widgetList = [];
                 },
 
                 _onProjectSelected: function() {
@@ -243,8 +251,8 @@
                 reset: function() {
                     this.set('isReady', false);
                     this.set('errorMessage', '');
-                    this.set('options.0.cssClasses', '');
-                    this.set('options.0.hidden', true);
+                    this.set('options.1.cssClasses', '');
+                    this.set('options.1.hidden', true);
 
                     if (this.xhr) {
                         this.xhr.abort();
@@ -274,6 +282,7 @@
                 },
 
                 createChart: function(startDate, endDate) {
+                    var self = this;
                     var chart = dc.lineChart("#cfd");
 
                     // basic chart configuration
@@ -289,21 +298,118 @@
                         .brushOn(false)       // don't select with drag-n-drop
                         .mouseZoomable(false)  // zoom with mouse wheel
                         .elasticY(true)       // y axis will adjust to the data
-                        .xAxis()
-                            .tickValues(
-                                dcUtils.getDateTicks(startDate, endDate, 14)
-                            )
-                            .tickFormat(function(v) {
-                                return dcUtils.dateFormat(v);
-                            });
+
+                    setupChartDateTicks(chart, startDate, endDate, 14);
 
                     dcUtils.rotateDateFormattedXAxis(chart);
 
+                    chart.addChartWidget = function(c){
+                        self.widgetList.push(c)
+                    }
+
+                    var brushOnDelegate = chart.brushOn;
+                    chart.brushOn = function(state) {
+                        if (arguments.length > 0) {
+                            self.setupViewMode(state);
+                            return brushOnDelegate(state);
+                        }
+
+                        return brushOnDelegate();
+                    }
+
+                    chart.on('filtered', this.setupSelector.bind(this));
+                    
+                    $("#cfd").dblclick(this.toggleSelectionViewMode.bind(this));
+
                     this.set('chart', chart);
+                    this.fire("iron-signal", {name:"cfd-created", data:{
+                        cfdChartInstance: chart
+                    }})
+                    this.needsSetup = true;
+                    this.startDate = startDate;
+                    this.endDate = endDate;
+                    this.setupViewMode(false);
+                },
+
+                toggleSelectionViewMode: function() {
+                    if (this.needsSetup) {
+                        this.needsSetup = false;
+                        var timeSpan = this.endDate - this.startDate;
+                        var filterStart = new Date(this.startDate.getTime() + timeSpan/3)
+                        var filterEnd   = new Date(this.endDate.getTime() - timeSpan/3)
+                        this.chart.filter([filterStart, filterEnd])
+                    }
+
+                    this.chart.brushOn(!this.chart.brushOn());
+                    this.chart.render();
+                    this.setupSelector(this.chart)
+                },
+                
+                setupViewMode: function(state) {
+                    if (state) {
+                        $("#cfd").prop("title", "Double click to go back to view mode")
+                        this.set('options.0.cssClasses', 'widget__button_highlighted');
+                    }
+                    else { 
+                        $("#cfd").prop("title", "Double click to enter selection mode")
+                        this.set('options.0.cssClasses', '');
+                    }
+                },
+                
+                setupSelector: function(rangeChart) {
+                    if (!rangeChart.filter() || !rangeChart.brushOn())
+                        this.resetSelection(rangeChart)
+                    else
+                        this.applySelection(rangeChart);
+                },
+
+                applySelection: function(rangeChart) {
+                    this.widgetList.forEach(function(w) {
+                        var focusChart = w.chart;
+                        if (!rangesEqual(rangeChart.filter(), focusChart.filter())) {
+                            dc.events.trigger(function () {
+                                focusChart.focus(rangeChart.filter());
+
+                                var od = focusChart.xOriginalDomain();
+                                // recalculate tick count so we have a better resolution of dates when focused
+                                var tickCount = focusChart.visibleTickCount * ((od[od.length-1] - od[0])/ 
+                                         (rangeChart.filter()[1]-rangeChart.filter()[0]));
+                                tickCount = Math.round(tickCount);
+
+                                if (focusChart.tickCount && focusChart.tickCount != tickCount) {
+                                    focusChart
+                                        .xAxis()
+                                        .tickValues(dcUtils.getDateTicks(od[0], od[od.length-1], tickCount));
+                                    focusChart.render();
+                                }
+                                focusChart.tickCount = tickCount;
+                            });
+                        }
+                    });
+                },
+
+                resetSelection: function(rangeChart) {
+                    var self = this;
+                    var chart = this.chart;
+                    dc.events.trigger(function () {
+                        self.widgetList.forEach(function(w) {
+                            var focusChart = w.chart;
+                            var od = focusChart.xOriginalDomain();
+                            focusChart.x().domain(od);
+                            focusChart.focus([od[0], od[od.length-1]])
+                            focusChart
+                                .xAxis()
+                                .tickValues(
+                                    dcUtils.getDateTicks(od[0], od[od.length-1], 14)
+                                );
+                            focusChart.tickCount = 14;
+                            focusChart.render();
+                        });
+                    });
                 },
 
                 createIssueListFilter: function() {
-                    this.set('options.0.hidden', false);
+                    this.set('options.1.hidden', false);
                     var div = this.$$('.config-slot-0');
                     var list = dc.paperList(div);
 
@@ -328,7 +434,7 @@
                     list.render();
 
                     var highlightButton = function() {
-                        this.set('options.0.cssClasses', list.isAllSelected() ? '' : 'widget__button_highlighted');
+                        this.set('options.1.cssClasses', list.isAllSelected() ? '' : 'widget__button_highlighted');
                     }.bind(this);
                     list.on('filtered', highlightButton);
 

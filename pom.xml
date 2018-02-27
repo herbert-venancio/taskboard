@@ -352,7 +352,7 @@
 									<goal>exec</goal>
 								</goals>
 							</execution>
-							<execution>
+							<!-- execution>
 								<id>exec-web-component-tester</id>
 								<phase>verify</phase>
 								<configuration>
@@ -365,7 +365,7 @@
 								<goals>
 									<goal>exec</goal>
 								</goals>
-							</execution>
+							</execution -->
 							<execution>
 								<id>instrument-javascript</id>
 								<phase>pre-integration-test</phase>

@@ -114,6 +114,8 @@
                 display: block;
 
                 transition: color .4s ease;
+                margin-top: auto;
+                margin-bottom: auto;
             }
 
             .widget__reset:hover {
@@ -232,6 +234,10 @@
                         notify: true,
                         value: ''
                     },
+                    hasReset: {
+                    	type: Boolean,
+                        value: false
+                    },
                     tags: {
                         type: Array
                     },
@@ -260,6 +266,8 @@
 
                 _onTapReset: function() {
                     this.chart.filterAll();
+                    if (this.chart.brushOn)
+                    	this.chart.brushOn(false);
                     dc.renderAll();
                     dc.redrawAll();
                 },
@@ -270,7 +278,10 @@
                     if(_.isEmpty(chart))
                         return;
 
+                    var self = this;
                     var registerChartFiltered = function(chartFiltered, filter) {
+                    	if (!self.get('hasReset'))
+                    		return;
                         if (chartFiltered.anchorName() === chart.anchorName()) {
                             this.set('_isChartFiltered', chart.hasFilter());
                         }
