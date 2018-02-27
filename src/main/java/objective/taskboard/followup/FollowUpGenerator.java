@@ -64,7 +64,7 @@ public class FollowUpGenerator {
             updateTimelineDates(followupDataEntry.getDate());
             generateFromJiraSheet(followupData);
             generateTransitionsSheets(followupData);
-            generateEffortHistory(followupDataEntry, timezone);
+            generateEffortHistory(followupDataEntry);
             generateTShirtSizeSheet(followupDataEntry);
             generateWorklogSheet(followupData, timezone);
 
@@ -345,7 +345,7 @@ public class FollowUpGenerator {
         return sheet;
     }
     
-    void generateEffortHistory(FollowUpDataSnapshot followUpDataEntry, ZoneId timezone) {
+    void generateEffortHistory(FollowUpDataSnapshot followUpDataEntry) {
         Sheet sheet = editor.getOrCreateSheet("Effort History");
         sheet.truncate();
         
@@ -364,7 +364,7 @@ public class FollowUpGenerator {
                
         for (EffortHistoryRow historyRow : history.get().getHistoryRows()) {
             SheetRow row = sheet.createRow();
-            row.addColumn(historyRow.date.atStartOfDay(timezone));
+            row.addColumn(historyRow.date);
             row.addColumn(historyRow.sumEffortDone);
             row.addColumn(historyRow.sumEffortBacklog);
         }
