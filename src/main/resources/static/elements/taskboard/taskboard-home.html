@@ -452,15 +452,20 @@
                                 <iron-icon class="menu-icon" icon="settings" paper-drawer-toggle></iron-icon>
                             </paper-toolbar>
                         </div>
-                        <template is="dom-if" if="{{!user.isCustomer}}">
+
+                        <template is="dom-if" if="{{_showFollowupDownloadButton}}">
                             <div>
                                 <paper-icon-button icon="file-download" title="Download Followup Spreadsheet"
                                                    class="followup-button" on-tap="openFollowupDialog"></paper-icon-button>
                             </div>
+                        </template>
+                        <template is="dom-if" if="{{_showFollowupUploadButton}}">
                             <div>
                                 <paper-icon-button icon="file-upload" title="Followup Template"
                                                    class="template-followup-button" on-tap="openFollowupCrudModal"></paper-icon-button>
                             </div>
+                        </template>
+                        <template is="dom-if" if="{{_showFollowupDashboardButton}}">
                             <div>
                                 <a href="/followup-dashboard/" class="link-icon">
                                     <paper-icon-button icon="taskboard-icons:dashboard" title="Followup Dashboard"
@@ -546,6 +551,18 @@
                     stateTooltip: {
                         type: String,
                         value: "No issue data yet. Initialising"
+                    },
+                    _showFollowupDownloadButton: {
+                        type: Boolean,
+                        value: false
+                    },
+                    _showFollowupUploadButton: {
+                        type: Boolean,
+                        value: false
+                    },
+                    _showFollowupDashboardButton: {
+                        type: Boolean,
+                        value: false
                     }
                 },
 
@@ -556,6 +573,7 @@
                     this.retrieveBoardFeatures();
                     this.updatedIssueKeys = [];
                     this.user = taskboard.getLoggedUser();
+                    this.verifyPermissions();
                 },
 
                 retrieveFilters: function () {
@@ -804,6 +822,12 @@
                     }
                     this.set('stateIcon'   ,state[cacheState].icon)
                     this.set('stateTooltip',state[cacheState].tooltip);
+                },
+
+                verifyPermissions: function() {
+                    this.set('_showFollowupDownloadButton', authorizer.hasPermissionInAnyProject('followup.download'));
+                    this.set('_showFollowupUploadButton', authorizer.hasPermissionInAnyProject('followup.upload'));
+                    this.set('_showFollowupDashboardButton', authorizer.hasPermissionInAnyProject('dashboard.tactical') || authorizer.hasPermissionInAnyProject('dashboard.operational'));
                 }
             });
         })();

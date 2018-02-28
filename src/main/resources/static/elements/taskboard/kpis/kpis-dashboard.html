@@ -163,11 +163,29 @@
             .kpis__widget--height-half {
                 height: calc(50% - 16px);
             }
+
+            .loader {
+                width: 28px;
+                height: 28px;
+                position: absolute;
+                top: 50%;
+                margin-top: -14px;
+                left: 50%;
+                margin-left: -14px;
+                opacity: 0;
+                transition: opacity .4s ease;
+            }
+
+            .loader.active {
+                opacity: 1;
+                pointer-events: none;
+            }
         </style>
 
         <kpis-header user="{{user}}"></kpis-header>
 
         <div class="kpis">
+            <paper-spinner class="loader active" active="true"></paper-spinner>
 
             <template is="dom-if" if="{{_showProjectSelector}}">
                 <kpis-project-select projects="{{projects}}" user="{{user}}" selected-project-key="{{selectedProjectKey}}"></kpis-project-select>
@@ -178,20 +196,24 @@
 
                     <nav class="kpis__categories-wrapper">
                         <ul class="kpis__categories">
-                            <li class="kpis__category">
-                                <a class="kpis__category-link"
-                                   data-category="tactical"
-                                   on-tap="_onClickCategory">
-                                   Tactical
-                                </a>
-                            </li>
-                            <li class="kpis__category">
-                                <a class="kpis__category-link"
-                                   data-category="operational"
-                                   on-tap="_onClickCategory">
-                                   Operational
-                                </a>
-                            </li>
+                            <template is="dom-if" if="{{_showTactical}}">
+                                <li class="kpis__category">
+                                    <a class="kpis__category-link"
+                                       data-category="tactical"
+                                       on-tap="_onClickCategory">
+                                       Tactical
+                                    </a>
+                                </li>
+                            </template>
+                            <template is="dom-if" if="{{_showOperational}}">
+                                <li class="kpis__category">
+                                    <a class="kpis__category-link"
+                                       data-category="operational"
+                                       on-tap="_onClickCategory">
+                                       Operational
+                                    </a>
+                                </li>
+                            </template>
                         </ul>
                         <section class="kpis__selector">
                             <div class="kpis__select-project-wrapper">
@@ -203,6 +225,8 @@
                                                  label="[[selectedProjectKey]]"
                                                  text="[[selectedProjectKey]]"
                                                  disable-clear="true"
+                                                 disabled="{{hasOnlyOneProject}}"
+                                                 show-search-icon="{{!hasOnlyOneProject}}"
                                 ></tb-autocomplete>
                             </div>
                             <!--
@@ -226,35 +250,40 @@
 
                     <section class="kpis__widgets">
 
-                        <widget-cfd class="kpis__widget kpis__widget--2-3 kpis__widget--height-half"
-                                selected-project-key="{{selectedProjectKey}}"
-                                selected-date="{{selectedDate}}"
-                                ></widget-cfd>
+                        <template is="dom-if" if="{{_showTactical || _showOperational}}">
+                            <widget-cfd class="kpis__widget kpis__widget--2-3 kpis__widget--height-half"
+                                    selected-project-key="{{selectedProjectKey}}"
+                                    selected-date="{{selectedDate}}"
+                                    ></widget-cfd>
+                        </template>
 
-                        <widget-scope-by-type class="kpis__widget kpis__widget--height-half"
-                                data-category="tactical"
-                                selected-project-key="{{selectedProjectKey}}"
-                                selected-date="{{selectedDate}}"
-                                ></widget-scope-by-type>
+                        <template is="dom-if" if="{{_showTactical}}">
+                            <widget-scope-by-type class="kpis__widget kpis__widget--height-half"
+                                    data-category="tactical"
+                                    selected-project-key="{{selectedProjectKey}}"
+                                    selected-date="{{selectedDate}}"
+                                    ></widget-scope-by-type>
 
-                        <widget-progress-chart class="kpis__widget kpis__widget--height-half kpis__widget--1-2"
-                                data-category="tactical"
-                                selected-project-key="{{selectedProjectKey}}"
-                                selected-date="{{selectedDate}}"
-                                ></widget-progress-chart>
+                            <widget-progress-chart class="kpis__widget kpis__widget--height-half kpis__widget--1-2"
+                                    data-category="tactical"
+                                    selected-project-key="{{selectedProjectKey}}"
+                                    selected-date="{{selectedDate}}"
+                                    ></widget-progress-chart>
 
-                        <widget-scope-progress class="kpis__widget kpis__widget--height-half kpis__widget--1-2"
-                                data-category="tactical"
-                                selected-project-key="{{selectedProjectKey}}"
-                                selected-date="{{selectedDate}}"
-                                ></widget-scope-progress>
-
-                        <widget-planned-x-ballpark class="kpis__widget kpis__widget--height-half"
-                                data-category="operational"
-                                selected-project-key="{{selectedProjectKey}}"
-                                selected-date="{{selectedDate}}"
-                                selected-category="{{selectedCategory}}"
-                                ></widget-planned-x-ballpark>
+                            <widget-scope-progress class="kpis__widget kpis__widget--height-half kpis__widget--1-2"
+                                    data-category="tactical"
+                                    selected-project-key="{{selectedProjectKey}}"
+                                    selected-date="{{selectedDate}}"
+                                    ></widget-scope-progress>
+                        </template>
+                        <template is="dom-if" if="{{_showOperational}}">
+                            <widget-planned-x-ballpark class="kpis__widget kpis__widget--height-half"
+                                    data-category="operational"
+                                    selected-project-key="{{selectedProjectKey}}"
+                                    selected-date="{{selectedDate}}"
+                                    selected-category="{{selectedCategory}}"
+                                    ></widget-planned-x-ballpark>
+                        </template>
 
                     </section><!-- .kpis__widgets -->
 
@@ -297,15 +326,27 @@
                     },
                     _showProjectSelector: {
                         type: Boolean,
-                        value: true
+                        value: false
                     },
                     _showDashboard: {
+                        type: Boolean,
+                        value: false
+                    },
+                    _showTactical: {
+                        type: Boolean,
+                        value: false
+                    },
+                    _showOperational: {
                         type: Boolean,
                         value: false
                     },
                     _activeClass: {
                         type: String,
                         value: 'active'
+                    },
+                    hasOnlyOneProject: {
+                        type: Boolean,
+                        value: true
                     },
                 },
 
@@ -317,22 +358,35 @@
                 ready: function () {
                     this.populateProjects();
                     this.set('user', taskboard.getLoggedUser());
-                    this._setupScreen(this.selectedProjectKey);
                 },
 
                 populateProjects: function() {
                     var self = this;
-                    $.get('/api/projects', function(projects) {
+                    $.get('/api/projects/dashboard', function(projects) {
                         self.set('projects', projects);
+                        self.set('hasOnlyOneProject', projects.length == 1);
+                        self.$$('.loader').classList.remove('active');
+
+                        if (self.hasOnlyOneProject)
+                            self.set('selectedProjectKey', projects[0].projectKey);
+                        else
+                            self._setupScreen(self.selectedProjectKey);
                     })
                 },
 
                 _setupScreen: function(selectedProjectKey) {
                     var hasProjectSelected = !_.isEmpty(selectedProjectKey);
-                    var projectSelectorVisibility = !hasProjectSelected && !this.user.isCustomer;
-                    var dashboardVisibility = hasProjectSelected && !this.user.isCustomer;
-                    this.set('_showProjectSelector', projectSelectorVisibility);
-                    this.set('_showDashboard', dashboardVisibility);
+                    if (hasProjectSelected) {
+                        this.verifyPermissions();
+
+                        if (this._showTactical)
+                            this._activeCategory('tactical');
+                        else if (this._showOperational)
+                            this._activeCategory('operational');
+                    }
+
+                    this.set('_showProjectSelector', !hasProjectSelected);
+                    this.set('_showDashboard', hasProjectSelected);
 
                     var projectDates = hasProjectSelected ? this._getDatesFromProject(selectedProjectKey) : undefined;
                     this.set('_projectDates', projectDates);
@@ -347,13 +401,17 @@
 
                 _onShowDashboard: function(showDashboard) {
                     if (showDashboard) {
-                        this.$$('#dashboard-view').render();
                         this._activeCategory(this.selectedCategory);
                     }
                 },
 
                 _activeCategory: function(category) {
+                    this.$$('#dashboard-view').render();
                     var activeClass = this._activeClass;
+                    var allCategoryElements = document.querySelectorAll('[data-category="' + this.selectedCategory  + '"]');
+                    forEachInArray(allCategoryElements, function(el) {
+                        el.classList.remove(activeClass);
+                    })
                     var newActiveElements = document.querySelectorAll('[data-category="' + category + '"]');
                     forEachInArray(newActiveElements, function(el) {
                         el.classList.add(activeClass);
@@ -362,12 +420,6 @@
                 },
 
                 _onClickCategory: function(event) {
-                    var activeClass = this._activeClass;
-                    var allCategoryElements = document.querySelectorAll('[data-category="' + this.selectedCategory  + '"]');
-                    forEachInArray(allCategoryElements, function(el) {
-                        el.classList.remove(activeClass);
-                    })
-
                     var categoryClicked = event.target.dataset.category;
                     this._activeCategory(categoryClicked);
 
@@ -383,6 +435,11 @@
                         return project.projectKey;
                     });
                 },
+
+                verifyPermissions: function() {
+                    this.set('_showTactical', authorizer.hasPermissionInProject('dashboard.tactical', this.selectedProjectKey));
+                    this.set('_showOperational', authorizer.hasPermissionInProject('dashboard.operational', this.selectedProjectKey));
+                }
 
             });
         })();

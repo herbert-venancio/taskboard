@@ -22,6 +22,8 @@ package objective.taskboard.controller;
  */
 
 import static java.util.stream.Collectors.toList;
+import static objective.taskboard.repository.PermissionRepository.DASHBOARD_OPERATIONAL;
+import static objective.taskboard.repository.PermissionRepository.DASHBOARD_TACTICAL;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -41,6 +43,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import objective.taskboard.auth.Authorizer;
 import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.controller.ProjectCreationData.ProjectCreationDataTeam;
 import objective.taskboard.controller.ProjectData.ProjectConfigurationData;
@@ -80,6 +83,9 @@ public class ProjectController {
 
     @Autowired
     private CacheManager cacheManager;
+
+    @Autowired
+    private Authorizer authorizer;
 
     @RequestMapping
     public List<ProjectData> get() {
@@ -122,6 +128,17 @@ public class ProjectController {
         return response;
     }
     
+    @RequestMapping("/dashboard")
+    public ResponseEntity<Object> getProjectsVisibleOnDashboard() {
+        List<String> allowedProjectKeys = authorizer.getAllowedProjectsForPermissions(DASHBOARD_TACTICAL, DASHBOARD_OPERATIONAL);
+
+        List<ProjectData> projects = get().stream()
+            .filter(p -> allowedProjectKeys.contains(p.projectKey))
+            .collect(toList());
+
+        return ResponseEntity.ok(projects);
+    }
+
     @RequestMapping(method = RequestMethod.PATCH, consumes="application/json")
     public ResponseEntity<String> updateProjectsTeams(@RequestBody ProjectData [] projectsTeams) {
         List<ProjectTeam> projectTeamCfgsToAdd = new LinkedList<>();

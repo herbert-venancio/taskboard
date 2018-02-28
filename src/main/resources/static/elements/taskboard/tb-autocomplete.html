@@ -33,6 +33,7 @@
                             value="{{selected}}"
                             text="{{text}}"
                             disable-show-clear="{{disableClear}}"
+                            disabled="{{disabled}}"
 
                             min-length="0"
                             highlight-first="true"
@@ -95,6 +96,10 @@
                         notify: true
                     },
                     disableClear: {
+                        type: Boolean,
+                        value: false
+                    },
+                    disabled: {
                         type: Boolean,
                         value: false
                     }

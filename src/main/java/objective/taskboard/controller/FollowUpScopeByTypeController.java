@@ -19,8 +19,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import objective.taskboard.auth.Authorizer;
 import objective.taskboard.followup.impl.FollowUpScopeByTypeDataProvider;
 import objective.taskboard.jira.FrontEndMessageException;
+import objective.taskboard.repository.PermissionRepository;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 
 @RestController
@@ -34,8 +36,14 @@ public class FollowUpScopeByTypeController {
     @Autowired
     private ProjectFilterConfigurationCachedRepository projectRepository;
 
+    @Autowired
+    private Authorizer authorizer;
+
     @RequestMapping(value = "/api/projects/{projectKey}/followup/scope-by-type", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> scopeByTypeData(@PathVariable("projectKey") String projectKey, @RequestParam("date") String date, @RequestParam("timezone") String timezone) {
+        if (!authorizer.hasPermissionInProject(PermissionRepository.DASHBOARD_TACTICAL, projectKey))
+            return new ResponseEntity<>("Resource not found", HttpStatus.NOT_FOUND);
+
         if (isEmpty(projectKey))
             return new ResponseEntity<>("Project is required.", HttpStatus.BAD_REQUEST);
 

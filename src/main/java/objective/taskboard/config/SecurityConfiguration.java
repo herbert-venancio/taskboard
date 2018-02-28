@@ -20,8 +20,13 @@
  */
 package objective.taskboard.config;
 
+import static java.util.stream.Collectors.toList;
+
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
@@ -33,9 +38,12 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.context.annotation.RequestScope;
 
 import com.google.common.collect.Lists;
 
+import objective.taskboard.auth.CredentialsHolder;
+import objective.taskboard.auth.LoggedUserDetails;
 import objective.taskboard.jira.JiraService;
 
 
@@ -84,6 +92,21 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             }
 
         });
+    }
+
+    @Bean
+    @RequestScope
+    public LoggedUserDetails getLoggedUserDetails() {
+        List<LoggedUserDetails.Role> roles = jiraService.getUserRoles(CredentialsHolder.username()).stream()
+            .map(r -> new LoggedUserDetails.Role(r.id, r.name, r.projectKey))
+            .collect(toList());
+
+        return new LoggedUserDetails() {
+            @Override
+            public List<Role> getUserRoles() {
+                return roles;
+            }
+        };
     }
 
 }
