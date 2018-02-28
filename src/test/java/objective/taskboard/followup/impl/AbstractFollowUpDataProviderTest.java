@@ -69,6 +69,7 @@ import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.data.Status;
 import objective.taskboard.jira.data.StatusCategory;
 import objective.taskboard.jira.data.Version;
+import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.utils.Clock;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -94,9 +95,12 @@ public abstract class AbstractFollowUpDataProviderTest {
 
     @Mock
     private ProjectService projectService;
-    
+
     @Mock
     private FollowupClusterProvider clusterProvider;
+
+    @Mock
+    private ProjectFilterConfigurationCachedRepository projectRepository;
 
     protected CustomField propertiesCustomField;
     protected TShirtSize tshirtSizeInfo;
@@ -212,8 +216,10 @@ public abstract class AbstractFollowUpDataProviderTest {
         when(jiraProperties.getStatusesDeferredIds()).thenReturn(asList(10102L));
 
         when(cycleTime.getCycleTime(any(), any(), anyLong())).thenReturn(1D);
-        
+
         projectConfiguration.setProjectKey("PROJ");
+
+        when(projectRepository.getProjectByKey(any())).thenReturn(Optional.of(projectConfiguration));
     }
 
     public String[] defaultProjects() {

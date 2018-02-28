@@ -41,6 +41,7 @@ import objective.taskboard.followup.FollowupDataProvider;
 import objective.taskboard.followup.FromJiraDataRow;
 import objective.taskboard.followup.FromJiraDataSet;
 import objective.taskboard.followup.FromJiraRowService;
+import objective.taskboard.followup.FollowUpTimeline;
 import objective.taskboard.followup.cluster.FollowUpClusterItem;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -264,12 +265,12 @@ public class FollowUpScopeByTypeDataProviderTest {
         assertEquals(ZONE_ID.getId(), data.zoneId);
     }
 
-    private FollowUpDataSnapshot getSnapshot(LocalDate data, List<FromJiraDataRow> rows) {
+    private FollowUpDataSnapshot getSnapshot(LocalDate date, List<FromJiraDataRow> rows) {
         FromJiraDataSet dataSet = new FromJiraDataSet(FROMJIRA_HEADERS, rows);
         FollowupData followupData = new FollowupData(dataSet, emptyList(), emptyList());
         FollowupCluster fc = new FollowupClusterImpl(
                 asList(new FollowUpClusterItem(mock(ProjectFilterConfiguration.class), "a", "a", "a", 1.0, 1.0)));
-        return new FollowUpDataSnapshot(data, followupData, fc);
+        return new FollowUpDataSnapshot(new FollowUpTimeline(date), followupData, fc);
     }
 
     private void assertEffortEstimateByType(String type, Double exceptedValue) {

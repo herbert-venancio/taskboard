@@ -62,6 +62,7 @@ import objective.taskboard.followup.EmptyFollowupCluster;
 import objective.taskboard.followup.FollowUpDataHistoryRepository;
 import objective.taskboard.followup.FollowUpDataSnapshot;
 import objective.taskboard.followup.FollowupClusterProvider;
+import objective.taskboard.followup.FollowUpTimeline;
 import objective.taskboard.repository.FollowupDailySynthesisRepository;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.rules.TimeZoneRule;
@@ -71,6 +72,7 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
     private static final String PROJECT_TEST = "PROJECT TEST";
     private static final String PROJECT_TEST_2 = "PROJECT TEST 2";
     private static final LocalDate TODAY_DATE = LocalDate.now();
+    private static final FollowUpTimeline TIMELINE = new FollowUpTimeline(TODAY_DATE);
     private static final String TODAY = TODAY_DATE.format(FILE_NAME_FORMATTER);
 
     @Rule
@@ -107,7 +109,7 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
     @Test
     public void whenHasOneProject_thenOneFileShouldBeGenerated() throws IOException, InterruptedException {
         when(projectFilterCacheRepo.getProjects()).thenReturn(asList(projectFilter));
-        when(providerFromCurrentState.getJiraData(anyString())).thenReturn(new FollowUpDataSnapshot(TODAY_DATE, getDefaultFollowupData(), new EmptyFollowupCluster()));
+        when(providerFromCurrentState.getJiraData(anyString())).thenReturn(new FollowUpDataSnapshot(TIMELINE, getDefaultFollowupData(), new EmptyFollowupCluster()));
         when(clusterProvider.getForProject(PROJECT_TEST)).thenReturn(new EmptyFollowupCluster());
         when(clusterProvider.getForProject(PROJECT_TEST_2)).thenReturn(new EmptyFollowupCluster());
         
@@ -119,7 +121,7 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
     @Test
     public void whenProjectDoesNotHaveData_thenNoDataShouldBeGenerated() throws IOException, InterruptedException {
         when(projectFilterCacheRepo.getProjects()).thenReturn(asList(projectFilter));
-        when(providerFromCurrentState.getJiraData(anyString())).thenReturn(new FollowUpDataSnapshot(TODAY_DATE, getEmptyFollowupData(), new EmptyFollowupCluster()));
+        when(providerFromCurrentState.getJiraData(anyString())).thenReturn(new FollowUpDataSnapshot(TIMELINE, getEmptyFollowupData(), new EmptyFollowupCluster()));
 
         subject.generate();
 
@@ -129,7 +131,7 @@ public class FollowUpDataHistoryGeneratorJSONFilesTest {
     @Test
     public void whenHasTwoProjects_thenTwoFilesShouldBeGenerated() throws IOException, InterruptedException {
         when(projectFilterCacheRepo.getProjects()).thenReturn(asList(projectFilter, projectFilter2));
-        when(providerFromCurrentState.getJiraData(anyString())).thenReturn(new FollowUpDataSnapshot(TODAY_DATE, getDefaultFollowupData(), new EmptyFollowupCluster()));
+        when(providerFromCurrentState.getJiraData(anyString())).thenReturn(new FollowUpDataSnapshot(TIMELINE, getDefaultFollowupData(), new EmptyFollowupCluster()));
         when(clusterProvider.getForProject(PROJECT_TEST)).thenReturn(new EmptyFollowupCluster());
         when(clusterProvider.getForProject(PROJECT_TEST_2)).thenReturn(new EmptyFollowupCluster());
 
