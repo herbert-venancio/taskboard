@@ -19,15 +19,15 @@ public class CumulativeFlowDiagramDataProvider {
     @Autowired
     private FollowUpDataProviderFromCurrentState followUpDataProviderFromCurrentState;
 
-    public CumulativeFlowDiagramDataSet getCumulativeFlowDiagramDataSet(String project) {
+    public CumulativeFlowDiagramDataSet getCumulativeFlowDiagramDataSet(String project, String level) {
         if(!belongsToAnyProject(project))
             throw new IllegalArgumentException(String.format("Unknown project <%s>", project));
 
         FollowUpDataSnapshot followupData = followUpDataProviderFromCurrentState.getJiraData(project);
-        return transform(followupData.getData(), Lane.SUBTASK);
+        return transform(followupData.getData(), Level.valueOf(level.toUpperCase()));
     }
 
-    enum Lane {
+    enum Level {
         ALL(-1)
         , DEMAND(0)
         , FEATURE(1)
@@ -35,20 +35,20 @@ public class CumulativeFlowDiagramDataProvider {
 
         public final int index;
 
-        Lane(int index) {
+        Level(int index) {
             this.index = index;
         }
 
-        public boolean includeLane(int index) {
+        public boolean includeLevel(int index) {
             return this == ALL || this.index == index;
         }
     }
 
-    private CumulativeFlowDiagramDataSet transform(FollowupData followupData, Lane selectedLane) {
+    private CumulativeFlowDiagramDataSet transform(FollowupData followupData, Level selectedLevel) {
         LinkedHashMap<String, List<CumulativeFlowDiagramDataPoint>> dataByStatus = new LinkedHashMap<>();
 
         for (int i = 0; i < followupData.syntheticsTransitionsDsList.size(); ++i) {
-            if(!selectedLane.includeLane(i))
+            if(!selectedLevel.includeLevel(i))
                 continue;
             SyntheticTransitionsDataSet ds = followupData.syntheticsTransitionsDsList.get(i);
             int initial = ds.getInitialIndexStatusHeaders();

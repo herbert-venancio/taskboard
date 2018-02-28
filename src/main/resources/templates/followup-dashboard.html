@@ -227,7 +227,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             font-size: 14px;
             font-weight: normal;
             line-height: 18px;
-            margin-top: 0px;
             margin-bottom: 16px;
         }
 
@@ -271,7 +270,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         .filters-modal .dc-paper-item #checkbox.paper-checkbox {
             background-color: transparent;
-            border-color: #E4E4E4;
+            border-color: #E5E5E5;
             border-width: 1px;
         }
 
@@ -289,12 +288,43 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             flex: 1;
         }
 
-        .filters-modal .ok-button {
-            float: right;
-            background-color: #5DAFFF;
-            color: #FFFFFF;
-            font-size: 12px;
-            line-height: 15px;
+        /*
+            Settings modal
+        */
+        .settings-modal .radio-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .settings-modal .radio-group > * {
+            padding: 0;
+            margin-top: 10px;
+            min-height: auto;
+            display: flex;
+            align-items: center;
+        }
+
+        .settings-modal .radio-group > *:first-child {
+            margin-top: 0;
+        }
+
+        .settings-modal .radio-group > *:hover {
+            background: #EEE;
+        }
+
+        .settings-modal .radio-group > * #radioContainer > div {
+            border-width: 1px !important;
+            border-color: #E5E5E5 !important;
+        }
+
+        .settings-modal .radio-group > * #onRadio {
+            background-color: #000;
+        }
+
+        .settings-modal .radio-group > * #radioLabel {
+            line-height: 18px;
+            font-size: 14px;
+            flex: 1;
         }
 
         /*

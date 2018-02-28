@@ -3,6 +3,7 @@ package objective.taskboard.followup;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 
@@ -64,17 +65,31 @@ public class CumulativeFlowDiagramDataProviderTest {
     }
 
     @Test
-    public void whenGenerateSubTaskCfdData_dataShouldBeOrdered() {
-        // when
-        CumulativeFlowDiagramDataSet cfd = subject.getCumulativeFlowDiagramDataSet("TASKB");
-        String[] actualStatus = cfd.dataByStatus.keySet().toArray(new String[0]);
-        
-        assertEquals("To Do,Doing,Reviewing,UAT,Done", StringUtils.join(actualStatus));
-        
+    public void whenGenerateCfdData_dataShouldBeOrdered() {
+        CumulativeFlowDiagramDataSet cfdSubTask = subject.getCumulativeFlowDiagramDataSet("TASKB", "SUBTASK");
+        String[] actualStatusSubTask = cfdSubTask.dataByStatus.keySet().toArray(new String[0]);
+
+        assertEquals("To Do,Doing,Reviewing,UAT,Done", StringUtils.join(actualStatusSubTask));
+
         AnalyticsTransitionsDataSet subTaskAnalytics = followupData.analyticsTransitionsDsList.get(2);
-        
+
+        assertDates(subTaskAnalytics, cfdSubTask);
+        assertTypes(subTaskAnalytics, cfdSubTask);
+
+        CumulativeFlowDiagramDataSet cfdFeature = subject.getCumulativeFlowDiagramDataSet("TASKB", "Feature");
+        String[] actualStatusFeature = cfdFeature.dataByStatus.keySet().toArray(new String[0]);
+
+        assertEquals("To Do,Doing,QA,Done", StringUtils.join(actualStatusFeature));
+
+        AnalyticsTransitionsDataSet featureAnalytics = followupData.analyticsTransitionsDsList.get(1);
+
+        assertDates(featureAnalytics, cfdFeature);
+        assertTypes(featureAnalytics, cfdFeature);
+    }
+
+    private void assertDates(AnalyticsTransitionsDataSet analytics, CumulativeFlowDiagramDataSet cfd) {
         DateTimeFormatter format = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-        List<String> allDates = subTaskAnalytics.rows.stream()
+        String expectedDates = analytics.rows.stream()
                 .map(row -> row.transitionsDates)
                 .flatMap(r->r.stream())
                 .filter(it -> it != null)
@@ -82,10 +97,9 @@ public class CumulativeFlowDiagramDataProviderTest {
                 .distinct()
                 .sorted()
                 .map(d -> format.format(d))
-                .collect(Collectors.toList());
-        
-        String expectedDates = allDates.toString();
-        
+                .collect(Collectors.toList())
+                .toString();
+
         SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
         String actualDates = cfd.dataByStatus.get("To Do").stream()
             .map(each -> each.date)
@@ -94,10 +108,12 @@ public class CumulativeFlowDiagramDataProviderTest {
             .sorted()
             .collect(Collectors.toList())
             .toString();
-        
+
         assertEquals(expectedDates, actualDates);
-        
-        String expectedTypes = subTaskAnalytics.rows.stream()
+    }
+
+    private void assertTypes(AnalyticsTransitionsDataSet analytics, CumulativeFlowDiagramDataSet cfd) {
+        String expectedTypes = analytics.rows.stream()
                 .map(row -> row.issueType)
                 .distinct()
                 .sorted()
@@ -110,17 +126,24 @@ public class CumulativeFlowDiagramDataProviderTest {
                 .sorted()
                 .collect(Collectors.toList())
                 .toString();
-        
+
         assertEquals(expectedTypes, actualTypes);
     }
 
     @Test
     public void invalidProject() {
         try {
-            subject.getCumulativeFlowDiagramDataSet("INVALID");
+            subject.getCumulativeFlowDiagramDataSet("INVALID", "Subtask");
             Assert.fail();
         } catch (IllegalArgumentException e) {
             Assert.assertEquals("Unknown project <INVALID>", e.getMessage());
         }
     }
+
+    @Test
+    public void whenProjectHasNoData_CfdShouldGenerateEmpty() {
+        CumulativeFlowDiagramDataSet cfd = subject.getCumulativeFlowDiagramDataSet("EMPTY", "SUBTASK");
+        assertTrue(cfd.dataByStatus.isEmpty());
+    }
+
 }

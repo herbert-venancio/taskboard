@@ -25,17 +25,34 @@
         <style>
         </style>
 
-        <widget-wrap title="CFD" is-ready="{{isReady}}" options="{{options}}" chart="{{chart}}" error-message="{{errorMessage}}">
+        <widget-wrap title="CFD" is-ready="{{isReady}}" tags="{{tags}}" options="{{options}}" chart="{{chart}}" error-message="{{errorMessage}}">
 
             <div id="cfd" class="tb-chart"></div>
 
             <wrap-modal title="Filters" class="filters-modal">
                 <h3 class="tb-label">Issue Types</h3>
                 <div class="config-slot-0 dc-chart--no-float"></div>
-                <paper-button class="ok-button" on-tap="_closeFiltersModal">OK</paper-button>
+                <div class="modal-footer">
+                    <paper-button class="colorful" raised title="OK" on-tap="_closeFiltersModal">OK</paper-button>
+                </div>
             </wrap-modal>
 
         </widget-wrap>
+
+        <wrap-modal title="Settings" class="settings-modal">
+            <h3 class="tb-label">Level</h3>
+            <div>
+                <label id="labelLevel"></label>
+                <paper-radio-group class="radio-group" selected="{{settingLevel}}" aria-labelledby="labelLevel">
+                    <paper-radio-button name="Demand">Demand</paper-radio-button>
+                    <paper-radio-button name="Feature">Feature</paper-radio-button>
+                    <paper-radio-button name="Subtask">Subtask</paper-radio-button>
+                </paper-radio-group>
+            </div>
+            <div class="modal-footer">
+                <paper-button class="colorful" raised title="Save" on-tap="_saveSettings">Save</paper-button>
+            </div>
+        </wrap-modal>
 
     </template>
 
@@ -52,7 +69,7 @@
                     selectedDate: {
                         type: String,
                         notify: true,
-                        value: '',
+                        value: ''
                     },
                     isReady: {
                         type: Boolean,
@@ -69,14 +86,22 @@
                         notify: true,
                         value: function() { return {}; }
                     },
+                    tags: {
+                        type: Array
+                    },
                     options: {
                         type: Array,
                         readOnly: true
+                    },
+                    settingLevel: {
+                        type: String,
+                        notify: true,
+                        value: 'Subtask'
                     }
                 },
 
                 observers: [
-                    '_onProjectSelected(selectedProjectKey, selectedDate)',
+                    '_onProjectSelected(selectedProjectKey, selectedDate)'
                 ],
 
                 ready: function() {
@@ -85,13 +110,18 @@
                             icon:'taskboard-icons:dashboard-filter'
                             , title: 'Filters'
                             , tap: this._openFiltersModal.bind(this)
-                            , cssClasses: ''
+                            , hidden: true
+                        },
+                        {
+                            icon: 'taskboard-icons:settings'
+                            , title: 'Settings'
+                            , tap: this._openSettingsModal.bind(this)
                         }
                     ]);
                 },
 
-                _onProjectSelected: function(selectedProjectKey, selectedDate) {
-                    this.loadCfdChart(selectedProjectKey);
+                _onProjectSelected: function() {
+                    this.loadCfdChart();
                 },
 
                 groupByDate: function(cfdData) {
@@ -112,12 +142,14 @@
                     return graphData;
                 },
 
-                loadCfdChart: function(project) {
+                loadCfdChart: function() {
                     this.reset();
 
                     var self = this;
 
-                    self.xhr = d3.json("/api/projects/"+ project + "/followup/cfd", function(error, cfdData) {
+                    var savedLevel = self._getSavedLevel();
+                    self.set('tags', [savedLevel]);
+                    self.xhr = d3.json("/api/projects/"+ self.selectedProjectKey + "/followup/cfd?level=" + savedLevel, function(error, cfdData) {
                         if(self.handleErrors(error, cfdData))
                             return;
 
@@ -212,6 +244,7 @@
                     this.set('isReady', false);
                     this.set('errorMessage', '');
                     this.set('options.0.cssClasses', '');
+                    this.set('options.0.hidden', true);
 
                     if (this.xhr) {
                         this.xhr.abort();
@@ -270,6 +303,7 @@
                 },
 
                 createIssueListFilter: function() {
+                    this.set('options.0.hidden', false);
                     var div = this.$$('.config-slot-0');
                     var list = dc.paperList(div);
 
@@ -307,6 +341,26 @@
 
                 _closeFiltersModal: function() {
                     this.$$('.filters-modal').close();
+                },
+
+                _openSettingsModal: function() {
+                    this.settingLevel = this._getSavedLevel();
+                    this.$$('.settings-modal').open();
+                },
+
+                _saveSettings: function() {
+                    var savedLevel = this._getSavedLevel();
+                    if (savedLevel === this.settingLevel) {
+                        this.$$('.settings-modal').close();
+                        return;
+                    }
+                    localStorage.setItem("dashboard.cfd-chart." + this.selectedProjectKey + ".level", this.settingLevel);
+                    this.$$('.settings-modal').close();
+                    this.loadCfdChart();
+                },
+
+                _getSavedLevel: function() {
+                    return localStorage.getItem("dashboard.cfd-chart." + this.selectedProjectKey + ".level") || "Subtask";
                 }
             });
         })();
