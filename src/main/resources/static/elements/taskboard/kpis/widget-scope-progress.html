@@ -30,6 +30,7 @@
             <div id="scope-progress" class="tb-chart"></div>
 
         </widget-wrap>
+        <iron-signals on-iron-signal-cfd-created="linkCfdBrush" />
         <wrap-modal id="modal" title="Scope Progress Settings">
             <div class="modal-content">
                 <form class="progress-chart-modal" style="width: 250px">
@@ -115,8 +116,14 @@
                         }
                     }];
                 },
-
+                
                 ready: function() {
+                    var self = this;
+                    this.chartDeferred = $.Deferred();
+                    this.selectorChartDeferred = $.Deferred();
+                    $.when(this.chartDeferred, this.selectorChartDeferred).then(function(_chart, _selectorChart){
+                        _selectorChart.addChartWidget(self);
+                    })
                 },
 
                 _onProjectSelected: function(selectedProjectKey, selectedDate) {
@@ -135,6 +142,10 @@
 
                         self.set('isReady', true);
                     });
+                },
+
+                linkCfdBrush: function(event, data) {
+                    this.selectorChartDeferred.resolve(data.cfdChartInstance);
                 },
 
                 reset: function() {
@@ -244,16 +255,11 @@
 
                     // axis
                     chart
-                        //.xAxisLabel("Timeline")
                         .yAxisLabel("Effort (hours)")
-                        .elasticY(true)       // y axis will adjust to the data
-                        .xAxis()
-                            .tickValues(
-                                dcUtils.getDateTicks(startDate, endDate, 14)
-                            )
-                            .tickFormat(function (v) {
-                                return dcUtils.dateFormat(v);
-                            });
+                        .elasticY(false)
+                        .yAxisPadding('15%')
+                        
+                    setupChartDateTicks(chart, startDate, endDate, 14);
 
                     // mouse interaction
                     chart
@@ -263,6 +269,7 @@
                         });
 
                     this._setChart(chart);
+                    this.chartDeferred.resolve(chart);
                 },
 
                 updateChart: function() {
