@@ -31,6 +31,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import objective.taskboard.auth.Authorizer;
 import objective.taskboard.cycletime.CycleTimeProperties;
 import objective.taskboard.cycletime.HolidayService;
 import objective.taskboard.data.User;
@@ -56,6 +57,9 @@ public class HomeController {
     @Autowired
     private GoogleApiConfig googleApiConfig;
 
+    @Autowired
+    private Authorizer authorizer;
+
     @RequestMapping("/")
     public String home(Model model) {
         User user = jiraService.getUser();
@@ -70,6 +74,7 @@ public class HomeController {
         model.addAttribute("holidays", serialize(holidayService.getHolidays()));
         model.addAttribute("invalidTeam", INVALID_TEAM);
         model.addAttribute("googleClientId", googleApiConfig.getClientId());
+        model.addAttribute("permissions", serialize(authorizer.getProjectsPermission()));
         return "index";
     }
 

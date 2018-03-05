@@ -7,6 +7,11 @@
   "roles": [
     {
       "projectKey": "TASKB",
+      "name": "Administrators",
+      "id": 10100
+    },
+    {
+      "projectKey": "TASKB",
       "name": "Developers",
       "id": 10100
     },

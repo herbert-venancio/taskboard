@@ -27,23 +27,6 @@
                 color: #FFF;
             }
 
-            .loader {
-                width: 28px;
-                height: 28px;
-                position: absolute;
-                top: 50%;
-                margin-top: -14px;
-                left: 50%;
-                margin-left: -14px;
-                opacity: 0;
-                transition: opacity .4s ease;
-            }
-
-            .loader.active {
-                opacity: 1;
-                pointer-events: none;
-            }
-
             .project-select {
                 width: 400px;
                 opacity: 0.3;
@@ -65,8 +48,6 @@
                 width: 100%;
             }
         </style>
-
-        <paper-spinner class="loader active" active="true"></paper-spinner>
 
         <section class="project-select">
 
@@ -119,7 +100,6 @@
                 _onProjectsLoaded: function(projects) {
                     var showLoader = _.isEmpty(this.projects);
                     if(!showLoader) {
-                        this.$$('.loader').classList.remove('active');
                         this.$$('.project-select').classList.add('active');
                     }
                 },

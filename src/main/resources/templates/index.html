@@ -160,8 +160,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <script src="/static/scripts/taskboard.js"></script>
 <script src="/static/scripts/cycleTime.js"></script>
 <script src="/static/scripts/searchFilter.js"></script>
+<script src="/static/scripts/authorization.js"></script>
 <!-- endbuild-->
 
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var permissions = JSON.parse(/*[[${permissions}]]*/ null);
+    var authorizer = new Authorizer(permissions);
+    /*]]>*/
+</script>
 <script async="async" defer="defer" src="https://apis.google.com/js/api.js"
         onload="this.onload=function(){};"
         onreadystatechange="if (this.readyState === 'complete') this.onload()">
