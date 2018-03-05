@@ -60,7 +60,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
                 .antMatchers(HttpMethod.POST, "/webhook/**").permitAll()
                 .anyRequest().authenticated().and().formLogin();
-        
+
+        // allow using iframe to download files from same origin
+        http.headers().frameOptions().sameOrigin();
+
         http.authorizeRequests().antMatchers("/api/*").authenticated().and().httpBasic();
         
         http.formLogin().loginPage("/login").permitAll();
