@@ -108,11 +108,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 </template>
 <script th:inline="javascript">
     var CUSTOMFIELD = {
-        SIZES: [[${jiraCustomfields.tShirtSize.ids}]],
-        CLASSE_DE_SERVICO: [[${jiraCustomfields.classOfService.id}]],
-        IMPEDIDO: [[${jiraCustomfields.blocked.id}]],
         LAST_BLOCK_REASON: [[${jiraCustomfields.lastBlockReason.id}]],
-        ADDITIONAL_ESTIMATED_HOURS: [[${jiraCustomfields.additionalEstimatedHours.id}]]
+        CLASSE_DE_SERVICO: [[${jiraCustomfields.classOfService.id}]]
     };
 
     var CONFIGURATION = {
@@ -131,8 +128,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         DEMANDA: [[${jiraIssuetypes.demand.id}]]
     };
 
-    var STATUSES_CANCELED_IDS = JSON.parse([[${jiraStatusesCanceledIds}]]);
-    var STATUSES_COMPLETED_IDS = JSON.parse([[${jiraStatusesCompletedIds}]]).concat(STATUSES_CANCELED_IDS);
     var TRANSITION_REQUIRED_COMMENT = JSON.parse([[${jiraTransitionsWithRequiredCommentNames}]]);
     var START_BUSINESS_HOURS = JSON.parse([[${cycleTimeStartBusinessHours}]]);
     var END_BUSINESS_HOURS = JSON.parse([[${cycleTimeEndBusinessHours}]]);

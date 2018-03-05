@@ -15682,6 +15682,7 @@
                     "self": "http://localhost:4567/rest/api/latest/customFieldOption/12657",
                     "value": "S"
                 },
+                "customfield_11450": 5,
                 "description": null,
                 "issuelinks": [],
                 "issuetype": {

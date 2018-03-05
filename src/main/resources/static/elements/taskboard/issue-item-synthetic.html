@@ -134,14 +134,14 @@
                     style$="{{getIssueColor(item)}} -webkit-mask-image:url({{getIssueTypeImage(item, parentTypeIcon)}}); -moz-mask-image:url({{getIssueTypeImage(item, parentTypeIcon)}}); mask-image:url({{getIssueTypeImage(item, parentTypeIcon)}});"></span>
             </div>
 
-            <template is="dom-if" if="{{issueImpedida(item)}}">
+            <template is="dom-if" if="{{item.blocked}}">
                 <div class="impedida">
                     <iron-icon id="issueImpedidaIcon" class="iconImpedidaCancelada" icon="av:not-interested"
-                               title="Blocked issue. Last Block Reason: {{item.customfields.lastBlockReason}}"></iron-icon>
+                               title="Blocked issue. Last Block Reason: {{item.lastBlockReason}}"></iron-icon>
                 </div>
             </template>
 
-            <template is="dom-if" if="{{issueCancelada(item)}}">
+            <template is="dom-if" if="{{item.cancelled}}">
                 <div class="cancelada">
                     <iron-icon id="issueCanceladaIcon" class="iconImpedidaCancelada" icon="warning"
                                title="Canceled issue"></iron-icon>
@@ -170,14 +170,6 @@
                     }
                 },
 
-                issueImpedida: function (item) {
-                    return this.item.customfields.impedido;
-                },
-
-                issueCancelada: function (item) {
-                    return STATUSES_CANCELED_IDS.indexOf(item.status) != -1;
-                },
-
                 getIssueTypeImage: function(issue, parentTypeIcon) {
                     var iconUri = issue.typeIconUri;
                     if (parentTypeIcon && issue.parentTypeIconUri)
@@ -188,14 +180,14 @@
 
                 getItemClass: function (item) {
                     var clazz = this.getSizeClass(item);
-                    if (this.issueCancelada(item))
+                    if (item.cancelled)
                         clazz += " cancelada";
 
                     return clazz;
                 },
 
                 getSizeClass: function(item) {
-                    var issueSize = taskboard.getOnlyOneSize(item.customfields.sizes);
+                    var issueSize = item.cardTshirtSize;
                     switch (issueSize) {
                         case TAMANHO.PP:
                             return "size-pp";
