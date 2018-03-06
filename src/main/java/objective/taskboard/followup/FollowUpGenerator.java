@@ -27,7 +27,6 @@ import static objective.taskboard.followup.impl.FollowUpTransitionsDataProvider.
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.LinkedList;
@@ -61,7 +60,7 @@ public class FollowUpGenerator {
             FollowUpDataSnapshot followupDataEntry = provider.getJiraData(includedProjects, timezone);
             FollowupData followupData = followupDataEntry.getData();
 
-            updateTimelineDates(followupDataEntry.getDate());
+            updateTimelineDates(followupDataEntry.getTimeline());
             generateFromJiraSheet(followupData);
             generateTransitionsSheets(followupData);
             generateEffortHistory(followupDataEntry);
@@ -77,9 +76,11 @@ public class FollowUpGenerator {
         }
     }
 
-    void updateTimelineDates(LocalDate followupDate) {
+    void updateTimelineDates(FollowUpTimeline timeline) {
         Sheet sheet = editor.getSheet("Timeline");
-        sheet.getOrCreateRow(6).setValue("B", followupDate);
+        timeline.getStart().ifPresent(start -> sheet.getOrCreateRow(2).setValue("B", start));
+        timeline.getEnd().ifPresent(end -> sheet.getOrCreateRow(5).setValue("B", end));
+        sheet.getOrCreateRow(6).setValue("B", timeline.getReference());
         sheet.save();
     }
 

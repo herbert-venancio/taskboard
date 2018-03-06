@@ -47,6 +47,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -78,6 +79,7 @@ public class FollowUpGeneratorTest {
 
     private SimpleSpreadsheetEditorMock editor = new SimpleSpreadsheetEditorMock();
     private LocalDate followUpDate = LocalDate.parse("2007-12-03");
+    private FollowUpTimeline timeline = new FollowUpTimeline(followUpDate);
 
     @Before
     public void setup() {
@@ -181,7 +183,7 @@ public class FollowUpGeneratorTest {
         FollowUpTemplate testTemplate = new FollowUpTemplate(resolve("followup/Followup-template.xlsm"));
         subject = new FollowUpGenerator(provider, new SimpleSpreadsheetEditor(testTemplate));
 
-        when(provider.getJiraData(emptyArray(), ZoneId.systemDefault())).thenReturn(new FollowUpDataSnapshot(followUpDate, getDefaultFollowupData(), new EmptyFollowupCluster()));
+        when(provider.getJiraData(emptyArray(), ZoneId.systemDefault())).thenReturn(new FollowUpDataSnapshot(timeline, getDefaultFollowupData(), new EmptyFollowupCluster()));
 
         Resource resource = subject.generate(emptyArray(), ZoneId.systemDefault());
         assertNotNull("Resource shouldn't be null", resource);
@@ -192,7 +194,7 @@ public class FollowUpGeneratorTest {
         FollowUpTemplate testTemplate = new FollowUpTemplate(resolve("followup/Followup-template.xlsm"));
         subject = new FollowUpGenerator(provider, new SimpleSpreadsheetEditor(testTemplate));
 
-        when(provider.getJiraData(emptyArray(), ZoneId.systemDefault())).thenReturn(new FollowUpDataSnapshot(followUpDate, getDefaultFollowupData(), new EmptyFollowupCluster()));
+        when(provider.getJiraData(emptyArray(), ZoneId.systemDefault())).thenReturn(new FollowUpDataSnapshot(timeline, getDefaultFollowupData(), new EmptyFollowupCluster()));
 
         Resource resource = subject.generate(emptyArray(), ZoneId.systemDefault());
         assertNotNull("Resource shouldn't be null", resource);
@@ -209,7 +211,7 @@ public class FollowUpGeneratorTest {
 
         FromJiraDataSet fromJiraDs = new FromJiraDataSet(FROMJIRA_HEADERS, fromJiraDataRowList);
         FollowupData followupData = new FollowupData(fromJiraDs, getDefaultAnalyticsTransitionsDataSet(), getDefaultSyntheticTransitionsDataSet());
-        FollowUpDataSnapshot followUpDataEntry = new FollowUpDataSnapshot(followUpDate, followupData, new EmptyFollowupCluster());
+        FollowUpDataSnapshot followUpDataEntry = new FollowUpDataSnapshot(timeline, followupData, new EmptyFollowupCluster());
 
         when(provider.getJiraData(emptyArray(), ZoneId.systemDefault())).thenReturn(followUpDataEntry);
         Resource resource = subject.generate(emptyArray(), ZoneId.systemDefault());
@@ -321,12 +323,18 @@ public class FollowUpGeneratorTest {
         subject = new FollowUpGenerator(provider, editor);
 
         subject.getEditor().open();
-        subject.updateTimelineDates(LocalDate.parse("2017-10-03"));
+        subject.updateTimelineDates(new FollowUpTimeline(LocalDate.parse("2017-10-03")
+                                                         , Optional.of(LocalDate.parse("2017-10-01"))
+                                                         , Optional.of(LocalDate.parse("2017-11-01"))));
         subject.getEditor().close();
 
         String expectedEditorLogger = 
                 "Spreadsheet Open\n" + 
                 "Sheet Create: Timeline\n" + 
+                "Sheet \"Timeline\" Row Get/Create: 2\n" + 
+                "Sheet \"Timeline\" Row \"2\" SetValue (date) \"B2\": 2017-10-01\n" + 
+                "Sheet \"Timeline\" Row Get/Create: 5\n" + 
+                "Sheet \"Timeline\" Row \"5\" SetValue (date) \"B5\": 2017-11-01\n" + 
                 "Sheet \"Timeline\" Row Get/Create: 6\n" + 
                 "Sheet \"Timeline\" Row \"6\" SetValue (date) \"B6\": 2017-10-03\n" + 
                 "Sheet \"Timeline\" Save\n" + 
@@ -493,10 +501,10 @@ public class FollowUpGeneratorTest {
         return followUpDataEntry(date, rows, followupCluster);
     }
     
-    private FollowUpDataSnapshot followUpDataEntry(LocalDate data, List<FromJiraDataRow> rows, FollowupCluster followupCluster) {
+    private FollowUpDataSnapshot followUpDataEntry(LocalDate date, List<FromJiraDataRow> rows, FollowupCluster followupCluster) {
         FromJiraDataSet dataSet = new FromJiraDataSet(FROMJIRA_HEADERS, rows);
         FollowupData followupData = new FollowupData(dataSet, emptyList(), emptyList());
-        return new FollowUpDataSnapshot(data, followupData, followupCluster);
+        return new FollowUpDataSnapshot(new FollowUpTimeline(date), followupData, followupCluster);
     }
 
     private String txtResourceAsString(String pathResource) {

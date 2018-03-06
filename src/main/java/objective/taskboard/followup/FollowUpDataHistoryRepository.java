@@ -60,9 +60,9 @@ public class FollowUpDataHistoryRepository {
     public static final String EXTENSION_ZIP = ".zip";
 
     private final DataBaseDirectory dataBaseDirectory;
-    private FollowupClusterProvider clusterProvider;
-    private FollowupDailySynthesisRepository followupDailySynthesisRepo;
-    private ProjectFilterConfigurationCachedRepository projectRepo;
+    private final FollowupClusterProvider clusterProvider;
+    private final FollowupDailySynthesisRepository followupDailySynthesisRepo;
+    private final ProjectFilterConfigurationCachedRepository projectRepo;
 
     private final Gson gson = new GsonBuilder()
             .registerTypeAdapter(ZonedDateTime.class, new DateTimeUtils.ZonedDateTimeAdapter())
@@ -125,9 +125,10 @@ public class FollowUpDataHistoryRepository {
         }
 
         FollowupCluster cluster = clusterProvider.getForProject(projectsKey.get(0));
-        return new FollowUpDataSnapshot(parseLocalDate(date), loader.create(), cluster);
+        FollowUpTimeline timeline = FollowUpTimeline.getTimeline(parseLocalDate(date), projectRepo.getProjectByKey(projectsKey.get(0)));
+        return new FollowUpDataSnapshot(timeline, loader.create(), cluster);
     }
-    
+
     private FollowUpDataSnapshot load(String date, ZoneId timezone, String project) {
         FollowUpDataLoader loader = new FollowUpDataLoader(gson, timezone);
 
@@ -157,9 +158,10 @@ public class FollowUpDataHistoryRepository {
         }
 
         FollowupCluster cluster = clusterProvider.getForProject(project);
-        return new FollowUpDataSnapshot(parseLocalDate(date), loader.create(), cluster);
+        FollowUpTimeline timeline = FollowUpTimeline.getTimeline(parseLocalDate(date), projectRepo.getProjectByKey(project));
+        return new FollowUpDataSnapshot(timeline, loader.create(), cluster);
     }
-    
+
     public List<String> getHistoryGivenProjects(String... projectsKey) {
         return getHistoryGivenProjectsInFilesystem(asList(projectsKey)).stream().map(d->d.format(FILE_NAME_FORMATTER)).collect(Collectors.toList());
     }
@@ -287,9 +289,9 @@ public class FollowUpDataHistoryRepository {
     }
 
     public void save(String projectKey, FollowUpDataSnapshot followUpDataEntry) throws IOException {
-        saveSnapshotInFile(projectKey, followUpDataEntry.getDate(), followUpDataEntry.getData());
+        saveSnapshotInFile(projectKey, followUpDataEntry.getTimeline().getReference(), followUpDataEntry.getData());
         calculateAndPersistEffortForProject(
-                followUpDataEntry.getDate(),
+                followUpDataEntry.getTimeline().getReference(),
                 projectKey,
                 Optional.of(followUpDataEntry));
     }

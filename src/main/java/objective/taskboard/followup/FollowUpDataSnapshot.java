@@ -1,6 +1,5 @@
 package objective.taskboard.followup;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -8,24 +7,24 @@ import java.util.function.Consumer;
 import objective.taskboard.followup.FromJiraRowCalculator.FromJiraRowCalculation;
 
 public class FollowUpDataSnapshot {
-    private final LocalDate date;
+    private final FollowUpTimeline timeline;
     private final FollowupData followupData;
     private FollowUpDataSnapshotHistory history;
     private FollowupCluster followupCluster;
 
-    public FollowUpDataSnapshot(LocalDate date, FollowupData followupData, FollowUpDataSnapshotHistory history, FollowupCluster followupCluster) {
-        this.date = date;
+    public FollowUpDataSnapshot(FollowUpTimeline timeline, FollowupData followupData, FollowUpDataSnapshotHistory history, FollowupCluster followupCluster) {
+        this.timeline = timeline;
         this.followupData = followupData;
         this.history = history;
         this.followupCluster = followupCluster;
     }
 
-    public FollowUpDataSnapshot(LocalDate date, FollowupData followupData, FollowupCluster followupCluster) {
-        this(date, followupData, null, followupCluster);
+    public FollowUpDataSnapshot(FollowUpTimeline timeline, FollowupData followupData, FollowupCluster followupCluster) {
+        this(timeline, followupData, null, followupCluster);
     }
     
-    public LocalDate getDate() {
-        return date;
+    public FollowUpTimeline getTimeline() {
+        return timeline;
     }
 
     public FollowupData getData() {
@@ -75,7 +74,7 @@ public class FollowUpDataSnapshot {
 
     public EffortHistoryRow getEffortHistoryRow() {
         FromJiraRowCalculator rowCalculator = getCalculator();
-        EffortHistoryRow historyRow = new EffortHistoryRow(getDate());
+        EffortHistoryRow historyRow = new EffortHistoryRow(getTimeline().getReference());
 
         getData().fromJiraDs.rows.stream().forEach(fromJiraRow -> {
             FromJiraRowCalculation fromJiraRowCalculation = rowCalculator.calculate(fromJiraRow);

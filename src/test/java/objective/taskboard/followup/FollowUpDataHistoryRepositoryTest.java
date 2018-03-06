@@ -124,9 +124,9 @@ public class FollowUpDataHistoryRepositoryTest {
         when(projectTest2.getProjectKey()).thenReturn(PROJECT_TEST_2);
         when(projectTest2.getId()).thenReturn(PROJECT_TEST_2.hashCode());
         when(projectRepo.getProjectByKey(PROJECT_TEST_2)).thenReturn(Optional.of(projectTest2));
-        
+
         subject = new FollowUpDataHistoryRepository(dataBaseDirectory, clusterProvider, synthesisRepo, projectRepo);
-        
+
         when(clusterProvider.getForProject(PROJECT_TEST)).thenReturn(new FollowupClusterImpl(Arrays.asList(
                 new FollowUpClusterItem(projectTest1, "Sub-Task", "notused", "XXS", 1.9, 2.8),
                 new FollowUpClusterItem(projectTest1, "Sub-Task", "notused", "XS", 2.0, 2.8),

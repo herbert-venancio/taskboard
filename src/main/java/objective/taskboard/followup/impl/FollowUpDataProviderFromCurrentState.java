@@ -44,6 +44,7 @@ import objective.taskboard.followup.AnalyticsTransitionsDataSet;
 import objective.taskboard.followup.FollowUpDataHistoryRepository;
 import objective.taskboard.followup.FollowUpDataSnapshot;
 import objective.taskboard.followup.FollowUpDataSnapshotHistory;
+import objective.taskboard.followup.FollowUpTimeline;
 import objective.taskboard.followup.FollowupCluster;
 import objective.taskboard.followup.FollowupClusterProvider;
 import objective.taskboard.followup.FollowupData;
@@ -57,6 +58,7 @@ import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraProperties.BallparkMapping;
 import objective.taskboard.jira.MetadataService;
+import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 
 @Service
 public class FollowUpDataProviderFromCurrentState implements FollowupDataProvider {
@@ -75,6 +77,9 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
 
     @Autowired
     private FollowupClusterProvider clusterProvider;
+
+    @Autowired
+    private ProjectFilterConfigurationCachedRepository projectRepository;
 
     @Override
     public FollowUpDataSnapshot getJiraData(String[] includeProjects, ZoneId timezone) {
@@ -116,7 +121,8 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
             List<SyntheticTransitionsDataSet> syntheticsTransitionsDsList = transitions.getSyntheticTransitionsDsList(analyticsTransitionsDsList);
             FollowupData followupData = new FollowupData(fromJiraDs, analyticsTransitionsDsList, syntheticsTransitionsDsList);
 
-            FollowUpDataSnapshot followUpDataEntry = new FollowUpDataSnapshot(date, followupData, cluster);
+            FollowUpTimeline timeline = FollowUpTimeline.getTimeline(date, projectRepository.getProjectByKey(i.get(0)));
+            FollowUpDataSnapshot followUpDataEntry = new FollowUpDataSnapshot(timeline, followupData, cluster);
             followUpDataEntry.setFollowUpDataEntryHistory(new FollowUpDataSnapshotHistory(
                     historyRepository,
                     includeProjects,
