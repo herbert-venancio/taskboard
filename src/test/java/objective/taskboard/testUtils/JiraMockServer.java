@@ -258,6 +258,13 @@ public class JiraMockServer {
             return "";
         });
 
+        delete("/rest/api/latest/issue/:issueKey", (req, res) -> {
+            String issueKey = req.params(":issueKey");
+
+            dirtySearchIssuesByKey.remove(issueKey);
+            return "";
+        });
+
         get("/rest/api/latest/issue/:issueId/transitions", (req,res) ->{
             String issueKey = issueKeyByIssueId.getOrDefault(req.params("issueId"), req.params("issueId"));
             if (issueKey == null)
@@ -651,6 +658,11 @@ public class JiraMockServer {
     private void put(String path, String acceptType, Route route) {
         ensureInitialized();
         server.put(path, acceptType, route);
+    }
+
+    private void delete(String path, Route route) {
+        ensureInitialized();
+        server.delete(path, route);
     }
 
     private String loaduser(String username) {

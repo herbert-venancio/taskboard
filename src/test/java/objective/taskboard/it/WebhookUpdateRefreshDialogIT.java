@@ -38,8 +38,8 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
         emulateUpdateIssue("TASKB-625", "{\"assignee\":{\"name\":\"foo\"}},\"properties\":[]");
 
         String[] updatedIssues = {"TASKB-625"};
-        mainPage.assertUpdatedIssues(updatedIssues);
-        mainPage.errorToast().close();
+        mainPage.assertUpdatedIssues(updatedIssues)
+            .errorToast().close();
         mainPage.refreshToast()
             .assertVisibleDuringMilliseconds(4500L)
             .assertNotVisible();
@@ -49,21 +49,23 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
 
         mainPage.refreshToast().assertVisible();
         mainPage.typeSearch("TASKB-61")
-            .assertVisibleIssues("TASKB-611", "TASKB-612", "TASKB-613", "TASKB-610", "TASKB-614");
-        mainPage.refreshToast().showOnlyUpdated()
+            .assertVisibleIssues("TASKB-611", "TASKB-612", "TASKB-613", "TASKB-610", "TASKB-614")
+            .refreshToast().showOnlyUpdated()
             .assertVisibleDuringMilliseconds(5500L);
-        mainPage.assertVisibleIssues("TASKB-625");
-        mainPage.issue("TASKB-625")
+        mainPage.assertVisibleIssues("TASKB-625")
+            .issue("TASKB-625")
             .assertHasFirstAssignee()
             .assertHasSecondAssignee();
 
         mainPage.refreshToast().dismiss()
             .assertNotVisible();
-        mainPage.assertVisibleIssues("TASKB-611", "TASKB-612", "TASKB-613", "TASKB-610", "TASKB-614");
-        mainPage.clearSearch().errorToast().close();
+        mainPage.assertVisibleIssues("TASKB-611", "TASKB-612", "TASKB-613", "TASKB-610", "TASKB-614")
+            .clearSearch();
 
         emulateUpdateIssue("TASKB-625", "{\"assignee\":{\"name\":\"foo\"}},\"properties\":[]");
 
+        mainPage.assertUpdatedIssues(updatedIssues)
+            .errorToast().close();
         mainPage.refreshToast()
             .assertVisibleDuringMilliseconds(4500L)
             .assertNotVisible();
@@ -82,8 +84,15 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
         
         issueDetails
             .assertRefreshWarnIsOpen()
-            .clickOnWarning()
+            .clickOnRefreshWarning()
             .assertAssigneeIs("foo");
+
+        emulateDeleteIssue("TASKB-625");
+
+        issueDetails
+            .assertDeleteWarnIsOpen()
+            .clickOnDeleteWarning()
+            .assertIsClosed();
     }
 
     @Test
@@ -125,7 +134,8 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
             .typeSearch("TASKB-186").assertVisibleIssues()
             .typeSearch("TASKB-235").assertVisibleIssues()
             .typeSearch("TASKB-601").assertVisibleIssues()
-            .typeSearch("TASKB-572").assertVisibleIssues();
+            .typeSearch("TASKB-572").assertVisibleIssues()
+            .refreshToast().assertNotVisible();
     }
 
     @Test
@@ -173,6 +183,19 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
             .assertClassOfService("Fixed Date").assertColor(FIXED_DATE_COLOR);
     }
 
+    @Test
+    public void whenDeleteIssueHappensViaWebhook_thenIssueShouldDisappear() {
+        MainPage mainPage = MainPage.produce(webDriver);
+        mainPage.typeSearch("TASKB-625")
+            .assertVisibleIssues("TASKB-625");
+
+        emulateDeleteIssue("TASKB-625");
+
+        mainPage.refreshToast().assertNotVisible();
+        mainPage.assertVisibleIssues()
+            .refreshToast().assertNotVisible();
+    }
+
     private static void emulateUpdateIssue(String issueKey, String fieldsJson) {
         RequestBuilder
             .url("http://localhost:4567/rest/api/latest/issue/" + issueKey)
@@ -180,6 +203,19 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
             .put();
 
         String body = IOUtilities.resourceToString("webhook/" + issueKey + "_updatePayload.json");
+        RequestBuilder
+            .url(getSiteBase()+"/webhook/TASKB")
+            .header("Content-Type", "application/json")
+            .body(body)
+            .post();
+    }
+
+    private static void emulateDeleteIssue(String issueKey) {
+        RequestBuilder
+            .url("http://localhost:4567/rest/api/latest/issue/" + issueKey)
+            .delete();
+
+        String body = IOUtilities.resourceToString("webhook/" + issueKey + "_deletePayload.json");
         RequestBuilder
             .url(getSiteBase()+"/webhook/TASKB")
             .header("Content-Type", "application/json")

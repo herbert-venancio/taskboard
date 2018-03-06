@@ -362,20 +362,28 @@ function Taskboard() {
         var updateByStep = {};
         updateEvents.forEach(function(anEvent) {
             var previousInstance = getPreviousIssueInstance(anEvent.target.issueKey);
-            if (previousInstance !== null && previousInstance.issue.stateHash === anEvent.target.stateHash)
+            if (anEvent.updateType !== 'DELETED' && previousInstance !== null && previousInstance.issue.stateHash === anEvent.target.stateHash)
                 return;
+
+            if (anEvent.updateType === 'DELETED' && previousInstance !== null) {
+                self.issues.splice(previousInstance.index, 1);
+                updatedIssueKeys.push(anEvent.target.issueKey);
+                self.fireIssueUpdated('server', taskboardHome, anEvent.target, anEvent.updateType);
+                return;
+            }
+
             var converted = anEvent.target;
             if (previousInstance === null)
-                self.issues.push(converted)
+                self.issues.push(converted);
             else
-                self.issues[previousInstance.index] = converted; 
+                self.issues[previousInstance.index] = converted;
 
-            updatedIssueKeys.push(anEvent.target.issueKey)
+            updatedIssueKeys.push(anEvent.target.issueKey);
             var issueStep = self.getIssueStep(converted);
             if (issueStep !== null) {
                 var stepId = issueStep.id;
                 if (Object.keys(updateByStep).indexOf(stepId) === -1)
-                     updateByStep[stepId] = [];
+                    updateByStep[stepId] = [];
 
                 updateByStep[stepId].push(anEvent.target);
             }
@@ -418,7 +426,7 @@ function Taskboard() {
     }
 
     this.fireIssueUpdated = function(source, triggerSource, issue, updateType) {
-        var converted = self.convertAndRegisterIssue(issue);
+        var converted = updateType === 'DELETED' ? issue : self.convertAndRegisterIssue(issue);
         converted.__eventInfo = {source: source, type: updateType}
         triggerSource.fire("iron-signal", {name:"issues-updated", data:{
             source: source,

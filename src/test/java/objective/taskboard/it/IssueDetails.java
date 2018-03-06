@@ -80,12 +80,24 @@ class IssueDetails extends AbstractUiFragment {
 
     public IssueDetails assertRefreshWarnIsOpen() {
         assertIsOpened();
-        waitUntilElementExists(By.className("glasspane"));
+        waitUntilElementExists(By.id("glasspane-updated"));
         return this;
     }
 
-    public IssueDetails clickOnWarning() {
-        WebElement glasspane = webDriver.findElement(By.className("glasspane"));
+    public IssueDetails clickOnRefreshWarning() {
+        WebElement glasspane = webDriver.findElement(By.id("glasspane-updated"));
+        waitForClick(glasspane);
+        return this;
+    }
+
+    public IssueDetails assertDeleteWarnIsOpen() {
+        assertIsOpened();
+        waitUntilElementExists(By.id("glasspane-deleted"));
+        return this;
+    }
+
+    public IssueDetails clickOnDeleteWarning() {
+        WebElement glasspane = webDriver.findElement(By.id("glasspane-deleted"));
         waitForClick(glasspane);
         return this;
     }
