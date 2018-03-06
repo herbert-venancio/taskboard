@@ -32,7 +32,11 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import objective.taskboard.utils.DateTimeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
@@ -57,6 +61,8 @@ public class FollowUpController {
             .appendLiteral(':')
             .appendValue(MINUTE_OF_HOUR, 2)
             .toFormatter();
+
+    private static final Pattern COMPACT_DATE_PATTERN = Pattern.compile("(\\d+)(\\d\\d)(\\d\\d)");
     
     @Autowired
     private FollowUpFacade followUpFacade;
@@ -81,18 +87,29 @@ public class FollowUpController {
             String filename = "Followup_"+template+"_" + templateDate(date, timezone)+".xlsm";
             return ResponseEntity.ok()
                   .contentLength(resource.contentLength())
-                  .header("Content-Disposition","attachment; filename=" + filename)
+                  .header("Content-Disposition","attachment; filename=\"" + filename + "\"")
+                  .header("Set-Cookie", "fileDownload=true; path=/")
                   .body(resource);
         } catch (Exception e) {
             log.warn("Error generating followup spreadsheet", e);
-            return new ResponseEntity<>(e.getMessage() == null ? e.toString() : e.getMessage(), INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(INTERNAL_SERVER_ERROR)
+                    .header("Content-Type", "text/html; charset=utf-8")
+                    .body(StringUtils.defaultIfEmpty(e.getMessage(), e.toString()));
         }
     }
 
     private String templateDate(Optional<String> date, ZoneId timezone) {
-        if (date.isPresent() && !date.get().isEmpty())
-            return date.get();
-        return ZonedDateTime.now(timezone).format(formatter);
+        return date.flatMap(d -> {
+            Matcher matcher = COMPACT_DATE_PATTERN.matcher(d);
+            if (matcher.matches()) {
+                String year = matcher.group(1);
+                String month = matcher.group(2);
+                String day = matcher.group(3);
+                return Optional.of(DateTimeUtils.parseDate(year + "-" + month + "-" + day, timezone));
+            }
+            return Optional.empty();
+        }).orElse(ZonedDateTime.now(timezone))
+                .format(formatter);
     }
 
     @RequestMapping("generic-template")

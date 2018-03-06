@@ -229,7 +229,7 @@
                         </paper-icon-button>
                     </div>
 
-                    <div class="error-message" hidden$="{{!errorMessage}}">{{errorMessage}}</div>
+                    <div class="error-message">{{errorMessage}}</div>
 
                 </div>
 
@@ -248,6 +248,7 @@
                             on-tap="downloadFollowup" title="Generate Report">
                             Generate Report
                         </paper-button>
+                        <paper-spinner active hidden$="{{!downloadInProgress}}">...</paper-spinner>
 
                     </div>
                 </div>
@@ -296,6 +297,10 @@
                     },
                     showClearDate: {
                         type: Boolean
+                    },
+                    downloadInProgress: {
+                        type: Boolean,
+                        value: false
                     }
                 },
 
@@ -353,7 +358,7 @@
                         if (areTemplatesAvailable)
                             self.selectedItem = 0;
 
-                        self.disableGenerateButton = !areTemplatesAvailable || self.selectedItem == -1;
+                        self.updateDisableGenerateButton();
                     });
                 },
 
@@ -416,13 +421,38 @@
                         return;
                     }
 
-                    var projectQuery = "projects="+selectedKeys.join(",")
-                    var templateQuery = "template=" + this.template.value;
-                    var dateQuery = "date=" + (this.selectedIndexDate > 0 ? this.selectedItemDate.value : "");
+                    var url = "ws/followup";
+                    var query = {};
+                    query.projects = selectedKeys.join(",");
+                    query.template = this.template.value;
+                    query.timezone = taskboard.getTimeZoneIdFromBrowser();
+                    if(this.selectedIndexDate > 0)
+                        query.date = this.selectedItemDate.value;
 
-                    var timezone = "timezone=" + taskboard.getTimeZoneIdFromBrowser();
+                    $.fileDownload(url, {
+                        data: query,
+                        successCallback: function (url) {
+                            self.set('downloadInProgress', false);
+                            self.updateDisableGenerateButton();
+                        },
+                        failCallback: function (html, url) {
+                            self.set('downloadInProgress', false);
+                            self.updateDisableGenerateButton();
+                            self.set('errorMessage', html ? html : 'Failed to download followup spreadsheet');
+                            $(".error-message").show().delay(2000).fadeOut();
+                        }
+                    });
+                    this.set('downloadInProgress', true);
+                    this.updateDisableGenerateButton();
+                },
 
-                    window.location = "ws/followup?"+projectQuery + "&" + templateQuery + "&" + dateQuery + "&" + timezone;
+                updateDisableGenerateButton() {
+                    // disable when any 1 condition is true
+                    var condition1 = this.downloadInProgress;
+                    var condition2 = !this.availableTemplates || this.availableTemplates.length == 0;
+                    var condition3 = this.selectedItem == -1;
+
+                    this.set('disableGenerateButton', condition1 || condition2 || condition3);
                 }
             });
         })();
