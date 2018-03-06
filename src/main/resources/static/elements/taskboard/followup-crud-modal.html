@@ -52,12 +52,21 @@
                 display: block;
                 margin-top: 10px;
             }
+
+            .control {
+                display: flex;
+            }
+
+            .control paper-button {
+                padding: 0;
+                margin-left: 20px;
+            }
         </style>
 
         <iron-ajax id="ajaxProjects"
                    method="GET"
                    on-response="_handleProjectsResponse"
-                   url="/api/projects"
+                   url="/api/projects/followup"
                    content-type='application/json'
                    last-response="{{projects}}"></iron-ajax>
         <iron-ajax id="ajaxTemplates"
@@ -121,14 +130,25 @@
                                 <span>5. In the Options tab on the ribbon and in the Data group, click on Refresh.</span>
                             </template>
                         </div>
-                        <div class='input-wrap'>
-                            <label for="inputTemplate">
-                                <iron-icon icon="file-upload"></iron-icon>
-                                Browse Template
-                            </label>
-                            <input on-change="_onFileSelected" id="inputTemplate" type="file" accept=".xlsm" />
-                            <span>{{fileName}}</span>
+                        <div class="control">
+                            <div class='input-wrap'>
+                                <label for="inputTemplate">
+                                    <iron-icon icon="file-upload"></iron-icon>
+                                    Browse Template
+                                </label>
+                                <input on-change="_onFileSelected" id="inputTemplate" type="file" accept=".xlsm" />
+                            </div>
+                            <template is="dom-if" if="{{!isNewTemplateSelected}}">
+                                <paper-button class="tb-button--background_none"
+                                               title="Download Selected Template"
+                                               on-tap="downloadSelectedTemplate">
+                                    <iron-icon icon="file-download"></iron-icon>
+                                    Download Template
+                                </paper-button>
+                            </template>
                         </div>
+                        <span>{{fileName}}</span>
+
                     </form>
                 </div>
             </div>
@@ -395,6 +415,10 @@
 
                 downloadGenericTemplate: function() {
                     window.location = "ws/followup/generic-template";
+                },
+
+                downloadSelectedTemplate: function() {
+                    window.location = "api/templates/" + this.templateSelected.id;
                 }
             });
         })();

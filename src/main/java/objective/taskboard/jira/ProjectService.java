@@ -76,8 +76,7 @@ public class ProjectService {
     }
 
     public boolean isProjectVisibleOnConfigurations(String projectKey) {
-        return projectCache.getUserProjects().values().stream()
-                .anyMatch(p -> p.getKey().equals(projectKey));
+        return projectCache.getUserProjects().containsKey(projectKey);
     }
 
     public Version getVersion(String versionId) {

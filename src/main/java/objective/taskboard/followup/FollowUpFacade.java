@@ -97,6 +97,14 @@ public class FollowUpFacade {
                 .collect(Collectors.toList());
     }
 
+    public Optional<TemplateData> getTemplate(Long id) {
+        Template template = templateService.getTemplate(id);
+        if (template == null)
+            return Optional.empty();
+
+        return Optional.of(templateConverter.convert(template));
+    }
+
     public void createTemplate(String templateName, String projects, MultipartFile file) throws IOException {
         List<String> projectKeys = Arrays.asList(projects.split(","));
         
@@ -144,6 +152,12 @@ public class FollowUpFacade {
 
     public Resource getGenericTemplate() {
         return IOUtilities.asResource(dataBaseDirectory.path(SAMPLE_FOLLOWUP_TEMPLATE_PATH));
+    }
+
+    public Resource getSavedTemplate(String templateName) {
+        Template followUpConfiguration = templateService.getTemplate(templateName);
+        FollowUpTemplate template = followUpTemplateStorage.getTemplate(followUpConfiguration.getPath());
+        return template.getPathFollowupTemplateXLSM();
     }
 
     public List<String> getHistoryGivenProjects(String... projectsKey) {

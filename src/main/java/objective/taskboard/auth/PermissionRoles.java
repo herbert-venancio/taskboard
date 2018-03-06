@@ -21,18 +21,6 @@ public class PermissionRoles {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public List<String> getRequiredRoles() {
-        return requiredRoles;
-    }
-
-    public void setRequiredRoles(List<String> requiredRoles) {
-        this.requiredRoles = requiredRoles;
-    }
-
     public boolean accepts(String role) {
         return requiredRoles.contains(role);
     }
