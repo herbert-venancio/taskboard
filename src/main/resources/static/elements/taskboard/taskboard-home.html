@@ -392,9 +392,7 @@
                       on-iron-signal-search-filter-changed="searchFilterChanged"
                       on-iron-signal-issue-cache-state-updated="cacheStateUpdated"
                       on-iron-signal-projects-changed="projectsUpdated"
-                      on-iron-signal-open-project-configuration-modal="openProjectConfigurationModal"
-                      >
-        </iron-signals>
+                      ></iron-signals>
 
         <followup-dialog id="followupdialog"></followup-dialog>
         <followup-crud-modal id="followupCrudModal"></followup-crud-modal>
@@ -752,10 +750,6 @@
 
                 openAbout: function() {
                     this.$.aboutModal.open();
-                },
-
-                openProjectConfigurationModal: function(event, data) {
-                    this.$.projectConfigurationModal.open(data.projectKey);
                 },
 
                 searchFilterChanged: function(event, data) {

@@ -20,13 +20,14 @@
  */
 package objective.taskboard.domain;
 
-import com.google.common.collect.Streams;
-import objective.taskboard.jira.data.Version;
-
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
+
+import com.google.common.collect.Streams;
+
+import objective.taskboard.jira.data.Version;
 
 public class Project {
 
@@ -34,6 +35,7 @@ public class Project {
     private String name;
     private List<Long> teamsIds;
     private List<Version> versions;
+    private Boolean archived;
 
     public static Project from(com.atlassian.jira.rest.client.api.domain.Project jiraProject,
             ProjectFilterConfiguration projectFilterConfiguration) {
@@ -41,6 +43,7 @@ public class Project {
         project.setKey(jiraProject.getKey());
         project.setName(jiraProject.getName());
         project.setTeamsIds(projectFilterConfiguration.getTeamsIds());
+        project.setArchived(projectFilterConfiguration.isArchived());
 
         List<Version> versions = newArrayList();
         if (jiraProject.getVersions() != null)
@@ -84,6 +87,14 @@ public class Project {
         this.versions = versions;
     }
 
+    public Boolean isArchived() {
+        return archived;
+    }
+
+    public void setArchived(Boolean archived) {
+        this.archived = archived;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -115,4 +126,5 @@ public class Project {
                 ", versions=" + versions +
                 '}';
     }
+
 }

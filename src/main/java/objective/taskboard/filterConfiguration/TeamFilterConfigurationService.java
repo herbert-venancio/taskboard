@@ -72,7 +72,7 @@ public class TeamFilterConfigurationService {
 
     @Cacheable(cacheNames = CacheConfiguration.TEAMS_VISIBLE_TO_USER, keyGenerator = LoggedInUserKeyGenerator.NAME)
     public List<Team> getTeamsVisibleToUser() {
-        Set<Long> visibleTeamsIds = projectService.getVisibleProjects()
+        Set<Long> visibleTeamsIds = projectService.getVisibleProjectsOnTaskboard()
                 .stream()
                 .flatMap(p -> p.getTeamsIds().stream())
                 .collect(toSet());

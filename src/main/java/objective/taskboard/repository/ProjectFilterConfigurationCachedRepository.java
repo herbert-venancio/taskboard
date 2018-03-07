@@ -29,11 +29,13 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
+import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 
 @Service
@@ -46,16 +48,19 @@ public class ProjectFilterConfigurationCachedRepository {
 
     private List<ProjectFilterConfiguration> cache = Lists.newArrayList();
 
+    @Autowired
+    private CacheManager cacheManager;
+
     @PostConstruct
-    private void load() {
+    private synchronized void load() {
         loadCache();
     }
 
-    public List<ProjectFilterConfiguration> getProjects() {
+    public synchronized List<ProjectFilterConfiguration> getProjects() {
         return ImmutableList.copyOf(cache);
     }
-    
-    public Optional<ProjectFilterConfiguration> getProjectByKey(String projectKey) {
+
+    public synchronized Optional<ProjectFilterConfiguration> getProjectByKey(String projectKey) {
         for (ProjectFilterConfiguration projectFilterConfiguration : cache) {
             if (projectFilterConfiguration.getProjectKey().equals(projectKey))
                 return Optional.of(projectFilterConfiguration);
@@ -63,7 +68,7 @@ public class ProjectFilterConfigurationCachedRepository {
         return Optional.empty();
     }
 
-    public boolean exists(String projectKey) {
+    public synchronized boolean exists(String projectKey) {
         for (ProjectFilterConfiguration projectFilterConfiguration : cache) {
             if (projectFilterConfiguration.getProjectKey().equals(projectKey))
                 return true;
@@ -71,13 +76,16 @@ public class ProjectFilterConfigurationCachedRepository {
         return false;
     }
 
-    public void loadCache() {
+    public synchronized void loadCache() {
         log.info("------------------------------ > ProjectFilterConfigurationRepository.loadCache()");
+        cacheManager.getCache(CacheConfiguration.DASHBOARD_PROGRESS_DATA).clear();
+        cacheManager.getCache(CacheConfiguration.USER_PROJECTS).clear();
         this.cache = projectFilterRepository.findAll();
     }
 
-    public void save(ProjectFilterConfiguration f) {
+    public synchronized void save(ProjectFilterConfiguration f) {
         projectFilterRepository.save(f);
         loadCache();
     }
+
 }

@@ -1,5 +1,3 @@
-package objective.taskboard.controller;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -21,25 +19,22 @@ package objective.taskboard.controller;
  * [/LICENSE]
  */
 
+package objective.taskboard.controller;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import objective.taskboard.domain.ProjectTeam;
-
 public class ProjectData {
     public String projectKey;
     public Set<String> teams = new HashSet<>();
     public List<String> followUpDataHistory = new ArrayList<String>();
-    
-    public ProjectData() {}
-    public ProjectData(ProjectTeam project) {
-        this.projectKey = project.getProjectKey();
-    }
+    public Boolean isArchived;
 
     public static class ProjectConfigurationData {
         public String startDate;
         public String deliveryDate;
+        public Boolean isArchived;
     }
 }

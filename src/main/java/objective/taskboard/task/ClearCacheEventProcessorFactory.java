@@ -27,7 +27,7 @@ public class ClearCacheEventProcessorFactory implements JiraEventProcessorFactor
 
         return Optional.of(new ClearCacheEventProcessor(
                 CacheConfiguration.ALL_PROJECTS
-                , CacheConfiguration.PROJECTS));
+                , CacheConfiguration.USER_PROJECTS));
     }
 
     private class ClearCacheEventProcessor implements JiraEventProcessor {

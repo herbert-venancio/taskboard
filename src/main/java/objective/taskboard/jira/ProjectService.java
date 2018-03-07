@@ -47,16 +47,15 @@ public class ProjectService {
     @Autowired
     private JiraEndpointAsLoggedInUser jiraEndpointAsUser;
 
-    public List<Project> getVisibleProjects() {
-        return projectCache.getVisibleProjects()
-                .values()
-                .stream()
+    public List<Project> getVisibleProjectsOnTaskboard() {
+        return projectCache.getUserProjects().values().stream()
+                .filter(p -> !p.isArchived())
                 .sorted(comparing(Project::getName))
                 .collect(toList());
     }
 
     public Optional<CimProject> getProjectMetadata(String projectKey) {
-        if (!isProjectVisible(projectKey))
+        if (!isProjectVisibleOnTaskboard(projectKey))
             return Optional.empty();
 
         GetCreateIssueMetadataOptions options = new GetCreateIssueMetadataOptionsBuilder()
@@ -71,8 +70,14 @@ public class ProjectService {
                 Optional.empty();
     }
 
-    public boolean isProjectVisible(String projectKey) {
-        return projectCache.getVisibleProjects().containsKey(projectKey);
+    public boolean isProjectVisibleOnTaskboard(String projectKey) {
+        return getVisibleProjectsOnTaskboard().stream()
+                .anyMatch(p -> p.getKey().equals(projectKey));
+    }
+
+    public boolean isProjectVisibleOnConfigurations(String projectKey) {
+        return projectCache.getUserProjects().values().stream()
+                .anyMatch(p -> p.getKey().equals(projectKey));
     }
 
     public Version getVersion(String versionId) {

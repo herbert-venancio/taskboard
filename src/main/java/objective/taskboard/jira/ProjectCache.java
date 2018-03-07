@@ -70,8 +70,8 @@ class ProjectCache {
                 .collect(toList());
     }
 
-    @Cacheable(cacheNames=CacheConfiguration.PROJECTS, keyGenerator=LoggedInUserKeyGenerator.NAME)
-    public Map<String, Project> getVisibleProjects() {
+    @Cacheable(cacheNames=CacheConfiguration.USER_PROJECTS, keyGenerator=LoggedInUserKeyGenerator.NAME)
+    public Map<String, Project> getUserProjects() {
         List<ProjectFilterConfiguration> configuredProjects = projectFilterConfiguration.getProjects();
 
         Map<String, com.atlassian.jira.rest.client.api.domain.Project> configuredJiraProjectsToUser = configuredProjects

@@ -44,25 +44,46 @@
                 flex: 1;
             }
 
-            paper-button {
-                padding: 0;
-                display: inline-block;
-                width: 100%;
-                text-align: left;
-                font-size: 12px;
-            }
-
             paper-icon-button {
                 margin: 0px 6px 0px 10px;
                 padding: 5px;
                 width: 35px;
                 height: 35px;
             }
+            .options {
+                padding: 10px 20px;
+                background: #DDD;
+            }
+            .list {
+                padding: 10px 0;
+            }
+            .list--show-archived_true .config-item-project--archived {
+            }
+            .list--show-archived_false .config-item-project--archived {
+                /* animation begin */
+                max-height: 0;
+                overflow: hidden;
+                /* animation end */
+            }
+            .config-item-project {
+                /* animation begin */
+                max-height: 35px;
+                overflow: hidden;
+                transition: max-height .3s ease;
+                /* animation end */
+
+                padding: 0;
+                display: block;
+                font-size: 12px;
+            }
+            .config-item-project.config-item-project--archived {
+                opacity: .6;
+            }
         </style>
         
         <iron-ajax id="ajaxProjects"
                    method="GET"
-                   url="/api/projects"
+                   url="/api/projects/all"
                    content-type='application/json'
                    last-response="{{projects}}"
                    auto></iron-ajax>
@@ -75,12 +96,25 @@
                 </paper-material>
             </paper-toolbar>
             <iron-collapse id="collapseMenu">
-                <template is="dom-repeat" items="{{projects}}">
-                    <paper-button class="config-item-project" elevation="0" on-tap="openProjectConfigurationModal">
-                        <paper-icon-button icon="settings"></paper-icon-button>
-                        {{item.projectKey}}
-                    </paper-button>
-                </template>
+                <div class="options">
+                    <div class="input-wrapper">
+                        <paper-toggle-button class="tb-toggle-button"
+                                             checked="{{_showArchived}}"
+                                             >
+                            Show archived projects
+                        </paper-toggle-button>
+                    </div>
+                </div>
+                <div class$="list list--show-archived_{{_showArchived}}">
+                    <template is="dom-repeat" items="{{projects}}" as="item">
+                        <paper-button class$="config-item-project config-item-project--{{_getArchivedText(item.isArchived)}}"
+                                      elevation="0"
+                                      on-tap="openProjectConfigurationModal">
+                            <paper-icon-button icon="settings"></paper-icon-button>
+                            {{item.projectKey}}
+                        </paper-button>
+                    </template>
+                </div>
             </iron-collapse>
         </paper-material>
 
@@ -94,7 +128,11 @@
                 properties: {
                     projects: {
                         type: Array
-                    }
+                    },
+                    _showArchived: {
+                        type: Boolean,
+                        value: false
+                    },
                 },
 
                 collapseMenuTap: function (e) {
@@ -110,6 +148,10 @@
                 openProjectConfigurationModal: function(e) {
                     var projectKey = e.model.item.projectKey;
                     this.fire('iron-signal', {name: 'open-project-configuration-modal', data: {projectKey: projectKey}})
+                },
+
+                _getArchivedText: function(isArchived) {
+                    return taskboard.getArchivedText(isArchived);
                 },
 
             });

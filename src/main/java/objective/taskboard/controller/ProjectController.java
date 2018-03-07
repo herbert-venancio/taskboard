@@ -26,16 +26,13 @@ import static objective.taskboard.repository.PermissionRepository.DASHBOARD_OPER
 import static objective.taskboard.repository.PermissionRepository.DASHBOARD_TACTICAL;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.CacheManager;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -44,7 +41,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import objective.taskboard.auth.Authorizer;
-import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.controller.ProjectCreationData.ProjectCreationDataTeam;
 import objective.taskboard.controller.ProjectData.ProjectConfigurationData;
 import objective.taskboard.data.Team;
@@ -82,57 +78,31 @@ public class ProjectController {
     private FollowUpFacade followUpFacade;
 
     @Autowired
-    private CacheManager cacheManager;
-
-    @Autowired
     private Authorizer authorizer;
 
     @RequestMapping
-    public List<ProjectData> get() {
-        List<ProjectTeam> projects = projectTeamRepo.findAll().stream()
-                .filter(t -> projectService.isProjectVisible(t.getProjectKey()))
-                .sorted((p1, p2) -> p1.getProjectKey().compareTo(p2.getProjectKey()))
-                .collect(toList());
-
-        List<ProjectData> response = new ArrayList<>();
-        Map<String, ProjectData> projectXData = new LinkedHashMap<>();
-        for (ProjectTeam projectTeam : projects) {   
-            if (!projectXData.containsKey(projectTeam.getProjectKey())) {
-                ProjectData value = new ProjectData(projectTeam);
-                response.add(value);
-                projectXData.put(projectTeam.getProjectKey(), value);
-            }
-            ProjectData p = projectXData.get(projectTeam.getProjectKey());
-            p.teams.add(getProjectTeamName(projectTeam));
-        }
-        
-        List<ProjectFilterConfiguration> projectFilter = projectRepository.
-                getProjects().stream()
-                .filter(t -> projectService.isProjectVisible(t.getProjectKey()))
-                .collect(toList());
-        
-        for (ProjectFilterConfiguration projectFilterConfiguration : projectFilter) {
-            if (!projectXData.containsKey(projectFilterConfiguration.getProjectKey())) {
-                ProjectData value = new ProjectData();
-                value.projectKey = projectFilterConfiguration.getProjectKey();
-                response.add(value);
-                projectXData.put(value.projectKey, value);
-            }
-        }
-
-        for (ProjectData projectData : response) {
-            String projectKey = projectData.projectKey;
-            projectData.followUpDataHistory = followUpFacade.getHistoryGivenProjects(projectKey);
-        }
-
-        return response;
+    public List<ProjectData> getProjectsVisibleOnTaskboard() {
+        return getProjects(projectService::isProjectVisibleOnTaskboard);
     }
-    
+
+    @RequestMapping(value = "all", method = RequestMethod.GET)
+    public List<ProjectData> getProjectsVisibleOnConfigurations() {
+        return getProjects(projectService::isProjectVisibleOnConfigurations);
+    }
+
+    private List<ProjectData> getProjects(Function<String, Boolean> filterProjectsByKey) {
+        return projectRepository.getProjects().stream()
+                .filter(projectFilterConfiguration -> filterProjectsByKey.apply(projectFilterConfiguration.getProjectKey()))
+                .map(projectFilterConfiguration -> generateProjectData(projectFilterConfiguration))
+                .sorted((p1, p2) -> p1.projectKey.compareTo(p2.projectKey))
+                .collect(toList());
+    }
+
     @RequestMapping("/dashboard")
     public ResponseEntity<Object> getProjectsVisibleOnDashboard() {
         List<String> allowedProjectKeys = authorizer.getAllowedProjectsForPermissions(DASHBOARD_TACTICAL, DASHBOARD_OPERATIONAL);
 
-        List<ProjectData> projects = get().stream()
+        List<ProjectData> projects = getProjectsVisibleOnTaskboard().stream()
             .filter(p -> allowedProjectKeys.contains(p.projectKey))
             .collect(toList());
 
@@ -190,30 +160,11 @@ public class ProjectController {
         return ResponseEntity.notFound().build();
     }
 
-    @RequestMapping(method = RequestMethod.POST, consumes="application/json")
-    public void create(@RequestBody ProjectCreationData data) {
-        if (projectRepository.exists(data.projectKey))
-            return;
-        Boolean hasTeamsOnData = data.teams != null && !data.teams.isEmpty();
-        if (hasTeamsOnData)
-            validateTeamsAndWipConfigurations(data.teams);        
-        createProjectFilterConfiguration(data.projectKey);
-        if (!hasTeamsOnData)
-            return;
-        data.teams.forEach(team -> {
-            createTeamAndConfigurations(data.projectKey, team.name, data.teamLeader, data.teamLeader, team.members);
-        });
-    }
-
     @RequestMapping(value = "{projectKey}/configuration", method = RequestMethod.POST, consumes = "application/json")
     public ResponseEntity<Object> updateProjectConfiguration(@PathVariable("projectKey") String projectKey, @RequestBody ProjectConfigurationData data) {
         Optional<ProjectFilterConfiguration> optConfiguration = projectRepository.getProjectByKey(projectKey);
         if (!optConfiguration.isPresent())
             return ResponseEntity.notFound().build();
-        ProjectFilterConfiguration configuration = optConfiguration.get();
-
-        if (data.startDate == null || data.deliveryDate == null)
-            return ResponseEntity.badRequest().body("{\"message\" : \"The dates are required\"}");
 
         if (!DateTimeUtils.isValidDate(data.startDate))
             return ResponseEntity.badRequest().body("{\"message\" : \"Invalid Start Date\"}");
@@ -221,17 +172,21 @@ public class ProjectController {
         if (!DateTimeUtils.isValidDate(data.deliveryDate))
             return ResponseEntity.badRequest().body("{\"message\" : \"Invalid End Date\"}");
 
-        LocalDate startDate = DateTimeUtils.parseDate(data.startDate).toLocalDate();
-        LocalDate deliveryDate = DateTimeUtils.parseDate(data.deliveryDate).toLocalDate();
-        if (startDate.isAfter(deliveryDate))
+        if (data.isArchived == null)
+            return ResponseEntity.badRequest().body("{\"message\" : \"Invalid \"Archived\" Value\"}");
+
+        LocalDate startDate = data.startDate != null ? DateTimeUtils.parseDate(data.startDate).toLocalDate() : null;
+        LocalDate deliveryDate = data.deliveryDate != null ? DateTimeUtils.parseDate(data.deliveryDate).toLocalDate() : null;
+
+        if (startDate != null && deliveryDate != null && startDate.isAfter(deliveryDate))
             return ResponseEntity.badRequest().body("{\"message\" : \"End Date should be greater than Start Date\"}");
 
+        ProjectFilterConfiguration configuration = optConfiguration.get();
         configuration.setStartDate(startDate);
         configuration.setDeliveryDate(deliveryDate);
+        configuration.setArchived(data.isArchived);
 
         projectRepository.save(configuration);
-
-        cacheManager.getCache(CacheConfiguration.DASHBOARD_PROGRESS_DATA).clear();
 
         return ResponseEntity.ok().build();
     }
@@ -246,8 +201,24 @@ public class ProjectController {
         ProjectConfigurationData data = new ProjectConfigurationData();
         data.startDate = projectFilterConfiguration.getStartDate() != null ? projectFilterConfiguration.getStartDate().toString() : "";
         data.deliveryDate = projectFilterConfiguration.getDeliveryDate() != null ? projectFilterConfiguration.getDeliveryDate().toString() : "";
+        data.isArchived = projectFilterConfiguration.isArchived();
 
         return ResponseEntity.ok(data);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, consumes="application/json")
+    public void create(@RequestBody ProjectCreationData data) {
+        if (projectRepository.exists(data.projectKey))
+            return;
+        Boolean hasTeamsOnData = data.teams != null && !data.teams.isEmpty();
+        if (hasTeamsOnData)
+            validateTeamsAndWipConfigurations(data.teams);
+        createProjectFilterConfiguration(data.projectKey);
+        if (!hasTeamsOnData)
+            return;
+        data.teams.forEach(team -> {
+            createTeamAndConfigurations(data.projectKey, team.name, data.teamLeader, data.teamLeader, team.members);
+        });
     }
 
     private void validateTeamsAndWipConfigurations(List<ProjectCreationDataTeam> pcdTeams) {
@@ -289,6 +260,22 @@ public class ProjectController {
         projectTeam.setProjectKey(projectKey);
         projectTeam.setTeamId(teamFilterConfiguration.getTeamId());
         return projectTeamRepo.save(projectTeam);
+    }
+
+    private ProjectData generateProjectData(ProjectFilterConfiguration projectFilterConfiguration) {
+        ProjectData projectData = new ProjectData();
+        projectData.projectKey = projectFilterConfiguration.getProjectKey();
+        projectData.isArchived = projectFilterConfiguration.isArchived();
+        projectData.teams.addAll(getTeams(projectFilterConfiguration));
+        projectData.followUpDataHistory = followUpFacade.getHistoryGivenProjects(projectData.projectKey);
+        return projectData;
+    }
+
+    private List<String> getTeams(ProjectFilterConfiguration projectFilterConfiguration) {
+        return projectTeamRepo.findAll().stream()
+            .filter(projectTeam -> projectTeam.getProjectKey().equals(projectFilterConfiguration.getProjectKey()))
+            .map(projectTeam -> getProjectTeamName(projectTeam))
+            .collect(toList());
     }
 
     private String getProjectTeamName(ProjectTeam projectTeam) {

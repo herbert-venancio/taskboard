@@ -1,5 +1,3 @@
-package objective.taskboard.followup;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -21,31 +19,37 @@ package objective.taskboard.followup;
  * [/LICENSE]
  */
 
-import com.google.common.collect.Lists;
-import objective.taskboard.domain.ProjectFilterConfiguration;
-import objective.taskboard.followup.data.Template;
-import objective.taskboard.followup.impl.DefaultTemplateService;
-import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
-import objective.taskboard.repository.ProjectFilterConfigurationRepository;
-import objective.taskboard.repository.TemplateRepository;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+package objective.taskboard.followup;
+
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertThat;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.cache.CacheManager;
+import org.springframework.context.annotation.Bean;
+import org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import com.google.common.collect.Lists;
+
+import objective.taskboard.config.CacheConfiguration;
+import objective.taskboard.domain.ProjectFilterConfiguration;
+import objective.taskboard.followup.data.Template;
+import objective.taskboard.followup.impl.DefaultTemplateService;
+import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
+import objective.taskboard.repository.ProjectFilterConfigurationRepository;
+import objective.taskboard.repository.TemplateRepository;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -75,6 +79,10 @@ public class TemplateServiceTest {
         @Bean
         public ProjectFilterConfigurationCachedRepository projectFilterConfigurationCachedRepository() {
             return new ProjectFilterConfigurationCachedRepository();
+        }
+        @Bean
+        public CacheManager cacheManager() {
+            return new CacheConfiguration().cacheManager();
         }
     }
 

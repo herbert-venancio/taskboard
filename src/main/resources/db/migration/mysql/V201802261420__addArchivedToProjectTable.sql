@@ -1,0 +1,1 @@
+ALTER TABLE project_filter_configuration ADD COLUMN is_archived BOOLEAN DEFAULT FALSE NOT NULL;

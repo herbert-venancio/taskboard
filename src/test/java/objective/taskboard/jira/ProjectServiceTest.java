@@ -5,10 +5,13 @@ import static objective.taskboard.config.CacheConfiguration.ALL_PROJECTS;
 import static objective.taskboard.jira.AuthorizedJiraEndpointTest.JIRA_MASTER_PASSWORD;
 import static objective.taskboard.jira.AuthorizedJiraEndpointTest.JIRA_MASTER_USERNAME;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -22,6 +25,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import objective.taskboard.config.CacheConfiguration;
+import objective.taskboard.domain.Project;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.jira.data.Version;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
@@ -43,7 +47,12 @@ public class ProjectServiceTest {
         }
         @Bean
         public ProjectCache projectCache() {
-            return new ProjectCache();
+            return new ProjectCache() {
+                @Override
+                public Map<String, Project> getUserProjects() {
+                    return generateUserProjects();
+                }
+            };
         }
         @Bean
         public ProjectService projectService() {
@@ -123,5 +132,50 @@ public class ProjectServiceTest {
         Version version2 = projectService.getVersion("12550");
 
         assertTrue(version1 != version2);
+    }
+
+    @Test
+    public void whenGetProjectsOnTaskboard_dontShowArchivedProjects() {
+        List<Project> visibleProjectsOnTaskboard = projectService.getVisibleProjectsOnTaskboard();
+        assertFalse(visibleProjectsOnTaskboard.stream().anyMatch(p -> p.getKey().equals("PROJ1")));
+        assertFalse(visibleProjectsOnTaskboard.stream().anyMatch(p -> p.isArchived() == true));
+    }
+
+    @Test
+    public void whenCheckIfAProjectIsVisibleOnTaskboard_ifIsArchived_returnFalse() {
+        assertFalse(projectService.isProjectVisibleOnTaskboard("PROJ1"));
+        assertTrue(projectService.isProjectVisibleOnTaskboard("PROJ2"));
+    }
+
+    @Test
+    public void whenCheckIfAProjectIsVisibleOnConfiguration_ifIsArchived_returnTrue() {
+        assertTrue(projectService.isProjectVisibleOnConfigurations("PROJ1"));
+        assertTrue(projectService.isProjectVisibleOnConfigurations("PROJ2"));
+    }
+
+
+    private static Map<String, Project> generateUserProjects() {
+        Map<String, Project> projectsMap = new HashMap<String, Project>();
+
+        Project p1 = new Project();
+        p1.setKey("PROJ1");
+        p1.setName("PROJECT 1");
+        p1.setArchived(true);
+
+        Project p2 = new Project();
+        p2.setKey("PROJ2");
+        p2.setName("PROJECT 2");
+        p2.setArchived(false);
+
+        Project p3 = new Project();
+        p3.setKey("PROJ3");
+        p3.setName("PROJECT 3");
+        p3.setArchived(false);
+
+        projectsMap.put(p1.getKey(), p1);
+        projectsMap.put(p2.getKey(), p2);
+        projectsMap.put(p3.getKey(), p3);
+
+        return projectsMap;
     }
 }

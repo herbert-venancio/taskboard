@@ -84,7 +84,7 @@ public class FollowUpFacade {
     }
 
     public List<TemplateData> getTemplatesForCurrentUser() {
-        List<String> projectKeys = projectService.getVisibleProjects()
+        List<String> projectKeys = projectService.getVisibleProjectsOnTaskboard()
                 .stream()
                 .map(Project::getKey)
                 .collect(Collectors.toList());
