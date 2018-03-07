@@ -11,8 +11,7 @@ public class IssueStateHashCalculator {
 
     public int calculateHash(Issue issue) {
         return Objects.hashCode(
-                issue.getCustomFields()
-                , issue.getColor()
+                  issue.getColor()
                 , issue.getUsersTeam()
                 , issue.getTeams()
                 , issue.getId()
@@ -53,6 +52,13 @@ public class IssueStateHashCalculator {
                 , issue.getReleaseId()
                 , issue.getRelease()
                 , issue.getClassOfServiceValue()
+                , issue.getAdditionalEstimatedHours()
+                , issue.isCancelled()
+                , issue.isCompleted()
+                , issue.isBlocked()
+                , issue.getLastBlockReason()
+                , issue.getSubtasksTshirtSizes()
+                , issue.getAdditionalEstimatedHoursField()
         );
     }
 }

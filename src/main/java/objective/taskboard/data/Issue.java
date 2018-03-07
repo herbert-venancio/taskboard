@@ -34,9 +34,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.ObjectUtils;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.DateDeserializers.DateDeserializer;
 
@@ -54,7 +55,6 @@ import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.data.Version;
 import objective.taskboard.repository.FilterCachedRepository;
 import objective.taskboard.utils.DateTimeUtils;
-
 
 public class Issue extends IssueScratch implements Serializable {
     private static final long serialVersionUID = 8513934402068368820L;
@@ -142,12 +142,11 @@ public class Issue extends IssueScratch implements Serializable {
         this.hidden = false;
         this.worklogs = scratch.worklogs;
     }
-
-    @JsonAnyGetter
+    
+    @JsonIgnore
     public Map<String, Serializable> getCustomFields() {
         return customFields;
     }
-
     public Issue() {
         jiraProperties = SpringContextBridge.getBean(JiraProperties.class);
         metaDataService = SpringContextBridge.getBean(MetadataService.class);
@@ -328,27 +327,55 @@ public class Issue extends IssueScratch implements Serializable {
     public Double getCycleTime(ZoneId timezone) {
         return cycleTime.getCycleTime(Instant.ofEpochMilli(startDateStepMillis), timezone, status);
     }
-
-    @JsonIgnore
-    public Double getAdditionalEstimatedHours() {
+    
+    public CustomField getAdditionalEstimatedHoursField() {
         String additionalEstimatedHoursFieldId = jiraProperties.getCustomfield().getAdditionalEstimatedHours().getId();
-        CustomField additionalEstimatedHours = (CustomField) getCustomFields().get(additionalEstimatedHoursFieldId);
+        return (CustomField) customFields.get(additionalEstimatedHoursFieldId);
+    }
+
+    public Double getAdditionalEstimatedHours() {
+        CustomField additionalEstimatedHours = getAdditionalEstimatedHoursField();
         if (additionalEstimatedHours != null)
             return (Double) additionalEstimatedHours.getValue();
         return null;
     }
+    
+    public boolean isCancelled() {
+        return jiraProperties.getStatusesCanceledIds().stream().anyMatch(s -> s.equals(status));
+    }
+    
+    public boolean isCompleted() {
+        return jiraProperties.getStatusesCompletedIds().stream().anyMatch(s -> s.equals(status));
+    }    
 
-    @JsonIgnore
-    public Boolean isBlocked() {
+    public boolean isBlocked() {
         String blockedFieldId = jiraProperties.getCustomfield().getBlocked().getId();
-        String blockedValue = (String) getCustomFields().get(blockedFieldId);
+        String blockedValue = (String) customFields.get(blockedFieldId);
         return StringUtils.isNotEmpty(blockedValue);
     }
 
-    @JsonIgnore
     public String getLastBlockReason() {
         String lastBlockReasonFieldId = jiraProperties.getCustomfield().getLastBlockReason().getId();
-        return (String) getCustomFields().get(lastBlockReasonFieldId);
+        return (String) customFields.get(lastBlockReasonFieldId);
+    }
+    
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    public List<CustomField> getSubtasksTshirtSizes() {
+        if (customFields == null)
+            return new LinkedList<>();
+        
+        return jiraProperties.getCustomfield().getTShirtSize().getIds().stream()
+            .filter(id -> !ObjectUtils.isEmpty(customFields.get(id)))
+            .map(id->(CustomField)customFields.get(id))
+            .collect(Collectors.toList());
+    }
+    
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    public String getCardTshirtSize() {
+        List<CustomField> tshirtSizes = getSubtasksTshirtSizes();
+        if (tshirtSizes.size() == 1)
+            return tshirtSizes.get(0).getValue().toString();
+        return "";
     }
 
     public Long getId() {

@@ -325,10 +325,6 @@ function Taskboard() {
         return this.getStatus(statusId).name;
     };
 
-    this.getOnlyOneSize = function(sizes) {
-        return sizes.length != 1 ? null : sizes[0].value;
-    };
-
     this.connectToWebsocket = function(taskboardHome) {
         var socket = new SockJS('/taskboard-websocket');
         var stompClient = Stomp.over(socket);
@@ -368,7 +364,7 @@ function Taskboard() {
             var previousInstance = getPreviousIssueInstance(anEvent.target.issueKey);
             if (previousInstance !== null && previousInstance.issue.stateHash === anEvent.target.stateHash)
                 return;
-            var converted = self.convertIssue(anEvent.target);
+            var converted = anEvent.target;
             if (previousInstance === null)
                 self.issues.push(converted)
             else
@@ -444,30 +440,13 @@ function Taskboard() {
     }
 
     this.convertAndRegisterIssue = function(issue) {
-        var converted = self.convertIssue(issue);
+        var converted = issue;
         var previousInstance = getPreviousIssueInstance(issue.issueKey);
         if (previousInstance === null)
             self.issues.push(converted)
         else
             self.issues[previousInstance.index] = converted;
         return converted;
-    }
-
-    this.convertIssue = function(issue) {
-        var listSizes = [];
-        CUSTOMFIELD.SIZES.forEach(function(sizeId) {
-            if (issue[sizeId])
-                listSizes.push(issue[sizeId]);
-        });
-
-        issue.customfields = {
-            sizes: listSizes,
-            impedido: issue[CUSTOMFIELD.IMPEDIDO],
-            lastBlockReason: issue[CUSTOMFIELD.LAST_BLOCK_REASON],
-            additionalEstimatedHours: issue[CUSTOMFIELD.ADDITIONAL_ESTIMATED_HOURS]
-        };
-
-        return issue;
     }
 
     function hasSomeFilteredIssue(issues) {

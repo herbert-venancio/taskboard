@@ -123,9 +123,6 @@
 
                 issuesReceived: function(data) {
                     var issues = data.detail.response;
-                    for (var i in issues) 
-                        taskboard.convertIssue(issues[i]);
-                    
                     taskboard.setIssues(issues);
                     this.issues = issues;
                     this.checkIssuesInvalidTeam();

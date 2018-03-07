@@ -482,7 +482,7 @@
                             </div>
                         </div>
 
-                        <template is="dom-if" if="{{issueBlocked(item)}}">
+                        <template is="dom-if" if="{{item.blocked}}">
                             <div class="column-block item-icon-text blocked">
                                 <div class="sub-header">Blocked</div>
                                 <div class="icon-text">
@@ -494,7 +494,7 @@
                             </div>
                         </template>
 
-                        <template is="dom-if" if="{{issueCancelada(item)}}">
+                        <template is="dom-if" if="{{item.cancelled}}">
                             <div class="column-block item-icon-text-canceled">
                                 <div class="sub-header">Canceled</div>
                                 <div class="icon-text">
@@ -547,10 +547,10 @@
                         </div>
                     </div>
 
-                    <template is="dom-if" if="{{item.customfields.sizes.length}}">
+                    <template is="dom-if" if="{{item.subtasksTshirtSizes.length}}">
                         <div class="content-row">
 
-                            <template is="dom-repeat" items="{{item.customfields.sizes}}" as="size">
+                            <template is="dom-repeat" items="{{item.subtasksTshirtSizes}}" as="size">
                                 <div class="column-block top-bottom-alignment">
                                     <div class="sub-header">{{size.name}}</div>
                                     <div class="sub-content">
@@ -572,11 +572,11 @@
                             </div>
                         </div>
 
-                        <template is="dom-if" if="{{item.customfields.additionalEstimatedHours}}">
+                        <template is="dom-if" if="{{item.additionalEstimatedHoursField}}">
                             <div class="column-block">
-                                <div class="sub-header">{{item.customfields.additionalEstimatedHours.name}}</div>
+                                <div class="sub-header">{{item.additionalEstimatedHoursField.name}}</div>
                                 <div class="sub-content">
-                                    <span>{{item.customfields.additionalEstimatedHours.value}}</span>
+                                    <span>{{item.additionalEstimatedHoursField.value}}</span>
                                 </div>
                             </div>
                         </template>
@@ -592,12 +592,12 @@
 
                     </div>
 
-                    <template is="dom-if" if="{{issueBlocked(item)}}">
+                    <template is="dom-if" if="{{item.blocked}}">
                         <div class="content-row">
                             <div class="column-block">
                                 <div class="sub-header">Last Block Reason</div>
                                 <div class="sub-content">
-                                    <textarea class="last-block-reason-textarea" disabled>{{item.customfields.lastBlockReason}}</textarea>
+                                    <textarea class="last-block-reason-textarea" disabled>{{item.lastBlockReason}}</textarea>
                                 </div>
                             </div>
                         </div>
@@ -954,8 +954,10 @@
                                 'Content-Type': 'application/json'
                             },
                             data: issue.customFields[CUSTOMFIELD.LAST_BLOCK_REASON],
-                            success: function () {
-                                location.reload(true);
+                            success: function (issueFromServer) {
+                                self._setIssueLocalStateAndFireUpdated(issueFromServer, false, null, 'UPDATED');
+                                if(self._isOpenedAndIsTheSameIssue(issueFromServer.issueKey))
+                                    self.setCard(issueFromServer);
                             },
                             error: function (jqXhr, textStatus, errorThrown) {
                                 console.error(errorThrown);
@@ -990,8 +992,10 @@
                     $.ajax({
                         url: '/ws/issues/unblock-task/' + self.item.issueKey,
                         type: 'get',
-                        success: function () {
-                            location.reload(true);
+                        success: function (issueFromServer) {
+                            self._setIssueLocalStateAndFireUpdated(issueFromServer, false, null, 'UPDATED');
+                            if(self._isOpenedAndIsTheSameIssue(issueFromServer.issueKey))
+                                self.setCard(issueFromServer);
                         },
                         error: function (jqXhr, textStatus, errorThrown) {
                             console.error(errorThrown);
@@ -1143,8 +1147,8 @@
                     this.subtasks = item.subtasks;
                     this.shouldShowSubtasks = typeof this.subtasks !== undefined && this.subtasks.length > 0;
 
-                    this.canBlock = !this.issueBlocked(item) && !this.issueFechada(item);
-                    this.canUnblock = this.issueBlocked(item) && !this.issueFechada(item);
+                    this.canBlock = !item.blocked && !item.completed;
+                    this.canUnblock = item.blocked && !item.completed;
                     this.issueChangeStateClass = '';
                     this.updatedIssue = null;
 
@@ -1237,18 +1241,6 @@
                     this.isUpdating = false;
                     this.errorMessage = null;
                     this.set('_modalStatus', this._modalStatuses.CLOSED);
-                },
-
-                issueFechada: function (item) {
-                    return STATUSES_COMPLETED_IDS.indexOf(item.status) != -1;
-                },
-
-                issueCancelada: function (item) {
-                    return STATUSES_CANCELED_IDS.indexOf(item.status) != -1;
-                },
-
-                issueBlocked: function (item) {
-                    return this.item.customfields.impedido;
                 },
 
                 getIssueTypeName: function(issueTypeId) {

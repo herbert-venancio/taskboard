@@ -78,6 +78,7 @@ public class IssueStateHashCalculatorTest {
                 .map(method -> method.getName())
                 .collect(Collectors.toSet());
 
+        ignoredMethods.add("getCardTshirtSize");
         ignoredMethods.add("getStateHash");
         ignoredMethods.add("getClass");
 
