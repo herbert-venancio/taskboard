@@ -79,8 +79,8 @@ public class FollowupGeneratorUiIT extends AuthenticatedIntegrationTest {
         String yesterdayString = yesterday.toString(FILE_NAME_FORMAT);
         createProjectZip("TASKB", yesterdayString);
 
-        Integer projectTASKBIndex = 0;
-        Integer projectPROJ1Index = 1;
+        Integer projectTASKBIndex = 6;
+        Integer projectPROJ1Index = 0;
         MainPage mainPage = MainPage.produce(webDriver);
 
         mainPage

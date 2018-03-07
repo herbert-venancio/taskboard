@@ -1,0 +1,1 @@
+ALTER TABLE project_filter_configuration ADD is_archived NUMBER(1,0) DEFAULT 0 NOT NULL;

@@ -80,16 +80,26 @@
                     text: {
                         type: String,
                         notify: true
+                    },
+
+                    buttonCallback: {
+                        value: undefined
                     }
                 },
 
                 close: function () {
-                	this.$.alertModal.toggle();
+                    if (this.buttonCallback) {
+                        this.buttonCallback();
+                        this.buttonCallback = undefined;
+                    } else {
+                        this.$.alertModal.toggle();
+                    }
                 },
 
-                open: function (title, text) {
+                open: function (title, text, buttonCallback) {
                     this.title = title;
                     this.text = text;
+                    this.buttonCallback = buttonCallback;
                     this.$.alertModal.toggle();
                 }
 

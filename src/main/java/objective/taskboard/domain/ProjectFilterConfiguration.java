@@ -1,8 +1,3 @@
-package objective.taskboard.domain;
-
-import java.io.Serializable;
-import java.time.LocalDate;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -23,6 +18,11 @@ import java.time.LocalDate;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+
+package objective.taskboard.domain;
+
+import java.io.Serializable;
+import java.time.LocalDate;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -55,6 +55,9 @@ public class ProjectFilterConfiguration implements Serializable {
     @Column
     private LocalDate deliveryDate;//NOSONAR
 
+    @Column
+    private Boolean isArchived;
+
     public Integer getId() {
         return id;
     }
@@ -83,6 +86,14 @@ public class ProjectFilterConfiguration implements Serializable {
         this.deliveryDate = deliveryDate;
     }
 
+    public Boolean isArchived() {
+        return isArchived != null ? isArchived : false;
+    }
+
+    public void setArchived(Boolean isArchived) {
+        this.isArchived = isArchived;
+    }
+
     @OneToMany(fetch=FetchType.EAGER)
     @JoinColumn(name="projectKey", referencedColumnName="projectKey")
     private List<ProjectTeam> projectTeams;
@@ -90,4 +101,5 @@ public class ProjectFilterConfiguration implements Serializable {
     public List<Long> getTeamsIds() {
         return projectTeams.stream().map(el->el.getTeamId()).collect(Collectors.toList());
     }
+
 }

@@ -42,7 +42,7 @@ public class CacheConfiguration {
     public static final String ISSUE_TYPE_METADATA = "issueTypeMetadata";
     public static final String CONFIGURED_TEAMS = "configured-teams";
     public static final String TEAMS_VISIBLE_TO_USER = "teams-visible-to-user";
-    public static final String PROJECTS = "projects";
+    public static final String USER_PROJECTS = "user-projects";
     public static final String ALL_PROJECTS = "all-projects";
     public static final String JIRA_FIELD_METADATA = "jira-field-metadata";
     public static final String HOLIDAYS = "holidays";
@@ -61,7 +61,7 @@ public class CacheConfiguration {
                 new GuavaCache(ISSUE_LINKS_METADATA, CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).concurrencyLevel(1).build()),
                 new GuavaCache(CONFIGURED_TEAMS, CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).concurrencyLevel(1).build()),
                 new GuavaCache(TEAMS_VISIBLE_TO_USER, CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).concurrencyLevel(1).build()),
-                new GuavaCache(PROJECTS, CacheBuilder.newBuilder().expireAfterWrite(6, TimeUnit.HOURS).concurrencyLevel(1).build()),
+                new GuavaCache(USER_PROJECTS, CacheBuilder.newBuilder().expireAfterWrite(6, TimeUnit.HOURS).concurrencyLevel(1).build()),
                 new GuavaCache(ALL_PROJECTS, CacheBuilder.newBuilder().expireAfterWrite(6, TimeUnit.HOURS).concurrencyLevel(1).build()),
                 new GuavaCache(JIRA_FIELD_METADATA, CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).concurrencyLevel(1).build()),
                 new GuavaCache(HOLIDAYS, CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).concurrencyLevel(1).build()),

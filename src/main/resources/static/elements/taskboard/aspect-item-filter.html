@@ -61,10 +61,8 @@
         </paper-toolbar>
         <iron-collapse id="collapseFilter">
             <paper-material class="layout vertical" elevation="0">
-                <template is="dom-repeat" items="{{aspectItemFilter.aspectsSubitemFilter}}" as="aspectSubitemFilter">
-                    <template is="dom-if" if="{{isVisible(aspectSubitemFilter, notified)}}">
-                        <aspect-subitem-filter aspect-subitem-filter="{{aspectSubitemFilter}}" description="{{aspectItemFilter.description}}" selected="{{aspectSubitemFilter.selected}}"></aspect-subitem-filter>
-                    </template>
+                <template class="aspectItemsFilter" is="dom-repeat" items="{{aspectItemFilter.aspectsSubitemFilter}}" as="aspectSubitemFilter" filter="isVisible">
+                    <aspect-subitem-filter aspect-subitem-filter="{{aspectSubitemFilter}}" description="{{aspectItemFilter.description}}" selected="{{aspectSubitemFilter.selected}}"></aspect-subitem-filter>
                 </template>
             </paper-material>
         </iron-collapse>
@@ -93,7 +91,8 @@
                 },
 
                 observers: [
-                    'refreshCheckBox(aspectItemFilter.aspectsSubitemFilter.*)'
+                    'refreshCheckBox(aspectItemFilter.aspectsSubitemFilter.*)',
+                    'refreshList(aspectItemFilter.aspectsSubitemFilter.*, notified)'
                 ],
 
                 checkAll: function () {
@@ -125,6 +124,10 @@
                             return;
                         }
                     }
+                },
+
+                refreshList: function() {
+                    this.$$('.aspectItemsFilter').render();
                 },
 
                 isVisible: function(aspectSubitemFilter) {

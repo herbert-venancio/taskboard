@@ -53,6 +53,10 @@ function addDaysToDate(date, days) {
     return newDate;
 }
 
+function getCapitalized(string) {
+    return _.isEmpty(string) ? string : string.charAt(0).toUpperCase() + string.slice(1);
+}
+
 if (!Object.values) {
     Object.values = function(obj) {
         return Object.keys(obj).map(

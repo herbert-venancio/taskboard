@@ -497,6 +497,10 @@ function Taskboard() {
         return "resolution";
     }
 
+    this.getArchivedText = function(isArchived) {
+        return isArchived ? 'archived' : 'active';
+    };
+
 }
 
 var taskboard = new Taskboard();
