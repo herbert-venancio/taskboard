@@ -22,42 +22,47 @@
     },
     {
       "projectKey": "PROJ1",
+      "name": "Administrators",
+      "id": 10100
+    },
+    {
+      "projectKey": "PROJ1",
       "name": "Developers",
       "id": 10100
     },
     {
       "projectKey": "PROJ2",
-      "name": "Developers",
+      "name": "Administrators",
       "id": 10100
     },
     {
       "projectKey": "PROJ3",
-      "name": "Developers",
+      "name": "Administrators",
       "id": 10100
     },
     {
       "projectKey": "PROJ4",
-      "name": "Developers",
+      "name": "Administrators",
       "id": 10100
     },
     {
       "projectKey": "PROJ5",
-      "name": "Developers",
+      "name": "Administrators",
       "id": 10100
     },
     {
       "projectKey": "PROJ6",
-      "name": "Developers",
+      "name": "Administrators",
       "id": 10100
     },
     {
       "projectKey": "PROJ7",
-      "name": "Developers",
+      "name": "Administrators",
       "id": 10100
     },
     {
       "projectKey": "PROJ8",
-      "name": "Developers",
+      "name": "Administrators",
       "id": 10100
     }
   ]

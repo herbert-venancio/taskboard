@@ -22,6 +22,7 @@ package objective.taskboard.controller;
  */
 
 import static java.util.stream.Collectors.toList;
+import static objective.taskboard.repository.PermissionRepository.ADMINISTRATIVE;
 import static objective.taskboard.repository.PermissionRepository.DASHBOARD_OPERATIONAL;
 import static objective.taskboard.repository.PermissionRepository.DASHBOARD_TACTICAL;
 
@@ -29,7 +30,7 @@ import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,9 +91,9 @@ public class ProjectController {
         return getProjects(projectService::isProjectVisibleOnConfigurations);
     }
 
-    private List<ProjectData> getProjects(Function<String, Boolean> filterProjectsByKey) {
+    private List<ProjectData> getProjects(Predicate<String> filterProjectsByKey) {
         return projectRepository.getProjects().stream()
-                .filter(projectFilterConfiguration -> filterProjectsByKey.apply(projectFilterConfiguration.getProjectKey()))
+                .filter(projectFilterConfiguration -> filterProjectsByKey.test(projectFilterConfiguration.getProjectKey()))
                 .map(projectFilterConfiguration -> generateProjectData(projectFilterConfiguration))
                 .sorted((p1, p2) -> p1.projectKey.compareTo(p2.projectKey))
                 .collect(toList());
@@ -102,9 +103,18 @@ public class ProjectController {
     public ResponseEntity<Object> getProjectsVisibleOnDashboard() {
         List<String> allowedProjectKeys = authorizer.getAllowedProjectsForPermissions(DASHBOARD_TACTICAL, DASHBOARD_OPERATIONAL);
 
-        List<ProjectData> projects = getProjectsVisibleOnTaskboard().stream()
-            .filter(p -> allowedProjectKeys.contains(p.projectKey))
-            .collect(toList());
+        Predicate<String> visibleOnTaskboardAndAllowed = projectKey -> projectService.isProjectVisibleOnTaskboard(projectKey) && allowedProjectKeys.contains(projectKey);
+        List<ProjectData> projects = getProjects(visibleOnTaskboardAndAllowed);
+
+        return ResponseEntity.ok(projects);
+    }
+
+    @RequestMapping("/followup")
+    public ResponseEntity<Object> getProjectsVisibleOnFollowupConfigurations() {
+        List<String> allowedProjectKeys = authorizer.getAllowedProjectsForPermissions(ADMINISTRATIVE);
+
+        Predicate<String> visibleOnTaskboardAndAllowed = projectKey -> projectService.isProjectVisibleOnTaskboard(projectKey) && allowedProjectKeys.contains(projectKey);
+        List<ProjectData> projects = getProjects(visibleOnTaskboardAndAllowed);
 
         return ResponseEntity.ok(projects);
     }
