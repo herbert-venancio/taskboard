@@ -24,11 +24,41 @@ import org.junit.Test;
 
 public class BasicLoginIT extends AbstractUIWithCoverageIntegrationTest {
     @Test
-    public void testLoginSuccessful() {
+    public void givenAdminUser_whenLogin_thenHasAdminAccess() {
         LoginPage loginPage = LoginPage.to(webDriver);
         loginPage.login("foo", "bar");
         
         MainPage mainPage = MainPage.produce(webDriver);
         mainPage.waitUserLabelToBe("Foo");
+        mainPage.assertFollowupButtonIsVisible()
+            .assertTemplateButtonIsVisible()
+            .assertDashboardButtonIsVisible()
+            .assertSizingImportButtonIsVisible();
+    }
+
+    @Test
+    public void givenDeveloperUser_whenLogin_thenHasDeveloperAccess() {
+        LoginPage loginPage = LoginPage.to(webDriver);
+        loginPage.login("thomas.developer", "thomas.developer");
+        
+        MainPage mainPage = MainPage.produce(webDriver);
+        mainPage.waitUserLabelToBe("Thomas.developer");
+        mainPage.assertFollowupButtonIsNotVisible()
+            .assertTemplateButtonIsNotVisible()
+            .assertDashboardButtonIsVisible()
+            .assertSizingImportButtonIsNotVisible();
+    }
+
+    @Test
+    public void givenCustomerUser_whenLogin_thenHasCustomerAccess() {
+        LoginPage loginPage = LoginPage.to(webDriver);
+        loginPage.login("albert.customer", "albert.customer");
+        
+        MainPage mainPage = MainPage.produce(webDriver);
+        mainPage.waitUserLabelToBe("Albert.customer");
+        mainPage.assertFollowupButtonIsNotVisible()
+            .assertTemplateButtonIsNotVisible()
+            .assertDashboardButtonIsNotVisible()
+            .assertSizingImportButtonIsNotVisible();
     }
 }
