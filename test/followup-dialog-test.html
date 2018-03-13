@@ -1,0 +1,357 @@
+<!doctype html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+    <title>Followup Dialog Test</title>
+
+    <link rel="import" href="/static/bower_components/polymer/polymer.html">
+    <link rel="import" href="/static/bower_components/test-fixture/test-fixture.html">
+
+    <script src="/static/bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
+    <script src="/static/bower_components/web-component-tester/browser.js"></script>
+    <script src="/static/bower_components/test-fixture/test-fixture-mocha.js"></script>
+    <script src="/static/bower_components/iron-test-helpers/mock-interactions.js"></script>
+
+    <!-- dependencies -->
+    <link rel="import" href="/static/bower_components/iron-flex-layout/classes/iron-flex-layout.html">
+    <link rel="import" href="/static/bower_components/iron-icons/iron-icons.html">
+    <link rel="stylesheet" href="/static/styles/main.css">
+
+    <link rel="import" href="/static/bower_components/iron-ajax/iron-ajax.html">
+    <link rel="import" href="/static/bower_components/iron-selector/iron-selector.html">
+    <link rel="import" href="/static/bower_components/iron-icon/iron-icon.html">
+    <link rel="import" href="/static/bower_components/paper-dialog/paper-dialog.html">
+    <link rel="import" href="/static/bower_components/paper-card/paper-card.html">
+    <link rel="import" href="/static/bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+    <link rel="import" href="/static/bower_components/paper-menu/paper-menu.html">
+    <link rel="import" href="/static/bower_components/paper-item/paper-item.html">
+    <link rel="import" href="/static/bower_components/paper-icon-button/paper-icon-button.html">
+    <link rel="import" href="/static/bower_components/paper-radio-button/paper-radio-button.html">
+    <link rel="import" href="/static/bower_components/paper-radio-group/paper-radio-group.html">
+    <link rel="import" href="/static/bower_components/paper-spinner/paper-spinner.html">
+    <link rel="import" href="/static/bower_components/neon-animation/neon-animations.html">
+    <script src="/static/scripts/utils.js"></script>
+    <script src="/static/bower_components/jquery/dist/jquery.js"></script>
+
+    <!-- Import the element to test -->
+    <link rel="import" href="/static/elements/taskboard/followup-dialog.html">
+
+</head>
+<body>
+
+    <test-fixture id="followup-dialog-fixture">
+        <template>
+            <followup-dialog></followup-dialog>
+        </template>
+    </test-fixture>
+
+    <script>
+        function async(callback, timeout) {
+            Polymer.Base.async(callback, timeout || 0);
+        }
+
+        function wait(timeout) {
+            return function() {
+                return new Promise(function(resolve, reject) {
+                    async(resolve, timeout);
+                });
+            };
+        }
+
+        suite('<followup-dialog>', function() {
+
+            var followupDialog;
+            var server;
+            var responseHeaders = {
+                json: { 'Content-Type': 'application/json' }
+            };
+
+            function openDialog() {
+                return new Promise(
+                    function(resolve, reject) {
+                        var listener = function(event) {
+                            followupDialog.$.modal.removeEventListener('neon-animation-finish', listener);
+                            async(function() { resolve(followupDialog); });
+                        }
+                        followupDialog.$.modal.addEventListener('neon-animation-finish', listener);
+                        followupDialog.opendialog();
+                        server.respond();
+                    }
+                );
+            }
+
+            setup(function() {
+                followupDialog = fixture('followup-dialog-fixture');
+                window.authorizer = {
+                    hasPermissionInAnyProject: function() {
+                        return true;
+                    }
+                };
+            });
+
+            teardown(function() {
+                if(server) {
+                    server.restore();
+                    server = null;
+                }
+                delete window.authorizer;
+            });
+
+            suite('<sanity-check>', function() {
+
+                test('sanity check - followup-dialog loads correctly', function() {
+                    assert.isDefined(followupDialog.root, 'component should be defined.');
+                });
+
+            });
+
+            suite('<basic-interaction>', function() {
+
+                function tapRadioButton(key) {
+                    return function() {
+                        return new Promise(
+                            function(resolve, reject) {
+                                var templateRadioButton = _.find(
+                                    followupDialog.querySelectorAll('paper-radio-button')
+                                    , function(radioButton) {
+                                        return radioButton.textContent.trim() == key;
+                                    });
+                                if(templateRadioButton) {
+                                    MockInteractions.tap(templateRadioButton);
+                                    async(function() { resolve(templateRadioButton); });
+                                } else {
+                                    reject(new Error('paper-radio-button with key="' + key + '" not found'));
+                                }
+                            }
+                        );
+                    }
+                }
+
+                function selectDate(date) {
+                    return function() {
+                        return new Promise(function(resolve, reject) {
+                            var dateDropDown = followupDialog.$$('.followup-dropdown');
+                            var listener = function() {
+                                dateDropDown.$.menuButton.$.dropdown.removeEventListener('iron-overlay-opened', listener);
+                                async(function() { resolve(dateDropDown); });
+                            }
+                            dateDropDown.$.menuButton.$.dropdown.addEventListener('iron-overlay-opened', listener);
+                            MockInteractions.tap(dateDropDown);
+                        }).then(function() {
+                            return new Promise(function(resolve, reject) {
+                                var paperItem = _.find(
+                                    followupDialog.$.dateMenu.querySelectorAll('paper-item')
+                                    , function(paperItem) {
+                                        return paperItem.value == date;
+                                    });
+                                if(paperItem) {
+                                    MockInteractions.tap(paperItem);
+                                    async(function() { resolve(paperItem); });
+                                } else {
+                                    reject(new Error('paper-item with value="' + date + '" not found'));
+                                }
+                            });
+                        });
+                    };
+                }
+
+                function tapGenerate() {
+                    return new Promise(function(resolve, reject) {
+                        var generateButton = followupDialog.$.generate;
+                        MockInteractions.tap(generateButton);
+                        async(function() { resolve(generateButton); });
+                    });
+                }
+
+                function tapButton(selector) {
+                    return function() {
+                        return new Promise(function(resolve, reject) {
+                            var button = followupDialog.$$(selector);
+                            MockInteractions.tap(button);
+                            resolve();
+                        })
+                    }
+                }
+
+                function callSuccessCallback() {
+                    return new Promise(function(resolve, reject) {
+                        // generating report on backend
+                        async(function() {
+                            var args = $.fileDownload.args[0];
+                            var url = args[0];
+                            var config = args[1];
+                            config.successCallback(url);
+                            resolve();
+                        }, 200);
+                    });
+                }
+
+                setup(function() {
+                    server = sinon.fakeServer.create();
+                    server.respondWith(
+                        'GET',
+                        /\/api\/projects/, [
+                            200,
+                            responseHeaders.json,
+                            '['
+                            +'  {"projectKey":"TASKB","followUpDataHistory":["20180101","20180102","20180103"]}'
+                            +', {"projectKey":"PROJ1","followUpDataHistory":["20180102","20180103","20180104"]}'
+                            +', {"projectKey":"PROJ2","followUpDataHistory":["20180103","20180104","20180105"]}'
+                            +', {"projectKey":"PROJ3","followUpDataHistory":[]}'
+                            +']'
+                        ]
+                    );
+                    server.respondWith(
+                        'GET',
+                        /\/api\/templates/, [
+                            200,
+                            responseHeaders.json,
+                            '['
+                            +'  {"id":1,"name":"TASKB Template","projects":["TASKB"]}'
+                            +', {"id":2,"name":"PROJ1 Template","projects":["PROJ1"]}'
+                            +', {"id":3,"name":"TASKB+PROJ2 Template","projects":["TASKB","PROJ2"]}'
+                            +', {"id":4,"name":"PROJ3 Template","projects":["PROJ3"]}'
+                            +']'
+                        ]
+                    );
+                    window.$.fileDownload = sinon.spy();
+                    window.taskboard = {
+                        getTimeZoneIdFromBrowser: function() {
+                            return 'America/Sao_Paulo';
+                        }
+                    };
+                });
+
+                teardown(function() {
+                    delete window.taskboard;
+                    delete window.$.fileDownload;
+                });
+
+                test('opens dialog => load projects + templates => then close', function() {
+                    return openDialog()
+                        .then(function() {
+                            expect(followupDialog.projects.length).to.be.equal(4);
+                            expect(followupDialog.allTemplates.length).to.be.equal(4);
+                            expect(followupDialog.showNoTemplatesFoundWarning).to.be.false;
+                            expect(followupDialog.$.noTemplateWarning.hidden).to.be.true;
+                        }).then(function() {
+                            expect(followupDialog.$.modal.opened).to.be.true;
+                        }).then(tapButton('.buttonClose'))
+                        .then(function() {
+                            expect(followupDialog.$.modal.opened).to.be.false;
+                        });
+                });
+
+                test('select any template => enables button', function() {
+                    return openDialog()
+                        .then(function() {
+                            expect(followupDialog.$.generate.disabled).to.be.true;
+                        }).then(tapRadioButton('TASKB Template'))
+                        .then(function() {
+                            expect(followupDialog.$.generate.disabled).to.be.false;
+                        });
+                });
+
+                test('select TASKB+PROJ2 Template => filter dates', function() {
+                    return openDialog()
+                        .then(tapRadioButton('TASKB+PROJ2 Template'))
+                        .then(function() {
+                            var dateMenu = followupDialog.$.dateMenu;
+                            expect(dateMenu.items.length).to.be.equal(2);
+                        });
+                });
+
+                test('select template + select date + tap generate => no error message + spinner => download complete', function() {
+                    return openDialog()
+                        .then(tapRadioButton('PROJ1 Template'))
+                        .then(selectDate('20180103'))
+                        .then(tapGenerate)
+                        .then(function() {
+                            expect(followupDialog.errorMessage).to.be.empty;
+                            expect(followupDialog.disableGenerateButton).to.be.true;
+                            expect(followupDialog.downloadInProgress).to.be.true;
+                            var generateButton = followupDialog.$.generate;
+                            var paperSpinner = followupDialog.$$('paper-spinner');
+                            expect(paperSpinner.hidden).to.be.false;
+                            expect(generateButton.disabled).to.be.true;
+                            sinon.assert.calledOnce(window.$.fileDownload);
+                        }).then(callSuccessCallback)
+                        .then(function() {
+                            expect(followupDialog.disableGenerateButton).to.be.false;
+                            expect(followupDialog.downloadInProgress).to.be.false;
+                        });
+                });
+
+                test("select template for project without history => disable date dropdown menu", function() {
+                    return openDialog()
+                        .then(tapRadioButton('PROJ3 Template'))
+                        .then(function() {
+                            expect(followupDialog.showDateSelect).to.be.false;
+                            var dateDropDown = followupDialog.$$('.followup-dropdown');
+                            expect(dateDropDown.disabled).to.be.true;
+                        });
+                });
+
+                test('select date + tap clear => reset date; select date + press escape => reset date', function() {
+                    return openDialog()
+                        .then(tapRadioButton('TASKB Template'))
+                        .then(selectDate('20180102'))
+                        .then(wait(100))
+                        .then(function() {
+                            expect(followupDialog.selectedIndexDate).to.not.equal(0);
+                        }).then(tapButton('.clear-button'))
+                        .then(function() {
+                            expect(followupDialog.selectedIndexDate).to.be.equal(0);
+                        }).then(selectDate('20180102'))
+                        .then(wait(100))
+                        .then(function() {
+                            expect(followupDialog.selectedIndexDate).to.not.equal(0);
+                            var dateDropDown = followupDialog.$$('.followup-dropdown');
+                            MockInteractions.pressAndReleaseKeyOn(dateDropDown, 27, [], 'Escape');
+                            expect(followupDialog.selectedIndexDate).to.be.equal(0);
+                        });
+                });
+            });
+
+            suite('<corner-cases>', function() {
+
+                setup(function() {
+                    server = sinon.fakeServer.create();
+                    server.respondWith(
+                        'GET',
+                        /\/api\/projects/, [
+                            200,
+                            responseHeaders.json,
+                            '['
+                            +'  {"projectKey":"TASKB","followUpDataHistory":["20180101","20180102","20180103"]}'
+                            +', {"projectKey":"PROJ1","followUpDataHistory":["20180102","20180103","20180104"]}'
+                            +', {"projectKey":"PROJ2","followUpDataHistory":["20180103","20180104","20180105"]}'
+                            +', {"projectKey":"PROJ3","followUpDataHistory":[]}'
+                            +']'
+                        ]
+                    );
+                    server.respondWith(
+                        'GET',
+                        /\/api\/templates/, [
+                            200,
+                            responseHeaders.json,
+                            '[]'
+                        ]
+                    );
+                });
+
+                test('server returns no templates => shows warning', function() {
+                    return openDialog()
+                        .then(function() {
+                            expect(followupDialog.showNoTemplatesFoundWarning).to.be.true;
+                            expect(followupDialog.$.noTemplateWarning.hidden).to.be.false;
+                        });
+                });
+            });
+        });
+
+    </script>
+
+</body>
+</html>

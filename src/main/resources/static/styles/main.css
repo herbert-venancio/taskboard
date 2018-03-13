@@ -281,6 +281,32 @@ paper-dialog {
 }
 
 /*
+    Radio button
+*/
+
+paper-radio-button.tb-paper-radio-button {
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+    padding: 0;
+    overflow: hidden;
+    --paper-radio-button-ink-size: 0px;
+}
+
+paper-radio-button.tb-paper-radio-button:first-child {
+    margin-top: 0;
+}
+
+paper-radio-button.tb-paper-radio-button #radioContainer {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+paper-radio-button.tb-paper-radio-button #radioLabel.paper-radio-button {
+    height: 16px;
+    line-height: 16px;
+}
+
+/*
     Follow Up Dropdown
 */
 .followup-dropdown {

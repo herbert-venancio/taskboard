@@ -132,6 +132,7 @@
                 display: flex;
                 margin-left: -5px;
                 margin-right: -5px;
+                float: right;
             }
 
             .custom-footer-buttons paper-button {
@@ -145,18 +146,21 @@
                 display: none;
             }
 
+            .info-box {
+                display: block;
+            }
+
             .warn-box {
                 margin: 20px 0;
                 max-width: 250px;
             }
 
             .scroll {
-                padding: 10px;
-                overflow: auto;
-                overflow-x: hidden;
-                max-height: 150px;
+                max-height: 250px;
+                overflow-y: auto;
                 width: 100%;
-                background-color: white;
+                margin-top: 20px;
+                margin-bottom: 20px;
             }
 
             .set-template-link {
@@ -193,29 +197,28 @@
                     </div>
                 </div>
 
-                <div class="content-box">
+                <div class="content-box" hidden$="{{showNoTemplatesFoundWarning}}">
                     <div class="sub-header">
-                        Select the projects to include in the report:
+                        Select report template:
                     </div>
                     <div class="content-row">
-                        <div class="scroll" id="listOfProjects">
-                            <template is="dom-repeat" items="{{projects}}">
-                                <paper-checkbox checked="{{item.checked}}" on-change='filter'>{{item.projectKey}}</paper-checkbox><br>
+                        <paper-radio-group class="scroll" id="listOfTemplates"
+                                selected="{{selectedTemplate}}"
+                                attr-for-selected="value">
+                            <template id="templateRadioElements" is="dom-repeat" items="{{allTemplates}}">
+                                <paper-radio-button title="{{item.projects}}" class="tb-paper-radio-button"
+                                    checked="{{item.checked}}"
+                                    value="{{item.id}}">{{item.name}}</paper-radio-button>
                             </template>
-                        </div>
+                        </paper-radio-group>
+                    </div>
+                    <div hidden$="{{!showCreateTemplateMessage}}">
+                        Don't see your template?
+                        <span class="set-template-link" on-tap="openTemplateFollowupDialog">Click here</span>
+                        to create a new template
                     </div>
                     <div class="content-row">
-                        <paper-dropdown-menu class="followup-dropdown" hidden$={{!showTemplatesCombo}}
-                            name="template" always-float-label label="Template" selected-item="{{template}}">
-                            <paper-menu id="templateType" class="dropdown-content" selected="{{selectedItem}}">
-                                <template is="dom-repeat" id="templates" items="{{availableTemplates}}">
-                                    <paper-item value="{{item.name}}">{{item.name}}</paper-item>
-                                </template>
-                            </paper-menu>
-                        </paper-dropdown-menu>
-                    </div>
-                    <div class="content-row">
-                        <paper-dropdown-menu class="followup-dropdown" hidden$={{!showDateCombo}}
+                        <paper-dropdown-menu class="followup-dropdown" disabled="{{!showDateSelect}}"
                             name="date" always-float-label label="Date" selected-item="{{selectedItemDate}}"
                             on-value-changed="dateOnChange" on-keydown="dateOnKeyDown">
                             <paper-menu id="dateMenu" class="dropdown-content" selected="{{selectedIndexDate}}">
@@ -234,8 +237,7 @@
                 </div>
 
                 <div id="noTemplateWarning" class="alert alert-warning warn-box" hidden$={{!showNoTemplatesFoundWarning}}>
-                    <strong>No matching template</strong><br />
-                    Could not find a template for the selected set of projects.
+                    <strong>No template available</strong><br />
                     <span class="set-template-link" on-tap="openTemplateFollowupDialog">Click here</span>
                     to create a template
                 </div>
@@ -265,16 +267,12 @@
                         type: Array
                     },
                     allTemplates: {
-                        type: Array
+                        type: Array,
+                        observer: '_updateTemplates'
                     },
-                    availableTemplates: {
-                        type: Array
-                    },
-                    template: {
-                        type: Object
-                    },
-                    showTemplatesCombo: {
-                        type: Boolean
+                    selectedTemplate: {
+                        type: Object,
+                        observer: 'filter'
                     },
                     showNoTemplatesFoundWarning: {
                         type: Boolean
@@ -282,7 +280,10 @@
                     disableGenerateButton: {
                         type: Boolean
                     },
-                    showDateCombo: {
+                    showDateSelect: {
+                        type: Boolean
+                    },
+                    showCreateTemplateMessage: {
                         type: Boolean
                     },
                     availableDates: {
@@ -299,22 +300,20 @@
                         type: Boolean
                     },
                     downloadInProgress: {
-                        type: Boolean,
-                        value: false
+                        type: Boolean
                     }
                 },
 
                 opendialog: function () {
-                    this.projects = [];
                     this.$.ajaxProjects.generateRequest();
-                    this.templates = [];
                     this.$.ajaxTemplates.generateRequest();
                     this.$.modal.open();
-                    this.showTemplatesCombo = false;
                     this.showNoTemplatesFoundWarning = false;
                     this.disableGenerateButton = true;
-                    this.showDateCombo = false;
+                    this.showDateSelect = false;
                     this.showClearDate = false;
+                    this.downloadInProgress = false;
+                    this.showCreateTemplateMessage = authorizer.hasPermissionInAnyProject('taskboard.administrative');
                 },
 
                 close: function() {
@@ -327,60 +326,39 @@
                 },
 
                 filter: function() {
-                    this.filterTemplates();
                     this.filterDates();
-                },
-
-                filterTemplates: function() {
-                    var selectedProjects = this.filterSelectedProjectKeys();
-                    var templates = [];
-                    var oldSelection = this.template;
-
-                    this.allTemplates.forEach(function(t, index) {
-                        // perfect match only
-                        if( t.projects && t.projects.length == selectedProjects.length
-                            && _.every(t.projects, function(proj) { return _.contains(selectedProjects, proj); } ) )
-                            templates.push(t);
-                    });
-
-                    this.availableTemplates = templates;
-                    var areTemplatesAvailable = this.availableTemplates && this.availableTemplates.length != 0;
-                    this.showTemplatesCombo = this.availableTemplates.length > 1;
-                    this.showNoTemplatesFoundWarning = !areTemplatesAvailable && selectedProjects.length > 0;
-
-                    // update combo selection if old selection became invalid
-                    if ( oldSelection && ! _.contains(templates, oldSelection.value) )
-                        this.selectedItem = -1;
-
-                    var self = this;
-                    this.async(function() {
-                        // select first option, if available
-                        if (areTemplatesAvailable)
-                            self.selectedItem = 0;
-
-                        self.updateDisableGenerateButton();
-                    });
+                    this.updateDisableGenerateButton();
                 },
 
                 filterDates: function() {
                     var selectedProjects = this.filterSelectedProjects();
 
-                    var dates = [];
-                    if (selectedProjects.length > 0) {
-                        dates = selectedProjects[0].followUpDataHistory;
-                        selectedProjects.forEach(function(p) {
-                            dates = _.intersection(dates, p.followUpDataHistory);
-                        });
-                    }
-                    this.availableDates = dates.sort().reverse();
+                    this.availableDates = _.chain(selectedProjects)
+                        .map(function(p) { return p.followUpDataHistory; })
+                        .reduce(function(result, projectHistoryDates){ return _.intersection(result, projectHistoryDates); })
+                        .value()
+                        .sort()
+                        .reverse();
 
-                    this.showDateCombo = !this.showNoTemplatesFoundWarning && this.availableDates.length > 0;
+                    this.showDateSelect = this.availableDates.length > 0;
                     this.clearSelectedDate();
                 },
 
+                getTemplateById(id) {
+                    return _.find(this.allTemplates, function(t) { return t.id === id; });
+                },
+
+                getProjectByKey(key) {
+                    return _.find(this.projects, function(p) { return p.projectKey === key; });
+                },
+
                 filterSelectedProjects: function() {
-                    if (!this.projects) return;
-                    return _.filter(this.projects, function(p) { return p.checked; });
+                    var selectedTemplate = this.getTemplateById(this.selectedTemplate);
+                    if(!selectedTemplate) {
+                        return [];
+                    }
+
+                    return _.map(selectedTemplate.projects, this.getProjectByKey.bind(this));
                 },
 
                 filterSelectedProjectKeys: function() {
@@ -404,27 +382,30 @@
                     return getDateFromYYYYMMDD(item).toLocaleDateString();
                 },
 
+                showErrorMessage(msg) {
+                    this.set('errorMessage', msg);
+                    $(".error-message").stop(true, false).fadeIn(0).animate({opacity:1}, 2000).fadeOut();
+                },
+
                 downloadFollowup: function() {
                     var self = this;
-                    self.errorMessage = "";
+                    this.errorMessage = "";
                     var selectedKeys = this.filterSelectedProjectKeys();
 
                     if (selectedKeys.length == 0) {
-                        this.errorMessage = "Please, selected at least one project"
-                        $(".error-message").show().delay(2000).fadeOut();
+                        this.showErrorMessage("Please, selected at least one project");
                         return;
                     }
 
-                    if (!this.template) {
-                        this.errorMessage = "Template not selected";
-                        $(".error-message").show().delay(2000).fadeOut();
+                    if (!this.selectedTemplate) {
+                        this.showErrorMessage("Template not selected");
                         return;
                     }
 
                     var url = "ws/followup";
                     var query = {};
                     query.projects = selectedKeys.join(",");
-                    query.template = this.template.value;
+                    query.template = this.getTemplateById(this.selectedTemplate).name;
                     query.timezone = taskboard.getTimeZoneIdFromBrowser();
                     if(this.selectedIndexDate > 0)
                         query.date = this.selectedItemDate.value;
@@ -438,21 +419,25 @@
                         failCallback: function (html, url) {
                             self.set('downloadInProgress', false);
                             self.updateDisableGenerateButton();
-                            self.set('errorMessage', html ? html : 'Failed to download followup spreadsheet');
-                            $(".error-message").show().delay(2000).fadeOut();
+                            self.showErrorMessage(html ? html : 'Failed to download followup spreadsheet');
                         }
                     });
                     this.set('downloadInProgress', true);
                     this.updateDisableGenerateButton();
                 },
 
-                updateDisableGenerateButton() {
+                updateDisableGenerateButton: function() {
                     // disable when any 1 condition is true
                     var condition1 = this.downloadInProgress;
-                    var condition2 = !this.availableTemplates || this.availableTemplates.length == 0;
-                    var condition3 = this.selectedItem == -1;
+                    var condition2 = !this.selectedTemplate;
 
-                    this.set('disableGenerateButton', condition1 || condition2 || condition3);
+                    this.set('disableGenerateButton', condition1 || condition2);
+                },
+
+                _updateTemplates: function() {
+                    this.set('showNoTemplatesFoundWarning', _.isEmpty(this.allTemplates));
+                    this.$.templateRadioElements.render();
+                    this.$.modal.refit();
                 }
             });
         })();
