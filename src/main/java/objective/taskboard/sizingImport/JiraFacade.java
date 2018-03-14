@@ -25,13 +25,11 @@ import com.atlassian.jira.rest.client.api.domain.CustomFieldOption;
 import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.IssueLink;
 import com.atlassian.jira.rest.client.api.domain.IssuelinksType;
-import com.atlassian.jira.rest.client.api.domain.Permissions;
 import com.atlassian.jira.rest.client.api.domain.Project;
 import com.atlassian.jira.rest.client.api.domain.Version;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInput;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder;
 import com.atlassian.jira.rest.client.api.domain.input.LinkIssuesInput;
-import com.atlassian.jira.rest.client.api.domain.input.MyPermissionsInput;
 import com.atlassian.jira.rest.client.api.domain.input.VersionInput;
 
 import objective.taskboard.jira.JiraProperties;
@@ -141,13 +139,6 @@ class JiraFacade {
     public Version createVersion(String projectKey, String name) {
         VersionInput versionInput = new VersionInput(projectKey, name, null, null, false, false);
         return jiraEndpoint.executeRequest(client -> client.getVersionRestClient().createVersion(versionInput));
-    }
-
-    public boolean isAdminOfProject(String projectKey) {
-        Permissions permissions = jiraEndpoint.executeRequest(client -> 
-            client.getMyPermissionsRestClient().getMyPermissions(MyPermissionsInput.withProject(projectKey)));
-
-        return permissions.havePermission("PROJECT_ADMIN");
     }
 
     private List<CimIssueType> requestCreateIssueMetadata(String projectKey, List<Long> issueTypeIds) {

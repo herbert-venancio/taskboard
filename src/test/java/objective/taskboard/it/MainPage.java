@@ -202,4 +202,47 @@ public class MainPage extends AbstractUiFragment {
             }
         });
     }
+
+    public MainPage assertFollowupButtonIsVisible() {
+        return assertButtonExistsAndVisible("followup-button");
+    }
+
+    public MainPage assertFollowupButtonIsNotVisible() {
+        waitUntilElementNotExists(className("followup-button"));
+        return this;
+    }
+
+    public MainPage assertTemplateButtonIsVisible() {
+        return assertButtonExistsAndVisible("template-followup-button");
+    }
+
+    public MainPage assertTemplateButtonIsNotVisible() {
+        waitUntilElementNotExists(className("template-followup-button"));
+        return this;
+    }
+
+    public MainPage assertDashboardButtonIsVisible() {
+        return assertButtonExistsAndVisible("dashboard-button");
+    }
+
+    public MainPage assertDashboardButtonIsNotVisible() {
+        waitUntilElementNotExists(className("dashboard-button"));
+        return this;
+    }
+
+    public MainPage assertSizingImportButtonIsVisible() {
+        return assertButtonExistsAndVisible("sizing-button");
+    }
+
+    public MainPage assertSizingImportButtonIsNotVisible() {
+        waitUntilElementNotExists(className("sizing-button"));
+        return this;
+    }
+
+    public MainPage assertButtonExistsAndVisible(String buttonClass) {
+        WebElement button = getElementWhenItExists(className(buttonClass));
+        waitVisibilityOfElement(button);
+        return this;
+    }
+
 }

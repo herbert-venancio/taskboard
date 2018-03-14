@@ -471,10 +471,12 @@
                                 </a>
                             </div>
                         </template>
-                        <div>
-                            <paper-icon-button icon="save" title="Import Sizing Spreadsheet"
-                                               class="sizing-button" on-tap="openSizingImport"></paper-icon-button>
-                        </div>
+                        <template is="dom-if" if="{{_showSizingImportButton}}">
+                            <div>
+                                <paper-icon-button icon="save" title="Import Sizing Spreadsheet"
+                                                   class="sizing-button" on-tap="openSizingImport"></paper-icon-button>
+                            </div>
+                        </template>
                         <div>
                             <paper-icon-button icon="info" title="Taskboard About"
                                                class="about-button" on-tap="openAbout"></paper-icon-button>
@@ -559,6 +561,10 @@
                         value: false
                     },
                     _showFollowupDashboardButton: {
+                        type: Boolean,
+                        value: false
+                    },
+                    _showSizingImportButton: {
                         type: Boolean,
                         value: false
                     }
@@ -822,6 +828,7 @@
                     this.set('_showFollowupDownloadButton', authorizer.hasPermissionInAnyProject('taskboard.administrative'));
                     this.set('_showFollowupUploadButton', authorizer.hasPermissionInAnyProject('taskboard.administrative'));
                     this.set('_showFollowupDashboardButton', authorizer.hasPermissionInAnyProject('dashboard.tactical') || authorizer.hasPermissionInAnyProject('dashboard.operational'));
+                    this.set('_showSizingImportButton', authorizer.hasPermissionInAnyProject('taskboard.administrative'));
                 }
             });
         })();

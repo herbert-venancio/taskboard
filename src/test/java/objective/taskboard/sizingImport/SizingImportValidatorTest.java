@@ -42,8 +42,6 @@ public class SizingImportValidatorTest {
     public void setup() {
         config.setDataStartingRowNumber(2);
 
-        when(jiraFacade.isAdminOfProject("OBJ")).thenReturn(true);
-        
         Map<String, CimFieldInfo> featureFields = new HashMap<>();
         featureFields.put("f5", new CimFieldInfo("f5", false, "Assumptions", null, null, null, null));
         featureFields.put("f6", new CimFieldInfo("f6", false, "Acceptance Criteria", null, null, null, null));
@@ -73,16 +71,6 @@ public class SizingImportValidatorTest {
     public void shouldReturnSuccessWhenEverythingIsCorrect() {
         ValidationResult result = subject.validate("OBJ", "100");
         assertTrue(result.success);
-    }
-
-    @Test
-    public void shouldFailWhenUserCantAdminTheProject() {
-        when(jiraFacade.isAdminOfProject("OBJ")).thenReturn(false);
-        
-        ValidationResult result = subject.validate("OBJ", "100");
-
-        assertFalse(result.success);
-        assertEquals("You should have permission to admin this project in Jira.", result.errorMessage);
     }
 
     @Test

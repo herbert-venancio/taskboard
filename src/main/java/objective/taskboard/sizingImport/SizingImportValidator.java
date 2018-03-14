@@ -25,7 +25,6 @@ class SizingImportValidator {
     
     private final SizingImportConfig config;
     private final GoogleApiService googleApiService;
-    private final JiraFacade jiraFacade;
     private final SheetColumnDefinitionProvider columnDefinitionProvider;
 
     @Autowired
@@ -37,7 +36,6 @@ class SizingImportValidator {
 
         this.config = config;
         this.googleApiService = googleApiService;
-        this.jiraFacade = jiraFacade;
         this.columnDefinitionProvider = columnDefinitionProvider;
     }
 
@@ -46,13 +44,6 @@ class SizingImportValidator {
         SpreadsheetsManager spreadsheetsManager = googleApiService.buildSpreadsheetsManager();
         ValidationContext context = new ValidationContext(projectKey, spreadsheetId, headersRowIndex, spreadsheetsManager);
 
-        return validateUserIsAdminOfProject(context);
-    }
-    
-    private ValidationResult validateUserIsAdminOfProject(ValidationContext context) {
-        if (!jiraFacade.isAdminOfProject(context.projectKey))
-            return ValidationResult.fail("You should have permission to admin this project in Jira.");
-        
         return validateSpreadsheetExistence(context);
     }
 
