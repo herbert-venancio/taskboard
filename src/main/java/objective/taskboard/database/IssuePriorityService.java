@@ -22,10 +22,8 @@ package objective.taskboard.database;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -38,6 +36,7 @@ import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import objective.taskboard.data.Issue;
 import objective.taskboard.data.TaskboardIssue;
 import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.jira.client.JiraIssueDto;
@@ -60,11 +59,11 @@ public class IssuePriorityService {
         cache.clear();
         List<TaskboardIssue> all = repo.findAll();
         for (TaskboardIssue taskboardIssue : all) 
-            cache.put(taskboardIssue.getProjectKey(), taskboardIssue);
+            cache.put(taskboardIssue.getIssueKey(), taskboardIssue);
         log.debug("DONE Loading IssuePriorityService");
     }
     
-    public Long determinePriority(JiraIssueDto jiraIssue) {
+    public long determinePriority(JiraIssueDto jiraIssue) {
         TaskboardIssue priorityOrder = cache.get(jiraIssue.getKey());
         if (priorityOrder == null)
             return jiraIssue.getCreationDate().getMillis();
@@ -81,57 +80,53 @@ public class IssuePriorityService {
 
     public synchronized List<TaskboardIssue> reorder(String[] issueKeys) {
         List<TaskboardIssue> issues = reorderAndSave(issueKeys);
-        
-        for (TaskboardIssue taskboardIssue : issues) 
-            cache.put(taskboardIssue.getProjectKey(), taskboardIssue);
-        
+
+        for (TaskboardIssue taskboardIssue : issues)
+            cache.put(taskboardIssue.getIssueKey(), taskboardIssue);
+
         return issues;
     }
     
     @Transactional
     private List<TaskboardIssue> reorderAndSave(String[] issueKeys) {
-        List<TaskboardIssue> issues =new ArrayList<>(repo.findByIssueKeyIn(Arrays.asList(issueKeys)));
-        List<TaskboardIssue> updatedIssues = new ArrayList<>(); 
-        Map<String, TaskboardIssue> issueByKey = issues.stream().collect(Collectors.toMap(TaskboardIssue::getProjectKey, Function.identity()));
-        
-        for (String ti : issueKeys) {
-            if (issueByKey.get(ti) == null){
-                TaskboardIssue taskboardIssue = new TaskboardIssue(ti, issueBufferService.getIssueByKey(ti).getCreated());
-                issueByKey.put(ti, taskboardIssue);
-                issues.add(taskboardIssue);
-            }
-        }
-        
-        LinkedList<Long> priorities = new LinkedList<Long>(issues.stream().map(e -> e.getPriority()).collect(Collectors.toList()));
-        Collections.sort(priorities);
+        List<TaskboardIssue> updatedIssues = new ArrayList<>();
+
+        Map<String, TaskboardIssue> issueByKey = repo.findByIssueKeyIn(Arrays.asList(issueKeys))
+                .stream()
+                .collect(Collectors.toMap(TaskboardIssue::getIssueKey, Function.identity()));
+
+        long[] priorities = Arrays.stream(issueKeys)
+                .map(issueKey -> issueByKey.computeIfAbsent(issueKey, key -> new TaskboardIssue(key, issueBufferService.getIssueByKey(key).getCreated())))
+                .mapToLong(TaskboardIssue::getPriority)
+                .sorted()
+                .toArray();
 
         fixClashingPriorities(priorities);
 
-        for (String pkey : issueKeys) {
-            TaskboardIssue taskboardIssue = issueByKey.get(pkey);
-            Long previousPriority = taskboardIssue.getPriority();
-            Long newPriority = priorities.poll();
-            if (previousPriority.equals(newPriority))
+        for(int i = 0; i < issueKeys.length; ++i) {
+            TaskboardIssue taskboardIssue = issueByKey.get(issueKeys[i]);
+            long newPriority = priorities[i];
+            long previousPriority = taskboardIssue.getPriority();
+            if (previousPriority == newPriority) {
+                Issue issue = issueBufferService.getIssueByKey(issueKeys[i]);
+                if(issue.getPriorityOrder() != previousPriority)
+                    updatedIssues.add(taskboardIssue);
                 continue;
+            }
             taskboardIssue.setPriority(newPriority);
             updatedIssues.add(repo.save(taskboardIssue));
         }
         return updatedIssues;
     }
 
-    private void fixClashingPriorities(LinkedList<Long> priorities) {
-        boolean hasRepeatedPriority = priorities.stream().anyMatch(p -> Collections.frequency(priorities, p) > 1);
-        if (!hasRepeatedPriority)
-            return;
-
-        Long previous = priorities.get(0);
-        for (int i = 1; i < priorities.size(); i++) {
-            Long current = priorities.get(i);
+    private void fixClashingPriorities(long[] priorities) {
+        for (int i = 1; i < priorities.length; i++) {
+            long previous = priorities[i-1];
+            long current = priorities[i];
             if (current <= previous) {
                 current = previous + 1;
-                priorities.set(i, current);
+                priorities[i] = current;
             }
-            previous = current;
         }
     }
 

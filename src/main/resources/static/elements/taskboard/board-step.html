@@ -41,6 +41,20 @@
             .issue-transition-state {
                 box-shadow: inset 0 0 1px !important
             }
+
+            issue-item:hover {
+                cursor: pointer;
+            }
+
+            /* while item is being dragged */
+            issue-item.ui-sortable-helper {
+                cursor: move;
+            }
+
+            issue-item.ui-sortable-helper.cannot-drag {
+                cursor: not-allowed;
+            }
+
         </style>
 
         <iron-signals on-iron-signal-update-user-preferences="preferencesUpdated"
@@ -66,6 +80,7 @@
                     <issue-item
                         data-id$="{{issue.issueKey}}"
                         id='{{issue.issueKey}}'
+                        class$="{{issueItemClasses}}"
                         item="{{issue}}"
                         boardstepid="{{stepMetadata.id}}"
                         style$="{{getOptimalIssueWidth(columns, issue)}}"
@@ -117,10 +132,10 @@
                         type: Array,
                         value: []
                     },
-                    _repriorizationCount: {
+                    _reprioritizationCount: {
                         value: 0
                     },
-                    _issuesWithRepriorizationError: {
+                    _issuesWithReprioritizationError: {
                         value: new Map()
                     },
                     team: {
@@ -146,6 +161,12 @@
                     localStates: {
                         type: Object,
                         notify: true
+                    },
+                    canChangePrioritization: {
+                        type: Boolean
+                    },
+                    issueItemClasses: {
+                        type: String
                     }
                 },
 
@@ -162,68 +183,78 @@
                         throw "Failed to enable prioritization because the step item could not be found";
                     }
                     this.makeStepSortable();
+                    this.updateCanChangePrioritization();
                 },
 
                 makeStepSortable: function() {
-                    var handle = function(e,ui) {
-                        var orderBeforeSort = this._filteredIssuesKeys;
-                        var newOrder = this.getIssueKeysRenderedOrder();
+                    var self = this;
+                    var stopHandler = function(e,ui) {
+                        var orderBeforeSort = self._filteredIssuesKeys;
+                        var newOrder = self.getIssueKeysRenderedOrder();
                         if (_.isEqual(orderBeforeSort, newOrder))
                             return;
-                        var self = this;
-                        self._repriorizationCount++;
+
+                        if(!self.canChangePrioritization) {
+                            self.showCannotChangePrioritizationError();
+                            self.stepItem().sortable( "cancel" );
+                            flash($(ui.item).find('.issue'), 'red');
+                            return;
+                        }
+
+                        self._reprioritizationCount++;
                         self._setStepLocalState(true);
                         $.ajax({
-                             url: '/ws/issues/reorder',
-                             type: 'post',
-                             contentType: 'application/json',
-                             data: JSON.stringify(self.getIssueKeysRenderedOrder()),
-                             success: function(updatedIssueList) {
-                                 self._repriorizationCount--;
-                                 if (self._repriorizationCount === 0) {
-                                     var converted = taskboard.convertAndRegisterIssues(updatedIssueList);
-                                     var issueByKey = [];
-                                     converted.forEach(function(issue) {
-                                         issueByKey[issue.issueKey] = issue;
-                                     });
-                                     self.issues.forEach(function(issue, index) {
-                                         if (!issueByKey[issue.issueKey]) return;
-                                         self.issues[index] = issueByKey[issue.issueKey];
-                                     });
-                                     self.filterAndForceUpdate();
-                                     self._setStepLocalState(false);
-                                     self._issuesWithRepriorizationError.clear();
-                                 }
-                             },
-                             error: function (jqXhr, textStatus, errorThrown) {
-                                 self._repriorizationCount--;
-                                 Object.values(ui.item).forEach( function(item) {
-                                     self._issuesWithRepriorizationError.set(item.id, item);
-                                 });
-                                 if (self._repriorizationCount === 0) {
-                                     self.fire("iron-signal", {name:"show-error-message", data:"Repriorization failed. Reason: status ("+jqXhr.status+") " + textStatus });
-                                     var parent = ui.item.closest(".board-lane.table-wrapper");
-                                     self.filterAndForceUpdate();
-                                     self._issuesWithRepriorizationError.forEach( function(issueItem) {
-                                         var card = $('issue-item#' + issueItem.id + ' .issue');
-                                         flash(card, 'red');
-                                     });
-                                     parent.animate({
-                                         scrollTop: ui.item.offset().top - parent.offset().top
-                                     });
-                                     self._setStepLocalState(false);
-                                     self._issuesWithRepriorizationError.clear();
-                                 }
-                             }
+                            url: '/ws/issues/reorder',
+                            type: 'post',
+                            contentType: 'application/json',
+                            data: JSON.stringify(newOrder),
+                            success: function(updatedIssueList) {
+                                self._reprioritizationCount--;
+                                if (self._reprioritizationCount === 0) {
+                                    var converted = taskboard.convertAndRegisterIssues(updatedIssueList);
+                                    var issueByKey = [];
+                                    converted.forEach(function(issue) {
+                                        issueByKey[issue.issueKey] = issue;
+                                    });
+                                    self.issues.forEach(function(issue, index) {
+                                        if (!issueByKey[issue.issueKey]) return;
+                                        self.issues[index] = issueByKey[issue.issueKey];
+                                    });
+                                    self.filterAndForceUpdate();
+                                    self._setStepLocalState(false);
+                                    self._issuesWithReprioritizationError.clear();
+                                }
+                            },
+                            error: function (jqXhr, textStatus, errorThrown) {
+                                textStatus = jqXhr.responseJSON ? jqXhr.responseJSON.message : textStatus;
+                                self._reprioritizationCount--;
+                                Object.values(ui.item).forEach( function(item) {
+                                    self._issuesWithReprioritizationError.set(item.id, item);
+                                });
+                                if (self._reprioritizationCount === 0) {
+                                    self.fire("iron-signal", {name:"show-error-message", data:"Reprioritization failed. Reason: status ("+jqXhr.status+") " + textStatus });
+                                    var parent = ui.item.closest(".board-lane.table-wrapper");
+                                    self.filterAndForceUpdate();
+                                    self._issuesWithReprioritizationError.forEach( function(issueItem) {
+                                        var card = $('issue-item#' + issueItem.id + ' .issue');
+                                        flash(card, 'red');
+                                    });
+                                    parent.animate({
+                                        scrollTop: ui.item.offset().top - parent.offset().top
+                                    });
+                                    self._setStepLocalState(false);
+                                    self._issuesWithReprioritizationError.clear();
+                                }
+                            }
                          });
-                    }.bind(this);
+                    }
                     this.stepItem().sortable({
                         items: 'issue-item',
                         opacity: 0.7,
                         animation: 150,
                         forceHelperSize: true,
                         forcePlaceholderSize: true,
-                        stop: handle
+                        stop: stopHandler
                     });
                 },
 
@@ -337,6 +368,31 @@
                     this.filter();
                     this.lastPreferenceUpdate = new Date();
                     this.getParentLane().lastPreferenceUpdate = this.lastPreferenceUpdate;
+                    this.updateCanChangePrioritization();
+                },
+
+                updateCanChangePrioritization: function() {
+                    var self = this;
+                    var hasPermission = _.isEmpty(this.listInvalidPermissionProjects());
+                    this.set('canChangePrioritization', hasPermission);
+                    this.set('issueItemClasses', hasPermission ? '' : 'cannot-drag');
+                },
+
+                listInvalidPermissionProjects: function() {
+                    return _.filter(taskboard.getVisibleProjectKeys(), function(projectKey) {
+                        return !authorizer.hasPermissionInProject('taskboard.administrative', projectKey);
+                    });
+                },
+
+                showCannotChangePrioritizationError: function() {
+                    var self = this;
+                    var invalidPermissionProjects = this.listInvalidPermissionProjects();
+                    this.fire("iron-signal", {
+                        name:"show-error-message"
+                        , data: "You can't reprioritize because you don't have permission on visible projects ["
+                                + invalidPermissionProjects
+                                + "]. Hide the projects you don't have permission and try again."
+                    });
                 },
 
                 handleUpdatedIssues: function(event, data) {

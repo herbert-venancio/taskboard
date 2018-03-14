@@ -509,6 +509,25 @@ function Taskboard() {
         return isArchived ? 'archived' : 'active';
     };
 
+    this.getVisibleProjectKeys = function() {
+        return _.chain(this.getAspectFilters())
+            .filter(function(itemFilter) {
+                return itemFilter.description === 'Project';
+            })
+            .map(function(itemFilter) {
+                return _.chain(itemFilter.aspectsSubitemFilter)
+                    .filter(function(subitemFilter) {
+                        return subitemFilter.visible && subitemFilter.selected;
+                    })
+                    .map(function(subitemFilter) {
+                        return subitemFilter.value;
+                    })
+                    .value();
+            })
+            .flatten()
+            .value();
+    }
+
 }
 
 var taskboard = new Taskboard();
