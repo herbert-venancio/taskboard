@@ -432,8 +432,12 @@
                       on-iron-overlay-closed="_afterClose"
                       data-status$="{{_modalStatus}}">
 
-                <div class$="glasspane {{issueChangeStateClass}}" on-tap="refreshIfUpdated">
+                <div id="glasspane-updated" class$="glasspane {{issueChangeStateClass}}" on-tap="refreshIfUpdated">
                     <span>This issue has been updated. <br>Click to refresh its contents.</span>
+                </div>
+
+                <div id="glasspane-deleted" class$="glasspane {{issueDeleteStateClass}}" on-tap="close">
+                    <span>This issue has been deleted. <br>Click to close.</span>
                 </div>
 
             <paper-card class="card-custom">
@@ -806,6 +810,11 @@
                         value: ''
                     },
 
+                    issueDeleteStateClass: {
+                        type: String,
+                        value: ''
+                    },
+
                     localStates: {
                         type: Object,
                         notify: true
@@ -1150,6 +1159,7 @@
                     this.canBlock = !item.blocked && !item.completed;
                     this.canUnblock = item.blocked && !item.completed;
                     this.issueChangeStateClass = '';
+                    this.issueDeleteStateClass = '';
                     this.updatedIssue = null;
 
                     this._updateIssueLocalState();
@@ -1255,18 +1265,24 @@
                     return taskboard.getStatusName(statusId);
                 },
 
-                updateIssue: function(event) {
+                updateIssue: function(event, data) {
                     if (!this.isOpen)
                         return;
 
-                    if (event.detail.source === 'client')
+                    if (data.source === 'client')
                         return;
 
-                    if (this.item != null && event.detail.issue.issueKey !== this.item.issueKey)
+                    if (this.item != null && data.issue.issueKey !== this.item.issueKey)
                         return;
 
                     this.isObserving = true;
-                    this.set('updatedIssue', event.detail.issue);
+                    this.set('updatedIssue', data.issue);
+                    if (data.eventType === 'DELETED') {
+                        this.set('issueDeleteStateClass', 'visible-glasspane');
+                        this.set('issueChangeStateClass', '');
+                        return;
+                    }
+                    this.set('issueDeleteStateClass', '');
                     this.set('issueChangeStateClass', 'visible-glasspane');
                 },
 

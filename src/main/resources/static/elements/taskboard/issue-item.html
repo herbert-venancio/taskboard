@@ -424,8 +424,11 @@
                     if (typeof this.item.__eventInfo === 'undefined')
                         return;
 
-                    var issueStep = taskboard.getIssueStep(this.item);
-                    var belongsToThisStep = issueStep === null ? false : this.boardstepid === issueStep.id;
+                    var belongsToThisStep = false;
+                    if (this.item.__eventInfo.type !== 'DELETED') {
+                        var issueStep = taskboard.getIssueStep(this.item);
+                        belongsToThisStep = issueStep != null && this.boardstepid === issueStep.id;
+                    }
                     if (!belongsToThisStep)
                         return;
 
