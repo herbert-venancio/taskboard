@@ -69,11 +69,7 @@ public class ProjectFilterConfigurationCachedRepository {
     }
 
     public synchronized boolean exists(String projectKey) {
-        for (ProjectFilterConfiguration projectFilterConfiguration : cache) {
-            if (projectFilterConfiguration.getProjectKey().equals(projectKey))
-                return true;
-        }
-        return false;
+        return cache.stream().anyMatch(p -> p.getProjectKey().equals(projectKey));
     }
 
     public synchronized void loadCache() {

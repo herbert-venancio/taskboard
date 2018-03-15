@@ -385,6 +385,9 @@ tb-autocomplete[disable-clear="true"] .input-wrapper paper-icon-button#clear {
 paper-toggle-button.tb-toggle-button {
     font-size: 14px;
 }
+paper-toggle-button[disabled] .paper-toggle-button {
+    opacity: .6;
+}
 
 /*
     Clear button

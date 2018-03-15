@@ -1,5 +1,3 @@
-package objective.taskboard.jira;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,6 +18,8 @@ package objective.taskboard.jira;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+
+package objective.taskboard.jira;
 
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
@@ -75,7 +75,7 @@ public class ProjectService {
                 .anyMatch(p -> p.getKey().equals(projectKey));
     }
 
-    public boolean isProjectVisibleOnConfigurations(String projectKey) {
+    public boolean existisAndHasAccess(String projectKey) {
         return projectCache.getUserProjects().containsKey(projectKey);
     }
 

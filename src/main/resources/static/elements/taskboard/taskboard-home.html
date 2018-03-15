@@ -109,15 +109,6 @@
                 color: #fe6565;
             }
 
-            .app-name {
-                background-color: #3f51b5;
-                color: white;
-                font-weight: 400;
-                font-size: x-large;
-                padding: 20px;
-                z-index: 1;
-            }
-
             .bottom {
                 background-color: #3F51B5;
                 height: 35px;
@@ -485,22 +476,7 @@
                     <board-table id="table" conf={{conf}} aspects-filter="{{aspectsFilter}}"></board-table>
                 </div>
                 <paper-header-panel drawer>
-                    <paper-material class="app-name">
-                        <div class="filters-title">Configurations</div>
-                    </paper-material>
-                    <paper-material class="layout vertical">
-                        <aspects-filter aspects-filter="{{aspectsFilter}}"></aspects-filter>
-                        <config-table config={{conf}}></config-table>
-                        <config-projects></config-projects>
-                    </paper-material>
-<!--                     <paper-material class="bottom"> -->
-<!--                         <paper-material class="legendas flex layout horizontal"> -->
-<!--                             <div class="label-colors os">OS</div> -->
-<!--                             <div class="label-colors task">TASK</div> -->
-<!--                             <div class="label-colors bug">BUG</div> -->
-<!--                             <div class="label-colors outros">OTHERS</div> -->
-<!--                         </paper-material> -->
-<!--                     </paper-material> -->
+                    <tb-configurations conf={{conf}} aspects-filter="{{aspectsFilter}}"></tb-configurations>
                 </paper-header-panel>
             </template>
         </paper-drawer-panel>

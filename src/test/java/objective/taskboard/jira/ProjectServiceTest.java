@@ -40,6 +40,10 @@ import objective.taskboard.testUtils.JiraMockServer;
         , CacheConfiguration.class})
 public class ProjectServiceTest {
 
+    private final static String PROJECT_WITHOUT_NO_ACCESS = "PROJ4";
+    private final static String PROJECT_ARCHIVED = "PROJ1";
+    private final static String PROJECT_REGULAR = "PROJ2";
+
     public static class Configuration {
         @Bean
         public ProjectFilterConfigurationCachedRepository projectFilterConfigurationCachedRepository() {
@@ -97,14 +101,20 @@ public class ProjectServiceTest {
         ProjectFilterConfiguration taskb = new ProjectFilterConfiguration();
         taskb.setProjectKey("TASKB");
         ProjectFilterConfiguration proj1 = new ProjectFilterConfiguration();
-        proj1.setProjectKey("PROJ1");
+        proj1.setProjectKey(PROJECT_ARCHIVED);
         ProjectFilterConfiguration proj2 = new ProjectFilterConfiguration();
-        proj2.setProjectKey("PROJ2");
+        proj2.setProjectKey(PROJECT_REGULAR);
+        ProjectFilterConfiguration proj3 = new ProjectFilterConfiguration();
+        proj3.setProjectKey("PROJ3");
+        ProjectFilterConfiguration proj4 = new ProjectFilterConfiguration();
+        proj4.setProjectKey(PROJECT_WITHOUT_NO_ACCESS);
 
         List<ProjectFilterConfiguration> projectList = asList(
                 taskb
                 , proj1
-                , proj2);
+                , proj2
+                , proj3
+                , proj4);
         doReturn(projectList).when(projectFilterRepository).findAll();
         projectFilterConfigurationCachedRepository.loadCache();
     }
@@ -137,33 +147,35 @@ public class ProjectServiceTest {
     @Test
     public void whenGetProjectsOnTaskboard_dontShowArchivedProjects() {
         List<Project> visibleProjectsOnTaskboard = projectService.getVisibleProjectsOnTaskboard();
-        assertFalse(visibleProjectsOnTaskboard.stream().anyMatch(p -> p.getKey().equals("PROJ1")));
+        assertFalse(visibleProjectsOnTaskboard.stream().anyMatch(p -> p.getKey().equals(PROJECT_ARCHIVED)));
         assertFalse(visibleProjectsOnTaskboard.stream().anyMatch(p -> p.isArchived() == true));
     }
 
     @Test
     public void whenCheckIfAProjectIsVisibleOnTaskboard_ifIsArchived_returnFalse() {
-        assertFalse(projectService.isProjectVisibleOnTaskboard("PROJ1"));
-        assertTrue(projectService.isProjectVisibleOnTaskboard("PROJ2"));
+        assertFalse(projectService.isProjectVisibleOnTaskboard(PROJECT_ARCHIVED));
+        assertTrue(projectService.isProjectVisibleOnTaskboard(PROJECT_REGULAR));
     }
 
     @Test
-    public void whenCheckIfAProjectIsVisibleOnConfiguration_ifIsArchived_returnTrue() {
-        assertTrue(projectService.isProjectVisibleOnConfigurations("PROJ1"));
-        assertTrue(projectService.isProjectVisibleOnConfigurations("PROJ2"));
-    }
+    public void whenProjectExists_ifTheUserHasAccess_returnTrue() {
+        assertTrue(projectService.existisAndHasAccess(PROJECT_ARCHIVED));
+        assertTrue(projectService.existisAndHasAccess(PROJECT_REGULAR));
 
+        assertTrue(projectFilterRepository.findAll().stream().anyMatch(p -> PROJECT_WITHOUT_NO_ACCESS.equals(p.getProjectKey()) ));
+        assertFalse(projectService.existisAndHasAccess(PROJECT_WITHOUT_NO_ACCESS));
+    }
 
     private static Map<String, Project> generateUserProjects() {
         Map<String, Project> projectsMap = new HashMap<String, Project>();
 
         Project p1 = new Project();
-        p1.setKey("PROJ1");
+        p1.setKey(PROJECT_ARCHIVED);
         p1.setName("PROJECT 1");
         p1.setArchived(true);
 
         Project p2 = new Project();
-        p2.setKey("PROJ2");
+        p2.setKey(PROJECT_REGULAR);
         p2.setName("PROJECT 2");
         p2.setArchived(false);
 
