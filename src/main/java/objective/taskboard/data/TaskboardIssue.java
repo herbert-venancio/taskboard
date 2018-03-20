@@ -68,12 +68,12 @@ public class TaskboardIssue implements Serializable {
         this.priority = priority;
     }
     
-    public String getProjectKey() {
+    public String getIssueKey() {
         return issueKey;
     }
     
-    public void setProjectKey(String projectKey) {
-        this.issueKey = projectKey;
+    public void setIssueKey(String issueKey) {
+        this.issueKey = issueKey;
     }
     
     public Date getUpdated() {

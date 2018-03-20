@@ -21,15 +21,19 @@
 package objective.taskboard.issueBuffer;
 
 import static java.util.stream.Collectors.toList;
+import static objective.taskboard.repository.PermissionRepository.ADMINISTRATIVE;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
@@ -43,6 +47,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.util.concurrent.Uninterruptibles;
 
+import objective.taskboard.auth.Authorizer;
 import objective.taskboard.data.Issue;
 import objective.taskboard.data.IssuePriorityOrderChanged;
 import objective.taskboard.data.ProjectsUpdateEvent;
@@ -53,6 +58,7 @@ import objective.taskboard.domain.converter.ParentProvider;
 import objective.taskboard.issue.IssueUpdate;
 import objective.taskboard.issue.IssueUpdateType;
 import objective.taskboard.issue.IssuesUpdateEvent;
+import objective.taskboard.jira.FrontEndMessageException;
 import objective.taskboard.jira.JiraIssueService;
 import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.ProjectService;
@@ -90,7 +96,10 @@ public class IssueBufferService {
     
     @Autowired
     private CardRepoService cardsRepoService;
-    
+
+    @Autowired
+    private Authorizer authorizer;
+
     private CardRepo cardsRepo;
     
     private final ParentProvider parentProviderFetchesMissingParents = parentKey -> {
@@ -291,24 +300,18 @@ public class IssueBufferService {
     @EventListener
     protected void onAfterSave(IssuePriorityOrderChanged event) {
         TaskboardIssue entity = event.getTarget();
-        cardsRepo.get(entity.getProjectKey()).setPriorityOrder(entity.getPriority());
+        cardsRepo.get(entity.getIssueKey()).setPriorityOrder(entity.getPriority());
     }
 
 
     public synchronized List<Issue> reorder(String[] issues) {
-        List<TaskboardIssue> updated = issuePriorityService.reorder(issues);
-        updateIssuesPriorities(updated);
-        
-        List<Issue> updatedIssues = new LinkedList<Issue>();
-        for (String issue : issues) 
-            updatedIssues.add(this.getIssueByKey(issue));
-        
-        return updatedIssues;
+        ReorderIssuesAction action = new ReorderIssuesAction(issues);
+        return action.call();
     }
     
     private synchronized void updateIssuesPriorities(List<TaskboardIssue> issuesPriorities) {
         for (TaskboardIssue taskboardIssue : issuesPriorities) { 
-            Issue issue = cardsRepo.get(taskboardIssue.getProjectKey());
+            Issue issue = cardsRepo.get(taskboardIssue.getIssueKey());
             issue.setPriorityOrder(taskboardIssue.getPriority());
             issue.setPriorityUpdatedDate(taskboardIssue.getUpdated());
             cardsRepo.setChanged(issue.getIssueKey());
@@ -367,5 +370,40 @@ public class IssueBufferService {
             } catch (InterruptedException e) {
                 return;
             }
+    }
+
+    public class ReorderIssuesAction implements Callable<List<Issue>> {
+
+        private final String[] issueKeys;
+
+        public ReorderIssuesAction(String[] issueKeys) {
+            this.issueKeys = issueKeys;
+        }
+
+        @Override
+        public List<Issue> call() {
+            validateUserPermissions();
+
+            List<TaskboardIssue> updated = issuePriorityService.reorder(issueKeys);
+            updateIssuesPriorities(updated);
+
+            List<Issue> updatedIssues = new LinkedList<Issue>();
+            for (String issue : issueKeys)
+                updatedIssues.add(getIssueByKey(issue));
+
+            return updatedIssues;
+        }
+
+        private void validateUserPermissions() {
+            Set<String> projectsWithoutPermission = Arrays.stream(issueKeys)
+                    .map(IssueBufferService.this::getIssueByKey)
+                    .map(Issue::getProjectKey)
+                    .distinct()
+                    .filter(projectKey -> !authorizer.hasPermissionInProject(ADMINISTRATIVE, projectKey))
+                    .collect(Collectors.toSet());
+            if(!projectsWithoutPermission.isEmpty()) {
+                throw new FrontEndMessageException("User doesn't have permission to reoder issues of " + projectsWithoutPermission);
+            }
+        }
     }
 }

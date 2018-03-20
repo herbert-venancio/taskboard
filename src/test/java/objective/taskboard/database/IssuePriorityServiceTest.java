@@ -66,15 +66,15 @@ public class IssuePriorityServiceTest {
         Mockito.verify(issueOrderPriority, Mockito.times(3)).save(argument.capture());
         LinkedList<TaskboardIssue> actual = new LinkedList<TaskboardIssue>(argument.getAllValues());
         TaskboardIssue e = actual.poll();
-        assertEquals("P-3", e.getProjectKey());
+        assertEquals("P-3", e.getIssueKey());
         assertEquals(100L, e.getPriority());
         
         e = actual.poll();
-        assertEquals("P-1", e.getProjectKey());
+        assertEquals("P-1", e.getIssueKey());
         assertEquals(150L, e.getPriority());
         
         e = actual.poll();
-        assertEquals("P-2", e.getProjectKey());
+        assertEquals("P-2", e.getIssueKey());
         assertEquals(200L, e.getPriority());
     }
 
@@ -109,19 +109,19 @@ public class IssuePriorityServiceTest {
         Mockito.verify(issueOrderPriority, Mockito.times(4)).save(argument.capture());
         LinkedList<TaskboardIssue> actual = new LinkedList<TaskboardIssue>(argument.getAllValues());
         TaskboardIssue e = actual.poll();
-        assertEquals("P-4", e.getProjectKey());
+        assertEquals("P-4", e.getIssueKey());
         assertEquals(100L, e.getPriority());
 
         e = actual.poll();
-        assertEquals("P-3", e.getProjectKey());
+        assertEquals("P-3", e.getIssueKey());
         assertEquals(101L, e.getPriority());
 
         e = actual.poll();
-        assertEquals("P-2", e.getProjectKey());
+        assertEquals("P-2", e.getIssueKey());
         assertEquals(102L, e.getPriority());
 
         e = actual.poll();
-        assertEquals("P-1", e.getProjectKey());
+        assertEquals("P-1", e.getIssueKey());
         assertEquals(103L, e.getPriority());
     }
 }
