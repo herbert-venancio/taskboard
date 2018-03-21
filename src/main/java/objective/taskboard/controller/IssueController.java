@@ -222,7 +222,7 @@ public class IssueController
 
     private List<AspectSubitemFilter> getProjectFilterItems() {
         List<Team> teamsVisibleToUser = teamFilterConfigurationService.getTeamsVisibleToUser();
-        return projectService.getVisibleProjectsOnTaskboard().stream()
+        return projectService.getNonArchivedJiraProjectsForUser().stream()
                 .map(p -> AspectSubitemFilter.from(p.getName(), p.getKey(), true,
                                                    teamsVisibleToUser.stream()
                                                        .filter(t -> p.getTeamsIds().contains(t.getId()))

@@ -30,6 +30,24 @@ function findIndexInArray(array, callback) {
     return notFoundValue;
 }
 
+function filterInArray(array, callback) {
+    var res = [];
+    var arrayLength = array.length;
+    for (var i = 0; i < arrayLength; i++)
+        if(callback(array[i]))
+            res.push(array[i]);
+    return res;
+}
+
+
+function isEmptyArray(array) {
+    if (!Array.isArray(array))
+        throw new TypeError('This value ('+ array +') is not an array');
+
+    return array.length === 0;
+
+}
+
 function copyProperties(receiverObject, objectToMarge) {
     $.extend(receiverObject, objectToMarge);
 }
@@ -86,6 +104,12 @@ if (!Array.prototype.findIndex) {
             }
         }
         return -1;
+    };
+}
+
+if (!Array.isArray) {
+    Array.isArray = function(arg) {
+        return Object.prototype.toString.call(arg) === '[object Array]';
     };
 }
 

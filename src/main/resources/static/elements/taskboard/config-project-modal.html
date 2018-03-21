@@ -37,34 +37,34 @@
         </style>
 
         <iron-signals
-                      on-iron-signal-open-project-configuration-modal="openByEvent"
+                on-iron-signal-open-project-configuration-modal="openByEvent"
         ></iron-signals>
 
         <alert-modal id="alertModalConfiguration"></alert-modal>
-        <wrap-modal id="modal" title="Project Configuration for {{projectKey}}">
+        <wrap-modal id="modal" title="Project Configuration for [[projectConfiguration.projectKey]]">
             <div class="modal-content">
-                
+
                 <form class="configuration-form">
                     <div class="error-message" hidden$="{{!errorMessage}}">{{errorMessage}}</div>
                     <paper-input id="projectStartDate" always-float-label
-                        label="Project Start Date ({{dateFormatPlaceholder}})"
-                        value="{{projectConfiguration.startDate}}"
-                        tabindex="1"
-                        maxlength="10"
-                        pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}"></paper-input>
+                                 label="Project Start Date ([[dateFormatPlaceholder]])"
+                                 value="{{projectConfiguration.startDate}}"
+                                 tabindex="1"
+                                 maxlength="10"
+                                 pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}"></paper-input>
 
-                    <paper-input id="projectDeliveryDate" always-float-label 
-                        label="Project End Date ({{dateFormatPlaceholder}})"
-                        value="{{projectConfiguration.deliveryDate}}"
-                        maxlength="10"
-                        pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}"></paper-input>
+                    <paper-input id="projectDeliveryDate" always-float-label
+                                 label="Project End Date ([[dateFormatPlaceholder]])"
+                                 value="{{projectConfiguration.deliveryDate}}"
+                                 maxlength="10"
+                                 pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}"></paper-input>
 
                     <div class="input-wrapper">
                         <paper-toggle-button class="tb-toggle-button" checked="{{!projectConfiguration.isArchived}}"
                                              on-change="_onChangeArchived">
                             Project status:
-                            <span class$="project-status project-status--{{_getArchivedText(projectConfiguration.isArchived)}}">
-                                {{_getArchivedText(projectConfiguration.isArchived, 'true')}}
+                            <span class$="project-status project-status--[[_getArchivedText(projectConfiguration.isArchived)]]">
+                                [[_getArchivedText(projectConfiguration.isArchived, 'true')]]
                             </span>
                         </paper-toggle-button>
                     </div>
@@ -72,9 +72,9 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <paper-spinner active hidden$="{{!showLoadingSpinner}}">...</paper-spinner>
+                <paper-spinner active hidden$="[[!showLoadingSpinner]]">...</paper-spinner>
                 <paper-button id="updateProjectConfiguration" raised class="colorful" title="Update Configuration"
-                              disabled="{{showLoadingSpinner}}"
+                              disabled="[[showLoadingSpinner]]"
                               on-tap="updateConfiguration">
                     Update
                 </paper-button>
@@ -90,12 +90,8 @@
                 is: 'config-project-modal',
 
                 properties: {
-                    projectKey: {
-                        type: String
-                    },
                     projectConfiguration: {
-                        type: Object,
-                        notify: true
+                        type: Object
                     },
                     showLoadingSpinner: {
                         type: Boolean
@@ -105,46 +101,39 @@
                     }
                 },
 
-                open: function(projectKey) {
-                    var self = this;
+                open: function(projectConfiguration) {
+                    moment.locale(taskboard.getLocaleFromBrowser());
+                    this.set('dateFormatPlaceholder', moment.localeData().longDateFormat("L").toLowerCase());
+                    this.set('errorMessage', '');
+                    this._setProjectFilterConfiguration(projectConfiguration);
+                    this.showLoading(false);
+                    this.$.projectStartDate.invalid = false;
+                    this.$.projectDeliveryDate.invalid = false;
 
-                    moment.locale(self._getLocale());
-                    self.set("dateFormatPlaceholder", moment.localeData().longDateFormat("L").toLowerCase());
-
-                    self.errorMessage = "";
-                    self.set("projectConfiguration", {startDate: "", deliveryDate: "", isArchived: null}); // set just {} was not enough
-                    self.set("projectKey", projectKey);
-                    self.$.projectStartDate.invalid = false;
-                    self.$.projectDeliveryDate.invalid = false;
-
-                    $.ajax({
-                        url: "/api/projects/"+projectKey+"/configuration",
-                        dataType: "json",
-                        success: function (data) {
-                            var projectConfiguration = {
-                                startDate: self._getLocaleDate(data.startDate), 
-                                deliveryDate: self._getLocaleDate(data.deliveryDate),
-                                isArchived: data.isArchived
-                            };
-                            self.set("projectConfiguration", projectConfiguration);
-                            self.showLoading(false);
-                        }
-                    });
                     this.$.modal.open();
-                    self.$.projectStartDate.$.input.focus();
+                    this.$.projectStartDate.$.input.focus();
 
                     // after set this mask, polymer binding will not work properly
-                    $(self.$.projectStartDate.$.input).mask("99/99/9999", {placeholder:" "});
-                    $(self.$.projectDeliveryDate.$.input).mask("99/99/9999", {placeholder:" "});
+                    $(this.$.projectStartDate.$.input).mask("99/99/9999", {placeholder:" "});
+                    $(this.$.projectDeliveryDate.$.input).mask("99/99/9999", {placeholder:" "});
                 },
 
-                openByEvent: function(event, data) {
-                    this.open(data.projectKey);
+                _setProjectFilterConfiguration: function(projectFilterConfiguration) {
+                    var newProjFilterConf = clone(projectFilterConfiguration);
+                    newProjFilterConf.startDate = this._getLocaleDate(newProjFilterConf.startDate);
+                    newProjFilterConf.deliveryDate = this._getLocaleDate(newProjFilterConf.deliveryDate);
+                    this.set('projectConfiguration', {});
+                    this.set('projectConfiguration', newProjFilterConf);
+                },
+
+                openByEvent: function(projectConfigurationEvent) {
+                    this.open(projectConfigurationEvent.detail);
                 },
 
                 updateConfiguration: function() {
-                    console.log("update project configuration.");
                     var self = this;
+
+                    var projectKey = self.projectConfiguration.projectKey;
 
                     if (!self._isValid())
                         return;
@@ -153,6 +142,7 @@
 
                     // get directly from component because the polymer binding is not working after set the mask on input
                     var data = {
+                        projectKey: self.projectConfiguration.projectKey,
                         startDate: self._getISODate(self.$.projectStartDate.$.input.value),
                         deliveryDate: self._getISODate(self.$.projectDeliveryDate.$.input.value),
                         isArchived: self.projectConfiguration.isArchived
@@ -162,13 +152,13 @@
                         data: JSON.stringify(data),
                         type: 'POST',
                         contentType: "application/json; charset=utf-8",
-                        url: '/api/projects/' + self.projectKey + '/configuration'
+                        url: '/api/projects/' + projectKey + '/configuration'
                     }).done(function () {
                         self.showLoading(false);
                         self.$.modal.close();
                         self.$.alertModalConfiguration.open(
                             "Configuration Updated",
-                            "Configuration for project " + self.projectKey + " has been updated. We will reload the page to apply the configuration.",
+                            "Configuration for project " + projectKey + " has been updated. We will reload the page to apply the configuration.",
                             function() { location.reload(); }
                         );
                     }).fail(function (jqXHR, textStatus, errorThrown) {
@@ -195,7 +185,7 @@
 
                 _isValid: function() {
                     return this.$.projectStartDate.validate() & this.$.projectDeliveryDate.validate();
-                 },
+                },
 
                 _getLocaleDate: function(date) {
                     if (date)
@@ -207,10 +197,6 @@
                         return moment(date, "L").format("YYYY-MM-DD");
                 },
 
-                _getLocale: function() {
-                    return window.navigator.userLanguage || window.navigator.language;
-                },
-
                 _getArchivedText: function(isArchived, capitalize) {
                     var archivedText = taskboard.getArchivedText(isArchived);
                     return (String(capitalize).toLowerCase() === 'true') ? getCapitalized(archivedText) : archivedText;
@@ -218,7 +204,7 @@
 
                 _onChangeArchived: function(e) {
                     this.set('projectConfiguration.isArchived', !e.target.active);
-                },
+                }
 
             });
         })();

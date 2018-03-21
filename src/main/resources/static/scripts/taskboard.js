@@ -491,7 +491,11 @@ function Taskboard() {
 
     this.getTimeZoneIdFromBrowser = function() {
         return Intl.DateTimeFormat().resolvedOptions().timeZone || jstz.determine().name();
-    }
+    };
+
+    this.getLocaleFromBrowser = function() {
+        return window.navigator.userLanguage || window.navigator.language;
+    };
 
     function getStepsOfLane(lane) {
         var stepsOfLane = [];
@@ -503,7 +507,7 @@ function Taskboard() {
 
     this.getResolutionFieldName = function() {
         return "resolution";
-    }
+    };
 
     this.getArchivedText = function(isArchived) {
         return isArchived ? 'archived' : 'active';

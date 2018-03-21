@@ -80,13 +80,6 @@
                 opacity: .6;
             }
         </style>
-        
-        <iron-ajax id="ajaxProjects"
-                   method="GET"
-                   url="/api/projects/all"
-                   content-type='application/json'
-                   last-response="{{projects}}"
-                   auto></iron-ajax>
 
         <paper-material>
             <paper-toolbar on-tap="collapseMenuTap">
@@ -96,25 +89,33 @@
                 </paper-material>
             </paper-toolbar>
             <iron-collapse id="collapseMenu">
-                <div class="options">
-                    <div class="input-wrapper">
-                        <paper-toggle-button class="tb-toggle-button"
-                                             checked="{{_showArchived}}"
-                                             >
-                            Show archived projects
-                        </paper-toggle-button>
+                <template is="dom-if" if="[[!_showProjects]]">
+                    <div class="options">
+                        No projects to configure
                     </div>
-                </div>
-                <div class$="list list--show-archived_{{_showArchived}}">
-                    <template is="dom-repeat" items="{{projects}}" as="item">
-                        <paper-button class$="config-item-project config-item-project--{{_getArchivedText(item.isArchived)}}"
-                                      elevation="0"
-                                      on-tap="openProjectConfigurationModal">
-                            <paper-icon-button icon="settings"></paper-icon-button>
-                            {{item.projectKey}}
-                        </paper-button>
-                    </template>
-                </div>
+                </template>
+                <template is="dom-if" if="[[_showProjects]]">
+                    <div class="options">
+                        <div class="input-wrapper" title$="[[_archivedOptionMessage]]">
+                            <paper-toggle-button class="tb-toggle-button"
+                                                 checked="{{_showArchivedProjects}}"
+                                                 disabled="[[_disableArchivedOption]]"
+                            >
+                                Show archived projects
+                            </paper-toggle-button>
+                        </div>
+                    </div>
+                    <div class$="list list--show-archived_[[_showArchivedProjects]]">
+                        <template is="dom-repeat" items="[[projectsConfigurations]]" as="item">
+                            <paper-button class$="config-item-project config-item-project--[[_getArchivedText(item.isArchived)]]"
+                                          elevation="0"
+                                          on-tap="openProjectConfigurationModal">
+                                <paper-icon-button icon="settings"></paper-icon-button>
+                                [[item.projectKey]]
+                            </paper-button>
+                        </template>
+                    </div>
+                </template>
             </iron-collapse>
         </paper-material>
 
@@ -126,13 +127,70 @@
                 is: 'config-projects',
 
                 properties: {
-                    projects: {
+                    projectsConfigurations: {
                         type: Array
                     },
-                    _showArchived: {
+
+                    /* Visibility properties */
+                    _showProjects: {
                         type: Boolean,
                         value: false
                     },
+                    _showArchivedProjects: {
+                        type: Boolean,
+                        value: false
+                    },
+                    _disableArchivedOption: {
+                        type: Boolean,
+                        value: false
+                    },
+                    _archivedOptionMessage: {
+                        type: String,
+                        value: ''
+                    }
+                },
+
+                observers: [
+                    '_configureVisibility(projectsConfigurations)',
+                ],
+
+                _configureVisibility: function (projectsConfigurations) {
+                    var hasProjects = !isEmptyArray(projectsConfigurations);
+                    var showArchivedProjects = false;
+                    var disableArchivedOption = false;
+                    var archivedOptionMessage = 'Show/Hide archived projects';
+
+                    if (hasProjects) {
+                        var archivedProjects = filterInArray(projectsConfigurations, function (project) {
+                            return project.isArchived;
+                        });
+                        var hasOnlyArchived = archivedProjects.length === projectsConfigurations.length;
+                        var hasOnlyActive = archivedProjects.length === 0;
+
+                        disableArchivedOption = hasOnlyArchived || hasOnlyActive;
+
+                        if (hasOnlyArchived) {
+                            showArchivedProjects = true;
+                            archivedOptionMessage = 'Only archived projects available';
+                        } else if (hasOnlyActive) {
+                            archivedOptionMessage = 'Only active projects available';
+                        }
+                    }
+
+                    this.set('_showProjects', hasProjects);
+                    this.set('_showArchivedProjects', showArchivedProjects);
+                    this.set('_disableArchivedOption', disableArchivedOption);
+                    this.set('_archivedOptionMessage', archivedOptionMessage);
+                },
+
+                _hasArchivedProjects: function(projectsConfigurations) {
+                    if (isEmptyArray(projectsConfigurations))
+                        return false;
+
+                    var found = filterInArray(projectsConfigurations, function(project) {
+                        return project.isArchived;
+                    });
+                    return found !== undefined;
                 },
 
                 collapseMenuTap: function (e) {
@@ -147,12 +205,15 @@
 
                 openProjectConfigurationModal: function(e) {
                     var projectKey = e.model.item.projectKey;
-                    this.fire('iron-signal', {name: 'open-project-configuration-modal', data: {projectKey: projectKey}})
+                    var project = findInArray(this.projectsConfigurations, function(p) {
+                        return p.projectKey === projectKey;
+                    });
+                    this.fire('iron-signal', {name: 'open-project-configuration-modal', data: project})
                 },
 
                 _getArchivedText: function(isArchived) {
                     return taskboard.getArchivedText(isArchived);
-                },
+                }
 
             });
         })();

@@ -35,7 +35,6 @@ public class Project {
     private String name;
     private List<Long> teamsIds;
     private List<Version> versions;
-    private Boolean archived;
 
     public static Project from(com.atlassian.jira.rest.client.api.domain.Project jiraProject,
             ProjectFilterConfiguration projectFilterConfiguration) {
@@ -43,7 +42,6 @@ public class Project {
         project.setKey(jiraProject.getKey());
         project.setName(jiraProject.getName());
         project.setTeamsIds(projectFilterConfiguration.getTeamsIds());
-        project.setArchived(projectFilterConfiguration.isArchived());
 
         List<Version> versions = newArrayList();
         if (jiraProject.getVersions() != null)
@@ -85,14 +83,6 @@ public class Project {
 
     public void setVersions(final List<Version> versions) {
         this.versions = versions;
-    }
-
-    public Boolean isArchived() {
-        return archived;
-    }
-
-    public void setArchived(Boolean archived) {
-        this.archived = archived;
     }
 
     @Override

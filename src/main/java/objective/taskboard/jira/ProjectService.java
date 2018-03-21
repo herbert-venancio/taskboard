@@ -1,5 +1,3 @@
-package objective.taskboard.jira;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -21,73 +19,119 @@ package objective.taskboard.jira;
  * [/LICENSE]
  */
 
+package objective.taskboard.jira;
+
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.atlassian.jira.rest.client.api.GetCreateIssueMetadataOptions;
-import com.atlassian.jira.rest.client.api.GetCreateIssueMetadataOptionsBuilder;
 import com.atlassian.jira.rest.client.api.domain.CimProject;
 
+import objective.taskboard.auth.Authorizer;
 import objective.taskboard.domain.Project;
+import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.jira.data.Version;
-import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
+import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 
 @Service
 public class ProjectService {
 
     @Autowired
-    private ProjectCache projectCache;
+    private ProjectFilterConfigurationCachedRepository projectRepository;
 
     @Autowired
-    private JiraEndpointAsLoggedInUser jiraEndpointAsUser;
+    private JiraProjectService jiraProjectService;
 
-    public List<Project> getVisibleProjectsOnTaskboard() {
-        return projectCache.getUserProjects().values().stream()
-                .filter(p -> !p.isArchived())
+    @Autowired
+    private Authorizer authorizer;
+
+    public List<Project> getNonArchivedJiraProjectsForUser() {
+        return jiraProjectService.getUserProjects().values().stream()
+                .filter(p -> !isArchived(p.getKey()))
                 .sorted(comparing(Project::getName))
                 .collect(toList());
     }
 
+    public List<ProjectFilterConfiguration> getTaskboardProjects() {
+        return projectRepository.getProjects().stream()
+                .sorted((p1, p2) -> p1.getProjectKey().compareTo(p2.getProjectKey()))
+                .collect(toList());
+    }
+
+    public List<ProjectFilterConfiguration> getTaskboardProjects(String... permissions) {
+        List<String> allowedProjectsKeys = authorizer.getAllowedProjectsForPermissions(permissions);
+
+        return getTaskboardProjects().stream()
+                .filter(projectFilterConfiguration -> allowedProjectsKeys.contains(projectFilterConfiguration.getProjectKey()))
+                .collect(toList());
+    }
+
+    public List<ProjectFilterConfiguration> getTaskboardProjects(Predicate<String> filterProjectByKey, String... permissions) {
+        return getTaskboardProjects(permissions).stream()
+                .filter(projectFilterConfiguration -> filterProjectByKey.test(projectFilterConfiguration.getProjectKey()))
+                .collect(toList());
+    }
+
     public Optional<CimProject> getProjectMetadata(String projectKey) {
-        if (!isProjectVisibleOnTaskboard(projectKey))
+        if (!isNonArchivedAndUserHasAccess(projectKey))
             return Optional.empty();
 
-        GetCreateIssueMetadataOptions options = new GetCreateIssueMetadataOptionsBuilder()
-                .withExpandedIssueTypesFields()
-                .withProjectKeys(projectKey)
-                .build();
-
-        Iterable<CimProject> projects = jiraEndpointAsUser.executeRequest(c -> c.getIssueClient().getCreateIssueMetadata(options));
+        Iterable<CimProject> projects = jiraProjectService.getCreateIssueMetadata(projectKey);
 
         return projects.iterator().hasNext() ?
                 Optional.of(projects.iterator().next()) :
                 Optional.empty();
     }
 
-    public boolean isProjectVisibleOnTaskboard(String projectKey) {
-        return getVisibleProjectsOnTaskboard().stream()
-                .anyMatch(p -> p.getKey().equals(projectKey));
+    public boolean isNonArchivedAndUserHasAccess(String projectKey) {
+        return !isArchived(projectKey) && jiraProjectService.getUserProjects().containsKey(projectKey);
     }
 
-    public boolean isProjectVisibleOnConfigurations(String projectKey) {
-        return projectCache.getUserProjects().containsKey(projectKey);
+    public boolean jiraProjectExistsAndUserHasAccess(String projectKey) {
+        return jiraProjectService.getUserProjects().containsKey(projectKey);
+    }
+
+    private boolean isArchived(String projectKey) {
+        Optional<ProjectFilterConfiguration> projectOpt = projectRepository.getProjectByKey(projectKey);
+        if (!projectOpt.isPresent())
+            throw new IllegalArgumentException(projectKey + " doesn't exist");
+
+        return projectOpt.get().isArchived();
+    }
+
+    public boolean taskboardProjectExists(String projectKey) {
+        return projectRepository.exists(projectKey);
+    }
+
+    public Optional<ProjectFilterConfiguration> getTaskboardProject(String projectKey) {
+        return projectRepository.getProjectByKey(projectKey);
+    }
+
+    public Optional<ProjectFilterConfiguration> getTaskboardProject(String projectKey, String... permissions) {
+        List<String> allowedProjectsKeys = authorizer.getAllowedProjectsForPermissions(permissions);
+        return allowedProjectsKeys.contains(projectKey) ? getTaskboardProject(projectKey) : Optional.empty();
+    }
+
+    public void saveTaskboardProject(ProjectFilterConfiguration project) {
+        projectRepository.save(project);
     }
 
     public Version getVersion(String versionId) {
         if(versionId == null)
             return null;
 
-        return projectCache.getAllProjects().stream()
+        return jiraProjectService.getAllProjects().stream()
                 .filter(project -> project.versions != null)
                 .flatMap(project -> project.versions.stream())
                 .filter(version -> versionId.equals(version.id))
                 .findFirst()
                 .orElse(null);
     }
+
 }

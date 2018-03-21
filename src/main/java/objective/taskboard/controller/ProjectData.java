@@ -30,9 +30,9 @@ public class ProjectData {
     public String projectKey;
     public Set<String> teams = new HashSet<>();
     public List<String> followUpDataHistory = new ArrayList<String>();
-    public Boolean isArchived;
 
     public static class ProjectConfigurationData {
+        public String projectKey;
         public String startDate;
         public String deliveryDate;
         public Boolean isArchived;
