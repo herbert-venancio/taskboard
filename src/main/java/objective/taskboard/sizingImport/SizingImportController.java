@@ -49,7 +49,7 @@ public class SizingImportController {
     
     @GetMapping("/initial-data")
     public InitialData getInitialData() throws IOException {
-        List<ProjectDto> projects = projectService.getVisibleProjectsOnTaskboard().stream()
+        List<ProjectDto> projects = projectService.getNonArchivedJiraProjectsForUser().stream()
                 .filter(p -> authorizer.hasPermissionInProject(ADMINISTRATIVE, p.getKey()))
                 .map(ProjectDto::new).collect(toList());
         boolean needsGoogleAuthorizarion = !googleApiService.verifyAuthorization();

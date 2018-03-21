@@ -30,7 +30,6 @@ import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +40,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import objective.taskboard.auth.Authorizer;
 import objective.taskboard.controller.ProjectCreationData.ProjectCreationDataTeam;
 import objective.taskboard.controller.ProjectData.ProjectConfigurationData;
 import objective.taskboard.data.Team;
@@ -50,7 +48,6 @@ import objective.taskboard.domain.ProjectTeam;
 import objective.taskboard.domain.TeamFilterConfiguration;
 import objective.taskboard.followup.FollowUpFacade;
 import objective.taskboard.jira.ProjectService;
-import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.repository.ProjectTeamRepository;
 import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.repository.TeamFilterConfigurationCachedRepository;
@@ -59,9 +56,6 @@ import objective.taskboard.utils.DateTimeUtils;
 @RestController
 @RequestMapping("/api/projects")
 public class ProjectController {
-
-    @Autowired
-    ProjectFilterConfigurationCachedRepository projectRepository;
 
     @Autowired
     ProjectTeamRepository projectTeamRepo;
@@ -78,53 +72,32 @@ public class ProjectController {
     @Autowired
     private FollowUpFacade followUpFacade;
 
-    @Autowired
-    private Authorizer authorizer;
-
     @RequestMapping
     public List<ProjectData> getProjectsVisibleOnTaskboard() {
-        return getProjects(projectService::isProjectVisibleOnTaskboard);
+        return projectService.getTaskboardProjects(projectService::isNonArchivedAndUserHasAccess).stream()
+                .map(pfc -> generateProjectData(pfc))
+                .collect(toList());
     }
 
     @RequestMapping(value = "configurations", method = RequestMethod.GET)
-    public ResponseEntity<List<ProjectConfigurationData>> getProjectsVisibleOnConfigurations() {
-        List<String> allowedProjectsKeys = authorizer.getAllowedProjectsForPermissions(ADMINISTRATIVE);
-
-        List<ProjectConfigurationData> projects = projectRepository.getProjects().stream()
-            .filter(p -> allowedProjectsKeys.contains(p.getProjectKey()))
-            .map(p -> generateProjectConfigurationData(p))
-            .sorted((p1, p2) -> p1.projectKey.compareTo(p2.projectKey))
-            .collect(toList());
-
-        return projects.size() > 0 ? ResponseEntity.ok(projects) : ResponseEntity.notFound().build();
-    }
-
-    private List<ProjectData> getProjects(Predicate<String> filterProjectsByKey) {
-        return projectRepository.getProjects().stream()
-                .filter(projectFilterConfiguration -> filterProjectsByKey.test(projectFilterConfiguration.getProjectKey()))
-                .map(projectFilterConfiguration -> generateProjectData(projectFilterConfiguration))
-                .sorted((p1, p2) -> p1.projectKey.compareTo(p2.projectKey))
+    public List<ProjectConfigurationData> getProjectsVisibleOnConfigurations() {
+        return projectService.getTaskboardProjects(ADMINISTRATIVE).stream()
+                .map(pfc -> generateProjectConfigurationData(pfc))
                 .collect(toList());
     }
 
     @RequestMapping("/dashboard")
-    public ResponseEntity<List<ProjectData>> getProjectsVisibleOnDashboard() {
-        List<String> allowedProjectKeys = authorizer.getAllowedProjectsForPermissions(DASHBOARD_TACTICAL, DASHBOARD_OPERATIONAL);
-
-        Predicate<String> visibleOnTaskboardAndAllowed = projectKey -> projectService.isProjectVisibleOnTaskboard(projectKey) && allowedProjectKeys.contains(projectKey);
-        List<ProjectData> projects = getProjects(visibleOnTaskboardAndAllowed);
-
-        return ResponseEntity.ok(projects);
+    public List<ProjectData> getProjectsVisibleOnDashboard() {
+        return projectService.getTaskboardProjects(projectService::isNonArchivedAndUserHasAccess, DASHBOARD_TACTICAL, DASHBOARD_OPERATIONAL).stream()
+                .map(pfc -> generateProjectData(pfc))
+                .collect(toList());
     }
 
     @RequestMapping("/followup")
-    public ResponseEntity<List<ProjectData>> getProjectsVisibleOnFollowupConfigurations() {
-        List<String> allowedProjectKeys = authorizer.getAllowedProjectsForPermissions(ADMINISTRATIVE);
-
-        Predicate<String> visibleOnTaskboardAndAllowed = projectKey -> projectService.isProjectVisibleOnTaskboard(projectKey) && allowedProjectKeys.contains(projectKey);
-        List<ProjectData> projects = getProjects(visibleOnTaskboardAndAllowed);
-
-        return ResponseEntity.ok(projects);
+    public List<ProjectData> getProjectsVisibleOnFollowupConfigurations() {
+        return projectService.getTaskboardProjects(projectService::isNonArchivedAndUserHasAccess, ADMINISTRATIVE).stream()
+                .map(pfc -> generateProjectData(pfc))
+                .collect(toList());
     }
 
     @RequestMapping(method = RequestMethod.PATCH, consumes="application/json")
@@ -170,19 +143,16 @@ public class ProjectController {
 
     @RequestMapping(value="{projectKey}", method = RequestMethod.GET)
     public ResponseEntity<Void> get(@PathVariable("projectKey") String projectKey) {
-        return projectService.existisAndHasAccess(projectKey) ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
+        return projectService.jiraProjectExistsAndUserHasAccess(projectKey) ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
     }
 
     @RequestMapping(value = "{projectKey}/configuration", method = RequestMethod.POST, consumes = "application/json")
     public ResponseEntity<Object> updateProjectConfiguration(@PathVariable("projectKey") String projectKey, @RequestBody ProjectConfigurationData data) {
-        Optional<ProjectFilterConfiguration> optConfiguration = projectRepository.getProjectByKey(projectKey);
+        Optional<ProjectFilterConfiguration> optConfiguration = projectService.getTaskboardProject(projectKey, ADMINISTRATIVE);
         if (!optConfiguration.isPresent())
             return ResponseEntity.notFound().build();
 
         ProjectFilterConfiguration configuration = optConfiguration.get();
-
-        if (!authorizer.hasPermissionInProject(ADMINISTRATIVE, configuration.getProjectKey()))
-            return ResponseEntity.notFound().build();
 
         if (!DateTimeUtils.isValidDate(data.startDate))
             return ResponseEntity.badRequest().body("{\"message\" : \"Invalid Start Date\"}");
@@ -203,14 +173,14 @@ public class ProjectController {
         configuration.setDeliveryDate(deliveryDate);
         configuration.setArchived(data.isArchived);
 
-        projectRepository.save(configuration);
+        projectService.saveTaskboardProject(configuration);
 
         return ResponseEntity.ok().build();
     }
 
     @RequestMapping(method = RequestMethod.POST, consumes="application/json")
     public void create(@RequestBody ProjectCreationData data) {
-        if (projectRepository.exists(data.projectKey))
+        if (projectService.taskboardProjectExists(data.projectKey))
             return;
         Boolean hasTeamsOnData = data.teams != null && !data.teams.isEmpty();
         if (hasTeamsOnData)
@@ -237,7 +207,7 @@ public class ProjectController {
     private void createProjectFilterConfiguration(String projectKey) {
         final ProjectFilterConfiguration configuration = new ProjectFilterConfiguration();
         configuration.setProjectKey(projectKey);
-        projectRepository.save(configuration);
+        projectService.saveTaskboardProject(configuration);
     }
 
     private void createTeamAndConfigurations(String projectKey, String teamName, String manager, String coach, List<String> members) {

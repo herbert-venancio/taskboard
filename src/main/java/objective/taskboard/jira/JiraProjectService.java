@@ -28,12 +28,17 @@ import static java.util.stream.Collectors.toSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+
+import com.atlassian.jira.rest.client.api.GetCreateIssueMetadataOptions;
+import com.atlassian.jira.rest.client.api.GetCreateIssueMetadataOptionsBuilder;
+import com.atlassian.jira.rest.client.api.domain.CimProject;
 
 import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.config.LoggedInUserKeyGenerator;
@@ -45,7 +50,7 @@ import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 
 @Component
-class ProjectCache {
+class JiraProjectService {
 
     @Autowired
     private ProjectFilterConfigurationCachedRepository projectFilterConfiguration;
@@ -90,10 +95,22 @@ class ProjectCache {
     private com.atlassian.jira.rest.client.api.domain.Project getJiraProjectByKeyAsUser(String projectKey) {
         try {
             return jiraEndpointAsUser.executeRequest(client -> client.getProjectClient().getProject(projectKey));
-        }catch(JiraServiceException e) {
-            if (e.getStatusCode().isPresent() && e.getStatusCode().get() == HttpStatus.NOT_FOUND)
-                return null;
+        } catch(JiraServiceException e) {
+            Optional<HttpStatus> statusCode = e.getStatusCode();
+            if (statusCode.isPresent()) {
+                if (statusCode.get() == HttpStatus.NOT_FOUND)
+                    return null;
+            }
             throw e;
         }
+    }
+
+    public Iterable<CimProject> getCreateIssueMetadata(String projectKey) {
+        GetCreateIssueMetadataOptions options = new GetCreateIssueMetadataOptionsBuilder()
+                .withExpandedIssueTypesFields()
+                .withProjectKeys(projectKey)
+                .build();
+
+        return jiraEndpointAsUser.executeRequest(c -> c.getIssueClient().getCreateIssueMetadata(options));
     }
 }

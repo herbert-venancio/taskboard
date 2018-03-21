@@ -260,7 +260,7 @@ public class IssueBufferService {
 
     public synchronized List<Issue> getIssues() {
         return cardsRepo.values().stream()
-                .filter(t -> projectService.isProjectVisibleOnTaskboard(t.getProjectKey()))
+                .filter(t -> projectService.isNonArchivedAndUserHasAccess(t.getProjectKey()))
                 .filter(t -> t.isVisible())
                 .collect(toList());
     }
