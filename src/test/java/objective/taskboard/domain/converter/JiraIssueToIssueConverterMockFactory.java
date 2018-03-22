@@ -42,8 +42,6 @@ public class JiraIssueToIssueConverterMockFactory implements FactoryBean<JiraIss
                     defaultIfNull(jiraIssue.getSummary(), ""),
                     jiraIssue.getStatus().getId(),
                     0L,
-                    null,
-                    null,
                     parent.map(IssueParent::getKey).orElse(null),
                     parent.map(IssueParent::getTypeId).orElse(0L),
                     parent.map(IssueParent::getTypeIconUrl).orElse(null),

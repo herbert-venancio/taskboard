@@ -103,7 +103,7 @@
         <paper-menu-button class="configUser">
             <div class="dropdown-trigger title">
                 <span class="nameButton">{{user.user}}</span>
-                <img class="avatar" src$="{{user.avatar}}"/>
+                <img class="avatar" src$="{{getAvatarURL(user.name)}}"/>
             </div>
             <paper-menu class="dropdown-content shadow-elevation-8dp menu">
                 <paper-material class="dropdow-menu-item">{{user.name}}</paper-material>
@@ -143,6 +143,10 @@
 
                 collapseUserConfig: function (e) {
                     this.$.collapseUserConfig.toggle();
+                },
+
+                getAvatarURL: function(username) {
+                    return "/ws/avatar?username=" + username;
                 }
             });
         })();

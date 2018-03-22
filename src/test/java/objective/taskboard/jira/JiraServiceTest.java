@@ -30,41 +30,37 @@ public class JiraServiceTest {
     @Test
     public void givenUserHasCustomerRole_thenUserIsCustomer() {
         // given
-        willReturn(albertCustomer()).given(jiraService).getLoggedUser();
         willReturn(customerRole()).given(jiraService).getUserRoles(eq("albert.customer"));
 
         // then
-        assertThat(jiraService.getUser().isCustomer).isTrue();
+        assertThat(jiraService.getUser(albertCustomer()).isCustomer).isTrue();
     }
 
     @Test
     public void givenUserHasDevelopersRole_thenUserIsNotCustomer() {
         // given
-        willReturn(thomasDeveloper()).given(jiraService).getLoggedUser();
         willReturn(developerRole()).given(jiraService).getUserRoles(eq("thomas.developer"));
 
         // then
-        assertThat(jiraService.getUser().isCustomer).isFalse();
+        assertThat(jiraService.getUser(thomasDeveloper()).isCustomer).isFalse();
     }
 
     @Test
     public void givenUserHasReviewerRole_thenUserIsNotCustomer() {
         // given
-        willReturn(grahamReviewer()).given(jiraService).getLoggedUser();
         willReturn(reviewerRole()).given(jiraService).getUserRoles(eq("graham.reviewer"));
 
         // then
-        assertThat(jiraService.getUser().isCustomer).isFalse();
+        assertThat(jiraService.getUser(grahamReviewer()).isCustomer).isFalse();
     }
 
     @Test
     public void givenUserHasNoRoleForSomeReason_thenUserIsCustomer() {
         // given
-        willReturn(johnDoe()).given(jiraService).getLoggedUser();
         willReturn(emptyList()).given(jiraService).getUserRoles(eq("john.doe"));
 
         // then
-        assertThat(jiraService.getUser().isCustomer).isTrue();
+        assertThat(jiraService.getUser(johnDoe()).isCustomer).isTrue();
     }
 
     private static JiraUser albertCustomer() {

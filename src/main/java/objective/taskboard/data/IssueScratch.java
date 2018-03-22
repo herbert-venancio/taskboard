@@ -24,8 +24,6 @@ public class IssueScratch implements Serializable {
     protected String summary;
     protected long status;
     protected long startDateStepMillis;
-    protected String subresponsavel1;
-    protected String subresponsavel2;
     protected String parent;
     protected long parentType;
     protected String parentTypeIconUri;
@@ -76,8 +74,6 @@ public class IssueScratch implements Serializable {
             String summary, 
             long status, 
             long startDateStepMillis, 
-            String subresponsavel1, 
-            String subresponsavel2, 
             String parent, 
             long parentType, 
             String parentTypeIconUri,
@@ -111,8 +107,6 @@ public class IssueScratch implements Serializable {
         this.summary = summary;
         this.status = status;
         this.startDateStepMillis = startDateStepMillis;
-        this.subresponsavel1 = subresponsavel1;
-        this.subresponsavel2 = subresponsavel2;
         this.parent = parent;
         this.parentType = parentType;
         this.parentTypeIconUri = parentTypeIconUri;

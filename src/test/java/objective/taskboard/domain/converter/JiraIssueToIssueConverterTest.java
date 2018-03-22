@@ -219,8 +219,6 @@ public class JiraIssueToIssueConverterTest {
         assertEquals("Summary", "Summary", converted.getSummary());
         assertEquals("Status id", 1L, converted.getStatus());
         assertEquals("Start date step millis", 1L, converted.getStartDateStepMillis());
-        assertEquals("Assignee avatar URI", "assigneeAvatarURI", converted.getSubresponsavel1());
-        assertEquals("Co-assignee avatar URI", "", converted.getSubresponsavel2());
         assertEquals("Parent key", "", converted.getParent());
         assertEquals("Parent type id", 0L, converted.getParentType());
         assertEquals("Parent type icon URI", "", converted.getParentTypeIconUri());

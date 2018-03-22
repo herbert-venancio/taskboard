@@ -62,7 +62,7 @@ public class HomeController {
 
     @RequestMapping("/")
     public String home(Model model) {
-        User user = jiraService.getUser();
+        User user = jiraService.getLoggedUser();
         model.addAttribute("user", serialize(user));
         model.addAttribute("jiraCustomfields", jiraPropeties.getCustomfield());
         model.addAttribute("jiraIssuetypes", jiraPropeties.getIssuetype());

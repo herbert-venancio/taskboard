@@ -102,8 +102,6 @@ public class Issue extends IssueScratch implements Serializable {
         this.summary = scratch.summary;
         this.status = scratch.status;
         this.startDateStepMillis = scratch.startDateStepMillis;
-        this.subresponsavel1 = scratch.subresponsavel1;
-        this.subresponsavel2 = scratch.subresponsavel2;
         this.parent = scratch.parent;
         this.parentType = scratch.parentType;
         this.parentTypeIconUri = scratch.parentTypeIconUri;
@@ -414,14 +412,6 @@ public class Issue extends IssueScratch implements Serializable {
         return this.startDateStepMillis;
     }
 
-    public String getSubresponsavel1() {
-        return this.subresponsavel1;
-    }
-
-    public String getSubresponsavel2() {
-        return this.subresponsavel2;
-    }
-
     public String getParent() {
         return this.parent;
     }
@@ -561,14 +551,6 @@ public class Issue extends IssueScratch implements Serializable {
 
     public void setStartDateStepMillis(final long startDateStepMillis) {
         this.startDateStepMillis = startDateStepMillis;
-    }
-
-    public void setSubresponsavel1(final String subresponsavel1) {
-        this.subresponsavel1 = subresponsavel1;
-    }
-
-    public void setSubresponsavel2(final String subresponsavel2) {
-        this.subresponsavel2 = subresponsavel2;
     }
 
     public void setParent(final String parent) {

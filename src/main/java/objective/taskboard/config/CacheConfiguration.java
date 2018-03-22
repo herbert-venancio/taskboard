@@ -49,6 +49,7 @@ public class CacheConfiguration {
     public static final String ISSUE_LINKS_METADATA = "issueLinksMetadata";
     public static final String JIRA_TIME_ZONE = "jiraTimeZone";
     public static final String DASHBOARD_PROGRESS_DATA = "dashboardProgressData";
+    public static final String JIRA_USER = "jiraUser";
 
     @Bean
     public CacheManager cacheManager() {
@@ -66,7 +67,8 @@ public class CacheConfiguration {
                 new GuavaCache(JIRA_FIELD_METADATA, CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).concurrencyLevel(1).build()),
                 new GuavaCache(HOLIDAYS, CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).concurrencyLevel(1).build()),
                 new GuavaCache(JIRA_TIME_ZONE, CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.DAYS).concurrencyLevel(1).build()),
-                new GuavaCache(DASHBOARD_PROGRESS_DATA, CacheBuilder.newBuilder().maximumSize(20).expireAfterWrite(1, TimeUnit.DAYS).concurrencyLevel(1).build())
+                new GuavaCache(DASHBOARD_PROGRESS_DATA, CacheBuilder.newBuilder().maximumSize(20).expireAfterWrite(1, TimeUnit.DAYS).concurrencyLevel(1).build()),
+                new GuavaCache(JIRA_USER, CacheBuilder.newBuilder().expireAfterWrite(6, TimeUnit.HOURS).concurrencyLevel(1).build())
         ));
         return simpleCacheManager;
     }

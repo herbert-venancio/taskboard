@@ -122,12 +122,6 @@ public class JiraIssueToIssueConverter {
     public objective.taskboard.data.Issue convertSingleIssue(JiraIssueDto jiraIssue, ParentProvider provider) {
         List<IssueCoAssignee> coAssignees = extractCoAssignees(jiraProperties, jiraIssue);
         
-        String avatarCoAssignee1 = jiraIssue.getAssignee() != null ? jiraIssue.getAssignee().getAvatarUri("24x24").toString() : "";
-        String avatarCoAssignee2 = coAssignees.stream()
-                .map(c -> c.getAvatarUrl())
-                .filter(url -> !url.equals(avatarCoAssignee1))
-                .findFirst().orElse("");
-        
         Long priorityOrder = priorityService.determinePriority(jiraIssue);
         
         Optional<Date> priorityUpdateDate = priorityService.priorityUpdateDate(jiraIssue);
@@ -143,8 +137,6 @@ public class JiraIssueToIssueConverter {
                 defaultIfNull(jiraIssue.getSummary(),""),
                 jiraIssue.getStatus().getId(),
                 startDateStepService.get(jiraIssue),
-                avatarCoAssignee1,
-                avatarCoAssignee2,
                 extractParentKey(jiraProperties, jiraIssue, parentIssueLinks),
                 getParentTypeId(jiraIssue),
                 getParentTypeIconUri(jiraIssue),
