@@ -306,6 +306,10 @@ paper-radio-button.tb-paper-radio-button #radioLabel.paper-radio-button {
     line-height: 16px;
 }
 
+paper-radio-button.tb-paper-radio-button paper-ripple#ink {
+    display: none;
+}
+
 /*
     Follow Up Dropdown
 */
@@ -437,4 +441,44 @@ paper-toggle-button[disabled] .paper-toggle-button {
 .alert-danger {
     color: #721c24;
     background-color: #f8d7da;
+}
+
+/*
+    Message Box
+*/
+.message-box {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+}
+
+.message-box--error {
+    background: #F4A9A1;
+}
+
+.message-box--updating {
+    background: #fdf8b2;
+}
+
+.message-box__icon {
+    flex: 0 0 auto;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    margin: 0 10px 0 0;
+}
+
+.message-box__message {
+    flex: 1;
+    margin: 0;
+    font-weight: bold;
+    overflow: hidden;
+}
+
+.message-box__close {
+    flex: 0 0 auto;
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    margin: 0 0 0 10px;
 }

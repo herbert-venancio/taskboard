@@ -26,12 +26,28 @@
             :host {
             }
 
+            #modal {
+                background: #FFF;
+                width: 450px;
+                min-height: 360px;
+                margin: 0;
+                display: block;
+                font-family: inherit;
+            }
+
             .card-custom {
+                display: flex;
+                flex-direction: column;
                 background: transparent;
                 width: 100%;
                 min-height: 360px;
                 padding: 20px;
                 margin: 0;
+            }
+
+            .card-custom[data-loading] {
+                opacity: .6;
+                pointer-events: none;
             }
 
             .card-header-custom {
@@ -59,12 +75,8 @@
 
             .content-row {
                 display: flex;
-                margin-top: 10px;
+                margin-top: 20px;
                 align-items: center;
-            }
-
-            .content-row:first-child {
-                margin-top: 0;
             }
 
             .card-header-buttons {
@@ -98,23 +110,6 @@
                 background-color: rgba(66, 133, 244, 0.75);
             }
 
-            #modal {
-                background: white;
-                min-width: 300px;
-                min-height: 360px;
-                margin: 0;
-                display: block;
-                font-family: inherit;
-            }
-
-            .error-message {
-                color: red;
-                font-weight: bold;
-                width: 100%;
-                margin-top: 5px;
-                margin-bottom: 15px;
-            }
-
             .buttonClose {
                 background: #fff;
                 color: #000;
@@ -125,14 +120,15 @@
             }
 
             .custom-footer {
-                bottom: 20px;
+                padding-top: 20px;
+                margin-top: auto;
             }
 
             .custom-footer-buttons {
                 display: flex;
+                justify-content: flex-end;
                 margin-left: -5px;
                 margin-right: -5px;
-                float: right;
             }
 
             .custom-footer-buttons paper-button {
@@ -140,10 +136,6 @@
                 margin: 0 5px;
                 text-transform: none;
                 text-align: center;
-            }
-
-            paper-spinner[aria-hidden=true] {
-                display: none;
             }
 
             .info-box {
@@ -159,19 +151,31 @@
                 max-height: 250px;
                 overflow-y: auto;
                 width: 100%;
-                margin-top: 20px;
-                margin-bottom: 20px;
             }
 
             .set-template-link {
                 text-decoration: underline;
                 cursor: pointer;
             }
+
+            paper-spinner {
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                margin-top: -14px;
+                margin-left: -14px;
+                padding: 0;
+                display: block;
+            }
+
+            paper-spinner[aria-hidden=true] {
+                display: none;
+            }
         </style>
 
         <iron-ajax id="ajaxProjects"
                    method="GET"
-                   url="/api/projects"
+                   url="/api/projects/followup"
                    content-type='application/json'
                    last-response="{{projects}}"></iron-ajax>
         <iron-ajax id="ajaxTemplates"
@@ -179,8 +183,10 @@
                    url="/api/templates"
                    content-type='application/json'
                    last-response="{{allTemplates}}"></iron-ajax>
+
         <paper-dialog id="modal" entry-animation="scale-up-animation" exit-animation="fade-out-animation" with-backdrop modal>
-                <paper-card class="card-custom">
+
+            <paper-card class="card-custom" data-loading$="[[_isLoading(_isReady, downloadInProgress)]]">
 
                 <div class="card-header-custom">
                     <div class="card-header-info">
@@ -197,10 +203,12 @@
                     </div>
                 </div>
 
-                <div class="content-box" hidden$="{{showNoTemplatesFoundWarning}}">
+                <template is="dom-if" if="[[_shouldShowContent(_isReady, showNoTemplatesFoundWarning)]]">
+
                     <div class="sub-header">
                         Select report template:
                     </div>
+
                     <div class="content-row">
                         <paper-radio-group class="scroll" id="listOfTemplates"
                                 selected="{{selectedTemplate}}"
@@ -212,11 +220,13 @@
                             </template>
                         </paper-radio-group>
                     </div>
-                    <div hidden$="{{!showCreateTemplateMessage}}">
-                        Don't see your template?
-                        <span class="set-template-link" on-tap="openTemplateFollowupDialog">Click here</span>
-                        to create a new template
-                    </div>
+
+                    <template is="dom-if" if="[[showCreateTemplateMessage]]">
+                        <div class="content-row">
+                            Don't see your template? <span class="set-template-link" on-tap="openTemplateFollowupDialog">Click here</span> to create a new template
+                        </div>
+                    </template>
+
                     <div class="content-row">
                         <paper-dropdown-menu class="followup-dropdown" disabled="{{!showDateSelect}}"
                             name="date" always-float-label label="Date" selected-item="{{selectedItemDate}}"
@@ -228,19 +238,25 @@
                                 </template>
                             </paper-menu>
                         </paper-dropdown-menu>
-                        <paper-icon-button icon="clear" on-click="clearSelectedDate" hidden$={{!showClearDate}} class="clear-button">
-                        </paper-icon-button>
+                        <paper-icon-button icon="clear" on-click="clearSelectedDate" hidden$={{!showClearDate}} class="clear-button"></paper-icon-button>
                     </div>
 
-                    <div class="error-message">{{errorMessage}}</div>
+                    <template is="dom-if" if="[[errorMessage]]">
+                        <div class="message-box message-box--error">
+                            <paper-icon-button class="message-box__icon" icon="error" title="Error Icon"></paper-icon-button>
+                            <p class="message-box__message">[[errorMessage]]</p>
+                            <paper-icon-button class="message-box__close" icon="close" title="Close error" on-tap="_closeErrorMessage"></paper-icon-button>
+                        </div>
+                    </template>
 
-                </div>
+                </template>
 
-                <div id="noTemplateWarning" class="alert alert-warning warn-box" hidden$={{!showNoTemplatesFoundWarning}}>
-                    <strong>No template available</strong><br />
-                    <span class="set-template-link" on-tap="openTemplateFollowupDialog">Click here</span>
-                    to create a template
-                </div>
+                <template is="dom-if" if="[[showNoTemplatesFoundWarning]]">
+                    <div id="noTemplateWarning" class="alert alert-warning warn-box">
+                        <strong>No template available</strong><br />
+                        <span class="set-template-link" on-tap="openTemplateFollowupDialog">Click here</span> to create a template
+                    </div>
+                </template>
 
                 <div class="custom-footer">
 
@@ -250,12 +266,17 @@
                             on-tap="downloadFollowup" title="Generate Report">
                             Generate Report
                         </paper-button>
-                        <paper-spinner active hidden$="{{!downloadInProgress}}">...</paper-spinner>
 
                     </div>
                 </div>
             </paper-card>
+
+            <template is="dom-if" if="[[_isLoading(_isReady, downloadInProgress)]]">
+                <paper-spinner active alt="Loading..."></paper-spinner>
+            </template>
+
         </paper-dialog>
+
     </template>
     <script>
         (function () {
@@ -267,12 +288,10 @@
                         type: Array
                     },
                     allTemplates: {
-                        type: Array,
-                        observer: '_updateTemplates'
+                        type: Array
                     },
                     selectedTemplate: {
-                        type: Object,
-                        observer: 'filter'
+                        type: Object
                     },
                     showNoTemplatesFoundWarning: {
                         type: Boolean
@@ -293,27 +312,45 @@
                         type: Object
                     },
                     selectedIndexDate: {
-                        type: Number,
-                        value: 0
+                        type: Number
                     },
                     showClearDate: {
                         type: Boolean
                     },
                     downloadInProgress: {
                         type: Boolean
+                    },
+                    _isReady: {
+                        type: Boolean
+                    },
+                    errorMessage: {
+                        type: String
                     }
                 },
 
+                observers: [
+                    '_onSelectTemplate(selectedTemplate)',
+                    '_setReady(projects, allTemplates)',
+                    '_resizeModal(allTemplates, projects, showNoTemplatesFoundWarning, errorMessage)',
+                ],
+
                 opendialog: function () {
+                    this.set('projects', undefined);
+                    this.set('allTemplates', undefined);
+                    this.set('errorMessage', '');
+                    this.set('_isReady', false);
+                    this.set('downloadInProgress', false);
+                    this.set('showNoTemplatesFoundWarning', false);
+                    this.set('selectedIndexDate', 0);
+                    this.set('selectedTemplate', undefined);
+                    this.set('selectedItemDate', undefined);
                     this.$.ajaxProjects.generateRequest();
                     this.$.ajaxTemplates.generateRequest();
                     this.$.modal.open();
-                    this.showNoTemplatesFoundWarning = false;
                     this.disableGenerateButton = true;
                     this.showDateSelect = false;
                     this.showClearDate = false;
-                    this.downloadInProgress = false;
-                    this.showCreateTemplateMessage = authorizer.hasPermissionInAnyProject('taskboard.administrative');
+                    this.showCreateTemplateMessage = authorizer.hasPermissionInAnyProject(authorizer.permissions.ADMINISTRATIVE);
                 },
 
                 close: function() {
@@ -325,7 +362,10 @@
                     this.fire('iron-signal', {name: 'open-template-followup-modal'})
                 },
 
-                filter: function() {
+                _onSelectTemplate: function() {
+                    if (this.selectedTemplate === undefined)
+                        return;
+
                     this.filterDates();
                     this.updateDisableGenerateButton();
                 },
@@ -344,11 +384,11 @@
                     this.clearSelectedDate();
                 },
 
-                getTemplateById(id) {
+                getTemplateById: function(id) {
                     return _.find(this.allTemplates, function(t) { return t.id === id; });
                 },
 
-                getProjectByKey(key) {
+                getProjectByKey: function(key) {
                     return _.find(this.projects, function(p) { return p.projectKey === key; });
                 },
 
@@ -370,7 +410,7 @@
                 },
 
                 dateOnChange: function() {
-                    this.showClearDate = this.selectedIndexDate > 0 ? true : false;
+                    this.showClearDate = this.selectedIndexDate > 0;
                 },
 
                 dateOnKeyDown: function(e) {
@@ -382,17 +422,16 @@
                     return getDateFromYYYYMMDD(item).toLocaleDateString();
                 },
 
-                showErrorMessage(msg) {
+                showErrorMessage: function(msg) {
                     this.set('errorMessage', msg);
-                    $(".error-message").stop(true, false).fadeIn(0).animate({opacity:1}, 2000).fadeOut();
                 },
 
                 downloadFollowup: function() {
                     var self = this;
-                    this.errorMessage = "";
+                    this.errorMessage = '';
                     var selectedKeys = this.filterSelectedProjectKeys();
 
-                    if (selectedKeys.length == 0) {
+                    if (selectedKeys.length === 0) {
                         this.showErrorMessage("Please, selected at least one project");
                         return;
                     }
@@ -434,11 +473,27 @@
                     this.set('disableGenerateButton', condition1 || condition2);
                 },
 
-                _updateTemplates: function() {
-                    this.set('showNoTemplatesFoundWarning', _.isEmpty(this.allTemplates));
-                    this.$.templateRadioElements.render();
-                    this.$.modal.refit();
+                _setReady: function(projects, allTemplates) {
+                    this.set('_isReady', projects !== undefined && allTemplates !== undefined);
+                    this.set('showNoTemplatesFoundWarning', _.isEmpty(this.allTemplates) && allTemplates !== undefined);
+                },
+
+                _isLoading: function(_isReady, downloadInProgress) {
+                    return !_isReady || downloadInProgress;
+                },
+
+                _resizeModal: function() {
+                    this.$.modal.notifyResize();
+                },
+
+                _shouldShowContent: function(_isReady, showNoTemplatesFoundWarning) {
+                    return _isReady && !showNoTemplatesFoundWarning;
+                },
+
+                _closeErrorMessage: function() {
+                    this.set('errorMessage', '');
                 }
+
             });
         })();
     </script>

@@ -302,7 +302,7 @@
                     });
                 },
 
-                getFormData() {
+                getFormData: function() {
                     var projectsStr = "";
                     this.templateSelected.projects.forEach(function(p) {
                         if(p.checked) projectsStr += p.projectKey + ',';

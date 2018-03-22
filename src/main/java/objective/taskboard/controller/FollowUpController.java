@@ -22,6 +22,8 @@ package objective.taskboard.controller;
 
 import static java.time.temporal.ChronoField.HOUR_OF_DAY;
 import static java.time.temporal.ChronoField.MINUTE_OF_HOUR;
+import static java.util.Arrays.asList;
+import static objective.taskboard.repository.PermissionRepository.ADMINISTRATIVE;
 import static objective.taskboard.utils.DateTimeUtils.determineTimeZoneId;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -31,11 +33,11 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import objective.taskboard.utils.DateTimeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -45,14 +47,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import objective.taskboard.auth.Authorizer;
 import objective.taskboard.followup.FollowUpDataHistoryGenerator;
 import objective.taskboard.followup.FollowUpFacade;
 import objective.taskboard.followup.FollowUpGenerator;
-
+import objective.taskboard.utils.DateTimeUtils;
 @RestController
 @RequestMapping("/ws/followup")
 public class FollowUpController {
+
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FollowUpController.class);
+
     private static final DateTimeFormatter formatter = new DateTimeFormatterBuilder()
             .parseCaseInsensitive()
             .append(DateTimeFormatter.ISO_LOCAL_DATE)
@@ -63,12 +68,15 @@ public class FollowUpController {
             .toFormatter();
 
     private static final Pattern COMPACT_DATE_PATTERN = Pattern.compile("(\\d+)(\\d\\d)(\\d\\d)");
-    
+
     @Autowired
     private FollowUpFacade followUpFacade;
 
     @Autowired
     private FollowUpDataHistoryGenerator followUpDataHistoryGenerator;
+
+    @Autowired
+    private Authorizer authorizer;
 
     @RequestMapping
     public ResponseEntity<Object> download(@RequestParam("projects") String projects, @RequestParam("template") String template,
@@ -80,11 +88,18 @@ public class FollowUpController {
             return new ResponseEntity<>("Template not selected", BAD_REQUEST);
 
         String [] includedProjects = projects.split(",");
+        List<String> allowedProjectKeys = authorizer.getAllowedProjectsForPermissions(ADMINISTRATIVE);
+
+        if (!allowedProjectKeys.containsAll(asList(includedProjects)))
+            return new ResponseEntity<>("One or more projects don't exist", BAD_REQUEST);
+
         ZoneId timezone = determineTimeZoneId(zoneId);
+
         try {
             FollowUpGenerator followupGenerator = followUpFacade.getGenerator(template, date);
             Resource resource = followupGenerator.generate(includedProjects, timezone);
             String filename = "Followup_"+template+"_" + templateDate(date, timezone)+".xlsm";
+
             return ResponseEntity.ok()
                   .contentLength(resource.contentLength())
                   .header("Content-Disposition","attachment; filename=\"" + filename + "\"")
