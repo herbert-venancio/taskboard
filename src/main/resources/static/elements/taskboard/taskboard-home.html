@@ -795,16 +795,18 @@
                         ready               : {icon: "icons:check-circle", tooltip: "Data ready, no errors"},
                         updateError         : {icon: "icons:warning", tooltip: "Error synching data from jira. Issues might be outdated"},
                         initialisationError : {icon: "icons:error", tooltip: "Failure fetching data from jira. No issues available"},
-                    }
-                    this.set('stateIcon'   ,state[cacheState].icon)
-                    this.set('stateTooltip',state[cacheState].tooltip);
+                    };
+                    this.set('stateIcon', state[cacheState].icon);
+                    this.set('stateTooltip', state[cacheState].tooltip);
                 },
 
                 verifyPermissions: function() {
-                    this.set('_showFollowupDownloadButton', authorizer.hasPermissionInAnyProject('taskboard.administrative'));
-                    this.set('_showFollowupUploadButton', authorizer.hasPermissionInAnyProject('taskboard.administrative'));
-                    this.set('_showFollowupDashboardButton', authorizer.hasPermissionInAnyProject('dashboard.tactical') || authorizer.hasPermissionInAnyProject('dashboard.operational'));
-                    this.set('_showSizingImportButton', authorizer.hasPermissionInAnyProject('taskboard.administrative'));
+                    var hasAdministrativePermissionInAnyProject = authorizer.hasPermissionInAnyProject(authorizer.permissions.ADMINISTRATIVE);
+                    var hasDashboardPermissionInAnyProject =  authorizer.hasPermissionInAnyProject(authorizer.permissions.DASHBOARD_TACTICAL) || authorizer.hasPermissionInAnyProject(authorizer.permissions.DASHBOARD_OPERATIONAL);
+                    this.set('_showFollowupDownloadButton', hasAdministrativePermissionInAnyProject);
+                    this.set('_showFollowupUploadButton', hasAdministrativePermissionInAnyProject);
+                    this.set('_showFollowupDashboardButton', hasDashboardPermissionInAnyProject);
+                    this.set('_showSizingImportButton', hasAdministrativePermissionInAnyProject);
                 }
             });
         })();

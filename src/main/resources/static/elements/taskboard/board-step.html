@@ -380,7 +380,7 @@
 
                 listInvalidPermissionProjects: function() {
                     return _.filter(taskboard.getVisibleProjectKeys(), function(projectKey) {
-                        return !authorizer.hasPermissionInProject('taskboard.administrative', projectKey);
+                        return !authorizer.hasPermissionInProject(authorizer.permissions.ADMINISTRATIVE, projectKey);
                     });
                 },
 

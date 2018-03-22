@@ -260,7 +260,6 @@ public class FollowUpGeneratorTest {
     }
 
     @Test
-
     public void generateEffortHistoryTest() throws IOException {
         ProjectFilterConfiguration project = Mockito.mock(ProjectFilterConfiguration.class);
         doReturn("PROJ").when(project).getProjectKey();
