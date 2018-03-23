@@ -21,7 +21,19 @@
     {
       "self": "http://localhost:4567/rest/api/latest/component/11380",
       "id": "11380",
-      "name": "ComponentTakano",
+      "name": "Dev Support",
+      "isAssigneeTypeValid": false
+    },
+    {
+      "self": "http://localhost:4567/rest/api/latest/component/11381",
+      "id": "11381",
+      "name": "Management",
+      "isAssigneeTypeValid": false
+    },
+    {
+      "self": "http://localhost:4567/rest/api/latest/component/11382",
+      "id": "11382",
+      "name": "Coaching",
       "isAssigneeTypeValid": false
     }
   ],

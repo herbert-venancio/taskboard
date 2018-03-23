@@ -560,6 +560,15 @@
                             </div>
                         </template>
 
+                        <template is="dom-if" if="{{item.components.length}}">
+                            <div class="column-block">
+                                <div class="sub-header">Component/s</div>
+                                <template is="dom-repeat" items="{{item.components}}" as="component">
+                                    <div class="sub-content">{{component}}</div>
+                                </template>
+                            </div>
+                        </template>
+
                     </div>
 
                     <template is="dom-if" if="{{item.blocked}}">
