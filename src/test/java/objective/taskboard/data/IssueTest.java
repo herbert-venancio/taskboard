@@ -24,8 +24,6 @@ public class IssueTest {
                 "summary", 
                 2l,
                 3000l,
-                "co1",
-                "co2",
                 "K", 
                 4l,
                 "parent-type-uri",

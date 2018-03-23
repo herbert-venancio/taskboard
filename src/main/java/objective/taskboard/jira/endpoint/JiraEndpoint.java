@@ -23,6 +23,9 @@ package objective.taskboard.jira.endpoint;
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.codec.binary.Base64;
@@ -149,6 +152,19 @@ public class JiraEndpoint {
 
             com.squareup.okhttp.Request request = builder.build();
             return chain.proceed(request);
+        }
+    }
+
+    public byte[] readBytesFromURL(URL url, String username, String password) throws IOException {
+        URLConnection connection = url.openConnection();
+        connection.setRequestProperty("Authorization", Credentials.basic(username, password));
+        try (InputStream inputStream = connection.getInputStream()) {
+            byte[] bytes = new byte[connection.getContentLength()];
+            inputStream.read(bytes);
+            return bytes;
+        } catch (Exception e) {
+            log.error("Error reading bytes from url: " + e.getMessage());
+            throw new IllegalStateException(e);
         }
     }
 

@@ -442,8 +442,6 @@ public abstract class AbstractFollowUpDataProviderTest {
                     summary,
                     status,
                     startDateStepMillis, //startDateStepMillis
-                    null, //subresponsavel1
-                    null, //subresponsavel2
                     parent,
                     0L,   //parentType
                     null, //parentTypeIconUri

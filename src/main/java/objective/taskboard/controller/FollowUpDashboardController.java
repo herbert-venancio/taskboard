@@ -34,7 +34,7 @@ public class FollowUpDashboardController {
                 !authorizer.hasPermissionInAnyProject(DASHBOARD_OPERATIONAL))
             throw new ResourceNotFoundException();
 
-        User user = jiraService.getUser();
+        User user = jiraService.getLoggedUser();
         model.addAttribute("logo", serialize(taskboardProperties.getLogo()));
         model.addAttribute("user", serialize(user));
         model.addAttribute("permissions", serialize(authorizer.getProjectsPermission()));

@@ -23,8 +23,6 @@ public class IssueStateHashCalculator {
                 , issue.getSummary()
                 , issue.getStatus()
                 , issue.getStartDateStepMillis()
-                , issue.getSubresponsavel1()
-                , issue.getSubresponsavel2()
                 , issue.getParent()
                 , issue.getParentType()
                 , issue.getParentTypeIconUri()

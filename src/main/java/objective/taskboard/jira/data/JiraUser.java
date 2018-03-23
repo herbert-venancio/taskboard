@@ -8,6 +8,7 @@ import retrofit.http.Query;
 
 public class JiraUser {
 
+    public static String S24_24 = "24x24";
     public static String S48_48 = "48x48";
 
     public String name;
@@ -24,7 +25,11 @@ public class JiraUser {
         this.avatarUrls = avatarUrls;
     }
 
-    public URI getAvatarUri() {
+    public URI getAvatarUri24() {
+        return avatarUrls.get(S24_24);
+    }
+
+    public URI getAvatarUri48() {
         return avatarUrls.get(S48_48);
     }
 

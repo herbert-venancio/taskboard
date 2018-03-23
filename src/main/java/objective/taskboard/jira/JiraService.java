@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -46,6 +47,7 @@ import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder;
 import com.google.common.collect.ImmutableList;
 
 import objective.taskboard.auth.CredentialsHolder;
+import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.data.Issue;
 import objective.taskboard.data.User;
 import objective.taskboard.jira.client.JiraIssueDto;
@@ -197,9 +199,10 @@ public class JiraService {
         return issue.getKey();
     }
 
-    public JiraUser getLoggedUser() {
-        log.debug("⬣⬣⬣⬣⬣  getLoggedUser");
-        return jiraEndpointAsUser.request(JiraUser.Service.class).get(CredentialsHolder.username());
+    @Cacheable(CacheConfiguration.JIRA_USER)
+    public JiraUser getJiraUser(String username) {
+        log.debug("⬣⬣⬣⬣⬣  getJiraUser");
+        return jiraEndpointAsUser.request(JiraUser.Service.class).get(username);
     }
 
     public void block(String issueKey, String lastBlockReason) {
@@ -228,16 +231,19 @@ public class JiraService {
         }
     }
 
-    public User getUser() {
-        try {
-            JiraUser jiraUser = getLoggedUser();
+    public User getLoggedUser() {
+        JiraUser loggedJiraUser = getJiraUser(CredentialsHolder.username());
+        return getUser(loggedJiraUser);
+    }
 
+    protected User getUser(JiraUser jiraUser) {
+        try {
             List<UserDetail.Role> allUserRoles = getUserRoles(jiraUser.name);
             boolean isCustomer = allUserRoles.isEmpty() ||
                     allUserRoles.stream()
                             .anyMatch(role -> CUSTOMER_ROLE_NAME.equals(role.name));
 
-            return new User(jiraUser.displayName, jiraUser.name, jiraUser.emailAddress, jiraUser.getAvatarUri(), isCustomer);
+            return new User(jiraUser.displayName, jiraUser.name, jiraUser.emailAddress, jiraUser.getAvatarUri48(), isCustomer);
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             return null;
