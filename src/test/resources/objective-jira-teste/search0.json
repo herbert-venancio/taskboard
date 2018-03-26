@@ -15652,6 +15652,23 @@
                     "self": "http://localhost:4567/rest/api/latest/user?username=gtakeuchi",
                     "timeZone": "America/Sao_Paulo"
                 },
+                "components": [
+                    {
+                        "self": "http://localhost:4567/rest/api/latest/component/11380",
+                        "id": "11380",
+                        "name": "Dev Support"
+                    },
+                    {
+                        "self": "http://localhost:4567/rest/api/latest/component/11381",
+                        "id": "11381",
+                        "name": "Management"
+                    },
+                    {
+                        "self": "http://localhost:4567/rest/api/latest/component/11382",
+                        "id": "11382",
+                        "name": "Coaching"
+                    }
+                ],
                 "created": "2017-05-30T20:01:28.000+0000",
                 "customfield_11440": {
                     "id": "12606",
@@ -15660,7 +15677,13 @@
                 },
                 "customfield_11451": null,
                 "customfield_11452": null,
-                "customfield_11455": null,
+                "customfield_11455": {
+                    "archived": false,
+                    "id": "12564",
+                    "name": "15.0",
+                    "released": false,
+                    "self": "http://localhost:4567/rest/api/latest/version/12564"
+                },
                 "customfield_11456": [
                     {
                         "active": true,
@@ -24967,10 +24990,10 @@
                 "customfield_11452": null,
                 "customfield_11455": {
                     "archived": false,
-                    "id": "12659",
+                    "id": "12564",
                     "name": "15.0",
                     "released": false,
-                    "self": "http://localhost:4567/rest/api/latest/version/12659"
+                    "self": "http://localhost:4567/rest/api/latest/version/12564"
                 },
                 "customfield_11456": null,
                 "description": "Vide OS",
