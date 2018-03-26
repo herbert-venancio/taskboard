@@ -251,10 +251,12 @@ public class IssueFieldsExtractorTest {
                 + "{name:'Co-assignee 2', avatarUrls:{24x24:'avatarUrl2'}}]");
         mockIssueField(CO_ASSIGNEES_ID, jsonCoAssignees);
 
-        List<String> coAssignees = IssueFieldsExtractor.extractCoAssignees(jiraProperties, issue);
+        List<IssueCoAssignee> coAssignees = IssueFieldsExtractor.extractCoAssignees(jiraProperties, issue);
         assertEquals(MSG_CO_ASSIGNEES_QUANTITY, 2, coAssignees.size());
-        assertEquals("First co-assignee name", "Co-assignee 1", coAssignees.get(0));
-        assertEquals("Second co-assignee name", "Co-assignee 2", coAssignees.get(1));
+        assertEquals("First co-assignee name", "Co-assignee 1", coAssignees.get(0).getName());
+        assertEquals("First co-assignee avatar url", "avatarUrl1", coAssignees.get(0).getAvatarUrl());
+        assertEquals("Second co-assignee name", "Co-assignee 2", coAssignees.get(1).getName());
+        assertEquals("Second co-assignee avatar url", "avatarUrl2", coAssignees.get(1).getAvatarUrl());
     }
 
     @Test
@@ -273,13 +275,14 @@ public class IssueFieldsExtractorTest {
 
     @Test
     public void extractCoAssigneesInvalid() throws JSONException {
-        JSONArray jsonCoAssignees = new JSONArray("[{namee:'Co-assignee 1'},"
+        JSONArray jsonCoAssignees = new JSONArray("[{name:'Co-assignee 1'},"
                 + "{name:'Co-assignee 2', avatarUrls:{24x24:'avatarUrl2'}}]");
         mockIssueField(CO_ASSIGNEES_ID, jsonCoAssignees);
 
-        List<String> coAssignees = IssueFieldsExtractor.extractCoAssignees(jiraProperties, issue);
+        List<IssueCoAssignee> coAssignees = IssueFieldsExtractor.extractCoAssignees(jiraProperties, issue);
         assertEquals(MSG_CO_ASSIGNEES_QUANTITY, 1, coAssignees.size());
-        assertEquals("Co-assignee name", "Co-assignee 2", coAssignees.get(0));
+        assertEquals("Co-assignee name", "Co-assignee 2", coAssignees.get(0).getName());
+        assertEquals("Co-assignee avatar url", "avatarUrl2", coAssignees.get(0).getAvatarUrl());
     }
 
     @Test

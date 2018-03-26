@@ -93,18 +93,19 @@ public class IssueFieldsExtractor {
         return links.get(0).getTargetIssueKey();
     }
 
-    public  static List<String> extractCoAssignees(JiraProperties jiraProperties, JiraIssueDto issue) {
+    public  static List<IssueCoAssignee> extractCoAssignees(JiraProperties jiraProperties, JiraIssueDto issue) {
         String fieldId = jiraProperties.getCustomfield().getCoAssignees().getId();
         JSONArray value = issue.getField(fieldId);
 
         if (value == null)
             return newArrayList();
 
-        List<String> coAssignees = newArrayList();
+        List<IssueCoAssignee> coAssignees = newArrayList();
         for (int i = 0; i < value.length(); i++) {
             try {
                 String name = value.getJSONObject(i).getString("name");
-                coAssignees.add(name);
+                String avatarUrl = value.getJSONObject(i).getJSONObject("avatarUrls").getString("24x24");
+                coAssignees.add(new IssueCoAssignee(name, avatarUrl));
             } catch (JSONException e) {
             	logErrorExtractField(issue, fieldId + ".name (co-assignees)", e);
             }

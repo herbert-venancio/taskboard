@@ -43,6 +43,7 @@ import objective.taskboard.database.IssuePriorityService;
 import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.domain.IssueStateHashCalculator;
 import objective.taskboard.domain.converter.CardVisibilityEvalService;
+import objective.taskboard.domain.converter.IssueCoAssignee;
 import objective.taskboard.domain.converter.IssueTeamService;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraProperties.BallparkMapping;
@@ -398,7 +399,7 @@ public class Issue extends IssueScratch implements Serializable {
     }
 
     public String getSubResponsaveis() {
-        return String.join(",", coAssignees);
+        return coAssignees.stream().map(IssueCoAssignee::getName).collect(Collectors.joining(","));
     }
 
     public String getAssignee() {
@@ -561,7 +562,7 @@ public class Issue extends IssueScratch implements Serializable {
     public void setTimeTracking(final TaskboardTimeTracking timeTracking) {
         this.timeTracking = timeTracking;
     }
-    
+
     public String getReporter() {
         return reporter;
     }
@@ -571,11 +572,11 @@ public class Issue extends IssueScratch implements Serializable {
     }
 
     @JsonIgnore
-    public List<String> getCoAssignees() {
+    public List<IssueCoAssignee> getCoAssignees() {
         return coAssignees;
     }
 
-    public void setCoAssignees(List<String> coAssigness) {
+    public void setCoAssignees(List<IssueCoAssignee> coAssigness) {
         this.coAssignees = coAssigness;
     }
 

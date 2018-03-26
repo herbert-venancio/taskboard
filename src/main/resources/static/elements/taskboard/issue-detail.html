@@ -1172,7 +1172,7 @@
                 },
 
                 getFieldName: function(field) {
-                    return FIELDNAMES[field.fieldId] || field.fieldId;
+                    return taskboard.getFieldName(field.fieldId);
                 },
 
                 hasRecords: function (records) {

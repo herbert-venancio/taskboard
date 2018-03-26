@@ -81,7 +81,8 @@ public class IssueTeamService {
         String assignee = issue.getAssignee();
         if (!isEmpty(assignee))
             users.add(assignee);
-        users.addAll(issue.getCoAssignees());
+        for (IssueCoAssignee coAssignee : issue.getCoAssignees())
+            users.add(coAssignee.getName());
 
         return getUsersTeams(users, issue.getProjectKey(), true);
     }

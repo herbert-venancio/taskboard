@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import objective.taskboard.domain.converter.IssueCoAssignee;
 
 public class IssueScratch implements Serializable {
     private static final long serialVersionUID = -8643342601909365442L;
@@ -42,7 +43,7 @@ public class IssueScratch implements Serializable {
     @JsonIgnore
     protected String reporter;
     @JsonIgnore
-    protected List<String> coAssignees = new LinkedList<>();//NOSONAR
+    protected List<IssueCoAssignee> coAssignees = new LinkedList<>();//NOSONAR
     @JsonIgnore
     protected CustomField classOfService;
     @JsonIgnore
@@ -78,7 +79,7 @@ public class IssueScratch implements Serializable {
             CustomField additionalEstimatedHours,
             TaskboardTimeTracking timeTracking,
             String reporter, 
-            List<String> coAssignees,
+            List<IssueCoAssignee> coAssignees,
             CustomField classOfService, 
             String releaseId,
             List<Changelog> changelog,

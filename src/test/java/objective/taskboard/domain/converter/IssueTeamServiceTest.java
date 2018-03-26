@@ -227,7 +227,7 @@ public class IssueTeamServiceTest {
         }
 
         FluentScenario issueHasCoAssignee() {
-            issue.setCoAssignees(singletonList(NAME_CO_ASSIGNEE));
+            issue.setCoAssignees(singletonList(new IssueCoAssignee(NAME_CO_ASSIGNEE, null)));
             return this;
         }
 
@@ -244,7 +244,7 @@ public class IssueTeamServiceTest {
 
         FluentScenario parentIssueHasCoAssignee() {
             issue.setParentCard(parentCard);
-            parentCard.setCoAssignees(singletonList(NAME_PARENT_CO_ASSIGNEE));
+            parentCard.setCoAssignees(singletonList(new IssueCoAssignee(NAME_PARENT_CO_ASSIGNEE, null)));
             return this;
         }
 

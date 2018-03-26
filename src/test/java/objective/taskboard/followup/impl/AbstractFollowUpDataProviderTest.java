@@ -49,6 +49,7 @@ import objective.taskboard.data.TaskboardTimeTracking;
 import objective.taskboard.data.Worklog;
 import objective.taskboard.database.IssuePriorityService;
 import objective.taskboard.domain.ProjectFilterConfiguration;
+import objective.taskboard.domain.converter.IssueCoAssignee;
 import objective.taskboard.domain.converter.IssueTeamService;
 import objective.taskboard.followup.EmptyFollowupCluster;
 import objective.taskboard.followup.FollowupCluster;
@@ -257,7 +258,7 @@ public abstract class AbstractFollowUpDataProviderTest {
         private String key;
         private String summary;
         private String assignee;
-        private List<String> coAssignees;
+        private List<IssueCoAssignee> coAssignees;
         private Long status = statusToDo;
         private long startDateStepMillis;
         private Integer originalEstimateMinutes;
@@ -360,7 +361,10 @@ public abstract class AbstractFollowUpDataProviderTest {
 
         public IssueBuilder coAssignees(String... coAssigneesNames) {
             if (coAssigneesNames != null && coAssigneesNames.length > 0) {
-                this.coAssignees = Arrays.asList(coAssigneesNames);
+                List<IssueCoAssignee> coAssignees = new ArrayList<>();
+                for (int i = 0 ; i < coAssigneesNames.length; i++)
+                    coAssignees.add(new IssueCoAssignee(coAssigneesNames[i], "avatarUrl-" + coAssigneesNames[i]));
+                this.coAssignees = coAssignees;
             }
             return this;
         }

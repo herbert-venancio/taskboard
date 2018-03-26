@@ -23,12 +23,12 @@ package objective.taskboard.jira;
 import static com.google.common.collect.Lists.newArrayList;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -308,7 +308,10 @@ public class JiraService {
 
         private JiraIssue.Input buildRequest() {
             // add last assignee as co-assignee
-            final Set<String> coAssignees = new HashSet<>(issue.getCoAssignees());
+            final Set<String> coAssignees = issue.getCoAssignees()
+                    .stream()
+                    .map(co -> co.getName())
+                    .collect(Collectors.toSet());
             coAssignees.add(issue.getAssignee());
             coAssignees.remove(assignee);
 
