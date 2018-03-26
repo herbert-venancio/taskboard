@@ -24,6 +24,8 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 import java.util.Collections;
@@ -43,7 +45,6 @@ import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.client.JiraCommentDto;
 import objective.taskboard.jira.client.JiraComponentDto;
 import objective.taskboard.jira.client.JiraIssueDto;
-import objective.taskboard.jira.client.JiraIssueFieldDto;
 import objective.taskboard.jira.client.JiraIssueLinkTypeDto;
 import objective.taskboard.jira.client.JiraLinkDto;
 import objective.taskboard.jira.client.JiraWorklogResultSetDto;
@@ -53,33 +54,24 @@ public class IssueFieldsExtractor {
     private static final int REASON_WIDTH_LIMIT = 200;
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(IssueFieldsExtractor.class);
 
-    public static IssueParent extractRealParent(JiraIssueDto issue) {
-        JiraIssueFieldDto field = issue.getField("parent");
-
-        if (field == null)
-            return null;
-
-        JSONObject json = (JSONObject) field.getValue();
+    public static String extractRealParent(JiraIssueDto issue) {
+        JSONObject json = issue.getField("parent");
 
         if (json == null)
             return null;
 
         try {
-            String key = json.getString("key");
-            JSONObject type = json.getJSONObject("fields").getJSONObject("issuetype");
-            long typeId = type.getLong("id");
-            String typeIconUrl = type.getString("iconUrl");
-            return new IssueParent(key, typeId, typeIconUrl);
+            return json.getString("key");
         } catch (JSONException e) {
-            logErrorExtractField(issue, field, e);
+            logErrorExtractField(issue, "parent.key", e);
             return null;
         }
     }
-    
+
     public static String extractParentKey(JiraProperties jiraProperties, JiraIssueDto issue, List<String> parentIssueLinks) {
-    	IssueParent realParent = extractRealParent(issue);
+    	String realParent = extractRealParent(issue);
         if (realParent != null)
-            return realParent.getKey();
+            return realParent;
         
         String linkedParentKey = extractLinkedParentKey(jiraProperties, issue, parentIssueLinks);
         if (linkedParentKey != null)
@@ -101,25 +93,20 @@ public class IssueFieldsExtractor {
         return links.get(0).getTargetIssueKey();
     }
 
-    public  static List<IssueCoAssignee> extractCoAssignees(JiraProperties jiraProperties, JiraIssueDto issue) {
-        JiraIssueFieldDto field = issue.getField(jiraProperties.getCustomfield().getCoAssignees().getId());
-
-        if (field == null)
-            return newArrayList();
-
-        JSONArray value = (JSONArray) field.getValue();
+    public  static List<String> extractCoAssignees(JiraProperties jiraProperties, JiraIssueDto issue) {
+        String fieldId = jiraProperties.getCustomfield().getCoAssignees().getId();
+        JSONArray value = issue.getField(fieldId);
 
         if (value == null)
             return newArrayList();
 
-        List<IssueCoAssignee> coAssignees = newArrayList();
+        List<String> coAssignees = newArrayList();
         for (int i = 0; i < value.length(); i++) {
             try {
                 String name = value.getJSONObject(i).getString("name");
-                String avatarUrl = value.getJSONObject(i).getJSONObject("avatarUrls").getString("24x24");
-                coAssignees.add(new IssueCoAssignee(name, avatarUrl));
+                coAssignees.add(name);
             } catch (JSONException e) {
-            	logErrorExtractField(issue, field, e);
+            	logErrorExtractField(issue, fieldId + ".name (co-assignees)", e);
             }
         }
 
@@ -127,12 +114,8 @@ public class IssueFieldsExtractor {
     }
 
     public static CustomField extractClassOfService(JiraProperties jiraProperties,JiraIssueDto issue) {
-        JiraIssueFieldDto field = issue.getField(jiraProperties.getCustomfield().getClassOfService().getId());
-
-        if (field == null)
-            return null;
-
-        JSONObject json = (JSONObject) field.getValue();
+        String fieldId = jiraProperties.getCustomfield().getClassOfService().getId();
+        JSONObject json = issue.getField(fieldId);
 
         if (json == null)
             return null;
@@ -140,43 +123,37 @@ public class IssueFieldsExtractor {
         try {
             Long optionId = json.getLong("id");
             String value = json.getString("value");
-            return new CustomField(field.getName(), value, optionId);
+            return new CustomField(fieldId, value, optionId);
         } catch (JSONException e) {
-            logErrorExtractField(issue, field, e);
+            logErrorExtractField(issue, fieldId + ".value (classOfService)", e);
             return null;
         }
     }
 
-    public static String extractSingleValueCheckbox(String customFieldId, JiraIssueDto issue) {
-        JiraIssueFieldDto field = issue.getField(customFieldId);
-
-        if (field == null)
-            return "";
-
-        JSONArray jsonArray = (JSONArray) field.getValue();
+    public static boolean extractSingleValueCheckbox(String customFieldId, JiraIssueDto issue) {
+        JSONArray jsonArray = issue.getField(customFieldId);
 
         if (jsonArray == null || jsonArray.length() == 0)
-            return "";
+            return false;
 
         try {
-            return jsonArray.getJSONObject(0).getString("value");
+            return isNotEmpty(jsonArray.getJSONObject(0).getString("value"));
         } catch (JSONException e) {
-            logErrorExtractField(issue, field, e);
-            return "";
+            logErrorExtractField(issue, customFieldId + ".value", e);
+            return false;
         }
     }
 
-    public  static String extractBlocked(JiraProperties jiraProperties, JiraIssueDto issue) {
+    public  static boolean extractBlocked(JiraProperties jiraProperties, JiraIssueDto issue) {
         return extractSingleValueCheckbox(jiraProperties.getCustomfield().getBlocked().getId(), issue);
     }
 
     public  static String extractLastBlockReason(JiraProperties jiraProperties, JiraIssueDto issue) {
-        JiraIssueFieldDto field = issue.getField(jiraProperties.getCustomfield().getLastBlockReason().getId());
+        String lastBlockReason = issue.getField(jiraProperties.getCustomfield().getLastBlockReason().getId());
 
-        if (field == null || field.getValue() == null)
+        if (isEmpty(lastBlockReason))
             return "";
 
-        String lastBlockReason = field.getValue().toString();
         return lastBlockReason.length() > REASON_WIDTH_LIMIT ? lastBlockReason.substring(0, REASON_WIDTH_LIMIT) + "..." : lastBlockReason;
     }
 
@@ -189,8 +166,7 @@ public class IssueFieldsExtractor {
             if (isNullOrEmpty(tShirtSizeValue))
                 continue;
 
-            String fieldName = issue.getField(tSizeId).getName();
-            CustomField tShirtSize = new CustomField(fieldName, tShirtSizeValue);
+            CustomField tShirtSize = new CustomField(tSizeId, tShirtSizeValue);
             tShirtSizes.put(tSizeId, tShirtSize);
         }
 
@@ -198,17 +174,12 @@ public class IssueFieldsExtractor {
     }
 
     public  static String extractTShirtSize(JiraIssueDto issue, String tShirtSizeId) {
-        JiraIssueFieldDto field = issue.getField(tShirtSizeId);
-
-        if (field == null)
-            return "";
-
-        JSONObject json = (JSONObject) field.getValue();
+        JSONObject json = issue.getField(tShirtSizeId);
 
         try {
             return json != null ? json.getString("value") : "";
         } catch (JSONException e) {
-            logErrorExtractField(issue, field, e);
+            logErrorExtractField(issue, tShirtSizeId + ".value (t-shirt size)", e);
             return "";
         }
     }
@@ -237,27 +208,18 @@ public class IssueFieldsExtractor {
     }
 
 
-    public static Map<String, CustomField> extractAdditionalEstimatedHours(JiraProperties jiraProperties, JiraIssueDto issue) {
+    public static CustomField extractAdditionalEstimatedHours(JiraProperties jiraProperties, JiraIssueDto issue) {
         String additionalHoursId = jiraProperties.getCustomfield().getAdditionalEstimatedHours().getId();
-        JiraIssueFieldDto field = issue.getField(additionalHoursId);
-        if (field == null || field.getValue() == null)
-            return newHashMap();
+        Double additionalHours = issue.getField(additionalHoursId);
+        if (additionalHours == null)
+            return null;
 
-        Double additionalHours = (Double) field.getValue();
-        CustomField customFieldAdditionalHours = new CustomField(field.getName(), additionalHours);
-        Map<String, CustomField> mapAdditionalHours = newHashMap();
-        mapAdditionalHours.put(additionalHoursId, customFieldAdditionalHours);
-        return mapAdditionalHours;
+        return new CustomField(additionalHoursId, additionalHours);
     }
 
     public static String extractReleaseId(JiraProperties jiraProperties, JiraIssueDto issue) {
         String releaseFieldId = jiraProperties.getCustomfield().getRelease().getId();
-        JiraIssueFieldDto field = issue.getField(releaseFieldId);
-
-        if (field == null)
-            return null;
-
-        JSONObject json = (JSONObject) field.getValue();
+        JSONObject json = issue.getField(releaseFieldId);
 
         if (json == null)
             return null;
@@ -265,7 +227,7 @@ public class IssueFieldsExtractor {
         try {
             return json.getString("id");
         } catch (JSONException e) {
-            logErrorExtractField(issue, field, e);
+            logErrorExtractField(issue, releaseFieldId + ".id (release)", e);
             return null;
         }
     }
@@ -306,8 +268,8 @@ public class IssueFieldsExtractor {
         return result;
     }
 
-    private static void logErrorExtractField(JiraIssueDto issue, JiraIssueFieldDto field, JSONException e) {
-        log.error("Error extracting " + field.getName() + " from issue " + issue.getKey() + ": " + e.getMessage());
+    private static void logErrorExtractField(JiraIssueDto issue, String fieldName, JSONException e) {
+        log.error("Error extracting " + fieldName + " from issue " + issue.getKey() + ": " + e.getMessage());
     }
 
     public static List<Worklog> convertWorklog(JiraWorklogResultSetDto jiraWorklogs) {

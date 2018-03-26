@@ -55,7 +55,6 @@ import objective.taskboard.jira.JiraSearchService;
 import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.MetadataCachedService;
 import objective.taskboard.jira.client.JiraIssueDto;
-import objective.taskboard.jira.client.JiraIssueFieldDto;
 import objective.taskboard.jira.data.Status;
 import objective.taskboard.repository.ProjectTeamRepository;
 import objective.taskboard.repository.TeamCachedRepository;
@@ -185,10 +184,9 @@ public class WipValidatorController {
     private boolean isClassOfServiceExpedite(JiraIssueDto issue) {
         try {
             String classOfServiceId = jiraProperties.getCustomfield().getClassOfService().getId();
-            JiraIssueFieldDto fieldClassOfService = issue.getField(classOfServiceId);
-            if (fieldClassOfService == null || fieldClassOfService.getValue() == null)
+            JSONObject json = issue.getField(classOfServiceId);
+            if (json == null)
                 return false;
-            JSONObject json = (JSONObject) fieldClassOfService.getValue();
             return json.getString("value").equals(CLASS_OF_SERVICE_EXPEDITE);
         } catch (JSONException e) {
             log.error("Failure trying to check expedite class of service", e);

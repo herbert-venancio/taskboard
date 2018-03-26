@@ -13,10 +13,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -47,8 +47,8 @@ import objective.taskboard.data.Issue;
 import objective.taskboard.data.IssueScratch;
 import objective.taskboard.data.TaskboardTimeTracking;
 import objective.taskboard.data.Worklog;
+import objective.taskboard.database.IssuePriorityService;
 import objective.taskboard.domain.ProjectFilterConfiguration;
-import objective.taskboard.domain.converter.IssueCoAssignee;
 import objective.taskboard.domain.converter.IssueTeamService;
 import objective.taskboard.followup.EmptyFollowupCluster;
 import objective.taskboard.followup.FollowupCluster;
@@ -101,6 +101,9 @@ public abstract class AbstractFollowUpDataProviderTest {
 
     @Mock
     private ProjectFilterConfigurationCachedRepository projectRepository;
+
+    @Mock
+    private IssuePriorityService issuePriorityService;
 
     protected CustomField propertiesCustomField;
     protected TShirtSize tshirtSizeInfo;
@@ -254,14 +257,17 @@ public abstract class AbstractFollowUpDataProviderTest {
         private String key;
         private String summary;
         private String assignee;
-        private List<IssueCoAssignee> coAssignees;
+        private List<String> coAssignees;
         private Long status = statusToDo;
         private long startDateStepMillis;
         private Integer originalEstimateMinutes;
         private Integer timeSpentMinutes;
         private Date priorityUpdatedDate;
         private String parent;
-        private Map<String, Serializable> customFields = new LinkedHashMap<>();
+        private boolean blocked = false;
+        private String lastBlockReason;
+        private Map<String, objective.taskboard.data.CustomField> tshirtSizes = new LinkedHashMap<>();
+        private objective.taskboard.data.CustomField additionalEstimatedHours;
         private Long priorityOrder = 0L;
         private List<Pair<String, ZonedDateTime>> transitions = new LinkedList<>();
         private Long created = 0L;
@@ -299,22 +305,22 @@ public abstract class AbstractFollowUpDataProviderTest {
         }
 
         public IssueBuilder tshirt(String tshirtId, String tshirtSize) {
-            customFields.put(tshirtId, new objective.taskboard.data.CustomField(tshirtId, tshirtSize));
+            tshirtSizes.put(tshirtId, new objective.taskboard.data.CustomField(tshirtId, tshirtSize));
             return this;
         }
 
         public IssueBuilder isBlocked(String yesNoValue) {
-            customFields.put(BLOCKED_ID, yesNoValue);
+            this.blocked = StringUtils.isNotEmpty(yesNoValue);
             return this;
         }
 
         public IssueBuilder lastBlockReason(String lastBlockReason) {
-            customFields.put(LAST_BLOCK_REASON_ID, lastBlockReason);
+            this.lastBlockReason = lastBlockReason;
             return this;
         }
 
         public IssueBuilder additionalEstimatedHours(Double additionalEstimatedHours) {
-            customFields.put(ADDITIONAL_ESTIMATED_HOURS_ID, new objective.taskboard.data.CustomField(ADDITIONAL_ESTIMATED_HOURS_ID, additionalEstimatedHours));
+            this.additionalEstimatedHours = new objective.taskboard.data.CustomField(ADDITIONAL_ESTIMATED_HOURS_ID, additionalEstimatedHours);
             return this;
         }
 
@@ -354,10 +360,7 @@ public abstract class AbstractFollowUpDataProviderTest {
 
         public IssueBuilder coAssignees(String... coAssigneesNames) {
             if (coAssigneesNames != null && coAssigneesNames.length > 0) {
-                List<IssueCoAssignee> coAssignees = new ArrayList<>();
-                for (int i = 0 ; i < coAssigneesNames.length; i++)
-                    coAssignees.add(new IssueCoAssignee(coAssigneesNames[i], "avatarUrl-" + coAssigneesNames[i]));
-                this.coAssignees = coAssignees;
+                this.coAssignees = Arrays.asList(coAssigneesNames);
             }
             return this;
         }
@@ -438,27 +441,24 @@ public abstract class AbstractFollowUpDataProviderTest {
                     getProjectKey(project),
                     getProjectName(),
                     issueType,
-                    null, //typeIconUri
                     summary,
                     status,
                     startDateStepMillis, //startDateStepMillis
                     parent,
-                    0L,   //parentType
-                    null, //parentTypeIconUri
-                    new ArrayList<String>(),//dependencies
-                    null, //subResponsaveis
+                    new ArrayList<>(),//dependencies
                     assignee,
                     0L, //priority
                     dueDate,
                     created,
-                    priorityUpdatedDate,
                     null,//Date remoteUpdatedDate,
                     null, //description
                     null, //comments
                     labels,
                     components,
-                    customFields,
-                    priorityOrder,
+                    blocked,
+                    lastBlockReason,
+                    tshirtSizes,
+                    additionalEstimatedHours,
                     timeTracking,
                     reporter,
                     coAssignees,
@@ -467,7 +467,11 @@ public abstract class AbstractFollowUpDataProviderTest {
                     buildTransitions(),
                     worklogs
                     );
-            return new Issue(scratch, jiraProperties, metadataService, issueTeamService, null, cycleTime, null, projectService, null, null);
+
+            Issue issue = new Issue(scratch, jiraProperties, metadataService, issueTeamService, null, cycleTime, null, projectService, null, null, issuePriorityService);
+            doReturn(priorityOrder).when(issuePriorityService).determinePriority(issue);
+            doReturn(priorityUpdatedDate).when(issuePriorityService).priorityUpdateDate(issue);
+            return issue;
         }
 
         private List<Changelog> buildTransitions() {

@@ -20,7 +20,6 @@
  */
 package objective.taskboard;
 
-import java.sql.SQLException;
 import javax.sql.DataSource;
 
 import org.springframework.boot.SpringApplication;
@@ -29,6 +28,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.scheduling.annotation.EnableScheduling;
+
 import objective.taskboard.driver.H2DriverNoCommit;
 import objective.taskboard.testUtils.JiraMockServer;
 
@@ -36,7 +36,7 @@ import objective.taskboard.testUtils.JiraMockServer;
 @SpringBootApplication
 public class TestMain {
     @Bean
-    public DataSource targetDataSource() throws SQLException {
+    public DataSource targetDataSource() {
         TransactionAwareDataSourceProxy transactionAwareDataSourceProxy = new TransactionAwareDataSourceProxy();
         SingleConnectionDataSource singleConn = new SingleConnectionDataSource();
         if (System.getProperty("taskboard.TestMain.traceH2Driver", "false").equals("true"))

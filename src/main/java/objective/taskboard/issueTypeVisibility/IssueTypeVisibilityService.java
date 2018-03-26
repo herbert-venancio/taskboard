@@ -30,7 +30,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,7 +49,7 @@ public class IssueTypeVisibilityService {
         return loadIssueTypeConfiguration();
     }
 
-    public List<IssueType> getVisibleIssueTypes() throws InterruptedException, ExecutionException {
+    public List<IssueType> getVisibleIssueTypes() {
         List<Long> ids = getIssueTypeConfiguration().stream().map(IssueTypeConfiguration::getIssueTypeId).collect(Collectors.toList());
         return metadataService.getIssueTypeMetadata().values().stream().filter(t -> ids.contains(t.getId())).collect(Collectors.toList());
     }

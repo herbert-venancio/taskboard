@@ -20,7 +20,6 @@
  */
 package objective.taskboard.domain.converter;
 
-import static com.google.common.collect.Maps.newHashMap;
 import static java.util.stream.Collectors.toList;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.convertWorklog;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractAdditionalEstimatedHours;
@@ -34,17 +33,13 @@ import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractD
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractLabels;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractLastBlockReason;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractParentKey;
-import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractRealParent;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractReleaseId;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractTShirtSizes;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import javax.annotation.PostConstruct;
@@ -120,43 +115,33 @@ public class JiraIssueToIssueConverter {
     }
     
     public objective.taskboard.data.Issue convertSingleIssue(JiraIssueDto jiraIssue, ParentProvider provider) {
-        List<IssueCoAssignee> coAssignees = extractCoAssignees(jiraProperties, jiraIssue);
-        
-        Long priorityOrder = priorityService.determinePriority(jiraIssue);
-        
-        Optional<Date> priorityUpdateDate = priorityService.priorityUpdateDate(jiraIssue);
-        
-        Date remoteIssueUpdatedDate = jiraIssue.getUpdateDate() != null ? jiraIssue.getUpdateDate().toDate() : jiraIssue.getCreationDate().toDate();
         IssueScratch converted = new IssueScratch(
                 jiraIssue.getId(),
                 jiraIssue.getKey(),
                 jiraIssue.getProject().getKey(),
                 jiraIssue.getProject().getName(),
                 jiraIssue.getIssueType().getId(),
-                jiraIssue.getIssueType().getIconUri().toASCIIString(),
                 defaultIfNull(jiraIssue.getSummary(),""),
                 jiraIssue.getStatus().getId(),
                 startDateStepService.get(jiraIssue),
                 extractParentKey(jiraProperties, jiraIssue, parentIssueLinks),
-                getParentTypeId(jiraIssue),
-                getParentTypeIconUri(jiraIssue),
                 extractDependenciesIssues(jiraProperties, jiraIssue),
-                String.join(",", coAssignees.stream().map(x -> x.getName()).collect(toList())),
                 jiraIssue.getAssignee() != null ? jiraIssue.getAssignee().getName() : "",
                 jiraIssue.getPriority() != null ? jiraIssue.getPriority().getId() : 0l,
                 jiraIssue.getDueDate() != null ? jiraIssue.getDueDate().toDate() : null,
                 jiraIssue.getCreationDate().getMillis(),
-                priorityUpdateDate.orElse(new Date()),
-                remoteIssueUpdatedDate,
+                jiraIssue.getUpdateDate() != null ? jiraIssue.getUpdateDate().toDate() : jiraIssue.getCreationDate().toDate(),
                 defaultIfNull(jiraIssue.getDescription(), ""),
                 getComments(jiraIssue),
                 extractLabels(jiraIssue),
                 extractComponents(jiraIssue),
-                getCustomFields(jiraIssue),
-                priorityOrder,
+                extractBlocked(jiraProperties, jiraIssue),
+                extractLastBlockReason(jiraProperties, jiraIssue),
+                extractTShirtSizes(jiraProperties, jiraIssue),
+                extractAdditionalEstimatedHours(jiraProperties, jiraIssue),
                 TaskboardTimeTracking.fromJira(jiraIssue.getTimeTracking()),
                 jiraIssue.getReporter() == null ? null : jiraIssue.getReporter().getName(),
-                coAssignees,
+                extractCoAssignees(jiraProperties, jiraIssue),
                 extractClassOfService(jiraProperties, jiraIssue),
                 extractReleaseId(jiraProperties, jiraIssue),
                 extractChangelog(jiraIssue),
@@ -175,7 +160,8 @@ public class JiraIssueToIssueConverter {
                 cardVisibilityEvalService,
                 projectService,
                 issueStateHashCalculator,
-                issueColorService);
+                issueColorService,
+                priorityService);
         
     	if (!isEmpty(converted.getParent())) {
     	    Optional<objective.taskboard.data.Issue> parentCard = provider.get(converted.getParent());
@@ -186,34 +172,10 @@ public class JiraIssueToIssueConverter {
         return converted;
     }
 
-    private long getParentTypeId(JiraIssueDto issue) {
-    	IssueParent realParent = extractRealParent(issue);
-        if (realParent == null)
-            return 0;
-        return realParent.getTypeId();
-    }
-
-    private String getParentTypeIconUri(JiraIssueDto issue) {
-    	IssueParent realParent = extractRealParent(issue);
-        if (realParent == null)
-            return "";
-        return realParent.getTypeIconUrl();
-    }
-
     private String getComments(JiraIssueDto issue) {
     	List<String> comments = extractComments(issue);
         if (comments.isEmpty())
             return "";
         return comments.get(0);
-    }
-    
-    private Map<String, Serializable> getCustomFields(JiraIssueDto issue) {
-        Map<String, Serializable> customFields = newHashMap();
-        
-        customFields.put(jiraProperties.getCustomfield().getBlocked().getId(), extractBlocked(jiraProperties, issue));
-        customFields.put(jiraProperties.getCustomfield().getLastBlockReason().getId(), extractLastBlockReason(jiraProperties, issue));
-        customFields.putAll(extractTShirtSizes(jiraProperties, issue));
-        customFields.putAll(extractAdditionalEstimatedHours(jiraProperties, issue));
-        return customFields;
     }
 }

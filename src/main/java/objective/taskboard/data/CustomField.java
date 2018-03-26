@@ -26,27 +26,22 @@ public class CustomField implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private String name;
-
+    private String fieldId;
     private Serializable value;
-
     private Long optionId;
-    
-    public CustomField() {}
 
-    public CustomField(String name, Serializable value, Long optionId) {
-        this.name = name;
+    public CustomField(String fieldId, Serializable value) {
+        this(fieldId, value, null);
+    }
+
+    public CustomField(String fieldId, Serializable value, Long optionId) {
+        this.fieldId = fieldId;
         this.value = value;
         this.optionId = optionId;
     }
 
-    public CustomField(String name, Serializable value) {
-        this.name = name;
-        this.value = value;
-    }
-
-    public String getName() {
-        return this.name;
+    public String getFieldId() {
+        return fieldId;
     }
 
     public Object getValue() {
@@ -57,44 +52,4 @@ public class CustomField implements Serializable {
         return this.optionId;
     }
 
-    public void setName(final String name) {
-        this.name = name;
-    }
-
-    public void setValue(final String value) {
-        this.value = value;
-    }
-
-    public void setOptionId(final Long optionId) {
-        this.optionId = optionId;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        CustomField that = (CustomField) o;
-
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
-        if (value != null ? !value.equals(that.value) : that.value != null) return false;
-        return optionId != null ? optionId.equals(that.optionId) : that.optionId == null;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = name != null ? name.hashCode() : 0;
-        result = 31 * result + (value != null ? value.hashCode() : 0);
-        result = 31 * result + (optionId != null ? optionId.hashCode() : 0);
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "CustomField{" +
-                "name='" + name + '\'' +
-                ", value=" + value +
-                ", optionId=" + optionId +
-                '}';
-    }
 }

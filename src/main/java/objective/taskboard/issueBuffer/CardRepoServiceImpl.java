@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import objective.taskboard.cycletime.CycleTime;
+import objective.taskboard.database.IssuePriorityService;
 import objective.taskboard.database.directory.DataBaseDirectory;
 import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.domain.IssueStateHashCalculator;
@@ -55,6 +56,9 @@ public class CardRepoServiceImpl implements CardRepoService {
     @Autowired
     private IssueColorService issueColorService;
 
+    @Autowired
+    private IssuePriorityService issuePriorityService;
+
     public CardRepo from(String cacheName) {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
@@ -78,7 +82,8 @@ public class CardRepoServiceImpl implements CardRepoService {
                     cardVisibilityEvalService,
                     projectService,
                     issueStateHashCalculator,
-                    issueColorService);
+                    issueColorService,
+                    issuePriorityService);
         });
 
         log.info(cachefile.getAbsolutePath()+ " data read in " + stopWatch.getTime() + " ms. Loaded " + repo.size() + " issues");        

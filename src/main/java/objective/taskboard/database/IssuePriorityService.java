@@ -26,7 +26,6 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -39,7 +38,6 @@ import org.springframework.stereotype.Service;
 import objective.taskboard.data.Issue;
 import objective.taskboard.data.TaskboardIssue;
 import objective.taskboard.issueBuffer.IssueBufferService;
-import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.repository.TaskboardIssueRepository;
 
 @Service
@@ -63,19 +61,19 @@ public class IssuePriorityService {
         log.debug("DONE Loading IssuePriorityService");
     }
     
-    public long determinePriority(JiraIssueDto jiraIssue) {
-        TaskboardIssue priorityOrder = cache.get(jiraIssue.getKey());
+    public long determinePriority(Issue issue) {
+        TaskboardIssue priorityOrder = cache.get(issue.getIssueKey());
         if (priorityOrder == null)
-            return jiraIssue.getCreationDate().getMillis();
+            return issue.getCreated();
 
         return priorityOrder.getPriority();
     }
 
-    public Optional<Date> priorityUpdateDate(JiraIssueDto jiraIssue) {
-        TaskboardIssue priorityOrder = cache.get(jiraIssue.getKey());
+    public Date priorityUpdateDate(Issue issue) {
+        TaskboardIssue priorityOrder = cache.get(issue.getIssueKey());
         if (priorityOrder == null)
-            return Optional.empty();
-        return Optional.of(priorityOrder.getUpdated());
+            return new Date(issue.getCreated());
+        return priorityOrder.getUpdated();
     }
 
     public synchronized List<TaskboardIssue> reorder(String[] issueKeys) {
@@ -107,12 +105,8 @@ public class IssuePriorityService {
             TaskboardIssue taskboardIssue = issueByKey.get(issueKeys[i]);
             long newPriority = priorities[i];
             long previousPriority = taskboardIssue.getPriority();
-            if (previousPriority == newPriority) {
-                Issue issue = issueBufferService.getIssueByKey(issueKeys[i]);
-                if(issue.getPriorityOrder() != previousPriority)
-                    updatedIssues.add(taskboardIssue);
+            if (previousPriority == newPriority)
                 continue;
-            }
             taskboardIssue.setPriority(newPriority);
             updatedIssues.add(repo.save(taskboardIssue));
         }

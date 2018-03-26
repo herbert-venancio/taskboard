@@ -386,7 +386,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
             followUpData.subtaskLabels = subtask.getLabels() != null ? subtask.getLabels().stream().collect(Collectors.joining(",")) : "";
             followUpData.subtaskComponents = subtask.getComponents() != null ? subtask.getComponents().stream().collect(Collectors.joining(",")) : "";
             followUpData.subtaskReporter = subtask.getReporter();
-            followUpData.subtaskCoAssignees = subtask.getCoAssignees() != null ? subtask.getCoAssignees().stream().map(c -> c.getName()).collect(Collectors.joining(",")) : "";
+            followUpData.subtaskCoAssignees = subtask.getCoAssignees() != null ? subtask.getCoAssignees().stream().collect(Collectors.joining(",")) : "";
             followUpData.subtaskClassOfService = subtask.getClassOfServiceValue();
             followUpData.subtaskUpdatedDate = subtask.getUpdatedDateByTimezoneId(timezone);
             followUpData.subtaskCycletime = subtask.getCycleTime(timezone);
@@ -416,7 +416,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
             followUpData.demandLabels = demand.getLabels() != null ? demand.getLabels().stream().collect(Collectors.joining(",")) : "";
             followUpData.demandComponents = demand.getComponents() != null ? demand.getComponents().stream().collect(Collectors.joining(",")) : "";
             followUpData.demandReporter = demand.getReporter();
-            followUpData.demandCoAssignees = demand.getCoAssignees() != null ? demand.getCoAssignees().stream().map(c -> c.getName()).collect(Collectors.joining(",")) : "";
+            followUpData.demandCoAssignees = demand.getCoAssignees() != null ? demand.getCoAssignees().stream().collect(Collectors.joining(",")) : "";
             followUpData.demandClassOfService = demand.getClassOfServiceValue();
             followUpData.demandCycletime = demand.getCycleTime(timezone);
             followUpData.demandIsBlocked = demand.isBlocked();
@@ -441,7 +441,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
             followUpData.taskLabels = task.getLabels() != null ? task.getLabels().stream().collect(Collectors.joining(",")) : "";
             followUpData.taskComponents = task.getComponents() != null ? task.getComponents().stream().collect(Collectors.joining(",")) : "";
             followUpData.taskReporter = task.getReporter();
-            followUpData.taskCoAssignees = task.getCoAssignees() != null ? task.getCoAssignees().stream().map(c -> c.getName()).collect(Collectors.joining(",")) : "";
+            followUpData.taskCoAssignees = task.getCoAssignees() != null ? task.getCoAssignees().stream().collect(Collectors.joining(",")) : "";
             followUpData.taskClassOfService = task.getClassOfServiceValue();
             followUpData.taskUpdatedDate = task.getUpdatedDateByTimezoneId(timezone);
             followUpData.taskCycletime = task.getCycleTime(timezone);

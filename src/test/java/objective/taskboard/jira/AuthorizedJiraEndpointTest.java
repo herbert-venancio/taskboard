@@ -1,12 +1,12 @@
 package objective.taskboard.jira;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -24,6 +25,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.jira.data.JiraIssue;
 import objective.taskboard.jira.data.JiraProject;
 import objective.taskboard.jira.data.JiraUser;
@@ -46,6 +48,7 @@ public class AuthorizedJiraEndpointTest {
     public static final String JIRA_USER_USERNAME = "user";
     public static final String JIRA_USER_PASSWORD = "pass";
 
+    @Import(CacheConfiguration.class)
     public static class Configuration {
         @Bean
         public JiraMockServer jira() {

@@ -26,7 +26,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -34,7 +33,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import com.atlassian.jira.rest.client.api.domain.CimProject;
 
 import objective.taskboard.auth.Authorizer;
-import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.domain.Project;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.jira.data.Version;
@@ -43,11 +41,9 @@ import objective.taskboard.repository.ProjectFilterConfigurationRepository;
 import objective.taskboard.testUtils.JiraMockServer;
 
 @RunWith(SpringRunner.class)
-@EnableCaching
 @ContextConfiguration(classes = {
         AuthorizedJiraEndpointTest.Configuration.class
-        , ProjectServiceTest.Configuration.class
-        , CacheConfiguration.class})
+        , ProjectServiceTest.Configuration.class})
 public class ProjectServiceTest {
 
     private final static String PROJECT_ARCHIVED = "PROJ1";

@@ -15,6 +15,7 @@ public class JiraUser {
     public String displayName;
     public String emailAddress;
     public Map<String, URI> avatarUrls;
+    public String locale;
     
     public JiraUser(){}
 
@@ -36,5 +37,8 @@ public class JiraUser {
     public interface Service {
         @GET("/rest/api/latest/user?expand=groups")
         JiraUser get(@Query("username") String name);
+
+        @GET("/rest/api/latest/myself")
+        JiraUser myself();
     }
 }

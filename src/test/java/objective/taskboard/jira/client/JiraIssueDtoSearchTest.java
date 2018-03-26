@@ -2,15 +2,16 @@ package objective.taskboard.jira.client;
 
 import static objective.taskboard.utils.IOUtilities.resourceAsString;
 import static org.apache.tomcat.util.buf.StringUtils.join;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.util.List;
+
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.junit.Test;
-
-import java.util.List;
 
 public class JiraIssueDtoSearchTest {
     @Test
@@ -85,11 +86,10 @@ public class JiraIssueDtoSearchTest {
         assertEquals("demands", issueLinkType2.getDescription());
         assertEquals(JiraIssueLinkTypeDto.Direction.OUTBOUND, issueLinkType2.getDirection());
 
-        JiraIssueFieldDto field = resultIssue.getField("customfield_11440");
-        JSONObject fieldValue = (JSONObject) field.getValue();
+        JSONObject fieldValue = resultIssue.getField("customfield_11440");
         assertEquals("Standard", fieldValue.get("value"));
 
-        assertEquals("Last Block Reason", resultIssue.getField("customfield_11452").getValue());
+        assertEquals("Last Block Reason", resultIssue.getField("customfield_11452"));
     }
 
     @Test

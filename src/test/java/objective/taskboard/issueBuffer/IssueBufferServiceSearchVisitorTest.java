@@ -8,7 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.Optional;
 
 import org.codehaus.jettison.json.JSONException;
@@ -99,7 +99,7 @@ public class IssueBufferServiceSearchVisitorTest {
         properties.setIssuetype(issueType);
         
         when(priorityService.determinePriority(any())).thenReturn(1l);
-        when(priorityService.priorityUpdateDate((any()))).thenReturn(Optional.empty());
+        when(priorityService.priorityUpdateDate((any()))).thenReturn(new Date());
         
         when(issueColorService.getColor(any())).thenReturn("#FFFFFF");
         
@@ -170,7 +170,6 @@ public class IssueBufferServiceSearchVisitorTest {
     
     @Test
     public void whenIssuesAreReturnedInOrder() throws JSONException {
-        when(issue.getCustomFields()).thenReturn(new HashMap<>());
         when(issueBufferService.getAllIssues()).thenReturn(newArrayList(issue));
         when(issueBufferService.getIssueByKey("TASKB-685")).thenReturn(issue);
 
@@ -202,22 +201,6 @@ public class IssueBufferServiceSearchVisitorTest {
             fail("Should throw an IllegalStateException");
         } catch (IllegalStateException e) {
             assertEquals("Some parents were never found: TASKB-685", e.getMessage());
-        }
-    }
-
-    @Test
-    public void whenHasIssueWithNullFields_ShouldThrowIllegalStateException() throws JSONException {
-        when(issue.getIssueKey()).thenReturn("TASKB-1");
-        when(issue.getCustomFields()).thenReturn(null);
-        when(issueBufferService.getAllIssues()).thenReturn(newArrayList(issue));
-
-        IssueBufferServiceSearchVisitor subject = new IssueBufferServiceSearchVisitor(issueConverter, issueBufferService);
-
-        try {
-            subject.complete();
-            fail("Should throw an IllegalStateException");
-        } catch (IllegalStateException e) {
-            assertEquals("issue TASKB-1 has invalid null fields", e.getMessage());
         }
     }
 

@@ -60,15 +60,14 @@ import objective.taskboard.domain.WipConfiguration;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraProperties.CustomField;
 import objective.taskboard.jira.JiraProperties.CustomField.ClassOfServiceDetails;
-import objective.taskboard.jira.client.JiraIssueDto;
-import objective.taskboard.jira.client.JiraIssueFieldDto;
-import objective.taskboard.jira.client.JiraIssueTypeDto;
-import objective.taskboard.jira.client.JiraProjectDto;
 import objective.taskboard.jira.JiraProperties.Wip;
 import objective.taskboard.jira.JiraSearchService;
 import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.MetadataCachedService;
 import objective.taskboard.jira.SearchIssueVisitor;
+import objective.taskboard.jira.client.JiraIssueDto;
+import objective.taskboard.jira.client.JiraIssueTypeDto;
+import objective.taskboard.jira.client.JiraProjectDto;
 import objective.taskboard.jira.data.Status;
 import objective.taskboard.repository.ProjectTeamRepository;
 import objective.taskboard.repository.TeamCachedRepository;
@@ -113,8 +112,6 @@ public class WipValidatorControllerTest {
     @Mock
     private JiraIssueDto issue;
     @Mock
-    private JiraIssueFieldDto issueField;
-    @Mock
     private JiraProperties jiraProperties;
     @Mock
     private CustomField customField;
@@ -156,9 +153,6 @@ public class WipValidatorControllerTest {
         when(classOfServiceDetails.getId()).thenReturn(CLASS_OF_SERVICE_ID);
         when(customField.getClassOfService()).thenReturn(classOfServiceDetails);
         when(jiraProperties.getCustomfield()).thenReturn(customField);
-
-        when(issueField.getValue()).thenReturn(new JSONObject("{value:Standard}"));
-        when(issue.getField(CLASS_OF_SERVICE_ID)).thenReturn(issueField);
 
         when(project.getKey()).thenReturn(PROJECT_KEY);
         when(issue.getProject()).thenReturn(project);
@@ -280,7 +274,7 @@ public class WipValidatorControllerTest {
 
     @Test
     public void classOfServiceExpedite() throws JSONException {
-        when(issueField.getValue()).thenReturn(new JSONObject("{value:Expedite}"));
+        when(issue.getField(CLASS_OF_SERVICE_ID)).thenReturn(new JSONObject("{value:Expedite}"));
         ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("", USER, STATUS.name);
         assertFalse(MSG_ASSERT_WIP_SHOULDN_T_HAVE_EXCEEDED, responseEntity.getBody().isWipExceeded);
         assertEquals(MSG_ASSERT_RESPONSE_MESSAGE, "Class of service is Expedite", responseEntity.getBody().message);
@@ -333,7 +327,7 @@ public class WipValidatorControllerTest {
 
     @Test
     public void classOfServiceValueNull() {
-        when(issueField.getValue()).thenReturn(null);
+        when(issue.getField(CLASS_OF_SERVICE_ID)).thenReturn(null);
         ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("", USER, STATUS.name);
         assertTrue(MSG_ASSERT_WIP_SHOULD_HAVE_EXCEEDED, responseEntity.getBody().isWipExceeded);
         assertEquals(MSG_ASSERT_RESPONSE_MESSAGE, MSG_EXPECTED_WIP_EXCEEDED, responseEntity.getBody().message);
@@ -342,7 +336,7 @@ public class WipValidatorControllerTest {
 
     @Test
     public void jsonClassOfServiceInvalid() throws JSONException {
-        when(issueField.getValue()).thenReturn(new JSONObject("{valuee:Expedite}"));
+        when(issue.getField(CLASS_OF_SERVICE_ID)).thenReturn(new JSONObject("{valuee:Expedite}"));
         ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("", USER, STATUS.name);
         assertTrue(MSG_ASSERT_WIP_SHOULD_HAVE_EXCEEDED, responseEntity.getBody().isWipExceeded);
         assertEquals(MSG_ASSERT_RESPONSE_MESSAGE, MSG_EXPECTED_WIP_EXCEEDED, responseEntity.getBody().message);

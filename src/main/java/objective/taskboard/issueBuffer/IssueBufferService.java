@@ -42,14 +42,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import com.google.common.util.concurrent.Uninterruptibles;
 
 import objective.taskboard.auth.Authorizer;
 import objective.taskboard.data.Issue;
-import objective.taskboard.data.IssuePriorityOrderChanged;
 import objective.taskboard.data.ProjectsUpdateEvent;
 import objective.taskboard.data.TaskboardIssue;
 import objective.taskboard.database.IssuePriorityService;
@@ -297,13 +295,6 @@ public class IssueBufferService {
         cardsRepo.putOnlyIfNewer(issue);
     }
 
-    @EventListener
-    protected void onAfterSave(IssuePriorityOrderChanged event) {
-        TaskboardIssue entity = event.getTarget();
-        cardsRepo.get(entity.getIssueKey()).setPriorityOrder(entity.getPriority());
-    }
-
-
     public synchronized List<Issue> reorder(String[] issues) {
         ReorderIssuesAction action = new ReorderIssuesAction(issues);
         return action.call();
@@ -312,9 +303,6 @@ public class IssueBufferService {
     private synchronized void updateIssuesPriorities(List<TaskboardIssue> issuesPriorities) {
         for (TaskboardIssue taskboardIssue : issuesPriorities) { 
             Issue issue = cardsRepo.get(taskboardIssue.getIssueKey());
-            issue.setPriorityOrder(taskboardIssue.getPriority());
-            issue.setPriorityUpdatedDate(taskboardIssue.getUpdated());
-            cardsRepo.setChanged(issue.getIssueKey());
             issueEvents.add(new InternalUpdateIssue(issue.getProjectKey(), issue.getIssueKey()));
         }
     }
@@ -387,7 +375,7 @@ public class IssueBufferService {
             List<TaskboardIssue> updated = issuePriorityService.reorder(issueKeys);
             updateIssuesPriorities(updated);
 
-            List<Issue> updatedIssues = new LinkedList<Issue>();
+            List<Issue> updatedIssues = new LinkedList<>();
             for (String issue : issueKeys)
                 updatedIssues.add(getIssueByKey(issue));
 

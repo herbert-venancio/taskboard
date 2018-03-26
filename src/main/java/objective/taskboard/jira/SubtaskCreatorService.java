@@ -40,9 +40,7 @@ import com.atlassian.jira.rest.client.api.domain.input.IssueInput;
 import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder;
 
 import objective.taskboard.jira.JiraProperties.SubtaskCreation;
-import objective.taskboard.jira.JiraProperties.SubtaskCreation.CustomFieldCondition;
 import objective.taskboard.jira.client.JiraIssueDto;
-import objective.taskboard.jira.client.JiraIssueFieldDto;
 import objective.taskboard.jira.client.JiraSubtaskDto;
 import objective.taskboard.jira.client.JiraUserDto;
 import objective.taskboard.jira.data.Transition;
@@ -82,19 +80,15 @@ public class SubtaskCreatorService {
     }
 
     private boolean hasRequiredValueOrHasNoRequirement(JiraIssueDto parent, SubtaskCreation creationProperties) {
-        final Optional<CustomFieldCondition> customFieldCondition = creationProperties.getCustomFieldCondition();
-        if (customFieldCondition.isPresent()) {
-            final String currentValue = extractSingleValueCheckbox(customFieldCondition.get().getId(), parent);
-            if (!customFieldCondition.get().getValue().equals(currentValue))
-                return false;
-        }
-        return true;
+        return creationProperties.getCustomFieldCondition()
+                .map(field -> extractSingleValueCheckbox(field.getId(), parent))
+                .orElse(true);
     }
     
     private boolean skipCreationWhenTShirtSizeParentIsAbsent(JiraIssueDto parent, SubtaskCreation creationProperties) {
-        JiraIssueFieldDto parentTShirtSize = parent.getField(creationProperties.getTShirtSizeParentId());
+        JSONObject parentTShirtSize = parent.getField(creationProperties.getTShirtSizeParentId());
         Boolean skipCreation = creationProperties.getSkipCreationWhenTShirtParentIsAbsent();
-        return (parentTShirtSize == null || parentTShirtSize.getValue() == null) && skipCreation;
+        return parentTShirtSize == null && skipCreation;
     }
 
     private String subtaskOfType(JiraIssueDto parent, Long typeId) {
@@ -139,12 +133,12 @@ public class SubtaskCreatorService {
     }
 
     private String getTShirtSizeValue(JiraIssueDto parent, String tShirtSizeParentId, String tShirtSizeDefaultValue) {
-        JiraIssueFieldDto parentTShirtSize = parent.getField(tShirtSizeParentId);
-        if (parentTShirtSize == null || parentTShirtSize.getValue() == null)
+        JSONObject parentTShirtSize = parent.getField(tShirtSizeParentId);
+        if (parentTShirtSize == null)
             return tShirtSizeDefaultValue;
 
         try {
-            return ((JSONObject) parentTShirtSize.getValue()).getString("value");
+            return parentTShirtSize.getString("value");
         } catch (JSONException e) {
             log.error("Error extracting t-shirt-size value (customfield id = '" + tShirtSizeParentId + "') from parent issue '" + parent.getKey() + "'", e);
             return  tShirtSizeDefaultValue;
@@ -153,13 +147,13 @@ public class SubtaskCreatorService {
 
     private void setClassOfService(IssueInputBuilder issueBuilder, JiraIssueDto parent) {
         String classOfServiceId = jiraProperties.getCustomfield().getClassOfService().getId();
-        JiraIssueFieldDto parentClassOfService = parent.getField(classOfServiceId);
+        JSONObject parentClassOfService = parent.getField(classOfServiceId);
         
-        if (parentClassOfService == null || parentClassOfService.getValue() == null)
+        if (parentClassOfService == null)
             return;
 
         try {
-            String valueId = ((JSONObject) parentClassOfService.getValue()).getString("id");
+            String valueId = parentClassOfService.getString("id");
             issueBuilder.setFieldValue(classOfServiceId, ComplexIssueInputFieldValue.with("id", valueId));
         } catch (JSONException e) {
             // just don't set if can't extract parent value
