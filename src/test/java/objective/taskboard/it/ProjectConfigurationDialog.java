@@ -47,7 +47,7 @@ public class ProjectConfigurationDialog extends AbstractUiFragment {
     }
 
     public ProjectConfigurationDialog close() {
-        WebElement close = dialog.findElement(By.cssSelector(".button-close"));
+        WebElement close = dialog.findElement(By.cssSelector(".modal__close"));
         waitForClick(close);
         return this;
     }

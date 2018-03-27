@@ -28,26 +28,28 @@
             }
         </style>
 
-        <wrap-modal id="about" title="Taskboard">
-            <table>
-                <tr>
-                    <td class="label"><b>Version:</b></td>
-                    <td>{{version}}</td>
-                </tr>
-                <tr>
-                    <td class="label"><b>Version date:</b></td>
-                    <td>{{versionDate}}</td>
-                </tr>
-                <tr>
-                    <td class="label"><b>Up Time:</b></td>
-                    <td>{{upTime}}</td>
-                </tr>
-                <tr>
-                    <td class="label"><b>Start Time:</b></td>
-                    <td>{{startTime}}</td>
-                </tr>
-            </table>
-        </wrap-modal>
+        <modal-wrap id="about" title="Taskboard">
+            <modal-wrap-content>
+                <table>
+                    <tr>
+                        <td class="label"><b>Version:</b></td>
+                        <td>{{version}}</td>
+                    </tr>
+                    <tr>
+                        <td class="label"><b>Version date:</b></td>
+                        <td>{{versionDate}}</td>
+                    </tr>
+                    <tr>
+                        <td class="label"><b>Up Time:</b></td>
+                        <td>{{upTime}}</td>
+                    </tr>
+                    <tr>
+                        <td class="label"><b>Start Time:</b></td>
+                        <td>{{startTime}}</td>
+                    </tr>
+                </table>
+            </modal-wrap-content>
+        </modal-wrap>
     </template>
 
     <script>

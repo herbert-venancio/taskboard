@@ -126,7 +126,7 @@ public class FollowupDialog extends AbstractUiFragment {
     }
 
     public FollowupDialog close() {
-        WebElement close = dialog.findElement(By.cssSelector(".buttonClose"));
+        WebElement close = dialog.findElement(By.cssSelector(".modal__close"));
         waitForClick(close);
         return this;
     }

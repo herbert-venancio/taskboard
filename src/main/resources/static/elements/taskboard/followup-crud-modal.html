@@ -3,9 +3,12 @@
     <template>
 
         <style>
+            .modal-content {
+                display: flex;
+            }
+
             .templates-list {
                 width: 250px;
-                margin-top: 10px;
             }
 
             .template-list-box {
@@ -14,8 +17,11 @@
 
             .template-form {
                 width: 350px;
-                margin: 0 20px;
-                float: right;
+                margin: 0 0 0 20px;
+            }
+
+            paper-input#templateNameInputl {
+                margin-top: -10px;
             }
 
             .projects-list {
@@ -25,11 +31,6 @@
 
             paper-item.selected {
                 background-color: #dedede;
-            }
-
-            .delete {
-                background: red;
-                color: #820000;
             }
 
             input[type='file'] {
@@ -61,6 +62,11 @@
                 padding: 0;
                 margin-left: 20px;
             }
+
+            .upload-button {
+                display: flex;
+                align-items: center;
+            }
         </style>
 
         <iron-ajax id="ajaxProjects"
@@ -80,95 +86,96 @@
                    url="/ws/followup/has-generic-template"
                    content-type='application/json'
                    last-response="{{hasSampleTemplate}}"></iron-ajax>
+
         <confirm-modal id="confirmationModal"></confirm-modal>
+
         <alert-modal id="alertModalTemplate"></alert-modal>
-        <wrap-modal id="modal" title="Followup Template">
-            <div class="modal-content">
-                <div class="templates-list">
-                    <paper-listbox id="templates" class="template-list-box scroll" selected="0">
-                        <paper-item id="newTemplateItem" on-tap="selectNewTemplate">
-                            <iron-icon icon="add"></iron-icon> New Template
-                        </paper-item>
-                        <template is="dom-repeat" items="{{templates}}">
-                            <paper-item class="template-item" on-tap="selectTemplate" role="option">{{item.name}}</paper-item>
-                        </template>
-                    </paper-listbox>
-                    <div>
-                        <paper-button class="tb-button--background_none"
-                                           title="Sample Template"
-                                           on-tap="downloadGenericTemplate"
-                                           disabled="{{!hasSampleTemplate}}">
-                            <iron-icon icon="file-download"></iron-icon>
-                            Sample Template
-                        </paper-button>
-                        <template is="dom-if" if="{{!hasSampleTemplate}}">
-                            <div class="alert alert-warning clean-cache-msg">
-                                Sample Template not available
+
+        <modal-wrap id="modal"
+                    icon="file-upload"
+                    title="Followup Template"
+                    loading="[[showLoadingSpinner]]"
+                    >
+            <modal-wrap-content>
+                <div class="modal-content">
+                    <div class="templates-list">
+                        <paper-listbox id="templates" class="template-list-box scroll" selected="0">
+                            <paper-item id="newTemplateItem" on-tap="selectNewTemplate">
+                                <iron-icon icon="add"></iron-icon> New Template
+                            </paper-item>
+                            <template is="dom-repeat" items="{{templates}}">
+                                <paper-item class="template-item" on-tap="selectTemplate" role="option">{{item.name}}</paper-item>
+                            </template>
+                        </paper-listbox>
+                        <div>
+                            <paper-button class="tb-button tb-button--type_link"
+                                               title="Sample Template"
+                                               on-tap="downloadGenericTemplate"
+                                               disabled="{{!hasSampleTemplate}}">
+                                <iron-icon icon="file-download"></iron-icon>
+                                Sample Template
+                            </paper-button>
+                            <template is="dom-if" if="{{!hasSampleTemplate}}">
+                                <div class="alert alert-warning clean-cache-msg">
+                                    Sample Template not available
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                    <div class="template-form">
+                        <form>
+                            <paper-input id="templateNameInputl" always-float-label label="Template name" value="{{templateSelected.name}}">
+                            </paper-input>
+                            <div class="projects-list scroll" id="listOfProjects">
+                                <template is="dom-repeat" items="{{templateSelected.projects}}">
+                                    <paper-checkbox checked="{{item.checked}}">{{item.projectKey}}</paper-checkbox><br>
+                                </template>
                             </div>
-                        </template>
+                            <div class="alert alert-warning clean-cache-msg">
+                                <strong>Before uploading the template, make sure you clean up the pivot tables cache</strong>
+                                <paper-button hidden$="{{showCacheInstructions}}" title="Show instructions" on-tap="howDoICleanTheCache">
+                                    How do I clean up the cache?
+                                </paper-button>
+                                <template is="dom-if" if="{{showCacheInstructions}}">
+                                    <span>1. With a cell selected within your pivot table, select the Options tab on the ribbon.</span>
+                                    <span>2. In the PivotTable group, select Options.</span>
+                                    <span>3. In the dialog box, select the Data tab.</span>
+                                    <span>4. For "Number of items to retain per field", select None, and click OK.</span>
+                                    <span>5. In the Options tab on the ribbon and in the Data group, click on Refresh.</span>
+                                </template>
+                            </div>
+                            <div class="control">
+                                <div class="upload-button">
+                                    <label for="inputTemplate">
+                                        <iron-icon icon="file-upload"></iron-icon>
+                                        Browse Template
+                                    </label>
+                                    <input on-change="_onFileSelected" id="inputTemplate" type="file" accept=".xlsm" />
+                                </div>
+                                <template is="dom-if" if="{{!isNewTemplateSelected}}">
+                                    <paper-button class="tb-button tb-button--type_link"
+                                                   title="Download Selected Template"
+                                                   on-tap="downloadSelectedTemplate">
+                                        <iron-icon icon="file-download"></iron-icon>
+                                        Download Template
+                                    </paper-button>
+                                </template>
+                            </div>
+                            <span>{{fileName}}</span>
+                        </form>
                     </div>
                 </div>
-                <div class="template-form">
-                    <form>
-                        <paper-input id="templateNameInputl" always-float-label label="Template name" value="{{templateSelected.name}}">
-                        </paper-input>
-                        <div class="projects-list scroll" id="listOfProjects">
-                            <template is="dom-repeat" items="{{templateSelected.projects}}">
-                                <paper-checkbox checked="{{item.checked}}">{{item.projectKey}}</paper-checkbox><br>
-                            </template>
-                        </div>
-                        <div class="alert alert-warning clean-cache-msg">
-                            <strong>Before uploading the template, make sure you clean up the pivot tables cache</strong>
-                            <paper-button hidden$="{{showCacheInstructions}}" title="Show instructions" on-tap="howDoICleanTheCache">
-                                How do I clean up the cache?
-                            </paper-button>
-                            <template is="dom-if" if="{{showCacheInstructions}}">
-                                <span>1. With a cell selected within your pivot table, select the Options tab on the ribbon.</span>
-                                <span>2. In the PivotTable group, select Options.</span>
-                                <span>3. In the dialog box, select the Data tab.</span>
-                                <span>4. For "Number of items to retain per field", select None, and click OK.</span>
-                                <span>5. In the Options tab on the ribbon and in the Data group, click on Refresh.</span>
-                            </template>
-                        </div>
-                        <div class="control">
-                            <div class='input-wrap'>
-                                <label for="inputTemplate">
-                                    <iron-icon icon="file-upload"></iron-icon>
-                                    Browse Template
-                                </label>
-                                <input on-change="_onFileSelected" id="inputTemplate" type="file" accept=".xlsm" />
-                            </div>
-                            <template is="dom-if" if="{{!isNewTemplateSelected}}">
-                                <paper-button class="tb-button--background_none"
-                                               title="Download Selected Template"
-                                               on-tap="downloadSelectedTemplate">
-                                    <iron-icon icon="file-download"></iron-icon>
-                                    Download Template
-                                </paper-button>
-                            </template>
-                        </div>
-                        <span>{{fileName}}</span>
-
-                    </form>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <paper-spinner active hidden$="{{!showLoadingSpinner}}">...</paper-spinner>
-                <template is="dom-if" if="{{isNewTemplateSelected}}">
-                    <paper-button id="createTemplate" raised class="colorful" title="Create Template" on-tap="createTemplate">
-                        Create
-                    </paper-button>
+            </modal-wrap-content>
+            <modal-wrap-footer>
+                <template is="dom-if" if="[[isNewTemplateSelected]]">
+                    <tb-button button="[[_btCreate]]"></tb-button>
                 </template>
-                <template is="dom-if" if="{{!isNewTemplateSelected}}">
-                    <paper-button id="deleteTemplate" raised title="Delete Template" on-tap="deleteTemplate">
-                        Delete
-                    </paper-button>
-                    <paper-button id="updateTemplate" raised class="colorful" title="Update Template" on-tap="updateTemplate">
-                        Update
-                    </paper-button>
+                <template is="dom-if" if="[[!isNewTemplateSelected]]">
+                    <tb-button button="[[_btDelete]]"></tb-button>
+                    <tb-button button="[[_btUpdate]]"></tb-button>
                 </template>
-            </div>
-        </wrap-modal>
+            </modal-wrap-footer>
+        </modal-wrap>
     </template>
 
     <script>
@@ -184,7 +191,8 @@
                         type: Array
                     },
                     isNewTemplateSelected: {
-                        type: Boolean
+                        type: Boolean,
+                        value: true
                     },
                     showLoadingSpinner: {
                         type: Boolean
@@ -207,7 +215,46 @@
                     hasSampleTemplate: {
                         type: Boolean,
                         value: false
+                    },
+                    _btCreate: {
+                        type: Object,
+                        value: function() { return {} }
+                    },
+                    _btUpdate: {
+                        type: Object,
+                        value: function() { return {} }
+                    },
+                    _btDelete: {
+                        type: Object,
+                        value: function() { return {} }
                     }
+                },
+
+                ready: function() {
+                    var btCreate = ButtonBuilder('Create').id('createTemplate').onClick(this.createTemplate.bind(this)).build();
+                    var btUpdate = ButtonBuilder('Update').id('updateTemplate').onClick(this.updateTemplate.bind(this)).build();
+                    var btDelete = ButtonBuilder('Delete').id('deleteTemplate').type(buttonTypes.LINK).onClick(this.deleteTemplate.bind(this)).build();
+
+                    this.set('_btCreate', btCreate);
+                    this.set('_btUpdate', btUpdate);
+                    this.set('_btDelete', btDelete);
+                },
+
+                open: function () {
+                    this.set('isNewTemplateSelected', true);
+                    this.set('templateSelected', {});
+                    this.set('newTemplate', {});
+                    this.set('projects', []);
+                    this.set('templates', []);
+                    this.set('fileData', null);
+                    this.set('fileName', '');
+                    this.set('showCleanUpCacheInstructions', false);
+                    this.set('hasSampleTemplate', false);
+
+                    this.showLoading(true);
+                    this.$.ajaxProjects.generateRequest();
+                    this.$.ajaxHasSampleTemplate.generateRequest();
+                    this.$.modal.open();
                 },
 
                 selectTemplate: function(event) {
@@ -344,6 +391,7 @@
 
                 showLoading: function(show) {
                     this.showLoadingSpinner = show;
+                    this.$$('modal-wrap').resize();
                 },
 
                 howDoICleanTheCache: function() {
@@ -397,29 +445,14 @@
                     this.showLoading(false);
                 },
 
-                open: function () {
-                    this.newTemplate = {};
-                    this.projects = [];
-                    this.fileData = null;
-                    this.fileName = '';
-                    this.showLoading(true);
-                    this.showCleanUpCacheInstructions = false;
-                    this.$.ajaxProjects.generateRequest();
-                    this.$.ajaxHasSampleTemplate.generateRequest();
-                    this.$.modal.open();
-                },
-
-                close: function() {
-                    this.$.modal.close();
-                },
-
                 downloadGenericTemplate: function() {
                     window.location = "ws/followup/generic-template";
                 },
 
                 downloadSelectedTemplate: function() {
                     window.location = "api/templates/" + this.templateSelected.id;
-                }
+                },
+
             });
         })();
     </script>

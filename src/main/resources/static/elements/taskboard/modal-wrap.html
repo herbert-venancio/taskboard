@@ -1,0 +1,124 @@
+<dom-module id="modal-wrap">
+
+    <template>
+
+        <style>
+            :root {
+            }
+
+            .modal {
+            }
+
+            .modal[data-loading] .modal__content {
+                opacity: .6;
+                pointer-events: none;
+            }
+
+            .modal__area {
+                display: flex;
+                flex-direction: column;
+
+                background: #FFF;
+                min-width: 240px;
+                padding: 0;
+                margin: 0;
+            }
+
+            .modal__header {
+                display: flex;
+                align-items: center;
+
+                background: #555;
+                padding: 24px;
+                color: #FFF;
+            }
+
+            .modal__icon {
+                margin-right: 16px;
+            }
+
+            .modal__title {
+                flex: 1;
+
+                margin: 0;
+                font-size: 16px;
+                line-height: 20px;
+            }
+
+            .modal__close {
+                padding-left: 16px;
+                margin-left: auto;
+                color: #8E8E8E;
+                cursor: pointer;
+            }
+
+            .modal__main {
+                position: relative;
+            }
+        </style>
+
+        <paper-dialog class="modal tb-paper-dialog"
+                      entry-animation="scale-up-animation"
+                      exit-animation="fade-out-animation"
+                      with-backdrop modal
+                      data-loading$="[[loading]]"
+                      >
+            <div class="modal__area">
+                <div class="modal__header">
+                    <template is="dom-if" if="[[icon]]">
+                        <iron-icon class="modal__icon tb-icon tb-icon--24" icon="[[icon]]" title="Close"></iron-icon>
+                    </template>
+                    <h2 class="modal__title">[[title]]</h2>
+                    <div class="modal__close">
+                        <iron-icon on-tap="close" class="modal__close-icon tb-icon tb-icon--16" icon="clear"></iron-icon>
+                    </div>
+                </div>
+                <div class="modal__main">
+                    <div class="modal__content">
+                        <content select="modal-wrap-content"></content>
+                        <content select="modal-wrap-footer"></content>
+                    </div>
+                    <template is="dom-if" if="[[loading]]">
+                        <paper-spinner class="tb-spinner tb-spinner--centered" active="[[loading]]" alt="Loading..."></paper-spinner>
+                    </template>
+                </div>
+            </div>
+        </paper-dialog>
+
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'modal-wrap',
+
+                properties: {
+                    title: {
+                        type: String,
+                        value: ''
+                    },
+                    icon: {
+                        type: String,
+                        value: ''
+                    },
+                    loading: {
+                        type: Boolean,
+                        value: false
+                    }
+                },
+
+                open: function () {
+                    this.$$('paper-dialog').open();
+                },
+
+                close: function() {
+                    this.$$('paper-dialog').close();
+                },
+
+                resize: function() {
+                    this.$$('.modal').notifyResize();
+                }
+            });
+        })();
+    </script>
+</dom-module>

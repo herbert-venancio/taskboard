@@ -74,7 +74,7 @@ public class TemplateFollowupDialog extends AbstractUiFragment {
     }
     
     public TemplateFollowupDialog close() {
-        WebElement close = dialog.findElement(By.cssSelector(".button-close"));
+        WebElement close = dialog.findElement(By.cssSelector(".modal__close"));
         waitForClick(close);
         return this;
     }
@@ -86,11 +86,8 @@ public class TemplateFollowupDialog extends AbstractUiFragment {
     public TemplateFollowupDialog tryToCreateATemplateWithoutName() {
         waitForClick(newTemplateItem);
         waitForClick(createButton);
-        System.out.println("antes do asser error message");
         assertErrorMessage(DEFAUT_ERROR_MESSAGE);
-        System.out.println("depois do asser error message");
         closeAlertDialog();
-        System.out.println("fechou dialog do error message");
         return this;
     }
     

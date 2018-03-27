@@ -322,7 +322,7 @@ function Taskboard() {
 
     this.getStatus = function(statusId) {
         var statusIdNumber = parseInt(statusId);
-        return Object.values(this.getStatuses()).find( s => s.id === statusIdNumber );
+        return Object.values(this.getStatuses()).find( function(s) { return s.id === statusIdNumber } );
     };
 
     this.getStatusName = function(statusId) {
@@ -585,6 +585,52 @@ function StepLocalStateBuilder(idOfStep) {
         },
         build: function() {
             return stepLocalState;
+        }
+    }
+}
+
+var buttonTypes = {
+    BUTTON: 'button',
+    LINK: 'link'
+};
+
+function ButtonBuilder(text) {
+    var button = {
+        text: text,
+        type: buttonTypes.BUTTON,
+        disabled: false,
+        hidden: false,
+        onClick: function() {
+            throw '"onClick" callback needs to be implemented.';
+        }
+    };
+    return {
+        id: function(id) {
+            button.id = id;
+            return this;
+        },
+        classes: function(classes) {
+            button.classes = classes;
+            return this;
+        },
+        type: function(type) {
+            button.type = type;
+            return this;
+        },
+        disabled: function(disabled) {
+            button.disabled = disabled;
+            return this;
+        },
+        hidden: function(hidden) {
+            button.hidden = hidden;
+            return this;
+        },
+        onClick: function(callback) {
+            button.onClick = callback;
+            return this;
+        },
+        build: function() {
+            return button;
         }
     }
 }

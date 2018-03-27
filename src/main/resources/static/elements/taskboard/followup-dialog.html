@@ -26,44 +26,8 @@
             :host {
             }
 
-            #modal {
-                background: #FFF;
-                width: 450px;
-                min-height: 360px;
-                margin: 0;
-                display: block;
-                font-family: inherit;
-            }
-
-            .card-custom {
-                display: flex;
-                flex-direction: column;
-                background: transparent;
-                width: 100%;
-                min-height: 360px;
-                padding: 20px;
-                margin: 0;
-            }
-
-            .card-custom[data-loading] {
-                opacity: .6;
-                pointer-events: none;
-            }
-
-            .card-header-custom {
-                width: 100%;
-                margin-bottom: 30px;
-                font-size: 24px;
-                display: flex;
-            }
-
-            .card-header-info {
-                flex: 1;
-            }
-
-            .card-header-breadcrumb {
-                margin-bottom: 10px;
-                font-size: 15px;
+            .followup-dialog-content {
+                min-width: 400px;
             }
 
             .sub-header {
@@ -74,72 +38,12 @@
             }
 
             .content-row {
-                display: flex;
                 margin-top: 20px;
-                align-items: center;
             }
 
-            .card-header-buttons {
-                padding: 0;
-                margin-left: auto;
-            }
-
-            paper-material, paper-button {
-                box-shadow: none !important;
-            }
-
-            paper-button {
-                background: #4285f4;
-                color: #fff;
-                margin-bottom: 12px;
-            }
-
-            paper-button[toggles] {
-                transition: all 0.3s;
-            }
-
-            paper-button[toggles][active] {
-                background-color: rgba(0, 0, 0, 0.25);
-            }
-
-            paper-button[toggles][active].colorful {
-                background-color: rgba(66, 133, 244, 0.25);
-            }
-
-            paper-button[toggles][active][raised].colorful {
-                background-color: rgba(66, 133, 244, 0.75);
-            }
-
-            .buttonClose {
-                background: #fff;
-                color: #000;
-                min-width: auto;
-                display: inline;
-                padding: 0;
-                margin: 0;
-            }
-
-            .custom-footer {
-                padding-top: 20px;
-                margin-top: auto;
-            }
-
-            .custom-footer-buttons {
+            .content-row.content-row--flex {
                 display: flex;
-                justify-content: flex-end;
-                margin-left: -5px;
-                margin-right: -5px;
-            }
-
-            .custom-footer-buttons paper-button {
-                padding: 5px 10px;
-                margin: 0 5px;
-                text-transform: none;
-                text-align: center;
-            }
-
-            .info-box {
-                display: block;
+                align-items: center;
             }
 
             .warn-box {
@@ -157,20 +61,6 @@
                 text-decoration: underline;
                 cursor: pointer;
             }
-
-            paper-spinner {
-                position: absolute;
-                left: 50%;
-                top: 50%;
-                margin-top: -14px;
-                margin-left: -14px;
-                padding: 0;
-                display: block;
-            }
-
-            paper-spinner[aria-hidden=true] {
-                display: none;
-            }
         </style>
 
         <iron-ajax id="ajaxProjects"
@@ -184,98 +74,81 @@
                    content-type='application/json'
                    last-response="{{allTemplates}}"></iron-ajax>
 
-        <paper-dialog id="modal" entry-animation="scale-up-animation" exit-animation="fade-out-animation" with-backdrop modal>
+        <modal-wrap
+                id="modal"
+                icon="file-download"
+                title="Followup report generation"
+                loading="[[_isLoading(_isReady, downloadInProgress)]]"
+                >
 
-            <paper-card class="card-custom" data-loading$="[[_isLoading(_isReady, downloadInProgress)]]">
+            <modal-wrap-content>
 
-                <div class="card-header-custom">
-                    <div class="card-header-info">
-                        <div class="card-header-breadcrumb">
-                            <span class="project-title">
-                                Followup report generation
-                            </span>
+                <div class="followup-dialog-content">
+
+                    <template is="dom-if" if="[[_shouldShowContent(_isReady, showNoTemplatesFoundWarning)]]">
+
+                        <div class="sub-header">
+                            Select report template:
                         </div>
-                    </div>
-                    <div class="card-header-buttons">
-                        <paper-button class="buttonClose" on-tap="close" dialog-confirm autofocus>
-                            <iron-icon icon="clear"></iron-icon>
-                        </paper-button>
-                    </div>
-                </div>
 
-                <template is="dom-if" if="[[_shouldShowContent(_isReady, showNoTemplatesFoundWarning)]]">
-
-                    <div class="sub-header">
-                        Select report template:
-                    </div>
-
-                    <div class="content-row">
-                        <paper-radio-group class="scroll" id="listOfTemplates"
-                                selected="{{selectedTemplate}}"
-                                attr-for-selected="value">
-                            <template id="templateRadioElements" is="dom-repeat" items="{{allTemplates}}">
-                                <paper-radio-button title="{{item.projects}}" class="tb-paper-radio-button"
-                                    checked="{{item.checked}}"
-                                    value="{{item.id}}">{{item.name}}</paper-radio-button>
-                            </template>
-                        </paper-radio-group>
-                    </div>
-
-                    <template is="dom-if" if="[[showCreateTemplateMessage]]">
                         <div class="content-row">
-                            Don't see your template? <span class="set-template-link" on-tap="openTemplateFollowupDialog">Click here</span> to create a new template
-                        </div>
-                    </template>
-
-                    <div class="content-row">
-                        <paper-dropdown-menu class="followup-dropdown" disabled="{{!showDateSelect}}"
-                            name="date" always-float-label label="Date" selected-item="{{selectedItemDate}}"
-                            on-value-changed="dateOnChange" on-keydown="dateOnKeyDown">
-                            <paper-menu id="dateMenu" class="dropdown-content" selected="{{selectedIndexDate}}">
-                                <paper-item value="">Today</paper-item>
-                                <template is="dom-repeat" id="datesRepeat" items="{{availableDates}}" as="itemDate">
-                                    <paper-item value="{{itemDate}}">{{getLocaleDate(itemDate)}}</paper-item>
+                            <paper-radio-group class="scroll" id="listOfTemplates"
+                                    selected="{{selectedTemplate}}"
+                                    attr-for-selected="value">
+                                <template id="templateRadioElements" is="dom-repeat" items="{{allTemplates}}">
+                                    <paper-radio-button title="{{item.projects}}" class="tb-paper-radio-button"
+                                        checked="{{item.checked}}"
+                                        value="{{item.id}}">{{item.name}}</paper-radio-button>
                                 </template>
-                            </paper-menu>
-                        </paper-dropdown-menu>
-                        <paper-icon-button icon="clear" on-click="clearSelectedDate" hidden$={{!showClearDate}} class="clear-button"></paper-icon-button>
-                    </div>
+                            </paper-radio-group>
+                        </div>
 
-                    <template is="dom-if" if="[[errorMessage]]">
-                        <div class="message-box message-box--error">
-                            <paper-icon-button class="message-box__icon" icon="error" title="Error Icon"></paper-icon-button>
-                            <p class="message-box__message">[[errorMessage]]</p>
-                            <paper-icon-button class="message-box__close" icon="close" title="Close error" on-tap="_closeErrorMessage"></paper-icon-button>
+                        <template is="dom-if" if="[[showCreateTemplateMessage]]">
+                            <div class="content-row">
+                                Don't see your template? <span class="set-template-link" on-tap="openTemplateFollowupDialog">Click here</span> to create a new template
+                            </div>
+                        </template>
+
+                        <div class="content-row content-row--flex">
+                            <paper-dropdown-menu class="followup-dropdown" disabled="{{!showDateSelect}}"
+                                name="date" always-float-label label="Date" selected-item="{{selectedItemDate}}"
+                                on-value-changed="dateOnChange" on-keydown="dateOnKeyDown">
+                                <paper-menu id="dateMenu" class="dropdown-content" selected="{{selectedIndexDate}}">
+                                    <paper-item value="">Today</paper-item>
+                                    <template is="dom-repeat" id="datesRepeat" items="{{availableDates}}" as="itemDate">
+                                        <paper-item value="{{itemDate}}">{{getLocaleDate(itemDate)}}</paper-item>
+                                    </template>
+                                </paper-menu>
+                            </paper-dropdown-menu>
+                            <paper-icon-button icon="clear" on-click="clearSelectedDate" hidden$={{!showClearDate}} class="clear-button"></paper-icon-button>
+                        </div>
+
+                        <template is="dom-if" if="[[errorMessage]]">
+                            <div class="message-box message-box--error">
+                                <paper-icon-button class="message-box__icon" icon="error" title="Error Icon"></paper-icon-button>
+                                <p class="message-box__message">[[errorMessage]]</p>
+                                <paper-icon-button class="message-box__close" icon="close" title="Close error" on-tap="_closeErrorMessage"></paper-icon-button>
+                            </div>
+                        </template>
+
+                    </template>
+
+                    <template is="dom-if" if="[[showNoTemplatesFoundWarning]]">
+                        <div id="noTemplateWarning" class="alert alert-warning warn-box">
+                            <strong>No template available</strong><br />
+                            <span class="set-template-link" on-tap="openTemplateFollowupDialog">Click here</span> to create a template
                         </div>
                     </template>
 
-                </template>
-
-                <template is="dom-if" if="[[showNoTemplatesFoundWarning]]">
-                    <div id="noTemplateWarning" class="alert alert-warning warn-box">
-                        <strong>No template available</strong><br />
-                        <span class="set-template-link" on-tap="openTemplateFollowupDialog">Click here</span> to create a template
-                    </div>
-                </template>
-
-                <div class="custom-footer">
-
-                    <div class="custom-footer-buttons">
-
-                        <paper-button id="generate" raised class="colorful" disabled="{{disableGenerateButton}}"
-                            on-tap="downloadFollowup" title="Generate Report">
-                            Generate Report
-                        </paper-button>
-
-                    </div>
                 </div>
-            </paper-card>
 
-            <template is="dom-if" if="[[_isLoading(_isReady, downloadInProgress)]]">
-                <paper-spinner active alt="Loading..."></paper-spinner>
-            </template>
+            </modal-wrap-content>
 
-        </paper-dialog>
+            <modal-wrap-footer>
+                <tb-button button="[[_generateButton]]"></tb-button>
+            </modal-wrap-footer>
+
+        </modal-wrap>
 
     </template>
     <script>
@@ -294,9 +167,6 @@
                         type: Object
                     },
                     showNoTemplatesFoundWarning: {
-                        type: Boolean
-                    },
-                    disableGenerateButton: {
                         type: Boolean
                     },
                     showDateSelect: {
@@ -325,6 +195,10 @@
                     },
                     errorMessage: {
                         type: String
+                    },
+                    _generateButton: {
+                        type: Object,
+                        value: function () { return {} }
                     }
                 },
 
@@ -347,10 +221,10 @@
                     this.$.ajaxProjects.generateRequest();
                     this.$.ajaxTemplates.generateRequest();
                     this.$.modal.open();
-                    this.disableGenerateButton = true;
                     this.showDateSelect = false;
                     this.showClearDate = false;
                     this.showCreateTemplateMessage = authorizer.hasPermissionInAnyProject(authorizer.permissions.ADMINISTRATIVE);
+                    this._createGenerateButton();
                 },
 
                 close: function() {
@@ -367,7 +241,7 @@
                         return;
 
                     this.filterDates();
-                    this.updateDisableGenerateButton();
+                    this._updateGenerateButtonStatus();
                 },
 
                 filterDates: function() {
@@ -453,24 +327,16 @@
                         data: query,
                         successCallback: function (url) {
                             self.set('downloadInProgress', false);
-                            self.updateDisableGenerateButton();
+                            self._updateGenerateButtonStatus();
                         },
                         failCallback: function (html, url) {
                             self.set('downloadInProgress', false);
-                            self.updateDisableGenerateButton();
+                            self._updateGenerateButtonStatus();
                             self.showErrorMessage(html ? html : 'Failed to download followup spreadsheet');
                         }
                     });
                     this.set('downloadInProgress', true);
-                    this.updateDisableGenerateButton();
-                },
-
-                updateDisableGenerateButton: function() {
-                    // disable when any 1 condition is true
-                    var condition1 = this.downloadInProgress;
-                    var condition2 = !this.selectedTemplate;
-
-                    this.set('disableGenerateButton', condition1 || condition2);
+                    this._updateGenerateButtonStatus();
                 },
 
                 _setReady: function(projects, allTemplates) {
@@ -483,7 +349,7 @@
                 },
 
                 _resizeModal: function() {
-                    this.$.modal.notifyResize();
+                    this.$.modal.resize();
                 },
 
                 _shouldShowContent: function(_isReady, showNoTemplatesFoundWarning) {
@@ -492,6 +358,15 @@
 
                 _closeErrorMessage: function() {
                     this.set('errorMessage', '');
+                },
+
+                _createGenerateButton: function() {
+                    var generateButton = ButtonBuilder('Generate report').id("generate").disabled(true).onClick(this.downloadFollowup.bind(this)).build();
+                    this.set('_generateButton', generateButton);
+                },
+
+                _updateGenerateButtonStatus: function() {
+                    this.set('_generateButton.disabled', this.downloadInProgress || !this.selectedTemplate);
                 }
 
             });

@@ -1,0 +1,30 @@
+<dom-module id="modal-wrap-content">
+
+    <template>
+
+        <style>
+            .modal__inputted {
+                padding: 24px;
+                min-height: 80px;
+                overflow: hidden;
+                transition: opacity .3s ease;
+            }
+        </style>
+
+        <div class="modal__inputted">
+            <content></content>
+        </div>
+
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'modal-wrap-content',
+
+                properties: {
+                }
+            });
+        })();
+    </script>
+</dom-module>

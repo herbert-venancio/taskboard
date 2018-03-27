@@ -26,33 +26,39 @@
         </style>
 
         <widget-wrap title="CFD" is-ready="{{isReady}}" tags="{{tags}}" options="{{options}}" chart="{{chart}}" error-message="{{errorMessage}}">
-
             <div id="cfd" title="Double click to enter selection mode" class="tb-chart"></div>
-
-            <wrap-modal title="Filters" class="filters-modal">
-                <h3 class="tb-label">Issue Types</h3>
-                <div class="config-slot-0 dc-chart--no-float"></div>
-                <div class="modal-footer">
-                    <paper-button class="colorful" raised title="OK" on-tap="_closeFiltersModal">OK</paper-button>
-                </div>
-            </wrap-modal>
-
         </widget-wrap>
 
-        <wrap-modal title="Settings" class="settings-modal">
-            <h3 class="tb-label">Level</h3>
-            <div>
-                <label id="labelLevel"></label>
-                <paper-radio-group class="radio-group" selected="{{settingLevel}}" aria-labelledby="labelLevel">
-                    <paper-radio-button name="Demand">Demand</paper-radio-button>
-                    <paper-radio-button name="Feature">Feature</paper-radio-button>
-                    <paper-radio-button name="Subtask">Subtask</paper-radio-button>
-                </paper-radio-group>
-            </div>
-            <div class="modal-footer">
-                <paper-button class="colorful" raised title="Save" on-tap="_saveSettings">Save</paper-button>
-            </div>
-        </wrap-modal>
+        <modal-wrap class="filters-modal"
+                    title="Filters"
+                    >
+            <modal-wrap-content>
+                <h3 class="tb-label">Issue Types</h3>
+                <div class="config-slot-0 dc-chart--no-float"></div>
+            </modal-wrap-content>
+            <modal-wrap-footer>
+                <tb-button button=[[_btFilterClose]]></tb-button>
+            </modal-wrap-footer>
+        </modal-wrap>
+
+        <modal-wrap class="settings-modal"
+                    title="Settings"
+                    >
+            <modal-wrap-content>
+                <h3 class="tb-label">Level</h3>
+                <div>
+                    <label id="labelLevel"></label>
+                    <paper-radio-group class="radio-group" selected="{{settingLevel}}" aria-labelledby="labelLevel">
+                        <paper-radio-button name="Demand">Demand</paper-radio-button>
+                        <paper-radio-button name="Feature">Feature</paper-radio-button>
+                        <paper-radio-button name="Subtask">Subtask</paper-radio-button>
+                    </paper-radio-group>
+                </div>
+            </modal-wrap-content>
+            <modal-wrap-footer>
+                <tb-button button="[[_btLevelSave]]"></tb-button>
+            </modal-wrap-footer>
+        </modal-wrap>
 
     </template>
 
@@ -97,6 +103,14 @@
                         type: String,
                         notify: true,
                         value: 'Subtask'
+                    },
+                    _btFilterClose: {
+                        type: Object,
+                        value: function() { return {}; }
+                    },
+                    _btLevelSave: {
+                        type: Object,
+                        value: function() { return {}; }
                     }
                 },
 
@@ -126,6 +140,12 @@
                         }
                     ]);
                     this.widgetList = [];
+
+                    var btFilterClose = ButtonBuilder('Ok').onClick(this._closeFiltersModal.bind(this)).build();
+                    this.set('_btFilterClose', btFilterClose);
+
+                    var btLevelSave = ButtonBuilder('Save').onClick(this._saveSettings.bind(this)).build();
+                    this.set('_btLevelSave', btLevelSave);
                 },
 
                 _onProjectSelected: function() {
