@@ -522,7 +522,7 @@
 
                             <template is="dom-repeat" items="{{item.subtasksTshirtSizes}}" as="size">
                                 <div class="column-block top-bottom-alignment">
-                                    <div class="sub-header">{{size.name}}</div>
+                                    <div class="sub-header">{{getFieldName(size)}}</div>
                                     <div class="sub-content">
                                         {{size.value}}
                                     </div>
@@ -544,7 +544,7 @@
 
                         <template is="dom-if" if="{{item.additionalEstimatedHoursField}}">
                             <div class="column-block">
-                                <div class="sub-header">{{item.additionalEstimatedHoursField.name}}</div>
+                                <div class="sub-header">{{getFieldName(item.additionalEstimatedHoursField)}}</div>
                                 <div class="sub-content">
                                     <span>{{item.additionalEstimatedHoursField.value}}</span>
                                 </div>
@@ -1169,6 +1169,10 @@
 
                 getDescription: function (issue) {
                     return issue.description ? jira2md.to_markdown(issue.description) : 'N/A';
+                },
+
+                getFieldName: function(field) {
+                    return taskboard.getFieldName(field.fieldId);
                 },
 
                 hasRecords: function (records) {

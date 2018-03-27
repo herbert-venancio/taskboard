@@ -20,7 +20,6 @@
  */
 package objective.taskboard.database;
 
-import java.sql.SQLException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +37,7 @@ public class TaskboardDatabaseService {
     @Autowired
     private LaneCachedRepository laneRepository;
 
-    public List<LaneConfiguration> laneConfiguration() throws SQLException {
+    public List<LaneConfiguration> laneConfiguration() {
         return getConfigurations();
     }
 

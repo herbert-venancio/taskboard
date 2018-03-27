@@ -21,8 +21,8 @@ package objective.taskboard.jira;
  * [/LICENSE]
  */
 
-import static com.google.common.collect.Lists.newArrayList;
 import static objective.taskboard.config.CacheConfiguration.JIRA_FIELD_METADATA;
+import static objective.taskboard.config.CacheConfiguration.JIRA_FIELD_METADATA_LOCALIZED;
 
 import java.util.List;
 
@@ -30,8 +30,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import com.atlassian.jira.rest.client.api.domain.Field;
-
+import objective.taskboard.config.LoggedInUserLocaleKeyGenerator;
+import objective.taskboard.jira.client.JiraFieldDataDto;
+import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
 import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
 
 @Service
@@ -40,10 +41,16 @@ public class FieldMetadataService {
     @Autowired
     private JiraEndpointAsMaster jiraEndpointAsMaster;
 
+    @Autowired
+    private JiraEndpointAsLoggedInUser jiraEndpointAsUser;
+
     @Cacheable(JIRA_FIELD_METADATA)
-    public List<Field> getFieldsMetadata() {
-        Iterable<Field> fields = jiraEndpointAsMaster.executeRequest(client -> client.getMetadataClient().getFields());
-        return newArrayList(fields);
+    public List<JiraFieldDataDto> getFieldsMetadata() {
+        return jiraEndpointAsMaster.request(JiraFieldDataDto.Service.class).all();
     }
 
+    @Cacheable(cacheNames=JIRA_FIELD_METADATA_LOCALIZED, keyGenerator=LoggedInUserLocaleKeyGenerator.NAME)
+    public List<JiraFieldDataDto> getFieldsMetadataAsUser() {
+        return jiraEndpointAsUser.request(JiraFieldDataDto.Service.class).all();
+    }
 }

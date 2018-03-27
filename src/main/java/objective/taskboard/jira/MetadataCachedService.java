@@ -4,11 +4,8 @@ import static com.google.common.collect.Lists.newArrayList;
 
 import java.time.ZoneId;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-import objective.taskboard.jira.data.JiraTimezone;
-import objective.taskboard.jira.data.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -18,6 +15,8 @@ import com.atlassian.jira.rest.client.api.domain.IssuelinksType;
 import com.atlassian.jira.rest.client.api.domain.Priority;
 
 import objective.taskboard.config.CacheConfiguration;
+import objective.taskboard.jira.data.JiraTimezone;
+import objective.taskboard.jira.data.Status;
 import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
 
 @Service
@@ -27,12 +26,12 @@ public class MetadataCachedService {
     private JiraEndpointAsMaster jiraEndpointAsMaster;
 
     @Cacheable(CacheConfiguration.ISSUE_TYPE_METADATA)
-    public Map<Long, IssueType> getIssueTypeMetadata() throws InterruptedException, ExecutionException {
+    public Map<Long, IssueType> getIssueTypeMetadata() {
         return loadIssueTypes();
     }
 
     @Cacheable(CacheConfiguration.PRIORITIES_METADATA)
-    public Map<Long, Priority> getPrioritiesMetadata() throws InterruptedException, ExecutionException {
+    public Map<Long, Priority> getPrioritiesMetadata() {
         return loadPriorities();
     }
 
@@ -51,12 +50,12 @@ public class MetadataCachedService {
         return ZoneId.of(jiraEndpointAsMaster.request(JiraTimezone.Service.class).get().timeZone);
     }
 
-    private Map<Long, IssueType> loadIssueTypes() throws InterruptedException, ExecutionException {
+    private Map<Long, IssueType> loadIssueTypes() {
         Iterable<IssueType> issueTypes = jiraEndpointAsMaster.executeRequest(client -> client.getMetadataClient().getIssueTypes());
         return newArrayList(issueTypes).stream().collect(Collectors.toMap(IssueType::getId, t -> t));
     }
 
-    private Map<Long, Priority> loadPriorities() throws InterruptedException, ExecutionException {
+    private Map<Long, Priority> loadPriorities() {
         Iterable<Priority> priorities = jiraEndpointAsMaster.executeRequest(client -> client.getMetadataClient().getPriorities());
         return newArrayList(priorities).stream().collect(Collectors.toMap(Priority::getId, t -> t));
     }

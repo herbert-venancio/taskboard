@@ -23,15 +23,14 @@ package objective.taskboard.domain.converter;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.Serializable;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Date;
@@ -51,6 +50,8 @@ import org.mockito.Mock;
 import org.mockito.internal.util.collections.Sets;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.atlassian.jira.rest.client.api.domain.IssueType;
+
 import objective.taskboard.database.IssuePriorityService;
 import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.jira.JiraProperties;
@@ -60,9 +61,9 @@ import objective.taskboard.jira.JiraProperties.CustomField.ClassOfServiceDetails
 import objective.taskboard.jira.JiraProperties.CustomField.CustomFieldDetails;
 import objective.taskboard.jira.JiraProperties.CustomField.TShirtSize;
 import objective.taskboard.jira.JiraService;
+import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.client.JiraCommentDto;
 import objective.taskboard.jira.client.JiraIssueDto;
-import objective.taskboard.jira.client.JiraIssueFieldDto;
 import objective.taskboard.jira.client.JiraIssueTypeDto;
 import objective.taskboard.jira.client.JiraPriorityDto;
 import objective.taskboard.jira.client.JiraProjectDto;
@@ -81,7 +82,7 @@ public class JiraIssueToIssueConverterTest {
     private static final String CLASS_OF_SERVICE_EXPEDITE = "Expedite";
     private static final String CLASS_OF_SERVICE_STANDARD = "Standard";
 
-    private static final String JSON_PARENT = "{key:'%s', fields:{issuetype:{id:1, iconUrl:'%s'}}}";
+    private static final String JSON_PARENT = "{key:'%s'}";
     private static final String JSON_CLASS_OF_SERVICE = "{id:1, value:'%s'}";
 
     private static final String PARENT_ID = "parent";
@@ -140,13 +141,9 @@ public class JiraIssueToIssueConverterTest {
     @Mock
     private JiraService jiraService;
     @Mock
-    private JiraIssueFieldDto classOfServiceField;
-    @Mock
-    private JiraIssueFieldDto releaseField;
-    @Mock
-    private JiraIssueFieldDto parentField;
-    @Mock
     private IssuePriorityService priorityService;
+    @Mock
+    private MetadataService metadataService;
     @Mock
     private JiraCommentDto comment;
     @Mock
@@ -181,14 +178,14 @@ public class JiraIssueToIssueConverterTest {
 
         when(jiraProperties.getCustomfield()).thenReturn(customField);
 
-        when(issueType.getIconUri()).thenReturn(URI.create(TYPE_ICON_URI));
         mockIssue(issue, ISSUE_KEY);
 
         when(priorityService.determinePriority(any())).thenReturn(0L);
-        
-        when(priorityService.priorityUpdateDate(any())).thenReturn(Optional.empty());
-        
+
         when(cardVisibilityEvalService.calculateVisibleUntil(any(), any(), any())).thenReturn(Optional.empty());
+
+        IssueType metadataIssueType = new IssueType(null, 1L, null, false, null, URI.create(TYPE_ICON_URI));
+        when(metadataService.getIssueTypeById(any())).thenReturn(metadataIssueType);
     }
 
     @Test
@@ -233,12 +230,11 @@ public class JiraIssueToIssueConverterTest {
         assertEquals("Teams", 1, converted.getTeams().size());
         assertEquals("Team name", "team", converted.getTeams().iterator().next());
         assertEquals("Comments", "", converted.getComments());
-        Map<String, Serializable> customFields = converted.getCustomFields();
-        assertTrue("Blocked should be in custom fields", customFields.containsKey(BLOCKED_ID));
-        assertTrue("Last block reason should be in custom fields", customFields.containsKey(LAST_BLOCK_REASON_ID));
+        assertFalse("Blocked", converted.isBlocked());
+        assertEquals("Last block reason", "", converted.getLastBlockReason());
         assertEquals("Class of Service", null, converted.getLocalClassOfServiceCustomField());
         assertEquals("Color", null, converted.getColor());
-        assertEquals("Priority order", 0L, converted.getPriorityOrder().longValue());
+        assertEquals("Priority order", 0L, converted.getPriorityOrder());
     }
 
     private ParentProvider buildProvider() {
@@ -250,11 +246,11 @@ public class JiraIssueToIssueConverterTest {
     @Test
     public void issueWithParentConvert() throws JSONException {
         when(classOfServiceDetails.getDefaultValue()).thenReturn(CLASS_OF_SERVICE_STANDARD);
-        mockIssue(parent, PARENT_ISSUE_KEY);
+        mockIssue(parent, PARENT_ISSUE_KEY, 1L);
 
-        mockIssueField(parent, classOfServiceField, CLASS_OF_SERVICE_ID, format(JSON_CLASS_OF_SERVICE, CLASS_OF_SERVICE_EXPEDITE));
-        mockIssueField(parent, releaseField, RELEASE_ID, "{id: 100}");
-        mockIssueField(issue, parentField, PARENT_ID, format(JSON_PARENT, PARENT_ISSUE_KEY, TYPE_ICON_URI));
+        mockIssueField(parent, CLASS_OF_SERVICE_ID, format(JSON_CLASS_OF_SERVICE, CLASS_OF_SERVICE_EXPEDITE));
+        mockIssueField(parent, RELEASE_ID, "{id: 100}");
+        mockIssueField(issue, PARENT_ID, format(JSON_PARENT, PARENT_ISSUE_KEY));
 
         objective.taskboard.data.Issue parentIssue = subject.convertSingleIssue(parent, buildProvider());
         objective.taskboard.data.Issue childIssue = subject.convertSingleIssue(issue, parentKey -> Optional.of(parentIssue));
@@ -282,13 +278,13 @@ public class JiraIssueToIssueConverterTest {
 
     @Test
     public void updateIssueConverted() throws JSONException {
-        mockIssueField(issue, classOfServiceField, CLASS_OF_SERVICE_ID, format(JSON_CLASS_OF_SERVICE, CLASS_OF_SERVICE_EXPEDITE));
+        mockIssueField(issue, CLASS_OF_SERVICE_ID, format(JSON_CLASS_OF_SERVICE, CLASS_OF_SERVICE_EXPEDITE));
 
         objective.taskboard.data.Issue converted = subject.convertSingleIssue(issue, buildProvider());
 
         assertEquals("Class of service", converted.getClassOfServiceValue(), CLASS_OF_SERVICE_EXPEDITE);
 
-        mockIssueField(issue, classOfServiceField, CLASS_OF_SERVICE_ID, format(JSON_CLASS_OF_SERVICE, CLASS_OF_SERVICE_STANDARD));
+        mockIssueField(issue, CLASS_OF_SERVICE_ID, format(JSON_CLASS_OF_SERVICE, CLASS_OF_SERVICE_STANDARD));
 
         objective.taskboard.data.Issue issueUpdated = subject.convertSingleIssue(issue, buildProvider());
         assertNotNull("Issue updated converted", issueUpdated);
@@ -301,9 +297,9 @@ public class JiraIssueToIssueConverterTest {
         JiraIssueDto B = mock(JiraIssueDto.class);
         JiraIssueDto C = mock(JiraIssueDto.class);
         mockIssue(A,"KEY-1");
-        mockIssueField(A, mock(JiraIssueFieldDto.class), PARENT_ID, format(JSON_PARENT, "PARENT-1", TYPE_ICON_URI));
-        mockIssueField(A, classOfServiceField, CLASS_OF_SERVICE_ID, format(JSON_CLASS_OF_SERVICE, CLASS_OF_SERVICE_EXPEDITE));
-        mockIssueField(B, mock(JiraIssueFieldDto.class), PARENT_ID, format(JSON_PARENT, "PARENT-2", TYPE_ICON_URI));
+        mockIssueField(A, PARENT_ID, format(JSON_PARENT, "PARENT-1", TYPE_ICON_URI));
+        mockIssueField(A, CLASS_OF_SERVICE_ID, format(JSON_CLASS_OF_SERVICE, CLASS_OF_SERVICE_EXPEDITE));
+        mockIssueField(B, PARENT_ID, format(JSON_PARENT, "PARENT-2", TYPE_ICON_URI));
         mockIssue(B,"PARENT-1");
         mockIssue(C,"PARENT-2");
         
@@ -332,7 +328,7 @@ public class JiraIssueToIssueConverterTest {
         issueByKey.put("PARENT-1", subject.convertSingleIssue(B, provider));
         subject.convertSingleIssue(A, provider);
     }
-    
+
     private void mockIssue(JiraIssueDto issue, String issueKey) {
         when(issue.getKey()).thenReturn(issueKey);
         when(issue.getProject()).thenReturn(project);
@@ -343,10 +339,16 @@ public class JiraIssueToIssueConverterTest {
         when(issue.getWorklogs()).thenReturn(new JiraWorklogResultSetDto());
     }
 
-    private void mockIssueField(JiraIssueDto issue, JiraIssueFieldDto issueField, String fieldId, String json) throws JSONException {
+    private void mockIssue(JiraIssueDto issue, String issueKey, long issueTypeId) {
+        mockIssue(issue, issueKey);
+        JiraIssueTypeDto issueType = mock(JiraIssueTypeDto.class);
+        when(issueType.getId()).thenReturn(issueTypeId);
+        when(issue.getIssueType()).thenReturn(issueType);
+    }
+
+    private void mockIssueField(JiraIssueDto issue, String fieldId, String json) throws JSONException {
         JSONObject fieldValue = new JSONObject(json);
-        when(issueField.getValue()).thenReturn(fieldValue);
-        when(issue.getField(fieldId)).thenReturn(issueField);
+        when(issue.getField(fieldId)).thenReturn(fieldValue);
     }
 
     private void assertIssueWithParent(objective.taskboard.data.Issue converted) {

@@ -37,7 +37,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
-import objective.taskboard.RequestBuilder;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
@@ -47,6 +46,7 @@ import org.codehaus.jettison.json.JSONObject;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import objective.taskboard.RequestBuilder;
 import objective.taskboard.utils.IOUtilities;
 import spark.ExceptionHandler;
 import spark.Route;
@@ -153,6 +153,8 @@ public class JiraMockServer {
         get("rest/api/latest/priority",  (req, res) ->{
             return loadMockData("priority.response.json");
         });
+
+        get("rest/api/latest/field", (req, res) -> loadMockData("field.response.json"));
         
         get("/rest/api/latest/issue/createmeta",  (req, res) ->{
             return loadMockData("createmeta.response.json");

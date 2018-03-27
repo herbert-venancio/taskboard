@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang.ObjectUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -42,9 +41,6 @@ public class JiraIssueDto {
     
     @JsonProperty
     private JiraIssueDtoFields fields;
-    
-    @JsonProperty
-    private Map<String, String> names;
     
     public String getKey() {
         return key;
@@ -140,21 +136,14 @@ public class JiraIssueDto {
         this.fields.worklog = worklogsForIssue;
     }
 
-    public JiraIssueFieldDto getField(String field) {
+    @SuppressWarnings("unchecked")
+    public <T> T getField(String field) {
         JSONObjectAdapter jsonObjectAdapter = fields.other.get(field);
         if (jsonObjectAdapter == null)
             return null;
-        String name = getFieldName(field);
-        return new JiraIssueFieldDto(name, jsonObjectAdapter.object);
+        return (T) jsonObjectAdapter.object;
     }
 
-    private String getFieldName(String field) {
-        if (names == null)
-            return "NAME NOT RESOLVED";
-        
-        return (String) ObjectUtils.defaultIfNull(names.get(field), "NAME NOT RESOLVED");
-    }
-    
     @JsonIgnoreProperties(ignoreUnknown = true)
     private static class JiraIssueDtoFields {
         public JiraTimeTrackingDto timetracking;
@@ -251,9 +240,5 @@ public class JiraIssueDto {
             }
             return new JSONObjectAdapter();
         }
-    }
-
-    public void setFieldNames(Map<String, String> names) {
-        this.names = names;
     }
 }

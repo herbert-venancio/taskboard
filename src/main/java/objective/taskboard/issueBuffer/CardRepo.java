@@ -47,16 +47,9 @@ public class CardRepo  {
             return true;
         }
         
-        if ((current.getPriorityOrder().equals(newValue.getPriorityOrder()) ||
-            current.getPriorityUpdatedDate().compareTo(newValue.getPriorityUpdatedDate()) >= 0) &&
-            current.getRemoteIssueUpdatedDate().compareTo(newValue.getRemoteIssueUpdatedDate()) >= 0)
+        if (current.getRemoteIssueUpdatedDate().compareTo(newValue.getRemoteIssueUpdatedDate()) >= 0)
             return false;
-        
-        if (current.getPriorityUpdatedDate().after(newValue.getPriorityUpdatedDate())) {
-            newValue.setPriorityOrder(current.getPriorityOrder());
-            newValue.setPriorityUpdatedDate(current.getPriorityUpdatedDate());
-        }
-        
+
         put(newValue.getIssueKey(), newValue);
         return true;
     }

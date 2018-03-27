@@ -24,6 +24,7 @@ import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -57,7 +58,6 @@ import objective.taskboard.jira.JiraProperties.IssueType.IssueTypeDetails;
 import objective.taskboard.jira.client.JiraCommentDto;
 import objective.taskboard.jira.client.JiraComponentDto;
 import objective.taskboard.jira.client.JiraIssueDto;
-import objective.taskboard.jira.client.JiraIssueFieldDto;
 import objective.taskboard.jira.client.JiraIssueLinkTypeDto;
 import objective.taskboard.jira.client.JiraIssueTypeDto;
 import objective.taskboard.jira.client.JiraLinkDto;
@@ -121,8 +121,6 @@ public class IssueFieldsExtractorTest {
     @Mock
     private JiraIssueTypeDto issueType;
     @Mock
-    private JiraIssueFieldDto issueField;
-    @Mock
     private JiraLinkDto issueLink;
     @Mock
     private JiraIssueLinkTypeDto issueLinkType;
@@ -136,8 +134,7 @@ public class IssueFieldsExtractorTest {
     private JiraProjectDto basicProject;
 
     private void mockIssueField(String fieldId, Object fieldValue) {
-        when(issueField.getValue()).thenReturn(fieldValue);
-        when(issue.getField(fieldId)).thenReturn(issueField);
+        when(issue.getField(fieldId)).thenReturn(fieldValue);
     }
 
     @Before
@@ -184,9 +181,7 @@ public class IssueFieldsExtractorTest {
         mockIssueField(PARENT_ID, jsonRealParent);
 
         assertNotNull("Real parent shouldn't be null", IssueFieldsExtractor.extractRealParent(issue));
-        assertEquals("Real parent key", ISSUE_KEY, IssueFieldsExtractor.extractRealParent(issue).getKey());
-        assertEquals("Real parent issue type id", 2, IssueFieldsExtractor.extractRealParent(issue).getTypeId());
-        assertEquals("Real parent issue type icon url", "url", IssueFieldsExtractor.extractRealParent(issue).getTypeIconUrl());
+        assertEquals("Real parent key", ISSUE_KEY, IssueFieldsExtractor.extractRealParent(issue));
         assertEquals("Parent key", ISSUE_KEY, IssueFieldsExtractor.extractParentKey(jiraProperties, issue, null));
     }
 
@@ -328,21 +323,21 @@ public class IssueFieldsExtractorTest {
         JSONArray jsonBlocked = new JSONArray("[{value:'Yes'}]");
         mockIssueField(BLOCKED_ID, jsonBlocked);
 
-        assertEquals(MSG_ASSERT_BLOCKED, "Yes", IssueFieldsExtractor.extractBlocked(jiraProperties, issue));
+        assertTrue(MSG_ASSERT_BLOCKED, IssueFieldsExtractor.extractBlocked(jiraProperties, issue));
     }
 
     @Test
     public void extractBlockedFieldValueNull() {
         mockIssueField(BLOCKED_ID, null);
 
-        assertEquals(MSG_ASSERT_BLOCKED, "", IssueFieldsExtractor.extractBlocked(jiraProperties, issue));
+        assertFalse(MSG_ASSERT_BLOCKED, IssueFieldsExtractor.extractBlocked(jiraProperties, issue));
     }
 
     @Test
     public void extractBlockedFieldNull() {
         when(issue.getField(BLOCKED_ID)).thenReturn(null);
 
-        assertEquals(MSG_ASSERT_BLOCKED, "", IssueFieldsExtractor.extractBlocked(jiraProperties, issue));
+        assertFalse(MSG_ASSERT_BLOCKED, IssueFieldsExtractor.extractBlocked(jiraProperties, issue));
     }
 
     @Test
@@ -350,7 +345,7 @@ public class IssueFieldsExtractorTest {
         JSONArray jsonBlocked = new JSONArray("[]");
         mockIssueField(BLOCKED_ID, jsonBlocked);
 
-        assertEquals(MSG_ASSERT_BLOCKED, "", IssueFieldsExtractor.extractBlocked(jiraProperties, issue));
+        assertFalse(MSG_ASSERT_BLOCKED, IssueFieldsExtractor.extractBlocked(jiraProperties, issue));
     }
 
     @Test
@@ -358,7 +353,7 @@ public class IssueFieldsExtractorTest {
         JSONArray jsonBlocked = new JSONArray("[{valuee:'Yes'}]");
         mockIssueField(BLOCKED_ID, jsonBlocked);
 
-        assertEquals(MSG_ASSERT_BLOCKED, "", IssueFieldsExtractor.extractBlocked(jiraProperties, issue));
+        assertFalse(MSG_ASSERT_BLOCKED, IssueFieldsExtractor.extractBlocked(jiraProperties, issue));
     }
 
     @Test
@@ -481,19 +476,16 @@ public class IssueFieldsExtractorTest {
     public void extractAdditionalEstimatedHoursValid() {
         mockIssueField(ADDITIONAL_ESTIMATED_HOURS_ID, 1.1);
 
-        Map<String, objective.taskboard.data.CustomField> additionalEstimatedHours = IssueFieldsExtractor.extractAdditionalEstimatedHours(jiraProperties, issue);
-        assertTrue("Additional estimated hours should have been extracted", additionalEstimatedHours.containsKey(ADDITIONAL_ESTIMATED_HOURS_ID));
-
-        objective.taskboard.data.CustomField cfAdditionalEstimatedHours = additionalEstimatedHours.get(ADDITIONAL_ESTIMATED_HOURS_ID);
-        assertNotNull("Additional estimated hours shouldn't be null", cfAdditionalEstimatedHours);
-        assertEquals("Additional estimated hours", 1.1, cfAdditionalEstimatedHours.getValue());
+        objective.taskboard.data.CustomField additionalEstimatedHours = IssueFieldsExtractor.extractAdditionalEstimatedHours(jiraProperties, issue);
+        assertNotNull("Additional estimated hours shouldn't be null", additionalEstimatedHours);
+        assertEquals("Additional estimated hours", 1.1, additionalEstimatedHours.getValue());
     }
 
     @Test
     public void extractAdditionalEstimatedHoursFieldValueNull() {
         mockIssueField(ADDITIONAL_ESTIMATED_HOURS_ID, null);
 
-        assertTrue("Additional estimated hours should be empty", IssueFieldsExtractor.extractAdditionalEstimatedHours(jiraProperties, issue).isEmpty());
+        assertNull("Additional estimated hours should be null", IssueFieldsExtractor.extractAdditionalEstimatedHours(jiraProperties, issue));
     }
 
     @Test

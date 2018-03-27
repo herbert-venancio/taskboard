@@ -1,9 +1,8 @@
 package objective.taskboard.jira;
 
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
+import java.util.Optional;
 
-import objective.taskboard.jira.data.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,17 +10,19 @@ import com.atlassian.jira.rest.client.api.domain.IssueType;
 import com.atlassian.jira.rest.client.api.domain.IssuelinksType;
 import com.atlassian.jira.rest.client.api.domain.Priority;
 
+import objective.taskboard.jira.data.Status;
+
 @Service
 public class MetadataService {
 
     @Autowired
     private MetadataCachedService cache;
 
-    public Map<Long, IssueType> getIssueTypeMetadata() throws InterruptedException, ExecutionException {
+    public Map<Long, IssueType> getIssueTypeMetadata() {
         return cache.getIssueTypeMetadata();
     }
 
-    public Map<Long, Priority> getPrioritiesMetadata() throws InterruptedException, ExecutionException {
+    public Map<Long, Priority> getPrioritiesMetadata() {
         return cache.getPrioritiesMetadata();
     }
 
@@ -34,14 +35,8 @@ public class MetadataService {
     }
 
     public IssueType getIssueTypeById(Long id) {
-        try {
-            IssueType issueType = getIssueTypeMetadata().get(id);
-            if (issueType == null)
-                throw new IllegalArgumentException("There's no Issue Type with given ID: " + id);
-            return issueType;
-        } catch (InterruptedException | ExecutionException e) {
-            throw new IllegalStateException(e);
-        }
+        return Optional.ofNullable(getIssueTypeMetadata().get(id))
+                .orElseThrow(() -> new IllegalArgumentException("There's no Issue Type with given ID: " + id));
     }
 
     public Status getStatusById(Long id) {

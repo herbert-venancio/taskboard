@@ -26,14 +26,12 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
 import javax.persistence.Id;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
-@EntityListeners(IssuePersistenceListener.class)
 public class TaskboardIssue implements Serializable {
     private static final long serialVersionUID = -1772950366555561419L;
     

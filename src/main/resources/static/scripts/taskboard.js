@@ -316,6 +316,10 @@ function Taskboard() {
         return this.statuses;
     };
 
+    this.getFieldName = function(fieldId) {
+        return FIELDNAMES[fieldId] || fieldId;
+    };
+
     this.getStatus = function(statusId) {
         var statusIdNumber = parseInt(statusId);
         return Object.values(this.getStatuses()).find( s => s.id === statusIdNumber );

@@ -24,6 +24,8 @@ package objective.taskboard.controller;
 import static objective.taskboard.domain.converter.JiraIssueToIssueConverter.INVALID_TEAM;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,8 +38,10 @@ import objective.taskboard.cycletime.CycleTimeProperties;
 import objective.taskboard.cycletime.HolidayService;
 import objective.taskboard.data.User;
 import objective.taskboard.google.GoogleApiConfig;
+import objective.taskboard.jira.FieldMetadataService;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraService;
+import objective.taskboard.jira.client.JiraFieldDataDto;
 
 @Controller
 public class HomeController {
@@ -60,6 +64,9 @@ public class HomeController {
     @Autowired
     private Authorizer authorizer;
 
+    @Autowired
+    private FieldMetadataService fieldMetadataService;
+
     @RequestMapping("/")
     public String home(Model model) {
         User user = jiraService.getLoggedUser();
@@ -75,6 +82,7 @@ public class HomeController {
         model.addAttribute("invalidTeam", INVALID_TEAM);
         model.addAttribute("googleClientId", googleApiConfig.getClientId());
         model.addAttribute("permissions", serialize(authorizer.getProjectsPermission()));
+        model.addAttribute("fieldNames", getFieldNames());
         return "index";
     }
 
@@ -86,4 +94,9 @@ public class HomeController {
         }
     }
 
+    private Map<String, String> getFieldNames() {
+        return fieldMetadataService.getFieldsMetadataAsUser()
+                .stream()
+                .collect(Collectors.toMap(JiraFieldDataDto::getId, JiraFieldDataDto::getName));
+    }
 }

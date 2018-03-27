@@ -28,13 +28,9 @@ import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.ObjectUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -43,6 +39,7 @@ import com.fasterxml.jackson.databind.deser.std.DateDeserializers.DateDeserializ
 
 import objective.taskboard.config.SpringContextBridge;
 import objective.taskboard.cycletime.CycleTime;
+import objective.taskboard.database.IssuePriorityService;
 import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.domain.IssueStateHashCalculator;
 import objective.taskboard.domain.converter.CardVisibilityEvalService;
@@ -81,9 +78,9 @@ public class Issue extends IssueScratch implements Serializable {
 
     private transient CycleTime cycleTime;
 
-    private List<IssueCoAssignee> coAssignees = new LinkedList<>(); //NOSONAR
+    private transient IssuePriorityService issuePriorityService;
 
-    public Issue(IssueScratch scratch, 
+    public Issue(IssueScratch scratch,
             JiraProperties properties, 
             MetadataService metadataService, 
             IssueTeamService issueTeamService, 
@@ -92,21 +89,18 @@ public class Issue extends IssueScratch implements Serializable {
             CardVisibilityEvalService cardVisibilityEvalService,
             ProjectService projectService,
             IssueStateHashCalculator issueStateHashCalculator,
-            IssueColorService issueColorService) {
+            IssueColorService issueColorService,
+            IssuePriorityService issuePriorityService) {
         this.id = scratch.id;
         this.issueKey = scratch.issueKey;
         this.projectKey = scratch.projectKey;
         this.project = scratch.project;
         this.type = scratch.type;
-        this.typeIconUri = scratch.typeIconUri;
         this.summary = scratch.summary;
         this.status = scratch.status;
         this.startDateStepMillis = scratch.startDateStepMillis;
         this.parent = scratch.parent;
-        this.parentType = scratch.parentType;
-        this.parentTypeIconUri = scratch.parentTypeIconUri;
         this.dependencies = scratch.dependencies;
-        this.subResponsaveis = scratch.subResponsaveis;
         this.assignee = scratch.assignee;
         this.priority = scratch.priority;
         this.dueDate = scratch.dueDate;
@@ -115,15 +109,16 @@ public class Issue extends IssueScratch implements Serializable {
         this.comments = scratch.comments;
         this.labels = scratch.labels;
         this.components = scratch.components;
-        this.customFields = scratch.customFields;
-        this.priorityOrder = scratch.priorityOrder;
+        this.blocked = scratch.blocked;
+        this.lastBlockReason = scratch.lastBlockReason;
+        this.tshirtSizes = scratch.tshirtSizes;
+        this.additionalEstimatedHours = scratch.additionalEstimatedHours;
         this.timeTracking = scratch.timeTracking;
         this.reporter = scratch.reporter;
         this.coAssignees = scratch.coAssignees;
         this.classOfService = scratch.classOfService;
         this.releaseId = scratch.releaseId;
         this.changelog = scratch.changelog;
-        this.priorityUpdatedDate = scratch.priorityUpdatedDate;
         this.remoteIssueUpdatedDate = scratch.remoteIssueUpdatedDate;
 
         this.metaDataService = metadataService;
@@ -135,16 +130,10 @@ public class Issue extends IssueScratch implements Serializable {
         this.projectService = projectService;
         this.issueStateHashCalculator = issueStateHashCalculator;
         this.issueColorService = issueColorService;
-        this.render = false;
-        this.favorite = false;
-        this.hidden = false;
+        this.issuePriorityService = issuePriorityService;
         this.worklogs = scratch.worklogs;
     }
     
-    @JsonIgnore
-    public Map<String, Serializable> getCustomFields() {
-        return customFields;
-    }
     public Issue() {
         jiraProperties = SpringContextBridge.getBean(JiraProperties.class);
         metaDataService = SpringContextBridge.getBean(MetadataService.class);
@@ -164,33 +153,16 @@ public class Issue extends IssueScratch implements Serializable {
     @JsonIgnore
     public String getTShirtSize() {
         String mainTShirtSizeFieldId = jiraProperties.getCustomfield().getTShirtSize().getMainTShirtSizeFieldId();
-        if (customFields.get(mainTShirtSizeFieldId) == null)
-            return null;
-
-        CustomField customField = (CustomField)customFields.get(mainTShirtSizeFieldId);
-        if (customField == null || customField.getValue() == null)
-            return null;
-        return customField.getValue().toString();
-    }
-
-    @JsonIgnore
-    public void setTShirtSize(String value) {
-        String mainTShirtSizeFieldId = jiraProperties.getCustomfield().getTShirtSize().getMainTShirtSizeFieldId();
-        if (customFields.get(mainTShirtSizeFieldId) == null)
-            return;
-        CustomField customField = (CustomField)customFields.get(mainTShirtSizeFieldId);
-        if (customField == null) {
-            customField = new CustomField(mainTShirtSizeFieldId, value);
-            customFields.put(mainTShirtSizeFieldId, customField);
-        }
-        customField.setValue(value);
+        return Optional.ofNullable(tshirtSizes.get(mainTShirtSizeFieldId))
+                .flatMap(customField -> Optional.ofNullable((String) customField.getValue()))
+                .orElse(null);
     }
 
     @JsonIgnore
     public String getTshirtSizeOfSubtaskForBallpark(BallparkMapping mapping) {
-        CustomField customField = (CustomField)customFields.get(mapping.getTshirtCustomFieldId());
-        if (customField == null || customField.getValue() == null) return null;
-        return customField.getValue().toString();
+        return Optional.ofNullable(tshirtSizes.get(mapping.getTshirtCustomFieldId()))
+                .flatMap(customField -> Optional.ofNullable((String) customField.getValue()))
+                .orElse(null);
     }
 
     @JsonIgnore
@@ -267,7 +239,7 @@ public class Issue extends IssueScratch implements Serializable {
         Optional<Issue> pc = getParentCard();
         if (pc.isPresent())
             return pc.get().getClassOfServiceCustomField();
-            
+
         return classOfService;
     }
 
@@ -327,8 +299,7 @@ public class Issue extends IssueScratch implements Serializable {
     }
     
     public CustomField getAdditionalEstimatedHoursField() {
-        String additionalEstimatedHoursFieldId = jiraProperties.getCustomfield().getAdditionalEstimatedHours().getId();
-        return (CustomField) customFields.get(additionalEstimatedHoursFieldId);
+        return additionalEstimatedHours;
     }
 
     public Double getAdditionalEstimatedHours() {
@@ -347,25 +318,20 @@ public class Issue extends IssueScratch implements Serializable {
     }    
 
     public boolean isBlocked() {
-        String blockedFieldId = jiraProperties.getCustomfield().getBlocked().getId();
-        String blockedValue = (String) customFields.get(blockedFieldId);
-        return StringUtils.isNotEmpty(blockedValue);
+        return blocked;
     }
 
     public String getLastBlockReason() {
-        String lastBlockReasonFieldId = jiraProperties.getCustomfield().getLastBlockReason().getId();
-        return (String) customFields.get(lastBlockReasonFieldId);
+        return lastBlockReason;
     }
     
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     public List<CustomField> getSubtasksTshirtSizes() {
-        if (customFields == null)
-            return new LinkedList<>();
-        
-        return jiraProperties.getCustomfield().getTShirtSize().getIds().stream()
-            .filter(id -> !ObjectUtils.isEmpty(customFields.get(id)))
-            .map(id->(CustomField)customFields.get(id))
-            .collect(Collectors.toList());
+        return jiraProperties.getCustomfield().getTShirtSize().getIds()
+                .stream()
+                .filter(tshirtSizes::containsKey)
+                .map(tshirtSizes::get)
+                .collect(Collectors.toList());
     }
     
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
@@ -397,7 +363,7 @@ public class Issue extends IssueScratch implements Serializable {
     }
 
     public String getTypeIconUri() {
-        return this.typeIconUri;
+        return metaDataService.getIssueTypeById(type).getIconUri().toASCIIString();
     }
 
     public String getSummary() {
@@ -417,31 +383,23 @@ public class Issue extends IssueScratch implements Serializable {
     }
 
     public long getParentType() {
-        return this.parentType;
+        return getParentCard()
+                .map(parent -> parent.type)
+                .orElse(0L);
     }
 
     public String getParentTypeIconUri() {
-        return this.parentTypeIconUri;
+        return getParentCard()
+                .map(Issue::getTypeIconUri)
+                .orElse("");
     }
 
     public List<String> getDependencies() {
         return this.dependencies;
     }
 
-    public boolean isRender() {
-        return this.render;
-    }
-
-    public boolean isFavorite() {
-        return this.favorite;
-    }
-
-    public boolean isHidden() {
-        return this.hidden;
-    }
-
     public String getSubResponsaveis() {
-        return this.subResponsaveis;
+        return coAssignees.stream().map(IssueCoAssignee::getName).collect(Collectors.joining(","));
     }
 
     public String getAssignee() {
@@ -464,16 +422,10 @@ public class Issue extends IssueScratch implements Serializable {
 
     @JsonDeserialize(using = DateDeserializer.class)
     public Date getUpdatedDate() {
-        if (priorityUpdatedDate == null && remoteIssueUpdatedDate == null)
-            return null;
-        
-        if (remoteIssueUpdatedDate == null)
-            return priorityUpdatedDate;
-                
-        if (priorityUpdatedDate == null)
-            return priorityUpdatedDate;
-        
-        if (priorityUpdatedDate.after(remoteIssueUpdatedDate))
+        Date priorityUpdatedDate = getPriorityUpdatedDate();
+
+        if (remoteIssueUpdatedDate == null
+                || priorityUpdatedDate.after(remoteIssueUpdatedDate))
             return priorityUpdatedDate;
         
         return remoteIssueUpdatedDate;
@@ -509,8 +461,8 @@ public class Issue extends IssueScratch implements Serializable {
         return this.components;
     }
 
-    public Long getPriorityOrder() {
-        return this.priorityOrder;
+    public long getPriorityOrder() {
+        return issuePriorityService.determinePriority(this);
     }
 
     public TaskboardTimeTracking getTimeTracking() {
@@ -537,10 +489,6 @@ public class Issue extends IssueScratch implements Serializable {
         this.type = type;
     }
 
-    public void setTypeIconUri(final String typeIconUri) {
-        this.typeIconUri = typeIconUri;
-    }
-
     public void setSummary(final String summary) {
         this.summary = summary;
     }
@@ -557,32 +505,8 @@ public class Issue extends IssueScratch implements Serializable {
         this.parent = parent;
     }
 
-    public void setParentType(final long parentType) {
-        this.parentType = parentType;
-    }
-
-    public void setParentTypeIconUri(final String parentTypeIconUri) {
-        this.parentTypeIconUri = parentTypeIconUri;
-    }
-
     public void setDependencies(final List<String> dependencies) {
         this.dependencies = dependencies;
-    }
-
-    public void setRender(final boolean render) {
-        this.render = render;
-    }
-
-    public void setFavorite(final boolean favorite) {
-        this.favorite = favorite;
-    }
-
-    public void setHidden(final boolean hidden) {
-        this.hidden = hidden;
-    }
-
-    public void setSubResponsaveis(final String subResponsaveis) {
-        this.subResponsaveis = subResponsaveis;
     }
 
     public void setAssignee(final String assignee) {
@@ -597,10 +521,6 @@ public class Issue extends IssueScratch implements Serializable {
         this.dueDate = dueDate;
     }
 
-    public void setPriorityUpdatedDate(final Date updatedDate) {
-        this.priorityUpdatedDate = updatedDate;
-    }
-    
     public void setRemoteIssueUpdatedDate(final Date remoteIssueUpdatedDate) {
         this.remoteIssueUpdatedDate = remoteIssueUpdatedDate;
     }
@@ -612,7 +532,7 @@ public class Issue extends IssueScratch implements Serializable {
     
     @JsonDeserialize(using = DateDeserializer.class)
     public Date getPriorityUpdatedDate() {
-        return priorityUpdatedDate;
+        return issuePriorityService.priorityUpdateDate(this);
     }
     
     public void setCreated(final long created) {
@@ -635,10 +555,6 @@ public class Issue extends IssueScratch implements Serializable {
         this.components = components;
     }
 
-    public void setPriorityOrder(final Long priorityOrder) {
-        this.priorityOrder = priorityOrder;
-    }
-
     public void setReleaseId(final String releaseId) {
         this.releaseId = releaseId;
     }
@@ -646,7 +562,7 @@ public class Issue extends IssueScratch implements Serializable {
     public void setTimeTracking(final TaskboardTimeTracking timeTracking) {
         this.timeTracking = timeTracking;
     }
-    
+
     public String getReporter() {
         return reporter;
     }
@@ -669,10 +585,6 @@ public class Issue extends IssueScratch implements Serializable {
         return classOfService;
     }
 
-    public void setCustomFields(final Map<String, Serializable> customFields) {
-        this.customFields = customFields;
-    }
-    
     public boolean isVisible() {
         if (isDeferred())
             return false;
@@ -732,7 +644,8 @@ public class Issue extends IssueScratch implements Serializable {
             CardVisibilityEvalService cardVisibilityEvalService,
             ProjectService projectService,
             IssueStateHashCalculator issueStateHashCalculator,
-            IssueColorService issueColorService) {
+            IssueColorService issueColorService,
+            IssuePriorityService issuePriorityService) {
         this.jiraProperties = jiraProperties;
         this.metaDataService = metaDataService;
         this.issueTeamService = issueTeamService;
@@ -742,6 +655,7 @@ public class Issue extends IssueScratch implements Serializable {
         this.projectService = projectService;
         this.issueStateHashCalculator = issueStateHashCalculator;
         this.issueColorService = issueColorService;
+        this.issuePriorityService = issuePriorityService;
     }
     
     @Override

@@ -29,9 +29,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.atlassian.jira.rest.client.api.domain.Field;
-
 import objective.taskboard.jira.FieldMetadataService;
+import objective.taskboard.jira.client.JiraFieldDataDto;
 
 @RestController
 public class FieldMetadataController {
@@ -40,9 +39,9 @@ public class FieldMetadataController {
     private FieldMetadataService fieldMetadataService;
 
     @RequestMapping(path = "/ws/field/{id}", method = RequestMethod.GET)
-    public Field getFieldMetadata(@PathVariable String id) {
-        List<Field> fields = fieldMetadataService.getFieldsMetadata();
-        for (Field field : fields)
+    public JiraFieldDataDto getFieldMetadata(@PathVariable String id) {
+        List<JiraFieldDataDto> fields = fieldMetadataService.getFieldsMetadata();
+        for (JiraFieldDataDto field : fields)
             if (field.getId().equals(id))
                 return field;
         return null;

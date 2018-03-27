@@ -23,7 +23,6 @@ package objective.taskboard.controller;
 import static java.util.stream.Collectors.toList;
 import static objective.taskboard.domain.converter.JiraIssueToIssueConverter.INVALID_TEAM;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -157,7 +156,7 @@ public class IssueController
     }
 
     @RequestMapping("configuration")
-    public Map<String, Object> configuration() throws SQLException, InterruptedException, ExecutionException {
+    public Map<String, Object> configuration() {
         Map<String, Object> map = new HashMap<>();
         map.put("laneConfiguration", taskService.laneConfiguration());
         map.put("issueTypes", metadataService.getIssueTypeMetadata());

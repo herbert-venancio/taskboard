@@ -15,7 +15,6 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import objective.taskboard.data.Issue;
 import objective.taskboard.data.IssueScratch;
 import objective.taskboard.domain.converter.IncompleteIssueException;
 import objective.taskboard.domain.converter.JiraIssueToIssueConverter;
@@ -87,18 +86,12 @@ public class IssueBufferServiceSearchVisitor implements SearchIssueVisitor {
     }
     
     private void validateNotPending() {
-        List<String> missingParents = new LinkedList<String>();
+        List<String> missingParents = new LinkedList<>();
         for (Entry<String, List<IssueScratch>> each : pending.entrySet()) 
             if (each.getValue().size() > 0) 
                 missingParents.add(each.getKey());
         
         if (missingParents.size() > 0)
             throw new IllegalStateException("Some parents were never found: " + StringUtils.join(missingParents,","));
-        
-        for (Issue each : issueBufferService.getAllIssues()) {
-            if (each.getCustomFields() == null) {
-                throw new IllegalStateException("issue " + each.getIssueKey() + " has invalid null fields");
-            }
-        }
-    }    
+    }
 }

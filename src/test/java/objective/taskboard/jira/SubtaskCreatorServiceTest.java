@@ -55,7 +55,6 @@ import com.atlassian.jira.rest.client.api.domain.input.IssueInput;
 
 import objective.taskboard.jira.JiraProperties.SubtaskCreation.CustomFieldCondition;
 import objective.taskboard.jira.client.JiraIssueDto;
-import objective.taskboard.jira.client.JiraIssueFieldDto;
 import objective.taskboard.jira.client.JiraIssueTypeDto;
 import objective.taskboard.jira.client.JiraPriorityDto;
 import objective.taskboard.jira.client.JiraProjectDto;
@@ -143,7 +142,7 @@ public class SubtaskCreatorServiceTest {
         properties.setCustomFieldCondition(makeCustomFieldCondition(CUSTOM_FIELD_CONDITION_ID, CUSTOM_FIELD_CONDITION_VALUE));
 
         JSONArray issueFieldValue = null;
-        when(parent.getField(CUSTOM_FIELD_CONDITION_ID)).thenReturn(new JiraIssueFieldDto(issueFieldValue));
+        when(parent.getField(CUSTOM_FIELD_CONDITION_ID)).thenReturn(issueFieldValue);
 
         service.create(parent, properties);
         verifyZeroInteractions(jiraService);
@@ -154,7 +153,7 @@ public class SubtaskCreatorServiceTest {
         properties.setCustomFieldCondition(makeCustomFieldCondition(CUSTOM_FIELD_CONDITION_ID, CUSTOM_FIELD_CONDITION_VALUE));
 
         JSONArray issueFieldValue = new JSONArray("[{value:Yes}]");
-        when(parent.getField(CUSTOM_FIELD_CONDITION_ID)).thenReturn(new JiraIssueFieldDto(issueFieldValue));
+        when(parent.getField(CUSTOM_FIELD_CONDITION_ID)).thenReturn(issueFieldValue);
 
         service.create(parent, properties);
         verify(jiraService, only()).createIssueAsMaster(any());
@@ -311,8 +310,8 @@ public class SubtaskCreatorServiceTest {
         when(parent.getProject()).thenReturn(parentProject);
         when(parent.getPriority()).thenReturn(parentPriority);
         when(parent.getReporter()).thenReturn(parentReporter);
-        when(parent.getField(TSHIRT_PARENT_ID)).thenReturn(new JiraIssueFieldDto(new JSONObject("{value=L}")));
-        when(parent.getField(CLASSOFSERVICE_ID)).thenReturn(new JiraIssueFieldDto(new JSONObject("{id=685321}")));
+        when(parent.getField(TSHIRT_PARENT_ID)).thenReturn(new JSONObject("{value=L}"));
+        when(parent.getField(CLASSOFSERVICE_ID)).thenReturn(new JSONObject("{id=685321}"));
         
         when(parentReporter.getSelf()).thenReturn("http://foo/my.user");
         when(parentReporter.getName()).thenReturn("my.user");
