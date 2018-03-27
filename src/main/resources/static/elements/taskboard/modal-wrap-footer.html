@@ -1,0 +1,35 @@
+<dom-module id="modal-wrap-footer">
+
+    <template>
+
+        <style>
+            .modal__footer {
+                display: flex;
+                justify-content: flex-end;
+
+                border-top: 1px solid #E5E5E5;
+                padding: 24px;
+                transition: opacity .3s ease;
+            }
+            .modal__footer ::content tb-button {
+                margin-left: 16px;
+            }
+        </style>
+
+        <div class="modal__footer">
+            <content></content>
+        </div>
+
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'modal-wrap-footer',
+
+                properties: {
+                }
+            });
+        })();
+    </script>
+</dom-module>
