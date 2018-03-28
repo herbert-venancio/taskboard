@@ -1,10 +1,12 @@
 function DcUtils() {
 
+    this._DATE_YEAR_SPLIT_WORD = '|';
+
     this.percentFormat = d3.format('.2f');
 
-    this.dateFormat = d3.time.format('%Y-%m-%d');
+    this.dateFormatWithoutYear = d3.time.format('%b %e');
 
-    this.monthAndYearFormat = d3.time.format('%b %y');
+    this.dateFormatWithYear = d3.time.format('%b %e' + this._DATE_YEAR_SPLIT_WORD + '%Y');
 
     this.getDefaultLegend = function () {
         return dc.legend().gap(8);
@@ -20,20 +22,6 @@ function DcUtils() {
             );
 
         this.orderChartByKey(chart);
-    };
-
-    this.rotateDateFormattedXAxis = function(chart) {
-        chart.on('pretransition', function(chart) {
-            chart.selectAll('g.x text')
-                .attr('transform', 'translate(-10,20) rotate(315)');
-        });
-    };
-
-    this.rotateMonthAndYearFormattedXAxis = function(chart) {
-        chart.on('pretransition', function (chart) {
-            chart.selectAll('g.x text')
-                .attr('transform', 'translate(-10,10) rotate(315)');
-        });
     };
 
     this.orderChartByKey = function(chart) {
@@ -101,33 +89,58 @@ function DcUtils() {
         REWORK_DONE: '#E64E29',
     };
 
+    this.rangesEqual = function(range1, range2) {
+        if (!range1 && !range2) {
+            return true;
+        }
+        else if (!range1 || !range2) {
+            return false;
+        }
+        else if (range1.length === 0 && range2.length === 0) {
+            return true;
+        }
+        else if (range1[0].valueOf() === range2[0].valueOf() &&
+            range1[1].valueOf() === range2[1].valueOf()) {
+            return true;
+        }
+        return false;
+    };
+
+    this.setupChartDateTicks = function(chart, startDate, endDate, tickCount) {
+        var self = this;
+        var lastYearShown;
+
+        chart.xAxis()
+            .tickValues(
+                self.getDateTicks(startDate, endDate, tickCount)
+            )
+            .tickFormat(function (tickDate, tickIndex) {
+                if (tickIndex === 0 || lastYearShown !== tickDate.getFullYear()) {
+                    lastYearShown = tickDate.getFullYear();
+                    return self.dateFormatWithYear(tickDate);
+                }
+                return self.dateFormatWithoutYear(tickDate);
+            });
+
+        self._breakLineOnTicksThatContainsYears(chart);
+
+        chart.visibleTickCount = tickCount;
+    };
+
+    this._breakLineOnTicksThatContainsYears = function(chart) {
+        var self = this;
+        chart.on('pretransition', function(chart) {
+            chart.selectAll('g.x text').each(function(d, i) {
+                if (this.innerHTML.indexOf(self._DATE_YEAR_SPLIT_WORD) === -1)
+                    return;
+
+                var dateArray = this.innerHTML.split(self._DATE_YEAR_SPLIT_WORD);
+                var dayMonth = dateArray[0];
+                var year = dateArray[1];
+                this.innerHTML = dayMonth + '<tspan class="tick-year" x="0" dy="1.2em">' + year + '</tspan>';
+            });
+        });
+    };
+
 }
 var dcUtils = new DcUtils();
-
-function rangesEqual(range1, range2) {
-    if (!range1 && !range2) {
-        return true;
-    }
-    else if (!range1 || !range2) {
-        return false;
-    }
-    else if (range1.length === 0 && range2.length === 0) {
-        return true;
-    }
-    else if (range1[0].valueOf() === range2[0].valueOf() &&
-        range1[1].valueOf() === range2[1].valueOf()) {
-        return true;
-    }
-    return false;
-}
-
-function setupChartDateTicks(chart, startDate, endDate, tickCount) {
-    chart.xAxis()
-        .tickValues(
-            dcUtils.getDateTicks(startDate, endDate, tickCount)
-        )
-        .tickFormat(function (v) {
-            return dcUtils.dateFormat(v);
-        });
-    chart.visibleTickCount = tickCount;
-}

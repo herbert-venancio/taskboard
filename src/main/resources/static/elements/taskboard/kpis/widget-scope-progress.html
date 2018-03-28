@@ -248,9 +248,9 @@
 
                     var chart = dc.barChart("#scope-progress");
 
-                    // chart configuration
                     chart
-                        .margins({top: 20, right: 30, bottom: 60, left: 50})
+                        // chart configuration
+                        .margins({top: 5, right: 30, bottom: 40, left: 50})
                         .legend(dcUtils
                                 .getDefaultLegend()
                                 .x(95).y(20)
@@ -261,24 +261,20 @@
                         )
                         .colors(
                             self._getChartColors()
-                        );
+                        )
 
-                    dcUtils.rotateDateFormattedXAxis(chart);
-
-                    // axis
-                    chart
+                        // axis
                         .yAxisLabel("Effort (hours)")
                         .elasticY(false)
                         .yAxisPadding('15%')
-                        
-                    setupChartDateTicks(chart, startDate, endDate, 14);
 
-                    // mouse interaction
-                    chart
+                        // mouse interaction
                         .brushOn(false)       // don't select with drag-n-drop
                         .title(function(d) {  // popup text on mouse over data points
                             return this.layer + ": " + dcUtils.percentFormat(d.value[INDICES[this.layer]]) + " h (" + d.key.toLocaleDateString() + ")";
                         });
+
+                    dcUtils.setupChartDateTicks(chart, startDate, endDate, 12);
 
                     this._setChart(chart);
                     this.chartDeferred.resolve(chart);

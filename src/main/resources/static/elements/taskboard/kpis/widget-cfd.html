@@ -307,7 +307,7 @@
 
                     // basic chart configuration
                     chart
-                        .margins({top: 20, right: 30, bottom: 60, left: 200})
+                        .margins({top: 5, right: 30, bottom: 40, left: 200})
                         .legend(
                             dcUtils.getDefaultLegend()
                         )
@@ -319,13 +319,11 @@
                         .mouseZoomable(false)  // zoom with mouse wheel
                         .elasticY(true)       // y axis will adjust to the data
 
-                    setupChartDateTicks(chart, startDate, endDate, 14);
-
-                    dcUtils.rotateDateFormattedXAxis(chart);
+                    dcUtils.setupChartDateTicks(chart, startDate, endDate, 14);
 
                     chart.addChartWidget = function(c){
                         self.widgetList.push(c)
-                    }
+                    };
 
                     var brushOnDelegate = chart.brushOn;
                     chart.brushOn = function(state) {
@@ -335,7 +333,7 @@
                         }
 
                         return brushOnDelegate();
-                    }
+                    };
 
                     chart.on('filtered', this.setupSelector.bind(this));
                     
@@ -386,7 +384,7 @@
                 applySelection: function(rangeChart) {
                     this.widgetList.forEach(function(w) {
                         var focusChart = w.chart;
-                        if (!rangesEqual(rangeChart.filter(), focusChart.filter())) {
+                        if (!dcUtils.rangesEqual(rangeChart.filter(), focusChart.filter())) {
                             dc.events.trigger(function () {
                                 focusChart.focus(rangeChart.filter());
 

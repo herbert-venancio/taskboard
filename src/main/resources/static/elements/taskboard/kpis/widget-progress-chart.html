@@ -206,15 +206,12 @@
                                 .itemWidth(90)
                                 .horizontal(1)
                                 .legendWidth(180))
+                        .margins({top: 5, right: 30, bottom: 40, left: 50})
                         .colors(
                             self._getChartColors()
                         );
-                    
-                    setupChartDateTicks(chart, startDate, endDate, 14);
-                    
-                    chart.margins({top: 20, right: 30, bottom: 60, left: 50});
 
-                    dcUtils.rotateDateFormattedXAxis(chart);
+                    dcUtils.setupChartDateTicks(chart, startDate, endDate, 12);
 
                     return chart;
                 },
