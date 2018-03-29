@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -134,7 +133,7 @@ public abstract class AbstractFollowUpDataProviderTest {
     private static final String ADDITIONAL_ESTIMATED_HOURS_ID = "3";
 
     protected static final StatusCategory CATEGORY_UNDEFINED = new StatusCategory(
-            Long.valueOf(1L)
+            1L
             , "undefined"
             , "medium-gray"
             , "No Category");

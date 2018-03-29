@@ -213,7 +213,6 @@ public class FollowUpTransitionsDataProvider {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static Range<ZonedDateTime> calculateInterval(AnalyticsTransitionsDataSet dataset) {
         ZonedDateTime firstDate = null;
         ZonedDateTime lastDate = null;
@@ -231,7 +230,7 @@ public class FollowUpTransitionsDataProvider {
         if (firstDate == null || lastDate == null)
             throw new IllegalArgumentException("Invalid dates.");
 
-        return (Range) Range.between(DateTimeUtils.roundDown(firstDate), DateTimeUtils.roundUp(lastDate));
+        return DateTimeUtils.range(DateTimeUtils.roundDown(firstDate), DateTimeUtils.roundUp(lastDate));
     }
 
     private static Optional<Integer> getTransitionIndexByDate(AnalyticsTransitionsDataRow row, ZonedDateTime date) {
