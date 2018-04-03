@@ -63,7 +63,7 @@ public class TemplateFollowupDialog extends AbstractUiFragment {
 
         newTemplateItem = dialog.findElement(By.id("newTemplateItem"));
         createButton = dialog.findElement(By.id("createTemplate"));
-        templateNameInput = dialog.findElement(By.id("templateNameInputl"));
+        templateNameInput = dialog.findElement(By.cssSelector("#templateNameInputl input"));
         templateFileLabel = dialog.findElement(By.cssSelector("label[for=inputTemplate]"));
         projectsCheckbox = dialog.findElements(By.cssSelector("paper-checkbox"));
         waitVisibilityOfElements(newTemplateItem, createButton, templateNameInput, templateFileLabel);
@@ -125,7 +125,7 @@ public class TemplateFollowupDialog extends AbstractUiFragment {
         for (Integer projectIndex : projectsIndex)
             waitForClick(projectsCheckbox.get(projectIndex));
 
-        templateFileInput.sendKeys(file.toString());
+        sendKeysToFileInput(templateFileInput, file.toString());
         waitForClick(createButton);
         
         waitUntil(new ExpectedCondition<Boolean>() {
@@ -144,7 +144,7 @@ public class TemplateFollowupDialog extends AbstractUiFragment {
         });
         return this;
     }
-    
+
     private void assertErrorMessage(String message) {
         waitUntil(new ExpectedCondition<Boolean>() {
             @Override

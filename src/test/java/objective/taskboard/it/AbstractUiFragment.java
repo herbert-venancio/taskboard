@@ -38,6 +38,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
@@ -180,6 +181,27 @@ public abstract class AbstractUiFragment {
 
     protected void waitUntilPaperCheckboxSelectionStateToBe(WebElement element, Boolean selected) {
         waitUntil(attributeToBe(element, "aria-checked", String.valueOf(selected)));
+    }
+
+    /**
+     * Geckodriver implements a webdriver spec that requires inputs to be visible during interactions.
+     * On the other hand, it's common to set file inputs hidden and use a placeholder for better looking.
+     * This method turns the field temporary visible to allow the "sendKeys" command execution.<br>
+     * 
+     * https://github.com/w3c/webdriver/issues/1230
+     */
+    protected void sendKeysToFileInput(WebElement fileInput, String value) {
+        if (!(webDriver instanceof FirefoxDriver)) {
+            fileInput.sendKeys(value);
+            return;
+        }
+        
+        FirefoxDriver firefoxWebDriver = (FirefoxDriver) webDriver;
+
+        firefoxWebDriver.executeScript("arguments[0].style.display='block'", fileInput);
+        waitVisibilityOfElement(fileInput);
+        fileInput.sendKeys(value);
+        firefoxWebDriver.executeScript("arguments[0].style.display=''", fileInput);
     }
 
 }

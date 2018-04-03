@@ -102,8 +102,7 @@ public class MenuFilters extends AbstractUiFragment {
     }
 
     public void closeMenuFilters() {
-        WebElement title = webDriver.findElement(By.className("title"));
-        waitForClick(title);
+        waitForClick(webDriver.findElement(By.id("scrim")));
         waitInvisibilityOfElement(aspectsFilterButton);
     }
 }
