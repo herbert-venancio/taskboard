@@ -1,6 +1,7 @@
 package objective.taskboard.utils;
 
 import static java.util.Collections.emptyList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.closeTo;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -17,6 +18,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 
@@ -110,7 +112,7 @@ public class DateTimeUtilsTest {
         boolean EXCEL_1904_DATE_SYSTEM = true;
 
         // given
-        LocalDateTime date1 = LocalDateTime.of(2017, 9, 20, 10, 05, 48, 0);
+        LocalDateTime date1 = LocalDateTime.of(2017, 9, 20, 10, 5, 48, 0);
         LocalDateTime date2 = LocalDateTime.of(2001, 1, 1, 1, 1, 1, 0);
         LocalDateTime date3 = LocalDateTime.of(1900, 1, 1, 0, 0, 0, 0);
         LocalDateTime date4 = LocalDateTime.of(2021, 9, 21, 10, 5, 48, 0);
@@ -193,5 +195,27 @@ public class DateTimeUtilsTest {
 
         // then
         assertEquals(expected, actual);
+    }
+
+    @Test
+    public void dayStream_oneDay() {
+        List<ZonedDateTime> days = DateTimeUtils.dayStream(ZonedDateTime.of(2020, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), ZonedDateTime.of(2020, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()))
+                .collect(Collectors.toList());
+        assertThat(days).containsOnly(
+                ZonedDateTime.of(2020, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault())
+        );
+    }
+
+    @Test
+    public void dayStream_inverseFromTo_returnsInOrder() {
+        ZonedDateTime from = ZonedDateTime.of(2020, 1, 3, 0, 0, 0, 0, ZoneId.systemDefault());
+        ZonedDateTime to = ZonedDateTime.of(2020, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        List<ZonedDateTime> days = DateTimeUtils.dayStream(from, to)
+                .collect(Collectors.toList());
+        assertThat(days).containsExactly(
+                ZonedDateTime.of(2020, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault())
+                , ZonedDateTime.of(2020, 1, 2, 0, 0, 0, 0, ZoneId.systemDefault())
+                , ZonedDateTime.of(2020, 1, 3, 0, 0, 0, 0, ZoneId.systemDefault())
+        );
     }
 }

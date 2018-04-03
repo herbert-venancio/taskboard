@@ -14,20 +14,24 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.Temporal;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.Range;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.google.common.collect.Streams;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -171,7 +175,7 @@ public class DateTimeUtils {
         }
 
         @Override
-        public void serialize(LocalDate value, JsonGenerator gen, SerializerProvider serializers) throws IOException, JsonProcessingException {
+        public void serialize(LocalDate value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
             gen.writeNumber(value.atStartOfDay().atZone(getTimezone()).toInstant().toEpochMilli());
         }
     }
@@ -179,7 +183,7 @@ public class DateTimeUtils {
     public static Date parseStringToDate(String yyyymmdd) {
         DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         try {
-            return (Date)formatter.parse(yyyymmdd);
+            return formatter.parse(yyyymmdd);
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -201,5 +205,38 @@ public class DateTimeUtils {
             return false;
         }
         return true;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends Temporal & Comparable<T>, S extends T> Range<S> range(T fromInclusive, T toInclusive) {
+        return (Range<S>) Range.between(fromInclusive, toInclusive);
+    }
+
+    public static Stream<LocalDate> dayStream(LocalDate fromInclusive, LocalDate toInclusive) {
+        return dayStream(range(fromInclusive, toInclusive));
+    }
+
+    public static Stream<ZonedDateTime> dayStream(ZonedDateTime fromInclusive, ZonedDateTime toInclusive) {
+        return dayStream(range(fromInclusive, toInclusive));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends Temporal & Comparable<?>> Stream<T> dayStream(final Range<T> dateRange) {
+        return Streams.stream(new Iterator<T>() {
+
+            private T next = dateRange.getMinimum();
+
+            @Override
+            public boolean hasNext() {
+                return dateRange.contains(next);
+            }
+
+            @Override
+            public T next() {
+                T current = next;
+                next = (T) next.plus(1, ChronoUnit.DAYS);
+                return current;
+            }
+        });
     }
 }

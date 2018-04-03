@@ -2,6 +2,7 @@ package objective.taskboard.followup;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
@@ -9,10 +10,15 @@ import static org.mockito.Mockito.doReturn;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.tomcat.util.buf.StringUtils;
 import org.junit.Assert;
@@ -26,6 +32,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import objective.taskboard.Constants;
 import objective.taskboard.followup.impl.FollowUpDataProviderFromCurrentState;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
+import objective.taskboard.utils.DateTimeUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CumulativeFlowDiagramDataProviderTest {
@@ -147,4 +154,151 @@ public class CumulativeFlowDiagramDataProviderTest {
         assertTrue(cfd.dataByStatus.isEmpty());
     }
 
+    @Test
+    public void whenProjectHasStartAndDeliveryDates_cfdShouldRespectDateRange() {
+        // given
+        LocalDate projectStart = LocalDate.of(1999, 12, 1);
+        LocalDate projectDelivery = LocalDate.of(2000, 1, 31);
+        AssertionContext ctx = setupProject("STARTDELIVERY", projectStart, projectDelivery);
+
+        // when
+        CumulativeFlowDiagramDataSet cfd = subject.getCumulativeFlowDiagramDataSet("STARTDELIVERY", "SUBTASK");
+
+        // then
+        assertThat(cfd)
+                .satisfies(ctx::containsAllDaysBetweenProjectStartAndDelivery)
+                .satisfies(ctx::allDataPointsBeforeAnyIssueWereCreatedShouldHaveCountEqualsZero)
+                .satisfies(ctx::allDataPointsAfterLastIssueTransitionShouldRepeatLastRow)
+                .satisfies(ctx::statusInOrder);
+    }
+
+    @Test
+    public void whenProjectHasDeliveryDateOnly_cfdShouldRespectDateRange() {
+        // given
+        LocalDate projectStart = null;
+        LocalDate projectDelivery = LocalDate.of(2000, 1, 31);
+        AssertionContext ctx = setupProject("DELIVERY", projectStart, projectDelivery);
+
+        // when
+        CumulativeFlowDiagramDataSet cfd = subject.getCumulativeFlowDiagramDataSet("DELIVERY", "SUBTASK");
+
+        // then
+        assertThat(cfd)
+                .satisfies(ctx::containsAllDaysBetweenProjectStartAndDelivery)
+                .satisfies(ctx::allDataPointsBeforeAnyIssueWereCreatedShouldHaveCountEqualsZero)
+                .satisfies(ctx::allDataPointsAfterLastIssueTransitionShouldRepeatLastRow)
+                .satisfies(ctx::statusInOrder);
+    }
+
+    @Test
+    public void whenProjectHasNarrowerStartAndDeliveryDate_cfdShouldRespectDateRange() {
+        // given
+        LocalDate projectStart = LocalDate.of(2000, 1, 3);
+        LocalDate projectDelivery = LocalDate.of(2000, 1, 5);
+        AssertionContext ctx = setupProject("NARROW", projectStart, projectDelivery);
+
+        // when
+        CumulativeFlowDiagramDataSet cfd = subject.getCumulativeFlowDiagramDataSet("NARROW", "SUBTASK");
+
+        // then
+        assertThat(cfd)
+                .satisfies(ctx::containsAllDaysBetweenProjectStartAndDelivery)
+                .satisfies(ctx::allDataPointsBeforeAnyIssueWereCreatedShouldHaveCountEqualsZero)
+                .satisfies(ctx::allDataPointsAfterLastIssueTransitionShouldRepeatLastRow)
+                .satisfies(ctx::statusInOrder);
+    }
+
+    private AssertionContext setupProject(String projectKey, LocalDate projectStart, LocalDate projectDelivery) {
+        FollowUpTimeline timeline = new FollowUpTimeline(TODAY_DATE, Optional.ofNullable(projectStart), Optional.ofNullable(projectDelivery));
+        FollowUpDataSnapshot snapshot = new FollowUpDataSnapshot(timeline, followupData, new EmptyFollowupCluster());
+        doReturn(snapshot).when(followUpDataProviderFromCurrentState).getJiraData(eq(projectKey));
+        doReturn(true).when(projectRepository).exists(eq(projectKey));
+        return new AssertionContext(snapshot);
+    }
+
+    private static class AssertionContext {
+
+        private final ZoneId zone = ZoneId.systemDefault();
+        private final FollowUpTimeline timeline;
+        private final SyntheticTransitionsDataSet ds;
+        private final ZonedDateTime followupStart;
+        private final ZonedDateTime followupEnd;
+        private final List<String> statuses;
+        private final List<String> issueTypes;
+
+        private AssertionContext(FollowUpDataSnapshot snapshot) {
+            // only sub-task data is checked
+            ds = snapshot.getData().syntheticsTransitionsDsList.get(2);
+            timeline = snapshot.getTimeline();
+            followupStart = ds.rows.stream().map(row -> row.date).min(Comparator.comparing(date -> date)).orElseThrow(AssertionError::new);
+            followupEnd = ds.rows.stream().map(row -> row.date).max(Comparator.comparing(date -> date)).orElseThrow(AssertionError::new);
+            statuses = ds.headers.subList(ds.getInitialIndexStatusHeaders(), ds.headers.size());
+            issueTypes = ds.rows.stream()
+                    .map(row -> row.issueType)
+                    .distinct()
+                    .collect(toList());
+        }
+
+        private Stream<CumulativeFlowDiagramDataPoint> dataPointsFor(CumulativeFlowDiagramDataSet cfd, String status, String issueType) {
+            return cfd.dataByStatus
+                    .get(status)
+                    .stream()
+                    .filter(point -> issueType.equals(point.type));
+        }
+
+        private int lastRowIssueCountFor(String status, String issueType) {
+            return ds.rows.stream()
+                    .filter(row -> issueType.equals(row.issueType))
+                    .max(Comparator.comparing(row -> row.date))
+                    .map(row -> row.amountOfIssueInStatus.get(statuses.indexOf(status)))
+                    .orElseThrow(AssertionError::new);
+        }
+
+        public void containsAllDaysBetweenProjectStartAndDelivery(CumulativeFlowDiagramDataSet cfd) {
+            final LocalDate projectStart = timeline.getStart().orElseGet(followupStart::toLocalDate);
+            final LocalDate projectDelivery = timeline.getEnd().orElseGet(followupEnd::toLocalDate);
+            for (String status : statuses) {
+                for (String issueType : issueTypes) {
+                    assertThat(dataPointsFor(cfd, status, issueType))
+                            .extracting(dataPoint -> DateTimeUtils.toLocalDate(dataPoint.date, zone))
+                            .containsExactlyElementsOf(DateTimeUtils.dayStream(projectStart, projectDelivery).collect(toList()));
+                }
+            }
+        }
+
+        public void allDataPointsBeforeAnyIssueWereCreatedShouldHaveCountEqualsZero(CumulativeFlowDiagramDataSet cfd) {
+            for (String status : statuses) {
+                for (String issueType : issueTypes) {
+                    assertThat(dataPointsFor(cfd, status, issueType))
+                            .filteredOn(dataPoint -> DateTimeUtils.get(dataPoint.date, zone).isBefore(followupStart))
+                            .allSatisfy(dataPoint ->
+                                    assertThat(dataPoint.count).isEqualTo(0)
+                            );
+                }
+            }
+        }
+
+        public void allDataPointsAfterLastIssueTransitionShouldRepeatLastRow(CumulativeFlowDiagramDataSet cfd) {
+            for (String status : statuses) {
+                for (String issueType : issueTypes) {
+                    assertThat(dataPointsFor(cfd, status, issueType))
+                            .filteredOn(dataPoint -> DateTimeUtils.get(dataPoint.date, zone).isAfter(followupEnd))
+                            .allSatisfy(dataPoint ->
+                                    assertThat(dataPoint.count).isEqualTo(lastRowIssueCountFor(status, issueType))
+                            );
+                }
+            }
+        }
+
+        public void statusInOrder(CumulativeFlowDiagramDataSet cfd) {
+            assertThat(cfd.dataByStatus.keySet())
+                    .containsExactly(
+                            "To Do"
+                            , "Doing"
+                            , "Reviewing"
+                            , "UAT"
+                            , "Done"
+                    );
+        }
+    }
 }

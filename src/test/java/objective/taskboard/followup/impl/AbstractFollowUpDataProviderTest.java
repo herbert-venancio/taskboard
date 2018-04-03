@@ -133,7 +133,7 @@ public abstract class AbstractFollowUpDataProviderTest {
     private static final String ADDITIONAL_ESTIMATED_HOURS_ID = "3";
 
     protected static final StatusCategory CATEGORY_UNDEFINED = new StatusCategory(
-            Long.valueOf(1L)
+            1L
             , "undefined"
             , "medium-gray"
             , "No Category");
