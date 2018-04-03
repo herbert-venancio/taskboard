@@ -30,10 +30,10 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class LoginPage {
-    @FindBy(id="username")
+    @FindBy(css="#username input")
     private WebElement username;
 
-    @FindBy(id="password")
+    @FindBy(css="#password input")
     private WebElement password;
 
     @FindBy(id="login")

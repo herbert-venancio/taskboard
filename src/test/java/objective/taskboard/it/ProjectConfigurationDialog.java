@@ -38,8 +38,8 @@ public class ProjectConfigurationDialog extends AbstractUiFragment {
         waitForClick(this.projectItemButton);
         waitVisibilityOfElement(dialog);
         
-        startDateInput = dialog.findElement(By.id("projectStartDate"));
-        deliveryDateInput = dialog.findElement(By.id("projectDeliveryDate"));
+        startDateInput = dialog.findElement(By.cssSelector("#projectStartDate input"));
+        deliveryDateInput = dialog.findElement(By.cssSelector("#projectDeliveryDate input"));
         updateButton = dialog.findElement(By.id("updateProjectConfiguration"));
         waitVisibilityOfElements(startDateInput, deliveryDateInput, updateButton);
 
@@ -75,8 +75,6 @@ public class ProjectConfigurationDialog extends AbstractUiFragment {
     }
 
     public ProjectConfigurationDialog tryUpdateWithInvalidStartDate() {
-        open(projectItemButton);
-
         startDateInput.sendKeys("22/22/2222");
         deliveryDateInput.sendKeys("02/01/2018");
         waitForClick(updateButton);
