@@ -1,1 +1,0 @@
-ALTER TABLE project_filter_configuration ADD risk_percentage NUMBER(5,4) DEFAULT 0 NOT NULL;

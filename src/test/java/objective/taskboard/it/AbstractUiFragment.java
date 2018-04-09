@@ -26,9 +26,9 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.not;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElement;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
 
 import java.util.List;
 import java.util.function.Function;
@@ -136,12 +136,6 @@ public abstract class AbstractUiFragment {
         element.click();
     }
 
-    protected void setInputValue(WebElement input, String value) {
-        input.clear();
-        input.sendKeys(value);
-        waitAttributeValueInElement(input, "value", value);
-    }
-    
     protected void waitPaperDropdownMenuSelectedValueToBe(WebElement element, String expected) {
         waitVisibilityOfElement(element);
         waitUntil(ExpectedConditions.or(

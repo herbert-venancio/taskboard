@@ -1,44 +1,28 @@
 package objective.taskboard.it;
 
-import static java.text.MessageFormat.format;
-import static org.openqa.selenium.support.PageFactory.initElements;
-
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+
+import static org.openqa.selenium.support.PageFactory.initElements;
+
+import java.text.MessageFormat;
+
+import org.openqa.selenium.By;
 
 public class ProjectConfigurationDialog extends AbstractUiFragment {
 
     private static final String SUCCESS_MESSAGE = "Configuration for project {0} has been updated.";
 
-    private String projectKey;
+    private WebElement projectItemButton;
 
     @FindBy(id="projectConfigurationModal")
     private WebElement dialog;
-    
-    @FindBy(id="project-error")
-    private WebElement globalError;
 
-    @FindBy(css="#projectStartDate input")
     private WebElement startDateInput;
-    
-    @FindBy(css="#projectStartDate paper-input-error")
-    private WebElement startDateError;
 
-    @FindBy(css="#projectDeliveryDate input")
     private WebElement deliveryDateInput;
-    
-    @FindBy(css="#projectDeliveryDate paper-input-error")
-    private WebElement deliveryDateError;
-    
-    @FindBy(css="#projectRisk input")
-    private WebElement riskInput;
-    
-    @FindBy(css="#projectRisk paper-input-error")
-    private WebElement riskError;
 
-    @FindBy(id="updateProjectConfiguration")
     private WebElement updateButton;
 
     public ProjectConfigurationDialog(WebDriver driver) {
@@ -50,10 +34,14 @@ public class ProjectConfigurationDialog extends AbstractUiFragment {
     }
 
     private ProjectConfigurationDialog open(WebElement projectItemButton) {
-        this.projectKey = projectItemButton.getText();
-        waitForClick(projectItemButton);
+        this.projectItemButton = projectItemButton;
+        waitForClick(this.projectItemButton);
         waitVisibilityOfElement(dialog);
-        waitVisibilityOfElements(startDateInput, deliveryDateInput, riskInput, updateButton);
+        
+        startDateInput = dialog.findElement(By.cssSelector("#projectStartDate input"));
+        deliveryDateInput = dialog.findElement(By.cssSelector("#projectDeliveryDate input"));
+        updateButton = dialog.findElement(By.id("updateProjectConfiguration"));
+        waitVisibilityOfElements(startDateInput, deliveryDateInput, updateButton);
 
         return this;
     }
@@ -63,71 +51,62 @@ public class ProjectConfigurationDialog extends AbstractUiFragment {
         waitForClick(close);
         return this;
     }
-    
-    public ProjectConfigurationDialog setStartDate(String value) {
-        setInputValue(startDateInput, value);
-        return this;
-    }
-    
-    public ProjectConfigurationDialog assertStartDate(String expectedValue) {
-        waitAttributeValueInElement(startDateInput, "value", expectedValue);
-        return this;
-    }
 
-    public ProjectConfigurationDialog assertStartDateError(String expectedError) {
-        waitTextInElement(startDateError, expectedError);
-        return this;
-    }
+    public ProjectConfigurationDialog updateConfiguration(String startDate, String deliveryDate) {
+        open(projectItemButton);
 
-    public ProjectConfigurationDialog setDeliveryDate(String value) {
-        setInputValue(deliveryDateInput, value);
-        return this;
-    }
-    
-    public ProjectConfigurationDialog assertDeliveryDate(String expectedValue) {
-        waitAttributeValueInElement(deliveryDateInput, "value", expectedValue);
-        return this;
-    }
-    
-    public ProjectConfigurationDialog assertDeliveryDateError(String expectedError) {
-        waitTextInElement(deliveryDateError, expectedError);
-        return this;
-    }
-    
-    public ProjectConfigurationDialog setRisk(String value) {
-        setInputValue(riskInput, value);
-        return this;
-    }
-    
-    public ProjectConfigurationDialog assertRisk(String expectedValue) {
-        waitAttributeValueInElement(riskInput, "value", expectedValue);
-        return this;
-    }
-    
-    public ProjectConfigurationDialog assertRiskError(String expectedError) {
-        waitTextInElement(riskError, expectedError);
-        return this;
-    }
-
-    public ProjectConfigurationDialog update() {
+        startDateInput.sendKeys(startDate);
+        deliveryDateInput.sendKeys(deliveryDate);
         waitForClick(updateButton);
-        return this;
-    }
-   
-    public ProjectConfigurationDialog assertGlobalError(String message) {
-        waitTextInElement(globalError, message);
+        assertSuccessMessage(MessageFormat.format(SUCCESS_MESSAGE, projectItemButton.getText()));
+        closeAlertDialog();
         return this;
     }
 
-    public void closeSuccessAlert() {
+    public ProjectConfigurationDialog tryUpdateWithInvalidDateRange() {
+        open(projectItemButton);
+
+        startDateInput.sendKeys("04/01/2018");
+        deliveryDateInput.sendKeys("02/01/2018");
+        waitForClick(updateButton);
+        assertErrorMessage("End Date should be greater than Start Date");
+        close();
+        return this;
+    }
+
+    public ProjectConfigurationDialog tryUpdateWithInvalidStartDate() {
+        startDateInput.sendKeys("22/22/2222");
+        deliveryDateInput.sendKeys("02/01/2018");
+        waitForClick(updateButton);
+        assertErrorMessage("Invalid Start Date");
+        close();
+        return this;
+    }
+
+    public ProjectConfigurationDialog tryUpdateWithInvalidEndDate() {
+        open(projectItemButton);
+
+        startDateInput.sendKeys("01/01/2018");
+        deliveryDateInput.sendKeys("22/22/2222");
+        waitForClick(updateButton);
+        assertErrorMessage("Invalid End Date");
+        close();
+        return this;
+    }
+
+    private void assertSuccessMessage(String message) {
+        WebElement successMessage = dialog.findElement(By.cssSelector("#alertModalConfiguration .text"));
+        waitTextInElement(successMessage, message);
+    }
+
+    private void assertErrorMessage(String message) {
+        WebElement errorMessage = dialog.findElement(By.cssSelector(".error-message"));
+        waitTextInElement(errorMessage, message);
+    }
+
+    private void closeAlertDialog() {
         WebElement closeAlertDialog = dialog.findElement(By.cssSelector("#alertModalConfiguration #ok"));
         waitForClick(closeAlertDialog);
-    }
-
-    public ProjectConfigurationDialog assertSuccessAlertIsOpen() {
-        WebElement successMessage = dialog.findElement(By.cssSelector("#alertModalConfiguration .text"));
-        waitTextInElement(successMessage, format(SUCCESS_MESSAGE, projectKey));
-        return this;
     }
 
 }

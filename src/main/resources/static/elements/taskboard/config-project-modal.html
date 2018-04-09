@@ -4,12 +4,18 @@
 
         <style>
             .error-message {
-                color: #dd2c00;
-                margin-bottom: 8px;
+                color: red;
+                font-weight: bold;
+                margin-top: 5px;
+                margin-bottom: 15px;
             }
 
             .configuration-form {
                 width: 400px;
+            }
+
+            .input-wrapper {
+                margin-top: 20px;
             }
 
             .project-status {
@@ -42,35 +48,20 @@
                 >
 
             <modal-wrap-content>
-                <form class="configuration-form tb-form">
-                    <div id="project-error" class="error-message" hidden$="{{!errorMessage}}">{{errorMessage}}</div>
-                    
-                    <tb-date-validator validator-name="dateValidator"></tb-date-validator>
-                    
+                <form class="configuration-form">
+                    <div class="error-message" hidden$="{{!errorMessage}}">{{errorMessage}}</div>
                     <paper-input id="projectStartDate" always-float-label
-                                 label="Project Start Date ([[dateFormatPlaceholder]])"
+                                 label="Project Start Date ({{dateFormatPlaceholder}})"
                                  value="{{projectConfiguration.startDate}}"
                                  tabindex="1"
-                                 maxlength="[[dateFormatPlaceholder.length]]"
-                                 validator="dateValidator"
-                                 error-message="Please enter a valid date"></paper-input>
+                                 maxlength="10"
+                                 pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}"></paper-input>
 
                     <paper-input id="projectDeliveryDate" always-float-label
-                                 label="Project End Date ([[dateFormatPlaceholder]])"
+                                 label="Project End Date ({{dateFormatPlaceholder}})"
                                  value="{{projectConfiguration.deliveryDate}}"
-                                 maxlength="[[dateFormatPlaceholder.length]]"
-                                 validator="dateValidator"
-                                 error-message="Please enter a valid date"></paper-input>
-                   <paper-input id="projectRisk" always-float-label
-                                 label="Risk *"
-                                 value="{{projectConfiguration.risk}}"
-                                 type="number"
-                                 required 
-                                 min="0"
-                                 step="any"
-                                 error-message="Please enter a positive value or zero">
-                                 <div slot="suffix">%</div>
-                                 </paper-input>
+                                 maxlength="10"
+                                 pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}"></paper-input>
 
                     <div class="input-wrapper">
                         <paper-toggle-button class="tb-toggle-button" checked="{{!projectConfiguration.isArchived}}"
@@ -92,6 +83,8 @@
         </modal-wrap>
 
     </template>
+    <script src="/static/bower_components/moment/min/moment-with-locales.js"></script>
+    <script src="/static/bower_components/jquery.maskedinput/dist/jquery.maskedinput.min.js"></script>
     <script>
         (function () {
             Polymer({
@@ -126,10 +119,13 @@
                     this.showLoading(false);
                     this.$.projectStartDate.invalid = false;
                     this.$.projectDeliveryDate.invalid = false;
-                    this.$.projectRisk.invalid = false;
 
                     this.$.modal.open();
                     this.$.projectStartDate.$.input.focus();
+
+                    // after set this mask, polymer binding will not work properly
+                    $(this.$.projectStartDate.$.input).mask("99/99/9999", {placeholder:" "});
+                    $(this.$.projectDeliveryDate.$.input).mask("99/99/9999", {placeholder:" "});
                 },
 
                 _setProjectFilterConfiguration: function(projectFilterConfiguration) {
@@ -146,21 +142,20 @@
 
                 updateConfiguration: function() {
                     var self = this;
+
                     var projectKey = self.projectConfiguration.projectKey;
 
-                    self.errorMessage = '';
-                    
-                    if (!self._validate())
+                    if (!self._isValid())
                         return;
 
                     self.showLoading(true);
 
+                    // get directly from component because the polymer binding is not working after set the mask on input
                     var data = {
                         projectKey: self.projectConfiguration.projectKey,
-                        startDate: self._getISODate(self.projectConfiguration.startDate),
-                        deliveryDate: self._getISODate(self.projectConfiguration.deliveryDate),
-                        isArchived: self.projectConfiguration.isArchived,
-                        risk: self.projectConfiguration.risk
+                        startDate: self._getISODate(self.$.projectStartDate.$.input.value),
+                        deliveryDate: self._getISODate(self.$.projectDeliveryDate.$.input.value),
+                        isArchived: self.projectConfiguration.isArchived
                     };
 
                     $.ajax({
@@ -191,21 +186,25 @@
                     if  (jqXHR && jqXHR.responseText) {
                         var responseError = JSON.parse(jqXHR.responseText);
                         self.errorMessage = responseError.message;
+                        $(".error-message").show().delay(3000).fadeOut();
                     } else {
                         self.errorMessage = "The request has failed";
+                        $(".error-message").show().delay(3000).fadeOut();
                     }
                 },
 
-                _validate: function() {
-                    return this.$.projectStartDate.validate() & this.$.projectDeliveryDate.validate() & this.$.projectRisk.validate();
+                _isValid: function() {
+                    return this.$.projectStartDate.validate() & this.$.projectDeliveryDate.validate();
                 },
 
                 _getLocaleDate: function(date) {
-                    return date ? moment(date).format("L") : null;
+                    if (date)
+                        return moment(date).format("L");
                 },
 
                 _getISODate: function(date) {
-                    return date ? moment(date, "L").format("YYYY-MM-DD") : null;
+                    if(date)
+                        return moment(date, "L").format("YYYY-MM-DD");
                 },
 
                 _getArchivedText: function(isArchived, capitalize) {

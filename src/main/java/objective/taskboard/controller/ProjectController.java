@@ -26,7 +26,6 @@ import static objective.taskboard.repository.PermissionRepository.ADMINISTRATIVE
 import static objective.taskboard.repository.PermissionRepository.DASHBOARD_OPERATIONAL;
 import static objective.taskboard.repository.PermissionRepository.DASHBOARD_TACTICAL;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
@@ -163,9 +162,6 @@ public class ProjectController {
 
         if (data.isArchived == null)
             return ResponseEntity.badRequest().body("{\"message\" : \"Invalid \"Archived\" Value\"}");
-        
-        if (data.risk == null)
-            return ResponseEntity.badRequest().build();
 
         LocalDate startDate = data.startDate != null ? DateTimeUtils.parseDate(data.startDate).toLocalDate() : null;
         LocalDate deliveryDate = data.deliveryDate != null ? DateTimeUtils.parseDate(data.deliveryDate).toLocalDate() : null;
@@ -176,7 +172,6 @@ public class ProjectController {
         configuration.setStartDate(startDate);
         configuration.setDeliveryDate(deliveryDate);
         configuration.setArchived(data.isArchived);
-        configuration.setRiskPercentage(data.risk.divide(BigDecimal.valueOf(100)));
 
         projectService.saveTaskboardProject(configuration);
 
@@ -245,7 +240,6 @@ public class ProjectController {
         data.startDate = projectFilterConfiguration.getStartDate() != null ? projectFilterConfiguration.getStartDate().toString() : "";
         data.deliveryDate = projectFilterConfiguration.getDeliveryDate() != null ? projectFilterConfiguration.getDeliveryDate().toString() : "";
         data.isArchived = projectFilterConfiguration.isArchived();
-        data.risk = projectFilterConfiguration.getRiskPercentage().multiply(BigDecimal.valueOf(100));
         return data;
     }
 

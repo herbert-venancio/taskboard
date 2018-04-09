@@ -21,12 +21,9 @@
 
 package objective.taskboard.domain;
 
-import static java.util.Objects.requireNonNull;
-
 import java.io.Serializable;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -60,9 +57,6 @@ public class ProjectFilterConfiguration implements Serializable {
 
     @Column
     private Boolean isArchived;
-    
-    @Column(precision = 5, scale = 4)
-    private BigDecimal riskPercentage = BigDecimal.ZERO;
 
     public Integer getId() {
         return id;
@@ -98,19 +92,6 @@ public class ProjectFilterConfiguration implements Serializable {
 
     public void setArchived(Boolean isArchived) {
         this.isArchived = isArchived;
-    }
-    
-    public BigDecimal getRiskPercentage() {
-        return riskPercentage;
-    }
-    
-    public void setRiskPercentage(BigDecimal riskPercentage) {
-        BigDecimal newValue = requireNonNull(riskPercentage).setScale(4, RoundingMode.HALF_EVEN);
-        
-        if (newValue.compareTo(BigDecimal.ZERO) < 0)
-            throw new IllegalArgumentException("Risk percentage should be between 0 and 1 (inclusive). Actual: " + newValue);
-        
-        this.riskPercentage = newValue;
     }
 
     @OneToMany(fetch=FetchType.EAGER)

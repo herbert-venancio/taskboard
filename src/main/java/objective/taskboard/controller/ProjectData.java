@@ -21,7 +21,6 @@
 
 package objective.taskboard.controller;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -37,6 +36,5 @@ public class ProjectData {
         public String startDate;
         public String deliveryDate;
         public Boolean isArchived;
-        public BigDecimal risk;
     }
 }

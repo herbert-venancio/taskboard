@@ -51,11 +51,9 @@ public abstract class AbstractUIIntegrationTest extends AbstractIntegrationTest 
             throw new IllegalStateException("To run integration tests, you must run 'mvn clean install' at least once to download gecko driver");
 
         FirefoxOptions options = new FirefoxOptions();
-
         options.addPreference("dom.file.createInChild", true);
         options.addPreference("browser.link.open_newwindow", 3);
         options.addPreference("browser.link.open_newwindow.restriction", 2);
-        options.addPreference("intl.accept_languages", "en");
 
         webDriver = new FirefoxDriver(options);
         webDriver.manage().window().setSize(new Dimension(1280,1080));
