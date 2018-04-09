@@ -1,0 +1,1 @@
+ALTER TABLE project_filter_configuration ADD COLUMN risk_percentage decimal(5,4) DEFAULT 0 NOT NULL;
