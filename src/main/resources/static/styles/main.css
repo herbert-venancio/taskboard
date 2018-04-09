@@ -54,6 +54,15 @@ paper-dialog, paper-dialog.tb-paper-dialog {
     overflow-y: overlay;
 }
 
+
+.tb-form paper-input paper-input-container.paper-input {
+    padding-top: 0;
+}
+
+.tb-form paper-input paper-input-error.paper-input {
+    position: relative;
+}
+
 /*
     Icons
 */
