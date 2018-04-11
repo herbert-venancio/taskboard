@@ -72,6 +72,12 @@ public class ProjectService {
                 .collect(toList());
     }
 
+    public List<ProjectFilterConfiguration> getTaskboardProjects(Predicate<String> filterProjectByKey) {
+        return getTaskboardProjects().stream()
+                .filter(projectFilterConfiguration -> filterProjectByKey.test(projectFilterConfiguration.getProjectKey()))
+                .collect(toList());
+    }
+
     public List<ProjectFilterConfiguration> getTaskboardProjects(Predicate<String> filterProjectByKey, String... permissions) {
         return getTaskboardProjects(permissions).stream()
                 .filter(projectFilterConfiguration -> filterProjectByKey.test(projectFilterConfiguration.getProjectKey()))
