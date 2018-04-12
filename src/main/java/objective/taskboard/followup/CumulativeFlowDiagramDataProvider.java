@@ -1,13 +1,14 @@
 package objective.taskboard.followup;
 
-import static com.google.common.collect.Multimaps.asMap;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -144,5 +145,9 @@ public class CumulativeFlowDiagramDataProvider {
                 .orElseGet(() -> ds.rows.get(ds.rows.size()-1).date);
 
         return DateTimeUtils.range(startDate, endDate);
+    }
+
+    private static <K, V> Map<K, List<V>> asMap(ListMultimap<K, V> multimap) {
+        return new LinkedHashMap<>(Multimaps.asMap(multimap));
     }
 }
