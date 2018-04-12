@@ -212,6 +212,7 @@ public class ProjectController {
     private void createProjectFilterConfiguration(String projectKey) {
         final ProjectFilterConfiguration configuration = new ProjectFilterConfiguration();
         configuration.setProjectKey(projectKey);
+        configuration.setArchived(false);
         projectService.saveTaskboardProject(configuration);
     }
 
