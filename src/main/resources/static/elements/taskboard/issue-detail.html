@@ -383,7 +383,7 @@
         <iron-ajax id="ajaxTimetracking"
                    method="POST"
                    url="/ws/issues/timetracking"
-                   body="{{item}}"
+                   body="{{item.issueKey}}"
                    content-type='application/json'
                    headers='{"Content-Type": "application/json"}'
                    last-response="{{timetracking}}"

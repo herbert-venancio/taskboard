@@ -133,11 +133,11 @@ public class IssueController
     }
 
     @RequestMapping(path = "timetracking", method = RequestMethod.POST)
-    public JiraTimeTrackingDto timetracking(@RequestBody Issue issue) throws JSONException {
+    public JiraTimeTrackingDto timetracking(@RequestBody String issueKey) throws JSONException {
         Integer timeEstimateMinutes = 0;
         Integer timeSpentMinutes = 0;
 
-        Issue main = issueBufferService.getIssueByKey(issue.getIssueKey());
+        Issue main = issueBufferService.getIssueByKey(issueKey);
 
         timeEstimateMinutes += main.getTimeTracking().getOriginalEstimateMinutes() != null ? main.getTimeTracking().getOriginalEstimateMinutes() : 0;
         timeSpentMinutes += main.getTimeTracking().getTimeSpentMinutes() != null ? main.getTimeTracking().getTimeSpentMinutes() : 0;
