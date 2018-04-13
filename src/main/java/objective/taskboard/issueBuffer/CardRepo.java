@@ -47,7 +47,8 @@ public class CardRepo  {
             return true;
         }
         
-        if (current.getRemoteIssueUpdatedDate().compareTo(newValue.getRemoteIssueUpdatedDate()) >= 0)
+        if (current.getRemoteIssueUpdatedDate().compareTo(newValue.getRemoteIssueUpdatedDate()) >= 0
+                && current.getChangelog().size() >= newValue.getChangelog().size())
             return false;
 
         put(newValue.getIssueKey(), newValue);
