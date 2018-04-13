@@ -121,12 +121,6 @@
                 ready: function() {
                     this._setOptions([
                         {
-                            icon:'taskboard-icons:dashboard-view-mode'
-                            , title: 'Toggle View/Selection mode'
-                            , tap: this.toggleSelectionViewMode.bind(this)
-                            , cssClasses: ''
-                        },
-                        {
                             icon:'taskboard-icons:dashboard-filter'
                             , title: 'Filters'
                             , tap: this._openFiltersModal.bind(this)
@@ -139,7 +133,6 @@
                             , cssClasses: ''
                         }
                     ]);
-                    this.widgetList = [];
 
                     var btFilterClose = ButtonBuilder('Ok').onClick(this._closeFiltersModal.bind(this)).build();
                     this.set('_btFilterClose', btFilterClose);
@@ -226,11 +219,10 @@
                             };
                         }
 
-                        var xScale = d3.time.scale().domain([startDate, endDate]);
                         self.chart
                             .dimension(self.cfdDim)
                             .group(self.cfdGroup, status[0], stackAccessor(status[0])) // the first stack must be added as a group
-                            .x(xScale);
+                            .x(d3.time.scale().domain([startDate, endDate]));
 
                         status.forEach(function(stat) {
                             // stackTitle(stat) generates a callback to generate the label for points in this stack
@@ -262,7 +254,7 @@
                             return items.reverse();
                         };
 
-                        self.chart.render();
+                        dcDateRangeChartsService.registerChartInRangeAndRender(self.chart);
 
                         self.isReady = true;
                     });
@@ -279,6 +271,7 @@
                         this.xhr = null;
                     }
                     if (!_.isEmpty(this.chart)) {
+                        dcDateRangeChartsService.deregisterChartInRange(this.chart);
                         dc.deregisterChart(this.chart);
                         this.set('chart', {});
                     }
@@ -302,12 +295,11 @@
                 },
 
                 createChart: function(startDate, endDate) {
-                    var self = this;
                     var chart = dc.lineChart("#cfd");
 
                     // basic chart configuration
                     chart
-                        .margins({top: 20, right: 30, bottom: 60, left: 200})
+                        .margins({top: 15, right: 20, bottom: 20, left: 170})
                         .legend(
                             dcUtils.getDefaultLegend()
                         )
@@ -319,113 +311,9 @@
                         .mouseZoomable(false)  // zoom with mouse wheel
                         .elasticY(true)       // y axis will adjust to the data
 
-                    setupChartDateTicks(chart, startDate, endDate, 14);
-
-                    dcUtils.rotateDateFormattedXAxis(chart);
-
-                    chart.addChartWidget = function(c){
-                        self.widgetList.push(c)
-                    }
-
-                    var brushOnDelegate = chart.brushOn;
-                    chart.brushOn = function(state) {
-                        if (arguments.length > 0) {
-                            self.setupViewMode(state);
-                            return brushOnDelegate(state);
-                        }
-
-                        return brushOnDelegate();
-                    }
-
-                    chart.on('filtered', this.setupSelector.bind(this));
-                    
-                    $("#cfd").dblclick(this.toggleSelectionViewMode.bind(this));
+                    dcUtils.setupChartDateTicks(chart, startDate, endDate, 14);
 
                     this.set('chart', chart);
-                    this.fire("iron-signal", {name:"cfd-created", data:{
-                        cfdChartInstance: chart
-                    }})
-                    this.needsSetup = true;
-                    this.startDate = startDate;
-                    this.endDate = endDate;
-                    this.setupViewMode(false);
-                },
-
-                toggleSelectionViewMode: function() {
-                    if (this.needsSetup) {
-                        this.needsSetup = false;
-                        var timeSpan = this.endDate - this.startDate;
-                        var filterStart = new Date(this.startDate.getTime() + timeSpan/3)
-                        var filterEnd   = new Date(this.endDate.getTime() - timeSpan/3)
-                        this.chart.filter([filterStart, filterEnd])
-                    }
-
-                    this.chart.brushOn(!this.chart.brushOn());
-                    this.chart.render();
-                    this.setupSelector(this.chart)
-                },
-                
-                setupViewMode: function(state) {
-                    if (state) {
-                        $("#cfd").prop("title", "Double click to go back to view mode")
-                        this.set('options.0.cssClasses', 'widget__button_highlighted');
-                    }
-                    else { 
-                        $("#cfd").prop("title", "Double click to enter selection mode")
-                        this.set('options.0.cssClasses', '');
-                    }
-                },
-                
-                setupSelector: function(rangeChart) {
-                    if (!rangeChart.filter() || !rangeChart.brushOn())
-                        this.resetSelection(rangeChart)
-                    else
-                        this.applySelection(rangeChart);
-                },
-
-                applySelection: function(rangeChart) {
-                    this.widgetList.forEach(function(w) {
-                        var focusChart = w.chart;
-                        if (!rangesEqual(rangeChart.filter(), focusChart.filter())) {
-                            dc.events.trigger(function () {
-                                focusChart.focus(rangeChart.filter());
-
-                                var od = focusChart.xOriginalDomain();
-                                // recalculate tick count so we have a better resolution of dates when focused
-                                var tickCount = focusChart.visibleTickCount * ((od[od.length-1] - od[0])/ 
-                                         (rangeChart.filter()[1]-rangeChart.filter()[0]));
-                                tickCount = Math.round(tickCount);
-
-                                if (focusChart.tickCount && focusChart.tickCount != tickCount) {
-                                    focusChart
-                                        .xAxis()
-                                        .tickValues(dcUtils.getDateTicks(od[0], od[od.length-1], tickCount));
-                                    focusChart.render();
-                                }
-                                focusChart.tickCount = tickCount;
-                            });
-                        }
-                    });
-                },
-
-                resetSelection: function(rangeChart) {
-                    var self = this;
-                    var chart = this.chart;
-                    dc.events.trigger(function () {
-                        self.widgetList.forEach(function(w) {
-                            var focusChart = w.chart;
-                            var od = focusChart.xOriginalDomain();
-                            focusChart.x().domain(od);
-                            focusChart.focus([od[0], od[od.length-1]])
-                            focusChart
-                                .xAxis()
-                                .tickValues(
-                                    dcUtils.getDateTicks(od[0], od[od.length-1], 14)
-                                );
-                            focusChart.tickCount = 14;
-                            focusChart.render();
-                        });
-                    });
                 },
 
                 createIssueListFilter: function() {
@@ -488,6 +376,7 @@
                 _getSavedLevel: function() {
                     return localStorage.getItem("dashboard.cfd-chart." + this.selectedProjectKey + ".level") || "Subtask";
                 }
+
             });
         })();
     </script>

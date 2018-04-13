@@ -1,0 +1,212 @@
+<!--
+  [LICENSE]
+  Taskboard
+  ---
+  Copyright (C) 2015 - 2016 Objective Solutions
+  ---
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  [/LICENSE]
+  -->
+<dom-module id="chart-date-range">
+
+    <template>
+
+        <style>
+            .date-range {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #8E8E8E;
+            }
+        </style>
+
+        <div class="date-range" style$="height: [[_dateRangeAreaHeight]]px;">
+
+            <div id="date-range-chart" class="tb-chart tb-chart--range-selector date-range__chart" hidden$="[[errorMessage]]"></div>
+
+            <template is="dom-if" if="[[errorMessage]]">
+                <div class="date-range__error">
+                    [[errorMessage]]
+                </div>
+            </template>
+
+        </div>
+
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'chart-date-range',
+
+                properties: {
+                    selectedProjectKey: {
+                        type: String
+                    },
+                    chart: {
+                        type: Object,
+                        value: function() { return {} }
+                    },
+                    errorMessage: {
+                        type: String,
+                        value: null
+                    },
+                    _dateRangeSVGElContainer: {
+                        type: Object,
+                        value: function() { return {} }
+                    },
+                    _dateRangeAreaHeight: {
+                        type: Number
+                    },
+                    _chartHeight: {
+                        type: Number
+                    },
+                    _brushHeight: {
+                        type: Number,
+                        value: 24,
+                        readOnly: true
+                    },
+                    _xhr: {
+                        type: Object,
+                        value: function() { return {} }
+                    }
+                },
+
+                observers: [
+                    '_onProjectSelected(selectedProjectKey)'
+                ],
+
+                ready: function() {
+                    var paddingTopAndBottom = 40;
+                    var allOtherChartElementsHeightSum = 20;
+                    this.set('_chartHeight', this._brushHeight + allOtherChartElementsHeightSum);
+                    this.set('_dateRangeAreaHeight', this._chartHeight + paddingTopAndBottom);
+
+                    this.set('_dateRangeSVGElContainer', this.$$('#date-range-chart'));
+                },
+
+                reset: function() {
+                    this.set('errorMessage', null);
+                    if (!_.isEmpty(this._xhr)) {
+                        this._xhr.abort();
+                        this.set('_xhr', {});
+                    }
+                    if (!_.isEmpty(this.chart)) {
+                        dc.deregisterChart(this.chart);
+                        this.set('chart', {});
+                    }
+                },
+
+                _onProjectSelected: function(selectedProjectKey) {
+                    this.reset();
+
+                    var xhr = d3.json('/api/projects/'+ selectedProjectKey +'/followup/date-range', function(error, data) {
+
+                        if (error) {
+                            this._removeSVGIfExists();
+                            this.set('errorMessage', 'Impossible to generate Date Range. '+ error.responseText);
+                            return;
+                        }
+
+                        var dateValueList = this._generateDateValues(new Date(data.startDate), new Date(data.deliveryDate));
+
+                        var chart = dc.barChart(this._dateRangeSVGElContainer);
+
+                        var chartDimension = crossfilter(dateValueList).dimension(function (d) {
+                            return d.date;
+                        });
+                        var chartGroup = chartDimension.group();
+
+                        chart
+                            .height(this._chartHeight)
+                            .margins({top: 0, right: 20, bottom: 20, left: 20})
+                            .dimension(chartDimension)
+                            .group(chartGroup)
+                            .x(d3.time.scale().domain([data.startDate, data.deliveryDate]));
+
+                        dcUtils.setupChartDateTicks(chart, new Date(data.startDate), new Date(data.deliveryDate), 14);
+
+                        this._updateSVGToDateRangeStyle(chart);
+
+                        dcDateRangeChartsService.setDateRangeChart(chart);
+
+                        this.set('chart', chart);
+
+                        setTimeout(function () {
+                            chart.render();
+                        }, 200);
+
+                    }.bind(this));
+
+                    this.set('_xhr', xhr);
+                },
+
+                _removeSVGIfExists: function() {
+                    var chartSVG = this._dateRangeSVGElContainer.children[0];
+                    if (chartSVG)
+                        chartSVG.remove();
+                },
+
+                _generateDateValues: function(startDate, endDate) {
+                    var dateArray = [];
+                    var currentDate = startDate;
+                    while (currentDate <= endDate) {
+                        dateArray.push({
+                            date: currentDate
+                        });
+                        currentDate = addDaysToDate(currentDate, 1);
+                    }
+                    return dateArray;
+                },
+
+                _updateSVGToDateRangeStyle: function(chart) {
+                    var rectIconHeight = 11;
+                    var rectIconTransformCenter = 'transform: translate(-2px, ' + (this._brushHeight - rectIconHeight) / 2 + 'px)';
+
+                    var rectLineStr = '<rect width="1" height="'+ this._brushHeight +'" fill="#FFF" style="pointer-events: none;"></rect>';
+                    var rectIconStr = '<rect width="5" height="'+ rectIconHeight +'" rx="15" ry="15" fill="#FFF" style="'+ rectIconTransformCenter +'; height: '+ rectIconHeight +'px !important; pointer-events: none;"></rect>';
+
+                    var tbIconResizeClass = 'tb-icon-resize';
+
+                    var rectStr = rectLineStr + rectIconStr;
+                    var gLeft = makeSVGEl('g', { class: tbIconResizeClass + ' tb-icon-resize--left' });
+                    gLeft.innerHTML = rectStr;
+
+                    var gRight = makeSVGEl('g', { class: tbIconResizeClass + ' tb-icon-resize--right' });
+                    gRight.innerHTML = rectStr;
+
+                    chart.on('pretransition.pret', function(chart) {
+                        chart.selectAll('g.chart-body').each(function(d, i) {
+                            this.setAttribute('style', 'display: none');
+                        });
+                        chart.selectAll('g.axis.y').each(function(d, i) {
+                            this.setAttribute('style', 'display: none');
+                        });
+                        chart.selectAll('g.resize').each(function(d, i) {
+                            forEachInArray(this.childNodes, function(node) {
+                                if (!node.classList.contains(tbIconResizeClass))
+                                    node.setAttribute('opacity', '0');
+                            });
+
+                            if (this.classList.contains('w'))
+                                this.appendChild(gLeft);
+                            else if (this.classList.contains('e'))
+                                this.appendChild(gRight);
+                        });
+                    });
+                }
+            });
+        })();
+    </script>
+</dom-module>

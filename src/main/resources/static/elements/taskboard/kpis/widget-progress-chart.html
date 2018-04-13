@@ -117,13 +117,6 @@
                 },
                 
                 ready: function() {
-                    var self = this;                	
-                    this.chartDeferred = $.Deferred();
-                    this.selectorChartDeferred = $.Deferred();
-                    $.when(this.chartDeferred, this.selectorChartDeferred).then(function(_chart, _selectorChart){
-                        _selectorChart.addChartWidget(self);
-                    });
-
                     var btSave = ButtonBuilder('Save').id('update').onClick(this.updateSettings.bind(this)).build();
                     this.set('_btSave', btSave);
                 },
@@ -175,10 +168,9 @@
                                 .dimension(dateDimension)
                                 .group(effortDoneByDayGroup);
 
-                            chart.render();
+                            dcDateRangeChartsService.registerChartInRangeAndRender(chart);
 
                             self.set('chart', chart);
-                            self.chartDeferred.resolve(chart);
                         })();
 
                         self.set('isReady', true);
@@ -206,15 +198,12 @@
                                 .itemWidth(90)
                                 .horizontal(1)
                                 .legendWidth(180))
+                        .margins({top: 15, right: 20, bottom: 20, left: 50})
                         .colors(
                             self._getChartColors()
                         );
-                    
-                    setupChartDateTicks(chart, startDate, endDate, 14);
-                    
-                    chart.margins({top: 20, right: 30, bottom: 60, left: 50});
 
-                    dcUtils.rotateDateFormattedXAxis(chart);
+                    dcUtils.setupChartDateTicks(chart, startDate, endDate, 12);
 
                     return chart;
                 },
@@ -226,10 +215,6 @@
                     return dcUtils.getChartColorsFromArray([actual, expected, projection]);
                 },
 
-                linkCfdBrush: function(event, data) {
-                    this.selectorChartDeferred.resolve(data.cfdChartInstance);
-                },
-
                 reset: function() {
                     this.set('isReady', false);
                     this.set('errorMessage', '');
@@ -239,6 +224,7 @@
                         this.xhr = null;
                     }
                     if (!_.isEmpty(this.chart)) {
+                        dcDateRangeChartsService.deregisterChartInRange(this.chart);
                         dc.deregisterChart(this.chart);
                         this.set('chart', {});
                     }

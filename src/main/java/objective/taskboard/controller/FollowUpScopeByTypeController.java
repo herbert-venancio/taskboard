@@ -42,7 +42,7 @@ public class FollowUpScopeByTypeController {
     @RequestMapping(value = "/api/projects/{projectKey}/followup/scope-by-type", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> scopeByTypeData(@PathVariable("projectKey") String projectKey, @RequestParam("date") String date, @RequestParam("timezone") String timezone) {
         if (!authorizer.hasPermissionInProject(PermissionRepository.DASHBOARD_TACTICAL, projectKey))
-            return new ResponseEntity<>("Resource not found", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Resource not found.", HttpStatus.NOT_FOUND);
 
         if (isEmpty(projectKey))
             return new ResponseEntity<>("Project is required.", HttpStatus.BAD_REQUEST);

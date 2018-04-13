@@ -111,6 +111,11 @@
                 height: 100%;
             }
 
+            chart-date-range {
+                width: 100%;
+                display: block;
+            }
+
             /*
                 Widgets
             */
@@ -161,7 +166,7 @@
             }
 
             .kpis__widget--height-half {
-                height: calc(50% - 16px);
+                height: calc(46% - 16px);
             }
 
             .loader {
@@ -249,6 +254,12 @@
                     </nav><!-- .kpis__categories-wrapper -->
 
                     <section class="kpis__widgets">
+
+                        <template is="dom-if" if="{{_showTactical || _showOperational}}">
+                            <chart-date-range
+                                    selected-project-key="{{selectedProjectKey}}"
+                            ></chart-date-range>
+                        </template>
 
                         <template is="dom-if" if="{{_showTactical || _showOperational}}">
                             <widget-cfd class="kpis__widget kpis__widget--2-3 kpis__widget--height-half"
