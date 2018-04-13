@@ -71,8 +71,30 @@ function addDaysToDate(date, days) {
     return newDate;
 }
 
+function removeDaysFromDate(date, days) {
+    var newDate = new Date(date.valueOf());
+    newDate.setDate(newDate.getDate() - days);
+    return newDate;
+}
+
 function getCapitalized(string) {
     return _.isEmpty(string) ? string : string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function makeSVGEl(tag, attrs) {
+    var el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    forEachInArray(Object.keys(attrs), function (key) {
+        el.setAttribute(key, attrs[key]);
+    });
+    return el;
+}
+
+var _MS_PER_DAY = 1000 * 60 * 60 * 24;
+function dateDiffInDays(dateA, dateB) {
+    var utc1 = Date.UTC(dateA.getFullYear(), dateA.getMonth(), dateA.getDate());
+    var utc2 = Date.UTC(dateB.getFullYear(), dateB.getMonth(), dateB.getDate());
+
+    return Math.floor((utc2 - utc1) / _MS_PER_DAY);
 }
 
 if (!Object.values) {

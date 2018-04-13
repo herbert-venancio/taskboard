@@ -25,8 +25,6 @@
         <style>
         </style>
 
-        <iron-signals on-iron-signal-cfd-created="linkCfdBrush"></iron-signals>
-
         <widget-wrap title="Scope Progress" is-ready="{{isReady}}" error-message="{{errorMessage}}" options="{{options}}" chart="{{chart}}">
             <div id="scope-progress" class="tb-chart"></div>
         </widget-wrap>
@@ -127,13 +125,6 @@
                 },
                 
                 ready: function() {
-                    var self = this;
-                    this.chartDeferred = $.Deferred();
-                    this.selectorChartDeferred = $.Deferred();
-                    $.when(this.chartDeferred, this.selectorChartDeferred).then(function(_chart, _selectorChart){
-                        _selectorChart.addChartWidget(self);
-                    });
-
                     var btSave = ButtonBuilder('Save').id('update').onClick(this.updateSettings.bind(this)).build();
                     this.set('_btSave', btSave);
                 },
@@ -156,10 +147,6 @@
                     });
                 },
 
-                linkCfdBrush: function(event, data) {
-                    this.selectorChartDeferred.resolve(data.cfdChartInstance);
-                },
-
                 reset: function() {
                     this.set('isReady', false);
                     this.set('errorMessage', '');
@@ -167,9 +154,10 @@
                         this.xhr.abort();
                         this.xhr = null;
                     }
-                    if(this.chart) {
+                    if(!_.isEmpty(this.chart)) {
+                        dcDateRangeChartsService.deregisterChartInRange(this.chart);
                         dc.deregisterChart(this.chart);
-                        this._setChart(null);
+                        this._setChart({});
                     }
                 },
 
@@ -250,8 +238,9 @@
 
                     chart
                         // chart configuration
-                        .margins({top: 5, right: 30, bottom: 40, left: 50})
-                        .legend(dcUtils
+                        .margins({top: 15, right: 20, bottom: 20, left: 50})
+                        .legend(
+                            dcUtils
                                 .getDefaultLegend()
                                 .x(95).y(20)
                                 .itemHeight(13)
@@ -262,6 +251,7 @@
                         .colors(
                             self._getChartColors()
                         )
+                        .transitionDuration(0)
 
                         // axis
                         .yAxisLabel("Effort (hours)")
@@ -277,7 +267,6 @@
                     dcUtils.setupChartDateTicks(chart, startDate, endDate, 12);
 
                     this._setChart(chart);
-                    this.chartDeferred.resolve(chart);
                 },
 
                 updateChart: function() {
@@ -295,7 +284,7 @@
                         .stack(this.group, LAYERS[BACKLOG_INDEX], selectStack(BACKLOG_INDEX))
                         .stack(this.group, LAYERS[BACKLOG_PROJECTION_INDEX], selectStack(BACKLOG_PROJECTION_INDEX));
 
-                    this.chart.render();
+                    dcDateRangeChartsService.registerChartInRangeAndRender(this.chart);
                 },
 
                 _getChartColors: function() {

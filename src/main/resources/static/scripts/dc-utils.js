@@ -21,14 +21,17 @@ function DcUtils() {
                 this.getDefaultLegend()
             );
 
-        this.orderChartByKey(chart);
+        this._orderChartByKey(chart);
     };
 
-    this.orderChartByKey = function(chart) {
+    this._orderChartByKey = function(chart) {
         chart.ordering(function(d) { return -d.key });
     };
 
     this.getDateTicks = function(startDate, endDate, numOfTicks) {
+        if (!startDate || !endDate)
+            return;
+
         if (numOfTicks < 2)
             numOfTicks = 2;
 
@@ -39,8 +42,13 @@ function DcUtils() {
         var betweenTicks = diffInDays / cols;
 
         var ticks = [];
+        var lastYearAdded = startDate.getFullYear();
         for (var i = 0; i < cols; i++) {
             var dateTick = addDaysToDate(startDate, Math.round(betweenTicks * i));
+            if (lastYearAdded !== dateTick.getFullYear()) {
+                lastYearAdded = dateTick.getFullYear();
+                ticks.push(new Date(lastYearAdded, 0, 1));
+            }
             ticks.push(dateTick);
         }
         ticks.push(endDate);
@@ -122,24 +130,54 @@ function DcUtils() {
                 return self.dateFormatWithoutYear(tickDate);
             });
 
-        self._breakLineOnTicksThatContainsYears(chart);
+        self._updateStyleOfTicksThatContainsYears(chart);
 
         chart.visibleTickCount = tickCount;
     };
 
-    this._breakLineOnTicksThatContainsYears = function(chart) {
+    this._updateStyleOfTicksThatContainsYears = function(chart) {
         var self = this;
         chart.on('pretransition', function(chart) {
-            chart.selectAll('g.x text').each(function(d, i) {
-                if (this.innerHTML.indexOf(self._DATE_YEAR_SPLIT_WORD) === -1)
+            var chartHeight = chart.effectiveHeight();
+            chart.selectAll('g.x .tick').each(function(d, i) {
+                var textElOfTick = this.childNodes[1];
+                if (self._textHasDateYearSplitWord(textElOfTick.innerHTML))
                     return;
 
-                var dateArray = this.innerHTML.split(self._DATE_YEAR_SPLIT_WORD);
-                var dayMonth = dateArray[0];
-                var year = dateArray[1];
-                this.innerHTML = dayMonth + '<tspan class="tick-year" x="0" dy="1.2em">' + year + '</tspan>';
+                self._transformYearTick(this, chartHeight, i);
             });
         });
+    };
+
+    this._textHasDateYearSplitWord = function(text) {
+        return text.indexOf(this._DATE_YEAR_SPLIT_WORD) === -1;
+    };
+
+    this._transformYearTick = function(tickEl, chartHeight, tickIndex) {
+        var textElYear = tickEl.childNodes[2];
+
+        if (textElYear)
+            return;
+
+        var lineEl = tickEl.childNodes[0];
+        var textElDayMonthYear = tickEl.childNodes[1];
+
+        tickEl.classList.add('tick--has-year');
+
+        var dateArray = textElDayMonthYear.innerHTML.split(this._DATE_YEAR_SPLIT_WORD);
+        var dayMonth = dateArray[0];
+        var year = dateArray[1];
+
+        var yearLineHeight = chartHeight + 4;
+        lineEl.setAttribute('y1', -yearLineHeight);
+
+        if (tickIndex === 0)
+            textElDayMonthYear.innerHTML = dayMonth;
+        else
+            textElDayMonthYear.setAttribute('style', 'display: none');
+
+        var textElYearElStr = '<text class="tick-year" x="0" dy="1.2em" transform="translate(0, -' + (yearLineHeight + 15) + ')" style="text-anchor: middle;">' + year + '</text>';
+        tickEl.insertAdjacentHTML('beforeend', textElYearElStr);
     };
 
 }
