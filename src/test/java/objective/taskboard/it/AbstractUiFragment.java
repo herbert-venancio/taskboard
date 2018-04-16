@@ -254,6 +254,24 @@ public abstract class AbstractUiFragment {
         waitPaperDropdownMenuSelectedTextToBe(dropdown, itemText);
     }
 
+    protected void waitElementIsDisabled(WebElement element) {
+        waitUntil(new ExpectedCondition<Boolean>() {
+            @Override
+            public Boolean apply(WebDriver input) {
+                return element.getAttribute("disabled") != null;
+            }
+        });
+    }
+
+    protected void waitElementIsEnabled(WebElement element) {
+        waitUntil(new ExpectedCondition<Boolean>() {
+            @Override
+            public Boolean apply(WebDriver input) {
+                return element.getAttribute("disabled") == null;
+            }
+        });
+    }
+
     /**
      * Geckodriver implements a webdriver spec that requires inputs to be visible during interactions.
      * On the other hand, it's common to set file inputs hidden and use a placeholder for better looking.

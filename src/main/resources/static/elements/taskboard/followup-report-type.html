@@ -1,0 +1,307 @@
+<dom-module id="followup-report-type">
+
+    <template>
+
+        <style>
+            modal-wrap-content {
+                width: 610px;
+                display: block;
+            }
+
+            #inputName {
+                border: 1px solid #E5E5E5;
+                border-radius: 4px;
+                padding: 0 16px;
+                color: #555;
+                font-size: 14px;
+                line-height: 20px;
+                margin-top: 8px;
+                height: 32px;
+                display: block;
+                width: 100%;
+            }
+
+            #inputName:focus {
+                outline: 0;
+            }
+
+            .content-row {
+                margin-top: 16px;
+            }
+
+            .roles-list {
+                display: flex;
+                height: 166px;
+                border: 1px solid #E5E5E5;
+                border-radius: 4px;
+                margin-top: 8px;
+                overflow: hidden;
+            }
+
+            .roles-list > div {
+                flex: 1;
+                margin-bottom: -1px;
+            }
+
+            label {
+                font-size: 16px;
+                line-height: 20px;
+                color: #555;
+            }
+        </style>
+
+        <iron-ajax id="ajaxRoles"
+                   method="GET"
+                   on-response="_handleRolesResponse"
+                   url="/ws/roles"
+                   content-type='application/json'
+                   last-response="{{roles}}"></iron-ajax>
+
+        <confirm-modal id="followupReportTypeConfirmModal"></confirm-modal>
+
+        <modal-wrap id="modal"
+                    icon="taskboard-icons:edit"
+                    title="[[title]]"
+                    loading="[[showLoadingSpinner]]"
+                    confirm-close="[[confirmClose]]">
+
+            <modal-wrap-content>
+                <tb-message-box></tb-message-box>
+
+                <div class="template-form">
+                    <div>
+                        <label>Name</label>
+                        <input id="inputName" value="{{template.name::input}}" on-change="_onDataChange"></input>
+                    </div>
+                    <drag-and-drop-file class="content-row" file-name="{{fileName}}" file-data="{{fileData}}"
+                                        url-download="[[urlDownload]]"></drag-and-drop-file>
+                    <div class="content-row">
+                        <label>Allow to generate</label>
+                        <div class="roles-list">
+	                        <div class="scroll" id="listOfRoles">
+	                            <template is="dom-repeat" items="{{template.roles}}">
+	                                <paper-checkbox class="tb-paper-checkbox" checked="{{item.checked}}"
+	                                                on-tap="_onDataChange">[[item.name]]</paper-checkbox><br>
+	                            </template>
+	                        </div>
+                        </div>
+                    </div>
+                </div>
+            </modal-wrap-content>
+            <modal-wrap-footer>
+                <tb-button button="[[_btCancel]]"></tb-button>
+                <tb-button button="[[_btSave]]"></tb-button>
+            </modal-wrap-footer>
+        </modal-wrap>
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'followup-report-type',
+
+                properties: {
+                    template: {
+                        type: Object
+                    },
+                    roles: {
+                        type: Array
+                    },
+                    showLoadingSpinner: {
+                        type: Boolean
+                    },
+                    fileName: {
+                        type: String
+                    },
+                    fileData: {
+                        type: Object
+                    },
+                    urlDownload: {
+                        type: String
+                    },
+                    title: {
+                        type: String
+                    },
+                    confirmClose: {
+                        type: Boolean,
+                        value: false
+                    },
+                    _btSave: {
+                        type: Object,
+                        value: function() { return {} }
+                    },
+                    _btDelete: {
+                        type: Object,
+                        value: function() { return {} }
+                    }
+                },
+
+                observers: [
+                    '_onDataChange(fileName)'
+                ],
+
+                ready: function() {
+                    var btSave = ButtonBuilder('Save').id('save').build();
+                    var btCancel = ButtonBuilder('Cancel').id('cancel').type(buttonTypes.LINK).onClick(this.close.bind(this)).build();
+                    this.set('_btSave', btSave);
+                    this.set('_btCancel', btCancel);
+                },
+
+                open: function (templateEdit) {
+                    this.set('template', { name: '', roles: [] });
+                    this.set('roles', []);
+                    this.set('fileName', undefined);
+                    this.set('fileData', undefined);
+                    this.set('urlDownload', '');
+                    this.set('title', 'Add report type');
+                    this.set('_btSave.onClick', this._createTemplate.bind(this));
+
+                    if (templateEdit) {
+                        this.set('template', { id: templateEdit.id, name: templateEdit.name, roles: templateEdit.roles });
+                        this.set('title', 'Edit report type');
+                        this.set('fileName', templateEdit.name + "-followup-template.xlsm");
+                        this.set('urlDownload', 'api/templates/' + templateEdit.id);
+                        this.set('_btSave.onClick', this._updateTemplate.bind(this));
+                    }
+
+                    this.set('confirmClose', false);
+                    this._closeErrorMessage();
+                    this._showLoading(true);
+                    this.$.ajaxRoles.generateRequest();
+                    this.$.modal.open();
+                },
+
+                close: function() {
+                    this.$.modal.close();
+                },
+
+                _updateTemplate: function() {
+                    var self = this;
+                    if (!self._isValid())
+                        return;
+
+                    var text = "Do you want to update this report type?"
+                    this.$.followupReportTypeConfirmModal.openDialog("Confirmation", text, function() {
+                        self._showLoading(true);
+                        $.ajax({
+                            url: 'api/templates/' + self.template.id,
+                            type: 'PUT',
+                            data: self._getFormData(),
+                            processData: false,
+                            contentType: false,
+                            enctype: 'multipart/form-data',
+                            success: function() {
+                                self._defaultSuccess();
+                            },
+                            error: function(jqXHR) {
+                                self._showError(jqXHR, self);
+                            }
+                        });
+                    });
+                },
+
+                _createTemplate: function() {
+                    var self = this;
+                    if (!self._isValid())
+                        return;
+
+                    self._showLoading(true);
+                    $.ajax({
+                        url: 'api/templates',
+                        type: 'POST',
+                        data: self._getFormData(),
+                        processData: false,
+                        contentType: false,
+                        enctype: 'multipart/form-data',
+                        success: function() {
+                            self._defaultSuccess();
+                        },
+                        error: function(jqXHR) {
+                            self._showError(jqXHR, self);
+                        }
+                    });
+                },
+
+                _defaultSuccess: function() {
+                    this._showLoading(false);
+                    this.set('confirmClose', false);
+                    this.close();
+                    this.fire('iron-signal', {name: 'refresh-templates'});
+                },
+
+                _getFormData: function() {
+                    var rolesCheckedNames = this._getTemplateRolesChecked().map(function(r){return r.name});
+
+                    var formData = new FormData();
+                    formData.append("name", this.template.name);
+                    formData.append("roles", rolesCheckedNames);
+                    if (this.fileData)
+                        formData.append("file", this.fileData, this.fileName);
+
+                    return formData;
+                },
+
+                _isValid: function() {
+                    this._closeErrorMessage();
+                    var rolesChecked = this._getTemplateRolesChecked();
+                    var fileWasNotUploaded = !this.fileName;
+                    if (!this.template.name || fileWasNotUploaded || rolesChecked.length == 0) {
+                        this._showErrorMessage("Make sure the name is not empty, the report type file has been uploaded, " +
+                            "and at least one role has been selected.");
+                        return false;
+                    }
+
+                    if (!this.fileName.endsWith('.xlsm')) {
+                        this._showErrorMessage("Invalid type file! It accepts only .xlsm files.");
+                        return false;
+                    }
+
+                    return true;
+                },
+
+                _onDataChange: function() {
+                    this.set('confirmClose', true);
+                },
+
+                _getTemplateRolesChecked: function() {
+                    return this.template.roles.filter(function(r){return r.checked});
+                },
+
+                _showLoading: function(show) {
+                    this.set('showLoadingSpinner', show);
+                },
+
+                _showError: function(jqXHR, self) {
+                    self._showLoading(false);
+                    if  (jqXHR && jqXHR.responseText) {
+                        var responseError = JSON.parse(jqXHR.responseText);
+                        self._showErrorMessage(responseError.message);
+                    } else {
+                        self._showErrorMessage("The request has failed");
+                    }
+                },
+
+                _handleRolesResponse: function() {
+                    var template = this.template;
+                    var roles = this.roles.map(function(role) {
+                        return {
+                            name: role.name,
+                            checked: template.roles.indexOf(role.name) > -1
+                        }
+                    });
+                    this.set('template.roles', roles);
+                    this._showLoading(false);
+                },
+
+                _showErrorMessage: function(msg) {
+                    this.$$('tb-message-box').open(msg);
+                },
+
+                _closeErrorMessage: function() {
+                    this.$$('tb-message-box').close();
+                }
+
+            });
+        })();
+    </script>
+</dom-module>

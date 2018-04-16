@@ -1,0 +1,160 @@
+<dom-module id="drag-and-drop-file">
+    <template>
+        <style>
+            :host {
+                display: block;
+            }
+
+            #areaDragOver {
+                display: flex;
+                align-items: center;
+                width: 100%;
+                border-top: 1px solid #E5E5E5;
+                border-bottom: 1px solid #E5E5E5;
+                color: #555;
+                padding: 8px 16px 8px 0;
+                margin-top: 8px;
+                height: 42px;
+                position: relative;
+            }
+
+            #areaDrop {
+                border: 1px dashed #555;
+                background-color: #E5E5E5;
+                opacity: 0.4;
+                width: 100%;
+                height: calc(100% + 2px);
+                position: absolute;
+                left: 0;
+                top: -1px;
+            }
+
+            .link {
+                color: #5DAFFF;
+                cursor: pointer;
+                font-size: 14px;
+                line-height: 18px;
+            }
+
+            iron-icon {
+                width: 24px;
+                height: 24px;
+                padding: 4px;
+                flex: 0 0 auto;
+            }
+
+            label {
+                font-size: 16px;
+                line-height: 20px;
+                color: #555;
+            }
+
+            span {
+                margin-left: 8px;
+                flex: 1;
+                font-size: 14px;
+                line-height: 18px;
+            }
+
+            paper-icon-button {
+                margin-left: 8px;
+                flex: 0 0 auto;
+            }
+
+            input[type='file'] {
+                display: none;
+            }
+        </style>
+
+        <label>Browse</label>
+        <div id="areaDragOver" on-dragover="_showAreaDrop">
+            <iron-icon icon="taskboard-icons:attachment"></iron-icon>
+            <span id="dropFileMessage" hidden="[[fileName]]">Drop files to attach, or <label for="inputFile" class="link">browse</label>.</span>
+
+            <input on-change="_onFileSelected" id="inputFile" type="file" accept=".xlsm" />
+            <a id="linkDownload" hidden="true" href="[[urlDownload]]" download="[[fileName]]"></a>
+
+            <template is="dom-if" if="[[fileName]]">
+                <span id="fileName">[[fileName]]</span>
+                <paper-icon-button id="downloadFileButton" class="tb-paper-icon-button" title="Download file" icon="taskboard-icons:download"
+                                   on-tap="_downloadFile"></paper-icon-button>
+                <paper-icon-button id="clearFileButton" class="tb-paper-icon-button" title="Clear file" icon="taskboard-icons:delete"
+                                   on-tap="_clearFile"></paper-icon-button>
+            </template>
+            <div id="areaDrop" hidden="[[!isShowAreaDrop]]" on-dragover="_handleDragOver" on-dragleave="_hideAreaDrop" on-drop="_onFileDrop"></div>
+        </div>
+
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'drag-and-drop-file',
+
+                properties: {
+                    fileName: {
+                        type: String,
+                        notify: true
+                    },
+                    fileData: {
+                        type: Object,
+                        notify: true
+                    },
+                    urlDownload: {
+                        type: String
+                    },
+                    isShowAreaDrop: {
+                        type: Boolean,
+                        value: false
+                    }
+                },
+
+                _showAreaDrop: function(event) {
+                    event.preventDefault();
+                    this.set('isShowAreaDrop', true);
+                },
+
+                _handleDragOver: function(event) {
+                    event.preventDefault();
+                },
+
+                _hideAreaDrop: function(event) {
+                    event.preventDefault();
+                    this.set('isShowAreaDrop', false);
+                },
+
+                _onFileDrop: function(event) {
+                    event.preventDefault();
+                    this.set('isShowAreaDrop', false);
+                    this._setFile(event.dataTransfer.files[0]);
+                },
+
+                _onFileSelected: function(event) {
+                    this._setFile(event.target.files[0]);
+                    $("#inputFile").val('');
+                },
+
+                _setFile: function(file) {
+                    if (!file)
+                        return;
+                    this.set('fileName', file.name);
+                    this.set('fileData', file);
+
+                    var blob = new Blob([this.fileData], { type: "multipart/form-data" });
+                    var url = URL.createObjectURL(blob);
+                    this.set('urlDownload', url);
+                },
+
+                _downloadFile: function() {
+                    this.$.linkDownload.click();
+                },
+
+                _clearFile: function() {
+                    this.set('fileName', null);
+                    this.set('fileData', null);
+                    this.set('urlDownload', '');
+                }
+            });
+        })();
+    </script>
+</dom-module>
