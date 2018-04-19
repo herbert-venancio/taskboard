@@ -1,0 +1,1 @@
+ALTER TABLE project_filter_configuration ADD projection_timespan NUMBER DEFAULT NULL;

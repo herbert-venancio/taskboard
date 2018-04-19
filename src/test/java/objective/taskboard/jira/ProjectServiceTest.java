@@ -116,22 +116,16 @@ public class ProjectServiceTest {
 
     @Before
     public void mockRepository() {
-        ProjectFilterConfiguration taskb = new ProjectFilterConfiguration();
-        taskb.setProjectKey("TASKB");
-        ProjectFilterConfiguration proj1 = new ProjectFilterConfiguration();
-        proj1.setProjectKey(PROJECT_ARCHIVED);
+        ProjectFilterConfiguration taskb = new ProjectFilterConfiguration("TASKB");
+        ProjectFilterConfiguration proj1 = new ProjectFilterConfiguration(PROJECT_ARCHIVED);
         proj1.setArchived(true);
-        ProjectFilterConfiguration proj2 = new ProjectFilterConfiguration();
-        proj2.setProjectKey(PROJECT_REGULAR_1);
+        ProjectFilterConfiguration proj2 = new ProjectFilterConfiguration(PROJECT_REGULAR_1);
         proj2.setArchived(false);
-        ProjectFilterConfiguration proj3 = new ProjectFilterConfiguration();
-        proj3.setProjectKey(PROJECT_REGULAR_2);
+        ProjectFilterConfiguration proj3 = new ProjectFilterConfiguration(PROJECT_REGULAR_2);
         proj3.setArchived(false);
-        ProjectFilterConfiguration proj4 = new ProjectFilterConfiguration();
-        proj4.setProjectKey(PROJECT_WITHOUT_ACCESS);
+        ProjectFilterConfiguration proj4 = new ProjectFilterConfiguration(PROJECT_WITHOUT_ACCESS);
         proj4.setArchived(false);
-        ProjectFilterConfiguration proj5 = new ProjectFilterConfiguration();
-        proj5.setProjectKey(PROJECT_WITHOUT_METADATA);
+        ProjectFilterConfiguration proj5 = new ProjectFilterConfiguration(PROJECT_WITHOUT_METADATA);
         proj5.setArchived(false);
 
         List<ProjectFilterConfiguration> projectList = asList(taskb, proj1, proj2, proj3, proj4, proj5);
@@ -321,8 +315,7 @@ public class ProjectServiceTest {
 
     @Test
     public void saveTaskboardProject() {
-        ProjectFilterConfiguration newProject = new ProjectFilterConfiguration();
-        newProject.setProjectKey(PROJECT_INVALID);
+        ProjectFilterConfiguration newProject = new ProjectFilterConfiguration(PROJECT_INVALID);
         subject.saveTaskboardProject(newProject);
 
         verify(projectRepository, atLeast(1)).save(newProject);

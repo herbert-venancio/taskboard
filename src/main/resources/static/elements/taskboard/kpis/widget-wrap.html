@@ -173,19 +173,23 @@
                 <template is="dom-repeat" items="{{tags}}" as="tag">
                     <span class="widget__tag">[[tag]]</span>
                 </template>
-                <div class="widget__options">
-                    <template is="dom-repeat" items="{{options}}" as="option">
-                        <template is="dom-if" if="{{!option.hidden}}">
-                            <paper-icon-button icon="{{option.icon}}"
-                                title="{{option.title}}"
-                                class$="widget__button {{option.cssClasses}}"
-                                on-tap="_onOptionTap"></paper-icon-button>
+                <template is="dom-if" if="[[_shouldShowOptions(isReady,errorMessage)]]">
+                    <div class="widget__options">
+                        <template is="dom-repeat" items="{{options}}" as="option">
+                            <template is="dom-if" if="{{!option.hidden}}">
+                                <paper-icon-button
+                                    icon="{{option.icon}}"
+                                    title="{{option.title}}"
+                                    class$="widget__button {{option.cssClasses}}"
+                                    on-tap="_onOptionTap"
+                                    ></paper-icon-button>
+                            </template>
                         </template>
-                    </template>
-                    <template is="dom-if" if="{{_isChartFiltered}}">
-                        <a class="widget__reset widget__option" on-tap="_onTapReset">Reset</a>
-                    </template>
-                </div>
+                        <template is="dom-if" if="{{_isChartFiltered}}">
+                            <a class="widget__reset widget__option" on-tap="_onTapReset">Reset</a>
+                        </template>
+                    </div>
+                </template>
             </header>
             <div class="widget__body">
                 <template is="dom-if" if="{{!errorMessage}}">
@@ -314,6 +318,10 @@
                 _onOptionTap: function(event) {
                     var callback = event.model.get('option.tap');
                     callback();
+                },
+
+                _shouldShowOptions: function(isReady,errorMessage) {
+                    return isReady && _.isEmpty(errorMessage);
                 }
             });
         })();

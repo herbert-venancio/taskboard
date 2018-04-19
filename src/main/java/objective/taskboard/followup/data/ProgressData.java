@@ -10,4 +10,5 @@ public class ProgressData {
     public List<ProgressDataPoint> actualProjection   = new LinkedList<>();
     public LocalDate startingDate;
     public LocalDate endingDate;
+    public Integer projectionTimespan;
 }
