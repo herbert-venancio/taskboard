@@ -32,7 +32,7 @@
         </widget-wrap>
 
         <modal-wrap id="modal"
-                    title="Progress Chart Settings"
+                    title="Progress Chart Filters"
                     >
 
             <modal-wrap-content>
@@ -40,7 +40,7 @@
                     <form class="progress-chart-modal" style="width: 250px">
                         <paper-input id="projectProjectionTimespan"
                             label="Projection Timespan (in days)"
-                            value="{{projectionTimespan}}"
+                            value="{{tempProjectionTimespan}}"
                             type="number"
                             min="0"
                             auto-validate></paper-input>
@@ -49,7 +49,7 @@
             </modal-wrap-content>
 
             <modal-wrap-footer>
-                <tb-button button="[[_btSave]]"></tb-button>
+                <tb-button button="[[_btUpdate]]"></tb-button>
             </modal-wrap-footer>
 
         </modal-wrap>
@@ -88,51 +88,64 @@
                     },
                     options: {
                         type: Array,
-                        value: []
+                        value: function() { return []; }
                     },
-                    projectionTimespan: {
+                    tempProjectionTimespan: {
                         type: Number,
-                        notify: true
+                        value: null
                     },
-                    _btSave: {
+                    _btUpdate: {
                         type: Object,
                         value: function () { return {} }
                     }
                 },
 
                 observers: [
+                    '_resetProjectionTimespan(selectedProjectKey, selectedDate)',
                     '_onProjectSelected(selectedProjectKey, selectedDate)',
                 ],
-
-                attached: function() {
-                    var self = this;
-                    this.options = [{
-                        icon:'taskboard-icons:settings'
-                        , title: 'Chart settings'
-                        , tap: function() {
-                            self.projectionTimespan = self._getSavedProjection(self.selectedProjectKey);
-                            self.$.modal.open();
-                        }
-                    }];
-                },
                 
                 ready: function() {
-                    var btSave = ButtonBuilder('Save').id('update').onClick(this.updateSettings.bind(this)).build();
-                    this.set('_btSave', btSave);
+                    this._createChartOptions();
+
+                    var btUpdate = ButtonBuilder('Update chart').id('update').onClick(this.updateFilters.bind(this)).build();
+                    this.set('_btUpdate', btUpdate);
+                },
+
+                _createChartOptions: function() {
+                    var self = this;
+                    this.set('options', [
+                        {
+                            icon:'taskboard-icons:dashboard-filter',
+                            title: 'Chart filters',
+                            tap: function() {
+                                self.$.modal.open();
+                            }
+                        }
+                    ]);
                 },
 
                 _onProjectSelected: function(selectedProjectKey, selectedDate) {
                     var self = this;
+
                     self.reset();
-                    self.projectionTimespan = self._getSavedProjection(self.selectedProjectKey);
-                    var url = "/api/projects/"+selectedProjectKey+"/followup/progress?timezone=" + taskboard.getTimeZoneIdFromBrowser() + "&projection=" + self.projectionTimespan;
+
+                    var url = "/api/projects/"+selectedProjectKey+"/followup/progress?timezone=" + taskboard.getTimeZoneIdFromBrowser();
+
+                    if (self.tempProjectionTimespan)
+                        url = url + "&projection=" + self.tempProjectionTimespan;
+
                     self.xhr = d3.json(url, function(req, data) {
                         (function(){
+
                             if (req != null && req.status >= 400) {
                                 var msg = 'Impossible to generate Progress Chart. '+ req.responseText;
                                 self.set('errorMessage', msg);
                                 return;
                             }
+
+                            if (!self.tempProjectionTimespan)
+                                self.set('tempProjectionTimespan', data.projectionTimespan);
 
                             function plotCallback(type) {
                                 return function(d, index) {
@@ -148,9 +161,7 @@
                             data.actualProjection.forEach(plotCallback("Projection"));
                             data.expected.forEach(plotCallback("Expected"));
 
-                            ndx = crossfilter(graphData);
-
-                            var dateDimension = ndx.dimension(function (d) {
+                            var dateDimension = crossfilter(graphData).dimension(function (d) {
                                 return [d.type, d.date];
                             });
 
@@ -191,13 +202,14 @@
                         )
                         .elasticY(false)
                         .yAxisLabel("Progress %")
-                        .legend(dcUtils
-                                .getDefaultLegend()
+                        .legend(
+                            dcUtils.getDefaultLegend()
                                 .x(80).y(20)
                                 .itemHeight(13)
                                 .itemWidth(90)
                                 .horizontal(1)
-                                .legendWidth(180))
+                                .legendWidth(180)
+                        )
                         .margins({top: 15, right: 20, bottom: 20, left: 50})
                         .colors(
                             self._getChartColors()
@@ -230,21 +242,13 @@
                     }
                 },
 
-                updateSettings: function() {
-                    this._saveProjectionTimespan(this.projectionTimespan, this.selectedProjectKey);
+                _resetProjectionTimespan: function() {
+                    this.set('tempProjectionTimespan', null);
+                },
+
+                updateFilters: function() {
                     this.$.modal.close();
                     this._onProjectSelected(this.selectedProjectKey, this.selectedDate);
-                },
-
-                _saveProjectionTimespan: function(projection, projectKey) {
-                   localStorage.setItem("dashboard.progress-chart." + projectKey + ".projection", projection);
-                },
-
-                _getSavedProjection: function(projectKey) {
-                    var projection = localStorage.getItem("dashboard.progress-chart." + projectKey + ".projection");
-                    if (!projection)
-                        return 20;
-                    return Number(projection);
                 }
 
             });

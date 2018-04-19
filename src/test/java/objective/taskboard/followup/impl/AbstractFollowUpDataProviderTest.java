@@ -109,7 +109,7 @@ public abstract class AbstractFollowUpDataProviderTest {
     protected TShirtSize tshirtSizeInfo;
 
     protected JiraProperties.Followup followup = new JiraProperties.Followup();
-    protected ProjectFilterConfiguration projectConfiguration = new ProjectFilterConfiguration();
+    protected ProjectFilterConfiguration projectConfiguration;
 
     @InjectMocks
     FollowUpDataProviderFromCurrentState subject;
@@ -220,7 +220,7 @@ public abstract class AbstractFollowUpDataProviderTest {
 
         when(cycleTime.getCycleTime(any(), any(), anyLong())).thenReturn(1D);
 
-        projectConfiguration.setProjectKey("PROJ");
+        projectConfiguration = new ProjectFilterConfiguration("PROJ");
 
         when(projectRepository.getProjectByKey(any())).thenReturn(Optional.of(projectConfiguration));
     }

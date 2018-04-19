@@ -24,7 +24,7 @@ public class FollowupProgressCalculator {
     public ProgressData calculate(FollowUpDataSnapshot followupData, LocalDate projectStartDate, LocalDate projectDeliveryDate) {
         return calculate(followupData, projectStartDate, projectDeliveryDate, DEFAULT_PROJECTION_SAMPLE_SIZE);
     }
-    
+
     public ProgressData calculate(FollowUpDataSnapshot followupData, LocalDate projectStartDate, LocalDate projectDeliveryDate, int projectionSampleSize) {
         ProgressData progressData = new ProgressData();
 
@@ -44,12 +44,14 @@ public class FollowupProgressCalculator {
 
         LocalDate startingDate = firstRow.date;
         LocalDate finalProjectDate = projectDeliveryDate.isBefore(lastRow.date) ? lastRow.date : projectDeliveryDate;
-        
+
         addExpectedProgress(progressData, projectStartDate, projectDeliveryDate, finalProjectDate);
         addProjectionData(progressData, historyRows, startingDate, finalProjectDate, projectionSampleSize);
-        
+
         progressData.startingDate = projectStartDate;
         progressData.endingDate = finalProjectDate;
+        progressData.projectionTimespan = projectionSampleSize;
+
         return progressData;
     }
 

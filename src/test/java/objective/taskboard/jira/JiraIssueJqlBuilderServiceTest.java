@@ -45,14 +45,11 @@ public class JiraIssueJqlBuilderServiceTest {
     public void setup() {
         when(metadataService.getJiraTimeZone()).thenReturn(ZoneId.of("America/Sao_Paulo"));
         when(cardsRepo.getCurrentProjects()).thenReturn(Optional.of(Sets.newSet("PROJ")));
+        when(projectRepository.getProjects()).thenReturn(asList(new ProjectFilterConfiguration("PROJ")));
     }
     
     @Test
     public void whenProjectsJql_produceProjectsJql() {
-        ProjectFilterConfiguration projectFilterConfiguration = new ProjectFilterConfiguration();
-        projectFilterConfiguration.setProjectKey("PROJ");
-        when(projectRepository.getProjects()).thenReturn(asList(projectFilterConfiguration));
-        
         String actual = subject.projectsSqlWithoutTimeConstraint().trim();
         
         assertEquals("project in ('PROJ')", actual);
@@ -60,10 +57,6 @@ public class JiraIssueJqlBuilderServiceTest {
     
     @Test
     public void whenProjectsJqlWithDate_produceProjectsJqlWithUpdatedDate() {
-        ProjectFilterConfiguration projectFilterConfiguration = new ProjectFilterConfiguration();
-        projectFilterConfiguration.setProjectKey("PROJ");
-        when(projectRepository.getProjects()).thenReturn(asList(projectFilterConfiguration));
-        
         when(cardsRepo.getLastUpdatedDate()).thenReturn(Optional.of(date(2017,5,1,10,30)));
         String actual = subject.projectsJql(cardsRepo).trim();
         

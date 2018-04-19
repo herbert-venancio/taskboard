@@ -1,16 +1,18 @@
 package objective.taskboard.controller;
 
 import static objective.taskboard.utils.DateTimeUtils.determineTimeZoneId;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.base.Objects;
-import com.google.common.cache.Cache;
 
 import objective.taskboard.auth.Authorizer;
 import objective.taskboard.config.CacheConfiguration;
@@ -34,94 +35,94 @@ import objective.taskboard.repository.PermissionRepository;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 
 @RestController
-public class DashboardProjectProgressController {
+public class FollowUpProgressController {
+
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FollowUpProgressController.class);
+
     @Autowired
     private FollowUpDataProviderFromCurrentState providerFromCurrentState;
-    
+
     @Autowired
     private ProjectFilterConfigurationCachedRepository projects;
 
     @Autowired
     private CacheManager cacheManager;
 
-    private Cache<Key, ResponseEntity<Object>> cache;
+    private Cache cache;
 
     @Autowired
     private Authorizer authorizer;
 
     @PostConstruct
-    @SuppressWarnings("unchecked")
     public void initCache() {
-        cache = (Cache<Key, ResponseEntity<Object>>) cacheManager.getCache(CacheConfiguration.DASHBOARD_PROGRESS_DATA).getNativeCache();
+        cache = cacheManager.getCache(CacheConfiguration.DASHBOARD_PROGRESS_DATA);
     }
-    
+
     @RequestMapping(value = "/api/projects/{project}/followup/progress", method = RequestMethod.GET)
     public ResponseEntity<Object> progress(
             @PathVariable("project") String projectKey,
             @RequestParam("timezone") String zoneId,
-            @RequestParam(value = "projection", defaultValue = "20") Integer projectionTimespan) {
+            @RequestParam("projection") Optional<Integer> projectionTimespan) {
         if (!authorizer.hasPermissionInProject(PermissionRepository.DASHBOARD_TACTICAL, projectKey))
-            return new ResponseEntity<>("Resource not found", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Resource not found.", HttpStatus.NOT_FOUND);
 
         String today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
         Key cacheKey = new Key(projectKey, zoneId, today, projectionTimespan);
 
         try {
             return cache.get(cacheKey, () -> load(cacheKey));
-        } catch(Exception ex) {
-            return new ResponseEntity<>(ex, INTERNAL_SERVER_ERROR);
+        } catch(Exception e) {
+            log.error("Error on load " + projectKey, e);
+            return new ResponseEntity<>("Unexpected behavior. Please, report this error to the administrator.", INTERNAL_SERVER_ERROR);
         }
     }
 
     private ResponseEntity<Object> load(Key key) throws Exception {
-        String projectKey = key.projectKey;
-        String zoneId = key.zoneId;
-        Integer projectionSampleSize = key.projection;
+        Optional<ProjectFilterConfiguration> projectOpt = projects.getProjectByKey(key.projectKey);
 
-        if (projectionSampleSize < 0)
-            return new ResponseEntity<>("The projection timespan should be a positive number.", INTERNAL_SERVER_ERROR);
+        if (!projectOpt.isPresent())
+            return new ResponseEntity<>("Project not found: " + key.projectKey + ".", NOT_FOUND);
 
-        Optional<ProjectFilterConfiguration> project = projects.getProjectByKey(projectKey);
+        ProjectFilterConfiguration project = projectOpt.get();
 
-        if (!project.isPresent())
-            return new ResponseEntity<>("Project not found: " + projectKey + ".", HttpStatus.NOT_FOUND);
+        final Integer projectionTimespan;
 
-        ZoneId timezone = determineTimeZoneId(zoneId);
+        projectionTimespan = key.projectionTimespan.orElseGet(project::getProjectionTimespan);
 
-        if (project.get().getDeliveryDate() == null)
-            return new ResponseEntity<>("The project " + projectKey + " has no delivery date.", INTERNAL_SERVER_ERROR);
+        if (projectionTimespan <= 0)
+            return new ResponseEntity<>("The projection timespan should be a positive number.", BAD_REQUEST);
 
-        LocalDate deliveryDate = project.get().getDeliveryDate();
+        if (project.getDeliveryDate() == null)
+            return new ResponseEntity<>("The project " + key.projectKey + " has no delivery date.", INTERNAL_SERVER_ERROR);
 
-        if (project.get().getStartDate() == null)
-            return new ResponseEntity<>("The project " + projectKey + " has no start date.", INTERNAL_SERVER_ERROR);
+        if (project.getStartDate() == null)
+            return new ResponseEntity<>("The project " + key.projectKey + " has no start date.", INTERNAL_SERVER_ERROR);
 
-        LocalDate projectStartDate = project.get().getStartDate();
-
-        FollowUpDataSnapshot snapshot = providerFromCurrentState.getJiraData(new String[]{projectKey}, timezone);
+        FollowUpDataSnapshot snapshot = providerFromCurrentState.getJiraData(new String[]{key.projectKey}, determineTimeZoneId(key.zoneId));
         if (!snapshot.hasClusterConfiguration())
-            return new ResponseEntity<>("No cluster configuration found for project " + projectKey + ".", INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("No cluster configuration found for project " + key.projectKey + ".", INTERNAL_SERVER_ERROR);
 
         if (!snapshot.getHistory().isPresent())
-            return new ResponseEntity<>("No progress history found for project " + projectKey, INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("No progress history found for project " + key.projectKey + ".", INTERNAL_SERVER_ERROR);
 
         FollowupProgressCalculator calculator = new FollowupProgressCalculator();
-        ProgressData progressData = calculator.calculate(snapshot, projectStartDate, deliveryDate, projectionSampleSize);
 
+        ProgressData progressData = calculator.calculate(snapshot, project.getStartDate(), project.getDeliveryDate(), projectionTimespan);
         return ResponseEntity.ok().body(progressData);
+
     }
 
     private static class Key {
         public final String projectKey;
         public final String zoneId;
         public final String today;
-        public final Integer projection;
+        public final Optional<Integer> projectionTimespan;
 
-        public Key(String projectKey, String zoneId, String today, Integer projection) {
+        public Key(String projectKey, String zoneId, String today, Optional<Integer> projection) {
             this.projectKey = projectKey;
             this.zoneId = zoneId;
             this.today = today;
-            this.projection = projection;
+            this.projectionTimespan = projection;
         }
 
         @Override
@@ -132,12 +133,12 @@ public class DashboardProjectProgressController {
             return Objects.equal(projectKey, key.projectKey) &&
                     Objects.equal(zoneId, key.zoneId) &&
                     Objects.equal(today, key.today) &&
-                    Objects.equal(projection, key.projection);
+                    Objects.equal(projectionTimespan, key.projectionTimespan);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(projectKey, zoneId, today, projection);
+            return Objects.hashCode(projectKey, zoneId, today, projectionTimespan);
         }
     }
 }

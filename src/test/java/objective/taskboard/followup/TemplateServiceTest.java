@@ -96,9 +96,7 @@ public class TemplateServiceTest {
     public void createProjects() {
         List<String> keys = Lists.newArrayList(PROJ1, PROJ2);
         for(String projectKey : keys) {
-            ProjectFilterConfiguration proj = new ProjectFilterConfiguration();
-            proj.setProjectKey(projectKey);
-            projectFilterConfigurationCachedRepository.save(proj);
+            projectFilterConfigurationCachedRepository.save(new ProjectFilterConfiguration(projectKey));
         }
     }
 

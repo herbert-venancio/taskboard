@@ -62,8 +62,7 @@ public class FollowUpDateRangeControllerTest {
         LocalDate startDate = LocalDate.of(2017, 1, 1);
         LocalDate deliveryDate = LocalDate.of(2018, 1, 1);
 
-        ProjectFilterConfiguration taskboardProject = new ProjectFilterConfiguration();
-        taskboardProject.setProjectKey(PROJECT_KEY);
+        ProjectFilterConfiguration taskboardProject = new ProjectFilterConfiguration(PROJECT_KEY);
         taskboardProject.setStartDate(startDate);
         taskboardProject.setDeliveryDate(deliveryDate);
 

@@ -163,9 +163,12 @@ public class ProjectController {
 
         if (data.isArchived == null)
             return ResponseEntity.badRequest().body("{\"message\" : \"Invalid \"Archived\" Value\"}");
-        
+
         if (data.risk == null)
             return ResponseEntity.badRequest().build();
+
+        if (data.projectionTimespan == null || data.projectionTimespan <= 0)
+            return ResponseEntity.badRequest().body("{\"message\" : \"Projection Timespan should be not null and greater than zero\"}");
 
         LocalDate startDate = data.startDate != null ? DateTimeUtils.parseDate(data.startDate).toLocalDate() : null;
         LocalDate deliveryDate = data.deliveryDate != null ? DateTimeUtils.parseDate(data.deliveryDate).toLocalDate() : null;
@@ -177,6 +180,7 @@ public class ProjectController {
         configuration.setDeliveryDate(deliveryDate);
         configuration.setArchived(data.isArchived);
         configuration.setRiskPercentage(data.risk.divide(BigDecimal.valueOf(100)));
+        configuration.setProjectionTimespan(data.projectionTimespan);
 
         projectService.saveTaskboardProject(configuration);
 
@@ -187,12 +191,15 @@ public class ProjectController {
     public void create(@RequestBody ProjectCreationData data) {
         if (projectService.taskboardProjectExists(data.projectKey))
             return;
+
         Boolean hasTeamsOnData = data.teams != null && !data.teams.isEmpty();
         if (hasTeamsOnData)
             validateTeamsAndWipConfigurations(data.teams);
-        createProjectFilterConfiguration(data.projectKey);
+
+        projectService.saveTaskboardProject(new ProjectFilterConfiguration(data.projectKey));
         if (!hasTeamsOnData)
             return;
+
         data.teams.forEach(team -> {
             createTeamAndConfigurations(data.projectKey, team.name, data.teamLeader, data.teamLeader, team.members);
         });
@@ -207,13 +214,6 @@ public class ProjectController {
     private void validateTeamDontExist(String teamName) {
         if (teamRepository.exists(teamName))
             throw new IllegalArgumentException("Team '" + teamName + "' already exists.");
-    }
-
-    private void createProjectFilterConfiguration(String projectKey) {
-        final ProjectFilterConfiguration configuration = new ProjectFilterConfiguration();
-        configuration.setProjectKey(projectKey);
-        configuration.setArchived(false);
-        projectService.saveTaskboardProject(configuration);
     }
 
     private void createTeamAndConfigurations(String projectKey, String teamName, String manager, String coach, List<String> members) {
@@ -247,6 +247,7 @@ public class ProjectController {
         data.deliveryDate = projectFilterConfiguration.getDeliveryDate() != null ? projectFilterConfiguration.getDeliveryDate().toString() : "";
         data.isArchived = projectFilterConfiguration.isArchived();
         data.risk = projectFilterConfiguration.getRiskPercentage().multiply(BigDecimal.valueOf(100));
+        data.projectionTimespan = projectFilterConfiguration.getProjectionTimespan();
         return data;
     }
 

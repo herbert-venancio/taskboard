@@ -31,7 +31,7 @@
 
         <iron-signals
                 on-iron-signal-open-project-configuration-modal="openByEvent"
-        ></iron-signals>
+                ></iron-signals>
 
         <alert-modal id="alertModalConfiguration"></alert-modal>
 
@@ -71,6 +71,15 @@
                                  error-message="Please enter a positive value or zero">
                                  <div slot="suffix">%</div>
                                  </paper-input>
+                    <paper-input id="projectionTimespan" always-float-label
+                                 label="Projection Timespan *"
+                                 value="{{projectConfiguration.projectionTimespan}}"
+                                 type="number"
+                                 required
+                                 min="1"
+                                 step="any"
+                                 error-message="Please enter a positive value"
+                                 ></paper-input>
 
                     <div class="input-wrapper">
                         <paper-toggle-button class="tb-toggle-button" checked="{{!projectConfiguration.isArchived}}"
@@ -99,7 +108,8 @@
 
                 properties: {
                     projectConfiguration: {
-                        type: Object
+                        type: Object,
+                        value: function() { return {} }
                     },
                     showLoadingSpinner: {
                         type: Boolean
@@ -127,6 +137,7 @@
                     this.$.projectStartDate.invalid = false;
                     this.$.projectDeliveryDate.invalid = false;
                     this.$.projectRisk.invalid = false;
+                    this.$.projectionTimespan.invalid = false;
 
                     this.$.modal.open();
                     this.$.projectStartDate.$.input.focus();
@@ -160,7 +171,8 @@
                         startDate: self._getISODate(self.projectConfiguration.startDate),
                         deliveryDate: self._getISODate(self.projectConfiguration.deliveryDate),
                         isArchived: self.projectConfiguration.isArchived,
-                        risk: self.projectConfiguration.risk
+                        risk: self.projectConfiguration.risk,
+                        projectionTimespan: self.projectConfiguration.projectionTimespan
                     };
 
                     $.ajax({
@@ -197,7 +209,10 @@
                 },
 
                 _validate: function() {
-                    return this.$.projectStartDate.validate() & this.$.projectDeliveryDate.validate() & this.$.projectRisk.validate();
+                    return this.$.projectStartDate.validate() &
+                        this.$.projectDeliveryDate.validate() &
+                        this.$.projectRisk.validate() &
+                        this.$.projectionTimespan.validate();
                 },
 
                 _getLocaleDate: function(date) {

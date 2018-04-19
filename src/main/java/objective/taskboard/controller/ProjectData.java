@@ -38,5 +38,6 @@ public class ProjectData {
         public String deliveryDate;
         public Boolean isArchived;
         public BigDecimal risk;
+        public Integer projectionTimespan;
     }
 }
