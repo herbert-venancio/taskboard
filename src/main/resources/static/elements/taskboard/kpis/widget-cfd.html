@@ -97,7 +97,8 @@
                     },
                     options: {
                         type: Array,
-                        readOnly: true
+                        readOnly: true,
+                        value: function() { return []; }
                     },
                     settingLevel: {
                         type: String,
@@ -263,8 +264,8 @@
                 reset: function() {
                     this.set('isReady', false);
                     this.set('errorMessage', '');
-                    this.set('options.1.cssClasses', '');
-                    this.set('options.1.hidden', true);
+                    this.set('options.0.cssClasses', '');
+                    this.set('options.0.hidden', true);
 
                     if (this.xhr) {
                         this.xhr.abort();
@@ -342,7 +343,7 @@
                     list.render();
 
                     var highlightButton = function() {
-                        this.set('options.1.cssClasses', list.isAllSelected() ? '' : 'widget__button_highlighted');
+                        this.set('options.0.cssClasses', list.isAllSelected() ? '' : 'widget__button_highlighted');
                     }.bind(this);
                     list.on('filtered', highlightButton);
 
