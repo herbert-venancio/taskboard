@@ -25,9 +25,9 @@ import org.springframework.http.ResponseEntity;
 
 import objective.taskboard.auth.Authorizer;
 import objective.taskboard.followup.FollowUpFacade;
+import objective.taskboard.followup.FollowUpHistoryKeeper;
 import objective.taskboard.followup.TemplateService;
 import objective.taskboard.followup.data.Template;
-import objective.taskboard.followup.impl.FollowUpDataHistoryGeneratorJSONFiles;
 import objective.taskboard.utils.IOUtilities;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -47,7 +47,7 @@ public class FollowUpControllerTest {
     private FollowUpFacade followUpFacade;
 
     @Mock
-    private FollowUpDataHistoryGeneratorJSONFiles followUpDataHistoryGenerator;
+    private FollowUpHistoryKeeper historyKeeper;
 
     @Mock
     private Authorizer authorizer;
@@ -82,7 +82,7 @@ public class FollowUpControllerTest {
         String projectNotExistsMessage = "You must provide the project";
 
         ResponseEntity<Object> responseEmpty = subject.download("", TEMPLATE_NAME, Optional.empty(), ZONE_ID);
-        assertResponse(BAD_REQUEST, projectNotExistsMessage, responseEmpty);
+        assertResponse(HttpStatus.BAD_REQUEST, projectNotExistsMessage, responseEmpty);
 
         ResponseEntity<Object> responseNull = subject.download(null, TEMPLATE_NAME, Optional.empty(), ZONE_ID);
         assertResponse(BAD_REQUEST, projectNotExistsMessage, responseNull);
