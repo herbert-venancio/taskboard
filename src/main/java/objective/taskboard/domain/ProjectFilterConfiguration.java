@@ -47,7 +47,6 @@ public class ProjectFilterConfiguration implements Serializable {
     private static final long serialVersionUID = 765599368694090438L;
 
     private static final int DEFAULT_PROJECTION_TIMESPAN = 20;
-    private static final boolean DEFAULT_ARCHIVED = false;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -62,8 +61,8 @@ public class ProjectFilterConfiguration implements Serializable {
     @Column
     private LocalDate deliveryDate;//NOSONAR
 
-    @Column
-    private Boolean isArchived;
+    @Column(nullable = false)
+    private boolean isArchived;
 
     @Column(precision = 5, scale = 4)
     private BigDecimal riskPercentage = BigDecimal.ZERO;
@@ -71,7 +70,7 @@ public class ProjectFilterConfiguration implements Serializable {
     @Column
     private Integer projectionTimespan;
 
-    protected ProjectFilterConfiguration() {};//NOSONAR
+    protected ProjectFilterConfiguration() {} //NOSONAR
 
     public ProjectFilterConfiguration(String projectKey) {
         this.setProjectKey(projectKey);
@@ -108,11 +107,11 @@ public class ProjectFilterConfiguration implements Serializable {
         this.deliveryDate = deliveryDate;
     }
 
-    public Boolean isArchived() {
-        return isArchived != null ? isArchived : DEFAULT_ARCHIVED;
+    public boolean isArchived() {
+        return isArchived;
     }
 
-    public void setArchived(Boolean isArchived) {
+    public void setArchived(boolean isArchived) {
         this.isArchived = isArchived;
     }
 
