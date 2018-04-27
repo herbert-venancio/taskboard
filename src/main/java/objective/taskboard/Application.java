@@ -29,7 +29,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 public class Application {
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Application.class);
+
     public static void main(String[] args) {
+        log.info( "Running the Application!" );
         SpringApplication.run(Application.class, args);
     }
 

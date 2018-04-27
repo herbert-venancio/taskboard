@@ -21,6 +21,7 @@
 
 package objective.taskboard;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -31,6 +32,13 @@ public class TaskboardProperties {
     private String rootDataDirectory = "";
 
     private String logo = "";
+
+    @Value("${taskboard.executing.application:true}")
+    private Boolean executingApplication;
+
+    public Boolean isExecutingApplication() {
+        return executingApplication;
+    }
 
     public String getRootDataDirectory() {
         return rootDataDirectory;
