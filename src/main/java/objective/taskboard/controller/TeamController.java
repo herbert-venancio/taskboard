@@ -21,6 +21,8 @@ package objective.taskboard.controller;
  * [/LICENSE]
  */
 
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -53,18 +55,18 @@ public class TeamController {
             availableTeams.add(new TeamControllerData(team));
         }
         
-        return new ResponseEntity<List<TeamControllerData>>(availableTeams, HttpStatus.OK);
+        return new ResponseEntity<>(availableTeams, HttpStatus.OK);
     }
     
     @RequestMapping(path="{teamName}", method = RequestMethod.GET)
     public ResponseEntity<TeamControllerData> getTeamMembers(@PathVariable("teamName") String teamName) {
         Team team = teamRepo.findByName(teamName);
         if (team == null) 
-            return new ResponseEntity<TeamControllerData>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         
         TeamControllerData teamController = new TeamControllerData(team);
         
-        return new ResponseEntity<TeamControllerData>(teamController, HttpStatus.OK);
+        return new ResponseEntity<>(teamController, HttpStatus.OK);
     }
     
     @RequestMapping(method = RequestMethod.PATCH, consumes="application/json")
@@ -92,8 +94,9 @@ public class TeamController {
             else
                 data.teamMembers.remove(userInTeam.getUserName());
         }
-        for (String memberName : data.teamMembers) 
-            team.getMembers().add(new UserTeam(memberName, teamName));
+        for (String memberName : data.teamMembers)
+            if(isNotEmpty(memberName))
+                team.getMembers().add(new UserTeam(memberName, teamName));
         
         teamRepo.save(team);
         
