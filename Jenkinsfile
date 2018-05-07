@@ -98,7 +98,7 @@ node("single-executor") {
                 else {
                     def tag = isMasterBranch() ? 'latest' : env.BRANCH_NAME
                     dir('liferay-environment-bootstrap') {
-                        git branch: 'master', credentialsId: 'objective-solutions-user-rsa', url: 'git@github.com:objective-solutions/liferay-environment-bootstrap.git'
+                        git branch: 'master', credentialsId: 'objective-solutions-user-rsa', url: 'git@gitlab:sdlc/liferay-environment-bootstrap.git'
 
                         dir ('dockers/taskboard') {
                             sh 'cp ../../../target/taskboard-*-SNAPSHOT.war ./taskboard.war'
