@@ -66,7 +66,7 @@ public class Team implements Serializable {
 
     private String jiraSubequipe;
 
-    @OneToMany(fetch=FetchType.EAGER, cascade=CascadeType.ALL)
+    @OneToMany(fetch=FetchType.EAGER, cascade=CascadeType.ALL, orphanRemoval=true)
     @JoinColumn(name="team", referencedColumnName="name")
     private List<UserTeam> members;
 
