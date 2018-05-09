@@ -2,15 +2,9 @@ package objective.taskboard.controller;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static objective.taskboard.testUtils.ControllerTestUtils.getDefaultMockMvc;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
@@ -21,11 +15,11 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean;
-import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
+
+import com.google.common.collect.Lists;
 
 import objective.taskboard.data.Team;
 import objective.taskboard.data.UserTeam;
@@ -36,30 +30,22 @@ import objective.taskboard.repository.UserTeamRepository;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = TeamControllerTest.Configuration.class)
 @DataJpaTest
-@WebAppConfiguration
 public class TeamControllerTest {
 
-    interface VALID {
-        String TEAM_NAME = "VALID_DEV";
-        String TEAM_MANAGER = "Manager";
-        String TEAM_COACH = "Coach";
-        List<String> TEAM_MEMBERS = asList("thomas.developer", "graham.reviewer");
-    }
+    private static final String VALID_TEAM_NAME = "VALID_DEV";
+    private static final String VALID_TEAM_MANAGER = "Manager";
+    private static final String VALID_TEAM_COACH = "Coach";
+    private static final List<String> VALID_TEAM_MEMBERS = asList("thomas.developer", "graham.reviewer");
 
-    interface EMPTY {
-        String TEAM_NAME = "EMPTY";
-        String TEAM_MANAGER = "Manager";
-        String TEAM_COACH = "Coach";
-        List<String> TEAM_MEMBERS = emptyList();
-    }
+    private static final String EMPTY_TEAM_NAME = "EMPTY";
+    private static final String EMPTY_TEAM_MANAGER = "Manager";
+    private static final String EMPTY_TEAM_COACH = "Coach";
+    private static final List<String> EMPTY_TEAM_MEMBERS = emptyList();
 
-    interface INVALID {
-        String TEAM_NAME = "INVALID";
-    }
+    private static final String INVALID_TEAM_NAME = "INVALID";
 
     private Long validId;
     private Long emptyId;
-    private MockMvc mockMvc;
 
     @EntityScan(basePackageClasses = Team.class)
     public static class Configuration {
@@ -98,90 +84,76 @@ public class TeamControllerTest {
 
     @Before
     public void setup() {
-        mockMvc = getDefaultMockMvc(subject);
-        Team taskb = new Team(VALID.TEAM_NAME, VALID.TEAM_MANAGER, VALID.TEAM_COACH, VALID.TEAM_MEMBERS);
-        Team empty = new Team(EMPTY.TEAM_NAME, EMPTY.TEAM_MANAGER, EMPTY.TEAM_COACH, EMPTY.TEAM_MEMBERS);
+        Team taskb = new Team(VALID_TEAM_NAME, VALID_TEAM_MANAGER, VALID_TEAM_COACH, VALID_TEAM_MEMBERS);
+        Team empty = new Team(EMPTY_TEAM_NAME, EMPTY_TEAM_MANAGER, EMPTY_TEAM_COACH, EMPTY_TEAM_MEMBERS);
         validId = teamRepository.save(taskb).getId();
         emptyId = teamRepository.save(empty).getId();
         teamCachedRepository.loadCache();
-        System.out.println("End of setup");
     }
 
     @Test
-    public void givenInvalidTeam_whenGet_thenIsNotFound() throws Exception {
-        mockMvc.perform(get("/api/teams/{teamName}", INVALID.TEAM_NAME))
-                .andExpect(status().isNotFound());
+    public void givenInvalidTeam_whenGet_thenIsNotFound() {
+        assertThat(subject.getTeamMembers(INVALID_TEAM_NAME).getStatusCode())
+                .isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
-    public void givenValidTeam_whenGet_thenIsOk() throws Exception {
-        mockMvc.perform(get("/api/teams/{teamName}", VALID.TEAM_NAME))
-                .andExpect(status().isOk());
+    public void givenValidTeam_whenGet_thenIsOk() {
+        assertThat(subject.getTeamMembers(VALID_TEAM_NAME).getStatusCode())
+                .isEqualTo(HttpStatus.OK);
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    public void givenEmptyTeam_whenUpdateTeamMembers_thenTeamIncludeMembers() throws Exception {
-        String payload = createPayload(EMPTY.TEAM_NAME, "thomas.developer","graham.reviewer");
-        mockMvc.perform(patch("/api/teams/{teamName}", EMPTY.TEAM_NAME).contentType(MediaType.APPLICATION_JSON).content(payload))
-                .andExpect(status().isOk());
+    public void givenEmptyTeam_whenUpdateTeamMembers_thenTeamIncludeMembers() {
+        TeamControllerData payload = createPayload(EMPTY_TEAM_NAME, "thomas.developer","graham.reviewer");
+        assertThat(subject.updateTeamMembers(EMPTY_TEAM_NAME, payload).getStatusCode())
+                .isEqualTo(HttpStatus.OK);
 
         assertThat(teamRepository.findOne(emptyId).getMembers()).extracting(UserTeam::getUserName)
                 .containsExactlyInAnyOrder("thomas.developer", "graham.reviewer");
-        assertThat(userTeamRepository.findAll())
+        assertThat(userTeamRepository.findAll().stream().filter(userTeam -> EMPTY_TEAM_NAME.equals(userTeam.getTeam())))
                 .extracting(userTeam -> Pair.of(userTeam.getTeam(), userTeam.getUserName()))
                 .containsExactlyInAnyOrder(
-                        Pair.of(VALID.TEAM_NAME, "thomas.developer")
-                        , Pair.of(VALID.TEAM_NAME, "graham.reviewer")
-                        , Pair.of(EMPTY.TEAM_NAME, "thomas.developer")
-                        , Pair.of(EMPTY.TEAM_NAME, "graham.reviewer")
+                        Pair.of(EMPTY_TEAM_NAME, "thomas.developer")
+                        , Pair.of(EMPTY_TEAM_NAME, "graham.reviewer")
                 );
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    public void givenValidTeam_whenUpdateTeamMembers_thenTeamMembersChangedAndOrphansAreRemoved() throws Exception {
-        String payload = createPayload(VALID.TEAM_NAME, "graham.reviewer","john.doe");
-        mockMvc.perform(patch("/api/teams/{teamName}", VALID.TEAM_NAME).contentType(MediaType.APPLICATION_JSON).content(payload))
-                .andExpect(status().isOk());
+    public void givenValidTeam_whenUpdateTeamMembers_thenTeamMembersChangedAndOrphansAreRemoved() {
+        TeamControllerData payload = createPayload(VALID_TEAM_NAME, "graham.reviewer","john.doe");
+        assertThat(subject.updateTeamMembers(VALID_TEAM_NAME, payload).getStatusCode())
+                .isEqualTo(HttpStatus.OK);
 
         assertThat(teamRepository.findOne(validId).getMembers()).extracting(UserTeam::getUserName)
                 .containsExactlyInAnyOrder("graham.reviewer", "john.doe");
-        assertThat(userTeamRepository.findAll())
+        assertThat(userTeamRepository.findAll().stream().filter(userTeam -> VALID_TEAM_NAME.equals(userTeam.getTeam())))
                 .extracting(userTeam -> Pair.of(userTeam.getTeam(), userTeam.getUserName()))
                 .containsExactlyInAnyOrder(
-                        Pair.of(VALID.TEAM_NAME, "graham.reviewer")
-                        , Pair.of(VALID.TEAM_NAME, "john.doe")
+                        Pair.of(VALID_TEAM_NAME, "graham.reviewer")
+                        , Pair.of(VALID_TEAM_NAME, "john.doe")
                 );
     }
 
     @Test
-    public void givenEmptyTeam_whenUpdateTeamMemberIsNullOrEmpty_thenTeamMembersNotAdded() throws Exception {
-        String payload = createPayload(VALID.TEAM_NAME, null, "");
-        mockMvc.perform(patch("/api/teams/{teamName}", VALID.TEAM_NAME).contentType(MediaType.APPLICATION_JSON).content(payload))
-                .andExpect(status().isOk());
+    public void givenEmptyTeam_whenUpdateTeamMemberIsNullOrEmpty_thenTeamMembersNotAdded() {
+        TeamControllerData payload = createPayload(VALID_TEAM_NAME, null, "");
+        assertThat(subject.updateTeamMembers(VALID_TEAM_NAME, payload).getStatusCode())
+                .isEqualTo(HttpStatus.OK);
 
         assertThat(teamRepository.findOne(validId).getMembers())
                 .isEmpty();
-        assertThat(userTeamRepository.findAll())
+        assertThat(userTeamRepository.findAll().stream().filter(userTeam -> VALID_TEAM_NAME.equals(userTeam.getTeam())))
                 .isEmpty();
     }
 
-    private static String createPayload(String teamName, String... teamMembers) {
-        return "{"
-                + "\"teamName\":" + addQuotes(teamName)
-                + ",\"teamMembers\":["
-                + Arrays.stream(teamMembers)
-                    .map(TeamControllerTest::addQuotes)
-                    .collect(Collectors.joining(","))
-                + "]"
-                + "}";
-    }
-
-    private static String addQuotes(String value) {
-        if(value == null)
-            return "null";
-        else
-            return "\"" + value + "\"";
+    private static TeamControllerData createPayload(String teamName, String... teamMembers) {
+        TeamControllerData payload = new TeamControllerData();
+        payload.teamName = teamName;
+        payload.manager = null;
+        payload.teamMembers = Lists.newArrayList(teamMembers);
+        return payload;
     }
 }
