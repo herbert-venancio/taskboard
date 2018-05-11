@@ -23,25 +23,69 @@
     <template>
 
         <style>
-            :host {
+            :host * {
+                font-family: 'ptsans-regular', Verdana, Arial, Helvetica, sans-serif;
             }
+
+            .people--separator {
+                height: 0px;
+                margin-top: 32px;
+                border: 1px none #8e8e8e;
+                border-top-style: solid;
+            }
+
+             /* width */
+            ::-webkit-scrollbar {
+                width: 10px;
+            }
+
+            /* Track */
+            ::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 10px;
+            }
+
+            /* Handle */
+            ::-webkit-scrollbar-thumb {
+                background: #888;
+                border-radius: 10px;
+            }
+
+            /* Handle on hover */
+            ::-webkit-scrollbar-thumb:hover {
+                background: #555;
+                border-radius: 10px;
+            } 
 
             .card-custom {
-                background: transparent;
+                background: white;
                 width: 100%;
                 min-height: 360px;
-                padding: 20px;
+                padding: 0px;
                 margin: 0;
+                border-radius: 4px;
+                line-height: 18px;
+                color: #555;
             }
 
-            .half-column {
+            .project-title {
+                color: #8E8E8E;
+            }
+
+            .transitions-row {
+                display: flex;
+                align-items: center;
+                font-size: 12px;
+                margin-bottom: 24px;
             }
 
             .card-header-custom {
                 width: 100%;
-                margin-bottom: 30px;
                 font-size: 24px;
                 display: flex;
+                background-color: #555555;
+                padding: 24px;
+                border-radius: 4px 4px 0px 0px;
             }
 
             .card-header-info {
@@ -49,48 +93,29 @@
             }
 
             .card-header-breadcrumb {
-                margin-bottom: 10px;
-                font-size: 15px;
+                font-size: 10px;
+                line-height: 14px;
             }
 
             .arrow {
                 margin: 0 5px;
             }
 
-            paper-button.headerLink {
+            .card-header-title {
                 min-width: initial;
                 margin: 0px;
                 padding: 0px;
                 font-weight: normal;
+                display: inline !important;
             }
 
-            .issue-key-link {
-                font-weight: 600;
-            }
-
-            .card-header-title paper-button {
-                text-transform: none;
-                font-size: 25px;
-                line-height: normal;
+            .card-header-title a {
+                font-size: 16px;
+                line-height: 22px;
                 display: block;
-            }
-
-            .sub-header {
-                line-height: normal;
-                margin-bottom: 5px;
-                font-size: 13px;
-                font-weight: 600;
-            }
-
-            .content-row {
-                display: flex;
-                margin-top: 20px;
-                margin-left: -10px;
-                margin-right: -10px;
-            }
-
-            .content-row:first-child {
-                margin-top: 0;
+                font-family: 'ptsans-caption-bold', Verdana, Arial, Helvetica, sans-serif;
+                color: #F5F5F5;
+                cursor: pointer;
             }
 
             .column-block {
@@ -99,26 +124,19 @@
                 margin-right: 10px;
             }
 
-            .column-block.top-bottom-alignment {
-                display: flex;
-                flex-direction: column;
-            }
-
-            .column-block.top-bottom-alignment .sub-content {
-                margin-top: auto;
-            }
-
             .sub-content {
-                font-size: 15px;
+                font-size: 14px;
             }
 
             paper-button {
                 margin-bottom: 12px;
+                text-transform: none;
             }
 
             .card-header-buttons {
                 padding: 0;
-                margin-left: auto;
+                margin-top: auto;
+                margin-bottom: auto;
             }
 
             .icon-text {
@@ -132,26 +150,47 @@
                 bottom: initial;
             }
 
-            .assign-icon {
-                height: 17px;
-                width: 18px;
-            }
-
             paper-material, paper-button {
                 box-shadow: none !important;
             }
 
-            paper-button.colorful {
-                color: #4285f4;
+            paper-button.transition-button {
+                border-right: 1px solid #E5E5E5;
+                border-top: 1px solid #E5E5E5;
+                border-bottom: 1px solid #E5E5E5;
+                padding: 4px 16px;
+                margin: 0px;
+                font-size: 12px;
+                border-radius: 0px;
+                text-transform: none;
+                height: 32px;
             }
 
-            paper-button[disabled].colorful {
-                opacity: .6;
+            paper-button.current-status {
+                background-color: #E27323;
+                color: white;
+                cursor: default;
             }
 
-            paper-button[raised].colorful {
-                background: #4285f4;
-                color: #fff;
+            paper-button.transition-button:first-of-type {
+                border-top-left-radius: 5px !important;
+                border-bottom-left-radius: 5px !important;
+                border-left: 1px solid #E5E5E5;
+            }
+
+            paper-button.transition-button:last-of-type {
+                border-top-right-radius: 5px !important;
+                border-bottom-right-radius: 5px !important;
+            }
+
+            .block-button-container {
+                display: flex;
+                margin-left: 16px;
+                margin-right: 8px;
+            }
+
+            .block-button {
+                cursor: pointer;
             }
 
             paper-button[toggles] {
@@ -162,123 +201,112 @@
                 background-color: rgba(0, 0, 0, 0.25);
             }
 
-            paper-button[toggles][active].colorful {
-                background-color: rgba(66, 133, 244, 0.25);
-            }
-
-            paper-button[toggles][active][raised].colorful {
-                background-color: rgba(66, 133, 244, 0.75);
-            }
-
             paper-button.parentLink {
-                font-size: 15px;
                 font-weight: 600;
                 margin: 0px;
                 padding: 0px;
                 text-align: left;
-                color: #3B50C7;
+                color: #5DAFFF;
             }
 
-            paper-button.subtaskLink {
-                font-size: inherit;
-                font-weight: 600;
-                color: #3B50C7;
+            paper-material.subtask-panel {
+                display: flex;
+                border-bottom: 1px solid #EFEFEF;
+                border-top: 1px solid #EFEFEF;
+                padding: 8px;
+            }
+            paper-material.subtask-panel > div {
+                display: flex;
+                margin-top: auto;
+                margin-bottom: auto;
+            }
+            .subtasks--panel {
+                width: 100%;
+            }
+            .subtask--issue-type {
+                width: 48px;
+            }
+            .subtask--issue-type img {
+                margin: auto;
+            }
+            .subtask--issue-key {
+                color: #5DAFFF;
+                margin-right: 10px;
+            }
+
+            paper-button.subtask-link {
+                color: #5DAFFF;
                 margin: 0 5px 0 0;
                 padding: 0;
                 display: inline;
             }
 
-            paper-material.subtaskPanel {
-                margin-top: 5px;
+            .subtask--summary {
+                flex: 10;
             }
 
-            paper-material.subtaskPanel:first-child {
+            .subtask--status {
+                border-radius: 5px;
+                color: white;
+                height: 24px;
+                font-size: 12px;
+                padding-left: 8px;
+                padding-right: 8px;
+            }
+            .subtask--status span {
+                display: inline-block;
+                margin: auto;
+            }
+
+            paper-material.subtask-panel:first-child {
                 margin-top: 0;
             }
 
-            paper-material.highlightPanel {
-                padding: 4px;
-                padding-left: 8px;
-                padding-right: 8px;
-                border-radius: 5px;
-                color: white;
-                background-color: #7180D6;
-                margin: 2px;
-            }
-
-            .red {
-                --paper-progress-active-color: var(--paper-red-500);
-                --paper-progress-secondary-color: var(--paper-red-100);
-            }
-
-            .green {
-                --paper-progress-active-color: var(--paper-light-green-500);
-                --paper-progress-secondary-color: var(--paper-light-green-100);
-            }
-
             .content-box {
+                padding-left: 24px;
+                padding-right: 24px;
+                padding-top: 24px;
+                margin-bottom: 24px;
             }
 
             #timetracking_content {
                 height: 40px;
             }
 
-            #timetracking_content paper-progress {
-                width: 100%;
-                --paper-progress-height: 10px;
-                margin-top: 5px;
-            }
-
             #modal {
-                background: transparent;
-                min-width: 600px;
-                min-height: 360px;
+                background: white;
+                width: 1280px;
                 margin: 0;
                 display: block;
-                font-family: inherit;
+                border-radius: 5px;
+                overflow-x: initial;
+                overflow-y: initial;
             }
 
-            #loadCard {
-                margin-top: 12px;
-            }
-
-            .bottom {
-                margin: 4px;
-                display: flex;
-            }
-
-            .icon-blocked {
-                color: #F78181;
-                bottom: 3px;
-                -webkit-filter: drop-shadow(1px 1px 1px #616161);
-                filter: drop-shadow(1px 1px 1px #616161);
-            }
-
-            .icon-cancelada {
-                color: #FFCD00;
-                bottom: 3px;
-                -webkit-filter: drop-shadow(1px 1px 1px #616161);
-                filter: drop-shadow(1px 1px 1px #616161);
-            }
-
-            .info {
-                -webkit-filter: drop-shadow(1px 1px 1px #616161);
-                filter: drop-shadow(1px 1px 1px #616161);
-            }
-
-            .buttonClose {
+            .button-close {
                 min-width: auto;
                 display: inline;
                 padding: 0;
                 margin: 0;
             }
 
-            textarea {
-                height: 30px;
-                width: 100%;
-                border: none;
-                background-color: inherit;
-                margin-top: 7px;
+            .button-close iron-icon {
+                width: 14px;
+                height: 14px;
+                color: #8E8E8E;
+            }
+
+            .close-tshirt-bubble {
+                min-width: auto;
+                display: inline;
+                padding: 0;
+                margin: 0;
+                color: #8E8E8E;
+            }
+
+            .close-tshirt-bubble iron-icon {
+                width: 10px;
+                height: 10px;
             }
 
             .icon img {
@@ -286,58 +314,52 @@
             }
 
             .icon-small {
-                width: 25px;
-                height: 25px;
+                width: 32px;
+                height: 32px;
             }
 
-            .scroll {
-                padding: 10px;
-                overflow: auto;
-                overflow-x: hidden;
-                max-height: 150px;
-                max-width: 100%;
-                background-color: white;
+            .description-box {
+                width: 100%;
+                border: 1px solid #e5e5e5;
+                margin-top: 16px;
+            }
+            .description-row {
+                width: 100%;
+            }
+            .description-row--collapsed {
+                overflow-y: hidden;
+                max-height: 20vh;
+                text-overflow: ellipsis;
+            }
+            .description-row-no-description {
+                font-style: italic;
+                color: #8e8e8e !important;
+            }
+            .description-row marked-element {
+                padding: 8px;
+                width: 100%;
             }
 
-            .custom-footer {
-                margin-top: 20px;
+            .descriptionShowMore {
+                color: #5DAFFF;
+                font-size: 12px;
+                margin-top: 10px;
+                margin-left: 10px;
+                margin-bottom: 8px;
+                cursor: pointer;
             }
-
-            .custom-footer-buttons {
-                display: flex;
-                margin-left: -5px;
-                margin-right: -5px;
+            .descriptionShowMore iron-icon {
+                width: 8px;
+                height: 8px;
+                margin-bottom: 3px;
+                display: inline-block;
             }
-
-            .custom-footer-buttons paper-button {
-                padding: 5px 10px;
-                margin: 0 5px;
-                text-transform: none;
-                text-align: center;
+            .upsideDown {
+                transform: rotate(180deg);
             }
 
             paper-spinner[aria-hidden=true] {
                 display: none;
-            }
-
-            .last-block-reason-textarea {
-                border: 1px solid #CCC;
-                background: #FFF;
-                width: 100%;
-                min-height: 54px;
-                min-width: 100%;
-                max-width: 100%;
-                padding: 5px;
-                margin: 0px;
-                font-size: inherit;
-                line-height: normal;
-                font-family: inherit;
-                color: inherit;
-            }
-
-            .last-block-reason-textarea:disabled {
-                background: #DDD;
-                color: #555;
             }
 
             .glasspane {
@@ -369,7 +391,355 @@
             }
 
             .message-box {
-                margin-top: 20px;
+                position: absolute;
+                bottom: 25px;
+                right: 25px;
+                min-width: 182px;
+                box-shadow: rgba(0, 0, 0, 0.4) 0px 0px 4px;
+                border-radius: 5px;
+                padding: 8px;
+            }
+            .message-box--error {
+                background: #E72915;
+            }
+
+            .message-box--updating {
+                background: #E2AE33;
+            }
+
+            .message-box__icon {
+                flex: 0 0 auto;
+                width: 14px;
+                height: 14px;
+                padding: 0;
+                margin-top: auto;
+                margin-bottom: auto;
+            }
+
+            .message-box__icon[icon="error"] {
+                color: white !important;
+                width: 20px;
+                height: 20px;
+            }
+
+            .message-box__message {
+                flex: 1;
+                margin: 0;
+                color: white;
+                font-weight: normal;
+            }
+
+            .message-box__close {
+                flex: 0 0 auto;
+                width: 20px;
+                height: 20px;
+                padding: 0;
+                margin-top: auto;
+                margin-bottom: auto;
+                color: white;
+            }
+
+            .tag {
+                background-color: #666666;
+                font-size: 12px;
+                border-radius: 5px;
+                color: white;
+                padding: 2px 6px;
+                display: flex;
+                margin-right: 8px;
+                white-space: nowrap;
+                height: 2em;
+                margin-top: 2px;
+                margin-bottom: 2px;
+            }
+
+            .invalid-assignee {
+                background-color: #E2AE33;
+            }
+            .invalid-assignee .assignee-button {
+                color: white !important;
+            }
+            
+            .assignee span {
+                display: inline-block;
+                margin-right: 2px;
+            }
+            .add-people-icon {
+                width: 9px;
+                height: 9px;
+                margin: auto 2px;
+            }
+            .restore-icon {
+                width: 9px;
+                height: 9px;
+                margin: auto 3px;
+            }
+            #assignToMe {
+                margin-right: 8px;
+            }
+
+            .people-action-link {
+                cursor: pointer;
+                color: #5DAFFF;
+                font-size: 12px;
+                display: flex;
+                margin-top: 5px;
+                margin-bottom: 5px;
+            }
+
+            #restoreTeamButton {
+                margin-left: 10px;
+            }
+
+            .people-actions {
+                display: flex;
+                white-space: nowrap;
+            }
+
+            .people-action-link span {
+                margin: auto;
+            }
+
+            .icon-tiny {
+                width: 12px;
+                height: 12px;
+            }
+
+            .remove-button {
+                width: 10px;
+                height: 10px;
+            }
+
+            .assignee-button {
+                cursor: pointer;
+                color: #8E8E8E;
+                margin: auto 2px auto 5px;
+            }
+
+            .default-team {
+                background-color: #8e8e8e !important;
+                cursor: pointer;
+            }
+
+            .default-team iron-icon {
+                color: #e5e5e5 !important;
+            }
+
+            .parent-team {
+                background-color: #8e8e8e !important;
+                cursor: pointer;
+            }
+
+            .parent-team iron-icon {
+                color: #e5e5e5 !important;
+            }
+
+            .people-picker {
+                display: none;
+                background-color: #666666;
+                font-size: 12px;
+                border-radius: 5px;
+                color: white;
+                padding-left: 6px;
+                padding-right: 6px;
+                white-space: nowrap;
+                margin: 2px 0px;
+                height: 24px;
+            }
+
+            .blocked {
+                background-color: #FCE196;
+                border-radius: 4px;
+                padding: 16px;
+                display: flex;
+            }
+            .blocked iron-icon {
+                margin-top: auto;
+                margin-bottom: auto;
+            }
+            .blocked span {
+                margin-top: auto;
+                margin-bottom: auto;
+                margin-left: 10px;
+                display: inline-block;
+            }
+
+            .cancelled {
+                background-color: #FCE196;
+                border-radius: 4px;
+                padding: 16px;
+                display: flex;
+            }
+            .cancelled iron-icon {
+                margin-top: auto;
+                margin-bottom: auto;
+            }
+            .cancelled span {
+                margin-top: auto;
+                margin-bottom: auto;
+                margin-left: 10px;
+                display: inline-block;
+            }
+
+            .panel-parent {
+                display: flex;
+                height: 60vh;
+            }
+
+            .leftPanel {
+                width: 64%;
+                display: block;
+                overflow-y: scroll;
+                padding-right: 1em;
+            }
+
+            .rightPanel {
+                padding-left: 10px;
+                width: 36%;
+                display: inline-block;
+            }
+
+            .subtitle {
+                font-size: 16px;
+                display: flex;
+                margin-top: 32px;
+                font-family: 'ptsans-caption-bold', Verdana, Arial, Helvetica, sans-serif;
+                line-height: 22px;
+            }
+
+            .subtitle:first-of-type {
+                margin-top: 0px;
+            }
+
+            .subtitle--slot1 {
+                flex: 1;
+                font-weight: bold;
+            }
+
+            .subtasks--title {
+                margin-bottom: 12px;
+            }
+
+            .tshirtSizesView {
+                font-size: 12px;
+                color: #5DAFFF;
+                display: flex;
+            }
+
+            .tshirtSizesView * {
+                cursor: pointer;
+            }
+
+            .tshirtSizesView label {
+                margin-top: auto;
+                margin-bottom: auto;
+                margin-left: 5px;
+            }
+
+            .subsubtitle {
+                margin-bottom: 8px;
+                font-size: 14px;
+                font-weight: bold;
+            }
+
+            .details-row {
+                width: 100%;
+                display: flex;
+                flex-wrap: wrap;
+                margin: 16px 0px;
+            }
+
+            .tshirt-bubble {
+                display: none;
+                border-radius: 5px;
+                border: 1px solid #E3E3E3;
+                width: 200px;
+                position: absolute;
+                margin-left: 90px;
+                padding: 10px;
+                background-color: white;
+                z-index: 1000;
+                -webkit-box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.15);
+                -moz-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.15);
+                box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.15);
+            }
+            
+            .tshirt-bubble-arrow {
+                background-color: white;
+                box-shadow: -1px 1px 1px 0 rgba( 0, 0, 0, .25);
+                content: "\00a0";
+                display: block;
+                height: 10px;
+                left: -5px;
+                position: absolute;
+                top: 50%;
+                transform:             rotate( 45deg );
+                    -moz-transform:    rotate( 45deg );
+                    -ms-transform:     rotate( 45deg );
+                    -o-transform:      rotate( 45deg );
+                    -webkit-transform: rotate( 45deg );
+                width: 10px;
+            }
+
+            .tshirt-line {
+                border-bottom: 1px solid #E3E3E3;
+                font-size: 12px;
+                color: #555555;
+                display: flex;
+                padding-top: 8px;
+                padding-bottom: 8px;
+            }
+            .tshirt-label {
+                flex: 1;
+            }
+            .tshirt-label--header {
+                font-size: 14px;
+                font-weight: bold;
+                padding-top: 0px;
+            }
+            .details-column {
+                flex: 1
+            }
+            .text {
+                font-size: 14px;
+            }
+            #class-of-service-value {
+                border-radius: 5px;
+                padding: 2px 5px;
+                width: min-content;
+                white-space: nowrap;
+                display: inline-block;
+            }
+            .hidden-section {
+                display: none;
+            }
+        </style>
+        <style is="custom-property">
+            paper-toggle-button {
+                --paper-toggle-button-unchecked-bar-color: white;
+                --paper-toggle-button-unchecked-bar: {
+                    border: 1px solid #aaaaaa
+                }
+                --paper-toggle-button-checked-bar-color: white;
+                --paper-toggle-button-checked-bar: {
+                    border: 1px solid #aaaaaa
+                }
+                --paper-toggle-button-unchecked-button: {
+                    box-shadow: none;
+                    width: 10px;
+                    height: 10px;
+                    background-color: #8E8E8E;
+                    margin: 5px;
+                }
+                --paper-toggle-button-checked-button: {
+                    background-color: #E27323;
+                }
+                --paper-toggle-button-unchecked-ink: {
+                    display: none;
+                }
+                --paper-toggle-button-checked-ink: {
+                    display: none;
+                }
             }
         </style>
 
@@ -395,7 +765,6 @@
                       entry-animation="scale-up-animation"
                       exit-animation="fade-out-animation"
                       on-iron-overlay-opened="_afterOpen"
-                      on-iron-overlay-closed="_afterClose"
                       data-status$="{{_modalStatus}}">
 
                 <div id="glasspane-updated" class$="glasspane {{issueChangeStateClass}}" on-tap="refreshIfUpdated">
@@ -406,7 +775,7 @@
                     <span>This issue has been deleted. <br>Click to close.</span>
                 </div>
 
-            <paper-card class="card-custom">
+            <paper-card class="card-custom" on-tap="_cardTapped">
 
                 <div class="card-header-custom">
                     <div class="card-header-info">
@@ -417,282 +786,324 @@
                             <template is="dom-if" if="{{item.parent}}">
                                 <span class="parent-key">
                                     <span class="arrow">></span>
-                                    <paper-button class="parentLink" on-tap="openJira" data-issue-key$="{{item.parent}}">{{item.parent}}</paper-button>
+                                    <paper-button class="parentLink" on-tap="openJira" data-issue-key$="{{item.parent}}">{{item.parent}} {{item.parentSummary}}</paper-button>
                                 </span>
                             </template>
-                            <span class="issue-key">
-                                <span class="arrow">></span>
-                                <paper-button class="headerLink issue-key-link" on-tap="openJira" data-issue-key$="{{item.issueKey}}">{{item.issueKey}}</paper-button>
-                            </span>
                         </div>
                         <div class="card-header-title">
-                            <paper-button class="headerLink" on-tap="openJira" data-issue-key$="{{item.issueKey}}">{{item.summary}}</paper-button>
+                            <a class="headerLink" on-tap="openJira" data-issue-key$="{{item.issueKey}}">{{item.issueKey}} {{item.summary}}</a>
                         </div>
                     </div>
                     <div class="card-header-buttons">
-                        <paper-button class="buttonClose" on-tap="close">
-                            <iron-icon icon="clear"></iron-icon>
+                        <paper-button class="button-close" on-tap="close">
+                            <iron-icon icon="taskboard-icons:close"></iron-icon>
                         </paper-button>
                     </div>
                 </div>
 
                 <div class="content-box">
-                    <div class="content-row">
-
-                        <div class="column-block issue-type">
-                            <div class="sub-header">Issue type</div>
-                            <div class="icon-text">
-                                <div class="icon">
-                                    <img id="issueTypeIcon" class="icon-small"
-                                         title$="{{getIssueTypeName(item.type)}}" src$="{{getIssueTypeImage(item)}}"/>
-                                </div>
-                                <div class="text">
-                                    {{getIssueTypeName(item.type)}}
-                                </div>
-                            </div>
-                        </div>
-
-                        <template is="dom-if" if="{{item.blocked}}">
-                            <div class="column-block item-icon-text blocked">
-                                <div class="sub-header">Blocked</div>
-                                <div class="icon-text">
-                                    <iron-icon class="icon icon-blocked icon-small" icon="icons:block"></iron-icon>
-                                    <div class="text">
-                                        Blocked
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="transitions-row">
+                        <template is="dom-if" if="{{hasRecords(transitions)}}">
+                                <template id="issueTransitions" is="dom-repeat" items="{{transitionList(transitions)}}" as="transition">
+                                    <template is="dom-if" if="{{transition.id}}">        
+                                        <paper-button 
+                                            title$="Transition to {{transition.to.name}}"
+                                            data-transition-name$='{{transition.name}}' 
+                                            data-transition-id$='{{transition.id}}' 
+                                            data-transition-to-status-id$='{{transition.to.id}}' raised 
+                                            class="transition-button"
+                                            on-tap="requestTransition">
+                                            {{transition.name}}
+                                        </paper-button>
+                                    </template>
+                                    <template is="dom-if" if="{{!transition.id}}">        
+                                        <paper-button 
+                                            class="transition-button current-status">
+                                            {{transition.name}}
+                                        </paper-button>
+                                    </template>
+                                </template>
                         </template>
-
-                        <template is="dom-if" if="{{item.cancelled}}">
-                            <div class="column-block item-icon-text-canceled">
-                                <div class="sub-header">Canceled</div>
-                                <div class="icon-text">
-                                    <iron-icon class="icon icon-cancelada icon-small" icon="warning"></iron-icon>
-                                    <div class="text">
-                                        Canceled
-                                    </div>
-                                </div>
-                            </div>
+                        <template is="dom-if" if="{{!hasRecords(transitions)}}">
+                            <paper-spinner active="true" alt="Loading..."></paper-spinner>
                         </template>
-
-                        <div class="column-block">
-                            <div class="sub-header">Status</div>
-                            <div class="sub-content horizontal layout">
-                                <paper-material class="highlightPanel">{{getStatusName(item.status)}}</paper-material>
-                            </div>
-                        </div>
-
-                        <div class="column-block half-column">
-                            <div class="sub-header">Class of Service</div>
-                            <div id="classOfServiceValue" class="sub-content">
-                                {{item.classOfServiceValue}}
-                            </div>
-                        </div>
-
+                                                
+                        <div class="block-button-container">Block</div>
+                        <paper-toggle-button iron-label-target 
+                            class="tb-toggle-button block-button" checked="{{blocked}}"
+                            on-change="_toggleBlockUnblock" 
+                            enabled="{{_canToggleBlockState()}}">
+                        </paper-toggle-button>
                     </div>
+                    
+                    <div class="panel-parent">
+                        <div class="leftPanel">
+                            <template is="dom-if" if="{{item.blocked}}">
+                                <div class="blocked" title="This issue is blocked">
+                                    <iron-icon class="icon-small" icon="taskboard-icons:blocked"></iron-icon>
+                                    <span>{{item.lastBlockReason}}</span>
+                                </div>
+                            </template>
+                            <template is="dom-if" if="{{item.cancelled}}">
+                                <div class="cancelled" title="This issue was cancelled">
+                                    <iron-icon class="icon icon-cancelada icon-small" icon="taskboard-icons:cancelled"></iron-icon>
+                                    <span>This issue was cancelled. Check jira for more details</span>
+                                </div>
+                            </template>
 
-                    <div class="content-row">
+                            <div class="subtitle">Details</div>
 
-                        <div class="column-block half-column">
-                            <div class="sub-header">Assignees</div>
-                            <div class="sub-content flex horizontal layout wrap">
-                                <template is="dom-repeat" items="{{getAssignees(item)}}" as="assignee">
-                                    <paper-material class="assignee highlightPanel">
-                                        <span>{{assignee}}</span>
-                                        <template is="dom-if" if="{{isInvalidTeam(item)}}">
-                                            <iron-icon class="icon icon-cancelada icon-small" icon="warning" title="{{getTitleIconInvalidTeam(item)}}"></iron-icon>
-                                        </template>
-                                    </paper-material>
+                            <div class="details-row">
+                                <div class="details-column issue-type">
+                                    <div class="subsubtitle">Issue type</div>
+                                    <div class="icon-text">
+                                        <div class="icon">
+                                            <img id="issueTypeIcon" src$="{{issue.typeIconUri}}"/>
+                                        </div>
+                                        <div class="text">
+                                            {{getIssueTypeName(item.type)}}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="details-column">
+                                    <div class="subsubtitle">Class of service</div>
+                                    <div id="class-of-service-value" class="sub-content classofservice" style$="background-color:{{item.color}}">
+                                        {{item.classOfServiceValue}}
+                                    </div>
+                                </div>
+                                <template is="dom-if" if="{{item.release}}">
+                                    <div class="column-block">
+                                        <div class="subsubtitle">Release</div>
+                                        <div class="sub-content">
+                                            <span>{{item.release.name}}</span>
+                                        </div>
+                                    </div>
+                                </template>
+                                <template is="dom-if" if="{{item.cardTshirtSize}}">
+                                    <div class="details-column">
+                                        <div class="subsubtitle">Size</div>
+                                        <div class="sub-content">
+                                            {{item.cardTshirtSize}}
+                                        </div>
+                                    </div>
                                 </template>
                             </div>
-                        </div>
 
-                    </div>
+                            <div class="subtitle">Description</div>
 
-                    <div class="content-row">
-                        <div class="column-block">
-                            <div class="sub-header">Description</div>
-                            <marked-element class="scroll" markdown="{{getDescription(item)}}"></marked-element>
-                        </div>
-                    </div>
+                            <div class="description-box">
+                                <div class$="details-row  description-row {{getDescriptionClass(item)}}">
+                                    <marked-element markdown="{{getDescription(item)}}"></marked-element>
+                                </div>
+                                <template is="dom-if" if="{{descriptionTooLong}}">
+                                <div class="descriptionShowMore" on-tap="_toggleShowMoreOrLess">
+                                    <iron-icon icon="taskboard-icons:showmore"></iron-icon>
+                                    [[showMoreOrLess]]
+                                </div>
+                                </template>
+                            </div>
 
-                    <template is="dom-if" if="{{item.subtasksTshirtSizes.length}}">
-                        <div class="content-row">
+                            <template is="dom-if" if="{{canHaveSubtasks}}">
+                                <div class="subtitle subtasks--title">
+                                    <div class="subtitle--slot1">
+                                    [[subtaskHeader(item.type)]] ({{item.subtasks.length}})
+                                    </div>
+                                    <div class="subtitle--slot2">
+                                        <template is="dom-if" if="{{hasMultipleTShirtSizes(item)}}">
+                                            <div class="tshirtSizesView" title="Click to see tshirt sizes">
+                                                <iron-icon icon="taskboard-icons:view" on-tap="_showTShirtBubble">Ballparks</iron-icon>
+                                                <label on-tap="_showTShirtBubble">
+                                                Ballparks
+                                                </label>
+                                            </div>
+                                            <div class="tshirt-bubble" on-tap="_stopPropagation">
+                                                <div class="tshirt-bubble-arrow"></div>
+                                                <div class="tshirt-line">
+                                                    <div class="tshirt-label tshirt-label--header">Ballparks</div>
+                                                    <div class="tshirtValue">
+                                                    <paper-button class="close-tshirt-bubble" on-tap="_closeTShirtBubble" title="close">
+                                                        <iron-icon icon="taskboard-icons:close"></iron-icon>
+                                                    </paper-button>
+                                                    </div>
+                                                </div>
+                                                <template is="dom-repeat" items="{{item.subtasksTshirtSizes}}" as="size">
+                                                    <div class="tshirt-line">
+                                                        <div class="tshirt-label">{{size.name}}</div>
+                                                        <div class="tshirtValue">{{size.value}}</div>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
 
-                            <template is="dom-repeat" items="{{item.subtasksTshirtSizes}}" as="size">
-                                <div class="column-block top-bottom-alignment">
-                                    <div class="sub-header">{{getFieldName(size)}}</div>
-                                    <div class="sub-content">
-                                        {{size.value}}
                                     </div>
                                 </div>
                             </template>
 
-                        </div>
-
-                    </template>
-
-                    <div class="content-row">
-
-                        <div class="column-block">
-                            <div class="sub-header">Cycle Time</div>
-                            <div class="sub-content">
-                                {{item.cycletime}} days
-                            </div>
-                        </div>
-
-                        <template is="dom-if" if="{{item.additionalEstimatedHoursField}}">
-                            <div class="column-block">
-                                <div class="sub-header">{{getFieldName(item.additionalEstimatedHoursField)}}</div>
-                                <div class="sub-content">
-                                    <span>{{item.additionalEstimatedHoursField.value}}</span>
-                                </div>
-                            </div>
-                        </template>
-
-                        <template is="dom-if" if="{{item.release}}">
-                            <div class="column-block">
-                                <div class="sub-header">Release</div>
-                                <div class="sub-content">
-                                    <span>{{item.release.name}}</span>
-                                </div>
-                            </div>
-                        </template>
-
-                        <template is="dom-if" if="{{item.components.length}}">
-                            <div class="column-block">
-                                <div class="sub-header">Component/s</div>
-                                <template is="dom-repeat" items="{{item.components}}" as="component">
-                                    <div class="sub-content">{{component}}</div>
-                                </template>
-                            </div>
-                        </template>
-
-                    </div>
-
-                    <template is="dom-if" if="{{item.blocked}}">
-                        <div class="content-row">
-                            <div class="column-block">
-                                <div class="sub-header">Last Block Reason</div>
-                                <div class="sub-content">
-                                    <textarea class="last-block-reason-textarea" disabled>{{item.lastBlockReason}}</textarea>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-
-                    <template is="dom-if" if="{{shouldShowSubtasks}}">
-                        <div class="content-row">
-
-                            <div class="column-block">
-                                <div class="sub-header">{{showHeaderSubtasks(item)}}</div>
-                                <div id="subtasks_content" class="sub-content">
-                                    <div class="scroll">
-                                        <template is="dom-repeat" items="{{subtasks}}" as="subtask">
-                                            <paper-material class="subtaskPanel" elevation="0">
-                                                <paper-button class="subtaskLink" on-tap="openJira"  data-issue-key$="{{subtask.issueKey}}">
-                                                    {{subtask.issueKey}}
-                                                </paper-button>
-                                                {{subtask.summary}}
+                            <template is="dom-if" if="{{hasSubtasks}}">
+                                <div class="details-row">
+                                    <div id="subtasks_content" class="subtasks--panel">
+                                        <template is="dom-repeat" items="{{item.subtasks}}" as="subtask">
+                                            <paper-material class="subtask-panel" elevation="0">
+                                                <div class="subtask--issue-type">
+                                                    <img class="icon-tiny" src$="{{subtask.issueTypeUri}}" title$="{{subtask.issueType}}"/>
+                                                </div>
+                                                <div class="subtask--issue-key">
+                                                    <paper-button class="subtask-link" on-tap="openJira"  data-issue-key$="{{subtask.issueKey}}">
+                                                        {{subtask.issueKey}}
+                                                    </paper-button>
+                                                </div>
+                                                <div class="subtask--summary">
+                                                    {{subtask.summary}}
+                                                </div>
+                                                <div class="subtask--status" style$="background-color: {{subtask.color}}">
+                                                    <span>{{subtask.status}}</span>
+                                                </div>
                                             </paper-material>
                                         </template>
                                     </div>
                                 </div>
-                            </div>
+                            </template>
 
                         </div>
-                    </template>
+                        <div class="rightPanel">
+                            <div class="subtitle">People</div>
 
-                    <template is="dom-if" if="{{shouldShowTimetracking}}">
+                            <div id="teamSection" class$="people-section {{determineTeamSectionClass(item)}}">
+                                <div class="subsubtitle">Team:</div>
+                                <div class="details-row teams">
+                                    <template is="dom-repeat" items="{{item.teams}}" as="team" index-as="teamIndex">
+                                        <paper-material class$="{{teamClasses(team)}} tag team labelForTeam_{{teamIndex}}"
+                                            title="{{titleForTeam(team)}}" data-team$="{{team.name}}">
+                                            <span on-tap="_showReplaceTeamPicker"
+                                                data-picker$="teamSelector">{{team.name}}</span>
 
-                        <div class="content-row">
+                                            <template is="dom-if" if="{{showReplaceAction(item.teams)}}">
+                                                <iron-icon class="icon-tiny assignee-button" icon="taskboard-icons:change-team"
+                                                    on-tap="_showReplaceTeamPicker"
+                                                    title="Replace {{team.name}} by another team">
+                                                </iron-icon>
+                                            </template>
 
-                            <div class="column-block">
-                                <div class="sub-header">Effort</div>
-                                <template is="dom-if" if="{{!isUpdating}}">
-                                    <div id="timetracking_content" class="sub-content">
-                                        <template is="dom-if" if="{{timetracking}}">
-                                            <span>[[timetrackingLabel]]</span>
-                                            <paper-progress id="timeTracking" min="0"
-                                                            max="[[timetracking.originalEstimateMinutes]]"
-                                                            value="[[timetracking.timeSpentMinutes]]"
-                                                            class$="{{getTimeTrackingColor()}}"></paper-progress>
-                                        </template>
-                                        <template is="dom-if" if="{{!timetracking}}">
-                                            <paper-spinner active="true" alt="Loading..."></paper-spinner>
+                                            <template is="dom-if" if="{{showRemoveAction(item.teams)}}">
+                                                <iron-icon class="remove-button assignee-button" icon="taskboard-icons:remove"
+                                                    on-tap="removeTeam"
+                                                    title="Remove {{team.name}} from this issue">
+                                                </iron-icon>
+                                            </template>
+                                        </paper-material>
+                                    </template>
+                                    <team-picker id="teamSelector" class="people-picker" on-tap="_stopPropagation" on-selected-team="_addOrReplaceTeam" on-close-clicked="_closePicker"></team-picker>
+
+                                    <div class="people-actions">
+                                        <div id="addTeamButton" class="people-action-link" on-tap="_showAddTeamPicker" title="Add a new team to this issue">
+                                            <iron-icon class="add-people-icon" icon="taskboard-icons:add-team"></iron-icon>
+                                            <span>Team</span>
+                                        </div>
+                                        <template is="dom-if" if="{{canReturnToDefault(item)}}">
+                                            <div id="restoreTeamButton" class="people-action-link" on-tap="_restoreDefaultTeams" title="Restore issue default teams">
+                                                <iron-icon class="restore-icon" icon="taskboard-icons:restore"></iron-icon>
+                                                <span>Restore default</span>
+                                            </div>
+                                       </template>
+                                   </div>
+                                </div>
+                            </div>
+
+                            <div class="subsubtitle">Assignees: </div>
+
+                            <div class="details-row assignees">
+                                <template is="dom-repeat" items="{{item.assignees}}" as="assignee" index-as="userIndex">
+                                    <paper-material class$="assignee tag {{addClassToInvalidTeam(item, assignee)}}" title="{{titleForAssignee(item, assignee)}}"
+                                        data-assignee$="{{assignee.name}}">
+                                         <span>{{assignee.name}}</span>
+                                         <iron-icon class="remove-button assignee-button" icon="taskboard-icons:remove"
+                                                on-tap="_removeAssignee"
+                                                title="Remove {{assignee.name}} from this issue"></iron-icon>
+                                    </paper-material>
+                                </template>
+                                <div class="people-actions">
+                                    <template is="dom-if" if="{{isNotAssignedToMySelf(item)}}">
+                                        <div id="assignToMe" class="people-action-link" on-tap="_addMeAsAssignee" title="Add my self">
+                                            <iron-icon class="add-people-icon" icon="taskboard-icons:add-team"></iron-icon>
+                                            <span>Me</span>
+                                        </div>
+                                    </template>
+                                    <div id="addAssigneeButton" class="people-action-link" on-tap="pickerForAddAssignee" title="Add a new assignee to this issue">
+                                        <iron-icon class="add-people-icon" icon="taskboard-icons:add-team"></iron-icon>
+                                        <span>Assignee</span>
+                                    </div>
+                                    <user-picker
+                                            id="pickerForAddAssignee"
+                                            class="people-picker"
+                                            on-selected-user = "_addAssignee"
+                                            on-close-clicked = "_closePicker"
+                                            on-tap="_stopPropagation"
+                                            >
+                                    </user-picker>
+                                </div>
+                            </div>
+                            <hr class="people--separator"/>
+                            <div class="subtitle">Tracking</div>
+
+                            <div class="details-row">
+                                <div class="datailsColumn">
+                                    <div class="subsubtitle">Cycle Time</div>
+                                    <div class="sub-content">
+                                        {{item.cycletime}} days
+                                    </div>
+                                </div>
+                            </div>
+                            <template is="dom-if" if="{{item.additionalEstimatedHoursField}}">
+                                <div class="details-row">
+                                    <div class="datailsColumn">
+                                        <div class="subsubtitle">{{item.additionalEstimatedHoursField.name}}</div>
+                                        <div class="sub-content">
+                                            <span>{{item.additionalEstimatedHoursField.value}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <template is="dom-if" if="{{shouldShowTimetracking}}">
+                                <div class="details-row">
+                                    <div class="datailsColumn">
+                                        <div class="subsubtitle">Effort</div>
+                                        <template is="dom-if" if="{{!isUpdating}}">
+                                            <div id="timetracking_content" class="sub-content">
+                                                <template is="dom-if" if="{{timetracking}}">
+                                                    <span class="text">[[timetrackingLabel]]</span>
+                                                </template>
+                                                <template is="dom-if" if="{{!timetracking}}">
+                                                    <paper-spinner active="true" alt="Loading..."></paper-spinner>
+                                                </template>
+                                            </div>
                                         </template>
                                     </div>
-                                </template>
-                            </div>
+                                </div>
+                            </template>
 
+                            <template is="dom-if" if="{{errorMessage}}">
+                                <div class="message-box message-box--error">
+                                    <paper-icon-button class="message-box__icon" icon="error" title="Error Icon"></paper-icon-button>
+                                    <p class="message-box__message">{{errorMessage}}</p>
+                                    <paper-icon-button class="message-box__close" icon="close" title="Close error" on-tap="_closeErrorMessage"></paper-icon-button>
+                                </div>
+                            </template>
+
+                            <template is="dom-if" if="{{isUpdating}}">
+                                <div class="message-box message-box--updating">
+                                    <paper-spinner class="message-box__icon" active="true" alt="Updating..."></paper-spinner>
+                                    <p class="message-box__message">Updating...</p>
+                                </div>
+                            </template>
                         </div>
-
-                    </template>
-
+                    </div>
                 </div>
-
-                <template is="dom-if" if="{{errorMessage}}">
-                    <div class="message-box message-box--error">
-                        <paper-icon-button class="message-box__icon" icon="error" title="Error Icon"></paper-icon-button>
-                        <p class="message-box__message">{{errorMessage}}</p>
-                        <paper-icon-button class="message-box__close" icon="close" title="Close error" on-tap="_closeErrorMessage"></paper-icon-button>
-                    </div>
-                </template>
-
-                <template is="dom-if" if="{{isUpdating}}">
-                    <div class="message-box message-box--updating">
-                        <paper-spinner class="message-box__icon" active="true" alt="Updating..."></paper-spinner>
-                        <p class="message-box__message">Updating...</p>
-                    </div>
-                </template>
-
-                <template is="dom-if" if="{{!isUpdating}}">
-
-                    <div class="custom-footer">
-
-                        <div id="transitions_content" class="custom-footer-buttons">
-
-                            <paper-button disabled="{{isAlreadyAssignedToLoggedUser(item)}}" id="assignButton" raised class="colorful" on-tap="assignIssue" title="Assign to me">
-                                Assign to me
-                            </paper-button>
-
-                            <template is="dom-if" if="{{hasRecords(transitions)}}">
-                                <template id="issueTransitions" is="dom-repeat" items="{{transitions}}" as="transition">
-                                    <paper-button data-transition-name$='{{transition.name}}' data-transition-id$='{{transition.id}}' data-transition-to-status-id$='{{transition.to.id}}' raised class="colorful" on-tap="requestTransition">
-                                        {{transition.name}}
-                                    </paper-button>
-                                </template>
-                            </template>
-
-                            <template is="dom-if" if="{{canBlock}}">
-                                <paper-button id="blockButton" raised class="colorful" on-tap="block" title="Block">
-                                    Block
-                                </paper-button>
-                            </template>
-
-                            <template is="dom-if" if="{{canUnblock}}">
-                                <paper-button id="unblockButton" raised class="colorful" on-tap="unblock" title="Unblock">
-                                    Unblock
-                                </paper-button>
-                            </template>
-
-                            <template is="dom-if" if="{{!hasRecords(transitions)}}">
-                                <paper-spinner active="true" alt="Loading..."></paper-spinner>
-                            </template>
-
-                        </div><!-- #transitions_content -->
-
-                    </div><!-- .custom-footer -->
-
-                </template>
-
             </paper-card>
         </paper-dialog>
         <transition-required-modal id="transitionRequiredDialog"></transition-required-modal>
         <confirm-modal id="confirmModal"></confirm-modal>
-        <fields-required-modal id="fieldsRequiredDialog"></fields-required-modal>
-        <issue-new-task id="dialogNewTask" item="{{item}}"></issue-new-task>
+        <fields-required-modal id="fieldsRequiredDialog" on-close-clicked="blockCancelled"></fields-required-modal>
     </template>
 
     <script>
@@ -721,19 +1132,9 @@
                         notify: true
                     },
 
-                    resolution: {
-                        type: Object,
-                        notify: true
-                    },
-
                     shouldShowTimetracking: {
                         type: Boolean,
                         value: true,
-                        notify: true
-                    },
-
-                    timetrackerBlown: {
-                        type: Boolean,
                         notify: true
                     },
 
@@ -742,7 +1143,13 @@
                         notify: true
                     },
 
-                    shouldShowSubtasks: {
+                    hasSubtasks: {
+                        type: Boolean,
+                        value: true,
+                        notify: true
+                    },
+
+                    canHaveSubtasks: {
                         type: Boolean,
                         value: true,
                         notify: true
@@ -775,6 +1182,10 @@
                         notify: true
                     },
 
+                    blocked: {
+                        type: Boolean
+                    },
+
                     updatedIssue: {
                         type: Object,
                         value: null
@@ -805,26 +1216,35 @@
                             OPENED: 'opened',
                             CLOSED: 'closed'
                         }
+                    },
+                    descriptionTooLong: {
+                        type: Boolean,
+                        notify: true,
+                        value: false
+                    },
+                    showMoreOrLess: {
+                        type: String,
+                        notify: true,
+                        value: 'Show More'
                     }
-
                 },
 
                 observers: [
                     '_resizeModal(subtasks, timetracking, isUpdating, errorMessage)',
-                    '_updateIssueLocalState(localStates.*)'
+                    '_updateIssueLocalState(localStates.*)',
+                    '_newTeamChosen(newTeam)',
                 ],
 
                 attached: function() {
                     var self = this;
+
                     self.isObserving = false;
                     new MutationObserver(function(mutations) {
                         if (!self.isObserving)
                             return;
                         mutations.forEach(function(mutation) {
-                           console.log(mutation.target);
-                           if (mutation.type == 'characterData') {
+                           if (mutation.type === 'characterData')
                                flash($(mutation.target.parentElement), 'yellow')
-                           }
                            else
                                flash($(mutation.target), 'yellow')
                         });
@@ -832,14 +1252,192 @@
                     }).observe(Polymer.dom(this).node, {subtree: true, childList: true, characterData: true});
 
                     this.set('_modalStatus', this._modalStatuses.CLOSED);
+                    this._setupPickers();
                 },
 
-                computeTimeTrackingLabel: function () {
-                    this.timetrackingLabel = this.parseMinutesToHours(this.timetracking.timeSpentMinutes) + '/' + this.parseMinutesToHours(this.timetracking.originalEstimateMinutes);
+                showReplaceAction: function() {
+                    return this.item.usingDefaultTeam;
+                },
+
+                showRemoveAction: function() {
+                    return this.item.teams.length > 1;
+                },
+
+                canReturnToDefault: function() {
+                    return !this.item.usingDefaultTeam && !this.item.usingParentTeam;
+                },
+
+                teamClasses: function() {
+                    if (this.item.usingDefaultTeam)
+                        return "default-team";
+                    if (this.item.usingParentTeam)
+                        return "parent-team";
+                    return "";
+                },
+
+                titleForTeam: function(team) {
+                    if (this.item.usingDefaultTeam)
+                        return team.name + " is the default team for project " + this.item.project;
+                    if (this.item.usingParentTeam)
+                        return "Team " + team.name + " was inherited from parent issue " + this.item.parent;
+                    return "";
+                },
+
+                addClassToInvalidTeam: function(item, assignee) {
+                    if (this.isInvalidTeam(item, assignee)) {
+                        return "invalid-assignee";
+                    }
+                    return "";
+                },
+
+                titleForAssignee: function(item, assignee) {
+                    if (this.isInvalidTeam(item, assignee))
+                        return "Assignee should be in one of these teams: " + item.teamNames.join(",");
+                    return "";
+                },
+
+                _showAddTeamPicker: function(e) {
+                    e.stopPropagation();
+                    this._closeAllPickers();
+                    this.$.teamSelector.open(this.$.addTeamButton);
+                },
+
+                _restoreDefaultTeams: function() {
+                    this._issueAction(
+                            'restoreDefaultTeams',
+                            'restore teams in issue')
+                },
+
+                _showReplaceTeamPicker: function(e) {
+                    e.stopPropagation();
+                    if (!this.item.usingDefaultTeam)
+                        return;
+
+                    this._closeAllPickers();
+
+                    var team = e.model.get("team");
+                    var label = this.$$(".labelForTeam_0");
+                    $(this.$.teamSelector).css("width", $(label).width()+40)
+                    this.$.teamSelector.open(label, team.id);
+                },
+
+                pickerForAddAssignee: function(e) {
+                    e.stopPropagation();
+                    this._closeAllPickers();
+                    this.$.pickerForAddAssignee.open();
+                },
+
+                _addOrReplaceTeam: function(e) {
+                    var teamPicker = e.target;
+                    var selectedTeamId = teamPicker.selected;
+
+                    if (!selectedTeamId) {
+                        teamPicker.close();
+                        return;
+                    }
+
+                    var action;
+                    if (teamPicker.idOfteamToReplace) // replace
+                        action = this._issueAction(
+                            'replaceTeamInIssue',
+                            'replace team in issue',
+                            {teamToReplace: teamPicker.idOfteamToReplace, replacementTeam: selectedTeamId})
+                    else //add
+                        action = this._issueAction('addTeamToIssue', 'add team to issue', {id: selectedTeamId})
+
+                    action.always(function() {
+                        teamPicker.close();
+                    })
+                },
+
+                _addAssignee: function(e) {
+                    var userPicker = e.target;
+                    var selectedUsername = userPicker.selected;
+
+                    if (!selectedUsername) {
+                        userPicker.close();
+                        return;
+                    }
+                    this._issueAction('addAssigneeToIssue', 'add assignee to issue', {username: selectedUsername})
+                        .always(function() {
+                            userPicker.close();
+                        })
+                },
+
+                _setupPickers: function() {
+                    // setup replacement pickers
+                    var self = this;
+                    // setup add new team picker
+                    var teamPicker = this.$.teamSelector;
+                    teamPicker.open = function(label, id) {
+                        teamPicker.clear()
+                        $(teamPicker).show();
+                        teamPicker.focus()
+                        teamPicker.label = $(label);
+                        teamPicker.label.hide();
+                        teamPicker.idOfteamToReplace = id;
+                    }
+                    teamPicker.close = function() {
+                        $(teamPicker).hide();
+                        if (teamPicker.label)
+                            teamPicker.label.show();
+                        teamPicker.idOfteamToReplace = null;
+                    }
+
+                    // setup the assignee picker
+                    var userPicker = self.$.pickerForAddAssignee;
+                    userPicker.open = function() {
+                        userPicker.clear();
+                        $(userPicker).show();
+                        userPicker.focus()
+                        $(self.$.addAssigneeButton).hide();
+                        if (self.isNotAssignedToMySelf(self.item))
+                        	$(self.$$("#assignToMe")).hide();
+                    }
+                    userPicker.close = function() {
+                        $(userPicker).hide();
+                        $(self.$.addAssigneeButton).show();
+                        if (self.isNotAssignedToMySelf(self.item))
+                        	$(self.$$("#assignToMe")).show();
+                    }
+	            },
+
+                _closePicker: function(e) {
+					e.target.close();
+                },
+
+                _closeAllPickers: function() {
+                    var pickers = Polymer.dom(this.root).querySelectorAll(".people-picker");
+                    pickers.forEach(function(tp) {
+                        tp.close();
+                    });
+                },
+
+                _toggleShowMoreOrLess: function() {
+                    if (!this.descriptionExpanded)
+                       this._expandDescription();
+                    else
+                       this._collapseDescription();
+
+                    this.descriptionExpanded = !this.descriptionExpanded;
+                },
+
+                _expandDescription: function() {
+                    var element = this.$$(".description-row");
+                    $(element).animate({"max-height" : element.scrollHeight}, 500)
+                    $(".descriptionShowMore iron-icon").addClass("upsideDown")
+                    this.showMoreOrLess = "Show Less"
+                },
+
+                _collapseDescription: function() {
+                    var element = this.$$(".description-row");
+                    $(element).animate({"max-height" : '20vh'}, 500);
+                    $(".descriptionShowMore iron-icon").removeClass("upsideDown")
+                    this.showMoreOrLess = "Show More"
                 },
 
                 parseMinutesToHours: function (minutes) {
-                    if (minutes == 0)
+                    if (minutes === 0)
                         return '0h';
 
                     var hours = Math.floor(minutes / 60);
@@ -851,15 +1449,14 @@
                 timetrackingCallback: function (timetracking) {
                     this.timetracking = timetracking.detail.response;
                     this.shouldShowTimetracking = true;
-                    this.updateTimetrackerColor();
-                    this.computeTimeTrackingLabel();
+                    this.timetrackingLabel = this.parseMinutesToHours(this.timetracking.timeSpentMinutes)
                 },
 
-                showHeaderSubtasks: function (item) {
-                    if (this.item.type == ISSUETYPE_ID.DEMANDA)
+                subtaskHeader: function (item) {
+                    if (this.item.type === ISSUETYPE_ID.DEMANDA)
                         return "Tasks";
                     else
-                        return "Sub-Tasks";
+                        return "Sub-tasks";
                 },
 
                 hideTimetracking: function () {
@@ -870,14 +1467,17 @@
                     return 'images/projetos/logo_' + issue.project.toLowerCase() + '.png';
                 },
 
-                assignIssue: function () {
+                _addMeAsAssignee: function (e) {
+                    try {
+                    	e.target.close();
+                    }catch(ex){}
                     var self = this;
                     var issueBefore = this.item;
                     var issue = clone(this.item);
 
                     var requestBody = issue.issueKey;
                     $.ajax({
-                        url: '/ws/issues/assign',
+                        url: '/ws/issues/addMeAsAssignee',
                         type: 'post',
                         dataType: 'json',
                         contentType: 'application/json',
@@ -900,98 +1500,54 @@
                             if(self._isOpenedAndIsTheSameIssue(issueBefore.issueKey)) {
                                 self.item = issueBefore;
                             } else {
-                                self.fire("iron-signal", {name:"show-issue-error-message", data: {
-                                        issueKey: issueBefore.issueKey,
-                                        errorMessage: toastMessage
-                                    }});
+                                taskboard.showIssueError(self. issueBefore.issueKey, toastMessage);
                             }
                         },
                         async: true
                     });
+                },
 
-                    var current = issue.assignee;
-                    var assignee = taskboard.getLoggedUser().name;
-                    if(current != assignee) {
-                        var coAssignees = issue.subResponsaveis.split(",");
-                        coAssignees = _.without(coAssignees, assignee, "");
-                        if(current && !_.contains(coAssignees, current))
-                            coAssignees.push(current);
+                _canToggleBlockState: function(state) {
+                    if (!this.item)
+                        return false;
+                    if (this.item.blocked)
+                        return this.canBlock;
+                    return this.canUnblock;
+                },
 
-                        issue.assignee = assignee;
-                        issue.subResponsaveis = coAssignees.join();
-                    }
-                    self._setIssueLocalStateAndFireUpdated(issue, true, null, 'UPDATED');
-                    this.item = issue;
+                _toggleBlockUnblock: function() {
+                    if (this.blocked)
+                        return this.block();
+
+                    return this.unblock();
                 },
 
                 block: function () {
                     var self = this;
-                    self._setIssueLocalState(self.item, true, null);
                     var callback = function(issue) {
-                        $.ajax({
-                            url: '/ws/issues/block-task/' + issue.issueKey,
-                            type: 'post',
-                            dataType: 'json',
-                            contentType: 'application/json',
-                            headers: {
-                                'Accept': 'application/json',
-                                'Content-Type': 'application/json'
-                            },
-                            data: issue.customFields[CUSTOMFIELD.LAST_BLOCK_REASON],
-                            success: function (issueFromServer) {
-                                self._setIssueLocalStateAndFireUpdated(issueFromServer, false, null, 'UPDATED');
-                                if(self._isOpenedAndIsTheSameIssue(issueFromServer.issueKey))
-                                    self.setCard(issueFromServer);
-                            },
-                            error: function (jqXhr, textStatus, errorThrown) {
-                                console.error(errorThrown);
-                                var errorMessage = jqXhr.responseJSON.message;
-                                self._setIssueLocalState(self.item, false, errorMessage);
-                            },
-                            async: true
-                        });
+                        self._setIssueLocalState(self.item, true, null);
+                        self._issueAction("block-task", "block issue " + issue.issueKey, issue.lastBlockReason)
+							.fail(function(){
+                        	    self.blocked = false;
+                        	});
                     };
 
-                    $.ajax({
-                        url: '/ws/field/' + CUSTOMFIELD.LAST_BLOCK_REASON,
-                        type: 'get',
-                        success: function(data) {
-                            var fields = [{id: CUSTOMFIELD.LAST_BLOCK_REASON,
-                                           name: data.name,
-                                           type: TYPE_FIELD.TEXTAREA}];
-                            self.$.fieldsRequiredDialog.openDialog(fields, "Block", self.item, callback);
-                            self._setIssueLocalState(self.item, false, null);
-                        },
-                        error: function(jqXhr, textStatus, errorThrown) {
-                            console.error(errorThrown);
-                            var errorMessage = jqXhr.responseJSON.message;
-                            self._setIssueLocalState(self.item, false, errorMessage);
-                        }
-                    });
+                    var fields = [{id: "lastBlockReason",
+                        name: taskboard.getFieldName({fieldId: CUSTOMFIELD.LAST_BLOCK_REASON}),
+                        type: TYPE_FIELD.TEXTAREA}];
+
+         			self.$.fieldsRequiredDialog.openDialog(fields, "Block", self.item, callback);
+                },
+
+                blockCancelled: function() {
+                    this.blocked = false;
                 },
 
                 unblock: function () {
-                    var self = this;
-                    self._setIssueLocalState(self.item, true, null);
-                    $.ajax({
-                        url: '/ws/issues/unblock-task/' + self.item.issueKey,
-                        type: 'get',
-                        success: function (issueFromServer) {
-                            self._setIssueLocalStateAndFireUpdated(issueFromServer, false, null, 'UPDATED');
-                            if(self._isOpenedAndIsTheSameIssue(issueFromServer.issueKey))
-                                self.setCard(issueFromServer);
-                        },
-                        error: function (jqXhr, textStatus, errorThrown) {
-                            console.error(errorThrown);
-                            var errorMessage = jqXhr.responseJSON.message;
-                            self._setIssueLocalState(self.item, false, errorMessage);
-                        },
-                        async: true
-                    });
-                },
-
-                isAlreadyAssignedToLoggedUser: function(item) {
-                    return item.assignee === taskboard.getLoggedUser().name;
+                    this._issueAction("unblock-task", "unblock issue " + this.item.issueKey, {})
+    					.fail(function(){
+                    	    self.blocked = true;
+                    	});
                 },
 
                 requestTransition: function (e) {
@@ -1018,13 +1574,13 @@
                     var self = this;
                     var fieldsTransitions = [];
                     if (transition){
-                        Object.values(transition.fields).forEach( field => {
+                        Object.values(transition.fields).forEach(function(field ) {
                             if(field.required && !isFieldNameEquals(field.name, taskboard.getResolutionFieldName())){
                                 self.showFieldsRequiredDialog = true;
                                 fieldsTransitions.push(field);
                             }
-                        });
-                        if(TRANSITION_REQUIRED_COMMENT.indexOf(transition.name) != -1)
+                        })
+                        if(TRANSITION_REQUIRED_COMMENT.indexOf(transition.name) !== -1)
                            self.showFieldsRequiredDialog = true;
                     }
                     return fieldsTransitions;
@@ -1033,8 +1589,10 @@
                 isResolutionRequired: function (transition) {
                     if (!transition)
                         return false;
-                    var found = Object.values(transition.fields).find( field => field.required && isFieldNameEquals(field.name, taskboard.getResolutionFieldName()) );
-                    return found != undefined;
+                    var found = Object.values(transition.fields).find(
+                        function(field) { return field.required && isFieldNameEquals(field.name, taskboard.getResolutionFieldName()) }
+                        );
+                    return found !== undefined;
                 },
 
                 doTransition: function (transition, issue, status, fieldValuesRequired) {
@@ -1067,10 +1625,7 @@
                             if(self._isOpenedAndIsTheSameIssue(issueBeforeTransition.issueKey))
                                 self.setCard(issueBeforeTransition);
 
-                            self.fire("iron-signal", {name:"show-issue-error-message", data: {
-                                    issueKey: issueBeforeTransition.issueKey,
-                                    errorMessage: toastMessage
-                                }});
+                            taskboard.showIssueError(self, issueBeforeTransition.issueKey, toastMessage);
                         },
                         async: true
                     });
@@ -1096,110 +1651,124 @@
                     });
                 },
 
-                shouldShowNewSubtask: function (item) {
-                    var issueTypes = JSON.parse(localStorage.getItem("issueTypes"));
-                    var issueConf = JSON.parse(localStorage.getItem("issueTypeConfig"));
-
-                    for (x in issueConf)
-                        if (x == this.item.type)
-                            return true;
-                    return false;
-                },
-
                 opendialog: function (item) {
                     this.isObserving = false;
                     this.setCard(item);
                     this.$.modal.open();
                     this.isOpen = true;
+
+                    this.showMoreOrLess      = "Show More";
+                    this.descriptionExpanded = false;
+                    this.set('descriptionTooLong', false);
+                    $(this.$$(".tshirt-bubble")).hide();
+                    var self = this;
+                    if (this.canHaveSubtasks) {
+                        this._collapseDescription();
+                        setTimeout(function() {
+                            var element = self.$$(".description-row");
+                            if (element.offsetHeight < element.scrollHeight ||
+                                element.offsetWidth < element.scrollWidth)
+                                self.set('descriptionTooLong', true);
+                            else
+                                self.set('descriptionTooLong', false);
+                        },10)
+                    }
+                    else setTimeout(function() {
+                        self._expandDescription();
+                    },10);
+
                 },
 
-                _resizeModal: function(subtasks, timetracking, isUpdating, errorMessage) {
+                _resizeModal: function() {
                     this.$.modal.notifyResize();
                 },
 
                 setCard: function(item) {
                     var startDateStep = new Date(item.startDateStepMillis);
                     item.cycletime = cycleTime.getCycleTime(startDateStep, new Date()).toFixed(2);
-                    
-                    this.item = item;
-                    $(this.$.modal).css('background-color', this.item.color);
 
-                    if(!this.isUpdating) {
-                        this.$.ajaxTimetracking.generateRequest();
-                        this.$.ajaxTransitions.generateRequest();
-                    }
-                    this.subtasks = item.subtasks;
-                    this.shouldShowSubtasks = typeof this.subtasks !== undefined && this.subtasks.length > 0;
+                    this.hasSubtasks = (typeof item.subtasks !== undefined && item.subtasks.length > 0);
+                    this.canHaveSubtasks = item.feature || item.demand;
 
                     this.canBlock = !item.blocked && !item.completed;
                     this.canUnblock = item.blocked && !item.completed;
                     this.issueChangeStateClass = '';
                     this.issueDeleteStateClass = '';
                     this.updatedIssue = null;
+                    this.item = item;
+                    this.blocked = this.item.blocked;
+                    if(!this.isUpdating) {
+                        this.$.ajaxTimetracking.generateRequest();
+                        this.$.ajaxTransitions.generateRequest();
+                    }
 
                     this._updateIssueLocalState();
                 },
 
-                getAssignees: function (item) {
-                    var assignees = "";
-
-                    if (item.subResponsaveis) {
-                        if (item.subResponsaveis.indexOf(item.assignee) < 0) {
-                            assignees = item.assignee + ',' + item.subResponsaveis;
-                        } else {
-                            assignees = item.subResponsaveis;
-                        }
-                    } else {
-                        assignees = item.assignee;
-                    }
-
-                    if (!assignees)
-                        return [];
-
-                    return assignees.split(',');
+                getDescriptionClass: function() {
+                    var classes = "";
+                    if (this.canHaveSubtasks)
+                        classes += " description-row--collapsed";
+                    if (!this.item.description)
+                        classes += " description-row-no-description"
+                    return classes;
                 },
 
-                isInvalidTeam: function(item) {
-                    return taskboard.isInvalidTeam(item.teams);
+                isInvalidTeam: function(item,assignee) {
+                    return item.mismatchingUsers.indexOf(assignee.name) !== -1;
                 },
 
-                getTitleIconInvalidTeam: function(item) {
-                    return "Assignee should be in one of these teams: " + taskboard.getTeamsOfProject(item.projectKey);
+                determineTeamSectionClass: function(item) {
+                    return item.teams.length > 0?"":"hidden-section";
+                },
+
+                hasMultipleTShirtSizes: function(item) {
+                    return item.subtasksTshirtSizes.length > 1;
                 },
 
                 getDescription: function (issue) {
-                    return issue.description ? jira2md.to_markdown(issue.description) : 'N/A';
-                },
-
-                getFieldName: function(field) {
-                    return taskboard.getFieldName(field.fieldId);
+                    return issue.description ? jira2md.to_markdown(issue.description) : 'No description';
                 },
 
                 hasRecords: function (records) {
                     return records && records.length > 0;
                 },
 
-                updateTimetrackerColor: function () {
-                    if (this.timetracking.originalEstimateMinutes)
-                        this.timetrackerBlown = this.timetracking.timeSpentMinutes > this.timetracking.originalEstimateMinutes;
-                    else
-                        this.timetrackerBlown = false;
+                isNotAssignedToMySelf: function(item) {
+                    return item.assignees.map(function(a){return a.name}).indexOf(taskboard.getLoggedUser().name) === -1;
                 },
 
-                getTimeTrackingColor: function() {
-                    return this.timetrackerBlown ? 'red' : 'green';
+                _showTShirtBubble: function(e) {
+                    var bb = $(this.$$(".tshirt-bubble"));
+                    var offset = ($(".subtitle--slot2").outerHeight()+bb.outerHeight())/2+5 + $(this.$$(".leftPanel")).scrollTop();
+                    bb.css("margin-top", "-"+offset+"px")
+                    bb.show();
+
+                    var arrow = $(this.$$(".tshirt-bubble-arrow"));
+                    arrow.css("top", "50%")
+
+                    // adjust bubble and arrow position in case it goes partially offscreen
+                    var windowBottom = $(window).scrollTop()+$(window).height()-10;
+                    var bubbleBottom = bb.offset().top+bb.outerHeight();
+                    if (bubbleBottom > windowBottom) {
+                        var delta = bubbleBottom-windowBottom;
+                        arrow.css("top", arrow.offset().top+delta-bb.offset().top);
+                        offset += delta;
+                        bb.css("margin-top", "-"+offset+"px")
+                    }
+
+                    if (e) e.stopPropagation();
                 },
 
-                openDialogNewTask: function () {
-                    this.$.dialogNewTask.opendialog(this.item);
-                    this.close();
-                    this.isOpen = false;
+                _closeTShirtBubble: function() {
+                    var bb = $(this.$$(".tshirt-bubble"));
+                    bb.hide();
                 },
 
                 openJira: function (event) {
                     event.stopPropagation();
                     var issueKey = event.target.getAttribute('data-issue-key');
-                    var win = window.open(window.urlJira + '/browse/' + issueKey, '_blank');
+                    window.open(window.urlJira + '/browse/' + issueKey, '_blank');
                 },
 
                 _afterOpen: function() {
@@ -1209,6 +1778,7 @@
                 close: function() {
                     this._beforeClose();
                     this.$.modal.close();
+                    this._afterClose();
                 },
 
                 _beforeClose: function () {
@@ -1219,13 +1789,10 @@
                 _afterClose: function () {
                     this.timetracking = {};
                     this.transitions = [];
-                    this.subtasks = null;
-                    this.resolution = null;
                     this.showFieldsRequiredDialog = false;
-                    this.timetracking = null;
 
                     this.shouldShowTimetracking = true;
-                    this.shouldShowSubtasks = true;
+                    this.hasSubtasks = true;
 
                     this.isUpdating = false;
                     this.errorMessage = null;
@@ -1237,11 +1804,18 @@
                 },
 
                 getIssueTypeImage: function(issue) {
-                    return issue.typeIconUri.replace('xsmall', 'medium');
+                    return issue.typeIconUri;
                 },
-
-                getStatusName: function(statusId) {
-                    return taskboard.getStatusName(statusId);
+                
+                transitionList: function() {
+                    var r = [];
+                    r.push({name: taskboard.getStatusName(this.item.status), order: this.item.statusOrder})
+                    for(var t in this.transitions ) {
+                        r.push(this.transitions[t])
+                    }
+                    return r.sort(function(a,b) {
+                        return a.order - b.order;
+                    });
                 },
 
                 updateIssue: function(event, data) {
@@ -1271,7 +1845,7 @@
                 },
 
                 getTransitionById: function(transitionId) {
-                    return this.transitions.find( transition => transition.id == transitionId );
+                    return this.transitions.find( function(transition) { return transition.id == transitionId} );
                 },
 
                 _closeErrorMessage: function() {
@@ -1281,6 +1855,7 @@
 
                 _setIssueLocalStateAndFireUpdated: function(issue, isUpdating, errorMessage, eventType) {
                     this._setIssueLocalState(issue, isUpdating, errorMessage);
+                    console.log("issue-detail: updated issue: " + issue.issueKey + " -- " +issue.stateHash)
                     taskboard.fireIssueUpdated('client', this, issue, eventType);
                 },
 
@@ -1320,9 +1895,50 @@
                 _isOpenedAndIsTheSameIssue: function(issueKey) {
                     return this.isOpen && (this.item && this.item.issueKey == issueKey);
                 },
+                
+                removeTeam: function(e) {
+                    var teamId = e.model.get("team.id")
+                    this._issueAction('removeTeamFromIssue', 'remove team from issue', {id: teamId})
+                },
+                
+                _removeAssignee: function(e) {
+                    var username = e.model.get("assignee.name")
+                    this._issueAction('removeAssigneeFromIssue', 'remove assignee from issue', {username: username})
+                },
+                
+                _issueAction: function(action, actionName, data) {
+                    var source = this;
+                    this._setIssueLocalState(this.item, true, null);
+                    return $.ajax({
+                            url: '/ws/issues/'+action+'/'+source.item.issueKey,
+                            type: 'post',
+                            dataType: 'json',
+                            contentType: 'application/json',
+                            data: (typeof data === 'object') ? JSON.stringify(data) : data
+                        })
+                        .done(function(issueFromServer) {
+                            source._setIssueLocalStateAndFireUpdated(issueFromServer, false, null, 'UPDATED');
+                            if(source._isOpenedAndIsTheSameIssue(issueFromServer.issueKey))
+                                source.setCard(issueFromServer);
+                        })
+                        .fail(function (jqXhr) {
+                            var errorMessage = "";
+                            if (jqXhr.responseJSON)
+                                errorMessage = jqXhr.responseJSON.message;
+                            taskboard.showIssueError(source, source.item.issueKey, "Failed to "+ actionName + ". Error " + errorMessage);
+                            source._setIssueLocalState(source.item, false, errorMessage);
+                        });
+                },
 
+                _cardTapped: function () {
+                    this._closeTShirtBubble();
+                    this._closeAllPickers();
+                },
+
+                _stopPropagation: function (e) {
+                    e.stopPropagation();
+                }
             });
-
         })();
     </script>
 

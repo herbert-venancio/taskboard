@@ -57,6 +57,25 @@ public abstract class AbstractUiFragment {
         waitVisibilityOfElement(element);
         waitUntil(textToBePresentInElement(element, expected));
     }
+    
+    protected void waitUntilElementExistsWithText(By by, String valueToSelect) {
+        waitUntil(new ExpectedCondition<Boolean>() {
+            @Override
+            public Boolean apply(WebDriver element) {
+                List<WebElement> elements = element.findElements(by);
+                if (elements.size() == 0)
+                    return false;
+                WebElement we = elements.get(0);
+                if (!we.isDisplayed())
+                    return false;
+                try {
+                    return we.getText().trim().equals(valueToSelect);
+                }catch(StaleElementReferenceException ex) {
+                    return false;
+                }
+            }
+        });
+    }
 
     protected void waitAttributeValueInElement(WebElement element, String attribute, String expected) {
         waitVisibilityOfElement(element);
@@ -110,6 +129,15 @@ public abstract class AbstractUiFragment {
             }
         });
     }
+    
+    protected void waitUntilElementsShowsUpCountTimes(By by, int count) {
+        waitUntil(new ExpectedCondition<Boolean>() {
+            @Override
+            public Boolean apply(WebDriver element) {
+                return element.findElements(by).size() == count;
+            }
+        });
+    }
 
     protected void waitUntilElementNotExists(By by) {
         waitUntil(new ExpectedCondition<Boolean>() {
@@ -134,6 +162,26 @@ public abstract class AbstractUiFragment {
         waitVisibilityOfElement(element);
         waitUntil(elementToBeClickable(element));
         element.click();
+    }
+    
+    protected void waitForClick(By by) {
+        waitUntil(new ExpectedCondition<Boolean>() {
+            @Override
+            public Boolean apply(WebDriver element) {
+                List<WebElement> elements = element.findElements(by);
+                if (elements.size() == 0)
+                    return false;
+                try {
+                    WebElement we = elements.get(0);
+                    if (!we.isDisplayed())
+                        return false;
+                    we.click();
+                    return true;
+                }catch(StaleElementReferenceException ex) {
+                    return false;
+                }
+            }
+        });
     }
 
     protected void setInputValue(WebElement input, String value) {

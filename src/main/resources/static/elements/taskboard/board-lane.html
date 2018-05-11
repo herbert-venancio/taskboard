@@ -89,11 +89,7 @@
                 font-size: inherit;
                 color: inherit;
                 border-radius: 0;
-                vertical-align: middle;
                 font-weight: inherit;
-            }
-
-            .name {
             }
 
             .table-body {
@@ -140,6 +136,7 @@
                       on-iron-signal-level-visibility-changed="preferencesUpdated"
                       on-iron-signal-search-filter-changed="preferencesUpdated"
                       on-iron-signal-issue-count-changed="preferencesUpdated"
+                      on-iron-signal-board-resized="recomputeHeight"
                       ></iron-signals>
 
         <!-- Lane Header -->
@@ -148,7 +145,7 @@
         </div>
 
         <!-- Lane Body -->
-        <div data-lane-name$='{{metadata.level}}' class="table-wrapper" style$="height:{{getWrapperHeight(weight, issues, lastPreferenceUpdate)}}px">
+        <div data-lane-name$='{{metadata.level}}' class="table-wrapper" style$="height:[[getWrapperHeight(weight, lastPreferenceUpdate)]]px">
             <table class="lane-body">
 
                 <!-- Headers -->
@@ -356,6 +353,10 @@
                 },
 
                 preferencesUpdated: function() {
+                    this.recomputeHeight();
+                },
+
+                recomputeHeight: function() {
                     this.lastPreferenceUpdate = new Date();
                 },
 

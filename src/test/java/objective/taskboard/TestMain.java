@@ -55,6 +55,26 @@ public class TestMain {
     public static void main(String[] args) {
         System.setProperty("spring.datasource.data", "classpath:/populate_db.sql");
         JiraMockServer.begin();
+
+        if (Boolean.parseBoolean(System.getProperty("TestMain.devMode", "false")))
+            registerWebhook();
+
         SpringApplication.run(TestMain.class, new String[]{"--server.port=8900"});
+    }
+
+    private static void registerWebhook() {
+        while (true) {
+            try {
+                JiraMockServer.registerWebhook("http://localhost:8900", "jira:issue_updated");
+                break;
+            }catch(IllegalStateException e) {
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e1) {
+                    throw new RuntimeException(e1);
+                }
+            }
+        }
+        System.out.println("Webhook registered");
     }    
 }

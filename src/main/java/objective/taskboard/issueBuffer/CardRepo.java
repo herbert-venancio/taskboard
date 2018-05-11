@@ -23,11 +23,14 @@ public class CardRepo  {
     private Map<String, Issue> cardByKey = new ConcurrentHashMap<>();
     private Set<String> unsavedCards = new HashSet<>();
     private Set<String> currentProjects = new HashSet<>();
+    private Map<Long, String> keyById = new ConcurrentHashMap<>();
        
     public CardRepo(CardStorage repodb) {
         this.db = repodb;
-        if (repodb.issues().size() > 0) 
+        if (repodb.issues().size() > 0) {
             cardByKey.putAll(repodb.issues());
+            cardByKey.values().stream().forEach(i->keyById.put(i.getId(), i.getIssueKey()));
+        }
         
         this.lastRemoteUpdatedDate = repodb.getLastRemoteUpdatedDate();
         this.currentProjects = repodb.getCurrentProjects();
@@ -37,6 +40,15 @@ public class CardRepo  {
     }
 
     public Issue get(String key) {
+        return cardByKey.get(key);
+    }
+
+    public Issue getById(Long id) {
+        String key = keyById.get(id);
+        if (key == null) {
+            log.warn("Issue id " + id + " not found. This probably means an incomplete/corrupted cache");
+            return null;
+        }
         return cardByKey.get(key);
     }
     
@@ -79,6 +91,8 @@ public class CardRepo  {
             });
 
         unsavedCards.add(key);
+        if (value.getIssueKey() != null)
+            keyById.put(value.getId(), value.getIssueKey());
         addProject(value.getProjectKey());
     }
     

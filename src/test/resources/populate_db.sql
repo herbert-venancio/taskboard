@@ -47,17 +47,6 @@ Insert into step (ID,NAME,ORDEM,SHOW_HEADER,WEIGHT,STAGE) values (41,'To Review'
 Insert into step (ID,NAME,ORDEM,SHOW_HEADER,WEIGHT,STAGE) values (42,'Reviewing',1,'F',1,22);
 Insert into step (ID,NAME,ORDEM,SHOW_HEADER,WEIGHT,STAGE) values (43,'Done',1,'F',1,23);
 
-Insert into project_filter_configuration (ID,PROJECT_KEY,RISK_PERCENTAGE,IS_ARCHIVED) values (158,'TASKB',0.0,0);
-Insert into project_filter_configuration (ID,PROJECT_KEY,RISK_PERCENTAGE,IS_ARCHIVED) values (159,'PROJ1',0.0,0);
-Insert into project_filter_configuration (ID,PROJECT_KEY,RISK_PERCENTAGE,IS_ARCHIVED) values (160,'PROJ2',0.0,0);
-Insert into project_filter_configuration (ID,PROJECT_KEY,RISK_PERCENTAGE,IS_ARCHIVED) values (161,'PROJ3',0.0,0);
-Insert into project_filter_configuration (ID,PROJECT_KEY,RISK_PERCENTAGE,IS_ARCHIVED) values (162,'PROJ4',0.0,0);
-Insert into project_filter_configuration (ID,PROJECT_KEY,RISK_PERCENTAGE,IS_ARCHIVED) values (163,'PROJ5',0.0,0);
-Insert into project_filter_configuration (ID,PROJECT_KEY,RISK_PERCENTAGE,IS_ARCHIVED) values (164,'PROJ6',0.0,0);
-Insert into project_filter_configuration (ID,PROJECT_KEY,RISK_PERCENTAGE,IS_ARCHIVED) values (165,'PROJ7',0.0,0);
-Insert into project_filter_configuration (ID,PROJECT_KEY,RISK_PERCENTAGE,IS_ARCHIVED) values (166,'PROJ8',0.0,0);
-
-
 -- INSERTING into team_filter_configuration
 Insert into team_filter_configuration (ID,TEAM_ID) values (174,521);
 Insert into team_filter_configuration (ID,TEAM_ID) values (175,522);
@@ -79,7 +68,7 @@ Insert into team (ID,COACH,COACH_USER_NAME,MANAGER,NAME,CREATED_AT,JIRA_EQUIPE,J
 Insert into team (ID,COACH,COACH_USER_NAME,MANAGER,NAME,CREATED_AT,JIRA_EQUIPE,JIRA_SUBEQUIPE,NICK_NAME,UPDATED_AT) values (12,'guilherme@objective.com.br','adolpho','guilherme@objective.com.br','PRODUCAO-MGA',PARSEDATETIME('31-03-14','DD-MM-yy'),null,null,null,PARSEDATETIME('12-08-16','DD-MM-yy'));
 Insert into team (ID,COACH,COACH_USER_NAME,MANAGER,NAME,CREATED_AT,JIRA_EQUIPE,JIRA_SUBEQUIPE,NICK_NAME,UPDATED_AT) values (13,'adolpho@objective.com.br','adolpho','elizabeth@objective.com.br','SP',PARSEDATETIME('31-03-14','DD-MM-yy'),null,null,'Adolpho',PARSEDATETIME('25-11-15','DD-MM-yy'));
 Insert into team (ID,COACH,COACH_USER_NAME,MANAGER,NAME,CREATED_AT,JIRA_EQUIPE,JIRA_SUBEQUIPE,NICK_NAME,UPDATED_AT) values (14,'jclaudio@objective.com.br','gabriel.takeuchi','flm@objective.com.br','OITV-RJ',PARSEDATETIME('31-03-14','DD-MM-yy'),null,null,null,PARSEDATETIME('11-04-14','DD-MM-yy'));
-Insert into team (ID,COACH,COACH_USER_NAME,MANAGER,NAME,CREATED_AT,JIRA_EQUIPE,JIRA_SUBEQUIPE,NICK_NAME,UPDATED_AT) values (15,'elizabeth@objective.com.br','gabriel.takeuchi','jonas@objective.com.br','TORRE-TEL',PARSEDATETIME('31-03-14','DD-MM-yy'),null,null,null,PARSEDATETIME('31-03-14','DD-MM-yy'));
+Insert into team (ID,COACH,COACH_USER_NAME,MANAGER,NAME,CREATED_AT,JIRA_EQUIPE,JIRA_SUBEQUIPE,NICK_NAME,UPDATED_AT) values (15,'elizabeth@objective.com.br','herminio.regilio','jonas@objective.com.br','TORRE-TEL',PARSEDATETIME('31-03-14','DD-MM-yy'),null,null,null,PARSEDATETIME('31-03-14','DD-MM-yy'));
 Insert into team (ID,COACH,COACH_USER_NAME,MANAGER,NAME,CREATED_AT,JIRA_EQUIPE,JIRA_SUBEQUIPE,NICK_NAME,UPDATED_AT) values (140,'herminio.regilio@objective.com.br','herminio.regilio','ptrack@objective.com.br','HERMES',PARSEDATETIME('01-08-14','DD-MM-yy'),'Maringá','Hermes',null,PARSEDATETIME('11-07-16','DD-MM-yy'));
 Insert into team (ID,COACH,COACH_USER_NAME,MANAGER,NAME,CREATED_AT,JIRA_EQUIPE,JIRA_SUBEQUIPE,NICK_NAME,UPDATED_AT) values (16,'rafael.zulin@objective.com.br','adolpho','ptrack@objective.com.br','TREINAMENTO_MGA',PARSEDATETIME('31-03-14','DD-MM-yy'),null,null,null,PARSEDATETIME('11-07-16','DD-MM-yy'));
 Insert into team (ID,COACH,COACH_USER_NAME,MANAGER,NAME,CREATED_AT,JIRA_EQUIPE,JIRA_SUBEQUIPE,NICK_NAME,UPDATED_AT) values (141,'luiz.augusto@objective.com.br','luiz.augusto','ptrack@objective.com.br','GUTO',PARSEDATETIME('01-08-14','DD-MM-yy'),'Maringá','Guto',null,PARSEDATETIME('11-07-16','DD-MM-yy'));
@@ -116,9 +105,15 @@ Insert into team (ID,COACH,COACH_USER_NAME,MANAGER,NAME,CREATED_AT,JIRA_EQUIPE,J
 Insert into team (ID,COACH,COACH_USER_NAME,MANAGER,NAME,CREATED_AT,JIRA_EQUIPE,JIRA_SUBEQUIPE,NICK_NAME,UPDATED_AT) values (521,'jean.takano@objective.com.br','gabriel.takeuchi','jean.takano@objective.com.br','TASKBOARD 2',null,null,null,null,null);
 Insert into team (ID,COACH,COACH_USER_NAME,MANAGER,NAME,CREATED_AT,JIRA_EQUIPE,JIRA_SUBEQUIPE,NICK_NAME,UPDATED_AT) values (522,'taskboard@objective.com.br','gabriel.takeuchi','taskboard@objective.com.br','TASKBOARD 1',null,null,null,null,null);
 
--- INSERTING into project_team
-Insert into project_team (PROJECT_KEY,TEAM_ID) values ('TASKB',521);
-Insert into project_team (PROJECT_KEY,TEAM_ID) values ('TASKB',522);
+Insert into project_filter_configuration (ID,PROJECT_KEY,DEFAULT_TEAM,RISK_PERCENTAGE,IS_ARCHIVED) values (158,'TASKB',522,0.0,0);
+Insert into project_filter_configuration (ID,PROJECT_KEY,DEFAULT_TEAM,RISK_PERCENTAGE,IS_ARCHIVED) values (159,'PROJ1',521,0.0,0);
+Insert into project_filter_configuration (ID,PROJECT_KEY,DEFAULT_TEAM,RISK_PERCENTAGE,IS_ARCHIVED) values (160,'PROJ2',521,0.0,0);
+Insert into project_filter_configuration (ID,PROJECT_KEY,DEFAULT_TEAM,RISK_PERCENTAGE,IS_ARCHIVED) values (161,'PROJ3',521,0.0,0);
+Insert into project_filter_configuration (ID,PROJECT_KEY,DEFAULT_TEAM,RISK_PERCENTAGE,IS_ARCHIVED) values (162,'PROJ4',521,0.0,0);
+Insert into project_filter_configuration (ID,PROJECT_KEY,DEFAULT_TEAM,RISK_PERCENTAGE,IS_ARCHIVED) values (163,'PROJ5',521,0.0,0);
+Insert into project_filter_configuration (ID,PROJECT_KEY,DEFAULT_TEAM,RISK_PERCENTAGE,IS_ARCHIVED) values (164,'PROJ6',521,0.0,0);
+Insert into project_filter_configuration (ID,PROJECT_KEY,DEFAULT_TEAM,RISK_PERCENTAGE,IS_ARCHIVED) values (165,'PROJ7',521,0.0,0);
+Insert into project_filter_configuration (ID,PROJECT_KEY,DEFAULT_TEAM,RISK_PERCENTAGE,IS_ARCHIVED) values (166,'PROJ8',521,0.0,0);
 
 -- INSERTING into user_team
 Insert into user_team (ID,CREATED_AT,END_DATE,IS_ESPECIFICADOR,TEAM,UPDATED_AT,USER_NAME) values (1342,PARSEDATETIME('01-08-14','DD-MM-yy'),null,0,'MARCELO REZENDE',PARSEDATETIME('24-08-15','DD-MM-yy'),'evaldo.bratti');
@@ -652,7 +647,10 @@ Insert into user_team (ID,CREATED_AT,END_DATE,IS_ESPECIFICADOR,TEAM,UPDATED_AT,U
 Insert into user_team (ID,CREATED_AT,END_DATE,IS_ESPECIFICADOR,TEAM,UPDATED_AT,USER_NAME) values (3246,PARSEDATETIME('16-09-15','DD-MM-yy'),null,0,'TASKBOARD 2',PARSEDATETIME('27-10-16','DD-MM-yy'),'gtakeuchi');
 Insert into user_team (ID,CREATED_AT,END_DATE,IS_ESPECIFICADOR,TEAM,UPDATED_AT,USER_NAME) values (3247,PARSEDATETIME('16-09-15','DD-MM-yy'),null,0,'TASKBOARD 2',PARSEDATETIME('27-10-16','DD-MM-yy'),'jhony.gomes');
 Insert into user_team (ID,CREATED_AT,END_DATE,IS_ESPECIFICADOR,TEAM,UPDATED_AT,USER_NAME) values (3248,PARSEDATETIME('16-09-15','DD-MM-yy'),null,0,'TASKBOARD 2',PARSEDATETIME('27-10-16','DD-MM-yy'),'nazar');
-Insert into user_team (ID,CREATED_AT,END_DATE,IS_ESPECIFICADOR,TEAM,UPDATED_AT,USER_NAME) values (3249,PARSEDATETIME('16-09-15','DD-MM-yy'),null,0,'TASKBOARD 2',PARSEDATETIME('27-10-16','DD-MM-yy'),'foo');
+Insert into user_team (ID,CREATED_AT,END_DATE,IS_ESPECIFICADOR,TEAM,UPDATED_AT,USER_NAME) values (3249,PARSEDATETIME('16-09-15','DD-MM-yy'),null,0,'TASKBOARD 1',PARSEDATETIME('27-10-16','DD-MM-yy'),'foo');
+Insert into user_team (ID,CREATED_AT,END_DATE,IS_ESPECIFICADOR,TEAM,UPDATED_AT,USER_NAME) values (3250,PARSEDATETIME('16-09-15','DD-MM-yy'),null,0,'FFC',PARSEDATETIME('27-10-16','DD-MM-yy'),'foo');
+Insert into user_team (ID,CREATED_AT,END_DATE,IS_ESPECIFICADOR,TEAM,UPDATED_AT,USER_NAME) values (3251,PARSEDATETIME('31-03-14','DD-MM-yy'),null,0,'OITV-RJ',PARSEDATETIME('31-03-14','DD-MM-yy'),'gabriel.takeuchi');
+Insert into user_team (ID,CREATED_AT,END_DATE,IS_ESPECIFICADOR,TEAM,UPDATED_AT,USER_NAME) values (3252,PARSEDATETIME('16-09-15','DD-MM-yy'),null,0,'TASKBOARD 2',PARSEDATETIME('27-10-16','DD-MM-yy'),'lohandus.ribeiro');
 
 -- INSERTING into holiday
 -- delete from holiday;

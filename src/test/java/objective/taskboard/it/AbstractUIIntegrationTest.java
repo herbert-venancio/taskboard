@@ -79,6 +79,8 @@ public abstract class AbstractUIIntegrationTest extends AbstractIntegrationTest 
                 capturePage = ((TakesScreenshot) webDriver)
                         .getScreenshotAs(OutputType.BYTES);
             }
+
+            ((JavascriptExecutor) webDriver).executeScript("return window.jsErrors");
     
             webDriver.quit();
         }catch (Exception e) {

@@ -25,7 +25,7 @@ import java.util.List;
 public class ProjectCreationData {
     public String projectKey;
     public String teamLeader;
-    public List<ProjectCreationDataTeam> teams;
+    public ProjectCreationDataTeam defaultTeam;
 
     public static class ProjectCreationDataTeam {
         public String name;

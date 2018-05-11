@@ -21,20 +21,20 @@
 package objective.taskboard.controller;
 
 import static java.util.stream.Collectors.toList;
-import static objective.taskboard.domain.converter.JiraIssueToIssueConverter.INVALID_TEAM;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import org.codehaus.jettison.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,8 +48,8 @@ import objective.taskboard.data.AspectSubitemFilter;
 import objective.taskboard.data.Issue;
 import objective.taskboard.data.Team;
 import objective.taskboard.database.TaskboardDatabaseService;
-import objective.taskboard.filterConfiguration.TeamFilterConfigurationService;
 import objective.taskboard.filterPreferences.UserPreferencesService;
+import objective.taskboard.issue.CardStatusOrderCalculator;
 import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.issueBuffer.IssueBufferState;
 import objective.taskboard.issueTypeVisibility.IssueTypeVisibilityService;
@@ -61,6 +61,7 @@ import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.client.JiraTimeTrackingDto;
 import objective.taskboard.jira.data.Transition;
 import objective.taskboard.linkgraph.LinkGraphProperties;
+import objective.taskboard.team.UserTeamService;
 
 @RestController
 @RequestMapping("/ws/issues")
@@ -78,9 +79,6 @@ public class IssueController
     private IssueTypeVisibilityService issueTypeVisibilityService;
 
     @Autowired
-    private TeamFilterConfigurationService teamFilterConfigurationService;
-
-    @Autowired
     private MetadataService metadataService;
 
     @Autowired
@@ -92,35 +90,78 @@ public class IssueController
     @Autowired
     private UserPreferencesService userPreferencesService;
 
-    @Value("${spring.datasource.username}")
-    private String datasourceUserName;
-
     @Autowired
     private JiraProperties jiraProperties;
 
     @Autowired
     private LinkGraphProperties linkGraphProperties;
+    
+    @Autowired
+    private UserTeamService userTeamService;
+
+    @Autowired
+    private CardStatusOrderCalculator statusOrderCalculator;
 
     @RequestMapping(path = "/", method = RequestMethod.POST)
-    public List<Issue> issues() {
-        return issueBufferService.getIssues();
+    public List<CardDto> issues() {
+        return toCardDto(issueBufferService.getVisibleIssues());
+    }
+    
+    @RequestMapping(path = "/byids", method = RequestMethod.POST)
+    public List<CardDto> byids(@RequestBody List<Long> issuesIds) {
+        return toCardDto(issueBufferService.getVisibleIssuesByIds(issuesIds));
     }
 
-    @RequestMapping(path = "assign", method = RequestMethod.POST)
-    public Issue assign(@RequestBody String issueKey) throws JSONException {
-        return issueBufferService.assignToMe(issueKey);
+    @RequestMapping(path = "addMeAsAssignee", method = RequestMethod.POST)
+    public CardDto addMeAsAssignee(@RequestBody String issueKey) {
+        return toCardDto(issueBufferService.addMeAsAssignee(issueKey));
+    }
+
+    @RequestMapping(path = "addAssigneeToIssue/{issue}", method = RequestMethod.POST)
+    public CardDto addAssigneeToIssue(@PathVariable("issue") String issueKey, @RequestBody UserRequestDTO user) {
+        return toCardDto(issueBufferService.addAssigneeToIssue(issueKey, user.username));
+    }
+
+    @RequestMapping(path = "removeAssigneeFromIssue/{issue}", method = RequestMethod.POST)
+    public CardDto removeAssigneeFromIssue(@PathVariable("issue") String issueKey, @RequestBody UserRequestDTO user) {
+        return toCardDto(issueBufferService.removeAssigneeFromIssue(issueKey, user.username));
+    }
+
+    @RequestMapping(path = "addTeamToIssue/{issue}", method = RequestMethod.POST)
+    public CardDto addTeamToIssue(@PathVariable("issue") String issueKey, @RequestBody TeamRequestDTO team) {
+        return toCardDto(issueBufferService.addTeamToIssue(issueKey, team.id));
+    }
+
+    @RequestMapping(path = "replaceTeamInIssue/{issue}", method = RequestMethod.POST)
+    public CardDto replaceTeamInIssue(@PathVariable("issue") String issueKey, @RequestBody ReplaceTeamRequestDTO replaceTeamRequest) {
+        return toCardDto(issueBufferService.replaceTeamInIssue(
+                issueKey,
+                replaceTeamRequest.teamToReplace,
+                replaceTeamRequest.replacementTeam));
+    }
+
+    @RequestMapping(path = "removeTeamFromIssue/{issue}", method = RequestMethod.POST)
+    public CardDto removeTeamFromIssue(@PathVariable("issue") String issueKey, @RequestBody TeamRequestDTO team) {
+        return toCardDto(issueBufferService.removeTeamFromIssue(
+                issueKey,
+                team.id));
+    }
+    
+    @RequestMapping(path = "restoreDefaultTeams/{issue}", method = RequestMethod.POST)
+    public CardDto restoreDefaultTeams(@PathVariable("issue") String issueKey) {
+        return toCardDto(issueBufferService.restoreDefaultTeams(issueKey));
     }
 
     @RequestMapping(path = "transition", method = RequestMethod.POST)
-    public Issue transition(@RequestBody TransitionRequestDTO tr) throws JSONException {
+    public CardDto transition(@RequestBody TransitionRequestDTO tr) throws JSONException {
         Map<String, Object> fields = tr.fields == null ? Collections.emptyMap() : tr.fields;
-        return issueBufferService.doTransition(tr.issueKey, tr.transitionId, fields);
+        return toCardDto(issueBufferService.doTransition(tr.issueKey, tr.transitionId, fields));
     }
 
     @RequestMapping(path = "transitions", method = RequestMethod.POST)
     public List<Transition> transitions(@RequestBody String issueKey) {
         try {
-            return jiraBean.getTransitions(issueKey);
+            return issueBufferService.transitions(issueKey);
         } catch (PermissaoNegadaException e) {
             log.debug("Could not fetch transitions", e);
             return Lists.newLinkedList();
@@ -177,20 +218,20 @@ public class IssueController
     }
 
     @RequestMapping(path = "block-task/{issue}", method = RequestMethod.POST)
-    public Issue blockTask(@PathVariable("issue") String issue, @RequestBody String lastBlockReason) {
+    public CardDto blockTask(@PathVariable("issue") String issue, @RequestBody String lastBlockReason) {
         jiraBean.block(issue, lastBlockReason);
-        return issueBufferService.updateIssueBuffer(issue);
+        return toCardDto(issueBufferService.updateIssueBuffer(issue));
     }
 
-    @RequestMapping("unblock-task/{issue}")
-    public void unblockTask(@PathVariable("issue") String issue) {
+    @RequestMapping(path = "unblock-task/{issue}", method = RequestMethod.POST)
+    public CardDto unblockTask(@PathVariable("issue") String issue) {
         jiraBean.unblock(issue);
-        issueBufferService.updateIssueBuffer(issue);
+        return toCardDto(issueBufferService.updateIssueBuffer(issue));
     }
     
     @RequestMapping("reorder")
-    public List<Issue> reorder(@RequestBody String [] issues) {
-        return issueBufferService.reorder(issues);
+    public List<CardDto> reorder(@RequestBody String [] issues) {
+        return toCardDto(issueBufferService.reorder(issues));
     }
 
     @RequestMapping("issue-buffer-state")
@@ -198,11 +239,23 @@ public class IssueController
         return issueBufferService.getState().name();
     }
 
+    private CardDto toCardDto(Issue issue) {
+        List<Long> teamsVisibleToUser = userTeamService.getIdsOfTeamsVisibleToUser();
+        return CardDto.fromIssue(issue, teamsVisibleToUser, statusOrderCalculator);
+    }
+
+    private List<CardDto> toCardDto(List<Issue> issues) {
+        List<Long> teamsVisibleToUser = userTeamService.getIdsOfTeamsVisibleToUser();
+        return issues.stream()
+                .map(i->CardDto.fromIssue(i, teamsVisibleToUser, statusOrderCalculator))
+                .collect(Collectors.toList());
+    }
+
     private List<AspectItemFilter> getDefaultFieldFilterList() throws InterruptedException, ExecutionException {
         List<AspectItemFilter> defaultFieldFilters = new ArrayList<>();
         defaultFieldFilters.add(AspectItemFilter.from("Issue Type", "type", getIssueTypeFilterItems()));
         defaultFieldFilters.add(AspectItemFilter.from("Project", "projectKey", getProjectFilterItems()));
-        defaultFieldFilters.add(AspectItemFilter.from("Team", "teams", getTeamFilterItems()));
+        defaultFieldFilters.add(AspectItemFilter.from("Team", "teamNames", getTeamFilterItems()));
         return defaultFieldFilters;
     }
 
@@ -220,11 +273,11 @@ public class IssueController
     }
 
     private List<AspectSubitemFilter> getProjectFilterItems() {
-        List<Team> teamsVisibleToUser = teamFilterConfigurationService.getTeamsVisibleToUser();
+        Set<Team> teamsVisibleToUser = userTeamService.getTeamsVisibleToLoggedInUser();
         return projectService.getNonArchivedJiraProjectsForUser().stream()
                 .map(p -> AspectSubitemFilter.from(p.getName(), p.getKey(), true,
                                                    teamsVisibleToUser.stream()
-                                                       .filter(t -> p.getTeamsIds().contains(t.getId()))
+                                                       .filter(t -> p.getTeamId().equals(t.getId()))
                                                        .map(t -> t.getName())
                                                        .collect(toList()),
                                                    p.getVersions()))
@@ -233,11 +286,12 @@ public class IssueController
     }
 
     private List<AspectSubitemFilter> getTeamFilterItems() {
-        List<AspectSubitemFilter> teamsFilter = teamFilterConfigurationService.getTeamsVisibleToUser().stream()
+        List<AspectSubitemFilter> teamsFilter = 
+                userTeamService.getTeamsVisibleToLoggedInUser().stream()
                 .map(t -> AspectSubitemFilter.from(t.getName(), t.getName(), true))
                 .sorted(this::compareFilter)
                 .collect(toList());
-        teamsFilter.add(AspectSubitemFilter.from(INVALID_TEAM, INVALID_TEAM, true));
+        
         return teamsFilter;
     }
 
@@ -253,5 +307,17 @@ public class IssueController
         public Long transitionId;
         public Map<String, Object> fields;
     }
+    
+    private static class TeamRequestDTO {
+        public Long id;
+    }
 
+    private static class ReplaceTeamRequestDTO {
+        public Long teamToReplace;
+        public Long replacementTeam;
+    }
+
+    private static class UserRequestDTO {
+        public String username;
+    }
 }

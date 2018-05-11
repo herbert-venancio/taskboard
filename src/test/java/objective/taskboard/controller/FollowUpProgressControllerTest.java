@@ -83,7 +83,7 @@ public class FollowUpProgressControllerTest {
     }
 
     private void setupValidProject() {
-        project = new ProjectFilterConfiguration(PROJECT_KEY);
+        project = new ProjectFilterConfiguration(PROJECT_KEY, 1L);
         project.setStartDate(START_DATE);
         project.setDeliveryDate(END_DATE);
         project.setProjectionTimespan(PROJECT_PROJECTION_TIMESPAN);

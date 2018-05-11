@@ -33,7 +33,7 @@ public class Project {
 
     private String key;
     private String name;
-    private List<Long> teamsIds;
+    private Long teamId;
     private List<Version> versions;
 
     public static Project from(com.atlassian.jira.rest.client.api.domain.Project jiraProject,
@@ -41,7 +41,7 @@ public class Project {
         Project project = new Project();
         project.setKey(jiraProject.getKey());
         project.setName(jiraProject.getName());
-        project.setTeamsIds(projectFilterConfiguration.getTeamsIds());
+        project.setTeamId(projectFilterConfiguration.getDefaultTeam());
 
         List<Version> versions = newArrayList();
         if (jiraProject.getVersions() != null)
@@ -61,8 +61,8 @@ public class Project {
         return this.name;
     }
 
-    public List<Long> getTeamsIds() {
-        return this.teamsIds;
+    public Long getTeamId() {
+        return this.teamId;
     }
 
     public List<Version> getVersions() {
@@ -77,8 +77,8 @@ public class Project {
         this.name = name;
     }
 
-    public void setTeamsIds(final List<Long> teamsIds) {
-        this.teamsIds = teamsIds;
+    public void setTeamId(final Long teamId) {
+        this.teamId = teamId;
     }
 
     public void setVersions(final List<Version> versions) {
@@ -94,7 +94,7 @@ public class Project {
 
         if (key != null ? !key.equals(project.key) : project.key != null) return false;
         if (name != null ? !name.equals(project.name) : project.name != null) return false;
-        if (teamsIds != null ? !teamsIds.equals(project.teamsIds) : project.teamsIds != null) return false;
+        if (teamId != null ? !teamId.equals(project.teamId) : project.teamId != null) return false;
         return versions != null ? versions.equals(project.versions) : project.versions == null;
     }
 
@@ -102,7 +102,7 @@ public class Project {
     public int hashCode() {
         int result = key != null ? key.hashCode() : 0;
         result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (teamsIds != null ? teamsIds.hashCode() : 0);
+        result = 31 * result + (teamId != null ? teamId.hashCode() : 0);
         result = 31 * result + (versions != null ? versions.hashCode() : 0);
         return result;
     }
@@ -112,7 +112,7 @@ public class Project {
         return "Project{" +
                 "key='" + key + '\'' +
                 ", name='" + name + '\'' +
-                ", teamsIds=" + teamsIds +
+                ", teamsIds=" + teamId +
                 ", versions=" + versions +
                 '}';
     }

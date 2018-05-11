@@ -1,0 +1,66 @@
+<dom-module id="team-picker">
+    <template>
+        <tag-picker
+                id = "team-selector-autocomplete"
+                source="{{availableTeams}}"
+                text-property="teamName"
+                value-property="id"
+                on-selected-value="_onSelect"
+                on-close-suggestions-clicked="_onClose"
+                >
+        </tag-picker>
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'team-picker',
+                properties: {
+                    selected: {
+                        type: String
+                    }
+                },
+                
+                availableTeams: {
+                    type: Array,
+                    value: []
+                },                
+
+                attached: function() {
+                    this.tagPicker = this.$$('tag-picker');
+                    this.tagPicker.setQueryFn(function(source, query) {
+                        var suggestions = source.filter(function(t) {
+                            return t.teamName.toLowerCase().indexOf(query.toLowerCase()) !== -1;
+                        });
+                        if (suggestions.length === 0)
+                            return [{"teamName":"No matches"}];
+
+                        return suggestions;
+                    }.bind(this));
+
+                    this.availableTeams = taskboard.getAvailableTeams();
+                },
+                
+                clear: function() {
+                    this.tagPicker.clear();
+                },
+                
+                focus: function() {
+                    this.tagPicker.focus();
+                    this.tagPicker.suggestions(this.availableTeams);
+                },
+                
+                _onSelect: function(e) {
+                    var team = e.detail;
+                    if (team)
+                        this.selected = team.id;
+                    this.fire("selected-team", {target: this})
+                },
+                
+                _onClose: function(e) {
+                    this.fire("close-clicked", {target: this})
+                }
+            });
+        })();
+    </script>
+</dom-module>

@@ -32,18 +32,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.deser.std.DateDeserializers.DateDeserializer;
+import org.apache.commons.lang3.SerializationUtils;
 
 import objective.taskboard.config.SpringContextBridge;
 import objective.taskboard.cycletime.CycleTime;
 import objective.taskboard.database.IssuePriorityService;
 import objective.taskboard.domain.IssueColorService;
-import objective.taskboard.domain.IssueStateHashCalculator;
 import objective.taskboard.domain.converter.CardVisibilityEvalService;
-import objective.taskboard.domain.converter.IssueCoAssignee;
 import objective.taskboard.domain.converter.IssueTeamService;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraProperties.BallparkMapping;
@@ -72,8 +67,6 @@ public class Issue extends IssueScratch implements Serializable {
 
     private transient ProjectService projectService;
 
-    private transient IssueStateHashCalculator issueStateHashCalculator;
-
     private transient IssueColorService issueColorService;
 
     private transient CycleTime cycleTime;
@@ -88,7 +81,6 @@ public class Issue extends IssueScratch implements Serializable {
             CycleTime cycleTime,
             CardVisibilityEvalService cardVisibilityEvalService,
             ProjectService projectService,
-            IssueStateHashCalculator issueStateHashCalculator,
             IssueColorService issueColorService,
             IssuePriorityService issuePriorityService) {
         this.id = scratch.id;
@@ -115,11 +107,11 @@ public class Issue extends IssueScratch implements Serializable {
         this.additionalEstimatedHours = scratch.additionalEstimatedHours;
         this.timeTracking = scratch.timeTracking;
         this.reporter = scratch.reporter;
-        this.coAssignees = scratch.coAssignees;
         this.classOfService = scratch.classOfService;
         this.releaseId = scratch.releaseId;
         this.changelog = scratch.changelog;
         this.remoteIssueUpdatedDate = scratch.remoteIssueUpdatedDate;
+        this.coAssignees = scratch.coAssignees;
 
         this.metaDataService = metadataService;
         this.jiraProperties = properties;
@@ -128,10 +120,10 @@ public class Issue extends IssueScratch implements Serializable {
         this.cycleTime = cycleTime;
         this.cardVisibilityEvalService = cardVisibilityEvalService;
         this.projectService = projectService;
-        this.issueStateHashCalculator = issueStateHashCalculator;
         this.issueColorService = issueColorService;
         this.issuePriorityService = issuePriorityService;
         this.worklogs = scratch.worklogs;
+        this.assignedTeamsIds = scratch.assignedTeamsIds;
     }
     
     public Issue() {
@@ -140,9 +132,12 @@ public class Issue extends IssueScratch implements Serializable {
         issueTeamService = SpringContextBridge.getBean(IssueTeamService.class);
         filterRepository = SpringContextBridge.getBean(FilterCachedRepository.class);
         cycleTime = SpringContextBridge.getBean(CycleTime.class);
+        cardVisibilityEvalService = SpringContextBridge.getBean(CardVisibilityEvalService.class);
+        projectService = SpringContextBridge.getBean(ProjectService.class);
+        issueColorService = SpringContextBridge.getBean(IssueColorService.class);
+        issuePriorityService = SpringContextBridge.getBean(IssuePriorityService.class);
     }
 
-    @JsonIgnore
     public boolean isDeferred() {
         boolean isDeferredStatus = jiraProperties.getStatusesDeferredIds().contains(this.getStatus());
         if (!isDeferredStatus && parentCard != null)
@@ -150,7 +145,6 @@ public class Issue extends IssueScratch implements Serializable {
         return isDeferredStatus;
     }
 
-    @JsonIgnore
     public String getTShirtSize() {
         String mainTShirtSizeFieldId = jiraProperties.getCustomfield().getTShirtSize().getMainTShirtSizeFieldId();
         return Optional.ofNullable(tshirtSizes.get(mainTShirtSizeFieldId))
@@ -158,19 +152,12 @@ public class Issue extends IssueScratch implements Serializable {
                 .orElse(null);
     }
 
-    @JsonIgnore
     public String getTshirtSizeOfSubtaskForBallpark(BallparkMapping mapping) {
         return Optional.ofNullable(tshirtSizes.get(mapping.getTshirtCustomFieldId()))
                 .flatMap(customField -> Optional.ofNullable((String) customField.getValue()))
                 .orElse(null);
     }
 
-    @JsonIgnore
-    public List<BallparkMapping> getBallparkMappings() {
-        return jiraProperties.getFollowup().getBallparkMappings().get(getType());
-    }
-
-    @JsonIgnore
     public List<BallparkMapping> getActiveBallparkMappings() {
         List<BallparkMapping> list = jiraProperties.getFollowup().getBallparkMappings().get(getType());
         if (list == null)
@@ -178,17 +165,59 @@ public class Issue extends IssueScratch implements Serializable {
 
         return list.stream().filter(bm -> getTshirtSizeOfSubtaskForBallpark(bm)!=null).collect(Collectors.toList());
     }
+    
+    public String getParentSummary() {
+        if (this.parentCard != null)
+            return this.parentCard.getSummary();
+        return "";
+    }
 
     public String getColor() {
         return issueColorService.getColor(getClassOfServiceId());
     }
-
-    public String getUsersTeam() {
-        return issueTeamService.getUsersTeam(this);
+    
+    public Set<String> getMismatchingUsers() {
+        return issueTeamService.getMismatchingUsers(this);
     }
 
-    public Set<String> getTeams() {
-        return issueTeamService.getTeams(this);
+    public Set<CardTeam> getTeams() {
+        Set<CardTeam> issueTeams = new LinkedHashSet<>(issueTeamService.getTeamsForIds(getRawAssignedTeamsIds()));
+        if (!issueTeams.isEmpty())
+            return issueTeams;
+
+        Optional<Issue> parentCardOpt = getParentCard();
+        if (parentCardOpt.isPresent())
+            return parentCardOpt.get().getTeams();
+
+        issueTeams.add(issueTeamService.getDefaultTeam(getProjectKey()));
+
+        return issueTeams;
+    }
+    
+    /**
+     * Returns the value of assigned teams id in jira field. The default team will never be returned here.
+     * 
+     * @return the list of team id values in the jira issue. Prefer using getTeams to find the *actual* teams. 
+     */
+    public List<Long> getRawAssignedTeamsIds() {
+        return assignedTeamsIds;
+    }
+
+    public boolean isUsingDefaultTeam() {
+        if (getRawAssignedTeamsIds().size() > 0)
+            return false;
+        Optional<Issue> parentCard = getParentCard();
+        return parentCard.map(Issue::isUsingDefaultTeam).orElse(true);
+    }
+
+    public boolean isUsingParentTeam() {
+        if (parentCard == null)
+            return false;
+
+        if (getRawAssignedTeamsIds().size() > 0)
+            return false;
+
+        return !parentCard.isUsingDefaultTeam();
     }
 
     public void setParentCard(Issue parentCard) {
@@ -208,7 +237,6 @@ public class Issue extends IssueScratch implements Serializable {
         parentCard = null;
     }
 
-    @JsonIgnore
     public Optional<Issue> getParentCard() {
         return Optional.ofNullable(parentCard);
     }
@@ -219,14 +247,12 @@ public class Issue extends IssueScratch implements Serializable {
         return classOfService == null ? defaultClassOfService : (String)classOfService.getValue();
     }
 
-    @JsonIgnore
-    public Long getClassOfServiceId() {
+    private Long getClassOfServiceId() {
         CustomField classOfService = getClassOfServiceCustomField();
         return classOfService == null ? 0L : classOfService.getOptionId();
     }
 
-    @JsonIgnore
-    public CustomField getClassOfServiceCustomField() {
+    private CustomField getClassOfServiceCustomField() {
         String defaultClassOfService = jiraProperties.getCustomfield().getClassOfService().getDefaultValue();
         CustomField classOfService = getLocalClassOfServiceCustomField();
 
@@ -243,42 +269,34 @@ public class Issue extends IssueScratch implements Serializable {
         return classOfService;
     }
 
-    @JsonIgnore
     public List<Changelog> getChangelog() {
         return changelog;
     }
 
-    @JsonIgnore
     public boolean isDemand() {
         return jiraProperties.getIssuetype().getDemand().getId() == this.getType();
     }
 
-    @JsonIgnore
     public boolean isFeature() {
         return jiraProperties.getIssuetype().getFeatures().stream().anyMatch(ft -> ft.getId() == this.getType());
     }
 
-    @JsonIgnore
     public boolean isSubTask() {
         return !isDemand() && !isFeature();
     }
 
-    @JsonIgnore
     public Integer getIssueKeyNum() {
         return Integer.parseInt(issueKey.replace(projectKey+"-", ""));
     }
 
-    @JsonIgnore
     public String getIssueTypeName() {
         return metaDataService.getIssueTypeById(type).getName();
     }
 
-    @JsonIgnore
     public String getStatusName() {
         return metaDataService.getStatusById(status).name;
     }
 
-    @JsonIgnore
     public Integer getStatusPriority() {
         Integer r;
         if (this.isDemand())
@@ -293,7 +311,6 @@ public class Issue extends IssueScratch implements Serializable {
         return r;
     }
 
-    @JsonIgnore
     public Double getCycleTime(ZoneId timezone) {
         return cycleTime.getCycleTime(Instant.ofEpochMilli(startDateStepMillis), timezone, status);
     }
@@ -325,7 +342,6 @@ public class Issue extends IssueScratch implements Serializable {
         return lastBlockReason;
     }
     
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     public List<CustomField> getSubtasksTshirtSizes() {
         return jiraProperties.getCustomfield().getTShirtSize().getIds()
                 .stream()
@@ -334,7 +350,6 @@ public class Issue extends IssueScratch implements Serializable {
                 .collect(Collectors.toList());
     }
     
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     public String getCardTshirtSize() {
         List<CustomField> tshirtSizes = getSubtasksTshirtSizes();
         if (tshirtSizes.size() == 1)
@@ -398,29 +413,34 @@ public class Issue extends IssueScratch implements Serializable {
         return this.dependencies;
     }
 
-    public String getSubResponsaveis() {
-        return coAssignees.stream().map(IssueCoAssignee::getName).collect(Collectors.joining(","));
+    public List<User> getCoAssignees() {
+        return this.coAssignees;
+    }
+    
+    public List<User> getAssignees() {
+        LinkedList<User> assigneeSet = new LinkedList<>();
+        if (getAssignee().isAssigned())
+            assigneeSet.add(getAssignee());
+        assigneeSet.addAll(getCoAssignees());
+        return assigneeSet;
     }
 
-    public String getAssignee() {
+    public User getAssignee() {
         return this.assignee;
     }
-
+    
     public long getPriority() {
         return this.priority;
     }
 
-    @JsonDeserialize(using = DateDeserializer.class)
     public Date getDueDate() {
         return this.dueDate;
     }
 
-    @JsonIgnore
     public ZonedDateTime getDueDateByTimezoneId(ZoneId timezone) {
         return DateTimeUtils.get(dueDate, timezone);
     }
 
-    @JsonDeserialize(using = DateDeserializer.class)
     public Date getUpdatedDate() {
         Date priorityUpdatedDate = getPriorityUpdatedDate();
 
@@ -431,7 +451,6 @@ public class Issue extends IssueScratch implements Serializable {
         return remoteIssueUpdatedDate;
     }
 
-    @JsonIgnore
     public ZonedDateTime getUpdatedDateByTimezoneId(ZoneId timezone) {
         return DateTimeUtils.get(getUpdatedDate(), timezone);
     }
@@ -440,7 +459,6 @@ public class Issue extends IssueScratch implements Serializable {
         return this.created;
     }
 
-    @JsonIgnore
     public ZonedDateTime getCreatedDateByTimezoneId(ZoneId timezone) {
         return DateTimeUtils.get(this.created, timezone);
     }
@@ -497,10 +515,6 @@ public class Issue extends IssueScratch implements Serializable {
         this.status = status;
     }
 
-    public void setStartDateStepMillis(final long startDateStepMillis) {
-        this.startDateStepMillis = startDateStepMillis;
-    }
-
     public void setParent(final String parent) {
         this.parent = parent;
     }
@@ -509,7 +523,7 @@ public class Issue extends IssueScratch implements Serializable {
         this.dependencies = dependencies;
     }
 
-    public void setAssignee(final String assignee) {
+    public void setAssignee(final User assignee) {
         this.assignee = assignee;
     }
 
@@ -517,20 +531,14 @@ public class Issue extends IssueScratch implements Serializable {
         this.priority = priority;
     }
 
-    public void setDueDate(final Date dueDate) {
-        this.dueDate = dueDate;
-    }
-
     public void setRemoteIssueUpdatedDate(final Date remoteIssueUpdatedDate) {
         this.remoteIssueUpdatedDate = remoteIssueUpdatedDate;
     }
     
-    @JsonDeserialize(using = DateDeserializer.class)
     public Date getRemoteIssueUpdatedDate() {
         return remoteIssueUpdatedDate;
     }
     
-    @JsonDeserialize(using = DateDeserializer.class)
     public Date getPriorityUpdatedDate() {
         return issuePriorityService.priorityUpdateDate(this);
     }
@@ -555,14 +563,6 @@ public class Issue extends IssueScratch implements Serializable {
         this.components = components;
     }
 
-    public void setReleaseId(final String releaseId) {
-        this.releaseId = releaseId;
-    }
-
-    public void setTimeTracking(final TaskboardTimeTracking timeTracking) {
-        this.timeTracking = timeTracking;
-    }
-
     public String getReporter() {
         return reporter;
     }
@@ -570,26 +570,16 @@ public class Issue extends IssueScratch implements Serializable {
     public void setReporter(String nameReporter) {
         this.reporter = nameReporter;
     }
-
-    @JsonIgnore
-    public List<IssueCoAssignee> getCoAssignees() {
-        return coAssignees;
-    }
-
-    public void setCoAssignees(List<IssueCoAssignee> coAssigness) {
-        this.coAssignees = coAssigness;
-    }
-
-    @JsonIgnore
+    
     public CustomField getLocalClassOfServiceCustomField() {
         return classOfService;
     }
-
+    
     public boolean isVisible() {
         if (isDeferred())
             return false;
         
-        boolean isVisible =  filterRepository.getCache().stream().filter(f -> f.isApplicable(this)).count() != 0;
+        boolean isVisible = filterRepository.getCache().stream().anyMatch(f -> f.isApplicable(this));
         if (!isVisible)
             return false;
         
@@ -604,7 +594,14 @@ public class Issue extends IssueScratch implements Serializable {
     }
    
     public List<Subtask> getSubtasks() {
-        return subtasks.stream().map(s->new Subtask(s.issueKey, s.summary)).collect(Collectors.toList());
+        return subtasks.stream().map(s->
+            new Subtask(s.issueKey, 
+                        s.summary, 
+                        s.getStatusName(), 
+                        s.getIssueTypeName(),
+                        s.getTypeIconUri(), 
+                        issueColorService.getStatusColor(s.type, s.status)))
+                .collect(Collectors.toList());
     }
 
     public String getReleaseId() {
@@ -612,18 +609,12 @@ public class Issue extends IssueScratch implements Serializable {
             return releaseId;
 
         Optional<Issue> pc = getParentCard();
-        if(pc.isPresent())
-            return pc.get().releaseId;
+        return pc.map(issue -> issue.releaseId).orElse(null);
 
-        return null;
     }
 
     public Version getRelease() {
         return projectService.getVersion(getReleaseId());
-    }
-
-    public int getStateHash() {
-        return issueStateHashCalculator.calculateHash(this);
     }
     
     public List<Worklog> getWorklogs() {
@@ -643,7 +634,6 @@ public class Issue extends IssueScratch implements Serializable {
             CycleTime cycleTime,
             CardVisibilityEvalService cardVisibilityEvalService,
             ProjectService projectService,
-            IssueStateHashCalculator issueStateHashCalculator,
             IssueColorService issueColorService,
             IssuePriorityService issuePriorityService) {
         this.jiraProperties = jiraProperties;
@@ -653,7 +643,6 @@ public class Issue extends IssueScratch implements Serializable {
         this.cycleTime = cycleTime;
         this.cardVisibilityEvalService = cardVisibilityEvalService;
         this.projectService = projectService;
-        this.issueStateHashCalculator = issueStateHashCalculator;
         this.issueColorService = issueColorService;
         this.issuePriorityService = issuePriorityService;
     }
@@ -673,5 +662,113 @@ public class Issue extends IssueScratch implements Serializable {
             return (issueKey+"").equals(other.issueKey+"");
         }
         return false;
+    }
+
+    public void addTeam(Team teamToAdd) {
+        if (isUsingDefaultTeam())
+            assignedTeamsIds.add(issueTeamService.getDefaultTeamId(this));
+
+        if (isUsingParentTeam())
+            assignedTeamsIds.addAll(parentCard.getRawAssignedTeamsIds());
+
+        if (!assignedTeamsIds.contains(teamToAdd.getId()))
+            assignedTeamsIds.add(teamToAdd.getId());
+    }
+
+    public void removeTeam(Team teamToRemove) {
+        if (isUsingParentTeam()) {
+            this.assignedTeamsIds.addAll(parentCard.getRawAssignedTeamsIds());
+        }
+        assignedTeamsIds.remove(teamToRemove.getId());
+    }
+    
+    public void replaceTeam(Optional<Team> teamToReplace, Team replacementTeam) {
+        if (teamToReplace.isPresent()) {
+            int previousPos = assignedTeamsIds.indexOf(teamToReplace.get().getId());
+            if (previousPos > -1) {
+                assignedTeamsIds.set(previousPos, replacementTeam.getId());
+                return;
+            }
+        }
+        assignedTeamsIds.add(replacementTeam.getId());
+    }
+    
+    public static class CardTeam {
+        public String name;
+        public Long id;
+        
+        public CardTeam() {}
+
+        public CardTeam(Long i) {
+            id = i;
+        }
+
+        CardTeam(String name, Long i) {
+            this.name = name;
+            id = i;
+        }
+
+        public static CardTeam from(Team team) {
+            CardTeam card = new CardTeam();
+            card.name = team.getName();
+            card.id = team.getId();
+            return card;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((id == null) ? 0 : id.hashCode());
+            result = prime * result + ((name == null) ? 0 : name.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            CardTeam other = (CardTeam) obj;
+            if (id == null) {
+                if (other.id != null)
+                    return false;
+            } else if (!id.equals(other.id))
+                return false;
+            if (name == null) {
+                if (other.name != null)
+                    return false;
+            } else if (!name.equals(other.name))
+                return false;
+            return true;
+        }
+    }
+
+    public Issue copy() {
+        Issue copy = SerializationUtils.clone(this);
+        copy.restoreServices(
+                jiraProperties,
+                metaDataService,
+                issueTeamService,
+                filterRepository,
+                cycleTime,
+                cardVisibilityEvalService,
+                projectService,
+                issueColorService,
+                issuePriorityService);
+
+        if (this.parentCard != null) {
+            Issue parentCopy = SerializationUtils.clone(this.parentCard);
+            copy.setParentCard(parentCopy);
+        }
+
+        return copy;
+    }
+
+    public void restoreDefaultTeams() {
+        this.assignedTeamsIds.clear();
     }
 }
