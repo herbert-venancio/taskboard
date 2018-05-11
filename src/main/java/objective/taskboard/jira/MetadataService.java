@@ -45,4 +45,9 @@ public class MetadataService {
             throw new IllegalArgumentException("There's no Status with given ID: " + id);
         return status;
     }
+
+    public Long getIdOfStatusByName(String name) {
+        Map<Long, Status> metadata = getStatusesMetadata();
+        return metadata.entrySet().stream().filter(entry -> entry.getValue().name.equals(name)).findFirst().map(entry -> entry.getKey()).orElse(null);
+    }
 }

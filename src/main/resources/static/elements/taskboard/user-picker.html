@@ -1,0 +1,121 @@
+<dom-module id="user-picker">
+    <template>
+        <tag-picker
+            id = "user-selector-autocomplete"
+            on-selected-value="_onSelect"
+            on-close-suggestions-clicked="_onClose"
+            text="{{text}}"
+            remoteSource="true"
+            searching="{{searching}}"
+            on-focus="handleFocus"
+            >
+        </tag-picker>
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'user-picker',
+
+                properties: {
+                    selected: {
+                        type: String,
+                        notify: true
+                    },
+                    text: {
+                        type: String,
+                        notify: true
+                    },
+                    teams: {
+                        type: Array,
+                        value: []
+                    },
+                    searching: {
+                        type: Boolean,
+                        value: false
+                    },
+                    availableUsers: {
+                        type: Array,
+                        value: [],
+                        notify: true
+                    }
+                },
+                
+                observers: [
+                    '_onChangeText(text)'
+                ],
+
+                attached: function () {
+                    this.tagPicker = this.$$("tag-picker");
+                },
+
+                clear: function() {
+                    this.tagPicker.clear();
+                },
+                
+                handleFocus: function() {
+                    this._onChangeText(this.text);
+                },
+
+                focus: function() {
+                    this.tagPicker.focus();
+                },
+                
+                _onSelect: function(e) {
+                    this.selected = e.detail.value;
+                    this.fire("selected-user", {target: this})
+                },
+                
+                _onClose: function(e) {
+                    this.fire("close-clicked", {target: this})
+                },
+                
+                _onChangeText: function(text) {
+                    var tagPicker = this.tagPicker;
+                    if (text.length < 3) {
+                        tagPicker.suggestions([{"text":"Type at least 3 letters.."}]);
+                        return;
+                    }
+
+                    if (this.previousRequest)
+                        clearTimeout(this.previousRequest);
+
+                    var self = this;
+                    this.previousRequest = setTimeout(function() {
+                        self.searching = true;
+                        $.ajax({
+                            url: '/ws/users/search?&query=' + text + '&teamFilter='+self.teams.join(","),
+                            headers: {
+                                'Accept': 'application/json'
+                            },
+                            async: true
+                        })
+                        .done(function (userList) {
+                            if (userList.length === 0) {
+                                tagPicker.suggestions([{"text":"No matches"}]);
+                                return;
+                            }
+
+                            tagPicker.suggestions(
+                                userList.map(function(t){
+                                    return {
+                                        "text": t.displayName,
+                                        "value": t.name
+                                    }
+                                }));
+                        }).
+                        fail(function (jqXhr, textStatus, errorThrown) {
+                            console.error(jqXhr);
+                            console.error(textStatus);
+                            console.error(errorThrown);
+                        })
+                        .always(function() {
+                            self.previousRequest = null;
+                            self.searching = false;
+                        })
+                    }, 100)
+                }
+            });
+        })();
+    </script>
+</dom-module>

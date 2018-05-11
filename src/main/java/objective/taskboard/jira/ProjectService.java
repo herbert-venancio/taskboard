@@ -140,4 +140,10 @@ public class ProjectService {
                 .orElse(null);
     }
 
+    public Optional<ProjectFilterConfiguration> getAllowedTaskboardProject(String projectKey) {
+        Optional<ProjectFilterConfiguration> optProject = getTaskboardProject(projectKey);
+        if (!optProject.isPresent() || !isNonArchivedAndUserHasAccess(projectKey))
+            return Optional.empty();
+        return optProject;
+    }
 }

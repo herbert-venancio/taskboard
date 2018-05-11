@@ -29,6 +29,14 @@ function Taskboard() {
     this.getLoggedUser = function() {
         return window.user;
     }
+    
+    this.getAvailableTeams = function() {
+        return TEAMS;
+    }
+
+    this.getTeamById = function(id) {
+        return TEAMS_BY_ID[id];
+    }
 
     this.getTaskboardLogoUrl = function() {
         var logoUrlExistis = window.logo !== null && window.logo !== undefined && window.logo !== '';
@@ -54,18 +62,11 @@ function Taskboard() {
         return teamFilter.aspectsSubitemFilter;
     };
 
-    this.getTeamsOfProject = function(projectKey) {
-        var projectFilter = _.find(this.getAspectFilters(), function(filter) {
-            return filter.description == "Project";
-        });
-        var projectSubitemFilter = _.find(projectFilter.aspectsSubitemFilter, function(subitem) {
-            return subitem.value == projectKey;
-        });
-        return projectSubitemFilter ? projectSubitemFilter.teams : [];
-    };
-
     this.setIssues = function(issues) {
         this.issues = issues;
+        for (var index in this.issues) {
+            this.issues[index] = this.resolveIssueFields(issues[index]);
+        }
         setIssuesBySteps(issues);
         this.refitSteps();
     };
@@ -94,8 +95,6 @@ function Taskboard() {
     }
 
     this.getIssueStep = function(issue) {
-        if (!issue.visible) return null;
-
         var steps = self.getAllSteps()
         for (var s in steps) {
             var step = steps[s]
@@ -114,10 +113,6 @@ function Taskboard() {
     this.getIssuesByStep = function(stepId) {
         if (issuesBySteps)
             return issuesBySteps[stepId];
-    };
-
-    this.getIssues = function() {
-        return this.issues;
     };
 
     this.getIssueByKey = function(issueKey) {
@@ -263,17 +258,13 @@ function Taskboard() {
         return dependencies;
     }
 
-    this.isInvalidTeam = function(teams) {
-        return teams.indexOf(INVALID_TEAM) != -1;
-    };
-
     this.applyFilterPreferences = function() {
         var filterPreferences = userPreferences.getFilters();
 
         if (_.isEmpty(filterPreferences))
             return;
 
-        var filterTeams = [INVALID_TEAM];
+        var filterTeams = [];
         aspectFilters.forEach(function(item) {
             if (item.description !== 'Project')
                 return;
@@ -316,8 +307,8 @@ function Taskboard() {
         return this.statuses;
     };
 
-    this.getFieldName = function(fieldId) {
-        return FIELDNAMES[fieldId] || fieldId;
+    this.getFieldName = function(fs) {
+        return FIELDNAMES[fs.fieldId] || fs.fieldId;
     };
 
     this.getStatus = function(statusId) {
@@ -335,11 +326,12 @@ function Taskboard() {
         stompClient.debug = function(message) {
             if(!message || message.indexOf('PING') > -1 || message.indexOf('PONG') > -1)
                 return;
-            console.log(message);
+            if (message.indexOf("ERROR") > -1)
+                console.log(message);
         };
         stompClient.connect({}, function () {
-            stompClient.subscribe('/topic/issues/updates', function (issues) {
-                handleIssueUpdate(taskboardHome, issues)
+            stompClient.subscribe('/topic/issues/updates', function (response) {
+                handleIssueUpdates(taskboardHome, response)
             });
 
             stompClient.subscribe('/user/topic/sizing-import/status', function(status) {
@@ -360,15 +352,47 @@ function Taskboard() {
         });
     }
 
-    function handleIssueUpdate(taskboardHome, response) {
-        var updateEvents = JSON.parse(response.body)
+    function handleIssueUpdates(taskboardHome, response) {
+        var relevantEvents = JSON.parse(response.body)
+        var ids = relevantEvents.map(function(i) { return i.issueId })
+
+        $.post({
+            url:"/ws/issues/byids", 
+            contentType: 'application/json', 
+            data: JSON.stringify(ids)
+        })
+        .done(function(issues) {
+            var issueById = {};
+            issues.forEach(function(i){
+                issueById[i.id] = i;
+            })
+            var issueUpdateEvents = []
+            relevantEvents.forEach(function(event){
+                var issueData = issueById[event.issueId];
+                if (!issueData)
+                    event.updateType = 'DELETED'
+
+                if (event.updateType === 'DELETED') {
+                    var previous = getPreviousIssueInstanceById(event.issueId);
+                    if (!previous)
+                        return;
+                    event.target = previous.issue;
+                }
+                else {
+                    event.target = issueData;
+                }
+                issueUpdateEvents.push(event);
+            })
+
+            updateIssuesByEvents(taskboardHome, issueUpdateEvents)
+        })
+    }
+
+    function updateIssuesByEvents(taskboardHome, updateEvents) {
         var updatedIssueKeys = []
         var updateByStep = {};
         updateEvents.forEach(function(anEvent) {
-            var previousInstance = getPreviousIssueInstance(anEvent.target.issueKey);
-            if (anEvent.updateType !== 'DELETED' && previousInstance !== null && previousInstance.issue.stateHash === anEvent.target.stateHash)
-                return;
-
+            var previousInstance = getPreviousIssueInstanceById(anEvent.target.id);
             if (anEvent.updateType === 'DELETED' && previousInstance !== null) {
                 self.issues.splice(previousInstance.index, 1);
                 updatedIssueKeys.push(anEvent.target.issueKey);
@@ -376,11 +400,14 @@ function Taskboard() {
                 return;
             }
 
-            var converted = anEvent.target;
+            var converted = self.resolveIssueFields(anEvent.target);
             if (previousInstance === null)
                 self.issues.push(converted);
-            else
+            else {
+                if (previousInstance.issue.stateHash === anEvent.target.stateHash)
+                    return;
                 self.issues[previousInstance.index] = converted;
+            }
 
             updatedIssueKeys.push(anEvent.target.issueKey);
             var issueStep = self.getIssueStep(converted);
@@ -421,9 +448,9 @@ function Taskboard() {
         }});
     }
 
-    function getPreviousIssueInstance(key) {
+    function getPreviousIssueInstanceById(id) {
         var previousInstance = null;
-        var piIndex = findIndexInArray(self.issues, function(i) { return i.issueKey === key });
+        var piIndex = findIndexInArray(self.issues, function(i) { return i.id === id });
         if (piIndex > -1)
             previousInstance = {issue: self.issues[piIndex], index: piIndex};
         return previousInstance;
@@ -452,13 +479,25 @@ function Taskboard() {
     }
 
     this.convertAndRegisterIssue = function(issue) {
-        var converted = issue;
-        var previousInstance = getPreviousIssueInstance(issue.issueKey);
+        var converted = this.resolveIssueFields(issue);
+        
+        var previousInstance = getPreviousIssueInstanceById(issue.id);
         if (previousInstance === null)
             self.issues.push(converted)
         else
             self.issues[previousInstance.index] = converted;
         return converted;
+    }
+    
+    this.resolveIssueFields = function(issue) {
+        if (issue.additionalEstimatedHoursField)
+            issue.additionalEstimatedHoursField.name = this.getFieldName(issue.additionalEstimatedHoursField);
+
+        issue.subtasksTshirtSizes.forEach(function(ts) {
+            ts.name = this.getFieldName(ts);
+        }.bind(this))
+        
+        return issue;
     }
 
     function hasSomeFilteredIssue(issues) {
@@ -536,6 +575,16 @@ function Taskboard() {
             .value();
     }
 
+    this.showError = function(source, message, actions) {
+        source.fire("iron-signal", {name:"show-error-message", data: { message: message, actions: actions}});
+    }
+    
+    this.showIssueError = function(source, issueKey, message) {
+        source.fire("iron-signal", {name:"show-issue-error-message", data: {
+            issueKey: issueKey,
+            errorMessage: message
+        }});
+    }
 }
 
 var taskboard = new Taskboard();

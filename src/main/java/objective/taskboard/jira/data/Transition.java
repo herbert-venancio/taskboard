@@ -9,6 +9,7 @@ public class Transition {
     public String name;
     public Status to;
     public Map<String, Field> fields;
+    public Long order;
     
     public Transition(){}
 

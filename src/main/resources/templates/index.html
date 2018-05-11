@@ -63,6 +63,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <!-- build:css styles/main.css -->
     <link rel="stylesheet" href="/static/styles/main.css"/>
+    <link rel="stylesheet" href="/static/styles/issue-detail.css"/>
     <!-- endbuild-->
 
     <!-- build:js bower_components/webcomponentsjs/webcomponents-lite.min.js -->
@@ -108,6 +109,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <taskboard-home class="fit"></taskboard-home>
 </template>
 <script th:inline="javascript">
+    window.jsErrors = [];
+    window.onerror = function(errorMessage) {
+        window.jsErrors[window.jsErrors.length] = errorMessage;
+    }
     var CUSTOMFIELD = {
         LAST_BLOCK_REASON: [[${jiraCustomfields.lastBlockReason.id}]],
         CLASSE_DE_SERVICO: [[${jiraCustomfields.classOfService.id}]]
@@ -126,7 +131,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         G: [[${jiraCustomfields.tShirtSize.large}]],
         GG: [[${jiraCustomfields.tShirtSize.extraLarge}]]
     };
-
+    
     var ISSUETYPE_ID = {
         DEMANDA: [[${jiraIssuetypes.demand.id}]]
     };
@@ -135,7 +140,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     var START_BUSINESS_HOURS = JSON.parse([[${cycleTimeStartBusinessHours}]]);
     var END_BUSINESS_HOURS = JSON.parse([[${cycleTimeEndBusinessHours}]]);
     var HOLIDAYS = JSON.parse([[${holidays}]]);
-    var INVALID_TEAM = [[${invalidTeam}]];
 
     var TYPE_FIELD = {
         TEXT: "text",
@@ -147,6 +151,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     ];
 
     var GOOGLE_CLIENT_ID = [[${googleClientId}]];
+
+    var TEAMS = JSON.parse([[${teams}]]);
+    var TEAMS_BY_ID = {}
+    TEAMS.forEach(function(t) {
+        TEAMS_BY_ID[t.id] = t;
+    });
 </script>
 <!-- build:js scripts/app.js -->
 <script src="/static/scripts/3rd/jstz.min.js"></script>

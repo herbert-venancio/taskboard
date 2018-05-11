@@ -26,6 +26,7 @@ import static objective.taskboard.repository.PermissionRepository.ADMINISTRATIVE
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -47,12 +48,16 @@ import org.springframework.stereotype.Service;
 import com.google.common.util.concurrent.Uninterruptibles;
 
 import objective.taskboard.auth.Authorizer;
+import objective.taskboard.auth.CredentialsHolder;
 import objective.taskboard.data.Issue;
 import objective.taskboard.data.ProjectsUpdateEvent;
 import objective.taskboard.data.TaskboardIssue;
+import objective.taskboard.data.Team;
+import objective.taskboard.data.User;
 import objective.taskboard.database.IssuePriorityService;
 import objective.taskboard.domain.converter.JiraIssueToIssueConverter;
 import objective.taskboard.domain.converter.ParentProvider;
+import objective.taskboard.issue.CardStatusOrderCalculator;
 import objective.taskboard.issue.IssueUpdate;
 import objective.taskboard.issue.IssueUpdateType;
 import objective.taskboard.issue.IssuesUpdateEvent;
@@ -61,7 +66,9 @@ import objective.taskboard.jira.JiraIssueService;
 import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.client.JiraIssueDto;
+import objective.taskboard.jira.data.Transition;
 import objective.taskboard.jira.data.WebhookEvent;
+import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.task.IssueEventProcessScheduler;
 import objective.taskboard.task.JiraEventProcessor;
 
@@ -98,6 +105,12 @@ public class IssueBufferService {
     @Autowired
     private Authorizer authorizer;
 
+    @Autowired
+    private TeamCachedRepository teamRepo;
+
+    @Autowired
+    private CardStatusOrderCalculator statusOrderCalculator;
+    
     private CardRepo cardsRepo;
     
     private final ParentProvider parentProviderFetchesMissingParents = parentKey -> {
@@ -256,11 +269,23 @@ public class IssueBufferService {
         projectsUpdatedByEvent.clear();
     }
 
-    public synchronized List<Issue> getIssues() {
+    public synchronized List<Issue> getVisibleIssues() {
         return cardsRepo.values().stream()
-                .filter(t -> projectService.isNonArchivedAndUserHasAccess(t.getProjectKey()))
-                .filter(t -> t.isVisible())
-                .collect(toList());
+                .filter(this::isAccessible)
+                .collect(Collectors.toList());
+    }
+
+    public synchronized List<Issue> getVisibleIssuesByIds(List<Long> issuesIds) {
+        return issuesIds.stream()
+                .map(id->cardsRepo.getById(id))
+                .filter(this::isAccessible)
+                .collect(Collectors.toList());
+    }
+
+    private boolean isAccessible(Issue t) {
+        if (t == null)
+            return false;
+        return projectService.isNonArchivedAndUserHasAccess(t.getProjectKey()) && t.isVisible();
     }
     
     public synchronized List<Issue> getAllIssues() {
@@ -271,13 +296,98 @@ public class IssueBufferService {
         return cardsRepo.get(key);
     }
 
-    public synchronized Issue assignToMe(String issueKey) {
+    public synchronized List<Transition> transitions(String issueKey) {
         Issue issue = getIssueByKey(issueKey);
-        if(jiraBean.assignToMe(issue)) {
-            return updateIssueBuffer(issueKey);
-        } else {
+        List<Transition> transitions = jiraBean.getTransitions(issueKey);
+        
+        transitions.forEach(t -> t.order = (long) statusOrderCalculator.computeStatusOrder(issue.getType(), t.to.id) );
+        return transitions;
+    }
+
+    public synchronized Issue addMeAsAssignee(String issueKey) {
+        return addAssigneeToIssue(issueKey, CredentialsHolder.username());
+    }
+    
+    public synchronized Issue addAssigneeToIssue(String issueKey, String username) {
+        Issue issue = getIssueCopyByKeyOrCry(issueKey);
+        if (issue.getAssignees().stream().map(a -> a.name).anyMatch(name -> name.equals(username)))
             return issue;
+        
+        LinkedList<User> assigneeList = new LinkedList<>(issue.getAssignees());
+        assigneeList.add(new User(username));
+
+        if (jiraBean.assignToUsers(issue.getIssueKey(), assigneeList))
+            return updateIssueBuffer(issueKey);
+
+        return issue;
+    }
+
+    public Issue removeAssigneeFromIssue(String issueKey, String username) {
+        Issue issue = getIssueCopyByKeyOrCry(issueKey);
+        
+        List<User> assignees =
+                issue.getAssignees().stream()
+                .collect(Collectors.toList());
+        
+        Iterator<User> it = assignees.iterator();
+        while(it.hasNext()) {
+            User anAssignee = it.next();
+            if (anAssignee.isAssigned() && anAssignee.name.equals(username))
+                it.remove();
         }
+
+        if (jiraBean.assignToUsers(issue.getIssueKey(), assignees))
+            return updateIssueBuffer(issueKey);
+
+        return issue;
+    }
+    
+    public synchronized Issue addTeamToIssue(String issueKey, Long teamId) {
+        Issue issue = getIssueCopyByKeyOrCry(issueKey);
+        Team teamToAdd = getTeamByIdOrCry(teamId);
+        issue.addTeam(teamToAdd);
+        return syncIssueTeams(issueKey, issue);
+    }
+
+    public synchronized Issue removeTeamFromIssue(String issueKey, Long teamToReplace) {
+        Issue issue = getIssueCopyByKeyOrCry(issueKey);
+        Team teamToRemove = getTeamByIdOrCry(teamToReplace);
+        issue.removeTeam(teamToRemove);
+        return syncIssueTeams(issueKey, issue);
+    }
+
+    public synchronized Issue replaceTeamInIssue(String issueKey, Long previousTeam, Long replacementTeam) {
+        Issue issue = getIssueCopyByKeyOrCry(issueKey);
+        Optional<Team> teamToRemove = teamRepo.findById(previousTeam);
+        Team teamToAdd = getTeamByIdOrCry(replacementTeam);
+        issue.replaceTeam(teamToRemove, teamToAdd);
+        return syncIssueTeams(issueKey, issue);
+    }
+
+    public Issue restoreDefaultTeams(String issueKey) {
+        Issue issue = getIssueCopyByKeyOrCry(issueKey);
+        issue.restoreDefaultTeams();
+        return syncIssueTeams(issueKey, issue);
+    }
+
+    private Issue syncIssueTeams(String issueKey, Issue issue) {
+        jiraBean.setTeams(issue.getIssueKey(),issue.getRawAssignedTeamsIds());
+        return updateIssueBuffer(issueKey);
+    }
+
+    private Issue getIssueCopyByKeyOrCry(String issueKey) {
+        Issue issue = getIssueByKey(issueKey);
+        if (issue == null)
+            throw new IssueNotFoundException(issueKey);
+
+        return issue.copy();
+    }
+
+    private Team getTeamByIdOrCry(Long teamId) {
+        Optional<Team> teamToAdd = teamRepo.findById(teamId);
+        if (!teamToAdd.isPresent())
+            throw new IllegalArgumentException("Team id " + teamId + " not found");
+        return teamToAdd.get();
     }
 
     public synchronized Issue doTransition(String issueKey, Long transitionId, Map<String, Object> fields) {
@@ -393,5 +503,13 @@ public class IssueBufferService {
                 throw new FrontEndMessageException("User doesn't have permission to reoder issues of " + projectsWithoutPermission);
             }
         }
+    }
+    
+    public class IssueNotFoundException extends RuntimeException {
+        public IssueNotFoundException(String issueKey) {
+            super("Issue with key " + issueKey + " not found");
+        }
+
+        private static final long serialVersionUID = 1L;
     }
 }

@@ -21,6 +21,7 @@
 package objective.taskboard.testUtils;
 
 import static java.util.Collections.singletonMap;
+import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.capitalize;
 import static spark.Service.ignite;
 
@@ -28,6 +29,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -185,7 +187,9 @@ public class JiraMockServer {
 
         get("rest/api/latest/user",  (req, res) ->loaduser(req.queryParams("username")));
         get("rest/api/latest/myself",  (req, res) ->loaduser(username));
-        
+
+        get("/rest/projectbuilder/1.0/users",  (req, res) -> findUsers(req.queryParams("q")));
+
         get("rest/api/latest/serverInfo",  (req, res) ->{
             String auth = new String(Base64.getDecoder().decode(req.headers("Authorization").replace("Basic ","").getBytes()));
             username = auth.split(":")[0];
@@ -232,7 +236,8 @@ public class JiraMockServer {
             JSONObject issueSearchData = getIssueDataForKey(issueKey);
             
             JSONArray issues = issueSearchData.getJSONArray("issues");
-            JSONObject fields = issues.getJSONObject(0).getJSONObject("fields");
+            JSONObject issue = issues.getJSONObject(0);
+            JSONObject fields = issue.getJSONObject("fields");
             JSONObject reqFields = reqData.getJSONObject("fields");
             Iterator keys = reqFields.keys();
             while(keys.hasNext()) {
@@ -251,12 +256,24 @@ public class JiraMockServer {
                     case "customfield_11440"://Class Of Service
                         setClassOfService(fields, aKey, reqFields.getJSONObject(aKey));
                         break;
+                    case "customfield_10100"://Assigned team
+                        fields.put(aKey, reqFields.getString(aKey));
+                        break;
+                    case "customfield_11451"://blocked
+                        fields.put(aKey, reqFields.getJSONArray(aKey));
+                        break;
+                    case "customfield_11452"://last block reason
+                        fields.put(aKey, reqFields.getString(aKey));
+                        break;
                     default:
                         throw new IllegalStateException("Unsupported Field in Mock : " + aKey);
                 }
-                
+                fields.put("updated", nowIso8601());
             }
             res.status(204);
+
+            sendWebhookWithContentInIssue("jira:issue_updated", issue);
+
             return "";
         });
 
@@ -355,7 +372,7 @@ public class JiraMockServer {
                    throw new RuntimeException(e);
                }
             });
-            sendWebhook("TASKB", "jira:version_updated", "TASKB_version_update.json");
+            sendWebhookWithContentInResourceFile("TASKB", "jira:version_updated", "TASKB_version_update.json");
             // not really correct response
             return loadMockData("createversion.response.json");
         });
@@ -585,14 +602,32 @@ public class JiraMockServer {
         return response.toString();
     }
 
-    private static void sendWebhook(String projectKey, String eventType, String webhookContentFile) {
+    private static void sendWebhookWithContentInResourceFile(String projectKey, String eventType, String resourceName) {
+        sendWebhookContent(projectKey, eventType, IOUtilities.resourceToString("webhook/" + resourceName));
+    }
+    
+    private void sendWebhookWithContentInIssue(String eventType, JSONObject issue) {
+        JSONObject webhookData = new JSONObject();
+        try {
+            webhookData.put("issue", issue);
+            webhookData.put("user", new JSONObject(loaduser(username)));
+            webhookData.put("webhookEvent", eventType);
+            webhookData.put("timestamp", System.currentTimeMillis());
+            String projectKey = issue.getJSONObject("fields").getJSONObject("project").getString("key");
+            
+            sendWebhookContent(projectKey, eventType, webhookData.toString());
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    private static void sendWebhookContent(String projectKey, String eventType, String body) {
         webhooks.stream()
                 .filter(webhook -> webhook.events.contains(eventType))
                 .map(webhook ->
                         (Runnable) () -> {
                             Map<String, String> parameters = singletonMap("project.key", projectKey);
                             String webhookUrl = StrSubstitutor.replace(webhook.url, parameters);
-                            String body = IOUtilities.resourceToString("webhook/" + webhookContentFile);
                             RequestBuilder.url(webhookUrl)
                                     .header("Content-Type", "application/json")
                                     .body(body)
@@ -674,6 +709,39 @@ public class JiraMockServer {
                 .replace("\"name\": \"taskboard\"", "\"name\": \"" + username + "\"")
                 .replace("\"displayName\": \"Taskboard\",", "\"displayName\": \"" + capitalize(username) + "\",");
         return loadMockData;
+    }
+
+    private String findUsers(String nameStart) throws JSONException {
+        String loadMockData = loadMockData("users-autocomplete.response.json");
+        JSONArray allUsers = new JSONArray(loadMockData);
+        int allUsersSize = allUsers.length();
+
+        JSONArray filteredUserList = new JSONArray();
+        for(int i = 0; i < allUsersSize; i++) {
+            JSONObject user = allUsers.getJSONObject(i);
+            if (user.getString("displayName").toLowerCase().matches("(?i).*\\b"+nameStart.toLowerCase()+".*"))
+                filteredUserList.put(user);
+            else if (user.getString("name").toLowerCase().matches(".*\\b"+nameStart.toLowerCase()+".*"))
+                filteredUserList.put(user);
+        }
+
+        return filteredUserList.toString();
+    }
+
+    public static void registerWebhook(String url, String... events) {
+        String eventList = String.join(",", Arrays.stream(events)
+                .map(event -> "\"" + event + "\"")
+                .collect(toList()));
+    
+        String registerWebhook = "{" +
+                "  \"name\": \"my webhook via rest\"," +
+                "  \"url\": \"" + url + "/webhook/${project.key}\"," +
+                "  \"events\": [" + eventList + "]" +
+                "}";
+    
+        RequestBuilder.url("http://localhost:4567/rest/webhooks/1.0/webhook")
+                .body(registerWebhook)
+                .post();
     }
 
     private static class WebHookConfiguration {

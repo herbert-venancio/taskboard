@@ -37,7 +37,7 @@ public class FollowUpDateRangeProviderTest {
 
     @Test
     public void whenGetDateRange_ifTheProjectExists_thenReturnTheValue() {
-        ProjectFilterConfiguration taskboardProject = new ProjectFilterConfiguration(PROJECT_KEY);
+        ProjectFilterConfiguration taskboardProject = new ProjectFilterConfiguration(PROJECT_KEY, 1L);
         taskboardProject.setStartDate(START_DATE);
         taskboardProject.setDeliveryDate(DELIVERY_DATE);
 

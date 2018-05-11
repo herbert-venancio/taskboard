@@ -45,7 +45,7 @@ public class JiraIssueJqlBuilderServiceTest {
     public void setup() {
         when(metadataService.getJiraTimeZone()).thenReturn(ZoneId.of("America/Sao_Paulo"));
         when(cardsRepo.getCurrentProjects()).thenReturn(Optional.of(Sets.newSet("PROJ")));
-        when(projectRepository.getProjects()).thenReturn(asList(new ProjectFilterConfiguration("PROJ")));
+        when(projectRepository.getProjects()).thenReturn(asList(new ProjectFilterConfiguration("PROJ", 1L)));
     }
     
     @Test

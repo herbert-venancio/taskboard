@@ -46,18 +46,21 @@ public class ReleaseFilterIT extends AuthenticatedIntegrationTest {
 
     @Test
     public void whenWebhookProjectVersionUpdate_updateReleaseOfIssues() {
+        MainPage mainPage = MainPage.produce(webDriver);
+        mainPage.assertUpdatedIssues();
+
         emulateVersionUpdate("1.0-edited");
 
         String[] updatedIssues = {"TASKB-186", "TASKB-238", "TASKB-572"};
 
-        MainPage.produce(webDriver)
+        mainPage
                 .assertUpdatedIssues(updatedIssues)
                 .waitReleaseFilterContains("TASKB - 1.0-edited")
                 .filterByRelease("TASKB - 1.0-edited")
                 .assertVisibleIssues(updatedIssues);
 
         emulateVersionUpdate("1.0-changed");
-        MainPage.produce(webDriver)
+        mainPage
                 .assertUpdatedIssues(updatedIssues)
                 .assertLabelRelease("TASKB - 1.0-changed")
                 .assertVisibleIssues(updatedIssues);

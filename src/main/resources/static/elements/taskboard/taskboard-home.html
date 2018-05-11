@@ -254,10 +254,6 @@
                 z-index: 10;
                 background-color: #EFEFEF;
                 color: #333;
-                box-shadow: none;
-            }
-
-            .search {
             }
 
             .visibility {
@@ -358,6 +354,33 @@
                 from {transform:rotate(0deg);}
                 to {transform:rotate(360deg);}
             }
+            .search-warning {
+                align-items: center;
+                height: [[filterWarningHeight]]px;
+                position: relative;
+                background-color: #FCE196;
+                color: #333;
+                box-shadow: none;
+                text-align: center;
+                display: block;
+                padding: 8px;
+                font-size: 14px;
+                font-family: 'ptsans-regular', Verdana, Arial, Helvetica, sans-serif;
+            }
+
+            .search-warning span {
+                text-decoration: underline;
+                cursor: pointer;
+            }
+        </style>
+        <style is="custom-property">
+            tb-button {
+                --button-style: {
+                    text-transform: none;
+                    color: #eeff41;
+                    background: transparent;
+                }
+            }
         </style>
 
         <iron-ajax id="ajaxState"
@@ -398,11 +421,13 @@
 
         <paper-drawer-panel disable-swipe right-drawer force-narrow drawer-width="350px">
             <template is="dom-if" if={{done}}>
-                <div main>
+                <div main on-tap="_closeToastError">
                     <paper-toast duration="0" id="toastError" on-iron-overlay-closed="_onToastErrorClosed">
                         <iron-icon icon="icons:error"></iron-icon>
                         <span>{{errorMessage}}</span>
-                        <paper-button on-tap="_closeToastError" class="yellow-button">Close</paper-button>
+                        <template is="dom-repeat" is="dom-repeat" items="{{errorActions}}" as="action">
+                            <tb-button data-action-name$="{{action.name}}" button="[[action.button]]" class="yellow-button"></tb-button>
+                        </template>
                     </paper-toast>
                     <paper-toast duration="5000" id="toastIssueUpdated" class="issue-updated" horizontal-align='right' vertical-align='bottom'
                                  on-iron-overlay-closed="_onIssueUpdatedClosed">
@@ -428,7 +453,7 @@
                     <paper-material class="menu-header u-clearfix">
                         <div class="title">Taskboard<iron-icon class$="issue-state issue-state-{{cacheState}}" icon="{{stateIcon}}" title$="{{stateTooltip}}"></iron-icon></div>
                         <div class="search">
-                            <board-search></board-search>
+                            <board-search query="{{searchQuery}}"></board-search>
                         </div>
                         <div class="visibility">
                             <config-visibility></config-visibility>
@@ -473,7 +498,10 @@
                                                class="about-button" on-tap="openAbout"></paper-icon-button>
                         </div>
                     </paper-material>
-                    <board-table id="table" conf={{conf}} aspects-filter="{{aspectsFilter}}"></board-table>
+                    <paper-material class="search-warning">
+                        Issues are being filtered. <span on-tap="clearFilter">Click here to reset</span>
+                    </paper-material>
+                    <board-table id="table" conf="{{conf}}" aspects-filter="[[aspectsFilter]]" ></board-table>
                 </div>
                 <paper-header-panel drawer>
                     <tb-configurations conf={{conf}} aspects-filter="{{aspectsFilter}}"></tb-configurations>
@@ -489,10 +517,15 @@
                 is: 'taskboard-home',
 
                 observers: [
-                    'refreshDone(aspectsFilter, conf)'
+                    'refreshDone(aspectsFilter, conf)',
+                    'activateFilter(searchQuery)'
                 ],
 
                 properties: {
+                    filterWarningHeight: {
+                        type: Number,
+                        value: 32
+                    },
                     aspectsFilter: {
                         type: Object,
                         notify: true
@@ -543,6 +576,10 @@
                     _showSizingImportButton: {
                         type: Boolean,
                         value: false
+                    },
+                    searchQuery: {
+                        type: String,
+                        value: ""
                     }
                 },
 
@@ -554,6 +591,7 @@
                     this.updatedIssueKeys = [];
                     this.user = taskboard.getLoggedUser();
                     this.verifyPermissions();
+                    this.isFiltering = false;
                 },
 
                 retrieveFilters: function () {
@@ -651,7 +689,16 @@
                 },
 
                 showErrorMessage: function(event) {
-                    this.set('errorMessage', event.detail);
+                    this.set('errorMessage', event.detail.message);
+                    var errorButtons = event.detail.actions;
+                    if (!errorButtons)
+                        errorButtons = [];
+                    errorButtons.push({name:"Close", callback: this._closeToastError})
+                    errorButtons.forEach(function(action) {
+                        action.button = ButtonBuilder(action.name).onClick(function(){action.callback(toastError)}).build();
+                    })
+                    this.set('errorActions', errorButtons);
+                    
                     if (this.issueErrorMessages.length === 0 && !this.infoMessage) {
                         if(!_.isEmpty(this.errorMessage))
                             toastError.open();
@@ -666,6 +713,24 @@
                     this.updatedIssueKeys = this.updatedIssueKeys.concat(event.detail.updatedIssueKeys);
                     if (this.issueErrorMessages.length === 0 && !this.errorMessage)
                         toastIssueUpdated.open();
+                },
+                
+                activateFilter: function(searchQuery) {
+                    var active = (""+searchQuery).length !== 0;
+                    if (this.isFiltering === active) return;
+                    
+                    var self = this;
+                    var afterAnimation = function(){self.fire('iron-signal', {name: 'board-resized'})}
+                    if (active)
+                        $("#lane-container").animate({"margin-top": (40 + this.filterWarningHeight)+"px"}, afterAnimation)
+                    else
+                        $("#lane-container").animate({"margin-top": "40px"}, afterAnimation)
+                    
+                    this.isFiltering = active;
+                },
+                
+                clearFilter: function() {
+                    this.searchQuery = "";
                 },
 
                 _showIssueErrorMessage: function(event) {
@@ -738,6 +803,7 @@
                     if (data.dontSaveQuery)
                         return;
                     this.currentQueryData = data;
+                    this.searchQuery = data.query;
                 },
 
                 projectsUpdated: function(event, data) {

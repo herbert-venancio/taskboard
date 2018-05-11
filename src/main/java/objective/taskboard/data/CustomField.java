@@ -29,6 +29,8 @@ public class CustomField implements Serializable {
     private String fieldId;
     private Serializable value;
     private Long optionId;
+    
+    public CustomField(){}
 
     public CustomField(String fieldId, Serializable value) {
         this(fieldId, value, null);
@@ -39,7 +41,7 @@ public class CustomField implements Serializable {
         this.value = value;
         this.optionId = optionId;
     }
-
+    
     public String getFieldId() {
         return fieldId;
     }
@@ -52,4 +54,42 @@ public class CustomField implements Serializable {
         return this.optionId;
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((fieldId == null) ? 0 : fieldId.hashCode());
+        result = prime * result + ((optionId == null) ? 0 : optionId.hashCode());
+        result = prime * result + ((value == null) ? 0 : value.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        CustomField other = (CustomField) obj;
+        if (fieldId == null) {
+            if (other.fieldId != null)
+                return false;
+        } else if (!fieldId.equals(other.fieldId))
+            return false;
+        if (optionId == null) {
+            if (other.optionId != null)
+                return false;
+        } else if (!optionId.equals(other.optionId))
+            return false;
+        if (value == null) {
+            if (other.value != null)
+                return false;
+        } else if (!value.equals(other.value))
+            return false;
+        return true;
+    }
+
+    
 }
