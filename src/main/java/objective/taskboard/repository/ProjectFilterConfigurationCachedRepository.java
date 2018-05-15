@@ -21,6 +21,7 @@ package objective.taskboard.repository;
  * [/LICENSE]
  */
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,7 +34,6 @@ import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 
 import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.domain.ProjectFilterConfiguration;
@@ -46,7 +46,7 @@ public class ProjectFilterConfigurationCachedRepository {
     @Autowired
     private ProjectFilterConfigurationRepository projectFilterRepository;
 
-    private List<ProjectFilterConfiguration> cache = Lists.newArrayList();
+    private List<ProjectFilterConfiguration> cache = Collections.emptyList();
 
     @Autowired
     private CacheManager cacheManager;

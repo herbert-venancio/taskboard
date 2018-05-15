@@ -37,7 +37,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.atlassian.jira.rest.client.api.domain.IssueType;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -67,6 +66,7 @@ import objective.taskboard.jira.JiraProperties.IssueLink;
 import objective.taskboard.jira.JiraProperties.IssueType.IssueTypeDetails;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.ProjectService;
+import objective.taskboard.jira.client.JiraIssueTypeDto;
 import objective.taskboard.jira.data.Status;
 import objective.taskboard.jira.data.StatusCategory;
 import objective.taskboard.jira.data.Version;
@@ -168,12 +168,11 @@ public abstract class FollowUpDataGeneratorTestBase {
         statusMap.put(statusDone,       new Status(statusDone,       "Done",  CATEGORY_UNDEFINED));
         doReturn(statusMap).when(metadataService).getStatusesMetadata();
 
-        Map<Long, IssueType> issueTypeMap = new LinkedHashMap<>();
-        issueTypeMap.put(demandIssueType, new IssueType(null, demandIssueType, "Demand", false, null,null));
-        issueTypeMap.put(taskIssueType,   new IssueType(null, taskIssueType,   "Task", false, null,null));
-                
-        issueTypeMap.put(devIssueType,    new IssueType(null, devIssueType,    "Dev", false, null,null));
-        issueTypeMap.put(alphaIssueType,  new IssueType(null, alphaIssueType,  "Alpha", false, null,null));
+        Map<Long, JiraIssueTypeDto> issueTypeMap = new LinkedHashMap<>();
+        issueTypeMap.put(demandIssueType, new JiraIssueTypeDto(demandIssueType, "Demand", false));
+        issueTypeMap.put(taskIssueType,   new JiraIssueTypeDto(taskIssueType,   "Task", false));
+        issueTypeMap.put(devIssueType,    new JiraIssueTypeDto(devIssueType,    "Dev", false));
+        issueTypeMap.put(alphaIssueType,  new JiraIssueTypeDto(alphaIssueType,  "Alpha", false));
         doReturn(issueTypeMap).when(metadataService).getIssueTypeMetadata();
 
         // tshirt size information

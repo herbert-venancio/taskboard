@@ -21,7 +21,7 @@ package objective.taskboard.auth;
  * [/LICENSE]
  */
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 public abstract class CredentialsHolder {

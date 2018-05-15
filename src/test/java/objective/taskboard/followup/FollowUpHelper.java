@@ -30,7 +30,7 @@ import static objective.taskboard.followup.FollowUpTransitionsDataProvider.TYPE_
 import static objective.taskboard.followup.FollowUpTransitionsDataProvider.TYPE_FEATURES;
 import static objective.taskboard.followup.FollowUpTransitionsDataProvider.TYPE_SUBTASKS;
 import static objective.taskboard.utils.IOUtilities.resourceToString;
-import static org.apache.commons.lang.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
@@ -51,7 +51,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.primitives.Ints;
 import com.google.gson.Gson;

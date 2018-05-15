@@ -24,21 +24,17 @@ package objective.taskboard.jira;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
-import com.atlassian.jira.rest.client.api.GetCreateIssueMetadataOptions;
-import com.atlassian.jira.rest.client.api.GetCreateIssueMetadataOptionsBuilder;
-import com.atlassian.jira.rest.client.api.domain.BasicProject;
-import com.atlassian.jira.rest.client.api.domain.CimProject;
-
 import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.config.LoggedInUserKeyGenerator;
+import objective.taskboard.jira.client.JiraCreateIssue;
 import objective.taskboard.jira.data.JiraProject;
 import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
 import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
@@ -69,23 +65,19 @@ class JiraProjectService {
                 .map(project -> service.get(project.key))
                 .collect(toList());
     }
-    
+
     @Cacheable(cacheNames=CacheConfiguration.USER_PROJECTS, keyGenerator=LoggedInUserKeyGenerator.NAME)
     public List<String> getUserProjectKeys() {
-        Iterable<BasicProject> visible = jiraEndpointAsUser.executeRequest(client -> client.getProjectClient().getAllProjects());
-        List<String> visibleKeys = new LinkedList<>();
-        for (BasicProject basicProject : visible) 
-            visibleKeys.add(basicProject.getKey());
-        
-        return visibleKeys;
+        return jiraEndpointAsUser.request(JiraProject.Service.class).all()
+                .stream().map(jp -> jp.key)
+                .collect(toList());
     }
 
-    public Iterable<CimProject> getCreateIssueMetadata(String projectKey) {
-        GetCreateIssueMetadataOptions options = new GetCreateIssueMetadataOptionsBuilder()
-                .withExpandedIssueTypesFields()
-                .withProjectKeys(projectKey)
-                .build();
-
-        return jiraEndpointAsUser.executeRequest(c -> c.getIssueClient().getCreateIssueMetadata(options));
+    public Optional<JiraCreateIssue.ProjectMetadata> getCreateIssueMetadata(String projectKey) {
+        return jiraEndpointAsUser.request(JiraCreateIssue.Service.class)
+                .getByProjectKey(projectKey)
+                .projects.stream()
+                .filter(project -> projectKey.equals(project.key))
+                .findFirst();
     }
 }

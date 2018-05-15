@@ -1,6 +1,6 @@
 package objective.taskboard.followup;
 
-import static org.apache.commons.lang.ArrayUtils.INDEX_NOT_FOUND;
+import static org.apache.commons.lang3.ArrayUtils.INDEX_NOT_FOUND;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -17,7 +17,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.Range;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

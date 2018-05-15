@@ -18,16 +18,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.atlassian.jira.rest.client.api.RestClientException;
-
 import objective.taskboard.auth.Authorizer;
 import objective.taskboard.domain.Project;
 import objective.taskboard.google.GoogleApiService;
 import objective.taskboard.google.SpreadsheetsManager.SpreadsheetException;
-import objective.taskboard.jira.JiraServiceException;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.sizingImport.PreviewBuilder.ImportPreview;
 import objective.taskboard.sizingImport.SizingImportValidator.ValidationResult;
+import retrofit.RetrofitError;
 
 @RestController
 @RequestMapping("ws/sizing-import")
@@ -91,12 +89,9 @@ public class SizingImportController {
             ImportPreview preview = sizingImportService.getPreview(projectKey, spreadsheetId, dynamicColumnsMapping);
             return ResponseEntity.ok(new ImportPreviewDto(preview));
 
-        } catch (JiraServiceException | RestClientException ex) {
+        } catch (RetrofitError ex) {
             log.error(null, ex);
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (Exception ex) {
-            log.error(null, ex);
-            return new ResponseEntity<>("Internal Error", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.valueOf(ex.getResponse().getStatus()));
         }
     }
 
@@ -111,12 +106,9 @@ public class SizingImportController {
 
             return ResponseEntity.ok(new SpreadsheetDetailsDto(sheetDefinition, lastColumn));
 
-        } catch (JiraServiceException | RestClientException ex) {
+        } catch (RetrofitError ex) {
             log.error(null, ex);
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (Exception ex) {
-            log.error(null, ex);
-            return new ResponseEntity<>("Internal Error", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.valueOf(ex.getResponse().getStatus()));
         }
     }
 
@@ -136,14 +128,11 @@ public class SizingImportController {
         try {
             sizingImportService.importSpreadsheet(projectKey, spreadsheetId, dynamicColumnsMapping);
             return ResponseEntity.ok().build();
-        } catch (JiraServiceException | RestClientException ex) {
+        } catch (RetrofitError ex) {
             log.error(null, ex);
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.valueOf(ex.getResponse().getStatus()));
         } catch(SpreadsheetException ex) {
             throw ex;
-        } catch (Exception ex) {
-            log.error(null, ex);
-            return new ResponseEntity<>("Internal Error", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

@@ -30,7 +30,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.atlassian.jira.rest.client.api.domain.IssueType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import objective.taskboard.data.Issue;
@@ -50,6 +49,7 @@ import objective.taskboard.jira.JiraProperties.CustomField.TShirtSize;
 import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.client.JiraIssueDto;
+import objective.taskboard.jira.client.JiraIssueTypeDto;
 import objective.taskboard.jira.data.Status;
 import objective.taskboard.jira.data.WebHookBody;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
@@ -92,7 +92,7 @@ public class IssueBufferServiceTest {
             MetadataService metadataService = mock(MetadataService.class);
             when(metadataService.getStatusByIdAsLoggedInUser(10000L)).thenReturn(new Status(10000L, "Done", null));
             try {
-                IssueType issueType = new IssueType(null, 10001L, "Feature", false, "", new URI("http://foo"));
+                JiraIssueTypeDto issueType = new JiraIssueTypeDto(10001L, "Feature", false, new URI("http://foo"));
                 when(metadataService.getIssueTypeByIdAsLoggedInUser(10001L)).thenReturn(issueType);
                 when(metadataService.getIssueTypeById(10001L)).thenReturn(issueType);
             } catch (URISyntaxException e) {

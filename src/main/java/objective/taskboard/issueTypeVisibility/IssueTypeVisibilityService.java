@@ -21,16 +21,17 @@ package objective.taskboard.issueTypeVisibility;
  * [/LICENSE]
  */
 
-import com.atlassian.jira.rest.client.api.domain.IssueType;
-import objective.taskboard.domain.IssueTypeConfiguration;
-import objective.taskboard.jira.MetadataService;
-import objective.taskboard.repository.IssueTypeConfigurationCachedRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import objective.taskboard.domain.IssueTypeConfiguration;
+import objective.taskboard.jira.MetadataService;
+import objective.taskboard.jira.client.JiraIssueTypeDto;
+import objective.taskboard.repository.IssueTypeConfigurationCachedRepository;
 
 @Service
 public class IssueTypeVisibilityService {
@@ -49,7 +50,7 @@ public class IssueTypeVisibilityService {
         return loadIssueTypeConfiguration();
     }
 
-    public List<IssueType> getVisibleIssueTypes() {
+    public List<JiraIssueTypeDto> getVisibleIssueTypes() {
         List<Long> ids = getIssueTypeConfiguration().stream().map(IssueTypeConfiguration::getIssueTypeId).collect(Collectors.toList());
         return metadataService.getIssueTypeMetadataAsLoggedInUser().values().stream().filter(t -> ids.contains(t.getId())).collect(Collectors.toList());
     }

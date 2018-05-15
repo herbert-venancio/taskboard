@@ -58,7 +58,6 @@ import org.mockito.Mock;
 import org.mockito.internal.util.collections.Sets;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.atlassian.jira.rest.client.api.domain.IssueType;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -169,7 +168,7 @@ public class JiraIssueToIssueConverterTest {
     private CardVisibilityEvalService cardVisibilityEvalService;
     @Mock
     private FieldMetadataService fieldMetadataService;
-    
+
     @Before
     public void before() {
         when(parentIssueLinkRepository.findAll()).thenReturn(asList());
@@ -207,7 +206,7 @@ public class JiraIssueToIssueConverterTest {
 
         when(cardVisibilityEvalService.calculateVisibleUntil(any(), any(), any())).thenReturn(Optional.empty());
 
-        IssueType metadataIssueType = new IssueType(null, 1L, null, false, null, URI.create(TYPE_ICON_URI));
+        JiraIssueTypeDto metadataIssueType = new JiraIssueTypeDto(1L, null, false, URI.create(TYPE_ICON_URI));
         when(metadataService.getIssueTypeById(any())).thenReturn(metadataIssueType);
     }
 

@@ -21,8 +21,7 @@
 package objective.taskboard.data;
 
 import java.io.Serializable;
-
-import org.apache.commons.lang.ObjectUtils;
+import java.util.Objects;
 
 import objective.taskboard.domain.converter.IssueCoAssignee;
 import objective.taskboard.jira.client.JiraUserDto;
@@ -79,6 +78,6 @@ public class User implements Serializable {
     public boolean equals(Object obj) {
         if (!(obj instanceof User))
             return false;
-        return ObjectUtils.equals(((User)obj).name, name);
+        return Objects.equals(((User)obj).name, name);
     }
 }

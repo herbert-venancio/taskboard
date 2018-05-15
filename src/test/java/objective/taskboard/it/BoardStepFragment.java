@@ -26,6 +26,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import org.openqa.selenium.By;
@@ -33,8 +34,6 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-
-import com.atlassian.util.concurrent.atomic.AtomicReference;
 
 public class BoardStepFragment extends AbstractUiFragment {
 
@@ -60,7 +59,7 @@ public class BoardStepFragment extends AbstractUiFragment {
     }
 
     public void issueCountBadge(int i) {
-        webDriver.findElement(By.cssSelector("[data-step-count-name='"+stepName+"']"));
+        webDriver.findElement(By.cssSelector("[data-step-count-name='"+stepName+"']")); // TODO: investigate why parameter is not used
     }
 
     private List<String> issueList() {

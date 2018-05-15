@@ -24,13 +24,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.atlassian.jira.rest.client.api.domain.BasicIssue;
-import com.atlassian.jira.rest.client.api.domain.CimFieldInfo;
-import com.atlassian.jira.rest.client.api.domain.CimIssueType;
-import com.atlassian.jira.rest.client.api.domain.Issue;
-import com.atlassian.jira.rest.client.api.domain.Project;
-import com.atlassian.jira.rest.client.api.domain.Version;
-
+import objective.taskboard.jira.client.JiraCreateIssue;
+import objective.taskboard.jira.client.JiraIssueDto;
+import objective.taskboard.jira.data.JiraIssue;
+import objective.taskboard.jira.data.JiraProject;
+import objective.taskboard.jira.data.Version;
 import objective.taskboard.sizingImport.JiraFacade.IssueCustomFieldOptionValue;
 import objective.taskboard.sizingImport.JiraFacade.IssueFieldObjectValue;
 import objective.taskboard.sizingImport.SheetColumnDefinition.ColumnTag;
@@ -54,8 +52,8 @@ public class SizingImporterTest {
     private final SizingImportConfig importConfig = new SizingImportConfig();
     private final JiraFacade jiraFacade = mock(JiraFacade.class);
     private final SizingImporterRecorder recorder = new SizingImporterRecorder();
-    private final Map<String, CimFieldInfo> featureMetadataFields = new HashMap<>();
-    private final Map<String, CimFieldInfo> taskMetadataFields = new HashMap<>();
+    private final Map<String, JiraCreateIssue.FieldInfoMetadata> featureMetadataFields = new HashMap<>();
+    private final Map<String, JiraCreateIssue.FieldInfoMetadata> taskMetadataFields = new HashMap<>();
     
     private final SizingImporter subject = new SizingImporter(importConfig, jiraFacade);
 
@@ -66,8 +64,8 @@ public class SizingImporterTest {
         when(jiraFacade.getDemandKeyGivenFeature(any())).thenReturn(Optional.of("PX-1"));
 
         when(jiraFacade.requestFeatureTypes(PROJECT_X_KEY)).thenReturn(asList(
-                new CimIssueType(null, FEATURE_TYPE_ID, "Feature", false, null, null, featureMetadataFields),
-                new CimIssueType(null, TASK_TYPE_ID,    "Task",    false, null, null, taskMetadataFields)));
+                new JiraCreateIssue.IssueTypeMetadata(FEATURE_TYPE_ID, "Feature", false, featureMetadataFields),
+                new JiraCreateIssue.IssueTypeMetadata(TASK_TYPE_ID,    "Task",    false, taskMetadataFields)));
 
         subject.addListener(recorder);
     }
@@ -194,8 +192,8 @@ public class SizingImporterTest {
 
     @Test
     public void importLineWithoutSizingAndExtraFields() {
-        when(jiraFacade.createDemand(any(), eq("Blue"), any())).thenReturn(new BasicIssue(null, "PX-1", 0L));
-        when(jiraFacade.createFeature(any(), any(), any(), eq("Banana"), any(), any())).thenReturn(new BasicIssue(null, "PX-15", 0L));
+        when(jiraFacade.createDemand(any(), eq("Blue"), any())).thenReturn(new JiraIssue("PX-1"));
+        when(jiraFacade.createFeature(any(), any(), any(), eq("Banana"), any(), any())).thenReturn(new JiraIssue("PX-15"));
 
         List<SizingImportLine> lines = asList(
                 new SizingImportLine(0, asList(
@@ -220,24 +218,24 @@ public class SizingImporterTest {
 
     @Test
     public void importHappyDay() {
-        CimFieldInfo devTSizeField = jiraOptionalField("f1", "Dev TSize");
-        CimFieldInfo uatTSizeField = jiraOptionalField("f2", "UAT TSize");
-        CimFieldInfo taskTSizeField = jiraOptionalField("f5", "Task TSize");
-        CimFieldInfo useCasesField = jiraOptionalField("f3", "Use Cases");
+        JiraCreateIssue.FieldInfoMetadata devTSizeField = jiraOptionalField("f1", "Dev TSize");
+        JiraCreateIssue.FieldInfoMetadata uatTSizeField = jiraOptionalField("f2", "UAT TSize");
+        JiraCreateIssue.FieldInfoMetadata taskTSizeField = jiraOptionalField("f5", "Task TSize");
+        JiraCreateIssue.FieldInfoMetadata useCasesField = jiraOptionalField("f3", "Use Cases");
         
-        featureMetadataFields.put(devTSizeField.getId(), devTSizeField);
-        featureMetadataFields.put(uatTSizeField.getId(), uatTSizeField);
-        featureMetadataFields.put(useCasesField.getId(), useCasesField);
-        taskMetadataFields.put(taskTSizeField.getId(), taskTSizeField);
+        featureMetadataFields.put(devTSizeField.id, devTSizeField);
+        featureMetadataFields.put(uatTSizeField.id, uatTSizeField);
+        featureMetadataFields.put(useCasesField.id, useCasesField);
+        taskMetadataFields.put(taskTSizeField.id, taskTSizeField);
         
-        when(jiraFacade.getSizingFieldIds()).thenReturn(asList(devTSizeField.getId(), uatTSizeField.getId(), taskTSizeField.getId()));
-        importConfig.getSheetMap().getExtraFields().add(new ExtraField(useCasesField.getId(), "Use Cases", "H"));
+        when(jiraFacade.getSizingFieldIds()).thenReturn(asList(devTSizeField.id, uatTSizeField.id, taskTSizeField.id));
+        importConfig.getSheetMap().getExtraFields().add(new ExtraField(useCasesField.id, "Use Cases", "H"));
         
-        when(jiraFacade.createDemand(any(), eq("Blue"), any())).thenReturn(new BasicIssue(null, "PX-2", 0L));
-        when(jiraFacade.createDemand(any(), eq("Red"), any())).thenReturn(new BasicIssue(null, "PX-3", 0L));
-        when(jiraFacade.createFeature(any(), any(), any(), eq("Banana"), any(), any())).thenReturn(new BasicIssue(null, "PX-15", 0L));
-        when(jiraFacade.createFeature(any(), any(), any(), eq("Lemon"), any(), any())).thenReturn(new BasicIssue(null, "PX-16", 0L));
-        when(jiraFacade.createFeature(any(), any(), any(), eq("Grape"), any(), any())).thenReturn(new BasicIssue(null, "PX-17", 0L));
+        when(jiraFacade.createDemand(any(), eq("Blue"), any())).thenReturn(new JiraIssue("PX-2"));
+        when(jiraFacade.createDemand(any(), eq("Red"), any())).thenReturn(new JiraIssue("PX-3"));
+        when(jiraFacade.createFeature(any(), any(), any(), eq("Banana"), any(), any())).thenReturn(new JiraIssue("PX-15"));
+        when(jiraFacade.createFeature(any(), any(), any(), eq("Lemon"), any(), any())).thenReturn(new JiraIssue("PX-16"));
+        when(jiraFacade.createFeature(any(), any(), any(), eq("Grape"), any(), any())).thenReturn(new JiraIssue("PX-17"));
         
         SheetColumn devTSizeCol = new SheetColumn(new SheetColumnDefinition("Dev TSize", new ColumnTag(SIZING_FIELD_ID_TAG, "f1")), "E");
         SheetColumn uatTSizeCol = new SheetColumn(new SheetColumnDefinition("UAT TSize", new ColumnTag(SIZING_FIELD_ID_TAG, "f2")), "F");
@@ -300,14 +298,14 @@ public class SizingImporterTest {
 
     @Test
     public void importLineWithUnsupportedFields() {
-        CimFieldInfo devTSizeField = jiraOptionalField("f1", "Dev TSize");
-        CimFieldInfo uatTSizeField = jiraOptionalField("f2", "UAT TSize");
+        JiraCreateIssue.FieldInfoMetadata devTSizeField = jiraOptionalField("f1", "Dev TSize");
+        JiraCreateIssue.FieldInfoMetadata uatTSizeField = jiraOptionalField("f2", "UAT TSize");
         
-        featureMetadataFields.put(devTSizeField.getId(), devTSizeField);
+        featureMetadataFields.put(devTSizeField.id, devTSizeField);
         
-        when(jiraFacade.getSizingFieldIds()).thenReturn(asList(devTSizeField.getId(), uatTSizeField.getId()));
-        when(jiraFacade.createDemand(any(), eq("Blue"), any())).thenReturn(new BasicIssue(null, "PX-1", 0L));
-        when(jiraFacade.createFeature(any(), any(), any(), eq("Banana"), any(), any())).thenReturn(new BasicIssue(null, "PX-15", 0L));
+        when(jiraFacade.getSizingFieldIds()).thenReturn(asList(devTSizeField.id, uatTSizeField.id));
+        when(jiraFacade.createDemand(any(), eq("Blue"), any())).thenReturn(new JiraIssue("PX-1"));
+        when(jiraFacade.createFeature(any(), any(), any(), eq("Banana"), any(), any())).thenReturn(new JiraIssue("PX-15"));
         
         SheetColumn devTSizeCol = new SheetColumn(new SheetColumnDefinition("Dev TSize", new ColumnTag(SIZING_FIELD_ID_TAG, "f1")), "E");
         SheetColumn uatTSizeCol = new SheetColumn(new SheetColumnDefinition("UAT TSize", new ColumnTag(SIZING_FIELD_ID_TAG, "f2")), "F");
@@ -339,9 +337,9 @@ public class SizingImporterTest {
     @Test
     public void importUsingAlreadyCreatedVersion() {
         when(jiraFacade.getProject("PY")).thenReturn(jiraProject("PY", "Project Y", asList(jiraVersion("Two"))));
-        when(jiraFacade.createDemand(any(), eq("Blue"), any())).thenReturn(new BasicIssue(null, "PY-1", 0L));
-        when(jiraFacade.createFeature(any(), any(), any(), eq("Banana"), any(), any())).thenReturn(new BasicIssue(null, "PY-15", 0L));
-        when(jiraFacade.requestFeatureTypes("PY")).thenReturn(asList(new CimIssueType(null, FEATURE_TYPE_ID, "Feature", false, null, null, emptyMap())));
+        when(jiraFacade.createDemand(any(), eq("Blue"), any())).thenReturn(new JiraIssue("PY-1"));
+        when(jiraFacade.createFeature(any(), any(), any(), eq("Banana"), any(), any())).thenReturn(new JiraIssue("PY-15"));
+        when(jiraFacade.requestFeatureTypes("PY")).thenReturn(asList(new JiraCreateIssue.IssueTypeMetadata(FEATURE_TYPE_ID, "Feature", false, emptyMap())));
 
         List<SizingImportLine> lines = asList(
                 new SizingImportLine(0, asList(
@@ -364,10 +362,10 @@ public class SizingImporterTest {
 
     @Test
     public void recoverDemandFromPreviouslyImportedFeature() {
-        Issue bananaIssue = mock(Issue.class);
+        JiraIssueDto bananaIssue = mock(JiraIssueDto.class);
         when(jiraFacade.getIssue("PX-10")).thenReturn(bananaIssue);
         when(jiraFacade.getDemandKeyGivenFeature(bananaIssue)).thenReturn(Optional.of("PX-1"));
-        when(jiraFacade.createFeature(any(), any(), any(), eq("Lemon"), any(), any())).thenReturn(new BasicIssue(null, "PX-15", 0L));
+        when(jiraFacade.createFeature(any(), any(), any(), eq("Lemon"), any(), any())).thenReturn(new JiraIssue("PX-15"));
 
         List<SizingImportLine> lines = asList(
                 new SizingImportLine(0, asList(
@@ -395,24 +393,24 @@ public class SizingImporterTest {
         verify(jiraFacade).createFeature(PROJECT_X_KEY, "PX-1", FEATURE_TYPE_ID, "Lemon", VERSION_ONE, emptyList());
     }
 
-    private static Project jiraProject(String key, String name, List<Version> versions) {
-        return new Project(emptyList(), null, key, 0L, name, null, null, null, versions, null, null, null);
+    private static JiraProject jiraProject(String key, String name, List<Version> versions) {
+        return new JiraProject("0", key, versions, name);
     }
     
-    private static Project jiraProject(String key, String name) {
+    private static JiraProject jiraProject(String key, String name) {
         return jiraProject(key, name, emptyList());
     }
 
-    private static CimFieldInfo jiraRequiredField(String id, String name) {
-        return new CimFieldInfo(id, true, name, null, null, null, null);
+    private static JiraCreateIssue.FieldInfoMetadata jiraRequiredField(String id, String name) {
+        return new JiraCreateIssue.FieldInfoMetadata(id, true, name);
     }
     
-    private static CimFieldInfo jiraOptionalField(String id, String name) {
-        return new CimFieldInfo(id, false, name, null, null, null, null);
+    private static JiraCreateIssue.FieldInfoMetadata jiraOptionalField(String id, String name) {
+        return new JiraCreateIssue.FieldInfoMetadata(id, false, name);
     }
     
     private static Version jiraVersion(String name) {
-        return new Version(null, 0L, name, null, false, false, null);
+        return new Version("0", name);
     }
     
     private void verifyJiraFacadeNeverCreateItems() {

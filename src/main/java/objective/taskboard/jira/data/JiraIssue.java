@@ -1,18 +1,20 @@
 package objective.taskboard.jira.data;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonMap;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import com.google.common.collect.Maps;
+
 import retrofit.client.Response;
 import retrofit.http.Body;
 import retrofit.http.POST;
 import retrofit.http.PUT;
 import retrofit.http.Path;
-
-import java.util.Collection;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonMap;
 
 public class JiraIssue {
 
@@ -30,6 +32,9 @@ public class JiraIssue {
 
         @PUT("/rest/api/latest/issue/{id}")
         Response update(@Path("id") String id, @Body Input input);
+
+        @POST("/rest/api/latest/issueLink")
+        Response linkIssue(@Body LinkInput input);
     }
 
     public static class Input {
@@ -38,11 +43,9 @@ public class JiraIssue {
             return new InputBuilder();
         }
 
-        public final String summary;
         public final Map<String, Object> fields;
 
-        public Input(String summary, Map<String, Object> fields) {
-            this.summary = summary;
+        public Input(Map<String, Object> fields) {
             this.fields = fields;
         }
     }
@@ -51,20 +54,14 @@ public class JiraIssue {
 
         private InputBuilder() {}
 
-        protected String summary;
         protected final Map<String, Object> fields = Maps.newLinkedHashMap();
-
-        public InputBuilder summary(String summary) {
-            this.summary = summary;
-            return this;
-        }
 
         public FieldBuilder field(String field) {
             return new FieldBuilder(this, field);
         }
 
         public Input build() {
-            return new Input(summary, fields);
+            return new Input(fields);
         }
     }
 
@@ -83,6 +80,11 @@ public class JiraIssue {
 
         public InputBuilder byId(String id) {
             builder.fields.put(field, singletonMap("id", id));
+            return builder;
+        }
+
+        public InputBuilder byIds(String... ids) {
+            builder.fields.put(field, Arrays.stream(ids).map(id -> singletonMap("id", id)));
             return builder;
         }
 
@@ -107,9 +109,56 @@ public class JiraIssue {
             return builder;
         }
 
-        public InputBuilder value(Object value) {
+        public InputBuilder byValue(String value) {
+            builder.fields.put(field, singletonMap("value", value));
+            return builder;
+        }
+
+        public InputBuilder set(Object value) {
             builder.fields.put(field, value);
             return builder;
+        }
+    }
+
+    public static class LinkInput {
+
+        public final Object type;
+        public final Object inwardIssue;
+        public final Object outwardIssue;
+
+        public static LinkInputBuilder builder() {
+            return new LinkInputBuilder();
+        }
+
+        public LinkInput(Object type, Object inward, Object outward) {
+            this.type = type;
+            this.inwardIssue = inward;
+            this.outwardIssue = outward;
+        }
+    }
+
+    public static class LinkInputBuilder {
+        private String type;
+        private String fromIssueKey;
+        private String toIssueKey;
+
+        public LinkInputBuilder type(String type) {
+            this.type = type;
+            return this;
+        }
+
+        public LinkInputBuilder from(String issueKey) {
+            this.fromIssueKey = issueKey;
+            return this;
+        }
+
+        public LinkInputBuilder to(String issueKey) {
+            this.toIssueKey = issueKey;
+            return this;
+        }
+
+        public LinkInput build() {
+            return new LinkInput(singletonMap("name", type), singletonMap("key", fromIssueKey), singletonMap("key", toIssueKey));
         }
     }
 }

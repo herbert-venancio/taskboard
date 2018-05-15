@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class JiraLinkDto {
     @JsonProperty
-    private LinkedIssueType type;
+    private JiraLinkTypeDto type;
     
     @JsonProperty
     private LinkedIssue inwardIssue;
@@ -36,22 +36,14 @@ public class JiraLinkDto {
     }
 
     private JiraIssueLinkTypeDto.Direction determineDirection() {
-        if (inwardIssue != null)
-            return JiraIssueLinkTypeDto.Direction.INBOUND;
-        
-        return JiraIssueLinkTypeDto.Direction.OUTBOUND;
+        return inwardIssue != null
+                ? JiraIssueLinkTypeDto.Direction.INBOUND
+                : JiraIssueLinkTypeDto.Direction.OUTBOUND;
     }    
 
     @JsonIgnoreProperties(ignoreUnknown=true)
     public static class LinkedIssue {
         public String key;
         public JiraIssueDtoFields fields;
-    }
-    
-    @JsonIgnoreProperties(ignoreUnknown=true)
-    public static class LinkedIssueType {
-        public String name;
-        public String inward;
-        public String outward;
     }
 }

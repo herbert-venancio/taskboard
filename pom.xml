@@ -18,7 +18,6 @@
 		<javax.servlet.version>3.1.0</javax.servlet.version>
 		<selenium.version>3.4.0</selenium.version>
 		<jackson.version>2.9.4</jackson.version>
-		<jira.api.version>4.0.1-OBJ</jira.api.version>
 		<sonar.sources>src/main/java,src/main/resources/static</sonar.sources>
 		<sonar.exclusions>src/main/resources/static/bower_components/**,src/main/resources/static/scripts/3rd/**</sonar.exclusions>
 		<sonar.junit.reportsPaths>${project.build.directory}/combined-reports</sonar.junit.reportsPaths>
@@ -521,33 +520,10 @@
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 		</dependency>
-		<!-- JIRA REST CLIENT -->
 		<dependency>
-			<groupId>com.atlassian.jira</groupId>
-			<artifactId>jira-rest-java-client-core</artifactId>
-			<version>${jira.api.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.google.guava</groupId>
-					<artifactId>guava</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>com.atlassian.fugue</groupId>
-			<artifactId>fugue</artifactId>
-			<version>2.2.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.atlassian.jira</groupId>
-			<artifactId>jira-rest-java-client-api</artifactId>
-			<version>${jira.api.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.google.guava</groupId>
-					<artifactId>guava</artifactId>
-				</exclusion>
-			</exclusions>
+			<groupId>org.codehaus.jettison</groupId>
+			<artifactId>jettison</artifactId>
+			<version>1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.squareup.retrofit</groupId>

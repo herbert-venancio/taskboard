@@ -1,29 +1,22 @@
 package objective.taskboard.jira;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toMap;
 import static objective.taskboard.utils.StreamUtils.returnFirstMerger;
-import static objective.taskboard.utils.StreamUtils.streamOf;
 
 import java.time.ZoneId;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import com.atlassian.jira.rest.client.api.GetCreateIssueMetadataOptions;
-import com.atlassian.jira.rest.client.api.GetCreateIssueMetadataOptionsBuilder;
-import com.atlassian.jira.rest.client.api.domain.CimIssueType;
-import com.atlassian.jira.rest.client.api.domain.CimProject;
-import com.atlassian.jira.rest.client.api.domain.IssueType;
-import com.atlassian.jira.rest.client.api.domain.IssuelinksType;
-import com.atlassian.jira.rest.client.api.domain.Priority;
-
 import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.config.LoggedInUserKeyGenerator;
+import objective.taskboard.jira.client.JiraCreateIssue;
+import objective.taskboard.jira.client.JiraIssueTypeDto;
+import objective.taskboard.jira.client.JiraLinkTypeDto;
+import objective.taskboard.jira.client.JiraPriorityDto;
 import objective.taskboard.jira.data.JiraTimezone;
 import objective.taskboard.jira.data.Status;
 import objective.taskboard.jira.endpoint.AuthorizedJiraEndpoint;
@@ -40,17 +33,17 @@ public class MetadataCachedService {
     private JiraEndpointAsLoggedInUser jiraEndpointAsLoggedInUser;
 
     @Cacheable(CacheConfiguration.ISSUE_TYPE_METADATA)
-    public Map<Long, IssueType> getIssueTypeMetadata() {
+    public Map<Long, JiraIssueTypeDto> getIssueTypeMetadata() {
         return loadIssueTypes(jiraEndpointAsMaster);
     }
 
     @Cacheable(cacheNames=CacheConfiguration.ISSUE_TYPE_METADATA, keyGenerator=LoggedInUserKeyGenerator.NAME)
-    public Map<Long, IssueType> getIssueTypeMetadataAsLoggedInUser() {
+    public Map<Long, JiraIssueTypeDto> getIssueTypeMetadataAsLoggedInUser() {
         return loadIssueTypes(jiraEndpointAsLoggedInUser);
     }
 
     @Cacheable(CacheConfiguration.PRIORITIES_METADATA)
-    public Map<Long, Priority> getPrioritiesMetadata() {
+    public Map<Long, JiraPriorityDto> getPrioritiesMetadata() {
         return loadPriorities();
     }
 
@@ -65,12 +58,12 @@ public class MetadataCachedService {
     }
 
     @Cacheable(CacheConfiguration.ISSUE_LINKS_METADATA)
-    public Map<String, IssuelinksType> getIssueLinksMetadata() {
+    public Map<String, JiraLinkTypeDto> getIssueLinksMetadata() {
         return loadIssueLinks();
     }
 
     @Cacheable(CacheConfiguration.CREATE_ISSUE_METADATA)
-    public Map<Long, CimIssueType> getCreateIssueMetadata() {
+    public Map<Long, JiraCreateIssue.IssueTypeMetadata> getCreateIssueMetadata() {
         return loadCreateIssueMetadata();
     }
 
@@ -79,38 +72,35 @@ public class MetadataCachedService {
         return ZoneId.of(jiraEndpointAsMaster.request(JiraTimezone.Service.class).get().timeZone);
     }
 
-    private Map<Long, IssueType> loadIssueTypes(AuthorizedJiraEndpoint jiraEndpoint) {
-        Iterable<IssueType> issueTypes = jiraEndpoint.executeRequest(client -> client.getMetadataClient().getIssueTypes());
-        return newArrayList(issueTypes).stream().collect(Collectors.toMap(IssueType::getId, t -> t));
+    private Map<Long, JiraIssueTypeDto> loadIssueTypes(AuthorizedJiraEndpoint jiraEndpoint) {
+        return jiraEndpoint.request(JiraIssueTypeDto.Service.class).all()
+                .stream()
+                .collect(toMap(JiraIssueTypeDto::getId, t -> t));
     }
 
-    private Map<Long, Priority> loadPriorities() {
-        Iterable<Priority> priorities = jiraEndpointAsMaster.executeRequest(client -> client.getMetadataClient().getPriorities());
-        return newArrayList(priorities).stream().collect(Collectors.toMap(Priority::getId, t -> t));
+    private Map<Long, JiraPriorityDto> loadPriorities() {
+        return jiraEndpointAsMaster.request(JiraPriorityDto.Service.class).all()
+                .stream()
+                .collect(toMap(JiraPriorityDto::getId, t -> t));
     }
 
     private Map<Long, Status> loadStatuses(AuthorizedJiraEndpoint jiraEndpoint) {
         return jiraEndpoint.request(Status.Service.class).all()
                 .stream()
-                .collect(Collectors.toMap(t -> t.id, t -> t));
+                .collect(toMap(t -> t.id, t -> t));
     }
 
-    private Map<Long, CimIssueType> loadCreateIssueMetadata() {
-        GetCreateIssueMetadataOptions options = new GetCreateIssueMetadataOptionsBuilder()
-                .withExpandedIssueTypesFields()
-                .build();
-
-        Iterable<CimProject> projects = jiraEndpointAsMaster
-                .executeRequest(client -> client.getIssueClient().getCreateIssueMetadata(options));
-
-        return streamOf(projects)
-                .flatMap(p -> streamOf(p.getIssueTypes()))
-                .collect(toMap(CimIssueType::getId, Function.identity(), returnFirstMerger()));
+    private Map<Long, JiraCreateIssue.IssueTypeMetadata> loadCreateIssueMetadata() {
+        return jiraEndpointAsMaster.request(JiraCreateIssue.Service.class).all()
+                .projects.stream()
+                .flatMap(p -> p.issueTypes.stream())
+                .collect(toMap(issueType -> issueType.id, Function.identity(), returnFirstMerger()));
     }
 
-    private Map<String, IssuelinksType> loadIssueLinks() {
-        Iterable<IssuelinksType> links = jiraEndpointAsMaster.executeRequest(client -> client.getMetadataClient().getIssueLinkTypes());
-        return newArrayList(links).stream().collect(Collectors.toMap(IssuelinksType::getId, l -> l));
+    private Map<String, JiraLinkTypeDto> loadIssueLinks() {
+        return jiraEndpointAsMaster.request(JiraLinkTypeDto.Service.class).all()
+                .issueLinkTypes.stream()
+                .collect(toMap(l -> l.id, l -> l));
     }
 
 }

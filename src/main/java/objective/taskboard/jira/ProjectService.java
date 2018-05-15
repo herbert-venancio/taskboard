@@ -38,12 +38,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.atlassian.jira.rest.client.api.domain.CimProject;
-
 import objective.taskboard.auth.Authorizer;
 import objective.taskboard.domain.Project;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.jira.data.JiraProject;
+import objective.taskboard.jira.client.JiraCreateIssue;
 import objective.taskboard.jira.data.Version;
 import objective.taskboard.project.ProjectBaselineProvider;
 import objective.taskboard.project.ProjectProfileItem;
@@ -118,15 +117,11 @@ public class ProjectService {
                 .collect(toList());
     }
 
-    public Optional<CimProject> getProjectMetadata(String projectKey) {
+    public Optional<JiraCreateIssue.ProjectMetadata> getProjectMetadata(String projectKey) {
         if (!isNonArchivedAndUserHasAccess(projectKey))
             return Optional.empty();
 
-        Iterable<CimProject> projects = jiraProjectService.getCreateIssueMetadata(projectKey);
-
-        return projects.iterator().hasNext() ?
-                Optional.of(projects.iterator().next()) :
-                Optional.empty();
+        return jiraProjectService.getCreateIssueMetadata(projectKey);
     }
 
     public boolean isNonArchivedAndUserHasAccess(String projectKey) {

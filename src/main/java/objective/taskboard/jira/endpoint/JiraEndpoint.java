@@ -28,23 +28,12 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.codec.binary.Base64;
-import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
-import com.atlassian.jira.rest.client.api.JiraRestClient;
-import com.atlassian.jira.rest.client.api.RestClientException;
-import com.atlassian.util.concurrent.Promise;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.squareup.okhttp.Credentials;
@@ -53,9 +42,7 @@ import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Response;
 
 import objective.taskboard.config.converter.TaskboardJacksonModule;
-import objective.taskboard.jira.JiraClientFactory;
 import objective.taskboard.jira.JiraProperties;
-import objective.taskboard.jira.JiraServiceException;
 import retrofit.RestAdapter;
 import retrofit.client.OkClient;
 import retrofit.converter.JacksonConverter;
@@ -67,35 +54,6 @@ public class JiraEndpoint {
 
     @Autowired 
     private JiraProperties jiraProperties;
-
-    /**
-     * @throws JiraServiceException
-     * @throws RuntimeException
-     */
-    public <T> T executeRequest(String username, String password, Request<T> request) {
-        JiraRestClient client = getClient(username, password);
-
-        try {
-            return request.execute(client).claim();
-
-        } catch (RestClientException e) {
-            throw new JiraServiceException(e);
-
-        } finally {
-            closeClient(client);
-        }
-    }
-
-    private JiraRestClient getClient(String username, String password) {
-        JiraClientFactory jiraClient = new JiraClientFactory();
-        return jiraClient.getInstance(jiraProperties.getUrl(), username, password);
-    }
-
-    private void closeClient(JiraRestClient client) {
-        try {
-            client.close();
-        } catch (Exception e) { log.debug("Error when trying to close client. Ignored" ,e);}
-    }
 
     public <S> S request(Class<S> service, String username, String password) {
         OkHttpClient client = new OkHttpClient();
@@ -168,37 +126,5 @@ public class JiraEndpoint {
             log.error("Error reading bytes from url: " + e.getMessage());
             throw new IllegalStateException(e);
         }
-    }
-
-    public String postWithRestTemplate(String username, String password, String path, MediaType mediaType, JSONObject jsonRequest) {
-        RestTemplate restTemplate = new RestTemplate();
-        HttpEntity<String> request = new HttpEntity<>(jsonRequest.toString(), getAuthorizationRequestHeader(username, password, mediaType));
-        String url = jiraProperties.getUrl() + path;
-        setConnectionTimeout(restTemplate);
-        return restTemplate.postForObject(url, request, String.class);
-    }
-
-    public void setConnectionTimeout(RestTemplate restTemplate) {
-        ClientHttpRequestFactory rf = restTemplate.getRequestFactory();
-        if (rf instanceof SimpleClientHttpRequestFactory) {
-            SimpleClientHttpRequestFactory httprf = (SimpleClientHttpRequestFactory)rf;
-            httprf.setReadTimeout((int) TimeUnit.SECONDS.toMillis(60));
-            httprf.setConnectTimeout((int) TimeUnit.SECONDS.toMillis(60));
-            
-            return;
-        }
-        throw new IllegalStateException("SimpleClientHttpRequestFactory of unsupported type " + rf.getClass());
-    }
-
-    private HttpHeaders getAuthorizationRequestHeader(String username, String password, MediaType mediaType) {
-        HttpHeaders headers = new HttpHeaders();
-        String userAndPass = username + ":" + password;
-        headers.add("Authorization", "Basic " + new String(Base64.encodeBase64((userAndPass).getBytes())));
-        headers.setContentType(mediaType);
-        return headers;
-    }
-
-    public interface Request<T> {
-        Promise<T> execute(JiraRestClient client);
     }
 }

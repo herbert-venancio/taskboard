@@ -9,8 +9,6 @@ import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.atlassian.jira.rest.client.api.domain.IssueType;
-
 import objective.taskboard.data.CardFieldFilter;
 import objective.taskboard.data.CardFieldFilter.FieldSelector;
 import objective.taskboard.data.FilterFieldValue;
@@ -18,6 +16,7 @@ import objective.taskboard.data.Team;
 import objective.taskboard.domain.Project;
 import objective.taskboard.issueTypeVisibility.IssueTypeVisibilityService;
 import objective.taskboard.jira.ProjectService;
+import objective.taskboard.jira.client.JiraIssueTypeDto;
 import objective.taskboard.team.UserTeamService;
 
 @Service
@@ -39,7 +38,7 @@ class CardFieldFilterProvider {
     }
 
     public List<CardFieldFilter> getDefaultList() {
-        List<IssueType> visibleIssueTypes = issueTypeVisibilityService.getVisibleIssueTypes();
+        List<JiraIssueTypeDto> visibleIssueTypes = issueTypeVisibilityService.getVisibleIssueTypes();
         Set<Team> teamsVisibleToUser = userTeamService.getTeamsVisibleToLoggedInUser();
         List<Project> nonArchivedJiraProjectsForUser = projectService.getNonArchivedJiraProjectsForUser();
 
@@ -50,7 +49,7 @@ class CardFieldFilterProvider {
             ).sorted(this::compareFilter).collect(toList());
     }
 
-    private List<FilterFieldValue> getIssueTypeItems(List<IssueType> visibleIssueTypes) {
+    private List<FilterFieldValue> getIssueTypeItems(List<JiraIssueTypeDto> visibleIssueTypes) {
         return visibleIssueTypes.stream()
                 .map(t -> new FilterFieldValue(t.getName(), t.getId().toString(), t.getIconUri(), true))
                 .sorted(this::compareFilter)

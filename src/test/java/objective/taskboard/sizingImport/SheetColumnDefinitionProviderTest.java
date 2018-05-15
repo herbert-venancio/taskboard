@@ -17,9 +17,7 @@ import java.util.stream.Stream;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.atlassian.jira.rest.client.api.domain.CimFieldInfo;
-import com.atlassian.jira.rest.client.api.domain.CimIssueType;
-
+import objective.taskboard.jira.client.JiraCreateIssue;
 import objective.taskboard.sizingImport.SizingImportConfig.SheetMap.DefaultColumn;
 import objective.taskboard.sizingImport.SizingImportConfig.SheetMap.ExtraField;
 
@@ -73,12 +71,12 @@ public class SheetColumnDefinitionProviderTest {
     
     @Test
     public void getDynamicColumns() {
-        CimFieldInfo featureTSizeField  = new CimFieldInfo("cf_2", true,  "Feature TSize", null, null, null, null);
-        CimFieldInfo uxTSizeField       = new CimFieldInfo("cf_3", false, "UX TSize",      null, null, null, null);
-        CimFieldInfo useCasesField      = new CimFieldInfo("cf_4", false, "Use Cases",     null, null, null, null);
-        CimFieldInfo taskTSizeField     = new CimFieldInfo("cf_5", false, "Task TSize",      null, null, null, null);
+        JiraCreateIssue.FieldInfoMetadata featureTSizeField  = new JiraCreateIssue.FieldInfoMetadata("cf_2", true,  "Feature TSize");
+        JiraCreateIssue.FieldInfoMetadata uxTSizeField       = new JiraCreateIssue.FieldInfoMetadata("cf_3", false, "UX TSize");
+        JiraCreateIssue.FieldInfoMetadata useCasesField      = new JiraCreateIssue.FieldInfoMetadata("cf_4", false, "Use Cases");
+        JiraCreateIssue.FieldInfoMetadata taskTSizeField     = new JiraCreateIssue.FieldInfoMetadata("cf_5", false, "Task TSize");
         
-        when(jiraFacade.getSizingFieldIds()).thenReturn(asList(featureTSizeField.getId(), uxTSizeField.getId(), taskTSizeField.getId()));
+        when(jiraFacade.getSizingFieldIds()).thenReturn(asList(featureTSizeField.id, uxTSizeField.id, taskTSizeField.id));
         
         when(jiraFacade.requestFeatureTypes("PX")).thenReturn(asList(
                 issueType(1L, "Feature", featureTSizeField, uxTSizeField, useCasesField),
@@ -105,8 +103,8 @@ public class SheetColumnDefinitionProviderTest {
         assertFalse(mappingDefinition.getDefaultColumnLetter().isPresent());
     }
     
-    private static CimIssueType issueType(Long id, String name, CimFieldInfo... fields) {
-        Map<String, CimFieldInfo> fieldsMap = Stream.of(fields).collect(toMap(CimFieldInfo::getId, Function.identity()));
-        return new CimIssueType(null, id, name, false, null, null, fieldsMap);
+    private static JiraCreateIssue.IssueTypeMetadata issueType(Long id, String name, JiraCreateIssue.FieldInfoMetadata... fields) {
+        Map<String, JiraCreateIssue.FieldInfoMetadata> fieldsMap = Stream.of(fields).collect(toMap(f -> f.id, Function.identity()));
+        return new JiraCreateIssue.IssueTypeMetadata(id, name, false, fieldsMap);
     }
 }

@@ -5,7 +5,7 @@ import static objective.taskboard.followup.FollowUpTransitionsDataProvider.TYPE_
 import static objective.taskboard.followup.FollowUpTransitionsDataProvider.TYPE_FEATURES;
 import static objective.taskboard.followup.FollowUpTransitionsDataProvider.TYPE_SUBTASKS;
 import static objective.taskboard.utils.StreamUtils.toLinkedHashSet;
-import static org.apache.commons.lang.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 import java.time.ZoneId;
 import java.util.Comparator;
@@ -22,10 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.atlassian.jira.rest.client.api.domain.CimFieldInfo;
-import com.atlassian.jira.rest.client.api.domain.CimIssueType;
-import com.atlassian.jira.rest.client.api.domain.IssueType;
-
 import objective.taskboard.Constants;
 import objective.taskboard.data.Issue;
 import objective.taskboard.followup.cluster.FollowupCluster;
@@ -34,6 +30,7 @@ import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraProperties.BallparkMapping;
 import objective.taskboard.jira.MetadataService;
+import objective.taskboard.jira.client.JiraCreateIssue;
 
 @Component
 public class FollowUpDataGenerator {
@@ -121,9 +118,9 @@ public class FollowUpDataGenerator {
         }
 
         private Map<String, Set<String>> collectExtraFieldsHeaders() {
-            final Predicate<CimIssueType> filterBySubtask = IssueType::isSubtask;
-            final Predicate<CimIssueType> filterByDemand = t -> jiraProperties.getIssuetype().getDemand().getId() == t.getId();
-            final Predicate<CimIssueType> filterByFeature = t -> !filterBySubtask.test(t) && !filterByDemand.test(t);
+            final Predicate<JiraCreateIssue.IssueTypeMetadata> filterBySubtask = t -> t.subtask;
+            final Predicate<JiraCreateIssue.IssueTypeMetadata> filterByDemand = t -> jiraProperties.getIssuetype().getDemand().getId() == t.id;
+            final Predicate<JiraCreateIssue.IssueTypeMetadata> filterByFeature = t -> !filterBySubtask.test(t) && !filterByDemand.test(t);
 
             final Map<String, Set<String>> extraFieldsHeaders = new LinkedHashMap<>();
             extraFieldsHeaders.put(TYPE_DEMAND, collectExtraFieldsHeaders(filterByDemand));
@@ -133,15 +130,15 @@ public class FollowUpDataGenerator {
             return extraFieldsHeaders;
         }
 
-        private Set<String> collectExtraFieldsHeaders(Predicate<CimIssueType> featureTypeFilter) {
+        private Set<String> collectExtraFieldsHeaders(Predicate<JiraCreateIssue.IssueTypeMetadata> featureTypeFilter) {
             final List<String> fields = jiraProperties.getExtraFields().getFieldIds();
             if(fields.isEmpty())
                 return emptySet();
 
             return metadataService.getCreateIssueMetadata().values().stream()
                     .filter(featureTypeFilter)
-                    .flatMap(t -> t.getFields().values().stream()
-                            .map(CimFieldInfo::getId)
+                    .flatMap(t -> t.getFields().stream()
+                            .map(f -> f.id)
                             .filter(fields::contains))
                     .collect(toLinkedHashSet());
         }
@@ -199,7 +196,7 @@ public class FollowUpDataGenerator {
             Iterator<Issue> it = issues.iterator();
             while(it.hasNext()) {
                 Issue issue = it.next();
-                
+
                 Issue feature = featuresByKey.get(issue.getParent());
                 if (feature == null)
                     continue;

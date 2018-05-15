@@ -1,7 +1,7 @@
 package objective.taskboard.jira.client;
 
 public class JiraIssueLinkTypeDto {
-    public static enum Direction {
+    public enum Direction {
         OUTBOUND,
         INBOUND
     }

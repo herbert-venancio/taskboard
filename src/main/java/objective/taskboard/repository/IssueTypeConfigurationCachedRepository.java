@@ -20,6 +20,7 @@
  */
 package objective.taskboard.repository;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -28,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 
 import objective.taskboard.domain.IssueTypeConfiguration;
 
@@ -38,7 +38,7 @@ public class IssueTypeConfigurationCachedRepository {
     @Autowired
     private IssueTypeConfigurationRepository issueTypeConfigurationRepository;
 
-    private List<IssueTypeConfiguration> cache = Lists.newArrayList();
+    private List<IssueTypeConfiguration> cache = Collections.emptyList();
 
     @PostConstruct
     private void load() {

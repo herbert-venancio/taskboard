@@ -32,10 +32,10 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.apache.commons.lang.ObjectUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
@@ -209,14 +209,14 @@ public abstract class AbstractUiFragment {
 
         waitUntil(new ExpectedCondition<Boolean>() {
             private String actual;
-            
+
             @Override
             public Boolean apply(WebDriver driver) {
                 actual = element.findElements(By.cssSelector("paper-item[aria-selected='true']")).stream()
                         .map(i -> i.getAttribute("textContent").trim())
                         .findFirst()
                         .orElse("<not-selected>");
-                
+
                 return actual.equals(expected);
             }
 
@@ -249,7 +249,7 @@ public abstract class AbstractUiFragment {
 
     protected WebElement getPaperDropdownMenuItemByText(WebElement dropDownMenu, String itemText) {
         WebElement menuItem = dropDownMenu.findElements(By.tagName("paper-item")).stream()
-                .filter(paperItem -> ObjectUtils.equals(itemText, paperItem.getText().trim()))
+                .filter(paperItem -> Objects.equals(itemText, paperItem.getText().trim()))
                 .findFirst().orElse(null);
 
         if (menuItem == null)
@@ -261,7 +261,7 @@ public abstract class AbstractUiFragment {
     protected void waitUntilPaperCheckboxSelectionStateToBe(WebElement element, Boolean selected) {
         waitUntil(attributeToBe(element, "aria-checked", String.valueOf(selected)));
     }
-    
+
     protected void selectPaperDropdownItem(WebElement dropdown, String itemText) {
         waitForClick(dropdown);
         WebElement dateElement = getPaperDropdownMenuItemByText(dropdown, itemText);

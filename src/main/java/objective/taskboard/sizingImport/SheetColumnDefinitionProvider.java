@@ -16,10 +16,8 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.atlassian.jira.rest.client.api.domain.CimFieldInfo;
-import com.atlassian.jira.rest.client.api.domain.CimIssueType;
-
 import objective.taskboard.google.SpreadsheetUtils;
+import objective.taskboard.jira.client.JiraCreateIssue;
 import objective.taskboard.sizingImport.SheetColumnDefinition.ColumnTag;
 import objective.taskboard.sizingImport.SheetColumnDefinition.PreviewBehavior;
 import objective.taskboard.sizingImport.SizingImportConfig.SheetMap.DefaultColumn;
@@ -77,19 +75,19 @@ class SheetColumnDefinitionProvider {
     }
     
     public List<DynamicMappingDefinition> getDynamicMappings(String projectKey) {
-        List<CimFieldInfo> sizingFields = getConfiguredSizingFields(projectKey);
+        List<JiraCreateIssue.FieldInfoMetadata> sizingFields = getConfiguredSizingFields(projectKey);
 
         List<DefaultColumn> defaultColumns = importConfig.getSheetMap().getDefaultColumns();
         Map<String, String> defaultColumnByFieldId = defaultColumns.stream().collect(toMap(DefaultColumn::getFieldId, DefaultColumn::getColumn));
 
         return sizingFields.stream()
                 .map(fieldInfo -> {
-                    ColumnTag sizingFieldTag = new ColumnTag(SIZING_FIELD_ID_TAG, fieldInfo.getId());
-                    SheetColumnDefinition columnDefinition = new SheetColumnDefinition(fieldInfo.getName(), sizingFieldTag);
+                    ColumnTag sizingFieldTag = new ColumnTag(SIZING_FIELD_ID_TAG, fieldInfo.id);
+                    SheetColumnDefinition columnDefinition = new SheetColumnDefinition(fieldInfo.name, sizingFieldTag);
 
-                    String columnId = "sizing:" + fieldInfo.getId();
-                    Optional<String> defaultColumnLetter = Optional.ofNullable(defaultColumnByFieldId.get(fieldInfo.getId()));
-                    boolean mappingRequired = fieldInfo.isRequired();
+                    String columnId = "sizing:" + fieldInfo.id;
+                    Optional<String> defaultColumnLetter = Optional.ofNullable(defaultColumnByFieldId.get(fieldInfo.id));
+                    boolean mappingRequired = fieldInfo.required;
 
                     return new DynamicMappingDefinition(columnDefinition, columnId, mappingRequired, defaultColumnLetter);
                 })
@@ -97,15 +95,15 @@ class SheetColumnDefinitionProvider {
                 .collect(toList());
     }
 
-    private List<CimFieldInfo> getConfiguredSizingFields(String projectKey) {
-        List<CimIssueType> featureTypes = jiraFacade.requestFeatureTypes(projectKey);
+    private List<JiraCreateIssue.FieldInfoMetadata> getConfiguredSizingFields(String projectKey) {
+        List<JiraCreateIssue.IssueTypeMetadata> featureTypes = jiraFacade.requestFeatureTypes(projectKey);
         List<String> configuredSizingFieldIds = jiraFacade.getSizingFieldIds();
 
         return featureTypes.stream()
-                .flatMap(featureType -> featureType.getFields().values().stream())
-                .filter(field -> configuredSizingFieldIds.contains(field.getId()))
-                .filter(distinctByKey(CimFieldInfo::getId))
-                .sorted(comparing(CimFieldInfo::getName))
+                .flatMap(featureType -> featureType.getFields().stream())
+                .filter(field -> configuredSizingFieldIds.contains(field.id))
+                .filter(distinctByKey(field -> field.id))
+                .sorted(comparing(field -> field.name))
                 .collect(toList());
     }
 }
