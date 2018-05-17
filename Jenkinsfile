@@ -31,11 +31,8 @@ node("single-executor") {
         try {
             stage('Build') {
                 try {
-print 'before timeout'
                     timeout(time: 20, unit: TimeUnit.MINUTES) {
-print 'before xvnc'
                         wrap([$class: 'Xvnc']) {
-print 'before mvn'
                             sh "${mvnHome}/bin/mvn --batch-mode -V -U -Dmaven.test.failure.ignore=true clean verify -P packaging-war,dev"
                         }
                     }
