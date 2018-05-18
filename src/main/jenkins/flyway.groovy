@@ -112,7 +112,7 @@ class Flyway implements Serializable {
     private waitOracleAcceptConnections() {
         script.echo "Waiting for database ready for connections..."
         try {
-            script.timeout(1) {
+            script.timeout(5) {
                 script.sh(script: $/sudo docker exec $CONTAINER_ID bash -c "until ( echo \"select 'oracle is ready' from dual;\" | /opt/oracle/product/11.2.0/dbhome_1/bin/sqlplus system/oracle@localhost:1521/orcl | grep 'oracle is ready' ); do sleep 1; done"/$
                         , returnStatus: true)
             }
