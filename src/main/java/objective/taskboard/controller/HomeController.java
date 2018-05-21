@@ -12,7 +12,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import objective.taskboard.auth.Authorizer;
-import objective.taskboard.cycletime.CycleTimeProperties;
 import objective.taskboard.cycletime.HolidayService;
 import objective.taskboard.data.Team;
 import objective.taskboard.data.User;
@@ -36,9 +35,6 @@ public class HomeController {
     private JiraProperties jiraPropeties;
 
     @Autowired
-    private CycleTimeProperties cycleTimePropeties;
-    
-    @Autowired
     private GoogleApiConfig googleApiConfig;
 
     @Autowired
@@ -59,8 +55,6 @@ public class HomeController {
         model.addAttribute("jiraStatusesCompletedIds", serialize(jiraPropeties.getStatusesCompletedIds()));
         model.addAttribute("jiraStatusesCanceledIds", serialize(jiraPropeties.getStatusesCanceledIds()));
         model.addAttribute("jiraTransitionsWithRequiredCommentNames", serialize(jiraPropeties.getTransitionsWithRequiredCommentNames()));
-        model.addAttribute("cycleTimeStartBusinessHours", serialize(cycleTimePropeties.getStartBusinessHours()));
-        model.addAttribute("cycleTimeEndBusinessHours", serialize(cycleTimePropeties.getEndBusinessHours()));
         model.addAttribute("holidays", serialize(holidayService.getHolidays()));
         model.addAttribute("googleClientId", googleApiConfig.getClientId());
         model.addAttribute("permissions", serialize(authorizer.getProjectsPermission()));

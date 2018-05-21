@@ -1,6 +1,7 @@
 package objective.taskboard.data;
 
 import java.io.Serializable;
+import java.util.Optional;
 
 import objective.taskboard.jira.client.JiraTimeTrackingDto;
 
@@ -25,14 +26,14 @@ public class TaskboardTimeTracking implements Serializable {
         return new TaskboardTimeTracking(tt.getOriginalEstimateMinutes(), tt.getTimeSpentMinutes());
     }
 
-    public Integer getOriginalEstimateMinutes() {
-        return originalEstimateMinutes;
+    public Optional<Integer> getOriginalEstimateMinutes() {
+        return Optional.ofNullable(originalEstimateMinutes);
     }
     public void setOriginalEstimateMinutes(Integer originalEstimateMinutes) {
         this.originalEstimateMinutes = originalEstimateMinutes;
     }
-    public Integer getTimeSpentMinutes() {
-        return timeSpentMinutes;
+    public Optional<Integer> getTimeSpentMinutes() {
+        return Optional.ofNullable(timeSpentMinutes);
     }
     public void setTimeSpentMinutes(Integer timeSpentMinutes) {
         this.timeSpentMinutes = timeSpentMinutes;

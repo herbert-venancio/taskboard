@@ -219,7 +219,7 @@ public abstract class AbstractFollowUpDataProviderTest {
         when(jiraProperties.getStatusesCanceledIds()).thenReturn(asList(10101L));
         when(jiraProperties.getStatusesDeferredIds()).thenReturn(asList(10102L));
 
-        when(cycleTime.getCycleTime(any(), any(), anyLong())).thenReturn(1D);
+        when(cycleTime.getCycleTime(any(), any(), anyLong())).thenReturn(Optional.ofNullable(1D));
 
         projectConfiguration = new ProjectFilterConfiguration("PROJ", 1L);
 

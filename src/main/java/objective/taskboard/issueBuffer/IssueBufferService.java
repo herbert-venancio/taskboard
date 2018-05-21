@@ -295,6 +295,15 @@ public class IssueBufferService {
     public synchronized Issue getIssueByKey(String key) {
         return cardsRepo.get(key);
     }
+    
+    public synchronized Optional<Issue> getVisibleIssueByKey(String key) {
+        Issue issue = cardsRepo.get(key);
+        
+        if(!this.isAccessible(issue))
+            return Optional.empty();
+        
+        return Optional.ofNullable(issue);
+    }
 
     public synchronized List<Transition> transitions(String issueKey) {
         Issue issue = getIssueByKey(issueKey);

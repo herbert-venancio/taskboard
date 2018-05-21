@@ -118,13 +118,6 @@
                 cursor: pointer;
             }
 
-            .column-block {
-                flex: 1;
-                margin-top: 20px;
-                margin-left: 10px;
-                margin-right: 10px;
-            }
-
             .sub-content {
                 font-size: 14px;
             }
@@ -744,23 +737,6 @@
             }
         </style>
 
-        <iron-ajax id="ajaxTransitions"
-                   method="POST"
-                   url="/ws/issues/transitions"
-                   body="{{item.issueKey}}"
-                   content-type='application/json'
-                   headers='{"Content-Type": "application/json"}'
-                   last-response="{{transitions}}"></iron-ajax>
-        <iron-ajax id="ajaxTimetracking"
-                   method="POST"
-                   url="/ws/issues/timetracking"
-                   body="{{item.issueKey}}"
-                   content-type='application/json'
-                   headers='{"Content-Type": "application/json"}'
-                   last-response="{{timetracking}}"
-                   on-response="timetrackingCallback"
-                   on-error="hideTimetracking"></iron-ajax>
-
         <iron-signals on-iron-signal-issues-updated="updateIssue"></iron-signals>
         <paper-dialog id="modal" with-backdrop modal
                       entry-animation="scale-up-animation"
@@ -873,7 +849,7 @@
                                     </div>
                                 </div>
                                 <template is="dom-if" if="{{item.release}}">
-                                    <div class="column-block">
+                                    <div class="details-column">
                                         <div class="subsubtitle">Release</div>
                                         <div class="sub-content">
                                             <span>{{item.release.name}}</span>
@@ -1046,12 +1022,12 @@
                             <hr class="people--separator"/>
                             <div class="subtitle">Tracking</div>
 
-                            <template is="dom-if" if="{{_shouldShowCycleTime(item.status)}}">
+                            <template is="dom-if" if="{{_shouldShowCycleTime(cycleTime)}}">
                                 <div class="details-row">
                                     <div class="datailsColumn">
                                         <div class="subsubtitle">Cycle Time</div>
                                         <div class="sub-content">
-                                            {{item.cycletime}} days
+                                            {{cycleTime}} days
                                         </div>
                                     </div>
                                 </div>
@@ -1221,15 +1197,22 @@
                             CLOSED: 'closed'
                         }
                     },
+
                     descriptionTooLong: {
                         type: Boolean,
                         notify: true,
                         value: false
                     },
+
                     showMoreOrLess: {
                         type: String,
                         notify: true,
                         value: 'Show More'
+                    },
+
+                    cycleTime: {
+                        type: Object,
+                        notify: true
                     }
                 },
 
@@ -1451,7 +1434,7 @@
                 },
 
                 timetrackingCallback: function (timetracking) {
-                    this.timetracking = timetracking.detail.response;
+                    this.timetracking = timetracking;
                     this.shouldShowTimetracking = true;
                     this.timetrackingLabel = this.parseMinutesToHours(this.timetracking.timeSpentMinutes)
                 },
@@ -1688,8 +1671,6 @@
                 },
 
                 setCard: function(item) {
-                    var startDateStep = new Date(item.startDateStepMillis);
-                    item.cycletime = cycleTime.getCycleTime(startDateStep, new Date()).toFixed(2);
 
                     this.hasSubtasks = (typeof item.subtasks !== undefined && item.subtasks.length > 0);
                     this.canHaveSubtasks = item.feature || item.demand;
@@ -1702,8 +1683,21 @@
                     this.item = item;
                     this.blocked = this.item.blocked;
                     if(!this.isUpdating) {
-                        this.$.ajaxTimetracking.generateRequest();
-                        this.$.ajaxTransitions.generateRequest();
+                        var self = this;
+                        $.ajax({
+                            url: '/ws/issue-detail/' + self.item.issueKey + "?timezone="+ taskboard.getTimeZoneIdFromBrowser(),
+                            type: 'get',
+                            success: function (data, textStatus, jQxhr) {
+                                self.cycleTime = data.cycleTime.toFixed(2);
+                                self.transitions = data.transitions;
+                                self.timetrackingCallback(data.jiraTimeTracking);
+                            },
+                            error: function (jqXhr, textStatus, errorThrown) {
+                                self.hideTimetracking();
+                                console.error('Error during remote proccess. ' + jqXhr);
+                                self.set('errorMessage', jqXhr.responseJSON.message);
+                            }
+                        });
                     }
 
                     this._updateIssueLocalState();
@@ -1943,8 +1937,8 @@
                     e.stopPropagation();
                 },
 
-                _shouldShowCycleTime: function(status) {
-                    return !_.contains(STATUSES_COMPLETED_IDS, status);
+                _shouldShowCycleTime: function(cycleTime) {
+                    return cycleTime !== null;
                 }
             });
         })();

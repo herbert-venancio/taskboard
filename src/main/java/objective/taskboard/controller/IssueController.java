@@ -32,16 +32,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import org.codehaus.jettison.json.JSONException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.google.common.collect.Lists;
 
 import objective.taskboard.data.AspectItemFilter;
 import objective.taskboard.data.AspectSubitemFilter;
@@ -55,19 +52,14 @@ import objective.taskboard.issueBuffer.IssueBufferState;
 import objective.taskboard.issueTypeVisibility.IssueTypeVisibilityService;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraService;
-import objective.taskboard.jira.JiraService.PermissaoNegadaException;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.ProjectService;
-import objective.taskboard.jira.client.JiraTimeTrackingDto;
-import objective.taskboard.jira.data.Transition;
 import objective.taskboard.linkgraph.LinkGraphProperties;
 import objective.taskboard.team.UserTeamService;
 
 @RestController
 @RequestMapping("/ws/issues")
-public class IssueController 
-{
-    private static final Logger log = LoggerFactory.getLogger(IssueController.class);
+public class IssueController {
     
     @Autowired
     private TaskboardDatabaseService taskService;
@@ -102,8 +94,9 @@ public class IssueController
     @Autowired
     private CardStatusOrderCalculator statusOrderCalculator;
 
-    @RequestMapping(path = "/", method = RequestMethod.POST)
+    @GetMapping
     public List<CardDto> issues() {
+        
         return toCardDto(issueBufferService.getVisibleIssues());
     }
     
@@ -158,37 +151,9 @@ public class IssueController
         return toCardDto(issueBufferService.doTransition(tr.issueKey, tr.transitionId, fields));
     }
 
-    @RequestMapping(path = "transitions", method = RequestMethod.POST)
-    public List<Transition> transitions(@RequestBody String issueKey) {
-        try {
-            return issueBufferService.transitions(issueKey);
-        } catch (PermissaoNegadaException e) {
-            log.debug("Could not fetch transitions", e);
-            return Lists.newLinkedList();
-        }
-    }
-
     @RequestMapping(path = "resolutions/{transition}", method = RequestMethod.GET)
     public String resolutions(@PathVariable String transition) {
         return jiraBean.getResolutions(transition);
-    }
-
-    @RequestMapping(path = "timetracking", method = RequestMethod.POST)
-    public JiraTimeTrackingDto timetracking(@RequestBody String issueKey) throws JSONException {
-        Integer timeEstimateMinutes = 0;
-        Integer timeSpentMinutes = 0;
-
-        Issue main = issueBufferService.getIssueByKey(issueKey);
-
-        timeEstimateMinutes += main.getTimeTracking().getOriginalEstimateMinutes() != null ? main.getTimeTracking().getOriginalEstimateMinutes() : 0;
-        timeSpentMinutes += main.getTimeTracking().getTimeSpentMinutes() != null ? main.getTimeTracking().getTimeSpentMinutes() : 0;
-
-        for (Issue subTaskJira : main.getSubtaskCards()) {
-            timeEstimateMinutes += subTaskJira.getTimeTracking().getOriginalEstimateMinutes() != null ? subTaskJira.getTimeTracking().getOriginalEstimateMinutes() : 0;
-            timeSpentMinutes += subTaskJira.getTimeTracking().getTimeSpentMinutes() != null ? subTaskJira.getTimeTracking().getTimeSpentMinutes() : 0;
-        }
-
-        return new JiraTimeTrackingDto(timeEstimateMinutes, timeSpentMinutes);
     }
 
     @RequestMapping(path = "cacheState")

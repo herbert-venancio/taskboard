@@ -298,9 +298,12 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
                 return 0.0;
             if (issue.getTimeTracking() == null)
                 return 0.0;
-            if (issue.getTimeTracking().getTimeSpentMinutes() == null)
+            if (!issue.getTimeTracking().getTimeSpentMinutes().isPresent())
                 return 0.0;
-            return issue.getTimeTracking().getTimeSpentMinutes()/60.0;
+            
+            Integer minutes = issue.getTimeTracking().getTimeSpentMinutes().orElse(0);
+            
+            return toHour(minutes);
         }
 
         private Double originalEstimateInHour(Issue issue) {
@@ -308,9 +311,11 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
                 return 0.0;
             if (issue.getTimeTracking() == null)
                 return 0.0;
-            if (issue.getTimeTracking().getOriginalEstimateMinutes() == null)
+            if (!issue.getTimeTracking().getOriginalEstimateMinutes().isPresent())
                 return 0.0;
-            return issue.getTimeTracking().getOriginalEstimateMinutes()/60.0;
+            
+            Integer minutes = issue.getTimeTracking().getOriginalEstimateMinutes().orElse(0);
+            return toHour(minutes);
         }
 
         private FromJiraDataRow createBallparkFeature(Issue demand, Issue task, BallparkMapping ballparkMapping, ZoneId timezone) {
@@ -389,7 +394,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
             followUpData.subtaskCoAssignees = subtask.getCoAssignees().stream().map(c -> c.name).collect(Collectors.joining(","));
             followUpData.subtaskClassOfService = subtask.getClassOfServiceValue();
             followUpData.subtaskUpdatedDate = subtask.getUpdatedDateByTimezoneId(timezone);
-            followUpData.subtaskCycletime = subtask.getCycleTime(timezone);
+            followUpData.subtaskCycletime = subtask.getCycleTime(timezone).orElse(0D);
             followUpData.subtaskIsBlocked = subtask.isBlocked();
             followUpData.subtaskLastBlockReason = subtask.getLastBlockReason();
             followUpData.worklogs = subtask.getWorklogs();
@@ -418,7 +423,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
             followUpData.demandReporter = demand.getReporter();
             followUpData.demandCoAssignees = demand.getCoAssignees().stream().map(c -> c.name).collect(Collectors.joining(","));
             followUpData.demandClassOfService = demand.getClassOfServiceValue();
-            followUpData.demandCycletime = demand.getCycleTime(timezone);
+            followUpData.demandCycletime = demand.getCycleTime(timezone).orElse(0D);
             followUpData.demandIsBlocked = demand.isBlocked();
             followUpData.demandLastBlockReason = demand.getLastBlockReason();
         }
@@ -444,7 +449,7 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
             followUpData.taskCoAssignees = task.getCoAssignees().stream().map(c -> c.name).collect(Collectors.joining(","));
             followUpData.taskClassOfService = task.getClassOfServiceValue();
             followUpData.taskUpdatedDate = task.getUpdatedDateByTimezoneId(timezone);
-            followUpData.taskCycletime = task.getCycleTime(timezone);
+            followUpData.taskCycletime = task.getCycleTime(timezone).orElse(0D);
             followUpData.taskIsBlocked = task.isBlocked();
             followUpData.taskLastBlockReason = task.getLastBlockReason();
         }
@@ -496,5 +501,9 @@ public class FollowUpDataProviderFromCurrentState implements FollowupDataProvide
 
     private static String featureBallparkKey(Issue feature, BallparkMapping mapping) {
         return feature.getIssueKey() + mapping.getTshirtCustomFieldId();
+    }
+    
+    private Double toHour(Integer minutes) {
+        return minutes / 60.0;
     }
 }

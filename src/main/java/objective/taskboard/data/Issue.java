@@ -311,7 +311,7 @@ public class Issue extends IssueScratch implements Serializable {
         return r;
     }
 
-    public Double getCycleTime(ZoneId timezone) {
+    public Optional<Double> getCycleTime(ZoneId timezone) {
         return cycleTime.getCycleTime(Instant.ofEpochMilli(startDateStepMillis), timezone, status);
     }
     
