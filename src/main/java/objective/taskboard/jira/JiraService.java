@@ -20,6 +20,9 @@
  */
 package objective.taskboard.jira;
 
+import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byName;
+import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byNames;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -213,10 +216,9 @@ public class JiraService {
 
     private void setBlocked(String issueKey, boolean blocked, String lastBlockReason) {
         log.debug("⬣⬣⬣⬣⬣  setBlocked");
-        String yesOptionId = properties.getCustomfield().getBlocked().getYesOptionId().toString();
-        Response result = updateIssue(issueKey, JiraIssue.Input.builder()
-                .field(properties.getCustomfield().getBlocked().getId()).byIds(blocked ? yesOptionId : null)
-                .field(properties.getCustomfield().getLastBlockReason().getId()).set(lastBlockReason)
+        Response result = updateIssue(issueKey, JiraIssue.Input.builder(properties)
+                .blocked(blocked)
+                .lastBlockReason(lastBlockReason)
                 .build());
 
         if (HttpStatus.valueOf(result.getStatus()) != HttpStatus.NO_CONTENT)
@@ -297,18 +299,13 @@ public class JiraService {
         }
 
         private JiraIssue.Input buildRequest() {
-            // build request
-            String assigneeField = "assignee";
             Optional<User> firstAssignee = Optional.ofNullable(assignees.poll());
             String assignee = firstAssignee.map(u->u.name).orElse(null);
             List<String> coAssigneesNames = assignees.stream().map(a -> a.name).collect(Collectors.toList());
 
-            // build request
-            String coAssigneeField = properties.getCustomfield().getCoAssignees().getId();
-            
-            return JiraIssue.Input.builder()
-                    .field(assigneeField).byName(assignee)
-                    .field(coAssigneeField).byNames(coAssigneesNames)
+            return JiraIssue.Input.builder(properties)
+                    .assignee(byName(assignee))
+                    .coAssignees(byNames(coAssigneesNames))
                     .build();
         }
 
@@ -345,7 +342,7 @@ public class JiraService {
 
         private JiraIssue.Input buildRequest() {
             return JiraIssue.Input.builder()
-                    .field(field).set(value)
+                    .field(field, value)
                     .build();
         }
 

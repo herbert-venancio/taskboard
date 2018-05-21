@@ -1,5 +1,7 @@
 package objective.taskboard.jira;
 
+import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byName;
+import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byNames;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -120,9 +122,9 @@ public class AuthorizedJiraEndpointTest {
     @Test
     public void updateIssue() {
         // given
-        JiraIssue.Input request = JiraIssue.Input.builder()
-                .field("assignee").byName("foo")
-                .field(jiraProperties.getCustomfield().getCoAssignees().getId()).byNames("bar", "baz")
+        JiraIssue.Input request = JiraIssue.Input.builder(jiraProperties)
+                .assignee(byName("foo"))
+                .coAssignees(byNames("bar", "baz"))
                 .build();
 
         // when

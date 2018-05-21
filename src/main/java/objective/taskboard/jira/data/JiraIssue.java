@@ -2,14 +2,17 @@ package objective.taskboard.jira.data;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
+import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byId;
+import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byIds;
+import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byKey;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.Maps;
-
+import objective.taskboard.jira.JiraProperties;
 import retrofit.client.Response;
 import retrofit.http.Body;
 import retrofit.http.POST;
@@ -39,8 +42,24 @@ public class JiraIssue {
 
     public static class Input {
 
-        public static InputBuilder builder() {
-            return new InputBuilder();
+        public static InputBuilder<?> builder() {
+            return new InputBuilder<>();
+        }
+
+        public static InputBuilder<?> builder(String projectKey, long issueTypeId) {
+            return new InputBuilder<>()
+                    .project(byKey(projectKey))
+                    .issueType(byId(issueTypeId));
+        }
+
+        public static CustomInputBuilder builder(JiraProperties jiraProperties) {
+            return new CustomInputBuilder(jiraProperties);
+        }
+
+        public static CustomInputBuilder builder(JiraProperties jiraProperties, String projectKey, long issueTypeId) {
+            return new CustomInputBuilder(jiraProperties)
+                    .project(byKey(projectKey))
+                    .issueType(byId(issueTypeId));
         }
 
         public final Map<String, Object> fields;
@@ -50,14 +69,51 @@ public class JiraIssue {
         }
     }
 
-    public static class InputBuilder {
+    public static class InputBuilder<T extends InputBuilder<T>> {
+
+        @SuppressWarnings("unchecked")
+        private T self = (T) this;
 
         private InputBuilder() {}
 
-        protected final Map<String, Object> fields = Maps.newLinkedHashMap();
+        protected final Map<String, Object> fields = new LinkedHashMap<>();
 
-        public FieldBuilder field(String field) {
-            return new FieldBuilder(this, field);
+        public T project(FieldBuilder fieldBuilder) {
+            return field("project", fieldBuilder);
+        }
+
+        public T issueType(FieldBuilder fieldBuilder) {
+            return field("issuetype", fieldBuilder);
+        }
+
+        public T parent(FieldBuilder fieldBuilder) {
+            return field("parent", fieldBuilder);
+        }
+
+        public T priority(FieldBuilder fieldBuilder) {
+            return field("priority", fieldBuilder);
+        }
+
+        public T summary(String value) {
+            return field("summary", value);
+        }
+
+        public T reporter(FieldBuilder fieldBuilder) {
+            return field("reporter", fieldBuilder);
+        }
+
+        public T assignee(FieldBuilder fieldBuilder) {
+            return field("assignee", fieldBuilder);
+        }
+
+        public T field(String field, FieldBuilder fieldBuilder) {
+            fieldBuilder.op.accept(this, field);
+            return self;
+        }
+
+        public T field(String field, Object value) {
+            fields.put(field, value);
+            return self;
         }
 
         public Input build() {
@@ -65,58 +121,94 @@ public class JiraIssue {
         }
     }
 
-    public static class FieldBuilder {
-        private final InputBuilder builder;
-        private final String field;
+    public static class CustomInputBuilder extends InputBuilder<CustomInputBuilder> {
 
-        public FieldBuilder(InputBuilder builder, String field) {
-            this.builder = builder;
-            this.field = field;
+        private final JiraProperties jiraProperties;
+
+        public CustomInputBuilder(JiraProperties jiraProperties) {
+            this.jiraProperties = jiraProperties;
         }
 
-        public InputBuilder byId(long id) {
+        public CustomInputBuilder release(Version release) {
+            return field(jiraProperties.getCustomfield().getRelease().getId(), release);
+        }
+
+        public CustomInputBuilder blocked(boolean value) {
+            String yesOptionId = jiraProperties.getCustomfield().getBlocked().getYesOptionId().toString();
+            return field(jiraProperties.getCustomfield().getBlocked().getId(), byIds(value ? yesOptionId : null));
+        }
+
+        public CustomInputBuilder lastBlockReason(String lastBlockReason) {
+            return field(jiraProperties.getCustomfield().getLastBlockReason().getId(), lastBlockReason);
+        }
+
+        public CustomInputBuilder coAssignees(FieldBuilder fieldBuilder) {
+            return field(jiraProperties.getCustomfield().getCoAssignees().getId(), fieldBuilder);
+        }
+
+        public CustomInputBuilder classOfService(FieldBuilder fieldBuilder) {
+            return field(jiraProperties.getCustomfield().getClassOfService().getId(), fieldBuilder);
+        }
+    }
+
+    public static class FieldBuilder {
+
+        protected final BiConsumer<InputBuilder<?>, String> op;
+
+        private FieldBuilder(BiConsumer<InputBuilder<?>, String> op) {
+            this.op = op;
+        }
+
+        public static FieldBuilder byId(long id) {
             return byId(Long.toString(id));
         }
 
-        public InputBuilder byId(String id) {
-            builder.fields.put(field, singletonMap("id", id));
-            return builder;
+        public static FieldBuilder byId(String id) {
+            return new FieldBuilder((builder, field) ->
+                    builder.fields.put(field, singletonMap("id", id))
+            );
         }
 
-        public InputBuilder byIds(String... ids) {
-            builder.fields.put(field, Arrays.stream(ids).map(id -> singletonMap("id", id)));
-            return builder;
+        public static FieldBuilder byIds(String... ids) {
+            return byIds(asList(ids));
         }
 
-        public InputBuilder byKey(String key) {
-            builder.fields.put(field, singletonMap("key", key));
-            return builder;
+        public static FieldBuilder byIds(Collection<String> ids) {
+            return new FieldBuilder((builder, field) ->
+                    builder.fields.put(field, ids.stream()
+                            .map(id -> singletonMap("id", id))
+                            .collect(Collectors.toList()))
+            );
         }
 
-        public InputBuilder byName(String name) {
-            builder.fields.put(field, singletonMap("name", name));
-            return builder;
+        public static FieldBuilder byKey(String key) {
+            return new FieldBuilder(
+                    (builder, field) -> builder.fields.put(field, singletonMap("key", key))
+            );
         }
 
-        public InputBuilder byNames(String... names) {
+        public static FieldBuilder byName(String name) {
+            return new FieldBuilder((builder, field) ->
+                    builder.fields.put(field, singletonMap("name", name))
+            );
+        }
+
+        public static FieldBuilder byNames(String... names) {
             return byNames(asList(names));
         }
 
-        public InputBuilder byNames(Collection<String> names) {
-            builder.fields.put(field, names.stream()
-                    .map(name -> singletonMap("name", name))
-                    .collect(Collectors.toList()));
-            return builder;
+        public static FieldBuilder byNames(Collection<String> names) {
+            return new FieldBuilder((builder, field) ->
+                    builder.fields.put(field, names.stream()
+                            .map(name -> singletonMap("name", name))
+                            .collect(Collectors.toList()))
+            );
         }
 
-        public InputBuilder byValue(String value) {
-            builder.fields.put(field, singletonMap("value", value));
-            return builder;
-        }
-
-        public InputBuilder set(Object value) {
-            builder.fields.put(field, value);
-            return builder;
+        public static FieldBuilder byValue(String value) {
+            return new FieldBuilder((builder, field) ->
+                    builder.fields.put(field, singletonMap("value", value))
+            );
         }
     }
 

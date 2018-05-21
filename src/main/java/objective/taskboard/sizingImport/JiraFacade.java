@@ -46,26 +46,19 @@ class JiraFacade {
 
     public JiraIssue createDemand(String projectKey, String summary, Version release) {
         long demandTypeId = jiraProperties.getIssuetype().getDemand().getId();
-        String releaseFieldId = jiraProperties.getCustomfield().getRelease().getId();
 
-        JiraIssue.Input demandInput = JiraIssue.Input.builder()
-                .field("project").byKey(projectKey)
-                .field("issuetype").byId(demandTypeId)
-                .field("summary").set(summary)
-                .field(releaseFieldId).set(release)
+        JiraIssue.Input demandInput = JiraIssue.Input.builder(jiraProperties, projectKey, demandTypeId)
+                .summary(summary)
+                .release(release)
                 .build();
         
         return createIssue(demandInput);
     }
 
     public JiraIssue createFeature(String projectKey, String demandKey, Long featureTypeId, String summary, Version release, Collection<IssueFieldValue> fieldValues) {
-        String customFieldRelease = jiraProperties.getCustomfield().getRelease().getId();
-
-        JiraIssue.InputBuilder builder = JiraIssue.Input.builder()
-                .field("project").byKey(projectKey)
-                .field("issuetype").byId(featureTypeId)
-                .field("summary").set(summary)
-                .field(customFieldRelease).set(release);
+        JiraIssue.InputBuilder<?> builder = JiraIssue.Input.builder(jiraProperties, projectKey, featureTypeId)
+                .summary(summary)
+                .release(release);
 
         for (IssueFieldValue fv : fieldValues)
             fv.setFieldValue(builder);
@@ -145,7 +138,7 @@ class JiraFacade {
             return fieldId;
         }
         
-        protected abstract void setFieldValue(JiraIssue.InputBuilder builder);
+        protected abstract void setFieldValue(JiraIssue.InputBuilder<?> builder);
 
         @Override
         public int hashCode() {
@@ -167,8 +160,8 @@ class JiraFacade {
         }
 
         @Override
-        protected void setFieldValue(JiraIssue.InputBuilder builder) {
-            builder.field(getFieldId()).set(value);
+        protected void setFieldValue(JiraIssue.InputBuilder<?> builder) {
+            builder.field(getFieldId(), value);
         }
         
         @Override
@@ -201,9 +194,9 @@ class JiraFacade {
         }
 
         @Override
-        protected void setFieldValue(JiraIssue.InputBuilder builder) {
+        protected void setFieldValue(JiraIssue.InputBuilder<?> builder) {
             JiraCreateIssue.CustomFieldOption option = getOption();
-            builder.field(getFieldId()).set(option);
+            builder.field(getFieldId(), option);
         }
 
         private JiraCreateIssue.CustomFieldOption getOption() {

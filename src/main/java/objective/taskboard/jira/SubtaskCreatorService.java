@@ -22,6 +22,10 @@
 package objective.taskboard.jira;
 
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractSingleValueCheckbox;
+import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byId;
+import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byKey;
+import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byName;
+import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byValue;
 
 import java.util.List;
 import java.util.Optional;
@@ -97,13 +101,11 @@ public class SubtaskCreatorService {
         String tShirtSizeSubtaskId = creationProperties.getTShirtSizeSubtaskId();
         String tShirtSizeDefaultValue = creationProperties.getTShirtSizeDefaultValue();
 
-        JiraIssue.InputBuilder issueBuilder = JiraIssue.Input.builder()
-                .field("project").byKey(parent.getProject().getKey())
-                .field("issuetype").byId(typeId)
-                .field("parent").byKey(parent.getKey())
-                .field("priority").byId(parent.getPriority().getId())
-                .field("summary").set(summaryPrefix + parent.getSummary())
-                .field("reporter").byName(parent.getReporter().getName());
+        JiraIssue.CustomInputBuilder issueBuilder = JiraIssue.Input.builder(jiraProperties, parent.getProject().getKey(), typeId)
+                .parent(byKey(parent.getKey()))
+                .priority(byId(parent.getPriority().getId()))
+                .summary(summaryPrefix + parent.getSummary())
+                .reporter(byName(parent.getReporter().getName()));
         setTShirtSize(issueBuilder, parent, tShirtSizeParentId, tShirtSizeSubtaskId, tShirtSizeDefaultValue);
         setClassOfService(issueBuilder, parent);
         
@@ -114,9 +116,9 @@ public class SubtaskCreatorService {
         return jiraService.createIssueAsMaster(issueInput);
     }
 
-    private void setTShirtSize(JiraIssue.InputBuilder issueBuilder, JiraIssueDto parent, String tShirtParentId, String tShirtSubtaskId, String defaultValue) {
+    private void setTShirtSize(JiraIssue.InputBuilder<?> issueBuilder, JiraIssueDto parent, String tShirtParentId, String tShirtSubtaskId, String defaultValue) {
         String tShirtValue = getTShirtSizeValue(parent, tShirtParentId, defaultValue);
-        issueBuilder.field(tShirtSubtaskId).byValue(tShirtValue);
+        issueBuilder.field(tShirtSubtaskId, byValue(tShirtValue));
     }
 
     private String getTShirtSizeValue(JiraIssueDto parent, String tShirtSizeParentId, String tShirtSizeDefaultValue) {
@@ -132,7 +134,7 @@ public class SubtaskCreatorService {
         }
     }
 
-    private void setClassOfService(JiraIssue.InputBuilder issueBuilder, JiraIssueDto parent) {
+    private void setClassOfService(JiraIssue.CustomInputBuilder issueBuilder, JiraIssueDto parent) {
         String classOfServiceId = jiraProperties.getCustomfield().getClassOfService().getId();
         JSONObject parentClassOfService = parent.getField(classOfServiceId);
         
@@ -141,7 +143,7 @@ public class SubtaskCreatorService {
 
         try {
             String valueId = parentClassOfService.getString("id");
-            issueBuilder.field(classOfServiceId).byId(valueId);
+            issueBuilder.classOfService(byId(valueId));
         } catch (JSONException e) {
             // just don't set if can't extract parent value
             log.error("Error extracting class-of-service value (customfield id = '" + classOfServiceId + "') from parent issue '" + parent.getKey() + "'", e);
