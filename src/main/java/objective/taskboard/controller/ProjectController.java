@@ -220,8 +220,9 @@ public class ProjectController {
     private ProjectData generateProjectData(ProjectFilterConfiguration projectFilterConfiguration) {
         ProjectData projectData = new ProjectData();
         projectData.projectKey = projectFilterConfiguration.getProjectKey();
-        projectData.followUpDataHistory = followUpFacade.getHistoryGivenProjects(projectData.projectKey);
+        projectData.followUpDataHistory = followUpFacade.getHistoryGivenProject(projectData.projectKey);
         projectData.roles = authorizer.getRolesForProject(projectFilterConfiguration.getProjectKey());
+       
         return projectData;
     }
 }

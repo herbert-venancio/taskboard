@@ -68,6 +68,10 @@ function getDateHour() {
     return moment().format('YYYY-MM-DD_HH:mm');
 }
 
+function getDateFromIso(isoString) {
+    return moment(isoString, 'YYYY-MM-DD').toDate();
+}
+
 function addDaysToDate(date, days) {
     var newDate = new Date(date.valueOf());
     newDate.setDate(newDate.getDate() + days);

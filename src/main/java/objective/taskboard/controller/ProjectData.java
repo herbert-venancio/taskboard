@@ -22,13 +22,14 @@
 package objective.taskboard.controller;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ProjectData {
     public String projectKey;
     public String defaultTeam;
-    public List<String> followUpDataHistory = new ArrayList<String>();
+    public List<LocalDate> followUpDataHistory = new ArrayList<>();
     public List<String> roles = new ArrayList<String>();
 
     public static class ProjectConfigurationData {
