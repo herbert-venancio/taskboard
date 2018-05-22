@@ -14,6 +14,7 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -23,7 +24,9 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,14 +107,11 @@ public class FollowUpDataRepositoryByFile implements FollowUpDataRepository {
 
         String fileExtension = EXTENSION_JSON + EXTENSION_ZIP;
         LocalDate today = LocalDate.now();
-        
-        try {
-            return Files.walk(pathProject)
-                    .map(Path::toFile)
-                    .filter(file -> file.isFile())
-                    .filter(file -> file.getName().toLowerCase().endsWith(fileExtension))
-                    .map(file -> parseLocalDate(file.getName().replace(fileExtension, "")))
-                    .filter(date -> !date.equals(today))
+
+        try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(pathProject, "*" + fileExtension)) {
+            return StreamSupport.stream(dirStream.spliterator(), false)
+                    .map(path -> parseLocalDate(path.getFileName().toString().replace(fileExtension, "")))
+                    .filter(date -> date.isBefore(today))
                     .sorted()
                     .collect(toList());
 
@@ -172,5 +172,10 @@ public class FollowUpDataRepositoryByFile implements FollowUpDataRepository {
         } finally {
             deleteQuietly(pathJSON.toFile());
         }
+    }
+
+    @Override
+    public Optional<LocalDate> getFirstDate(String projectKey) {
+        return getHistoryByProject(projectKey).stream().findFirst();
     }
 }

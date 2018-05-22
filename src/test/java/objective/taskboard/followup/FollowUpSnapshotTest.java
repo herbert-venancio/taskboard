@@ -2,6 +2,7 @@ package objective.taskboard.followup;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.joining;
+import static objective.taskboard.followup.FixedFollowUpSnapshotValuesProvider.emptyValuesProvider;
 import static objective.taskboard.followup.FollowUpHelper.getFollowupData;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -18,11 +19,33 @@ import objective.taskboard.followup.cluster.FollowupCluster;
 import objective.taskboard.followup.cluster.FollowupClusterImpl;
 
 public class FollowUpSnapshotTest {
+    
+    private ProjectFilterConfiguration project = mock(ProjectFilterConfiguration.class);
+    
+    private FollowupCluster cluster = new FollowupClusterImpl(asList(
+            new FollowUpClusterItem(project, "UX", "na", "S", 1.0, 0.0),
+            new FollowUpClusterItem(project, "UX", "na", "M", 2.0, 0.0)));
+    
+    @Test
+    public void shouldReturnEffortHistoryRow() {
+        FollowUpTimeline timeline = new FollowUpTimeline(LocalDate.parse("2018-04-10"));
 
+        FollowUpData data = getFollowupData(
+                dataRow("UX", "Open", "M"),
+                dataRow("UX", "Open", "S"),
+                dataRow("UX", "Done", "S"),
+                dataRow("UX", "Done", "S"));
+
+        FollowUpSnapshot subject = new FollowUpSnapshot(timeline, data, cluster, emptyValuesProvider());
+        EffortHistoryRow effortHistoryRow = subject.getEffortHistoryRow();
+
+        assertEquals(LocalDate.parse("2018-04-10"), effortHistoryRow.date);
+        assertEquals(2.0, effortHistoryRow.sumEffortDone, 0.0);
+        assertEquals(3.0, effortHistoryRow.sumEffortBacklog, 0.0);
+    }
+    
     @Test
     public void shouldReturnEffortHistory() {
-        ProjectFilterConfiguration project = mock(ProjectFilterConfiguration.class);
-        
         FollowUpTimeline timeline = new FollowUpTimeline(LocalDate.parse("2018-04-10"));
         List<EffortHistoryRow> effortHistory = asList(
                 new EffortHistoryRow(LocalDate.parse("2018-04-03"), 2d, 8d),
@@ -32,12 +55,9 @@ public class FollowUpSnapshotTest {
                 dataRow("UX", "Open", "M"),
                 dataRow("UX", "Open", "S"),
                 dataRow("UX", "Done", "S"));
+
         
-        FollowupCluster cluster = new FollowupClusterImpl(asList(
-                new FollowUpClusterItem(project, "UX", "na", "S", 1.0, 0.0),
-                new FollowUpClusterItem(project, "UX", "na", "M", 2.0, 0.0)));
-        
-        FollowUpSnapshot subject = new FollowUpSnapshot(timeline, data, cluster, effortHistory);
+        FollowUpSnapshot subject = new FollowUpSnapshot(timeline, data, cluster, new FixedFollowUpSnapshotValuesProvider(effortHistory));
         
         assertEffortHistory(subject.getEffortHistory(), 
                 "2018-04-03 | 2.0 | 8.0",

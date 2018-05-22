@@ -35,6 +35,8 @@ import java.util.Optional;
 
 import org.springframework.core.io.Resource;
 
+import objective.taskboard.followup.FromJiraRowCalculator.FromJiraRowCalculation;
+import objective.taskboard.followup.ReleaseHistoryProvider.ProjectRelease;
 import objective.taskboard.followup.cluster.FollowUpClusterItem;
 import objective.taskboard.followup.cluster.FollowupCluster;
 import objective.taskboard.google.SpreadsheetUtils.SpreadsheetA1Range;
@@ -60,12 +62,13 @@ public class FollowUpReportGenerator {
 
             FollowUpData followupData = snapshot.getData();
 
-            updateTimelineDates(snapshot.getTimeline());
-            generateFromJiraSheet(followupData);
+            updateTimelineDates(snapshot.getTimeline(), snapshot.getReleases());
+            generateFromJiraSheet(snapshot);
             generateTransitionsSheets(followupData);
             generateEffortHistory(snapshot);
             generateTShirtSizeSheet(snapshot.getCluster());
             generateWorklogSheet(followupData, timezone);
+            generateScopeBaselineSheet(snapshot);
 
             return IOUtilities.asResource(editor.toBytes());
         } catch (Exception e) {
@@ -76,15 +79,29 @@ public class FollowUpReportGenerator {
         }
     }
 
-    void updateTimelineDates(FollowUpTimeline timeline) {
+    private void updateTimelineDates(FollowUpTimeline timeline, List<ProjectRelease> releases) {
         Sheet sheet = editor.getSheet("Timeline");
-        timeline.getStart().ifPresent(start -> sheet.getOrCreateRow(2).setValue("B", start));
-        timeline.getEnd().ifPresent(end -> sheet.getOrCreateRow(5).setValue("B", end));
+        if (sheet == null)
+            return;
+
+        sheet.getOrCreateRow(2).setValue("B", timeline.getStart().orElse(null));
+        sheet.getOrCreateRow(5).setValue("B", timeline.getEnd().orElse(null));
         sheet.getOrCreateRow(6).setValue("B", timeline.getReference());
+        sheet.getOrCreateRow(8).setValue("B", timeline.getRiskPercentage());
+        sheet.getOrCreateRow(9).setValue("B", timeline.getBaselineDate().orElse(null));
+        
+        for (int i = 0; i < releases.size(); i++) {
+            ProjectRelease release = releases.get(i);
+            
+            SheetRow row = sheet.getOrCreateRow(i + 2);
+            row.setValue("L", release.getDate());
+            row.setValue("N", release.getName());
+        }
+
         sheet.save();
     }
 
-    void generateWorklogSheet(FollowUpData followupData, ZoneId timezone) {
+    private void generateWorklogSheet(FollowUpData followupData, ZoneId timezone) {
         Sheet sheet = editor.getOrCreateSheet("Worklogs");
         sheet.truncate();
         SheetRow rowHeader = sheet.createRow();
@@ -106,9 +123,21 @@ public class FollowUpReportGenerator {
         });
         sheet.save();
     }
+    
+    private void generateFromJiraSheet(FollowUpSnapshot snapshot) {
+        generateFollowUpDataSheet("From Jira", snapshot.getData(), snapshot.getFromJiraRowCalculations());
+    }
+    
+    private void generateScopeBaselineSheet(FollowUpSnapshot snapshot) {
+        Optional<FollowUpData> scopeBaseline = snapshot.getScopeBaseline();
+        if (!scopeBaseline.isPresent())
+            return;
+        
+        generateFollowUpDataSheet("Scope Baseline", scopeBaseline.get(), snapshot.getScopeBaselineRowCalculations());
+    }
 
-    Sheet generateFromJiraSheet(FollowUpData followupData) {
-        Sheet sheet = editor.getSheet("From Jira");
+    private void generateFollowUpDataSheet(String sheetName, FollowUpData followupData, List<FromJiraRowCalculation> rowCalculations) {
+        Sheet sheet = editor.getOrCreateSheet(sheetName);
         sheet.truncate();
 
         SheetRow rowHeader = sheet.createRow();
@@ -119,7 +148,8 @@ public class FollowUpReportGenerator {
         addAnalyticsHeadersIfExist(followupData.analyticsTransitionsDsList, TYPE_FEATURES, rowHeader);
         addAnalyticsHeadersIfExist(followupData.analyticsTransitionsDsList, TYPE_SUBTASKS, rowHeader);
 
-        for (FromJiraDataRow fromJiraDataRow : followupData.fromJiraDs.rows) {
+        for (FromJiraRowCalculation rowCalculation : rowCalculations) {
+            FromJiraDataRow fromJiraDataRow = rowCalculation.getRow();
             SheetRow row = sheet.createRow();
 
             row.addColumn(fromJiraDataRow.project);
@@ -194,46 +224,29 @@ public class FollowUpReportGenerator {
             row.addColumn(fromJiraDataRow.taskBallpark);
             row.addColumn(fromJiraDataRow.tshirtSize);
             row.addColumn(fromJiraDataRow.queryType);
-            //EffortEstimate
-            row.addFormula("IF(AND(AllIssues[[#This Row],[TASK_BALLPARK]]>0,AllIssues[[#This Row],[Query_Type]]<>\"SUBTASK PLAN\"),AllIssues[[#This Row],[TASK_BALLPARK]],SUMIFS(Clusters[Effort],Clusters[Cluster Name],AllIssues[[#This Row],[SUBTASK_TYPE]],Clusters[T-Shirt Size],AllIssues[tshirt_size]))");
-            //CycleEstimate            
-            row.addFormula("IF(AND(AllIssues[[#This Row],[TASK_BALLPARK]]>0,AllIssues[[#This Row],[Query_Type]]<>\"SUBTASK PLAN\"),AllIssues[[#This Row],[TASK_BALLPARK]]*1.3,SUMIFS(Clusters[Cycle],Clusters[Cluster Name],AllIssues[[#This Row],[SUBTASK_TYPE]],Clusters[T-Shirt Size],AllIssues[tshirt_size]))");
-            // EffortOnBacklog
-            row.addFormula("AllIssues[EffortEstimate]-AllIssues[EffortDone]");
-            // CycleOnBacklog
-            row.addFormula("AllIssues[CycleEstimate]-AllIssues[CycleDone]");
-            // BallparkEffort
-            row.addFormula("IF(AllIssues[[#This Row],[planning_type]]=\"Ballpark\",AllIssues[EffortEstimate],0)");
-            // PlannedEffort
-            row.addFormula("IF(AllIssues[[#This Row],[planning_type]]=\"Plan\",AllIssues[EffortEstimate],0)");
-            // EffortDone
-            row.addFormula("IF(OR(AllIssues[SUBTASK_STATUS]=\"Done\",AllIssues[SUBTASK_STATUS]=\"Cancelled\"),AllIssues[EffortEstimate],0)");
-            // CycleDone
-            row.addFormula("IF(OR(AllIssues[SUBTASK_STATUS]=\"Done\",AllIssues[SUBTASK_STATUS]=\"Cancelled\"),AllIssues[CycleEstimate],0)");
-            // WorklogDone
-            row.addFormula("IF(OR(AllIssues[SUBTASK_STATUS]=\"Done\",AllIssues[SUBTASK_STATUS]=\"Cancelled\"),AllIssues[worklog],0)");
-            // WorklogDoing
-            row.addFormula("IF(OR(AllIssues[SUBTASK_STATUS]=\"Done\",AllIssues[SUBTASK_STATUS]=\"Cancelled\"),0, AllIssues[worklog])");
-            // CountTasks
-            row.addFormula("IF(COUNTIFS(AllIssues[TASK_ID],AllIssues[TASK_ID],AllIssues[TASK_ID],\">0\")=0,0,1/COUNTIFS(AllIssues[TASK_ID],AllIssues[TASK_ID],AllIssues[TASK_ID],\">0\"))");
-            // CountDemands
-            row.addFormula("IF(COUNTIFS(AllIssues[demand_description],AllIssues[demand_description])=0,0,1/COUNTIFS(AllIssues[demand_description],AllIssues[demand_description]))");
-            // CountSubtasks
-            row.addFormula("IF(AllIssues[planning_type]=\"Plan\",1,0)");
-            // SubtaskEstimativeForEEPCalculation
-            row.addFormula("IF(AllIssues[[#This Row],[SUBTASK_STATUS]]=\"Done\", AllIssues[[#This Row],[EffortDone]],0)");
-            // PlannedEffortOnBug
-            row.addFormula("IF(AllIssues[TASK_TYPE]=\"Bug\",AllIssues[EffortEstimate], 0)");
-            // WorklogOnBug
-            row.addFormula("IF(AllIssues[TASK_TYPE]=\"Bug\",AllIssues[worklog],0)");
+
+            row.addColumn(rowCalculation.getEffortEstimate());
+            row.addColumn(rowCalculation.getCycleEstimate());
+            row.addColumn(rowCalculation.getEffortOnBacklog());
+            row.addColumn(rowCalculation.getCycleOnBacklog());
+            row.addColumn(rowCalculation.getBallparkEffort());
+            row.addColumn(rowCalculation.getPlannedEffort());
+            row.addColumn(rowCalculation.getEffortDone());
+            row.addColumn(rowCalculation.getCycleDone());
+            row.addColumn(rowCalculation.getWorklogDone());
+            row.addColumn(rowCalculation.getWorklogDoing());
+            row.addColumn(rowCalculation.getCountTasks());
+            row.addColumn(rowCalculation.getCountDemands());
+            row.addColumn(rowCalculation.getCountSubtasks());
+            row.addColumn(rowCalculation.getSubtaskEstimativeForEepCalculation());
+            row.addColumn(rowCalculation.getPlannedEffortOnBug());
+            row.addColumn(rowCalculation.getWorklogOnBug());
 
             addTransitionsDatesIfExist(followupData.analyticsTransitionsDsList, TYPE_DEMAND, fromJiraDataRow.demandNum, row);
             addTransitionsDatesIfExist(followupData.analyticsTransitionsDsList, TYPE_FEATURES, fromJiraDataRow.taskNum, row);
             addTransitionsDatesIfExist(followupData.analyticsTransitionsDsList, TYPE_SUBTASKS, fromJiraDataRow.subtaskNum, row);
         }
         sheet.save();
-
-        return sheet;
     }
 
     private void addAnalyticsHeadersIfExist(List<AnalyticsTransitionsDataSet> analyticsDataSets, String type, SheetRow rowHeader) {
@@ -277,7 +290,7 @@ public class FollowUpReportGenerator {
             .findFirst();
     }
 
-    List<Sheet> generateTransitionsSheets(FollowUpData followupData) {
+    private List<Sheet> generateTransitionsSheets(FollowUpData followupData) {
         List<Sheet> sheets = new LinkedList<>();
         sheets.addAll(generateAnalyticTransitionsSheets(followupData.analyticsTransitionsDsList));
         sheets.addAll(generateSyntheticTransitionsSheets(followupData.syntheticsTransitionsDsList));
@@ -346,7 +359,7 @@ public class FollowUpReportGenerator {
         return sheet;
     }
     
-    void generateEffortHistory(FollowUpSnapshot snapshot) {
+    private void generateEffortHistory(FollowUpSnapshot snapshot) {
         Sheet sheet = editor.getOrCreateSheet("Effort History");
         sheet.truncate();
         
@@ -368,7 +381,7 @@ public class FollowUpReportGenerator {
         sheet.save();
     }
 
-    void generateTShirtSizeSheet(FollowupCluster cluster) {
+    private void generateTShirtSizeSheet(FollowupCluster cluster) {
         String sheetName = "T-shirt Size";
         String clustersTableName = "Clusters";
         
@@ -405,11 +418,6 @@ public class FollowUpReportGenerator {
         sheet.save();
     }
 
-    
-    public SpreadsheetEditor getEditor() {
-        return editor;
-    }
-    
     public static class InvalidTableRangeException extends RuntimeException {
         private static final long serialVersionUID = 1L;
         

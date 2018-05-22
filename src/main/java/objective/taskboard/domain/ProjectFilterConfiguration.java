@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.Optional;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -47,6 +48,9 @@ public class ProjectFilterConfiguration implements Serializable {
 
     @Column
     private Integer projectionTimespan;
+    
+    @Column
+    private LocalDate baselineDate;//NOSONAR
 
     protected ProjectFilterConfiguration() {} //NOSONAR
 
@@ -71,19 +75,26 @@ public class ProjectFilterConfiguration implements Serializable {
     }
 
     public void setStartDate(LocalDate startDate) {
+        validateProjectDates(startDate, this.deliveryDate);
         this.startDate = startDate;
     }
 
-    public LocalDate getStartDate() {
-        return startDate;
+    public Optional<LocalDate> getStartDate() {
+        return Optional.ofNullable(startDate);
     }
 
-    public LocalDate getDeliveryDate() {
-        return deliveryDate;
+    public Optional<LocalDate> getDeliveryDate() {
+        return Optional.ofNullable(deliveryDate);
     }
 
     public void setDeliveryDate(LocalDate deliveryDate) {
+        validateProjectDates(this.startDate, deliveryDate);
         this.deliveryDate = deliveryDate;
+    }
+    
+    private static void validateProjectDates(LocalDate startDate, LocalDate deliveryDate) {
+        if (startDate != null && deliveryDate != null && startDate.isAfter(deliveryDate))
+            throw new IllegalArgumentException("'startDate' should be before or equal to 'deliveryDate'");
     }
 
     public boolean isArchived() {
@@ -125,5 +136,13 @@ public class ProjectFilterConfiguration implements Serializable {
     public void setDefaultTeam(Long defaultTeamId) {
         notNull(defaultTeamId);
         this.defaultTeam = defaultTeamId;
+    }
+    
+    public void setBaselineDate(LocalDate baselineDate) {
+        this.baselineDate = baselineDate;
+    }
+    
+    public Optional<LocalDate> getBaselineDate() {
+        return Optional.ofNullable(baselineDate);
     }
 }

@@ -17,7 +17,6 @@ import org.springframework.util.StringUtils;
 
 import objective.taskboard.Constants;
 import objective.taskboard.data.Issue;
-import objective.taskboard.followup.FromJiraRowCalculator.FromJiraRowCalculation;
 import objective.taskboard.followup.cluster.FollowupCluster;
 import objective.taskboard.followup.cluster.FollowupClusterProvider;
 import objective.taskboard.issueBuffer.IssueBufferService;
@@ -46,16 +45,15 @@ public class FollowUpDataGenerator {
     }
 
     public FollowUpData generate(ZoneId timezone, FollowupCluster cluster, String projectKey) {
-        return new CurrentStateSnapshot(timezone, cluster, projectKey).execute();
+        return new GenerationScope(timezone, cluster, projectKey).generate();
     }
-    
 
     public FollowUpData generate(ZoneId timezone, String projectKey) {
         FollowupCluster cluster = clusterProvider.getForProject(projectKey);
         return generate(timezone, cluster, projectKey);
     }
 
-    private class CurrentStateSnapshot {
+    private class GenerationScope {
 
         private final String projectKey;
         private final ZoneId timezone;
@@ -66,14 +64,14 @@ public class FollowUpDataGenerator {
         private Map<String, Issue> featuresByKey;
         private Map<String, FromJiraDataRow> followUpBallparks;
 
-        private CurrentStateSnapshot(ZoneId timezone, FollowupCluster cluster, String projectKey) {
+        private GenerationScope(ZoneId timezone, FollowupCluster cluster, String projectKey) {
             this.projectKey = projectKey;
             this.timezone = timezone;
             this.cluster = cluster;
             this.fromJiraRowCalculator = new FromJiraRowCalculator(cluster); 
         }
 
-        public FollowUpData execute() {
+        public FollowUpData generate() {
             List<Issue> issuesVisibleToUser = issueBufferService.getAllIssues().stream()
                     .filter(issue -> projectKey.equals(issue.getProjectKey()))
                     .filter(issue -> isAllowedStatus(issue.getStatus()))
@@ -199,9 +197,9 @@ public class FollowUpDataGenerator {
             
             if (featureBallpark == null)
                 return;
-            
-            FromJiraRowCalculation subtaskRowCalculation = fromJiraRowCalculator.calculate(subtaskRow);
-            featureBallpark.taskBallpark -= subtaskRowCalculation.getEffortEstimate();
+
+            double effortEstimate = fromJiraRowCalculator.getEffortEstimate(subtaskRow);
+            featureBallpark.taskBallpark -= effortEstimate;
             
             if (featureBallpark.taskBallpark <= 0)
                 followUpBallparks.remove(featureBallparkKey);
@@ -221,7 +219,7 @@ public class FollowUpDataGenerator {
 
             setDemandFields(followUpData, demand, timezone);
 
-            followUpData.planningType = "Ballpark";
+            followUpData.planningType = FromJiraDataRow.PLANNING_TYPE_BALLPARK;
             followUpData.project = demand.getProject();//NOSONAR demand is never null here
             followUpData.tshirtSize = "M";
             followUpData.worklog = 0.0;
@@ -282,7 +280,7 @@ public class FollowUpDataGenerator {
             setDemandFields(followUpData, demand, timezone);
             setTaskFields(followUpData, task, timezone);
 
-            followUpData.planningType = "Ballpark";
+            followUpData.planningType = FromJiraDataRow.PLANNING_TYPE_BALLPARK;
             followUpData.project = task.getProject();
             followUpData.tshirtSize = task.getTshirtSizeOfSubtaskForBallpark(ballparkMapping);
             followUpData.worklog = 0.0;
@@ -320,7 +318,7 @@ public class FollowUpDataGenerator {
             setDemandFields(followUpData, demand, timezone);
             setTaskFields(followUpData, task, timezone);
 
-            followUpData.planningType = "Plan";
+            followUpData.planningType = FromJiraDataRow.PLANNING_TYPE_PLAN;
             followUpData.project = task.getProject();
             followUpData.tshirtSize = subtask.getTShirtSize() == null? "": subtask.getTShirtSize();
             followUpData.worklog = timeSpentInHour(subtask);

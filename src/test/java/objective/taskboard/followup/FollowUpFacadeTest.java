@@ -65,9 +65,10 @@ import org.xlsx4j.sml.Row;
 import org.xlsx4j.sml.Sheet;
 
 import objective.taskboard.database.directory.DataBaseDirectory;
-import objective.taskboard.followup.cluster.EmptyFollowupCluster;
+import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.cluster.FollowupClusterProvider;
 import objective.taskboard.followup.data.Template;
+import objective.taskboard.jira.ProjectService;
 import objective.taskboard.rules.CleanupDataFolderRule;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -93,10 +94,19 @@ public class FollowUpFacadeTest {
     
     @Mock
     private FollowUpSnapshotService snapshotService;
+    
+    @Mock
+    private ReleaseHistoryProvider releaseHistoryProvider;
 
     @Spy
     @InjectMocks
     private FollowUpTemplateStorage followUpTemplateStorage = new FollowUpTemplateStorage();
+    
+    @Mock
+    private ProjectService projectService;
+    
+    @Mock
+    private FollowUpDataRepository historyRepository;
 
     @InjectMocks
     private FollowUpFacade followUpFacade = new FollowUpFacade();
@@ -118,6 +128,10 @@ public class FollowUpFacadeTest {
         String path = argCaptor.getValue();
         template = mock(Template.class);
         when(template.getPath()).thenReturn(path);
+        
+        when(releaseHistoryProvider.get(any())).thenReturn(Collections.emptyList());
+        when(projectService.getTaskboardProjectOrCry(PROJECT)).thenReturn(new ProjectFilterConfiguration(PROJECT, 1L));
+        when(historyRepository.getFirstDate(PROJECT)).thenReturn(Optional.empty());
     }
 
     @Before
@@ -128,10 +142,11 @@ public class FollowUpFacadeTest {
     @Test
     public void okTemplateGenerate() throws Exception {
         LocalDate date = LocalDate.parse("2017-10-01");
-        given(templateService.getTemplate(TEMPLATE_NAME)).willReturn(template);
-        given(snapshotService.get(any(), any(), Mockito.eq(PROJECT)))
-            .willReturn(new FollowUpSnapshot(new FollowUpTimeline(date), getDefaultFollowupData(), new EmptyFollowupCluster(), Collections.emptyList()));
+        FollowUpSnapshot snapshot = new FollowUpSnapshotMockBuilder().timeline(date).data(getDefaultFollowupData()).build();
 
+        given(templateService.getTemplate(TEMPLATE_NAME)).willReturn(template);
+        given(snapshotService.get(any(), any(), Mockito.eq(PROJECT))).willReturn(snapshot);
+        
         // when
         Resource resource = followUpFacade.generateReport(TEMPLATE_NAME, Optional.of(date), ZoneId.systemDefault(), PROJECT);
 
@@ -157,7 +172,7 @@ public class FollowUpFacadeTest {
                 "Sub-task", "Doing", "I-3", "Summary Sub-task", "Description Sub-task", "Full Description Sub-task",
                 "0", "assignee.subtask.test", "5/23/25 0:00", "1/3/12 0:00", "", "", "reporter.subtask.test", "", "Standard", "2/3/12 0:00", "3,333333", "false", "Subtask last block reason",
                 "1", "2", "3", "Ballpark", "Release", "1", "1", "1", "1", "M", "Type",
-                FORMULA, FORMULA, FORMULA, FORMULA, FORMULA, FORMULA, FORMULA, FORMULA, FORMULA, FORMULA, FORMULA, FORMULA, FORMULA, FORMULA, FORMULA, FORMULA,
+                "5", "0", "3", "0", "0", "0", "2", "0", "0", "0", "0", "0", "0", "0", "0", "0",
                 "9/27/17 0:00", "9/26/17 0:00", "9/25/17 0:00", "", "9/26/17 0:00", "9/25/17 0:00", "", "", "9/25/17 0:00"};
     }
 

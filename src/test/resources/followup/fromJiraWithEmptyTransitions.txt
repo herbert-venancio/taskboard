@@ -100,10 +100,10 @@ Sheet "From Jira" Row "2" AddColumn "G2": 0
 Sheet "From Jira" Row "2" AddColumn "H2": assignee.demand.test
 Sheet "From Jira" Row "2" AddColumn "I2": 2025-05-25T00:00-03:00[America/Sao_Paulo]
 Sheet "From Jira" Row "2" AddColumn "J2": 2012-01-01T00:00-02:00[America/Sao_Paulo]
-Sheet "From Jira" Row "2" AddColumn "K2": 
-Sheet "From Jira" Row "2" AddColumn "L2": 
+Sheet "From Jira" Row "2" AddColumn "K2":
+Sheet "From Jira" Row "2" AddColumn "L2":
 Sheet "From Jira" Row "2" AddColumn "M2": reporter.demand.test
-Sheet "From Jira" Row "2" AddColumn "N2": 
+Sheet "From Jira" Row "2" AddColumn "N2":
 Sheet "From Jira" Row "2" AddColumn "O2": Standard
 Sheet "From Jira" Row "2" AddColumn "P2": 2012-02-01T00:00-02:00[America/Sao_Paulo]
 Sheet "From Jira" Row "2" AddColumn "Q2": 1.111111
@@ -120,10 +120,10 @@ Sheet "From Jira" Row "2" AddColumn "AA2": 0
 Sheet "From Jira" Row "2" AddColumn "AB2": assignee.task.test
 Sheet "From Jira" Row "2" AddColumn "AC2": 2025-05-24T00:00-03:00[America/Sao_Paulo]
 Sheet "From Jira" Row "2" AddColumn "AD2": 2012-01-02T00:00-02:00[America/Sao_Paulo]
-Sheet "From Jira" Row "2" AddColumn "AE2": 
-Sheet "From Jira" Row "2" AddColumn "AF2": 
+Sheet "From Jira" Row "2" AddColumn "AE2":
+Sheet "From Jira" Row "2" AddColumn "AF2":
 Sheet "From Jira" Row "2" AddColumn "AG2": reporter.demand.test
-Sheet "From Jira" Row "2" AddColumn "AH2": 
+Sheet "From Jira" Row "2" AddColumn "AH2":
 Sheet "From Jira" Row "2" AddColumn "AI2": Standard
 Sheet "From Jira" Row "2" AddColumn "AJ2": 2012-02-02T00:00-02:00[America/Sao_Paulo]
 Sheet "From Jira" Row "2" AddColumn "AK2": 2.222222
@@ -139,10 +139,10 @@ Sheet "From Jira" Row "2" AddColumn "AT2": 0
 Sheet "From Jira" Row "2" AddColumn "AU2": assignee.subtask.test
 Sheet "From Jira" Row "2" AddColumn "AV2": 2025-05-23T00:00-03:00[America/Sao_Paulo]
 Sheet "From Jira" Row "2" AddColumn "AW2": 2012-01-03T00:00-02:00[America/Sao_Paulo]
-Sheet "From Jira" Row "2" AddColumn "AX2": 
-Sheet "From Jira" Row "2" AddColumn "AY2": 
+Sheet "From Jira" Row "2" AddColumn "AX2":
+Sheet "From Jira" Row "2" AddColumn "AY2":
 Sheet "From Jira" Row "2" AddColumn "AZ2": reporter.subtask.test
-Sheet "From Jira" Row "2" AddColumn "BA2": 
+Sheet "From Jira" Row "2" AddColumn "BA2":
 Sheet "From Jira" Row "2" AddColumn "BB2": Standard
 Sheet "From Jira" Row "2" AddColumn "BC2": 2012-02-03T00:00-02:00[America/Sao_Paulo]
 Sheet "From Jira" Row "2" AddColumn "BD2": 3.333333
@@ -159,22 +159,22 @@ Sheet "From Jira" Row "2" AddColumn "BN2": 1.0
 Sheet "From Jira" Row "2" AddColumn "BO2": 1.0
 Sheet "From Jira" Row "2" AddColumn "BP2": M
 Sheet "From Jira" Row "2" AddColumn "BQ2": Type
-Sheet "From Jira" Row "2" AddFormula "BR2": IF(AND(AllIssues[[#This Row],[TASK_BALLPARK]]>0,AllIssues[[#This Row],[Query_Type]]<>"SUBTASK PLAN"),AllIssues[[#This Row],[TASK_BALLPARK]],SUMIFS(Clusters[Effort],Clusters[Cluster Name],AllIssues[[#This Row],[SUBTASK_TYPE]],Clusters[T-Shirt Size],AllIssues[tshirt_size]))
-Sheet "From Jira" Row "2" AddFormula "BS2": IF(AND(AllIssues[[#This Row],[TASK_BALLPARK]]>0,AllIssues[[#This Row],[Query_Type]]<>"SUBTASK PLAN"),AllIssues[[#This Row],[TASK_BALLPARK]]*1.3,SUMIFS(Clusters[Cycle],Clusters[Cluster Name],AllIssues[[#This Row],[SUBTASK_TYPE]],Clusters[T-Shirt Size],AllIssues[tshirt_size]))
-Sheet "From Jira" Row "2" AddFormula "BT2": AllIssues[EffortEstimate]-AllIssues[EffortDone]
-Sheet "From Jira" Row "2" AddFormula "BU2": AllIssues[CycleEstimate]-AllIssues[CycleDone]
-Sheet "From Jira" Row "2" AddFormula "BV2": IF(AllIssues[[#This Row],[planning_type]]="Ballpark",AllIssues[EffortEstimate],0)
-Sheet "From Jira" Row "2" AddFormula "BW2": IF(AllIssues[[#This Row],[planning_type]]="Plan",AllIssues[EffortEstimate],0)
-Sheet "From Jira" Row "2" AddFormula "BX2": IF(OR(AllIssues[SUBTASK_STATUS]="Done",AllIssues[SUBTASK_STATUS]="Cancelled"),AllIssues[EffortEstimate],0)
-Sheet "From Jira" Row "2" AddFormula "BY2": IF(OR(AllIssues[SUBTASK_STATUS]="Done",AllIssues[SUBTASK_STATUS]="Cancelled"),AllIssues[CycleEstimate],0)
-Sheet "From Jira" Row "2" AddFormula "BZ2": IF(OR(AllIssues[SUBTASK_STATUS]="Done",AllIssues[SUBTASK_STATUS]="Cancelled"),AllIssues[worklog],0)
-Sheet "From Jira" Row "2" AddFormula "CA2": IF(OR(AllIssues[SUBTASK_STATUS]="Done",AllIssues[SUBTASK_STATUS]="Cancelled"),0, AllIssues[worklog])
-Sheet "From Jira" Row "2" AddFormula "CB2": IF(COUNTIFS(AllIssues[TASK_ID],AllIssues[TASK_ID],AllIssues[TASK_ID],">0")=0,0,1/COUNTIFS(AllIssues[TASK_ID],AllIssues[TASK_ID],AllIssues[TASK_ID],">0"))
-Sheet "From Jira" Row "2" AddFormula "CC2": IF(COUNTIFS(AllIssues[demand_description],AllIssues[demand_description])=0,0,1/COUNTIFS(AllIssues[demand_description],AllIssues[demand_description]))
-Sheet "From Jira" Row "2" AddFormula "CD2": IF(AllIssues[planning_type]="Plan",1,0)
-Sheet "From Jira" Row "2" AddFormula "CE2": IF(AllIssues[[#This Row],[SUBTASK_STATUS]]="Done", AllIssues[[#This Row],[EffortDone]],0)
-Sheet "From Jira" Row "2" AddFormula "CF2": IF(AllIssues[TASK_TYPE]="Bug",AllIssues[EffortEstimate], 0)
-Sheet "From Jira" Row "2" AddFormula "CG2": IF(AllIssues[TASK_TYPE]="Bug",AllIssues[worklog],0)
+Sheet "From Jira" Row "2" AddColumn "BR2": 5.0
+Sheet "From Jira" Row "2" AddColumn "BS2": 0.0
+Sheet "From Jira" Row "2" AddColumn "BT2": 3.0
+Sheet "From Jira" Row "2" AddColumn "BU2": 0.0
+Sheet "From Jira" Row "2" AddColumn "BV2": 0.0
+Sheet "From Jira" Row "2" AddColumn "BW2": 0.0
+Sheet "From Jira" Row "2" AddColumn "BX2": 2.0
+Sheet "From Jira" Row "2" AddColumn "BY2": 0.0
+Sheet "From Jira" Row "2" AddColumn "BZ2": 0.0
+Sheet "From Jira" Row "2" AddColumn "CA2": 0.0
+Sheet "From Jira" Row "2" AddColumn "CB2": 0.0
+Sheet "From Jira" Row "2" AddColumn "CC2": 0.0
+Sheet "From Jira" Row "2" AddColumn "CD2": 0.0
+Sheet "From Jira" Row "2" AddColumn "CE2": 0.0
+Sheet "From Jira" Row "2" AddColumn "CF2": 0.0
+Sheet "From Jira" Row "2" AddColumn "CG2": 0.0
 Sheet "From Jira" Row "2" AddColumn "CH2": null
 Sheet "From Jira" Row "2" AddColumn "CI2": null
 Sheet "From Jira" Row "2" AddColumn "CJ2": null

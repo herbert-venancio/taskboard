@@ -11,7 +11,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import objective.taskboard.followup.FollowUpSnapshot.SnapshotRow;
+import objective.taskboard.followup.FromJiraRowCalculator.FromJiraRowCalculation;
 import objective.taskboard.followup.cluster.ClusterNotConfiguredException;
 
 @Service
@@ -44,23 +44,23 @@ public class FollowUpScopeByTypeDataProvider {
         if (!snapshot.hasClusterConfiguration())
             throw new ClusterNotConfiguredException();
         
-        for (SnapshotRow r : snapshot.getSnapshotRows()) {
-            Double effortEstimate = r.calcutatedData.getEffortEstimate();
-            if (rowService.isIntangible(r.rowData) && rowService.isDone(r.rowData))
+        for (FromJiraRowCalculation r : snapshot.getFromJiraRowCalculations()) {
+            Double effortEstimate = r.getEffortEstimate();
+            if (rowService.isIntangible(r.getRow()) && rowService.isDone(r.getRow()))
                 sum(map, INTANGIBLE_DONE, effortEstimate);
-            else if (rowService.isIntangible(r.rowData) && rowService.isBacklog(r.rowData))
+            else if (rowService.isIntangible(r.getRow()) && rowService.isBacklog(r.getRow()))
                 sum(map, INTANGIBLE_BACKLOG, effortEstimate);
-            else if (rowService.isNewScope(r.rowData) && rowService.isDone(r.rowData))
+            else if (rowService.isNewScope(r.getRow()) && rowService.isDone(r.getRow()))
                 sum(map, NEW_SCOPE_DONE, effortEstimate);
-            else if (rowService.isNewScope(r.rowData) && rowService.isBacklog(r.rowData))
+            else if (rowService.isNewScope(r.getRow()) && rowService.isBacklog(r.getRow()))
                 sum(map, NEW_SCOPE_BACKLOG, effortEstimate);
-            else if (rowService.isRework(r.rowData) && rowService.isDone(r.rowData))
+            else if (rowService.isRework(r.getRow()) && rowService.isDone(r.getRow()))
                 sum(map, REWORK_DONE, effortEstimate);
-            else if (rowService.isRework(r.rowData) && rowService.isBacklog(r.rowData))
+            else if (rowService.isRework(r.getRow()) && rowService.isBacklog(r.getRow()))
                 sum(map, REWORK_BACKLOG, effortEstimate);
-            else if (rowService.isBaselineDone(r.rowData))
+            else if (rowService.isBaselineDone(r.getRow()))
                 sum(map, BASELINE_DONE, effortEstimate);
-            else if (rowService.isBaselineBacklog(r.rowData))
+            else if (rowService.isBaselineBacklog(r.getRow()))
                 sum(map, BASELINE_BACKLOG, effortEstimate);
         }
 

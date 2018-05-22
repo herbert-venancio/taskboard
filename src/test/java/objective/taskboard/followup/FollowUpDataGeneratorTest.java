@@ -35,7 +35,7 @@ import org.junit.Test;
 import objective.taskboard.data.Worklog;
 import objective.taskboard.followup.cluster.FollowUpClusterItem;
 
-public class FollowUpDataMinerTest extends FollowUpDataMinerTestBase {
+public class FollowUpDataGeneratorTest extends FollowUpDataGeneratorTestBase {
 
     @Test
     public void demandWithoutChildFeatures_shouldCreateASingleBallpark() {

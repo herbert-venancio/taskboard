@@ -2,7 +2,6 @@ package objective.taskboard.followup;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.joining;
-import static objective.taskboard.utils.DateTimeUtils.parseDate;
 import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
 import static objective.taskboard.utils.DateTimeUtils.parseStringToDate;
 import static org.junit.Assert.assertEquals;
@@ -73,7 +72,7 @@ import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository
 import objective.taskboard.utils.Clock;
 
 @RunWith(MockitoJUnitRunner.class)
-public abstract class FollowUpDataMinerTestBase {
+public abstract class FollowUpDataGeneratorTestBase {
 
     @Mock
     protected JiraProperties jiraProperties;
@@ -382,7 +381,7 @@ public abstract class FollowUpDataMinerTestBase {
         }
 
         public IssueBuilder transition(String status, String date) {
-            return transition(status, parseDate(date));
+            return transition(status, parseDateTime(date));
         }
 
         public IssueBuilder transition(String status, ZonedDateTime date) {
@@ -404,7 +403,7 @@ public abstract class FollowUpDataMinerTestBase {
         }
         
         public IssueBuilder created(String created) {
-            return created(parseDate(created));
+            return created(parseDateTime(created));
         }
 
         public IssueBuilder created(String date, String time) {

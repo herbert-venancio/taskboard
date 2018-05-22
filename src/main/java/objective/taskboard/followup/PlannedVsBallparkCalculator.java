@@ -7,7 +7,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import objective.taskboard.followup.FollowUpSnapshot.SnapshotRow;
+import objective.taskboard.followup.FromJiraRowCalculator.FromJiraRowCalculation;
 import objective.taskboard.followup.cluster.ClusterNotConfiguredException;
 
 @Component
@@ -29,9 +29,9 @@ public class PlannedVsBallparkCalculator {
         PlannedVsBallparkChartData plannedChartData = new PlannedVsBallparkChartData("Planned", 0);
         PlannedVsBallparkChartData ballparkChartData = new PlannedVsBallparkChartData("Ballpark", 0);
 
-        for (SnapshotRow snapshotRow : snapshot.getSnapshotRows()) {
-            double effortEstimate = snapshotRow.calcutatedData.getEffortEstimate();
-            if (FromJiraDataRow.QUERY_TYPE_SUBTASK_PLAN.equals(snapshotRow.rowData.queryType)) {
+        for (FromJiraRowCalculation rowCalculation : snapshot.getFromJiraRowCalculations()) {
+            double effortEstimate = rowCalculation.getEffortEstimate();
+            if (FromJiraDataRow.QUERY_TYPE_SUBTASK_PLAN.equals(rowCalculation.getRow().queryType)) {
                 plannedChartData.totalEffort += effortEstimate;
             } else {
                 ballparkChartData.totalEffort += effortEstimate;

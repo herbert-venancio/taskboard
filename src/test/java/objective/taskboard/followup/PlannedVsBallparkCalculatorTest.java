@@ -14,7 +14,6 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import objective.taskboard.followup.FollowUpSnapshot.SnapshotRow;
 import objective.taskboard.followup.FromJiraRowCalculator.FromJiraRowCalculation;
 
 public class PlannedVsBallparkCalculatorTest {
@@ -25,7 +24,7 @@ public class PlannedVsBallparkCalculatorTest {
     
     @Before
     public void setup() {
-        when(snapshot.getSnapshotRows()).thenReturn(emptyList());
+        when(snapshot.getFromJiraRowCalculations()).thenReturn(emptyList());
         when(snapshot.hasClusterConfiguration()).thenReturn(true);
         
         when(snapshotService.getFromCurrentState(any(), any())).thenReturn(snapshot);
@@ -53,7 +52,7 @@ public class PlannedVsBallparkCalculatorTest {
     
     @Test
     public void givenSomeSnapshotRows_whenAccumulate_thenShouldSumEffortEstimateOfPlannedRows() {
-        when(snapshot.getSnapshotRows()).thenReturn(getSnapshotRows());
+        when(snapshot.getFromJiraRowCalculations()).thenReturn(getRowCalculations());
 
         PlannedVsBallparkChartData plannedData = getDataFromAccumulatorWithType(subject, "Planned");        
         assertEquals(25d, plannedData.totalEffort, 0d);                
@@ -61,13 +60,13 @@ public class PlannedVsBallparkCalculatorTest {
     
     @Test
     public void givenSomeSnapshotRows_whenAccumulate_thenShouldSumEffortEstimateOfBallparkRows() {
-        when(snapshot.getSnapshotRows()).thenReturn(getSnapshotRows());
+        when(snapshot.getFromJiraRowCalculations()).thenReturn(getRowCalculations());
 
         PlannedVsBallparkChartData ballparkData = getDataFromAccumulatorWithType(subject, "Ballpark");        
         assertEquals(45d, ballparkData.totalEffort, 0d);                
     }
 
-    private List<SnapshotRow> getSnapshotRows() {
+    private List<FromJiraRowCalculation> getRowCalculations() {
         FromJiraDataRow plannedRow = new FromJiraDataRow();
         plannedRow.queryType = FromJiraDataRow.QUERY_TYPE_SUBTASK_PLAN;
         
@@ -77,11 +76,11 @@ public class PlannedVsBallparkCalculatorTest {
         FromJiraDataRow ballparkRow2 = new FromJiraDataRow();
         ballparkRow2.queryType = FromJiraDataRow.QUERY_TYPE_FEATURE_BALLPARK;
         
-        List<SnapshotRow> snapshotRows = Arrays.asList(
-                new SnapshotRow(plannedRow, new FromJiraRowCalculation(10d, 0d, 0d)),
-                new SnapshotRow(plannedRow, new FromJiraRowCalculation(15d, 0d, 0d)),
-                new SnapshotRow(ballparkRow1, new FromJiraRowCalculation(20d, 0d, 0d)),
-                new SnapshotRow(ballparkRow1, new FromJiraRowCalculation(25d, 0d, 0d)));
+        List<FromJiraRowCalculation> snapshotRows = Arrays.asList(
+                new FromJiraRowCalculation(plannedRow, 10d, 0d, 0d),
+                new FromJiraRowCalculation(plannedRow, 15d, 0d, 0d),
+                new FromJiraRowCalculation(ballparkRow1, 20d, 0d, 0d),
+                new FromJiraRowCalculation(ballparkRow1, 25d, 0d, 0d));
         return snapshotRows;
     }
     
