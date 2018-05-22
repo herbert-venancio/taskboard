@@ -29,6 +29,7 @@ public class ProjectData {
     public String projectKey;
     public String defaultTeam;
     public List<String> followUpDataHistory = new ArrayList<String>();
+    public List<String> roles = new ArrayList<String>();
 
     public static class ProjectConfigurationData {
         public String projectKey;

@@ -41,6 +41,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import objective.taskboard.auth.Authorizer;
 import objective.taskboard.controller.ProjectCreationData.ProjectCreationDataTeam;
 import objective.taskboard.controller.ProjectData.ProjectConfigurationData;
 import objective.taskboard.data.Team;
@@ -72,6 +73,9 @@ public class ProjectController {
     @Autowired
     private FollowUpFacade followUpFacade;
 
+    @Autowired
+    private Authorizer authorizer;
+
     @RequestMapping
     public List<ProjectData> getProjectsVisibleOnTaskboard() {
         return projectService.getTaskboardProjects(projectService::isNonArchivedAndUserHasAccess).stream()
@@ -89,13 +93,6 @@ public class ProjectController {
     @RequestMapping("/dashboard")
     public List<ProjectData> getProjectsVisibleOnDashboard() {
         return projectService.getTaskboardProjects(projectService::isNonArchivedAndUserHasAccess, DASHBOARD_TACTICAL, DASHBOARD_OPERATIONAL).stream()
-                .map(pfc -> generateProjectData(pfc))
-                .collect(toList());
-    }
-
-    @RequestMapping("/followup")
-    public List<ProjectData> getProjectsVisibleOnFollowupConfigurations() {
-        return projectService.getTaskboardProjects(projectService::isNonArchivedAndUserHasAccess, ADMINISTRATIVE).stream()
                 .map(pfc -> generateProjectData(pfc))
                 .collect(toList());
     }
@@ -224,6 +221,7 @@ public class ProjectController {
         ProjectData projectData = new ProjectData();
         projectData.projectKey = projectFilterConfiguration.getProjectKey();
         projectData.followUpDataHistory = followUpFacade.getHistoryGivenProjects(projectData.projectKey);
+        projectData.roles = authorizer.getRolesForProject(projectFilterConfiguration.getProjectKey());
         return projectData;
     }
 }
