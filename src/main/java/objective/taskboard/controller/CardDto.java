@@ -27,7 +27,6 @@ public class CardDto {
     public long type;
     public String summary;
     public long status;
-    public long startDateStepMillis;
     public String parent;
     public List<String> dependencies;
     public long priority;
@@ -83,7 +82,6 @@ public class CardDto {
         cardDto.summary = issue.getSummary();
         cardDto.status = issue.getStatus();
         cardDto.statusOrder = statusOrderCalculator.computeStatusOrder(cardDto.type, cardDto.status);
-        cardDto.startDateStepMillis = issue.getStartDateStepMillis();
         cardDto.dependencies = issue.getDependencies();
         cardDto.assignees = issue.getAssignees();
         cardDto.priority = issue.getPriority();
@@ -130,6 +128,7 @@ public class CardDto {
         
         cardDto.mismatchingUsers = issue.getMismatchingUsers();
         cardDto.stateHash = CardDto.calculateHash(cardDto);
+        
         return cardDto;
     }
 
@@ -148,7 +147,6 @@ public class CardDto {
                 , dto.type
                 , dto.summary
                 , dto.status
-                , dto.startDateStepMillis
                 , dto.parent
                 , dto.parentType
                 , dto.dependencies
@@ -183,7 +181,6 @@ public class CardDto {
                 , dto.cardTshirtSize
                 , dto.parentTypeIconUri
                 , dto.statusOrder
-    
         );
     }
 }

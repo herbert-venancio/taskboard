@@ -23,6 +23,10 @@ import objective.taskboard.testUtils.SystemClockMock;
 @RunWith(MockitoJUnitRunner.class)
 public class CycleTimeTest {
 
+    private static final long DERREFED_STATUS_ID = 10102L;
+    private static final long CANCELED_STATUS_ID = 10101L;
+    private static final long COMPLETED_STATUS_ID = 10001L;
+
     private static final ZoneId ZONE_ID = ZoneId.of("America/Sao_Paulo");
 
     @Mock
@@ -45,18 +49,26 @@ public class CycleTimeTest {
         Instant now = ZonedDateTime.of(2017, 12, 18, 15, 57, 28, 867000000, ZONE_ID).toInstant();
         when(clock.now()).thenReturn(now);
 
-        when(cycleTimeProperties.getStartBusinessHours()).thenReturn(new Time(9, 0, "am"));
-        when(cycleTimeProperties.getEndBusinessHours()).thenReturn(new Time(6, 0, "pm"));
+        when(cycleTimeProperties.getStartBusinessHours())
+            .thenReturn(new Time(9, 0, "am"));
+        
+        when(cycleTimeProperties.getEndBusinessHours())
+            .thenReturn(new Time(6, 0, "pm"));
 
-        when(jiraProperties.getStatusesCompletedIds()).thenReturn(asList(10001L));
-        when(jiraProperties.getStatusesCanceledIds()).thenReturn(asList(10101L));
-        when(jiraProperties.getStatusesDeferredIds()).thenReturn(asList(10102L));
+        when(jiraProperties.getStatusesCompletedIds())
+            .thenReturn(asList(COMPLETED_STATUS_ID));
+        
+        when(jiraProperties.getStatusesCanceledIds())
+            .thenReturn(asList(CANCELED_STATUS_ID));
+        
+        when(jiraProperties.getStatusesDeferredIds())
+            .thenReturn(asList(DERREFED_STATUS_ID));
     }
 
     @Test
     public void whenGetCycleTime_returnCorrectValue() {
         ZonedDateTime startDate = ZonedDateTime.of(2017, 12, 12, 15, 54, 03, 0, ZONE_ID);
-        Double cycleTimeValue = subject.getCycleTime(startDate.toInstant(), ZONE_ID, 0L);
+        Double cycleTimeValue = subject.getCycleTime(startDate.toInstant(), ZONE_ID, 0L).get();
 
         Double expected = 4.006353919753087;
         assertEquals(expected, cycleTimeValue);
@@ -65,38 +77,35 @@ public class CycleTimeTest {
     @Test
     public void ifStartDateIsTheSameDayOfNow_calcJustTheDifferenceBetweenThemInMillis() {
         ZonedDateTime startDate = ZonedDateTime.of(2017, 12, 18, 10, 0, 0, 0, ZONE_ID);
-        Double cycleTimeValue = subject.getCycleTime(startDate.toInstant(), ZONE_ID, 0L);
+        Double cycleTimeValue = subject.getCycleTime(startDate.toInstant(), ZONE_ID, 0L).get();
 
         Double expected = 0.6620020679012346;
         assertEquals(expected, cycleTimeValue);
     }
 
     @Test
-    public void ifIncalculableStatus_returnZero() {
+    public void ifIncalculableStatus_returnNegative() {
         ZonedDateTime startDate = ZonedDateTime.of(2017, 12, 12, 15, 54, 03, 0, ZONE_ID);
         Double expected = 0D;
 
-        long completedStatusId = 10001L;
-        Double cycleTimeWithCompletedStatus = subject.getCycleTime(startDate.toInstant(), ZONE_ID, completedStatusId);
+        Double cycleTimeWithCompletedStatus = subject.getCycleTime(startDate.toInstant(), ZONE_ID, COMPLETED_STATUS_ID).orElse(0D);
         assertEquals(expected, cycleTimeWithCompletedStatus);
 
-        long canceledStatusId = 10001L;
-        Double cycleTimeWithCanceledStatus = subject.getCycleTime(startDate.toInstant(), ZONE_ID, canceledStatusId);
+        Double cycleTimeWithCanceledStatus = subject.getCycleTime(startDate.toInstant(), ZONE_ID, CANCELED_STATUS_ID).orElse(0D);
         assertEquals(expected, cycleTimeWithCanceledStatus);
 
-        long deferredStatusId = 10001L;
-        Double cycleTimeWithDeferredStatus = subject.getCycleTime(startDate.toInstant(), ZONE_ID, deferredStatusId);
+        Double cycleTimeWithDeferredStatus = subject.getCycleTime(startDate.toInstant(), ZONE_ID, DERREFED_STATUS_ID).orElse(0D);
         assertEquals(expected, cycleTimeWithDeferredStatus);
-
+        
         long otherStatusId = 1L;
-        Double cycleTimeWithOtherStatus = subject.getCycleTime(startDate.toInstant(), ZONE_ID, otherStatusId);
+        Double cycleTimeWithOtherStatus = subject.getCycleTime(startDate.toInstant(), ZONE_ID, otherStatusId).get();
         assertNotEquals(expected, cycleTimeWithOtherStatus);
     }
 
     @Test
     public void ifNowIsBeforeStartDate_returnZero() {
         ZonedDateTime startDate = ZonedDateTime.of(2020, 1, 1, 0, 0, 0, 0, ZONE_ID);
-        Double cycleTimeValue = subject.getCycleTime(startDate.toInstant(), ZONE_ID, 0L);
+        Double cycleTimeValue = subject.getCycleTime(startDate.toInstant(), ZONE_ID, 0L).get();
 
         Double expected = 0D;
         assertEquals(expected, cycleTimeValue);

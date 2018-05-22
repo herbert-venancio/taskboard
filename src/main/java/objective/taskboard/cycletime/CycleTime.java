@@ -4,6 +4,7 @@ import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,10 +29,10 @@ public class CycleTime {
         this.jiraProperties = jiraProperties;
     }
 
-    public Double getCycleTime(Instant startDateInstant, ZoneId timezone, Long status) {
+    public Optional<Double> getCycleTime(Instant startDateInstant, ZoneId timezone, Long status) {
 
         if (!isIssueOnCalculableStatus(status))
-            return 0D;
+            return Optional.empty();
 
         final Instant instantToCalc = clock.now();
         final ZonedDateTime startDate = ZonedDateTime.ofInstant(startDateInstant, timezone);
@@ -41,13 +42,16 @@ public class CycleTime {
         final ZonedDateTime endWorkDay = getEndWorkDay(endDate);
 
         if (endWorkDay.isBefore(startWorkDay))
-            return 0D;
+            return Optional.ofNullable(0D);
 
-        if (isSameDay(startWorkDay, endWorkDay))
-            return toWorkedDays(
+        if (isSameDay(startWorkDay, endWorkDay)) {
+            Double workedDays = toWorkedDays(
                     endWorkDay.toInstant().toEpochMilli() - startWorkDay.toInstant().toEpochMilli(),
                     instantToCalc,
                     timezone);
+            
+            return Optional.ofNullable(workedDays);
+        }
 
         final long millisecondsWorkedStartDate = getEndBusinessHours(startWorkDay).toInstant().toEpochMilli() - startWorkDay.toInstant().toEpochMilli();
         final long millisecondsWorkedEndDate = endWorkDay.toInstant().toEpochMilli() - getStartBusinessHours(endWorkDay).toInstant().toEpochMilli();
@@ -61,9 +65,11 @@ public class CycleTime {
             currentDate = currentDate.plusDays(1);
         }
 
-        return toWorkedDays(millisecondsWorked, instantToCalc, timezone);
+        Double workedDays = toWorkedDays(millisecondsWorked, instantToCalc, timezone);
+        
+        return Optional.ofNullable(workedDays);
     }
-
+    
     private ZonedDateTime getStartWorkDay(ZonedDateTime startDate) {
         final ZonedDateTime startBusinessHours = getStartBusinessHours(startDate);
         if (isWorkDay(startDate))
@@ -138,5 +144,5 @@ public class CycleTime {
                 jiraProperties.getStatusesCanceledIds().contains(status) ||
                 jiraProperties.getStatusesDeferredIds().contains(status));
     }
-
+    
 }
