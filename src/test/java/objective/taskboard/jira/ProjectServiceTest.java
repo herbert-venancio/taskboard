@@ -2,18 +2,15 @@ package objective.taskboard.jira;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
-import static objective.taskboard.config.CacheConfiguration.ALL_PROJECTS;
-import static objective.taskboard.jira.AuthorizedJiraEndpointTest.JIRA_MASTER_PASSWORD;
-import static objective.taskboard.jira.AuthorizedJiraEndpointTest.JIRA_MASTER_USERNAME;
 import static objective.taskboard.repository.PermissionRepository.ADMINISTRATIVE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -21,32 +18,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.cache.CacheManager;
-import org.springframework.context.annotation.Bean;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import com.atlassian.jira.rest.client.api.domain.CimProject;
 
 import objective.taskboard.auth.Authorizer;
 import objective.taskboard.domain.Project;
 import objective.taskboard.domain.ProjectFilterConfiguration;
+import objective.taskboard.jira.data.JiraProject;
 import objective.taskboard.jira.data.Version;
 import objective.taskboard.project.ProjectBaselineProvider;
+import objective.taskboard.project.ProjectProfileItemRepository;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
-import objective.taskboard.repository.ProjectFilterConfigurationRepository;
-import objective.taskboard.testUtils.JiraMockServer;
 
-@RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {
-        AuthorizedJiraEndpointTest.Configuration.class
-        , ProjectServiceTest.Configuration.class})
 public class ProjectServiceTest {
 
     private final static String PROJECT_ARCHIVED = "PROJ1";
@@ -56,72 +43,15 @@ public class ProjectServiceTest {
     private final static String PROJECT_WITHOUT_METADATA = "PROJ5";
     private final static String PROJECT_INVALID = "PROJECTINVALID";
 
-    public static class Configuration {
-        @Bean
-        public ProjectFilterConfigurationCachedRepository projectRepository() {
-            return spy(new ProjectFilterConfigurationCachedRepository());
-        }
-        @Bean
-        public JiraProjectService jiraProjectService() {
-            return new JiraProjectService() {
-                @Override
-                public Map<String, Project> getUserProjects() {
-                    return generateUserProjects();
-                }
-                @Override
-                public Iterable<CimProject> getCreateIssueMetadata(String projectKey) {
-                    if (PROJECT_WITHOUT_METADATA.equals(projectKey))
-                        return asList();
-                    return asList(new CimProject(null, null, null, null, null, null));
-                }
-            };
-        }
-        @Bean
-        public ProjectService projectService() {
-            return new ProjectService();
-        }
-    }
-
-    @Autowired
-    private JiraMockServer jira;
-
-    @MockBean
-    private JiraProperties jiraProperties;
-
-    @MockBean
-    private ProjectFilterConfigurationRepository projectFilterRepository;
-
-    @MockBean
-    private Authorizer authorizer;
-    
-    @MockBean
-    private ProjectBaselineProvider projectBaselineProvider;
-
-    @Autowired
-    private ProjectFilterConfigurationCachedRepository projectRepository;
-
-    @Autowired
-    private ProjectService subject;
-
-    @Autowired
-    private CacheManager cacheManager;
+    private ProjectFilterConfigurationCachedRepository projectRepository = mock(ProjectFilterConfigurationCachedRepository.class);
+    private ProjectProfileItemRepository projectProfileItemRepository = mock(ProjectProfileItemRepository.class);
+    private JiraProjectService jiraProjectService = mock(JiraProjectService.class);
+    private Authorizer authorizer = mock(Authorizer.class);
+    private ProjectBaselineProvider projectBaselineProvider = mock(ProjectBaselineProvider.class);
+    private ProjectService subject = new ProjectService(projectRepository, projectProfileItemRepository, jiraProjectService, authorizer, projectBaselineProvider);
 
     @Before
-    public void setupSecurity() {
-        // master user
-        JiraProperties.Lousa lousa = new JiraProperties.Lousa();
-        lousa.setUsername(JIRA_MASTER_USERNAME);
-        lousa.setPassword(JIRA_MASTER_PASSWORD);
-        doReturn(lousa).when(jiraProperties).getLousa();
-    }
-
-    @Before
-    public void setupProperties() {
-        doReturn("http://localhost:" + jira.port()).when(jiraProperties).getUrl();
-    }
-
-    @Before
-    public void mockRepository() {
+    public void setup() {
         ProjectFilterConfiguration taskb = new ProjectFilterConfiguration("TASKB", 1L);
         ProjectFilterConfiguration proj1 = new ProjectFilterConfiguration(PROJECT_ARCHIVED, 1L);
         proj1.setArchived(true);
@@ -135,8 +65,31 @@ public class ProjectServiceTest {
         proj5.setArchived(false);
 
         List<ProjectFilterConfiguration> projectList = asList(taskb, proj1, proj2, proj3, proj4, proj5);
-        doReturn(projectList).when(projectFilterRepository).findAll();
-        projectRepository.loadCache();
+        Map<String, ProjectFilterConfiguration> projectsByKey = projectList.stream().collect(Collectors.toMap(p -> p.getProjectKey(), p -> p));
+        
+        when(projectRepository.getProjects()).thenReturn(projectList);
+        when(projectRepository.exists(any())).thenAnswer(i -> projectsByKey.containsKey(i.getArgumentAt(0, String.class)));
+        when(projectRepository.getProjectByKey(any())).thenAnswer(i -> Optional.ofNullable(projectsByKey.get(i.getArgumentAt(0, String.class))));
+        when(projectRepository.getProjectByKeyOrCry(any())).thenAnswer(i -> projectsByKey.get(i.getArgumentAt(0, String.class)));
+        
+        when(jiraProjectService.getUserProjects()).thenReturn(generateUserProjects());
+        
+        when(jiraProjectService.getCreateIssueMetadata(any())).thenAnswer(i -> {
+            String projectKey = i.getArgumentAt(0, String.class);
+
+            return PROJECT_WITHOUT_METADATA.equals(projectKey) 
+                    ? emptyList() 
+                    : asList(new CimProject(null, projectKey, 1L, projectKey, emptyMap(), emptyList()));
+        });
+        
+        List<Version> versions = asList(new Version("12549", "0.3"), new Version("12550", "1.0"),  new Version("12551", "2.0"));
+
+        when(jiraProjectService.getAllProjects()).thenReturn(
+                projectList.stream().map(p -> new JiraProject("1", p.getProjectKey(), versions, null)).collect(toList()));
+        
+        when(authorizer.getAllowedProjectsForPermissions(any())).thenReturn(asList(PROJECT_ARCHIVED, PROJECT_REGULAR_1, PROJECT_REGULAR_2, PROJECT_WITHOUT_METADATA));
+        
+        when(projectBaselineProvider.getAvailableDates(any())).thenReturn(emptyList());
     }
 
     private static Map<String, Project> generateUserProjects() {
@@ -166,13 +119,6 @@ public class ProjectServiceTest {
         return projectsMap;
     }
 
-    @Before
-    public void setupOtherMocks() {
-        doReturn(asList(PROJECT_ARCHIVED, PROJECT_REGULAR_1, PROJECT_REGULAR_2, PROJECT_WITHOUT_METADATA)).when(authorizer).getAllowedProjectsForPermissions(any());
-        
-        when(projectBaselineProvider.getAvailableDates(any())).thenReturn(emptyList());
-    }
-
     @Test
     public void getVersion() {
         Version expected = new Version("12550", "1.0");
@@ -187,15 +133,6 @@ public class ProjectServiceTest {
         Version version2 = subject.getVersion("12550");
 
         assertTrue(version1 == version2);
-    }
-
-    @Test
-    public void evict() {
-        Version version1 = subject.getVersion("12550");
-        cacheManager.getCache(ALL_PROJECTS).clear();
-        Version version2 = subject.getVersion("12550");
-
-        assertTrue(version1 != version2);
     }
 
     @Test

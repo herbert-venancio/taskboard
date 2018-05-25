@@ -5,29 +5,37 @@ import java.util.List;
 import java.util.Optional;
 
 import objective.taskboard.followup.ReleaseHistoryProvider.ProjectRelease;
+import objective.taskboard.project.ProjectProfileItem;
 
 class FixedFollowUpSnapshotValuesProvider implements FollowUpSnapshotValuesProvider {
 
-    private final List<EffortHistoryRow> effortHistory;
-    private final List<ProjectRelease> releases;
-    private final Optional<FollowUpData> scopeBaseline;
+    private List<EffortHistoryRow> effortHistory = Collections.emptyList();
+    private List<ProjectRelease> releases = Collections.emptyList();
+    private List<ProjectProfileItem> projectProfile = Collections.emptyList();
+    private Optional<FollowUpData> scopeBaseline = Optional.empty();
 
-    public FixedFollowUpSnapshotValuesProvider(List<EffortHistoryRow> effortHistory, List<ProjectRelease> releases, FollowUpData scopeBaseline) {
-        this.effortHistory = effortHistory;
-        this.releases = releases;
-        this.scopeBaseline = Optional.ofNullable(scopeBaseline);
-    }
-    
-    public FixedFollowUpSnapshotValuesProvider(List<EffortHistoryRow> effortHistory) {
-        this(effortHistory, Collections.emptyList(), null);
-    }
-    
-    public FixedFollowUpSnapshotValuesProvider() {
-        this(Collections.emptyList());
-    }
-    
     public static FollowUpSnapshotValuesProvider emptyValuesProvider() {
         return new FixedFollowUpSnapshotValuesProvider();
+    }
+
+    public FixedFollowUpSnapshotValuesProvider effortHistory(List<EffortHistoryRow> effortHistory) {
+        this.effortHistory = effortHistory;
+        return this;
+    }
+
+    public FixedFollowUpSnapshotValuesProvider releases(List<ProjectRelease> releases) {
+        this.releases = releases;
+        return this;
+    }
+
+    public FixedFollowUpSnapshotValuesProvider projectProfile(List<ProjectProfileItem> projectProfile) {
+        this.projectProfile = projectProfile;
+        return this;
+    }
+
+    public FixedFollowUpSnapshotValuesProvider scopeBaseline(Optional<FollowUpData> scopeBaseline) {
+        this.scopeBaseline = scopeBaseline;
+        return this;
     }
 
     @Override
@@ -43,5 +51,10 @@ class FixedFollowUpSnapshotValuesProvider implements FollowUpSnapshotValuesProvi
     @Override
     public Optional<FollowUpData> getScopeBaseline() {
         return scopeBaseline;
+    }
+
+    @Override
+    public List<ProjectProfileItem> getProjectProfile() {
+        return projectProfile;
     }
 }

@@ -19,14 +19,14 @@ import objective.taskboard.domain.FollowupDailySynthesis;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.cluster.EmptyFollowupCluster;
 import objective.taskboard.followup.cluster.FollowupClusterProvider;
-import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
+import objective.taskboard.jira.ProjectService;
 import objective.taskboard.testUtils.FixedClock;
 
 public class FollowUpSnapshotServiceTest {
 
     private FixedClock clock = new FixedClock();
     private FollowUpDataRepositoryMock historyRepository = new FollowUpDataRepositoryMock();
-    private ProjectFilterConfigurationCachedRepository projectRepository = mock(ProjectFilterConfigurationCachedRepository.class);
+    private ProjectService projectService = mock(ProjectService.class);
     private FollowupDailySynthesisRepositoryMock dailySynthesisRepository = new FollowupDailySynthesisRepositoryMock();
     private FollowUpDataGenerator dataGenerator = mock(FollowUpDataGenerator.class);
     private FollowupClusterProvider clusterProvider = mock(FollowupClusterProvider.class);
@@ -39,7 +39,7 @@ public class FollowUpSnapshotServiceTest {
     private FollowUpSnapshotService subject = new FollowUpSnapshotService(
             clock, 
             historyRepository, 
-            projectRepository, 
+            projectService, 
             dailySynthesisRepository, 
             dataGenerator, 
             clusterProvider, 
@@ -55,9 +55,9 @@ public class FollowUpSnapshotServiceTest {
         when(project2.getId()).thenReturn(92);
         when(project2.getBaselineDate()).thenReturn(Optional.empty());
         
-        when(projectRepository.getProjects()).thenReturn(asList(project1, project2));
-        when(projectRepository.getProjectByKeyOrCry(eq("PROJ1"))).thenReturn(project1);
-        when(projectRepository.getProjectByKeyOrCry(eq("PROJ2"))).thenReturn(project2);
+        when(projectService.getTaskboardProjects()).thenReturn(asList(project1, project2));
+        when(projectService.getTaskboardProjectOrCry(eq("PROJ1"))).thenReturn(project1);
+        when(projectService.getTaskboardProjectOrCry(eq("PROJ2"))).thenReturn(project2);
         
         when(dataGenerator.generate(any(), any())).thenReturn(getEmptyFollowupData());
         
@@ -93,7 +93,7 @@ public class FollowUpSnapshotServiceTest {
         dailySynthesisRepository.add(new FollowupDailySynthesis(91, LocalDate.parse("2018-04-10"), 9.0, 2.0));
 
         when(dataGenerator.generate(any(), any())).thenReturn(getEmptyFollowupData());
-        when(projectRepository.getProjects()).thenReturn(asList(project1));
+        when(projectService.getTaskboardProjects()).thenReturn(asList(project1));
         
         clock.setNow("2018-04-10T12:00:00.00Z");
         subject.storeSnapshots(timezone);

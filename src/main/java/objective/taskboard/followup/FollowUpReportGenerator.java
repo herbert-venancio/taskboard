@@ -40,6 +40,7 @@ import objective.taskboard.followup.ReleaseHistoryProvider.ProjectRelease;
 import objective.taskboard.followup.cluster.FollowUpClusterItem;
 import objective.taskboard.followup.cluster.FollowupCluster;
 import objective.taskboard.google.SpreadsheetUtils.SpreadsheetA1Range;
+import objective.taskboard.project.ProjectProfileItem;
 import objective.taskboard.spreadsheet.Sheet;
 import objective.taskboard.spreadsheet.SheetRow;
 import objective.taskboard.spreadsheet.SheetTable;
@@ -69,6 +70,7 @@ public class FollowUpReportGenerator {
             generateTShirtSizeSheet(snapshot.getCluster());
             generateWorklogSheet(followupData, timezone);
             generateScopeBaselineSheet(snapshot);
+            generateProjectProfileSheet(snapshot);
 
             return IOUtilities.asResource(editor.toBytes());
         } catch (Exception e) {
@@ -415,6 +417,27 @@ public class FollowUpReportGenerator {
             row.addColumn(clusterItem.getProject().getProjectKey());
         }
 
+        sheet.save();
+    }
+
+    private void generateProjectProfileSheet(FollowUpSnapshot snapshot) {
+        Sheet sheet = editor.getOrCreateSheet("Project Profile");
+        sheet.truncate();
+        
+        SheetRow header = sheet.createRow();
+        header.addColumn("Role Name");
+        header.addColumn("People Count");
+        header.addColumn("Allocation Start");
+        header.addColumn("Allocation End");
+        
+        for (ProjectProfileItem projectProfileItem : snapshot.getProjectProfile()) {
+            SheetRow row = sheet.createRow();
+            row.addColumn(projectProfileItem.getRoleName());
+            row.addColumn(projectProfileItem.getPeopleCount());
+            row.addColumn(projectProfileItem.getAllocationStart());
+            row.addColumn(projectProfileItem.getAllocationEnd());
+        }
+        
         sheet.save();
     }
 

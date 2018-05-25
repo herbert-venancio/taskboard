@@ -60,6 +60,7 @@ import objective.taskboard.followup.cluster.FollowUpClusterItem;
 import objective.taskboard.followup.cluster.FollowupCluster;
 import objective.taskboard.followup.cluster.FollowupClusterImpl;
 import objective.taskboard.google.SpreadsheetUtils.SpreadsheetA1Range;
+import objective.taskboard.project.ProjectProfileItem;
 import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor;
 import objective.taskboard.spreadsheet.SimpleSpreadsheetEditorMock;
 import objective.taskboard.utils.DateTimeUtils;
@@ -274,6 +275,47 @@ public class FollowUpReportGeneratorTest {
                 "Spreadsheet Close";
 
         assertEquals(expectedEditorLogger, editor.loggerString("Effort History"));
+    }
+    
+    @Test
+    public void generateProjectProfile() throws IOException {
+        ProjectFilterConfiguration project = mock(ProjectFilterConfiguration.class);
+
+        List<ProjectProfileItem> projectProfile = asList(
+                new ProjectProfileItem(project, "Dev",    20, LocalDate.parse("2018-01-01"), LocalDate.parse("2018-05-01")),
+                new ProjectProfileItem(project, "UX",      4, LocalDate.parse("2018-02-01"), LocalDate.parse("2018-05-01")),
+                new ProjectProfileItem(project, "Tester",  8, LocalDate.parse("2018-03-01"), LocalDate.parse("2018-05-01")));
+
+        FollowUpSnapshot snapshot = new FollowUpSnapshotMockBuilder().projectProfile(projectProfile).build();
+        subject.generate(snapshot, timezone);
+
+        String expectedEditorLogger = 
+                "Spreadsheet Open\n" + 
+                "Sheet Create: Project Profile\n" + 
+                "Sheet \"Project Profile\" Row Create: 1\n" + 
+                "Sheet \"Project Profile\" Row \"1\" AddColumn \"A1\": Role Name\n" + 
+                "Sheet \"Project Profile\" Row \"1\" AddColumn \"B1\": People Count\n" + 
+                "Sheet \"Project Profile\" Row \"1\" AddColumn \"C1\": Allocation Start\n" +
+                "Sheet \"Project Profile\" Row \"1\" AddColumn \"D1\": Allocation End\n" +
+                "Sheet \"Project Profile\" Row Create: 2\n" + 
+                "Sheet \"Project Profile\" Row \"2\" AddColumn \"A2\": Dev\n" + 
+                "Sheet \"Project Profile\" Row \"2\" AddColumn \"B2\": 20\n" + 
+                "Sheet \"Project Profile\" Row \"2\" AddColumn \"C2\": 2018-01-01\n" +
+                "Sheet \"Project Profile\" Row \"2\" AddColumn \"D2\": 2018-05-01\n" +
+                "Sheet \"Project Profile\" Row Create: 3\n" + 
+                "Sheet \"Project Profile\" Row \"3\" AddColumn \"A3\": UX\n" + 
+                "Sheet \"Project Profile\" Row \"3\" AddColumn \"B3\": 4\n" + 
+                "Sheet \"Project Profile\" Row \"3\" AddColumn \"C3\": 2018-02-01\n" +
+                "Sheet \"Project Profile\" Row \"3\" AddColumn \"D3\": 2018-05-01\n" +
+                "Sheet \"Project Profile\" Row Create: 4\n" + 
+                "Sheet \"Project Profile\" Row \"4\" AddColumn \"A4\": Tester\n" + 
+                "Sheet \"Project Profile\" Row \"4\" AddColumn \"B4\": 8\n" + 
+                "Sheet \"Project Profile\" Row \"4\" AddColumn \"C4\": 2018-03-01\n" +
+                "Sheet \"Project Profile\" Row \"4\" AddColumn \"D4\": 2018-05-01\n" +
+                "Sheet \"Project Profile\" Save\n" + 
+                "Spreadsheet Close";
+
+        assertEquals(expectedEditorLogger, editor.loggerString("Project Profile"));
     }
 
     @Test

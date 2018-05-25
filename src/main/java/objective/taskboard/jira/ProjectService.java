@@ -39,22 +39,32 @@ import objective.taskboard.domain.Project;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.jira.data.Version;
 import objective.taskboard.project.ProjectBaselineProvider;
+import objective.taskboard.project.ProjectProfileItem;
+import objective.taskboard.project.ProjectProfileItemRepository;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 
 @Service
 public class ProjectService {
 
-    @Autowired
-    private ProjectFilterConfigurationCachedRepository projectRepository;
+    private final ProjectFilterConfigurationCachedRepository projectRepository;
+    private final ProjectProfileItemRepository projectProfileItemRepository;
+    private final JiraProjectService jiraProjectService;
+    private final Authorizer authorizer;
+    private final ProjectBaselineProvider baselineProvider;
 
     @Autowired
-    private JiraProjectService jiraProjectService;
-
-    @Autowired
-    private Authorizer authorizer;
-    
-    @Autowired
-    private ProjectBaselineProvider baselineProvider;
+    public ProjectService(
+            ProjectFilterConfigurationCachedRepository projectRepository,
+            ProjectProfileItemRepository projectProfileItemRepository, 
+            JiraProjectService jiraProjectService,
+            Authorizer authorizer, 
+            ProjectBaselineProvider baselineProvider) {
+        this.projectRepository = projectRepository;
+        this.projectProfileItemRepository = projectProfileItemRepository;
+        this.jiraProjectService = jiraProjectService;
+        this.authorizer = authorizer;
+        this.baselineProvider = baselineProvider;
+    }
 
     public List<Project> getNonArchivedJiraProjectsForUser() {
         return jiraProjectService.getUserProjects().values().stream()
@@ -158,6 +168,11 @@ public class ProjectService {
 
     public List<LocalDate> getAvailableBaselineDates(String projectKey) {
         return baselineProvider.getAvailableDates(projectKey);
+    }
+    
+    public List<ProjectProfileItem> getProjectProfile(String projectKey) {
+        ProjectFilterConfiguration project = projectRepository.getProjectByKeyOrCry(projectKey);
+        return projectProfileItemRepository.listByProject(project);
     }
 
 }

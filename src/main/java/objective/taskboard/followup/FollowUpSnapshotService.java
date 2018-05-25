@@ -18,8 +18,9 @@ import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.ReleaseHistoryProvider.ProjectRelease;
 import objective.taskboard.followup.cluster.FollowupCluster;
 import objective.taskboard.followup.cluster.FollowupClusterProvider;
+import objective.taskboard.jira.ProjectService;
+import objective.taskboard.project.ProjectProfileItem;
 import objective.taskboard.repository.FollowupDailySynthesisRepository;
-import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.utils.Clock;
 
 @Service
@@ -29,7 +30,7 @@ public class FollowUpSnapshotService {
 
     private final Clock clock;
     private final FollowUpDataRepository historyRepository;
-    private final ProjectFilterConfigurationCachedRepository projectRepository;
+    private final ProjectService projectService;
     private final FollowupDailySynthesisRepository dailySynthesisRepository;
     private final FollowUpDataGenerator dataGenerator;
     private final FollowupClusterProvider clusterProvider;
@@ -39,14 +40,14 @@ public class FollowUpSnapshotService {
     public FollowUpSnapshotService(
             Clock clock,
             FollowUpDataRepository historyRepository,
-            ProjectFilterConfigurationCachedRepository projectRepository,
+            ProjectService projectService,
             FollowupDailySynthesisRepository dailySynthesisRepository, 
             FollowUpDataGenerator dataGenerator,
             FollowupClusterProvider clusterProvider,
             ReleaseHistoryProvider releaseHistoryProvider) {
         this.clock = clock;
         this.historyRepository = historyRepository;
-        this.projectRepository = projectRepository;
+        this.projectService = projectService;
         this.dailySynthesisRepository = dailySynthesisRepository;
         this.dataGenerator = dataGenerator;
         this.clusterProvider = clusterProvider;
@@ -74,7 +75,7 @@ public class FollowUpSnapshotService {
     }
 
     private FollowUpSnapshot createSnapshot(ZoneId timezone, LocalDate date, String projectKey, FollowupDataSupplier dataSupplier) {
-        ProjectFilterConfiguration project = projectRepository.getProjectByKeyOrCry(projectKey);
+        ProjectFilterConfiguration project = projectService.getTaskboardProjectOrCry(projectKey);
         FollowUpTimeline timeline = FollowUpTimeline.build(date, project, historyRepository);
         FollowupCluster cluster = clusterProvider.getFor(project);
         FollowUpData data = dataSupplier.get(cluster);
@@ -96,6 +97,11 @@ public class FollowUpSnapshotService {
             public Optional<FollowUpData> getScopeBaseline() {
                 return timeline.getBaselineDate().map(d -> historyRepository.get(d, timezone, project.getProjectKey()));
             }
+
+            @Override
+            public List<ProjectProfileItem> getProjectProfile() {
+                return projectService.getProjectProfile(projectKey);
+            }
         };
 
         return new FollowUpSnapshot(timeline, data, cluster, valuesProvider);
@@ -103,7 +109,7 @@ public class FollowUpSnapshotService {
   
     public void storeSnapshots(ZoneId timezone) {
         log.info("Snapshots storage started...");
-        for (ProjectFilterConfiguration pf : projectRepository.getProjects()) {
+        for (ProjectFilterConfiguration pf : projectService.getTaskboardProjects()) {
             String projectKey = pf.getProjectKey();
 
             log.info("Snapshot storage of project " + projectKey + " started...");
@@ -124,7 +130,7 @@ public class FollowUpSnapshotService {
     public void syncSynthesis(ZoneId timezone) {
         log.info("Synthesis sync started...");
 
-        for (ProjectFilterConfiguration pf : projectRepository.getProjects()) {
+        for (ProjectFilterConfiguration pf : projectService.getTaskboardProjects()) {
             String projectKey = pf.getProjectKey();
 
             log.info("Synthesis sync of project " + projectKey + " started...");
@@ -136,7 +142,7 @@ public class FollowUpSnapshotService {
     }
 
     private synchronized void syncSynthesis(String projectKey, LocalDate date, ZoneId timezone, boolean override) {
-        ProjectFilterConfiguration project = projectRepository.getProjectByKeyOrCry(projectKey);
+        ProjectFilterConfiguration project = projectService.getTaskboardProjectOrCry(projectKey);
 
         if (dailySynthesisRepository.exists(project.getId(), date)) {
             if (override) {

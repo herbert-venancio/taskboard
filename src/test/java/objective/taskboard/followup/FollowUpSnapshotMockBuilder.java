@@ -18,6 +18,7 @@ import objective.taskboard.followup.cluster.EmptyFollowupCluster;
 import objective.taskboard.followup.cluster.FollowUpClusterItem;
 import objective.taskboard.followup.cluster.FollowupCluster;
 import objective.taskboard.followup.cluster.FollowupClusterImpl;
+import objective.taskboard.project.ProjectProfileItem;
 
 class FollowUpSnapshotMockBuilder {
     private FollowupCluster cluster;
@@ -25,6 +26,7 @@ class FollowUpSnapshotMockBuilder {
     private List<EffortHistoryRow> effortHistory;
     private EffortHistoryRow effortHistoryRow;
     private List<ProjectRelease> releases;
+    private List<ProjectProfileItem> projectProfile;
     private FollowUpData scopeBaseline;
     private FollowUpTimeline timeline;
     
@@ -51,6 +53,7 @@ class FollowUpSnapshotMockBuilder {
         when(snapshot.getEffortHistoryRow()).thenReturn(effortHistoryRow == null ? new EffortHistoryRow(timeline.getReference(), 0.0, 0.0) : effortHistoryRow);
         when(snapshot.getFromJiraRowCalculations()).thenReturn(fromJiraRowCalculations);
         when(snapshot.getReleases()).thenReturn(releases == null ? emptyList() : releases);
+        when(snapshot.getProjectProfile()).thenReturn(projectProfile == null ? emptyList() : projectProfile);
         when(snapshot.getScopeBaseline()).thenReturn(scopeBaseline);
         when(snapshot.getScopeBaselineRowCalculations()).thenReturn(scopeBaselineRowCalculations);
         when(snapshot.getTimeline()).thenReturn(timeline);
@@ -95,6 +98,11 @@ class FollowUpSnapshotMockBuilder {
 
     public FollowUpSnapshotMockBuilder releases(List<ProjectRelease> releases) {
         this.releases = releases;
+        return this;
+    }
+    
+    public FollowUpSnapshotMockBuilder projectProfile(List<ProjectProfileItem> projectProfile) {
+        this.projectProfile = projectProfile;
         return this;
     }
 

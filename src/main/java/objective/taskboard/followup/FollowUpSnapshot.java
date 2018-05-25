@@ -12,6 +12,7 @@ import java.util.Optional;
 import objective.taskboard.followup.FromJiraRowCalculator.FromJiraRowCalculation;
 import objective.taskboard.followup.ReleaseHistoryProvider.ProjectRelease;
 import objective.taskboard.followup.cluster.FollowupCluster;
+import objective.taskboard.project.ProjectProfileItem;
 
 public class FollowUpSnapshot {
     private final FollowUpTimeline timeline;
@@ -23,6 +24,7 @@ public class FollowUpSnapshot {
     
     private List<EffortHistoryRow> effortHistory;
     private List<ProjectRelease> releases;
+    private List<ProjectProfileItem> projectProfile;
     private Optional<FollowUpData> scopeBaseline;
     private List<FromJiraRowCalculation> scopeBaselineRowCalculations;
 
@@ -55,6 +57,13 @@ public class FollowUpSnapshot {
             releases = unmodifiableList(valuesProvider.getReleases());
 
         return releases;
+    }
+    
+    public List<ProjectProfileItem> getProjectProfile() {
+        if (projectProfile == null)
+            projectProfile = unmodifiableList(valuesProvider.getProjectProfile());
+
+        return projectProfile;
     }
     
     public Optional<FollowUpData> getScopeBaseline() {
