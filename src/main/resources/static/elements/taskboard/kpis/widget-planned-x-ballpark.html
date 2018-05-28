@@ -25,7 +25,7 @@
         <style>
         </style>
 
-        <widget-wrap title="Planned X Ballpark" is-ready="{{isReady}}" has-reset="true" error-message="{{errorMessage}}" chart="{{chart}}" >
+        <widget-wrap title="Planned X Ballpark" is-ready="{{isReady}}" has-reset="true" error-message="{{errorMessage}}" chart="{{chart}}" options="{{options}}">
 
             <div id="planned-x-ballpark" class="tb-chart"></div>
 
@@ -71,7 +71,11 @@
                         type: Object,
                         notify: true,
                         value: function() { return {}; }
-                    }
+                    },
+                    options: {
+                        type: Array,
+                        value: []
+                    },
                 },
 
                 observers: [
@@ -79,7 +83,23 @@
                     '_onCategorySelected(selectedCategory)'
                 ],
 
-                ready: function() {},
+                ready: function() {
+                    this._createChartOptions();
+                },
+
+                _createChartOptions: function() {
+                    var self = this;
+                    this.set('options', [
+                        {
+                            icon:'taskboard-icons:download',
+                            title: 'Download chart as picture',
+                            tap: function() {
+                                var fileName = 'Planned_X_Ballpark_' + getDateHour();
+                                downloadElementAsJpegImage('planned-x-ballpark', fileName);
+                            }
+                        }
+                    ]);
+                },
 
                 _onProjectSelected: function(selectedProjectKey, selectedDate) {
                     this.set('_isChartRendered', false);

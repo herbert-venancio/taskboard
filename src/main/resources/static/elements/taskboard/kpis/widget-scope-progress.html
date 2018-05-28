@@ -129,6 +129,14 @@
                             tap: function() {
                                 self.$.modal.open();
                             }
+                        },
+                        {
+                            icon:'taskboard-icons:download',
+                            title: 'Download chart as picture',
+                            tap: function() {
+                                var fileName = 'Scope_Progress_' + getDateHour();
+                                downloadElementAsJpegImage('scope-progress', fileName);
+                            }
                         }
                     ]);
                 },

@@ -39,7 +39,6 @@ function filterInArray(array, callback) {
     return res;
 }
 
-
 function isEmptyArray(array) {
     if (!Array.isArray(array))
         throw new TypeError('This value ('+ array +') is not an array');
@@ -63,6 +62,10 @@ function getDateFromYYYYMMDD(yyyymmdd) {
     var month = yyyymmdd.substr(4, 2) - 1;
     var day = yyyymmdd.substr(6, 2);
     return new Date(year, month, day);
+}
+
+function getDateHour() {
+    return moment().format('YYYY-MM-DD_HH:mm');
 }
 
 function addDaysToDate(date, days) {
@@ -95,6 +98,16 @@ function dateDiffInDays(dateA, dateB) {
     var utc2 = Date.UTC(dateB.getFullYear(), dateB.getMonth(), dateB.getDate());
 
     return Math.floor((utc2 - utc1) / _MS_PER_DAY);
+}
+
+function downloadElementAsJpegImage(elementId, fileName) {
+    domtoimage.toJpeg(document.getElementById(elementId), { quality: 0.95 })
+        .then(function (dataUrl) {
+            var link = document.createElement('a');
+            link.download = fileName + '.jpeg';
+            link.href = dataUrl;
+            link.click();
+        });
 }
 
 if (!Object.values) {

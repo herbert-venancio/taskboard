@@ -125,7 +125,11 @@
                             icon:'taskboard-icons:dashboard-filter'
                             , title: 'Filters'
                             , tap: this._openFiltersModal.bind(this)
-                            , hidden: true
+                        },
+                        {
+                            icon:'taskboard-icons:download'
+                            , title: 'Download chart as picture'
+                            , tap: this._downloadChart.bind(this)
                         },
                         {
                             icon: 'taskboard-icons:settings'
@@ -376,6 +380,11 @@
 
                 _getSavedLevel: function() {
                     return localStorage.getItem("dashboard.cfd-chart." + this.selectedProjectKey + ".level") || "Subtask";
+                },
+
+                _downloadChart: function() {
+                    var fileName = 'CFD_Chart_' + getDateHour();
+                    downloadElementAsJpegImage('cfd', fileName);
                 }
 
             });

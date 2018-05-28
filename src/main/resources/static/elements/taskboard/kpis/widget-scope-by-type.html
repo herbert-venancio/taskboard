@@ -25,7 +25,7 @@
         <style>
         </style>
 
-        <widget-wrap title="Scope By Type" is-ready="{{isReady}}" chart="{{chart}}" has-reset="true" error-message="{{errorMessage}}">
+        <widget-wrap title="Scope By Type" is-ready="{{isReady}}" chart="{{chart}}" has-reset="true" error-message="{{errorMessage}}" options="{{options}}">
 
             <div id="scope-by-type" class="tb-chart"></div>
 
@@ -58,6 +58,10 @@
                         notify: true,
                         value: function() { return {}; }
                     },
+                    options: {
+                        type: Array,
+                        value: []
+                    },
                     errorMessage: {
                         type: String,
                         notify: true
@@ -69,6 +73,21 @@
                 ],
 
                 ready: function() {
+                    this._createChartOptions();
+                },
+
+                _createChartOptions: function() {
+                    var self = this;
+                    this.set('options', [
+                        {
+                            icon:'taskboard-icons:download',
+                            title: 'Download chart as picture',
+                            tap: function() {
+                                var fileName = 'Scope_By_Type_' + getDateHour();
+                                downloadElementAsJpegImage('scope-by-type', fileName);
+                            }
+                        }
+                    ]);
                 },
 
                 _onProjectSelected: function(selectedProjectKey, selectedDate) {

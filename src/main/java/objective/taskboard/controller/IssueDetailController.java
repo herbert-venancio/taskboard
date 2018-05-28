@@ -78,7 +78,7 @@ public class IssueDetailController {
         return new JiraTimeTrackingDto(timeEstimateMinutes, timeSpentMinutes);
     }
 
-    private static class IssueDetailDto {
+    public static class IssueDetailDto {
 
         public Double cycleTime;
         public List<Transition> transitions;
