@@ -1688,7 +1688,7 @@
                             url: '/ws/issue-detail/' + self.item.issueKey + "?timezone="+ taskboard.getTimeZoneIdFromBrowser(),
                             type: 'get',
                             success: function (data, textStatus, jQxhr) {
-                                self.cycleTime = data.cycleTime.toFixed(2);
+                                self.cycleTime = data.cycleTime === null ? null : data.cycleTime.toFixed(2);
                                 self.transitions = data.transitions;
                                 self.timetrackingCallback(data.jiraTimeTracking);
                             },

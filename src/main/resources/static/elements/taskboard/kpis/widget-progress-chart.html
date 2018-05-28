@@ -121,6 +121,14 @@
                             tap: function() {
                                 self.$.modal.open();
                             }
+                        },
+                        {
+                            icon:'taskboard-icons:download',
+                            title: 'Download chart as picture',
+                            tap: function() {
+                                var fileName = 'Progress_Chart_' + getDateHour();
+                                downloadElementAsJpegImage('progress-chart', fileName);
+                            }
                         }
                     ]);
                 },

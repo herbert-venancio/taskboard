@@ -175,6 +175,9 @@
                 </template>
                 <template is="dom-if" if="[[_shouldShowOptions(isReady,errorMessage)]]">
                     <div class="widget__options">
+                        <template is="dom-if" if="{{_isChartFiltered}}">
+                            <a class="widget__reset widget__option" on-tap="_onTapReset">Reset</a>
+                        </template>
                         <template is="dom-repeat" items="{{options}}" as="option">
                             <template is="dom-if" if="{{!option.hidden}}">
                                 <paper-icon-button
@@ -184,9 +187,6 @@
                                     on-tap="_onOptionTap"
                                     ></paper-icon-button>
                             </template>
-                        </template>
-                        <template is="dom-if" if="{{_isChartFiltered}}">
-                            <a class="widget__reset widget__option" on-tap="_onTapReset">Reset</a>
                         </template>
                     </div>
                 </template>
