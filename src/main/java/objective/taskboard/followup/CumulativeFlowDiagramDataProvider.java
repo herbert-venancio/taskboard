@@ -20,7 +20,6 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
 
-import objective.taskboard.followup.impl.FollowUpDataProviderFromCurrentState;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.utils.DateTimeUtils;
 
@@ -31,13 +30,13 @@ public class CumulativeFlowDiagramDataProvider {
     private ProjectFilterConfigurationCachedRepository projectRepository;
 
     @Autowired
-    private FollowUpDataProviderFromCurrentState followUpDataProviderFromCurrentState;
+    private FollowUpSnapshotService snapshotService;
 
     public CumulativeFlowDiagramDataSet getCumulativeFlowDiagramDataSet(String project, String level) {
         if(!belongsToAnyProject(project))
             throw new IllegalArgumentException(String.format("Unknown project <%s>", project));
 
-        FollowUpDataSnapshot followupData = followUpDataProviderFromCurrentState.getJiraData(project);
+        FollowUpSnapshot followupData = snapshotService.getFromCurrentState(ZoneId.systemDefault(), project);
         return transform(followupData, Level.valueOf(level.toUpperCase()));
     }
 
@@ -58,8 +57,8 @@ public class CumulativeFlowDiagramDataProvider {
         }
     }
 
-    private CumulativeFlowDiagramDataSet transform(FollowUpDataSnapshot followUpDataSnapshot, Level selectedLevel) {
-        FollowupData followupData = followUpDataSnapshot.getData();
+    private CumulativeFlowDiagramDataSet transform(FollowUpSnapshot followUpDataSnapshot, Level selectedLevel) {
+        FollowUpData followupData = followUpDataSnapshot.getData();
         ListMultimap<String, CumulativeFlowDiagramDataPoint> dataByStatus = LinkedListMultimap.create();
 
         for (int i = 0; i < followupData.syntheticsTransitionsDsList.size(); ++i) {

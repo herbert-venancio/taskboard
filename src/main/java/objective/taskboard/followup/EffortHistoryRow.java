@@ -6,13 +6,9 @@ import objective.taskboard.domain.FollowupDailySynthesis;
 
 public class EffortHistoryRow {
     public final LocalDate date;
-    public double sumEffortDone = 0;
-    public double sumEffortBacklog = 0;
+    public double sumEffortDone;
+    public double sumEffortBacklog;
 
-    public EffortHistoryRow(LocalDate date) {
-        this.date = date;
-    }
-    
     public EffortHistoryRow(LocalDate date, double sumEffortDone, double sumEffortBacklog) {
         this.date = date;
         this.sumEffortDone = sumEffortDone;

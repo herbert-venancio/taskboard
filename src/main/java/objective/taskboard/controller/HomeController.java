@@ -15,6 +15,7 @@ import objective.taskboard.auth.Authorizer;
 import objective.taskboard.cycletime.HolidayService;
 import objective.taskboard.data.Team;
 import objective.taskboard.data.User;
+import objective.taskboard.followup.FollowUpFacade;
 import objective.taskboard.google.GoogleApiConfig;
 import objective.taskboard.jira.FieldMetadataService;
 import objective.taskboard.jira.JiraProperties;
@@ -46,6 +47,9 @@ public class HomeController {
     @Autowired
     private UserTeamService userTeamService;
 
+    @Autowired
+    private FollowUpFacade followupFacade;
+
     @RequestMapping("/")
     public String home(Model model) {
         User user = jiraService.getLoggedUser();
@@ -66,6 +70,8 @@ public class HomeController {
                     .map(t->new TeamControllerData(t))
                     .sorted((a,b)->a.teamName.compareTo(b.teamName))
                     .collect(Collectors.toList())));
+
+        model.addAttribute("hasFollowupTemplateAvailable", followupFacade.getTemplatesForCurrentUser().size() > 0);
 
         return "index";
     }

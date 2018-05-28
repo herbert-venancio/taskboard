@@ -228,6 +228,7 @@
                                                  value-property="projectKey"
                                                  text-property="projectKey"
                                                  label="[[selectedProjectKey]]"
+                                                 no-label-float
                                                  text="[[selectedProjectKey]]"
                                                  disable-clear="true"
                                                  disabled="{{hasOnlyOneProject}}"
@@ -407,7 +408,7 @@
                     var selectedProject = findInArray(this.projects, function(p) {
                         return p.projectKey === projectKey;
                     })
-                    return selectedProject.followUpDataHistory.sort().reverse();
+                    return selectedProject.followUpDataHistory.slice(0).sort().reverse();
                 },
 
                 _onShowDashboard: function(showDashboard) {

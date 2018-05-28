@@ -24,6 +24,7 @@ package objective.taskboard.jira;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -37,19 +38,33 @@ import objective.taskboard.auth.Authorizer;
 import objective.taskboard.domain.Project;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.jira.data.Version;
+import objective.taskboard.project.ProjectBaselineProvider;
+import objective.taskboard.project.ProjectProfileItem;
+import objective.taskboard.project.ProjectProfileItemRepository;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 
 @Service
 public class ProjectService {
 
-    @Autowired
-    private ProjectFilterConfigurationCachedRepository projectRepository;
+    private final ProjectFilterConfigurationCachedRepository projectRepository;
+    private final ProjectProfileItemRepository projectProfileItemRepository;
+    private final JiraProjectService jiraProjectService;
+    private final Authorizer authorizer;
+    private final ProjectBaselineProvider baselineProvider;
 
     @Autowired
-    private JiraProjectService jiraProjectService;
-
-    @Autowired
-    private Authorizer authorizer;
+    public ProjectService(
+            ProjectFilterConfigurationCachedRepository projectRepository,
+            ProjectProfileItemRepository projectProfileItemRepository, 
+            JiraProjectService jiraProjectService,
+            Authorizer authorizer, 
+            ProjectBaselineProvider baselineProvider) {
+        this.projectRepository = projectRepository;
+        this.projectProfileItemRepository = projectProfileItemRepository;
+        this.jiraProjectService = jiraProjectService;
+        this.authorizer = authorizer;
+        this.baselineProvider = baselineProvider;
+    }
 
     public List<Project> getNonArchivedJiraProjectsForUser() {
         return jiraProjectService.getUserProjects().values().stream()
@@ -118,6 +133,10 @@ public class ProjectService {
     public Optional<ProjectFilterConfiguration> getTaskboardProject(String projectKey) {
         return projectRepository.getProjectByKey(projectKey);
     }
+    
+    public ProjectFilterConfiguration getTaskboardProjectOrCry(String projectKey) {
+        return projectRepository.getProjectByKeyOrCry(projectKey);
+    }
 
     public Optional<ProjectFilterConfiguration> getTaskboardProject(String projectKey, String... permissions) {
         List<String> allowedProjectsKeys = authorizer.getAllowedProjectsForPermissions(permissions);
@@ -146,4 +165,14 @@ public class ProjectService {
             return Optional.empty();
         return optProject;
     }
+
+    public List<LocalDate> getAvailableBaselineDates(String projectKey) {
+        return baselineProvider.getAvailableDates(projectKey);
+    }
+    
+    public List<ProjectProfileItem> getProjectProfile(String projectKey) {
+        ProjectFilterConfiguration project = projectRepository.getProjectByKeyOrCry(projectKey);
+        return projectProfileItemRepository.listByProject(project);
+    }
+
 }

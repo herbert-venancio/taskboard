@@ -20,11 +20,13 @@
  */
 package objective.taskboard.followup;
 
+import static java.util.stream.Collectors.toList;
+
 import java.io.IOException;
-import java.util.Arrays;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
@@ -32,12 +34,11 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import objective.taskboard.auth.Authorizer;
 import objective.taskboard.controller.TemplateData;
 import objective.taskboard.database.directory.DataBaseDirectory;
 import objective.taskboard.domain.Project;
 import objective.taskboard.followup.data.Template;
-import objective.taskboard.followup.impl.FollowUpDataProviderFromCurrentState;
-import objective.taskboard.followup.impl.FollowUpDataProviderFromHistory;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor;
 import objective.taskboard.utils.IOUtilities;
@@ -51,7 +52,7 @@ public class FollowUpFacade {
     private FollowUpTemplateStorageInterface followUpTemplateStorage;
 
     @Autowired
-    private FollowUpDataProviderFromCurrentState providerFromCurrentState;
+    private FollowUpSnapshotService snapshotService;
 
     @Autowired
     private TemplateService templateService;
@@ -66,35 +67,33 @@ public class FollowUpFacade {
     private DataBaseDirectory dataBaseDirectory;
     
     @Autowired
-    private FollowUpDataHistoryRepository historyRepository;
-    
-    public FollowUpGenerator getGenerator(String templateName, Optional<String> date) {
-        Template followUpConfiguration = templateService.getTemplate(templateName);
+    private Authorizer authorizer;
 
-        FollowUpTemplate template = followUpTemplateStorage.getTemplate(followUpConfiguration.getPath());
+    public Resource generateReport(String templateName, Optional<LocalDate> date, ZoneId timezone, String projectKey) throws IOException {
+        FollowUpTemplate template = getTemplate(templateName);
         SimpleSpreadsheetEditor spreadsheetEditor = new SimpleSpreadsheetEditor(template);
+        FollowUpSnapshot snapshot = snapshotService.get(date, timezone, projectKey);
 
-        return new FollowUpGenerator(getProvider(date), spreadsheetEditor);
+        return new FollowUpReportGenerator(spreadsheetEditor).generate(snapshot, timezone);
     }
 
-    public FollowupDataProvider getProvider(Optional<String> date) {
-        if (!date.isPresent() || date.get().isEmpty())
-            return providerFromCurrentState;
-        return new FollowUpDataProviderFromHistory(date.get(), historyRepository);
+    public List<TemplateData> getTemplates() {
+        return templateService.getTemplates()
+                .stream()
+                .map(t -> templateConverter.convert(t))
+                .collect(toList());
     }
 
     public List<TemplateData> getTemplatesForCurrentUser() {
         List<String> projectKeys = projectService.getNonArchivedJiraProjectsForUser()
                 .stream()
                 .map(Project::getKey)
-                .collect(Collectors.toList());
+                .collect(toList());
 
-        List<Template> templates = templateService.findTemplatesForProjectKeys(projectKeys);
-
-        return templates
+        return getTemplates()
                 .stream()
-                .map(t -> templateConverter.convert(t))
-                .collect(Collectors.toList());
+                .filter(t -> authorizer.hasAnyRoleInProjects(t.roles, projectKeys))
+                .collect(toList());
     }
 
     public Optional<TemplateData> getTemplate(Long id) {
@@ -105,28 +104,23 @@ public class FollowUpFacade {
         return Optional.of(templateConverter.convert(template));
     }
 
-    public void createTemplate(String templateName, String projects, MultipartFile file) throws IOException {
-        List<String> projectKeys = Arrays.asList(projects.split(","));
-        
+    public void createTemplate(String templateName, List<String> roles, MultipartFile file) throws IOException {
         if (templateService.getTemplate(templateName) != null)
             throw new RuntimeException("This template name is already in use");
-        
-        if (templateService.findATemplateOnlyMatchedWithThisProjectKey(projectKeys) != null)
-            throw new RuntimeException("This match of projects is already used by other template");
-        
+
         String path = followUpTemplateStorage
                 .storeTemplate(file.getInputStream(), new FollowUpTemplateValidator());
-        
-        templateService.saveTemplate(templateName, projectKeys, path);
+
+        templateService.saveTemplate(templateName, roles, path);
     }
-    
+
     public void deleteTemplate(Long id) throws IOException {
         Template template = templateService.getTemplate(id);
         followUpTemplateStorage.deleteFile(template.getPath());
         templateService.deleteTemplate(id);
     }
-    
-    public void updateTemplate(Long id, String templateName, String projects,
+
+    public void updateTemplate(Long id, String templateName, List<String> roles,
                                Optional<MultipartFile> file) throws IOException {
         String path = null;
         String oldPath = null;
@@ -138,7 +132,7 @@ public class FollowUpFacade {
         }
 
         try {
-            templateService.updateTemplate(id, templateName, projects, path);
+            templateService.updateTemplate(id, templateName, roles, path);
         } catch(Exception t) {
             if(path != null) {
                 followUpTemplateStorage.deleteFile(path);
@@ -154,13 +148,16 @@ public class FollowUpFacade {
         return IOUtilities.asResource(dataBaseDirectory.path(SAMPLE_FOLLOWUP_TEMPLATE_PATH));
     }
 
-    public Resource getSavedTemplate(String templateName) {
+    private FollowUpTemplate getTemplate(String templateName) {
         Template followUpConfiguration = templateService.getTemplate(templateName);
-        FollowUpTemplate template = followUpTemplateStorage.getTemplate(followUpConfiguration.getPath());
-        return template.getPathFollowupTemplateXLSM();
+        return followUpTemplateStorage.getTemplate(followUpConfiguration.getPath());
     }
 
-    public List<String> getHistoryGivenProjects(String... projectsKey) {
-        return historyRepository.getHistoryGivenProjects(projectsKey);
+    public Resource getTemplateResource(String templateName) {
+        return getTemplate(templateName).getPathFollowupTemplateXLSM();
+    }
+
+    public List<LocalDate> getHistoryGivenProject(String projectKey) {
+        return snapshotService.getAvailableHistory(projectKey);
     }
 }

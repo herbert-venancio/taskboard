@@ -26,6 +26,10 @@ import java.util.List;
 import objective.taskboard.data.Worklog;
 
 public class FromJiraDataRow {
+    
+    public static final String PLANNING_TYPE_BALLPARK = "Ballpark";
+    public static final String PLANNING_TYPE_PLAN = "Plan";
+    
     public static final String QUERY_TYPE_SUBTASK_PLAN = "SUBTASK PLAN";
     public static final String QUERY_TYPE_DEMAND_BALLPARK = "DEMAND BALLPARK";
     public static final String QUERY_TYPE_FEATURE_BALLPARK = "FEATURE BALLPARK";

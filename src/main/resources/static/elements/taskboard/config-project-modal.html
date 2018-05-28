@@ -27,6 +27,10 @@
             paper-button[disabled].colorful {
                 opacity: .6;
             }
+            
+            paper-dropdown-menu {
+                display: block;
+            }
         </style>
 
         <iron-signals
@@ -80,6 +84,17 @@
                                  step="any"
                                  error-message="Please enter a positive value"
                                  ></paper-input>
+                                 
+                    <paper-dropdown-menu id="baselineDate" always-float-label
+                        label="Baseline Date *" 
+                        error-message="Please enter a valid date">
+                        <paper-menu class="dropdown-content" attr-for-selected="value" selected="{{projectConfiguration.baselineDate}}">
+                            <paper-item value=""><span style="white-space: nowrap">Project Start</span></paper-item>
+                            <template id="baselineDateTemplate" is="dom-repeat" items="{{availableBaselineDates}}" as="date">
+                                <paper-item value="{{date}}">{{getDisplayDate(date)}}</paper-item>
+                            </template>
+                        </paper-menu>
+                    </paper-dropdown-menu>
 
                     <paper-autocomplete
                                     id = "defaultTeam"
@@ -153,7 +168,8 @@
                     },
                     invalidTeam: {
                         type: Boolean
-                    }
+                    },
+                    availableBaselineDates: Array
                 },
 
                 observers: [
@@ -207,32 +223,49 @@
                     this.$.defaultTeam.validate(true)
                 },
 
-                open: function(projectConfiguration) {
-                    moment.locale(taskboard.getLocaleFromBrowser());
-                    this.set('dateFormatPlaceholder', moment.localeData().longDateFormat("L").toLowerCase());
-                    this.set('errorMessage', '');
-                    this._setProjectFilterConfiguration(projectConfiguration);
-                    this.showLoading(false);
+                open: function(projectKey) {
+                    var self = this;
+                    
+                    this.dateFormatPlaceholder = moment.localeData().longDateFormat("L").toLowerCase();
+                    this.errorMessage = '';
+
                     this.$.projectStartDate.invalid = false;
                     this.$.projectDeliveryDate.invalid = false;
                     this.$.projectRisk.invalid = false;
                     this.$.projectionTimespan.invalid = false;
-
+                    
+                    this.projectConfiguration = {};
+                    this.showLoading(true);
                     this.$.modal.open();
-                    this.$.projectStartDate.$.input.focus();
 
-                    var team = taskboard.getAvailableTeams().filter(function(t){return t.id == projectConfiguration.defaultTeam})[0];
-                    this.selectedTeamName = team.teamName
-                    this.selectedTeamId = team.id;
-                    this.suggestions = [team]
-                },
+                    $.getJSON('/ws/project/config/edit/' + projectKey + '/init-data')
+                        .done(function(data) {
+                            self.availableBaselineDates = data.availableBaselineDates;
+                            self.$.baselineDateTemplate.render(); //Forces sync render. Without this, the selected item may be wrong.
 
-                _setProjectFilterConfiguration: function(projectFilterConfiguration) {
-                    var newProjFilterConf = clone(projectFilterConfiguration);
-                    newProjFilterConf.startDate = this._getLocaleDate(newProjFilterConf.startDate);
-                    newProjFilterConf.deliveryDate = this._getLocaleDate(newProjFilterConf.deliveryDate);
-                    this.set('projectConfiguration', {});
-                    this.set('projectConfiguration', newProjFilterConf);
+                            self.projectConfiguration = {
+                                    projectKey: data.config.projectKey,
+                                    startDate: self.getDisplayDate(data.config.startDate),
+                                    deliveryDate: self.getDisplayDate(data.config.deliveryDate),
+                                    isArchived: data.config.isArchived,
+                                    risk: data.config.risk,
+                                    projectionTimespan: data.config.projectionTimespan,
+                                    defaultTeam: data.config.defaultTeam,
+                                    baselineDate: data.config.baselineDate || ''
+                            };
+                            
+                            self.showLoading(false);
+                            self.$.projectStartDate.$.input.focus();
+                            
+                            var team = taskboard.getAvailableTeams().filter(function(t){return t.id == self.projectConfiguration.defaultTeam})[0];
+                            self.selectedTeamName = team.teamName;
+                            self.selectedTeamId = team.id;
+                            self.suggestions = [team];
+                        })
+                        .fail(function() {
+                            self.errorMessage = 'Failed to load project configuration.';
+                            self.showLoading(false);
+                        });
                 },
 
                 openByEvent: function(projectConfigurationEvent) {
@@ -258,14 +291,15 @@
                         isArchived: self.projectConfiguration.isArchived,
                         risk: self.projectConfiguration.risk,
                         projectionTimespan: self.projectConfiguration.projectionTimespan,
-                        defaultTeam: self.projectConfiguration.defaultTeam
+                        defaultTeam: self.projectConfiguration.defaultTeam,
+                        baselineDate: self.projectConfiguration.baselineDate || null
                     };
 
                     $.ajax({
                         data: JSON.stringify(data),
                         type: 'POST',
                         contentType: "application/json; charset=utf-8",
-                        url: '/api/projects/' + projectKey + '/configuration'
+                        url: '/ws/project/config/edit/' + projectKey
                     }).done(function () {
                         self.showLoading(false);
                         self.$.modal.close();
@@ -297,27 +331,39 @@
                 },
 
                 _validate: function() {
-                    var fieldsToTest = [
-                        this.$.projectStartDate,
-                        this.$.projectDeliveryDate,
-                        this.$.projectRisk,
-                        this.$.defaultTeam,
-                        this.$.projectionTimespan ];
+                    var validations = [
+                        this.$.projectStartDate.validate(),
+                        this.$.projectDeliveryDate.validate(),
+                        this.$.projectRisk.validate(),
+                        this.$.defaultTeam.validate(),
+                        this.$.projectionTimespan.validate(),
+                        this._validateProjectDates()];
 
-                    var isValid = true;
-                    fieldsToTest.forEach(function(f, i){
-                        isValid = f.validate() && isValid;
-                    })
-
-                    return isValid;
+                    return validations.every(function(r) { return r == true });
+                },
+                
+                _validateProjectDates: function() {
+                    var startDate = this._getMoment(this.projectConfiguration.startDate);
+                    var deliveryDate = this._getMoment(this.projectConfiguration.deliveryDate);
+                    
+                    if (startDate && deliveryDate && startDate.isAfter(deliveryDate)) {
+                        this.errorMessage = 'End Date should be greater than Start Date';
+                        return false;
+                    }
+                    
+                    return true;
                 },
 
-                _getLocaleDate: function(date) {
-                    return date ? moment(date).format("L") : null;
+                getDisplayDate: function(isoDate) {
+                    return isoDate ? moment(isoDate, 'YYYY-MM-DD').format('L') : null;
+                },
+                
+                _getMoment:  function(displayDate) {
+                    return displayDate ? moment(displayDate, "L") : null;
                 },
 
-                _getISODate: function(date) {
-                    return date ? moment(date, "L").format("YYYY-MM-DD") : null;
+                _getISODate: function(displayDate) {
+                    return displayDate ? this._getMoment(displayDate).format("YYYY-MM-DD") : null;
                 },
 
                 _getArchivedText: function(isArchived, capitalize) {

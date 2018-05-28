@@ -1,6 +1,5 @@
 package objective.taskboard.utils;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -11,26 +10,15 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.Range;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import com.google.common.collect.Streams;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -42,27 +30,18 @@ import com.google.gson.JsonSerializer;
 
 public class DateTimeUtils {
 
-    public static ZonedDateTime parseDate(String yyyymmdd) {
-        return parseDate(yyyymmdd, ZoneId.systemDefault());
-    }
-
-    public static ZonedDateTime parseDate(String yyyymmdd, ZoneId timezone) {
-        if(yyyymmdd == null)
-            return null;
-        return LocalDate.parse(yyyymmdd, DateTimeFormatter.ISO_LOCAL_DATE).atTime(0, 0, 0).atZone(timezone);
-    }
-
-    public static List<ZonedDateTime> parseDateList(String... yyyymmdd) {
-        return Arrays.stream(yyyymmdd)
-                .map(DateTimeUtils::parseDate)
-                .collect(Collectors.toList());
-    }
-
     public static ZonedDateTime parseDateTime(String yyyymmdd, String hhmmss) {
         return parseDateTime(yyyymmdd, hhmmss, ZoneId.systemDefault());
     }
 
+    public static ZonedDateTime parseDateTime(String yyyymmdd) {
+        return parseDateTime(yyyymmdd, "00:00:00");
+    }
+
     public static ZonedDateTime parseDateTime(String yyyymmdd, String hhmmss, ZoneId timezone) {
+        if (yyyymmdd == null)
+            return null;
+
         return LocalDateTime.parse(yyyymmdd + "T" + hhmmss, DateTimeFormatter.ISO_LOCAL_DATE_TIME).atZone(timezone);
     }
     
@@ -157,29 +136,6 @@ public class DateTimeUtils {
         }
     }
 
-    public static class LocalDateTimeStampSerializer extends com.fasterxml.jackson.databind.JsonSerializer<LocalDate> {
-
-        public static final LocalDateTimeStampSerializer INSTANCE = new LocalDateTimeStampSerializer();
-
-        protected LocalDateTimeStampSerializer(){}
-
-        private static ZoneId getTimezone() {
-            RequestAttributes ra = RequestContextHolder.getRequestAttributes();
-            if (ra instanceof ServletRequestAttributes) {
-                HttpServletRequest request = ((ServletRequestAttributes)ra).getRequest();
-                String zoneId = request.getParameter("timezone");
-                if(zoneId != null)
-                    return determineTimeZoneId(zoneId);
-            }
-            return ZoneId.systemDefault();
-        }
-
-        @Override
-        public void serialize(LocalDate value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-            gen.writeNumber(value.atStartOfDay().atZone(getTimezone()).toInstant().toEpochMilli());
-        }
-    }
-
     public static Date parseStringToDate(String yyyymmdd) {
         DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         try {
@@ -196,15 +152,6 @@ public class DateTimeUtils {
     
     public static LocalDate toLocalDate(Date date, ZoneId zone) {
         return date.toInstant().atZone(zone).toLocalDate();
-    }
-
-    public static boolean isValidDate(String yyyymmdd) {
-        try {
-            parseDate(yyyymmdd);
-        } catch (DateTimeParseException e) {
-            return false;
-        }
-        return true;
     }
 
     @SuppressWarnings("unchecked")

@@ -20,27 +20,27 @@
  */
 package objective.taskboard.controller;
 
+import static java.lang.String.format;
 import static java.time.temporal.ChronoField.HOUR_OF_DAY;
 import static java.time.temporal.ChronoField.MINUTE_OF_HOUR;
 import static java.util.Arrays.asList;
-import static objective.taskboard.repository.PermissionRepository.ADMINISTRATIVE;
 import static objective.taskboard.utils.DateTimeUtils.determineTimeZoneId;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
-import java.util.List;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,10 +48,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import objective.taskboard.auth.Authorizer;
-import objective.taskboard.followup.FollowUpDataHistoryGenerator;
 import objective.taskboard.followup.FollowUpFacade;
-import objective.taskboard.followup.FollowUpGenerator;
-import objective.taskboard.utils.DateTimeUtils;
+import objective.taskboard.followup.FollowUpHistoryKeeper;
+import objective.taskboard.followup.FollowUpReportGenerator.InvalidTableRangeException;
+import objective.taskboard.followup.TemplateService;
+import objective.taskboard.followup.data.Template;
+
 @RestController
 @RequestMapping("/ws/followup")
 public class FollowUpController {
@@ -67,44 +69,50 @@ public class FollowUpController {
             .appendValue(MINUTE_OF_HOUR, 2)
             .toFormatter();
 
-    private static final Pattern COMPACT_DATE_PATTERN = Pattern.compile("(\\d+)(\\d\\d)(\\d\\d)");
-
     @Autowired
     private FollowUpFacade followUpFacade;
 
     @Autowired
-    private FollowUpDataHistoryGenerator followUpDataHistoryGenerator;
+    private FollowUpHistoryKeeper historyKeeper;
 
     @Autowired
     private Authorizer authorizer;
 
-    @RequestMapping
-    public ResponseEntity<Object> download(@RequestParam("projects") String projects, @RequestParam("template") String template,
-            @RequestParam("date") Optional<String> date, @RequestParam("timezone") String zoneId) {
+    @Autowired
+    private TemplateService templateService;
 
-        if (ObjectUtils.isEmpty(projects))
-            return new ResponseEntity<>("You must provide a list of projects separated by comma", BAD_REQUEST);
+    @RequestMapping
+    public ResponseEntity<Object> download(@RequestParam("project") String projectKey, @RequestParam("template") String template,
+            @RequestParam("date") Optional<LocalDate> date, @RequestParam("timezone") String zoneId) {
+
+        if (ObjectUtils.isEmpty(projectKey))
+            return new ResponseEntity<>("You must provide the project", BAD_REQUEST);
         if (ObjectUtils.isEmpty(template))
             return new ResponseEntity<>("Template not selected", BAD_REQUEST);
 
-        String [] includedProjects = projects.split(",");
-        List<String> allowedProjectKeys = authorizer.getAllowedProjectsForPermissions(ADMINISTRATIVE);
+        Template templateFollowup = templateService.getTemplate(template);
 
-        if (!allowedProjectKeys.containsAll(asList(includedProjects)))
-            return new ResponseEntity<>("One or more projects don't exist", BAD_REQUEST);
+        if (templateFollowup == null || !authorizer.hasAnyRoleInProjects(templateFollowup.getRoles(), asList(projectKey)))
+            return new ResponseEntity<>("Template or project doesn't exist", HttpStatus.NOT_FOUND);
 
         ZoneId timezone = determineTimeZoneId(zoneId);
 
         try {
-            FollowUpGenerator followupGenerator = followUpFacade.getGenerator(template, date);
-            Resource resource = followupGenerator.generate(includedProjects, timezone);
-            String filename = "Followup_"+template+"_" + templateDate(date, timezone)+".xlsm";
+            Resource resource = followUpFacade.generateReport(template, date, timezone, projectKey);
+            String filename = "Followup_" + template + "_" + projectKey + "_" + templateDate(date, timezone) + ".xlsm";
 
             return ResponseEntity.ok()
                   .contentLength(resource.contentLength())
                   .header("Content-Disposition","attachment; filename=\"" + filename + "\"")
                   .header("Set-Cookie", "fileDownload=true; path=/")
                   .body(resource);
+        } catch (InvalidTableRangeException e) {//NOSONAR
+            return ResponseEntity.badRequest()
+                    .body(format(
+                            "The selected template is invalid. The range of table “%s” in sheet “%s” is smaller than the available data. " + 
+                            "Please increase the range to cover at least row %s.",
+                            e.getTableName(), e.getSheetName(), e.getMinRows()));
+
         } catch (Exception e) {
             log.warn("Error generating followup spreadsheet", e);
             return ResponseEntity.status(INTERNAL_SERVER_ERROR)
@@ -113,17 +121,9 @@ public class FollowUpController {
         }
     }
 
-    private String templateDate(Optional<String> date, ZoneId timezone) {
-        return date.flatMap(d -> {
-            Matcher matcher = COMPACT_DATE_PATTERN.matcher(d);
-            if (matcher.matches()) {
-                String year = matcher.group(1);
-                String month = matcher.group(2);
-                String day = matcher.group(3);
-                return Optional.of(DateTimeUtils.parseDate(year + "-" + month + "-" + day, timezone));
-            }
-            return Optional.empty();
-        }).orElse(ZonedDateTime.now(timezone))
+    private String templateDate(Optional<LocalDate> date, ZoneId timezone) {
+        return date.map(d -> ZonedDateTime.of(d, LocalTime.MIDNIGHT, timezone))
+                .orElse(ZonedDateTime.now(timezone))
                 .format(formatter);
     }
 
@@ -148,7 +148,7 @@ public class FollowUpController {
 
     @RequestMapping("generate-history")
     public String generateHistory() {
-        followUpDataHistoryGenerator.scheduledGenerate();
+        historyKeeper.generate();
         return "HISTORY GENERATOR STARTED";
     }
 }

@@ -57,6 +57,8 @@
             }
         </style>
 
+        <confirm-modal id="confirmationModal"></confirm-modal>
+
         <paper-dialog class="modal tb-paper-dialog"
                       entry-animation="scale-up-animation"
                       exit-animation="fade-out-animation"
@@ -67,7 +69,7 @@
             <div class="modal__area">
                 <div class="modal__header">
                     <template is="dom-if" if="[[icon]]">
-                        <iron-icon class="modal__icon tb-icon tb-icon--24" icon="[[icon]]" title="Close"></iron-icon>
+                        <iron-icon class="modal__icon tb-icon tb-icon--24" icon="[[icon]]" title="[[title]]"></iron-icon>
                     </template>
                     <h2 class="modal__title">[[title]]</h2>
                     <div class="modal__close">
@@ -105,6 +107,10 @@
                     loading: {
                         type: Boolean,
                         value: false
+                    },
+                    confirmClose: {
+                        type: Boolean,
+                        value: false
                     }
                 },
 
@@ -113,12 +119,24 @@
                 },
 
                 close: function() {
+                    if (this.confirmClose){
+                        this._confirmClose();
+                        return;
+                    }
                     this.$$('paper-dialog').close();
                     this.fire("close-clicked");
                 },
 
                 resize: function() {
                     this.$$('.modal').notifyResize();
+                },
+
+                _confirmClose: function() {
+                    var self = this;
+                    var text = "Do you want to discard the changes?";
+                    this.$.confirmationModal.openDialog("Discard", text, function() {
+                        self.$$('paper-dialog').close();
+                    });
                 },
 
                 _onOpened: function() {

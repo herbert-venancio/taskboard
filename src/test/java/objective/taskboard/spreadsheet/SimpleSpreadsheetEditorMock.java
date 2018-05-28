@@ -1,5 +1,6 @@
 package objective.taskboard.spreadsheet;
 
+import static java.util.stream.Collectors.toSet;
 import static objective.taskboard.google.SpreadsheetUtils.columnIndexToLetter;
 import static objective.taskboard.google.SpreadsheetUtils.columnLetterToIndex;
 
@@ -8,32 +9,47 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
-import objective.taskboard.followup.FollowUpTemplate;
+import objective.taskboard.google.SpreadsheetUtils.SpreadsheetA1Range;
+import objective.taskboard.testUtils.OperationLoggers;
+import objective.taskboard.testUtils.OperationLoggers.OperationLogger;
 
 public class SimpleSpreadsheetEditorMock implements SpreadsheetEditor {
 
-    private Map<String,String> sheetPathByName = new LinkedHashMap<>();
-    FollowUpTemplate template;
-
-    private StringBuilder logger = new StringBuilder();
-
-    public SimpleSpreadsheetEditorMock() {
-    }
+    private final OperationLogger logger = OperationLoggers.create();
+    private final Map<String,String> sheetPathByName = new LinkedHashMap<>();
+    private final Map<String, SheetTable> tables = new HashMap<>();
 
     public void open() {
-        logger.append("Spreadsheet Open\n");
+        logger.append("Spreadsheet Open", "global");
     }
 
     public Sheet getSheet(String sheetName) {
-        return new SheetMock(sheetName);
+        return new SheetMock(sheetName, tables, logger);
     }
 
-    public String loggerString() {
-        return logger.toString();
+    public String loggerString(String... sheetNames) {
+        if (sheetNames.length == 0)
+            return logger.getAllLog();
+        
+        Collection<String> markersToFilter = Stream.of(sheetNames).map(s -> "sheet:" + s).collect(toSet());
+        markersToFilter.add("global");
+
+        return logger.getLog(markersToFilter);
+    }
+
+    public void clearLogger() {
+        logger.clear();
+    }
+    
+    public void addTable(String sheetName, String tableName, SpreadsheetA1Range reference) {
+        tables.put(sheetName + ":" + tableName, new SheetTableMock(tableName, reference));
     }
 
     @Override
@@ -49,7 +65,7 @@ public class SimpleSpreadsheetEditorMock implements SpreadsheetEditor {
 
         sheetPathByName.put(sheetName, sheetPath);
 
-        return new SheetMock(sheetName);
+        return new SheetMock(sheetName, tables, logger);
     }
 
     @Override
@@ -63,17 +79,17 @@ public class SimpleSpreadsheetEditorMock implements SpreadsheetEditor {
 
     @Override
     public byte[] toBytes() {
-        return null;
+        return new byte[0];
     }
 
     @Override
     public void save() throws IOException {
-        logger.append("Spreadsheet Save\n");
+        logger.append("Spreadsheet Save", "global");
     }
 
     @Override
     public void close() throws IOException {
-        logger.append("Spreadsheet Close\n");
+        logger.append("Spreadsheet Close", "global");
     }
 
     @Override
@@ -96,13 +112,19 @@ public class SimpleSpreadsheetEditorMock implements SpreadsheetEditor {
         return null;
     }
 
-    public class SheetMock implements Sheet {
-        private int rowNumber = 0;
-        private String sheetName;
+    private static class SheetMock implements Sheet {
+        private final String sheetName;
+        private final OperationLogger logger;
+        private final Map<String, SheetTable> tables;
 
-        public SheetMock(String sheetName) {
-            logger.append("Sheet Create: " + sheetName + "\n");
+        private int rowNumber = 0;
+
+        public SheetMock(String sheetName, Map<String, SheetTable> tables, OperationLogger logger) {
             this.sheetName = sheetName;
+            this.tables = tables;
+            this.logger = OperationLoggers.wrap(logger, "sheet:" + sheetName);
+
+            this.logger.append("Sheet Create: " + sheetName + "\n");
         }
 
         @Override
@@ -114,14 +136,14 @@ public class SimpleSpreadsheetEditorMock implements SpreadsheetEditor {
         public SheetRowMock createRow() {
             rowNumber++;
             logger.append("Sheet \"" + sheetName + "\" Row Create: "+ rowNumber +"\n");
-            return new SheetRowMock(sheetName, rowNumber);
+            return new SheetRowMock(sheetName, rowNumber, logger);
         }
 
         @Override
         public SheetRow getOrCreateRow(int rowNumber) {
             this.rowNumber = Math.max(this.rowNumber, rowNumber);
             logger.append("Sheet \"" + sheetName + "\" Row Get/Create: "+ rowNumber +"\n");
-            return new SheetRowMock(sheetName, rowNumber);
+            return new SheetRowMock(sheetName, rowNumber, logger);
         }
 
         @Override
@@ -132,16 +154,24 @@ public class SimpleSpreadsheetEditorMock implements SpreadsheetEditor {
         public String getSheetPath() {
             return null;
         }
+
+        @Override
+        public Optional<SheetTable> getTable(String tableName) {
+            return Optional.ofNullable(tables.get(sheetName + ":" + tableName));
+        }
     }
 
-    public class SheetRowMock implements SheetRow {
-        private String sheetname;
-        private int rowNum;
+    private static class SheetRowMock implements SheetRow {
+        private final String sheetname;
+        private final int rowNum;
+        private final OperationLogger logger;
+
         private int columIndex = 0;
 
-        public SheetRowMock(String sheetname, int rowNum) {
+        public SheetRowMock(String sheetname, int rowNum, OperationLogger logger) {
             this.sheetname = sheetname;
             this.rowNum = rowNum;
+            this.logger = logger;
         }
 
         @Override
@@ -222,22 +252,23 @@ public class SimpleSpreadsheetEditorMock implements SpreadsheetEditor {
         }
     }
 
-    protected class SimpleSpreadsheetStylesEditorMock implements SpreadsheetStylesEditor {
-        protected static final String PATH_STYLES = "xl/styles.xml";
-
-        @Override
-        public int getOrCreateNumberFormat(String format) {
-            return 0;
+    private static class SheetTableMock implements SheetTable {
+        private final String name;
+        private final SpreadsheetA1Range reference;
+        
+        public SheetTableMock(String name, SpreadsheetA1Range reference) {
+            this.name = name;
+            this.reference = reference;
         }
 
         @Override
-        public void save() {
+        public String getName() {
+            return name;
         }
 
         @Override
-        public String getPathStyles() {
-            return null;
+        public SpreadsheetA1Range getReference() {
+            return reference;
         }
     }
-
 }

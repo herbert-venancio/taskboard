@@ -1,12 +1,10 @@
 package objective.taskboard.controller;
 
-import static java.util.stream.Collectors.toList;
 import static objective.taskboard.repository.PermissionRepository.ADMINISTRATIVE;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,42 +34,37 @@ public class TemplateController {
 
     @RequestMapping
     public List<TemplateData> get() {
-        List<String> allowedProjects = authorizer.getAllowedProjectsForPermissions(ADMINISTRATIVE);
-        List<TemplateData> templates = followUpFacade.getTemplatesForCurrentUser().stream()
-            .filter(template -> allowedProjects.containsAll(template.projects))
-            .collect(toList());
-
-        return templates;
+        if (!authorizer.hasPermissionInAnyProject(ADMINISTRATIVE))
+            return followUpFacade.getTemplatesForCurrentUser();
+        return followUpFacade.getTemplates();
     }
 
     @RequestMapping(method = RequestMethod.POST, consumes="multipart/form-data")
     public void upload(@RequestParam("file") MultipartFile file
             , @RequestParam("name") String templateName
-            , @RequestParam("projects") String projects) throws IOException {
+            , @RequestParam("roles") List<String> roles) throws IOException {
 
-        List<String> projectKeys = Arrays.asList(projects.split(","));
-        if (!isTemplateProjectsInAllowedProjects(projectKeys))
+        if (!authorizer.hasPermissionInAnyProject(ADMINISTRATIVE))
             throw new ResourceNotFoundException();
 
-        followUpFacade.createTemplate(templateName, projects, file);
+        followUpFacade.createTemplate(templateName, roles, file);
     }
-    
+
     @RequestMapping(value = "{id}", method = RequestMethod.PUT, consumes="multipart/form-data")
     public void update(@PathVariable("id") Long id
             , @RequestParam("file") Optional<MultipartFile > file
             , @RequestParam("name") String templateName
-            , @RequestParam("projects") String projects) throws IOException {
+            , @RequestParam("roles") List<String> roles) throws IOException {
 
-        List<String> projectKeys = Arrays.asList(projects.split(","));
-        if (!isAllowedTemplate(id) || !isTemplateProjectsInAllowedProjects(projectKeys))
+        if (!authorizer.hasPermissionInAnyProject(ADMINISTRATIVE))
             throw new ResourceNotFoundException();
 
-        followUpFacade.updateTemplate(id, templateName, projects, file);
+        followUpFacade.updateTemplate(id, templateName, roles, file);
     }
-    
+
     @RequestMapping(value = "{id}", method = RequestMethod.DELETE)
     public void delete(@PathVariable("id") Long id) throws IOException {
-        if (!isAllowedTemplate(id))
+        if (!authorizer.hasPermissionInAnyProject(ADMINISTRATIVE))
             throw new ResourceNotFoundException();
 
         followUpFacade.deleteTemplate(id);
@@ -79,7 +72,7 @@ public class TemplateController {
 
     @RequestMapping("{id}")
     public ResponseEntity<Object> downloadSavedTemplate(@PathVariable("id") Long id) {
-        if (!isAllowedTemplate(id))
+        if (!authorizer.hasPermissionInAnyProject(ADMINISTRATIVE))
             return new ResponseEntity<>("Template not found.", NOT_FOUND);
 
         try {
@@ -88,7 +81,7 @@ public class TemplateController {
                 return new ResponseEntity<>("Template not found.", NOT_FOUND);
 
             String templateName = template.get().name;
-            Resource resource = followUpFacade.getSavedTemplate(templateName);
+            Resource resource = followUpFacade.getTemplateResource(templateName);
             return ResponseEntity.ok()
                       .contentLength(resource.contentLength())
                       .header("Content-Disposition","attachment; filename=" + templateName + "-followup-template.xlsm")
@@ -99,12 +92,4 @@ public class TemplateController {
         }
     }
 
-    private boolean isAllowedTemplate(Long id) {
-        Optional<TemplateData> template = followUpFacade.getTemplate(id);
-        return template.isPresent() && isTemplateProjectsInAllowedProjects(template.get().projects);
-    }
-
-    private boolean isTemplateProjectsInAllowedProjects(List<String> projectKeys) {
-        return authorizer.getAllowedProjectsForPermissions(ADMINISTRATIVE).containsAll(projectKeys);
-    }
 }

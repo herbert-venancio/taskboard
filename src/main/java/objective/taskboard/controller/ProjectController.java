@@ -22,12 +22,9 @@
 package objective.taskboard.controller;
 
 import static java.util.stream.Collectors.toList;
-import static objective.taskboard.repository.PermissionRepository.ADMINISTRATIVE;
 import static objective.taskboard.repository.PermissionRepository.DASHBOARD_OPERATIONAL;
 import static objective.taskboard.repository.PermissionRepository.DASHBOARD_TACTICAL;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,8 +38,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import objective.taskboard.auth.Authorizer;
 import objective.taskboard.controller.ProjectCreationData.ProjectCreationDataTeam;
-import objective.taskboard.controller.ProjectData.ProjectConfigurationData;
 import objective.taskboard.data.Team;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.domain.TeamFilterConfiguration;
@@ -51,7 +48,6 @@ import objective.taskboard.jira.ProjectService;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.repository.TeamFilterConfigurationCachedRepository;
-import objective.taskboard.utils.DateTimeUtils;
 
 @RestController
 @RequestMapping("/api/projects")
@@ -72,6 +68,9 @@ public class ProjectController {
     @Autowired
     private FollowUpFacade followUpFacade;
 
+    @Autowired
+    private Authorizer authorizer;
+
     @RequestMapping
     public List<ProjectData> getProjectsVisibleOnTaskboard() {
         return projectService.getTaskboardProjects(projectService::isNonArchivedAndUserHasAccess).stream()
@@ -79,23 +78,9 @@ public class ProjectController {
                 .collect(toList());
     }
 
-    @RequestMapping(value = "configurations", method = RequestMethod.GET)
-    public List<ProjectConfigurationData> getProjectsVisibleOnConfigurations() {
-        return projectService.getTaskboardProjects(ADMINISTRATIVE).stream()
-                .map(pfc -> generateProjectConfigurationData(pfc))
-                .collect(toList());
-    }
-
     @RequestMapping("/dashboard")
     public List<ProjectData> getProjectsVisibleOnDashboard() {
         return projectService.getTaskboardProjects(projectService::isNonArchivedAndUserHasAccess, DASHBOARD_TACTICAL, DASHBOARD_OPERATIONAL).stream()
-                .map(pfc -> generateProjectData(pfc))
-                .collect(toList());
-    }
-
-    @RequestMapping("/followup")
-    public List<ProjectData> getProjectsVisibleOnFollowupConfigurations() {
-        return projectService.getTaskboardProjects(projectService::isNonArchivedAndUserHasAccess, ADMINISTRATIVE).stream()
                 .map(pfc -> generateProjectData(pfc))
                 .collect(toList());
     }
@@ -108,62 +93,6 @@ public class ProjectController {
     @RequestMapping(value="{projectKey}", method = RequestMethod.GET)
     public ResponseEntity<Void> get(@PathVariable("projectKey") String projectKey) {
         return projectService.jiraProjectExistsAndUserHasAccess(projectKey) ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
-    }
-
-    @RequestMapping(value = "{projectKey}/configuration", method = RequestMethod.POST, consumes = "application/json")
-    public ResponseEntity<Object> updateProjectConfiguration(@PathVariable("projectKey") String projectKey, @RequestBody ProjectConfigurationData data) {
-        Optional<ProjectFilterConfiguration> optConfiguration = projectService.getTaskboardProject(projectKey, ADMINISTRATIVE);
-        if (!optConfiguration.isPresent())
-            return ResponseEntity.notFound().build();
-
-        ProjectFilterConfiguration configuration = optConfiguration.get();
-
-        if (!DateTimeUtils.isValidDate(data.startDate))
-            return ResponseEntity.badRequest().body("{\"message\" : \"Invalid Start Date\"}");
-
-        if (!DateTimeUtils.isValidDate(data.deliveryDate))
-            return ResponseEntity.badRequest().body("{\"message\" : \"Invalid End Date\"}");
-
-        if (data.isArchived == null)
-            return ResponseEntity.badRequest().body("{\"message\" : \"Invalid \"Archived\" Value\"}");
-
-        if (data.risk == null)
-            return ResponseEntity.badRequest().build();
-
-        if (data.projectionTimespan == null || data.projectionTimespan <= 0)
-            return ResponseEntity.badRequest().body("{\"message\" : \"Projection Timespan should be not null and greater than zero\"}");
-
-        LocalDate startDate = data.startDate != null ? DateTimeUtils.parseDate(data.startDate).toLocalDate() : null;
-        LocalDate deliveryDate = data.deliveryDate != null ? DateTimeUtils.parseDate(data.deliveryDate).toLocalDate() : null;
-
-        if (startDate != null && deliveryDate != null && startDate.isAfter(deliveryDate))
-            return ResponseEntity.badRequest().body("{\"message\" : \"End Date should be greater than Start Date\"}");
-
-        configuration.setStartDate(startDate);
-        configuration.setDeliveryDate(deliveryDate);
-        configuration.setArchived(data.isArchived);
-        configuration.setRiskPercentage(data.risk.divide(BigDecimal.valueOf(100)));
-        configuration.setProjectionTimespan(data.projectionTimespan);
-        configuration.setDefaultTeam(data.defaultTeam);
-
-        projectService.saveTaskboardProject(configuration);
-
-        return ResponseEntity.ok().build();
-    }
-
-    @RequestMapping(value = "{projectKey}/configuration", method = RequestMethod.GET)
-    public ResponseEntity<ProjectConfigurationData> getProjectConfiguration(@PathVariable("projectKey") String projectKey) {
-        Optional<ProjectFilterConfiguration> optProject = projectService.getAllowedTaskboardProject(projectKey);
-        if (!optProject.isPresent())
-            return ResponseEntity.notFound().build();
-
-        ProjectFilterConfiguration project = optProject.get();
-        ProjectConfigurationData data = new ProjectConfigurationData();
-        data.startDate = project.getStartDate() != null ? project.getStartDate().toString() : "";
-        data.deliveryDate = project.getDeliveryDate() != null ? project.getDeliveryDate().toString() : "";
-        data.isArchived = project.isArchived();
-
-        return ResponseEntity.ok(data);
     }
 
     @RequestMapping(method = RequestMethod.POST, consumes="application/json")
@@ -208,22 +137,12 @@ public class ProjectController {
         return teamFilterConfigurationRepository.save(teamFilterConfiguration);
     }
 
-    private ProjectConfigurationData generateProjectConfigurationData(ProjectFilterConfiguration projectFilterConfiguration) {
-        ProjectConfigurationData data = new ProjectConfigurationData();
-        data.projectKey = projectFilterConfiguration.getProjectKey();
-        data.startDate = projectFilterConfiguration.getStartDate() != null ? projectFilterConfiguration.getStartDate().toString() : "";
-        data.deliveryDate = projectFilterConfiguration.getDeliveryDate() != null ? projectFilterConfiguration.getDeliveryDate().toString() : "";
-        data.isArchived = projectFilterConfiguration.isArchived();
-        data.risk = projectFilterConfiguration.getRiskPercentage().multiply(BigDecimal.valueOf(100));
-        data.projectionTimespan = projectFilterConfiguration.getProjectionTimespan();
-        data.defaultTeam = projectFilterConfiguration.getDefaultTeam();
-        return data;
-    }
-
     private ProjectData generateProjectData(ProjectFilterConfiguration projectFilterConfiguration) {
         ProjectData projectData = new ProjectData();
         projectData.projectKey = projectFilterConfiguration.getProjectKey();
-        projectData.followUpDataHistory = followUpFacade.getHistoryGivenProjects(projectData.projectKey);
+        projectData.followUpDataHistory = followUpFacade.getHistoryGivenProject(projectData.projectKey);
+        projectData.roles = authorizer.getRolesForProject(projectFilterConfiguration.getProjectKey());
+       
         return projectData;
     }
 }
