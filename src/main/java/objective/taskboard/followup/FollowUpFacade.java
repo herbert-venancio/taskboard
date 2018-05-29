@@ -81,6 +81,7 @@ public class FollowUpFacade {
         return templateService.getTemplates()
                 .stream()
                 .map(t -> templateConverter.convert(t))
+                .sorted((t1, t2) -> t1.name.compareTo(t2.name))
                 .collect(toList());
     }
 

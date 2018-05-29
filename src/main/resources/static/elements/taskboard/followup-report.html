@@ -35,6 +35,10 @@
                 margin-bottom: -1px;
             }
 
+            .template-list paper-radio-group:focus {
+                outline: 0;
+            }
+
             .labelRadioButton {
                 flex: 1;
             }
@@ -220,6 +224,7 @@
                     this.set('availableDates', []);
                     this.set('selectedDate', '');
                     this.set('isAdminUser', authorizer.hasPermissionInAnyProject(authorizer.permissions.ADMINISTRATIVE));
+                    this._closeErrorMessage();
                     this._showLoading(true);
                     this.$.ajaxProjects.generateRequest();
                     this.$.ajaxTemplates.generateRequest();
