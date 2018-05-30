@@ -177,8 +177,21 @@ function DcUtils() {
             textElDayMonthYear.setAttribute('style', 'display: none');
 
         var textElYearElStr = '<text class="tick-year" x="0" dy="1.2em" transform="translate(0, -' + (yearLineHeight + 15) + ')" style="text-anchor: middle;">' + year + '</text>';
-        tickEl.insertAdjacentHTML('beforeend', textElYearElStr);
+        tickEl.innerHTML += textElYearElStr;
     };
 
+    this.downloadElementAsJpegImage = function(elementId, fileName) { 
+        domtoimage.toJpeg(document.getElementById(elementId), { quality: 0.95 }) 
+            .then(function (dataUrl) { 
+                var link = document.createElement('a'); 
+                link.setAttribute("type", "hidden");
+                link.download = fileName + '.jpeg'; 
+                link.href = dataUrl; 
+
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+            }); 
+    };
 }
 var dcUtils = new DcUtils();

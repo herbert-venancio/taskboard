@@ -102,6 +102,12 @@
                 display: flex;
                 width: 32px;
                 height: 32px;
+                color: inherit;
+            }
+
+            .widget__button[disabled] {
+                pointer-events: initial !important;
+                opacity: 0.4;
             }
 
             .widget__button_highlighted {
@@ -112,10 +118,10 @@
                 cursor: pointer;
                 color: inherit;
                 display: block;
-
                 transition: color .4s ease;
                 margin-top: auto;
                 margin-bottom: auto;
+                margin-right: 8px; 
             }
 
             .widget__reset:hover {
@@ -178,9 +184,17 @@
                         <template is="dom-if" if="{{_isChartFiltered}}">
                             <a class="widget__reset widget__option" on-tap="_onTapReset">Reset</a>
                         </template>
+                        <paper-icon-button id="download-button"
+                            disabled="[[_isEdge()]]"
+                            icon='taskboard-icons:download'
+                            title="[[_getDownloadButtonTitle()]]"
+                            class$="widget__button {{option.cssClasses}}"
+                            on-tap="_onTapDownload">
+                        </paper-icon-button>
                         <template is="dom-repeat" items="{{options}}" as="option">
                             <template is="dom-if" if="{{!option.hidden}}">
                                 <paper-icon-button
+                                    disabled="{{option.disabled}}"
                                     icon="{{option.icon}}"
                                     title="{{option.title}}"
                                     class$="widget__button {{option.cssClasses}}"
@@ -191,7 +205,7 @@
                     </div>
                 </template>
             </header>
-            <div class="widget__body">
+            <div class="widget__body" id="widget-wrap-body">
                 <template is="dom-if" if="{{!errorMessage}}">
                     <div class="widget__content">
                         <content></content>
@@ -256,6 +270,19 @@
                     '_onChartChanged(chart)',
                     '_onErrorMessageChanged(errorMessage)',
                 ],
+                
+                _isEdge: function() {
+                    return isEdge();
+                },
+
+                _getDownloadButtonTitle: function() {
+                    var title = 'Download chart as picture';
+                    
+                    if (isEdge())
+                        title += ' - Disabled on Edge browser.';
+                    
+                    return title;
+                },
 
                 _onReadyChanged: function(isReady) {
                     var loader = this.$$('.loader');
@@ -316,12 +343,19 @@
                 },
 
                 _onOptionTap: function(event) {
-                    var callback = event.model.get('option.tap');
-                    callback();
+                    var option = event.model.get('option');
+                    if (option.disabled)
+                        return;
+                    option.tap();
                 },
 
                 _shouldShowOptions: function(isReady,errorMessage) {
                     return isReady && _.isEmpty(errorMessage);
+                },
+
+                _onTapDownload: function() {
+                    var fileName = this.title.replace(/ /g, '_') + "_" + getDateHour();
+                    dcUtils.downloadElementAsJpegImage('widget-wrap-body', fileName);
                 }
             });
         })();
