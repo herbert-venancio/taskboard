@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import objective.taskboard.it.FollowupReportType.FollowupReportTypeData;
 
-public class FollowupReportUiIt extends AuthenticatedIntegrationTest {
+public class FollowupReportUiIT extends AuthenticatedIntegrationTest {
     private static final String DEV = "Dev";
     private static final String REPORT_TYPE_TEST = "Report Type Test";
 
@@ -143,7 +143,7 @@ public class FollowupReportUiIt extends AuthenticatedIntegrationTest {
             .waitClose();
 
         reportWindow
-                .assertReportTypes(asList(REPORT_TYPE_TEST, DEV))
+                .assertReportTypes(asList(DEV, REPORT_TYPE_TEST))
                 .assertProjectIsDisabled()
                 .assertDateDropdownIsDisabled()
                 .assertGenerateButtonIsDisabled()
