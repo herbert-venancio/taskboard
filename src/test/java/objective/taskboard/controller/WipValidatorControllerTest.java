@@ -25,16 +25,13 @@ import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.contains;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.PRECONDITION_FAILED;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,7 +42,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.ResponseEntity;
 
@@ -62,10 +58,7 @@ import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraProperties.CustomField;
 import objective.taskboard.jira.JiraProperties.CustomField.ClassOfServiceDetails;
 import objective.taskboard.jira.JiraProperties.Wip;
-import objective.taskboard.jira.JiraSearchService;
 import objective.taskboard.jira.MetadataCachedService;
-import objective.taskboard.jira.SearchIssueVisitor;
-import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.data.Status;
 import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.repository.UserTeamCachedRepository;
@@ -83,6 +76,7 @@ public class WipValidatorControllerTest {
     private static final String MSG_EXPECTED_NO_WIP = "No wip configuration was found";
 
     private static final Status STATUS = new Status(10L, "status", null);
+    private static final Status STATUS_2 = new Status(11L, "status_2", null);
     private static final String PROJECT_KEY = "PROJECT";
     private static final String USER = "user";
     private static final String TEAM_NAME = "Team";
@@ -92,18 +86,6 @@ public class WipValidatorControllerTest {
     @InjectMocks
     private WipValidatorController subject;
 
-    boolean throwExceptionDuringSearch = false;
-    
-    @Spy
-    private JiraSearchService jiraSearchService =  new JiraSearchService() {
-        @Override
-        public void searchIssues(String jql, SearchIssueVisitor visitor, String... additionalFields) {
-            if (throwExceptionDuringSearch)
-                throw new RuntimeException("Error");
-            visitor.processIssue(Mockito.mock(JiraIssueDto.class));
-        }
-    };
-    
     @Mock
     private Issue issue;
     @Mock
@@ -146,9 +128,15 @@ public class WipValidatorControllerTest {
         when(issue.getClassOfServiceValue()).thenReturn("Standard");
         when(issue.getType()).thenReturn(99L);
         when(issue.getProjectKey()).thenReturn(PROJECT_KEY);
-        when(issue.getTeams()).thenReturn(Sets.newHashSet(new Issue.CardTeam(1L), new Issue.CardTeam(2L)));
+        when(issue.getTeams()).thenReturn(Sets.newHashSet(new Issue.CardTeam(TEAM_NAME, 1L), new Issue.CardTeam(TEAM2_NAME, 2L)));
 
-        when(cardService.getIssueByKey(anyString())).thenReturn(issue);
+        when(cardService.getIssueByKey("I-1")).thenReturn(issue);
+        
+        Issue otherIssue = Mockito.mock(Issue.class);
+        when(otherIssue.getType()).thenReturn(99L);
+        when(otherIssue.getStatus()).thenReturn(10L);
+        when(otherIssue.getTeams()).thenReturn(Sets.newHashSet(new Issue.CardTeam(TEAM_NAME, 1L), new Issue.CardTeam(TEAM2_NAME, 2L)));
+        when(cardService.getAllIssues()).thenReturn(Arrays.asList(issue, otherIssue));
 
         when(userTeam.getUserName()).thenReturn(USER);
         when(userTeam.getTeam()).thenReturn(TEAM_NAME);
@@ -174,162 +162,117 @@ public class WipValidatorControllerTest {
         
         when(step.getFilters()).thenReturn(asList(filter));
 
+        when(jiraProperties.getWip()).thenReturn(new Wip());
         when(wipConfig.getTeam()).thenReturn(TEAM_NAME);
         when(wipConfig.getWip()).thenReturn(1);
         when(wipConfig.isApplicable(99L, STATUS.id)).thenReturn(true);
         when(wipConfig.getStep()).thenReturn(step);
-        when(wipConfigRepo.findByTeamIn(asList(TEAM_NAME))).thenReturn(asList(wipConfig));
+        when(wipConfigRepo.findByTeamIn(asList(TEAM_NAME, TEAM2_NAME))).thenReturn(asList(wipConfig));
         
         Map<Long, Status> statuses = new HashMap<>();
         statuses.put(STATUS.id, STATUS);
+        statuses.put(STATUS_2.id, STATUS_2);
         when(metadataService.getStatusesMetadata()).thenReturn(statuses);
     }
 
     @Test
-    public void wipExceeded() {
-        ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("I-1", USER, STATUS.name);
+    public void whenWipExceeds_reponseOkWipExceedsFlagTrue() {
+        ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("I-1", STATUS.name);
+        
         assertTrue(MSG_ASSERT_WIP_SHOULD_HAVE_EXCEEDED, responseEntity.getBody().isWipExceeded);
         assertEquals(MSG_ASSERT_RESPONSE_MESSAGE, MSG_EXPECTED_WIP_EXCEEDED, responseEntity.getBody().message);
         assertEquals(MSG_ASSERT_RESPONSE_STATUS_CODE, OK, responseEntity.getStatusCode());
     }
 
     @Test
-    public void issueNotFound() {
+    public void whenIssueNotFound_ResponseError() {
         when(cardService.getIssueByKey(anyString())).thenReturn(null);
-        ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("", "", "");
+        ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("", "");
         assertFalse(MSG_ASSERT_WIP_SHOULDN_T_HAVE_EXCEEDED, responseEntity.getBody().isWipExceeded);
         assertEquals(MSG_ASSERT_RESPONSE_MESSAGE, "Issue  not found", responseEntity.getBody().message);
         assertEquals(MSG_ASSERT_RESPONSE_STATUS_CODE, PRECONDITION_FAILED, responseEntity.getStatusCode());
     }
-
-    @Test
-    public void userEmptyRequired() {
-        when(cardService.getIssueByKey(anyString())).thenReturn(issue);
-        ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("", "", "");
-        assertFalse(MSG_ASSERT_WIP_SHOULDN_T_HAVE_EXCEEDED, responseEntity.getBody().isWipExceeded);
-        assertEquals(MSG_ASSERT_RESPONSE_MESSAGE, "Query parameter 'user' is required",
-                responseEntity.getBody().message);
-        assertEquals(MSG_ASSERT_RESPONSE_STATUS_CODE, PRECONDITION_FAILED, responseEntity.getStatusCode());
-    }
-
-    @Test
-    public void userNullRequired() {
-        when(cardService.getIssueByKey(anyString())).thenReturn(issue);
-        ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("", null, "");
-        assertFalse(MSG_ASSERT_WIP_SHOULDN_T_HAVE_EXCEEDED, responseEntity.getBody().isWipExceeded);
-        assertEquals(MSG_ASSERT_RESPONSE_MESSAGE, "Query parameter 'user' is required",
-                responseEntity.getBody().message);
-        assertEquals(MSG_ASSERT_RESPONSE_STATUS_CODE, PRECONDITION_FAILED, responseEntity.getStatusCode());
-    }
-
-    @Test
-    public void statusEmptyRequired() {
-        when(cardService.getIssueByKey(anyString())).thenReturn(issue);
-        ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("", USER, "");
-        assertFalse(MSG_ASSERT_WIP_SHOULDN_T_HAVE_EXCEEDED, responseEntity.getBody().isWipExceeded);
-        assertEquals(MSG_ASSERT_RESPONSE_MESSAGE, "Query parameter 'status' is required",
-                responseEntity.getBody().message);
-        assertEquals(MSG_ASSERT_RESPONSE_STATUS_CODE, PRECONDITION_FAILED, responseEntity.getStatusCode());
-    }
-
-    @Test
-    public void statusNullRequired() {
-        when(cardService.getIssueByKey(anyString())).thenReturn(issue);
-        ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("", USER, null);
-        assertFalse(MSG_ASSERT_WIP_SHOULDN_T_HAVE_EXCEEDED, responseEntity.getBody().isWipExceeded);
-        assertEquals(MSG_ASSERT_RESPONSE_MESSAGE, "Query parameter 'status' is required",
-                responseEntity.getBody().message);
-        assertEquals(MSG_ASSERT_RESPONSE_STATUS_CODE, PRECONDITION_FAILED, responseEntity.getStatusCode());
-    }
-
-    @Test
-    public void classOfServiceExpedite() throws JSONException {
-        when(issue.getClassOfServiceValue()).thenReturn("Expedite");
-        ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("", USER, STATUS.name);
-        assertFalse(MSG_ASSERT_WIP_SHOULDN_T_HAVE_EXCEEDED, responseEntity.getBody().isWipExceeded);
-        assertEquals(MSG_ASSERT_RESPONSE_MESSAGE, "Class of service is Expedite", responseEntity.getBody().message);
-        assertEquals(MSG_ASSERT_RESPONSE_STATUS_CODE, OK, responseEntity.getStatusCode());
-    }
-
-    @Test
-    public void noUserTeam() {
-        when(userTeamRepo.findByUserName(USER)).thenReturn(asList());
-        ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("", USER, STATUS.name);
-        assertFalse(MSG_ASSERT_WIP_SHOULDN_T_HAVE_EXCEEDED, responseEntity.getBody().isWipExceeded);
-        assertEquals(MSG_ASSERT_RESPONSE_MESSAGE, MSG_EXPECTED_NO_WIP, responseEntity.getBody().message);
-        assertEquals(MSG_ASSERT_RESPONSE_STATUS_CODE, OK, responseEntity.getStatusCode());
-    }
-
-    @Test
-    public void noTeam() {
-        when(teamRepo.findByName(TEAM_NAME)).thenReturn(null);
-        ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("", USER, STATUS.name);
-        assertFalse(MSG_ASSERT_WIP_SHOULDN_T_HAVE_EXCEEDED, responseEntity.getBody().isWipExceeded);
-        assertEquals(MSG_ASSERT_RESPONSE_MESSAGE, MSG_EXPECTED_NO_WIP, responseEntity.getBody().message);
-        assertEquals(MSG_ASSERT_RESPONSE_STATUS_CODE, OK, responseEntity.getStatusCode());
-    }
     
     @Test
-    public void standardIssueType() {
-        ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("", USER, STATUS.name);
-        assertTrue(MSG_ASSERT_WIP_SHOULD_HAVE_EXCEEDED, responseEntity.getBody().isWipExceeded);
-        assertEquals(MSG_ASSERT_RESPONSE_MESSAGE, MSG_EXPECTED_WIP_EXCEEDED, responseEntity.getBody().message);
+    public void whenWipNotConfigured_ResponseOkWipExceedsFlagFalse() {
+        when(issue.getStatus()).thenReturn(1000L);
+        
+        ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("I-1", STATUS_2.name);
+        
+        assertFalse(MSG_ASSERT_WIP_SHOULDN_T_HAVE_EXCEEDED, responseEntity.getBody().isWipExceeded);
+        assertEquals(MSG_ASSERT_RESPONSE_MESSAGE, MSG_EXPECTED_NO_WIP, responseEntity.getBody().message);
         assertEquals(MSG_ASSERT_RESPONSE_STATUS_CODE, OK, responseEntity.getStatusCode());
     }
 
     @Test
-    public void classOfServiceFieldNull() {
-        ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("", USER, STATUS.name);
-        assertTrue(MSG_ASSERT_WIP_SHOULD_HAVE_EXCEEDED, responseEntity.getBody().isWipExceeded);
+    public void whenStatusEmpty_ResponseError() {
+        when(cardService.getIssueByKey(anyString())).thenReturn(issue);
+        ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("", "");
+        assertFalse(MSG_ASSERT_WIP_SHOULDN_T_HAVE_EXCEEDED, responseEntity.getBody().isWipExceeded);
+        assertEquals(MSG_ASSERT_RESPONSE_MESSAGE, "Query parameter 'status' is required",
+                responseEntity.getBody().message);
+        assertEquals(MSG_ASSERT_RESPONSE_STATUS_CODE, PRECONDITION_FAILED, responseEntity.getStatusCode());
+    }
+
+    @Test
+    public void whenStatusIsNull_ResponseError() {
+        when(cardService.getIssueByKey(anyString())).thenReturn(issue);
+        ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("", null);
+        assertFalse(MSG_ASSERT_WIP_SHOULDN_T_HAVE_EXCEEDED, responseEntity.getBody().isWipExceeded);
+        assertEquals(MSG_ASSERT_RESPONSE_MESSAGE, "Query parameter 'status' is required",
+                responseEntity.getBody().message);
+        assertEquals(MSG_ASSERT_RESPONSE_STATUS_CODE, PRECONDITION_FAILED, responseEntity.getStatusCode());
+    }
+
+    @Test
+    public void whenClassOfServiceExpedite_ResponseOkWipExceedsFlagFalse() throws JSONException {
+        when(issue.getClassOfServiceValue()).thenReturn("Expedite");
+        
+        ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("I-1", STATUS.name);
+        
+        assertFalse(MSG_ASSERT_WIP_SHOULD_HAVE_EXCEEDED, responseEntity.getBody().isWipExceeded);
+        assertEquals(MSG_ASSERT_RESPONSE_STATUS_CODE, OK, responseEntity.getStatusCode());
+        assertEquals(MSG_ASSERT_RESPONSE_MESSAGE, "Class of service is Expedite", responseEntity.getBody().message);
+    }
+
+    @Test
+    public void whenClassOfServiceFieldNull_ResponseOkWipExceedsFlagTrue() {
+    	when(issue.getClassOfServiceValue()).thenReturn(null);
+        
+        ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("I-1", STATUS.name);
+        
         assertEquals(MSG_ASSERT_RESPONSE_MESSAGE, MSG_EXPECTED_WIP_EXCEEDED, responseEntity.getBody().message);
+        assertTrue(MSG_ASSERT_WIP_SHOULD_HAVE_EXCEEDED, responseEntity.getBody().isWipExceeded);
         assertEquals(MSG_ASSERT_RESPONSE_STATUS_CODE, OK, responseEntity.getStatusCode());
     }
 
     @Test
-    public void throwedNullPointerException() {
-        when(userTeamRepo.findByUserName(USER)).thenReturn(null);
-        ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("", USER, STATUS.name);
+    public void whenExceptionHappens_ResponseErrorMessageContainsException() {
+    	when(wipConfigRepo.findByTeamIn(asList(TEAM_NAME, TEAM2_NAME))).thenReturn(null);
+        ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("I-1", STATUS.name);
         assertFalse(MSG_ASSERT_WIP_SHOULDN_T_HAVE_EXCEEDED, responseEntity.getBody().isWipExceeded);
         assertEquals(MSG_ASSERT_RESPONSE_MESSAGE, "java.lang.NullPointerException", responseEntity.getBody().message);
         assertEquals(MSG_ASSERT_RESPONSE_STATUS_CODE, INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
     }
 
     @Test
-    public void sortWipConfig() {
-        when(userTeamRepo.findByUserName(USER)).thenReturn(asList(userTeam, userTeam2));
-        
-        WipConfiguration wipConfig2 = mock(WipConfiguration.class);
-        when(wipConfig2.isApplicable(99L, STATUS.id)).thenReturn(true);
-        when(wipConfig2.getStep()).thenReturn(step);
-        when(wipConfig2.getTeam()).thenReturn(TEAM2_NAME);
-        when(wipConfig2.getWip()).thenReturn(0);
-
-        when(wipConfigRepo.findByTeamIn(Mockito.any())).thenReturn(asList(wipConfig, wipConfig2));
-        ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("I-1", USER, STATUS.name);
-        assertTrue(MSG_ASSERT_WIP_SHOULD_HAVE_EXCEEDED, responseEntity.getBody().isWipExceeded);
-        assertEquals(MSG_ASSERT_RESPONSE_MESSAGE,
-                "You can't exceed your team's WIP limit (Team: Team2, Actual: 1, Limit: 0)",
-                responseEntity.getBody().message);
-        assertEquals(MSG_ASSERT_RESPONSE_STATUS_CODE, OK, responseEntity.getStatusCode());
-    }
-
-    @Test
-    public void noWipExceeded() {
+    public void whenWipNotExceeded_ReponseOkWipExceedsFlagFalse() {
         when(wipConfig.getWip()).thenReturn(2);
-        ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("I-1", USER, STATUS.name);
+
+        ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("I-1", STATUS.name);
         assertFalse(MSG_ASSERT_WIP_SHOULDN_T_HAVE_EXCEEDED, responseEntity.getBody().isWipExceeded);
         assertEquals(MSG_ASSERT_RESPONSE_MESSAGE, "(Team: Team, Actual: 1, Limit: 2)", responseEntity.getBody().message);
         assertEquals(MSG_ASSERT_RESPONSE_STATUS_CODE, OK, responseEntity.getStatusCode());
     }
 
     @Test
-    public void ignoreIssueTypesOnGetWipCountWhenPropertyIsNotEmpty() {
+    public void whenIssueTypeIsIgnoredInProperty_ResponseOkWipExceedsFlagFalse() {
         Wip wip = new Wip();
-        wip.setIgnoreIssuetypesIds(asList(2L, 3L));
+        wip.setIgnoreIssuetypesIds(asList(99L));
         when(jiraProperties.getWip()).thenReturn(wip);
 
-        subject.validate("I-1", USER, STATUS.name);
-        verify(jiraSearchService).searchIssues(contains("and issuetype not in (2,3)"), anyObject());
+        ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("I-1", STATUS.name);
+        assertFalse(MSG_ASSERT_WIP_SHOULDN_T_HAVE_EXCEEDED, responseEntity.getBody().isWipExceeded);
     }
 
     @Test
@@ -340,18 +283,9 @@ public class WipValidatorControllerTest {
         when(issue.getType()).thenReturn(1L);
         when(issue.getIssueTypeName()).thenReturn("Feature Planning");
 
-        ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("I-1", USER, STATUS.name);
+        ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("I-1", STATUS.name);
         assertFalse(responseEntity.getBody().isWipExceeded);
         assertEquals("Issue Type Feature Planning is ignored on WIP count.", responseEntity.getBody().message);
         assertEquals(OK, responseEntity.getStatusCode());
-    }
-
-    @Test
-    public void throwedAnyException() {
-        throwExceptionDuringSearch = true;
-        ResponseEntity<WipValidatorResponse> responseEntity = subject.validate("I-1", USER, STATUS.name);
-        assertFalse(MSG_ASSERT_WIP_SHOULDN_T_HAVE_EXCEEDED, responseEntity.getBody().isWipExceeded);
-        assertEquals(MSG_ASSERT_RESPONSE_MESSAGE, "Error", responseEntity.getBody().message);
-        assertEquals(MSG_ASSERT_RESPONSE_STATUS_CODE, INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
     }
 }

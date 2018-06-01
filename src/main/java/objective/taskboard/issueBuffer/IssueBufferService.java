@@ -192,15 +192,10 @@ public class IssueBufferService {
             eventPublisher.publishEvent(new IssueCacheUpdateEvent(this, state));
     }
 
-    public Issue updateIssueBuffer(final String key) {
-        StopWatch watch = new StopWatch();
-        watch.start();
+    public synchronized Issue updateIssueBuffer(final String key) {
         Optional<JiraIssueDto> foundIssue =  jiraBean.getIssueByKey(key);
         if (!foundIssue.isPresent()) 
             return cardsRepo.remove(key);
-        
-        log.debug("Time to fetch issue: " + watch.getTime());
-
         return updateIssueBufferFetchParentIfNeeded(foundIssue.get());
     }
 
@@ -399,15 +394,9 @@ public class IssueBufferService {
         return teamToAdd.get();
     }
 
-    public synchronized Issue doTransition(String issueKey, Long transitionId, Map<String, Object> fields) {
-        StopWatch watch = new StopWatch();
-        watch.start();
+    public Issue doTransition(String issueKey, Long transitionId, Map<String, Object> fields) {
         jiraBean.doTransition(issueKey, transitionId, fields);
-        log.debug("Time to perform transition for issue key " + issueKey + " : " + watch.getTime());
-
-        Issue issue = updateIssueBuffer(issueKey);
-        updateIssueBuffer();
-        return issue;
+        return updateIssueBuffer(issueKey);
     }
 
     private void putIssue(Issue issue) {

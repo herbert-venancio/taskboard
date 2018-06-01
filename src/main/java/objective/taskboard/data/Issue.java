@@ -703,7 +703,7 @@ public class Issue extends IssueScratch implements Serializable {
             id = i;
         }
 
-        CardTeam(String name, Long i) {
+        public CardTeam(String name, Long i) {
             this.name = name;
             id = i;
         }
