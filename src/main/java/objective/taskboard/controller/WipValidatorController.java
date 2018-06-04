@@ -21,21 +21,16 @@
 package objective.taskboard.controller;
 
 import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.PRECONDITION_FAILED;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,16 +40,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import objective.taskboard.data.Issue;
-import objective.taskboard.data.Team;
-import objective.taskboard.domain.Filter;
+import objective.taskboard.data.Issue.CardTeam;
 import objective.taskboard.domain.WipConfiguration;
 import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.jira.JiraProperties;
-import objective.taskboard.jira.JiraSearchService;
 import objective.taskboard.jira.MetadataCachedService;
 import objective.taskboard.jira.data.Status;
-import objective.taskboard.repository.TeamCachedRepository;
-import objective.taskboard.repository.UserTeamCachedRepository;
 import objective.taskboard.repository.WipConfigurationRepository;
 
 
@@ -69,15 +60,6 @@ public class WipValidatorController {
     private WipConfigurationRepository wipConfigRepo;
 
     @Autowired
-    private UserTeamCachedRepository userTeamRepo;
-
-    @Autowired
-    private TeamCachedRepository teamRepo;
-
-    @Autowired
-    private JiraSearchService jiraSearchService;
-
-    @Autowired
     private JiraProperties jiraProperties;
     
     @Autowired
@@ -89,7 +71,6 @@ public class WipValidatorController {
     @RequestMapping
     public ResponseEntity<WipValidatorResponse> validate(
             @RequestParam("issue") String issueKey,
-            @RequestParam("user") String user, 
             @RequestParam("status") String newStatusName) {
         WipValidatorResponse response = new WipValidatorResponse();
 
@@ -97,11 +78,6 @@ public class WipValidatorController {
             Issue issue = cardService.getIssueByKey(issueKey);
             if (issue == null) {
                 response.message = "Issue " + issueKey + " not found";
-                return new ResponseEntity<WipValidatorResponse>(response, PRECONDITION_FAILED);
-            }
-
-            if (user == null || user.isEmpty()) {
-                response.message = "Query parameter 'user' is required";
                 return new ResponseEntity<WipValidatorResponse>(response, PRECONDITION_FAILED);
             }
 
@@ -129,31 +105,23 @@ public class WipValidatorController {
                 return new ResponseEntity<WipValidatorResponse>(response, OK);
             }
 
-            Optional<WipConfiguration> optionalWipConfig = getWipConfig(user, issue, newStatus.get().id);
+            Optional<WipConfiguration> optionalWipConfig = getWipConfig(issue, newStatus.get().id);
             if (!optionalWipConfig.isPresent()) {
                 response.message = "No wip configuration was found";
                 return new ResponseEntity<WipValidatorResponse>(response, OK);
             }
 
             WipConfiguration wipConfig = optionalWipConfig.get();
-            List<String> teamUsers = userTeamRepo.findByTeam(wipConfig.getTeam()).stream()
-                    .map(u -> u.getUserName())
-                    .collect(toList());
 
-            Set<String> teamProjects = issue.getTeams().stream().map(t->t.name).collect(Collectors.toSet());
+            long issueCount = countIssuesForTheTeamInTheSameStep(wipConfig, issue);
 
-            String query = getWipCountQuery(wipConfig.getStep().getFilters(), teamUsers, teamProjects);
-
-            AtomicInteger wipActual = new AtomicInteger(0);
-            jiraSearchService.searchIssues(query, _i -> wipActual.incrementAndGet());
-
-            if (wipActual.get() >= wipConfig.getWip()) {
+            if (issueCount >= wipConfig.getWip()) {
                 response.isWipExceeded = true;
                 response.message = "You can't exceed your team's WIP limit ";
             }
 
             response.message += String.format("(Team: %s, Actual: %d, Limit: %d)", wipConfig.getTeam(),
-                    wipActual.get(), wipConfig.getWip());
+                    issueCount, wipConfig.getWip());
 
             return new ResponseEntity<WipValidatorResponse>(response, OK);
         } catch (Exception e) {
@@ -163,23 +131,32 @@ public class WipValidatorController {
         }
     }
 
-    private boolean isClassOfServiceExpedite(Issue issue) {
-        return issue.getClassOfServiceValue().equals(CLASS_OF_SERVICE_EXPEDITE);
+    private long countIssuesForTheTeamInTheSameStep(WipConfiguration wipConfig, Issue iss) {
+        return cardService.getAllIssues().stream()
+            .filter(issue -> isNotIgnored(issue))
+            .filter(issue -> isWipApplicable(wipConfig, issue, iss.getTeams()))
+            .count();
+    }
+    
+    private boolean isNotIgnored(Issue issue) {
+        return !jiraProperties.getWip().getIgnoreIssuetypesIds().contains(issue.getType());
+    }
+    
+    private boolean isWipApplicable(WipConfiguration wipConfig, Issue issue, Set<CardTeam> set) {
+        return wipConfig.isApplicable(issue.getType(), issue.getStatus()) &&
+                set.stream().anyMatch(t -> issue.getTeams().contains(t));
     }
 
-    private Optional<WipConfiguration> getWipConfig(String user, Issue issueByKey, Long newStatusId) {
+    private boolean isClassOfServiceExpedite(Issue issue) {
+    	if (issue.getClassOfServiceValue() == null) return false;
+        	return issue.getClassOfServiceValue().equals(CLASS_OF_SERVICE_EXPEDITE);
+    }
+
+    private Optional<WipConfiguration> getWipConfig(Issue issueByKey, Long newStatusId) {
         long issueTypeId = issueByKey.getType();
 
-        List<Long> teamsIdsThatContributeToProject = issueByKey.getTeams().stream().map(t->t.id).collect(Collectors.toList());
-        
-        List<String> userTeamsNames = userTeamRepo.findByUserName(user).stream()
-                .map(userTeam -> teamRepo.findByName(userTeam.getTeam()))
-                .filter(Objects::nonNull)
-                .filter(team -> teamsIdsThatContributeToProject.contains(team.getId()))
-                .map(Team::getName)
-                .collect(toList());
-
-        List<WipConfiguration> wipConfigsApplicableToIssue = wipConfigRepo.findByTeamIn(userTeamsNames).stream()
+        List<String> teamNames = issueByKey.getTeams().stream().map(t->t.name).collect(Collectors.toList());
+        List<WipConfiguration> wipConfigsApplicableToIssue = wipConfigRepo.findByTeamIn(teamNames).stream()
                 .filter(c -> c.isApplicable(issueTypeId, newStatusId))
                 .collect(toList());
 
@@ -187,26 +164,6 @@ public class WipValidatorController {
                 .min(comparing(WipConfiguration::getWip));
 
         return smallestWip;
-    }
-
-    private String getWipCountQuery(Collection<Filter> stepFilters, List<String> teamUsers, Set<String> teamProjects) {
-        String stepQuery = stepFilters.stream()
-                .map(f -> "(issuetype=" + f.getIssueTypeId() + " AND status=" + f.getStatusId() + ")")
-                .collect(joining(" OR ", "(", ")"));
-
-        String query = "assignee in ('" + String.join("','", teamUsers) + "') " +
-                "and project in ('" + String.join("','", teamProjects) + "') " +
-                "and " + stepQuery + " " +
-                getIgnoreIssueTypesToQuery();
-
-        return query;
-    }
-
-    private String getIgnoreIssueTypesToQuery() {
-        if (jiraProperties.getWip() == null)
-            return "";
-        List<Long> idsToIgnore = jiraProperties.getWip().getIgnoreIssuetypesIds();
-        return idsToIgnore.size() > 0 ? " and issuetype not in (" + StringUtils.join(idsToIgnore, ',') + ") " : "";
     }
 
     private Boolean isIssueTypeToIgnore(Issue issue) {

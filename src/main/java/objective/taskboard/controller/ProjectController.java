@@ -26,7 +26,6 @@ import static objective.taskboard.repository.PermissionRepository.DASHBOARD_OPER
 import static objective.taskboard.repository.PermissionRepository.DASHBOARD_TACTICAL;
 
 import java.util.List;
-import java.util.Optional;
 
 import javax.transaction.Transactional;
 
@@ -107,7 +106,7 @@ public class ProjectController {
         validateTeamDoesntExist(data.defaultTeam.name);
 
         ProjectCreationDataTeam defaultTeam = data.defaultTeam; 
-        TeamFilterConfiguration team = createTeamAndConfigurations(data.projectKey, defaultTeam.name, data.teamLeader, data.teamLeader, defaultTeam.members);
+        TeamFilterConfiguration team = createTeamAndConfigurations(defaultTeam.name, data.teamLeader, data.teamLeader, defaultTeam.members);
 
         projectService.saveTaskboardProject(new ProjectFilterConfiguration(data.projectKey, team.getId()));
     }
@@ -117,11 +116,7 @@ public class ProjectController {
             throw new IllegalArgumentException("Team '" + teamName + "' already exists.");
     }
 
-    private TeamFilterConfiguration createTeamAndConfigurations(String projectKey, String teamName, String manager, String coach, List<String> members) {
-        Optional<ProjectFilterConfiguration> projectByKey = projectRepository.getProjectByKey(projectKey);
-        if (!projectByKey.isPresent())
-            throw new IllegalArgumentException("Project with key " + projectKey + " not found.");
-        
+    private TeamFilterConfiguration createTeamAndConfigurations(String teamName, String manager, String coach, List<String> members) {
         Team team = createTeam(teamName, manager, coach, members);
         return createTeamFilterConfiguration(team);
     }
