@@ -140,7 +140,7 @@ public class IssueBufferService {
 
         log.info("Card repo is not initialized. This might take some time..");
         
-        while(!getState().isInitialized()) 
+        while(!getState().isInitialized())
             Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
         
         log.info("Card repo initialized");
@@ -164,14 +164,17 @@ public class IssueBufferService {
             stopWatch.start();
             try {
                 updateState(state.start());
-                
+
                 IssueBufferServiceSearchVisitor visitor = new IssueBufferServiceSearchVisitor(issueConverter, this);
                 jiraIssueService.searchAllProjectIssues(visitor, cardsRepo);
 
                 log.info("Issue buffer - processed " + visitor.getProcessedCount() + " issues");
-                
+
                 updateState(state.done());
                 saveCache();
+            } catch(RequiresReindexException e) {
+                updateState(IssueBufferState.requiresReindex);
+                log.error("objective.taskboard.issueBuffer.IssueBufferService.updateIssueBuffer", e);
             }catch(Exception e) {
                 updateState(state.error());
                 log.error("objective.taskboard.issueBuffer.IssueBufferService.updateIssueBuffer - Failed to bring issues", e);
