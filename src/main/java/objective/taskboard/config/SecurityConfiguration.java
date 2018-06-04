@@ -38,7 +38,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.web.context.annotation.RequestScope;
+import org.springframework.web.context.annotation.SessionScope;
 
 import com.google.common.collect.Lists;
 
@@ -96,9 +96,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
         });
     }
-
+    
     @Bean
-    @RequestScope
+    @SessionScope
     public LoggedUserDetails getLoggedUserDetails() {
         String username = CredentialsHolder.username();
         List<LoggedUserDetails.Role> roles = jiraService.getUserRoles(username).stream()

@@ -32,5 +32,6 @@ public abstract class AuthenticatedIntegrationTest extends AbstractUIWithCoverag
         
         MainPage mainPage = MainPage.produce(webDriver);
         mainPage.waitUserLabelToBe("Foo");
+        mainPage.lane("Demand").boardStep("Open").assertIssueList("TASKB-20");
     }
 }

@@ -22,28 +22,23 @@ package objective.taskboard.jira;
  */
 
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import com.atlassian.jira.rest.client.api.GetCreateIssueMetadataOptions;
 import com.atlassian.jira.rest.client.api.GetCreateIssueMetadataOptionsBuilder;
+import com.atlassian.jira.rest.client.api.domain.BasicProject;
 import com.atlassian.jira.rest.client.api.domain.CimProject;
 
 import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.config.LoggedInUserKeyGenerator;
-import objective.taskboard.domain.Project;
-import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.jira.data.JiraProject;
 import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
 import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
@@ -74,35 +69,15 @@ class JiraProjectService {
                 .map(project -> service.get(project.key))
                 .collect(toList());
     }
-
+    
     @Cacheable(cacheNames=CacheConfiguration.USER_PROJECTS, keyGenerator=LoggedInUserKeyGenerator.NAME)
-    public Map<String, Project> getUserProjects() {
-        List<ProjectFilterConfiguration> configuredProjects = projectFilterConfiguration.getProjects();
-
-        Map<String, com.atlassian.jira.rest.client.api.domain.Project> configuredJiraProjectsToUser = configuredProjects
-                .stream()
-                .map(pf -> getJiraProjectByKeyAsUser(pf.getProjectKey()))
-                .filter(Objects::nonNull)
-                .collect(toMap(com.atlassian.jira.rest.client.api.domain.Project::getKey, p -> p));
-
-        return configuredProjects
-                .stream()
-                .filter(pf -> configuredJiraProjectsToUser.containsKey(pf.getProjectKey()))
-                .map(pf -> Project.from(configuredJiraProjectsToUser.get(pf.getProjectKey()), pf))
-                .collect(toMap(Project::getKey, p -> p));
-    }
-
-    private com.atlassian.jira.rest.client.api.domain.Project getJiraProjectByKeyAsUser(String projectKey) {
-        try {
-            return jiraEndpointAsUser.executeRequest(client -> client.getProjectClient().getProject(projectKey));
-        } catch(JiraServiceException e) {
-            Optional<HttpStatus> statusCode = e.getStatusCode();
-            if (statusCode.isPresent()) {
-                if (statusCode.get() == HttpStatus.NOT_FOUND)
-                    return null;
-            }
-            throw e;
-        }
+    public List<String> getUserProjectKeys() {
+        Iterable<BasicProject> visible = jiraEndpointAsUser.executeRequest(client -> client.getProjectClient().getAllProjects());
+        List<String> visibleKeys = new LinkedList<>();
+        for (BasicProject basicProject : visible) 
+            visibleKeys.add(basicProject.getKey());
+        
+        return visibleKeys;
     }
 
     public Iterable<CimProject> getCreateIssueMetadata(String projectKey) {

@@ -14,7 +14,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -72,8 +71,6 @@ public class ProjectServiceTest {
         when(projectRepository.getProjectByKey(any())).thenAnswer(i -> Optional.ofNullable(projectsByKey.get(i.getArgumentAt(0, String.class))));
         when(projectRepository.getProjectByKeyOrCry(any())).thenAnswer(i -> projectsByKey.get(i.getArgumentAt(0, String.class)));
         
-        when(jiraProjectService.getUserProjects()).thenReturn(generateUserProjects());
-        
         when(jiraProjectService.getCreateIssueMetadata(any())).thenAnswer(i -> {
             String projectKey = i.getArgumentAt(0, String.class);
 
@@ -84,39 +81,14 @@ public class ProjectServiceTest {
         
         List<Version> versions = asList(new Version("12549", "0.3"), new Version("12550", "1.0"),  new Version("12551", "2.0"));
 
+        when(jiraProjectService.getUserProjectKeys()).thenReturn(asList(PROJECT_ARCHIVED, PROJECT_REGULAR_1, PROJECT_REGULAR_2, PROJECT_WITHOUT_METADATA));
+
         when(jiraProjectService.getAllProjects()).thenReturn(
-                projectList.stream().map(p -> new JiraProject("1", p.getProjectKey(), versions, null)).collect(toList()));
+                projectList.stream().map(p -> new JiraProject("1", p.getProjectKey(), versions, p.getProjectKey())).collect(toList()));
         
         when(authorizer.getAllowedProjectsForPermissions(any())).thenReturn(asList(PROJECT_ARCHIVED, PROJECT_REGULAR_1, PROJECT_REGULAR_2, PROJECT_WITHOUT_METADATA));
         
         when(projectBaselineProvider.getAvailableDates(any())).thenReturn(emptyList());
-    }
-
-    private static Map<String, Project> generateUserProjects() {
-        Map<String, Project> projectsMap = new HashMap<String, Project>();
-
-        Project p1 = new Project();
-        p1.setKey(PROJECT_ARCHIVED);
-        p1.setName(PROJECT_ARCHIVED);
-
-        Project p2 = new Project();
-        p2.setKey(PROJECT_REGULAR_1);
-        p2.setName(PROJECT_REGULAR_1);
-
-        Project p3 = new Project();
-        p3.setKey(PROJECT_REGULAR_2);
-        p3.setName(PROJECT_REGULAR_2);
-
-        Project p4 = new Project();
-        p4.setKey(PROJECT_WITHOUT_METADATA);
-        p4.setName(PROJECT_WITHOUT_METADATA);
-
-        projectsMap.put(p1.getKey(), p1);
-        projectsMap.put(p2.getKey(), p2);
-        projectsMap.put(p3.getKey(), p3);
-        projectsMap.put(p4.getKey(), p4);
-
-        return projectsMap;
     }
 
     @Test
