@@ -1,5 +1,3 @@
-package objective.taskboard.filterPreferences;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -21,50 +19,36 @@ package objective.taskboard.filterPreferences;
  * [/LICENSE]
  */
 
-import objective.taskboard.auth.CredentialsHolder;
-import objective.taskboard.domain.UserPreferences;
+package objective.taskboard.filterPreferences;
+
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import objective.taskboard.auth.CredentialsHolder;
+import objective.taskboard.domain.UserPreferences;
+import objective.taskboard.repository.UserPreferencesRepository;
 
 @Service
 public class UserPreferencesService {
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private UserPreferencesRepository repository;
 
+    public Optional<UserPreferences> getLoggedUserPreferences() {
+        return repository.findOneByJiraUser(CredentialsHolder.username());
+    }
 
-    private String selectUserPreferences(String jiraUser) {
-        final String sql = "SELECT preferences FROM user_preferences WHERE JIRA_USER = ?";
-        final List<String> userPreferences = jdbcTemplate.queryForList(sql, new Object[]{jiraUser}, String.class);
-        if (!userPreferences.isEmpty()) {
-            return userPreferences.get(0);
+    public void save(String jiraUser, String preferences) {
+        Optional<UserPreferences> userPreferencesOpt = repository.findOneByJiraUser(jiraUser);
+        if (userPreferencesOpt.isPresent()) {
+            UserPreferences updatedUserPreferences = userPreferencesOpt.get();
+            updatedUserPreferences.setPreferences(preferences);
+            repository.updatePreferences(updatedUserPreferences);
         } else {
-            return null;
+            repository.add(new UserPreferences(jiraUser, preferences));
         }
     }
 
-    public synchronized String getUserPreferences() {
-        final String jiraUser = CredentialsHolder.username();
-        final String userPreferences = selectUserPreferences(jiraUser);
-
-        if (userPreferences != null)
-            return userPreferences;
-        else
-            return "{}";
-    }
-
-    public synchronized void insertOrUpdate(UserPreferences updatedUserPreferences) {
-        final String jiraUser = updatedUserPreferences.getJiraUser();
-        final String oldUserPreferences = selectUserPreferences(jiraUser);
-        String sql = "";
-        if (oldUserPreferences != null) {
-            sql = "UPDATE user_preferences SET preferences = ? WHERE JIRA_USER = ?";
-        } else {
-            sql = "INSERT INTO user_preferences (PREFERENCES, JIRA_USER) VALUES(?, ?)";
-        }
-        jdbcTemplate.update(sql, updatedUserPreferences.getPreferences(), jiraUser);
-    }
 }

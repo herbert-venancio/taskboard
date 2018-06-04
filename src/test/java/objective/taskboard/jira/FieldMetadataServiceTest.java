@@ -6,7 +6,6 @@ import static objective.taskboard.jira.AuthorizedJiraEndpointTest.JIRA_USER_PASS
 import static objective.taskboard.jira.AuthorizedJiraEndpointTest.JIRA_USER_USERNAME;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 
 import java.util.List;
 
@@ -18,15 +17,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import objective.taskboard.config.LoggedInUserLocaleKeyGenerator;
 import objective.taskboard.config.SpringContextBridge;
 import objective.taskboard.jira.client.JiraFieldDataDto;
+import objective.taskboard.testUtils.CredentialHolderUtils;
 import objective.taskboard.testUtils.JiraMockServer;
 
 @RunWith(SpringRunner.class)
@@ -77,14 +74,7 @@ public class FieldMetadataServiceTest {
         lousa.setPassword(JIRA_MASTER_PASSWORD);
         doReturn(lousa).when(jiraProperties).getLousa();
 
-        // logged user
-        Authentication authentication = mock(Authentication.class);
-        SecurityContext securityContext = mock(SecurityContext.class);
-        doReturn(JIRA_USER_USERNAME).when(authentication).getName();
-        doReturn(JIRA_USER_PASSWORD).when(authentication).getCredentials();
-        doReturn(true).when(authentication).isAuthenticated();
-        doReturn(authentication).when(securityContext).getAuthentication();
-        SecurityContextHolder.setContext(securityContext);
+        CredentialHolderUtils.mockLoggedUser(JIRA_USER_USERNAME, JIRA_USER_PASSWORD);
     }
 
     @Before

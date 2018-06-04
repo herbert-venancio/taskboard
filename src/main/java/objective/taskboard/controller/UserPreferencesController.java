@@ -1,5 +1,3 @@
-package objective.taskboard.controller;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -21,15 +19,18 @@ package objective.taskboard.controller;
  * [/LICENSE]
  */
 
-import objective.taskboard.auth.CredentialsHolder;
-import objective.taskboard.domain.UserPreferences;
-import objective.taskboard.filterPreferences.UserPreferencesService;
+package objective.taskboard.controller;
+
 import org.codehaus.jettison.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import objective.taskboard.auth.CredentialsHolder;
+import objective.taskboard.filterPreferences.UserPreferencesService;
 
 
 @RestController
@@ -40,12 +41,9 @@ public class UserPreferencesController {
     UserPreferencesService service;
 
     @RequestMapping(path = "update", method = RequestMethod.POST)
+    @Transactional
     public Boolean updatePreferences(@RequestBody String preferences) throws JSONException {
-        final String jiraUser = CredentialsHolder.username();
-        UserPreferences userPreferences = new UserPreferences();
-        userPreferences.setJiraUser(jiraUser);
-        userPreferences.setPreferences(preferences);
-        service.insertOrUpdate(userPreferences);
+        service.save(CredentialsHolder.username(), preferences);
         return true;
     }
 
