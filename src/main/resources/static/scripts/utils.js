@@ -104,14 +104,8 @@ function dateDiffInDays(dateA, dateB) {
     return Math.floor((utc2 - utc1) / _MS_PER_DAY);
 }
 
-function downloadElementAsJpegImage(elementId, fileName) {
-    domtoimage.toJpeg(document.getElementById(elementId), { quality: 0.95 })
-        .then(function (dataUrl) {
-            var link = document.createElement('a');
-            link.download = fileName + '.jpeg';
-            link.href = dataUrl;
-            link.click();
-        });
+function isEdge() {
+    return window.navigator.userAgent.indexOf("Edge") > -1;
 }
 
 if (!Object.values) {
