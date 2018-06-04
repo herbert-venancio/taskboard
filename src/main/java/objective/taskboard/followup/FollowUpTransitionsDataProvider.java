@@ -20,6 +20,8 @@ import java.util.stream.IntStream;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.Range;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
 import com.google.common.primitives.Ints;
@@ -31,6 +33,8 @@ import objective.taskboard.jira.MetadataService;
 import objective.taskboard.utils.DateTimeUtils;
 
 public class FollowUpTransitionsDataProvider {
+    
+    private static final Logger LOG = LoggerFactory.getLogger(FollowUpTransitionsDataProvider.class);
 
     public static final String TYPE_DEMAND = "Demand";
     public static final String TYPE_FEATURES = "Features";
@@ -100,8 +104,13 @@ public class FollowUpTransitionsDataProvider {
             if (!"status".equals(change.field))
                 continue;
             int statusIndex = ArrayUtils.indexOf(statuses, change.to);
-            if (lastStatusIndex != INDEX_NOT_FOUND && statusIndex >= lastStatusIndex)
+            
+            if (lastStatusIndex != INDEX_NOT_FOUND && statusIndex >= lastStatusIndex) {
                 lastTransitionDate.put(change.to, DateTimeUtils.get(change.timestamp, timezone));
+
+                if (change.timestamp == null)
+                    logWarning(issue);
+            }
         }
         return lastTransitionDate;
     }
@@ -240,5 +249,13 @@ public class FollowUpTransitionsDataProvider {
                 index = i;
         }
         return Optional.ofNullable(index);
+    }
+    
+    private void logWarning(Issue issue) {
+        StringBuilder history = new StringBuilder();
+        issue.getChangelog().forEach(history::append);
+        
+        String warningMessage = String.format("Issue with transition date/hour without fill, Issue: %s, %s.", issue.getIssueKey(), history.toString());
+        LOG.warn(warningMessage);
     }
 }
