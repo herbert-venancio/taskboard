@@ -22,16 +22,32 @@ package objective.taskboard.domain;
 
 import javax.persistence.Entity;
 import javax.persistence.Lob;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+
+import org.apache.commons.lang.Validate;
 
 @Entity
 @Table(name = "user_preferences")
+@NamedQueries({
+    @NamedQuery(
+            name = "UserPreferences.findByJiraUser",
+            query = "SELECT up FROM UserPreferences up WHERE up.jiraUser = :jiraUser")
+})
 public class UserPreferences extends TaskboardEntity {
 
     private String jiraUser;
 
     @Lob
     private String preferences;
+
+    protected UserPreferences() {}
+
+    public UserPreferences(String jiraUser, String preferences) {
+        this.setJiraUser(jiraUser);
+        this.setPreferences(preferences);
+    }
 
     public String getJiraUser() {
         return this.jiraUser;
@@ -42,10 +58,12 @@ public class UserPreferences extends TaskboardEntity {
     }
 
     public void setJiraUser(final String jiraUser) {
+        Validate.notEmpty(jiraUser, "jiraUser required");
         this.jiraUser = jiraUser;
     }
 
     public void setPreferences(final String preferences) {
+        Validate.notEmpty(jiraUser, "preferences required");
         this.preferences = preferences;
     }
 

@@ -6,7 +6,6 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 
 import java.util.List;
 
@@ -19,9 +18,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -36,6 +32,7 @@ import objective.taskboard.jira.endpoint.AuthorizedJiraEndpoint;
 import objective.taskboard.jira.endpoint.JiraEndpoint;
 import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
 import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
+import objective.taskboard.testUtils.CredentialHolderUtils;
 import objective.taskboard.testUtils.JiraMockServer;
 import retrofit.client.Response;
 
@@ -86,14 +83,7 @@ public class AuthorizedJiraEndpointTest {
         lousa.setPassword(JIRA_MASTER_PASSWORD);
         doReturn(lousa).when(jiraProperties).getLousa();
 
-        // logged user
-        Authentication authentication = mock(Authentication.class);
-        SecurityContext securityContext = mock(SecurityContext.class);
-        doReturn(JIRA_USER_USERNAME).when(authentication).getName();
-        doReturn(JIRA_USER_PASSWORD).when(authentication).getCredentials();
-        doReturn(true).when(authentication).isAuthenticated();
-        doReturn(authentication).when(securityContext).getAuthentication();
-        SecurityContextHolder.setContext(securityContext);
+        CredentialHolderUtils.mockLoggedUser(JIRA_USER_USERNAME, JIRA_USER_PASSWORD);
     }
 
     @Before

@@ -1,0 +1,7 @@
+-- TO BECOME SIMILAR AS ORACLE 1
+DELETE FROM user_preferences WHERE jira_user IS NULL OR preferences IS NULL;
+
+ALTER TABLE user_preferences MODIFY jira_user VARCHAR(255) NOT NULL;
+
+-- TO BECOME SIMILAR AS ORACLE 2
+ALTER TABLE user_preferences ADD CONSTRAINT UNIQUE_FIELDS UNIQUE (jira_user);

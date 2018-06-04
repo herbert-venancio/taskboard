@@ -1,5 +1,3 @@
-package objective.taskboard.config;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -20,6 +18,8 @@ package objective.taskboard.config;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
  */
+
+package objective.taskboard.config;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
@@ -53,6 +53,7 @@ public class CacheConfiguration {
     public static final String JIRA_USER = "jiraUser";
     public static final String COLOR_BY_ISSUETYPE_AND_STATUS = "colorByIssueTypeAndStatus";
     public static final String CONFIGURATION_COLOR = "getColorByIssueTypeAndStatusMap";
+    public static final String USER_PREFERENCES = "userPreferences";
 
     @Bean
     public CacheManager cacheManager() {
@@ -74,7 +75,8 @@ public class CacheConfiguration {
                 new GuavaCache(HOLIDAYS, CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).concurrencyLevel(1).build()),
                 new GuavaCache(JIRA_TIME_ZONE, CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.DAYS).concurrencyLevel(1).build()),
                 new GuavaCache(DASHBOARD_PROGRESS_DATA, CacheBuilder.newBuilder().maximumSize(20).expireAfterWrite(1, TimeUnit.DAYS).concurrencyLevel(1).build()),
-                new GuavaCache(JIRA_USER, CacheBuilder.newBuilder().expireAfterWrite(6, TimeUnit.HOURS).concurrencyLevel(1).build())
+                new GuavaCache(JIRA_USER, CacheBuilder.newBuilder().expireAfterWrite(6, TimeUnit.HOURS).concurrencyLevel(1).build()),
+                new GuavaCache(USER_PREFERENCES, CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.DAYS).concurrencyLevel(1).build())
         ));
         return simpleCacheManager;
     }

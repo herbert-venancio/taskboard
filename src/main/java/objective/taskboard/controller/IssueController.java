@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -45,6 +46,7 @@ import objective.taskboard.data.AspectSubitemFilter;
 import objective.taskboard.data.Issue;
 import objective.taskboard.data.Team;
 import objective.taskboard.database.TaskboardDatabaseService;
+import objective.taskboard.domain.UserPreferences;
 import objective.taskboard.filterPreferences.UserPreferencesService;
 import objective.taskboard.issue.CardStatusOrderCalculator;
 import objective.taskboard.issueBuffer.IssueBufferService;
@@ -169,9 +171,12 @@ public class IssueController {
         map.put("issueTypesConfig", issueTypeVisibilityService.getIssueTypeVisibility());
         map.put("priorities", metadataService.getPrioritiesMetadata());
         map.put("statuses", metadataService.getStatusesMetadata());
-        map.put("userPreferences", userPreferencesService.getUserPreferences());
         map.put("urlJira", jiraProperties.getUrl());
         map.put("urlLinkGraph", linkGraphProperties.getUrl());
+
+        final Optional<UserPreferences> userPreferences = userPreferencesService.getLoggedUserPreferences();
+        map.put("userPreferences", userPreferences.isPresent() ? userPreferences.get().getPreferences() : "{}");
+
         return map;
     }
 
