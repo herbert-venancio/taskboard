@@ -1,12 +1,8 @@
 package objective.taskboard.jira.client;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.codehaus.jettison.json.JSONArray;
@@ -14,8 +10,6 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.joda.time.DateTime;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParser;
@@ -138,51 +132,10 @@ public class JiraIssueDto {
 
     @SuppressWarnings("unchecked")
     public <T> T getField(String field) {
-        JSONObjectAdapter jsonObjectAdapter = fields.other.get(field);
+        JSONObjectAdapter jsonObjectAdapter = fields.other().get(field);
         if (jsonObjectAdapter == null)
             return null;
         return (T) jsonObjectAdapter.object;
-    }
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    private static class JiraIssueDtoFields {
-        public JiraTimeTrackingDto timetracking;
-        public JiraUserDto reporter;
-        public List<JiraComponentDto> components = new ArrayList<>();
-        public Set<String> labels = new HashSet<>();
-        public List<JiraLinkDto> issuelinks = new ArrayList<>();
-        public JiraPriorityDto priority;
-        public String description;
-        public List<JiraSubtaskDto> subtasks;
-        
-        @JsonDeserialize(using=JodaDateTimeDeserializer.class)
-        public DateTime dueDate;
-        
-        public JiraStatusDto status;
-        public String summary;
-        public JiraIssueTypeDto issuetype;
-        public JiraProjectDto project;
-        
-        @JsonDeserialize(using=JodaDateTimeDeserializer.class)
-        public DateTime updated;
-        
-        @JsonDeserialize(using=JodaDateTimeDeserializer.class)
-        public DateTime created;
-        public JiraUserDto assignee;
-        
-        public JiraWorklogResultSetDto worklog;
-        
-        private Map<String, JSONObjectAdapter> other = new HashMap<>();
-
-        @JsonAnyGetter
-        public Map<String, JSONObjectAdapter> other() {
-            return other;
-        }
-        
-        @JsonAnySetter
-        public void set(String name, JSONObjectAdapter value) {
-            other.put(name, value);
-        }
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

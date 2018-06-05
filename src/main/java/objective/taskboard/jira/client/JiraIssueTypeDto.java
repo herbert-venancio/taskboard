@@ -12,6 +12,7 @@ public class JiraIssueTypeDto {
     @JsonProperty
     private URI iconUrl;
     private String name;
+    private boolean subtask;
 
     public Long getId() {
         return id;
@@ -23,5 +24,9 @@ public class JiraIssueTypeDto {
     
     public String getName() {
         return name;
+    }
+
+    public boolean isSubtask() {
+        return subtask;
     }
 }

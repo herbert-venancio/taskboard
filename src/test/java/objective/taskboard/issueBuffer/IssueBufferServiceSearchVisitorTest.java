@@ -96,12 +96,13 @@ public class IssueBufferServiceSearchVisitorTest {
         CustomFieldDetails assignedTeams = new CustomFieldDetails();
         release.setId("customfield_10100");
         customFieldConfiguration.setAssignedTeams(assignedTeams);
-        
-        
+
         IssueType issueType = new IssueType();
-        issueType.setDemand(new IssueTypeDetails());
+        IssueTypeDetails demandTypeDetails = new IssueTypeDetails();
+        demandTypeDetails.setId(10600);
+        issueType.setDemand(demandTypeDetails);
         properties.setIssuetype(issueType);
-        
+
         when(priorityService.determinePriority(any())).thenReturn(1l);
         when(priorityService.priorityUpdateDate((any()))).thenReturn(new Date());
         
