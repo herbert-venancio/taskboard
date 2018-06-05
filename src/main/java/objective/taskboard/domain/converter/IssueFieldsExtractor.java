@@ -80,12 +80,20 @@ public class IssueFieldsExtractor {
         return "";
     }
 
-    public  static String extractLinkedParentKey(JiraProperties jiraProperties, JiraIssueDto issue, List<String> parentIssueLinks) {
-        if (isEmpty(issue.getIssueLinks()) || issue.getIssueType().getId() == jiraProperties.getIssuetype().getDemand().getId())
+    public static String extractLinkedParentKey(JiraProperties jiraProperties, JiraIssueDto issue, List<String> parentIssueLinks) {
+        if (isEmpty(issue.getIssueLinks()))
             return null;
 
-        List<JiraLinkDto> links = newArrayList(issue.getIssueLinks()).stream()
-                .filter(l -> parentIssueLinks.contains(l.getIssueLinkType().getDescription()))
+        if (issue.getIssueType().isSubtask())
+            return null;
+
+        long demandTypeId = jiraProperties.getIssuetype().getDemand().getId();
+        if (issue.getIssueType().getId() == demandTypeId)
+            return null;
+
+        List<JiraLinkDto> links = issue.getIssueLinks().stream()
+                .filter(l -> parentIssueLinks.contains(l.getIssueLinkType().getDescription())
+                        && l.getTargetIssue().fields.issuetype.getId() == demandTypeId)
                 .collect(toList());
 
         if (links.isEmpty())
@@ -201,7 +209,7 @@ public class IssueFieldsExtractor {
         if (issue.getComments() == null)
             return newArrayList();
 
-        return newArrayList(issue.getComments()).stream()
+        return issue.getComments().stream()
                .map(JiraCommentDto::toString)
                .collect(toList());
     }
@@ -212,7 +220,7 @@ public class IssueFieldsExtractor {
 
         List<String> dependencies = jiraProperties.getIssuelink().getDependencies();
         
-        return newArrayList(issue.getIssueLinks()).stream()
+        return issue.getIssueLinks().stream()
                 .filter(link ->{
 					return dependencies.contains(link.getIssueLinkType().getName()) && link.getIssueLinkType().getDirection() == JiraIssueLinkTypeDto.Direction.OUTBOUND;
 				})
@@ -256,7 +264,7 @@ public class IssueFieldsExtractor {
         if (issue.getComponents() == null)
             return newArrayList();
 
-        return newArrayList(issue.getComponents()).stream()
+        return issue.getComponents().stream()
                 .map(JiraComponentDto::getName)
                 .collect(toList());
     }

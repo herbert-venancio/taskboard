@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,6 +90,6 @@ public class IssueBufferServiceSearchVisitor implements SearchIssueVisitor {
                 missingParents.add(each.getKey());
         
         if (missingParents.size() > 0)
-            throw new IllegalStateException("Some parents were never found: " + StringUtils.join(missingParents,","));
+            throw new RequiresReindexException(missingParents);
     }
 }

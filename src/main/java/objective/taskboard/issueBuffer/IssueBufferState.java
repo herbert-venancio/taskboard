@@ -25,6 +25,7 @@ public enum IssueBufferState {
     uninitialised(false),
     initialising(false),
     initialisationError(false),
+    requiresReindex(true),
     updating(true),
     ready(true),
     updateError(true);

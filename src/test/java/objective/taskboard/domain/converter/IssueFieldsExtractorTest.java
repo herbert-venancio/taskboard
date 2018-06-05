@@ -20,6 +20,7 @@
  */
 package objective.taskboard.domain.converter;
 
+import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
@@ -47,6 +48,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraProperties.CustomField;
@@ -91,6 +96,9 @@ public class IssueFieldsExtractorTest {
     private static final String LINK_TYPE_NAME_DEPENDENCY = "Dependency";
     private static final String LINK_TYPE_DESC_DEPENDENCY = "is a dependency of";
     private static final String ISSUE_KEY = "ISSUE-1";
+
+    private static final long DEMAND_ISSUETYPE_ID = 1L;
+    private static final long FEATURE_ISSUETYPE_ID = 2L;
 
     @Mock
     private JiraIssueDto issue;
@@ -167,12 +175,14 @@ public class IssueFieldsExtractorTest {
         when(issueLinkProperty.getDependencies()).thenReturn(asList());
         when(jiraProperties.getIssuelink()).thenReturn(issueLinkProperty);
 
-        when(issueTypeDetails.getId()).thenReturn(1L);
+        when(issueTypeDetails.getId()).thenReturn(DEMAND_ISSUETYPE_ID);
         when(issueTypeProperty.getDemand()).thenReturn(issueTypeDetails);
         when(jiraProperties.getIssuetype()).thenReturn(issueTypeProperty);
 
         when(issue.getIssueType()).thenReturn(issueType);
         when(issue.getProject()).thenReturn(basicProject);
+
+        when(issueLink.getTargetIssueKey()).thenCallRealMethod();
     }
 
     @Test
@@ -213,7 +223,7 @@ public class IssueFieldsExtractorTest {
         when(issueLinkType.getName()).thenReturn(LINK_TYPE_NAME_DEMAND);
         when(issueLinkType.getDescription()).thenReturn(LINK_TYPE_DESC_DEMAND);
         when(issueLink.getIssueLinkType()).thenReturn(issueLinkType);
-        when(issueLink.getTargetIssueKey()).thenReturn(ISSUE_KEY);
+        when(issueLink.getTargetIssue()).thenReturn(linkedToDemand(ISSUE_KEY));
         when(issue.getIssueLinks()).thenReturn(asList(issueLink));
 
         assertEquals("Linked parent key", ISSUE_KEY, IssueFieldsExtractor.extractLinkedParentKey(jiraProperties, issue, asList(LINK_TYPE_DESC_DEMAND)));
@@ -226,7 +236,7 @@ public class IssueFieldsExtractorTest {
         when(issueLinkType.getName()).thenReturn(LINK_TYPE_NAME_DEPENDENCY);
         when(issueLinkType.getDescription()).thenReturn(LINK_TYPE_DESC_DEPENDENCY);
         when(issueLink.getIssueLinkType()).thenReturn(issueLinkType);
-        when(issueLink.getTargetIssueKey()).thenReturn(ISSUE_KEY);
+        when(issueLink.getTargetIssue()).thenReturn(linkedToDemand(ISSUE_KEY));
         when(issue.getIssueLinks()).thenReturn(asList(issueLink));
 
         assertNull("Linked parent key should be null", IssueFieldsExtractor.extractLinkedParentKey(jiraProperties, issue, asList(LINK_TYPE_DESC_DEMAND)));
@@ -238,11 +248,23 @@ public class IssueFieldsExtractorTest {
         when(issueLinkType.getName()).thenReturn(LINK_TYPE_NAME_DEMAND);
         when(issueLinkType.getDescription()).thenReturn(LINK_TYPE_DESC_DEMAND);
         when(issueLink.getIssueLinkType()).thenReturn(issueLinkType);
-        when(issueLink.getTargetIssueKey()).thenReturn(ISSUE_KEY);
+        when(issueLink.getTargetIssue()).thenReturn(linkedToDemand(ISSUE_KEY));
         when(issue.getIssueLinks()).thenReturn(asList(issueLink));
-        when(issueType.getId()).thenReturn(1L);
+        when(issueType.getId()).thenReturn(DEMAND_ISSUETYPE_ID);
 
         assertNull("Linked parent key should be null", IssueFieldsExtractor.extractLinkedParentKey(jiraProperties, issue, asList(LINK_TYPE_DESC_DEMAND)));
+    }
+
+    @Test
+    public void extractLinkedParentKey_thenNullWhenTargetIsNotDemand() {
+        when(issueLinkType.getDirection()).thenReturn(JiraIssueLinkTypeDto.Direction.OUTBOUND);
+        when(issueLinkType.getName()).thenReturn(LINK_TYPE_NAME_DEMAND);
+        when(issueLinkType.getDescription()).thenReturn(LINK_TYPE_DESC_DEMAND);
+        when(issueLink.getIssueLinkType()).thenReturn(issueLinkType);
+        when(issueLink.getTargetIssue()).thenReturn(linkedToFeature(ISSUE_KEY));
+        when(issue.getIssueLinks()).thenReturn(asList(issueLink));
+
+        assertNull("Linked parent key", IssueFieldsExtractor.extractLinkedParentKey(jiraProperties, issue, asList(LINK_TYPE_DESC_DEMAND)));
     }
 
     @Test
@@ -451,7 +473,7 @@ public class IssueFieldsExtractorTest {
         when(issueLinkType.getName()).thenReturn(LINK_TYPE_NAME_DEPENDENCY);
         when(issueLinkType.getDescription()).thenReturn(LINK_TYPE_DESC_DEPENDENCY);
         when(issueLink.getIssueLinkType()).thenReturn(issueLinkType);
-        when(issueLink.getTargetIssueKey()).thenReturn(ISSUE_KEY);
+        when(issueLink.getTargetIssue()).thenReturn(linkedToDemand(ISSUE_KEY));
         when(issue.getIssueLinks()).thenReturn(asList(issueLink));
 
         List<String> dependenciesIssuesKey = IssueFieldsExtractor.extractDependenciesIssues(jiraProperties, issue);
@@ -466,7 +488,7 @@ public class IssueFieldsExtractorTest {
         when(issueLinkType.getName()).thenReturn(LINK_TYPE_NAME_DEPENDENCY);
         when(issueLinkType.getDescription()).thenReturn(LINK_TYPE_DESC_DEPENDENCY);
         when(issueLink.getIssueLinkType()).thenReturn(issueLinkType);
-        when(issueLink.getTargetIssueKey()).thenReturn(ISSUE_KEY);
+        when(issueLink.getTargetIssue()).thenReturn(linkedToDemand(ISSUE_KEY));
         when(issue.getIssueLinks()).thenReturn(asList(issueLink));
 
         assertEquals(MSG_DEPENDENCIES_ISSUES_QUANTITY, 0, IssueFieldsExtractor.extractDependenciesIssues(jiraProperties, issue).size());
@@ -552,5 +574,34 @@ public class IssueFieldsExtractorTest {
     @Test
     public void extractComponentsNull() {
         assertTrue("Components should be empty", IssueFieldsExtractor.extractComponents(issue).isEmpty());
+    }
+
+    private JiraLinkDto.LinkedIssue linkedToDemand(String issueKey) {
+        return linkedTo(issueKey, DEMAND_ISSUETYPE_ID);
+    }
+
+    private JiraLinkDto.LinkedIssue linkedToFeature(String issueKey) {
+        return linkedTo(issueKey, FEATURE_ISSUETYPE_ID);
+    }
+
+    private JiraLinkDto.LinkedIssue linkedTo(String issueKey, long issueTypeId) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        ObjectNode issuetype = objectMapper.createObjectNode();
+        issuetype.put("id", issueTypeId);
+
+        ObjectNode fields = objectMapper.createObjectNode();
+        fields.set("issuetype", issuetype);
+
+        ObjectNode template = objectMapper.createObjectNode();
+        template.put("key", issueKey);
+        template.set("fields", fields);
+
+        try {
+            return objectMapper.treeToValue(template, JiraLinkDto.LinkedIssue.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

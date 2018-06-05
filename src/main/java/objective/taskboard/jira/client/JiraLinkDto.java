@@ -25,12 +25,16 @@ public class JiraLinkDto {
                 direction);
     }
 
-    public String getTargetIssueKey() {
+    public LinkedIssue getTargetIssue() {
         if (inwardIssue != null)
-            return inwardIssue.key;
-        return outwardIssue.key;
+            return inwardIssue;
+        return outwardIssue;
     }
-    
+
+    public String getTargetIssueKey() {
+        return getTargetIssue().key;
+    }
+
     private JiraIssueLinkTypeDto.Direction determineDirection() {
         if (inwardIssue != null)
             return JiraIssueLinkTypeDto.Direction.INBOUND;
@@ -39,12 +43,13 @@ public class JiraLinkDto {
     }    
 
     @JsonIgnoreProperties(ignoreUnknown=true)
-    public class LinkedIssue {
+    public static class LinkedIssue {
         public String key;
+        public JiraIssueDtoFields fields;
     }
     
     @JsonIgnoreProperties(ignoreUnknown=true)
-    public class LinkedIssueType {
+    public static class LinkedIssueType {
         public String name;
         public String inward;
         public String outward;
