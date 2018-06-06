@@ -180,8 +180,8 @@ function DcUtils() {
         tickEl.innerHTML += textElYearElStr;
     };
 
-    this.downloadElementAsJpegImage = function(elementId, fileName) { 
-        domtoimage.toJpeg(document.getElementById(elementId), { quality: 0.95 }) 
+    this.downloadElementAsJpegImage = function(element, fileName) { 
+        domtoimage.toJpeg(element, { quality: 0.95 }) 
             .then(function (dataUrl) { 
                 var link = document.createElement('a'); 
                 link.setAttribute("type", "hidden");

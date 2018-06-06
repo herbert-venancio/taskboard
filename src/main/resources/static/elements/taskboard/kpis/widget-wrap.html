@@ -355,7 +355,7 @@
 
                 _onTapDownload: function() {
                     var fileName = this.title.replace(/ /g, '_') + "_" + getDateHour();
-                    dcUtils.downloadElementAsJpegImage('widget-wrap-body', fileName);
+                    dcUtils.downloadElementAsJpegImage(this.$$('.widget__body'), fileName);
                 }
             });
         })();
