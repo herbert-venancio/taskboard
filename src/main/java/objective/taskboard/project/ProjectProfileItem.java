@@ -29,11 +29,11 @@ public class ProjectProfileItem extends TaskboardEntity {
     private ProjectFilterConfiguration project;
 
     private String roleName;
-    private Integer peopleCount;
+    private Double peopleCount;
     private LocalDate allocationStart;
     private LocalDate allocationEnd;
     
-    public ProjectProfileItem(ProjectFilterConfiguration project, String roleName, Integer peopleCount, LocalDate allocationStart, LocalDate allocationEnd) {
+    public ProjectProfileItem(ProjectFilterConfiguration project, String roleName, Double peopleCount, LocalDate allocationStart, LocalDate allocationEnd) {
         setProject(project);
         setRoleName(roleName);
         setPeopleCount(peopleCount);
@@ -60,11 +60,11 @@ public class ProjectProfileItem extends TaskboardEntity {
         this.roleName = roleName;
     }
 
-    public Integer getPeopleCount() {
+    public Double getPeopleCount() {
         return peopleCount;
     }
 
-    public void setPeopleCount(int peopleCount) {
+    public void setPeopleCount(double peopleCount) {
         if (peopleCount < 0)
             throw new IllegalArgumentException("People count should be a positive value");
 

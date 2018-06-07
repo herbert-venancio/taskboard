@@ -281,9 +281,9 @@ public class FollowUpReportGeneratorTest {
         ProjectFilterConfiguration project = mock(ProjectFilterConfiguration.class);
 
         List<ProjectProfileItem> projectProfile = asList(
-                new ProjectProfileItem(project, "Dev",    20, LocalDate.parse("2018-01-01"), LocalDate.parse("2018-05-01")),
-                new ProjectProfileItem(project, "UX",      4, LocalDate.parse("2018-02-01"), LocalDate.parse("2018-05-01")),
-                new ProjectProfileItem(project, "Tester",  8, LocalDate.parse("2018-03-01"), LocalDate.parse("2018-05-01")));
+                new ProjectProfileItem(project, "Dev",    20.0, LocalDate.parse("2018-01-01"), LocalDate.parse("2018-05-01")),
+                new ProjectProfileItem(project, "UX",      4.5, LocalDate.parse("2018-02-01"), LocalDate.parse("2018-05-01")),
+                new ProjectProfileItem(project, "Tester",  8.0, LocalDate.parse("2018-03-01"), LocalDate.parse("2018-05-01")));
 
         FollowUpSnapshot snapshot = new FollowUpSnapshotMockBuilder().projectProfile(projectProfile).build();
         subject.generate(snapshot, timezone);
@@ -298,17 +298,17 @@ public class FollowUpReportGeneratorTest {
                 "Sheet \"Project Profile\" Row \"1\" AddColumn \"D1\": Allocation End\n" +
                 "Sheet \"Project Profile\" Row Create: 2\n" + 
                 "Sheet \"Project Profile\" Row \"2\" AddColumn \"A2\": Dev\n" + 
-                "Sheet \"Project Profile\" Row \"2\" AddColumn \"B2\": 20\n" + 
+                "Sheet \"Project Profile\" Row \"2\" AddColumn \"B2\": 20.0\n" + 
                 "Sheet \"Project Profile\" Row \"2\" AddColumn \"C2\": 2018-01-01\n" +
                 "Sheet \"Project Profile\" Row \"2\" AddColumn \"D2\": 2018-05-01\n" +
                 "Sheet \"Project Profile\" Row Create: 3\n" + 
                 "Sheet \"Project Profile\" Row \"3\" AddColumn \"A3\": UX\n" + 
-                "Sheet \"Project Profile\" Row \"3\" AddColumn \"B3\": 4\n" + 
+                "Sheet \"Project Profile\" Row \"3\" AddColumn \"B3\": 4.5\n" + 
                 "Sheet \"Project Profile\" Row \"3\" AddColumn \"C3\": 2018-02-01\n" +
                 "Sheet \"Project Profile\" Row \"3\" AddColumn \"D3\": 2018-05-01\n" +
                 "Sheet \"Project Profile\" Row Create: 4\n" + 
                 "Sheet \"Project Profile\" Row \"4\" AddColumn \"A4\": Tester\n" + 
-                "Sheet \"Project Profile\" Row \"4\" AddColumn \"B4\": 8\n" + 
+                "Sheet \"Project Profile\" Row \"4\" AddColumn \"B4\": 8.0\n" + 
                 "Sheet \"Project Profile\" Row \"4\" AddColumn \"C4\": 2018-03-01\n" +
                 "Sheet \"Project Profile\" Row \"4\" AddColumn \"D4\": 2018-05-01\n" +
                 "Sheet \"Project Profile\" Save\n" + 
