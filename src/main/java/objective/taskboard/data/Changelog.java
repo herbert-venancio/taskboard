@@ -77,4 +77,10 @@ public class Changelog implements Serializable{
             return false;
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "Changelog [author=" + author + ", field=" + field + ", from=" + from + ", to=" + to + ", timestamp="
+                + timestamp + ", originalTo=" + originalTo + "]";
+    }
 }
