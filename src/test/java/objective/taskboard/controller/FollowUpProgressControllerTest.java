@@ -28,9 +28,9 @@ import org.springframework.cache.guava.GuavaCacheManager;
 
 import objective.taskboard.auth.Authorizer;
 import objective.taskboard.domain.ProjectFilterConfiguration;
+import objective.taskboard.followup.ProjectDatesNotConfiguredException;
 import objective.taskboard.followup.cluster.ClusterNotConfiguredException;
 import objective.taskboard.followup.data.FollowupProgressCalculator;
-import objective.taskboard.followup.data.FollowupProgressCalculator.ProjectDatesNotConfiguredException;
 import objective.taskboard.followup.data.ProgressData;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.testUtils.ControllerTestUtils.AssertResponse;

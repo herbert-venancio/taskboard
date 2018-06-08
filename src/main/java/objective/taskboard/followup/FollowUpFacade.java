@@ -38,6 +38,7 @@ import objective.taskboard.auth.Authorizer;
 import objective.taskboard.controller.TemplateData;
 import objective.taskboard.database.directory.DataBaseDirectory;
 import objective.taskboard.domain.Project;
+import objective.taskboard.followup.cluster.ClusterNotConfiguredException;
 import objective.taskboard.followup.data.Template;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor;
@@ -69,7 +70,9 @@ public class FollowUpFacade {
     @Autowired
     private Authorizer authorizer;
 
-    public Resource generateReport(String templateName, Optional<LocalDate> date, ZoneId timezone, String projectKey) throws IOException {
+    public Resource generateReport(String templateName, Optional<LocalDate> date, ZoneId timezone, String projectKey) 
+            throws ClusterNotConfiguredException, ProjectDatesNotConfiguredException {
+
         FollowUpTemplate template = getTemplate(templateName);
         SimpleSpreadsheetEditor spreadsheetEditor = new SimpleSpreadsheetEditor(template);
         FollowUpSnapshot snapshot = snapshotService.get(date, timezone, projectKey);

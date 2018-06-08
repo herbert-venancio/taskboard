@@ -1,0 +1,1 @@
+ALTER TABLE project_profile_item MODIFY COLUMN people_count DECIMAL(9,3) NOT NULL;

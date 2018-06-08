@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.OK;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -62,7 +61,7 @@ public class FollowUpControllerTest {
     private FollowUpController subject;
 
     @Before
-    public void setup() throws IOException {
+    public void setup() {
         when(followUpFacade.getGenericTemplate()).thenReturn(RESOURCE);
         when(followUpFacade.generateReport(eq(TEMPLATE_NAME), any(), any(), eq(ALLOWED_PROJECT_KEY))).thenReturn(RESOURCE);
 
@@ -72,13 +71,13 @@ public class FollowUpControllerTest {
     }
 
     @Test
-    public void download_returnFileToDownloadIfAllParamsAreValid() throws IOException {
+    public void download_returnFileToDownloadIfAllParamsAreValid() {
         ResponseEntity<Object> response = subject.download(ALLOWED_PROJECT_KEY, TEMPLATE_NAME, Optional.empty(), ZONE_ID);
         assertResponse(OK, EXPECTED_DOWNLOAD_STRING_BEFORE, EXPECTED_DOWNLOAD_STRING_AFTER, response);
     }
 
     @Test
-    public void download_projectProjectParamMustExists() throws IOException {
+    public void download_projectProjectParamMustExists() {
         String projectNotExistsMessage = "You must provide the project";
 
         ResponseEntity<Object> responseEmpty = subject.download("", TEMPLATE_NAME, Optional.empty(), ZONE_ID);
@@ -89,7 +88,7 @@ public class FollowUpControllerTest {
     }
 
     @Test
-    public void download_projectTemplateParamMustExists() throws IOException {
+    public void download_projectTemplateParamMustExists() {
         String templateNotExistsMessage = "Template not selected";
 
         ResponseEntity<Object> responseEmpty = subject.download(ALLOWED_PROJECT_KEY, "", Optional.empty(), ZONE_ID);
@@ -100,7 +99,7 @@ public class FollowUpControllerTest {
     }
 
     @Test
-    public void download_shouldCheckTemplateRolesWithAllProjects() throws IOException {
+    public void download_shouldCheckTemplateRolesWithAllProjects() {
         String matchTemplateRolesWithProjectsMessage = "Template or project doesn't exist";
 
         ResponseEntity<Object> responseTemplateNonExistent = subject.download(ALLOWED_PROJECT_KEY, TEMPLATE_NAME_NONEXISTENT, Optional.empty(), ZONE_ID);
@@ -111,7 +110,7 @@ public class FollowUpControllerTest {
     }
 
     @Test
-    public void genericTemplate_returnFileToDownloadIfNoErrorOccur() throws IOException {
+    public void genericTemplate_returnFileToDownloadIfNoErrorOccur() {
         ResponseEntity<Object> response = subject.genericTemplate();
         assertResponse(OK, EXPECTED_DOWNLOAD_STRING_BEFORE, EXPECTED_DOWNLOAD_STRING_AFTER, response);
     }

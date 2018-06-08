@@ -39,7 +39,6 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -55,7 +54,7 @@ import objective.taskboard.data.Worklog;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.FollowUpReportGenerator.InvalidTableRangeException;
 import objective.taskboard.followup.ReleaseHistoryProvider.ProjectRelease;
-import objective.taskboard.followup.cluster.EmptyFollowupCluster;
+import objective.taskboard.followup.cluster.ClusterNotConfiguredException;
 import objective.taskboard.followup.cluster.FollowUpClusterItem;
 import objective.taskboard.followup.cluster.FollowupCluster;
 import objective.taskboard.followup.cluster.FollowupClusterImpl;
@@ -73,7 +72,7 @@ public class FollowUpReportGeneratorTest {
     private FollowUpReportGenerator subject = new FollowUpReportGenerator(editor);
 
     @Test
-    public void generateJiraDataSheetTest() throws IOException {
+    public void generateJiraDataSheetTest() {
         subject.generate(mockSnapshot(getDefaultFollowupData()), timezone);
 
         String fromJiraSheetExpected = txtResourceAsString("followup/generateJiraDataSheetTest.txt");
@@ -81,7 +80,7 @@ public class FollowUpReportGeneratorTest {
     }
 
     @Test
-    public void whenGeneratingWithoutData_generatesFromJiraKeepingOnlyHeaders() throws IOException {
+    public void whenGeneratingWithoutData_generatesFromJiraKeepingOnlyHeaders() {
         subject.generate(FollowUpSnapshotMockBuilder.empty(), timezone);
         
         String fromJiraSheetExpected = txtResourceAsString("followup/emptyFromJiraWithGeneratedHeaders.txt");
@@ -89,7 +88,7 @@ public class FollowUpReportGeneratorTest {
     }
 
     @Test
-    public void givenEmptyTransitions_whenGenerateFromJiraSheet_thenShouldNotGenerateTransitions() throws IOException {
+    public void givenEmptyTransitions_whenGenerateFromJiraSheet_thenShouldNotGenerateTransitions() {
         FromJiraDataSet fromJiraDS = new FromJiraDataSet(FROMJIRA_HEADERS, getDefaultFromJiraDataRowList());
         FollowUpData followupData = new FollowUpData(fromJiraDS, getEmptyAnalyticsTransitionsDataSet(),
                 getEmptySyntheticTransitionsDataSet());
@@ -101,7 +100,7 @@ public class FollowUpReportGeneratorTest {
     }
 
     @Test
-    public void givenNoTransitions_whenGenerateFromJiraSheet_thenShouldNotGenerateTransitions() throws IOException {
+    public void givenNoTransitions_whenGenerateFromJiraSheet_thenShouldNotGenerateTransitions() {
         FromJiraDataSet fromJiraDS = new FromJiraDataSet(FROMJIRA_HEADERS, getDefaultFromJiraDataRowList());
         FollowUpData followupData = new FollowUpData(fromJiraDS, null, null);
 
@@ -112,7 +111,7 @@ public class FollowUpReportGeneratorTest {
     }
 
     @Test
-    public void givenTransitionsDatesOfOtherIssueKey_whenGenerateFromJiraSheet_thenShouldGenerateEmptyTransitionsDates() throws IOException {
+    public void givenTransitionsDatesOfOtherIssueKey_whenGenerateFromJiraSheet_thenShouldGenerateEmptyTransitionsDates() {
         FromJiraDataSet fromJiraDS = new FromJiraDataSet(FROMJIRA_HEADERS, getDefaultFromJiraDataRowList());
         FollowUpData followupData = new FollowUpData(fromJiraDS, getAnalyticsTransitionsDataSetWitNoRow(), getSyntheticTransitionsDataSetWithNoRow());
 
@@ -123,7 +122,7 @@ public class FollowUpReportGeneratorTest {
     }
 
     @Test
-    public void generateJiraDataSheetWithSomeEmptyAndNullAttributesJiraDataTest() throws IOException {
+    public void generateJiraDataSheetWithSomeEmptyAndNullAttributesJiraDataTest() {
         FromJiraDataRow fromJiraDefault = getDefaultFromJiraDataRow();
         fromJiraDefault.project = "";
         fromJiraDefault.demandType = null;
@@ -142,7 +141,7 @@ public class FollowUpReportGeneratorTest {
     }
 
     @Test
-    public void generateTest() throws IOException {
+    public void generateTest() {
         FollowUpTemplate testTemplate = new FollowUpTemplate(resolve("followup/Followup-template.xlsm"));
         subject = new FollowUpReportGenerator(new SimpleSpreadsheetEditor(testTemplate));
         
@@ -155,7 +154,7 @@ public class FollowUpReportGeneratorTest {
                 new ProjectRelease("Release 2", LocalDate.parse("2017-10-22")));
         
         FollowUpSnapshot snapshot = new FollowUpSnapshotMockBuilder()
-                .timeline(new FollowUpTimeline(LocalDate.parse("2007-12-03")))
+                .timeline(LocalDate.parse("2007-12-03"))
                 .data(getDefaultFollowupData())
                 .validCluster()
                 .effortHistory(effortHistory)
@@ -168,7 +167,7 @@ public class FollowUpReportGeneratorTest {
     }
 
     @Test
-    public void generateLotsOfLines() throws IOException {
+    public void generateLotsOfLines() {
         FollowUpTemplate testTemplate = new FollowUpTemplate(resolve("followup/Followup-template.xlsm"));
         subject = new FollowUpReportGenerator(new SimpleSpreadsheetEditor(testTemplate));
 
@@ -186,7 +185,7 @@ public class FollowUpReportGeneratorTest {
     }
 
     @Test
-    public void givenIssues_whenGenerateTransitionsSheets_thenSheetsShouldBeGenerated() throws IOException {
+    public void givenIssues_whenGenerateTransitionsSheets_thenSheetsShouldBeGenerated() {
         subject.generate(mockSnapshot(getDefaultFollowupData()), timezone);
 
         String expectedEditorLog = txtResourceAsString("followup/transitionsSheets.txt");
@@ -202,7 +201,7 @@ public class FollowUpReportGeneratorTest {
     }
 
     @Test
-    public void givenNoIssue_whenGenerateTransitionsSheets_thenSheetsShouldNotBeGenerated() throws IOException {
+    public void givenNoIssue_whenGenerateTransitionsSheets_thenSheetsShouldNotBeGenerated() {
         FollowUpData followupData = getEmptyFollowupData();
         subject.generate(mockSnapshot(followupData), timezone);
         assertNoTransitionsSheet();
@@ -233,7 +232,7 @@ public class FollowUpReportGeneratorTest {
     }
 
     @Test
-    public void generateEffortHistoryTest() throws IOException {
+    public void generateEffortHistoryTest() {
         List<EffortHistoryRow> effortHistory = asList(
                 new EffortHistoryRow(LocalDate.of(2017, 10, 1), 4.0, 6.0),
                 new EffortHistoryRow(LocalDate.of(2017, 10, 2), 13.0, 20.4),
@@ -278,13 +277,13 @@ public class FollowUpReportGeneratorTest {
     }
     
     @Test
-    public void generateProjectProfile() throws IOException {
+    public void generateProjectProfile() {
         ProjectFilterConfiguration project = mock(ProjectFilterConfiguration.class);
 
         List<ProjectProfileItem> projectProfile = asList(
-                new ProjectProfileItem(project, "Dev",    20, LocalDate.parse("2018-01-01"), LocalDate.parse("2018-05-01")),
-                new ProjectProfileItem(project, "UX",      4, LocalDate.parse("2018-02-01"), LocalDate.parse("2018-05-01")),
-                new ProjectProfileItem(project, "Tester",  8, LocalDate.parse("2018-03-01"), LocalDate.parse("2018-05-01")));
+                new ProjectProfileItem(project, "Dev",    20.0, LocalDate.parse("2018-01-01"), LocalDate.parse("2018-05-01")),
+                new ProjectProfileItem(project, "UX",      4.5, LocalDate.parse("2018-02-01"), LocalDate.parse("2018-05-01")),
+                new ProjectProfileItem(project, "Tester",  8.0, LocalDate.parse("2018-03-01"), LocalDate.parse("2018-05-01")));
 
         FollowUpSnapshot snapshot = new FollowUpSnapshotMockBuilder().projectProfile(projectProfile).build();
         subject.generate(snapshot, timezone);
@@ -299,17 +298,17 @@ public class FollowUpReportGeneratorTest {
                 "Sheet \"Project Profile\" Row \"1\" AddColumn \"D1\": Allocation End\n" +
                 "Sheet \"Project Profile\" Row Create: 2\n" + 
                 "Sheet \"Project Profile\" Row \"2\" AddColumn \"A2\": Dev\n" + 
-                "Sheet \"Project Profile\" Row \"2\" AddColumn \"B2\": 20\n" + 
+                "Sheet \"Project Profile\" Row \"2\" AddColumn \"B2\": 20.0\n" + 
                 "Sheet \"Project Profile\" Row \"2\" AddColumn \"C2\": 2018-01-01\n" +
                 "Sheet \"Project Profile\" Row \"2\" AddColumn \"D2\": 2018-05-01\n" +
                 "Sheet \"Project Profile\" Row Create: 3\n" + 
                 "Sheet \"Project Profile\" Row \"3\" AddColumn \"A3\": UX\n" + 
-                "Sheet \"Project Profile\" Row \"3\" AddColumn \"B3\": 4\n" + 
+                "Sheet \"Project Profile\" Row \"3\" AddColumn \"B3\": 4.5\n" + 
                 "Sheet \"Project Profile\" Row \"3\" AddColumn \"C3\": 2018-02-01\n" +
                 "Sheet \"Project Profile\" Row \"3\" AddColumn \"D3\": 2018-05-01\n" +
                 "Sheet \"Project Profile\" Row Create: 4\n" + 
                 "Sheet \"Project Profile\" Row \"4\" AddColumn \"A4\": Tester\n" + 
-                "Sheet \"Project Profile\" Row \"4\" AddColumn \"B4\": 8\n" + 
+                "Sheet \"Project Profile\" Row \"4\" AddColumn \"B4\": 8.0\n" + 
                 "Sheet \"Project Profile\" Row \"4\" AddColumn \"C4\": 2018-03-01\n" +
                 "Sheet \"Project Profile\" Row \"4\" AddColumn \"D4\": 2018-05-01\n" +
                 "Sheet \"Project Profile\" Save\n" + 
@@ -319,7 +318,7 @@ public class FollowUpReportGeneratorTest {
     }
 
     @Test
-    public void updateTimelineDatesTest() throws IOException {
+    public void updateTimelineDatesTest() {
         FollowUpTimeline timeline = new FollowUpTimeline(
                 LocalDate.parse("2017-10-03"), 
                 new BigDecimal("0.6098"), 
@@ -359,30 +358,37 @@ public class FollowUpReportGeneratorTest {
         assertEquals(expectedEditorLogger, editor.loggerString("Timeline"));
     }
 
-    @Test
-    public void whenClusteIsEmpty_ShouldOnlyTruncateTab() throws IOException {
-        List<EffortHistoryRow> effortHistory = asList(
-                new EffortHistoryRow(LocalDate.of(2017, 10, 1), 4.0, 6.0),
-                new EffortHistoryRow(LocalDate.of(2017, 10, 2), 13.0, 20.4),
-                new EffortHistoryRow(LocalDate.of(2017, 10, 3), 3.9, 4.0));
-        
-        FollowUpSnapshot snapshot = new FollowUpSnapshotMockBuilder().emptyCluster().effortHistory(effortHistory).build();
+    @Test(expected = ClusterNotConfiguredException.class)
+    public void generate_WhenClusteIsEmpty_ShouldThrowException() {
+        FollowUpSnapshot snapshot = new FollowUpSnapshotMockBuilder().emptyCluster().build();
         subject.generate(snapshot, timezone);
+    }
+    
+    @Test(expected = ProjectDatesNotConfiguredException.class)
+    public void generate_WhenProjectStartIsEmpty_ShouldThrowException() {
+        Optional<LocalDate> startDate = Optional.empty();
+        Optional<LocalDate> endDate = Optional.of(LocalDate.parse("2018-04-01"));
 
-        String expectedEditorLogger = 
-                "Spreadsheet Open\n" + 
-                "Sheet Create: Effort History\n" + 
-                "Sheet \"Effort History\" Row Create: 1\n" + 
-                "Sheet \"Effort History\" Row \"1\" AddColumn \"A1\": Date\n" + 
-                "Sheet \"Effort History\" Row \"1\" AddColumn \"B1\": SumEffortDone\n" + 
-                "Sheet \"Effort History\" Row \"1\" AddColumn \"C1\": SumEffortBacklog\n" + 
-                "Spreadsheet Close";
+        FollowUpTimeline timeline = new FollowUpTimeline(LocalDate.parse("2018-01-01"), BigDecimal.ZERO, startDate, endDate, Optional.empty());
+        FollowUpSnapshot snapshot = new FollowUpSnapshotMockBuilder().timeline(timeline).build();
 
-        assertEquals(expectedEditorLogger, editor.loggerString("Effort History"));
+        subject.generate(snapshot, timezone);
+    }
+    
+    @Test(expected = ProjectDatesNotConfiguredException.class)
+    public void generate_WhenProjectEndIsEmpty_ShouldThrowException() {
+        Optional<LocalDate> startDate = Optional.of(LocalDate.parse("2018-01-01"));
+        Optional<LocalDate> endDate = Optional.empty();
+
+        FollowUpTimeline timeline = new FollowUpTimeline(LocalDate.parse("2018-01-01"), BigDecimal.ZERO, startDate, endDate, Optional.empty());
+        FollowUpSnapshot snapshot = new FollowUpSnapshotMockBuilder().timeline(timeline).build();
+
+        subject.generate(snapshot, timezone);
     }
 
+
     @Test
-    public void givenFollowUpClusterItems_whenGenerateTShirtSizeSheet_thenSheetShouldContainsItems() throws IOException {
+    public void givenFollowUpClusterItems_whenGenerateTShirtSizeSheet_thenSheetShouldContainsItems() {
         editor.addTable("T-shirt Size", "Cluster", SpreadsheetA1Range.parse("A1:D4"));
 
         ProjectFilterConfiguration project = Mockito.mock(ProjectFilterConfiguration.class);
@@ -434,7 +440,7 @@ public class FollowUpReportGeneratorTest {
     }
     
     @Test
-    public void whenClustersTableRangeIsSmallerThanItemsSize_thenShouldThrowAnException() throws IOException {
+    public void whenClustersTableRangeIsSmallerThanItemsSize_thenShouldThrowAnException() {
         editor.addTable("T-shirt Size", "Clusters", SpreadsheetA1Range.parse("A1:D3"));
         
         ProjectFilterConfiguration project = mock(ProjectFilterConfiguration.class);
@@ -457,30 +463,7 @@ public class FollowUpReportGeneratorTest {
     }
 
     @Test
-    public void givenNoFollowUpClusterItems_whenGenerateTShirtSize_thenShouldNotGenerateSheet() throws IOException {
-        FollowupCluster cluster = new EmptyFollowupCluster();
-
-        FollowUpSnapshot snapshot = new FollowUpSnapshotMockBuilder().cluster(cluster).build();
-        subject.generate(snapshot, timezone);
-
-        String expectedEditorLogger =
-                "Spreadsheet Open\n" + 
-                "Sheet Create: T-shirt Size\n" + 
-                "Sheet \"T-shirt Size\" Row Create: 1\n" + 
-                "Sheet \"T-shirt Size\" Row \"1\" AddColumn \"A1\": Cluster Name\n" + 
-                "Sheet \"T-shirt Size\" Row \"1\" AddColumn \"B1\": T-Shirt Size\n" + 
-                "Sheet \"T-shirt Size\" Row \"1\" AddColumn \"C1\": Type\n" + 
-                "Sheet \"T-shirt Size\" Row \"1\" AddColumn \"D1\": Effort\n" + 
-                "Sheet \"T-shirt Size\" Row \"1\" AddColumn \"E1\": Cycle\n" + 
-                "Sheet \"T-shirt Size\" Row \"1\" AddColumn \"F1\": Project\n" + 
-                "Sheet \"T-shirt Size\" Save\n" + 
-                "Spreadsheet Close";
-
-        assertEquals("T-shirt Size Sheet", expectedEditorLogger, editor.loggerString("T-shirt Size"));
-    }
-    
-    @Test
-    public void whenThereAreWorklogs_ShouldGenerateWorklogSheet() throws IOException {
+    public void whenThereAreWorklogs_ShouldGenerateWorklogSheet() {
         FollowUpData followupData = getDefaultFollowupData();
         List<Worklog> worklogs = new LinkedList<>();
         worklogs.add(new Worklog("john.doe", DateTimeUtils.parseStringToDate("2018-12-12"), 18000));

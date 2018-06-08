@@ -51,7 +51,9 @@ import objective.taskboard.auth.Authorizer;
 import objective.taskboard.followup.FollowUpFacade;
 import objective.taskboard.followup.FollowUpHistoryKeeper;
 import objective.taskboard.followup.FollowUpReportGenerator.InvalidTableRangeException;
+import objective.taskboard.followup.ProjectDatesNotConfiguredException;
 import objective.taskboard.followup.TemplateService;
+import objective.taskboard.followup.cluster.ClusterNotConfiguredException;
 import objective.taskboard.followup.data.Template;
 
 @RestController
@@ -112,6 +114,12 @@ public class FollowUpController {
                             "The selected template is invalid. The range of table “%s” in sheet “%s” is smaller than the available data. " + 
                             "Please increase the range to cover at least row %s.",
                             e.getTableName(), e.getSheetName(), e.getMinRows()));
+
+        } catch (ClusterNotConfiguredException e) {//NOSONAR
+            return ResponseEntity.badRequest().body("No cluster configuration found for project " + projectKey + ".");
+
+        } catch (ProjectDatesNotConfiguredException e) {//NOSONAR
+            return ResponseEntity.badRequest().body("The project " + projectKey + " has no start or delivery date.");
 
         } catch (Exception e) {
             log.warn("Error generating followup spreadsheet", e);
