@@ -88,7 +88,7 @@ public class SimpleSpreadsheetEditorMock implements SpreadsheetEditor {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         logger.append("Spreadsheet Close", "global");
     }
 

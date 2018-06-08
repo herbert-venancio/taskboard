@@ -10,6 +10,8 @@ public interface SpreadsheetEditor extends Closeable {
     SpreadsheetStylesEditor SpreadsheetStylesEditor = null;
 
     void open();
+    
+    void close();
 
     Sheet getSheet(String sheetName);
 

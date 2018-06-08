@@ -7,6 +7,7 @@ import static objective.taskboard.followup.FollowUpHelper.getEmptyFollowupData;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -32,8 +33,13 @@ class FollowUpSnapshotMockBuilder {
     
     public FollowUpSnapshot build() {
         FollowUpData data = this.data == null ? getEmptyFollowupData() : this.data;
-        FollowUpTimeline timeline = this.timeline == null ? new FollowUpTimeline(LocalDate.parse("2018-01-01")) : this.timeline;
         
+        if (this.timeline == null)
+            validTimeline();
+
+        if (this.cluster == null)
+            validCluster();
+
         List<FromJiraRowCalculation> fromJiraRowCalculations = data.fromJiraDs.rows.stream()
                 .map(r -> new FromJiraRowCalculation(r, 5.0, 2.0, 3.0))
                 .collect(toList());
@@ -42,8 +48,6 @@ class FollowUpSnapshotMockBuilder {
         List<FromJiraRowCalculation> scopeBaselineRowCalculations = scopeBaseline.isPresent()
                 ? scopeBaseline.get().fromJiraDs.rows.stream().map(r -> new FromJiraRowCalculation(r, 5.0, 2.0, 3.0)).collect(toList())
                 : emptyList();
-
-        FollowupCluster cluster = this.cluster == null ? new EmptyFollowupCluster() : this.cluster;
 
         FollowUpSnapshot snapshot = mock(FollowUpSnapshot.class);
         when(snapshot.getCluster()).thenReturn(cluster);
@@ -77,7 +81,7 @@ class FollowUpSnapshotMockBuilder {
     }
     
     public FollowUpSnapshotMockBuilder emptyCluster() {
-        this.cluster = null;
+        this.cluster = new EmptyFollowupCluster();
         return this;
     }
 
@@ -117,7 +121,24 @@ class FollowUpSnapshotMockBuilder {
     }
     
     public FollowUpSnapshotMockBuilder timeline(LocalDate reference) {
-        this.timeline = new FollowUpTimeline(reference);
+        this.timeline = new FollowUpTimeline(
+                reference,
+                BigDecimal.ZERO, 
+                Optional.of(LocalDate.parse("2018-01-01")), 
+                Optional.of(LocalDate.parse("2018-06-01")), 
+                Optional.empty());
+        
+        return this;
+    }
+    
+    public FollowUpSnapshotMockBuilder validTimeline() {
+        this.timeline = new FollowUpTimeline(
+                LocalDate.parse("2018-01-01"),
+                BigDecimal.ZERO, 
+                Optional.of(LocalDate.parse("2018-01-01")), 
+                Optional.of(LocalDate.parse("2018-06-01")), 
+                Optional.empty());
+        
         return this;
     }
 }

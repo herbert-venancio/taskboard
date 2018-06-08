@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import objective.taskboard.followup.EffortHistoryRow;
 import objective.taskboard.followup.FollowUpSnapshot;
 import objective.taskboard.followup.FollowUpSnapshotService;
+import objective.taskboard.followup.ProjectDatesNotConfiguredException;
 import objective.taskboard.followup.cluster.ClusterNotConfiguredException;
 
 @Component
@@ -188,9 +189,5 @@ public class FollowupProgressCalculator {
                     .mapToDouble(i -> deltaFunction.applyAsDouble(historyRows.get(i)) - deltaFunction.applyAsDouble(historyRows.get(i - 1)))
                     .average();
         }
-    }
-    
-    public static class ProjectDatesNotConfiguredException extends RuntimeException {
-        private static final long serialVersionUID = 1L;
     }
 }

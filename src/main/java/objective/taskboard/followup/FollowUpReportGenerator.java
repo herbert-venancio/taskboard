@@ -26,7 +26,6 @@ import static objective.taskboard.followup.FollowUpTransitionsDataProvider.TYPE_
 import static objective.taskboard.followup.FollowUpTransitionsDataProvider.TYPE_SUBTASKS;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
-import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.LinkedList;
@@ -37,6 +36,7 @@ import org.springframework.core.io.Resource;
 
 import objective.taskboard.followup.FromJiraRowCalculator.FromJiraRowCalculation;
 import objective.taskboard.followup.ReleaseHistoryProvider.ProjectRelease;
+import objective.taskboard.followup.cluster.ClusterNotConfiguredException;
 import objective.taskboard.followup.cluster.FollowUpClusterItem;
 import objective.taskboard.followup.cluster.FollowupCluster;
 import objective.taskboard.google.SpreadsheetUtils.SpreadsheetA1Range;
@@ -49,15 +49,17 @@ import objective.taskboard.utils.DateTimeUtils;
 import objective.taskboard.utils.IOUtilities;
 
 public class FollowUpReportGenerator {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FollowUpReportGenerator.class);
-
     private final SpreadsheetEditor editor;
 
     public FollowUpReportGenerator(SpreadsheetEditor editor) {
         this.editor = editor;
     }
 
-    public Resource generate(FollowUpSnapshot snapshot, ZoneId timezone) throws IOException {
+    public Resource generate(FollowUpSnapshot snapshot, ZoneId timezone) 
+            throws ClusterNotConfiguredException, ProjectDatesNotConfiguredException {
+
+        validate(snapshot);
+        
         try {
             editor.open();
 
@@ -73,12 +75,18 @@ public class FollowUpReportGenerator {
             generateProjectProfileSheet(snapshot);
 
             return IOUtilities.asResource(editor.toBytes());
-        } catch (Exception e) {
-            log.error(e.getMessage() == null ? e.toString() : e.getMessage());
-            throw e;
+
         } finally {
             editor.close();
         }
+    }
+
+    private void validate(FollowUpSnapshot snapshot) {
+        if (!snapshot.hasClusterConfiguration())
+            throw new ClusterNotConfiguredException();
+        
+        if (!snapshot.getTimeline().getStart().isPresent() || !snapshot.getTimeline().getEnd().isPresent())
+            throw new ProjectDatesNotConfiguredException();
     }
 
     private void updateTimelineDates(FollowUpTimeline timeline, List<ProjectRelease> releases) {
@@ -86,8 +94,8 @@ public class FollowUpReportGenerator {
         if (sheet == null)
             return;
 
-        sheet.getOrCreateRow(2).setValue("B", timeline.getStart().orElse(null));
-        sheet.getOrCreateRow(5).setValue("B", timeline.getEnd().orElse(null));
+        sheet.getOrCreateRow(2).setValue("B", timeline.getStart().orElseThrow(IllegalStateException::new));
+        sheet.getOrCreateRow(5).setValue("B", timeline.getEnd().orElseThrow(IllegalStateException::new));
         sheet.getOrCreateRow(6).setValue("B", timeline.getReference());
         sheet.getOrCreateRow(8).setValue("B", timeline.getRiskPercentage());
         sheet.getOrCreateRow(9).setValue("B", timeline.getBaselineDate().orElse(null));
@@ -369,9 +377,6 @@ public class FollowUpReportGenerator {
         rowHeader.addColumn("Date");
         rowHeader.addColumn("SumEffortDone");
         rowHeader.addColumn("SumEffortBacklog");
-        
-        if (!snapshot.hasClusterConfiguration())
-            return;
 
         for (EffortHistoryRow historyRow : snapshot.getEffortHistory()) {
             SheetRow row = sheet.createRow();
