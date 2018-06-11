@@ -20,6 +20,10 @@ public class JiraProject {
         this.name = name;
     }
 
+    public String getKey() {
+        return key;
+    }
+
     public interface Service {
         @GET("/rest/api/latest/project")
         List<JiraProject> all();

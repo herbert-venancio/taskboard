@@ -23,12 +23,18 @@ package objective.taskboard.jira;
 
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import javax.annotation.PostConstruct;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +43,7 @@ import com.atlassian.jira.rest.client.api.domain.CimProject;
 import objective.taskboard.auth.Authorizer;
 import objective.taskboard.domain.Project;
 import objective.taskboard.domain.ProjectFilterConfiguration;
+import objective.taskboard.jira.data.JiraProject;
 import objective.taskboard.jira.data.Version;
 import objective.taskboard.project.ProjectBaselineProvider;
 import objective.taskboard.project.ProjectProfileItem;
@@ -45,6 +52,7 @@ import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository
 
 @Service
 public class ProjectService {
+	private static final Logger log = LoggerFactory.getLogger(ProjectService.class);
 
     private final ProjectFilterConfigurationCachedRepository projectRepository;
     private final ProjectProfileItemRepository projectProfileItemRepository;
@@ -66,8 +74,15 @@ public class ProjectService {
         this.baselineProvider = baselineProvider;
     }
 
+    @PostConstruct
+    public void loadAllProjects() {
+		log.info("Loading jira projects data in the cache...");
+		jiraProjectService.getAllProjects();
+		log.info("Load jira projects complete");
+    }
+
     public List<Project> getNonArchivedJiraProjectsForUser() {
-        return jiraProjectService.getUserProjects().values().stream()
+        return getUserProjects().values().stream()
                 .filter(p -> !isArchived(p.getKey()))
                 .sorted(comparing(Project::getName))
                 .collect(toList());
@@ -111,11 +126,11 @@ public class ProjectService {
     }
 
     public boolean isNonArchivedAndUserHasAccess(String projectKey) {
-        return !isArchived(projectKey) && jiraProjectService.getUserProjects().containsKey(projectKey);
+        return !isArchived(projectKey) && getUserProjects().containsKey(projectKey);
     }
 
     public boolean jiraProjectExistsAndUserHasAccess(String projectKey) {
-        return jiraProjectService.getUserProjects().containsKey(projectKey);
+        return getUserProjects().containsKey(projectKey);
     }
 
     private boolean isArchived(String projectKey) {
@@ -175,4 +190,15 @@ public class ProjectService {
         return projectProfileItemRepository.listByProject(project);
     }
 
+    private Map<String, Project> getUserProjects() {
+        List<String> userProjectKeys = jiraProjectService.getUserProjectKeys();
+        Map<String, JiraProject> projectByKey = jiraProjectService.getAllProjects()
+            .stream()
+            .collect(toMap(JiraProject::getKey, p -> p));
+
+        return projectRepository.getProjects().stream()
+                .filter(pf -> userProjectKeys.contains(pf.getProjectKey()))
+                .map(pf -> Project.from(projectByKey.get(pf.getProjectKey()), pf))
+                .collect(toMap(Project::getKey, p -> p));
+    }
 }
