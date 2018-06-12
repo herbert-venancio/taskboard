@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
+
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 
@@ -42,6 +44,12 @@ public class CustomJiraPluginInstalledVerifier {
 
         if (response.getStatus() != 404)
             return;
+
+        boolean htmlResponse = response.getHeaders().stream()
+                .filter(h -> HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(h.getName()))
+                .anyMatch(h -> h.getValue().contains("text/html"));
+        if(htmlResponse)
+            throw new CustomJiraPluginNotInstalledException();
 
         try (InputStream body = response.getBody().in()) {
             String content = IOUtilities.resourceAsString(body);
