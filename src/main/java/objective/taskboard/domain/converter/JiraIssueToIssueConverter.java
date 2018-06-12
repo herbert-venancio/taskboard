@@ -31,6 +31,7 @@ import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractC
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractComments;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractComponents;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractDependenciesIssues;
+import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractExtraFields;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractLabels;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractLastBlockReason;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractParentKey;
@@ -56,6 +57,7 @@ import objective.taskboard.data.User;
 import objective.taskboard.database.IssuePriorityService;
 import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.domain.ParentIssueLink;
+import objective.taskboard.jira.FieldMetadataService;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.ProjectService;
@@ -97,6 +99,9 @@ public class JiraIssueToIssueConverter {
 
     @Autowired
     private ProjectService projectService;
+
+    @Autowired
+    private FieldMetadataService fieldMetadataService;
 
     private List<String> parentIssueLinks = new ArrayList<>();
     
@@ -152,7 +157,8 @@ public class JiraIssueToIssueConverter {
                 extractReleaseId(jiraProperties, jiraIssue),
                 extractChangelog(jiraIssue),
                 convertWorklog(jiraIssue.getWorklogs()),
-                extractAssignedTeamsIds(jiraProperties, jiraIssue));
+                extractAssignedTeamsIds(jiraProperties, jiraIssue),
+                extractExtraFields(jiraProperties, fieldMetadataService, jiraIssue));
         
         return createIssueFromScratch(converted, provider);
     }

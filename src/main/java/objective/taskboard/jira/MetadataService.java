@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.atlassian.jira.rest.client.api.domain.CimIssueType;
 import com.atlassian.jira.rest.client.api.domain.IssueType;
 import com.atlassian.jira.rest.client.api.domain.IssuelinksType;
 import com.atlassian.jira.rest.client.api.domain.Priority;
@@ -32,6 +33,10 @@ public class MetadataService {
 
     public Map<String, IssuelinksType> getIssueLinksMetadata() {
         return cache.getIssueLinksMetadata();
+    }
+
+    public Map<Long, CimIssueType> getCreateIssueMetadata() {
+        return cache.getCreateIssueMetadata();
     }
 
     public IssueType getIssueTypeById(Long id) {

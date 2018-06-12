@@ -48,6 +48,8 @@ public class IssueScratch implements Serializable {
     protected List<Worklog> worklogs; //NOSONAR
     @JsonIgnore
     protected List<Long> assignedTeamsIds = new LinkedList<>();//NOSONAR
+
+    protected Map<String, String> extraFields;
     
     public IssueScratch() {
         super();
@@ -84,7 +86,8 @@ public class IssueScratch implements Serializable {
             String releaseId,
             List<Changelog> changelog,
             List<Worklog> worklogs,
-            List<Long> assignedTeamsIds) {
+            List<Long> assignedTeamsIds,
+            Map<String, String> extraFields) {
         this.id = id;
         this.issueKey = issueKey;
         this.projectKey = projectKey;
@@ -118,6 +121,8 @@ public class IssueScratch implements Serializable {
         this.assignedTeamsIds.addAll(assignedTeamsIds);
         
         this.worklogs = worklogs;
+
+        this.extraFields = extraFields;
     }
 
     public String getIssueKey() {

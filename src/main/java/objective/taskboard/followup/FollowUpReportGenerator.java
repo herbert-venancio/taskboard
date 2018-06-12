@@ -20,7 +20,10 @@
  */
 package objective.taskboard.followup;
 
+import static java.util.Collections.emptySet;
 import static java.util.Optional.empty;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toMap;
 import static objective.taskboard.followup.FollowUpTransitionsDataProvider.TYPE_DEMAND;
 import static objective.taskboard.followup.FollowUpTransitionsDataProvider.TYPE_FEATURES;
 import static objective.taskboard.followup.FollowUpTransitionsDataProvider.TYPE_SUBTASKS;
@@ -30,7 +33,9 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.core.io.Resource;
 
@@ -40,6 +45,8 @@ import objective.taskboard.followup.cluster.ClusterNotConfiguredException;
 import objective.taskboard.followup.cluster.FollowUpClusterItem;
 import objective.taskboard.followup.cluster.FollowupCluster;
 import objective.taskboard.google.SpreadsheetUtils.SpreadsheetA1Range;
+import objective.taskboard.jira.FieldMetadataService;
+import objective.taskboard.jira.client.JiraFieldDataDto;
 import objective.taskboard.project.ProjectProfileItem;
 import objective.taskboard.spreadsheet.Sheet;
 import objective.taskboard.spreadsheet.SheetRow;
@@ -50,9 +57,11 @@ import objective.taskboard.utils.IOUtilities;
 
 public class FollowUpReportGenerator {
     private final SpreadsheetEditor editor;
+    private final FieldMetadataService fieldMetadataService;
 
-    public FollowUpReportGenerator(SpreadsheetEditor editor) {
+    public FollowUpReportGenerator(SpreadsheetEditor editor, FieldMetadataService fieldMetadataService) {
         this.editor = editor;
+        this.fieldMetadataService = fieldMetadataService;
     }
 
     public Resource generate(FollowUpSnapshot snapshot, ZoneId timezone) 
@@ -154,6 +163,8 @@ public class FollowUpReportGenerator {
         for (String header : followupData.fromJiraDs.headers)
             rowHeader.addColumn(header);
 
+        addExtraFieldsHeadersIfExist(followupData.fromJiraDs, rowHeader);
+
         addAnalyticsHeadersIfExist(followupData.analyticsTransitionsDsList, TYPE_DEMAND, rowHeader);
         addAnalyticsHeadersIfExist(followupData.analyticsTransitionsDsList, TYPE_FEATURES, rowHeader);
         addAnalyticsHeadersIfExist(followupData.analyticsTransitionsDsList, TYPE_SUBTASKS, rowHeader);
@@ -252,6 +263,10 @@ public class FollowUpReportGenerator {
             row.addColumn(rowCalculation.getPlannedEffortOnBug());
             row.addColumn(rowCalculation.getWorklogOnBug());
 
+            addExtraFieldsIfExist(followupData.fromJiraDs, TYPE_DEMAND, fromJiraDataRow.demandExtraFields, row);
+            addExtraFieldsIfExist(followupData.fromJiraDs, TYPE_FEATURES, fromJiraDataRow.taskExtraFields, row);
+            addExtraFieldsIfExist(followupData.fromJiraDs, TYPE_SUBTASKS, fromJiraDataRow.subtaskExtraFields, row);
+
             addTransitionsDatesIfExist(followupData.analyticsTransitionsDsList, TYPE_DEMAND, fromJiraDataRow.demandNum, row);
             addTransitionsDatesIfExist(followupData.analyticsTransitionsDsList, TYPE_FEATURES, fromJiraDataRow.taskNum, row);
             addTransitionsDatesIfExist(followupData.analyticsTransitionsDsList, TYPE_SUBTASKS, fromJiraDataRow.subtaskNum, row);
@@ -289,6 +304,33 @@ public class FollowUpReportGenerator {
             for (int i = analyticDataSetOfType.get().getInitialIndexStatusHeaders(); i < headers.size(); i++)
                 row.addColumn(dateNull);
         }
+    }
+
+    private void addExtraFieldsHeadersIfExist(FromJiraDataSet ds, SheetRow rowHeader) {
+        if(ds.extraFieldsHeaders == null)
+            return;
+
+        Map<String, String> fieldNames = fieldMetadataService.getFieldsMetadataAsUser().stream()
+                .collect(toMap(JiraFieldDataDto::getId, JiraFieldDataDto::getName));
+
+        for(Map.Entry<String, Set<String>> entry : ds.extraFieldsHeaders.entrySet()) {
+            String prefix = entry.getKey();
+            Set<String> extraFieldsHeaders = entry.getValue();
+            for(String fieldId : extraFieldsHeaders) {
+                rowHeader.addColumn(prefix + " - " + fieldNames.get(fieldId));
+            }
+        }
+    }
+
+    private void addExtraFieldsIfExist(FromJiraDataSet ds, String type, Map<String, String> extraFields, SheetRow row) {
+        if(ds.extraFieldsHeaders == null)
+            return;
+
+        Set<String> fieldIds = ds.extraFieldsHeaders.getOrDefault(type, emptySet());
+        for(String fieldId : fieldIds)
+            row.addColumn(ofNullable(extraFields)
+                    .map(extra -> extra.getOrDefault(fieldId, ""))
+                    .orElse(""));
     }
 
     private Optional<AnalyticsTransitionsDataSet> getAnalyticDataSetWithRowByType(List<AnalyticsTransitionsDataSet> analyticsDataSets, String type) {

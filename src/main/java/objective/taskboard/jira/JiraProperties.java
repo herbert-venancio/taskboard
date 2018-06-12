@@ -88,6 +88,8 @@ public class JiraProperties {
     @Valid
     private StatusPriorityOrder statusPriorityOrder;
 
+    private ExtraFields extraFields = new ExtraFields();
+
     private Wip wip;
 
     public static class StatusPriorityOrder {
@@ -600,6 +602,18 @@ public class JiraProperties {
                     ", release=" + release +
                     ", additionalEstimatedHours=" + additionalEstimatedHours +
                     '}';
+        }
+    }
+
+    public static class ExtraFields {
+        private List<String> fieldIds = new ArrayList<>();
+
+        public List<String> getFieldIds() {
+            return fieldIds;
+        }
+
+        public void setFieldIds(List<String> fieldIds) {
+            this.fieldIds = fieldIds;
         }
     }
 
@@ -1368,6 +1382,14 @@ public class JiraProperties {
 
     public Followup getFollowup() {
         return this.followup;
+    }
+
+    public ExtraFields getExtraFields() {
+        return extraFields;
+    }
+
+    public void setExtraFields(ExtraFields extraFields) {
+        this.extraFields = extraFields;
     }
 
     public Wip getWip() {

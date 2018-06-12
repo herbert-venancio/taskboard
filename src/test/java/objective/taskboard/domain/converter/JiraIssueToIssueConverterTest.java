@@ -22,12 +22,17 @@ package objective.taskboard.domain.converter;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static objective.taskboard.followup.FollowUpHelper.COST_CENTER_FIELD_ID;
+import static objective.taskboard.followup.FollowUpHelper.COST_CENTER_FIELD_NAME;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -39,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.joda.time.DateTime;
@@ -55,6 +61,7 @@ import com.atlassian.jira.rest.client.api.domain.IssueType;
 import objective.taskboard.data.Issue;
 import objective.taskboard.database.IssuePriorityService;
 import objective.taskboard.domain.IssueColorService;
+import objective.taskboard.jira.FieldMetadataService;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraProperties.CustomField;
 import objective.taskboard.jira.JiraProperties.CustomField.Blocked;
@@ -64,6 +71,10 @@ import objective.taskboard.jira.JiraProperties.CustomField.TShirtSize;
 import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.client.JiraCommentDto;
+import objective.taskboard.jira.client.JiraFieldDataDto;
+import objective.taskboard.jira.client.JiraFieldSchemaDto;
+import objective.taskboard.jira.client.JiraFieldSchemaDto.CustomFieldTypes;
+import objective.taskboard.jira.client.JiraFieldSchemaDto.FieldSchemaType;
 import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.client.JiraIssueTypeDto;
 import objective.taskboard.jira.client.JiraPriorityDto;
@@ -85,6 +96,7 @@ public class JiraIssueToIssueConverterTest {
 
     private static final String JSON_PARENT = "{key:'%s'}";
     private static final String JSON_CLASS_OF_SERVICE = "{id:1, value:'%s'}";
+    private static final String JSON_COST_CENTER = "[{\"id\": \"13080\",\"value\": \"Taskboard\"}]";
 
     private static final String PARENT_ID = "parent";
     private static final String CLASS_OF_SERVICE_ID = "classOfServiceId";
@@ -151,6 +163,8 @@ public class JiraIssueToIssueConverterTest {
     private FilterCachedRepository filterRepository;
     @Mock
     private CardVisibilityEvalService cardVisibilityEvalService;
+    @Mock
+    private FieldMetadataService fieldMetadataService;
     
     @Before
     public void before() {
@@ -181,6 +195,7 @@ public class JiraIssueToIssueConverterTest {
         when(customField.getCoAssignees()).thenReturn(mock(CustomFieldDetails.class));
         
         when(jiraProperties.getCustomfield()).thenReturn(customField);
+        when(jiraProperties.getExtraFields()).thenReturn(new JiraProperties.ExtraFields());
 
         mockIssue(issue, ISSUE_KEY);
 
@@ -301,9 +316,9 @@ public class JiraIssueToIssueConverterTest {
         JiraIssueDto B = mock(JiraIssueDto.class);
         JiraIssueDto C = mock(JiraIssueDto.class);
         mockIssue(A,"KEY-1");
-        mockIssueField(A, PARENT_ID, format(JSON_PARENT, "PARENT-1", TYPE_ICON_URI));
+        mockIssueField(A, PARENT_ID, format(JSON_PARENT, "PARENT-1"));
         mockIssueField(A, CLASS_OF_SERVICE_ID, format(JSON_CLASS_OF_SERVICE, CLASS_OF_SERVICE_EXPEDITE));
-        mockIssueField(B, PARENT_ID, format(JSON_PARENT, "PARENT-2", TYPE_ICON_URI));
+        mockIssueField(B, PARENT_ID, format(JSON_PARENT, "PARENT-2"));
         mockIssue(B,"PARENT-1");
         mockIssue(C,"PARENT-2");
         
@@ -333,6 +348,59 @@ public class JiraIssueToIssueConverterTest {
         subject.convertSingleIssue(A, provider);
     }
 
+    @Test
+    public void givenExtraFieldsIsConfigured_whenConvert_thenExtractExtraFieldsHasValues() throws JSONException {
+        // given
+        setupExtraFields();
+        mockIssueField(issue, COST_CENTER_FIELD_ID, JSON_COST_CENTER);
+
+        // when
+        Issue converted = subject.convertSingleIssue(issue, buildProvider());
+
+        // then
+        assertThat(converted.getExtraFields()).containsEntry(COST_CENTER_FIELD_ID, "Taskboard");
+    }
+
+    @Test
+    public void givenExtraFieldsIsConfiguredAndValueIsEmpty_whenConvert_thenExtractedAsNull() throws JSONException {
+        // given
+        setupExtraFields();
+        mockIssueField(issue, COST_CENTER_FIELD_ID, null);
+
+        // when
+        Issue converted = subject.convertSingleIssue(issue, buildProvider());
+
+        // then
+        assertThat(converted.getExtraFields()).isNull();
+    }
+
+    @Test
+    public void givenExtraFieldsIsConfiguredAndIssueDoNotHaveField_whenConvert_thenExtractedAsNull() {
+        // given
+        setupExtraFields();
+
+        // when
+        Issue converted = subject.convertSingleIssue(issue, buildProvider());
+
+        // then
+        assertThat(converted.getExtraFields()).isNull();
+    }
+
+    private void setupExtraFields() {
+        JiraProperties.ExtraFields extraFields = new JiraProperties.ExtraFields();
+        extraFields.setFieldIds(singletonList(COST_CENTER_FIELD_ID));
+        when(jiraProperties.getExtraFields()).thenReturn(extraFields);
+
+        JiraFieldSchemaDto multiSelectFieldSchema = new JiraFieldSchemaDto(
+                10390L
+                , CustomFieldTypes.multiselect
+                , FieldSchemaType.array
+                , FieldSchemaType.option);
+
+        JiraFieldDataDto field = new JiraFieldDataDto(COST_CENTER_FIELD_ID, COST_CENTER_FIELD_NAME, JiraFieldDataDto.FieldType.CUSTOM, multiSelectFieldSchema);
+        when(fieldMetadataService.getFieldsMetadata()).thenReturn(singletonList(field));
+    }
+
     private void mockIssue(JiraIssueDto issue, String issueKey) {
         when(issue.getKey()).thenReturn(issueKey);
         when(issue.getProject()).thenReturn(project);
@@ -351,8 +419,16 @@ public class JiraIssueToIssueConverterTest {
     }
 
     private void mockIssueField(JiraIssueDto issue, String fieldId, String json) throws JSONException {
-        JSONObject fieldValue = new JSONObject(json);
-        when(issue.getField(fieldId)).thenReturn(fieldValue);
+        Object fieldValue;
+        if(json == null)
+            fieldValue = null;
+        else if (json.startsWith("{"))
+            fieldValue = new JSONObject(json);
+        else if (json.startsWith("["))
+            fieldValue = new JSONArray(json);
+        else
+            fieldValue = json;
+        when(issue.getField(eq(fieldId))).thenReturn(fieldValue);
     }
 
     private void assertIssueWithParent(objective.taskboard.data.Issue converted) {

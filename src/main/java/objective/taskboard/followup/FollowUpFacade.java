@@ -40,6 +40,7 @@ import objective.taskboard.database.directory.DataBaseDirectory;
 import objective.taskboard.domain.Project;
 import objective.taskboard.followup.cluster.ClusterNotConfiguredException;
 import objective.taskboard.followup.data.Template;
+import objective.taskboard.jira.FieldMetadataService;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor;
 import objective.taskboard.utils.IOUtilities;
@@ -70,6 +71,9 @@ public class FollowUpFacade {
     @Autowired
     private Authorizer authorizer;
 
+    @Autowired
+    private FieldMetadataService fieldMetadataService;
+
     public Resource generateReport(String templateName, Optional<LocalDate> date, ZoneId timezone, String projectKey) 
             throws ClusterNotConfiguredException, ProjectDatesNotConfiguredException {
 
@@ -77,7 +81,7 @@ public class FollowUpFacade {
         SimpleSpreadsheetEditor spreadsheetEditor = new SimpleSpreadsheetEditor(template);
         FollowUpSnapshot snapshot = snapshotService.get(date, timezone, projectKey);
 
-        return new FollowUpReportGenerator(spreadsheetEditor).generate(snapshot, timezone);
+        return new FollowUpReportGenerator(spreadsheetEditor, fieldMetadataService).generate(snapshot, timezone);
     }
 
     public List<TemplateData> getTemplates() {

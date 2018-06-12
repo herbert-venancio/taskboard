@@ -22,10 +22,14 @@ package objective.taskboard.followup;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static objective.taskboard.Constants.FROMJIRA_HEADERS;
+import static objective.taskboard.followup.FollowUpHelper.COST_CENTER_FIELD_ID;
+import static objective.taskboard.followup.FollowUpHelper.COST_CENTER_FIELD_NAME;
 import static objective.taskboard.followup.FollowUpHelper.getAnalyticsTransitionsDataSetWitNoRow;
 import static objective.taskboard.followup.FollowUpHelper.getDefaultAnalyticsTransitionsDataSet;
 import static objective.taskboard.followup.FollowUpHelper.getDefaultFollowupData;
+import static objective.taskboard.followup.FollowUpHelper.getDefaultFollowupDataWithExtraFields;
 import static objective.taskboard.followup.FollowUpHelper.getDefaultFromJiraDataRow;
 import static objective.taskboard.followup.FollowUpHelper.getDefaultFromJiraDataRowList;
 import static objective.taskboard.followup.FollowUpHelper.getDefaultSyntheticTransitionsDataSet;
@@ -38,6 +42,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -59,6 +64,8 @@ import objective.taskboard.followup.cluster.FollowUpClusterItem;
 import objective.taskboard.followup.cluster.FollowupCluster;
 import objective.taskboard.followup.cluster.FollowupClusterImpl;
 import objective.taskboard.google.SpreadsheetUtils.SpreadsheetA1Range;
+import objective.taskboard.jira.FieldMetadataService;
+import objective.taskboard.jira.client.JiraFieldDataDto;
 import objective.taskboard.project.ProjectProfileItem;
 import objective.taskboard.spreadsheet.SimpleSpreadsheetEditor;
 import objective.taskboard.spreadsheet.SimpleSpreadsheetEditorMock;
@@ -69,7 +76,7 @@ public class FollowUpReportGeneratorTest {
 
     private final ZoneId timezone = ZoneId.of("UTC");
     private SimpleSpreadsheetEditorMock editor = new SimpleSpreadsheetEditorMock();
-    private FollowUpReportGenerator subject = new FollowUpReportGenerator(editor);
+    private FollowUpReportGenerator subject = new FollowUpReportGenerator(editor, null);
 
     @Test
     public void generateJiraDataSheetTest() {
@@ -143,7 +150,7 @@ public class FollowUpReportGeneratorTest {
     @Test
     public void generateTest() {
         FollowUpTemplate testTemplate = new FollowUpTemplate(resolve("followup/Followup-template.xlsm"));
-        subject = new FollowUpReportGenerator(new SimpleSpreadsheetEditor(testTemplate));
+        subject = new FollowUpReportGenerator(new SimpleSpreadsheetEditor(testTemplate), null);
         
         List<EffortHistoryRow> effortHistory = asList(
                 new EffortHistoryRow(LocalDate.parse("2018-04-03"), 2d, 8d),
@@ -169,7 +176,7 @@ public class FollowUpReportGeneratorTest {
     @Test
     public void generateLotsOfLines() {
         FollowUpTemplate testTemplate = new FollowUpTemplate(resolve("followup/Followup-template.xlsm"));
-        subject = new FollowUpReportGenerator(new SimpleSpreadsheetEditor(testTemplate));
+        subject = new FollowUpReportGenerator(new SimpleSpreadsheetEditor(testTemplate), null);
 
         List<FromJiraDataRow> fromJiraDataRowList = new LinkedList<>();
         for (int i=0; i < 5000; i++)
@@ -490,6 +497,21 @@ public class FollowUpReportGeneratorTest {
                 "Sheet \"Worklogs\" Save\n" +
                 "Spreadsheet Close";
         assertEquals(expected, loggerString);
+    }
+
+    @Test
+    public void givenExtraFields_whenGenerateFromJiraSheet_shouldAddExtraColumns() {
+        FieldMetadataService fieldMetadataService = mock(FieldMetadataService.class);
+        when(fieldMetadataService.getFieldsMetadataAsUser())
+                .thenReturn(singletonList(new JiraFieldDataDto(COST_CENTER_FIELD_ID, COST_CENTER_FIELD_NAME, null, null)));
+        subject = new FollowUpReportGenerator(editor, fieldMetadataService);
+
+        FollowUpData followupData = getDefaultFollowupDataWithExtraFields();
+
+        subject.generate(mockSnapshot(followupData), timezone);
+
+        String fromJiraSheetExpected = txtResourceAsString("followup/fromJiraWithNoTransitionsAndExtraFields.txt");
+        assertEquals("From Jira sheet", fromJiraSheetExpected, editor.loggerString("From Jira"));
     }
 
     private FollowUpSnapshot mockSnapshot(FollowUpData data) {

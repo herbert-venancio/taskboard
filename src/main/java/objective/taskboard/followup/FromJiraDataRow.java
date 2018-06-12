@@ -22,6 +22,7 @@ package objective.taskboard.followup;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 
 import objective.taskboard.data.Worklog;
 
@@ -57,6 +58,7 @@ public class FromJiraDataRow {
     public Double demandCycletime;
     public Boolean demandIsBlocked;
     public String demandLastBlockReason;
+    public Map<String, String> demandExtraFields;
 
     public String taskType = "";
     public String taskStatus = "";
@@ -82,6 +84,7 @@ public class FromJiraDataRow {
     public Double taskCycletime;
     public Boolean taskIsBlocked;
     public String taskLastBlockReason;
+    public Map<String, String> taskExtraFields;
 
     public String subtaskType;
     public String subtaskStatus;
@@ -105,6 +108,7 @@ public class FromJiraDataRow {
     public Double subtaskCycletime;
     public Boolean subtaskIsBlocked;
     public String subtaskLastBlockReason;
+    public Map<String, String> subtaskExtraFields;
 
     public String tshirtSize;
     public Double worklog;
