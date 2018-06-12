@@ -29,16 +29,15 @@ public class AspectSubitemFilter {
     private String name;
     private Object value;
     private boolean selected;
-    private boolean visible;
     private List<String> teams;
     private List<Version> releases;
 
     public static AspectSubitemFilter from(String name, Object value, boolean selected) {
-        return new AspectSubitemFilter(name, value, selected, true, null, null);
+        return new AspectSubitemFilter(name, value, selected, null, null);
     }
 
     public static AspectSubitemFilter from(String name, Object value, boolean selected, List<String> teams, List<Version> releases) {
-        return new AspectSubitemFilter(name, value, selected, true, teams, releases);
+        return new AspectSubitemFilter(name, value, selected, teams, releases);
     }
 
     public String getName() {
@@ -51,10 +50,6 @@ public class AspectSubitemFilter {
 
     public boolean isSelected() {
         return this.selected;
-    }
-
-    public boolean isVisible() {
-        return this.visible;
     }
 
     public List<String> getTeams() {
@@ -77,10 +72,6 @@ public class AspectSubitemFilter {
         this.selected = selected;
     }
 
-    public void setVisible(final boolean visible) {
-        this.visible = visible;
-    }
-
     public void setTeams(final List<String> teams) {
         this.teams = teams;
     }
@@ -97,7 +88,6 @@ public class AspectSubitemFilter {
         AspectSubitemFilter that = (AspectSubitemFilter) o;
 
         if (selected != that.selected) return false;
-        if (visible != that.visible) return false;
         if (name != null ? !name.equals(that.name) : that.name != null) return false;
         if (value != null ? !value.equals(that.value) : that.value != null) return false;
         if (teams != null ? !teams.equals(that.teams) : that.teams != null) return false;
@@ -109,7 +99,6 @@ public class AspectSubitemFilter {
         int result = name != null ? name.hashCode() : 0;
         result = 31 * result + (value != null ? value.hashCode() : 0);
         result = 31 * result + (selected ? 1 : 0);
-        result = 31 * result + (visible ? 1 : 0);
         result = 31 * result + (teams != null ? teams.hashCode() : 0);
         result = 31 * result + (releases != null ? releases.hashCode() : 0);
         return result;
@@ -121,7 +110,6 @@ public class AspectSubitemFilter {
                 "name='" + name + '\'' +
                 ", value=" + value +
                 ", selected=" + selected +
-                ", visible=" + visible +
                 ", teams=" + teams +
                 ", releases=" + releases +
                 '}';
@@ -130,12 +118,11 @@ public class AspectSubitemFilter {
     public AspectSubitemFilter() {
     }
 
-    @java.beans.ConstructorProperties({"name", "value", "selected", "visible", "teams", "versions"})
-    private AspectSubitemFilter(final String name, final Object value, final boolean selected, final boolean visible, final List<String> teams, final List<Version> releases) {
+    @java.beans.ConstructorProperties({"name", "value", "selected", "teams", "versions"})
+    private AspectSubitemFilter(final String name, final Object value, final boolean selected, final List<String> teams, final List<Version> releases) {
         this.name = name;
         this.value = value;
         this.selected = selected;
-        this.visible = visible;
         this.teams = teams;
         this.releases = releases;
     }

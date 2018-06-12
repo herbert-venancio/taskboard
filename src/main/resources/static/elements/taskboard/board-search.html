@@ -188,8 +188,7 @@
                             return;
 
                         itemFilter.aspectsSubitemFilter.forEach(function(subitemFilter) {
-                            if (!subitemFilter.visible || !subitemFilter.selected ||
-                                subitemFilter.releases == null)
+                            if (!subitemFilter.selected || subitemFilter.releases == null)
                                 return;
 
                             subitemFilter.releases.forEach(function(v) {
