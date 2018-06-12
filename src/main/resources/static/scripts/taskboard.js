@@ -268,17 +268,6 @@ function Taskboard() {
         if (_.isEmpty(filterPreferences))
             return;
 
-        var filterTeams = [];
-        aspectFilters.forEach(function(item) {
-            if (item.description !== 'Project')
-                return;
-
-            item.aspectsSubitemFilter.forEach(function(subitem) {
-                if (filterPreferences[subitem.value] == true)
-                    filterTeams = filterTeams.concat(subitem.teams);
-            });
-        });
-
         aspectFilters.forEach(function(item) {
             item.aspectsSubitemFilter.forEach(function(subitem) {
                 if (this.description === 'Issue Type') {
@@ -289,13 +278,10 @@ function Taskboard() {
                         subitem.selected = filterPreferences[subitem.value];
                     else if (this.description === 'Project')
                         subitem.selected = false;
-                    subitem.visible = true;
-                    if (this.description === 'Team' && filterTeams.indexOf(subitem.value) == -1)
-                        subitem.visible = false;
                 }
             }, item);
         });
-    },
+    };
 
     this.getIssueTypeName = function(issueTypeId) {
         var types = JSON.parse(localStorage.getItem("issueTypes"));
@@ -568,7 +554,7 @@ function Taskboard() {
             .map(function(itemFilter) {
                 return _.chain(itemFilter.aspectsSubitemFilter)
                     .filter(function(subitemFilter) {
-                        return subitemFilter.visible && subitemFilter.selected;
+                        return subitemFilter.selected;
                     })
                     .map(function(subitemFilter) {
                         return subitemFilter.value;
@@ -577,11 +563,11 @@ function Taskboard() {
             })
             .flatten()
             .value();
-    }
+    };
 
     this.showError = function(source, message, actions) {
         source.fire("iron-signal", {name:"show-error-message", data: { message: message, actions: actions}});
-    }
+    };
     
     this.showIssueError = function(source, issueKey, message) {
         source.fire("iron-signal", {name:"show-issue-error-message", data: {

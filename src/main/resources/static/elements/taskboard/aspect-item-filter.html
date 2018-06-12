@@ -61,7 +61,7 @@
         </paper-toolbar>
         <iron-collapse id="collapseFilter">
             <paper-material class="layout vertical" elevation="0">
-                <template class="aspectItemsFilter" is="dom-repeat" items="{{aspectItemFilter.aspectsSubitemFilter}}" as="aspectSubitemFilter" filter="isVisible">
+                <template class="aspectItemsFilter" is="dom-repeat" items="{{aspectItemFilter.aspectsSubitemFilter}}" as="aspectSubitemFilter">
                     <aspect-subitem-filter aspect-subitem-filter="{{aspectSubitemFilter}}" description="{{aspectItemFilter.description}}" selected="{{aspectSubitemFilter.selected}}"></aspect-subitem-filter>
                 </template>
             </paper-material>
@@ -100,8 +100,6 @@
                     $(this.$$('#collapseFilter'))
                             .find('aspect-subitem-filter')
                             .each(function (i, e) {
-                                if (!e.aspectSubitemFilter.visible)
-                                    return;
                                 e.selected = checkAll;
                             });
 
@@ -119,7 +117,7 @@
                     var subitems = this.aspectItemFilter.aspectsSubitemFilter;
                     for (var subitemIndex in subitems) {
                         var subitem = subitems[subitemIndex];
-                        if (subitem.visible && subitem.selected) {
+                        if (subitem.selected) {
                             this.$$('#checkAll').checked = true;
                             return;
                         }
@@ -128,10 +126,6 @@
 
                 refreshList: function() {
                     this.$$('.aspectItemsFilter').render();
-                },
-
-                isVisible: function(aspectSubitemFilter) {
-                    return aspectSubitemFilter.visible;
                 },
 
                 refreshFilterTeams: function() {
