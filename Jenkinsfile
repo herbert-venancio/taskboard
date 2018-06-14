@@ -31,7 +31,7 @@ node("single-executor") {
         try {
             stage('Build') {
                 try {
-                    timeout(time: 20, unit: TimeUnit.MINUTES) {
+                    timeout(time: 40, unit: TimeUnit.MINUTES) {
                         wrap([$class: 'Xvnc']) {
                             sh "${mvnHome}/bin/mvn --batch-mode -V -U -Dmaven.test.failure.ignore=true clean verify -P packaging-war,dev"
                         }
