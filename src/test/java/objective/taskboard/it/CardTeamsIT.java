@@ -61,7 +61,10 @@ public class CardTeamsIT extends AuthenticatedIntegrationTest {
 
         mainPage.refreshToast().assertVisible().showOnlyUpdated();
         mainPage.assertVisibleIssues("TASKB-627", "TASKB-681", "TASKB-682", "TASKB-683", "TASKB-684");
-        mainPage.refreshToast().dismiss();
+        mainPage.refreshToast().dismiss().assertNotVisible();
+        mainPage.lane("Operational")
+        	.boardStep("To Do")
+        	.assertIssueList("TASKB-625","TASKB-627","TASKB-643","TASKB-644","TASKB-659","TASKB-661","TASKB-663","TASKB-664","TASKB-680","TASKB-681","TASKB-682","TASKB-683","TASKB-684","TASKB-686");
 
         TestIssue updatedIssue = mainPage.issue("TASKB-627");
         updatedIssue

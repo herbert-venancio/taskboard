@@ -99,9 +99,6 @@ class IssueDetails extends AbstractUiFragment {
         pickerInput.sendKeys(valueToSelect);
 
         waitUntilElementExistsWithText(By.cssSelector(pickerSelector + " #suggestionsWrapper paper-item.active .paper-autocomplete-suggestions"), valueToSelect);
-
-        WebElement item = pickerForAddTeam.findElement(By.cssSelector(pickerSelector +" #suggestionsWrapper paper-item.active"));
-        waitVisibilityOfElement(item);
         waitForClick(By.cssSelector(pickerSelector +" #suggestionsWrapper paper-item.active"));
         return this;
     }
