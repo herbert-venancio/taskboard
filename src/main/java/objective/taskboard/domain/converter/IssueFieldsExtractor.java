@@ -23,20 +23,20 @@ package objective.taskboard.domain.converter;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
-import static java.util.stream.Collectors.joining;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static objective.taskboard.domain.converter.FieldValueExtractor.extractExtraFieldValue;
+import static objective.taskboard.domain.converter.FieldValueExtractor.from;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.codehaus.jettison.json.JSONArray;
@@ -51,9 +51,6 @@ import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.client.JiraCommentDto;
 import objective.taskboard.jira.client.JiraComponentDto;
 import objective.taskboard.jira.client.JiraFieldDataDto;
-import objective.taskboard.jira.client.JiraFieldSchemaDto;
-import objective.taskboard.jira.client.JiraFieldSchemaDto.CustomFieldTypes;
-import objective.taskboard.jira.client.JiraFieldSchemaDto.FieldSchemaType;
 import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.client.JiraIssueLinkTypeDto;
 import objective.taskboard.jira.client.JiraLinkDto;
@@ -280,7 +277,7 @@ public class IssueFieldsExtractor {
 
     public static List<Changelog> extractChangelog(JiraIssueDto issue) {
         if (issue.getChangelog() == null)
-            return Collections.emptyList();
+            return emptyList();
 
         List<Changelog> result = new LinkedList<>();
         issue.getChangelog().forEach(change -> {
@@ -323,56 +320,11 @@ public class IssueFieldsExtractor {
     public static Map<String, String> extractExtraFields(JiraProperties jiraProperties, FieldMetadataService fieldMetadataService, JiraIssueDto issue) {
         final List<String> fields = jiraProperties.getExtraFields().getFieldIds();
         if(fields.isEmpty())
-            return null;
+            return emptyMap();
 
-        Map<String, JiraFieldDataDto> fieldMap = fieldMetadataService.getFieldsMetadata().stream()
+        return fieldMetadataService.getFieldsMetadata().stream()
                 .filter(f -> fields.contains(f.getId()))
-                .collect(toMap(JiraFieldDataDto::getId, Function.identity()));
-
-        Map<String, String> extraFields = fields.stream()
-                .filter(f -> issue.getField(f) != null)
-                .collect(toMap(f -> f, f -> extractExtraFieldValue(fieldMap.get(f), issue)));
-
-        return extraFields.isEmpty() ? null : extraFields;
-    }
-
-    private static String extractExtraFieldValue(JiraFieldDataDto fieldInfo, JiraIssueDto issue) {
-        JiraFieldSchemaDto schema = fieldInfo.getSchema();
-        if(FieldSchemaType.array == schema.getType()
-                && FieldSchemaType.option == schema.getItems()
-                && CustomFieldTypes.multiselect == schema.getCustom())
-            return extractValue(ofArray(ofObject(ofProperty("value"))), issue.getField(fieldInfo.getId()));
-
-        throw new IllegalArgumentException("Unsupported extra-field data extraction for \"" + fieldInfo.getName() + "\"");
-    }
-
-    static <T> String extractValue(Function<T, String> transformer, T fieldValue) {
-        return transformer.apply(fieldValue);
-    }
-
-    static Function<JSONArray, String> ofArray(final Function<Object, String> elementTransformer) {
-        return arrayValue -> IntStream.range(0, arrayValue.length())
-                        .mapToObj(arrayValue::opt)
-                        .map(elementTransformer)
-                        .collect(joining());
-    }
-
-    static <T> Function<Object, T> ofObject(final Function<JSONObject, T> childTransformer) {
-        return obj -> {
-            if(obj instanceof JSONObject)
-                return childTransformer.apply((JSONObject) obj);
-
-            throw new IllegalArgumentException("Was expecting JSONObject, got " + obj.getClass());
-        };
-    }
-
-    static Function<JSONObject, String> ofProperty(final String propertyName) {
-        return obj -> {
-            try {
-                return obj.getString(propertyName);
-            } catch (JSONException e) {
-                throw new IllegalArgumentException("Could not extract property " + propertyName + " from object", e);
-            }
-        };
+                .filter(f -> issue.getField(f.getId()) != null)
+                .collect(toMap(JiraFieldDataDto::getId, f -> from(issue, extractExtraFieldValue(f))));
     }
 }

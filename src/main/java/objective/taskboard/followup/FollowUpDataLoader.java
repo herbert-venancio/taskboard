@@ -90,7 +90,7 @@ public class FollowUpDataLoader {
     private abstract class BaseLoader {
 
         protected final ZoneId timezone;
-        protected Map<String, Set<String>> extraHeaders;
+        protected Map<String, Set<String>> extraHeaders = new LinkedHashMap<>();
         protected List<FromJiraDataRow> fromJira = new ArrayList<>();
         protected Set<String> types = new LinkedHashSet<>();
         protected ListMultimap<String, String> analyticsHeaders = LinkedListMultimap.create();
@@ -104,8 +104,6 @@ public class FollowUpDataLoader {
         protected void doLoad(FollowUpData data) {
             if (data.fromJiraDs != null) {
                 if (!isEmpty(data.fromJiraDs.extraFieldsHeaders)) {
-                    if(extraHeaders == null)
-                        extraHeaders = new LinkedHashMap<>();
                     Set<String> demandsHeaders = extraHeaders.computeIfAbsent(TYPE_DEMAND, key -> new LinkedHashSet<>());
                     Set<String> featureHeaders = extraHeaders.computeIfAbsent(TYPE_FEATURES, key -> new LinkedHashSet<>());
                     Set<String> subtaskHeaders = extraHeaders.computeIfAbsent(TYPE_SUBTASKS, key -> new LinkedHashSet<>());

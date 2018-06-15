@@ -49,7 +49,7 @@ public class IssueScratch implements Serializable {
     @JsonIgnore
     protected List<Long> assignedTeamsIds = new LinkedList<>();//NOSONAR
 
-    protected Map<String, String> extraFields;
+    protected Map<String, String> extraFields; //NOSONAR
     
     public IssueScratch() {
         super();

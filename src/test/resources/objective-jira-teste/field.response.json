@@ -1570,5 +1570,23 @@
       "custom": "com.atlassian.jira.plugin.system.customfieldtypes:float",
       "customId": 11450
     }
+  },
+  {
+    "id": "customfield_10390",
+    "name": "Centro de Custo/Projeto Solicitante",
+    "custom": true,
+    "orderable": true,
+    "navigable": true,
+    "searchable": true,
+    "clauseNames": [
+      "Centro de Custo/Projeto Solicitante",
+      "cf[10390]"
+    ],
+    "schema": {
+      "type": "array",
+      "items": "option",
+      "custom": "com.atlassian.jira.plugin.system.customfieldtypes:multiselect",
+      "customId": 10390
+    }
   }
 ]

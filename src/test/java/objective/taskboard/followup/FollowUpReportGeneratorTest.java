@@ -76,7 +76,8 @@ public class FollowUpReportGeneratorTest {
 
     private final ZoneId timezone = ZoneId.of("UTC");
     private SimpleSpreadsheetEditorMock editor = new SimpleSpreadsheetEditorMock();
-    private FollowUpReportGenerator subject = new FollowUpReportGenerator(editor, null);
+    private FieldMetadataService fieldMetadataService = mock(FieldMetadataService.class);
+    private FollowUpReportGenerator subject = new FollowUpReportGenerator(editor, fieldMetadataService);
 
     @Test
     public void generateJiraDataSheetTest() {
@@ -150,7 +151,7 @@ public class FollowUpReportGeneratorTest {
     @Test
     public void generateTest() {
         FollowUpTemplate testTemplate = new FollowUpTemplate(resolve("followup/Followup-template.xlsm"));
-        subject = new FollowUpReportGenerator(new SimpleSpreadsheetEditor(testTemplate), null);
+        subject = new FollowUpReportGenerator(new SimpleSpreadsheetEditor(testTemplate), fieldMetadataService);
         
         List<EffortHistoryRow> effortHistory = asList(
                 new EffortHistoryRow(LocalDate.parse("2018-04-03"), 2d, 8d),
@@ -176,7 +177,7 @@ public class FollowUpReportGeneratorTest {
     @Test
     public void generateLotsOfLines() {
         FollowUpTemplate testTemplate = new FollowUpTemplate(resolve("followup/Followup-template.xlsm"));
-        subject = new FollowUpReportGenerator(new SimpleSpreadsheetEditor(testTemplate), null);
+        subject = new FollowUpReportGenerator(new SimpleSpreadsheetEditor(testTemplate), fieldMetadataService);
 
         List<FromJiraDataRow> fromJiraDataRowList = new LinkedList<>();
         for (int i=0; i < 5000; i++)

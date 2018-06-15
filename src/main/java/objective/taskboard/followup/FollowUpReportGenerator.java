@@ -307,9 +307,6 @@ public class FollowUpReportGenerator {
     }
 
     private void addExtraFieldsHeadersIfExist(FromJiraDataSet ds, SheetRow rowHeader) {
-        if(ds.extraFieldsHeaders == null)
-            return;
-
         Map<String, String> fieldNames = fieldMetadataService.getFieldsMetadataAsUser().stream()
                 .collect(toMap(JiraFieldDataDto::getId, JiraFieldDataDto::getName));
 
@@ -323,7 +320,7 @@ public class FollowUpReportGenerator {
     }
 
     private void addExtraFieldsIfExist(FromJiraDataSet ds, String type, Map<String, String> extraFields, SheetRow row) {
-        if(ds.extraFieldsHeaders == null)
+        if(ds.extraFieldsHeaders.isEmpty())
             return;
 
         Set<String> fieldIds = ds.extraFieldsHeaders.getOrDefault(type, emptySet());

@@ -121,14 +121,14 @@ public class FollowUpDataGenerator {
         }
 
         private Map<String, Set<String>> collectExtraFieldsHeaders() {
-            final Predicate<CimIssueType> isSubtaskFilter = IssueType::isSubtask;
-            final Predicate<CimIssueType> isDemandFilter = t -> jiraProperties.getIssuetype().getDemand().getId() == t.getId();
-            final Predicate<CimIssueType> isFeatureFilter = t -> !isSubtaskFilter.test(t) && !isDemandFilter.test(t);
+            final Predicate<CimIssueType> filterBySubtask = IssueType::isSubtask;
+            final Predicate<CimIssueType> filterByDemand = t -> jiraProperties.getIssuetype().getDemand().getId() == t.getId();
+            final Predicate<CimIssueType> filterByFeature = t -> !filterBySubtask.test(t) && !filterByDemand.test(t);
 
             final Map<String, Set<String>> extraFieldsHeaders = new LinkedHashMap<>();
-            extraFieldsHeaders.put(TYPE_DEMAND, collectExtraFieldsHeaders(isDemandFilter));
-            extraFieldsHeaders.put(TYPE_FEATURES, collectExtraFieldsHeaders(isFeatureFilter));
-            extraFieldsHeaders.put(TYPE_SUBTASKS, collectExtraFieldsHeaders(isSubtaskFilter));
+            extraFieldsHeaders.put(TYPE_DEMAND, collectExtraFieldsHeaders(filterByDemand));
+            extraFieldsHeaders.put(TYPE_FEATURES, collectExtraFieldsHeaders(filterByFeature));
+            extraFieldsHeaders.put(TYPE_SUBTASKS, collectExtraFieldsHeaders(filterBySubtask));
 
             return extraFieldsHeaders;
         }
