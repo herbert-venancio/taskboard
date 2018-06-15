@@ -266,6 +266,7 @@ public abstract class AbstractUiFragment {
         waitForClick(dropdown);
         WebElement dateElement = getPaperDropdownMenuItemByText(dropdown, itemText);
         waitForClick(dateElement);
+        waitInvisibilityOfElement(dateElement);
         waitPaperDropdownMenuSelectedTextToBe(dropdown, itemText);
     }
 

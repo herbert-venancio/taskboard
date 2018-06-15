@@ -151,11 +151,19 @@ public class FollowupReport extends AbstractUiFragment {
     }
 
     public FollowupReport setProject(String name) {
-        WebElement input = projectAutocomplete.findElement(By.cssSelector("paper-input input"));
+        WebElement input = projectAutocomplete.findElement(By.cssSelector("paper-input input")); 
         input.sendKeys(Keys.CONTROL,"a");
         input.sendKeys(Keys.DELETE);
         input.sendKeys(name);
-        input.sendKeys(Keys.ENTER);
+        waitAttributeValueInElement(input, "value", name);
+        return this;
+    }
+
+    public FollowupReport clearProject() {
+        WebElement input = projectAutocomplete.findElement(By.cssSelector("paper-input input")); 
+        input.sendKeys(Keys.CONTROL,"a");
+        input.sendKeys(Keys.DELETE);
+        waitAttributeValueInElement(input, "value", "");
         return this;
     }
 
