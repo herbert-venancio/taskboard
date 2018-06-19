@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
@@ -169,6 +170,7 @@ public abstract class FollowUpDataGeneratorTestBase {
         Map<Long, IssueType> issueTypeMap = new LinkedHashMap<>();
         issueTypeMap.put(demandIssueType, new IssueType(null, demandIssueType, "Demand", false, null,null));
         issueTypeMap.put(taskIssueType,   new IssueType(null, taskIssueType,   "Task", false, null,null));
+                
         issueTypeMap.put(devIssueType,    new IssueType(null, devIssueType,    "Dev", false, null,null));
         issueTypeMap.put(alphaIssueType,  new IssueType(null, alphaIssueType,  "Alpha", false, null,null));
         doReturn(issueTypeMap).when(metadataService).getIssueTypeMetadata();
@@ -198,6 +200,7 @@ public abstract class FollowUpDataGeneratorTestBase {
 
         JiraProperties.IssueType issueType = new JiraProperties.IssueType();
         issueType.setFeatures(asList(new IssueTypeDetails(taskIssueType)));
+        issueType.setSubtasks(getSubtasksIssueTypeDetails());
         issueType.setDemand(new IssueTypeDetails(demandIssueType));
         when(jiraProperties.getIssuetype()).thenReturn(issueType);
 
@@ -225,6 +228,13 @@ public abstract class FollowUpDataGeneratorTestBase {
 
         when(projectRepository.getProjectByKey(any())).thenReturn(Optional.of(projectConfiguration));
         when(projectRepository.getProjectByKeyOrCry(any())).thenReturn(projectConfiguration);
+    }
+
+    private List<IssueTypeDetails> getSubtasksIssueTypeDetails() {
+        return getSubtasksIssueTypeDetails(devIssueType,alphaIssueType,reviewIssueType,deployIssueType,frontEndIssueType);
+    }
+    protected List<IssueTypeDetails> getSubtasksIssueTypeDetails(Long... issueTypes){
+        return Stream.of(issueTypes).map(i -> new IssueTypeDetails(i)).collect(Collectors.toList());
     }
 
     public void configureBallparkMappings(String... string) {

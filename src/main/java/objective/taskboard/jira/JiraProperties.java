@@ -679,6 +679,9 @@ public class JiraProperties {
 
         @NotNull
         private List<IssueTypeDetails> features;
+        
+        @NotNull
+        private List<IssueTypeDetails> subtasks;
 
 
         public static class IssueTypeDetails {
@@ -733,6 +736,10 @@ public class JiraProperties {
         public List<IssueTypeDetails> getFeatures() {
             return this.features;
         }
+        
+        public List<IssueTypeDetails> getSubtasks(){
+            return this.subtasks;
+        }
 
         public void setDemand(final IssueTypeDetails demand) {
             this.demand = demand;
@@ -745,6 +752,10 @@ public class JiraProperties {
         public void setFeatures(final List<IssueTypeDetails> features) {
             this.features = features;
         }
+        
+        public void setSubtasks(final List<IssueTypeDetails> subtasks) {
+            this.subtasks = subtasks;
+        }
 
         @Override
         public boolean equals(Object o) {
@@ -756,7 +767,8 @@ public class JiraProperties {
             if (demand != null ? !demand.equals(issueType.demand) : issueType.demand != null) return false;
             if (defaultFeature != null ? !defaultFeature.equals(issueType.defaultFeature) : issueType.defaultFeature != null)
                 return false;
-            return features != null ? features.equals(issueType.features) : issueType.features == null;
+            if (features != null ? !features.equals(issueType.features) : issueType.features != null) return false;
+            return subtasks != null ? subtasks.equals(issueType.subtasks) : issueType.subtasks == null;
         }
 
         @Override
@@ -764,6 +776,7 @@ public class JiraProperties {
             int result = demand != null ? demand.hashCode() : 0;
             result = 31 * result + (defaultFeature != null ? defaultFeature.hashCode() : 0);
             result = 31 * result + (features != null ? features.hashCode() : 0);
+            result = 31 * result + (subtasks != null ? subtasks.hashCode() : 0);
             return result;
         }
 
@@ -773,6 +786,7 @@ public class JiraProperties {
                     "demand=" + demand +
                     ", defaultFeature=" + defaultFeature +
                     ", features=" + features +
+                    ", subtasks=" + subtasks +
                     '}';
         }
     }
