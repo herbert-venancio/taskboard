@@ -113,7 +113,8 @@ public class JiraSearchService {
             properties.getCustomfield().getBlocked().getId(),
             properties.getCustomfield().getLastBlockReason().getId(),
             properties.getCustomfield().getAdditionalEstimatedHours().getId(),
-            properties.getCustomfield().getRelease().getId());
+            properties.getCustomfield().getRelease().getId(),
+            properties.getCustomfield().getAssignedTeams().getId());
         fields.addAll(properties.getCustomfield().getTShirtSize().getIds());
         fields.addAll(properties.getSubtaskCreatorRequiredFieldsIds());
         fields.addAll(asList(additionalFields));
