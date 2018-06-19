@@ -5,6 +5,7 @@ import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.doReturn;
 
@@ -69,17 +70,148 @@ public class FollowUpDataGeneratorTransitionsTest extends FollowUpDataGeneratorT
         List<AnalyticsTransitionsDataSet> dataList = subject.generate(ZoneId.systemDefault(), DEFAULT_PROJECT).analyticsTransitionsDsList;
 
         // then
-        List<ZonedDateTime> subtaskTransitionsDatesFirstRow = dataList.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows.get(0).transitionsDates;
-        assertThat(subtaskTransitionsDatesFirstRow.size(), is(7));
-        assertThat(subtaskTransitionsDatesFirstRow.get(0), is(parseDateTime("2020-01-07")));
-        assertThat(subtaskTransitionsDatesFirstRow.get(1), is(parseDateTime("2020-01-06")));
-        assertThat(subtaskTransitionsDatesFirstRow.get(2), is(parseDateTime("2020-01-05")));
-        assertThat(subtaskTransitionsDatesFirstRow.get(3), is(parseDateTime("2020-01-04")));
-        assertThat(subtaskTransitionsDatesFirstRow.get(4), is(parseDateTime("2020-01-03")));
-        assertThat(subtaskTransitionsDatesFirstRow.get(5), is(parseDateTime("2020-01-02")));
-        assertThat(subtaskTransitionsDatesFirstRow.get(6), is(parseDateTime("2020-01-01")));
+        assertThat(dataList.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows.size(), is(1));
+        
+        List<ZonedDateTime> transitionsDate = dataList.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows.get(0).transitionsDates;
+        assertThat(transitionsDate.size(), is(7));
+        assertThat(transitionsDate.get(0), is(parseDateTime("2020-01-07")));
+        assertThat(transitionsDate.get(1), is(parseDateTime("2020-01-06")));
+        assertThat(transitionsDate.get(2), is(parseDateTime("2020-01-05")));
+        assertThat(transitionsDate.get(3), is(parseDateTime("2020-01-04")));
+        assertThat(transitionsDate.get(4), is(parseDateTime("2020-01-03")));
+        assertThat(transitionsDate.get(5), is(parseDateTime("2020-01-02")));
+        assertThat(transitionsDate.get(6), is(parseDateTime("2020-01-01")));
     }
+    
+    @Test
+    public void issuesNotConfiguredAsSubtasks_thenShouldNotBeFilled() {
+        // given
+        issues(
+                subtask().id(100).key("PROJ-100").issueType(devIssueType)
+                    .transition("Open", "2020-01-01")
+                    .transition("To Do", "2020-01-02")
+                    .transition("Doing", "2020-01-03")
+                    .transition("To Review", "2020-01-04")
+                    .transition("Reviewing", "2020-01-05")
+                    .transition("Done", "2020-01-06")
+                    .transition("Cancelled", "2020-01-07").issueStatus(statusCancelled),
+                subtask().id(100).key("PROJ-100").issueType(alphaIssueType)
+                    .transition("Open", "2020-01-08")
+                    .transition("To Do", "2020-01-09")
+                    .transition("Doing", "2020-01-10")
+                    .transition("To Review", "2020-01-11")
+                    .transition("Reviewing", "2020-01-12")
+                    .transition("Done", "2020-01-13")
+                    .transition("Cancelled", "2020-01-14").issueStatus(statusCancelled)
+        );
+        
+        jiraProperties.getIssuetype().setSubtasks(getSubtasksIssueTypeDetails(devIssueType));
 
+        // when
+        List<AnalyticsTransitionsDataSet> dataList = subject.generate(ZoneId.systemDefault(), DEFAULT_PROJECT).analyticsTransitionsDsList;
+
+        // then
+        assertThat(dataList.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows.size(), is(1));
+        
+        AnalyticsTransitionsDataRow devTransitions = dataList.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows.get(0);
+        assertThat(devTransitions.issueKey, is("PROJ-100"));
+        List<ZonedDateTime> devTransitionsDates = devTransitions.transitionsDates;
+        assertThat(devTransitionsDates.size(), is(7));
+        assertThat(devTransitionsDates.get(0), is(parseDateTime("2020-01-07")));
+        assertThat(devTransitionsDates.get(1), is(parseDateTime("2020-01-06")));
+        assertThat(devTransitionsDates.get(2), is(parseDateTime("2020-01-05")));
+        assertThat(devTransitionsDates.get(3), is(parseDateTime("2020-01-04")));
+        assertThat(devTransitionsDates.get(4), is(parseDateTime("2020-01-03")));
+        assertThat(devTransitionsDates.get(5), is(parseDateTime("2020-01-02")));
+        assertThat(devTransitionsDates.get(6), is(parseDateTime("2020-01-01")));
+    }
+    
+    @Test
+    public void issuesWithDifferentType_thenShouldFillSeveralRows() {
+        // given
+        issues(
+                subtask().id(100).key("PROJ-100").issueType(devIssueType)
+                    .transition("Open", "2020-01-01")
+                    .transition("To Do", "2020-01-02")
+                    .transition("Doing", "2020-01-03")
+                    .transition("To Review", "2020-01-04")
+                    .transition("Reviewing", "2020-01-05")
+                    .transition("Done", "2020-01-06")
+                    .transition("Cancelled", "2020-01-07").issueStatus(statusCancelled),
+                subtask().id(100).key("PROJ-100").issueType(alphaIssueType)
+                    .transition("Open", "2020-01-08")
+                    .transition("To Do", "2020-01-09")
+                    .transition("Doing", "2020-01-10")
+                    .transition("To Review", "2020-01-11")
+                    .transition("Reviewing", "2020-01-12")
+                    .transition("Done", "2020-01-13")
+                    .transition("Cancelled", "2020-01-14").issueStatus(statusCancelled)
+        );
+        
+        jiraProperties.getIssuetype().setSubtasks(getSubtasksIssueTypeDetails(devIssueType,alphaIssueType));
+
+        // when
+        List<AnalyticsTransitionsDataSet> dataList = subject.generate(ZoneId.systemDefault(), DEFAULT_PROJECT).analyticsTransitionsDsList;
+
+        // then
+        assertThat(dataList.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows.size(), is(2));
+        
+        AnalyticsTransitionsDataRow devTransitions = dataList.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows.get(0);
+        assertThat(devTransitions.issueKey, is("PROJ-100"));
+        List<ZonedDateTime> devTransitionsDates = devTransitions.transitionsDates;
+        assertThat(devTransitionsDates.size(), is(7));
+        assertThat(devTransitionsDates.get(0), is(parseDateTime("2020-01-07")));
+        assertThat(devTransitionsDates.get(1), is(parseDateTime("2020-01-06")));
+        assertThat(devTransitionsDates.get(2), is(parseDateTime("2020-01-05")));
+        assertThat(devTransitionsDates.get(3), is(parseDateTime("2020-01-04")));
+        assertThat(devTransitionsDates.get(4), is(parseDateTime("2020-01-03")));
+        assertThat(devTransitionsDates.get(5), is(parseDateTime("2020-01-02")));
+        assertThat(devTransitionsDates.get(6), is(parseDateTime("2020-01-01")));
+        
+        AnalyticsTransitionsDataRow alphaTransitions = dataList.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows.get(1);
+        assertThat(alphaTransitions.issueKey, is("PROJ-100"));
+        List<ZonedDateTime> alphaTransitionsDates = alphaTransitions.transitionsDates;
+        assertThat(alphaTransitionsDates.size(), is(7));
+        assertThat(alphaTransitionsDates.get(0), is(parseDateTime("2020-01-14")));
+        assertThat(alphaTransitionsDates.get(1), is(parseDateTime("2020-01-13")));
+        assertThat(alphaTransitionsDates.get(2), is(parseDateTime("2020-01-12")));
+        assertThat(alphaTransitionsDates.get(3), is(parseDateTime("2020-01-11")));
+        assertThat(alphaTransitionsDates.get(4), is(parseDateTime("2020-01-10")));
+        assertThat(alphaTransitionsDates.get(5), is(parseDateTime("2020-01-09")));
+        assertThat(alphaTransitionsDates.get(6), is(parseDateTime("2020-01-08")));
+    }
+    
+    @Test
+    public void noSubtasksPropertyConfigured_thenNothingNotBeFilled() {
+        // given
+        issues(
+                subtask().id(100).key("PROJ-100").issueType(devIssueType)
+                    .transition("Open", "2020-01-01")
+                    .transition("To Do", "2020-01-02")
+                    .transition("Doing", "2020-01-03")
+                    .transition("To Review", "2020-01-04")
+                    .transition("Reviewing", "2020-01-05")
+                    .transition("Done", "2020-01-06")
+                    .transition("Cancelled", "2020-01-07").issueStatus(statusCancelled),
+                subtask().id(100).key("PROJ-100").issueType(alphaIssueType)
+                    .transition("Open", "2020-01-01")
+                    .transition("To Do", "2020-01-02")
+                    .transition("Doing", "2020-01-03")
+                    .transition("To Review", "2020-01-04")
+                    .transition("Reviewing", "2020-01-05")
+                    .transition("Done", "2020-01-06")
+                    .transition("Cancelled", "2020-01-07").issueStatus(statusCancelled)
+        );
+        
+        jiraProperties.getIssuetype().setSubtasks(getSubtasksIssueTypeDetails());
+
+        // when
+        List<AnalyticsTransitionsDataSet> dataList = subject.generate(ZoneId.systemDefault(), DEFAULT_PROJECT).analyticsTransitionsDsList;
+
+        // then      
+        assertThat(dataList.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows.size(), is(0));
+    }
+    
     @Test
     public void issueStatusGoneBackAndForth_shouldReturnLastChange() {
         // given
@@ -280,6 +412,137 @@ public class FollowUpDataGeneratorTransitionsTest extends FollowUpDataGeneratorT
         assertThat(rows.get(7).amountOfIssueInStatus, equalTo(asList(1, 2, 0, 1, 0, 0, 0)));
         assertThat(rows.get(8).amountOfIssueInStatus, equalTo(asList(1, 2, 1, 0, 0, 0, 0)));
         assertThat(rows.get(9).amountOfIssueInStatus, equalTo(asList(1, 3, 0, 0, 0, 0, 0)));
+    }
+    
+    @Test
+    public void someIssuesWithTransitions_withSeveraltypes_shouldAllAppear() {
+        // given
+        issues(
+                subtask().id(100).key("PROJ-100").issueType(devIssueType)
+                    .created("2017-01-01")
+                    .transition("To Do", "2017-01-02")
+                    .transition("Doing", "2017-01-03")
+                    .transition("To Do", "2017-01-04")
+                    .transition("Doing", "2017-01-05")
+                    .transition("To Review", "2017-01-06")
+                    .transition("Reviewing", "2017-01-07")
+                    .transition("To Review", "2017-01-08")
+                    .transition("Reviewing", "2017-01-09")
+                    .transition("Done", "2017-01-10").issueStatus(statusDone)
+                , subtask().id(101).key("PROJ-101").issueType(devIssueType)
+                    .created("2017-01-02")
+                    .transition("To Do", "2017-01-02")
+                    .transition("Doing", "2017-01-02")
+                    .transition("To Review", "2017-01-02")
+                    .transition("Reviewing", "2017-01-02")
+                    .transition("Done", "2017-01-02").issueStatus(statusDone)
+                , subtask().id(102).key("PROJ-102").issueType(alphaIssueType)
+                    .created("2017-01-03")
+                    .transition("To Do", "2017-01-04")
+                    .transition("Doing", "2017-01-05")
+                    .transition("To Review", "2017-01-06")
+                    .transition("Reviewing", "2017-01-07")
+                    .transition("Done", "2017-01-08").issueStatus(statusDone)
+                , subtask().id(103).key("PROJ-103").issueType(alphaIssueType)
+                    .created("2017-01-04")
+                    .transition("Cancelled", "2017-01-05").issueStatus(statusCancelled)
+        );
+
+        // when
+        List<SyntheticTransitionsDataSet> sets = subject.generate(ZoneId.systemDefault(), DEFAULT_PROJECT).syntheticsTransitionsDsList;
+
+        // then
+        List<SyntheticTransitionsDataRow> rows = sets.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows;
+        assertThat(rows.size(), is(20));
+        assertSyntheticData(rows.get(0),"Dev","2017-01-01",asList(0,0,0,0,0,0,1));
+        assertSyntheticData(rows.get(1),"Alpha","2017-01-01",asList(0, 0, 0, 0, 0, 0, 0));
+        
+        assertSyntheticData(rows.get(2),"Dev","2017-01-02",asList(0, 1, 0, 0, 0, 0, 1));
+        assertSyntheticData(rows.get(3),"Alpha","2017-01-02",asList(0, 0, 0, 0, 0, 0, 0));
+        
+        assertSyntheticData(rows.get(4),"Dev","2017-01-03",asList(0, 1, 0, 0, 0, 0, 1));
+        assertSyntheticData(rows.get(5),"Alpha","2017-01-03",asList(0, 0, 0, 0, 0, 0, 1));
+        
+        assertSyntheticData(rows.get(6),"Dev","2017-01-04",asList(0, 1, 0, 0, 0, 1, 0));
+        assertSyntheticData(rows.get(7),"Alpha","2017-01-04",asList(0, 0, 0, 0, 0, 1, 1));
+        
+        assertSyntheticData(rows.get(8),"Dev","2017-01-05",asList(0, 1, 0, 0, 1, 0, 0));
+        assertSyntheticData(rows.get(9),"Alpha","2017-01-05",asList(1, 0, 0, 0, 1, 0, 0));
+        
+        assertSyntheticData(rows.get(10),"Dev","2017-01-06",asList(0, 1, 0, 0, 1, 0, 0));
+        assertSyntheticData(rows.get(11),"Alpha","2017-01-06",asList(1, 0, 0, 1, 0, 0, 0));
+        
+        assertSyntheticData(rows.get(12),"Dev","2017-01-07",asList(0, 1, 0, 0, 1, 0, 0));
+        assertSyntheticData(rows.get(13),"Alpha","2017-01-07",asList(1, 0, 1, 0, 0, 0, 0));
+        
+        assertSyntheticData(rows.get(14),"Dev","2017-01-08",asList(0, 1, 0, 1, 0, 0, 0));
+        assertSyntheticData(rows.get(15),"Alpha","2017-01-08",asList(1, 1, 0, 0, 0, 0, 0));
+        
+        assertSyntheticData(rows.get(16),"Dev","2017-01-09",asList(0, 1, 1, 0, 0, 0, 0));
+        assertSyntheticData(rows.get(17),"Alpha","2017-01-09",asList(1, 1, 0, 0, 0, 0, 0));
+        
+        assertSyntheticData(rows.get(18),"Dev","2017-01-10",asList(0, 2, 0, 0, 0, 0, 0));
+        assertSyntheticData(rows.get(19),"Alpha","2017-01-10",asList(1, 1, 0, 0, 0, 0, 0));
+    }
+    
+    @Test
+    public void someIssuesWithTransitions_withSeveraltypes_notConfiguredAsSubtask_shouldNotAppear() {
+        // given
+        issues(
+                subtask().id(100).key("PROJ-100").issueType(devIssueType)
+                    .created("2017-01-01")
+                    .transition("To Do", "2017-01-02")
+                    .transition("Doing", "2017-01-03")
+                    .transition("To Do", "2017-01-04")
+                    .transition("Doing", "2017-01-05")
+                    .transition("To Review", "2017-01-06")
+                    .transition("Reviewing", "2017-01-07")
+                    .transition("To Review", "2017-01-08")
+                    .transition("Reviewing", "2017-01-09")
+                    .transition("Done", "2017-01-10").issueStatus(statusDone)
+                , subtask().id(101).key("PROJ-101").issueType(devIssueType)
+                    .created("2017-01-02")
+                    .transition("To Do", "2017-01-02")
+                    .transition("Doing", "2017-01-02")
+                    .transition("To Review", "2017-01-02")
+                    .transition("Reviewing", "2017-01-02")
+                    .transition("Done", "2017-01-02").issueStatus(statusDone)
+                , subtask().id(102).key("PROJ-102").issueType(alphaIssueType)
+                    .created("2017-01-03")
+                    .transition("To Do", "2017-01-04")
+                    .transition("Doing", "2017-01-05")
+                    .transition("To Review", "2017-01-06")
+                    .transition("Reviewing", "2017-01-07")
+                    .transition("Done", "2017-01-08").issueStatus(statusDone)
+                , subtask().id(103).key("PROJ-103").issueType(alphaIssueType)
+                    .created("2017-01-04")
+                    .transition("Cancelled", "2017-01-05").issueStatus(statusCancelled)
+        );
+
+        
+        jiraProperties.getIssuetype().setSubtasks(getSubtasksIssueTypeDetails(devIssueType));
+        // when
+        List<SyntheticTransitionsDataSet> sets = subject.generate(ZoneId.systemDefault(), DEFAULT_PROJECT).syntheticsTransitionsDsList;
+
+        // then
+        List<SyntheticTransitionsDataRow> rows = sets.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows;
+        assertThat(rows.size(), is(10));
+        assertSyntheticData(rows.get(0),"Dev","2017-01-01",asList(0,0,0,0,0,0,1));
+        assertSyntheticData(rows.get(1),"Dev","2017-01-02",asList(0, 1, 0, 0, 0, 0, 1));
+        assertSyntheticData(rows.get(2),"Dev","2017-01-03",asList(0, 1, 0, 0, 0, 0, 1));
+        assertSyntheticData(rows.get(3),"Dev","2017-01-04",asList(0, 1, 0, 0, 0, 1, 0));
+        assertSyntheticData(rows.get(4),"Dev","2017-01-05",asList(0, 1, 0, 0, 1, 0, 0));
+        assertSyntheticData(rows.get(5),"Dev","2017-01-06",asList(0, 1, 0, 0, 1, 0, 0));
+        assertSyntheticData(rows.get(6),"Dev","2017-01-07",asList(0, 1, 0, 0, 1, 0, 0));
+        assertSyntheticData(rows.get(7),"Dev","2017-01-08",asList(0, 1, 0, 1, 0, 0, 0));
+        assertSyntheticData(rows.get(8),"Dev","2017-01-09",asList(0, 1, 1, 0, 0, 0, 0));
+        assertSyntheticData(rows.get(9),"Dev","2017-01-10",asList(0, 2, 0, 0, 0, 0, 0));
+    }
+    
+    private void assertSyntheticData(SyntheticTransitionsDataRow row, String type, String date , List<Integer> amountOfIssues) {
+        assertThat(row.issueType, equalTo(type));
+        assertThat(row.date, is(parseDateTime(date)));
+        assertThat(row.amountOfIssueInStatus, equalTo(amountOfIssues));
     }
 
     @Test

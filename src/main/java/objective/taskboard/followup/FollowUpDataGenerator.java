@@ -199,6 +199,7 @@ public class FollowUpDataGenerator {
             Iterator<Issue> it = issues.iterator();
             while(it.hasNext()) {
                 Issue issue = it.next();
+                
                 Issue feature = featuresByKey.get(issue.getParent());
                 if (feature == null)
                     continue;

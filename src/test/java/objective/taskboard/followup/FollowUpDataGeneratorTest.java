@@ -449,6 +449,180 @@ public class FollowUpDataGeneratorTest extends FollowUpDataGeneratorTestBase {
     }
     
     @Test
+    public void subtaskTypeNotConfigured_shouldNotPreventFromJiraDataCreation() {
+        configureBallparkMappings(
+                taskIssueType + " : \n" +
+                "  - issueType : BALLPARK - Development\n" +
+                "    tshirtCustomFieldId: Dev_Tshirt\n" +
+                "    jiraIssueTypes:\n" +
+                "      - " + devIssueType + "\n"
+                );
+        issues( 
+                demand().id(1).key("PROJ-1").summary("Smry 1").originalEstimateInHours(1).timeSpentInHours(10).priorityOrder(1l),
+                demand().id(2).key("PROJ-2").summary("Smry 2").originalEstimateInHours(1).priorityOrder(1l),
+                task().id(3).key("PROJ-3").summary("Smry 3").originalEstimateInHours(2).parent("PROJ-2").priorityOrder(1l),
+                subtask().id(4).key("PROJ-4").summary("Smry 4").timeSpentInHours(5).parent("PROJ-3").issueType(devIssueType).tshirtSize("XL").priorityOrder(1l)
+        );
+        
+        jiraProperties.getIssuetype().setSubtasks(getSubtasksIssueTypeDetails(alphaIssueType,reviewIssueType,deployIssueType,frontEndIssueType));
+
+        assertFollowupsForIssuesEquals(
+            " planningType                  : Ballpark\n" +
+            " project                       : A Project\n" +
+            " demandType                    : Demand\n" +
+            " demandStatus                  : To Do\n" +
+            " demandId                      : 1\n" +
+            " demandNum                     : PROJ-1\n" +
+            " demandSummary                 : Smry 1\n" +
+            " demandDescription             : M | 00001 - Smry 1\n" +
+            " demandStatusPriority          : 5\n" +
+            " demandPriorityOrder           : 1\n" +
+            " demandStartDateStepMillis     : 0\n" +
+            " demandAssignee                : null\n" +
+            " demandDueDate                 : null\n" +
+            " demandCreated                 : 1969-12-31T21:00-03:00[America/Sao_Paulo]\n" +
+            " demandLabels                  : \n" +
+            " demandComponents              : \n" +
+            " demandReporter                : null\n" +
+            " demandCoAssignees             : \n" +
+            " demandClassOfService          : Standard\n" +
+            " demandUpdatedDate             : null\n" +
+            " demandCycletime               : 1.0\n" +
+            " demandIsBlocked               : false\n" +
+            " demandLastBlockReason         : null\n" +
+            " taskType                      : BALLPARK - Demand\n" +
+            " taskStatus                    : Open\n" +
+            " taskId                        : 0\n" +
+            " taskNum                       : PROJ-1\n" +
+            " taskSummary                   : Dummy Feature\n" +
+            " taskDescription               : 00000 - Smry 1\n" +
+            " taskFullDescription           : BALLPARK - Demand | M | 00000 - Smry 1\n" +
+            " taskAdditionalEstimatedHours  : null\n" +
+            " taskRelease                   : No release set\n" +
+            " taskStatusPriority            : 0\n" +
+            " taskPriorityOrder             : 0\n" +
+            " taskStartDateStepMillis       : null\n" +
+            " taskAssignee                  : null\n" +
+            " taskDueDate                   : null\n" +
+            " taskCreated                   : null\n" +
+            " taskLabels                    : null\n" +
+            " taskComponents                : null\n" +
+            " taskReporter                  : null\n" +
+            " taskCoAssignees               : null\n" +
+            " taskClassOfService            : null\n" +
+            " taskUpdatedDate               : null\n" +
+            " taskCycletime                 : null\n" +
+            " taskIsBlocked                 : null\n" +
+            " taskLastBlockReason           : null\n" +
+            " subtaskType                   : BALLPARK - Demand\n" +
+            " subtaskStatus                 : To Do\n" +
+            " subtaskId                     : 0\n" +
+            " subtaskNum                    : PROJ-0\n" +
+            " subtaskSummary                : Smry 1\n" +
+            " subtaskDescription            : M | 00000 - Smry 1\n" +
+            " subtaskFullDescription        : BALLPARK - Demand | M | 00000 - Smry 1\n" +
+            " subtaskStatusPriority         : 0\n" +
+            " subtaskPriorityOrder          : 0\n" +
+            " subtaskStartDateStepMillis    : null\n" +
+            " subtaskAssignee               : null\n" +
+            " subtaskDueDate                : null\n" +
+            " subtaskCreated                : null\n" +
+            " subtaskLabels                 : null\n" +
+            " subtaskComponents             : null\n" +
+            " subtaskReporter               : null\n" +
+            " subtaskCoAssignees            : null\n" +
+            " subtaskClassOfService         : null\n" +
+            " subtaskUpdatedDate            : null\n" +
+            " subtaskCycletime              : null\n" +
+            " subtaskIsBlocked              : null\n" +
+            " subtaskLastBlockReason        : null\n" +
+            " tshirtSize                    : M\n" +
+            " worklog                       : 0.0\n" +
+            " wrongWorklog                  : 10.0\n" +
+            " demandBallpark                : 1.0\n" +
+            " taskBallpark                  : 0.0\n" +
+            " queryType                     : DEMAND BALLPARK"+
+
+            "\n\n"+
+
+            " planningType                  : Plan\n" +
+            " project                       : A Project\n" +
+            " demandType                    : Demand\n" +
+            " demandStatus                  : To Do\n" +
+            " demandId                      : 2\n" +
+            " demandNum                     : PROJ-2\n" +
+            " demandSummary                 : Smry 2\n" +
+            " demandDescription             : 00002 - Smry 2\n" +
+            " demandStatusPriority          : 5\n" +
+            " demandPriorityOrder           : 1\n" +
+            " demandStartDateStepMillis     : 0\n" +
+            " demandAssignee                : null\n" +
+            " demandDueDate                 : null\n" +
+            " demandCreated                 : 1969-12-31T21:00-03:00[America/Sao_Paulo]\n" +
+            " demandLabels                  : \n" +
+            " demandComponents              : \n" +
+            " demandReporter                : null\n" +
+            " demandCoAssignees             : \n" +
+            " demandClassOfService          : Standard\n" +
+            " demandUpdatedDate             : null\n" +
+            " demandCycletime               : 1.0\n" +
+            " demandIsBlocked               : false\n" +
+            " demandLastBlockReason         : null\n" +
+            " taskType                      : Task\n" +
+            " taskStatus                    : To Do\n" +
+            " taskId                        : 3\n" +
+            " taskNum                       : PROJ-3\n" +
+            " taskSummary                   : Smry 3\n" +
+            " taskDescription               : 00003 - Smry 3\n" +
+            " taskFullDescription           : Task | 00003 - Smry 3\n" +
+            " taskAdditionalEstimatedHours  : null\n" +
+            " taskRelease                   : No release set\n" +
+            " taskStatusPriority            : 9\n" +
+            " taskPriorityOrder             : 1\n" +
+            " taskStartDateStepMillis       : 0\n" +
+            " taskAssignee                  : null\n" +
+            " taskDueDate                   : null\n" +
+            " taskCreated                   : 1969-12-31T21:00-03:00[America/Sao_Paulo]\n" +
+            " taskLabels                    : \n" +
+            " taskComponents                : \n" +
+            " taskReporter                  : null\n" +
+            " taskCoAssignees               : \n" +
+            " taskClassOfService            : Standard\n" +
+            " taskUpdatedDate               : null\n" +
+            " taskCycletime                 : 1.0\n" +
+            " taskIsBlocked                 : false\n" +
+            " taskLastBlockReason           : null\n" +
+            " subtaskType                   : Dev\n" +
+            " subtaskStatus                 : To Do\n" +
+            " subtaskId                     : 4\n" +
+            " subtaskNum                    : PROJ-4\n" +
+            " subtaskSummary                : Smry 4\n" +
+            " subtaskDescription            : XL | 00004 - Smry 4\n" +
+            " subtaskFullDescription        : To Do > Dev | XL | 00004 - Smry 4\n" +
+            " subtaskStatusPriority         : 5\n" +
+            " subtaskPriorityOrder          : 1\n" +
+            " subtaskStartDateStepMillis    : 0\n" +
+            " subtaskAssignee               : null\n" +
+            " subtaskDueDate                : null\n" +
+            " subtaskCreated                : 1969-12-31T21:00-03:00[America/Sao_Paulo]\n" +
+            " subtaskLabels                 : \n" +
+            " subtaskComponents             : \n" +
+            " subtaskReporter               : null\n" +
+            " subtaskCoAssignees            : \n" +
+            " subtaskClassOfService         : Standard\n" +
+            " subtaskUpdatedDate            : null\n" +
+            " subtaskCycletime              : 1.0\n" +
+            " subtaskIsBlocked              : false\n" +
+            " subtaskLastBlockReason        : null\n" +
+            " tshirtSize                    : XL\n" +
+            " worklog                       : 5.0\n" +
+            " wrongWorklog                  : 0.0\n" +
+            " demandBallpark                : 1.0\n" +
+            " taskBallpark                  : 0.0\n" +
+            " queryType                     : SUBTASK PLAN");
+    }
+    
+    @Test
     public void featureWithTwoBallparksMappedToTheSameIssueTypes_ShouldNotGenerateBallParks() {
         configureBallparkMappings(
                 taskIssueType + " : \n" +
@@ -2446,7 +2620,7 @@ public class FollowUpDataGeneratorTest extends FollowUpDataGeneratorTestBase {
 
         assertFollowupsForIssuesEquals("");
     }
-
+    
     @Test
     public void issuesWithoutParent_shouldNotBreakTheFollowupGeneration() {
         configureBallparkMappings(
