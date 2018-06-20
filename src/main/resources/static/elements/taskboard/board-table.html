@@ -26,6 +26,15 @@
             .board {
                 margin-top: 40px;
             }
+            .lane-up {
+                transition-property: transform;
+                transition-duration: 200ms;
+            }
+            .lane-down {
+                transform: translateY(32px);/* 32 is the size of the search-warning @ taskboard-home.html */
+                transition-property: transform;
+                transition-duration: 200ms;
+            }
         </style>
 
         <iron-ajax id=ajax
@@ -41,10 +50,9 @@
                       on-iron-signal-show-details="showDetails"
                       on-iron-signal-update-user-preferences="checkIssuesInvalidTeam"
                       on-iron-signal-level-config-changed="checkIssuesInvalidTeam"
-                      on-iron-signal-search-filter-changed="checkIssuesInvalidTeam"
                       on-iron-signal-update-issue-local-state-error="updateIssueLocalStateErrorMessage"></iron-signals>
 
-        <div id="lane-container" class="fit layout vertical board">
+        <div id="lane-container" class="lane-up fit layout vertical board">
             <template id="levels" is="dom-repeat" items="{{conf}}" as="level">
                 <template is="dom-if" if="{{showLevel(level.showLevel, lastLaneUpdate)}}">
                     <template is="dom-if" if="{{index}}">
@@ -72,6 +80,9 @@
                 is: 'board-table',
 
                 properties: {
+                    filterWarningHeight: {
+                        type: Number
+                    },
                     aspectsFilter: {
                         type: Object,
                         notify: true

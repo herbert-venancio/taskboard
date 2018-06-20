@@ -30,16 +30,6 @@ function SearchFilter() {
     };
     var rootHierarchicalFilter;
 
-    var hasAnyFilter = function() {
-        if(searchData.query || searchData.release)
-            return true;
-        if(searchData.updatedIssues && searchData.updatedIssues.length)
-            return true;
-        if(searchData.hierarchy && searchData.hierarchy.length)
-            return true;
-        if(searchData.dependencies && searchData.dependencies.length)
-            return true;
-    }
 
     function matchByString(issue, searchString) {//NOSONAR
         if (!searchString)
@@ -116,8 +106,26 @@ function SearchFilter() {
         source.fire('iron-signal', {name:'search-filter-changed', data:searchData});
     }
 
+    this.clearFilter = function(source) {
+        searchData.query = "";
+        searchData.release = "";
+        if (rootHierarchicalFilter)
+            this.toggleRootHierarchicalFilter(source, rootHierarchicalFilter)
+    }
+
+    this.hasAnyFilter = function() {
+        if(searchData.query || searchData.release)
+            return true;
+        if(searchData.updatedIssues && searchData.updatedIssues.length)
+            return true;
+        if(searchData.hierarchy && searchData.hierarchy.length)
+            return true;
+        if(searchData.dependencies && searchData.dependencies.length)
+            return true;
+    }
+
     this.match = function(issue) {
-        if (!issue || !hasAnyFilter())
+        if (!issue || !this.hasAnyFilter())
             return true;
 
         if(searchData.updatedIssues && searchData.updatedIssues.length)
