@@ -597,8 +597,8 @@ public class FollowUpDataGeneratorTest extends FollowUpDataGeneratorTestBase {
             " subtaskId                     : 4\n" +
             " subtaskNum                    : PROJ-4\n" +
             " subtaskSummary                : Smry 4\n" +
-            " subtaskDescription            : XL | 00004 - Smry 4\n" +
-            " subtaskFullDescription        : To Do > Dev | XL | 00004 - Smry 4\n" +
+            " subtaskDescription            : 00004 - Smry 4\n" +
+            " subtaskFullDescription        : To Do > Dev | 00004 - Smry 4\n" +
             " subtaskStatusPriority         : 5\n" +
             " subtaskPriorityOrder          : 1\n" +
             " subtaskStartDateStepMillis    : 0\n" +
