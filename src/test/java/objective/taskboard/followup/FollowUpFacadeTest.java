@@ -68,6 +68,7 @@ import objective.taskboard.database.directory.DataBaseDirectory;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.cluster.FollowupClusterProvider;
 import objective.taskboard.followup.data.Template;
+import objective.taskboard.jira.FieldMetadataService;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.rules.CleanupDataFolderRule;
 
@@ -107,6 +108,9 @@ public class FollowUpFacadeTest {
     
     @Mock
     private FollowUpDataRepository historyRepository;
+
+    @Mock
+    private FieldMetadataService fieldMetadataService;
 
     @InjectMocks
     private FollowUpFacade followUpFacade = new FollowUpFacade();

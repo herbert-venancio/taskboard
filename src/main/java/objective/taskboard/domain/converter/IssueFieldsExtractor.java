@@ -23,12 +23,16 @@ package objective.taskboard.domain.converter;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static objective.taskboard.domain.converter.FieldValueExtractor.extractExtraFieldValue;
+import static objective.taskboard.domain.converter.FieldValueExtractor.from;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -42,9 +46,11 @@ import org.codehaus.jettison.json.JSONObject;
 import objective.taskboard.data.Changelog;
 import objective.taskboard.data.CustomField;
 import objective.taskboard.data.Worklog;
+import objective.taskboard.jira.FieldMetadataService;
 import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.client.JiraCommentDto;
 import objective.taskboard.jira.client.JiraComponentDto;
+import objective.taskboard.jira.client.JiraFieldDataDto;
 import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.client.JiraIssueLinkTypeDto;
 import objective.taskboard.jira.client.JiraLinkDto;
@@ -271,7 +277,7 @@ public class IssueFieldsExtractor {
 
     public static List<Changelog> extractChangelog(JiraIssueDto issue) {
         if (issue.getChangelog() == null)
-            return Collections.emptyList();
+            return emptyList();
 
         List<Changelog> result = new LinkedList<>();
         issue.getChangelog().forEach(change -> {
@@ -309,5 +315,16 @@ public class IssueFieldsExtractor {
             .collect(Collectors.toList());
 
         return worklogs;
+    }
+
+    public static Map<String, String> extractExtraFields(JiraProperties jiraProperties, FieldMetadataService fieldMetadataService, JiraIssueDto issue) {
+        final List<String> fields = jiraProperties.getExtraFields().getFieldIds();
+        if(fields.isEmpty())
+            return emptyMap();
+
+        return fieldMetadataService.getFieldsMetadata().stream()
+                .filter(f -> fields.contains(f.getId()))
+                .filter(f -> issue.getField(f.getId()) != null)
+                .collect(toMap(JiraFieldDataDto::getId, f -> from(issue, extractExtraFieldValue(f))));
     }
 }

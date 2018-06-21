@@ -1,5 +1,10 @@
 package objective.taskboard.followup;
 
+import static java.util.Collections.emptySet;
+import static objective.taskboard.followup.FollowUpTransitionsDataProvider.TYPE_DEMAND;
+import static objective.taskboard.followup.FollowUpTransitionsDataProvider.TYPE_FEATURES;
+import static objective.taskboard.followup.FollowUpTransitionsDataProvider.TYPE_SUBTASKS;
+import static objective.taskboard.utils.StreamUtils.toLinkedHashSet;
 import static org.apache.commons.lang.ObjectUtils.defaultIfNull;
 
 import java.time.ZoneId;
@@ -9,11 +14,17 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+
+import com.atlassian.jira.rest.client.api.domain.CimFieldInfo;
+import com.atlassian.jira.rest.client.api.domain.CimIssueType;
+import com.atlassian.jira.rest.client.api.domain.IssueType;
 
 import objective.taskboard.Constants;
 import objective.taskboard.data.Issue;
@@ -31,7 +42,7 @@ public class FollowUpDataGenerator {
     private final MetadataService metadataService;
     private final IssueBufferService issueBufferService;
     private final FollowupClusterProvider clusterProvider;
-    
+
     @Autowired
     public FollowUpDataGenerator(
             JiraProperties jiraProperties, 
@@ -89,9 +100,11 @@ public class FollowUpDataGenerator {
         private FromJiraDataSet getFromJiraDs(List<Issue> issuesVisibleToUser, ZoneId timezone) {
             LinkedList<Issue> issues = new LinkedList<>(issuesVisibleToUser);
 
-            followUpBallparks = new LinkedHashMap<String, FromJiraDataRow>();
+            followUpBallparks = new LinkedHashMap<>();
             demandsByKey = makeDemandBallparks(issues, timezone);
             featuresByKey = makeFeatureBallparks(issues, timezone);
+
+            final Map<String, Set<String>> extraFieldsHeaders = collectExtraFieldsHeaders();
 
             final List<FromJiraDataRow> result = makeSubtasks(issues, timezone);
 
@@ -104,7 +117,33 @@ public class FollowUpDataGenerator {
                     .thenComparingInt(f -> f.subtaskStatusPriority)
                     .thenComparingLong(f -> f.subtaskPriorityOrder));
 
-            return new FromJiraDataSet(Constants.FROMJIRA_HEADERS, result);
+            return new FromJiraDataSet(Constants.FROMJIRA_HEADERS, extraFieldsHeaders, result);
+        }
+
+        private Map<String, Set<String>> collectExtraFieldsHeaders() {
+            final Predicate<CimIssueType> filterBySubtask = IssueType::isSubtask;
+            final Predicate<CimIssueType> filterByDemand = t -> jiraProperties.getIssuetype().getDemand().getId() == t.getId();
+            final Predicate<CimIssueType> filterByFeature = t -> !filterBySubtask.test(t) && !filterByDemand.test(t);
+
+            final Map<String, Set<String>> extraFieldsHeaders = new LinkedHashMap<>();
+            extraFieldsHeaders.put(TYPE_DEMAND, collectExtraFieldsHeaders(filterByDemand));
+            extraFieldsHeaders.put(TYPE_FEATURES, collectExtraFieldsHeaders(filterByFeature));
+            extraFieldsHeaders.put(TYPE_SUBTASKS, collectExtraFieldsHeaders(filterBySubtask));
+
+            return extraFieldsHeaders;
+        }
+
+        private Set<String> collectExtraFieldsHeaders(Predicate<CimIssueType> featureTypeFilter) {
+            final List<String> fields = jiraProperties.getExtraFields().getFieldIds();
+            if(fields.isEmpty())
+                return emptySet();
+
+            return metadataService.getCreateIssueMetadata().values().stream()
+                    .filter(featureTypeFilter)
+                    .flatMap(t -> t.getFields().values().stream()
+                            .map(CimFieldInfo::getId)
+                            .filter(fields::contains))
+                    .collect(toLinkedHashSet());
         }
 
         private boolean isAllowedStatus(long status) {
@@ -353,6 +392,7 @@ public class FollowUpDataGenerator {
             followUpData.subtaskCycletime = subtask.getCycleTime(timezone).orElse(0D);
             followUpData.subtaskIsBlocked = subtask.isBlocked();
             followUpData.subtaskLastBlockReason = subtask.getLastBlockReason();
+            followUpData.subtaskExtraFields = subtask.getExtraFields();
             followUpData.worklogs = subtask.getWorklogs();
 
             return followUpData;
@@ -382,6 +422,7 @@ public class FollowUpDataGenerator {
             followUpData.demandCycletime = demand.getCycleTime(timezone).orElse(0D);
             followUpData.demandIsBlocked = demand.isBlocked();
             followUpData.demandLastBlockReason = demand.getLastBlockReason();
+            followUpData.demandExtraFields = demand.getExtraFields();
         }
 
         private void setTaskFields(FromJiraDataRow followUpData, Issue task, ZoneId timezone) {
@@ -408,6 +449,7 @@ public class FollowUpDataGenerator {
             followUpData.taskCycletime = task.getCycleTime(timezone).orElse(0D);
             followUpData.taskIsBlocked = task.isBlocked();
             followUpData.taskLastBlockReason = task.getLastBlockReason();
+            followUpData.taskExtraFields = task.getExtraFields();
         }
 
         private String getTshirtSize(Issue i) {

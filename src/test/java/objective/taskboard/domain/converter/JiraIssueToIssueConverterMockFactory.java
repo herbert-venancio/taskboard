@@ -1,5 +1,6 @@
 package objective.taskboard.domain.converter;
 
+import static java.util.Collections.emptyMap;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.convertWorklog;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractChangelog;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractComponents;
@@ -45,7 +46,7 @@ public class JiraIssueToIssueConverterMockFactory implements FactoryBean<JiraIss
     }
 
     @Override
-    public JiraIssueToIssueConverter getObject() throws Exception {
+    public JiraIssueToIssueConverter getObject() {
         JiraIssueToIssueConverter jiraIssueToIssueConverter = mock(JiraIssueToIssueConverter.class);
         willAnswer(invocation -> {
             JiraIssueDto jiraIssue = invocation.getArgumentAt(0, JiraIssueDto.class);
@@ -88,7 +89,8 @@ public class JiraIssueToIssueConverterMockFactory implements FactoryBean<JiraIss
                     null,
                     extractChangelog(jiraIssue),
                     convertWorklog(jiraIssue.getWorklogs()),
-                    assignedTeamsIds);
+                    assignedTeamsIds,
+                    emptyMap());
             return jiraIssueToIssueConverter.createIssueFromScratch(scratch, provider);
         }).given(jiraIssueToIssueConverter).convertSingleIssue(any(), any());
         

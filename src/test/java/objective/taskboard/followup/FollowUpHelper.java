@@ -22,7 +22,10 @@ package objective.taskboard.followup;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static objective.taskboard.followup.FollowUpTransitionsDataProvider.TYPE_DEMAND;
 import static objective.taskboard.followup.FollowUpTransitionsDataProvider.TYPE_FEATURES;
 import static objective.taskboard.followup.FollowUpTransitionsDataProvider.TYPE_SUBTASKS;
@@ -41,8 +44,11 @@ import java.io.UncheckedIOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -58,7 +64,9 @@ import objective.taskboard.utils.DateTimeUtils.ZonedDateTimeAdapter;
 public class FollowUpHelper {
 
     private static final String TIMEZONE_ID = "America/Sao_Paulo";
-    
+    public static final String COST_CENTER_FIELD_ID = "customfield_10390";
+    public static final String COST_CENTER_FIELD_NAME = "Cost Center/Project Requester";
+
     public static FromJiraDataRow getDefaultFromJiraDataRow() {
         return getDefaultFromJiraDataRow("Doing", 1D, "M", "Type");
     }
@@ -88,6 +96,7 @@ public class FollowUpHelper {
         followUpData.demandCycletime = 1.111111;
         followUpData.demandIsBlocked = false;
         followUpData.demandLastBlockReason = "Demand last block reason";
+        followUpData.demandExtraFields = null;
 
         followUpData.taskType = "Feature";
         followUpData.taskStatus = subtaskStatus;
@@ -113,6 +122,7 @@ public class FollowUpHelper {
         followUpData.taskCycletime = 2.222222;
         followUpData.taskIsBlocked = false;
         followUpData.taskLastBlockReason = "Task last block reason";
+        followUpData.taskExtraFields = null;
 
         followUpData.subtaskType = "Sub-task";
         followUpData.subtaskStatus = subtaskStatus;
@@ -136,6 +146,7 @@ public class FollowUpHelper {
         followUpData.subtaskCycletime = 3.333333;
         followUpData.subtaskIsBlocked = false;
         followUpData.subtaskLastBlockReason = "Subtask last block reason";
+        followUpData.subtaskExtraFields = null;
 
         followUpData.tshirtSize = tshirtSize;
         followUpData.worklog = 1D;
@@ -155,6 +166,18 @@ public class FollowUpHelper {
     public static FollowUpData getBiggerFollowupData() {
         return new FollowUpData(new FromJiraDataSet(Constants.FROMJIRA_HEADERS, getDefaultFromJiraDataRowList()),
                 getBiggerAnalyticsTransitionsDataSet(), getBiggerSyntheticTransitionsDataSet());
+    }
+
+    public static FollowUpData getDefaultFollowupDataWithExtraFields() {
+        Map<String, Set<String>> extraFieldsHeaders = new LinkedHashMap<>();
+        extraFieldsHeaders.put(TYPE_DEMAND, emptySet());
+        extraFieldsHeaders.put(TYPE_FEATURES, singleton(COST_CENTER_FIELD_ID));
+        extraFieldsHeaders.put(TYPE_SUBTASKS, emptySet());
+
+        FromJiraDataRow row = getDefaultFromJiraDataRow();
+        row.taskExtraFields = singletonMap(COST_CENTER_FIELD_ID, "Taskboard");
+        return new FollowUpData(new FromJiraDataSet(Constants.FROMJIRA_HEADERS, extraFieldsHeaders, singletonList(row)),
+                getDefaultAnalyticsTransitionsDataSet(), getDefaultSyntheticTransitionsDataSet());
     }
 
     public static FollowUpData getEmptyFollowupData() {
@@ -560,6 +583,9 @@ public class FollowUpHelper {
     }
     public static String followupExpectedV2() {
         return resourceToString(FollowUpHelper.class, "impl/V2_followUpDataHistoryExpected.json");
+    }
+    public static String followupWithExtraFieldsV2() {
+        return resourceToString(FollowUpHelper.class, "impl/V2_followUpDataHistoryWithExtraFields.json");
     }
 
     public static String fromJiraRowstoString(List<FromJiraDataRow> rows, String separation) {

@@ -124,7 +124,7 @@ public class FollowUpDataRepositoryByFile implements FollowUpDataRepository {
         if(isEmpty(fromJiraDs.rows)) {
             return null;
         }
-        return new FromJiraDataSet(null, fromJiraDs.rows);
+        return new FromJiraDataSet(null, isEmpty(fromJiraDs.extraFieldsHeaders) ? null : fromJiraDs.extraFieldsHeaders, fromJiraDs.rows);
     }
 
     private static <T> List<T> nullIfEmpty(List<T> list) {//NOSONAR - sonar has bug and thinks this method is not used

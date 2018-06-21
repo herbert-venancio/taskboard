@@ -32,7 +32,9 @@ import static objective.taskboard.followup.FollowUpDataRepositoryByFile.FILE_NAM
 import static objective.taskboard.followup.FollowUpHelper.assertFollowUpDataV0;
 import static objective.taskboard.followup.FollowUpHelper.followupEmptyV2;
 import static objective.taskboard.followup.FollowUpHelper.followupExpectedV2;
+import static objective.taskboard.followup.FollowUpHelper.followupWithExtraFieldsV2;
 import static objective.taskboard.followup.FollowUpHelper.getDefaultFollowupData;
+import static objective.taskboard.followup.FollowUpHelper.getDefaultFollowupDataWithExtraFields;
 import static objective.taskboard.followup.FollowUpHelper.getEmptyFollowupData;
 import static objective.taskboard.utils.IOUtilities.ENCODE_UTF_8;
 import static objective.taskboard.utils.IOUtilities.asResource;
@@ -136,7 +138,7 @@ public class FollowUpDataRepositoryByFileTest {
     }
 
     @Test
-    public void givenProjectWithYesterdaysHistory_whenGetHistoryGivenProjects_thenReturnData() throws IOException {
+    public void givenProjectWithYesterdaysHistory_whenGetHistoryGivenProjects_thenReturnData() {
         createProjectZip(PROJECT_TEST, YESTERDAY);
 
         List<LocalDate> history = subject.getHistoryByProject(PROJECT_TEST);
@@ -145,7 +147,7 @@ public class FollowUpDataRepositoryByFileTest {
     }
 
     @Test
-    public void whenHasDataHistory_GetShouldReturnSomeData() throws IOException, URISyntaxException {
+    public void whenHasDataHistory_GetShouldReturnSomeData() {
         createProjectZipV0(PROJECT_TEST);
 
         List<FromJiraDataRow> jiraData = subject.get(YESTERDAY, TIMEZONE, PROJECT_TEST).fromJiraDs.rows;
@@ -179,7 +181,7 @@ public class FollowUpDataRepositoryByFileTest {
     }
 
     @Test
-    public void whenHasDataHistoryWithCfd_GetShouldRestoreSyntheticsDataSources() throws IOException, URISyntaxException {
+    public void whenHasDataHistoryWithCfd_GetShouldRestoreSyntheticsDataSources() {
         // given
         createProjectZipV2(PROJECT_TEST);
 
@@ -191,7 +193,7 @@ public class FollowUpDataRepositoryByFileTest {
     }
 
     @Test
-    public void testVersion2() throws IOException, URISyntaxException {
+    public void testVersion2() {
         // given
         createProjectZipV2(PROJECT_TEST);
 
@@ -203,7 +205,7 @@ public class FollowUpDataRepositoryByFileTest {
     }
 
     @Test
-    public void whenHasDataHistoryWithCfdAndPassesZoneId_GetShouldRecalculateAnalyticsAndSynthetics() throws IOException, URISyntaxException {
+    public void whenHasDataHistoryWithCfdAndPassesZoneId_GetShouldRecalculateAnalyticsAndSynthetics() {
         // given
         createProjectZipV1(PROJECT_TEST);
         ZoneId saoPauloTZ = ZoneId.of("America/Sao_Paulo"); // -03:00, no conversion
@@ -255,6 +257,13 @@ public class FollowUpDataRepositoryByFileTest {
         assertEquals(sydneySyntheticsRows.get(4).date, DateTimeUtils.parseDateTime("2017-09-27", "00:00:00", sydneyTZ));
         assertEquals(sydneySyntheticsRows.get(5).date, DateTimeUtils.parseDateTime("2017-09-27", "00:00:00", sydneyTZ));
     }
+
+    @Test
+    public void whenSaveExtraFieldsData_thenExtraFieldsDataShouldBeGenerated() throws IOException {
+        subject.save(PROJECT_TEST, TODAY_DATE, getDefaultFollowupDataWithExtraFields());
+
+        assertGeneratedFile(PROJECT_TEST, followupWithExtraFieldsV2());
+    }
   
     private void assertGeneratedFile(String project, String dataHistoryExpected) throws IOException {
         String dateString = TODAY.format(FILE_NAME_FORMATTER);
@@ -275,18 +284,18 @@ public class FollowUpDataRepositoryByFileTest {
         }
     }
 
-    private Path createProjectZipV0(String project) throws IOException, URISyntaxException {
+    private Path createProjectZipV0(String project) {
         return createProjectZip(project, YESTERDAY, "impl/V0_followUpDataHistoryExpected.json");
     }
 
-    private Path createProjectZipV1(String project) throws IOException, URISyntaxException {
+    private Path createProjectZipV1(String project) {
         return createProjectZip(project, YESTERDAY, "impl/V1_followUpDataHistoryExpected.json");
     }
 
-    private Path createProjectZipV2(String project) throws IOException, URISyntaxException {
+    private Path createProjectZipV2(String project) {
         return createProjectZip(project, YESTERDAY, "impl/V2_followUpDataHistoryExpected.json");
     }
-    
+
     private Path createProjectZip(String project, LocalDate date) {
         return createProjectZip(project, date, "impl/V2_followUpDataHistoryExpected.json");
     }

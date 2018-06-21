@@ -117,6 +117,7 @@ public class JiraSearchService {
             properties.getCustomfield().getAssignedTeams().getId());
         fields.addAll(properties.getCustomfield().getTShirtSize().getIds());
         fields.addAll(properties.getSubtaskCreatorRequiredFieldsIds());
+        fields.addAll(properties.getExtraFields().getFieldIds());
         fields.addAll(asList(additionalFields));
         return fields;
     }

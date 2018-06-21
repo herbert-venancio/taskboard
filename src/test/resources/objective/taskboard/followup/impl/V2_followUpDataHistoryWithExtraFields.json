@@ -1,0 +1,200 @@
+{
+  "followupDataVersion": "2",
+  "fromJiraDs": {
+    "extraFieldsHeaders": {
+      "Demand": [],
+      "Features": [
+        "customfield_10390"
+      ],
+      "Subtasks": []
+    },
+    "rows": [
+      {
+        "planningType": "Ballpark",
+        "project": "PROJECT TEST",
+        "demandType": "Demand",
+        "demandStatus": "Doing",
+        "demandId": 1,
+        "demandNum": "I-1",
+        "demandSummary": "Summary Demand",
+        "demandDescription": "Description Demand",
+        "demandStatusPriority": 0,
+        "demandPriorityOrder": 0,
+        "demandStartDateStepMillis": 0,
+        "demandAssignee": "assignee.demand.test",
+        "demandDueDate": "2025-05-25T00:00-03:00[America/Sao_Paulo]",
+        "demandCreated": "2012-01-01T00:00-02:00[America/Sao_Paulo]",
+        "demandLabels": "",
+        "demandComponents": "",
+        "demandReporter": "reporter.demand.test",
+        "demandCoAssignees": "",
+        "demandClassOfService": "Standard",
+        "demandUpdatedDate": "2012-02-01T00:00-02:00[America/Sao_Paulo]",
+        "demandCycletime": 1.111111,
+        "demandIsBlocked": false,
+        "demandLastBlockReason": "Demand last block reason",
+        "taskType": "Feature",
+        "taskStatus": "Doing",
+        "taskId": 2,
+        "taskNum": "I-2",
+        "taskSummary": "Summary Feature",
+        "taskDescription": "Description Feature",
+        "taskFullDescription": "Full Description Feature",
+        "taskAdditionalEstimatedHours": 80.0,
+        "taskRelease": "Release",
+        "taskStatusPriority": 0,
+        "taskPriorityOrder": 0,
+        "taskStartDateStepMillis": 0,
+        "taskAssignee": "assignee.task.test",
+        "taskDueDate": "2025-05-24T00:00-03:00[America/Sao_Paulo]",
+        "taskCreated": "2012-01-02T00:00-02:00[America/Sao_Paulo]",
+        "taskLabels": "",
+        "taskComponents": "",
+        "taskReporter": "reporter.demand.test",
+        "taskCoAssignees": "",
+        "taskClassOfService": "Standard",
+        "taskUpdatedDate": "2012-02-02T00:00-02:00[America/Sao_Paulo]",
+        "taskCycletime": 2.222222,
+        "taskIsBlocked": false,
+        "taskLastBlockReason": "Task last block reason",
+        "taskExtraFields": {
+          "customfield_10390": "Taskboard"
+        },
+        "subtaskType": "Sub-task",
+        "subtaskStatus": "Doing",
+        "subtaskId": 3,
+        "subtaskNum": "I-3",
+        "subtaskSummary": "Summary Sub-task",
+        "subtaskDescription": "Description Sub-task",
+        "subtaskFullDescription": "Full Description Sub-task",
+        "subtaskStatusPriority": 0,
+        "subtaskPriorityOrder": 0,
+        "subtaskStartDateStepMillis": 0,
+        "subtaskAssignee": "assignee.subtask.test",
+        "subtaskDueDate": "2025-05-23T00:00-03:00[America/Sao_Paulo]",
+        "subtaskCreated": "2012-01-03T00:00-02:00[America/Sao_Paulo]",
+        "subtaskLabels": "",
+        "subtaskComponents": "",
+        "subtaskReporter": "reporter.subtask.test",
+        "subtaskCoAssignees": "",
+        "subtaskClassOfService": "Standard",
+        "subtaskUpdatedDate": "2012-02-03T00:00-02:00[America/Sao_Paulo]",
+        "subtaskCycletime": 3.333333,
+        "subtaskIsBlocked": false,
+        "subtaskLastBlockReason": "Subtask last block reason",
+        "tshirtSize": "M",
+        "worklog": 1.0,
+        "wrongWorklog": 1.0,
+        "demandBallpark": 1.0,
+        "taskBallpark": 1.0,
+        "queryType": "Type"
+      }
+    ]
+  },
+  "analyticsTransitionsDsList": [
+    {
+      "issueType": "Demand",
+      "headers": [
+        "PKEY",
+        "ISSUE_TYPE",
+        "Done",
+        "Doing",
+        "To Do"
+      ],
+      "rows": [
+        {
+          "issueKey": "I-1",
+          "issueType": "Demand",
+          "transitionsDates": [
+            "2017-09-27T00:00-03:00[America/Sao_Paulo]",
+            "2017-09-26T00:00-03:00[America/Sao_Paulo]",
+            "2017-09-25T00:00-03:00[America/Sao_Paulo]"
+          ]
+        },
+        {
+          "issueKey": "I-4",
+          "issueType": "OS",
+          "transitionsDates": [
+            null,
+            "2017-09-26T00:00-03:00[America/Sao_Paulo]",
+            "2017-09-25T00:00-03:00[America/Sao_Paulo]"
+          ]
+        }
+      ]
+    },
+    {
+      "issueType": "Features",
+      "headers": [
+        "PKEY",
+        "ISSUE_TYPE",
+        "Done",
+        "Doing",
+        "To Do"
+      ],
+      "rows": [
+        {
+          "issueKey": "I-2",
+          "issueType": "Feature",
+          "transitionsDates": [
+            null,
+            "2017-09-26T00:00-03:00[America/Sao_Paulo]",
+            "2017-09-25T00:00-03:00[America/Sao_Paulo]"
+          ]
+        }
+      ]
+    },
+    {
+      "issueType": "Subtasks",
+      "headers": [
+        "PKEY",
+        "ISSUE_TYPE",
+        "Done",
+        "Doing",
+        "To Do"
+      ],
+      "rows": [
+        {
+          "issueKey": "I-3",
+          "issueType": "Sub-task",
+          "transitionsDates": [
+            null,
+            null,
+            "2017-09-25T00:00-03:00[America/Sao_Paulo]"
+          ]
+        }
+      ]
+    }
+  ],
+  "syntheticsTransitionsDsList": [
+    {
+      "issueType": "Demand",
+      "headers": [
+        "Date",
+        "Type",
+        "Done",
+        "Doing",
+        "To Do"
+      ]
+    },
+    {
+      "issueType": "Features",
+      "headers": [
+        "Date",
+        "Type",
+        "Done",
+        "Doing",
+        "To Do"
+      ]
+    },
+    {
+      "issueType": "Subtasks",
+      "headers": [
+        "Date",
+        "Type",
+        "Done",
+        "Doing",
+        "To Do"
+      ]
+    }
+  ]
+}

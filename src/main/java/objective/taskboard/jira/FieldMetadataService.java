@@ -27,7 +27,9 @@ import static objective.taskboard.config.CacheConfiguration.JIRA_FIELD_METADATA_
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.interceptor.SimpleKey;
 import org.springframework.stereotype.Service;
 
 import objective.taskboard.config.LoggedInUserLocaleKeyGenerator;
@@ -39,14 +41,19 @@ import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
 public class FieldMetadataService {
 
     @Autowired
+    private CacheManager cacheManager;
+
+    @Autowired
     private JiraEndpointAsMaster jiraEndpointAsMaster;
 
     @Autowired
     private JiraEndpointAsLoggedInUser jiraEndpointAsUser;
 
-    @Cacheable(JIRA_FIELD_METADATA)
     public List<JiraFieldDataDto> getFieldsMetadata() {
-        return jiraEndpointAsMaster.request(JiraFieldDataDto.Service.class).all();
+        // uses cache manager explicitly because CacheAspectSupport
+        // may not be initialized at this point
+        return cacheManager.getCache(JIRA_FIELD_METADATA)
+                .get(SimpleKey.EMPTY, () -> jiraEndpointAsMaster.request(JiraFieldDataDto.Service.class).all());
     }
 
     @Cacheable(cacheNames=JIRA_FIELD_METADATA_LOCALIZED, keyGenerator=LoggedInUserLocaleKeyGenerator.NAME)

@@ -40,6 +40,7 @@ public class CacheConfiguration {
     public static final String STATUSES_METADATA = "statusesMetadata";
     public static final String PRIORITIES_METADATA = "prioritiesMetadata";
     public static final String ISSUE_TYPE_METADATA = "issueTypeMetadata";
+    public static final String CREATE_ISSUE_METADATA = "createIssueMetadata";
     public static final String CONFIGURED_TEAMS = "configured-teams";
     public static final String USER_PROJECTS = "user-projects";
     public static final String ALL_PROJECTS = "all-projects";
@@ -62,6 +63,7 @@ public class CacheConfiguration {
                 new GuavaCache(CONFIGURATION_COLOR, CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).concurrencyLevel(1).build()),
                 new GuavaCache(COLOR_BY_ISSUETYPE_AND_STATUS, CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).concurrencyLevel(1).build()),
                 new GuavaCache(ISSUE_TYPE_METADATA, CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).concurrencyLevel(1).build()),
+                new GuavaCache(CREATE_ISSUE_METADATA, CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).concurrencyLevel(1).build()),
                 new GuavaCache(PRIORITIES_METADATA, CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).concurrencyLevel(1).build()),
                 new GuavaCache(STATUSES_METADATA, CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).concurrencyLevel(1).build()),
                 new GuavaCache(ISSUE_LINKS_METADATA, CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).concurrencyLevel(1).build()),

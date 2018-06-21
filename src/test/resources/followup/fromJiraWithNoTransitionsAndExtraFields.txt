@@ -1,0 +1,196 @@
+Spreadsheet Open
+Sheet Create: From Jira
+Sheet "From Jira" Row Create: 1
+Sheet "From Jira" Row "1" AddColumn "A1": project
+Sheet "From Jira" Row "1" AddColumn "B1": demand_type
+Sheet "From Jira" Row "1" AddColumn "C1": demand_status
+Sheet "From Jira" Row "1" AddColumn "D1": demand_num
+Sheet "From Jira" Row "1" AddColumn "E1": DEMAND_SUMMARY
+Sheet "From Jira" Row "1" AddColumn "F1": demand_description
+Sheet "From Jira" Row "1" AddColumn "G1": Demand_StartDateStepMillis
+Sheet "From Jira" Row "1" AddColumn "H1": Demand_Assignee
+Sheet "From Jira" Row "1" AddColumn "I1": Demand_DueDate
+Sheet "From Jira" Row "1" AddColumn "J1": Demand_Created
+Sheet "From Jira" Row "1" AddColumn "K1": Demand_Labels
+Sheet "From Jira" Row "1" AddColumn "L1": Demand_Components
+Sheet "From Jira" Row "1" AddColumn "M1": Demand_Reporter
+Sheet "From Jira" Row "1" AddColumn "N1": Demand_CoAssignees
+Sheet "From Jira" Row "1" AddColumn "O1": Demand_ClassOfService
+Sheet "From Jira" Row "1" AddColumn "P1": Demand_UpdatedDate
+Sheet "From Jira" Row "1" AddColumn "Q1": Demand_Cycletime
+Sheet "From Jira" Row "1" AddColumn "R1": Demand_Blocked
+Sheet "From Jira" Row "1" AddColumn "S1": Demand_LastBlockReason
+Sheet "From Jira" Row "1" AddColumn "T1": TASK_TYPE
+Sheet "From Jira" Row "1" AddColumn "U1": TASK_STATUS
+Sheet "From Jira" Row "1" AddColumn "V1": TASK_NUM
+Sheet "From Jira" Row "1" AddColumn "W1": TASK_SUMMARY
+Sheet "From Jira" Row "1" AddColumn "X1": TASK_DESCRIPTION
+Sheet "From Jira" Row "1" AddColumn "Y1": TASK_FULL_DESCRIPTION
+Sheet "From Jira" Row "1" AddColumn "Z1": TASK_AdditionalEstimatedHours
+Sheet "From Jira" Row "1" AddColumn "AA1": Task_StartDateStepMillis
+Sheet "From Jira" Row "1" AddColumn "AB1": Task_Assignee
+Sheet "From Jira" Row "1" AddColumn "AC1": Task_DueDate
+Sheet "From Jira" Row "1" AddColumn "AD1": Task_Created
+Sheet "From Jira" Row "1" AddColumn "AE1": Task_Labels
+Sheet "From Jira" Row "1" AddColumn "AF1": Task_Components
+Sheet "From Jira" Row "1" AddColumn "AG1": Task_Reporter
+Sheet "From Jira" Row "1" AddColumn "AH1": Task_CoAssignees
+Sheet "From Jira" Row "1" AddColumn "AI1": Task_ClassOfService
+Sheet "From Jira" Row "1" AddColumn "AJ1": Task_UpdatedDate
+Sheet "From Jira" Row "1" AddColumn "AK1": Task_Cycletime
+Sheet "From Jira" Row "1" AddColumn "AL1": Task_Blocked
+Sheet "From Jira" Row "1" AddColumn "AM1": Task_LastBlockReason
+Sheet "From Jira" Row "1" AddColumn "AN1": SUBTASK_TYPE
+Sheet "From Jira" Row "1" AddColumn "AO1": SUBTASK_STATUS
+Sheet "From Jira" Row "1" AddColumn "AP1": SUBTASK_NUM
+Sheet "From Jira" Row "1" AddColumn "AQ1": SUBTASK_SUMMARY
+Sheet "From Jira" Row "1" AddColumn "AR1": SUBTASK_DESCRIPTION
+Sheet "From Jira" Row "1" AddColumn "AS1": SUBTASK_FULL_DESCRIPTION
+Sheet "From Jira" Row "1" AddColumn "AT1": Subtask_StartDateStepMillis
+Sheet "From Jira" Row "1" AddColumn "AU1": Subtask_Assignee
+Sheet "From Jira" Row "1" AddColumn "AV1": Subtask_DueDate
+Sheet "From Jira" Row "1" AddColumn "AW1": Subtask_Created
+Sheet "From Jira" Row "1" AddColumn "AX1": Subtask_Labels
+Sheet "From Jira" Row "1" AddColumn "AY1": Subtask_Components
+Sheet "From Jira" Row "1" AddColumn "AZ1": Subtask_Reporter
+Sheet "From Jira" Row "1" AddColumn "BA1": Subtask_CoAssignees
+Sheet "From Jira" Row "1" AddColumn "BB1": Subtask_ClassOfService
+Sheet "From Jira" Row "1" AddColumn "BC1": Subtask_UpdatedDate
+Sheet "From Jira" Row "1" AddColumn "BD1": Subtask_Cycletime
+Sheet "From Jira" Row "1" AddColumn "BE1": Subtask_Blocked
+Sheet "From Jira" Row "1" AddColumn "BF1": Subtask_LastBlockReason
+Sheet "From Jira" Row "1" AddColumn "BG1": DEMAND_ID
+Sheet "From Jira" Row "1" AddColumn "BH1": TASK_ID
+Sheet "From Jira" Row "1" AddColumn "BI1": SUBTASK_ID
+Sheet "From Jira" Row "1" AddColumn "BJ1": planning_type
+Sheet "From Jira" Row "1" AddColumn "BK1": task_release
+Sheet "From Jira" Row "1" AddColumn "BL1": worklog
+Sheet "From Jira" Row "1" AddColumn "BM1": wrong_worklog
+Sheet "From Jira" Row "1" AddColumn "BN1": Demand_ballpark
+Sheet "From Jira" Row "1" AddColumn "BO1": TASK_BALLPARK
+Sheet "From Jira" Row "1" AddColumn "BP1": tshirt_size
+Sheet "From Jira" Row "1" AddColumn "BQ1": Query_Type
+Sheet "From Jira" Row "1" AddColumn "BR1": EffortEstimate
+Sheet "From Jira" Row "1" AddColumn "BS1": CycleEstimate
+Sheet "From Jira" Row "1" AddColumn "BT1": EffortOnBacklog
+Sheet "From Jira" Row "1" AddColumn "BU1": CycleOnBacklog
+Sheet "From Jira" Row "1" AddColumn "BV1": BallparkEffort
+Sheet "From Jira" Row "1" AddColumn "BW1": PlannedEffort
+Sheet "From Jira" Row "1" AddColumn "BX1": EffortDone
+Sheet "From Jira" Row "1" AddColumn "BY1": CycleDone
+Sheet "From Jira" Row "1" AddColumn "BZ1": WorklogDone
+Sheet "From Jira" Row "1" AddColumn "CA1": WorklogDoing
+Sheet "From Jira" Row "1" AddColumn "CB1": CountTasks
+Sheet "From Jira" Row "1" AddColumn "CC1": CountDemands
+Sheet "From Jira" Row "1" AddColumn "CD1": CountSubtasks
+Sheet "From Jira" Row "1" AddColumn "CE1": SubtaskEstimativeForEEPCalculation
+Sheet "From Jira" Row "1" AddColumn "CF1": PlannedEffortOnBug
+Sheet "From Jira" Row "1" AddColumn "CG1": WorklogOnBug
+Sheet "From Jira" Row "1" AddColumn "CH1": Features - Cost Center/Project Requester
+Sheet "From Jira" Row "1" AddColumn "CI1": Demand - Done
+Sheet "From Jira" Row "1" AddColumn "CJ1": Demand - Doing
+Sheet "From Jira" Row "1" AddColumn "CK1": Demand - To Do
+Sheet "From Jira" Row "1" AddColumn "CL1": Features - Done
+Sheet "From Jira" Row "1" AddColumn "CM1": Features - Doing
+Sheet "From Jira" Row "1" AddColumn "CN1": Features - To Do
+Sheet "From Jira" Row "1" AddColumn "CO1": Subtasks - Done
+Sheet "From Jira" Row "1" AddColumn "CP1": Subtasks - Doing
+Sheet "From Jira" Row "1" AddColumn "CQ1": Subtasks - To Do
+Sheet "From Jira" Row Create: 2
+Sheet "From Jira" Row "2" AddColumn "A2": PROJECT TEST
+Sheet "From Jira" Row "2" AddColumn "B2": Demand
+Sheet "From Jira" Row "2" AddColumn "C2": Doing
+Sheet "From Jira" Row "2" AddColumn "D2": I-1
+Sheet "From Jira" Row "2" AddColumn "E2": Summary Demand
+Sheet "From Jira" Row "2" AddColumn "F2": Description Demand
+Sheet "From Jira" Row "2" AddColumn "G2": 0
+Sheet "From Jira" Row "2" AddColumn "H2": assignee.demand.test
+Sheet "From Jira" Row "2" AddColumn "I2": 2025-05-25T00:00-03:00[America/Sao_Paulo]
+Sheet "From Jira" Row "2" AddColumn "J2": 2012-01-01T00:00-02:00[America/Sao_Paulo]
+Sheet "From Jira" Row "2" AddColumn "K2":
+Sheet "From Jira" Row "2" AddColumn "L2":
+Sheet "From Jira" Row "2" AddColumn "M2": reporter.demand.test
+Sheet "From Jira" Row "2" AddColumn "N2":
+Sheet "From Jira" Row "2" AddColumn "O2": Standard
+Sheet "From Jira" Row "2" AddColumn "P2": 2012-02-01T00:00-02:00[America/Sao_Paulo]
+Sheet "From Jira" Row "2" AddColumn "Q2": 1.111111
+Sheet "From Jira" Row "2" AddColumn "R2": false
+Sheet "From Jira" Row "2" AddColumn "S2": Demand last block reason
+Sheet "From Jira" Row "2" AddColumn "T2": Feature
+Sheet "From Jira" Row "2" AddColumn "U2": Doing
+Sheet "From Jira" Row "2" AddColumn "V2": I-2
+Sheet "From Jira" Row "2" AddColumn "W2": Summary Feature
+Sheet "From Jira" Row "2" AddColumn "X2": Description Feature
+Sheet "From Jira" Row "2" AddColumn "Y2": Full Description Feature
+Sheet "From Jira" Row "2" AddColumn "Z2": 80.0
+Sheet "From Jira" Row "2" AddColumn "AA2": 0
+Sheet "From Jira" Row "2" AddColumn "AB2": assignee.task.test
+Sheet "From Jira" Row "2" AddColumn "AC2": 2025-05-24T00:00-03:00[America/Sao_Paulo]
+Sheet "From Jira" Row "2" AddColumn "AD2": 2012-01-02T00:00-02:00[America/Sao_Paulo]
+Sheet "From Jira" Row "2" AddColumn "AE2":
+Sheet "From Jira" Row "2" AddColumn "AF2":
+Sheet "From Jira" Row "2" AddColumn "AG2": reporter.demand.test
+Sheet "From Jira" Row "2" AddColumn "AH2":
+Sheet "From Jira" Row "2" AddColumn "AI2": Standard
+Sheet "From Jira" Row "2" AddColumn "AJ2": 2012-02-02T00:00-02:00[America/Sao_Paulo]
+Sheet "From Jira" Row "2" AddColumn "AK2": 2.222222
+Sheet "From Jira" Row "2" AddColumn "AL2": false
+Sheet "From Jira" Row "2" AddColumn "AM2": Task last block reason
+Sheet "From Jira" Row "2" AddColumn "AN2": Sub-task
+Sheet "From Jira" Row "2" AddColumn "AO2": Doing
+Sheet "From Jira" Row "2" AddColumn "AP2": I-3
+Sheet "From Jira" Row "2" AddColumn "AQ2": Summary Sub-task
+Sheet "From Jira" Row "2" AddColumn "AR2": Description Sub-task
+Sheet "From Jira" Row "2" AddColumn "AS2": Full Description Sub-task
+Sheet "From Jira" Row "2" AddColumn "AT2": 0
+Sheet "From Jira" Row "2" AddColumn "AU2": assignee.subtask.test
+Sheet "From Jira" Row "2" AddColumn "AV2": 2025-05-23T00:00-03:00[America/Sao_Paulo]
+Sheet "From Jira" Row "2" AddColumn "AW2": 2012-01-03T00:00-02:00[America/Sao_Paulo]
+Sheet "From Jira" Row "2" AddColumn "AX2":
+Sheet "From Jira" Row "2" AddColumn "AY2":
+Sheet "From Jira" Row "2" AddColumn "AZ2": reporter.subtask.test
+Sheet "From Jira" Row "2" AddColumn "BA2":
+Sheet "From Jira" Row "2" AddColumn "BB2": Standard
+Sheet "From Jira" Row "2" AddColumn "BC2": 2012-02-03T00:00-02:00[America/Sao_Paulo]
+Sheet "From Jira" Row "2" AddColumn "BD2": 3.333333
+Sheet "From Jira" Row "2" AddColumn "BE2": false
+Sheet "From Jira" Row "2" AddColumn "BF2": Subtask last block reason
+Sheet "From Jira" Row "2" AddColumn "BG2": 1
+Sheet "From Jira" Row "2" AddColumn "BH2": 2
+Sheet "From Jira" Row "2" AddColumn "BI2": 3
+Sheet "From Jira" Row "2" AddColumn "BJ2": Ballpark
+Sheet "From Jira" Row "2" AddColumn "BK2": Release
+Sheet "From Jira" Row "2" AddColumn "BL2": 1.0
+Sheet "From Jira" Row "2" AddColumn "BM2": 1.0
+Sheet "From Jira" Row "2" AddColumn "BN2": 1.0
+Sheet "From Jira" Row "2" AddColumn "BO2": 1.0
+Sheet "From Jira" Row "2" AddColumn "BP2": M
+Sheet "From Jira" Row "2" AddColumn "BQ2": Type
+Sheet "From Jira" Row "2" AddColumn "BR2": 5.0
+Sheet "From Jira" Row "2" AddColumn "BS2": 0.0
+Sheet "From Jira" Row "2" AddColumn "BT2": 3.0
+Sheet "From Jira" Row "2" AddColumn "BU2": 0.0
+Sheet "From Jira" Row "2" AddColumn "BV2": 0.0
+Sheet "From Jira" Row "2" AddColumn "BW2": 0.0
+Sheet "From Jira" Row "2" AddColumn "BX2": 2.0
+Sheet "From Jira" Row "2" AddColumn "BY2": 0.0
+Sheet "From Jira" Row "2" AddColumn "BZ2": 0.0
+Sheet "From Jira" Row "2" AddColumn "CA2": 0.0
+Sheet "From Jira" Row "2" AddColumn "CB2": 0.0
+Sheet "From Jira" Row "2" AddColumn "CC2": 0.0
+Sheet "From Jira" Row "2" AddColumn "CD2": 0.0
+Sheet "From Jira" Row "2" AddColumn "CE2": 0.0
+Sheet "From Jira" Row "2" AddColumn "CF2": 0.0
+Sheet "From Jira" Row "2" AddColumn "CG2": 0.0
+Sheet "From Jira" Row "2" AddColumn "CH2": Taskboard
+Sheet "From Jira" Row "2" AddColumn "CI2": 2017-09-27T00:00-03:00[America/Sao_Paulo]
+Sheet "From Jira" Row "2" AddColumn "CJ2": 2017-09-26T00:00-03:00[America/Sao_Paulo]
+Sheet "From Jira" Row "2" AddColumn "CK2": 2017-09-25T00:00-03:00[America/Sao_Paulo]
+Sheet "From Jira" Row "2" AddColumn "CL2": null
+Sheet "From Jira" Row "2" AddColumn "CM2": 2017-09-26T00:00-03:00[America/Sao_Paulo]
+Sheet "From Jira" Row "2" AddColumn "CN2": 2017-09-25T00:00-03:00[America/Sao_Paulo]
+Sheet "From Jira" Row "2" AddColumn "CO2": null
+Sheet "From Jira" Row "2" AddColumn "CP2": null
+Sheet "From Jira" Row "2" AddColumn "CQ2": 2017-09-25T00:00-03:00[America/Sao_Paulo]
+Sheet "From Jira" Save
+Spreadsheet Close

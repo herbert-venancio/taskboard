@@ -18,14 +18,16 @@ public class JiraFieldDataDto {
     private String id;
     private String name;
     private FieldType fieldType;
+    private JiraFieldSchemaDto schema;
 
     public JiraFieldDataDto() {
     }
 
-    public JiraFieldDataDto(String id, String name, FieldType fieldType) {
+    public JiraFieldDataDto(String id, String name, FieldType fieldType, JiraFieldSchemaDto schema) {
         this.id = id;
         this.name = name;
         this.fieldType = fieldType;
+        this.schema = schema;
     }
 
     public String getId() {
@@ -40,4 +42,7 @@ public class JiraFieldDataDto {
         return fieldType;
     }
 
+    public JiraFieldSchemaDto getSchema() {
+        return schema;
+    }
 }

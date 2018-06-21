@@ -1,15 +1,22 @@
 package objective.taskboard.followup;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptySet;
+import static org.springframework.util.CollectionUtils.isEmpty;
 import static objective.taskboard.followup.FollowUpTransitionsDataProvider.HEADER_ISSUE_TYPE_COLUMN_NAME;
+import static objective.taskboard.followup.FollowUpTransitionsDataProvider.TYPE_DEMAND;
+import static objective.taskboard.followup.FollowUpTransitionsDataProvider.TYPE_FEATURES;
+import static objective.taskboard.followup.FollowUpTransitionsDataProvider.TYPE_SUBTASKS;
 
 import java.lang.reflect.Type;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -83,6 +90,7 @@ public class FollowUpDataLoader {
     private abstract class BaseLoader {
 
         protected final ZoneId timezone;
+        protected Map<String, Set<String>> extraHeaders = new LinkedHashMap<>();
         protected List<FromJiraDataRow> fromJira = new ArrayList<>();
         protected Set<String> types = new LinkedHashSet<>();
         protected ListMultimap<String, String> analyticsHeaders = LinkedListMultimap.create();
@@ -94,8 +102,18 @@ public class FollowUpDataLoader {
         }
 
         protected void doLoad(FollowUpData data) {
-            if (data.fromJiraDs != null)
+            if (data.fromJiraDs != null) {
+                if (!isEmpty(data.fromJiraDs.extraFieldsHeaders)) {
+                    Set<String> demandsHeaders = extraHeaders.computeIfAbsent(TYPE_DEMAND, key -> new LinkedHashSet<>());
+                    Set<String> featureHeaders = extraHeaders.computeIfAbsent(TYPE_FEATURES, key -> new LinkedHashSet<>());
+                    Set<String> subtaskHeaders = extraHeaders.computeIfAbsent(TYPE_SUBTASKS, key -> new LinkedHashSet<>());
+                    demandsHeaders.addAll(data.fromJiraDs.extraFieldsHeaders.getOrDefault(TYPE_DEMAND, emptySet()));
+                    featureHeaders.addAll(data.fromJiraDs.extraFieldsHeaders.getOrDefault(TYPE_FEATURES, emptySet()));
+                    subtaskHeaders.addAll(data.fromJiraDs.extraFieldsHeaders.getOrDefault(TYPE_SUBTASKS, emptySet()));
+                }
+
                 fromJira.addAll(data.fromJiraDs.rows);
+            }
 
             if(data.analyticsTransitionsDsList != null) {
                 for (AnalyticsTransitionsDataSet analyticsDs : data.analyticsTransitionsDsList) {
@@ -145,7 +163,7 @@ public class FollowUpDataLoader {
         }
 
         public FollowUpData create() {
-            FromJiraDataSet fromJiraDs = new FromJiraDataSet(Constants.FROMJIRA_HEADERS, fromJira);
+            FromJiraDataSet fromJiraDs = new FromJiraDataSet(Constants.FROMJIRA_HEADERS, extraHeaders, fromJira);
             List<AnalyticsTransitionsDataSet> analyticsDsList = new LinkedList<>();
             for(String type : types) {
                 List<String> headers = new LinkedList<>(analyticsHeaders.get(type));

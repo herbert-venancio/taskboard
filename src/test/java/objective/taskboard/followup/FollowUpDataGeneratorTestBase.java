@@ -1,6 +1,8 @@
 package objective.taskboard.followup;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.joining;
 import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
 import static objective.taskboard.utils.DateTimeUtils.parseStringToDate;
@@ -15,7 +17,6 @@ import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -218,6 +219,8 @@ public abstract class FollowUpDataGeneratorTestBase {
         when(jiraProperties.getStatusesCompletedIds()).thenReturn(asList(10001L));
         when(jiraProperties.getStatusesCanceledIds()).thenReturn(asList(10101L));
         when(jiraProperties.getStatusesDeferredIds()).thenReturn(asList(10102L));
+
+        when(jiraProperties.getExtraFields()).thenReturn(new JiraProperties.ExtraFields());
 
         when(cycleTime.getCycleTime(any(), any(), anyLong())).thenReturn(Optional.ofNullable(1D));
 
@@ -446,7 +449,7 @@ public abstract class FollowUpDataGeneratorTestBase {
                     status,
                     startDateStepMillis, //startDateStepMillis
                     parent,
-                    new ArrayList<String>(),//dependencies
+                    emptyList(),//dependencies
                     coAssignees, //subResponsaveis
                     new User(assignee),
                     0L, //priority
@@ -467,7 +470,8 @@ public abstract class FollowUpDataGeneratorTestBase {
                     releaseId,
                     buildTransitions(),
                     worklogs,
-                    Arrays.asList()
+                    emptyList(),
+                    emptyMap()
                     );
 
             Issue issue = new Issue(scratch, jiraProperties, metadataService, issueTeamService, null, cycleTime, null, projectService, null, issuePriorityService);

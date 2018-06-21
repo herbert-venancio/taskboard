@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -124,6 +125,8 @@ public class Issue extends IssueScratch implements Serializable {
         this.issuePriorityService = issuePriorityService;
         this.worklogs = scratch.worklogs;
         this.assignedTeamsIds = scratch.assignedTeamsIds;
+
+        this.extraFields = scratch.extraFields;
     }
     
     public Issue() {
@@ -616,7 +619,11 @@ public class Issue extends IssueScratch implements Serializable {
     public Version getRelease() {
         return projectService.getVersion(getReleaseId());
     }
-    
+
+    public Map<String, String> getExtraFields() {
+        return extraFields;
+    }
+
     public List<Worklog> getWorklogs() {
         return worklogs;
     }
@@ -692,7 +699,7 @@ public class Issue extends IssueScratch implements Serializable {
         }
         assignedTeamsIds.add(replacementTeam.getId());
     }
-    
+
     public static class CardTeam {
         public String name;
         public Long id;
