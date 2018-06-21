@@ -149,7 +149,7 @@
                     'query-changed': 'searchIssue'
                 },
 
-                searchIssue: function () {
+                searchIssue: _.debounce(function () {
                     if (this.isReleaseConfigured())
                         clearReleaseButton.hidden = this.releaseSelected ? false : true;
 
@@ -157,7 +157,7 @@
                         query: this.query
                         , release: this.releaseSelected
                     });
-                },
+                }, 100),
 
                 searchReset: function() {
                     this.memento = {query: this.query, releaseSelected: this.releaseSelected};

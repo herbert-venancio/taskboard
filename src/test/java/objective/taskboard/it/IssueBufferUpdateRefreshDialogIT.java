@@ -44,13 +44,14 @@ public class IssueBufferUpdateRefreshDialogIT extends AuthenticatedIntegrationTe
         mainPage.assertUpdatedIssues(updatedIssues);
         mainPage.refreshToast().assertVisible().showOnlyUpdated();
         mainPage.assertVisibleIssues(updatedIssues);
-        mainPage.refreshToast().close();
-        mainPage.typeSearch("TASKB-628").assertVisibleIssues();
+        mainPage.refreshToast().dismiss();
+        mainPage.lane("Demand").boardStep("Open").assertIssueList("TASKB-20");
+        MainPage typeSearch = mainPage.typeSearch("TASKB-628");
+		typeSearch.assertVisibleIssues();
     }
 
     private void forceUpdateIssueBuffer() {
         RequestBuilder.url(getSiteBase() + "/test/force-update-issue-buffer")
             .credentials("foo", "bar").get();
     }
-
 }

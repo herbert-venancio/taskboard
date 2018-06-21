@@ -25,7 +25,6 @@
         <style>
             :host {
                 width: 100%;
-                margin-top: 5px;
                 display: flex;
             }
 
@@ -33,6 +32,10 @@
                 width: calc(100% - 6px);
                 margin-right: 3px;
                 margin-left: 3px;
+            }
+
+            #item {
+                margin-top: 5px;
             }
 
             .issue {
@@ -291,8 +294,9 @@
                 opacity: .5;
             }
         </style>
+        <iron-signals on-iron-signal-search-filter-changed="filterUpdated"></iron-signals>
 
-        <div class="sortable-issue-item">
+        <div id='item' class="sortable-issue-item" style$="display: {{display}};">
             <input type="hidden" name="issueKey" value="{{item.issueKey}}" />
             <iron-ajax id="ajax"
                        method="POST"
@@ -398,6 +402,9 @@
                     localStates: {
                         type: Object,
                         notify: true
+                    },
+                    display: {
+                        type: String
                     }
                 },
 
@@ -415,14 +422,20 @@
                     });
                 },
 
+                filterUpdated: function() {
+                    var shouldBeVisible = searchFilter.match(this.item);
+                    this.set('display', shouldBeVisible?'':'none');
+                },
+
                 itemChanged: function() {
+                    this.filterUpdated();
                     if (typeof this.item.__eventInfo === 'undefined')
                         return;
 
                     var belongsToThisStep = false;
                     if (this.item.__eventInfo.type !== 'DELETED') {
                         var issueStep = taskboard.getIssueStep(this.item);
-                        belongsToThisStep = issueStep != null && this.boardstepid === issueStep.id;
+                        belongsToThisStep = issueStep !== null && this.boardstepid === issueStep.id;
                     }
                     if (!belongsToThisStep)
                         return;
@@ -445,8 +458,8 @@
                         // when an issue update comes from client, it means it is the result of user's action.
                         // in this case, we make sure to scroll and make the issue visible
                         parent.animate({scrollTop:
-                                $(self.$.issueCard).offset().top - $(parent).offset().top - (calcViewportHeight($(parent)) - $(self.$.issueCard).height()) / 2
-                            })
+                            $(self.$.issueCard).offset().top - $(parent).offset().top - (calcViewportHeight($(parent)) - $(self.$.issueCard).height()) / 2
+                        })
                     }
 
                 },
