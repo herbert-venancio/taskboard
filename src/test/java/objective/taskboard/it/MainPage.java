@@ -188,7 +188,9 @@ public class MainPage extends AbstractUiFragment {
             public Boolean apply(WebDriver driver) {
                 try {
                     actualIssueKeyList = driver.findElements(by).stream()
-                        .map(i -> i.findElement(cssSelector(".key.issue-item")).getText().trim())
+                        .map(i -> i.findElement(cssSelector(".key.issue-item")))
+                        .filter(i -> i.isDisplayed())
+                        .map(i-> i.getAttribute("data-issue-key").trim())
                         .toArray(String[]::new);
                     return Arrays.equals(expectedIssueKeyList, actualIssueKeyList);
                 } catch (StaleElementReferenceException e) {

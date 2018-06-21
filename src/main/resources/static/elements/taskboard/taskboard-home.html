@@ -358,7 +358,7 @@
             }
             .search-warning {
                 align-items: center;
-                height: [[filterWarningHeight]]px;
+                height: 32px;
                 position: relative;
                 background-color: #FCE196;
                 color: #333;
@@ -495,7 +495,7 @@
                     <paper-material class="search-warning">
                         Issues are being filtered. <span on-tap="clearFilter">Click here to reset</span>
                     </paper-material>
-                    <board-table id="table" conf="{{conf}}" aspects-filter="[[aspectsFilter]]" ></board-table>
+                    <board-table id="table" conf="{{conf}}" aspects-filter="[[aspectsFilter]]"></board-table>
                 </div>
                 <paper-header-panel drawer>
                     <tb-configurations conf={{conf}} aspects-filter="{{aspectsFilter}}"></tb-configurations>
@@ -511,15 +511,10 @@
                 is: 'taskboard-home',
 
                 observers: [
-                    'refreshDone(aspectsFilter, conf)',
-                    'activateFilter(searchQuery)'
+                    'refreshDone(aspectsFilter, conf)'
                 ],
 
                 properties: {
-                    filterWarningHeight: {
-                        type: Number,
-                        value: 32
-                    },
                     aspectsFilter: {
                         type: Object,
                         notify: true
@@ -582,6 +577,8 @@
                     this.user = taskboard.getLoggedUser();
                     this.verifyPermissions();
                     this.isFiltering = false;
+                    var afterAnimation = function(){self.fire('iron-signal', {name: 'board-resized'})}
+                    $("#lane-container").on("animationend", afterAnimation);
                 },
 
                 retrieveFilters: function () {
@@ -704,23 +701,26 @@
                     if (this.issueErrorMessages.length === 0 && !this.errorMessage)
                         toastIssueUpdated.open();
                 },
-                
-                activateFilter: function(searchQuery) {
-                    var active = (""+searchQuery).length !== 0;
+
+                activateFilter: function() {
+                    var active = searchFilter.hasAnyFilter();
                     if (this.isFiltering === active) return;
-                    
-                    var self = this;
-                    var afterAnimation = function(){self.fire('iron-signal', {name: 'board-resized'})}
-                    if (active)
-                        $("#lane-container").animate({"margin-top": (40 + this.filterWarningHeight)+"px"}, afterAnimation)
-                    else
-                        $("#lane-container").animate({"margin-top": "40px"}, afterAnimation)
-                    
+
+                    if (active) {
+                        $("#lane-container").removeClass('lane-up')
+                        $("#lane-container").addClass('lane-down')
+                    }
+                    else {
+                        $("#lane-container").removeClass('lane-down')
+                        $("#lane-container").addClass('lane-up')
+                    }
+
                     this.isFiltering = active;
                 },
-                
+
                 clearFilter: function() {
                     this.searchQuery = "";
+                    searchFilter.clearFilter(this);
                 },
 
                 _showIssueErrorMessage: function(event) {
@@ -786,6 +786,7 @@
                 },
 
                 searchFilterChanged: function(event, data) {
+                    this.activateFilter()
                     if (data.dontSaveQuery)
                         return;
                     this.currentQueryData = data;

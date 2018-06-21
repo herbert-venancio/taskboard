@@ -59,7 +59,6 @@
 
         <iron-signals on-iron-signal-update-user-preferences="preferencesUpdated"
                       on-iron-signal-config-visibility-synthetic-changed="preferencesUpdated"
-                      on-iron-signal-search-filter-changed="preferencesUpdated"
                       on-iron-signal-level-config-changed="preferencesUpdated"
                       on-iron-signal-issues-updated="handleUpdatedIssues"
                       on-iron-signal-step-update="handleStepUpdate"
@@ -320,7 +319,6 @@
                 shouldShowIssue: function(issue) {
                     return this.doFiltersAllow(issue) 
                             && this.doPreferencesAllow(issue) 
-                            && searchFilter.match(issue);
                 },
 
                 doFiltersAllow: function(issue) {

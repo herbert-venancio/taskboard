@@ -26,6 +26,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -64,10 +65,12 @@ public class BoardStepFragment extends AbstractUiFragment {
 
     private List<String> issueList() {
         try {
-            List<WebElement> findElements = boardStepRoot.findElements(By.cssSelector("paper-material.issue"));
+            List<WebElement> findElements = boardStepRoot
+            		.findElements(By.cssSelector("paper-material.issue")).stream()
+            		.filter(e -> e.isDisplayed()).collect(Collectors.toList());
             ArrayList<String> actualIssueKeyList = new ArrayList<String>(); 
             for (WebElement webElement : findElements) 
-                actualIssueKeyList.add( webElement.findElement(By.cssSelector(".key.issue-item")).getAttribute("data-issue-key").trim());
+                actualIssueKeyList.add(webElement.findElement(By.cssSelector(".key.issue-item")).getAttribute("data-issue-key").trim());
             
             return actualIssueKeyList;
         }catch(StaleElementReferenceException ex) {
