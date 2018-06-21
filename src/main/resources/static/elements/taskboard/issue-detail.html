@@ -1548,7 +1548,7 @@
                         if(self.isResolutionRequired(transition))
                             self.doResolution(transition, issue, status, fieldValuesRequired);
                         else
-                            self.doTransition(transition, issue, status, null, fieldValuesRequired);
+                            self.doTransition(transition, issue, status, fieldValuesRequired);
                     }
                     if(self.showFieldsRequiredDialog)
                         self.$.transitionRequiredDialog.openDialog(fieldsTransitions, transition.name, issue, callback);

@@ -52,7 +52,7 @@ function copyProperties(receiverObject, objectToMarge) {
 }
 
 function isFieldNameEquals(fieldName, anotherFieldName) {
-    return fieldName.toLowerCase === anotherFieldName.toLowerCase;
+    return fieldName.toLowerCase() === anotherFieldName.toLowerCase();
 }
 
 function getDateFromYYYYMMDD(yyyymmdd) {
