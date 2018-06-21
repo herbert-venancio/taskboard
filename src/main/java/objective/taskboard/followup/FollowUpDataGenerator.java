@@ -456,7 +456,8 @@ public class FollowUpDataGenerator {
         private String getTshirtSize(Issue i) {
             if (i.isFeature()) return "";
             if (i.isDemand()) return "M";
-            return i.getTShirtSize();
+            if (i.isSubTask())return i.getTShirtSize();
+            return "";
         }
 
         private String getRelease(Issue i) {
