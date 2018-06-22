@@ -285,7 +285,7 @@ public class Issue extends IssueScratch implements Serializable {
     }
 
     public boolean isSubTask() {
-        return !isDemand() && !isFeature();
+        return jiraProperties.getIssuetype().getSubtasks().stream().anyMatch(ft -> ft.getId() == this.getType());
     }
 
     public Integer getIssueKeyNum() {

@@ -199,6 +199,7 @@ public class FollowUpDataGenerator {
             Iterator<Issue> it = issues.iterator();
             while(it.hasNext()) {
                 Issue issue = it.next();
+                
                 Issue feature = featuresByKey.get(issue.getParent());
                 if (feature == null)
                     continue;
@@ -455,7 +456,8 @@ public class FollowUpDataGenerator {
         private String getTshirtSize(Issue i) {
             if (i.isFeature()) return "";
             if (i.isDemand()) return "M";
-            return i.getTShirtSize();
+            if (i.isSubTask())return i.getTShirtSize();
+            return "";
         }
 
         private String getRelease(Issue i) {
