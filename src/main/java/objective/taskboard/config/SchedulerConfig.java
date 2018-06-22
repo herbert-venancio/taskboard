@@ -32,7 +32,8 @@ public class SchedulerConfig implements SchedulingConfigurer {
         scheduledTaskRegistrar.setTaskScheduler(conditionalThreadPoolTaskScheduler);
     }
 
-    private class DisabledScheduler extends ThreadPoolTaskScheduler {
+    @SuppressWarnings("serial")
+	private class DisabledScheduler extends ThreadPoolTaskScheduler {
         @Override
         public ScheduledFuture<?> schedule(Runnable task, Trigger trigger) {
             return null;
