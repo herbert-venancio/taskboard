@@ -20,8 +20,17 @@
  */
 package objective.taskboard.it;
 
-import objective.taskboard.RequestBuilder;
+import static org.junit.Assert.assertEquals;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.junit.Test;
+import org.openqa.selenium.WebElement;
+
+import objective.taskboard.RequestBuilder;
 
 public class ReleaseFilterIT extends AuthenticatedIntegrationTest {
 
@@ -64,6 +73,20 @@ public class ReleaseFilterIT extends AuthenticatedIntegrationTest {
                 .assertUpdatedIssues(updatedIssues)
                 .assertSelectedRelease("TASKB - 1.0-changed")
                 .assertVisibleIssues(updatedIssues);
+    }
+
+    @Test
+    public void whenOpenReleaseDropDown_showSortedReleases() {
+        MainPage mainPage = MainPage.produce(webDriver);
+        Stream<WebElement> allReleases = mainPage.getAllReleases();
+        List<String> releaseNameResult = allReleases.map(WebElement::getText).collect(Collectors.toList());
+        List<String> releaseNameSortExpected = releaseNameResult.stream().collect(Collectors.toList());
+
+        Collections.sort(releaseNameSortExpected);
+
+        for(int i = 0 ; i < releaseNameResult.size(); i++) {
+            assertEquals("Releases have to be sorted ", releaseNameSortExpected.get(i), releaseNameResult.get(i));
+        }
     }
 
     private void emulateVersionUpdate(String newName) {

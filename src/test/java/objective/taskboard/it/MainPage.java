@@ -28,6 +28,7 @@ import static org.openqa.selenium.support.PageFactory.initElements;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementValue;
 
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
@@ -119,6 +120,13 @@ public class MainPage extends AbstractUiFragment {
 
         waitForClick(releaseElement);
         return this;
+    }
+
+    public Stream<WebElement> getAllReleases() {
+        waitForClick(searchReleaseDropdown);
+        waitUntilElementExists(cssSelector("#searchRelease paper-item"));
+
+        return searchReleaseDropdown.findElements(tagName("paper-item")).stream();
     }
 
     public MainPage assertLabelRelease(String expected) {

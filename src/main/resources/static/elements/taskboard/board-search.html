@@ -107,7 +107,7 @@
                                  label="{{getLabelSearchRelease(releases)}}" no-label-float
                                  on-value-changed="searchIssue" on-keydown="searchReleaseOnKeyDown">
                 <paper-listbox class="dropdown-content" attr-for-selected="value" selected="{{releaseSelected}}">
-                    <template is="dom-repeat" items="{{releases}}" as="itemRelease">
+                    <template is="dom-repeat" items="{{releases}}" as="itemRelease" sort="sortRelease">
                         <paper-item value="{{itemRelease.id}}">{{getReleaseString(itemRelease)}}</paper-item>
                     </template>
                 </paper-listbox>
@@ -244,7 +244,16 @@
 
                 hasReleases: function(releases) {
                     return releases && releases.length > 0;
-                }
+                },
+
+                sortRelease: function(a, b) {
+                	var a_provider = this.getReleaseString(a).toUpperCase();
+                	var b_provider = this.getReleaseString(b).toUpperCase();
+
+                	if (a_provider === b_provider)
+                		return 0
+                	return a_provider < b_provider ? -1 : 1;
+               	}
             });
         })();
     </script>
