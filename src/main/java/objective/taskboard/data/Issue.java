@@ -296,8 +296,16 @@ public class Issue extends IssueScratch implements Serializable {
         return metaDataService.getIssueTypeById(type).getName();
     }
 
+    public String getIssueTypeNameAsLoggedInUser() {
+        return metaDataService.getIssueTypeByIdAsLoggedInUser(type).getName();
+    }
+
     public String getStatusName() {
         return metaDataService.getStatusById(status).name;
+    }
+
+    public String getStatusNameAsLoggedInUser() {
+        return metaDataService.getStatusByIdAsLoggedInUser(status).name;
     }
 
     public Integer getStatusPriority() {
@@ -600,8 +608,8 @@ public class Issue extends IssueScratch implements Serializable {
         return subtasks.stream().map(s->
             new Subtask(s.issueKey, 
                         s.summary, 
-                        s.getStatusName(), 
-                        s.getIssueTypeName(),
+                        s.getStatusNameAsLoggedInUser(), 
+                        s.getIssueTypeNameAsLoggedInUser(),
                         s.getTypeIconUri(), 
                         issueColorService.getStatusColor(s.type, s.status)))
                 .collect(Collectors.toList());

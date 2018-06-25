@@ -167,10 +167,10 @@ public class IssueController {
     public Map<String, Object> configuration() {
         Map<String, Object> map = new HashMap<>();
         map.put("laneConfiguration", taskService.laneConfiguration());
-        map.put("issueTypes", metadataService.getIssueTypeMetadata());
+        map.put("issueTypes", metadataService.getIssueTypeMetadataAsLoggedInUser());
         map.put("issueTypesConfig", issueTypeVisibilityService.getIssueTypeVisibility());
         map.put("priorities", metadataService.getPrioritiesMetadata());
-        map.put("statuses", metadataService.getStatusesMetadata());
+        map.put("statuses", metadataService.getStatusesMetadataAsLoggedInUser());
         map.put("urlJira", jiraProperties.getUrl());
         map.put("urlLinkGraph", linkGraphProperties.getUrl());
 

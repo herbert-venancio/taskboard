@@ -51,7 +51,7 @@ public class IssueTypeVisibilityService {
 
     public List<IssueType> getVisibleIssueTypes() {
         List<Long> ids = getIssueTypeConfiguration().stream().map(IssueTypeConfiguration::getIssueTypeId).collect(Collectors.toList());
-        return metadataService.getIssueTypeMetadata().values().stream().filter(t -> ids.contains(t.getId())).collect(Collectors.toList());
+        return metadataService.getIssueTypeMetadataAsLoggedInUser().values().stream().filter(t -> ids.contains(t.getId())).collect(Collectors.toList());
     }
 
     public Map<Long, List<Long>> getIssueTypeVisibility() {

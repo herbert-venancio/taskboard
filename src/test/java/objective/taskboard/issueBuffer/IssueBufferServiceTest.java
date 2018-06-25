@@ -90,9 +90,11 @@ public class IssueBufferServiceTest {
         @Bean
         public MetadataService metaDataService() {
             MetadataService metadataService = mock(MetadataService.class);
-            when(metadataService.getStatusById(10000L)).thenReturn(new Status(10000L, "Done", null));
+            when(metadataService.getStatusByIdAsLoggedInUser(10000L)).thenReturn(new Status(10000L, "Done", null));
             try {
-                when(metadataService.getIssueTypeById(10001L)).thenReturn(new IssueType(null, 10001L, "Feature", false, "", new URI("http://foo")));
+                IssueType issueType = new IssueType(null, 10001L, "Feature", false, "", new URI("http://foo"));
+                when(metadataService.getIssueTypeByIdAsLoggedInUser(10001L)).thenReturn(issueType);
+                when(metadataService.getIssueTypeById(10001L)).thenReturn(issueType);
             } catch (URISyntaxException e) {
                 throw new RuntimeException(e);
             }
