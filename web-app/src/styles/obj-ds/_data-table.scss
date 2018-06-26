@@ -1,0 +1,66 @@
+
+.obj-data-table {
+    border-bottom: 1px solid $obj-color-dark-snow;
+    table-layout: fixed;
+
+    thead {
+        th {
+            padding: 0 16px 8px 16px;
+            font-family: $obj-font-ptsans;
+            font-size: 12px;
+            color: $obj-color-smoke;
+            text-align: left;
+        }
+    }
+
+    tbody {
+        tr {
+            border-top: 1px solid $obj-color-dark-snow;
+            background-color: #FFF;
+        }
+
+        td {
+            height: 40px;
+            padding: 0 16px;
+            vertical-align: middle;
+
+            font-family: $obj-font-ptsans;
+            font-size: 12px;
+            color: $obj-color-black;
+            text-align: left;
+        }
+    }
+
+    th.col-right,
+    td.col-right {
+        text-align: right;
+    }
+
+    th.col-center,
+    td.col-center {
+        text-align: center;
+    }
+}
+
+.obj-data-table.clickable {
+    tbody {
+        tr {
+            cursor: pointer;
+
+            &:hover {
+                background-color: $obj-color-snow;
+            }
+        }
+    }
+}
+
+
+obj-card .obj-data-table {
+    width: 100%;
+
+    tbody {
+        td {
+            height: 32px;
+        }
+    }
+}

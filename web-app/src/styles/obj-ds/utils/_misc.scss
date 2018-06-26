@@ -1,0 +1,13 @@
+
+$obj-navbar-height: 64px;
+
+@mixin obj-focusable($color: $obj-color-blue, $alpha: 1) {
+    &:focus {
+        box-shadow: 0 0 0 1px rgba($color, $alpha);
+        outline: none;
+    }
+
+    &::-moz-focus-inner {
+        border: 0;
+    }
+}

@@ -1,0 +1,72 @@
+@import "obj-ds/utils/all";
+
+$button-height: 32px;
+
+:host {
+    @include obj-border-box-radius;
+    height: $button-height;
+    min-width: 60px;
+    padding: 0 16px;
+    background: transparent;
+    outline: none;
+    font-family: $obj-font-ptsans;
+    font-size: 14px;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+:host:enabled {
+    cursor: pointer;
+}
+
+:host:disabled {
+    background-color: $obj-color-dark-snow;
+    border: none;
+    line-height: $button-height;
+    color: #FFF;
+}
+
+/* Models */
+
+:host:enabled,
+:host:enabled.secondary {
+    @include obj-focusable($obj-color-smoke, 0.4);
+
+    background-color: #FFF;
+    border: 1px solid $obj-color-dark-snow;
+    line-height: $button-height - 2px;
+    color: $obj-color-dark-smoke;
+
+    &:hover,
+    &:active {
+        background-color: $obj-color-snow;
+    }
+}
+
+:host:enabled.primary {
+    @include obj-focusable($obj-color-dark-blue, 1);
+
+    background-color: $obj-color-blue;
+    border: none;
+    line-height: $button-height;
+    color: #FFF;
+
+    &:hover,
+    &:active {
+        background-color: $obj-color-dark-blue;
+    }
+}
+
+:host:enabled.input-action {
+    @include obj-focusable($obj-color-dark-orange, 1);
+
+    background-color: $obj-color-orange;
+    border: none;
+    line-height: $button-height;
+    color: #FFF;
+
+    &:hover,
+    &:active {
+        background-color: $obj-color-dark-orange;
+    }
+}

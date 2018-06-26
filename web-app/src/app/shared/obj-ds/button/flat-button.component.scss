@@ -1,0 +1,63 @@
+@import "obj-ds/utils/all";
+@import "../icon/icons-base";
+
+:host {
+    min-width: 60px;
+    padding: 8px;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: $obj-font-ptsans;
+    font-size: 12px;
+    white-space: nowrap;
+    display: inline-block;
+    position: relative;
+
+    &:enabled {
+        cursor: pointer;
+    }
+
+    &:focus:after {
+        content: '';
+        position: absolute;
+        left: 8px;
+        right: 8px;
+        bottom: 4px;
+        border-bottom: 1px solid currentColor;
+    }
+
+    &::-moz-focus-inner {
+        border: 0;
+    }
+
+    &:disabled {
+        color: $obj-color-smoke;
+    }
+
+    &::ng-deep > obj-icon {
+        @extend %obj-icon-small;
+        float: left; // Workaround to remove the possible white space between icon and label.
+        color: inherit;
+    }
+
+    /* Models */
+
+    &:enabled,
+    &:enabled.primary {
+        color: $obj-color-blue;
+
+        &:hover,
+        &:active {
+            color: $obj-color-dark-blue;
+        }
+    }
+
+    &:enabled.secondary {
+        color: $obj-color-orange;
+
+        &:hover,
+        &:active {
+            color: $obj-color-dark-orange;
+        }
+    }
+}

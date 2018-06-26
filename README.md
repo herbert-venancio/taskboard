@@ -2,16 +2,18 @@
 
 This application **must be run with Java 8** (404 errors on ws may indicate wrong JRE version).
 
-## Development setup
+## Development Setup
 
 1. Install NodeJS: `sudo apt-get install nodejs`
 2. Install NPM: `sudo apt-get install npm`
-3. Install Bower: `npm install -g gulp bower` 
 4. Clone project and execute `mvn clean install` to assure dependencies are ok. (In case of error downloading from repository "git://github.com/PolymerElements/neon-elements.git" execute `git config --global url."https://".insteadOf git://`)
 5. Download [Eclipse](http://www.eclipse.org/downloads/) 
 6. Import the project on eclipse
 7. Import format configuration file taskboard-format.xml (`Project > Configuration > Java Code Style > Formatter > Import`).
 
+## Development Workflow
+
+- After update sources (e.g. git pull): Run `mvn generate-resources` to install and build front-end dependencies;
 
 ## Integration Tests
 

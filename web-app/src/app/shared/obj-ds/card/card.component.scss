@@ -1,0 +1,70 @@
+@import "obj-ds/utils/all";
+
+:host {
+    @include obj-shadow-small;
+    @include obj-border-box-radius;
+    background-color: #FFF;
+    display: block;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    height: 50px;
+}
+
+.collapse-button {
+    margin-right: 16px;
+}
+
+::ng-deep {
+    obj-card-actions {
+        display: block;
+        padding: 0 16px;
+    }
+
+    obj-card-content {
+        display: block;
+        padding: 0 16px 16px 16px;
+        min-height: 40px;
+    }
+
+    obj-card-title {
+        font-family: $obj-font-ptsans;
+        font-size: 14px;
+        font-weight: bold;
+        line-height: 18px;
+        color: $obj-color-dark-smoke;
+        padding: 0 16px;
+        display: block;
+        flex-grow: 2;
+    }
+}
+
+:host.collapsible {
+    .header {
+        height: 40px;
+        border-bottom: 1px solid $obj-color-dark-snow;
+    }
+
+    ::ng-deep obj-card-content {
+        padding: 16px;
+    }
+}
+
+:host.collapsed {
+    .header {
+        border-bottom: none;
+    }
+
+    ::ng-deep obj-card-content {
+        display: none;
+    }
+}
+
+:host.bordless,
+:host.bordless.collapsible {
+    ::ng-deep obj-card-content {
+        padding: 0;
+    }
+}

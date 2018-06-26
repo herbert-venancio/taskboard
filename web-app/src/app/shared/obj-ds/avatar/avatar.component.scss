@@ -1,0 +1,53 @@
+@import "obj-ds/utils/all";
+
+:host {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    position: relative;
+    overflow: hidden;
+}
+
+:host[click] {
+    cursor: pointer;
+}
+
+.img-container {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    right: 0;
+
+    &:hover {
+        background-color: $obj-color-dark-smoke;
+    }
+
+    img {
+        width: 100%;
+
+        &:hover {
+            opacity: .5;
+        }
+    }
+}
+
+.initials {
+    width: 100%;
+    height: 100%;
+    background-color: $obj-color-snow;
+    color: $obj-color-dark-smoke;
+
+    font-family: $obj-font-ptsans-caption;
+    font-weight: bold;
+    font-size: 14px;
+    text-align: center;
+    text-transform: uppercase;
+    line-height: 32px;
+    user-select: none;
+
+    &:hover {
+        background-color: $obj-color-dark-smoke;
+        color: $obj-color-snow;
+    }
+}

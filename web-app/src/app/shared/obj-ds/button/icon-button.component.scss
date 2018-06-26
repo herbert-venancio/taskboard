@@ -1,0 +1,30 @@
+@import "obj-ds/utils/all";
+
+:host {
+    @include obj-border-box-radius;
+    padding: 0;
+    outline: none;
+    border: none;
+    background: transparent;
+    display: inline-block;
+
+    &::ng-deep > obj-icon {
+        color: inherit;
+        display: block;
+    }
+
+    &:disabled {
+        color: $obj-color-dark-snow;
+    }
+
+    &:enabled {
+        @include obj-focusable;
+        cursor: pointer;
+        color: $obj-color-smoke;
+
+        &:hover,
+        &:active {
+            color: $obj-color-dark-smoke;
+        }
+    }
+}

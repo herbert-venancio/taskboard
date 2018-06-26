@@ -4,14 +4,16 @@
         "directive-selector": [
             true,
             "attribute",
-            "app",
+            "tb",
             "camelCase"
         ],
         "component-selector": [
             true,
             "element",
-            "app",
+            "tb",
             "kebab-case"
-        ]
+        ],
+        "use-host-property-decorator": false,
+        "no-input-rename": false
     }
 }

@@ -1,0 +1,40 @@
+@import "obj-ds/utils/all";
+@import "icons-base";
+
+:host {
+    display: inline-block;
+    color: $obj-color-smoke;
+}
+
+:host::ng-deep {
+    &  > .icon-container {
+        display: flex;
+        align-items: center;
+        border-radius: 50%;
+        overflow: hidden;
+        box-sizing: border-box;
+
+        & > svg {
+            display: block;
+        }
+    }
+
+    /* Sizes */
+
+    &,
+    &.medium {
+        @extend %obj-icon-medium;
+    }
+
+    &.small {
+        @extend %obj-icon-small;
+    }
+
+    &.large {
+        @extend %obj-icon-large;
+    }
+
+    &.extra-large {
+        @extend %obj-icon-extra-large;
+    }
+}

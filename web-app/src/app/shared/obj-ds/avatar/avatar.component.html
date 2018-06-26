@@ -1,0 +1,4 @@
+<div *ngIf="imageUrl" class="img-container" [style.visibility]="imageLoaded ? '' : 'hidden'">
+    <img [src]="imageUrl" (load)="onImageLoad()" />
+</div>
+<div *ngIf="!imageLoaded" class="initials">{{ getInitials() }}</div>
