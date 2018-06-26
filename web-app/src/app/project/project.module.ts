@@ -1,6 +1,7 @@
 import {NgModule} from '@angular/core';
 import {ProjectRoutingModule} from './project-routing.module';
 import {SharedModule} from 'app/shared/shared.module';
+import {ProjectProfileComponent} from './config/project-profile.component';
 
 @NgModule({
     imports: [
@@ -8,6 +9,10 @@ import {SharedModule} from 'app/shared/shared.module';
         ProjectRoutingModule
     ],
     declarations: [
+        ProjectProfileComponent
+    ],
+    exports: [
+        ProjectProfileComponent
     ]
 })
 export class ProjectModule {

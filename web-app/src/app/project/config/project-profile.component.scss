@@ -1,0 +1,39 @@
+@import "utils/all";
+
+.tb-page-content {
+    width: 900px;
+    padding: 24px;
+}
+
+.role-name-col { width: 160px }
+.actions-col   { width: 70px  }
+
+.title {
+    margin-bottom: 16px;
+}
+
+.obj-data-table.inline-input {
+    td {
+        height: auto;
+        vertical-align: top;
+        padding-top: 8px;
+        padding-bottom: 8px;
+
+        obj-error-messages.has-messages {
+            margin-top: 2px;
+        }
+    }
+
+    td > input {
+        width: 100%;
+    }
+}
+
+.footer {
+    padding: 16px 0;
+    text-align: right;
+
+    > * {
+        margin-left: 10px;
+    }
+}

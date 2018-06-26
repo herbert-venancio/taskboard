@@ -77,7 +77,9 @@ public class MenuFilters extends AbstractUiFragment {
         if (projectItemButton == null)
             throw new IllegalArgumentException("Element  for project key " + projectKey + " filter  not found");
 
-        return ProjectConfigurationDialog.open(webDriver, projectItemButton);
+        waitForClick(projectItemButton);
+
+        return new ProjectConfigurationDialog(webDriver, projectKey).assertIsOpen();
     }
 
     public MenuFilters clickAspectSubitemFilter(String filterName, String subitemFilterName) {

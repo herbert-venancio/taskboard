@@ -87,6 +87,10 @@ public class ProjectService {
                 .sorted(comparing(Project::getName))
                 .collect(toList());
     }
+    
+    public Optional<Project> getJiraProjectAsUser(String projectKey) {
+        return Optional.ofNullable(getUserProjects().get(projectKey));
+    }
 
     public List<ProjectFilterConfiguration> getTaskboardProjects() {
         return projectRepository.getProjects().stream()

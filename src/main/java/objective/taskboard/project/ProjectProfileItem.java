@@ -64,8 +64,8 @@ public class ProjectProfileItem extends TaskboardEntity {
         return peopleCount;
     }
 
-    public void setPeopleCount(double peopleCount) {
-        if (peopleCount < 0)
+    public void setPeopleCount(Double peopleCount) {
+        if (peopleCount == null || peopleCount < 0)
             throw new IllegalArgumentException("People count should be a positive value");
 
         this.peopleCount = peopleCount;

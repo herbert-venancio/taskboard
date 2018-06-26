@@ -21,6 +21,7 @@
 
 package objective.taskboard.it;
 
+import static org.junit.Assert.assertEquals;
 import static org.openqa.selenium.support.ui.ExpectedConditions.attributeContains;
 import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
@@ -32,13 +33,16 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllE
 
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 
 public abstract class AbstractUiFragment {
@@ -50,6 +54,16 @@ public abstract class AbstractUiFragment {
 
     public void waitUntil(ExpectedCondition<?> condition) {
         PageWait.wait(webDriver).until((Function<? super WebDriver, ?>) condition);
+    }
+    
+    public <T> void waitAssertEquals(T expected, Supplier<T> actualSupplier) {
+        try {
+            waitUntil(w -> {
+                return expected.equals(actualSupplier.get());
+            });
+        } catch (TimeoutException e) {
+            assertEquals(expected, actualSupplier.get());
+        }
     }
 
     protected void waitTextInElement(WebElement element, String expected) {
@@ -187,6 +201,7 @@ public abstract class AbstractUiFragment {
         input.clear();
         input.sendKeys(value);
         waitAttributeValueInElement(input, "value", value);
+        executeJavascript("arguments[0].blur()", input);
     }
     
     protected void waitPaperDropdownMenuSelectedTextToBe(WebElement element, String expected) {
@@ -271,6 +286,14 @@ public abstract class AbstractUiFragment {
             }
         });
     }
+    
+    private void executeJavascript(String script, Object... args) {
+        if (!(webDriver instanceof RemoteWebDriver)) 
+            throw new RuntimeException("WebDriver " + webDriver + " is unable to execute javascript");
+        
+        RemoteWebDriver remoteWebDriver = (RemoteWebDriver) webDriver;
+        remoteWebDriver.executeScript(script, args);
+    }
 
     /**
      * Geckodriver implements a webdriver spec that requires inputs to be visible during interactions.
@@ -284,13 +307,11 @@ public abstract class AbstractUiFragment {
             fileInput.sendKeys(value);
             return;
         }
-        
-        FirefoxDriver firefoxWebDriver = (FirefoxDriver) webDriver;
 
-        firefoxWebDriver.executeScript("arguments[0].style.display='block'", fileInput);
+        executeJavascript("arguments[0].style.display='block'", fileInput);
         waitVisibilityOfElement(fileInput);
         fileInput.sendKeys(value);
-        firefoxWebDriver.executeScript("arguments[0].style.display=''", fileInput);
+        executeJavascript("arguments[0].style.display=''", fileInput);
     }
 
 }

@@ -11,4 +11,8 @@ export class LegacyAppRouter {
     goToHome() {
         this.document.location.href = '/';
     }
+
+    goToProjectConfiguration(projectKey: string) {
+        this.document.location.href = `/#/project/${projectKey}/config`;
+    }
 }
