@@ -20,6 +20,7 @@
  */
 package objective.taskboard.it;
 
+import static org.junit.Assert.assertEquals;
 import static org.openqa.selenium.By.cssSelector;
 import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
 
@@ -124,6 +125,22 @@ class IssueDetails extends AbstractUiFragment {
     public void assertIsClosed() {
         waitUntil(attributeToBe(issueDetailRoot, "data-status", "closed"));
         waitInvisibilityOfElement(issueDetailRoot);
+    }
+
+    public IssueDetails assertCardName(String cardNameExpected) {
+        WebElement cardName = getElementWhenItExists(By.id("card-name"));
+        assertEquals("Card name have to be", cardNameExpected, cardName.getText());
+        return this;
+    }
+
+    public IssueDetails openParentCard() {
+        waitForClick(By.id("parent-card-name"));
+        return this;
+    }
+
+    public IssueDetails openFirstChildCard() {
+        waitForClick(By.id("child-issue-0"));
+        return this;
     }
 
     public IssueDetails transitionClick(String transitionName) {

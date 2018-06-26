@@ -701,8 +701,7 @@
 
                 _openIssue: function(e) {
                     var issueKey = e.target.dataset.issueKey;
-                    var issue = taskboard.getIssueByKey(issueKey);
-                    this.fire('iron-signal', {name: 'show-details', data: {item: issue}});
+                    navigatorService.openCard(issueKey);
                 },
 
                 _closeIssueError: function(e) {

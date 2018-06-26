@@ -122,9 +122,20 @@ function Taskboard() {
     };
 
     this.getIssueByKey = function(issueKey) {
-        return findInArray(this.issues, function(i) {
-                return i.issueKey === issueKey
-            });
+        var issue = findInArray(this.issues, function(i) {
+            return i.issueKey === issueKey
+        });
+
+        if(issue)
+            return issue;
+
+        $.get('/ws/issues/byKey/' + issueKey)
+            .done(function(issueFromServer) {
+                return issueFromServer;
+            })
+            .fail(function() {
+                return null;
+            })
     };
 
     this.setLaneConfiguration = function(laneConfiguration) {

@@ -544,7 +544,7 @@
                 },
 
                 opendialog: function () {
-                    this.fire('iron-signal', {name: 'show-details', data: {item: this.item}});
+                    navigatorService.openCard(this.item.issueKey);
                 },
 
                 getIssueTypeName: function(issueTypeId) {

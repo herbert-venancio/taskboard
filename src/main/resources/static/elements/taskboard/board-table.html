@@ -45,7 +45,6 @@
         </style>
 
         <iron-signals on-iron-signal-level-visibility-changed="laneVisibilityUpdated"
-                      on-iron-signal-show-details="showDetails"
                       on-iron-signal-update-user-preferences="checkIssuesInvalidTeam"
                       on-iron-signal-level-config-changed="checkIssuesInvalidTeam"
                       on-iron-signal-update-issue-local-state-error="updateIssueLocalStateErrorMessage"></iron-signals>
@@ -119,6 +118,10 @@
                     }
                 },
 
+                attached:function(){
+                    window.addEventListener("hashchange", navigatorService.resolve.bind(navigatorService));
+                },
+
                 ready: function() {
                     this.fetchIssues();
                     this.shownWarnings = [];
@@ -133,10 +136,6 @@
                     this.checkIssuesInvalidTeam();
                 },
 
-                showDetails: function (e) {
-                    this.$.issuedialog.opendialog(e.detail.item);
-                },
-
                 fetchIssues: function() {
                     var self = this;
                     self.set('_loading', true);
@@ -149,6 +148,7 @@
                         taskboard.setIssues(issues);
                         self.issues = issues;
                         self.checkIssuesInvalidTeam();
+                        navigatorService.resolve();
                     }).fail(function(jqXhr) {
                         console.log("Error fetching issues", jqXhr);
                         taskboard.showError(
