@@ -797,6 +797,7 @@
                         ready               : {icon: "icons:check-circle", tooltip: "Data ready, no errors"},
                         updateError         : {icon: "icons:warning", tooltip: "Error synching data from jira. Issues might be outdated"},
                         initialisationError : {icon: "icons:error", tooltip: "Failure fetching data from jira. No issues available"},
+                        requiresReindex     : {icon: "icons:error", tooltip: "Failure fetching data from jira. Requires re-index"},
                     };
                     this.set('stateIcon', state[cacheState].icon);
                     this.set('stateTooltip', state[cacheState].tooltip);
