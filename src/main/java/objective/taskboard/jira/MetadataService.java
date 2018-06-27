@@ -23,12 +23,20 @@ public class MetadataService {
         return cache.getIssueTypeMetadata();
     }
 
+    public Map<Long, IssueType> getIssueTypeMetadataAsLoggedInUser() {
+        return cache.getIssueTypeMetadataAsLoggedInUser();
+    }
+
     public Map<Long, Priority> getPrioritiesMetadata() {
         return cache.getPrioritiesMetadata();
     }
 
     public Map<Long, Status> getStatusesMetadata() {
         return cache.getStatusesMetadata();
+    }
+
+    public Map<Long, Status> getStatusesMetadataAsLoggedInUser() {
+        return cache.getStatusesMetadataAsLoggedInUser();
     }
 
     public Map<String, IssuelinksType> getIssueLinksMetadata() {
@@ -44,8 +52,20 @@ public class MetadataService {
                 .orElseThrow(() -> new IllegalArgumentException("There's no Issue Type with given ID: " + id));
     }
 
+    public IssueType getIssueTypeByIdAsLoggedInUser(Long id) {
+        return Optional.ofNullable(getIssueTypeMetadataAsLoggedInUser().get(id))
+                .orElseThrow(() -> new IllegalArgumentException("There's no Issue Type with given ID: " + id));
+    }
+
     public Status getStatusById(Long id) {
         Status status = getStatusesMetadata().get(id);
+        if (status == null)
+            throw new IllegalArgumentException("There's no Status with given ID: " + id);
+        return status;
+    }
+
+    public Status getStatusByIdAsLoggedInUser(Long id) {
+        Status status = getStatusesMetadataAsLoggedInUser().get(id);
         if (status == null)
             throw new IllegalArgumentException("There's no Status with given ID: " + id);
         return status;
