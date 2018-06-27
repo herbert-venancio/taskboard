@@ -1,0 +1,49 @@
+@import 'utils/all';
+
+:host {
+    @include obj-shadow-normal;
+
+    display: flex;
+    align-items: center;
+    height: 64px;
+    padding: 0 24px;
+    position: relative;
+    z-index: 10;
+    background-color: #FFF;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    margin-right: auto;
+
+    img {
+        height: 32px;
+        margin-right: 16px;
+    }
+
+    h1 {
+        font-size: 14px;
+        text-transform: uppercase;
+        font-family: $obj-font-ptsans-caption;
+        font-weight: bold;
+        color: $obj-color-black;
+    }
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    margin-right: 8px;
+
+    & > * + * {
+        margin-left: 8px;
+    }
+}
+
+.user-account {
+    obj-avatar {
+        cursor: pointer;
+        display: block;
+    }
+}

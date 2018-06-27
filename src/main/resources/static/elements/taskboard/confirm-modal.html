@@ -62,7 +62,7 @@
             <h2>[[title]]</h2>
             <div class="confirmText">[[text]]</div>
             <paper-button id="confirm" class="colorful" on-tap="confirmed" raised>Confirm</paper-button>
-            <paper-button id="cancel" class="colorful" on-tap="closeDialog">Cancel</paper-button>
+            <paper-button id="cancel" class="colorful" on-tap="cancel">Cancel</paper-button>
         </paper-dialog>
 
     </template>
@@ -85,6 +85,10 @@
                     
                     callback: {
                         type: Object
+                    },
+                    
+                    cancelCallback: {
+                        type: Object
                     }
                 },
 
@@ -92,15 +96,23 @@
                     this.callback();
                     this.closeDialog();
                 },
+                
+                cancel: function() {
+                    if (this.cancelCallback)
+                        this.cancelCallback();
+                    
+                    this.closeDialog();
+                },
 
                 closeDialog: function () {
                     this.$.confirmPaperDialog.close();
                 },
 
-                openDialog: function (title, text, callback) {
+                openDialog: function (title, text, callback, cancelCallback) {
                     this.title = title;
                     this.text = text;
                     this.callback = callback;
+                    this.cancelCallback = cancelCallback;
                     this.$.confirmPaperDialog.toggle();
                 }
 

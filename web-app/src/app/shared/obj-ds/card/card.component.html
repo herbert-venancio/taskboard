@@ -1,0 +1,8 @@
+<div class="header">
+    <ng-content select="obj-card-title"></ng-content>
+    <ng-content select="obj-card-actions"></ng-content>
+    <button obj-icon-button *ngIf="collapsible" (click)="toggleCollapsed()" class="collapse-button">
+        <obj-icon [iconName]="collapsed ? 'chevron-bottom' : 'chevron-top'" class="small"></obj-icon>
+    </button>
+</div>
+<ng-content select="obj-card-content"></ng-content>

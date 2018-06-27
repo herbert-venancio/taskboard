@@ -27,7 +27,8 @@ node("single-executor") {
     }
     def mvnHome = tool 'maven-3.3.3'
     def javaHome = tool '1.8.0_131'
-    withEnv(["JAVA_HOME=$javaHome", "M2_HOME=$mvnHome", "PATH+MAVEN=$mvnHome/bin", "PATH+JDK=$javaHome/bin"]) {
+    def nodeHome = tool 'NodeJS 9.11'
+    withEnv(["JAVA_HOME=$javaHome", "M2_HOME=$mvnHome", "PATH+MAVEN=$mvnHome/bin", "PATH+JDK=$javaHome/bin", "PATH+NODE=$nodeHome/bin"]) {
         try {
             stage('Build') {
                 try {

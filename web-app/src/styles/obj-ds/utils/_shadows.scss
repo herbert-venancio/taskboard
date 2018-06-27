@@ -1,0 +1,12 @@
+
+@mixin obj-shadow-small {
+    box-shadow: rgba($obj-color-black, .2) 0 0 5px;
+}
+
+@mixin obj-shadow-normal {
+    box-shadow: rgba($obj-color-black, .4) 0 0 5px;
+}
+
+@mixin obj-shadow-large {
+    box-shadow: rgba($obj-color-black, .8) 0 0 5px;
+}

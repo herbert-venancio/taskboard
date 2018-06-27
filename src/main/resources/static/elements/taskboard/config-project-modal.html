@@ -38,6 +38,7 @@
                 ></iron-signals>
 
         <alert-modal id="alertModalConfiguration"></alert-modal>
+        <confirm-modal id="saveProjectConfigurationConfirmModal"></confirm-modal>
 
         <modal-wrap
                 id="modal"
@@ -54,6 +55,7 @@
                     <paper-input id="projectStartDate" always-float-label
                                  label="Project Start Date ([[dateFormatPlaceholder]])"
                                  value="{{projectConfiguration.startDate}}"
+                                 on-input="setFormDirty"
                                  tabindex="1"
                                  maxlength="[[dateFormatPlaceholder.length]]"
                                  validator="dateValidator"
@@ -62,12 +64,14 @@
                     <paper-input id="projectDeliveryDate" always-float-label
                                  label="Project End Date ([[dateFormatPlaceholder]])"
                                  value="{{projectConfiguration.deliveryDate}}"
+                                 on-input="setFormDirty"
                                  maxlength="[[dateFormatPlaceholder.length]]"
                                  validator="dateValidator"
                                  error-message="Please enter a valid date"></paper-input>
                    <paper-input id="projectRisk" always-float-label
                                  label="Risk *"
                                  value="{{projectConfiguration.risk}}"
+                                 on-input="setFormDirty"
                                  type="number"
                                  required 
                                  min="0"
@@ -78,6 +82,7 @@
                     <paper-input id="projectionTimespan" always-float-label
                                  label="Projection Timespan *"
                                  value="{{projectConfiguration.projectionTimespan}}"
+                                 on-input="setFormDirty"
                                  type="number"
                                  required
                                  min="1"
@@ -87,6 +92,7 @@
                                  
                     <paper-dropdown-menu id="baselineDate" always-float-label
                         label="Baseline Date *" 
+                        on-iron-select="setFormDirty"
                         error-message="Please enter a valid date">
                         <paper-menu class="dropdown-content" attr-for-selected="value" selected="{{projectConfiguration.baselineDate}}">
                             <paper-item value=""><span style="white-space: nowrap">Project Start</span></paper-item>
@@ -107,6 +113,7 @@
                                     required="true"
                                     text="{{selectedTeamName}}"
                                     value="{{selectedTeamId}}"
+                                    on-autocomplete-selected="setFormDirty"
                                     error-message="Default team is required"
                                     min-length="0"
                                     always-float-label>
@@ -126,6 +133,7 @@
             </modal-wrap-content>
 
             <modal-wrap-footer>
+                <tb-button button="[[_editProjectProfileButton]]"></tb-button>
                 <tb-button button="[[_updateButton]]"></tb-button>
             </modal-wrap-footer>
 
@@ -152,6 +160,10 @@
                         type: Object,
                         value: function () { return {} }
                     },
+                    _editProjectProfileButton: {
+                        type: Object,
+                        value: function () { return {} }
+                    },
                     availableTeams: {
                         type: Array,
                         value: []
@@ -169,7 +181,11 @@
                     invalidTeam: {
                         type: Boolean
                     },
-                    availableBaselineDates: Array
+                    availableBaselineDates: Array,
+                    formDirty: {
+                        type: Boolean,
+                        value: false
+                    }
                 },
 
                 observers: [
@@ -179,6 +195,15 @@
                 ready: function() {
                     var updateButton = ButtonBuilder('Update').id('updateProjectConfiguration').onClick(this.updateConfiguration.bind(this)).build();
                     this.set('_updateButton', updateButton);
+
+                    var editProfile = ButtonBuilder('Edit Project Profile')
+                        .id('editProjectProfileConfiguration')
+                        .type(buttonTypes.LINK)
+                        .onClick(this.editProjectProfile.bind(this))
+                        .build();
+
+                    this.set('_editProjectProfileButton', editProfile);
+
                     this.availableTeams = taskboard.getAvailableTeams();
                     var self = this;
                     this.$.defaultTeam.queryFn = function(source, query) {
@@ -216,6 +241,13 @@
                         }
 
                         return !this.invalid;
+                    }
+
+                    var matchProjectRoute = new RegExp('#/project/(.*)/config$').exec(window.location.hash);
+                    if (matchProjectRoute) {
+                        var projectKey = matchProjectRoute[1];
+                        this.open(projectKey);
+                        window.location.hash = '';
                     }
                 },
 
@@ -261,6 +293,8 @@
                             self.selectedTeamName = team.teamName;
                             self.selectedTeamId = team.id;
                             self.suggestions = [team];
+                            
+                            self.formDirty = false;
                         })
                         .fail(function() {
                             self.errorMessage = 'Failed to load project configuration.';
@@ -271,8 +305,8 @@
                 openByEvent: function(projectConfigurationEvent) {
                     this.open(projectConfigurationEvent.detail);
                 },
-
-                updateConfiguration: function() {
+                
+                _saveConfiguration: function() {
                     var self = this;
 
                     var projectKey = self.projectConfiguration.projectKey;
@@ -295,12 +329,22 @@
                         baselineDate: self.projectConfiguration.baselineDate || null
                     };
 
-                    $.ajax({
+                    return $.ajax({
                         data: JSON.stringify(data),
                         type: 'POST',
                         contentType: "application/json; charset=utf-8",
                         url: '/ws/project/config/edit/' + projectKey
-                    }).done(function () {
+                    }).fail(function (jqXHR, textStatus, errorThrown) {
+                        console.error(errorThrown);
+                        self.showRequestError(jqXHR);
+                    });
+                },
+
+                updateConfiguration: function() {
+                    var self = this;
+                    var projectKey = self.projectConfiguration.projectKey;
+                    
+                    this._saveConfiguration().done(function () {
                         self.showLoading(false);
                         self.$.modal.close();
                         self.$.alertModalConfiguration.open(
@@ -308,10 +352,37 @@
                             "Configuration for project " + projectKey + " has been updated. We will reload the page to apply the configuration.",
                             function() { location.reload(); }
                         );
-                    }).fail(function (jqXHR, textStatus, errorThrown) {
-                        console.error(errorThrown);
-                        self.showRequestError(jqXHR);
                     });
+                },
+                
+                editProjectProfile: function() {                    
+                    var self = this;
+                    
+                    if (!this.formDirty) {
+                        self._goToProjectProfile();
+                        return;
+                    }
+
+                    var confirmCallback = function() {
+                        self._saveConfiguration().done(function () { 
+                    	    self._goToProjectProfile();
+                    	});
+                    }
+                    
+                    var cancelCallback = function() {
+                        self._goToProjectProfile()
+                    }
+                    
+                    this.$.saveProjectConfigurationConfirmModal.openDialog(
+                            "Save Changes?", 
+                            "All changes will be lost if you proceed without saving.", 
+                            confirmCallback,
+                            cancelCallback);
+                },
+                
+                _goToProjectProfile: function() {
+                    var projectKey = this.projectConfiguration.projectKey;
+                    window.location = '/app/project/' + projectKey + '/config/profile';
                 },
 
                 showLoading: function(show) {
@@ -358,6 +429,10 @@
                     return isoDate ? moment(isoDate, 'YYYY-MM-DD').format('L') : null;
                 },
                 
+                setFormDirty: function() {
+                    this.formDirty = true;
+                },
+                
                 _getMoment:  function(displayDate) {
                     return displayDate ? moment(displayDate, "L") : null;
                 },
@@ -373,6 +448,7 @@
 
                 _onChangeArchived: function(e) {
                     this.set('projectConfiguration.isArchived', !e.target.active);
+                    this.formDirty = true;
                 }
 
             });

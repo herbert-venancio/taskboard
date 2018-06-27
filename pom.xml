@@ -17,9 +17,7 @@
 		<jersey.version>2.22.1</jersey.version>
 		<slf4j.version>1.7.12</slf4j.version>
 		<aws.version>1.10.7</aws.version>
-		<node.version>v0.12.7</node.version>
 		<javax.servlet.version>3.1.0</javax.servlet.version>
-		<npm.version>2.13.0</npm.version>
 		<selenium.version>3.4.0</selenium.version>
 		<jackson.version>2.9.4</jackson.version>
 		<jira.api.version>4.0.1-OBJ</jira.api.version>
@@ -346,17 +344,15 @@
 								<phase>generate-resources</phase>
 							</execution>
 							<execution>
-								<id>exec-bower-install</id>
-								<phase>generate-sources</phase>
+								<id>exec-npm-build</id>
 								<configuration>
-									<executable>bower</executable>
-									<arguments>
-										<argument>install</argument>
-									</arguments>
+									<executable>npm</executable>
+									<commandlineArgs>run build</commandlineArgs>
 								</configuration>
 								<goals>
 									<goal>exec</goal>
 								</goals>
+								<phase>generate-resources</phase>
 							</execution>
 							<execution>
 								<id>exec-gulp</id>
@@ -410,59 +406,6 @@
 									<arguments>
 										<argument>src/test/js/report.js</argument>
 									</arguments>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>release</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>com.github.eirslett</groupId>
-						<artifactId>frontend-maven-plugin</artifactId>
-						<version>0.0.26</version>
-						<executions>
-							<execution>
-								<id>install node and npm</id>
-								<goals>
-									<goal>install-node-and-npm</goal>
-								</goals>
-								<configuration>
-									<nodeVersion>${node.version}</nodeVersion>
-									<npmVersion>${npm.version}</npmVersion>
-								</configuration>
-							</execution>
-							<execution>
-								<id>npm install</id>
-								<goals>
-									<goal>npm</goal>
-								</goals>
-								<configuration>
-									<arguments>install</arguments>
-								</configuration>
-							</execution>
-							<execution>
-								<id>bower install</id>
-								<goals>
-									<goal>bower</goal>
-								</goals>
-								<configuration>
-									<arguments>install</arguments>
-								</configuration>
-							</execution>
-							<execution>
-								<id>gulp build</id>
-								<goals>
-									<goal>gulp</goal>
-								</goals>
-								<phase>generate-resources</phase>
-								<configuration>
-									<arguments>--dest
-										${project.build.directory}/${project.build.finalName} default</arguments>
 								</configuration>
 							</execution>
 						</executions>

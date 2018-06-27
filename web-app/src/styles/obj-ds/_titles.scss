@@ -1,0 +1,35 @@
+
+%_obj-title-base {
+    font-family: $obj-font-ptsans-caption;
+    font-weight: bold;
+    color: $obj-color-dark-smoke;
+
+    .separator {
+        color: rgba($obj-color-smoke, 0.3);
+        font-weight: normal;
+    }
+}
+
+.obj-title-small {
+    @extend %_obj-title-base;
+    font-size: 14px;
+    line-height: 18px;
+}
+
+.obj-title-medium {
+    @extend %_obj-title-base;
+    font-size: 16px;
+    line-height: 22px;
+}
+
+.obj-title-large {
+    @extend %_obj-title-base;
+    font-size: 18px;
+    line-height: 24px;
+}
+
+.obj-title-extra-large {
+    @extend %_obj-title-base;
+    font-size: 24px;
+    line-height: 30px;
+}

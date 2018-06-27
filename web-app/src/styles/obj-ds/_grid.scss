@@ -1,0 +1,88 @@
+
+%_obj-grid-base {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    box-sizing: border-box;
+}
+
+%_obj-col-base {
+    box-sizing: border-box;
+}
+
+@mixin _obj_col($grid-size, $col-span) {
+    @extend %_obj-col-base;
+    width: 100% * ($col-span / $grid-size);
+}
+
+.obj-grid-12 {
+    @extend %_obj-grid-base;
+
+    > .obj-col-1  { @include _obj_col(12,  1); }
+    > .obj-col-2  { @include _obj_col(12,  2); }
+    > .obj-col-3  { @include _obj_col(12,  3); }
+    > .obj-col-4  { @include _obj_col(12,  4); }
+    > .obj-col-5  { @include _obj_col(12,  5); }
+    > .obj-col-6  { @include _obj_col(12,  6); }
+    > .obj-col-7  { @include _obj_col(12,  7); }
+    > .obj-col-8  { @include _obj_col(12,  8); }
+    > .obj-col-9  { @include _obj_col(12,  9); }
+    > .obj-col-10 { @include _obj_col(12, 10); }
+    > .obj-col-11 { @include _obj_col(12, 11); }
+    > .obj-col-12 { @include _obj_col(12, 12); }
+}
+
+.obj-grid-9 {
+    @extend %_obj-grid-base;
+
+    > .obj-col-1 { @include _obj_col(9, 1); }
+    > .obj-col-2 { @include _obj_col(9, 2); }
+    > .obj-col-3 { @include _obj_col(9, 3); }
+    > .obj-col-4 { @include _obj_col(9, 4); }
+    > .obj-col-5 { @include _obj_col(9, 5); }
+    > .obj-col-6 { @include _obj_col(9, 6); }
+    > .obj-col-7 { @include _obj_col(9, 7); }
+    > .obj-col-8 { @include _obj_col(9, 8); }
+    > .obj-col-9 { @include _obj_col(9, 9); }
+}
+
+.obj-grid-8 {
+    @extend %_obj-grid-base;
+
+    > .obj-col-1 { @include _obj_col(8, 1); }
+    > .obj-col-2 { @include _obj_col(8, 2); }
+    > .obj-col-3 { @include _obj_col(8, 3); }
+    > .obj-col-4 { @include _obj_col(8, 4); }
+    > .obj-col-5 { @include _obj_col(8, 5); }
+    > .obj-col-6 { @include _obj_col(8, 6); }
+    > .obj-col-7 { @include _obj_col(8, 7); }
+    > .obj-col-8 { @include _obj_col(8, 8); }
+}
+
+.obj-grid-6 {
+    @extend %_obj-grid-base;
+
+    > .obj-col-1 { @include _obj_col(6, 1); }
+    > .obj-col-2 { @include _obj_col(6, 2); }
+    > .obj-col-3 { @include _obj_col(6, 3); }
+    > .obj-col-4 { @include _obj_col(6, 4); }
+    > .obj-col-5 { @include _obj_col(6, 5); }
+    > .obj-col-6 { @include _obj_col(6, 6); }
+}
+
+.obj-grid-4 {
+    @extend %_obj-grid-base;
+
+    > .obj-col-1 { @include _obj_col(4, 1); }
+    > .obj-col-2 { @include _obj_col(4, 2); }
+    > .obj-col-3 { @include _obj_col(4, 3); }
+    > .obj-col-4 { @include _obj_col(4, 4); }
+}
+
+.obj-grid-3 {
+    @extend %_obj-grid-base;
+
+    > .obj-col-1 { @include _obj_col(3, 1); }
+    > .obj-col-2 { @include _obj_col(3, 2); }
+    > .obj-col-3 { @include _obj_col(3, 3); }
+}

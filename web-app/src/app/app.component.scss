@@ -1,0 +1,9 @@
+@import "utils/all";
+
+.page-container {
+    height: 100%;
+    padding-top: $obj-navbar-height;
+    margin-top: -$obj-navbar-height;
+    box-sizing: border-box;
+    position: relative;
+}

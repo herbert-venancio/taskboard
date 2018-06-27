@@ -1,0 +1,46 @@
+
+%_obj-input-base {
+    @extend %obj-border-box;
+
+    height: 32px;
+    padding: 0 16px;
+    font-family: $obj-font-ptsans;
+    font-size: 12px;
+    color: $obj-color-black;
+    box-sizing: border-box;
+    background-color: white;
+
+    &[disabled] {
+        color: rgba($obj-color-smoke, 0.8);
+        background-color: white;
+    }
+
+    &[readonly] {
+        font-size: 14px;
+        color: $obj-color-black;
+        border: none;
+        background-color: transparent;
+        padding: 0;
+    }
+
+    &:not([readonly]):focus {
+        outline: none;
+        border-color: $obj-color-blue;
+        box-shadow: 0 0 0 2px rgba($obj-color-blue, 0.2);
+
+        &.valid {
+            border-color: $obj-color-success;
+            box-shadow: 0 0 0 2px rgba($obj-color-success, 0.2);
+        }
+
+        &.invalid {
+            border-color: $obj-color-error;
+            box-shadow: 0 0 0 2px rgba($obj-color-error, 0.2);
+        }
+    }
+}
+
+.obj-text-field {
+    @extend %_obj-input-base;
+    height: 32px;
+}

@@ -1,0 +1,17 @@
+<div class="logo">
+    <img src="/static/images/touch/icon-128x128.png"/>
+    <h1>{{ title }}</h1>
+</div>
+
+<div class="actions">
+</div>
+
+<div class="user-account">
+    <obj-avatar [name]="loggedInUser.name" [imageUrl]="loggedInUser.avatarUrl" [objMenuToggle]="userAccountMenu"></obj-avatar>
+
+    <obj-menu #userAccountMenu>
+        <div>{{loggedInUser.name}}</div>
+        <button (click)="logout()">Logout</button>
+    </obj-menu>
+
+</div>

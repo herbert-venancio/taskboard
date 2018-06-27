@@ -12,10 +12,13 @@ public class ProjectConfigurationDialog extends AbstractUiFragment {
 
     private static final String SUCCESS_MESSAGE = "Configuration for project {0} has been updated.";
 
-    private String projectKey;
+    private final String projectKey;
 
     @FindBy(id="projectConfigurationModal")
     private WebElement dialog;
+    
+    @FindBy(css="#projectConfigurationModal .modal__title")
+    private WebElement dialogTitle;
     
     @FindBy(id="project-error")
     private WebElement globalError;
@@ -44,19 +47,19 @@ public class ProjectConfigurationDialog extends AbstractUiFragment {
     @FindBy(id="updateProjectConfiguration")
     private WebElement updateButton;
 
-    public ProjectConfigurationDialog(WebDriver driver) {
+    @FindBy(id="editProjectProfileConfiguration")
+    private WebElement editProjectProfileButton;
+
+    public ProjectConfigurationDialog(WebDriver driver, String projectKey) {
         super(driver);
+        this.projectKey = projectKey;
+        initElements(driver, this);
     }
 
-    public static ProjectConfigurationDialog open(WebDriver webDriver, WebElement projectItemButton) {
-        return initElements(webDriver, ProjectConfigurationDialog.class).open(projectItemButton);
-    }
-
-    private ProjectConfigurationDialog open(WebElement projectItemButton) {
-        this.projectKey = projectItemButton.getText();
-        waitForClick(projectItemButton);
+    public ProjectConfigurationDialog assertIsOpen() {
         waitVisibilityOfElement(dialog);
-        waitVisibilityOfElements(startDateInput, deliveryDateInput, riskInput, updateButton);
+        waitVisibilityOfElements(dialogTitle, startDateInput, deliveryDateInput, riskInput, updateButton);
+        waitTextInElement(dialogTitle, "Project Configuration for " + projectKey);
 
         return this;
     }
@@ -116,6 +119,11 @@ public class ProjectConfigurationDialog extends AbstractUiFragment {
         waitForClick(updateButton);
         return this;
     }
+    
+    public ProjectConfigurationDialog editProjectProfile() {
+        waitForClick(editProjectProfileButton);
+        return this;
+    }
    
     public ProjectConfigurationDialog assertGlobalError(String message) {
         waitTextInElement(globalError, message);
@@ -130,6 +138,23 @@ public class ProjectConfigurationDialog extends AbstractUiFragment {
     public ProjectConfigurationDialog assertSuccessAlertIsOpen() {
         WebElement successMessage = dialog.findElement(By.cssSelector("#alertModalConfiguration .text"));
         waitTextInElement(successMessage, format(SUCCESS_MESSAGE, projectKey));
+        return this;
+    }
+
+
+    public ProjectConfigurationDialog assertSaveConfirmModalIsOpen() {
+        WebElement title = dialog.findElement(By.cssSelector("#saveProjectConfigurationConfirmModal h2"));
+        waitTextInElement(title, "Save Changes?");
+        return this;
+    }
+
+    public ProjectConfigurationDialog confirmSave() {
+        waitForClick(By.cssSelector("#saveProjectConfigurationConfirmModal #confirm"));
+        return this;
+    }
+
+    public ProjectConfigurationDialog cancelSave() {
+        waitForClick(By.cssSelector("#saveProjectConfigurationConfirmModal #cancel"));
         return this;
     }
 

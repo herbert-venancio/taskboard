@@ -1,0 +1,101 @@
+<div class="tb-page-content">
+    <h2 id="tb-page-title" class="obj-title-large title">{{projectName}} <span class="separator">&gt;</span> Project Profile</h2>
+    <form #projectProfileForm="ngForm" (ngSubmit)="save(projectProfileForm)" tbLeaveConfirmation>
+        <obj-card class="bordless">
+            <obj-card-title>Items</obj-card-title>
+            <obj-card-actions>
+                <button id="tb-project-profile-add-item" type="button" obj-flat-button (click)="addItem()">
+                    <obj-icon iconName="plus"></obj-icon> Add Item
+                </button>
+            </obj-card-actions>
+            <obj-card-content>
+                <table id="tb-project-profile-items" class="obj-data-table inline-input" *ngIf="items.length > 0">
+                    <thead>
+                        <tr>
+                            <th class="role-name-col">Role Name</th>
+                            <th>People Count</th>
+                            <th>Allocation Start</th>
+                            <th>Allocation End</th>
+                            <th class="actions-col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let item of items" ngModelGroup="itemRow{{item.rowId}}">
+                            <td>
+                                <input type="text"
+                                       name="roleName"
+                                       objTextField
+                                       #roleName="objTextField"
+                                       [(ngModel)]="item.roleName"
+                                       (keydown.enter)="addItem(); false"
+                                       [tbFocus]="item == newItem"
+                                       tbNotEmpty />
+                                <obj-error-messages [for]="roleName">
+                                    <obj-error-message error="notEmpty">Role name is required.</obj-error-message>
+                                </obj-error-messages>
+                            </td>
+                            <td>
+                                <input type="number"
+                                       name="peopleCount"
+                                       objTextField
+                                       #peopleCount="objTextField"
+                                       [(ngModel)]="item.peopleCount"
+                                       (keydown.enter)="addItem(); false"
+                                       required
+                                       tbIsNumber
+                                       tbMin="0"
+                                       step="any" />
+                                <obj-error-messages [for]="peopleCount">
+                                    <obj-error-message error="min, isNumber">People count should be a positive number.</obj-error-message>
+                                    <obj-error-message error="required">People count is required.</obj-error-message>
+                                </obj-error-messages>
+                            </td>
+                            <td>
+                                <input type="text"
+                                       name="allocationStart"
+                                       objTextField
+                                       #allocationStart="objTextField"
+                                       [(ngModel)]="item.allocationStart"
+                                       (keydown.enter)="addItem(); false"
+                                       [placeholder]="dateDisplayFormat"
+                                       tbDateInput
+                                       required />
+                                <obj-error-messages [for]="allocationStart">
+                                    <obj-error-message error="dateParse">Date format should be {{dateDisplayFormat}}</obj-error-message>
+                                    <obj-error-message error="required">Allocation start is required.</obj-error-message>
+                                </obj-error-messages>
+                            </td>
+                            <td>
+                                <input type="text"
+                                       name="allocationEnd"
+                                       objTextField
+                                       #allocationEnd="objTextField"
+                                       [(ngModel)]="item.allocationEnd"
+                                       (keydown.enter)="addItem(); false"
+                                       [placeholder]="dateDisplayFormat"
+                                       tbDateInput
+                                       [tbSameOrAfter]="item.allocationStart"
+                                       required />
+                                <obj-error-messages [for]="allocationEnd">
+                                    <obj-error-message error="dateParse">Date format should be {{dateDisplayFormat}}</obj-error-message>
+                                    <obj-error-message error="required">Allocation end is required.</obj-error-message>
+                                    <obj-error-message error="sameOrAfter">Allocation end should be same or after allocation start.</obj-error-message>
+                                </obj-error-messages>
+                            </td>
+                            <td class="col-right">
+                                <button type="button" obj-flat-button class="remove-button" (click)="removeItem(item)">Remove</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="obj-empty" *ngIf="items.length == 0">No items registered.</div>
+            </obj-card-content>
+        </obj-card>
+
+        <div class="footer">
+            <button type="button" id="tb-project-profile-back-to-project" obj-button (click)="backToProject()">Back to Project</button>
+            <button type="submit" id="tb-project-profile-save" obj-button class="primary">Save</button>
+        </div>
+    </form>
+</div>
+<obj-snackbar id="tb-project-profile-snackbar" [control]="snackbar"></obj-snackbar>

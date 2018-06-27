@@ -1,0 +1,26 @@
+
+%_tb-page-base {
+    height: 100%;
+    display: block;
+    background-color: $obj-color-snow;
+}
+
+%_tb-page-base.dark {
+    background-color: $obj-color-dark-smoke;
+}
+
+.tb-fixed-page {
+    @extend %_tb-page-base;
+    overflow: auto;
+
+    .tb-page-content {
+        width: 1366px;
+        margin: 0 auto;
+    }
+}
+
+.tb-responsive-page {
+    @extend %_tb-page-base;
+
+    width: 100%;
+}

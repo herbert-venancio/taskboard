@@ -1,0 +1,60 @@
+@import "obj-ds/utils/all";
+
+:host {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+}
+
+.snackbar {
+    @include obj-shadow-small;
+    @include obj-border-box-radius;
+
+    background-color: #FFF;
+    padding: 8px;
+    height: 54px;
+    min-width: 192px;
+    box-sizing: border-box;
+    margin-top: 12px;
+    position: relative;
+    color: $obj-color-black;
+
+    .title {
+        color: inherit;
+        padding-right: 24px;
+    }
+
+    .description {
+        font-family: $obj-font-ptsans;
+        font-size: 12px;
+        line-height: 16px;
+    }
+
+    .close-button {
+        position: absolute;
+        right: 8px;
+        top: 8px;
+    }
+
+    &.success,
+    &.error {
+        color: #FFF;
+
+        .close-button {
+            color: #FFF;
+
+            &:hover {
+                color: $obj-color-dark-snow;
+            }
+        }
+    }
+
+    &.success {
+        background-color: $obj-color-dark-green;
+    }
+
+    &.error {
+        background-color: $obj-color-error;
+    }
+}
+

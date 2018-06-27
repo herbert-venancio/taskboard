@@ -1,0 +1,11 @@
+<div *ngFor="let item of items"
+     class="snackbar"
+     [class.success]="item.level == levels.Success"
+     [class.error]="item.level == levels.Error">
+    <h4 class="obj-title-small title">{{item.title}}</h4>
+    <div class="description" *ngIf="item.description">{{item.description}}</div>
+
+    <button type="button" obj-icon-button class="close-button" (click)="close(item)">
+        <obj-icon iconName="clear" class="small"></obj-icon>
+    </button>
+</div>
