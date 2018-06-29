@@ -18,7 +18,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
   [/LICENSE]
   -->
-<dom-module id="aspects-filter">
+<dom-module id="card-field-filters">
 
     <template>
 
@@ -46,15 +46,15 @@
         </style>
 
         <paper-material>
-            <paper-toolbar on-tap="aspectsFilterTap">
+            <paper-toolbar on-tap="_onCardFieldsFiltersTap">
                 <paper-material class="config-item flex layout horizontal" elevation=0>
                     <iron-icon id="toggleIcon" class="config-icon icon-small" icon="chevron-right"></iron-icon>
-                    <paper-material class="config-title" elevation=0>Aspects Filter</paper-material>
+                    <paper-material class="config-title" elevation=0>Card Field Filters</paper-material>
                 </paper-material>
             </paper-toolbar>
-            <iron-collapse id="aspectsFilter">
-                <template is="dom-repeat" items="{{aspectsFilter}}" as="aspectsFilter">
-                    <aspect-item-filter aspect-item-filter="{{aspectsFilter}}"></aspect-item-filter>
+            <iron-collapse id="cardFieldsFilters">
+                <template is="dom-repeat" items="[[cardFieldFilters]]" as="cardFieldFilter">
+                    <card-field-filter card-field-filter="[[cardFieldFilter]]"></card-field-filter>
                 </template>
             </iron-collapse>
         </paper-material>
@@ -64,27 +64,24 @@
     <script>
         (function () {
             Polymer({
-                is: 'aspects-filter',
+                is: 'card-field-filters',
 
                 properties: {
-                    aspectsFilter: {
-                        type: Object,
-                        notify: true
-                    },
+                    cardFieldFilters: {
+                        type: Object
+                    }
                 },
 
                 toggleAjax: function () {
                     this.$.spinner.active = false;
                 },
 
-                aspectsFilterTap: function (e) {
-                    this.$.aspectsFilter.toggle();
-
-                    if (this.$.aspectsFilter.opened) {
+                _onCardFieldsFiltersTap: function (e) {
+                    this.$.cardFieldsFilters.toggle();
+                    if (this.$.cardFieldsFilters.opened)
                         this.$.toggleIcon.icon = 'expand-more';
-                    } else {
+                    else
                         this.$.toggleIcon.icon = 'chevron-right';
-                    }
                 },
             });
         })();

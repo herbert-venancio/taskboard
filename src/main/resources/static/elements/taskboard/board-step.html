@@ -273,7 +273,7 @@
                 },
 
                 showTeamCount: function() {
-                    return userPreferences.getPreferences().laneConfiguration[0].showCount && this.getIssueCount() > 0 && this.team != null;
+                    return userPreferences.getLane().showCount && this.getIssueCount() > 0 && this.team != null;
                 },
 
                 showSynthetic: function() {
@@ -300,11 +300,11 @@
                 },
 
                 filterIssues: function(issues) {
-                    var filteredIssues = new Array();
-                    for (var i in issues)
-                        if (this.shouldShowIssue(issues[i]))
-                            filteredIssues.push(issues[i]);
-
+                    var filteredIssues = [];
+                    forEachInArray(issues, function(issue) {
+                        if (this.doFiltersAllow(issue))
+                            filteredIssues.push(issue);
+                    }.bind(this));
                     return filteredIssues.sort(sortByProperty('priorityOrder'));
                 },
 
@@ -316,38 +316,8 @@
                     return issuesDisabledTeam;
                 },
 
-                shouldShowIssue: function(issue) {
-                    return this.doFiltersAllow(issue) 
-                            && this.doPreferencesAllow(issue) 
-                },
-
                 doFiltersAllow: function(issue) {
                     return !this.team || issue.teamNames.indexOf(this.team) !== -1;
-                },
-
-                doPreferencesAllow: function(issue) {
-                    for (var i = 0; i < taskboard.getAspectFilters().length; i++) {
-                        var field = taskboard.getAspectFilters()[i].field;
-                        var value = issue[field]
-                        var filters = userPreferences.getFilters()
-
-                        if (!this.checkPreference(value,  filters))
-                            return false;
-                    }
-
-                    return true;
-                },
-
-                checkPreference: function(values, filters) {
-                    if (!Array.isArray(values))
-                        values = [ values ];
-
-                    for (var index in values) {
-                        if (filters[values[index]])
-                            return true;
-                    }
-
-                    return false;
                 },
 
                 getIssueCount: function() {
@@ -370,7 +340,6 @@
                 },
 
                 updateCanChangePrioritization: function() {
-                    var self = this;
                     var hasPermission = _.isEmpty(this.listInvalidPermissionProjects());
                     this.set('canChangePrioritization', hasPermission);
                     this.set('issueItemClasses', hasPermission ? '' : 'cannot-drag');
@@ -383,7 +352,6 @@
                 },
 
                 showCannotChangePrioritizationError: function() {
-                    var self = this;
                     var invalidPermissionProjects = this.listInvalidPermissionProjects();
                     this.fire("iron-signal", {
                         name:"show-error-message"
@@ -466,20 +434,20 @@
                 },
 
                 handleStepUpdate: function(event, data) {
-                    if (this.stepMetadata.id != data.stepId)
+                    if (this.stepMetadata.id !== data.stepId)
                         return;
-                    var self = this;
 
+                    var self = this;
                     this.updateQueue.push(function() {
                         self.performUpdate(function() {
                             self.updateQueue.shift();
-                            if (self.updateQueue.length == 0)
+                            if (self.updateQueue.length === 0)
                                 self.filter();
                             else
                                 self.updateQueue[0]();
                         });
-                    })
-                    if (this.updateQueue.length == 1)
+                    });
+                    if (this.updateQueue.length === 1)
                         this.updateQueue[0]();
                 },
 

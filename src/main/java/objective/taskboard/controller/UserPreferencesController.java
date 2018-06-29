@@ -21,7 +21,6 @@
 
 package objective.taskboard.controller;
 
-import org.codehaus.jettison.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import objective.taskboard.auth.CredentialsHolder;
+import objective.taskboard.domain.UserPreferences.Preferences;
 import objective.taskboard.filterPreferences.UserPreferencesService;
 
 
@@ -38,11 +38,11 @@ import objective.taskboard.filterPreferences.UserPreferencesService;
 public class UserPreferencesController {
 
     @Autowired
-    UserPreferencesService service;
+    private UserPreferencesService service;
 
     @RequestMapping(path = "update", method = RequestMethod.POST)
     @Transactional
-    public Boolean updatePreferences(@RequestBody String preferences) throws JSONException {
+    public Boolean updatePreferences(@RequestBody Preferences preferences) {
         service.save(CredentialsHolder.username(), preferences);
         return true;
     }

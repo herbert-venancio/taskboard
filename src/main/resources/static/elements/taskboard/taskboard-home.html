@@ -109,46 +109,6 @@
                 color: #fe6565;
             }
 
-            .bottom {
-                background-color: #3F51B5;
-                height: 35px;
-                width: 100%;
-                position: fixed;
-                bottom: 0;
-                left: 0;
-            }
-
-            .label-colors {
-                font-size: 15px;
-                font-weight: 600;
-                padding-left: 5px;
-                margin-left: 10px;
-            }
-
-            .label-colors.os {
-                color: #add9fe;
-            }
-
-            .label-colors.task {
-                color: #FDD28A;
-            }
-
-            .label-colors.bug {
-                color: #FF8B94;
-            }
-
-            .label-colors.outros {
-                color: #A0CB9C;
-            }
-
-            .legendas {
-                justify-content: center;
-                position: absolute;
-                width: 100%;
-                bottom: 0;
-                left: 0;
-            }
-
             #toastError .yellow-button {
                 text-transform: none;
                 color: #eeff41;
@@ -406,7 +366,7 @@
                       on-iron-signal-close-issue-error-message="_closeIssueErrorIronSignal"
                       on-iron-signal-search-filter-changed="searchFilterChanged"
                       on-iron-signal-issue-cache-state-updated="cacheStateUpdated"
-                      on-iron-signal-projects-changed="projectsUpdated"
+                      on-iron-signal-projects-changed="retrieveFilters"
                       ></iron-signals>
 
         <followup-report id="followupReport"></followup-report>
@@ -425,7 +385,7 @@
                     <paper-toast duration="0" id="toastError" on-iron-overlay-closed="_onToastErrorClosed">
                         <iron-icon icon="icons:error"></iron-icon>
                         <span>{{errorMessage}}</span>
-                        <template is="dom-repeat" is="dom-repeat" items="{{errorActions}}" as="action">
+                        <template is="dom-repeat" items="{{errorActions}}" as="action">
                             <tb-button data-action-name$="{{action.name}}" button="[[action.button]]" class="yellow-button"></tb-button>
                         </template>
                     </paper-toast>
@@ -441,7 +401,7 @@
                     <paper-toast duration="0" id="toastIssueError" class="issue-errors">
                         <iron-icon class="issue-errors__icon" icon="icons:error"></iron-icon>
                         <ul class="issue-errors__messages">
-                            <template is="dom-repeat" is="dom-repeat" items="{{issueErrorMessages}}" as="issueMessage">
+                            <template is="dom-repeat" items="{{issueErrorMessages}}" as="issueMessage">
                                 <li class="issue-error">
                                     <span class="issue-error__message">{{issueMessage.errorMessage}}</span>
                                     <paper-button data-issue-key$="{{issueMessage.issueKey}}" on-tap="_openIssue" class="issue-error__open">Open Issue</paper-button>
@@ -492,13 +452,13 @@
                                                class="about-button" on-tap="openAbout"></paper-icon-button>
                         </div>
                     </paper-material>
-                    <paper-material class="search-warning">
+                    <paper-material class="search-warning" hidden$="[[!isFiltering]]">
                         Issues are being filtered. <span on-tap="clearFilter">Click here to reset</span>
                     </paper-material>
-                    <board-table id="table" conf="{{conf}}" aspects-filter="[[aspectsFilter]]"></board-table>
+                    <board-table id="table" conf="{{conf}}"></board-table>
                 </div>
                 <paper-header-panel drawer>
-                    <tb-configurations conf={{conf}} aspects-filter="{{aspectsFilter}}"></tb-configurations>
+                    <tb-configurations conf="{{conf}}" card-field-filters="[[cardFieldFilters]]"></tb-configurations>
                 </paper-header-panel>
             </template>
         </paper-drawer-panel>
@@ -511,13 +471,12 @@
                 is: 'taskboard-home',
 
                 observers: [
-                    'refreshDone(aspectsFilter, conf)'
+                    'refreshDone(cardFieldFilters, conf)'
                 ],
 
                 properties: {
-                    aspectsFilter: {
-                        type: Object,
-                        notify: true
+                    cardFieldFilters: {
+                        type: Object
                     },
                     conf: {
                         type: Object
@@ -527,12 +486,11 @@
                     },
                     done: {
                         type: Boolean,
-                        notify: true,
                         value: false
                     },
                     errorMessage: {
                         type: String,
-                        value: "An unexpected error ocurred. Could not save your preferences on server."
+                        value: "An unexpected error occurred. Could not save your preferences on server."
                     },
                     issueErrorMessages: {
                         type: Array,
@@ -569,7 +527,6 @@
                 },
 
                 ready: function () {
-                    this.currentQueryData = {query: ''}
                     analytics.trackView();
                     taskboard.connectToWebsocket(this)
                     this.retrieveBoardFeatures();
@@ -582,20 +539,22 @@
                 },
 
                 retrieveFilters: function () {
-                    $.getJSON("/ws/issues/aspects-filter", $.proxy(function (data) {
-                        taskboard.setAspectFilters(this, data);
-                        taskboard.applyFilterPreferences();
-                        this.aspectsFilter = taskboard.getAspectFilters();
-                    }, this));
+                    $.getJSON("/ws/issues/card-field-filters", function (data) {
+                        taskboard.setCardFieldFilters(this, data);
+                        this.cardFieldFilters = taskboard.getCardFieldFilters();
+                    }.bind(this));
                 },
 
-                updateUserPreferences: function () {
+                updateUserPreferences: function(customEvent) {
                     var self = this;
                     $.ajax({
                         data: JSON.stringify(userPreferences.getPreferences()),
                         type: 'POST',
-                        contentType: "text/plain; charset=utf-8",
+                        contentType: 'application/json',
                         url: '/ws/user-preferences/update'
+                    }).done(function () {
+                        if (customEvent.type !== 'iron-signal-level-weight-changed')
+                            self.$$('board-table').fetchIssues();
                     }).fail(function (jqXHR, textStatus, errorThrown) {
                         console.error(errorThrown);
                         self.set('errorMessage', 'An unexpected error ocurred. Could not save your preferences on server.');
@@ -617,61 +576,55 @@
                     return levelConfig;
                 },
 
-                storageLevelsConfig: function () {
+                storageLevelsConfig: function (customEvent) {
                     if (this.conf.length === 0)
                         return;
                     userPreferences.setLevels(this.currentLevelPreferences());
-                    this.updateUserPreferences();
+                    this.updateUserPreferences(customEvent);
                 },
 
                 retrieveBoardFeatures: function () {
-                    var configBoard = [];
                     var self = this;
                     $.ajax({
                         url: "/ws/issues/configuration",
                         dataType: "json",
                         success: function (data) {
+                            userPreferences.setPreferences(data.userPreferences);
                             taskboard.setLaneConfiguration(data.laneConfiguration);
-                            configBoard = data.laneConfiguration;
+                            taskboard.urlJira = data.urlJira;
+                            taskboard.urlLinkGraph = data.urlLinkGraph;
+
                             localStorage.setItem("issueTypes", JSON.stringify(data.issueTypes));
                             localStorage.setItem("issueTypeConfig", JSON.stringify(data.issueTypesConfig));
                             localStorage.setItem("priorities", JSON.stringify(data.priorities));
                             localStorage.setItem("statuses", JSON.stringify(data.statuses));
 
-                            try {
-                                userPreferences.setPreferences(JSON.parse(data.userPreferences));
-                            }catch(e) {
-                                console.error(e)
-                            }
-
                             self.retrieveFilters();
 
-                            window.urlJira = data.urlJira;
-                            window.urlLinkGraph = data.urlLinkGraph;
+                            var lanesConfiguration = data.laneConfiguration;
+                            var levelsPreferences = userPreferences.getLevels();
 
-                            var levelPreferences = userPreferences.getLevels();
-                            if (levelPreferences && levelPreferences.length > 0) {
-                                for (var l = 0; l < configBoard.length; l++) {
-                                    for (var s = 0; s < levelPreferences.length; s++) {
-                                        var tmpConf = configBoard[l];
-                                        if (tmpConf.level === levelPreferences[s].level) {
-                                            tmpConf.showLevel = levelPreferences[s].showLevel;
-                                            tmpConf.weight = levelPreferences[s].weightLevel;
-                                            tmpConf.showLaneTeam = levelPreferences[s].showLaneTeam;
-                                            tmpConf.showHeader = levelPreferences[s].showHeader;
-                                            break;
-                                        }
-                                    }
-                                }
+                            if (!isEmptyArray(levelsPreferences)) {
+                                forEachInArray(lanesConfiguration, function(laneConf) {
+                                    var userPreferencesForLane = findInArray(levelsPreferences, function(levelPref) {
+                                        return laneConf.level === levelPref.level;
+                                    });
+                                    if(!userPreferencesForLane)
+                                        return;
+                                    laneConf.showLevel = userPreferencesForLane.showLevel;
+                                    laneConf.weight = userPreferencesForLane.weightLevel;
+                                    laneConf.showLaneTeam = userPreferencesForLane.showLaneTeam;
+                                    laneConf.showHeader = userPreferencesForLane.showHeader;
+                                });
                             }
 
-                            self.conf = configBoard;
+                            self.set('conf', lanesConfiguration);
                         }
                     });
                 },
 
-                refreshDone: function (f) {
-                    if (this.conf && this.aspectsFilter)
+                refreshDone: function () {
+                    if (this.conf && this.cardFieldFilters)
                         this.done = true;
                 },
 
@@ -680,7 +633,8 @@
                     var errorButtons = event.detail.actions;
                     if (!errorButtons)
                         errorButtons = [];
-                    errorButtons.push({name:"Close", callback: this._closeToastError})
+                    if (!event.detail.hideClose)
+                        errorButtons.push({name:"Close", callback: this._closeToastError})
                     errorButtons.forEach(function(action) {
                         action.button = ButtonBuilder(action.name).onClick(function(){action.callback(toastError)}).build();
                     })
@@ -789,15 +743,10 @@
                     this.activateFilter()
                     if (data.dontSaveQuery)
                         return;
-                    this.currentQueryData = data;
                     this.searchQuery = data.query;
                 },
 
-                projectsUpdated: function(event, data) {
-                    this.retrieveFilters();
-                },
-
-                _onIssueUpdatedClosed: function(event) {
+                _onIssueUpdatedClosed: function() {
                     toastIssueUpdated.duration = 5000;
                     this.updatedIssueKeys = [];
                     this.infoMessage = "";

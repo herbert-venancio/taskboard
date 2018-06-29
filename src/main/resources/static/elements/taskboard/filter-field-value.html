@@ -18,7 +18,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
   [/LICENSE]
   -->
-<dom-module id="aspect-subitem-filter">
+<dom-module id="filter-field-value">
 
     <template>
 
@@ -75,14 +75,14 @@
 
         </style>
 
-        <paper-button elevation="0" on-tap="toggle">
-          <template is="dom-if" if="{{isUrl(aspectSubitemFilter)}}">
-              <paper-icon-button src="{{getIconImage(aspectSubitemFilter)}}"></paper-icon-button>
-          </template>
-          <template is="dom-if" if="{{isNotUrl(aspectSubitemFilter)}}">
-              <paper-icon-button icon="{{getIconImage(aspectSubitemFilter)}}"></paper-icon-button>
-          </template>
-            <span>{{aspectSubitemFilter.name}}</span>
+        <paper-button elevation="0" on-tap="_toggleVisibility" class$="[[_getVisibilityIcon(filterFieldValue.selected)]]">
+            <template is="dom-if" if="[[_isUrl]]">
+                <paper-icon-button src="[[_imageOrIcon]]"></paper-icon-button>
+            </template>
+            <template is="dom-if" if="[[!_isUrl]]">
+                <paper-icon-button icon="[[_imageOrIcon]]"></paper-icon-button>
+            </template>
+            <span>[[filterFieldValue.name]]</span>
         </paper-button>
 
     </template>
@@ -90,64 +90,44 @@
     <script>
         (function () {
             Polymer({
-                is: 'aspect-subitem-filter',
+                is: 'filter-field-value',
 
                 properties: {
-                    aspectSubitemFilter: {
+                    filterFieldValue: {
                         type: Object,
                         notify: true
                     },
-                    description: {
-                        type: String
+                    _isUrl: {
+                        type: Boolean
                     },
-                    selected: {
-                        type: Boolean,
-                        notify: true
+                    _imageOrIcon: {
+                        type: String
                     }
                 },
 
-                observers: [
-                    'toggleIcon(selected)',
-                    'saveFilterPreferences(aspectSubitemFilter.*, description)'
-                ],
-
-                toggle: function () {
-                    this.selected = !this.selected;
-                    this.fire('iron-signal', {name: 'update-user-preferences'});
+                ready: function() {
+                    this.set('_imageOrIcon', this._getIconImage());
+                    this.set('_isUrl', isUrl(this._imageOrIcon));
+                    this._saveFilterPreferences();
                 },
 
-                saveFilterPreferences: function () {
-                  if (this.description === 'Issue Type') {
-                      userPreferences.setFilter(this.aspectSubitemFilter.value.id, this.aspectSubitemFilter.selected);
-                  } else {
-                      userPreferences.setFilter(this.aspectSubitemFilter.value, this.aspectSubitemFilter.selected);
-                  }
+                _toggleVisibility: function() {
+                    var newSelectedValue = !this.filterFieldValue.selected;
+                    this.set('filterFieldValue.selected', newSelectedValue);
+                    this._saveFilterPreferences();
+                    this.fire("selected-changed");
                 },
 
-                toggleIcon: function (selected) {
-                    if (selected)
-                        $(this).children().removeClass('icon');
-                    else
-                        $(this).children().addClass('icon');
-
-                    if (this.description === 'Project') {
-                        taskboard.applyFilterPreferences();
-                        this.fire('iron-signal', {name: 'refresh-filter-teams'});
-                        this.fire('iron-signal', {name: 'refresh-release-filter'});
-                    }
+                _saveFilterPreferences: function() {
+                    userPreferences.setFilter(this.filterFieldValue.value, this.filterFieldValue.selected);
                 },
 
-                isNotUrl: function (item) {
-                    return !this.isUrl(item);
+                _getVisibilityIcon: function() {
+                    return !this.filterFieldValue.selected ? 'icon' : '';
                 },
 
-                isUrl: function (item) {
-                   var regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
-                   return regexp.test(this.getIconImage(item));
-                },
-
-                getIconImage: function (item) {
-                    return item.value.iconUri ? item.value.iconUri.replace('xsmall', 'medium') : 'visibility';
+                _getIconImage: function() {
+                    return this.filterFieldValue.iconUri ? this.filterFieldValue.iconUri.replace('xsmall', 'medium') : 'visibility';
                 }
             });
         })();

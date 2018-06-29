@@ -141,11 +141,11 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
     }
 
     @Test
-    public void givenIssuesFilteredByAspectFilter_whenChangePriorityOrder_thenAfterFiltersShouldWork() {
+    public void givenIssuesFilteredByCardFieldFilter_whenChangePriorityOrder_thenAfterFiltersShouldWork() {
         MainPage mainPage = MainPage.produce(webDriver);
         mainPage.openMenuFilters()
-            .openAspectsFilter()
-            .clickAspectSubitemFilter("Team", "TASKBOARD 1")
+            .openCardFieldFilters()
+            .clickFilterFieldValue("Team", "TASKBOARD 1")
             .closeMenuFilters();
 
         LaneFragment deployable = mainPage.lane("Deployable");

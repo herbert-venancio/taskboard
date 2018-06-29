@@ -39,7 +39,7 @@ public class ReleaseFilterIT extends AuthenticatedIntegrationTest {
         MainPage mainPage = MainPage.produce(webDriver);
         MenuFilters menuFilters = mainPage.assertLabelRelease("Release")
                 .openMenuFilters();
-        menuFilters.openAspectsFilter()
+        menuFilters.openCardFieldFilters()
                 .clickCheckAllFilter("Project");
         mainPage.assertLabelRelease("No releases for visible projects");
         menuFilters.clickCheckAllFilter("Project");

@@ -278,12 +278,7 @@
                 },
 
                 ready: function () {
-                    var pref = userPreferences.getLevel(this.metadata.id);
-                    this.weight = pref ? pref.weightLevel : this.metadata.weight;
-
-                    this.addEventListener('dom-change', function() {
-                        taskboard.refitSteps();
-                    });
+                    this.weight = this.metadata.weight;
                 },
 
                 attached: function() {
@@ -312,7 +307,6 @@
                 },
 
                 getTotalStepWeight: function() {
-                    var self = this;
                     var totalStepWeight = 0;
                     this.metadata.stages.forEach(function(stage) {
                         stage.steps.forEach(function(x) {

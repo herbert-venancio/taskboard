@@ -9,14 +9,14 @@ function sortByProperty(property) {
 function forEachInArray(array, callback) {
     var arrayLength = array.length;
     for (var i = 0; i < arrayLength; i++)
-        callback(array[i])
+        callback(array[i], i) //NOSONAR
 }
 
 function findInArray(array, callback) {
     var notFoundValue = undefined;
     var arrayLength = array.length;
     for (var i = 0; i < arrayLength; i++)
-        if(callback(array[i]))
+        if(callback(array[i], i))
             return array[i];
     return notFoundValue;
 }
@@ -25,7 +25,7 @@ function findIndexInArray(array, callback) {
     var notFoundValue = -1;
     var arrayLength = array.length;
     for (var i = 0; i < arrayLength; i++)
-        if(callback(array[i]))
+        if(callback(array[i], i))
             return i;
     return notFoundValue;
 }
@@ -86,6 +86,11 @@ function removeDaysFromDate(date, days) {
 
 function getCapitalized(string) {
     return _.isEmpty(string) ? string : string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function isUrl(stringToTest) {
+    var regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
+    return regexp.test(stringToTest);
 }
 
 function makeSVGEl(tag, attrs) {

@@ -1766,7 +1766,7 @@
                 openJira: function (event) {
                     event.stopPropagation();
                     var issueKey = event.target.getAttribute('data-issue-key');
-                    window.open(window.urlJira + '/browse/' + issueKey, '_blank');
+                    window.open(taskboard.urlJira + '/browse/' + issueKey, '_blank');
                 },
 
                 _afterOpen: function() {
