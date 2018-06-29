@@ -20,13 +20,29 @@
  */
 package objective.taskboard.domain;
 
+import static java.util.Arrays.asList;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.persistence.Entity;
 import javax.persistence.Lob;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.apache.commons.lang.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 
 @Entity
 @Table(name = "user_preferences")
@@ -37,14 +53,23 @@ import org.apache.commons.lang.Validate;
 })
 public class UserPreferences extends TaskboardEntity {
 
+    private static final Logger log = LoggerFactory.getLogger(UserPreferences.class);
+
     private String jiraUser;
 
     @Lob
     private String preferences;
 
+    @Transient
+    private Preferences preferencesObj = null;
+
     protected UserPreferences() {}
 
-    public UserPreferences(String jiraUser, String preferences) {
+    public UserPreferences(String jiraUser) {
+        this(jiraUser, new Preferences());
+    }
+
+    public UserPreferences(String jiraUser, Preferences preferences) {
         this.setJiraUser(jiraUser);
         this.setPreferences(preferences);
     }
@@ -53,8 +78,10 @@ public class UserPreferences extends TaskboardEntity {
         return this.jiraUser;
     }
 
-    public String getPreferences() {
-        return this.preferences;
+    public Preferences getPreferences() {
+        if (this.preferencesObj == null)
+            this.preferencesObj = stringToPreferences(this.preferences);
+        return this.preferencesObj;
     }
 
     public void setJiraUser(final String jiraUser) {
@@ -62,36 +89,52 @@ public class UserPreferences extends TaskboardEntity {
         this.jiraUser = jiraUser;
     }
 
-    public void setPreferences(final String preferences) {
-        Validate.notEmpty(jiraUser, "preferences required");
-        this.preferences = preferences;
+    public void setPreferences(final Preferences preferences) {
+        Validate.notNull(preferences, "preferences required");
+        this.preferencesObj = preferences;
+        this.preferences = preferencesToString(preferences);
     }
 
-    @Override
-    public String toString() {
-        return "UserPreferences{" +
-                "jiraUser='" + jiraUser + '\'' +
-                ", preferences='" + preferences + '\'' +
-                '}';
+    private String preferencesToString(Preferences preferences) {
+        try {
+            return new ObjectMapper().writeValueAsString(preferences);
+        } catch (JsonProcessingException e) {
+            log.error("Error while generating \"preferences\" string", e);
+            throw new IllegalArgumentException(e);
+        }
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-
-        UserPreferences that = (UserPreferences) o;
-
-        if (jiraUser != null ? !jiraUser.equals(that.jiraUser) : that.jiraUser != null) return false;
-        return preferences != null ? preferences.equals(that.preferences) : that.preferences == null;
+    private Preferences stringToPreferences(String preferences) {
+        try {
+            return new ObjectMapper().readValue(preferences, Preferences.class);
+        } catch (IOException e) {
+            log.error("Error while parsing \"preferences\" json", e);
+            throw new IllegalArgumentException(e);
+        }
     }
 
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (jiraUser != null ? jiraUser.hashCode() : 0);
-        result = 31 * result + (preferences != null ? preferences.hashCode() : 0);
-        return result;
+    public static class Preferences {
+        public List<LevelPreference> levelPreferences = new ArrayList<>();
+        public Map<String, Boolean> filterPreferences = new HashMap<>();
+        public VisibilityConfiguration visibilityConfiguration = new VisibilityConfiguration();
+        public List<LaneConfiguration> laneConfiguration = asList(new LaneConfiguration());
     }
+
+    public static class LevelPreference {
+        public String level;
+        public Boolean showLevel;
+        public Boolean showHeader;
+        public Boolean showLaneTeam;
+        public Double weightLevel;
+    }
+
+    @JsonIgnoreProperties(value = { "issueOrder" })
+    public static class VisibilityConfiguration {
+        public Boolean showSynthetic = false;
+    }
+
+    public static class LaneConfiguration {
+        public Boolean showCount = false;
+    }
+
 }

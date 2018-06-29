@@ -20,51 +20,38 @@
  */
 function UserPreferences() {
 
-    var cacheUserPreferences;
+    var _userPreferences;
 
-    var getDefaultVisibilityConfiguration = function () {
-        return {
-            "showSynthetic": false
-        };
+    this.getPreferences = function() {
+        return _userPreferences;
     };
 
-    this.getPreferences = function () {
-        return cacheUserPreferences;
+    this.setPreferences = function(preferences) {
+        _userPreferences = preferences;
     };
 
-    this.setPreferences = function (preferences) {
-        cacheUserPreferences = preferences;
+    this.getView = function() {
+        return _userPreferences.visibilityConfiguration;
     };
 
-    this.getView = function () {
-        return cacheUserPreferences.visibilityConfiguration ||
-            (cacheUserPreferences.visibilityConfiguration = getDefaultVisibilityConfiguration());
+    this.getLane = function() {
+        return _userPreferences.laneConfiguration[0];
     };
 
-    this.getLanes = function () {
-        return cacheUserPreferences.laneConfiguration || (cacheUserPreferences.laneConfiguration = [{'showCount': false}]);
+    this.getFilters = function() {
+        return _userPreferences.filterPreferences;
     };
 
-    this.getFilters = function () {
-        return cacheUserPreferences.filterPreferences || (cacheUserPreferences.filterPreferences = {});
-    };
-
-    this.setFilter = function (filter, value) {
+    this.setFilter = function(filter, value) {
         this.getFilters()[filter] = value;
     };
 
-    this.getLevels = function () {
-        return cacheUserPreferences.levelPreferences || (cacheUserPreferences.levelPreferences = []);
+    this.getLevels = function() {
+        return _userPreferences.levelPreferences;
     };
 
-    this.setLevels = function (levels) {
-        cacheUserPreferences.levelPreferences = levels;
-    };
-
-    this.getLevel = function (id) {
-        return _.find(this.getLevels(), function(level) {
-            return level.id == id;
-        });
+    this.setLevels = function(levels) {
+        _userPreferences.levelPreferences = levels;
     };
 
 }

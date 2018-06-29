@@ -21,26 +21,39 @@
 
 package objective.taskboard.filterPreferences;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import objective.taskboard.auth.CredentialsHolder;
+import objective.taskboard.data.CardFieldFilter;
+import objective.taskboard.data.LaneConfiguration;
 import objective.taskboard.domain.UserPreferences;
+import objective.taskboard.domain.UserPreferences.LevelPreference;
+import objective.taskboard.domain.UserPreferences.Preferences;
 import objective.taskboard.repository.UserPreferencesRepository;
 
 @Service
 public class UserPreferencesService {
 
-    @Autowired
     private UserPreferencesRepository repository;
 
-    public Optional<UserPreferences> getLoggedUserPreferences() {
-        return repository.findOneByJiraUser(CredentialsHolder.username());
+    @Autowired
+    public UserPreferencesService(UserPreferencesRepository repository) {
+        this.repository = repository;
     }
 
-    public void save(String jiraUser, String preferences) {
+    public UserPreferences getLoggedUserPreferences() {
+        Optional<UserPreferences> userPreferences = repository.findOneByJiraUser(CredentialsHolder.username());
+        if (userPreferences.isPresent())
+            return userPreferences.get();
+        return new UserPreferences(CredentialsHolder.username());
+    }
+
+    public void save(String jiraUser, Preferences preferences) {
         Optional<UserPreferences> userPreferencesOpt = repository.findOneByJiraUser(jiraUser);
         if (userPreferencesOpt.isPresent()) {
             UserPreferences updatedUserPreferences = userPreferencesOpt.get();
@@ -49,6 +62,47 @@ public class UserPreferencesService {
         } else {
             repository.add(new UserPreferences(jiraUser, preferences));
         }
+    }
+
+    public void applyLoggedUserPreferencesOnCardFieldFilter(List<CardFieldFilter> cardFieldFilters) {
+        applyPreferencesOnCardFieldFilter(cardFieldFilters, getLoggedUserPreferences());
+    }
+
+    private void applyPreferencesOnCardFieldFilter(List<CardFieldFilter> cardFieldFilters, UserPreferences userPreferences) {
+        final Map<String, Boolean> filterPreferences = userPreferences.getPreferences().filterPreferences;
+        if (filterPreferences.isEmpty())
+            return;
+
+        cardFieldFilters.stream().forEach(cardFieldFilter -> {
+            cardFieldFilter.getFilterFieldsValues().stream().forEach(filterFieldValue -> {
+                if (filterPreferences.containsKey(filterFieldValue.getValue()))
+                    filterFieldValue.setSelected(filterPreferences.get(filterFieldValue.getValue()));
+            });
+        });
+    }
+
+    public void applyLoggedUserPreferencesOnLaneConfiguration(List<LaneConfiguration> lanesConfiguration) {
+        applyPreferencesOnLaneConfiguration(lanesConfiguration, getLoggedUserPreferences());
+    }
+
+    private void applyPreferencesOnLaneConfiguration(List<LaneConfiguration> lanesConfiguration, UserPreferences userPreferences) {
+        List<LevelPreference> levelPreferences = userPreferences.getPreferences().levelPreferences;
+        if (levelPreferences.isEmpty())
+            return;
+
+        lanesConfiguration.stream().forEach(laneConf -> {
+            Optional<LevelPreference> levelPreferenceOpt = levelPreferences.stream()
+                    .filter(levelPref -> levelPref.level.equals(laneConf.getLevel()))
+                    .findFirst();
+            if (!levelPreferenceOpt.isPresent())
+                return;
+
+            LevelPreference levelPreference = levelPreferenceOpt.get();
+            laneConf.setShowHeader(levelPreference.showHeader);
+            laneConf.setShowLaneTeam(levelPreference.showLaneTeam);
+            laneConf.setShowLevel(levelPreference.showLevel);
+            laneConf.setWeight(levelPreference.weightLevel);
+        });
     }
 
 }

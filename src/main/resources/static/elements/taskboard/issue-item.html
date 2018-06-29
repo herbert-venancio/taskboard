@@ -509,12 +509,12 @@
                 openJira: function (event) {
                     event.stopPropagation();
                     var issueKey = event.target.getAttribute('data-issue-key');
-                    var win = window.open(window.urlJira + '/browse/' + issueKey, '_blank');
+                    window.open(taskboard.urlJira + '/browse/' + issueKey, '_blank');
                 },
 
                 hierarchyFilterClick: function(event) {
                     event.stopPropagation();
-                    if (!window.urlLinkGraph)
+                    if (!taskboard.urlLinkGraph)
                         return this.applyFilter();
 
                     var self = this;
@@ -523,7 +523,7 @@
                             self.applyFilter();
                         },
                         function ondouble() {
-                            window.open(window.urlLinkGraph + self.item.issueKey, '_blank');
+                            window.open(taskboard.urlLinkGraph + self.item.issueKey, '_blank');
                         }
                     );
                 },

@@ -31,28 +31,26 @@
                 transition-duration: 200ms;
             }
             .lane-down {
-                transform: translateY(32px);/* 32 is the size of the search-warning @ taskboard-home.html */
+                transform: translateY(32px); /* 32 is the size of the search-warning @ taskboard-home.html */
                 transition-property: transform;
                 transition-duration: 200ms;
             }
+            #lane-container {
+                transition: opacity 0.3s ease;
+            }
+            #lane-container[data-loading] {
+                opacity: 0.7;
+                pointer-events: none;
+            }
         </style>
 
-        <iron-ajax id=ajax
-                   method="GET"
-                   url="/ws/issues"
-                   handle-as="json"
-                   content-type='application/json'
-                   headers='{"Content-Type": "application/json", "Accept" : "application/json"}'
-                   on-response="issuesReceived"
-                   auto verbose>
-        </iron-ajax>
         <iron-signals on-iron-signal-level-visibility-changed="laneVisibilityUpdated"
                       on-iron-signal-show-details="showDetails"
                       on-iron-signal-update-user-preferences="checkIssuesInvalidTeam"
                       on-iron-signal-level-config-changed="checkIssuesInvalidTeam"
                       on-iron-signal-update-issue-local-state-error="updateIssueLocalStateErrorMessage"></iron-signals>
 
-        <div id="lane-container" class="lane-up fit layout vertical board">
+        <div id="lane-container" class="lane-up fit layout vertical board" data-loading$="[[_loading]]">
             <template id="levels" is="dom-repeat" items="{{conf}}" as="level">
                 <template is="dom-if" if="{{showLevel(level.showLevel, lastLaneUpdate)}}">
                     <template is="dom-if" if="{{index}}">
@@ -67,10 +65,15 @@
                 </template>
             </template>
         </div>
+
         <issue-detail
             id="issuedialog"
             local-states="{{localStates}}"
             ></issue-detail>
+
+        <template is="dom-if" if="[[_loading]]">
+            <paper-spinner class="tb-spinner tb-spinner--centered" active="[[_loading]]" alt="Loading..."></paper-spinner>
+        </template>
 
     </template>
 
@@ -80,11 +83,6 @@
                 is: 'board-table',
 
                 properties: {
-                    aspectsFilter: {
-                        type: Object,
-                        notify: true
-                    },
-
                     conf: {
                         type: Object,
                         notify: true
@@ -107,6 +105,11 @@
                         notify: true
                     },
 
+                    _loading: {
+                        type: Boolean,
+                        value: true
+                    },
+
                     localStates: {
                         type: Object,
                         value: {
@@ -117,6 +120,7 @@
                 },
 
                 ready: function() {
+                    this.fetchIssues();
                     this.shownWarnings = [];
                 },
 
@@ -133,11 +137,34 @@
                     this.$.issuedialog.opendialog(e.detail.item);
                 },
 
-                issuesReceived: function(data) {
-                    var issues = data.detail.response;
-                    taskboard.setIssues(issues);
-                    this.issues = issues;
-                    this.checkIssuesInvalidTeam();
+                fetchIssues: function() {
+                    var self = this;
+                    self.set('_loading', true);
+                    $.ajax({
+                        async: true,
+                        url: '/ws/issues',
+                        dataType: 'json',
+                        contentType: 'application/json'
+                    }).done(function(issues) {
+                        taskboard.setIssues(issues);
+                        self.issues = issues;
+                        self.checkIssuesInvalidTeam();
+                    }).fail(function(jqXhr) {
+                        console.log("Error fetching issues", jqXhr);
+                        taskboard.showError(
+                            self,
+                            'Unexpected behavior. Please, report this error to the administrator. We will reload the page to try again.',
+                            [{
+                                name: 'Ok',
+                                callback: function(toast) {
+                                    location.reload();
+                                }
+                            }],
+                            true
+                        )
+                    }).always(function() {
+                        self.set('_loading', false);
+                    });
                 },
 
                 checkIssuesInvalidTeam: function() {

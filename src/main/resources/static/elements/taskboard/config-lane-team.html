@@ -61,18 +61,17 @@
             <paper-material class="level-configuration" elevation="0">
                 <template is="dom-repeat" items="{{levels}}" as="level">
                     <paper-material class="flex layout horizontal" elevation="0">
-                        <paper-checkbox checked="{{level.showLaneTeam}}" on-tap="changeConfig">[[level.level]]
+                        <paper-checkbox checked="{{level.showLaneTeam}}" on-tap="_updateLaneTeamConfiguration">
+                            [[level.level]]
                         </paper-checkbox>
                     </paper-material>
                 </template>
                 <hr/>
-                <template is="dom-repeat" items="{{laneConfiguration()}}" as="configurationX">
-                    <paper-material class="flex layout horizontal" elevation="0">
-
-                        <paper-checkbox checked="{{configurationX.showCount}}" on-tap="changeConfig">Show Count
-                        </paper-checkbox>
-                    </paper-material>
-                </template>
+                <paper-material class="flex layout horizontal" elevation="0">
+                    <paper-checkbox checked="{{_laneConfiguration.showCount}}" on-tap="_updateLaneTeamConfiguration">
+                        Show Count
+                    </paper-checkbox>
+                </paper-material>
             </paper-material>
         </iron-collapse>
 
@@ -87,24 +86,23 @@
                     levels: {
                         type: Object,
                         notify: true
+                    },
+                    _laneConfiguration: {
+                        type: Object
                     }
                 },
 
-                collapseLevelConfig: function (e) {
+                ready: function() {
+                    this.set('_laneConfiguration', userPreferences.getLane());
+                },
+
+                collapseLevelConfig: function() {
                     this.$.collapseLevelConfig.toggle();
                 },
 
-                laneConfiguration: function () {
-                    return userPreferences.getLanes();
-                },
-
-                changeConfig: function () {
+                _updateLaneTeamConfiguration: function() {
                     this.fire('iron-signal', {
                         name: 'level-config-changed',
-                        data: {}
-                    });
-                    this.fire('iron-signal', {
-                        name: 'update-lane-team',
                         data: {}
                     });
                 }

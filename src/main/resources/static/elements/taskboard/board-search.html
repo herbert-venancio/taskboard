@@ -183,17 +183,17 @@
                     var previousSelected = this.releaseSelected;
                     this.clearRelease();
                     var listReleases = [];
-                    taskboard.getAspectFilters().forEach(function(itemFilter) {
-                        if (itemFilter.description !== 'Project')
+                    taskboard.getCardFieldFilters().forEach(function(cardFieldFilter) {
+                        if (cardFieldFilter.fieldSelector.name !== taskboard.fieldSelector.PROJECT)
                             return;
 
-                        itemFilter.aspectsSubitemFilter.forEach(function(subitemFilter) {
-                            if (!subitemFilter.selected || subitemFilter.releases == null)
+                        cardFieldFilter.filterFieldsValues.forEach(function(filterFieldValue) {
+                            if (!filterFieldValue.selected || filterFieldValue.releases == null)
                                 return;
 
-                            subitemFilter.releases.forEach(function(v) {
-                                listReleases.push({ id: v.id, project: this.value, name: v.name })
-                            }, subitemFilter);
+                            filterFieldValue.releases.forEach(function(release) {
+                                listReleases.push({ id: release.id, project: filterFieldValue.value, name: release.name })
+                            });
                         });
                     });
 
@@ -202,7 +202,7 @@
 
                     this.releases = listReleases;
                     if (previousSelected) {
-                        var newRelease = _.find(listReleases, function(v) { return v && v.id == previousSelected; });
+                        var newRelease = findInArray(listReleases, function(release) { return release && release.id === previousSelected; });
                         if(newRelease) {
                             this.releaseSelected = previousSelected;
                             var paperDropdownMenu = this.$$('#searchRelease');

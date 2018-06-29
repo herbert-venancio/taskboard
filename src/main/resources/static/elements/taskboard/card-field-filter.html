@@ -18,7 +18,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
   [/LICENSE]
   -->
-<dom-module id="aspect-item-filter">
+<dom-module id="card-field-filter">
 
     <template>
 
@@ -53,16 +53,17 @@
             }
         </style>
 
-        <iron-signals on-iron-signal-refresh-filter-teams="refreshFilterTeams"></iron-signals>
-
         <paper-toolbar class="config-item-title" on-tap="collapseFilter">
             <paper-checkbox id="checkAll"></paper-checkbox>
-            <span>[[aspectItemFilter.description]]</span>
+            <span>[[cardFieldFilter.fieldSelector.name]]</span>
         </paper-toolbar>
         <iron-collapse id="collapseFilter">
             <paper-material class="layout vertical" elevation="0">
-                <template class="aspectItemsFilter" is="dom-repeat" items="{{aspectItemFilter.aspectsSubitemFilter}}" as="aspectSubitemFilter">
-                    <aspect-subitem-filter aspect-subitem-filter="{{aspectSubitemFilter}}" description="{{aspectItemFilter.description}}" selected="{{aspectSubitemFilter.selected}}"></aspect-subitem-filter>
+                <template is="dom-repeat" items="{{cardFieldFilter.filterFieldsValues}}" as="filterFieldValue">
+                    <filter-field-value
+                            filter-field-value="{{filterFieldValue}}"
+                            on-selected-changed="_onFilterFieldValueSelectChanged"
+                            ></filter-field-value>
                 </template>
             </paper-material>
         </iron-collapse>
@@ -72,38 +73,21 @@
     <script>
         (function () {
             Polymer({
-                is: 'aspect-item-filter',
+                is: 'card-field-filter',
 
                 properties: {
-                    aspectItemFilter: {
+                    cardFieldFilter: {
                         type: Object,
-                        notify: true
-                    },
-                    notified: {
-                        type: Date,
-                        value: new Date(),
                         notify: true
                     }
                 },
 
-                listeners: {
-                    'checkAll.change': 'checkAll'
+                ready: function() {
+                    this._setCheckAll();
                 },
 
-                observers: [
-                    'refreshCheckBox(aspectItemFilter.aspectsSubitemFilter.*)',
-                    'refreshList(aspectItemFilter.aspectsSubitemFilter.*, notified)'
-                ],
-
-                checkAll: function () {
-                    var checkAll = this.$$('#checkAll').checked;
-                    $(this.$$('#collapseFilter'))
-                            .find('aspect-subitem-filter')
-                            .each(function (i, e) {
-                                e.selected = checkAll;
-                            });
-
-                    this.fire('iron-signal', {name: 'update-user-preferences'});
+                listeners: {
+                    'checkAll.change': '_checkAllChanged'
                 },
 
                 collapseFilter: function (e) {
@@ -112,27 +96,37 @@
                     }
                 },
 
-                refreshCheckBox: function() {
+                _checkAllChanged: function () {
+                    this._updateAllFilterFieldsValuesSelection(this.$$('#checkAll').checked);
+                    this._fireFilterEvents();
+                },
+
+                _onFilterFieldValueSelectChanged: function() {
+                    this._fireFilterEvents();
+                    this._setCheckAll();
+                },
+
+                _updateAllFilterFieldsValuesSelection: function(selectedValue) {
+                    forEachInArray(this.cardFieldFilter.filterFieldsValues, function(filterFieldValue, index) {
+                        this.set(['cardFieldFilter.filterFieldsValues', index, 'selected'], selectedValue);
+                        userPreferences.setFilter(filterFieldValue.value, filterFieldValue.selected);
+                    }.bind(this));
+                },
+
+                _fireFilterEvents: function() {
+                    this.fire('iron-signal', {name: 'update-user-preferences'});
+                    if (this.cardFieldFilter.fieldSelector.name === taskboard.fieldSelector.PROJECT)
+                        this.fire('iron-signal', {name: 'refresh-release-filter'});
+                },
+
+                _setCheckAll: function() {
                     this.$$('#checkAll').checked = false;
-                    var subitems = this.aspectItemFilter.aspectsSubitemFilter;
-                    for (var subitemIndex in subitems) {
-                        var subitem = subitems[subitemIndex];
-                        if (subitem.selected) {
-                            this.$$('#checkAll').checked = true;
-                            return;
-                        }
-                    }
-                },
+                    var filterFieldValueSelected = findInArray(this.cardFieldFilter.filterFieldsValues, function(filterFieldValue) {
+                        return filterFieldValue.selected;
+                    });
+                    if (filterFieldValueSelected)
+                        this.$$('#checkAll').checked = true;
 
-                refreshList: function() {
-                    this.$$('.aspectItemsFilter').render();
-                },
-
-                refreshFilterTeams: function() {
-                    if (this.aspectItemFilter.description === 'Team') {
-                        this.notified = new Date();
-                        this.refreshCheckBox();
-                    }
                 }
             });
         })();

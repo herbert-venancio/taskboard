@@ -22,12 +22,24 @@
 function Taskboard() {
     var self = this;
 
-    var aspectFilters;
-    var issuesBySteps;
-    var laneConfiguration;
-    
+    var _cardFieldFilters;
+    var _issuesBySteps;
+    var _laneConfiguration;
+
+    this.urlJira = null;
+    this.urlLinkGraph = null
+
+    this.fieldSelector = {
+        ISSUE_TYPE: 'Issue Type',
+        PROJECT: 'Project',
+        TEAM: 'Team'
+    };
+
     this.init = function() {
         moment.locale(this.getLocaleFromBrowser());
+        window.addEventListener('resize', function() {
+            self.refitSteps();
+        });
     }
 
     this.getLoggedUser = function() {
@@ -48,54 +60,44 @@ function Taskboard() {
         return logoUrlExistis ? window.logo : logoUrlDefault;
     }
 
-    this.setAspectFilters = function(source, filters) {
-        aspectFilters = filters;
-        this.applyFilterPreferences();
+    this.setCardFieldFilters = function(source, cardFieldFilters) {
+        _cardFieldFilters = cardFieldFilters;
         if(source)
             source.fire('iron-signal', {name:'refresh-release-filter'});
     };
 
-    this.getAspectFilters = function() {
-        return aspectFilters;
+    this.getCardFieldFilters = function() {
+        return _cardFieldFilters;
     };
 
     this.getTeams = function() {
-        var teamFilter = _.find(this.getAspectFilters(), function (filter) {
-            return filter.description == "Team"
+        var cardTeamFilter = _.find(this.getCardFieldFilters(), function(fieldFilter) {
+            return fieldFilter.fieldSelector.name === self.fieldSelector.TEAM
         });
-        return teamFilter.aspectsSubitemFilter;
+        return cardTeamFilter.filterFieldsValues;
     };
 
     this.setIssues = function(issues) {
         this.issues = issues;
-        for (var index in this.issues) {
-            this.issues[index] = this.resolveIssueFields(issues[index]);
-        }
+        forEachInArray(issues, function (issue, index) {
+            self.issues[index] = self.resolveIssueFields(issue);
+        });
         setIssuesBySteps(issues);
         this.refitSteps();
     };
 
     function setIssuesBySteps(issues) {
-        issuesBySteps = new Object()
-
-        var steps = self.getAllSteps()
-        for (var s in steps) {
-            var step = steps[s]
-            var filters = step.issuesConfiguration
-            var issuesByStep = []
-
-            for (var f in filters) {
-                var filter = filters[f]
-
-                for (var i in issues) {
-                    var issue = issues[i]
-                    if (filter.issueType == issue.type && filter.status == issue.status)//NOSONAR
+        _issuesBySteps = {};
+        forEachInArray(self.getAllSteps(), function(step) {
+            var issuesByStep = [];
+            forEachInArray(step.issuesConfiguration, function(issueConfigurationFilter) {
+                forEachInArray(issues, function(issue) {
+                    if (issueConfigurationFilter.issueType === issue.type && issueConfigurationFilter.status === issue.status)
                         issuesByStep.push(issue)
-                }
-            }
-
-            issuesBySteps[step.id] = issuesByStep;
-        }
+                });
+            });
+            _issuesBySteps[step.id] = issuesByStep;
+        });
     }
 
     this.getIssueStep = function(issue) {
@@ -107,7 +109,7 @@ function Taskboard() {
             for (var f in filters) {
                 var filter = filters[f]
 
-                if (filter.issueType == issue.type && filter.status == issue.status)
+                if (filter.issueType === issue.type && filter.status === issue.status)
                     return step;
             }
         }
@@ -115,8 +117,8 @@ function Taskboard() {
     };
 
     this.getIssuesByStep = function(stepId) {
-        if (issuesBySteps)
-            return issuesBySteps[stepId];
+        if (_issuesBySteps)
+            return _issuesBySteps[stepId];
     };
 
     this.getIssueByKey = function(issueKey) {
@@ -126,40 +128,25 @@ function Taskboard() {
     };
 
     this.setLaneConfiguration = function(laneConfiguration) {
-        this.laneConfiguration = laneConfiguration;
-    };
-
-    this.getLaneConfiguration = function() {
-        return this.laneConfiguration;
+        _laneConfiguration = laneConfiguration;
     };
 
     this.getAllSteps = function() {
         var steps = new Array()
-        for(var laneIndex in this.laneConfiguration) {
-            var lane = this.laneConfiguration[laneIndex]
+        for(var laneIndex in _laneConfiguration) {
+            var lane = _laneConfiguration[laneIndex]
             for(var stageIndex in lane.stages) {
                 steps = steps.concat(lane.stages[stageIndex].steps)
             }
         }
         return steps;
-    }
-
-    this.getFilters = function(stepId) {
-        for(var lane = 0; lane < this.laneConfiguration.length; lane++)
-            for(var stage = 0; stage < this.laneConfiguration[lane].stages.length; stage++)
-                for(var step = 0; step < this.laneConfiguration[lane].stages[stage].steps.length; step++) {
-                    var cStep = this.laneConfiguration[lane].stages[stage].steps[step];
-                    if(cStep.id == stepId)//NOSONAR
-                        return cStep.issuesConfiguration;
-                }
-        return null;
     };
 
     this.getTotalLaneWeight = function() {
         var total = 0;
 
-        if (userPreferences.getLevels().length == 0) {
-            this.laneConfiguration.forEach(function(lane) {
+        if (userPreferences.getLevels().length === 0) {
+            _laneConfiguration.forEach(function(lane) {
                 total += lane.weight;
             });
             return total;
@@ -260,27 +247,6 @@ function Taskboard() {
             }
         }
         return dependencies;
-    }
-
-    this.applyFilterPreferences = function() {
-        var filterPreferences = userPreferences.getFilters();
-
-        if (_.isEmpty(filterPreferences))
-            return;
-
-        aspectFilters.forEach(function(item) {
-            item.aspectsSubitemFilter.forEach(function(subitem) {
-                if (this.description === 'Issue Type') {
-                    if (filterPreferences[subitem.value.id] != null)
-                        subitem.selected = filterPreferences[subitem.value.id];
-                } else {
-                    if (filterPreferences[subitem.value] != null)
-                        subitem.selected = filterPreferences[subitem.value];
-                    else if (this.description === 'Project')
-                        subitem.selected = false;
-                }
-            }, item);
-        });
     };
 
     this.getIssueTypeName = function(issueTypeId) {
@@ -415,10 +381,10 @@ function Taskboard() {
         if (updatedIssueKeys.length === 0)
             return;
 
-        Object.keys(updateByStep).forEach(function(step) {
+        Object.keys(updateByStep).forEach(function(stepIdKey) {
             taskboardHome.fire("iron-signal", {name:"step-update", data:{
-                issues: updateByStep[step],
-                stepId: step
+                issues: updateByStep[stepIdKey],
+                stepId: +stepIdKey
             }})
         })
 
@@ -454,10 +420,6 @@ function Taskboard() {
             eventType: updateType,
             issue: converted
         }})
-    }
-
-    this.issueGivenKey = function(issueKey) {
-        return $("paper-material.issue [data-issue-key='"+issueKey+"']").closest("paper-material.issue");
     }
 
     this.convertAndRegisterIssues = function(issues) {
@@ -501,7 +463,7 @@ function Taskboard() {
     this.getFilteredIssues = function() {
         var filteredIssues = [];
 
-        self.laneConfiguration.forEach(function(lane) {
+        _laneConfiguration.forEach(function(lane) {
             if (!lane.showLevel)
                 return;
 
@@ -547,17 +509,17 @@ function Taskboard() {
     };
 
     this.getVisibleProjectKeys = function() {
-        return _.chain(this.getAspectFilters())
-            .filter(function(itemFilter) {
-                return itemFilter.description === 'Project';
+        return _.chain(this.getCardFieldFilters())
+            .filter(function(cardFieldFilter) {
+                return cardFieldFilter.fieldSelector.name === self.fieldSelector.PROJECT;
             })
-            .map(function(itemFilter) {
-                return _.chain(itemFilter.aspectsSubitemFilter)
-                    .filter(function(subitemFilter) {
-                        return subitemFilter.selected;
+            .map(function(cardFieldFilter) {
+                return _.chain(cardFieldFilter.filterFieldsValues)
+                    .filter(function(filterFieldValue) {
+                        return filterFieldValue.selected;
                     })
-                    .map(function(subitemFilter) {
-                        return subitemFilter.value;
+                    .map(function(filterFieldValue) {
+                        return filterFieldValue.value;
                     })
                     .value();
             })
@@ -565,8 +527,8 @@ function Taskboard() {
             .value();
     };
 
-    this.showError = function(source, message, actions) {
-        source.fire("iron-signal", {name:"show-error-message", data: { message: message, actions: actions}});
+    this.showError = function(source, message, actions, hideClose) {
+        source.fire("iron-signal", {name:"show-error-message", data: { message: message, actions: actions, hideClose: hideClose}});
     };
     
     this.showIssueError = function(source, issueKey, message) {

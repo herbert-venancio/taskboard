@@ -37,7 +37,7 @@
 
         <paper-material class="layout vertical">
 
-            <aspects-filter aspects-filter="{{aspectsFilter}}"></aspects-filter>
+            <card-field-filters card-field-filters="[[cardFieldFilters]]"></card-field-filters>
 
             <config-table config={{conf}}></config-table>
 
@@ -55,9 +55,8 @@
                 is: 'tb-configurations',
 
                 properties: {
-                    aspectsFilter: {
-                        type: Object,
-                        notify: true
+                    cardFieldFilters: {
+                        type: Object
                     },
                     conf: {
                         type: Object,
