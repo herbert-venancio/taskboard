@@ -20,11 +20,9 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.atlassian.jira.rest.client.api.domain.CimFieldInfo;
-import com.atlassian.jira.rest.client.api.domain.CimIssueType;
-
 import objective.taskboard.google.GoogleApiService;
 import objective.taskboard.google.SpreadsheetsManager;
+import objective.taskboard.jira.client.JiraCreateIssue;
 import objective.taskboard.sizingImport.SizingImportValidator.ValidationResult;
 
 public class SizingImportValidatorTest {
@@ -42,13 +40,13 @@ public class SizingImportValidatorTest {
     public void setup() {
         config.setDataStartingRowNumber(2);
 
-        Map<String, CimFieldInfo> featureFields = new HashMap<>();
-        featureFields.put("f5", new CimFieldInfo("f5", false, "Assumptions", null, null, null, null));
-        featureFields.put("f6", new CimFieldInfo("f6", false, "Acceptance Criteria", null, null, null, null));
+        Map<String, JiraCreateIssue.FieldInfoMetadata> featureFields = new HashMap<>();
+        featureFields.put("f5", new JiraCreateIssue.FieldInfoMetadata("f5", false, "Assumptions"));
+        featureFields.put("f6", new JiraCreateIssue.FieldInfoMetadata("f6", false, "Acceptance Criteria"));
         
         when(jiraFacade.requestFeatureTypes("OBJ")).thenReturn(asList(
-                new CimIssueType(null, 55L, "Feature", false, null, null, featureFields),
-                new CimIssueType(null, 55L, "Task", false, null, null, emptyMap())));
+                new JiraCreateIssue.IssueTypeMetadata(55L, "Feature", false, featureFields),
+                new JiraCreateIssue.IssueTypeMetadata(55L, "Task", false, emptyMap())));
 
         when(googleApiService.buildSpreadsheetsManager()).thenReturn(spreadsheetsManager);
         

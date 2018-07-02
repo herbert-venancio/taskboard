@@ -17,14 +17,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.atlassian.jira.rest.client.api.domain.IssueType;
-
 import objective.taskboard.data.CardFieldFilter;
 import objective.taskboard.data.CardFieldFilter.FieldSelector;
 import objective.taskboard.data.Team;
 import objective.taskboard.domain.Project;
 import objective.taskboard.issueTypeVisibility.IssueTypeVisibilityService;
 import objective.taskboard.jira.ProjectService;
+import objective.taskboard.jira.client.JiraIssueTypeDto;
 import objective.taskboard.team.UserTeamService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -66,9 +65,9 @@ public class CardFieldFilterProviderTest {
     private IssueTypeVisibilityService getIssueTypeVisibilityServiceMock() {
         IssueTypeVisibilityService issueTypeVisibilityService = mock(IssueTypeVisibilityService.class);
         when(issueTypeVisibilityService.getVisibleIssueTypes()).thenReturn(asList(
-                new IssueType(null, 1L, "ISSUE_TYPE_1", true, null, null),
-                new IssueType(null, 2L, "ISSUE_TYPE_2", true, null, null),
-                new IssueType(null, 3L, "ISSUE_TYPE_3", true, null, null)
+                new JiraIssueTypeDto(1L, "ISSUE_TYPE_1", true),
+                new JiraIssueTypeDto(2L, "ISSUE_TYPE_2", true),
+                new JiraIssueTypeDto(3L, "ISSUE_TYPE_3", true)
                 ));
         return issueTypeVisibilityService;
     }

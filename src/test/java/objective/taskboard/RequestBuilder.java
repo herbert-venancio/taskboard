@@ -29,7 +29,7 @@ import java.net.URL;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -83,8 +83,8 @@ public class RequestBuilder {
 
 	/**
 	 * Add basic authorization based from a jenkins credentials given its id
-	 * 
-	 * @param credentialsId the id of the credential to add
+	 * @param user
+	 * @param password
 	 * @return the builder
 	 */
 	public RequestBuilder credentials(String user, String password) {

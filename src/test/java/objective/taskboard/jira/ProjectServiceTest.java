@@ -2,13 +2,13 @@ package objective.taskboard.jira;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
 import static objective.taskboard.repository.PermissionRepository.ADMINISTRATIVE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -22,11 +22,10 @@ import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.atlassian.jira.rest.client.api.domain.CimProject;
-
 import objective.taskboard.auth.Authorizer;
 import objective.taskboard.domain.Project;
 import objective.taskboard.domain.ProjectFilterConfiguration;
+import objective.taskboard.jira.client.JiraCreateIssue;
 import objective.taskboard.jira.data.JiraProject;
 import objective.taskboard.jira.data.Version;
 import objective.taskboard.project.ProjectBaselineProvider;
@@ -65,18 +64,21 @@ public class ProjectServiceTest {
 
         List<ProjectFilterConfiguration> projectList = asList(taskb, proj1, proj2, proj3, proj4, proj5);
         Map<String, ProjectFilterConfiguration> projectsByKey = projectList.stream().collect(Collectors.toMap(p -> p.getProjectKey(), p -> p));
-        
+
         when(projectRepository.getProjects()).thenReturn(projectList);
         when(projectRepository.exists(any())).thenAnswer(i -> projectsByKey.containsKey(i.getArgumentAt(0, String.class)));
         when(projectRepository.getProjectByKey(any())).thenAnswer(i -> Optional.ofNullable(projectsByKey.get(i.getArgumentAt(0, String.class))));
         when(projectRepository.getProjectByKeyOrCry(any())).thenAnswer(i -> projectsByKey.get(i.getArgumentAt(0, String.class)));
-        
+
         when(jiraProjectService.getCreateIssueMetadata(any())).thenAnswer(i -> {
             String projectKey = i.getArgumentAt(0, String.class);
 
-            return PROJECT_WITHOUT_METADATA.equals(projectKey) 
-                    ? emptyList() 
-                    : asList(new CimProject(null, projectKey, 1L, projectKey, emptyMap(), emptyList()));
+            if(PROJECT_WITHOUT_METADATA.equals(projectKey))
+                return Optional.empty();
+
+            JiraCreateIssue.ProjectMetadata projectMetadata = new JiraCreateIssue.ProjectMetadata();
+            projectMetadata.key = projectKey;
+            return Optional.of(projectMetadata);
         });
         
         List<Version> versions = asList(new Version("12549", "0.3"), new Version("12550", "1.0"),  new Version("12551", "2.0"));
@@ -85,9 +87,9 @@ public class ProjectServiceTest {
 
         when(jiraProjectService.getAllProjects()).thenReturn(
                 projectList.stream().map(p -> new JiraProject("1", p.getProjectKey(), versions, p.getProjectKey())).collect(toList()));
-        
+
         when(authorizer.getAllowedProjectsForPermissions(any())).thenReturn(asList(PROJECT_ARCHIVED, PROJECT_REGULAR_1, PROJECT_REGULAR_2, PROJECT_WITHOUT_METADATA));
-        
+
         when(projectBaselineProvider.getAvailableDates(any())).thenReturn(emptyList());
     }
 
@@ -163,16 +165,16 @@ public class ProjectServiceTest {
 
     @Test
     public void getProjectMetadata_ifProjectIsNonArchivedAndUserHasAccessAndProjectHasMetadata_returnTheValue() {
-        Optional<CimProject> metadataForRegular = subject.getProjectMetadata(PROJECT_REGULAR_1);
+        Optional<JiraCreateIssue.ProjectMetadata> metadataForRegular = subject.getProjectMetadata(PROJECT_REGULAR_1);
         assertTrue(metadataForRegular.isPresent());
 
-        Optional<CimProject> metadataForWithoutAccess = subject.getProjectMetadata(PROJECT_WITHOUT_ACCESS);
+        Optional<JiraCreateIssue.ProjectMetadata> metadataForWithoutAccess = subject.getProjectMetadata(PROJECT_WITHOUT_ACCESS);
         assertFalse(metadataForWithoutAccess.isPresent());
 
-        Optional<CimProject> metadataForArchived = subject.getProjectMetadata(PROJECT_ARCHIVED);
+        Optional<JiraCreateIssue.ProjectMetadata> metadataForArchived = subject.getProjectMetadata(PROJECT_ARCHIVED);
         assertFalse(metadataForArchived.isPresent());
 
-        Optional<CimProject> metadataForProjectWithoutMetadata = subject.getProjectMetadata(PROJECT_WITHOUT_METADATA);
+        Optional<JiraCreateIssue.ProjectMetadata> metadataForProjectWithoutMetadata = subject.getProjectMetadata(PROJECT_WITHOUT_METADATA);
         assertFalse(metadataForProjectWithoutMetadata.isPresent());
     }
 

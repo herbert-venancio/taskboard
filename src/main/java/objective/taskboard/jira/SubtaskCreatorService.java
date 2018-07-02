@@ -22,9 +22,11 @@
 package objective.taskboard.jira;
 
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractSingleValueCheckbox;
+import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byId;
+import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byKey;
+import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byName;
+import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byValue;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,15 +36,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.atlassian.jira.rest.client.api.domain.BasicUser;
-import com.atlassian.jira.rest.client.api.domain.input.ComplexIssueInputFieldValue;
-import com.atlassian.jira.rest.client.api.domain.input.IssueInput;
-import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder;
-
 import objective.taskboard.jira.JiraProperties.SubtaskCreation;
 import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.client.JiraSubtaskDto;
-import objective.taskboard.jira.client.JiraUserDto;
+import objective.taskboard.jira.data.JiraIssue;
 import objective.taskboard.jira.data.Transition;
 
 @Service
@@ -104,32 +101,24 @@ public class SubtaskCreatorService {
         String tShirtSizeSubtaskId = creationProperties.getTShirtSizeSubtaskId();
         String tShirtSizeDefaultValue = creationProperties.getTShirtSizeDefaultValue();
 
-        IssueInputBuilder issueBuilder = new IssueInputBuilder(parent.getProject().getKey(), typeId);
-        issueBuilder.setFieldValue("parent", ComplexIssueInputFieldValue.with("key", parent.getKey()));
-        issueBuilder.setPriorityId(parent.getPriority().getId());
-        issueBuilder.setSummary(summaryPrefix + parent.getSummary());
-        issueBuilder.setReporter(toJiraStandardUser(parent.getReporter()));
+        JiraIssue.CustomInputBuilder issueBuilder = JiraIssue.Input.builder(jiraProperties, parent.getProject().getKey(), typeId)
+                .parent(byKey(parent.getKey()))
+                .priority(byId(parent.getPriority().getId()))
+                .summary(summaryPrefix + parent.getSummary())
+                .reporter(byName(parent.getReporter().getName()));
         setTShirtSize(issueBuilder, parent, tShirtSizeParentId, tShirtSizeSubtaskId, tShirtSizeDefaultValue);
         setClassOfService(issueBuilder, parent);
         
-        IssueInput issueInput = issueBuilder.build();
+        JiraIssue.Input issueInput = issueBuilder.build();
         
         log.debug("Creating subtask of issue " + parent.getKey() + ". Type id: " + typeId);
 
         return jiraService.createIssueAsMaster(issueInput);
     }
 
-    private BasicUser toJiraStandardUser(JiraUserDto reporter) {
-        try {
-            return new BasicUser(new URI(reporter.getSelf()), reporter.getName(), reporter.getDisplayName());
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("Reporter has malformed self URL", e);
-        }
-    }
-
-    private void setTShirtSize(IssueInputBuilder issueBuilder, JiraIssueDto parent, String tShirtParentId, String tShirtSubtaskId, String defaultValue) {
+    private void setTShirtSize(JiraIssue.InputBuilder<?> issueBuilder, JiraIssueDto parent, String tShirtParentId, String tShirtSubtaskId, String defaultValue) {
         String tShirtValue = getTShirtSizeValue(parent, tShirtParentId, defaultValue);
-        issueBuilder.setFieldValue(tShirtSubtaskId, ComplexIssueInputFieldValue.with("value", tShirtValue));
+        issueBuilder.field(tShirtSubtaskId, byValue(tShirtValue));
     }
 
     private String getTShirtSizeValue(JiraIssueDto parent, String tShirtSizeParentId, String tShirtSizeDefaultValue) {
@@ -145,7 +134,7 @@ public class SubtaskCreatorService {
         }
     }
 
-    private void setClassOfService(IssueInputBuilder issueBuilder, JiraIssueDto parent) {
+    private void setClassOfService(JiraIssue.CustomInputBuilder issueBuilder, JiraIssueDto parent) {
         String classOfServiceId = jiraProperties.getCustomfield().getClassOfService().getId();
         JSONObject parentClassOfService = parent.getField(classOfServiceId);
         
@@ -154,7 +143,7 @@ public class SubtaskCreatorService {
 
         try {
             String valueId = parentClassOfService.getString("id");
-            issueBuilder.setFieldValue(classOfServiceId, ComplexIssueInputFieldValue.with("id", valueId));
+            issueBuilder.classOfService(byId(valueId));
         } catch (JSONException e) {
             // just don't set if can't extract parent value
             log.error("Error extracting class-of-service value (customfield id = '" + classOfServiceId + "') from parent issue '" + parent.getKey() + "'", e);
@@ -170,11 +159,7 @@ public class SubtaskCreatorService {
 
         log.debug("Executing transition of subtask " + issueKey + ". Transition id: " + transitionId);
 
-        try {
-            jiraService.doTransitionAsMaster(issueKey, transitionId);
-        } catch (JiraServiceException e) {
-            log.error("Error executing transition '" + transitionId + "' on issue '" + issueKey + "'", e);
-        }
+        jiraService.doTransitionAsMaster(issueKey, transitionId);
     }
 
     private Optional<Transition> findTransition(String issueKey, Long transitionId) {

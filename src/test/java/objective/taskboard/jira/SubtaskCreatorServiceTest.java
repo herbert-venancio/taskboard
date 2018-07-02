@@ -33,6 +33,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.codehaus.jettison.json.JSONArray;
@@ -48,11 +49,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.atlassian.jira.rest.client.api.domain.Issue;
-import com.atlassian.jira.rest.client.api.domain.input.ComplexIssueInputFieldValue;
-import com.atlassian.jira.rest.client.api.domain.input.FieldInput;
-import com.atlassian.jira.rest.client.api.domain.input.IssueInput;
-
 import objective.taskboard.jira.JiraProperties.SubtaskCreation.CustomFieldCondition;
 import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.client.JiraIssueTypeDto;
@@ -60,6 +56,7 @@ import objective.taskboard.jira.client.JiraPriorityDto;
 import objective.taskboard.jira.client.JiraProjectDto;
 import objective.taskboard.jira.client.JiraSubtaskDto;
 import objective.taskboard.jira.client.JiraUserDto;
+import objective.taskboard.jira.data.JiraIssue;
 import objective.taskboard.jira.data.Transition;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -84,10 +81,10 @@ public class SubtaskCreatorServiceTest {
     @Mock
     private JiraService jiraService;
     @Mock
-    private Issue subtask;
+    private JiraIssueDto subtask;
     
     @Captor
-    ArgumentCaptor<IssueInput> issueInputCaptor;
+    ArgumentCaptor<JiraIssue.Input> issueInputCaptor;
 
     private JiraProperties jiraProperties = new JiraProperties();
     private JiraProperties.SubtaskCreation properties = new JiraProperties.SubtaskCreation();
@@ -101,7 +98,7 @@ public class SubtaskCreatorServiceTest {
         setupProperties();
         setupParentMock();
         
-        when(jiraService.createIssueAsMaster(any(IssueInput.class))).thenReturn("TASK-101");
+        when(jiraService.createIssueAsMaster(any(JiraIssue.Input.class))).thenReturn("TASK-101");
         when(subtask.getKey()).thenReturn("TASK-101");
     }
 
@@ -242,7 +239,7 @@ public class SubtaskCreatorServiceTest {
         
         service.create(parent, properties);
         
-        verify(jiraService).createIssueAsMaster(any(IssueInput.class));
+        verify(jiraService).createIssueAsMaster(any(JiraIssue.Input.class));
         verify(jiraService).getTransitionsAsMaster(subtask.getKey());
     }
     
@@ -260,10 +257,10 @@ public class SubtaskCreatorServiceTest {
         properties.setSkipCreationWhenTShirtParentIsAbsent(true);
         
         service.create(parent, properties);
-        verify(jiraService).createIssueAsMaster(any(IssueInput.class));
+        verify(jiraService).createIssueAsMaster(any(JiraIssue.Input.class));
     }
     
-    private void assertIssueInput(IssueInput input, String... expecteds) {
+    private void assertIssueInput(JiraIssue.Input input, String... expecteds) {
         List<String> representations = new ArrayList<>();
         representations.add(getFieldRepresentation(input, "project", "key"));
         representations.add(getFieldRepresentation(input, "issuetype", "id"));
@@ -280,17 +277,15 @@ public class SubtaskCreatorServiceTest {
         Assert.assertEquals(expected, current);
     }
     
-    private String getFieldRepresentation(IssueInput input, String field, String valueKey) {
+    private String getFieldRepresentation(JiraIssue.Input input, String field, String valueKey) {
         String representation = field + "=";
-        FieldInput fieldInput = input.getField(field);
-        if (fieldInput == null || fieldInput.getValue() == null)
+        Object value = input.fields.get(field);
+        if (value == null)
             return representation + "null";
         
-        Object value = fieldInput.getValue();
-        if (value instanceof ComplexIssueInputFieldValue) {
-            ComplexIssueInputFieldValue complex = (ComplexIssueInputFieldValue) value;
-            if (complex != null)
-                return representation + complex.getValuesMap().get(valueKey);
+        if (value instanceof Map) {
+            Map<?, ?> complex = (Map<?, ?>) value;
+            return representation + complex.get(valueKey);
         }
         return representation + value;        
     }

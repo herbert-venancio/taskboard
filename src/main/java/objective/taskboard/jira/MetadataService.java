@@ -6,11 +6,10 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.atlassian.jira.rest.client.api.domain.CimIssueType;
-import com.atlassian.jira.rest.client.api.domain.IssueType;
-import com.atlassian.jira.rest.client.api.domain.IssuelinksType;
-import com.atlassian.jira.rest.client.api.domain.Priority;
-
+import objective.taskboard.jira.client.JiraCreateIssue;
+import objective.taskboard.jira.client.JiraIssueTypeDto;
+import objective.taskboard.jira.client.JiraLinkTypeDto;
+import objective.taskboard.jira.client.JiraPriorityDto;
 import objective.taskboard.jira.data.Status;
 
 @Service
@@ -19,15 +18,15 @@ public class MetadataService {
     @Autowired
     private MetadataCachedService cache;
 
-    public Map<Long, IssueType> getIssueTypeMetadata() {
+    public Map<Long, JiraIssueTypeDto> getIssueTypeMetadata() {
         return cache.getIssueTypeMetadata();
     }
 
-    public Map<Long, IssueType> getIssueTypeMetadataAsLoggedInUser() {
+    public Map<Long, JiraIssueTypeDto> getIssueTypeMetadataAsLoggedInUser() {
         return cache.getIssueTypeMetadataAsLoggedInUser();
     }
 
-    public Map<Long, Priority> getPrioritiesMetadata() {
+    public Map<Long, JiraPriorityDto> getPrioritiesMetadata() {
         return cache.getPrioritiesMetadata();
     }
 
@@ -39,20 +38,20 @@ public class MetadataService {
         return cache.getStatusesMetadataAsLoggedInUser();
     }
 
-    public Map<String, IssuelinksType> getIssueLinksMetadata() {
+    public Map<String, JiraLinkTypeDto> getIssueLinksMetadata() {
         return cache.getIssueLinksMetadata();
     }
 
-    public Map<Long, CimIssueType> getCreateIssueMetadata() {
+    public Map<Long, JiraCreateIssue.IssueTypeMetadata> getCreateIssueMetadata() {
         return cache.getCreateIssueMetadata();
     }
 
-    public IssueType getIssueTypeById(Long id) {
+    public JiraIssueTypeDto getIssueTypeById(Long id) {
         return Optional.ofNullable(getIssueTypeMetadata().get(id))
                 .orElseThrow(() -> new IllegalArgumentException("There's no Issue Type with given ID: " + id));
     }
 
-    public IssueType getIssueTypeByIdAsLoggedInUser(Long id) {
+    public JiraIssueTypeDto getIssueTypeByIdAsLoggedInUser(Long id) {
         return Optional.ofNullable(getIssueTypeMetadataAsLoggedInUser().get(id))
                 .orElseThrow(() -> new IllegalArgumentException("There's no Issue Type with given ID: " + id));
     }

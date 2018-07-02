@@ -20,9 +20,9 @@
  */
 package objective.taskboard.jira;
 
-import static com.google.common.collect.Lists.newArrayList;
+import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byName;
+import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byNames;
 
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -39,18 +39,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import com.atlassian.jira.rest.client.api.domain.BasicIssue;
-import com.atlassian.jira.rest.client.api.domain.Resolution;
-import com.atlassian.jira.rest.client.api.domain.ServerInfo;
-import com.atlassian.jira.rest.client.api.domain.input.ComplexIssueInputFieldValue;
-import com.atlassian.jira.rest.client.api.domain.input.IssueInput;
-import com.atlassian.jira.rest.client.api.domain.input.IssueInputBuilder;
 import com.google.common.collect.ImmutableList;
 
 import objective.taskboard.auth.CredentialsHolder;
 import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.data.User;
 import objective.taskboard.jira.client.JiraIssueDto;
+import objective.taskboard.jira.client.JiraResolutionDto;
+import objective.taskboard.jira.client.JiraServerInfoDto;
 import objective.taskboard.jira.data.JiraIssue;
 import objective.taskboard.jira.data.JiraUser;
 import objective.taskboard.jira.data.JiraUser.UserDetails;
@@ -59,7 +55,6 @@ import objective.taskboard.jira.data.Transitions;
 import objective.taskboard.jira.data.Transitions.DoTransitionRequestBody;
 import objective.taskboard.jira.data.plugin.UserDetail;
 import objective.taskboard.jira.endpoint.JiraEndpoint;
-import objective.taskboard.jira.endpoint.JiraEndpoint.Request;
 import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
 import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
 import retrofit.RetrofitError;
@@ -87,27 +82,18 @@ public class JiraService {
     public void authenticate(String username, String password) {
         log.debug("⬣⬣⬣⬣⬣  authenticate");
         try {
-            Request<ServerInfo> request = client -> client.getMetadataClient().getServerInfo();
             if (StringUtils.isEmpty(password))
                 throw new AccessDeniedException("The password can't be empty");
-            ServerInfo info = jiraEndpoint.executeRequest(username, password, request);
-            if (info == null)
-                throw new RuntimeException("The server did not respond");
-        } catch (RuntimeException ex) {
+            jiraEndpoint.request(JiraServerInfoDto.Service.class, username, password);
+        } catch (RetrofitError ex) {
             checkAuthenticationError(ex, username);
             log.error("Authentication error for user " + username);
             throw ex;
         }
     }
 
-    private void checkAuthenticationError(RuntimeException ex, String username) {
-        if (ex instanceof JiraServiceException) {
-            JiraServiceException jse = (JiraServiceException) ex;
-            Optional<HttpStatus> statusCode = jse.getStatusCode();
-            if (!statusCode.isPresent())
-                throw new IllegalStateException("Jira return an unrecognized error during authentication.");
-
-            HttpStatus httpStatus = statusCode.get();
+    private void checkAuthenticationError(RetrofitError ex, String username) {
+            HttpStatus httpStatus = HttpStatus.valueOf(ex.getResponse().getStatus());
             log.error("Authentication error " + httpStatus.value() + " for user " + username);
 
             if (httpStatus == HttpStatus.UNAUTHORIZED)
@@ -115,8 +101,6 @@ public class JiraService {
 
             if (httpStatus == HttpStatus.FORBIDDEN)
                 throw new AccessDeniedException(MSG_FORBIDDEN, ex);
-
-        }
     }
 
     public void doTransition(String issueKey, Long transitionId, Map<String, Object> fields) {
@@ -137,9 +121,8 @@ public class JiraService {
             DoTransitionRequestBody requestBody = new DoTransitionRequestBody(transitionId);
             jiraEndpointAsMaster.request(Transitions.Service.class).doTransition(issueKey, requestBody);
         } catch (RetrofitError e) {
+            log.error("Error executing transition '" + transitionId + "' on issue '" + issueKey + "'", e);
             throw new FrontEndMessageException(e);
-        } catch(Exception e) {
-            throw new IllegalArgumentException(e);
         }
     }
 
@@ -160,15 +143,17 @@ public class JiraService {
     
     public String getResolutions(String transitionName) {
         log.debug("⬣⬣⬣⬣⬣  getResolutions");
-        Resolution resolutionTransition = null;
 
-        Iterable<Resolution> response = jiraEndpointAsUser.executeRequest(client -> client.getMetadataClient().getResolutions());
-        List<Resolution> resolutions = newArrayList(response);
+
+        List<JiraResolutionDto> resolutions = jiraEndpointAsUser.request(JiraResolutionDto.Service.class).all();
 
         if (properties.getTransitionsDoneNames().contains(transitionName)) {
             String done = properties.getResolutions().getDone().getName();
-            resolutionTransition = resolutions.stream().filter(resolution -> resolution.getName().equals(done)).findFirst().orElse(null);
-            return resolutionTransition.getName();
+            return resolutions.stream()
+                    .filter(r -> done.equals(r.name))
+                    .map(r -> r.name)
+                    .findFirst()
+                    .orElse(null);
         } else if(properties.getTransitionsCancelNames().contains(transitionName))
             return properties.getResolutions().getCanceled().getName();
         return null;
@@ -189,8 +174,7 @@ public class JiraService {
     public Optional<JiraIssueDto> getIssueByKey(String key) {
         log.debug("⬣⬣⬣⬣⬣  getIssueByKey");
         try {
-            Optional<JiraIssueDto> optional = Optional.of(jiraEndpointAsUser.request(JiraIssueDto.Service.class).get(key));
-            return optional;
+            return Optional.of(jiraEndpointAsUser.request(JiraIssueDto.Service.class).get(key));
         }catch(retrofit.RetrofitError e) {
             if (e.getResponse().getStatus() == 404)
                 return Optional.empty();
@@ -203,10 +187,10 @@ public class JiraService {
         return jiraEndpointAsMaster.request(JiraIssueDto.Service.class).get(key);
     }
 
-    public String createIssueAsMaster(IssueInput issueInput) {
+    public String createIssueAsMaster(JiraIssue.Input issueInput) {
         log.debug("⬣⬣⬣⬣⬣  createIssue (master)");
-        BasicIssue issue = jiraEndpointAsMaster.executeRequest(client -> client.getIssueClient().createIssue(issueInput));
-        return issue.getKey();
+        JiraIssue issue = jiraEndpointAsMaster.request(JiraIssue.Service.class).create(issueInput);
+        return issue.key;
     }
 
     @Cacheable(CacheConfiguration.JIRA_USER)
@@ -232,23 +216,22 @@ public class JiraService {
 
     private void setBlocked(String issueKey, boolean blocked, String lastBlockReason) {
         log.debug("⬣⬣⬣⬣⬣  setBlocked");
-        String yesOptionId = properties.getCustomfield().getBlocked().getYesOptionId().toString();
-        ComplexIssueInputFieldValue value = new ComplexIssueInputFieldValue(Collections.singletonMap("id", blocked ? yesOptionId : null));
-        updateIssue(issueKey, new IssueInputBuilder()
-                                    .setFieldValue(properties.getCustomfield().getBlocked().getId(), Collections.singletonList(value))
-                                    .setFieldValue(properties.getCustomfield().getLastBlockReason().getId(), lastBlockReason));
+        Response result = updateIssue(issueKey, JiraIssue.Input.builder(properties)
+                .blocked(blocked)
+                .lastBlockReason(lastBlockReason)
+                .build());
+
+        if (HttpStatus.valueOf(result.getStatus()) != HttpStatus.NO_CONTENT)
+            throw new FrontEndMessageException("Unexpected return code during setBlocked: " + result.getStatus());
     }
 
-    private void updateIssue(String issueKey, IssueInputBuilder changes) {
+    private Response updateIssue(String issueKey, JiraIssue.Input request) {
         try {
-            jiraEndpointAsUser.executeRequest(client -> client.getIssueClient().updateIssue(issueKey, changes.build()));
-        }
-        catch (FrontEndMessageException ex) {
-            throw ex;
-        }
-        catch (Exception ex) {
-            log.error(ex.getMessage(), ex);
-            throw new RuntimeException("Could not update issue.", ex);
+            return jiraEndpointAsUser.request(JiraIssue.Service.class).update(issueKey, request);
+        } catch (RetrofitError ex) {
+            if (HttpStatus.valueOf(ex.getResponse().getStatus()) == HttpStatus.NOT_FOUND)
+                throw new FrontEndMessageException("Issue "+issueKey+" can't be update because it wasn't found in Jira");
+            throw new FrontEndMessageException(ex);
         }
     }
 
@@ -316,30 +299,20 @@ public class JiraService {
         }
 
         private JiraIssue.Input buildRequest() {
-            // build request
-            String assigneeField = "assignee";
             Optional<User> firstAssignee = Optional.ofNullable(assignees.poll());
             String assignee = firstAssignee.map(u->u.name).orElse(null);
             List<String> coAssigneesNames = assignees.stream().map(a -> a.name).collect(Collectors.toList());
 
-            // build request
-            String coAssigneeField = properties.getCustomfield().getCoAssignees().getId();
-            
-            return JiraIssue.Input.builder()
-                    .field(assigneeField).byName(assignee)
-                    .field(coAssigneeField).byNames(coAssigneesNames)
+            return JiraIssue.Input.builder(properties)
+                    .assignee(byName(assignee))
+                    .coAssignees(byNames(coAssigneesNames))
                     .build();
         }
 
         private void send(JiraIssue.Input request) {
-            JiraIssue.Service issueService = jiraEndpointAsUser.request(JiraIssue.Service.class);
-            try {
-                Response result = issueService.update(issueKey, request);
-                if (HttpStatus.valueOf(result.getStatus()) != HttpStatus.NO_CONTENT)
-                    throw new FrontEndMessageException("Unexpected return code during AssignIssueToUserAction: " + result.getStatus());
-            } catch (RetrofitError ex) {
-                throw new FrontEndMessageException(ex);
-            }
+            Response result = updateIssue(issueKey, request);
+            if (HttpStatus.valueOf(result.getStatus()) != HttpStatus.NO_CONTENT)
+                throw new FrontEndMessageException("Unexpected return code during AssignIssueToUserAction: " + result.getStatus());
         }
     }
     
@@ -369,21 +342,14 @@ public class JiraService {
 
         private JiraIssue.Input buildRequest() {
             return JiraIssue.Input.builder()
-                    .field(field).value(value)
+                    .field(field, value)
                     .build();
         }
 
         private void send(JiraIssue.Input request) {
-            JiraIssue.Service issueService = jiraEndpointAsUser.request(JiraIssue.Service.class);
-            try {
-                Response result = issueService.update(issueKey, request);
-                if (HttpStatus.valueOf(result.getStatus()) != HttpStatus.NO_CONTENT)
-                    throw new FrontEndMessageException("Unexpected return code during SetFieldAction: " + result.getStatus());
-            } catch (RetrofitError ex) {
-                if (HttpStatus.valueOf(ex.getResponse().getStatus()) == HttpStatus.NOT_FOUND)
-                    throw new FrontEndMessageException("Issue "+issueKey+" can't be update because it wasn't found in Jira");
-                throw new FrontEndMessageException(ex);
-            }
+            Response result = updateIssue(issueKey, request);
+            if (HttpStatus.valueOf(result.getStatus()) != HttpStatus.NO_CONTENT)
+                throw new FrontEndMessageException("Unexpected return code during SetFieldAction: " + result.getStatus());
         }
     }
 }
