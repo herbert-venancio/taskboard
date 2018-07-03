@@ -13,7 +13,6 @@ import org.joda.time.DateTime;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -35,7 +34,7 @@ public class JiraIssueDto {
     
     @JsonProperty
     private JiraIssueDtoFields fields;
-    
+
     public String getKey() {
         return key;
     }
@@ -164,7 +163,7 @@ public class JiraIssueDto {
 
         @Override
         public JSONObjectAdapter deserialize(JsonParser jp, DeserializationContext ctxt)
-                throws IOException, JsonProcessingException {
+                throws IOException {
             JsonNode node = jp.getCodec().readTree(jp);
             switch (node.getNodeType()) {
             case OBJECT:
