@@ -23,53 +23,88 @@ package objective.taskboard.it;
 import org.junit.Test;
 
 public class ReprioritizationIT extends AuthenticatedIntegrationTest {
+
+    @Test
+    public void whenTryingToChangePriorityOrderOfAFeaturedIssue_nothingChanges() {
+        MainPage mainPage = MainPage.produce(webDriver);
+        mainPage.errorToast().close();
+
+        final String FEATURED_ISSUE_1 = "TASKB-638";
+        final String FEATURED_ISSUE_2 = "TASKB-678";
+        final String FEATURED_ISSUE_3 = "TASKB-679";
+        final String REGULAR_ISSUE = "TASKB-656";
+        final String[] expectedIssueList = new String[] {
+                FEATURED_ISSUE_1,
+                FEATURED_ISSUE_2,
+                FEATURED_ISSUE_3,
+                REGULAR_ISSUE,
+                "TASKB-657",
+                "TASKB-658",
+                "TASKB-660",
+                "TASKB-662"
+                };
+
+        BoardStepFragment boardStepDone = mainPage.lane("Operational").boardStep("Done");
+
+        boardStepDone.assertIssueList(expectedIssueList);
+
+        mainPage.issue(FEATURED_ISSUE_2).dragOver(FEATURED_ISSUE_1);
+
+        boardStepDone.assertIssueList(expectedIssueList);
+
+        boardStepDone.scrollTo(FEATURED_ISSUE_3);
+
+        mainPage.issue(REGULAR_ISSUE).dragOver(FEATURED_ISSUE_3);
+
+        boardStepDone.assertIssueList(expectedIssueList);
+    }
+
     @Test
     public void whenIssueIsDragged_AfterReloadItShouldKeepOrder() {
         MainPage mainPage = MainPage.produce(webDriver);
         mainPage.errorToast().close();
         
         LaneFragment operational = mainPage.lane("Operational");
-        operational.boardStep("To Do").assertIssueList(
-                "TASKB-625",
-                "TASKB-627",
-                "TASKB-643",
-                "TASKB-644",
-                "TASKB-659",
-                "TASKB-661",
-                "TASKB-663",
-                "TASKB-664",
-                "TASKB-680",
-                "TASKB-681",
-                "TASKB-682",
-                "TASKB-683",
-                "TASKB-684",
-                "TASKB-686"
+        operational.boardStep("Doing").assertIssueList(
+                "TASKB-601",
+                "TASKB-572",
+                "TASKB-342",
+                "TASKB-273",
+                "TASKB-646"
                 );
 
-        mainPage.issue("TASKB-643").dragOver("TASKB-627");
+        mainPage.issue("TASKB-572").dragOver("TASKB-601");
         mainPage.reload();
+        mainPage.errorToast().close();
 
         operational = mainPage.lane("Operational");
-        operational.boardStep("To Do").assertIssueList(
-                "TASKB-625",
-                "TASKB-643",
-                "TASKB-627",
-                "TASKB-644",
-                "TASKB-659",
-                "TASKB-661",
-                "TASKB-663",
-                "TASKB-664",
-                "TASKB-680",
-                "TASKB-681",
-                "TASKB-682",
-                "TASKB-683",
-                "TASKB-684",
-                "TASKB-686"
+        operational.boardStep("Doing").assertIssueList(
+                "TASKB-572",
+                "TASKB-601",
+                "TASKB-342",
+                "TASKB-273",
+                "TASKB-646"
                 );
     }
 
     @Test
     public void whenIssueIsPriorityOrderIsChanged_ShouldShowNotificationInAnotherBrowserAndUpdateTheOrder() {
+        final String[] expectedIssueListBefore = new String[] {
+                "TASKB-601",
+                "TASKB-572",
+                "TASKB-342",
+                "TASKB-273",
+                "TASKB-646"
+                };
+
+        final String[] expectedIssueListAfter = new String[] {
+                "TASKB-572",
+                "TASKB-601",
+                "TASKB-342",
+                "TASKB-273",
+                "TASKB-646"
+                };
+
         createAndSwitchToNewTab();
         
         MainPage secondTabPage = MainPage.to(webDriver);
@@ -77,23 +112,9 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
         secondTabPage.errorToast().close();
         
         LaneFragment operationalInSecondTab = secondTabPage.lane("Operational");
-        secondTabPage.issue("TASKB-643").dragOver("TASKB-627");
-        operationalInSecondTab.boardStep("To Do").assertIssueList(
-                "TASKB-625",
-                "TASKB-643",
-                "TASKB-627",
-                "TASKB-644",
-                "TASKB-659",
-                "TASKB-661",
-                "TASKB-663",
-                "TASKB-664",
-                "TASKB-680",
-                "TASKB-681",
-                "TASKB-682",
-                "TASKB-683",
-                "TASKB-684",
-                "TASKB-686"
-                );
+        operationalInSecondTab.boardStep("Doing").assertIssueList(expectedIssueListBefore);
+        secondTabPage.issue("TASKB-572").dragOver("TASKB-601");
+        operationalInSecondTab.boardStep("Doing").assertIssueList(expectedIssueListAfter);
         
         switchToFirstTab();
         
@@ -101,43 +122,13 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
         mainPage.errorToast().close();
         mainPage.refreshToast().assertVisible();
         LaneFragment operational = mainPage.lane("Operational");
-        operational.boardStep("To Do").assertIssueList(
-                "TASKB-625",
-                "TASKB-643",
-                "TASKB-627",
-                "TASKB-644",
-                "TASKB-659",
-                "TASKB-661",
-                "TASKB-663",
-                "TASKB-664",
-                "TASKB-680",
-                "TASKB-681",
-                "TASKB-682",
-                "TASKB-683",
-                "TASKB-684",
-                "TASKB-686"
-                );
+        operational.boardStep("Doing").assertIssueList(expectedIssueListAfter);
         
         mainPage.refreshToast().close();
         // makes sure the model is correctly updated
         mainPage.typeSearch("TASKB-625");
         mainPage.clearSearch();
-        operational.boardStep("To Do").assertIssueList(
-                "TASKB-625",
-                "TASKB-643",
-                "TASKB-627",
-                "TASKB-644",
-                "TASKB-659",
-                "TASKB-661",
-                "TASKB-663",
-                "TASKB-664",
-                "TASKB-680",
-                "TASKB-681",
-                "TASKB-682",
-                "TASKB-683",
-                "TASKB-684",
-                "TASKB-686"
-                );
+        operational.boardStep("Doing").assertIssueList(expectedIssueListAfter);
     }
 
     @Test

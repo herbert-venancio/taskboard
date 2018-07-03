@@ -14,7 +14,7 @@ public class LaneFragment extends AbstractUiFragment {
 
 	public BoardStepFragment boardStep(String stepName) {
 		WebElement webStepElement = laneRoot
-				.findElement(By.cssSelector("[data-board-step='board-step-" + stepName + "']"));
+				.findElement(By.cssSelector("[data-step-name='" + stepName + "']"));
 		;
 		return new BoardStepFragment(webDriver, stepName, webStepElement);
 	}

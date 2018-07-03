@@ -293,7 +293,7 @@
         </style>
         <iron-signals on-iron-signal-search-filter-changed="filterUpdated"></iron-signals>
 
-        <div class="sortable-issue-item" style$="display: {{display}};">
+        <div class="sortable-issue-item" style$="[[display]]">
             <input type="hidden" name="issueKey" value="{{item.issueKey}}" />
             <iron-ajax id="ajax"
                        method="POST"
@@ -421,7 +421,7 @@
 
                 filterUpdated: function() {
                     var shouldBeVisible = searchFilter.match(this.item);
-                    this.set('display', shouldBeVisible?'':'none');
+                    this.set('display', shouldBeVisible ? '' : 'display: none;');
                 },
 
                 itemChanged: function() {

@@ -469,9 +469,8 @@ function Taskboard() {
 
             var stepsOfLane = getStepsOfLane(lane);
             stepsOfLane.forEach(function(step) {
-                var boardStep = document.querySelector('.step-' + step.id) == null ?
-                                    document.querySelector('board-step') :
-                                    document.querySelector('.step-' + step.id);
+                var boardStepEl = document.querySelector('#step-' + step.id);
+                var boardStep = boardStepEl != null ? boardStepEl : document.querySelector('board-step');
 
                 if (boardStep == null)
                     return;
@@ -506,6 +505,22 @@ function Taskboard() {
 
     this.getArchivedText = function(isArchived) {
         return isArchived ? 'archived' : 'active';
+    };
+
+    this.getExpediteIssues = function(issues) {
+        return filterInArray(issues, function(issue) {
+            return self.isIssueExpedite(issue);
+        }).sort(sortByProperty('created'));
+    };
+
+    this.getRegularIssues = function(issues) {
+        return filterInArray(issues, function(issue) {
+            return !self.isIssueExpedite(issue);
+        }).sort(sortByProperty('priorityOrder'));
+    };
+
+    this.isIssueExpedite = function(issue) {
+        return issue.classOfServiceValue === "Expedite";
     };
 
     this.getVisibleProjectKeys = function() {

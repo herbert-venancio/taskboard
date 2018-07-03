@@ -66,6 +66,10 @@ public abstract class AbstractUiFragment {
         }
     }
 
+    protected void scroolToElement(WebElement element) {
+        executeJavascript("arguments[0].scrollIntoView(true);", element);
+    }
+
     protected void waitTextInElement(WebElement element, String expected) {
         waitVisibilityOfElement(element);
         waitUntil(textToBePresentInElement(element, expected));

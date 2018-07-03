@@ -54,7 +54,9 @@
             issue-item.ui-sortable-helper.cannot-drag {
                 cursor: not-allowed;
             }
-
+            .step-list {
+                width: 100%;
+            }
         </style>
 
         <iron-signals on-iron-signal-update-user-preferences="preferencesUpdated"
@@ -64,33 +66,48 @@
                       on-iron-signal-step-update="handleStepUpdate"
                       ></iron-signals>
 
-        <div id="boardStep" boardstepid$="{{stepMetadata.id}}" class="wrap layout horizontal sortable-board-step" style="width: 100%">
+        <div id="boardStep" boardstepid$="[[stepMetadata.id]]" class="wrap layout horizontal">
 
             <!-- Issue Counter -->
-            <template is="dom-if" if="{{showTeamCount(issues, lastPreferenceUpdate)}}">
+            <template is="dom-if" if="[[showTeamCount(issues, lastPreferenceUpdate)]]">
                 <div style="width:100%" class="step-count-wrapper layout horizontal">
-                    <inline-badge class="step-count" value="{{getIssueCount(issues, lastPreferenceUpdate)}}"></inline-badge>
+                    <inline-badge class="step-count" value="[[getIssueCount(issues, lastPreferenceUpdate)]]"></inline-badge>
                 </div>
             </template>
 
-            <!-- Issues -->
-            <div id="boardStepIssues" class="wrap layout horizontal sortable-board-step" style="width: 100%">
-                <template id="boardStepIssuesFiltered" is="dom-repeat" items="{{filteredIssues}}" as="issue">
+            <div id="boardStepExpedite" class="wrap layout horizontal step-list">
+                <template is="dom-repeat" items="[[expediteIssues]]" as="issue">
                     <issue-item
-                        data-id$="{{issue.issueKey}}"
-                        id='{{issue.issueKey}}'
-                        class$="{{issueItemClasses}}"
-                        item="{{issue}}"
-                        boardstepid="{{stepMetadata.id}}"
-                        style$="{{getOptimalIssueWidth(columns, issue)}}"
-                        hidden="{{showSynthetic(lastPreferenceUpdate)}}"
-                        local-states="{{localStates}}"
-                        ></issue-item>
+                            id="[[issue.issueKey]]"
+                            class$="[[issueItemClasses]]"
+                            item="[[issue]]"
+                            boardstepid="[[stepMetadata.id]]"
+                            hidden="[[showSynthetic(lastPreferenceUpdate)]]"
+                            local-states="[[localStates]]"
+                            ></issue-item>
                     <issue-item-synthetic
-                        item="{{issue}}"
-                        parent-type-icon="{{showParentIconInSynthetic(parentLaneConfig)}}"
-                        hidden="{{!showSynthetic(lastPreferenceUpdate)}}"
-                        ></issue-item-synthetic>
+                            item="[[issue]]"
+                            parent-type-icon="[[showParentIconInSynthetic(parentLaneConfig)]]"
+                            hidden="[[!showSynthetic(lastPreferenceUpdate)]]"
+                            ></issue-item-synthetic>
+                </template>
+            </div>
+
+            <div id="boardStepIssues" class="wrap layout horizontal sortable-board-step step-list">
+                <template id="boardStepIssuesFiltered" is="dom-repeat" items="[[filteredIssues]]" as="issue">
+                    <issue-item
+                            id="[[issue.issueKey]]"
+                            class$="[[issueItemClasses]]"
+                            item="[[issue]]"
+                            boardstepid="[[stepMetadata.id]]"
+                            hidden="[[showSynthetic(lastPreferenceUpdate)]]"
+                            local-states="[[localStates]]"
+                            ></issue-item>
+                    <issue-item-synthetic
+                            item="[[issue]]"
+                            parent-type-icon="[[showParentIconInSynthetic(parentLaneConfig)]]"
+                            hidden="[[!showSynthetic(lastPreferenceUpdate)]]"
+                            ></issue-item-synthetic>
                 </template>
             </div>
 
@@ -124,8 +141,12 @@
                     },
                     filteredIssues: {
                         type: Array,
-                        value: [],
+                        value: function() { return [] },
                         observer: 'refreshFilter'
+                    },
+                    expediteIssues: {
+                        type: Array,
+                        value: function() { return [] }
                     },
                     _filteredIssuesKeys: {
                         type: Array,
@@ -178,7 +199,7 @@
                 },
 
                 attached: function() {
-                    if (this.stepItem().length == 0) {
+                    if (this.stepItem().length === 0) {
                         throw "Failed to enable prioritization because the step item could not be found";
                     }
                     this.makeStepSortable();
@@ -289,8 +310,11 @@
                 },
 
                 filter: function() {
-                    if(this.issues)
-                        this.set('filteredIssues', this.filterIssues(this.issues));
+                    if(this.issues) {
+                        var stepIssues = this.filterIssues(this.issues);
+                        this.set('expediteIssues', taskboard.getExpediteIssues(stepIssues));
+                        this.set('filteredIssues', taskboard.getRegularIssues(stepIssues));
+                    }
                     this._filteredIssuesKeys = this.getIssueKeysRenderedOrder();
                 },
 
@@ -305,7 +329,7 @@
                         if (this.doFiltersAllow(issue))
                             filteredIssues.push(issue);
                     }.bind(this));
-                    return filteredIssues.sort(sortByProperty('priorityOrder'));
+                    return filteredIssues;
                 },
 
                 filterIssuesDisabledTeam: function(issues) {
@@ -453,18 +477,19 @@
 
                 performUpdate: function(updateComplete) {
                     var self = this;
-                    var domCards = $(Polymer.dom(this.root).querySelectorAll("issue-item"));
+                    var domCards = $(Polymer.dom(this.root).querySelectorAll("#boardStepIssues issue-item"));
                     var domXissueKey = {};
                     domCards.each(function(card) {
-                        domXissueKey[this.getAttribute("data-id")] = this;
+                        domXissueKey[this.getAttribute("id")] = this;
                     });
 
                     var issueOrderBeforeUpdate = this.filteredIssues; 
-                    var issueOrderAfterUpdate  = this.filterIssues(this.issues);
+                    var stepIssues = this.filterIssues(this.issues);
+                    var issueOrderAfterUpdate = taskboard.getRegularIssues(stepIssues);
 
                     var transitions = [];
                     issueOrderBeforeUpdate.forEach(function(issue, index) {
-                        if (issueOrderAfterUpdate[index].issueKey == issue.issueKey) return;
+                        if (issueOrderAfterUpdate[index].issueKey === issue.issueKey) return;
                         var sourceNode = $(domXissueKey[issueOrderAfterUpdate[index].issueKey]).find("#issueCard");
                         var destinationNode = $(domCards[index]).find("#issueCard");
                         var newTop = destinationNode.offset().top - sourceNode.offset().top;

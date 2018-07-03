@@ -210,8 +210,15 @@
                                     <template is="dom-repeat" items="{{metadata.stages}}" as="stage">
                                         <template is="dom-repeat" items="{{stage.steps}}" as="step">
                                             <td class="cell step-cell">
-                                                <board-step parent-lane-id="{{metadata.id}}" parent-lane-config="{{metadata}}"
-                                                    class$="step-{{step.id}}" step-metadata="{{step}}" issues="{{getIssuesByStep(step.id, issues)}}" team="{{team.name}}"></board-step>
+                                                <board-step id="step-[[step.id]]"
+                                                        data-step-name$="[[step.step]]"
+                                                        parent-lane-id="{{metadata.id}}"
+                                                        parent-lane-config="{{metadata}}"
+                                                        issues="{{getIssuesByStep(step.id, issues)}}"
+                                                        local-states="{{localStates}}"
+                                                        step-metadata="{{step}}"
+                                                        team="{{team.name}}"
+                                                        ></board-step>
                                             </td>
                                         </template>
                                     </template>
@@ -227,9 +234,14 @@
                             <template is="dom-repeat" items="{{metadata.stages}}" as="stage">
                                 <template is="dom-repeat" items="{{stage.steps}}" as="step">
                                     <td class="cell step-cell">
-                                        <board-step parent-lane-id="{{metadata.id}}" parent-lane-config="{{metadata}}"
-                                            data-board-step$="board-step-{{step.step}}" local-states="{{localStates}}"
-                                            class$="step-{{step.id}}" step-metadata="{{step}}" issues="{{getIssuesByStep(step.id, issues)}}"></board-step>
+                                        <board-step id$="step-[[step.id]]"
+                                                data-step-name$="[[step.step]]"
+                                                parent-lane-id="{{metadata.id}}"
+                                                parent-lane-config="{{metadata}}"
+                                                issues="{{getIssuesByStep(step.id, issues)}}"
+                                                local-states="{{localStates}}"
+                                                step-metadata="{{step}}"
+                                                ></board-step>
                                     </td>
                                 </template>
                             </template>
@@ -355,13 +367,12 @@
                 },
 
                 getIssueCountByStep: function(stepId) {
-                    var steps = document.querySelectorAll('#lane-'+this.metadata.id+' .step-'+stepId);
-
-                    if (steps.length == 0)
+                    var step = document.querySelector('#lane-'+this.metadata.id+' #step-'+stepId);
+                    if (step == null)
                         return 0;
 
                     var issuesByStep = this.getIssuesByStep(stepId);
-                    return steps[0].filterIssuesDisabledTeam(issuesByStep).length;
+                    return step.filterIssuesDisabledTeam(issuesByStep).length;
                 },
 
                 getIssuesByStep: function(stepId) {
