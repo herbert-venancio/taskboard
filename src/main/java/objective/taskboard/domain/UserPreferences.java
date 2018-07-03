@@ -113,6 +113,7 @@ public class UserPreferences extends TaskboardEntity {
         }
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Preferences {
         public List<LevelPreference> levelPreferences = new ArrayList<>();
         public Map<String, Boolean> filterPreferences = new HashMap<>();
@@ -120,6 +121,7 @@ public class UserPreferences extends TaskboardEntity {
         public List<LaneConfiguration> laneConfiguration = asList(new LaneConfiguration());
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class LevelPreference {
         public String level;
         public Boolean showLevel;
@@ -128,11 +130,12 @@ public class UserPreferences extends TaskboardEntity {
         public Double weightLevel;
     }
 
-    @JsonIgnoreProperties(value = { "issueOrder" })
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class VisibilityConfiguration {
         public Boolean showSynthetic = false;
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class LaneConfiguration {
         public Boolean showCount = false;
     }
