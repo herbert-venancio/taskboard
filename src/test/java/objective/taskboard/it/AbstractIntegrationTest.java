@@ -29,6 +29,7 @@ import java.util.concurrent.TimeoutException;
 
 import objective.taskboard.rules.CleanupDataFolderRule;
 import objective.taskboard.testUtils.JiraMockServer;
+import objective.taskboard.utils.IOUtilities;
 
 import org.junit.Before;
 
@@ -40,11 +41,12 @@ import org.junit.Rule;
 
 public abstract class AbstractIntegrationTest {
 
-    @Rule
-    public CleanupDataFolderRule clean = new CleanupDataFolderRule(Paths.get("rootDataTest/data/followup-templates"));
-
+    private static final String JIRA_LOCAL_REST_API_ISSUE_URL = "http://localhost:4567/rest/api/latest/issue/";
     private static final ExecutorService service = Executors.newSingleThreadExecutor();
     private static final long TIMEOUT_IN_SECONDS = 120;
+
+    @Rule
+    public CleanupDataFolderRule clean = new CleanupDataFolderRule(Paths.get("rootDataTest/data/followup-templates"));
 
     @Before
     public final void setupIntegrationTest() {
@@ -84,7 +86,7 @@ public abstract class AbstractIntegrationTest {
         } 
     }
 
-    public static String getSiteBase(){
+    public static String getSiteBase() {
         return "http://localhost:8900";
     }
 
@@ -95,4 +97,43 @@ public abstract class AbstractIntegrationTest {
     protected void registerWebhook(String eventType) {
         JiraMockServer.registerWebhook(getSiteBase(), eventType);
     }
+    
+    protected void emulateVersionUpdate(String version, String newName) { 
+        registerWebhook("jira:version_updated"); 
+ 
+        RequestBuilder 
+                .url("http://localhost:4567/rest/api/latest/version/" + version) 
+                .body("{\"name\":\"" + newName + "\"}") 
+                .put(); 
+    }
+ 
+    protected static void emulateUpdateIssue(String issueKey, String fieldsJson) { 
+        RequestBuilder 
+            .url(JIRA_LOCAL_REST_API_ISSUE_URL + issueKey) 
+            .body("{\"fields\":" + fieldsJson + "}") 
+            .put(); 
+ 
+        String payloadJson = "_updatePayload.json";
+        sendNotificationByWebhook(issueKey, payloadJson); 
+    }
+
+    protected static void emulateDeleteIssue(String issueKey) { 
+        RequestBuilder 
+            .url(JIRA_LOCAL_REST_API_ISSUE_URL + issueKey)
+            .delete(); 
+ 
+        String payloadJson = "_deletePayload.json";
+        sendNotificationByWebhook(issueKey, payloadJson); 
+    }
+
+    private static void sendNotificationByWebhook(String issueKey, String payloadJson) {
+        String body = IOUtilities.resourceToString("webhook/" + issueKey + payloadJson);
+
+        RequestBuilder 
+            .url(getSiteBase()+"/webhook/TASKB") 
+            .header("Content-Type", "application/json") 
+            .body(body) 
+            .post();
+    } 
+
 }

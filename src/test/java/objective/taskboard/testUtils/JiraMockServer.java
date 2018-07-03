@@ -256,6 +256,9 @@ public class JiraMockServer {
                     case "customfield_11440"://Class Of Service
                         setClassOfService(fields, aKey, reqFields.getJSONObject(aKey));
                         break;
+                    case "customfield_11455"://Release
+                        setRelease(fields, aKey, reqFields.getJSONObject(aKey));
+                        break;
                     case "customfield_10100"://Assigned team
                         fields.put(aKey, reqFields.getString(aKey));
                         break;
@@ -431,6 +434,11 @@ public class JiraMockServer {
         makeClassOfService.put("id", newClassOfService.get("id"));
         makeClassOfService.put("value", newClassOfService.get("value"));
         fields.put(aKey, newClassOfService);
+        fields.put("updated", nowIso8601());
+    }
+
+    private static void setRelease(JSONObject fields, String aKey, JSONObject newRelease) throws JSONException {
+        fields.put(aKey, newRelease);
         fields.put("updated", nowIso8601());
     }
 

@@ -28,6 +28,7 @@ import java.util.Arrays;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -257,5 +258,25 @@ class IssueDetails extends AbstractUiFragment {
                         StringUtils.join(actualTeamList, ","));
             }
         });
+    }
+
+    public IssueDetails assertReleaseNotVisible() {
+        assertIsOpened();
+
+        try {
+            WebElement element = issueDetailRoot.findElement(By.className("release"));
+            waitInvisibilityOfElement(element);
+        } catch (NoSuchElementException e) { }
+
+        return this;
+    }
+
+    public IssueDetails assertRelease(String release) {
+        assertIsOpened();
+
+        WebElement releaseElement = getElementWhenItExists(By.className("release"));
+        waitTextInElement(releaseElement, release);
+
+        return this;
     }
 }

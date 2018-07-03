@@ -620,8 +620,7 @@ public class Issue extends IssueScratch implements Serializable {
             return releaseId;
 
         Optional<Issue> pc = getParentCard();
-        return pc.map(issue -> issue.releaseId).orElse(null);
-
+        return pc.map(issue -> issue.getReleaseId()).orElse(null);
     }
 
     public Version getRelease() {

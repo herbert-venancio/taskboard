@@ -30,8 +30,6 @@ import java.util.stream.Stream;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
-import objective.taskboard.RequestBuilder;
-
 public class ReleaseFilterIT extends AuthenticatedIntegrationTest {
 
     @Test
@@ -58,7 +56,7 @@ public class ReleaseFilterIT extends AuthenticatedIntegrationTest {
         MainPage mainPage = MainPage.produce(webDriver);
         mainPage.assertUpdatedIssues();
 
-        emulateVersionUpdate("1.0-edited");
+        emulateVersionUpdate("12550", "1.0-edited");
 
         String[] updatedIssues = {"TASKB-186", "TASKB-238", "TASKB-572"};
 
@@ -68,11 +66,33 @@ public class ReleaseFilterIT extends AuthenticatedIntegrationTest {
                 .filterByRelease("TASKB - 1.0-edited")
                 .assertVisibleIssues(updatedIssues);
 
-        emulateVersionUpdate("1.0-changed");
+        emulateVersionUpdate("12550", "1.0-changed");
         mainPage
                 .assertUpdatedIssues(updatedIssues)
                 .assertSelectedRelease("TASKB - 1.0-changed")
                 .assertVisibleIssues(updatedIssues);
+    }
+
+    @Test
+    public void whenWebhookChangeReleaseOfIssue_thenFilterByReleaseContinueWorking() {
+        MainPage mainPage = MainPage.produce(webDriver);
+        mainPage.assertUpdatedIssues();
+
+        emulateUpdateIssue("TASKB-606", "{\"customfield_11455\":{\"id\": \"12552\",\"name\": \"3.0\"}}");
+
+        String[] updatedIssues = {"TASKB-606", "TASKB-235", "TASKB-601"};
+
+        mainPage
+            .assertUpdatedIssues(updatedIssues)
+            .filterByRelease("TASKB - 3.0")
+            .assertVisibleIssues(updatedIssues);
+
+        emulateUpdateIssue("TASKB-606", "{\"customfield_11455\":{\"id\": \"12551\",\"name\": \"2.0\"}}");
+        
+        mainPage
+            .assertUpdatedIssues(updatedIssues)
+            .filterByRelease("TASKB - 2.0")
+            .assertVisibleIssues(updatedIssues);
     }
 
     @Test
@@ -87,14 +107,5 @@ public class ReleaseFilterIT extends AuthenticatedIntegrationTest {
         for(int i = 0 ; i < releaseNameResult.size(); i++) {
             assertEquals("Releases have to be sorted ", releaseNameSortExpected.get(i), releaseNameResult.get(i));
         }
-    }
-
-    private void emulateVersionUpdate(String newName) {
-        registerWebhook("jira:version_updated");
-
-        RequestBuilder
-                .url("http://localhost:4567/rest/api/latest/version/12550")
-                .body("{\"name\":\"" + newName + "\"}")
-                .put();
     }
 }
