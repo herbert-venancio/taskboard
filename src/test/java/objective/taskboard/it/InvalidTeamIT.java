@@ -18,6 +18,15 @@ public class InvalidTeamIT extends AuthenticatedIntegrationTest {
             .clickButtonWithText("Close and show cards with problems");
         
         mainPage
-            .assertVisibleIssues("TASKB-20", "TASKB-626", "TASKB-637", "TASKB-639", "TASKB-685", "TASKB-624", "TASKB-625", "TASKB-627");
+            .assertVisibleIssues(
+                    "TASKB-20",
+                    "TASKB-637",
+                    "TASKB-626",
+                    "TASKB-639",
+                    "TASKB-685",
+                    "TASKB-624",
+                    "TASKB-625",
+                    "TASKB-627"
+                    );
     }
 }

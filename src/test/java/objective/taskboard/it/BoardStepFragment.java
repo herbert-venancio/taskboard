@@ -62,6 +62,12 @@ public class BoardStepFragment extends AbstractUiFragment {
         webDriver.findElement(By.cssSelector("[data-step-count-name='"+stepName+"']")); // TODO: investigate why parameter is not used
     }
 
+    public void scrollTo(String issueKey) {
+        WebElement issueEl = boardStepRoot.findElement(By.cssSelector("issue-item#"+issueKey));
+        scroolToElement(issueEl);
+        waitVisibilityOfElement(issueEl);
+    }
+
     private List<String> issueList() {
         try {
             List<WebElement> findElements = boardStepRoot

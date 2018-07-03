@@ -35,6 +35,7 @@ public class IssueTransitionIT extends AuthenticatedIntegrationTest {
         
         operational.boardStep("To Do").issueCountBadge(14);
         operational.boardStep("To Do").assertIssueList(
+                "TASKB-680",
                 "TASKB-625",
                 "TASKB-627",
                 "TASKB-643",
@@ -43,7 +44,6 @@ public class IssueTransitionIT extends AuthenticatedIntegrationTest {
                 "TASKB-661",
                 "TASKB-663",
                 "TASKB-664",
-                "TASKB-680",
                 "TASKB-681",
                 "TASKB-682",
                 "TASKB-683",
@@ -69,6 +69,7 @@ public class IssueTransitionIT extends AuthenticatedIntegrationTest {
 
         operational.boardStep("To Do").issueCountBadge(6);
         operational.boardStep("To Do").assertIssueList(
+                "TASKB-680",
                 "TASKB-627",
                 "TASKB-643",
                 "TASKB-644",
@@ -76,7 +77,6 @@ public class IssueTransitionIT extends AuthenticatedIntegrationTest {
                 "TASKB-661",
                 "TASKB-663",
                 "TASKB-664",
-                "TASKB-680",
                 "TASKB-681",
                 "TASKB-682",
                 "TASKB-683",
@@ -105,6 +105,7 @@ public class IssueTransitionIT extends AuthenticatedIntegrationTest {
         LaneFragment operational = mainPage.lane("Operational");
 
         String[] issuesFromTodo = {
+                "TASKB-680",
                 "TASKB-625",
                 "TASKB-627",
                 "TASKB-643",
@@ -113,7 +114,6 @@ public class IssueTransitionIT extends AuthenticatedIntegrationTest {
                 "TASKB-661",
                 "TASKB-663",
                 "TASKB-664",
-                "TASKB-680",
                 "TASKB-681",
                 "TASKB-682",
                 "TASKB-683",
