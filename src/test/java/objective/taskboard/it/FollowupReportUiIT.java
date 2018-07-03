@@ -132,7 +132,8 @@ public class FollowupReportUiIT extends AuthenticatedIntegrationTest {
                 .assertDateIsToday()
                 .assertGenerateButtonIsEnabled()
             .selectDate("06/01/2017")
-            .setProject("")
+                .assertGenerateButtonIsEnabled()
+            .clearProject()
                 .assertDateIsToday()
                 .assertDateDropdownIsDisabled()
                 .assertGenerateButtonIsDisabled();
