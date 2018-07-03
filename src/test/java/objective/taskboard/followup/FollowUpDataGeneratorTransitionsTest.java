@@ -5,7 +5,6 @@ import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.doReturn;
 
