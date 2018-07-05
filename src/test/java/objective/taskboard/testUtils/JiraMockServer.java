@@ -25,6 +25,10 @@ import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.capitalize;
 import static spark.Service.ignite;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.net.URLConnection;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -389,6 +393,27 @@ public class JiraMockServer {
             return webhookRegistration(webhook);
         });
 
+        get("/secure/viewavatar", (req, res) -> {
+        	String avatarId = req.queryParams("avatarId");
+        	String avatarType = req.queryParams("avatarType");
+        	if (!avatarType.equals("issuetype"))
+        		return null;
+        	
+        	byte[] data = loadBinaryImage(avatarId+".svg");
+        	if (data == null)
+        		data = loadBinaryImage(avatarId+".png");
+        	
+        	if (data == null)
+        		return null; // not found
+        	
+        	String mimeType = getMimeType(data);
+        	if (mimeType.equals("application/xml"))
+        		mimeType = "image/svg+xml";
+			res.type(mimeType);
+			return data;
+        });
+
+
         if(loadPlugin) {
             new JiraPluginMock().load(server);
         }
@@ -398,6 +423,11 @@ public class JiraMockServer {
             res.status(404);
             return "{\"message\":\"null for uri: " + req.url() + "\",\"status-code\":404}";
         });
+    }
+    
+    public String getMimeType(byte data[]) throws Exception {
+        InputStream is = new BufferedInputStream(new ByteArrayInputStream(data));
+        return URLConnection.guessContentTypeFromStream(is);
     }
 
     private String applyProjectEdits(String project) throws JSONException {
@@ -545,6 +575,10 @@ public class JiraMockServer {
 
     static String loadMockData(String name) {
         return IOUtilities.resourceToString(JiraMockServer.class,"/"+environment() +"/" + name);
+    }
+    
+    static byte [] loadBinaryImage(String name) {
+        return IOUtilities.resourceToBytes(JiraMockServer.class,"/"+environment() +"/images/" + name);
     }
     
     private static String environment() {
