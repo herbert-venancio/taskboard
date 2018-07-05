@@ -33,7 +33,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -44,8 +43,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-
-import com.google.common.util.concurrent.Uninterruptibles;
 
 import objective.taskboard.auth.Authorizer;
 import objective.taskboard.auth.CredentialsHolder;
@@ -123,8 +120,6 @@ public class IssueBufferService {
     private IssueBufferState state = IssueBufferState.uninitialised;
 
     
-    private boolean isUpdatingTaskboardIssuesBuffer = false;
-
     private List<IssueUpdate> issuesUpdatedByEvent = new ArrayList<>();
     private Set<String> projectsUpdatedByEvent = new HashSet<>();
 
@@ -136,13 +131,8 @@ public class IssueBufferService {
             return;
         }
         
-        updateIssueBuffer();
-
         log.info("Card repo is not initialized. This might take some time..");
-        
-        while(!getState().isInitialized())
-            Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
-        
+        updateIssueBuffer();
         log.info("Card repo initialized");
     }
     
@@ -155,38 +145,28 @@ public class IssueBufferService {
     }
 
     public synchronized void updateIssueBuffer() {
-        if (isUpdatingTaskboardIssuesBuffer)
-            return;
-        
-        isUpdatingTaskboardIssuesBuffer = true;
-        Thread thread = new Thread(() -> {
-            StopWatch stopWatch = new StopWatch();
-            stopWatch.start();
-            try {
-                updateState(state.start());
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+        try {
+            updateState(state.start());
 
-                IssueBufferServiceSearchVisitor visitor = new IssueBufferServiceSearchVisitor(issueConverter, this);
-                jiraIssueService.searchAllProjectIssues(visitor, cardsRepo);
+            IssueBufferServiceSearchVisitor visitor = new IssueBufferServiceSearchVisitor(issueConverter, this);
+            jiraIssueService.searchAllProjectIssues(visitor, cardsRepo);
 
-                log.info("Issue buffer - processed " + visitor.getProcessedCount() + " issues");
+            log.info("Issue buffer - processed " + visitor.getProcessedCount() + " issues");
 
-                updateState(state.done());
-                saveCache();
-            } catch(RequiresReindexException e) {
-                updateState(IssueBufferState.requiresReindex);
-                log.error("objective.taskboard.issueBuffer.IssueBufferService.updateIssueBuffer", e);
-            }catch(Exception e) {
-                updateState(state.error());
-                log.error("objective.taskboard.issueBuffer.IssueBufferService.updateIssueBuffer - Failed to bring issues", e);
-            }
-            finally {
-                log.debug("updateIssueBuffer time spent " +stopWatch.getTime());
-                isUpdatingTaskboardIssuesBuffer = false;
-            }
-        });
-        thread.setName("Buffer.update");
-        thread.setDaemon(true);
-        thread.start();
+            updateState(state.done());
+            saveCache();
+        } catch(RequiresReindexException e) {
+            updateState(IssueBufferState.requiresReindex);
+            log.error("objective.taskboard.issueBuffer.IssueBufferService.updateIssueBuffer", e);
+        }catch(Exception e) {
+            updateState(state.error());
+            log.error("objective.taskboard.issueBuffer.IssueBufferService.updateIssueBuffer - Failed to bring issues", e);
+        }
+        finally {
+            log.debug("updateIssueBuffer time spent " +stopWatch.getTime());
+        }
     }
 
     private void updateState(IssueBufferState state) {
@@ -455,16 +435,10 @@ public class IssueBufferService {
         }
     }
     
-    public void reset() {
+    public synchronized void reset() {
         state = IssueBufferState.uninitialised;
         cardsRepo.clear();
         updateIssueBuffer();
-        while (isUpdatingTaskboardIssuesBuffer)
-            try {
-                Thread.sleep(300);
-            } catch (InterruptedException e) {
-                return;
-            }
     }
 
     public class ReorderIssuesAction implements Callable<List<Issue>> {
