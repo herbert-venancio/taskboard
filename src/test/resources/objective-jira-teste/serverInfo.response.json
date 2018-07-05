@@ -1,5 +1,5 @@
 {
-  "baseUrl": "http://54.68.128.117:8100",
+  "baseUrl": "http://localhost:4567",
   "version": "7.1.7",
   "versionNumbers": [
     7,

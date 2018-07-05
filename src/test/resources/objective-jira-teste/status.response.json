@@ -2,7 +2,7 @@
   {
     "self": "http://localhost:4567/rest/api/latest/status/10052",
     "description": "",
-    "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/open.png",
+    "iconUrl": "http://localhost:4567/images/icons/statuses/open.png",
     "name": "To Do",
     "id": "10052",
     "statusCategory": {
@@ -16,7 +16,7 @@
   {
     "self": "http://localhost:4567/rest/api/latest/status/10053",
     "description": "",
-    "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/closed.png",
+    "iconUrl": "http://localhost:4567/images/icons/statuses/closed.png",
     "name": "Done",
     "id": "10053",
     "statusCategory": {
@@ -30,7 +30,7 @@
   {
     "self": "http://localhost:4567/rest/api/latest/status/10465",
     "description": "",
-    "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
+    "iconUrl": "http://localhost:4567/images/icons/statuses/generic.png",
     "name": "To Review",
     "id": "10465",
     "statusCategory": {
@@ -44,7 +44,7 @@
   {
     "self": "http://localhost:4567/rest/api/latest/status/10651",
     "description": "Taskboard",
-    "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
+    "iconUrl": "http://localhost:4567/images/icons/statuses/generic.png",
     "name": "Open",
     "id": "10651",
     "statusCategory": {
@@ -58,7 +58,7 @@
   {
     "self": "http://localhost:4567/rest/api/latest/status/10652",
     "description": "Taskboard",
-    "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
+    "iconUrl": "http://localhost:4567/images/icons/statuses/generic.png",
     "name": "Doing",
     "id": "10652",
     "statusCategory": {
@@ -72,7 +72,7 @@
   {
     "self": "http://localhost:4567/rest/api/latest/status/10653",
     "description": "Taskboard",
-    "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
+    "iconUrl": "http://localhost:4567/images/icons/statuses/generic.png",
     "name": "To UAT",
     "id": "10653",
     "statusCategory": {
@@ -86,7 +86,7 @@
   {
     "self": "http://localhost:4567/rest/api/latest/status/10654",
     "description": "Taskboard",
-    "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
+    "iconUrl": "http://localhost:4567/images/icons/statuses/generic.png",
     "name": "UATing",
     "id": "10654",
     "statusCategory": {
@@ -100,7 +100,7 @@
   {
     "self": "http://localhost:4567/rest/api/latest/status/10655",
     "description": "Taskboard",
-    "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
+    "iconUrl": "http://localhost:4567/images/icons/statuses/generic.png",
     "name": "Deferred",
     "id": "10655",
     "statusCategory": {
@@ -114,7 +114,7 @@
   {
     "self": "http://localhost:4567/rest/api/latest/status/10656",
     "description": "Taskboard",
-    "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
+    "iconUrl": "http://localhost:4567/images/icons/statuses/generic.png",
     "name": "Cancelled",
     "id": "10656",
     "statusCategory": {
@@ -128,7 +128,7 @@
   {
     "self": "http://localhost:4567/rest/api/latest/status/10657",
     "description": "Taskboard",
-    "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
+    "iconUrl": "http://localhost:4567/images/icons/statuses/generic.png",
     "name": "To Feature Review",
     "id": "10657",
     "statusCategory": {
@@ -142,7 +142,7 @@
   {
     "self": "http://localhost:4567/rest/api/latest/status/10658",
     "description": "Taskboard",
-    "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
+    "iconUrl": "http://localhost:4567/images/icons/statuses/generic.png",
     "name": "Feature Reviewing",
     "id": "10658",
     "statusCategory": {
@@ -156,7 +156,7 @@
   {
     "self": "http://localhost:4567/rest/api/latest/status/10659",
     "description": "Taskboard",
-    "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
+    "iconUrl": "http://localhost:4567/images/icons/statuses/generic.png",
     "name": "To Alpha Test",
     "id": "10659",
     "statusCategory": {
@@ -170,7 +170,7 @@
   {
     "self": "http://localhost:4567/rest/api/latest/status/10660",
     "description": "Taskboard",
-    "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
+    "iconUrl": "http://localhost:4567/images/icons/statuses/generic.png",
     "name": "Alpha Testing",
     "id": "10660",
     "statusCategory": {
@@ -184,7 +184,7 @@
   {
     "self": "http://localhost:4567/rest/api/latest/status/10661",
     "description": "Taskboard",
-    "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
+    "iconUrl": "http://localhost:4567/images/icons/statuses/generic.png",
     "name": "To QA",
     "id": "10661",
     "statusCategory": {
@@ -198,7 +198,7 @@
   {
     "self": "http://localhost:4567/rest/api/latest/status/10662",
     "description": "Taskboard",
-    "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
+    "iconUrl": "http://localhost:4567/images/icons/statuses/generic.png",
     "name": "QAing",
     "id": "10662",
     "statusCategory": {
@@ -212,7 +212,7 @@
   {
     "self": "http://localhost:4567/rest/api/latest/status/10663",
     "description": "Taskboard",
-    "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
+    "iconUrl": "http://localhost:4567/images/icons/statuses/generic.png",
     "name": "Reviewing",
     "id": "10663",
     "statusCategory": {

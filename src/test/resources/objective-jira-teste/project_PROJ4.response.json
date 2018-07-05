@@ -30,7 +30,7 @@
       "self": "http://localhost:4567/rest/api/latest/issuetype/4",
       "id": "4",
       "description": "A problem which impairs or prevents the functions of the product.",
-      "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=11953&avatarType=issuetype",
+      "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=11953&avatarType=issuetype",
       "name": "Bug",
       "subtask": false,
       "avatarId": 11953
@@ -39,7 +39,7 @@
       "self": "http://localhost:4567/rest/api/latest/issuetype/10604",
       "id": "10604",
       "description": "Taskboard",
-      "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12254&avatarType=issuetype",
+      "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12254&avatarType=issuetype",
       "name": "Feature Planning",
       "subtask": true,
       "avatarId": 12254
@@ -48,7 +48,7 @@
       "self": "http://localhost:4567/rest/api/latest/issuetype/10605",
       "id": "10605",
       "description": "Taskboard",
-      "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12255&avatarType=issuetype",
+      "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12255&avatarType=issuetype",
       "name": "Frontend Development",
       "subtask": true,
       "avatarId": 12255
@@ -57,7 +57,7 @@
       "self": "http://localhost:4567/rest/api/latest/issuetype/10607",
       "id": "10607",
       "description": "Taskboard",
-      "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12257&avatarType=issuetype",
+      "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12257&avatarType=issuetype",
       "name": "Tech Planning",
       "subtask": true,
       "avatarId": 12257
@@ -66,7 +66,7 @@
       "self": "http://localhost:4567/rest/api/latest/issuetype/10610",
       "id": "10610",
       "description": "Taskboard",
-      "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12261&avatarType=issuetype",
+      "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12261&avatarType=issuetype",
       "name": "Backend Development",
       "subtask": true,
       "avatarId": 12261
@@ -75,7 +75,7 @@
       "self": "http://localhost:4567/rest/api/latest/issuetype/10609",
       "id": "10609",
       "description": "Taskboard",
-      "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12259&avatarType=issuetype",
+      "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12259&avatarType=issuetype",
       "name": "UX",
       "subtask": true,
       "avatarId": 12259
@@ -84,7 +84,7 @@
       "self": "http://localhost:4567/rest/api/latest/issuetype/12",
       "id": "12",
       "description": "Sub-task",
-      "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=11958&avatarType=issuetype",
+      "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=11958&avatarType=issuetype",
       "name": "Sub-task",
       "subtask": true,
       "avatarId": 11958
@@ -93,7 +93,7 @@
       "self": "http://localhost:4567/rest/api/latest/issuetype/10603",
       "id": "10603",
       "description": "Taskboard",
-      "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12253&avatarType=issuetype",
+      "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12253&avatarType=issuetype",
       "name": "Alpha Test",
       "subtask": true,
       "avatarId": 12253
@@ -102,7 +102,7 @@
       "self": "http://localhost:4567/rest/api/latest/issuetype/10602",
       "id": "10602",
       "description": "Taskboard",
-      "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12252&avatarType=issuetype",
+      "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12252&avatarType=issuetype",
       "name": "Alpha Bug",
       "subtask": true,
       "avatarId": 12252
@@ -111,7 +111,7 @@
       "self": "http://localhost:4567/rest/api/latest/issuetype/10606",
       "id": "10606",
       "description": "Taskboard",
-      "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12256&avatarType=issuetype",
+      "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12256&avatarType=issuetype",
       "name": "Feature Review",
       "subtask": true,
       "avatarId": 12256
@@ -120,7 +120,7 @@
       "self": "http://localhost:4567/rest/api/latest/issuetype/10608",
       "id": "10608",
       "description": "Taskboard",
-      "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12258&avatarType=issuetype",
+      "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12258&avatarType=issuetype",
       "name": "UAT",
       "subtask": true,
       "avatarId": 12258
@@ -129,7 +129,7 @@
       "self": "http://localhost:4567/rest/api/latest/issuetype/10611",
       "id": "10611",
       "description": "Taskboard",
-      "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12260&avatarType=issuetype",
+      "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12260&avatarType=issuetype",
       "name": "QA",
       "subtask": true,
       "avatarId": 12260
@@ -138,7 +138,7 @@
       "self": "http://localhost:4567/rest/api/latest/issuetype/10600",
       "id": "10600",
       "description": "Taskboard",
-      "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12250&avatarType=issuetype",
+      "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12250&avatarType=issuetype",
       "name": "Demand",
       "subtask": false,
       "avatarId": 12250
@@ -147,7 +147,7 @@
       "self": "http://localhost:4567/rest/api/latest/issuetype/10601",
       "id": "10601",
       "description": "Taskboard",
-      "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
+      "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
       "name": "Feature",
       "subtask": false,
       "avatarId": 12251
@@ -156,7 +156,7 @@
       "self": "http://localhost:4567/rest/api/latest/issuetype/11",
       "id": "11",
       "description": "A task that needs to be done.",
-      "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12262&avatarType=issuetype",
+      "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12262&avatarType=issuetype",
       "name": "Task",
       "subtask": false,
       "avatarId": 12262
@@ -166,28 +166,28 @@
   "versions": [],
   "name": "Project 4",
   "roles": {
-    "BPO": "http://54.68.128.117:8100/rest/api/latest/project/11320/role/10110",
-    "Demandador Restrito": "http://54.68.128.117:8100/rest/api/latest/project/11320/role/10210",
-    "Líderes de Desenvolvimento": "http://54.68.128.117:8100/rest/api/latest/project/11320/role/10030",
-    "Movers": "http://54.68.128.117:8100/rest/api/latest/project/11320/role/10090",
-    "Users": "http://54.68.128.117:8100/rest/api/latest/project/11320/role/10020",
-    "Viewers and Watchers": "http://54.68.128.117:8100/rest/api/latest/project/11320/role/10060",
-    "QA": "http://54.68.128.117:8100/rest/api/latest/project/11320/role/10071",
-    "Objective": "http://54.68.128.117:8100/rest/api/latest/project/11320/role/10001",
-    "Coordenador de Projeto": "http://54.68.128.117:8100/rest/api/latest/project/11320/role/10040",
-    "Demandador": "http://54.68.128.117:8100/rest/api/latest/project/11320/role/10310",
-    "Developers": "http://54.68.128.117:8100/rest/api/latest/project/11320/role/10021",
-    "Delegators": "http://54.68.128.117:8100/rest/api/latest/project/11320/role/10100",
-    "Administrators": "http://54.68.128.117:8100/rest/api/latest/project/11320/role/10002",
-    "Users in Customer": "http://54.68.128.117:8100/rest/api/latest/project/11320/role/10061",
-    "Stakeholders": "http://54.68.128.117:8100/rest/api/latest/project/11320/role/10070",
-    "Workloggers": "http://54.68.128.117:8100/rest/api/latest/project/11320/role/10050"
+    "BPO": "http://localhost:4567/rest/api/latest/project/11320/role/10110",
+    "Demandador Restrito": "http://localhost:4567/rest/api/latest/project/11320/role/10210",
+    "Líderes de Desenvolvimento": "http://localhost:4567/rest/api/latest/project/11320/role/10030",
+    "Movers": "http://localhost:4567/rest/api/latest/project/11320/role/10090",
+    "Users": "http://localhost:4567/rest/api/latest/project/11320/role/10020",
+    "Viewers and Watchers": "http://localhost:4567/rest/api/latest/project/11320/role/10060",
+    "QA": "http://localhost:4567/rest/api/latest/project/11320/role/10071",
+    "Objective": "http://localhost:4567/rest/api/latest/project/11320/role/10001",
+    "Coordenador de Projeto": "http://localhost:4567/rest/api/latest/project/11320/role/10040",
+    "Demandador": "http://localhost:4567/rest/api/latest/project/11320/role/10310",
+    "Developers": "http://localhost:4567/rest/api/latest/project/11320/role/10021",
+    "Delegators": "http://localhost:4567/rest/api/latest/project/11320/role/10100",
+    "Administrators": "http://localhost:4567/rest/api/latest/project/11320/role/10002",
+    "Users in Customer": "http://localhost:4567/rest/api/latest/project/11320/role/10061",
+    "Stakeholders": "http://localhost:4567/rest/api/latest/project/11320/role/10070",
+    "Workloggers": "http://localhost:4567/rest/api/latest/project/11320/role/10050"
   },
   "avatarUrls": {
-    "48x48": "http://54.68.128.117:8100/secure/projectavatar?avatarId=11653",
-    "24x24": "http://54.68.128.117:8100/secure/projectavatar?size=small&avatarId=11653",
-    "16x16": "http://54.68.128.117:8100/secure/projectavatar?size=xsmall&avatarId=11653",
-    "32x32": "http://54.68.128.117:8100/secure/projectavatar?size=medium&avatarId=11653"
+    "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653",
+    "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+    "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+    "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653"
   },
   "projectCategory": {
     "self": "http://localhost:4567/rest/api/latest/projectCategory/10001",

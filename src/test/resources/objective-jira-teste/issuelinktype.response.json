@@ -5,77 +5,77 @@
       "name": "Cloners",
       "inward": "is cloned by",
       "outward": "clones",
-      "self": "http://54.68.128.117:8100/rest/api/2/issueLinkType/10030"
+      "self": "http://localhost:4567/rest/api/2/issueLinkType/10030"
     },
     {
       "id": "10350",
       "name": "Demand",
       "inward": "is demanded by",
       "outward": "demands",
-      "self": "http://54.68.128.117:8100/rest/api/2/issueLinkType/10350"
+      "self": "http://localhost:4567/rest/api/2/issueLinkType/10350"
     },
     {
       "id": "10150",
       "name": "Demanda",
       "inward": "é demandado por",
       "outward": "demandou",
-      "self": "http://54.68.128.117:8100/rest/api/2/issueLinkType/10150"
+      "self": "http://localhost:4567/rest/api/2/issueLinkType/10150"
     },
     {
       "id": "10000",
       "name": "Duplicação",
       "inward": "foi duplicado por",
       "outward": "duplicou",
-      "self": "http://54.68.128.117:8100/rest/api/2/issueLinkType/10000"
+      "self": "http://localhost:4567/rest/api/2/issueLinkType/10000"
     },
     {
       "id": "10020",
       "name": "Duplicate",
       "inward": "is duplicated by",
       "outward": "duplicates",
-      "self": "http://54.68.128.117:8100/rest/api/2/issueLinkType/10020"
+      "self": "http://localhost:4567/rest/api/2/issueLinkType/10020"
     },
     {
       "id": "10450",
       "name": "Fatura",
       "inward": "é faturado por",
       "outward": "faturou",
-      "self": "http://54.68.128.117:8100/rest/api/2/issueLinkType/10450"
+      "self": "http://localhost:4567/rest/api/2/issueLinkType/10450"
     },
     {
       "id": "10250",
       "name": "Gap",
       "inward": "é solucionado por",
       "outward": "soluciona",
-      "self": "http://54.68.128.117:8100/rest/api/2/issueLinkType/10250"
+      "self": "http://localhost:4567/rest/api/2/issueLinkType/10250"
     },
     {
       "id": "10001",
       "name": "Geração",
       "inward": "foi gerado por",
       "outward": "gerou",
-      "self": "http://54.68.128.117:8100/rest/api/2/issueLinkType/10001"
+      "self": "http://localhost:4567/rest/api/2/issueLinkType/10001"
     },
     {
       "id": "10021",
       "name": "Requirement",
       "inward": "is required for",
       "outward": "requires",
-      "self": "http://54.68.128.117:8100/rest/api/2/issueLinkType/10021"
+      "self": "http://localhost:4567/rest/api/2/issueLinkType/10021"
     },
     {
       "id": "10040",
       "name": "Resolve",
       "inward": "foi resolvida por",
       "outward": "resolve",
-      "self": "http://54.68.128.117:8100/rest/api/2/issueLinkType/10040"
+      "self": "http://localhost:4567/rest/api/2/issueLinkType/10040"
     },
     {
       "id": "10010",
       "name": "Testando",
       "inward": "foi encontrado durante o teste de",
       "outward": ", durante o teste, evidenciou",
-      "self": "http://54.68.128.117:8100/rest/api/2/issueLinkType/10010"
+      "self": "http://localhost:4567/rest/api/2/issueLinkType/10010"
     }
   ]
 }

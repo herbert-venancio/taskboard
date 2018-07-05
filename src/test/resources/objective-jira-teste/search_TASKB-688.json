@@ -47,7 +47,7 @@
                 "issuetype": {
                     "avatarId": 11953,
                     "description": "A problem which impairs or prevents the functions of the product.",
-                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=11953&avatarType=issuetype",
+                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=11953&avatarType=issuetype",
                     "id": "4",
                     "name": "Bug",
                     "self": "http://localhost:4567/rest/api/2/issuetype/4",
@@ -55,17 +55,17 @@
                 },
                 "labels": [],
                 "priority": {
-                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
+                    "iconUrl": "http://localhost:4567/images/icons/priorities/minor.svg",
                     "id": "9",
                     "name": "M\u00e9dia",
                     "self": "http://localhost:4567/rest/api/2/priority/9"
                 },
                 "project": {
                     "avatarUrls": {
-                        "16x16": "http://54.68.128.117:8100/secure/projectavatar?size=xsmall&avatarId=11653",
-                        "24x24": "http://54.68.128.117:8100/secure/projectavatar?size=small&avatarId=11653",
-                        "32x32": "http://54.68.128.117:8100/secure/projectavatar?size=medium&avatarId=11653",
-                        "48x48": "http://54.68.128.117:8100/secure/projectavatar?avatarId=11653"
+                        "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+                        "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+                        "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653",
+                        "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653"
                     },
                     "id": "11315",
                     "key": "TASKB",
@@ -93,7 +93,7 @@
                 },
                 "status": {
                     "description": "Taskboard",
-                    "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
+                    "iconUrl": "http://localhost:4567/images/icons/statuses/generic.png",
                     "id": "10651",
                     "name": "Open",
                     "self": "http://localhost:4567/rest/api/2/status/10651",
@@ -118,7 +118,7 @@
                     "name": "To Do",
                     "to": {
                         "description": "",
-                        "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/open.png",
+                        "iconUrl": "http://localhost:4567/images/icons/statuses/open.png",
                         "id": "10052",
                         "name": "To Do",
                         "self": "http://localhost:4567/rest/api/2/status/10052",
@@ -136,7 +136,7 @@
                     "name": "Deferred",
                     "to": {
                         "description": "Taskboard",
-                        "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
+                        "iconUrl": "http://localhost:4567/images/icons/statuses/generic.png",
                         "id": "10655",
                         "name": "Deferred",
                         "self": "http://localhost:4567/rest/api/2/status/10655",
@@ -154,7 +154,7 @@
                     "name": "Cancel",
                     "to": {
                         "description": "Taskboard",
-                        "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
+                        "iconUrl": "http://localhost:4567/images/icons/statuses/generic.png",
                         "id": "10656",
                         "name": "Cancelled",
                         "self": "http://localhost:4567/rest/api/2/status/10656",
