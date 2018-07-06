@@ -20,15 +20,20 @@
  */
 package objective.taskboard.controller;
 
+import static org.springframework.http.HttpStatus.OK;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import org.codehaus.jettison.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -100,6 +105,17 @@ public class IssueController {
         List<Issue> visibleIssues = issueBufferService.getVisibleIssuesByIds(issuesIds);
         visibleIssues = cardFieldFilterService.getIssuesSelectedByLoggedUser(visibleIssues);
         return toCardDto(visibleIssues);
+    }
+
+    @RequestMapping(path = "byKey/{issueKey}", method = RequestMethod.GET)
+    public ResponseEntity<Object> byKey(@PathVariable String issueKey) {
+        Optional<Issue> issueOptional = issueBufferService.getVisibleIssueByKey(issueKey);
+        if(issueOptional.isPresent()){
+            Issue issue = issueOptional.get();
+            return new ResponseEntity<>(toCardDto(issue), OK);
+        }else{
+            return new ResponseEntity<>("Card: " +issueKey+" not found.", HttpStatus.NOT_FOUND);
+        }
     }
 
     @RequestMapping(path = "addMeAsAssignee", method = RequestMethod.POST)

@@ -106,16 +106,15 @@
                 margin: 0px;
                 padding: 0px;
                 font-weight: normal;
-                display: inline !important;
+                display: flex;
             }
 
-            .card-header-title a {
+            .card-header-title span {
                 font-size: 16px;
                 line-height: 22px;
                 display: block;
                 font-family: 'ptsans-caption-bold', Verdana, Arial, Helvetica, sans-serif;
                 color: #F5F5F5;
-                cursor: pointer;
             }
 
             .sub-content {
@@ -195,7 +194,7 @@
                 background-color: rgba(0, 0, 0, 0.25);
             }
 
-            paper-button.parentLink {
+            #parent-card-name {
                 font-weight: 600;
                 margin: 0px;
                 padding: 0px;
@@ -707,6 +706,17 @@
             .hidden-section {
                 display: none;
             }
+            .button-open-jira {
+                min-width: auto;
+                padding: 0px 0px 0px 5px;
+                margin: 0px 0px 0px 0px;
+            }
+            .button-open-jira iron-icon {
+                width: 16px;
+                height: 16px;
+                color: #8E8E8E;
+                top: -1px;
+            }
         </style>
         <style is="custom-property">
             paper-toggle-button {
@@ -763,12 +773,15 @@
                             <template is="dom-if" if="{{item.parent}}">
                                 <span class="parent-key">
                                     <span class="arrow">></span>
-                                    <paper-button class="parentLink" on-tap="openJira" data-issue-key$="{{item.parent}}">{{item.parent}} {{item.parentSummary}}</paper-button>
+                                    <paper-button on-tap="changeCard" data-issue-key$="{{item.parent}}" id="parent-card-name">{{item.parent}} {{item.parentSummary}}</paper-button>
                                 </span>
                             </template>
                         </div>
                         <div class="card-header-title">
-                            <a class="headerLink" on-tap="openJira" data-issue-key$="{{item.issueKey}}">{{item.issueKey}} {{item.summary}}</a>
+                            <span id="card-name">{{item.issueKey}} {{item.summary}}</span>
+                            <paper-button class="button-open-jira" on-tap="openJira" title="Open {{item.issueKey}} on Jira">
+                                <iron-icon icon="open-in-new"></iron-icon>
+                            </paper-button>
                         </div>
                     </div>
                     <div class="card-header-buttons">
@@ -925,7 +938,7 @@
                                                     <img class="icon-tiny" src$="{{subtask.issueTypeUri}}" title$="{{subtask.issueType}}"/>
                                                 </div>
                                                 <div class="subtask--issue-key">
-                                                    <paper-button class="subtask-link" on-tap="openJira"  data-issue-key$="{{subtask.issueKey}}">
+                                                    <paper-button class="subtask-link" on-tap="changeCard"  data-issue-key$="{{subtask.issueKey}}" id="child-issue-{{index}}">
                                                         {{subtask.issueKey}}
                                                     </paper-button>
                                                 </div>
@@ -1213,6 +1226,11 @@
                     cycleTime: {
                         type: Object,
                         notify: true
+                    },
+
+                    isOpen: {
+                        type: Boolean,
+                        value: false
                     }
                 },
 
@@ -1639,6 +1657,7 @@
                 },
 
                 opendialog: function (item) {
+                    this.closeIfOpenedDialog();
                     this.isObserving = false;
                     this.setCard(item);
                     this.$.modal.open();
@@ -1765,18 +1784,28 @@
 
                 openJira: function (event) {
                     event.stopPropagation();
+                    window.open(taskboard.urlJira + '/browse/' + this.item.issueKey, '_blank');
+                },
+
+                changeCard: function (event) {
                     var issueKey = event.target.getAttribute('data-issue-key');
-                    window.open(taskboard.urlJira + '/browse/' + issueKey, '_blank');
+                    navigatorService.openCard(issueKey);
                 },
 
                 _afterOpen: function() {
                     this.set('_modalStatus', this._modalStatuses.OPENED);
                 },
 
-                close: function() {
+                close: function(){
                     this._beforeClose();
                     this.$.modal.close();
                     this._afterClose();
+                    navigatorService.resetUrlWithouLoad();
+                },
+
+                closeIfOpenedDialog: function(){
+                    if(this.isOpen)
+                        this.close();
                 },
 
                 _beforeClose: function () {
