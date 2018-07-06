@@ -20,6 +20,8 @@
  */
 package objective.taskboard.it;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
@@ -30,10 +32,20 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
     private static final String STANDARD = "Standard";
     private static final String STANDARD_COLOR = "rgb(238, 238, 238)";
     private static final String FIXED_DATE_COLOR = "rgb(254, 229, 188)";
+    private MainPage mainPage; 
+
+    @Before 
+    public void beforeTest() { 
+        mainPage = MainPage.produce(webDriver); 
+    } 
+        
+    @After 
+    public void afterTest() { 
+        mainPage = null; 
+    } 
 
     @Test
     public void whenUpdateHappensViaWebHookAndUpdatedIssueIsOpen_ShouldWarnUser() {
-        MainPage mainPage = MainPage.produce(webDriver);
         mainPage.errorToast().close();
         IssueDetails issueDetails = mainPage
             .issue("TASKB-625")
@@ -57,7 +69,6 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
 
     @Test
     public void givenAnIssueNotVisible_whenUpdateHappensViaWebHook_RefreshToastShouldNotShowUP() {
-        MainPage mainPage = MainPage.produce(webDriver);
         mainPage.typeSearch("TASKB-625");
 
         BoardStepFragment stepToDo = mainPage.lane("Operational")
@@ -79,7 +90,6 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
 
     @Test
     public void givenVisibleIssuesWithChildren_whenParentGoToDeferred_thenAllChildrenShouldDisappear() {
-        MainPage mainPage = MainPage.produce(webDriver);
         mainPage.issue("TASKB-606")
             .enableHierarchicalFilter();
         mainPage.assertVisibleIssues("TASKB-606", "TASKB-186", "TASKB-235", "TASKB-601", "TASKB-572");
@@ -100,8 +110,6 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
 
     @Test
     public void givenIssuesWithChildren_whenParentChangeTheClassOfServiceOrRelease_thenAllChildrenShouldUpdate() {
-        MainPage mainPage = MainPage.produce(webDriver);
-        
         mainPage.issue("TASKB-606")
             .assertCardColor(STANDARD_COLOR)
                 .click().issueDetails()
@@ -186,7 +194,6 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
 
     @Test
     public void whenDeleteIssueHappensViaWebhook_thenIssueShouldDisappear() {
-        MainPage mainPage = MainPage.produce(webDriver);
         mainPage.typeSearch("TASKB-625")
             .assertVisibleIssues("TASKB-625");
 

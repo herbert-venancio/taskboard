@@ -27,14 +27,27 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
 public class ReleaseFilterIT extends AuthenticatedIntegrationTest {
 
+    private MainPage mainPage; 
+    
+    @Before 
+    public void beforeTest() { 
+        mainPage = MainPage.produce(webDriver); 
+    } 
+     
+    @After
+    public void afterTest() { 
+        mainPage = null; 
+    }
+
     @Test
     public void whenNoProjectsIsSelected_noReleasesLabelShowup() {
-        MainPage mainPage = MainPage.produce(webDriver);
         MenuFilters menuFilters = mainPage.assertLabelRelease("Release")
                 .openMenuFilters();
         menuFilters.openCardFieldFilters()
@@ -46,14 +59,13 @@ public class ReleaseFilterIT extends AuthenticatedIntegrationTest {
 
     @Test
     public void whenFilterByRelease_onlyIssueInTheReleaseShowUp() {
-        MainPage.produce(webDriver)
+        mainPage
                 .filterByRelease("TASKB - 1.0")
                 .assertVisibleIssues("TASKB-186", "TASKB-238", "TASKB-572");
     }
 
     @Test
     public void whenWebhookProjectVersionUpdate_updateReleaseOfIssues() {
-        MainPage mainPage = MainPage.produce(webDriver);
         mainPage.assertUpdatedIssues();
 
         emulateVersionUpdate("12550", "1.0-edited");
@@ -75,7 +87,6 @@ public class ReleaseFilterIT extends AuthenticatedIntegrationTest {
 
     @Test
     public void whenWebhookChangeReleaseOfIssue_thenFilterByReleaseContinueWorking() {
-        MainPage mainPage = MainPage.produce(webDriver);
         mainPage.assertUpdatedIssues();
 
         emulateUpdateIssue("TASKB-606", "{\"customfield_11455\":{\"id\": \"12552\",\"name\": \"3.0\"}}");
@@ -97,7 +108,6 @@ public class ReleaseFilterIT extends AuthenticatedIntegrationTest {
 
     @Test
     public void whenOpenReleaseDropDown_showSortedReleases() {
-        MainPage mainPage = MainPage.produce(webDriver);
         Stream<WebElement> allReleases = mainPage.getAllReleases();
         List<String> releaseNameResult = allReleases.map(WebElement::getText).collect(Collectors.toList());
         List<String> releaseNameSortExpected = releaseNameResult.stream().collect(Collectors.toList());
