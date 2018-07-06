@@ -59,7 +59,9 @@ class IssueDetails extends AbstractUiFragment {
 
     public IssueDetails removeAssignee(String assigneeToRemove) {
         assertIsOpened();
-        WebElement teamTag = issueDetailRoot.findElement(By.cssSelector(".assignees paper-material[data-assignee='"+assigneeToRemove+"'] .remove-button"));
+        By removeButtonSelector = By.cssSelector(".assignees paper-material[data-assignee='"+assigneeToRemove+"'] .remove-button");
+        waitUntilElementExists(removeButtonSelector);
+        WebElement teamTag = issueDetailRoot.findElement(removeButtonSelector);
         waitForClick(teamTag);
 
         return this;
