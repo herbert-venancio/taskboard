@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import objective.taskboard.data.CardFieldFilter;
@@ -108,8 +109,8 @@ public class IssueController {
     }
 
     @RequestMapping(path = "byKey/{issueKey}", method = RequestMethod.GET)
-    public ResponseEntity<Object> byKey(@PathVariable String issueKey) {
-        Optional<Issue> issueOptional = issueBufferService.getVisibleIssueByKey(issueKey);
+    public ResponseEntity<Object> byKey(@PathVariable String issueKey, @RequestParam(required = false, defaultValue ="true") boolean onlyVisible) {
+        Optional<Issue> issueOptional = issueBufferService.getIssueByKey(issueKey, onlyVisible);
         if(issueOptional.isPresent()){
             Issue issue = issueOptional.get();
             return new ResponseEntity<>(toCardDto(issue), OK);

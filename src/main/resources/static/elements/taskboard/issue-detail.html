@@ -1704,7 +1704,7 @@
                     if(!this.isUpdating) {
                         var self = this;
                         $.ajax({
-                            url: '/ws/issue-detail/' + self.item.issueKey + "?timezone="+ taskboard.getTimeZoneIdFromBrowser(),
+                            url: '/ws/issue-detail/' + self.item.issueKey + "?timezone="+ taskboard.getTimeZoneIdFromBrowser() +"&onlyVisible="+false,
                             type: 'get',
                             success: function (data, textStatus, jQxhr) {
                                 self.cycleTime = data.cycleTime === null ? null : data.cycleTime.toFixed(2);
