@@ -34,9 +34,10 @@ public class IssueDetailController {
     private IssueBufferService issueBufferService;
     
     @GetMapping("/{issueKey}")
-    public ResponseEntity<Object> findByKey(@PathVariable final String issueKey, @RequestParam("timezone") final String timezone) {
-        
-        final Optional<Issue> issueOptional = issueBufferService.getVisibleIssueByKey(issueKey);
+    public ResponseEntity<Object> findByKey(@PathVariable final String issueKey, @RequestParam("timezone") final String timezone,
+                                            @RequestParam(required = false, defaultValue ="true") boolean onlyVisible) {
+
+        final Optional<Issue> issueOptional = issueBufferService.getIssueByKey(issueKey, onlyVisible);
         
         if (!issueOptional.isPresent())
             return new ResponseEntity<>("Issue not found.", NOT_FOUND);

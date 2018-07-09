@@ -129,13 +129,14 @@ function Taskboard() {
         if(issue)
             return issue;
 
-        $.get('/ws/issues/byKey/' + issueKey)
-            .done(function(issueFromServer) {
-                return issueFromServer;
-            })
-            .fail(function() {
-                return null;
-            })
+        $.ajax({
+            url: '/ws/issues/byKey/' + issueKey + "?onlyVisible="+false,
+            async: false,
+            success: function (issueFromServer) {
+                issue = issueFromServer
+            }
+        });
+        return issue;
     };
 
     this.setLaneConfiguration = function(laneConfiguration) {

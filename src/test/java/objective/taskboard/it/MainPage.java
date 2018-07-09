@@ -71,6 +71,11 @@ public class MainPage extends AbstractUiFragment {
         return this;
     }
 
+    public MainPage navigateTo(String url) {
+        webDriver.get(AbstractUIIntegrationTest.getSiteBase()+url);
+        return this;
+    }
+
     public void waitUserLabelToBe(String expected) {
         waitTextInElement(userLabelButton, expected);
     }
