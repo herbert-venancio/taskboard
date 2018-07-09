@@ -314,7 +314,7 @@
                     self.errorMessage = '';
 
                     if (!self._validate())
-                        return;
+                        return { done:function(){} };
 
                     self.showLoading(true);
 

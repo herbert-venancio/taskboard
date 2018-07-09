@@ -79,13 +79,13 @@ public abstract class AbstractUiFragment {
         waitUntil(new ExpectedCondition<Boolean>() {
             @Override
             public Boolean apply(WebDriver element) {
-                List<WebElement> elements = element.findElements(by);
-                if (elements.size() == 0)
-                    return false;
-                WebElement we = elements.get(0);
-                if (!we.isDisplayed())
-                    return false;
                 try {
+                	List<WebElement> elements = element.findElements(by);
+                	if (elements.size() == 0)
+                		return false;
+                	WebElement we = elements.get(0);
+                	if (!we.isDisplayed())
+                		return false;
                     return we.getText().trim().equals(valueToSelect);
                 }catch(StaleElementReferenceException ex) {
                     return false;
