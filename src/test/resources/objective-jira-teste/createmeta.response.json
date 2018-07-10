@@ -3,10 +3,10 @@
     "projects": [
         {
             "avatarUrls": {
-                "16x16": "http://54.68.128.117:8100/secure/projectavatar?size=xsmall&avatarId=11653",
-                "24x24": "http://54.68.128.117:8100/secure/projectavatar?size=small&avatarId=11653",
-                "32x32": "http://54.68.128.117:8100/secure/projectavatar?size=medium&avatarId=11653",
-                "48x48": "http://54.68.128.117:8100/secure/projectavatar?avatarId=11653"
+                "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+                "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+                "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653",
+                "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653"
             },
             "expand": "issuetypes",
             "id": "11315",
@@ -233,7 +233,7 @@
                             }
                         },
                         "issuelinks": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/2/issue/picker?currentProjectId=&showSubTaskParent=true&showSubTasks=true&currentIssueKey=null&query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/2/issue/picker?currentProjectId=&showSubTaskParent=true&showSubTasks=true&currentIssueKey=null&query=",
                             "hasDefaultValue": false,
                             "name": "Linked Issues",
                             "operations": [
@@ -251,7 +251,7 @@
                                 {
                                     "avatarId": 11953,
                                     "description": "A problem which impairs or prevents the functions of the product.",
-                                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=11953&avatarType=issuetype",
+                                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=11953&avatarType=issuetype",
                                     "id": "4",
                                     "name": "Bug",
                                     "self": "http://localhost:4567/rest/api/2/issuetype/4",
@@ -270,31 +270,31 @@
                         "priority": {
                             "allowedValues": [
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/blocker.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/blocker.svg",
                                     "id": "6",
                                     "name": "Opera\u00e7\u00e3o Parada",
                                     "self": "http://localhost:4567/rest/api/2/priority/6"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/critical.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/critical.svg",
                                     "id": "7",
                                     "name": "Cr\u00edtico",
                                     "self": "http://localhost:4567/rest/api/2/priority/7"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/major.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/major.svg",
                                     "id": "8",
                                     "name": "Alta",
                                     "self": "http://localhost:4567/rest/api/2/priority/8"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/minor.svg",
                                     "id": "9",
                                     "name": "M\u00e9dia",
                                     "self": "http://localhost:4567/rest/api/2/priority/9"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/trivial.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/trivial.svg",
                                     "id": "10",
                                     "name": "Baixa",
                                     "self": "http://localhost:4567/rest/api/2/priority/10"
@@ -315,10 +315,10 @@
                             "allowedValues": [
                                 {
                                     "avatarUrls": {
-                                        "16x16": "http://54.68.128.117:8100/secure/projectavatar?size=xsmall&avatarId=11653",
-                                        "24x24": "http://54.68.128.117:8100/secure/projectavatar?size=small&avatarId=11653",
-                                        "32x32": "http://54.68.128.117:8100/secure/projectavatar?size=medium&avatarId=11653",
-                                        "48x48": "http://54.68.128.117:8100/secure/projectavatar?avatarId=11653"
+                                        "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+                                        "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+                                        "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653",
+                                        "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653"
                                     },
                                     "id": "11315",
                                     "key": "TASKB",
@@ -343,7 +343,7 @@
                             }
                         },
                         "reporter": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/latest/user/search?username=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/latest/user/search?username=",
                             "hasDefaultValue": false,
                             "name": "Reporter",
                             "operations": [
@@ -505,7 +505,7 @@
                             }
                         }
                     },
-                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=11953&avatarType=issuetype",
+                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=11953&avatarType=issuetype",
                     "id": "4",
                     "name": "Bug",
                     "self": "http://localhost:4567/rest/api/latest/issuetype/4",
@@ -516,7 +516,7 @@
                     "expand": "fields",
                     "fields": {
                         "assignee": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/latest/user/assignable/search?issueKey=null&username=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/latest/user/assignable/search?issueKey=null&username=",
                             "hasDefaultValue": false,
                             "name": "Assignee",
                             "operations": [
@@ -638,7 +638,7 @@
                             }
                         },
                         "customfield_11454": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/users/picker?fieldName=customfield_11454&query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/users/picker?fieldName=customfield_11454&query=",
                             "hasDefaultValue": false,
                             "name": "Subject Matter Expert",
                             "operations": [
@@ -772,7 +772,7 @@
                             }
                         },
                         "customfield_11456": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/users/picker?fieldName=customfield_11456&query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/users/picker?fieldName=customfield_11456&query=",
                             "hasDefaultValue": false,
                             "name": "Co-Assignees",
                             "operations": [
@@ -857,7 +857,7 @@
                                 {
                                     "avatarId": 12254,
                                     "description": "Taskboard",
-                                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12254&avatarType=issuetype",
+                                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12254&avatarType=issuetype",
                                     "id": "10604",
                                     "name": "Feature Planning",
                                     "self": "http://localhost:4567/rest/api/2/issuetype/10604",
@@ -874,7 +874,7 @@
                             }
                         },
                         "labels": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/labels/suggest?query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/labels/suggest?query=",
                             "hasDefaultValue": false,
                             "name": "Labels",
                             "operations": [
@@ -904,31 +904,31 @@
                         "priority": {
                             "allowedValues": [
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/blocker.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/blocker.svg",
                                     "id": "6",
                                     "name": "Opera\u00e7\u00e3o Parada",
                                     "self": "http://localhost:4567/rest/api/2/priority/6"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/critical.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/critical.svg",
                                     "id": "7",
                                     "name": "Cr\u00edtico",
                                     "self": "http://localhost:4567/rest/api/2/priority/7"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/major.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/major.svg",
                                     "id": "8",
                                     "name": "Alta",
                                     "self": "http://localhost:4567/rest/api/2/priority/8"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/minor.svg",
                                     "id": "9",
                                     "name": "M\u00e9dia",
                                     "self": "http://localhost:4567/rest/api/2/priority/9"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/trivial.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/trivial.svg",
                                     "id": "10",
                                     "name": "Baixa",
                                     "self": "http://localhost:4567/rest/api/2/priority/10"
@@ -949,10 +949,10 @@
                             "allowedValues": [
                                 {
                                     "avatarUrls": {
-                                        "16x16": "http://54.68.128.117:8100/secure/projectavatar?size=xsmall&avatarId=11653",
-                                        "24x24": "http://54.68.128.117:8100/secure/projectavatar?size=small&avatarId=11653",
-                                        "32x32": "http://54.68.128.117:8100/secure/projectavatar?size=medium&avatarId=11653",
-                                        "48x48": "http://54.68.128.117:8100/secure/projectavatar?avatarId=11653"
+                                        "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+                                        "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+                                        "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653",
+                                        "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653"
                                     },
                                     "id": "11315",
                                     "key": "TASKB",
@@ -977,7 +977,7 @@
                             }
                         },
                         "reporter": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/latest/user/search?username=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/latest/user/search?username=",
                             "hasDefaultValue": false,
                             "name": "Reporter",
                             "operations": [
@@ -1152,7 +1152,7 @@
                             }
                         }
                     },
-                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12254&avatarType=issuetype",
+                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12254&avatarType=issuetype",
                     "id": "10604",
                     "name": "Feature Planning",
                     "self": "http://localhost:4567/rest/api/latest/issuetype/10604",
@@ -1163,7 +1163,7 @@
                     "expand": "fields",
                     "fields": {
                         "assignee": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/latest/user/assignable/search?issueKey=null&username=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/latest/user/assignable/search?issueKey=null&username=",
                             "hasDefaultValue": false,
                             "name": "Assignee",
                             "operations": [
@@ -1285,7 +1285,7 @@
                             }
                         },
                         "customfield_11454": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/users/picker?fieldName=customfield_11454&query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/users/picker?fieldName=customfield_11454&query=",
                             "hasDefaultValue": false,
                             "name": "Subject Matter Expert",
                             "operations": [
@@ -1419,7 +1419,7 @@
                             }
                         },
                         "customfield_11456": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/users/picker?fieldName=customfield_11456&query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/users/picker?fieldName=customfield_11456&query=",
                             "hasDefaultValue": false,
                             "name": "Co-Assignees",
                             "operations": [
@@ -1504,7 +1504,7 @@
                                 {
                                     "avatarId": 12255,
                                     "description": "Taskboard",
-                                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12255&avatarType=issuetype",
+                                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12255&avatarType=issuetype",
                                     "id": "10605",
                                     "name": "Frontend Development",
                                     "self": "http://localhost:4567/rest/api/2/issuetype/10605",
@@ -1521,7 +1521,7 @@
                             }
                         },
                         "labels": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/labels/suggest?query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/labels/suggest?query=",
                             "hasDefaultValue": false,
                             "name": "Labels",
                             "operations": [
@@ -1551,31 +1551,31 @@
                         "priority": {
                             "allowedValues": [
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/blocker.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/blocker.svg",
                                     "id": "6",
                                     "name": "Opera\u00e7\u00e3o Parada",
                                     "self": "http://localhost:4567/rest/api/2/priority/6"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/critical.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/critical.svg",
                                     "id": "7",
                                     "name": "Cr\u00edtico",
                                     "self": "http://localhost:4567/rest/api/2/priority/7"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/major.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/major.svg",
                                     "id": "8",
                                     "name": "Alta",
                                     "self": "http://localhost:4567/rest/api/2/priority/8"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/minor.svg",
                                     "id": "9",
                                     "name": "M\u00e9dia",
                                     "self": "http://localhost:4567/rest/api/2/priority/9"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/trivial.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/trivial.svg",
                                     "id": "10",
                                     "name": "Baixa",
                                     "self": "http://localhost:4567/rest/api/2/priority/10"
@@ -1596,10 +1596,10 @@
                             "allowedValues": [
                                 {
                                     "avatarUrls": {
-                                        "16x16": "http://54.68.128.117:8100/secure/projectavatar?size=xsmall&avatarId=11653",
-                                        "24x24": "http://54.68.128.117:8100/secure/projectavatar?size=small&avatarId=11653",
-                                        "32x32": "http://54.68.128.117:8100/secure/projectavatar?size=medium&avatarId=11653",
-                                        "48x48": "http://54.68.128.117:8100/secure/projectavatar?avatarId=11653"
+                                        "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+                                        "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+                                        "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653",
+                                        "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653"
                                     },
                                     "id": "11315",
                                     "key": "TASKB",
@@ -1624,7 +1624,7 @@
                             }
                         },
                         "reporter": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/latest/user/search?username=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/latest/user/search?username=",
                             "hasDefaultValue": false,
                             "name": "Reporter",
                             "operations": [
@@ -1799,7 +1799,7 @@
                             }
                         }
                     },
-                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12255&avatarType=issuetype",
+                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12255&avatarType=issuetype",
                     "id": "10605",
                     "name": "Frontend Development",
                     "self": "http://localhost:4567/rest/api/latest/issuetype/10605",
@@ -1810,7 +1810,7 @@
                     "expand": "fields",
                     "fields": {
                         "assignee": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/latest/user/assignable/search?issueKey=null&username=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/latest/user/assignable/search?issueKey=null&username=",
                             "hasDefaultValue": false,
                             "name": "Assignee",
                             "operations": [
@@ -1932,7 +1932,7 @@
                             }
                         },
                         "customfield_11454": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/users/picker?fieldName=customfield_11454&query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/users/picker?fieldName=customfield_11454&query=",
                             "hasDefaultValue": false,
                             "name": "Subject Matter Expert",
                             "operations": [
@@ -2066,7 +2066,7 @@
                             }
                         },
                         "customfield_11456": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/users/picker?fieldName=customfield_11456&query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/users/picker?fieldName=customfield_11456&query=",
                             "hasDefaultValue": false,
                             "name": "Co-Assignees",
                             "operations": [
@@ -2151,7 +2151,7 @@
                                 {
                                     "avatarId": 12257,
                                     "description": "Taskboard",
-                                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12257&avatarType=issuetype",
+                                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12257&avatarType=issuetype",
                                     "id": "10607",
                                     "name": "Tech Planning",
                                     "self": "http://localhost:4567/rest/api/2/issuetype/10607",
@@ -2168,7 +2168,7 @@
                             }
                         },
                         "labels": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/labels/suggest?query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/labels/suggest?query=",
                             "hasDefaultValue": false,
                             "name": "Labels",
                             "operations": [
@@ -2198,31 +2198,31 @@
                         "priority": {
                             "allowedValues": [
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/blocker.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/blocker.svg",
                                     "id": "6",
                                     "name": "Opera\u00e7\u00e3o Parada",
                                     "self": "http://localhost:4567/rest/api/2/priority/6"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/critical.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/critical.svg",
                                     "id": "7",
                                     "name": "Cr\u00edtico",
                                     "self": "http://localhost:4567/rest/api/2/priority/7"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/major.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/major.svg",
                                     "id": "8",
                                     "name": "Alta",
                                     "self": "http://localhost:4567/rest/api/2/priority/8"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/minor.svg",
                                     "id": "9",
                                     "name": "M\u00e9dia",
                                     "self": "http://localhost:4567/rest/api/2/priority/9"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/trivial.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/trivial.svg",
                                     "id": "10",
                                     "name": "Baixa",
                                     "self": "http://localhost:4567/rest/api/2/priority/10"
@@ -2243,10 +2243,10 @@
                             "allowedValues": [
                                 {
                                     "avatarUrls": {
-                                        "16x16": "http://54.68.128.117:8100/secure/projectavatar?size=xsmall&avatarId=11653",
-                                        "24x24": "http://54.68.128.117:8100/secure/projectavatar?size=small&avatarId=11653",
-                                        "32x32": "http://54.68.128.117:8100/secure/projectavatar?size=medium&avatarId=11653",
-                                        "48x48": "http://54.68.128.117:8100/secure/projectavatar?avatarId=11653"
+                                        "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+                                        "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+                                        "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653",
+                                        "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653"
                                     },
                                     "id": "11315",
                                     "key": "TASKB",
@@ -2271,7 +2271,7 @@
                             }
                         },
                         "reporter": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/latest/user/search?username=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/latest/user/search?username=",
                             "hasDefaultValue": false,
                             "name": "Reporter",
                             "operations": [
@@ -2446,7 +2446,7 @@
                             }
                         }
                     },
-                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12257&avatarType=issuetype",
+                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12257&avatarType=issuetype",
                     "id": "10607",
                     "name": "Tech Planning",
                     "self": "http://localhost:4567/rest/api/latest/issuetype/10607",
@@ -2457,7 +2457,7 @@
                     "expand": "fields",
                     "fields": {
                         "assignee": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/latest/user/assignable/search?issueKey=null&username=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/latest/user/assignable/search?issueKey=null&username=",
                             "hasDefaultValue": false,
                             "name": "Assignee",
                             "operations": [
@@ -2579,7 +2579,7 @@
                             }
                         },
                         "customfield_11454": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/users/picker?fieldName=customfield_11454&query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/users/picker?fieldName=customfield_11454&query=",
                             "hasDefaultValue": false,
                             "name": "Subject Matter Expert",
                             "operations": [
@@ -2713,7 +2713,7 @@
                             }
                         },
                         "customfield_11456": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/users/picker?fieldName=customfield_11456&query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/users/picker?fieldName=customfield_11456&query=",
                             "hasDefaultValue": false,
                             "name": "Co-Assignees",
                             "operations": [
@@ -2798,7 +2798,7 @@
                                 {
                                     "avatarId": 12261,
                                     "description": "Taskboard",
-                                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12261&avatarType=issuetype",
+                                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12261&avatarType=issuetype",
                                     "id": "10610",
                                     "name": "Backend Development",
                                     "self": "http://localhost:4567/rest/api/2/issuetype/10610",
@@ -2815,7 +2815,7 @@
                             }
                         },
                         "labels": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/labels/suggest?query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/labels/suggest?query=",
                             "hasDefaultValue": false,
                             "name": "Labels",
                             "operations": [
@@ -2845,31 +2845,31 @@
                         "priority": {
                             "allowedValues": [
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/blocker.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/blocker.svg",
                                     "id": "6",
                                     "name": "Opera\u00e7\u00e3o Parada",
                                     "self": "http://localhost:4567/rest/api/2/priority/6"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/critical.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/critical.svg",
                                     "id": "7",
                                     "name": "Cr\u00edtico",
                                     "self": "http://localhost:4567/rest/api/2/priority/7"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/major.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/major.svg",
                                     "id": "8",
                                     "name": "Alta",
                                     "self": "http://localhost:4567/rest/api/2/priority/8"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/minor.svg",
                                     "id": "9",
                                     "name": "M\u00e9dia",
                                     "self": "http://localhost:4567/rest/api/2/priority/9"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/trivial.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/trivial.svg",
                                     "id": "10",
                                     "name": "Baixa",
                                     "self": "http://localhost:4567/rest/api/2/priority/10"
@@ -2890,10 +2890,10 @@
                             "allowedValues": [
                                 {
                                     "avatarUrls": {
-                                        "16x16": "http://54.68.128.117:8100/secure/projectavatar?size=xsmall&avatarId=11653",
-                                        "24x24": "http://54.68.128.117:8100/secure/projectavatar?size=small&avatarId=11653",
-                                        "32x32": "http://54.68.128.117:8100/secure/projectavatar?size=medium&avatarId=11653",
-                                        "48x48": "http://54.68.128.117:8100/secure/projectavatar?avatarId=11653"
+                                        "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+                                        "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+                                        "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653",
+                                        "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653"
                                     },
                                     "id": "11315",
                                     "key": "TASKB",
@@ -2918,7 +2918,7 @@
                             }
                         },
                         "reporter": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/latest/user/search?username=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/latest/user/search?username=",
                             "hasDefaultValue": false,
                             "name": "Reporter",
                             "operations": [
@@ -3093,7 +3093,7 @@
                             }
                         }
                     },
-                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12261&avatarType=issuetype",
+                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12261&avatarType=issuetype",
                     "id": "10610",
                     "name": "Backend Development",
                     "self": "http://localhost:4567/rest/api/latest/issuetype/10610",
@@ -3104,7 +3104,7 @@
                     "expand": "fields",
                     "fields": {
                         "assignee": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/latest/user/assignable/search?issueKey=null&username=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/latest/user/assignable/search?issueKey=null&username=",
                             "hasDefaultValue": false,
                             "name": "Assignee",
                             "operations": [
@@ -3226,7 +3226,7 @@
                             }
                         },
                         "customfield_11454": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/users/picker?fieldName=customfield_11454&query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/users/picker?fieldName=customfield_11454&query=",
                             "hasDefaultValue": false,
                             "name": "Subject Matter Expert",
                             "operations": [
@@ -3360,7 +3360,7 @@
                             }
                         },
                         "customfield_11456": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/users/picker?fieldName=customfield_11456&query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/users/picker?fieldName=customfield_11456&query=",
                             "hasDefaultValue": false,
                             "name": "Co-Assignees",
                             "operations": [
@@ -3445,7 +3445,7 @@
                                 {
                                     "avatarId": 12259,
                                     "description": "Taskboard",
-                                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12259&avatarType=issuetype",
+                                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12259&avatarType=issuetype",
                                     "id": "10609",
                                     "name": "UX",
                                     "self": "http://localhost:4567/rest/api/2/issuetype/10609",
@@ -3462,7 +3462,7 @@
                             }
                         },
                         "labels": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/labels/suggest?query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/labels/suggest?query=",
                             "hasDefaultValue": false,
                             "name": "Labels",
                             "operations": [
@@ -3492,31 +3492,31 @@
                         "priority": {
                             "allowedValues": [
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/blocker.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/blocker.svg",
                                     "id": "6",
                                     "name": "Opera\u00e7\u00e3o Parada",
                                     "self": "http://localhost:4567/rest/api/2/priority/6"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/critical.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/critical.svg",
                                     "id": "7",
                                     "name": "Cr\u00edtico",
                                     "self": "http://localhost:4567/rest/api/2/priority/7"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/major.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/major.svg",
                                     "id": "8",
                                     "name": "Alta",
                                     "self": "http://localhost:4567/rest/api/2/priority/8"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/minor.svg",
                                     "id": "9",
                                     "name": "M\u00e9dia",
                                     "self": "http://localhost:4567/rest/api/2/priority/9"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/trivial.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/trivial.svg",
                                     "id": "10",
                                     "name": "Baixa",
                                     "self": "http://localhost:4567/rest/api/2/priority/10"
@@ -3537,10 +3537,10 @@
                             "allowedValues": [
                                 {
                                     "avatarUrls": {
-                                        "16x16": "http://54.68.128.117:8100/secure/projectavatar?size=xsmall&avatarId=11653",
-                                        "24x24": "http://54.68.128.117:8100/secure/projectavatar?size=small&avatarId=11653",
-                                        "32x32": "http://54.68.128.117:8100/secure/projectavatar?size=medium&avatarId=11653",
-                                        "48x48": "http://54.68.128.117:8100/secure/projectavatar?avatarId=11653"
+                                        "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+                                        "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+                                        "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653",
+                                        "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653"
                                     },
                                     "id": "11315",
                                     "key": "TASKB",
@@ -3565,7 +3565,7 @@
                             }
                         },
                         "reporter": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/latest/user/search?username=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/latest/user/search?username=",
                             "hasDefaultValue": false,
                             "name": "Reporter",
                             "operations": [
@@ -3740,7 +3740,7 @@
                             }
                         }
                     },
-                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12259&avatarType=issuetype",
+                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12259&avatarType=issuetype",
                     "id": "10609",
                     "name": "UX",
                     "self": "http://localhost:4567/rest/api/latest/issuetype/10609",
@@ -3751,7 +3751,7 @@
                     "expand": "fields",
                     "fields": {
                         "assignee": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/latest/user/assignable/search?issueKey=null&username=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/latest/user/assignable/search?issueKey=null&username=",
                             "hasDefaultValue": false,
                             "name": "Assignee",
                             "operations": [
@@ -3873,7 +3873,7 @@
                             }
                         },
                         "customfield_11454": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/users/picker?fieldName=customfield_11454&query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/users/picker?fieldName=customfield_11454&query=",
                             "hasDefaultValue": false,
                             "name": "Subject Matter Expert",
                             "operations": [
@@ -4007,7 +4007,7 @@
                             }
                         },
                         "customfield_11456": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/users/picker?fieldName=customfield_11456&query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/users/picker?fieldName=customfield_11456&query=",
                             "hasDefaultValue": false,
                             "name": "Co-Assignees",
                             "operations": [
@@ -4092,7 +4092,7 @@
                                 {
                                     "avatarId": 11958,
                                     "description": "Sub-task",
-                                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=11958&avatarType=issuetype",
+                                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=11958&avatarType=issuetype",
                                     "id": "12",
                                     "name": "Sub-task",
                                     "self": "http://localhost:4567/rest/api/2/issuetype/12",
@@ -4109,7 +4109,7 @@
                             }
                         },
                         "labels": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/labels/suggest?query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/labels/suggest?query=",
                             "hasDefaultValue": false,
                             "name": "Labels",
                             "operations": [
@@ -4139,31 +4139,31 @@
                         "priority": {
                             "allowedValues": [
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/blocker.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/blocker.svg",
                                     "id": "6",
                                     "name": "Opera\u00e7\u00e3o Parada",
                                     "self": "http://localhost:4567/rest/api/2/priority/6"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/critical.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/critical.svg",
                                     "id": "7",
                                     "name": "Cr\u00edtico",
                                     "self": "http://localhost:4567/rest/api/2/priority/7"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/major.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/major.svg",
                                     "id": "8",
                                     "name": "Alta",
                                     "self": "http://localhost:4567/rest/api/2/priority/8"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/minor.svg",
                                     "id": "9",
                                     "name": "M\u00e9dia",
                                     "self": "http://localhost:4567/rest/api/2/priority/9"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/trivial.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/trivial.svg",
                                     "id": "10",
                                     "name": "Baixa",
                                     "self": "http://localhost:4567/rest/api/2/priority/10"
@@ -4184,10 +4184,10 @@
                             "allowedValues": [
                                 {
                                     "avatarUrls": {
-                                        "16x16": "http://54.68.128.117:8100/secure/projectavatar?size=xsmall&avatarId=11653",
-                                        "24x24": "http://54.68.128.117:8100/secure/projectavatar?size=small&avatarId=11653",
-                                        "32x32": "http://54.68.128.117:8100/secure/projectavatar?size=medium&avatarId=11653",
-                                        "48x48": "http://54.68.128.117:8100/secure/projectavatar?avatarId=11653"
+                                        "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+                                        "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+                                        "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653",
+                                        "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653"
                                     },
                                     "id": "11315",
                                     "key": "TASKB",
@@ -4212,7 +4212,7 @@
                             }
                         },
                         "reporter": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/latest/user/search?username=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/latest/user/search?username=",
                             "hasDefaultValue": false,
                             "name": "Reporter",
                             "operations": [
@@ -4387,7 +4387,7 @@
                             }
                         }
                     },
-                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=11958&avatarType=issuetype",
+                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=11958&avatarType=issuetype",
                     "id": "12",
                     "name": "Sub-task",
                     "self": "http://localhost:4567/rest/api/latest/issuetype/12",
@@ -4398,7 +4398,7 @@
                     "expand": "fields",
                     "fields": {
                         "assignee": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/latest/user/assignable/search?issueKey=null&username=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/latest/user/assignable/search?issueKey=null&username=",
                             "hasDefaultValue": false,
                             "name": "Assignee",
                             "operations": [
@@ -4520,7 +4520,7 @@
                             }
                         },
                         "customfield_11454": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/users/picker?fieldName=customfield_11454&query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/users/picker?fieldName=customfield_11454&query=",
                             "hasDefaultValue": false,
                             "name": "Subject Matter Expert",
                             "operations": [
@@ -4654,7 +4654,7 @@
                             }
                         },
                         "customfield_11456": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/users/picker?fieldName=customfield_11456&query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/users/picker?fieldName=customfield_11456&query=",
                             "hasDefaultValue": false,
                             "name": "Co-Assignees",
                             "operations": [
@@ -4762,7 +4762,7 @@
                                 {
                                     "avatarId": 12253,
                                     "description": "Taskboard",
-                                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12253&avatarType=issuetype",
+                                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12253&avatarType=issuetype",
                                     "id": "10603",
                                     "name": "Alpha Test",
                                     "self": "http://localhost:4567/rest/api/2/issuetype/10603",
@@ -4779,7 +4779,7 @@
                             }
                         },
                         "labels": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/labels/suggest?query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/labels/suggest?query=",
                             "hasDefaultValue": false,
                             "name": "Labels",
                             "operations": [
@@ -4809,31 +4809,31 @@
                         "priority": {
                             "allowedValues": [
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/blocker.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/blocker.svg",
                                     "id": "6",
                                     "name": "Opera\u00e7\u00e3o Parada",
                                     "self": "http://localhost:4567/rest/api/2/priority/6"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/critical.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/critical.svg",
                                     "id": "7",
                                     "name": "Cr\u00edtico",
                                     "self": "http://localhost:4567/rest/api/2/priority/7"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/major.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/major.svg",
                                     "id": "8",
                                     "name": "Alta",
                                     "self": "http://localhost:4567/rest/api/2/priority/8"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/minor.svg",
                                     "id": "9",
                                     "name": "M\u00e9dia",
                                     "self": "http://localhost:4567/rest/api/2/priority/9"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/trivial.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/trivial.svg",
                                     "id": "10",
                                     "name": "Baixa",
                                     "self": "http://localhost:4567/rest/api/2/priority/10"
@@ -4854,10 +4854,10 @@
                             "allowedValues": [
                                 {
                                     "avatarUrls": {
-                                        "16x16": "http://54.68.128.117:8100/secure/projectavatar?size=xsmall&avatarId=11653",
-                                        "24x24": "http://54.68.128.117:8100/secure/projectavatar?size=small&avatarId=11653",
-                                        "32x32": "http://54.68.128.117:8100/secure/projectavatar?size=medium&avatarId=11653",
-                                        "48x48": "http://54.68.128.117:8100/secure/projectavatar?avatarId=11653"
+                                        "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+                                        "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+                                        "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653",
+                                        "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653"
                                     },
                                     "id": "11315",
                                     "key": "TASKB",
@@ -4882,7 +4882,7 @@
                             }
                         },
                         "reporter": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/latest/user/search?username=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/latest/user/search?username=",
                             "hasDefaultValue": false,
                             "name": "Reporter",
                             "operations": [
@@ -5057,7 +5057,7 @@
                             }
                         }
                     },
-                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12253&avatarType=issuetype",
+                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12253&avatarType=issuetype",
                     "id": "10603",
                     "name": "Alpha Test",
                     "self": "http://localhost:4567/rest/api/latest/issuetype/10603",
@@ -5068,7 +5068,7 @@
                     "expand": "fields",
                     "fields": {
                         "assignee": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/latest/user/assignable/search?issueKey=null&username=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/latest/user/assignable/search?issueKey=null&username=",
                             "hasDefaultValue": false,
                             "name": "Assignee",
                             "operations": [
@@ -5190,7 +5190,7 @@
                             }
                         },
                         "customfield_11454": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/users/picker?fieldName=customfield_11454&query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/users/picker?fieldName=customfield_11454&query=",
                             "hasDefaultValue": false,
                             "name": "Subject Matter Expert",
                             "operations": [
@@ -5324,7 +5324,7 @@
                             }
                         },
                         "customfield_11456": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/users/picker?fieldName=customfield_11456&query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/users/picker?fieldName=customfield_11456&query=",
                             "hasDefaultValue": false,
                             "name": "Co-Assignees",
                             "operations": [
@@ -5409,7 +5409,7 @@
                                 {
                                     "avatarId": 12252,
                                     "description": "Taskboard",
-                                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12252&avatarType=issuetype",
+                                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12252&avatarType=issuetype",
                                     "id": "10602",
                                     "name": "Alpha Bug",
                                     "self": "http://localhost:4567/rest/api/2/issuetype/10602",
@@ -5426,7 +5426,7 @@
                             }
                         },
                         "labels": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/labels/suggest?query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/labels/suggest?query=",
                             "hasDefaultValue": false,
                             "name": "Labels",
                             "operations": [
@@ -5456,31 +5456,31 @@
                         "priority": {
                             "allowedValues": [
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/blocker.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/blocker.svg",
                                     "id": "6",
                                     "name": "Opera\u00e7\u00e3o Parada",
                                     "self": "http://localhost:4567/rest/api/2/priority/6"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/critical.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/critical.svg",
                                     "id": "7",
                                     "name": "Cr\u00edtico",
                                     "self": "http://localhost:4567/rest/api/2/priority/7"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/major.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/major.svg",
                                     "id": "8",
                                     "name": "Alta",
                                     "self": "http://localhost:4567/rest/api/2/priority/8"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/minor.svg",
                                     "id": "9",
                                     "name": "M\u00e9dia",
                                     "self": "http://localhost:4567/rest/api/2/priority/9"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/trivial.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/trivial.svg",
                                     "id": "10",
                                     "name": "Baixa",
                                     "self": "http://localhost:4567/rest/api/2/priority/10"
@@ -5501,10 +5501,10 @@
                             "allowedValues": [
                                 {
                                     "avatarUrls": {
-                                        "16x16": "http://54.68.128.117:8100/secure/projectavatar?size=xsmall&avatarId=11653",
-                                        "24x24": "http://54.68.128.117:8100/secure/projectavatar?size=small&avatarId=11653",
-                                        "32x32": "http://54.68.128.117:8100/secure/projectavatar?size=medium&avatarId=11653",
-                                        "48x48": "http://54.68.128.117:8100/secure/projectavatar?avatarId=11653"
+                                        "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+                                        "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+                                        "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653",
+                                        "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653"
                                     },
                                     "id": "11315",
                                     "key": "TASKB",
@@ -5529,7 +5529,7 @@
                             }
                         },
                         "reporter": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/latest/user/search?username=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/latest/user/search?username=",
                             "hasDefaultValue": false,
                             "name": "Reporter",
                             "operations": [
@@ -5704,7 +5704,7 @@
                             }
                         }
                     },
-                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12252&avatarType=issuetype",
+                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12252&avatarType=issuetype",
                     "id": "10602",
                     "name": "Alpha Bug",
                     "self": "http://localhost:4567/rest/api/latest/issuetype/10602",
@@ -5715,7 +5715,7 @@
                     "expand": "fields",
                     "fields": {
                         "assignee": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/latest/user/assignable/search?issueKey=null&username=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/latest/user/assignable/search?issueKey=null&username=",
                             "hasDefaultValue": false,
                             "name": "Assignee",
                             "operations": [
@@ -5837,7 +5837,7 @@
                             }
                         },
                         "customfield_11454": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/users/picker?fieldName=customfield_11454&query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/users/picker?fieldName=customfield_11454&query=",
                             "hasDefaultValue": false,
                             "name": "Subject Matter Expert",
                             "operations": [
@@ -5971,7 +5971,7 @@
                             }
                         },
                         "customfield_11456": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/users/picker?fieldName=customfield_11456&query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/users/picker?fieldName=customfield_11456&query=",
                             "hasDefaultValue": false,
                             "name": "Co-Assignees",
                             "operations": [
@@ -6056,7 +6056,7 @@
                                 {
                                     "avatarId": 12256,
                                     "description": "Taskboard",
-                                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12256&avatarType=issuetype",
+                                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12256&avatarType=issuetype",
                                     "id": "10606",
                                     "name": "Feature Review",
                                     "self": "http://localhost:4567/rest/api/2/issuetype/10606",
@@ -6073,7 +6073,7 @@
                             }
                         },
                         "labels": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/labels/suggest?query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/labels/suggest?query=",
                             "hasDefaultValue": false,
                             "name": "Labels",
                             "operations": [
@@ -6103,31 +6103,31 @@
                         "priority": {
                             "allowedValues": [
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/blocker.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/blocker.svg",
                                     "id": "6",
                                     "name": "Opera\u00e7\u00e3o Parada",
                                     "self": "http://localhost:4567/rest/api/2/priority/6"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/critical.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/critical.svg",
                                     "id": "7",
                                     "name": "Cr\u00edtico",
                                     "self": "http://localhost:4567/rest/api/2/priority/7"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/major.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/major.svg",
                                     "id": "8",
                                     "name": "Alta",
                                     "self": "http://localhost:4567/rest/api/2/priority/8"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/minor.svg",
                                     "id": "9",
                                     "name": "M\u00e9dia",
                                     "self": "http://localhost:4567/rest/api/2/priority/9"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/trivial.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/trivial.svg",
                                     "id": "10",
                                     "name": "Baixa",
                                     "self": "http://localhost:4567/rest/api/2/priority/10"
@@ -6148,10 +6148,10 @@
                             "allowedValues": [
                                 {
                                     "avatarUrls": {
-                                        "16x16": "http://54.68.128.117:8100/secure/projectavatar?size=xsmall&avatarId=11653",
-                                        "24x24": "http://54.68.128.117:8100/secure/projectavatar?size=small&avatarId=11653",
-                                        "32x32": "http://54.68.128.117:8100/secure/projectavatar?size=medium&avatarId=11653",
-                                        "48x48": "http://54.68.128.117:8100/secure/projectavatar?avatarId=11653"
+                                        "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+                                        "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+                                        "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653",
+                                        "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653"
                                     },
                                     "id": "11315",
                                     "key": "TASKB",
@@ -6176,7 +6176,7 @@
                             }
                         },
                         "reporter": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/latest/user/search?username=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/latest/user/search?username=",
                             "hasDefaultValue": false,
                             "name": "Reporter",
                             "operations": [
@@ -6351,7 +6351,7 @@
                             }
                         }
                     },
-                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12256&avatarType=issuetype",
+                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12256&avatarType=issuetype",
                     "id": "10606",
                     "name": "Feature Review",
                     "self": "http://localhost:4567/rest/api/latest/issuetype/10606",
@@ -6362,7 +6362,7 @@
                     "expand": "fields",
                     "fields": {
                         "assignee": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/latest/user/assignable/search?issueKey=null&username=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/latest/user/assignable/search?issueKey=null&username=",
                             "hasDefaultValue": false,
                             "name": "Assignee",
                             "operations": [
@@ -6484,7 +6484,7 @@
                             }
                         },
                         "customfield_11454": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/users/picker?fieldName=customfield_11454&query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/users/picker?fieldName=customfield_11454&query=",
                             "hasDefaultValue": false,
                             "name": "Subject Matter Expert",
                             "operations": [
@@ -6618,7 +6618,7 @@
                             }
                         },
                         "customfield_11456": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/users/picker?fieldName=customfield_11456&query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/users/picker?fieldName=customfield_11456&query=",
                             "hasDefaultValue": false,
                             "name": "Co-Assignees",
                             "operations": [
@@ -6703,7 +6703,7 @@
                                 {
                                     "avatarId": 12258,
                                     "description": "Taskboard",
-                                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12258&avatarType=issuetype",
+                                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12258&avatarType=issuetype",
                                     "id": "10608",
                                     "name": "UAT",
                                     "self": "http://localhost:4567/rest/api/2/issuetype/10608",
@@ -6720,7 +6720,7 @@
                             }
                         },
                         "labels": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/labels/suggest?query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/labels/suggest?query=",
                             "hasDefaultValue": false,
                             "name": "Labels",
                             "operations": [
@@ -6750,31 +6750,31 @@
                         "priority": {
                             "allowedValues": [
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/blocker.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/blocker.svg",
                                     "id": "6",
                                     "name": "Opera\u00e7\u00e3o Parada",
                                     "self": "http://localhost:4567/rest/api/2/priority/6"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/critical.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/critical.svg",
                                     "id": "7",
                                     "name": "Cr\u00edtico",
                                     "self": "http://localhost:4567/rest/api/2/priority/7"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/major.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/major.svg",
                                     "id": "8",
                                     "name": "Alta",
                                     "self": "http://localhost:4567/rest/api/2/priority/8"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/minor.svg",
                                     "id": "9",
                                     "name": "M\u00e9dia",
                                     "self": "http://localhost:4567/rest/api/2/priority/9"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/trivial.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/trivial.svg",
                                     "id": "10",
                                     "name": "Baixa",
                                     "self": "http://localhost:4567/rest/api/2/priority/10"
@@ -6795,10 +6795,10 @@
                             "allowedValues": [
                                 {
                                     "avatarUrls": {
-                                        "16x16": "http://54.68.128.117:8100/secure/projectavatar?size=xsmall&avatarId=11653",
-                                        "24x24": "http://54.68.128.117:8100/secure/projectavatar?size=small&avatarId=11653",
-                                        "32x32": "http://54.68.128.117:8100/secure/projectavatar?size=medium&avatarId=11653",
-                                        "48x48": "http://54.68.128.117:8100/secure/projectavatar?avatarId=11653"
+                                        "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+                                        "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+                                        "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653",
+                                        "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653"
                                     },
                                     "id": "11315",
                                     "key": "TASKB",
@@ -6823,7 +6823,7 @@
                             }
                         },
                         "reporter": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/latest/user/search?username=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/latest/user/search?username=",
                             "hasDefaultValue": false,
                             "name": "Reporter",
                             "operations": [
@@ -6998,7 +6998,7 @@
                             }
                         }
                     },
-                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12258&avatarType=issuetype",
+                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12258&avatarType=issuetype",
                     "id": "10608",
                     "name": "UAT",
                     "self": "http://localhost:4567/rest/api/latest/issuetype/10608",
@@ -7009,7 +7009,7 @@
                     "expand": "fields",
                     "fields": {
                         "assignee": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/latest/user/assignable/search?issueKey=null&username=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/latest/user/assignable/search?issueKey=null&username=",
                             "hasDefaultValue": false,
                             "name": "Assignee",
                             "operations": [
@@ -7131,7 +7131,7 @@
                             }
                         },
                         "customfield_11454": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/users/picker?fieldName=customfield_11454&query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/users/picker?fieldName=customfield_11454&query=",
                             "hasDefaultValue": false,
                             "name": "Subject Matter Expert",
                             "operations": [
@@ -7265,7 +7265,7 @@
                             }
                         },
                         "customfield_11456": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/users/picker?fieldName=customfield_11456&query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/users/picker?fieldName=customfield_11456&query=",
                             "hasDefaultValue": false,
                             "name": "Co-Assignees",
                             "operations": [
@@ -7350,7 +7350,7 @@
                                 {
                                     "avatarId": 12260,
                                     "description": "Taskboard",
-                                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12260&avatarType=issuetype",
+                                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12260&avatarType=issuetype",
                                     "id": "10611",
                                     "name": "QA",
                                     "self": "http://localhost:4567/rest/api/2/issuetype/10611",
@@ -7367,7 +7367,7 @@
                             }
                         },
                         "labels": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/labels/suggest?query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/labels/suggest?query=",
                             "hasDefaultValue": false,
                             "name": "Labels",
                             "operations": [
@@ -7397,31 +7397,31 @@
                         "priority": {
                             "allowedValues": [
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/blocker.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/blocker.svg",
                                     "id": "6",
                                     "name": "Opera\u00e7\u00e3o Parada",
                                     "self": "http://localhost:4567/rest/api/2/priority/6"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/critical.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/critical.svg",
                                     "id": "7",
                                     "name": "Cr\u00edtico",
                                     "self": "http://localhost:4567/rest/api/2/priority/7"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/major.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/major.svg",
                                     "id": "8",
                                     "name": "Alta",
                                     "self": "http://localhost:4567/rest/api/2/priority/8"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/minor.svg",
                                     "id": "9",
                                     "name": "M\u00e9dia",
                                     "self": "http://localhost:4567/rest/api/2/priority/9"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/trivial.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/trivial.svg",
                                     "id": "10",
                                     "name": "Baixa",
                                     "self": "http://localhost:4567/rest/api/2/priority/10"
@@ -7442,10 +7442,10 @@
                             "allowedValues": [
                                 {
                                     "avatarUrls": {
-                                        "16x16": "http://54.68.128.117:8100/secure/projectavatar?size=xsmall&avatarId=11653",
-                                        "24x24": "http://54.68.128.117:8100/secure/projectavatar?size=small&avatarId=11653",
-                                        "32x32": "http://54.68.128.117:8100/secure/projectavatar?size=medium&avatarId=11653",
-                                        "48x48": "http://54.68.128.117:8100/secure/projectavatar?avatarId=11653"
+                                        "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+                                        "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+                                        "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653",
+                                        "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653"
                                     },
                                     "id": "11315",
                                     "key": "TASKB",
@@ -7470,7 +7470,7 @@
                             }
                         },
                         "reporter": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/latest/user/search?username=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/latest/user/search?username=",
                             "hasDefaultValue": false,
                             "name": "Reporter",
                             "operations": [
@@ -7645,7 +7645,7 @@
                             }
                         }
                     },
-                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12260&avatarType=issuetype",
+                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12260&avatarType=issuetype",
                     "id": "10611",
                     "name": "QA",
                     "self": "http://localhost:4567/rest/api/latest/issuetype/10611",
@@ -7656,7 +7656,7 @@
                     "expand": "fields",
                     "fields": {
                         "assignee": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/latest/user/assignable/search?issueKey=null&username=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/latest/user/assignable/search?issueKey=null&username=",
                             "hasDefaultValue": false,
                             "name": "Assignee",
                             "operations": [
@@ -7778,7 +7778,7 @@
                             }
                         },
                         "customfield_11454": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/users/picker?fieldName=customfield_11454&query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/users/picker?fieldName=customfield_11454&query=",
                             "hasDefaultValue": false,
                             "name": "Subject Matter Expert",
                             "operations": [
@@ -7912,7 +7912,7 @@
                             }
                         },
                         "customfield_11456": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/users/picker?fieldName=customfield_11456&query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/users/picker?fieldName=customfield_11456&query=",
                             "hasDefaultValue": false,
                             "name": "Co-Assignees",
                             "operations": [
@@ -7957,7 +7957,7 @@
                                 {
                                     "avatarId": 12250,
                                     "description": "Taskboard",
-                                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12250&avatarType=issuetype",
+                                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12250&avatarType=issuetype",
                                     "id": "10600",
                                     "name": "Demand",
                                     "self": "http://localhost:4567/rest/api/2/issuetype/10600",
@@ -7974,7 +7974,7 @@
                             }
                         },
                         "labels": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/labels/suggest?query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/labels/suggest?query=",
                             "hasDefaultValue": false,
                             "name": "Labels",
                             "operations": [
@@ -7992,31 +7992,31 @@
                         "priority": {
                             "allowedValues": [
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/blocker.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/blocker.svg",
                                     "id": "6",
                                     "name": "Opera\u00e7\u00e3o Parada",
                                     "self": "http://localhost:4567/rest/api/2/priority/6"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/critical.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/critical.svg",
                                     "id": "7",
                                     "name": "Cr\u00edtico",
                                     "self": "http://localhost:4567/rest/api/2/priority/7"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/major.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/major.svg",
                                     "id": "8",
                                     "name": "Alta",
                                     "self": "http://localhost:4567/rest/api/2/priority/8"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/minor.svg",
                                     "id": "9",
                                     "name": "M\u00e9dia",
                                     "self": "http://localhost:4567/rest/api/2/priority/9"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/trivial.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/trivial.svg",
                                     "id": "10",
                                     "name": "Baixa",
                                     "self": "http://localhost:4567/rest/api/2/priority/10"
@@ -8037,10 +8037,10 @@
                             "allowedValues": [
                                 {
                                     "avatarUrls": {
-                                        "16x16": "http://54.68.128.117:8100/secure/projectavatar?size=xsmall&avatarId=11653",
-                                        "24x24": "http://54.68.128.117:8100/secure/projectavatar?size=small&avatarId=11653",
-                                        "32x32": "http://54.68.128.117:8100/secure/projectavatar?size=medium&avatarId=11653",
-                                        "48x48": "http://54.68.128.117:8100/secure/projectavatar?avatarId=11653"
+                                        "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+                                        "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+                                        "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653",
+                                        "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653"
                                     },
                                     "id": "11315",
                                     "key": "TASKB",
@@ -8065,7 +8065,7 @@
                             }
                         },
                         "reporter": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/latest/user/search?username=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/latest/user/search?username=",
                             "hasDefaultValue": false,
                             "name": "Reporter",
                             "operations": [
@@ -8240,7 +8240,7 @@
                             }
                         }
                     },
-                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12250&avatarType=issuetype",
+                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12250&avatarType=issuetype",
                     "id": "10600",
                     "name": "Demand",
                     "self": "http://localhost:4567/rest/api/latest/issuetype/10600",
@@ -8251,7 +8251,7 @@
                     "expand": "fields",
                     "fields": {
                         "assignee": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/latest/user/assignable/search?issueKey=null&username=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/latest/user/assignable/search?issueKey=null&username=",
                             "hasDefaultValue": false,
                             "name": "Assignee",
                             "operations": [
@@ -8719,7 +8719,7 @@
                             }
                         },
                         "customfield_11454": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/users/picker?fieldName=customfield_11454&query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/users/picker?fieldName=customfield_11454&query=",
                             "hasDefaultValue": false,
                             "name": "Subject Matter Expert",
                             "operations": [
@@ -8853,7 +8853,7 @@
                             }
                         },
                         "customfield_11456": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/users/picker?fieldName=customfield_11456&query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/users/picker?fieldName=customfield_11456&query=",
                             "hasDefaultValue": false,
                             "name": "Co-Assignees",
                             "operations": [
@@ -8894,7 +8894,7 @@
                             }
                         },
                         "issuelinks": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/2/issue/picker?currentProjectId=&showSubTaskParent=true&showSubTasks=true&currentIssueKey=null&query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/2/issue/picker?currentProjectId=&showSubTaskParent=true&showSubTasks=true&currentIssueKey=null&query=",
                             "hasDefaultValue": false,
                             "name": "Linked Issues",
                             "operations": [
@@ -8912,7 +8912,7 @@
                                 {
                                     "avatarId": 12251,
                                     "description": "Taskboard",
-                                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
+                                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
                                     "id": "10601",
                                     "name": "Feature",
                                     "self": "http://localhost:4567/rest/api/2/issuetype/10601",
@@ -8929,7 +8929,7 @@
                             }
                         },
                         "labels": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/labels/suggest?query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/labels/suggest?query=",
                             "hasDefaultValue": false,
                             "name": "Labels",
                             "operations": [
@@ -8947,31 +8947,31 @@
                         "priority": {
                             "allowedValues": [
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/blocker.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/blocker.svg",
                                     "id": "6",
                                     "name": "Opera\u00e7\u00e3o Parada",
                                     "self": "http://localhost:4567/rest/api/2/priority/6"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/critical.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/critical.svg",
                                     "id": "7",
                                     "name": "Cr\u00edtico",
                                     "self": "http://localhost:4567/rest/api/2/priority/7"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/major.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/major.svg",
                                     "id": "8",
                                     "name": "Alta",
                                     "self": "http://localhost:4567/rest/api/2/priority/8"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/minor.svg",
                                     "id": "9",
                                     "name": "M\u00e9dia",
                                     "self": "http://localhost:4567/rest/api/2/priority/9"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/trivial.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/trivial.svg",
                                     "id": "10",
                                     "name": "Baixa",
                                     "self": "http://localhost:4567/rest/api/2/priority/10"
@@ -8992,10 +8992,10 @@
                             "allowedValues": [
                                 {
                                     "avatarUrls": {
-                                        "16x16": "http://54.68.128.117:8100/secure/projectavatar?size=xsmall&avatarId=11653",
-                                        "24x24": "http://54.68.128.117:8100/secure/projectavatar?size=small&avatarId=11653",
-                                        "32x32": "http://54.68.128.117:8100/secure/projectavatar?size=medium&avatarId=11653",
-                                        "48x48": "http://54.68.128.117:8100/secure/projectavatar?avatarId=11653"
+                                        "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+                                        "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+                                        "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653",
+                                        "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653"
                                     },
                                     "id": "11315",
                                     "key": "TASKB",
@@ -9020,7 +9020,7 @@
                             }
                         },
                         "reporter": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/latest/user/search?username=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/latest/user/search?username=",
                             "hasDefaultValue": false,
                             "name": "Reporter",
                             "operations": [
@@ -9195,7 +9195,7 @@
                             }
                         }
                     },
-                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
+                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
                     "id": "10601",
                     "name": "Feature",
                     "self": "http://localhost:4567/rest/api/latest/issuetype/10601",
@@ -9206,7 +9206,7 @@
                     "expand": "fields",
                     "fields": {
                         "assignee": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/latest/user/assignable/search?issueKey=null&username=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/latest/user/assignable/search?issueKey=null&username=",
                             "hasDefaultValue": false,
                             "name": "Assignee",
                             "operations": [
@@ -9341,7 +9341,7 @@
                             }
                         },
                         "customfield_11454": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/users/picker?fieldName=customfield_11454&query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/users/picker?fieldName=customfield_11454&query=",
                             "hasDefaultValue": false,
                             "name": "Subject Matter Expert",
                             "operations": [
@@ -9475,7 +9475,7 @@
                             }
                         },
                         "customfield_11456": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/users/picker?fieldName=customfield_11456&query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/users/picker?fieldName=customfield_11456&query=",
                             "hasDefaultValue": false,
                             "name": "Co-Assignees",
                             "operations": [
@@ -9556,7 +9556,7 @@
                             }
                         },
                         "issuelinks": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/2/issue/picker?currentProjectId=&showSubTaskParent=true&showSubTasks=true&currentIssueKey=null&query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/2/issue/picker?currentProjectId=&showSubTaskParent=true&showSubTasks=true&currentIssueKey=null&query=",
                             "hasDefaultValue": false,
                             "name": "Linked Issues",
                             "operations": [
@@ -9574,7 +9574,7 @@
                                 {
                                     "avatarId": 12262,
                                     "description": "A task that needs to be done.",
-                                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12262&avatarType=issuetype",
+                                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12262&avatarType=issuetype",
                                     "id": "11",
                                     "name": "Task",
                                     "self": "http://localhost:4567/rest/api/2/issuetype/11",
@@ -9591,7 +9591,7 @@
                             }
                         },
                         "labels": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/1.0/labels/suggest?query=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/1.0/labels/suggest?query=",
                             "hasDefaultValue": false,
                             "name": "Labels",
                             "operations": [
@@ -9609,31 +9609,31 @@
                         "priority": {
                             "allowedValues": [
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/blocker.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/blocker.svg",
                                     "id": "6",
                                     "name": "Opera\u00e7\u00e3o Parada",
                                     "self": "http://localhost:4567/rest/api/2/priority/6"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/critical.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/critical.svg",
                                     "id": "7",
                                     "name": "Cr\u00edtico",
                                     "self": "http://localhost:4567/rest/api/2/priority/7"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/major.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/major.svg",
                                     "id": "8",
                                     "name": "Alta",
                                     "self": "http://localhost:4567/rest/api/2/priority/8"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/minor.svg",
                                     "id": "9",
                                     "name": "M\u00e9dia",
                                     "self": "http://localhost:4567/rest/api/2/priority/9"
                                 },
                                 {
-                                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/trivial.svg",
+                                    "iconUrl": "http://localhost:4567/images/icons/priorities/trivial.svg",
                                     "id": "10",
                                     "name": "Baixa",
                                     "self": "http://localhost:4567/rest/api/2/priority/10"
@@ -9654,10 +9654,10 @@
                             "allowedValues": [
                                 {
                                     "avatarUrls": {
-                                        "16x16": "http://54.68.128.117:8100/secure/projectavatar?size=xsmall&avatarId=11653",
-                                        "24x24": "http://54.68.128.117:8100/secure/projectavatar?size=small&avatarId=11653",
-                                        "32x32": "http://54.68.128.117:8100/secure/projectavatar?size=medium&avatarId=11653",
-                                        "48x48": "http://54.68.128.117:8100/secure/projectavatar?avatarId=11653"
+                                        "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+                                        "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+                                        "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653",
+                                        "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653"
                                     },
                                     "id": "11315",
                                     "key": "TASKB",
@@ -9682,7 +9682,7 @@
                             }
                         },
                         "reporter": {
-                            "autoCompleteUrl": "http://54.68.128.117:8100/rest/api/latest/user/search?username=",
+                            "autoCompleteUrl": "http://localhost:4567/rest/api/latest/user/search?username=",
                             "hasDefaultValue": false,
                             "name": "Reporter",
                             "operations": [
@@ -9857,7 +9857,7 @@
                             }
                         }
                     },
-                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12262&avatarType=issuetype",
+                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12262&avatarType=issuetype",
                     "id": "11",
                     "name": "Task",
                     "self": "http://localhost:4567/rest/api/latest/issuetype/11",

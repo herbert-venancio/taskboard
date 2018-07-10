@@ -6,10 +6,10 @@
     "key": "TASKB",
     "name": "Taskboard",
     "avatarUrls": {
-      "48x48": "http://54.68.128.117:8100/secure/projectavatar?avatarId=11653",
-      "24x24": "http://54.68.128.117:8100/secure/projectavatar?size=small&avatarId=11653",
-      "16x16": "http://54.68.128.117:8100/secure/projectavatar?size=xsmall&avatarId=11653",
-      "32x32": "http://54.68.128.117:8100/secure/projectavatar?size=medium&avatarId=11653"
+      "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653",
+      "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+      "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+      "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653"
     },
     "projectCategory": {
       "self": "http://localhost:4567/rest/api/latest/projectCategory/10001",
@@ -25,10 +25,10 @@
     "key": "PROJ1",
     "name": "Project 1",
     "avatarUrls": {
-      "48x48": "http://54.68.128.117:8100/secure/projectavatar?avatarId=11653",
-      "24x24": "http://54.68.128.117:8100/secure/projectavatar?size=small&avatarId=11653",
-      "16x16": "http://54.68.128.117:8100/secure/projectavatar?size=xsmall&avatarId=11653",
-      "32x32": "http://54.68.128.117:8100/secure/projectavatar?size=medium&avatarId=11653"
+      "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653",
+      "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+      "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+      "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653"
     },
     "projectCategory": {
       "self": "http://localhost:4567/rest/api/latest/projectCategory/10001",
@@ -44,10 +44,10 @@
     "key": "PROJ2",
     "name": "Project 2",
     "avatarUrls": {
-      "48x48": "http://54.68.128.117:8100/secure/projectavatar?avatarId=11653",
-      "24x24": "http://54.68.128.117:8100/secure/projectavatar?size=small&avatarId=11653",
-      "16x16": "http://54.68.128.117:8100/secure/projectavatar?size=xsmall&avatarId=11653",
-      "32x32": "http://54.68.128.117:8100/secure/projectavatar?size=medium&avatarId=11653"
+      "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653",
+      "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+      "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+      "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653"
     },
     "projectCategory": {
       "self": "http://localhost:4567/rest/api/latest/projectCategory/10001",
@@ -63,10 +63,10 @@
     "key": "PROJ3",
     "name": "Project 3",
     "avatarUrls": {
-      "48x48": "http://54.68.128.117:8100/secure/projectavatar?avatarId=11653",
-      "24x24": "http://54.68.128.117:8100/secure/projectavatar?size=small&avatarId=11653",
-      "16x16": "http://54.68.128.117:8100/secure/projectavatar?size=xsmall&avatarId=11653",
-      "32x32": "http://54.68.128.117:8100/secure/projectavatar?size=medium&avatarId=11653"
+      "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653",
+      "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+      "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+      "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653"
     },
     "projectCategory": {
       "self": "http://localhost:4567/rest/api/latest/projectCategory/10001",
@@ -82,10 +82,10 @@
     "key": "PROJ4",
     "name": "Project 4",
     "avatarUrls": {
-      "48x48": "http://54.68.128.117:8100/secure/projectavatar?avatarId=11653",
-      "24x24": "http://54.68.128.117:8100/secure/projectavatar?size=small&avatarId=11653",
-      "16x16": "http://54.68.128.117:8100/secure/projectavatar?size=xsmall&avatarId=11653",
-      "32x32": "http://54.68.128.117:8100/secure/projectavatar?size=medium&avatarId=11653"
+      "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653",
+      "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+      "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+      "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653"
     },
     "projectCategory": {
       "self": "http://localhost:4567/rest/api/latest/projectCategory/10001",
@@ -101,10 +101,10 @@
     "key": "PROJ5",
     "name": "Project 5",
     "avatarUrls": {
-      "48x48": "http://54.68.128.117:8100/secure/projectavatar?avatarId=11653",
-      "24x24": "http://54.68.128.117:8100/secure/projectavatar?size=small&avatarId=11653",
-      "16x16": "http://54.68.128.117:8100/secure/projectavatar?size=xsmall&avatarId=11653",
-      "32x32": "http://54.68.128.117:8100/secure/projectavatar?size=medium&avatarId=11653"
+      "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653",
+      "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+      "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+      "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653"
     },
     "projectCategory": {
       "self": "http://localhost:4567/rest/api/latest/projectCategory/10001",
@@ -120,10 +120,10 @@
     "key": "PROJ6",
     "name": "Project 6",
     "avatarUrls": {
-      "48x48": "http://54.68.128.117:8100/secure/projectavatar?avatarId=11653",
-      "24x24": "http://54.68.128.117:8100/secure/projectavatar?size=small&avatarId=11653",
-      "16x16": "http://54.68.128.117:8100/secure/projectavatar?size=xsmall&avatarId=11653",
-      "32x32": "http://54.68.128.117:8100/secure/projectavatar?size=medium&avatarId=11653"
+      "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653",
+      "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+      "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+      "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653"
     },
     "projectCategory": {
       "self": "http://localhost:4567/rest/api/latest/projectCategory/10001",

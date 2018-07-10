@@ -21,19 +21,19 @@
 
 package objective.taskboard.utils;
 
-import org.apache.commons.io.IOUtils;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.PathResource;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
+
+import org.apache.commons.io.IOUtils;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.PathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 
 public class IOUtilities {
     public static final String ENCODE_UTF_8 = "UTF-8";
@@ -52,6 +52,17 @@ public class IOUtilities {
             throw new IllegalStateException(e);
         }
     }
+    
+	public static byte[] resourceToBytes(Class<?> clazz, String path) {
+		InputStream inputStream = clazz.getResourceAsStream(path);
+        if (inputStream == null)
+            return null;
+        try {
+            return IOUtils.toByteArray(inputStream);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+	}
     
     public static String resourceAsString(Resource pathXML) {
         try {
@@ -92,4 +103,6 @@ public class IOUtilities {
             throw new IllegalStateException(e);
         }
     }
+
+
 }

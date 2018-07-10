@@ -16,7 +16,7 @@
                             "displayName": "Jean Takano",
                             "key": "jean.takano",
                             "name": "jean.takano",
-                            "self": "http://54.68.128.117:8100/rest/api/2/user?username=jean.takano",
+                            "self": "http://localhost:4567/rest/api/2/user?username=jean.takano",
                             "timeZone": "America/Sao_Paulo"
                         },
                         "created": "2017-06-02T14:15:38.000+0000",
@@ -44,7 +44,7 @@
                             "displayName": "Jean Takano",
                             "key": "jean.takano",
                             "name": "jean.takano",
-                            "self": "http://54.68.128.117:8100/rest/api/2/user?username=jean.takano",
+                            "self": "http://localhost:4567/rest/api/2/user?username=jean.takano",
                             "timeZone": "America/Sao_Paulo"
                         },
                         "created": "2017-06-02T14:15:58.000+0000",
@@ -80,7 +80,7 @@
                             "displayName": "Jean Takano",
                             "key": "jean.takano",
                             "name": "jean.takano",
-                            "self": "http://54.68.128.117:8100/rest/api/2/user?username=jean.takano",
+                            "self": "http://localhost:4567/rest/api/2/user?username=jean.takano",
                             "timeZone": "America/Sao_Paulo"
                         },
                         "created": "2017-06-02T14:17:31.000+0000",
@@ -108,7 +108,7 @@
                             "displayName": "Jean Takano",
                             "key": "jean.takano",
                             "name": "jean.takano",
-                            "self": "http://54.68.128.117:8100/rest/api/2/user?username=jean.takano",
+                            "self": "http://localhost:4567/rest/api/2/user?username=jean.takano",
                             "timeZone": "America/Sao_Paulo"
                         },
                         "created": "2017-06-02T14:20:30.000+0000",
@@ -136,7 +136,7 @@
                             "displayName": "Jean Takano",
                             "key": "jean.takano",
                             "name": "jean.takano",
-                            "self": "http://54.68.128.117:8100/rest/api/2/user?username=jean.takano",
+                            "self": "http://localhost:4567/rest/api/2/user?username=jean.takano",
                             "timeZone": "America/Sao_Paulo"
                         },
                         "created": "2017-06-02T14:20:49.000+0000",
@@ -170,13 +170,13 @@
                     "displayName": "Jean Takano",
                     "key": "jean.takano",
                     "name": "jean.takano",
-                    "self": "http://54.68.128.117:8100/rest/api/2/user?username=jean.takano",
+                    "self": "http://localhost:4567/rest/api/2/user?username=jean.takano",
                     "timeZone": "America/Sao_Paulo"
                 },
                 "created": "2017-06-02T14:14:10.000+0000",
                 "customfield_11440": {
                     "id": "12606",
-                    "self": "http://54.68.128.117:8100/rest/api/2/customFieldOption/12606",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12606",
                     "value": "Standard"
                 },
                 "customfield_11451": null,
@@ -185,7 +185,7 @@
                 "customfield_11456": null,
                 "customfield_11457": {
                     "id": "12657",
-                    "self": "http://54.68.128.117:8100/rest/api/2/customFieldOption/12657",
+                    "self": "http://localhost:4567/rest/api/2/customFieldOption/12657",
                     "value": "S"
                 },
                 "description": null,
@@ -193,25 +193,25 @@
                 "issuetype": {
                     "avatarId": 12262,
                     "description": "A task that needs to be done.",
-                    "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12262&avatarType=issuetype",
+                    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12262&avatarType=issuetype",
                     "id": "11",
                     "name": "Task",
-                    "self": "http://54.68.128.117:8100/rest/api/2/issuetype/11",
+                    "self": "http://localhost:4567/rest/api/2/issuetype/11",
                     "subtask": false
                 },
                 "labels": [],
                 "priority": {
-                    "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
+                    "iconUrl": "http://localhost:4567/images/icons/priorities/minor.svg",
                     "id": "9",
                     "name": "M\u00e9dia",
-                    "self": "http://54.68.128.117:8100/rest/api/2/priority/9"
+                    "self": "http://localhost:4567/rest/api/2/priority/9"
                 },
                 "project": {
                     "avatarUrls": {
-                        "16x16": "http://54.68.128.117:8100/secure/projectavatar?size=xsmall&avatarId=11653",
-                        "24x24": "http://54.68.128.117:8100/secure/projectavatar?size=small&avatarId=11653",
-                        "32x32": "http://54.68.128.117:8100/secure/projectavatar?size=medium&avatarId=11653",
-                        "48x48": "http://54.68.128.117:8100/secure/projectavatar?avatarId=11653"
+                        "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+                        "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+                        "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653",
+                        "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653"
                     },
                     "id": "11315",
                     "key": "TASKB",
@@ -219,9 +219,9 @@
                     "projectCategory": {
                         "id": "10001",
                         "name": "Externo",
-                        "self": "http://54.68.128.117:8100/rest/api/2/projectCategory/10001"
+                        "self": "http://localhost:4567/rest/api/2/projectCategory/10001"
                     },
-                    "self": "http://54.68.128.117:8100/rest/api/2/project/11315"
+                    "self": "http://localhost:4567/rest/api/2/project/11315"
                 },
                 "reporter": {
                     "active": true,
@@ -234,21 +234,21 @@
                     "displayName": "Jean Takano",
                     "key": "jean.takano",
                     "name": "jean.takano",
-                    "self": "http://54.68.128.117:8100/rest/api/2/user?username=jean.takano",
+                    "self": "http://localhost:4567/rest/api/2/user?username=jean.takano",
                     "timeZone": "America/Sao_Paulo"
                 },
                 "status": {
                     "description": "Taskboard",
-                    "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
+                    "iconUrl": "http://localhost:4567/images/icons/statuses/generic.png",
                     "id": "10657",
                     "name": "To Feature Review",
-                    "self": "http://54.68.128.117:8100/rest/api/2/status/10657",
+                    "self": "http://localhost:4567/rest/api/2/status/10657",
                     "statusCategory": {
                         "colorName": "yellow",
                         "id": 4,
                         "key": "indeterminate",
                         "name": "In Progress",
-                        "self": "http://54.68.128.117:8100/rest/api/2/statuscategory/4"
+                        "self": "http://localhost:4567/rest/api/2/statuscategory/4"
                     }
                 },
                 "summary": "teste",
@@ -257,23 +257,23 @@
             },
             "id": "226015",
             "key": "TASKB-685",
-            "self": "http://54.68.128.117:8100/rest/api/latest/issue/226015",
+            "self": "http://localhost:4567/rest/api/latest/issue/226015",
             "transitions": [
                 {
                     "id": "161",
                     "name": "Feature Reviewing",
                     "to": {
                         "description": "Taskboard",
-                        "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
+                        "iconUrl": "http://localhost:4567/images/icons/statuses/generic.png",
                         "id": "10658",
                         "name": "Feature Reviewing",
-                        "self": "http://54.68.128.117:8100/rest/api/2/status/10658",
+                        "self": "http://localhost:4567/rest/api/2/status/10658",
                         "statusCategory": {
                             "colorName": "yellow",
                             "id": 4,
                             "key": "indeterminate",
                             "name": "In Progress",
-                            "self": "http://54.68.128.117:8100/rest/api/2/statuscategory/4"
+                            "self": "http://localhost:4567/rest/api/2/statuscategory/4"
                         }
                     }
                 },
@@ -282,16 +282,16 @@
                     "name": "Back to 'Doing'",
                     "to": {
                         "description": "Taskboard",
-                        "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
+                        "iconUrl": "http://localhost:4567/images/icons/statuses/generic.png",
                         "id": "10652",
                         "name": "Doing",
-                        "self": "http://54.68.128.117:8100/rest/api/2/status/10652",
+                        "self": "http://localhost:4567/rest/api/2/status/10652",
                         "statusCategory": {
                             "colorName": "yellow",
                             "id": 4,
                             "key": "indeterminate",
                             "name": "In Progress",
-                            "self": "http://54.68.128.117:8100/rest/api/2/statuscategory/4"
+                            "self": "http://localhost:4567/rest/api/2/statuscategory/4"
                         }
                     }
                 },
@@ -300,16 +300,16 @@
                     "name": "Deferred",
                     "to": {
                         "description": "Taskboard",
-                        "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
+                        "iconUrl": "http://localhost:4567/images/icons/statuses/generic.png",
                         "id": "10655",
                         "name": "Deferred",
-                        "self": "http://54.68.128.117:8100/rest/api/2/status/10655",
+                        "self": "http://localhost:4567/rest/api/2/status/10655",
                         "statusCategory": {
                             "colorName": "blue-gray",
                             "id": 2,
                             "key": "new",
                             "name": "To Do",
-                            "self": "http://54.68.128.117:8100/rest/api/2/statuscategory/2"
+                            "self": "http://localhost:4567/rest/api/2/statuscategory/2"
                         }
                     }
                 }

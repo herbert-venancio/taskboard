@@ -64,10 +64,8 @@ public abstract class AbstractIntegrationTest {
                             .credentials("foo", "bar").get();
 
                     if (response.responseCode < 400) {
-                        if (response.content.equals(IssueBufferState.ready.toString()) || response.content.equals(IssueBufferState.updating.toString()))
+                        if (response.content.equals(IssueBufferState.ready.toString()))
                             return null;
-                        if (response.content.toLowerCase().endsWith("error")) 
-                            resetIssueBuffer();
                     }
                 } catch(Exception e) {
                     // just assume 'not ready'
