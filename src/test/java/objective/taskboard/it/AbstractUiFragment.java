@@ -291,7 +291,32 @@ public abstract class AbstractUiFragment {
             }
         });
     }
-    
+
+    protected void toggleElementVisibility(By elementToToggle, Runnable toggle) {
+        boolean isVisibleAndExists = isElementVisibleAndExists(elementToToggle);
+        toggle.run();
+        waitElementExistenceAndVisibilityIs(!isVisibleAndExists, elementToToggle);
+    }
+
+    protected void waitElementExistenceAndVisibilityIs(boolean isVisibleAndExists, By selector) {
+        waitUntil(new ExpectedCondition<Boolean>() {
+            @Override
+            public Boolean apply(WebDriver input) {
+                return isElementVisibleAndExists(selector) == isVisibleAndExists;
+            }
+        });
+    }
+
+    protected boolean isElementVisibleAndExists(By selector) {
+        List<WebElement> elements = webDriver.findElements(selector);
+        if (elements.size() == 0)
+            return false;
+        WebElement we = elements.get(0);
+        if (!we.isDisplayed())
+            return false;
+        return true;
+    }
+
     private void executeJavascript(String script, Object... args) {
         if (!(webDriver instanceof RemoteWebDriver)) 
             throw new RuntimeException("WebDriver " + webDriver + " is unable to execute javascript");
