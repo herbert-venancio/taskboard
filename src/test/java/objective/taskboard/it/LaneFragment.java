@@ -7,20 +7,22 @@ import org.openqa.selenium.WebElement;
 public class LaneFragment extends AbstractUiFragment {
 	WebElement laneRoot;
 
-	public LaneFragment(WebDriver driver, String laneName) {
+	private LaneFragment(WebDriver driver, String laneName) {
 		super(driver);
-		laneRoot = driver.findElement(By.cssSelector("[data-lane-name='" + laneName + "']"));
+		laneRoot = getElementWhenItExists(laneSelector(laneName));
 	}
 
 	public BoardStepFragment boardStep(String stepName) {
-		WebElement webStepElement = laneRoot
-				.findElement(By.cssSelector("[data-step-name='" + stepName + "']"));
-		;
+		WebElement webStepElement = laneRoot.findElement(By.cssSelector("[data-step-name='" + stepName + "']"));
 		return new BoardStepFragment(webDriver, stepName, webStepElement);
 	}
 
 	public static LaneFragment laneName(WebDriver webDriver, String laneName) {
-		PageWait.waitUntilElementExists(webDriver, By.cssSelector("[data-lane-name='" + laneName + "']"));
 		return new LaneFragment(webDriver, laneName);
 	}
+
+	public static By laneSelector(String laneName) {
+		return By.cssSelector("[data-lane-name='" + laneName + "']");
+	}
+
 }

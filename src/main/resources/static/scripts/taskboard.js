@@ -201,27 +201,23 @@ function Taskboard() {
         queue.push({issue:issue, parents:true, children:true});
 
         function enqueueParent(item) {
-            var parents = item.parents;
-            var issue = item.issue;
-            if(!parents || !issue.parent)
+            if(!item.parents || !item.issue.parent)
                 return;
 
-            // enqueue parent
-            queue.push({issue:self.getIssueByKey(issue.parent), parents:true});
+            var parentIssue = self.getIssueByKey(item.issue.parent);
+            if (parentIssue)
+                queue.push({issue:parentIssue, parents:true});
         }
 
         function enqueueChildren(item) {
-            var children = item.children;
-            var issue = item.issue;
-            if(!children)
+            if(!item.children)
                 return;
 
-            for(var i = 0; i < self.issues.length; ++i) {
-                var child = self.issues[i];
-                // enqueue all children
-                if(child.parent === issue.issueKey)
-                    queue.push({issue:child, children:true});
-            }
+            forEachInArray(item.issue.subtasks, function(subtaskSample) {
+                var subtask = self.getIssueByKey(subtaskSample.issueKey);
+                if (subtask)
+                    queue.push({issue:subtask, children:true});
+            });
         }
 
         var hierarchyIssueKeys = [];

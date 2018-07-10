@@ -1,5 +1,3 @@
-package objective.taskboard.it;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -21,13 +19,25 @@ package objective.taskboard.it;
  * [/LICENSE]
  */
 
+package objective.taskboard.it;
+
 import org.junit.Test;
 
 public class HierarchicalFilterIT extends AuthenticatedIntegrationTest {
+
     @Test
-    public void whenIssueFilterIsEnabled_OnlyIssueAndChildrenShowUp() {
+    public void whenIssueFilterIsEnabled_OnlyIssueAndItsChildrenAndParentShowUp() {
         MainPage mainPage = MainPage.produce(webDriver);
-        mainPage.issue("TASKB-637").enableHierarchicalFilter();
-        mainPage.assertVisibleIssues("TASKB-637", "TASKB-680", "TASKB-638", "TASKB-678", "TASKB-679");
+        mainPage.issue("TASKB-606").enableHierarchicalFilter();
+        mainPage.assertVisibleIssues("TASKB-606", "TASKB-186", "TASKB-235", "TASKB-601", "TASKB-572");
     }
+
+    @Test
+    public void whenMiddleLaneIsDisabled_filterStillWorking() {
+        MainPage mainPage = MainPage.produce(webDriver);
+        mainPage.openMenuFilters().toggleLaneVisibilityAndReload("Deployable", mainPage);
+        mainPage.issue("TASKB-606").enableHierarchicalFilter();
+        mainPage.assertVisibleIssues("TASKB-606", "TASKB-601", "TASKB-572");
+    }
+
 }

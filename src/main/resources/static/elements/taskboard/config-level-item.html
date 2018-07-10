@@ -59,13 +59,12 @@
 
         <paper-material class="paper-margin" elevation="0">
             <span class="level-title">
-                <paper-icon-button id="visibilityButton" on-tap="toggleVisibility"></paper-icon-button>[[level.level]]
+                <paper-icon-button class="visibility-button" on-tap="toggleVisibility"></paper-icon-button>[[level.level]]
             </span>
             <paper-material class="level-configuration" elevation="0">
                 <div class="sub-title">
                     <paper-checkbox id="showHeader" checked="{{level.showHeader}}" on-tap="levelShowHeaderChanged">Show Stages</paper-checkbox>
                 </div>
-
             </paper-material>
         </paper-material>
 
@@ -115,11 +114,10 @@
                 },
 
                 toggleVisibilityIcon: function (selected) {
-                    if (selected) {
-                        this.$.visibilityButton.icon = 'visibility';
-                    } else {
-                        this.$.visibilityButton.icon = 'visibility-off';
-                    }
+                    if (selected)
+                        this.$$('.visibility-button').icon = 'visibility';
+                    else
+                        this.$$('.visibility-button').icon = 'visibility-off';
                 }
 
             });

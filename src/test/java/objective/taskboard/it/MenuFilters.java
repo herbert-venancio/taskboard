@@ -44,6 +44,9 @@ public class MenuFilters extends AbstractUiFragment {
     @FindBy(css = ".config-projects.config-item-project")
     private List<WebElement> projectsConfigurationItem;
 
+    @FindBy(css = "config-table")
+    private WebElement boardFeatures;
+
     public MenuFilters(WebDriver webDriver) {
         super(webDriver);
     }
@@ -95,6 +98,18 @@ public class MenuFilters extends AbstractUiFragment {
 
         waitForClick(filterFieldValueToClick);
         return this;
+    }
+
+    public void toggleLaneVisibilityAndReload(String laneName, MainPage mainPage) {
+        toggleElementVisibility(LaneFragment.laneSelector(laneName), () -> {
+            waitForClick(boardFeatures);
+            waitForClick(boardFeatures.findElement(By.cssSelector("config-level .config-item-title")));
+            WebElement laneConf = boardFeatures.findElements(By.cssSelector(".level-title")).stream()
+                .filter(el -> laneName.equals(el.getText()))
+                .findFirst().orElseThrow(() -> new IllegalArgumentException("There's no lane with given name: " + laneName));
+            waitForClick(laneConf.findElement(By.cssSelector(".visibility-button")));
+        });
+        mainPage.reload();
     }
 
     public void closeMenuFilters() {
