@@ -284,6 +284,8 @@ function Taskboard() {
         return this.getStatus(statusId).name;
     };
 
+    var reconnectCount = 0;
+
     this.connectToWebsocket = function(taskboardHome) {
         var socket = new SockJS('/taskboard-websocket');
         var stompClient = Stomp.over(socket);
@@ -293,27 +295,74 @@ function Taskboard() {
             if (message.indexOf("ERROR") > -1)
                 console.log(message);
         };
-        stompClient.connect({}, function () {
-            stompClient.subscribe('/topic/issues/updates', function (response) {
-                handleIssueUpdates(taskboardHome, response)
-            });
+        stompClient.connect({},
+            function() {
+                reconnectCount = 0;
+                stompClient.subscribe('/topic/issues/updates', function (response) {
+                    handleIssueUpdates(taskboardHome, response)
+                });
 
-            stompClient.subscribe('/user/topic/sizing-import/status', function(status) {
-                handleSizingImportStatus(taskboardHome, status);
-            });
+                stompClient.subscribe('/user/topic/sizing-import/status', function(status) {
+                    handleSizingImportStatus(taskboardHome, status);
+                });
 
-            stompClient.subscribe('/topic/cache-state/updates', function (response) {
-                taskboardHome.fire("iron-signal", {name:"issue-cache-state-updated", data:{
-                    newstate: JSON.parse(response.body)
-                }})
-            });
+                stompClient.subscribe('/topic/cache-state/updates', function (response) {
+                    taskboardHome.fire("iron-signal", {name:"issue-cache-state-updated", data:{
+                        newstate: JSON.parse(response.body)
+                    }});
+                });
 
-            stompClient.subscribe('/topic/projects/updates', function (response) {
-                taskboardHome.fire('iron-signal', {name:'projects-changed', data:{
-                    projects: JSON.parse(response.body)
-                }});
+                stompClient.subscribe('/topic/projects/updates', function (response) {
+                    taskboardHome.fire('iron-signal', {name:'projects-changed', data:{
+                        projects: JSON.parse(response.body)
+                    }});
+                });
+            },
+            function() {
+                if (reconnectCount >= 10) {
+                    fireWebsocketError(taskboardHome, 'Taskboard websocket can\'t establish the connection.');
+                    return;
+                }
+
+                setTimeout(function() {
+                    $.get('/ws/taskboard-websocket/ping')
+                    .done(function() {
+                        reconnectCount++;
+                        self.connectToWebsocket(taskboardHome);
+                    })
+                    .fail(function(jqXHR) {
+                        if (jqXHR && jqXHR.status === 401) {
+                            var buttonGoToLogin = [{
+                                name: 'Go to Login',
+                                callback: function() { window.location = '/login'; }
+                            }];
+                            fireWebsocketError(taskboardHome, 'Your session has expired.', buttonGoToLogin);
+                            return;
+                        }
+                        if (jqXHR && jqXHR.status === 500) {
+                            fireWebsocketError(taskboardHome, 'Unexpected websocket error. Please, report this error to the administrator.');
+                            return;
+                        }
+                        reconnectCount++;
+                        self.connectToWebsocket(taskboardHome);
+                    });
+                }, 10000);
             });
-        });
+    }
+
+    function fireWebsocketError(source, errorMessage, button) {
+        if (!button) {
+            button = [{
+                name: 'Refresh',
+                callback: function() {
+                    location.reload(true);
+                }
+            }];
+        }
+        self.showError(source, errorMessage, button, true);
+        source.fire("iron-signal", {name:"issue-cache-state-updated", data:{
+            newstate: 'websocketError'
+        }});
     }
 
     function handleIssueUpdates(taskboardHome, response) {

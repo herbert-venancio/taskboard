@@ -105,6 +105,10 @@
                 color: #ff9800;
             }
 
+            .issue-state-websocketError {
+                color: #fe6565;
+            }
+
             .issue-state-initialisationError {
                 color: #fe6565;
             }
@@ -797,6 +801,7 @@
                         updateError         : {icon: "icons:warning", tooltip: "Error synching data from jira. Issues might be outdated"},
                         initialisationError : {icon: "icons:error", tooltip: "Failure fetching data from jira. No issues available"},
                         requiresReindex     : {icon: "icons:error", tooltip: "Failure fetching data from jira. Requires re-index"},
+                        websocketError      : {icon: "notification:sync-problem", tooltip: "Error in taskboard websocket. Please, try to refresh the page"}
                     };
                     this.set('stateIcon', state[cacheState].icon);
                     this.set('stateTooltip', state[cacheState].tooltip);
