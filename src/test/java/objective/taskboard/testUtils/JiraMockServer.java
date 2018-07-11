@@ -61,6 +61,8 @@ import spark.Service;
 
 public class JiraMockServer {
 
+    private static final String UNKNOWNUSER = "unknownuser";
+    private static final String APPLICATION_JSON = "application/json";
     private Service server;
 
     public static void main(String[] args) {
@@ -194,13 +196,19 @@ public class JiraMockServer {
 
         get("/rest/projectbuilder/1.0/users",  (req, res) -> findUsers(req.queryParams("q")));
 
-        get("rest/api/latest/serverInfo",  (req, res) ->{
+        get("rest/api/latest/serverInfo",  (req, res) -> {
             String auth = new String(Base64.getDecoder().decode(req.headers("Authorization").replace("Basic ","").getBytes()));
             username = auth.split(":")[0];
+
+            if (UNKNOWNUSER.equalsIgnoreCase(username)) {
+                res.status(401);
+                return "";
+            }
+            
             return loadMockData("serverInfo.response.json");
         });
         
-        post("/rest/api/latest/search", "application/json", (req,res) -> {
+        post("/rest/api/latest/search", APPLICATION_JSON, (req,res) -> {
             if (searchFailureEnabled)
                 throw new IllegalStateException("Emulated error");
 
@@ -305,7 +313,7 @@ public class JiraMockServer {
 
         post("/rest/api/latest/issue/:issueId/transitions", (req, res)-> {
             if (transitionFailureEnabled) {
-                res.type("application/json");
+                res.type(APPLICATION_JSON);
                 res.status(400);
                 return loadMockData("transition_failure.response.json");
             }
@@ -334,11 +342,11 @@ public class JiraMockServer {
             return "";
         });
         
-        post("/rest/api/latest/version", "application/json", (req,res) -> {
+        post("/rest/api/latest/version", APPLICATION_JSON, (req,res) -> {
             return loadMockData("createversion.response.json");
         });
 
-        put("/rest/api/latest/version/:versionId", "application/json", (req,res) -> {
+        put("/rest/api/latest/version/:versionId", APPLICATION_JSON, (req,res) -> {
             JSONObject body = new JSONObject(req.body());
             final String versionId = req.params(":versionId");
             final String newName = body.getString("name");
@@ -388,7 +396,7 @@ public class JiraMockServer {
             return loadMockData("status-categories.json");
         });
 
-        post("/rest/webhooks/1.0/webhook", "application/json", (req,res) -> {
+        post("/rest/webhooks/1.0/webhook", APPLICATION_JSON, (req,res) -> {
             WebHookConfiguration webhook = gson.fromJson(req.body(), WebHookConfiguration.class);
             return webhookRegistration(webhook);
         });
@@ -419,7 +427,7 @@ public class JiraMockServer {
         }
 
         get("*", (req, res) -> {
-            res.type("application/json");
+            res.type(APPLICATION_JSON);
             res.status(404);
             return "{\"message\":\"null for uri: " + req.url() + "\",\"status-code\":404}";
         });
@@ -671,7 +679,7 @@ public class JiraMockServer {
                             Map<String, String> parameters = singletonMap("project.key", projectKey);
                             String webhookUrl = StrSubstitutor.replace(webhook.url, parameters);
                             RequestBuilder.url(webhookUrl)
-                                    .header("Content-Type", "application/json")
+                                    .header("Content-Type", APPLICATION_JSON)
                                     .body(body)
                                     .post();
                         }

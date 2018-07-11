@@ -1,60 +1,44 @@
 package objective.taskboard.it;
 
-import java.util.function.Function;
-
-/*-
- * [LICENSE]
- * Taskboard
- * ---
- * Copyright (C) 2015 - 2017 Objective Solutions
- * ---
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * [/LICENSE]
- */
-
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 
-public class LoginPage {
-    @FindBy(css="#username input")
+public class LoginPage extends AbstractUiFragment {
+    
+    @FindBy(css = "#username input")
     private WebElement username;
 
-    @FindBy(css="#password input")
+    @FindBy(css = "#password input")
     private WebElement password;
 
-    @FindBy(id="login")
+    @FindBy(id = "login")
     private WebElement submit;
-
-    private WebDriver webDriver;
+    
+    @FindBy(css = ".incorrect")
+    private WebElement validationMessage;
 
     public LoginPage(WebDriver webDriver) {
-        this.webDriver = webDriver;
+        super(webDriver);
     }
 
-    public void login(String username, String password) {
-        PageWait.wait(webDriver).until((Function<? super WebDriver, ?>) ExpectedConditions.visibilityOf(this.username));
+    public LoginPage login(String username, String password) {
+        waitVisibilityOfElement(this.username);
         
         this.username.sendKeys(username);
         this.password.sendKeys(password);
         this.submit.click();
+        
+        return this;
     }   
 
     public static LoginPage to(WebDriver webDriver) {
         webDriver.get(AbstractUIIntegrationTest.getSiteBase()+"/login");
         return PageFactory.initElements(webDriver, LoginPage.class);
+    }
+
+    public void assertValidationMessage(String message) {
+        waitTextInElement(validationMessage, message);
     }
 }
