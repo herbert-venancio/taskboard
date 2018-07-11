@@ -84,7 +84,11 @@ public class JiraService {
         try {
             if (StringUtils.isEmpty(password))
                 throw new AccessDeniedException("The password can't be empty");
-            jiraEndpoint.request(JiraServerInfoDto.Service.class, username, password);
+            
+            jiraEndpoint
+                .request(JiraServerInfoDto.Service.class, username, password)
+                .get();
+            
         } catch (RetrofitError ex) {
             checkAuthenticationError(ex, username);
             log.error("Authentication error for user " + username);
