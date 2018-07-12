@@ -23,6 +23,7 @@ package objective.taskboard.jira;
 import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byName;
 import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byNames;
 
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,7 @@ import objective.taskboard.jira.data.JiraUser.UserDetails;
 import objective.taskboard.jira.data.Transition;
 import objective.taskboard.jira.data.Transitions;
 import objective.taskboard.jira.data.Transitions.DoTransitionRequestBody;
+import objective.taskboard.jira.data.plugin.RoleData;
 import objective.taskboard.jira.data.plugin.UserDetail;
 import objective.taskboard.jira.endpoint.JiraEndpoint;
 import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
@@ -270,6 +272,13 @@ public class JiraService {
                 throw ex;
             }
         }
+    }
+
+    public List<RoleData> getVisibleRoles() {
+        List<RoleData> roles = jiraEndpointAsUser.request(RoleData.Service.class)
+                .allVisible();
+        roles.sort(Comparator.comparing(role -> role.name));
+        return roles;
     }
 
     @SuppressWarnings("serial")

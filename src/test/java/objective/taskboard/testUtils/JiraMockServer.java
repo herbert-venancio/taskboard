@@ -194,8 +194,6 @@ public class JiraMockServer {
         get("rest/api/latest/user",  (req, res) ->loaduser(req.queryParams("username")));
         get("rest/api/latest/myself",  (req, res) ->loaduser(username));
 
-        get("/rest/projectbuilder/1.0/users",  (req, res) -> findUsers(req.queryParams("q")));
-
         get("rest/api/latest/serverInfo",  (req, res) -> {
             String auth = new String(Base64.getDecoder().decode(req.headers("Authorization").replace("Basic ","").getBytes()));
             username = auth.split(":")[0];
@@ -761,7 +759,7 @@ public class JiraMockServer {
         return loadMockData;
     }
 
-    private String findUsers(String nameStart) throws JSONException {
+    public static String findUsers(String nameStart) throws JSONException {
         String loadMockData = loadMockData("users-autocomplete.response.json");
         JSONArray allUsers = new JSONArray(loadMockData);
         int allUsersSize = allUsers.length();
