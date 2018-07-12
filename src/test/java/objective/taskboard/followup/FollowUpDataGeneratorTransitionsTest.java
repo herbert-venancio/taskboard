@@ -242,6 +242,36 @@ public class FollowUpDataGeneratorTransitionsTest extends FollowUpDataGeneratorT
         assertThat(subtaskTransitionsDatesFirstRow.get(5), is(parseDateTime("2020-01-04")));
         assertThat(subtaskTransitionsDatesFirstRow.get(6), is(parseDateTime("2020-01-03")));
     }
+    
+    @Test
+    public void issueStatusGoneForthAndBack_shouldNotReturnTransitionsAfterBackTransition() {
+        // given
+        issues(
+                subtask().id(100).key("PROJ-100").issueType(devIssueType)
+                .transition("Open", "2020-01-01")
+                .transition("To Do", "2020-01-02")
+                .transition("Open", "2020-01-03") // last
+                .transition("To Do", "2020-01-04") 
+                .transition("Doing", "2020-01-05") 
+                .transition("To Review", "2020-01-06")
+                .transition("Doing", "2020-01-07")
+                .transition("To Do", "2020-01-08").issueStatus(statusToDo) // last
+        );
+
+        // when
+        List<AnalyticsTransitionsDataSet> dataList = subject.generate(ZoneId.systemDefault(), DEFAULT_PROJECT).analyticsTransitionsDsList;
+
+        // then
+        List<ZonedDateTime> subtaskTransitionsDatesFirstRow = dataList.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows.get(0).transitionsDates;
+        assertThat(subtaskTransitionsDatesFirstRow.size(), is(7));
+        assertThat(subtaskTransitionsDatesFirstRow.get(0), nullValue());
+        assertThat(subtaskTransitionsDatesFirstRow.get(1), nullValue());
+        assertThat(subtaskTransitionsDatesFirstRow.get(2), nullValue());
+        assertThat(subtaskTransitionsDatesFirstRow.get(3), nullValue());
+        assertThat(subtaskTransitionsDatesFirstRow.get(4), nullValue());
+        assertThat(subtaskTransitionsDatesFirstRow.get(5), is(parseDateTime("2020-01-08")));
+        assertThat(subtaskTransitionsDatesFirstRow.get(6), is(parseDateTime("2020-01-03")));
+    }
 
     @Test
     public void issueGoBackStatus_shouldNotConsiderNextStatus() {

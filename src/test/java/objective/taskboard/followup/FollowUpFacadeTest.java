@@ -68,7 +68,9 @@ import objective.taskboard.database.directory.DataBaseDirectory;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.cluster.FollowupClusterProvider;
 import objective.taskboard.followup.data.Template;
+import objective.taskboard.followup.kpi.WipKPIService;
 import objective.taskboard.jira.FieldMetadataService;
+import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.rules.CleanupDataFolderRule;
 
@@ -78,6 +80,7 @@ public class FollowUpFacadeTest {
     private static final String FROM_JIRA = "From Jira";
     private static final String ANALYTIC_DEMAND = "Analytic - Demand";
     private static final String SYNTHETIC_DEMAND = "Synthetic - Demand";
+    private static final String WIP_DEMAND = "Wip MetaData - Demand";
 
     @Rule
     public CleanupDataFolderRule clean = new CleanupDataFolderRule(Paths.get("data/followup-templates"));
@@ -111,7 +114,14 @@ public class FollowUpFacadeTest {
 
     @Mock
     private FieldMetadataService fieldMetadataService;
-
+    
+    @Mock
+    private JiraProperties jiraProperties;
+    
+    @Spy
+    @InjectMocks
+    private WipKPIService wipKpiService = new WipKPIService();
+    
     @InjectMocks
     private FollowUpFacade followUpFacade = new FollowUpFacade();
 
@@ -136,6 +146,19 @@ public class FollowUpFacadeTest {
         when(releaseHistoryProvider.get(any())).thenReturn(Collections.emptyList());
         when(projectService.getTaskboardProjectOrCry(PROJECT)).thenReturn(new ProjectFilterConfiguration(PROJECT, 1L));
         when(historyRepository.getFirstDate(PROJECT)).thenReturn(Optional.empty());
+        
+        String[] demandsStatus = new String[] { "Doing"};
+        String[] subtaskStatus = new String[] { "Reviewing", "To Review", "Doing"};
+        String[] tasksStatus = new String[] { "QAing", "To QA", "Feature Reviewing", "To Feature Review",
+                "Alpha Testing", "To Alpha Test", "Doing" };
+        
+        JiraProperties.StatusCountingOnWip statusCounting = new JiraProperties.StatusCountingOnWip();
+        statusCounting.setDemands(demandsStatus);
+        statusCounting.setTasks(tasksStatus);
+        statusCounting.setSubtasks(subtaskStatus);
+        
+        when(jiraProperties.getStatusCountingOnWip()).thenReturn(statusCounting);
+        
     }
 
     @Before
@@ -159,6 +182,12 @@ public class FollowUpFacadeTest {
         assertThat(excelDoc).sheet(FROM_JIRA).row(1).has(expectedRowContentOfFromJira());
         assertThat(excelDoc).sheet(ANALYTIC_DEMAND).row(1).has(expectedRowContentOfAnalytics());
         assertThat(excelDoc).sheet(SYNTHETIC_DEMAND).row(1).has(expectedRowContentOfSyntetics());
+        assertThat(excelDoc).sheet(WIP_DEMAND).row(1).has(expectedRowContentOfWip("9/25/17 0:00","Demand", 0));
+        assertThat(excelDoc).sheet(WIP_DEMAND).row(2).has(expectedRowContentOfWip("9/25/17 0:00","OS", 0));
+        assertThat(excelDoc).sheet(WIP_DEMAND).row(3).has(expectedRowContentOfWip("9/26/17 0:00","Demand", 1));
+        assertThat(excelDoc).sheet(WIP_DEMAND).row(4).has(expectedRowContentOfWip("9/26/17 0:00","OS", 1));
+        assertThat(excelDoc).sheet(WIP_DEMAND).row(5).has(expectedRowContentOfWip("9/27/17 0:00","Demand", 0));
+        assertThat(excelDoc).sheet(WIP_DEMAND).row(6).has(expectedRowContentOfWip("9/27/17 0:00","OS", 1));
     }
 
     private static SpreadsheetMLPackage readFile(Resource resource) throws IOException, Docx4JException {
@@ -187,6 +216,10 @@ public class FollowUpFacadeTest {
 
     private static String[] expectedRowContentOfSyntetics() {
         return new String[]{"9/25/17 0:00", "Demand", "0", "0", "1"};
+    }
+    
+    private static String[] expectedRowContentOfWip(String date, String issueType, int count) {
+        return new String[]{date,issueType, "Doing", String.valueOf(count)};
     }
 
     public SpreadsheetAssert assertThat(SpreadsheetMLPackage actual) {
