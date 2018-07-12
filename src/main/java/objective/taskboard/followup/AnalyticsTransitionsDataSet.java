@@ -11,5 +11,9 @@ public class AnalyticsTransitionsDataSet extends TransitionDataSet<AnalyticsTran
     public int getInitialIndexStatusHeaders() {
         return headers.size() - rows.get(0).transitionsDates.size();
     }
+    
+    public List<String> getStatusHeader(){
+        return headers.subList(getInitialIndexStatusHeaders(), headers.size());
+    }
 
 }

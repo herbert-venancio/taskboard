@@ -63,6 +63,7 @@ import objective.taskboard.followup.cluster.ClusterNotConfiguredException;
 import objective.taskboard.followup.cluster.FollowUpClusterItem;
 import objective.taskboard.followup.cluster.FollowupCluster;
 import objective.taskboard.followup.cluster.FollowupClusterImpl;
+import objective.taskboard.followup.kpi.WipKPIService;
 import objective.taskboard.google.SpreadsheetUtils.SpreadsheetA1Range;
 import objective.taskboard.jira.FieldMetadataService;
 import objective.taskboard.jira.client.JiraFieldDataDto;
@@ -77,7 +78,8 @@ public class FollowUpReportGeneratorTest {
     private final ZoneId timezone = ZoneId.of("UTC");
     private SimpleSpreadsheetEditorMock editor = new SimpleSpreadsheetEditorMock();
     private FieldMetadataService fieldMetadataService = mock(FieldMetadataService.class);
-    private FollowUpReportGenerator subject = new FollowUpReportGenerator(editor, fieldMetadataService);
+    private WipKPIService wipKpiService = mock(WipKPIService.class);
+    private FollowUpReportGenerator subject = new FollowUpReportGenerator(editor, fieldMetadataService,wipKpiService);
 
     @Test
     public void generateJiraDataSheetTest() {
@@ -151,7 +153,7 @@ public class FollowUpReportGeneratorTest {
     @Test
     public void generateTest() {
         FollowUpTemplate testTemplate = new FollowUpTemplate(resolve("followup/Followup-template.xlsm"));
-        subject = new FollowUpReportGenerator(new SimpleSpreadsheetEditor(testTemplate), fieldMetadataService);
+        subject = new FollowUpReportGenerator(new SimpleSpreadsheetEditor(testTemplate), fieldMetadataService,wipKpiService);
         
         List<EffortHistoryRow> effortHistory = asList(
                 new EffortHistoryRow(LocalDate.parse("2018-04-03"), 2d, 8d),
@@ -177,7 +179,7 @@ public class FollowUpReportGeneratorTest {
     @Test
     public void generateLotsOfLines() {
         FollowUpTemplate testTemplate = new FollowUpTemplate(resolve("followup/Followup-template.xlsm"));
-        subject = new FollowUpReportGenerator(new SimpleSpreadsheetEditor(testTemplate), fieldMetadataService);
+        subject = new FollowUpReportGenerator(new SimpleSpreadsheetEditor(testTemplate), fieldMetadataService,wipKpiService);
 
         List<FromJiraDataRow> fromJiraDataRowList = new LinkedList<>();
         for (int i=0; i < 5000; i++)
@@ -505,7 +507,7 @@ public class FollowUpReportGeneratorTest {
         FieldMetadataService fieldMetadataService = mock(FieldMetadataService.class);
         when(fieldMetadataService.getFieldsMetadataAsUser())
                 .thenReturn(singletonList(new JiraFieldDataDto(COST_CENTER_FIELD_ID, COST_CENTER_FIELD_NAME, null, null)));
-        subject = new FollowUpReportGenerator(editor, fieldMetadataService);
+        subject = new FollowUpReportGenerator(editor, fieldMetadataService,wipKpiService);
 
         FollowUpData followupData = getDefaultFollowupDataWithExtraFields();
 

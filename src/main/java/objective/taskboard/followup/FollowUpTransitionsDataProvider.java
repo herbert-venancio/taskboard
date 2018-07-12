@@ -218,7 +218,7 @@ public class FollowUpTransitionsDataProvider {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-	private static Range<ZonedDateTime> calculateInterval(AnalyticsTransitionsDataSet dataset) {
+	public static Range<ZonedDateTime> calculateInterval(AnalyticsTransitionsDataSet dataset) {
         ZonedDateTime firstDate = null;
         ZonedDateTime lastDate = null;
         for (AnalyticsTransitionsDataRow row : dataset.rows) {

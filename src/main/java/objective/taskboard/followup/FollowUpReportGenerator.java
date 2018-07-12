@@ -44,6 +44,7 @@ import objective.taskboard.followup.ReleaseHistoryProvider.ProjectRelease;
 import objective.taskboard.followup.cluster.ClusterNotConfiguredException;
 import objective.taskboard.followup.cluster.FollowUpClusterItem;
 import objective.taskboard.followup.cluster.FollowupCluster;
+import objective.taskboard.followup.kpi.WipKPIService;
 import objective.taskboard.google.SpreadsheetUtils.SpreadsheetA1Range;
 import objective.taskboard.jira.FieldMetadataService;
 import objective.taskboard.jira.client.JiraFieldDataDto;
@@ -58,10 +59,12 @@ import objective.taskboard.utils.IOUtilities;
 public class FollowUpReportGenerator {
     private final SpreadsheetEditor editor;
     private final FieldMetadataService fieldMetadataService;
+    private final WipKPIService wipKpiService;
 
-    public FollowUpReportGenerator(SpreadsheetEditor editor, FieldMetadataService fieldMetadataService) {
+    public FollowUpReportGenerator(SpreadsheetEditor editor, FieldMetadataService fieldMetadataService, WipKPIService kpiService) {
         this.editor = editor;
         this.fieldMetadataService = fieldMetadataService;
+        this.wipKpiService = kpiService;
     }
 
     public Resource generate(FollowUpSnapshot snapshot, ZoneId timezone) 
@@ -82,6 +85,7 @@ public class FollowUpReportGenerator {
             generateWorklogSheet(followupData, timezone);
             generateScopeBaselineSheet(snapshot);
             generateProjectProfileSheet(snapshot);
+            generateWipSheets(followupData);
 
             return IOUtilities.asResource(editor.toBytes());
 
@@ -343,6 +347,26 @@ public class FollowUpReportGenerator {
         List<Sheet> sheets = new LinkedList<>();
         sheets.addAll(generateAnalyticTransitionsSheets(followupData.analyticsTransitionsDsList));
         sheets.addAll(generateSyntheticTransitionsSheets(followupData.syntheticsTransitionsDsList));
+        return sheets;
+    }
+    
+    private List<Sheet> generateWipSheets(FollowUpData followupData){
+        List<Sheet> sheets = new LinkedList<>();
+        List<WipDataSet> wipData = wipKpiService.getWipData(followupData);
+        
+        for (WipDataSet dataSet : wipData) {
+            Sheet sheet = createSheetWithHeader("Wip MetaData - ", dataSet);
+            for(WipRow wipRow : dataSet.rows) {
+                SheetRow row = sheet.createRow();
+                row.addColumn(wipRow.date);
+                row.addColumn(wipRow.type);
+                row.addColumn(wipRow.status);
+                row.addColumn(wipRow.count);
+            }
+            sheet.save();
+            sheets.add(sheet);
+        }
+        
         return sheets;
     }
 

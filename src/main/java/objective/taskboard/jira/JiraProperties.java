@@ -87,11 +87,40 @@ public class JiraProperties {
     @NotNull
     @Valid
     private StatusPriorityOrder statusPriorityOrder;
+    
+    @NotNull
+    @Valid
+    private StatusCountingOnWip statusCountingOnWip;
 
     private ExtraFields extraFields = new ExtraFields();
 
     private Wip wip;
 
+    public static class StatusCountingOnWip{
+        private String[] demands;
+        private String[] tasks;
+        private String[] subtasks;
+        
+        public String[] getDemands() {
+            return demands;
+        }
+        public String[] getTasks() {
+            return tasks;
+        }
+        public String[] getSubtasks() {
+            return subtasks;
+        }
+        public void setDemands(String[] demands) {
+            this.demands = demands;
+        }
+        public void setTasks(String[] tasks) {
+            this.tasks = tasks;
+        }
+        public void setSubtasks(String[] subtasks) {
+            this.subtasks = subtasks;
+        }
+    }
+    
     public static class StatusPriorityOrder {
         private String[] demands;
         private String[] tasks;
@@ -1338,6 +1367,10 @@ public class JiraProperties {
 
     }
 
+    public StatusCountingOnWip getStatusCountingOnWip() {
+        return statusCountingOnWip;
+    }
+    
     public StatusPriorityOrder getStatusPriorityOrder() {
         return statusPriorityOrder;
     }
@@ -1472,6 +1505,10 @@ public class JiraProperties {
 
     public void setStatusPriorityOrder(final StatusPriorityOrder statusPriorityOrder) {
         this.statusPriorityOrder = statusPriorityOrder;
+    }
+    
+    public void setStatusCountingOnWip(final StatusCountingOnWip statusCountingOnWip) {
+        this.statusCountingOnWip = statusCountingOnWip;
     }
 
     public void setSubtaskCreation(final List<SubtaskCreation> subtaskCreation) {
