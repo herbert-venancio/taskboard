@@ -80,8 +80,8 @@ public class SpreadsheetsManager {
         } catch (GoogleJsonResponseException ex) {
             if (ex.getStatusCode() == 401)
                 throw new SpreadsheeInvalidCredentialsException();
-            else if (ex.getStatusCode() == 403)
-                throw new SpreadsheeDailyLimitException();
+            else if (ex.getStatusCode() == 403) 
+                handlePermissionDenied(ex);
             else if (ex.getStatusCode() == 404)
                 throw new SpreadsheeNotFoundException(spreadsheetId);
             else if (ex.getStatusCode() >= 500)
@@ -92,6 +92,14 @@ public class SpreadsheetsManager {
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    private void handlePermissionDenied(GoogleJsonResponseException ex) {
+        log.warn("403 error while invoking google API: " + ex.getMessage());
+        if ("PERMISSION_DENIED".equals(ex.getDetails().get("status")))
+            throw new GoogleApiPermissionDeniedException();
+        else
+            throw new GoogleApiForbiddenException("Failure on google request: " + ex.getDetails().getMessage());
     }
 
     private <T> T exponentialBackOff(SpreadsheetsRequest<T> request) {
@@ -141,14 +149,22 @@ public class SpreadsheetsManager {
         private static final long serialVersionUID = 6453134117524063963L;
     }
 
-    @ResponseStatus(value = HttpStatus.FORBIDDEN, reason="Daily limit exceeded. Please, try again tomorrow.")
-    public static class SpreadsheeDailyLimitException extends SpreadsheetException {
+    @ResponseStatus(value = HttpStatus.FORBIDDEN)
+    public static class GoogleApiForbiddenException extends SpreadsheetException {
+        public GoogleApiForbiddenException(String message) {
+            super(message);
+        }
+
         private static final long serialVersionUID = 6179253232804985065L;
+    }
+
+    @ResponseStatus(value = HttpStatus.FORBIDDEN, reason="Failure on google request: Permission denied to access the spreadsheeet")
+    public static class GoogleApiPermissionDeniedException extends SpreadsheetException {
+        private static final long serialVersionUID = 8964963724318291472L;
     }
 
     @ResponseStatus(value = HttpStatus.UNAUTHORIZED, reason="Invalid Credentials.")
     public static class SpreadsheeInvalidCredentialsException extends SpreadsheetException {
         private static final long serialVersionUID = -5332931549640852185L;
     }
-
 }

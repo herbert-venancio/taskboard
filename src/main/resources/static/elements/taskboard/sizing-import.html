@@ -745,8 +745,19 @@
                                 self.loadingDisable();
                             }
                         },
-                        error: function () {
-                            self.setErrorMessage('Internal server error');
+                        error: function (error) {
+                            if (error.status === 403) {
+                                if (error.responseJSON.exception.match(/.*\$GoogleApiPermissionDeniedException$/)) {
+                                    self.needsGoogleAuthorizarion = true;
+                                    self.initGoogleAuth();
+                                    self.setErrorMessage("Previous stored user or selected user doesn't have access to the document. Try again and choose another user");
+                                }
+                                else {
+                                    self.setErrorMessage(error.responseJSON.message);
+                                }
+                            }
+                            else
+                                self.setErrorMessage('Internal server error');
                             self.loadingDisable();
                         }
                     });

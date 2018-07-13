@@ -20,7 +20,6 @@
  */
 package objective.taskboard.it;
 
-import static org.junit.Assert.assertEquals;
 import static org.openqa.selenium.By.cssSelector;
 import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
 
@@ -131,8 +130,7 @@ class IssueDetails extends AbstractUiFragment {
     }
 
     public IssueDetails assertCardName(String cardNameExpected) {
-        WebElement cardName = getElementWhenItExists(By.id("card-name"));
-        assertEquals("Card name have to be", cardNameExpected, cardName.getText());
+        waitTextInElement(getElementWhenItExists(By.id("card-name")), cardNameExpected);
         return this;
     }
 
