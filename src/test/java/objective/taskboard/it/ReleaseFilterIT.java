@@ -20,6 +20,8 @@
  */
 package objective.taskboard.it;
 
+import static objective.taskboard.it.IssueUpdateFieldJson.RELEASE_2_0;
+import static objective.taskboard.it.IssueUpdateFieldJson.RELEASE_3_0;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
@@ -89,7 +91,7 @@ public class ReleaseFilterIT extends AuthenticatedIntegrationTest {
     public void whenWebhookChangeReleaseOfIssue_thenFilterByReleaseContinueWorking() {
         mainPage.assertUpdatedIssues();
 
-        emulateUpdateIssue("TASKB-606", "{\"customfield_11455\":{\"id\": \"12552\",\"name\": \"3.0\"}}");
+        emulateUpdateIssue("TASKB-606", RELEASE_3_0);
 
         String[] updatedIssues = {"TASKB-606", "TASKB-235", "TASKB-601"};
 
@@ -98,8 +100,8 @@ public class ReleaseFilterIT extends AuthenticatedIntegrationTest {
             .filterByRelease("TASKB - 3.0")
             .assertVisibleIssues(updatedIssues);
 
-        emulateUpdateIssue("TASKB-606", "{\"customfield_11455\":{\"id\": \"12551\",\"name\": \"2.0\"}}");
-        
+        emulateUpdateIssue("TASKB-606", RELEASE_2_0);
+
         mainPage
             .assertUpdatedIssues(updatedIssues)
             .filterByRelease("TASKB - 2.0")

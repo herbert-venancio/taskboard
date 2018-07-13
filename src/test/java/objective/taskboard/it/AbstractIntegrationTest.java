@@ -20,24 +20,26 @@
  */
 package objective.taskboard.it;
 
+import static java.util.Arrays.asList;
+
 import java.nio.file.Paths;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
-import objective.taskboard.rules.CleanupDataFolderRule;
-import objective.taskboard.testUtils.JiraMockServer;
-import objective.taskboard.utils.IOUtilities;
+import java.util.stream.Collectors;
 
 import org.junit.Before;
+import org.junit.Rule;
 
 import objective.taskboard.RequestBuilder;
 import objective.taskboard.RequestResponse;
 import objective.taskboard.TestMain;
 import objective.taskboard.issueBuffer.IssueBufferState;
-import org.junit.Rule;
+import objective.taskboard.rules.CleanupDataFolderRule;
+import objective.taskboard.testUtils.JiraMockServer;
+import objective.taskboard.utils.IOUtilities;
 
 public abstract class AbstractIntegrationTest {
 
@@ -104,8 +106,18 @@ public abstract class AbstractIntegrationTest {
                 .body("{\"name\":\"" + newName + "\"}") 
                 .put(); 
     }
- 
-    protected static void emulateUpdateIssue(String issueKey, String fieldsJson) { 
+
+    protected static void emulateUpdateIssue(String issueKey, IssueUpdateFieldJson... jsonList) {
+        if (jsonList.length == 0)
+            throw new IllegalArgumentException();
+
+        String jsonValue = asList(jsonList).stream()
+            .map(json -> json.json)
+            .collect(Collectors.joining(","));
+        emulateUpdateIssue(issueKey, String.join(",", jsonValue));
+    }
+
+    private static void emulateUpdateIssue(String issueKey, String fieldsJson) {
         RequestBuilder 
             .url(JIRA_LOCAL_REST_API_ISSUE_URL + issueKey) 
             .body("{\"fields\":" + fieldsJson + "}") 

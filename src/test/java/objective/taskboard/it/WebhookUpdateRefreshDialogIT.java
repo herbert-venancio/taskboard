@@ -20,6 +20,13 @@
  */
 package objective.taskboard.it;
 
+import static objective.taskboard.it.IssueUpdateFieldJson.ASSIGNEE_FOO;
+import static objective.taskboard.it.IssueUpdateFieldJson.CLASS_OF_SERVICE_FIXED_DATE;
+import static objective.taskboard.it.IssueUpdateFieldJson.PROPERTIES_EMPTY;
+import static objective.taskboard.it.IssueUpdateFieldJson.RELEASE_2_0;
+import static objective.taskboard.it.IssueUpdateFieldJson.STATUS_DEFERRED;
+import static objective.taskboard.it.IssueUpdateFieldJson.STATUS_DOING;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,7 +59,7 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
             .click()
             .issueDetails();
         
-        emulateUpdateIssue("TASKB-625", "{\"assignee\":{\"name\":\"foo\"}},\"properties\":[]");
+        emulateUpdateIssue("TASKB-625", ASSIGNEE_FOO, PROPERTIES_EMPTY);
         
         issueDetails
             .assertRefreshWarnIsOpen()
@@ -78,7 +85,7 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
         mainPage.typeSearch("TASKB-61")
             .assertVisibleIssues("TASKB-611", "TASKB-612", "TASKB-613", "TASKB-610", "TASKB-614");
 
-        emulateUpdateIssue("TASKB-625", "{\"status\":{\"id\": \"10652\",\"name\": \"Doing\"}}");
+        emulateUpdateIssue("TASKB-625", STATUS_DOING);
 
         mainPage.refreshToast().assertNotVisible();
         mainPage.typeSearch("TASKB-625");
@@ -96,7 +103,7 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
         mainPage.issue("TASKB-606")
             .enableHierarchicalFilter();
 
-        emulateUpdateIssue("TASKB-606", "{\"status\":{\"id\": \"10655\",\"name\": \"Deferred\"}}");
+        emulateUpdateIssue("TASKB-606", STATUS_DEFERRED);
 
         mainPage.errorToast().close();
         mainPage.refreshToast().assertNotVisible();
@@ -145,8 +152,8 @@ public class WebhookUpdateRefreshDialogIT extends AuthenticatedIntegrationTest {
             .assertRelease(_1_0)
                 .closeDialog();
 
-        emulateUpdateIssue("TASKB-606", "{\"customfield_11440\":{\"id\": \"12607\",\"value\": \"Fixed Date\"}}");
-        emulateUpdateIssue("TASKB-606", "{\"customfield_11455\":{\"id\": \"12551\",\"name\": \"2.0\"}}");
+        emulateUpdateIssue("TASKB-606", CLASS_OF_SERVICE_FIXED_DATE);
+        emulateUpdateIssue("TASKB-606", RELEASE_2_0);
 
         String[] updatedIssues = {"TASKB-606", "TASKB-186", "TASKB-235", "TASKB-601", "TASKB-572"};
         mainPage.assertUpdatedIssues(updatedIssues);
