@@ -75,24 +75,6 @@
                 </div>
             </template>
 
-            <div id="boardStepExpedite" class="wrap layout horizontal step-list">
-                <template is="dom-repeat" items="[[expediteIssues]]" as="issue">
-                    <issue-item
-                            id="[[issue.issueKey]]"
-                            class$="[[issueItemClasses]]"
-                            item="[[issue]]"
-                            boardstepid="[[stepMetadata.id]]"
-                            hidden="[[showSynthetic(lastPreferenceUpdate)]]"
-                            local-states="[[localStates]]"
-                            ></issue-item>
-                    <issue-item-synthetic
-                            item="[[issue]]"
-                            parent-type-icon="[[showParentIconInSynthetic(parentLaneConfig)]]"
-                            hidden="[[!showSynthetic(lastPreferenceUpdate)]]"
-                            ></issue-item-synthetic>
-                </template>
-            </div>
-
             <div id="boardStepIssues" class="wrap layout horizontal sortable-board-step step-list">
                 <template id="boardStepIssuesFiltered" is="dom-repeat" items="[[filteredIssues]]" as="issue">
                     <issue-item
@@ -102,6 +84,8 @@
                             boardstepid="[[stepMetadata.id]]"
                             hidden="[[showSynthetic(lastPreferenceUpdate)]]"
                             local-states="[[localStates]]"
+                            style$="[[getOptimalIssueWidth(columns, issue)]]"
+                            data-expedite$="[[_isExpedite(issue.classOfServiceValue)]]"
                             ></issue-item>
                     <issue-item-synthetic
                             item="[[issue]]"
@@ -144,10 +128,6 @@
                         value: function() { return [] },
                         observer: 'refreshFilter'
                     },
-                    expediteIssues: {
-                        type: Array,
-                        value: function() { return [] }
-                    },
                     _filteredIssuesKeys: {
                         type: Array,
                         value: []
@@ -176,7 +156,7 @@
                     },
                     updateQueue: {
                         type: Array,
-                        value: []
+                        value: function() { return [] }
                     },
                     localStates: {
                         type: Object,
@@ -202,8 +182,11 @@
                     if (this.stepItem().length === 0) {
                         throw "Failed to enable prioritization because the step item could not be found";
                     }
-                    this.makeStepSortable();
                     this.updateCanChangePrioritization();
+                },
+
+                _isExpedite: function(classOfServiceValue) {
+                    return taskboard.isIssueExpedite(classOfServiceValue);
                 },
 
                 makeStepSortable: function() {
@@ -267,9 +250,11 @@
                                 }
                             }
                          });
-                    }
+                    };
+                    if (this.stepItem().hasClass('ui-sortable'))
+                        this.stepItem().sortable('destroy');
                     this.stepItem().sortable({
-                        items: 'issue-item',
+                        items: 'issue-item:not([data-expedite])',
                         opacity: 0.7,
                         animation: 150,
                         forceHelperSize: true,
@@ -310,12 +295,10 @@
                 },
 
                 filter: function() {
-                    if(this.issues) {
-                        var stepIssues = this.filterIssues(this.issues);
-                        this.set('expediteIssues', taskboard.getExpediteIssues(stepIssues));
-                        this.set('filteredIssues', taskboard.getRegularIssues(stepIssues));
-                    }
+                    if(this.issues)
+                        this.set('filteredIssues', this.filterAndOrderIssues(this.issues));
                     this._filteredIssuesKeys = this.getIssueKeysRenderedOrder();
+                    this.makeStepSortable();
                 },
 
                 filterAndForceUpdate: function() {
@@ -323,19 +306,19 @@
                     this.filter();
                 },
 
-                filterIssues: function(issues) {
+                filterAndOrderIssues: function(issues) {
                     var filteredIssues = [];
                     forEachInArray(issues, function(issue) {
                         if (this.doFiltersAllow(issue))
                             filteredIssues.push(issue);
                     }.bind(this));
-                    return filteredIssues;
+                    return taskboard.getOrderedIssues(filteredIssues);
                 },
 
                 filterIssuesDisabledTeam: function(issues) {
                     var bkpTeam = this.team;
                     this.team = null;
-                    var issuesDisabledTeam = this.filterIssues(issues);
+                    var issuesDisabledTeam = this.filterAndOrderIssues(issues);
                     this.team = bkpTeam;
                     return issuesDisabledTeam;
                 },
@@ -484,14 +467,16 @@
                     });
 
                     var issueOrderBeforeUpdate = this.filteredIssues; 
-                    var stepIssues = this.filterIssues(this.issues);
-                    var issueOrderAfterUpdate = taskboard.getRegularIssues(stepIssues);
+                    var issueOrderAfterUpdate = this.filterAndOrderIssues(this.issues);
 
                     var transitions = [];
                     issueOrderBeforeUpdate.forEach(function(issue, index) {
-                        if (issueOrderAfterUpdate[index].issueKey === issue.issueKey) return;
+                        if (issueOrderAfterUpdate[index].issueKey === issue.issueKey)
+                            return;
                         var sourceNode = $(domXissueKey[issueOrderAfterUpdate[index].issueKey]).find("#issueCard");
                         var destinationNode = $(domCards[index]).find("#issueCard");
+                        if (!sourceNode || !destinationNode)
+                            return;
                         var newTop = destinationNode.offset().top - sourceNode.offset().top;
                         var newLeft = destinationNode.offset().left - sourceNode.offset().left;
                         var newHeight = destinationNode.height();
@@ -505,14 +490,16 @@
                         );
                     });
                     var transitionsToGo = transitions.length;
+                    if (transitionsToGo === 0)
+                        updateComplete();
                     transitions.forEach(function(transition) {
                         transition.target.addClass("issue-transition-state")
                         transition.target.animate({
                             top:     transition.newTop,
                             left:    transition.newLeft,
                             height:  transition.newHeight
-                        }, 
-                        800, 
+                        },
+                        800,
                         'easeOutExpo',
                         function() {
                             transitionsToGo--;
@@ -522,11 +509,11 @@
                                 transitions.forEach(function(transition) {
                                     transition.target.removeClass("issue-transition-state")
                                     transition.target.offset({top: 0, left: 0})
-                                })
+                                });
                                 updateComplete();
                             });
                         });
-                    })
+                    });
                 },
 
                 _setStepLocalState: function(isUpdating) {

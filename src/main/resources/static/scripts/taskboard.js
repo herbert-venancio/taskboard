@@ -515,20 +515,25 @@ function Taskboard() {
         return isArchived ? 'archived' : 'active';
     };
 
-    this.getExpediteIssues = function(issues) {
+    this.getOrderedIssues = function(issues) {
+        return this._getExpediteIssues(issues)
+            .concat(this._getRegularIssues(issues));
+    };
+
+    this._getExpediteIssues = function(issues) {
         return filterInArray(issues, function(issue) {
-            return self.isIssueExpedite(issue);
+            return self.isIssueExpedite(issue.classOfServiceValue);
         }).sort(sortByProperty('created'));
     };
 
-    this.getRegularIssues = function(issues) {
+    this._getRegularIssues = function(issues) {
         return filterInArray(issues, function(issue) {
-            return !self.isIssueExpedite(issue);
+            return !self.isIssueExpedite(issue.classOfServiceValue);
         }).sort(sortByProperty('priorityOrder'));
     };
 
-    this.isIssueExpedite = function(issue) {
-        return issue.classOfServiceValue === "Expedite";
+    this.isIssueExpedite = function(classOfServiceValue) {
+        return classOfServiceValue === 'Expedite';
     };
 
     this.getVisibleProjectKeys = function() {
