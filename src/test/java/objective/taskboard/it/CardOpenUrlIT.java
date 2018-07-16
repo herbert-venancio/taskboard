@@ -1,5 +1,7 @@
 package objective.taskboard.it;
 
+import static objective.taskboard.it.IssueUpdateFieldJson.STATUS_DEFERRED;
+
 import org.junit.Test;
 
 public class CardOpenUrlIT extends AuthenticatedIntegrationTest {
@@ -30,7 +32,7 @@ public class CardOpenUrlIT extends AuthenticatedIntegrationTest {
     public void whenOpenDeferredIssue_ShouldOpenThisIssue(){
         MainPage mainPage = MainPage.produce(webDriver);
         mainPage.errorToast().close();
-        emulateUpdateIssue("TASKB-606", "{\"status\":{\"id\": \"10655\",\"name\": \"Deferred\"}}");
+        emulateUpdateIssue("TASKB-606", STATUS_DEFERRED);
         mainPage.typeSearch("TASKB-606").assertVisibleIssues();
         mainPage.clearSearch();
 

@@ -25,18 +25,18 @@ import org.junit.Test;
 public class ReprioritizationIT extends AuthenticatedIntegrationTest {
 
     @Test
-    public void whenTryingToChangePriorityOrderOfAFeaturedIssue_nothingChanges() {
+    public void whenTryingToChangePriorityOrderOfAExpediteIssue_nothingChanges() {
         MainPage mainPage = MainPage.produce(webDriver);
         mainPage.errorToast().close();
 
-        final String FEATURED_ISSUE_1 = "TASKB-638";
-        final String FEATURED_ISSUE_2 = "TASKB-678";
-        final String FEATURED_ISSUE_3 = "TASKB-679";
+        final String EXPEDITE_ISSUE_1 = "TASKB-638";
+        final String EXPEDITE_ISSUE_2 = "TASKB-678";
+        final String EXPEDITE_ISSUE_3 = "TASKB-679";
         final String REGULAR_ISSUE = "TASKB-656";
         final String[] expectedIssueList = new String[] {
-                FEATURED_ISSUE_1,
-                FEATURED_ISSUE_2,
-                FEATURED_ISSUE_3,
+                EXPEDITE_ISSUE_1,
+                EXPEDITE_ISSUE_2,
+                EXPEDITE_ISSUE_3,
                 REGULAR_ISSUE,
                 "TASKB-657",
                 "TASKB-658",
@@ -48,13 +48,13 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
 
         boardStepDone.assertIssueList(expectedIssueList);
 
-        mainPage.issue(FEATURED_ISSUE_2).dragOver(FEATURED_ISSUE_1);
+        mainPage.issue(EXPEDITE_ISSUE_2).dragOver(EXPEDITE_ISSUE_1);
 
         boardStepDone.assertIssueList(expectedIssueList);
 
-        boardStepDone.scrollTo(FEATURED_ISSUE_3);
+        boardStepDone.scrollTo(EXPEDITE_ISSUE_3);
 
-        mainPage.issue(REGULAR_ISSUE).dragOver(FEATURED_ISSUE_3);
+        mainPage.issue(REGULAR_ISSUE).dragOver(EXPEDITE_ISSUE_3);
 
         boardStepDone.assertIssueList(expectedIssueList);
     }
