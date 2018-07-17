@@ -64,6 +64,7 @@
                       on-iron-signal-level-config-changed="preferencesUpdated"
                       on-iron-signal-issues-updated="handleUpdatedIssues"
                       on-iron-signal-step-update="handleStepUpdate"
+                      on-iron-signal-search-filter-changed="filterUpdated"
                       ></iron-signals>
 
         <div id="boardStep" boardstepid$="[[stepMetadata.id]]" class="wrap layout horizontal">
@@ -84,7 +85,7 @@
                             boardstepid="[[stepMetadata.id]]"
                             hidden="[[showSynthetic(lastPreferenceUpdate)]]"
                             local-states="[[localStates]]"
-                            style$="[[getOptimalIssueWidth(columns, issue)]]"
+                            style$="[[getOptimalIssueWidth(columns, issue, filterUpdatedHook)]]"
                             data-expedite$="[[_isExpedite(issue.classOfServiceValue)]]"
                             ></issue-item>
                     <issue-item-synthetic
@@ -167,6 +168,10 @@
                     },
                     issueItemClasses: {
                         type: String
+                    },
+                    filterUpdatedHook: {
+                        type: Date,
+                        value: new Date()
                     }
                 },
 
@@ -290,8 +295,14 @@
                     return taskboard.getLane(this.parentLaneId);
                 },
 
-                getOptimalIssueWidth: function(columns) {
+                getOptimalIssueWidth: function(columns, issue) {
+                    if (!searchFilter.match(issue))
+                        return 'width: 0%';
                     return 'width: '+(100/columns)+'%';
+                },
+
+                filterUpdated: function() {
+                    this.filterUpdatedHook = new Date();
                 },
 
                 filter: function() {
