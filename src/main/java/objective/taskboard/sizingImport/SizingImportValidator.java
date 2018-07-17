@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import objective.taskboard.google.GoogleApiService;
 import objective.taskboard.google.SpreadsheetUtils;
 import objective.taskboard.google.SpreadsheetsManager;
+import objective.taskboard.google.SpreadsheetsManager.GoogleApiPermissionDeniedException;
 import objective.taskboard.google.SpreadsheetsManager.SpreadsheeNotFoundException;
 
 @Component
@@ -41,10 +42,16 @@ class SizingImportValidator {
 
     public ValidationResult validate(String projectKey, String spreadsheetId) {
         int headersRowIndex = config.getDataStartingRowIndex() - 1;
+        
         SpreadsheetsManager spreadsheetsManager = googleApiService.buildSpreadsheetsManager();
         ValidationContext context = new ValidationContext(projectKey, spreadsheetId, headersRowIndex, spreadsheetsManager);
 
-        return validateSpreadsheetExistence(context);
+        try {
+            return validateSpreadsheetExistence(context);
+        }catch(GoogleApiPermissionDeniedException ex) {
+            googleApiService.removeCredential();
+            throw ex;
+        }
     }
 
     private ValidationResult validateSpreadsheetExistence(ValidationContext context) {
