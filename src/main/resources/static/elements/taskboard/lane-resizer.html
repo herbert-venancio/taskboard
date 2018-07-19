@@ -101,7 +101,7 @@
                 canResize: function() {
                     var parent = this.getParentLane();
                     var prev = this.getLastVisibleLaneBeforeParent();
-                    return parent.show && prev != null && prev.show;
+                    return parent.canResize && prev != null && prev.canResize;
                 },
 
                 handleMousePress: function(e) {

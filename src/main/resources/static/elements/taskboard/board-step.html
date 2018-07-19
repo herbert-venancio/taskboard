@@ -70,9 +70,9 @@
         <div id="boardStep" boardstepid$="[[stepMetadata.id]]" class="wrap layout horizontal">
 
             <!-- Issue Counter -->
-            <template is="dom-if" if="[[showTeamCount(issues, lastPreferenceUpdate)]]">
+            <template is="dom-if" if="[[_showCount(lastPreferenceUpdate)]]">
                 <div style="width:100%" class="step-count-wrapper layout horizontal">
-                    <inline-badge class="step-count" value="[[getIssueCount(issues, lastPreferenceUpdate)]]"></inline-badge>
+                    <inline-badge class="step-count" value="[[filteredIssues.length]]"></inline-badge>
                 </div>
             </template>
 
@@ -116,12 +116,8 @@
                     stepMetadata: {
                         type: Object
                     },
-                    parentLaneId: {
-                        type: Number
-                    },
                     issues: {
                         type: Array,
-                        notify: true,
                         observer: 'preferencesUpdated'
                     },
                     filteredIssues: {
@@ -283,16 +279,12 @@
                     return this.parentLaneConfig.showParentIconInSynthetic;
                 },
 
-                showTeamCount: function() {
-                    return userPreferences.getLane().showCount && this.getIssueCount() > 0 && this.team != null;
-                },
-
                 showSynthetic: function() {
                     return userPreferences.getView().showSynthetic;
                 },
 
                 getParentLane: function() {
-                    return taskboard.getLane(this.parentLaneId);
+                    return taskboard.getLane(this.parentLaneConfig.id);
                 },
 
                 getOptimalIssueWidth: function(columns, issue) {
@@ -306,8 +298,7 @@
                 },
 
                 filter: function() {
-                    if(this.issues)
-                        this.set('filteredIssues', this.filterAndOrderIssues(this.issues));
+                    this.set('filteredIssues', taskboard.getOrderedIssues(this.issues));
                     this._filteredIssuesKeys = this.getIssueKeysRenderedOrder();
                     this.makeStepSortable();
                 },
@@ -317,37 +308,12 @@
                     this.filter();
                 },
 
-                filterAndOrderIssues: function(issues) {
-                    var filteredIssues = [];
-                    forEachInArray(issues, function(issue) {
-                        if (this.doFiltersAllow(issue))
-                            filteredIssues.push(issue);
-                    }.bind(this));
-                    return taskboard.getOrderedIssues(filteredIssues);
-                },
-
-                filterIssuesDisabledTeam: function(issues) {
-                    var bkpTeam = this.team;
-                    this.team = null;
-                    var issuesDisabledTeam = this.filterAndOrderIssues(issues);
-                    this.team = bkpTeam;
-                    return issuesDisabledTeam;
-                },
-
-                doFiltersAllow: function(issue) {
-                    return !this.team || issue.teamNames.indexOf(this.team) !== -1;
-                },
-
-                getIssueCount: function() {
-                    return this.filteredIssues.length;
-                },
-
                 refit: function() {
                     var rowNode = this.parentNode.parentNode;
                     var totalStepWeight = this.getParentLane().getTotalStepWeight();
                     var weight = this.stepMetadata.weight;
                     var size = rowNode.offsetWidth * weight / totalStepWeight;
-                    this.columns = Math.min(Math.max(Math.floor(size / this.idealIssueSize), 1), this.getIssueCount());
+                    this.columns = Math.min(Math.max(Math.floor(size / this.idealIssueSize), 1), this.filteredIssues.length);
                 },
 
                 preferencesUpdated: function() {
@@ -395,15 +361,20 @@
                         self.set(['issues', issueIndex], data.issue);
                     }
 
-                    if (belongsToThisStep && issueIndex == -1) {
+                    if (belongsToThisStep && issueIndex === -1) {
                         // issue added to this board step
+
+                        if (this.team && data.issue.teamNames.indexOf(this.team) === -1)
+                            // If segregated by teams and doesn't belong to this team
+                            return;
+
                         data.issue.__eventInfo.type = 'ADDED';
                         this.push('issues', data.issue);
 
                         this.async(function() {
                             self.filter();
                             this.fire("iron-signal", {name:"issue-count-changed"});
-                        })
+                        });
 
                         return;
                     }
@@ -478,7 +449,7 @@
                     });
 
                     var issueOrderBeforeUpdate = this.filteredIssues; 
-                    var issueOrderAfterUpdate = this.filterAndOrderIssues(this.issues);
+                    var issueOrderAfterUpdate = taskboard.getOrderedIssues(this.issues);
 
                     var transitions = [];
                     issueOrderBeforeUpdate.forEach(function(issue, index) {
@@ -525,6 +496,10 @@
                             });
                         });
                     });
+                },
+
+                _showCount: function() {
+                    return userPreferences.getLane().showCount && this.team;
                 },
 
                 _setStepLocalState: function(isUpdating) {

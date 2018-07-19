@@ -58,7 +58,7 @@
                     <board-lane
                         id$="lane-{{level.id}}"
                         metadata="{{level}}"
-                        issues="{{issues}}"
+                        issues="[[issues]]"
                         local-states="{{localStates}}"
                         data-lane-name$="[[level.level]]"
                         ></board-lane>
@@ -95,8 +95,7 @@
                     },
 
                     issues: {
-                        type: Array,
-                        notify: true
+                        type: Array
                     },
 
                     lastLaneUpdate: {
@@ -108,6 +107,11 @@
                     _loading: {
                         type: Boolean,
                         value: true
+                    },
+
+                    _warnings: {
+                        type: Array,
+                        value: () => []
                     },
 
                     localStates: {
@@ -125,7 +129,6 @@
 
                 ready: function() {
                     this.fetchIssues();
-                    this.shownWarnings = [];
                 },
 
                 showLevel: function(show) {
@@ -169,37 +172,31 @@
                 },
 
                 checkIssuesInvalidTeam: function() {
-                    var issuesInvalidTeam = this.getIssuesInvalidTeam();
-                    var showWarning = false;
-                    for (var i in issuesInvalidTeam) {
-                        if (this.shownWarnings.indexOf(issuesInvalidTeam[i]) === -1) {
-                            this.shownWarnings.push(issuesInvalidTeam[i])
-                            showWarning = true;
-                        }
-                    }
-                    if (!showWarning) return;
-                    if (issuesInvalidTeam.length === 0)
+                    var self = this;
+                    var newWarnings = self.getIssuesKeysInvalidTeam().filter(issueKey => self._warnings.indexOf(issueKey) === -1);
+
+                    if (isEmptyArray(newWarnings))
                         return;
 
-                    var self = this;
-                    taskboard.showError(this, 
-                            "Some users are assigned to tasks that are not in their teams.",
-                            [{name:"Close and show cards with problems", callback: function(toast) {
-								searchFilter.searchByQuery(self, "has:"+SearchFilter.INVALID_ASSIGNEE_TAG);
-								toast.close()
-                            }}]
+                    self._warnings = self._warnings.concat(newWarnings);
+                    taskboard.showError(self,
+                        'Some users are assigned to tasks that are not in their teams.',
+                        [
+                            {
+                                name:'Close and show cards with problems',
+                                callback: toast => {
+                                    searchFilter.searchByQuery(self, 'has:'+ SearchFilter.INVALID_ASSIGNEE_TAG);
+                                    toast.close()
+                                }
+                            }
+                        ]
                     )
                 },
 
-                getIssuesInvalidTeam: function() {
-                    var filteredIssues = taskboard.getFilteredIssues();
-                    var issuesInvalidTeam = [];
-                    filteredIssues.forEach(function(issue) {
-                        if (issue.mismatchingUsers.length === 0)
-                            return;
-                        issuesInvalidTeam.push(issue.issueKey);
-                    });
-                    return issuesInvalidTeam;
+                getIssuesKeysInvalidTeam: function() {
+                    return taskboard.getVisibleIssues()
+                        .filter(issue => !isEmptyArray(issue.mismatchingUsers))
+                        .map(issue => issue.issueKey);
                 },
 
                 updateIssueLocalStateErrorMessage: function(e) {

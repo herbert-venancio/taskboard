@@ -27,11 +27,6 @@
                 width: 100%;
             }
 
-            .ui-sortable-placeholder {
-                background: #000;
-                opacity: 0.8;
-            }
-
             .header {
                 align-items: center;
             }
@@ -136,7 +131,7 @@
                       on-iron-signal-level-visibility-changed="preferencesUpdated"
                       on-iron-signal-search-filter-changed="preferencesUpdated"
                       on-iron-signal-issue-count-changed="preferencesUpdated"
-                      on-iron-signal-board-resized="recomputeHeight"
+                      on-iron-signal-board-resized="preferencesUpdated"
                       ></iron-signals>
 
         <!-- Lane Header -->
@@ -212,12 +207,11 @@
                                             <td class="cell step-cell">
                                                 <board-step id="step-[[step.id]]"
                                                         data-step-name$="[[step.step]]"
-                                                        parent-lane-id="{{metadata.id}}"
                                                         parent-lane-config="{{metadata}}"
-                                                        issues="{{getIssuesByStep(step.id, issues)}}"
+                                                        issues="[[getIssuesByStep(step.id, team.name, issues)]]"
                                                         local-states="{{localStates}}"
                                                         step-metadata="{{step}}"
-                                                        team="{{team.name}}"
+                                                        team="[[team.name]]"
                                                         ></board-step>
                                             </td>
                                         </template>
@@ -236,9 +230,8 @@
                                     <td class="cell step-cell">
                                         <board-step id$="step-[[step.id]]"
                                                 data-step-name$="[[step.step]]"
-                                                parent-lane-id="{{metadata.id}}"
                                                 parent-lane-config="{{metadata}}"
-                                                issues="{{getIssuesByStep(step.id, issues)}}"
+                                                issues="[[getIssuesByStep(step.id, issues)]]"
                                                 local-states="{{localStates}}"
                                                 step-metadata="{{step}}"
                                                 ></board-step>
@@ -267,14 +260,14 @@
                         notify: true
                     },
                     issues: {
-                        type: Array,
-                        notify: true
+                        type: Array
                     },
                     weight: {
                         type: Number,
                         notify: true
                     },
-                    show: {
+                    canResize: {
+                        // Used on lane-resizer
                         type: Boolean,
                         value: true
                     },
@@ -359,24 +352,18 @@
                 },
 
                 preferencesUpdated: function() {
-                    this.recomputeHeight();
-                },
-
-                recomputeHeight: function() {
                     this.lastPreferenceUpdate = new Date();
                 },
 
                 getIssueCountByStep: function(stepId) {
-                    var step = document.querySelector('#lane-'+this.metadata.id+' #step-'+stepId);
-                    if (step == null)
-                        return 0;
-
-                    var issuesByStep = this.getIssuesByStep(stepId);
-                    return step.filterIssuesDisabledTeam(issuesByStep).length;
+                    return taskboard.getIssuesByStep(stepId).length;
                 },
 
-                getIssuesByStep: function(stepId) {
-                    return taskboard.getIssuesByStep(stepId);
+                getIssuesByStep: function(stepId, teamName) {
+                    var stepIssues = taskboard.getIssuesByStep(stepId);
+                    if (!this.metadata.showLaneTeam)
+                        return stepIssues;
+                    return filterInArray(stepIssues, issue => issue.teamNames.indexOf(teamName) !== -1);
                 }
 
             });
