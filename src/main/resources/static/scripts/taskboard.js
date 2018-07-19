@@ -445,7 +445,7 @@ function Taskboard() {
             }})
         })
 
-        if (!hasSomeFilteredIssue(updatedIssueKeys))
+        if (!hasSomeVisibleIssueByKeys(updatedIssueKeys))
             return;
 
         taskboardHome.fire("iron-signal", {name:"show-issue-updated-message", data:{
@@ -495,6 +495,7 @@ function Taskboard() {
             self.issues.push(converted)
         else
             self.issues[previousInstance.index] = converted;
+        setIssuesBySteps(self.issues);
         return converted;
     }
     
@@ -509,35 +510,12 @@ function Taskboard() {
         return issue;
     }
 
-    function hasSomeFilteredIssue(issues) {
-        var filteredIssues = self.getFilteredIssues();
-        var filteredIssue = _.find(filteredIssues, function(f) {
-            return issues.indexOf(f.issueKey) >= 0;
-        });
-        return filteredIssue != null;
+    function hasSomeVisibleIssueByKeys(issuesKeys) {
+        return self.getVisibleIssues().some(issue => issuesKeys.indexOf(issue.issueKey) !== -1);
     }
 
-    this.getFilteredIssues = function() {
-        var filteredIssues = [];
-
-        _laneConfiguration.forEach(function(lane) {
-            if (!lane.showLevel)
-                return;
-
-            var stepsOfLane = getStepsOfLane(lane);
-            stepsOfLane.forEach(function(step) {
-                var boardStepEl = document.querySelector('#step-' + step.id);
-                var boardStep = boardStepEl != null ? boardStepEl : document.querySelector('board-step');
-
-                if (boardStep == null)
-                    return;
-
-                var allIssuesStep = self.getIssuesByStep(step.id);
-                var filteredIssuesStep = boardStep.filterIssuesDisabledTeam(allIssuesStep);
-                filteredIssues = filteredIssues.concat(filteredIssuesStep);
-            });
-        });
-        return filteredIssues;
+    this.getVisibleIssues = function() {
+        return this.issues.filter(i => searchFilter.match(i));
     };
 
     this.getTimeZoneIdFromBrowser = function() {
@@ -547,14 +525,6 @@ function Taskboard() {
     this.getLocaleFromBrowser = function() {
         return window.navigator.userLanguage || window.navigator.language;
     };
-
-    function getStepsOfLane(lane) {
-        var stepsOfLane = [];
-        lane.stages.forEach(function(stage) {
-            stepsOfLane = stepsOfLane.concat(stage.steps);
-        });
-        return stepsOfLane;
-    }
 
     this.getResolutionFieldName = function() {
         return "resolution";
