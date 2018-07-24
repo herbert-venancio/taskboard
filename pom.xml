@@ -355,7 +355,7 @@
 								<id>exec-gulp</id>
 								<phase>process-resources</phase>
 								<configuration>
-									<executable>gulp</executable>
+									<executable>node_modules/.bin/gulp</executable>
 									<arguments>
 										<argument>--dest</argument>
 										<argument>${project.build.directory}/${project.build.finalName}</argument>

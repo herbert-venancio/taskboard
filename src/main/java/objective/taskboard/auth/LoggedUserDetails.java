@@ -2,11 +2,34 @@ package objective.taskboard.auth;
 
 import java.util.List;
 
-public interface LoggedUserDetails {
+public class LoggedUserDetails {
 
-    List<Role> getUserRoles();
+    private final String username;
+    private final List<Role> roles;
+    private final boolean isAdmin;
 
-    public String getUsername();
+    public LoggedUserDetails(String username, List<Role> roles, boolean isAdmin) {
+        this.username = username;
+        this.roles = roles;
+        this.isAdmin = isAdmin;
+    }
+
+    public List<Role> getUserRoles() {
+        return roles;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+    
+    public boolean isAdmin() {
+        return isAdmin;
+    }
+
+    @Override
+    public String toString() {
+        return username;
+    }
 
     public static class Role {
         public Long id;

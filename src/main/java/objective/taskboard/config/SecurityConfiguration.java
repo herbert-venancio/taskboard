@@ -20,10 +20,6 @@
  */
 package objective.taskboard.config;
 
-import static java.util.stream.Collectors.toList;
-
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Bean;
@@ -38,22 +34,25 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.web.context.annotation.SessionScope;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.context.annotation.RequestScope;
 
 import com.google.common.collect.Lists;
 
-import objective.taskboard.auth.CredentialsHolder;
+import objective.taskboard.auth.AuthenticationService;
+import objective.taskboard.auth.AuthenticationService.AuthenticationResult;
 import objective.taskboard.auth.LoggedUserDetails;
-import objective.taskboard.jira.JiraService;
 
 
 @Configuration
 @Order(SecurityProperties.ACCESS_OVERRIDE_ORDER)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+
     @Autowired
     private RESTAuthenticationFailureHandler authenticationFailureHandler;
+
     @Autowired
-    private JiraService jiraService;
+    private AuthenticationService authService;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -85,37 +84,24 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             public Authentication authenticate(Authentication authentication) throws AuthenticationException {
                 String name = authentication.getName();
                 String password = authentication.getCredentials().toString();
+                AuthenticationResult result = authService.authenticate(name, password);
 
-                try {
-                    jiraService.authenticate(name, password);
-                }catch(Exception e) {//NOSONAR
-                    throw new BadCredentialsException(e.getMessage());
-                }
-                return new UsernamePasswordAuthenticationToken(name, password, Lists.newArrayList());
+                if (result.isSuccess())
+                    return new UsernamePasswordAuthenticationToken(result.getPrincipal(), password, Lists.newArrayList());
+
+                throw new BadCredentialsException(result.getMessage());
             }
-
         });
     }
-    
+
     @Bean
-    @SessionScope
-    public LoggedUserDetails getLoggedUserDetails() {
-        String username = CredentialsHolder.username();
-        List<LoggedUserDetails.Role> roles = jiraService.getUserRoles(username).stream()
-            .map(r -> new LoggedUserDetails.Role(r.id, r.name, r.projectKey))
-            .collect(toList());
+    @RequestScope
+    public LoggedUserDetails getPrincipal() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        return new LoggedUserDetails() {
-            @Override
-            public String getUsername() {
-                return username;
-            }
+        if (authentication == null || !authentication.isAuthenticated())
+            throw new IllegalStateException("Not authenticated");
 
-            @Override
-            public List<Role> getUserRoles() {
-                return roles;
-            }
-        };
+        return (LoggedUserDetails) authentication.getPrincipal();
     }
-
 }
