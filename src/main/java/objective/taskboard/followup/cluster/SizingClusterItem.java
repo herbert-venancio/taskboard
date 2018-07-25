@@ -1,45 +1,53 @@
 package objective.taskboard.followup.cluster;
 
+import java.util.Optional;
+
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
 import org.apache.commons.lang3.Validate;
+import org.hibernate.annotations.Check;
 
-import objective.taskboard.domain.ProjectFilterConfiguration;
+import objective.taskboard.domain.TaskboardEntity;
 
-public class FollowUpClusterItem {
+@Entity
+@Table(name = "sizing_cluster_item")
+@Check(constraints = "(project_key IS NULL AND base_cluster_id IS NOT NULL) OR (project_key IS NOT NULL AND base_cluster_id IS NULL)")
+public class SizingClusterItem extends TaskboardEntity {
 
-    private ProjectFilterConfiguration project;
     private String subtaskTypeName;
     private String parentTypeName;
     private String sizing;
     private Double effort;
     private Double cycle;
+    private String projectKey;
     
-    public FollowUpClusterItem(
-            ProjectFilterConfiguration project,
+    @ManyToOne
+    @JoinColumn(name = "base_cluster_id")
+    private SizingCluster baseCluster;
+
+    public SizingClusterItem(
             String subtaskTypeName,
             String parentTypeName,
             String sizing,
             Double effort,
-            Double cycle
+            Double cycle,
+            String projectKey,
+            SizingCluster baseCluster
             ) {
-        setProject(project);
         setSubtaskTypeName(subtaskTypeName);
         setParentTypeName(parentTypeName);
         setSizing(sizing);
         setEffort(effort);
         setCycle(cycle);
+        setProjectKey(projectKey);
+        setBaseCluster(baseCluster);
     }
     
-    protected FollowUpClusterItem() {
+    protected SizingClusterItem() {
         //JPA
-    }
-    
-    public ProjectFilterConfiguration getProject() { 
-        return project; 
-    } 
- 
-    public void setProject(ProjectFilterConfiguration project) { 
-        Validate.notNull(project); 
-        this.project = project; 
     }
     
     public String getSubtaskTypeName() {
@@ -85,9 +93,19 @@ public class FollowUpClusterItem {
         this.cycle = cycle;
     }
 
-    @Override
-    public String toString() {
-        return "FollowUpClusterItem [project=" + project + ", subtaskTypeName=" + subtaskTypeName + ", parentTypeName="
-                + parentTypeName + ", sizing=" + sizing + ", effort=" + effort + ", cycle=" + cycle + "]";
+    public Optional<SizingCluster> getBaseCluster() {
+        return Optional.ofNullable(baseCluster);
+    }
+
+    public void setBaseCluster(SizingCluster baseCluster) {
+        this.baseCluster = baseCluster;
+    }
+
+    public Optional<String> getProjectKey() {
+        return Optional.ofNullable(projectKey);
+    }
+
+    public void setProjectKey(String projectKey) {
+        this.projectKey = projectKey;
     }
 }
