@@ -27,10 +27,10 @@ import objective.taskboard.data.Issue;
 import objective.taskboard.followup.cluster.FollowupCluster;
 import objective.taskboard.followup.cluster.FollowupClusterProvider;
 import objective.taskboard.issueBuffer.IssueBufferService;
-import objective.taskboard.jira.JiraProperties;
-import objective.taskboard.jira.JiraProperties.BallparkMapping;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.client.JiraCreateIssue;
+import objective.taskboard.jira.properties.JiraProperties;
+import objective.taskboard.jira.properties.JiraProperties.BallparkMapping;
 
 @Component
 public class FollowUpDataGenerator {

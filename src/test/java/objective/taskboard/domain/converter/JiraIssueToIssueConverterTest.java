@@ -65,12 +65,6 @@ import objective.taskboard.data.Issue;
 import objective.taskboard.database.IssuePriorityService;
 import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.jira.FieldMetadataService;
-import objective.taskboard.jira.JiraProperties;
-import objective.taskboard.jira.JiraProperties.CustomField;
-import objective.taskboard.jira.JiraProperties.CustomField.Blocked;
-import objective.taskboard.jira.JiraProperties.CustomField.ClassOfServiceDetails;
-import objective.taskboard.jira.JiraProperties.CustomField.CustomFieldDetails;
-import objective.taskboard.jira.JiraProperties.CustomField.TShirtSize;
 import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.client.JiraCommentDto;
@@ -82,6 +76,12 @@ import objective.taskboard.jira.client.JiraProjectDto;
 import objective.taskboard.jira.client.JiraStatusDto;
 import objective.taskboard.jira.client.JiraUserDto;
 import objective.taskboard.jira.client.JiraWorklogResultSetDto;
+import objective.taskboard.jira.properties.JiraProperties;
+import objective.taskboard.jira.properties.JiraProperties.CustomField;
+import objective.taskboard.jira.properties.JiraProperties.CustomField.Blocked;
+import objective.taskboard.jira.properties.JiraProperties.CustomField.ClassOfServiceDetails;
+import objective.taskboard.jira.properties.JiraProperties.CustomField.CustomFieldDetails;
+import objective.taskboard.jira.properties.JiraProperties.CustomField.TShirtSize;
 import objective.taskboard.repository.FilterCachedRepository;
 import objective.taskboard.repository.ParentIssueLinkRepository;
 import objective.taskboard.utils.IOUtilities;
@@ -147,7 +147,7 @@ public class JiraIssueToIssueConverterTest {
     @Mock
     private ClassOfServiceDetails classOfServiceDetails;
     @Mock
-    private objective.taskboard.jira.JiraProperties.IssueLink issueLinkProperty;
+    private objective.taskboard.jira.properties.JiraProperties.IssueLink issueLinkProperty;
     @Mock
     private IssueTeamService issueTeamService;
     @Mock

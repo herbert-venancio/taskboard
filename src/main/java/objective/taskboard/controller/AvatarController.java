@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.data.JiraUser;
 import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
+import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.utils.IOUtilities;
 
 @RestController

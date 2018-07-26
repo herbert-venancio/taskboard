@@ -8,10 +8,10 @@ import org.springframework.stereotype.Component;
 
 import objective.taskboard.data.Issue;
 import objective.taskboard.issueBuffer.IssueBufferService;
-import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.data.Version;
 import objective.taskboard.jira.data.WebHookBody;
 import objective.taskboard.jira.data.WebhookEvent;
+import objective.taskboard.jira.properties.JiraProperties;
 
 @Component
 public class VersionTypeEventProcessorFactory implements JiraEventProcessorFactory {

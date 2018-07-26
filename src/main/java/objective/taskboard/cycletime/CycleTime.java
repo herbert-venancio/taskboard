@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import objective.taskboard.data.Holiday;
-import objective.taskboard.jira.JiraProperties;
+import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.utils.Clock;
 
 @Component

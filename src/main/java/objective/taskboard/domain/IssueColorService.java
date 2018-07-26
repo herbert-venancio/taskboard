@@ -30,7 +30,7 @@ import org.springframework.stereotype.Service;
 
 import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.database.TaskboardDatabaseService;
-import objective.taskboard.jira.JiraProperties;
+import objective.taskboard.jira.properties.JiraProperties;
 
 @Service
 public class IssueColorService {

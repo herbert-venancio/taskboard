@@ -2,6 +2,8 @@ package objective.taskboard.jira;
 
 import objective.taskboard.jira.data.plugin.UserDetail;
 import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
+import objective.taskboard.jira.properties.JiraProperties;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

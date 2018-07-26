@@ -34,6 +34,7 @@ import objective.taskboard.jira.endpoint.AuthorizedJiraEndpoint;
 import objective.taskboard.jira.endpoint.JiraEndpoint;
 import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
 import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
+import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.testUtils.CredentialHolderUtils;
 import objective.taskboard.testUtils.JiraMockServer;
 import retrofit.client.Response;

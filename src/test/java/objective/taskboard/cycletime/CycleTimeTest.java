@@ -17,7 +17,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import objective.taskboard.cycletime.CycleTimeProperties.Time;
-import objective.taskboard.jira.JiraProperties;
+import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.testUtils.FixedClock;
 
 @RunWith(MockitoJUnitRunner.class)

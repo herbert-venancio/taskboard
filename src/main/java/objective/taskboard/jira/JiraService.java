@@ -59,6 +59,7 @@ import objective.taskboard.jira.data.plugin.UserDetail;
 import objective.taskboard.jira.endpoint.JiraEndpoint;
 import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
 import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
+import objective.taskboard.jira.properties.JiraProperties;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 

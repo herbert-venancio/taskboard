@@ -12,9 +12,9 @@ import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import objective.taskboard.jira.JiraProperties;
-import objective.taskboard.jira.JiraProperties.StatusPriorityOrder;
 import objective.taskboard.jira.MetadataService;
+import objective.taskboard.jira.properties.JiraProperties;
+import objective.taskboard.jira.properties.StatusConfiguration.StatusPriorityOrder;
 
 @Service
 public class CardStatusOrderCalculator {

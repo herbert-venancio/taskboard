@@ -36,6 +36,7 @@ import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.client.JiraIssueDtoSearch;
 import objective.taskboard.jira.client.JiraWorklogResultSetDto;
 import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
+import objective.taskboard.jira.properties.JiraProperties;
 
 @Service
 public class JiraSearchService {

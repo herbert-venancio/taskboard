@@ -18,9 +18,9 @@ import objective.taskboard.data.User;
 import objective.taskboard.followup.FollowUpFacade;
 import objective.taskboard.google.GoogleApiConfig;
 import objective.taskboard.jira.FieldMetadataService;
-import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.client.JiraFieldDataDto;
+import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.team.UserTeamService;
 
 @Controller

@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 
 import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.data.WebHookBody;
+import objective.taskboard.jira.properties.JiraProperties;
 
 @Service
 public class WebhookSubtaskCreatorService {

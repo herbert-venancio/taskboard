@@ -49,7 +49,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import objective.taskboard.jira.JiraProperties.SubtaskCreation.CustomFieldCondition;
 import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.client.JiraIssueTypeDto;
 import objective.taskboard.jira.client.JiraPriorityDto;
@@ -58,6 +57,8 @@ import objective.taskboard.jira.client.JiraSubtaskDto;
 import objective.taskboard.jira.client.JiraUserDto;
 import objective.taskboard.jira.data.JiraIssue;
 import objective.taskboard.jira.data.Transition;
+import objective.taskboard.jira.properties.JiraProperties;
+import objective.taskboard.jira.properties.JiraProperties.SubtaskCreation.CustomFieldCondition;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SubtaskCreatorServiceTest {

@@ -16,9 +16,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.data.Status;
+import objective.taskboard.jira.properties.JiraProperties;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FromJiraRowServiceTest {
