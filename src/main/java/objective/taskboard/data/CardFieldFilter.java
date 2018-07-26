@@ -20,11 +20,10 @@
  */
 package objective.taskboard.data;
 
-import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.BiPredicate;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -39,11 +38,7 @@ public class CardFieldFilter {
     }
 
     public boolean isIssueSelected(Issue issue) {
-        List<String> valuesToTest = getFieldSelector().issueValuesToFilter(issue);
-        return getFilterFieldsValues().stream()
-            .anyMatch(filterFieldValue -> {
-                return valuesToTest.contains(filterFieldValue.getValue()) && filterFieldValue.isSelected();
-            });
+        return getFieldSelector().isIssueSelected(getFilterFieldsValues(), issue);
     }
 
     public FieldSelector getFieldSelector() {
@@ -56,29 +51,44 @@ public class CardFieldFilter {
 
     @JsonFormat(shape = JsonFormat.Shape.OBJECT)
     public enum FieldSelector {
-        ISSUE_TYPE("Issue Type", (issue) -> asList(String.valueOf(issue.getType()))),
+        ISSUE_TYPE("Issue Type", (filterFieldsValues, issue) -> issueValueExistsAndIsSelect(filterFieldsValues, String.valueOf(issue.getType()))),
 
-        PROJECT("Project", (issue) -> asList(issue.getProjectKey())),
+        PROJECT("Project", (filterFieldsValues, issue) -> issueValueExistsAndIsSelect(filterFieldsValues, issue.getProjectKey())),
 
-        TEAM("Team", (issue) -> issue.getTeams().stream()
-                .map(t -> t.name)
-                .distinct()
-                .collect(toList()));
+        TEAM("Team", (filterFieldsValues, issue) -> {
+            List<String> valuesToTest = issue.getTeams().stream()
+                    .map(t -> t.name)
+                    .collect(toList());
+
+            List<FilterFieldValue> teamsVisibleToUserOnIssue = filterFieldsValues.stream()
+                .filter(filterFieldValue -> valuesToTest.contains(filterFieldValue.getValue()))
+                .collect(toList());
+
+            return teamsVisibleToUserOnIssue.isEmpty()
+                    || teamsVisibleToUserOnIssue.stream().anyMatch(filterFieldValue -> filterFieldValue.isSelected());
+        });
 
         private final String name;
-        private final Function<Issue, List<String>> fieldValuesCollector;
+        private final BiPredicate<List<FilterFieldValue>, Issue> isIssueSelected;
 
-        FieldSelector(String name, Function<Issue, List<String>> fieldValuesCollector) {
+        FieldSelector(String name, BiPredicate<List<FilterFieldValue>, Issue> isIssueSelected) {
             this.name = name;
-            this.fieldValuesCollector = fieldValuesCollector;
+            this.isIssueSelected = isIssueSelected;
         }
 
         public String getName() {
             return name;
         }
 
-        public List<String> issueValuesToFilter(Issue issue) {
-            return fieldValuesCollector.apply(issue);
+        public boolean isIssueSelected(List<FilterFieldValue> filterFieldsValues, Issue issue) {
+            return isIssueSelected.test(filterFieldsValues, issue);
+        }
+
+        private static boolean issueValueExistsAndIsSelect(List<FilterFieldValue> filterFieldsValues, String issueValueToTest) {
+            return filterFieldsValues.stream()
+                .anyMatch(filterFieldValue -> {
+                    return issueValueToTest.equals(filterFieldValue.getValue()) && filterFieldValue.isSelected();
+                });
         }
     }
 
