@@ -24,7 +24,7 @@ package objective.taskboard.jira.endpoint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import objective.taskboard.jira.JiraProperties;
+import objective.taskboard.jira.properties.JiraProperties;
 
 @Component
 public class JiraEndpointAsMaster extends AuthorizedJiraEndpoint {

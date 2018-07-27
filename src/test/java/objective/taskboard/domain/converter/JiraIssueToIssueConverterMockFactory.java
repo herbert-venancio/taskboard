@@ -25,9 +25,9 @@ import objective.taskboard.data.TaskboardTimeTracking;
 import objective.taskboard.data.User;
 import objective.taskboard.database.IssuePriorityService;
 import objective.taskboard.domain.IssueColorService;
-import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.client.JiraIssueDto;
+import objective.taskboard.jira.properties.JiraProperties;
 
 public class JiraIssueToIssueConverterMockFactory implements FactoryBean<JiraIssueToIssueConverter> {
 

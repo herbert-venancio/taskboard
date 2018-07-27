@@ -23,6 +23,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import objective.taskboard.config.LoggedInUserLocaleKeyGenerator;
 import objective.taskboard.config.SpringContextBridge;
 import objective.taskboard.jira.client.JiraFieldDataDto;
+import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.testUtils.CredentialHolderUtils;
 import objective.taskboard.testUtils.JiraMockServer;
 

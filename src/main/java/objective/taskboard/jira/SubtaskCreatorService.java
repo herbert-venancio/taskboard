@@ -36,11 +36,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import objective.taskboard.jira.JiraProperties.SubtaskCreation;
 import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.client.JiraSubtaskDto;
 import objective.taskboard.jira.data.JiraIssue;
 import objective.taskboard.jira.data.Transition;
+import objective.taskboard.jira.properties.JiraProperties;
+import objective.taskboard.jira.properties.JiraProperties.SubtaskCreation;
 
 @Service
 public class SubtaskCreatorService {

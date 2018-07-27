@@ -22,6 +22,8 @@ package objective.taskboard.followup;
 
 import static java.util.Arrays.asList;
 import static objective.taskboard.followup.FollowUpHelper.getDefaultFollowupData;
+import static objective.taskboard.followup.FollowUpHelper.getDefaultThroughputDataSet;
+import static objective.taskboard.followup.FollowUpHelper.getDefaultWipDataSet;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -68,10 +70,13 @@ import objective.taskboard.database.directory.DataBaseDirectory;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.cluster.FollowupClusterProvider;
 import objective.taskboard.followup.data.Template;
+import objective.taskboard.followup.kpi.ThroughputKPIService;
 import objective.taskboard.followup.kpi.WipKPIService;
 import objective.taskboard.jira.FieldMetadataService;
-import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.ProjectService;
+import objective.taskboard.jira.properties.JiraProperties;
+import objective.taskboard.jira.properties.StatusConfiguration.FinalStatuses;
+import objective.taskboard.jira.properties.StatusConfiguration.StatusCountingOnWip;
 import objective.taskboard.rules.CleanupDataFolderRule;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -81,6 +86,7 @@ public class FollowUpFacadeTest {
     private static final String ANALYTIC_DEMAND = "Analytic - Demand";
     private static final String SYNTHETIC_DEMAND = "Synthetic - Demand";
     private static final String WIP_DEMAND = "Wip MetaData - Demand";
+    private static final String THROUGHPUT_DEMAND = "Throughput MetaData - Demand";
 
     @Rule
     public CleanupDataFolderRule clean = new CleanupDataFolderRule(Paths.get("data/followup-templates"));
@@ -118,9 +124,11 @@ public class FollowUpFacadeTest {
     @Mock
     private JiraProperties jiraProperties;
     
-    @Spy
-    @InjectMocks
-    private WipKPIService wipKpiService = new WipKPIService();
+    @Mock
+    private WipKPIService wipKpiService;
+    
+    @Mock
+    private ThroughputKPIService tpKpiService;
     
     @InjectMocks
     private FollowUpFacade followUpFacade = new FollowUpFacade();
@@ -147,17 +155,24 @@ public class FollowUpFacadeTest {
         when(projectService.getTaskboardProjectOrCry(PROJECT)).thenReturn(new ProjectFilterConfiguration(PROJECT, 1L));
         when(historyRepository.getFirstDate(PROJECT)).thenReturn(Optional.empty());
         
-        String[] demandsStatus = new String[] { "Doing"};
-        String[] subtaskStatus = new String[] { "Reviewing", "To Review", "Doing"};
-        String[] tasksStatus = new String[] { "QAing", "To QA", "Feature Reviewing", "To Feature Review",
-                "Alpha Testing", "To Alpha Test", "Doing" };
-        
-        JiraProperties.StatusCountingOnWip statusCounting = new JiraProperties.StatusCountingOnWip();
-        statusCounting.setDemands(demandsStatus);
-        statusCounting.setTasks(tasksStatus);
-        statusCounting.setSubtasks(subtaskStatus);
+        StatusCountingOnWip statusCounting = new StatusCountingOnWip();
+        statusCounting.setDemands(new String[] { "Doing"});
+        statusCounting.setTasks(new String[] { "QAing", "To QA", "Feature Reviewing", "To Feature Review",
+                "Alpha Testing", "To Alpha Test", "Doing" });
+        statusCounting.setSubtasks(new String[] { "Reviewing", "To Review", "Doing"});
         
         when(jiraProperties.getStatusCountingOnWip()).thenReturn(statusCounting);
+        
+        FinalStatuses finalStatuses = new FinalStatuses();
+        String[] terminalStatuses = new String[] {"Done","Cancelled"};
+        finalStatuses.setDemands(terminalStatuses);
+        finalStatuses.setTasks(terminalStatuses);
+        finalStatuses.setSubtasks(terminalStatuses);
+        
+        when(jiraProperties.getFinalStatuses()).thenReturn(finalStatuses);
+        
+        when(wipKpiService.getData(any())).thenReturn(getDefaultWipDataSet());
+        when(tpKpiService.getData(any())).thenReturn(getDefaultThroughputDataSet());
         
     }
 
@@ -188,6 +203,13 @@ public class FollowUpFacadeTest {
         assertThat(excelDoc).sheet(WIP_DEMAND).row(4).has(expectedRowContentOfWip("9/26/17 0:00","OS", 1));
         assertThat(excelDoc).sheet(WIP_DEMAND).row(5).has(expectedRowContentOfWip("9/27/17 0:00","Demand", 0));
         assertThat(excelDoc).sheet(WIP_DEMAND).row(6).has(expectedRowContentOfWip("9/27/17 0:00","OS", 1));
+        
+        assertThat(excelDoc).sheet(THROUGHPUT_DEMAND).row(1).has(expectedRowContentOfThroughput("9/25/17 0:00","Demand", 0));
+        assertThat(excelDoc).sheet(THROUGHPUT_DEMAND).row(2).has(expectedRowContentOfThroughput("9/25/17 0:00","OS", 0));
+        assertThat(excelDoc).sheet(THROUGHPUT_DEMAND).row(3).has(expectedRowContentOfThroughput("9/26/17 0:00","Demand", 0));
+        assertThat(excelDoc).sheet(THROUGHPUT_DEMAND).row(4).has(expectedRowContentOfThroughput("9/26/17 0:00","OS", 0));
+        assertThat(excelDoc).sheet(THROUGHPUT_DEMAND).row(5).has(expectedRowContentOfThroughput("9/27/17 0:00","Demand", 1));
+        assertThat(excelDoc).sheet(THROUGHPUT_DEMAND).row(6).has(expectedRowContentOfThroughput("9/27/17 0:00","OS", 0));
     }
 
     private static SpreadsheetMLPackage readFile(Resource resource) throws IOException, Docx4JException {
@@ -220,6 +242,10 @@ public class FollowUpFacadeTest {
     
     private static String[] expectedRowContentOfWip(String date, String issueType, int count) {
         return new String[]{date,issueType, "Doing", String.valueOf(count)};
+    }
+    
+    private static String[] expectedRowContentOfThroughput(String date, String issueType, int count) {
+        return new String[]{date,issueType, String.valueOf(count)};
     }
 
     public SpreadsheetAssert assertThat(SpreadsheetMLPackage actual) {

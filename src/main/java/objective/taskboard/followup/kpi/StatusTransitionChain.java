@@ -10,6 +10,9 @@ public interface StatusTransitionChain {
     boolean isWithinDate(ZonedDateTime date);
 
     boolean isStatus(String status);
-    
 
+    StatusTransitionChain find(String status);
+    
+    Optional<ZonedDateTime> getDate();
+    
 }

@@ -18,10 +18,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import objective.taskboard.jira.JiraProperties.SubtaskCreation;
 import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.client.JiraIssueTypeDto;
 import objective.taskboard.jira.data.WebHookBody;
+import objective.taskboard.jira.properties.JiraProperties;
+import objective.taskboard.jira.properties.JiraProperties.SubtaskCreation;
 
 @RunWith(MockitoJUnitRunner.class)
 public class WebhookSubtaskCreatorServiceTest {

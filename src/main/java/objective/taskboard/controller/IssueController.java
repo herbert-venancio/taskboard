@@ -51,9 +51,9 @@ import objective.taskboard.issue.CardStatusOrderCalculator;
 import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.issueBuffer.IssueBufferState;
 import objective.taskboard.issueTypeVisibility.IssueTypeVisibilityService;
-import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.MetadataService;
+import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.linkgraph.LinkGraphProperties;
 import objective.taskboard.team.UserTeamService;
 

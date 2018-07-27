@@ -42,7 +42,7 @@ import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Response;
 
 import objective.taskboard.config.converter.TaskboardJacksonModule;
-import objective.taskboard.jira.JiraProperties;
+import objective.taskboard.jira.properties.JiraProperties;
 import retrofit.RestAdapter;
 import retrofit.client.OkClient;
 import retrofit.converter.JacksonConverter;

@@ -33,6 +33,8 @@ import static objective.taskboard.followup.FollowUpHelper.getDefaultFollowupData
 import static objective.taskboard.followup.FollowUpHelper.getDefaultFromJiraDataRow;
 import static objective.taskboard.followup.FollowUpHelper.getDefaultFromJiraDataRowList;
 import static objective.taskboard.followup.FollowUpHelper.getDefaultSyntheticTransitionsDataSet;
+import static objective.taskboard.followup.FollowUpHelper.getDefaultThroughputDataSet;
+import static objective.taskboard.followup.FollowUpHelper.getDefaultWipDataSet;
 import static objective.taskboard.followup.FollowUpHelper.getEmptyAnalyticsTransitionsDataSet;
 import static objective.taskboard.followup.FollowUpHelper.getEmptyFollowupData;
 import static objective.taskboard.followup.FollowUpHelper.getEmptySyntheticTransitionsDataSet;
@@ -43,6 +45,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.any;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -51,6 +54,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.core.io.Resource;
@@ -63,6 +67,7 @@ import objective.taskboard.followup.cluster.ClusterNotConfiguredException;
 import objective.taskboard.followup.cluster.FollowUpClusterItem;
 import objective.taskboard.followup.cluster.FollowupCluster;
 import objective.taskboard.followup.cluster.FollowupClusterImpl;
+import objective.taskboard.followup.kpi.ThroughputKPIService;
 import objective.taskboard.followup.kpi.WipKPIService;
 import objective.taskboard.google.SpreadsheetUtils.SpreadsheetA1Range;
 import objective.taskboard.jira.FieldMetadataService;
@@ -79,8 +84,16 @@ public class FollowUpReportGeneratorTest {
     private SimpleSpreadsheetEditorMock editor = new SimpleSpreadsheetEditorMock();
     private FieldMetadataService fieldMetadataService = mock(FieldMetadataService.class);
     private WipKPIService wipKpiService = mock(WipKPIService.class);
-    private FollowUpReportGenerator subject = new FollowUpReportGenerator(editor, fieldMetadataService,wipKpiService);
+    private ThroughputKPIService tpKpiService = mock(ThroughputKPIService.class);
+    private FollowUpReportGenerator subject = new FollowUpReportGenerator(editor, fieldMetadataService, wipKpiService, tpKpiService);
 
+    @Before
+    public void setup() {
+        
+        when(wipKpiService.getData(any())).thenReturn(getDefaultWipDataSet());
+        when(tpKpiService.getData(any())).thenReturn(getDefaultThroughputDataSet());
+    }
+    
     @Test
     public void generateJiraDataSheetTest() {
         subject.generate(mockSnapshot(getDefaultFollowupData()), timezone);
@@ -153,7 +166,7 @@ public class FollowUpReportGeneratorTest {
     @Test
     public void generateTest() {
         FollowUpTemplate testTemplate = new FollowUpTemplate(resolve("followup/Followup-template.xlsm"));
-        subject = new FollowUpReportGenerator(new SimpleSpreadsheetEditor(testTemplate), fieldMetadataService,wipKpiService);
+        subject = new FollowUpReportGenerator(new SimpleSpreadsheetEditor(testTemplate), fieldMetadataService, wipKpiService, tpKpiService);
         
         List<EffortHistoryRow> effortHistory = asList(
                 new EffortHistoryRow(LocalDate.parse("2018-04-03"), 2d, 8d),
@@ -179,7 +192,7 @@ public class FollowUpReportGeneratorTest {
     @Test
     public void generateLotsOfLines() {
         FollowUpTemplate testTemplate = new FollowUpTemplate(resolve("followup/Followup-template.xlsm"));
-        subject = new FollowUpReportGenerator(new SimpleSpreadsheetEditor(testTemplate), fieldMetadataService,wipKpiService);
+        subject = new FollowUpReportGenerator(new SimpleSpreadsheetEditor(testTemplate), fieldMetadataService, wipKpiService, tpKpiService);
 
         List<FromJiraDataRow> fromJiraDataRowList = new LinkedList<>();
         for (int i=0; i < 5000; i++)
@@ -206,6 +219,32 @@ public class FollowUpReportGeneratorTest {
                 "Synthetic - Demand",
                 "Synthetic - Features",
                 "Synthetic - Subtasks");
+
+        assertEquals(expectedEditorLog, actualEditorLog);
+    }
+    
+    @Test
+    public void givenIssues_thenWipSheetsShouldBeGenerated() {
+        subject.generate(mockSnapshot(getDefaultFollowupData()), timezone);
+
+        String expectedEditorLog = txtResourceAsString("followup/wipSheets.txt");
+        String actualEditorLog = editor.loggerString(
+                "Wip MetaData - Demand", 
+                "Wip MetaData - Features", 
+                "Wip MetaData - Subtasks");
+
+        assertEquals(expectedEditorLog, actualEditorLog);
+    }
+    
+    @Test
+    public void givenIssues_thenThroughputSheetsShouldBeGenerated() {
+        subject.generate(mockSnapshot(getDefaultFollowupData()), timezone);
+
+        String expectedEditorLog = txtResourceAsString("followup/throughputSheets.txt");
+        String actualEditorLog = editor.loggerString(
+                "Throughput MetaData - Demand", 
+                "Throughput MetaData - Features", 
+                "Throughput MetaData - Subtasks");
 
         assertEquals(expectedEditorLog, actualEditorLog);
     }
@@ -507,7 +546,7 @@ public class FollowUpReportGeneratorTest {
         FieldMetadataService fieldMetadataService = mock(FieldMetadataService.class);
         when(fieldMetadataService.getFieldsMetadataAsUser())
                 .thenReturn(singletonList(new JiraFieldDataDto(COST_CENTER_FIELD_ID, COST_CENTER_FIELD_NAME, null, null)));
-        subject = new FollowUpReportGenerator(editor, fieldMetadataService,wipKpiService);
+        subject = new FollowUpReportGenerator(editor, fieldMetadataService,wipKpiService,tpKpiService);
 
         FollowUpData followupData = getDefaultFollowupDataWithExtraFields();
 

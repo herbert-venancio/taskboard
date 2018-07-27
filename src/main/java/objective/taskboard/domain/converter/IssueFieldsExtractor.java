@@ -47,7 +47,6 @@ import objective.taskboard.data.Changelog;
 import objective.taskboard.data.CustomField;
 import objective.taskboard.data.Worklog;
 import objective.taskboard.jira.FieldMetadataService;
-import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.client.JiraCommentDto;
 import objective.taskboard.jira.client.JiraComponentDto;
 import objective.taskboard.jira.client.JiraFieldDataDto;
@@ -55,6 +54,7 @@ import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.client.JiraIssueLinkTypeDto;
 import objective.taskboard.jira.client.JiraLinkDto;
 import objective.taskboard.jira.client.JiraWorklogResultSetDto;
+import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.utils.DateTimeUtils;
 
 public class IssueFieldsExtractor {

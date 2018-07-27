@@ -335,6 +335,55 @@ public class FollowUpHelper {
         assertEquals("queryType", expected.queryType, actual.queryType);
     }
 
+    public static List<WipDataSet> getDefaultWipDataSet(){
+        
+        List<WipRow> demandRows = asList(
+                                    makeDefaultWipRow("2017-09-25", "Demand", 0l),
+                                    makeDefaultWipRow("2017-09-25", "OS", 0l),
+                                    makeDefaultWipRow("2017-09-26", "Demand", 1l),
+                                    makeDefaultWipRow("2017-09-26", "OS", 1l),
+                                    makeDefaultWipRow("2017-09-27", "Demand", 0l),
+                                    makeDefaultWipRow("2017-09-27", "OS", 1l)
+                                    );
+        List<WipRow> featureRows = asList(
+                                    makeDefaultWipRow("2017-09-25", "Feature", 0l),
+                                    makeDefaultWipRow("2017-09-26", "Feature", 1l)
+                                    );
+        List<WipRow> subtaskRows = asList(
+                                    makeDefaultWipRow("2017-09-25", "Sub-task", 0l)
+                                    );
+        
+        return asList(new WipDataSet(TYPE_DEMAND, demandRows),new WipDataSet(TYPE_FEATURES,featureRows),new WipDataSet(TYPE_SUBTASKS, subtaskRows));
+    }
+    
+    private static WipRow makeDefaultWipRow(String date, String type, Long count) {
+        return new WipRow(DateTimeUtils.parseDateTime(date),type,"Doing",count);
+    }
+    
+    public static List<ThroughputDataSet> getDefaultThroughputDataSet(){
+        List<ThroughputRow> demandRows = asList(
+                makeDefaultThroughputRow("2017-09-25", "Demand", 0l),
+                makeDefaultThroughputRow("2017-09-25", "OS", 0l),
+                makeDefaultThroughputRow("2017-09-26", "Demand", 0l),
+                makeDefaultThroughputRow("2017-09-26", "OS", 0l),
+                makeDefaultThroughputRow("2017-09-27", "Demand", 1l),
+                makeDefaultThroughputRow("2017-09-27", "OS", 0l)
+                );
+        List<ThroughputRow> featureRows = asList(
+                makeDefaultThroughputRow("2017-09-25", "Feature", 0l),
+                makeDefaultThroughputRow("2017-09-26", "Feature", 0l)
+                );
+        List<ThroughputRow> subtaskRows = asList(
+                makeDefaultThroughputRow("2017-09-25", "Sub-task", 0l)
+                );
+        
+        return asList(new ThroughputDataSet(TYPE_DEMAND, demandRows),new ThroughputDataSet(TYPE_FEATURES,featureRows),new ThroughputDataSet(TYPE_SUBTASKS, subtaskRows));
+    }
+    
+    private static ThroughputRow makeDefaultThroughputRow(String date, String type, Long count) {
+        return new ThroughputRow(DateTimeUtils.parseDateTime(date),type,count);
+    }
+    
     public static List<AnalyticsTransitionsDataSet> getDefaultAnalyticsTransitionsDataSet() {
         List<String> headers = new LinkedList<>();
         headers.add("PKEY");

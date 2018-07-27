@@ -56,20 +56,21 @@ import objective.taskboard.followup.cluster.FollowUpClusterItem;
 import objective.taskboard.followup.cluster.FollowupCluster;
 import objective.taskboard.followup.cluster.FollowupClusterProvider;
 import objective.taskboard.issueBuffer.IssueBufferService;
-import objective.taskboard.jira.JiraProperties;
-import objective.taskboard.jira.JiraProperties.BallparkMapping;
-import objective.taskboard.jira.JiraProperties.CustomField;
-import objective.taskboard.jira.JiraProperties.CustomField.Blocked;
-import objective.taskboard.jira.JiraProperties.CustomField.CustomFieldDetails;
-import objective.taskboard.jira.JiraProperties.CustomField.TShirtSize;
-import objective.taskboard.jira.JiraProperties.IssueLink;
-import objective.taskboard.jira.JiraProperties.IssueType.IssueTypeDetails;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.client.JiraIssueTypeDto;
 import objective.taskboard.jira.data.Status;
 import objective.taskboard.jira.data.StatusCategory;
 import objective.taskboard.jira.data.Version;
+import objective.taskboard.jira.properties.JiraProperties;
+import objective.taskboard.jira.properties.JiraProperties.BallparkMapping;
+import objective.taskboard.jira.properties.JiraProperties.CustomField;
+import objective.taskboard.jira.properties.JiraProperties.CustomField.Blocked;
+import objective.taskboard.jira.properties.JiraProperties.CustomField.CustomFieldDetails;
+import objective.taskboard.jira.properties.JiraProperties.CustomField.TShirtSize;
+import objective.taskboard.jira.properties.JiraProperties.IssueLink;
+import objective.taskboard.jira.properties.JiraProperties.IssueType.IssueTypeDetails;
+import objective.taskboard.jira.properties.StatusConfiguration.StatusPriorityOrder;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.utils.Clock;
 
@@ -212,7 +213,7 @@ public abstract class FollowUpDataGeneratorTestBase {
         String[] subtaskOrder = new String[] { "Cancelled", "Done", "Reviewing", "To Review", "Doing", "To Do", "Open" };
         String[] tasksOrder = new String[] { "Cancelled", "Done", "QAing", "To QA", "Feature Reviewing", "To Feature Review",
                 "Alpha Testing", "To Alpha Test", "Doing", "To Do", "Open" };
-        JiraProperties.StatusPriorityOrder statusOrder = new JiraProperties.StatusPriorityOrder();
+        StatusPriorityOrder statusOrder = new StatusPriorityOrder();
         statusOrder.setDemands(demandsOrder);
         statusOrder.setTasks(tasksOrder);
         statusOrder.setSubtasks(subtaskOrder);

@@ -19,5 +19,15 @@ public class TerminalStateTransition implements StatusTransitionChain{
     public boolean isStatus(String status) {
         return false;
     }
+
+    @Override
+    public StatusTransitionChain find(String status) {
+        return this;
+    }
     
+    @Override
+    public Optional<ZonedDateTime> getDate() {
+        return Optional.empty();
+    }
+
 }

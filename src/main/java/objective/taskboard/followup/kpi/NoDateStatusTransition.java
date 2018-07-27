@@ -27,6 +27,15 @@ public class NoDateStatusTransition implements StatusTransitionChain {
     public boolean isStatus(String status) {
         return this.status.equals(status);
     }
-    
- 
+
+    @Override
+    public StatusTransitionChain find(String status) {
+        return this.status.equals(status) ? this : next.find(status);
+    }
+
+    @Override
+    public Optional<ZonedDateTime> getDate() {
+        return Optional.empty();
+    }
+
 }

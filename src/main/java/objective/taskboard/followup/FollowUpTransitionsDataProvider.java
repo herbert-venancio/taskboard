@@ -28,8 +28,8 @@ import com.google.common.primitives.Ints;
 
 import objective.taskboard.data.Changelog;
 import objective.taskboard.data.Issue;
-import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.MetadataService;
+import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.utils.DateTimeUtils;
 
 public class FollowUpTransitionsDataProvider {

@@ -43,9 +43,9 @@ import objective.taskboard.data.Issue;
 import objective.taskboard.data.Issue.CardTeam;
 import objective.taskboard.domain.WipConfiguration;
 import objective.taskboard.issueBuffer.IssueBufferService;
-import objective.taskboard.jira.JiraProperties;
 import objective.taskboard.jira.MetadataCachedService;
 import objective.taskboard.jira.data.Status;
+import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.repository.WipConfigurationRepository;
 
 

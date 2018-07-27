@@ -2,6 +2,7 @@ package objective.taskboard.jira;
 
 import objective.taskboard.jira.data.plugin.UserDetail;
 import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
+import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.utils.IOUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

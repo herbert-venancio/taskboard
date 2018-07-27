@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
-import objective.taskboard.jira.JiraProperties;
+import objective.taskboard.jira.properties.JiraProperties;
 import retrofit.client.Response;
 import retrofit.http.Body;
 import retrofit.http.POST;

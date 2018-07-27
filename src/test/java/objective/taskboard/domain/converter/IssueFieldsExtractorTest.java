@@ -53,13 +53,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import objective.taskboard.jira.JiraProperties;
-import objective.taskboard.jira.JiraProperties.CustomField;
-import objective.taskboard.jira.JiraProperties.CustomField.Blocked;
-import objective.taskboard.jira.JiraProperties.CustomField.ClassOfServiceDetails;
-import objective.taskboard.jira.JiraProperties.CustomField.CustomFieldDetails;
-import objective.taskboard.jira.JiraProperties.CustomField.TShirtSize;
-import objective.taskboard.jira.JiraProperties.IssueType.IssueTypeDetails;
 import objective.taskboard.jira.client.JiraCommentDto;
 import objective.taskboard.jira.client.JiraComponentDto;
 import objective.taskboard.jira.client.JiraIssueDto;
@@ -67,6 +60,13 @@ import objective.taskboard.jira.client.JiraIssueLinkTypeDto;
 import objective.taskboard.jira.client.JiraIssueTypeDto;
 import objective.taskboard.jira.client.JiraLinkDto;
 import objective.taskboard.jira.client.JiraProjectDto;
+import objective.taskboard.jira.properties.JiraProperties;
+import objective.taskboard.jira.properties.JiraProperties.CustomField;
+import objective.taskboard.jira.properties.JiraProperties.CustomField.Blocked;
+import objective.taskboard.jira.properties.JiraProperties.CustomField.ClassOfServiceDetails;
+import objective.taskboard.jira.properties.JiraProperties.CustomField.CustomFieldDetails;
+import objective.taskboard.jira.properties.JiraProperties.CustomField.TShirtSize;
+import objective.taskboard.jira.properties.JiraProperties.IssueType.IssueTypeDetails;
 
 @RunWith(MockitoJUnitRunner.class)
 public class IssueFieldsExtractorTest {
@@ -121,9 +121,9 @@ public class IssueFieldsExtractorTest {
     @Mock
     private ClassOfServiceDetails classOfServiceDetails;
     @Mock
-    private objective.taskboard.jira.JiraProperties.IssueLink issueLinkProperty;
+    private objective.taskboard.jira.properties.JiraProperties.IssueLink issueLinkProperty;
     @Mock
-    private objective.taskboard.jira.JiraProperties.IssueType issueTypeProperty;
+    private objective.taskboard.jira.properties.JiraProperties.IssueType issueTypeProperty;
     @Mock
     private IssueTypeDetails issueTypeDetails;
     @Mock
