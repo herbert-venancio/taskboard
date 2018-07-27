@@ -44,6 +44,7 @@ import objective.taskboard.followup.ReleaseHistoryProvider.ProjectRelease;
 import objective.taskboard.followup.cluster.ClusterNotConfiguredException;
 import objective.taskboard.followup.cluster.FollowUpClusterItem;
 import objective.taskboard.followup.cluster.FollowupCluster;
+import objective.taskboard.followup.kpi.ThroughputKPIService;
 import objective.taskboard.followup.kpi.WipKPIService;
 import objective.taskboard.google.SpreadsheetUtils.SpreadsheetA1Range;
 import objective.taskboard.jira.FieldMetadataService;
@@ -60,11 +61,14 @@ public class FollowUpReportGenerator {
     private final SpreadsheetEditor editor;
     private final FieldMetadataService fieldMetadataService;
     private final WipKPIService wipKpiService;
+    private final ThroughputKPIService throughputKpiService;
+    
 
-    public FollowUpReportGenerator(SpreadsheetEditor editor, FieldMetadataService fieldMetadataService, WipKPIService kpiService) {
+    public FollowUpReportGenerator(SpreadsheetEditor editor, FieldMetadataService fieldMetadataService, WipKPIService kpiService, ThroughputKPIService throughputKpiService) {
         this.editor = editor;
         this.fieldMetadataService = fieldMetadataService;
         this.wipKpiService = kpiService;
+        this.throughputKpiService = throughputKpiService;
     }
 
     public Resource generate(FollowUpSnapshot snapshot, ZoneId timezone) 
@@ -86,6 +90,7 @@ public class FollowUpReportGenerator {
             generateScopeBaselineSheet(snapshot);
             generateProjectProfileSheet(snapshot);
             generateWipSheets(followupData);
+            generateThroughputSheets(followupData);
 
             return IOUtilities.asResource(editor.toBytes());
 
@@ -350,9 +355,25 @@ public class FollowUpReportGenerator {
         return sheets;
     }
     
+    private List<Sheet> generateThroughputSheets(FollowUpData followupData){
+        List<Sheet> sheets = new LinkedList<>();
+        List<ThroughputDataSet> tpData = throughputKpiService.getData(followupData);
+        for (ThroughputDataSet dataSet : tpData) {
+            Sheet sheet = createSheetWithHeader("Throughput MetaData - ", dataSet);
+            for(ThroughputRow tpRow : dataSet.rows) {
+                SheetRow row = sheet.createRow();
+                row.addColumn(tpRow.date);
+                row.addColumn(tpRow.type);
+                row.addColumn(tpRow.count);
+            }
+            sheet.save();
+            sheets.add(sheet);
+        }
+        return sheets;
+    }
     private List<Sheet> generateWipSheets(FollowUpData followupData){
         List<Sheet> sheets = new LinkedList<>();
-        List<WipDataSet> wipData = wipKpiService.getWipData(followupData);
+        List<WipDataSet> wipData = wipKpiService.getData(followupData);
         
         for (WipDataSet dataSet : wipData) {
             Sheet sheet = createSheetWithHeader("Wip MetaData - ", dataSet);

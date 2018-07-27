@@ -86,6 +86,67 @@ public class IssueStatusFlowTest {
         
     }
     
+    @Test
+    public void hasTransitedToStatus_happyDay() {
+        StatusTransitionChain done = makeStatus("Done","2020-01-03",new TerminalStateTransition());
+        StatusTransitionChain doing = makeStatus("Doing","2020-01-02",done);
+        StatusTransitionChain todo = makeStatus("To Do","2020-01-01",doing);
+        IssueStatusFlow issue = makeIssue("PROJ-01",todo);
+        
+        assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-01"), "Done"),is (false));
+        assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-02"), "Done"),is (false));
+        assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-03"), "Done"),is (true));
+    }
+    
+    @Test
+    public void hasTransitedToStatus_nonExistentStatus() {
+        StatusTransitionChain done = makeStatus("Done","2020-01-03",new TerminalStateTransition());
+        StatusTransitionChain doing = makeStatus("Doing","2020-01-02",done);
+        StatusTransitionChain todo = makeStatus("To Do","2020-01-01",doing);
+        IssueStatusFlow issue = makeIssue("PROJ-01",todo);
+        
+        assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-01"), "Integrating","Cancelled"),is (false));
+        assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-02"), "Integrating","Cancelled"),is (false));
+        assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-03"), "Integrating","Cancelled"),is (false));
+    }
+    
+    @Test
+    public void hasTransitedToStatus_onlyOneStatusTransited() {
+        StatusTransitionChain done = makeStatus("Done","2020-01-03",new TerminalStateTransition());
+        StatusTransitionChain doing = new NoDateStatusTransition("Doing",done);
+        StatusTransitionChain todo = makeStatus("To Do","2020-01-01",doing);
+        IssueStatusFlow issue = makeIssue("PROJ-01",todo);
+        
+        assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-01"), "Doing","Done"),is (false));
+        assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-02"), "Doing","Done"),is (false));
+        assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-03"), "Doing","Done"),is (true));
+    }
+    
+    @Test
+    public void hasTransitedToStatus_onlyNotTransited() {
+        StatusTransitionChain done = makeStatus("Done","2020-01-03",new TerminalStateTransition());
+        StatusTransitionChain doing = new NoDateStatusTransition("Doing",done);
+        StatusTransitionChain todo = makeStatus("To Do","2020-01-01",doing);
+        IssueStatusFlow issue = makeIssue("PROJ-01",todo);
+        
+        assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-01"), "Doing"),is (false));
+        assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-02"), "Doing"),is (false));
+        assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-03"), "Doing"),is (false));
+    }
+    
+    @Test
+    public void hasTransitedToStatus_earliestTransition() {
+        StatusTransitionChain done = makeStatus("Done","2020-01-03",new TerminalStateTransition());
+        StatusTransitionChain doing = makeStatus("Doing","2020-01-02",done);
+        StatusTransitionChain todo = makeStatus("To Do","2020-01-01",doing);
+        IssueStatusFlow issue = makeIssue("PROJ-01",todo);
+        
+        assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-01"), "Doing","Done"),is (false));
+        assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-02"), "Doing","Done"),is (true));
+        assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-03"), "Doing","Done"),is (false));
+    }
+    
+   
     private IssueStatusFlow makeIssue(String pKey, StatusTransitionChain firstStatus) {
         return new IssueStatusFlow(pKey,"Subtask", firstStatus);
         
