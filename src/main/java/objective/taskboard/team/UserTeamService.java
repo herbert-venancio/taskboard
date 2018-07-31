@@ -1,5 +1,6 @@
 package objective.taskboard.team;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -16,26 +17,28 @@ import objective.taskboard.repository.UserTeamCachedRepository;
 
 @Service
 public class UserTeamService {
-    @Autowired
-    private LoggedUserDetails loggedUser;
 
+    private final UserTeamCachedRepository userTeamRepo;
+    private final TeamCachedRepository teamRepo;
+    private final TeamFilterConfigurationService teamFilterConfigurationService;
+    private final LoggedUserDetails loggedInUser;
+    
     @Autowired
-    private UserTeamCachedRepository userTeamRepo;
-
-    @Autowired
-    private TeamCachedRepository teamRepo;
-
-    @Autowired
-    private TeamFilterConfigurationService teamFilterConfigurationService;
+    public UserTeamService(
+            UserTeamCachedRepository userTeamRepo, 
+            TeamCachedRepository teamRepo,
+            TeamFilterConfigurationService teamFilterConfigurationService, 
+            LoggedUserDetails loggedInUser) {
+        this.userTeamRepo = userTeamRepo;
+        this.teamRepo = teamRepo;
+        this.teamFilterConfigurationService = teamFilterConfigurationService;
+        this.loggedInUser = loggedInUser;
+    }
 
     public List<Long> getIdsOfTeamsVisibleToUser() {
-        return getTeamsVisibleToUser(loggedUser.getUsername()).stream().map(ut->ut.getId()).collect(Collectors.toList());
+        return getTeamsVisibleToLoggedInUser().stream().map(ut->ut.getId()).collect(Collectors.toList());
     }
-    
-    public Set<Team> getTeamsVisibleToLoggedInUser() {
-        return getTeamsVisibleToUser(loggedUser.getUsername());
-    }
-    
+
     public boolean isUserVisibleToLoggedUser(String username) {
         Set<Team> teams = getTeamsVisibleToLoggedInUser();
         for (Team team : teams) {
@@ -48,8 +51,11 @@ public class UserTeamService {
         return false;
     }
     
-    private Set<Team> getTeamsVisibleToUser(String username) {
-        List<UserTeam> userTeam = userTeamRepo.findByUserName(username);
+    public Set<Team> getTeamsVisibleToLoggedInUser() {
+        if (loggedInUser.isAdmin())
+            return new HashSet<>(teamRepo.getCache());
+        
+        List<UserTeam> userTeam = userTeamRepo.findByUserName(loggedInUser.getUsername());
         Set<Team> userTeams = userTeam.stream().map(ut->teamRepo.findByName(ut.getTeam())).filter(t->t!=null).distinct().collect(Collectors.toSet());
 
         List<Team> teamsInProjectsVisibleToUser = teamFilterConfigurationService.getDefaultTeamsInProjectsVisibleToUser();
