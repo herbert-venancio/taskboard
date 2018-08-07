@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
@@ -15,7 +17,9 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class SizingImportConfig {
 
-    public static final String SHEET_TITLE = "Scope";
+    public static final String SHEET_SCOPE = "Scope";
+    public static final String SHEET_COST = "Cost";
+    public static final String SHEET_SIZING_METADATA = "Sizing-Meta-Data";
 
     @NotNull
     private Integer dataStartingRowNumber;
@@ -23,8 +27,19 @@ public class SizingImportConfig {
     @Valid
     private SheetMap sheetMap = new SheetMap();
 
+    @Valid
+    private IndirectCosts indirectCosts;
+
     @NotNull
     private String valueToIgnore;
+
+    @NotEmpty
+    private String minimalVersionForCost = "4.1";
+    @NotNull
+    @Min(0)
+    private Integer versionRowIndex = 1;
+    @NotEmpty
+    private String versionColumnLetter = "B";
 
     public Integer getDataStartingRowNumber() {
         return dataStartingRowNumber;
@@ -52,6 +67,46 @@ public class SizingImportConfig {
 
     public void setValueToIgnore(String valueToIgnore) {
         this.valueToIgnore = valueToIgnore;
+    }
+
+    public IndirectCosts getIndirectCosts() {
+        return indirectCosts;
+    }
+
+    public void setIndirectCosts(IndirectCosts indirectCosts) {
+        this.indirectCosts = indirectCosts;
+    }
+
+    public Double getMinimalVersionForCostDouble() {
+        try {
+            return Double.parseDouble(minimalVersionForCost);
+        } catch (NumberFormatException e) {
+            return 4.1D;
+        }
+    }
+
+    public String getMinimalVersionForCost() {
+        return minimalVersionForCost;
+    }
+
+    public void setMinimalVersionForCost(String minimalVersionForCost) {
+        this.minimalVersionForCost = minimalVersionForCost;
+    }
+
+    public Integer getVersionRowIndex() {
+        return versionRowIndex;
+    }
+
+    public void setVersionRowIndex(Integer versionRowIndex) {
+        this.versionRowIndex = versionRowIndex;
+    }
+
+    public String getVersionColumnLetter() {
+        return versionColumnLetter;
+    }
+
+    public void setVersionColumnLetter(String versionColumnLetter) {
+        this.versionColumnLetter = versionColumnLetter;
     }
 
     public static class SheetMap {
@@ -210,6 +265,80 @@ public class SizingImportConfig {
             public void setColumnLetter(String columnLetter) {
                 this.columnLetter = columnLetter;
             }
+        }
+    }
+
+    public static class IndirectCosts {
+        @NotNull
+        @NotEmpty
+        private String indirectCostsColumn;
+
+        @NotNull
+        @NotEmpty
+        private String issueKeyColumn;
+
+        @NotNull
+        @NotEmpty
+        private String effortColumn;
+
+        @NotNull
+        @NotEmpty
+        private String totalIndirectCostsColumn;
+
+        @NotNull
+        @Min(1)
+        private Long parentTypeId;
+
+        @NotNull
+        @Min(1)
+        private Long subtaskTypeId;
+
+        public String getIndirectCostsColumn() {
+            return indirectCostsColumn;
+        }
+
+        public void setIndirectCostsColumn(String indirectCostsColumn) {
+            this.indirectCostsColumn = indirectCostsColumn;
+        }
+
+        public String getIssueKeyColumn() {
+            return issueKeyColumn;
+        }
+
+        public void setIssueKeyColumn(String issueKeyColumn) {
+            this.issueKeyColumn = issueKeyColumn;
+        }
+
+        public String getEffortColumn() {
+            return effortColumn;
+        }
+
+        public void setEffortColumn(String effortColumn) {
+            this.effortColumn = effortColumn;
+        }
+
+        public String getTotalIndirectCostsColumn() {
+            return totalIndirectCostsColumn;
+        }
+
+        public void setTotalIndirectCostsColumn(String totalIndirectCostsColumn) {
+            this.totalIndirectCostsColumn = totalIndirectCostsColumn;
+        }
+
+        public Long getParentTypeId() {
+            return parentTypeId;
+        }
+
+        public void setParentTypeId(Long parentTypeId) {
+            this.parentTypeId = parentTypeId;
+        }
+
+        public Long getSubtaskTypeId() {
+            return subtaskTypeId;
+        }
+
+        public void setSubtaskTypeId(Long subtaskTypeId) {
+            this.subtaskTypeId = subtaskTypeId;
         }
     }
 }

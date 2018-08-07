@@ -13,11 +13,11 @@ public class SpreadsheetUtils {
 
     public static int columnLetterToIndex(String column) {
         int columnNumber = 0;
-        int length = column.length();
         
-		if (column == null || length == 0)
+        if (column == null || column.length() == 0)
             throw new IllegalArgumentException("Input is not valid!");
 
+        int length = column.length();
         for (int i = 0; i < length; i++) {
             char curr = column.charAt(i);
             columnNumber += (curr - 'A' + 1) * Math.pow(26, length - i - 1);

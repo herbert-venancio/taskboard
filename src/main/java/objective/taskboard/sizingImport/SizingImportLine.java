@@ -2,14 +2,13 @@ package objective.taskboard.sizingImport;
 
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-class SizingImportLine {
+public abstract class SizingImportLine {
 
     private final int rowIndex;
     private final List<ImportValue> values;
@@ -24,7 +23,7 @@ class SizingImportLine {
     public int getRowIndex() {
         return rowIndex;
     }
-    
+
     public int getRowNumber() {
         return rowIndex + 1;
     }
@@ -37,51 +36,19 @@ class SizingImportLine {
         ImportValue importValue = valuesByColumnDefinition.get(columnDefinition);
         return importValue == null ? defaultValue : importValue.getValue();
     }
-    
+
+    public String getValue(SheetColumnDefinition columnDefinition) {
+        return getValue(columnDefinition, null);
+    }
+
     public Optional<String> getValue(Predicate<SheetColumn> columnPredicate) {
         return values.stream()
                 .filter(v -> columnPredicate.test(v.column))
                 .findFirst()
                 .map(ImportValue::getValue);
     }
-    
-    public String getValue(SheetColumnDefinition columnDefinition) {
-        return getValue(columnDefinition, null);
-    }
 
-    public String getJiraKey() {
-        return getValue(SheetColumnDefinitionProvider.KEY);
-    }
-
-    public boolean isImported() {
-        return isNotBlank(getJiraKey());
-    }
-    
-    public boolean isNotImported() {
-        return !isImported();
-    }
-    
-    public String getPhase() {
-        return getValue(SheetColumnDefinitionProvider.PHASE);
-    }
-
-    public String getDemand() {
-        return getValue(SheetColumnDefinitionProvider.DEMAND);
-    }
-    
-    public String getFeature() {
-        return getValue(SheetColumnDefinitionProvider.FEATURE);
-    }
-    
-    public String getType() {
-        return getValue(SheetColumnDefinitionProvider.TYPE);
-    }
-
-    public boolean isInclude() {
-        return "true".equalsIgnoreCase(getValue(SheetColumnDefinitionProvider.INCLUDE));
-    }
-
-    static class ImportValue {
+    public static class ImportValue {
         private final SheetColumn column;
         private final String value;
 

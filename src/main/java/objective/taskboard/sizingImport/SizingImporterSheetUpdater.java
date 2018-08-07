@@ -4,9 +4,9 @@ import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.joining;
 import static objective.taskboard.google.SpreadsheetUtils.columnLetterToIndex;
-import static objective.taskboard.sizingImport.SizingImportConfig.SHEET_TITLE;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.google.api.services.sheets.v4.model.BatchUpdateSpreadsheetRequest;
 import com.google.api.services.sheets.v4.model.CellData;
@@ -18,35 +18,63 @@ import com.google.api.services.sheets.v4.model.RepeatCellRequest;
 import com.google.api.services.sheets.v4.model.Request;
 
 import objective.taskboard.google.SpreadsheetsManager;
-import objective.taskboard.sizingImport.SizingImporter.SizingImporterListener;
+import objective.taskboard.sizingImport.SizingImporterNotifier.SizingImporterListener;
 
-class SizingImporterSheetUpdater implements SizingImporterListener {
+public class SizingImporterSheetUpdater implements SizingImporterListener {
 
     private final String spreadsheetId;
     private final SpreadsheetsManager spreadsheetsManager;
+    private final int sheetId;
     private final String jiraUrl;
     
     private final int issueKeyIndex;
-    private final int dataStartRowIndex;
-    private final int sheetId;
+    private final Integer dataStartingRowIndex;
+    private final Optional<Integer> dataEndingRowIndex;
 
-    public SizingImporterSheetUpdater(
+    private SizingImporterSheetUpdater(
             String spreadsheetId,
-            SpreadsheetsManager spreadsheetsManager, 
-            SizingImportConfig importConfig, 
-            String jiraUrl) {
+            String sheetTitle,
+            SpreadsheetsManager spreadsheetsManager,
+            String jiraUrl,
+            String issueKeyColumn,
+            Integer dataStartingRowIndex,
+            Optional<Integer> dataEndingRowIndex) {
         
         this.spreadsheetId = spreadsheetId;
         this.spreadsheetsManager = spreadsheetsManager;
+        this.sheetId = spreadsheetsManager.getSheetId(spreadsheetId, sheetTitle);
         this.jiraUrl = jiraUrl;
         
-        this.issueKeyIndex = columnLetterToIndex(importConfig.getSheetMap().getIssueKey());
-        this.dataStartRowIndex = importConfig.getDataStartingRowIndex();
-        this.sheetId = spreadsheetsManager.getSheetId(spreadsheetId, SHEET_TITLE);
+        this.issueKeyIndex = columnLetterToIndex(issueKeyColumn);
+        this.dataStartingRowIndex = dataStartingRowIndex;
+        this.dataEndingRowIndex = dataEndingRowIndex;
+    }
+
+    public SizingImporterSheetUpdater(
+            String spreadsheetId,
+            String sheetTitle,
+            SpreadsheetsManager spreadsheetsManager,
+            String jiraUrl,
+            String issueKeyColumn,
+            Integer dataStartingRowIndex,
+            Integer dataEndingRowIndex) {
+
+        this(spreadsheetId, sheetTitle, spreadsheetsManager, jiraUrl, issueKeyColumn, dataStartingRowIndex, Optional.of(dataEndingRowIndex));
+    }
+
+    public SizingImporterSheetUpdater(
+            String spreadsheetId,
+            String sheetTitle,
+            SpreadsheetsManager spreadsheetsManager,
+            String jiraUrl,
+            String issueKeyColumn,
+            Integer dataStartingRowIndex) {
+
+        this(spreadsheetId, sheetTitle, spreadsheetsManager, jiraUrl, issueKeyColumn, dataStartingRowIndex, Optional.empty());
     }
 
     @Override
-    public void onImportStarted(int totalLinesCount, int linesToImportCount) {
+    public void onSheetImportStarted(int totalLinesCount, int linesToImportCount) {
         clearAllErrors();
     }
 
@@ -55,8 +83,8 @@ class SizingImporterSheetUpdater implements SizingImporterListener {
     }
     
     @Override
-    public void onLineImportFinished(SizingImportLine line, String featureIssueKey) {
-        String keyValue = format("=HYPERLINK(\"%s/browse/%s\",\"%s\")", jiraUrl, featureIssueKey, featureIssueKey);
+    public void onLineImportFinished(SizingImportLine line, String issueKey) {
+        String keyValue = format("=HYPERLINK(\"%s/browse/%s\",\"%s\")", jiraUrl, issueKey, issueKey);
         setValue(line.getRowIndex(), keyValue);
     }
 
@@ -66,7 +94,7 @@ class SizingImporterSheetUpdater implements SizingImporterListener {
     }
 
     @Override
-    public void onImportFinished() {
+    public void onSheetImportFinished() {
     }
 
     private void setValue(int rowIndex, String formulaValue) {
@@ -119,10 +147,11 @@ class SizingImporterSheetUpdater implements SizingImporterListener {
     private void clearAllErrors() {
         GridRange range = new GridRange()
                 .setSheetId(sheetId)
-                .setStartRowIndex(dataStartRowIndex)
+                .setStartRowIndex(dataStartingRowIndex)
+                .setEndRowIndex(dataEndingRowIndex.map(i -> i + 1).orElse(null))
                 .setStartColumnIndex(issueKeyIndex)
                 .setEndColumnIndex(issueKeyIndex + 1);
-        
+
         CellData cell = new CellData()
                 .setNote(null)
                 .setUserEnteredFormat(null);
