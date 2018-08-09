@@ -207,6 +207,23 @@ public class IssueBufferService {
     }
 
     public synchronized void updateByEvent(WebhookEvent event, final String issueKey, Optional<JiraIssueDto> issue) {
+        Issue issueBeforeUpdate = cardsRepo.get(issueKey);
+        updateCardFromWebhookEvent(event, issueKey, issue);
+        Issue issueAfterUpdate = cardsRepo.get(issueKey);
+        boolean issueDidntExistBefore = issueBeforeUpdate == null;
+        if (issueDidntExistBefore)
+            // created
+            scheduleNotificationsForLinkedIssues(issueAfterUpdate);
+        else
+        if (issueAfterUpdate == null)
+            // removed
+            scheduleNotificationsForLinkedIssues(issueBeforeUpdate);
+        else
+            // updated
+            scheduleNotificationsForLinkedIssues(issueAfterUpdate);
+    }
+
+    private synchronized void updateCardFromWebhookEvent(WebhookEvent event, final String issueKey, Optional<JiraIssueDto> issue) {
         if (event == WebhookEvent.ISSUE_DELETED) {
             issuesUpdatedByEvent.add(new IssueUpdate(cardsRepo.get(issueKey), IssueUpdateType.DELETED));
             cardsRepo.remove(issueKey);
@@ -222,8 +239,6 @@ public class IssueBufferService {
             updateType = IssueUpdateType.CREATED;
 
         issuesUpdatedByEvent.add(new IssueUpdate(updated, updateType));
-
-        scheduleNotificationSubtasksUpdate(updated);
     }
 
     public synchronized void startBatchUpdate() {
@@ -404,14 +419,32 @@ public class IssueBufferService {
         if (!cardsRepo.putOnlyIfNewer(issue))
             return false;
         issueEvents.add(new InternalUpdateIssue(issue.getProjectKey(), issue.getIssueKey()));
-        scheduleNotificationSubtasksUpdate(issue);
+        scheduleNotificationsForLinkedIssues(issue);
         return true;
     }
 
-    private synchronized void scheduleNotificationSubtasksUpdate(Issue parent) {
-        for (Issue subtask : parent.getSubtaskCards()) {
+    private void scheduleNotificationsForLinkedIssues(Issue issue) {
+        if (issue == null)
+            return;
+        scheduleNotificationForParent(issue);
+        scheduleNotificationForSubtasks(issue);
+    }
+
+    private synchronized void scheduleNotificationForParent(Issue theIssue) {
+        if (theIssue.getParent() == null)
+            return;
+        Optional<Issue> parentCard = Optional.ofNullable(getIssueByKey(theIssue.getParent()));
+        if (!parentCard.isPresent())
+            return;
+
+        issuesUpdatedByEvent.add(new IssueUpdate(parentCard.get(), IssueUpdateType.UPDATED));
+        scheduleNotificationForParent(parentCard.get());
+    }
+
+    private synchronized void scheduleNotificationForSubtasks(Issue theIssue) {
+        for (Issue subtask : theIssue.getSubtaskCards()) {
             issueEvents.add(new InternalUpdateIssue(subtask.getProjectKey(), subtask.getIssueKey()));
-            scheduleNotificationSubtasksUpdate(subtask);
+            scheduleNotificationForSubtasks(subtask);
         }
     }
 

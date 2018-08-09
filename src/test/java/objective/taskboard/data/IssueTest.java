@@ -1,6 +1,7 @@
 package objective.taskboard.data;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
@@ -205,6 +206,17 @@ public class IssueTest {
 
         List<String> issueTeams = toStringSet(subject.getTeams());
         assertEquals("default project team", StringUtils.join(issueTeams));
+    }
+
+    @Test
+    public void testIssueKey() {
+        assertTrue(Issue.compareIssueKey("PROJ-1", "PROJ-2") < 0);
+        assertTrue(Issue.compareIssueKey("PROJ-2", "PROJ-1") > 0);
+        assertTrue(Issue.compareIssueKey("PROJ-1", "PROJ-1") == 0);
+        assertTrue(Issue.compareIssueKey("PROJ-10", "PROJ-2") > 0);
+        assertTrue(Issue.compareIssueKey("AROJ-10", "PROJ-2") < 0);
+        assertTrue(Issue.compareIssueKey("PROJ3-10", "PROJ3-2") > 0);
+        assertTrue(Issue.compareIssueKey("PROJ-3-10", "PROJ-3-2") > 0);
     }
 
     private List<String> toStringSet(Set<Issue.CardTeam> s) {

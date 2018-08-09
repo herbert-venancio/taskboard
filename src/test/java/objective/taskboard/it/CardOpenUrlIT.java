@@ -22,7 +22,7 @@ public class CardOpenUrlIT extends AuthenticatedIntegrationTest {
             .issueDetails()
             .assertCardName("TASKB-626 teste4")
             .openFirstChildCard()
-            .assertCardName("TASKB-684 Review of teste4")
+            .assertCardName("TASKB-627 aaa")
             .openParentCard()
             .assertCardName("TASKB-626 teste4")
             .closeDialog();

@@ -181,6 +181,7 @@ public class CardDto {
                 , dto.cardTshirtSize
                 , dto.parentTypeIconUri
                 , dto.statusOrder
+                , dto.subtasks
         );
     }
 }
