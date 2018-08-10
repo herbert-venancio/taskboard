@@ -236,7 +236,11 @@
                                     self._issuesWithReprioritizationError.set(item.id, item);
                                 });
                                 if (self._reprioritizationCount === 0) {
-                                    self.fire("iron-signal", {name:"show-error-message", data:"Reprioritization failed. Reason: status ("+jqXhr.status+") " + textStatus });
+                                    taskboard.showError(self,
+                                        "Reprioritization failed. Reason: status ("
+                                        + jqXhr.status
+                                        + ") " + textStatus
+                                    );
                                     var parent = ui.item.closest(".board-lane.table-wrapper");
                                     self.filterAndForceUpdate();
                                     self._issuesWithReprioritizationError.forEach( function(issueItem) {
@@ -337,12 +341,11 @@
 
                 showCannotChangePrioritizationError: function() {
                     var invalidPermissionProjects = this.listInvalidPermissionProjects();
-                    this.fire("iron-signal", {
-                        name:"show-error-message"
-                        , data: "You can't reprioritize because you don't have permission on visible projects ["
-                                + invalidPermissionProjects
-                                + "]. Hide the projects you don't have permission and try again."
-                    });
+                    taskboard.showError(this,
+                        "You can't reprioritize because you don't have permission on visible projects ["
+                        + invalidPermissionProjects
+                        + "]. Hide the projects you don't have permission and try again."
+                    );
                 },
 
                 handleUpdatedIssues: function(event, data) {
