@@ -51,12 +51,21 @@ public class ProjectFilterConfiguration implements Serializable {
     
     @Column
     private LocalDate baselineDate;//NOSONAR
+    
+    @Column
+    private Long baseClusterId;
 
     protected ProjectFilterConfiguration() {} //NOSONAR
 
     public ProjectFilterConfiguration(String projectKey, Long defaultTeamId) {
         this.setDefaultTeam(defaultTeamId);
         this.setProjectKey(projectKey);
+    }
+    
+    public ProjectFilterConfiguration(String projectKey, Long defaultTeamId, Long baseClusterId) {
+        this.setDefaultTeam(defaultTeamId);
+        this.setProjectKey(projectKey);
+        this.setBasepClusterId(baseClusterId);
     }
 
     public Integer getId() {
@@ -144,5 +153,21 @@ public class ProjectFilterConfiguration implements Serializable {
     
     public Optional<LocalDate> getBaselineDate() {
         return Optional.ofNullable(baselineDate);
+    }
+
+    public Long getBaseClusterId() {
+        return baseClusterId;
+    }
+
+    public void setBasepClusterId(Long baseClusterId) {
+        this.baseClusterId = baseClusterId;
+    }
+
+    @Override
+    public String toString() {
+        return "ProjectFilterConfiguration [id=" + id + ", projectKey=" + projectKey + ", startDate=" + startDate
+                + ", deliveryDate=" + deliveryDate + ", defaultTeam=" + defaultTeam + ", isArchived=" + isArchived
+                + ", riskPercentage=" + riskPercentage + ", projectionTimespan=" + projectionTimespan
+                + ", baselineDate=" + baselineDate + ", baseClusterId=" + baseClusterId + "]";
     }
 }
