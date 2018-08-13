@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.SerializationUtils;
@@ -605,14 +607,34 @@ public class Issue extends IssueScratch implements Serializable {
     }
    
     public List<Subtask> getSubtasks() {
-        return subtasks.stream().map(s->
-            new Subtask(s.issueKey, 
-                        s.summary, 
-                        s.getStatusNameAsLoggedInUser(), 
-                        s.getIssueTypeNameAsLoggedInUser(),
-                        s.getTypeIconUri(), 
-                        issueColorService.getStatusColor(s.type, s.status)))
+        return subtasks.stream().
+                sorted((s1,s2)->compareIssueKey(s1.issueKey, s2.issueKey)).
+                map(s->
+                    new Subtask(s.issueKey,
+                                s.summary,
+                                s.getStatusNameAsLoggedInUser(),
+                                s.getIssueTypeNameAsLoggedInUser(),
+                                s.getTypeIconUri(),
+                                issueColorService.getStatusColor(s.type, s.status)))
                 .collect(Collectors.toList());
+    }
+
+    static int compareIssueKey(String issueKey1, String issueKey2) {
+        try {
+            Pattern pattern = Pattern.compile("^(.*?)-([0-9]*)$");
+            Matcher mk1 = pattern.matcher(issueKey1);
+            Matcher mk2 = pattern.matcher(issueKey2);
+            if (!mk1.matches() || !mk2.matches()) return 0;
+
+            int projComp = mk1.group(1).compareTo(mk2.group(1));
+            if (projComp != 0)
+                return projComp;
+
+            return Integer.parseInt(mk1.group(2))-
+                   Integer.parseInt(mk2.group(2));
+        }catch(NumberFormatException e) {
+            return 0;
+        }
     }
 
     public String getReleaseId() {
