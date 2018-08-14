@@ -29,9 +29,21 @@ public class SizingImportIT extends AuthenticatedIntegrationTest {
 
         sizing.waitForStepTwo().submitStep();
 
-        sizing.waitForStepThree().submitStep();
+        sizing
+            .waitForStepThree()
+            .assertScopeTabIsActive()
+            .assertHeader("Phase | Demand | Feature / Task | Type | Acceptance Criteria | Feature Planning | UX | Development | " +
+                    "Tech Planning | Alpha Test | QA Support | Feature Review | T-Shirt Size")
+            .selectCostTab()
+            .assertHeader("Indirect Costs | Effort")
+            .submitStep();
 
         sizing.waitForStepFour()
+            .assertSummary(" | Scope | Cost",
+                    "Total lines | 12 | 5",
+                    "Lines to import | 12 | 5",
+                    "Imported lines | 0 | 3",
+                    "Failed lines | 12 | 2")
             .assertShowingButtonsAfterFinish()
             .returnToTaskboard();
 
@@ -60,6 +72,21 @@ public class SizingImportIT extends AuthenticatedIntegrationTest {
                 "Invalid spreadsheet format: Specified URL should contain a sheet with title “Scope”.", 
                 "Found sheets: Timeline, Cost");
         
+        sizing.waitForStepOne();
+    }
+
+    @Test
+    public void whenSubmitStepOneUsingASpreadsheetWithoutCostSheet_ShowError() {
+        SizingImportUi sizing = mainPage.openSizingImport();
+
+        sizing.waitForStepOne()
+            .withSpreadsheetUrl("https://docs.google.com/spreadsheets/d/spreadsheet-without-cost-sheet")
+            .submitStep();
+
+        sizing.assertErrorMessage(
+                "Invalid spreadsheet format: Specified URL should contain a sheet with title “Cost”.", 
+                "Found sheets: Scope, Timeline");
+
         sizing.waitForStepOne();
     }
 

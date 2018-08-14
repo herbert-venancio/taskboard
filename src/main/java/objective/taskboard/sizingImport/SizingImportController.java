@@ -219,7 +219,7 @@ public class SizingImportController {
 
         public ImportPreviewDto(ImportPreview object) {
             this.scopePreview = new ImportSheetPreviewDto(object.getScopePreview());
-            this.costPreview = new ImportSheetPreviewDto(object.getCostPreview());
+            this.costPreview = object.getCostPreview().map(costPreview -> new ImportSheetPreviewDto(costPreview)).orElse(null);
         }
     }
 

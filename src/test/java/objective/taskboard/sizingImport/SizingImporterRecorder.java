@@ -5,13 +5,13 @@ import static objective.taskboard.testUtils.AssertUtils.collectionToString;
 import java.util.ArrayList;
 import java.util.List;
 
-import objective.taskboard.sizingImport.SizingImporterNotifier.SizingImporterListener;
+import objective.taskboard.sizingImport.SizingSheetImporterNotifier.SizingSheetImporterListener;
 
-public class SizingImporterRecorder implements SizingImporterListener {
+public class SizingImporterRecorder implements SizingSheetImporterListener {
     private final List<String> events = new ArrayList<>();
 
     @Override
-    public void onSheetImportStarted(int totalLinesCount, int linesToImportCount) {
+    public void onSheetImportStarted(String sheetTitle, int totalLinesCount, int linesToImportCount) {
         events.add("Import started - Total lines count: " + totalLinesCount + " | lines to import: " + linesToImportCount);
     }
 

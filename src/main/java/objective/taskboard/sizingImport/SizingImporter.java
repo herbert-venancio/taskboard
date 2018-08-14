@@ -68,7 +68,7 @@ public class SizingImporter {
             String projectKey,
             List<SizingImportLineScope> scopeLines) {
 
-        SizingImporterNotifier importerNotifier = new SizingImporterNotifier();
+        SizingSheetImporterNotifier importerNotifier = new SizingSheetImporterNotifier();
         importerNotifier.addListener(socketStatusEmmiter);
         importerNotifier.addListener(new SizingImporterSheetUpdater(
                 spreadsheetId,
@@ -92,7 +92,7 @@ public class SizingImporter {
         if (!costLines.isPresent())
             return;
 
-        SizingImporterNotifier importerNotifier = new SizingImporterNotifier();
+        SizingSheetImporterNotifier importerNotifier = new SizingSheetImporterNotifier();
         importerNotifier.addListener(socketStatusEmmiter);
         importerNotifier.addListener(new SizingImporterSheetUpdater(
                 spreadsheetId,

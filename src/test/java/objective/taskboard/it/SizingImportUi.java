@@ -1,5 +1,7 @@
 package objective.taskboard.it;
 
+import static java.util.stream.Collectors.joining;
+import static org.apache.commons.lang3.StringUtils.join;
 import static org.openqa.selenium.support.PageFactory.initElements;
 
 import java.util.List;
@@ -240,14 +242,57 @@ public class SizingImportUi extends AbstractUiFragment {
     }
 
     static class SizingStepThree extends SizingMiddleStep {
+        private static final String SCOPE_TAB_NAME = "Scope (Total: 12)";
+        private static final String COST_TAB_NAME = "Cost (Total: 5)";
+
+        @FindBy(css="#sizingimport .tb-table.sizing__confirmation")
+        private WebElement tablePreview;
+
+        @FindBy(css="#sizingimport .tb-tabs .tb-tab.active")
+        private WebElement activeTab;
+
+        @FindBy(css="#sizingimport .tb-tabs .tb-tab-link")
+        private List<WebElement> tabs;
 
         public SizingStepThree(WebDriver driver) {
             super(driver, 3, "Confirmation");
+        }
+
+        public SizingStepThree assertScopeTabIsActive() {
+            waitTextInElement(activeTab, SCOPE_TAB_NAME);
+            return this;
+        }
+
+        public SizingStepThree assertCostTabIsActive() {
+            waitTextInElement(activeTab, COST_TAB_NAME);
+            return this;
+        }
+
+        public SizingStepThree assertHeader(String expected) {
+            waitAssertEquals(expected, () -> {
+                return tablePreview.findElements(By.cssSelector("thead th")).stream()
+                        .map(th -> th.getText())
+                        .collect(joining(" | "));
+            });
+            return this;
+        }
+
+        public SizingStepThree selectCostTab() {
+            for (WebElement tab : tabs)
+                if (tab.getText().equals(COST_TAB_NAME)) {
+                    waitForClick(tab);
+                    break;
+                }
+            assertCostTabIsActive();
+            return this;
         }
     }
 
     static class SizingStepFour extends SizingStep {
         
+        @FindBy(css="#sizingimport .steps__content .tb-table.sizing__importation--summary")
+        private WebElement tableSummary;
+
         @FindBy(css="#sizingimport .steps__content .sizing__return-to-taskboard")
         private WebElement buttonReturnToTaskboard;
         
@@ -256,6 +301,15 @@ public class SizingImportUi extends AbstractUiFragment {
 
         public SizingStepFour(WebDriver driver) {
             super(driver, 4, "Import Progress");
+        }
+
+        public SizingStepFour assertSummary(String... expectedRows) {
+            waitAssertEquals(join(expectedRows, "\n"), () -> {
+                return tableSummary.findElements(By.cssSelector("tr")).stream()
+                        .map(row -> row.findElements(By.className("tb-table__column")).stream().map(column -> column.getText()).collect(joining(" | ")))
+                        .collect(joining("\n"));
+            });
+            return this;
         }
 
         public SizingStepFour assertShowingButtonsAfterFinish() {

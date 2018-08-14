@@ -4,6 +4,7 @@ import static java.util.Arrays.asList;
 import static objective.taskboard.testUtils.AssertUtils.collectionToString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
@@ -94,8 +95,8 @@ public class PreviewBuilderTest {
                 asList("One",   "Red",    "Grape",   "Lion",       "D2",  ""  )));
         assertEquals(3, scopePreview.getTotalLinesCount());
 
-        ImportSheetPreview costPreview = preview.getCostPreview();
-        assertNotNull(costPreview);
+        assertTrue(preview.getCostPreview().isPresent());
+        ImportSheetPreview costPreview = preview.getCostPreview().get();
         assertEquals("Cost", costPreview.getSheetTitle());
         assertEquals(asList("Indirect Costs", "Effort"), costPreview.getHeaders());
         assertRows(costPreview.getRows(), asList(

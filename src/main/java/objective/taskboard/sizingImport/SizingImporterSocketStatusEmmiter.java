@@ -1,13 +1,18 @@
 package objective.taskboard.sizingImport;
 
+import static java.util.Optional.ofNullable;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import objective.taskboard.auth.CredentialsHolder;
-import objective.taskboard.sizingImport.SizingImporterNotifier.SizingImporterListener;
+import objective.taskboard.sizingImport.SizingSheetImporterNotifier.SizingSheetImporterListener;
 
-class SizingImporterSocketStatusEmmiter implements SizingImporterListener {
+class SizingImporterSocketStatusEmmiter implements SizingSheetImporterListener {
     
     private static final String TOPIC_DESTINATION = "/topic/sizing-import/status";
 
@@ -17,6 +22,8 @@ class SizingImporterSocketStatusEmmiter implements SizingImporterListener {
     private int importedLinesCount = 0;
     private int failedLinesCount = 0;
 
+    private SizingImportSheetStatus currentSheetStatus;
+    private List<SizingImportSheetStatus> sheetsStatus = new ArrayList<>();
 
     public SizingImporterSocketStatusEmmiter(SimpMessagingTemplate messagingTemplate) {
         this.messagingTemplate = messagingTemplate;
@@ -28,7 +35,10 @@ class SizingImporterSocketStatusEmmiter implements SizingImporterListener {
     }
 
     @Override
-    public void onSheetImportStarted(int totalLinesCount, int linesToImportCount) {
+    public void onSheetImportStarted(String sheetTitle, int totalLinesCount, int linesToImportCount) {
+        currentSheetStatus = new SizingImportSheetStatus(sheetTitle, totalLinesCount, linesToImportCount);
+        sheetsStatus.add(currentSheetStatus);
+        emmitStatus();
     }
 
     @Override
@@ -37,13 +47,15 @@ class SizingImporterSocketStatusEmmiter implements SizingImporterListener {
     
     @Override
     public void onLineImportFinished(SizingImportLine line, String issueKey) {
-        this.importedLinesCount++;
+        importedLinesCount++;
+        currentSheetStatus.importedLines++;
         emmitStatus();
     }
 
     @Override
     public void onLineError(SizingImportLine line, List<String> errorMessages) {
-        this.failedLinesCount++;
+        failedLinesCount++;
+        currentSheetStatus.failedLines++;
         emmitStatus();
     }
 
@@ -53,32 +65,64 @@ class SizingImporterSocketStatusEmmiter implements SizingImporterListener {
 
     private void emmitStatus() {
         String receiver = CredentialsHolder.username();
-        SizingImportStatus status = new SizingImportStatus(linesToImportCount, importedLinesCount, failedLinesCount);
+        SizingImportStatusDto status = new SizingImportStatusDto(linesToImportCount, importedLinesCount, failedLinesCount, ofNullable(currentSheetStatus), sheetsStatus);
         
         messagingTemplate.convertAndSendToUser(receiver, TOPIC_DESTINATION, status);
     }
 
-    protected static class SizingImportStatus {
-        private final int totalLines;
-        private final int importedLines;
-        private final int failedLines;
+    protected static class SizingImportStatusDto {
+        public final int totalLines;
+        public final int importedLines;
+        public final int failedLines;
+        public final SizingImportSheetStatusDto currentSheetStatus;
+        public final List<SizingImportSheetStatusDto> sheetsStatus;
 
-        public SizingImportStatus(int totalLines, int importedLines, int failedLines) {
+        public SizingImportStatusDto(
+                int totalLines,
+                int importedLines,
+                int failedLines,
+                Optional<SizingImportSheetStatus> currentSheetStatus,
+                List<SizingImportSheetStatus> sheetsStatus) {
+
             this.totalLines = totalLines;
             this.importedLines = importedLines;
             this.failedLines = failedLines;
+            this.currentSheetStatus = currentSheetStatus.map(sheetStatus -> new SizingImportSheetStatusDto(sheetStatus)).orElse(null);
+            this.sheetsStatus = sheetsStatus.stream()
+                .map(sheet -> new SizingImportSheetStatusDto(sheet))
+                .collect(Collectors.toList());
         }
+    }
 
-        public int getTotalLines() {
-            return totalLines;
+    protected static class SizingImportSheetStatusDto {
+        public final String sheetTitle;
+        public final int totalLines;
+        public final int linesToImport;
+        public final int importedLines;
+        public final int failedLines;
+
+        public SizingImportSheetStatusDto(SizingImportSheetStatus object) {
+            this.sheetTitle = object.sheetTitle;
+            this.totalLines = object.totalLines;
+            this.linesToImport = object.linesToImport;
+            this.importedLines = object.importedLines;
+            this.failedLines = object.failedLines;
         }
-        
-        public int getImportedLines() {
-            return importedLines;
-        }
-        
-        public int getFailedLines() {
-            return failedLines;
+    }
+
+    private static class SizingImportSheetStatus {
+        private final String sheetTitle;
+        private final int totalLines;
+        private final int linesToImport;
+        private int importedLines;
+        private int failedLines;
+
+        public SizingImportSheetStatus(String sheetTitle, int totalLines, int linesToImport) {
+            this.sheetTitle = sheetTitle;
+            this.totalLines = totalLines;
+            this.linesToImport = linesToImport;
+            this.importedLines = 0;
+            this.failedLines = 0;
         }
     }
 }

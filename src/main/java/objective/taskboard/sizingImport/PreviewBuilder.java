@@ -7,6 +7,7 @@ import static objective.taskboard.sizingImport.SizingImportConfig.SHEET_SCOPE;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import objective.taskboard.google.SpreadsheetUtils;
 import objective.taskboard.sizingImport.cost.SizingImportLineCost;
@@ -34,16 +35,19 @@ class PreviewBuilder {
     
     public ImportPreview build() {
         ImportSheetPreview scopePreview = new ImportSheetPreview(SHEET_SCOPE, scopeLines, linesLimit);
-        ImportSheetPreview costPreview = new ImportSheetPreview(SHEET_COST, costLines, linesLimit);
 
-        return new ImportPreview(scopePreview, costPreview);
+        if (costLines.isEmpty())
+            return new ImportPreview(scopePreview, Optional.empty());
+
+        ImportSheetPreview costPreview = new ImportSheetPreview(SHEET_COST, costLines, linesLimit);
+        return new ImportPreview(scopePreview, Optional.of(costPreview));
     }
     
     static class ImportPreview {
         private final ImportSheetPreview scopePreview;
-        private final ImportSheetPreview costPreview;
+        private final Optional<ImportSheetPreview> costPreview;
 
-        public ImportPreview(ImportSheetPreview scopePreview, ImportSheetPreview costPreview) {
+        public ImportPreview(ImportSheetPreview scopePreview, Optional<ImportSheetPreview> costPreview) {
             this.scopePreview = scopePreview;
             this.costPreview = costPreview;
         }
@@ -52,7 +56,7 @@ class PreviewBuilder {
             return scopePreview;
         }
 
-        public ImportSheetPreview getCostPreview() {
+        public Optional<ImportSheetPreview> getCostPreview() {
             return costPreview;
         }
     }

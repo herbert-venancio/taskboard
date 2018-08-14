@@ -18,9 +18,9 @@ import com.google.api.services.sheets.v4.model.RepeatCellRequest;
 import com.google.api.services.sheets.v4.model.Request;
 
 import objective.taskboard.google.SpreadsheetsManager;
-import objective.taskboard.sizingImport.SizingImporterNotifier.SizingImporterListener;
+import objective.taskboard.sizingImport.SizingSheetImporterNotifier.SizingSheetImporterListener;
 
-public class SizingImporterSheetUpdater implements SizingImporterListener {
+public class SizingImporterSheetUpdater implements SizingSheetImporterListener {
 
     private final String spreadsheetId;
     private final SpreadsheetsManager spreadsheetsManager;
@@ -74,7 +74,7 @@ public class SizingImporterSheetUpdater implements SizingImporterListener {
     }
 
     @Override
-    public void onSheetImportStarted(int totalLinesCount, int linesToImportCount) {
+    public void onSheetImportStarted(String sheetTitle, int totalLinesCount, int linesToImportCount) {
         clearAllErrors();
     }
 
