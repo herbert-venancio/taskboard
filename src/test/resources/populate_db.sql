@@ -852,221 +852,221 @@ Insert into user_preferences (JIRA_USER,PREFERENCES) values ('jean.takano','{"le
 
 -- INSERTING INTO sizing_cluster_item for dashboards
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (211,'Alpha Test','unused','XS',1.060,1.000,'TASKB', null);
+     VALUES (211,'Alpha Test','notused','XS',1.060,1.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (212,'Alpha Test','unused','S',2.130,2.000,'TASKB', null);
+     VALUES (212,'Alpha Test','notused','S',2.130,2.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (213,'Alpha Test','unused','M',4.260,5.000,'TASKB', null);
+     VALUES (213,'Alpha Test','notused','M',4.260,5.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (214,'Alpha Test','unused','L',8.510,10.000,'TASKB', null);
+     VALUES (214,'Alpha Test','notused','L',8.510,10.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (215,'Alpha Test','unused','XL',16.000,19.000,'TASKB', null);
+     VALUES (215,'Alpha Test','notused','XL',16.000,19.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (216,'Alpha Bug','unused','XS',1.060,1.000,'TASKB', null);
+     VALUES (216,'Alpha Bug','notused','XS',1.060,1.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (217,'Alpha Bug','unused','S',2.130,2.000,'TASKB', null);
+     VALUES (217,'Alpha Bug','notused','S',2.130,2.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (218,'Alpha Bug','unused','M',3.190,3.000,'TASKB', null);
+     VALUES (218,'Alpha Bug','notused','M',3.190,3.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (219,'Alpha Bug','unused','L',4.260,5.000,'TASKB', null);
+     VALUES (219,'Alpha Bug','notused','L',4.260,5.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (220,'Alpha Bug','unused','XL',5.320,6.000,'TASKB', null);
+     VALUES (220,'Alpha Bug','notused','XL',5.320,6.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (221,'Backend Development','unused','XS',4.000,4.000,'TASKB', null);
+     VALUES (221,'Backend Development','notused','XS',4.000,4.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (222,'Backend Development','unused','S',16.000,19.000,'TASKB', null);
+     VALUES (222,'Backend Development','notused','S',16.000,19.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (223,'Backend Development','unused','M',24.000,28.000,'TASKB', null);
+     VALUES (223,'Backend Development','notused','M',24.000,28.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (224,'Backend Development','unused','L',40.000,48.000,'TASKB', null);
+     VALUES (224,'Backend Development','notused','L',40.000,48.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (225,'Backend Development','unused','XL',48.000,57.000,'TASKB', null);
+     VALUES (225,'Backend Development','notused','XL',48.000,57.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (226,'Feature Planning','unused','XS',1.060,1.000,'TASKB', null);
+     VALUES (226,'Feature Planning','notused','XS',1.060,1.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (227,'Feature Planning','unused','S',2.130,2.000,'TASKB', null);
+     VALUES (227,'Feature Planning','notused','S',2.130,2.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (228,'Feature Planning','unused','M',4.260,5.000,'TASKB', null);
+     VALUES (228,'Feature Planning','notused','M',4.260,5.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (229,'Feature Planning','unused','L',8.510,10.000,'TASKB', null);
+     VALUES (229,'Feature Planning','notused','L',8.510,10.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (230,'Feature Planning','unused','XL',16.000,19.000,'TASKB', null);
+     VALUES (230,'Feature Planning','notused','XL',16.000,19.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (231,'Feature Review','unused','XS',1.060,1.000,'TASKB', null);
+     VALUES (231,'Feature Review','notused','XS',1.060,1.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (232,'Feature Review','unused','S',2.130,2.000,'TASKB', null);
+     VALUES (232,'Feature Review','notused','S',2.130,2.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (233,'Feature Review','unused','M',3.190,3.000,'TASKB', null);
+     VALUES (233,'Feature Review','notused','M',3.190,3.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (234,'Feature Review','unused','L',4.260,5.000,'TASKB', null);
+     VALUES (234,'Feature Review','notused','L',4.260,5.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (235,'Feature Review','unused','XL',8.000,9.000,'TASKB', null);
+     VALUES (235,'Feature Review','notused','XL',8.000,9.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (236,'Frontend Development','unused','XS',4.000,4.000,'TASKB', null);
+     VALUES (236,'Frontend Development','notused','XS',4.000,4.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (237,'Frontend Development','unused','S',16.000,19.000,'TASKB', null);
+     VALUES (237,'Frontend Development','notused','S',16.000,19.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (238,'Frontend Development','unused','M',24.000,28.000,'TASKB', null);
+     VALUES (238,'Frontend Development','notused','M',24.000,28.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (239,'Frontend Development','unused','L',40.000,48.000,'TASKB', null);
+     VALUES (239,'Frontend Development','notused','L',40.000,48.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (240,'Frontend Development','unused','XL',48.000,57.000,'TASKB', null);
+     VALUES (240,'Frontend Development','notused','XL',48.000,57.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (241,'Sub-Task','unused','XS',2.130,2.000,'TASKB', null);
+     VALUES (241,'Sub-Task','notused','XS',2.130,2.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (242,'Sub-Task','unused','S',4.260,5.000,'TASKB', null);
+     VALUES (242,'Sub-Task','notused','S',4.260,5.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (243,'Sub-Task','unused','M',8.510,10.000,'TASKB', null);
+     VALUES (243,'Sub-Task','notused','M',8.510,10.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (244,'Sub-Task','unused','L',17.020,20.000,'TASKB', null);
+     VALUES (244,'Sub-Task','notused','L',17.020,20.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (245,'Sub-Task','unused','XL',35.000,42.000,'TASKB', null);
+     VALUES (245,'Sub-Task','notused','XL',35.000,42.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (246,'Tech Planning','unused','XS',1.060,1.000,'TASKB', null);
+     VALUES (246,'Tech Planning','notused','XS',1.060,1.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (247,'Tech Planning','unused','S',2.130,2.000,'TASKB', null);
+     VALUES (247,'Tech Planning','notused','S',2.130,2.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (248,'Tech Planning','unused','M',4.260,5.000,'TASKB', null);
+     VALUES (248,'Tech Planning','notused','M',4.260,5.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (249,'Tech Planning','unused','L',8.510,10.000,'TASKB', null);
+     VALUES (249,'Tech Planning','notused','L',8.510,10.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (250,'Tech Planning','unused','XL',16.000,19.000,'TASKB', null);
+     VALUES (250,'Tech Planning','notused','XL',16.000,19.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (251,'UAT','unused','XS',2.000,2.000,'TASKB', null);
+     VALUES (251,'UAT','notused','XS',2.000,2.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (252,'UAT','unused','S',4.000,4.000,'TASKB', null);
+     VALUES (252,'UAT','notused','S',4.000,4.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (253,'UAT','unused','M',6.000,7.000,'TASKB', null);
+     VALUES (253,'UAT','notused','M',6.000,7.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (254,'UAT','unused','L',10.000,12.000,'TASKB', null);
+     VALUES (254,'UAT','notused','L',10.000,12.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (255,'UAT','unused','XL',16.000,19.000,'TASKB', null);
+     VALUES (255,'UAT','notused','XL',16.000,19.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (256,'UX','unused','XS',2.130,2.000,'TASKB', null);
+     VALUES (256,'UX','notused','XS',2.130,2.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (257,'UX','unused','S',4.260,5.000,'TASKB', null);
+     VALUES (257,'UX','notused','S',4.260,5.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (258,'UX','unused','M',8.510,10.000,'TASKB', null);
+     VALUES (258,'UX','notused','M',8.510,10.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (259,'UX','unused','L',17.020,20.000,'TASKB', null);
+     VALUES (259,'UX','notused','L',17.020,20.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (260,'UX','unused','XL',35.000,42.000,'TASKB', null);
+     VALUES (260,'UX','notused','XL',35.000,42.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (261,'QA','unused','XS',2.000,2.000,'TASKB', null);
+     VALUES (261,'QA','notused','XS',2.000,2.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (262,'QA','unused','S',4.000,4.000,'TASKB', null);
+     VALUES (262,'QA','notused','S',4.000,4.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (263,'QA','unused','M',6.000,7.000,'TASKB', null);
+     VALUES (263,'QA','notused','M',6.000,7.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (264,'QA','unused','L',10.000,12.000,'TASKB', null);
+     VALUES (264,'QA','notused','L',10.000,12.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (265,'QA','unused','XL',16.000,19.000,'TASKB', null);
+     VALUES (265,'QA','notused','XL',16.000,19.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (266,'BALLPARK - Planning','unused','XS',1.060,1.000,'TASKB', null);
+     VALUES (266,'BALLPARK - Planning','notused','XS',1.060,1.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (267,'BALLPARK - Planning','unused','S',2.130,2.000,'TASKB', null);
+     VALUES (267,'BALLPARK - Planning','notused','S',2.130,2.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (268,'BALLPARK - Planning','unused','M',4.260,5.000,'TASKB', null);
+     VALUES (268,'BALLPARK - Planning','notused','M',4.260,5.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (269,'BALLPARK - Planning','unused','L',8.510,10.000,'TASKB', null);
+     VALUES (269,'BALLPARK - Planning','notused','L',8.510,10.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (270,'BALLPARK - Planning','unused','XL',16.000,19.000,'TASKB', null);
+     VALUES (270,'BALLPARK - Planning','notused','XL',16.000,19.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (271,'BALLPARK - Feature Review','unused','XS',1.000,1.000,'TASKB', null);
+     VALUES (271,'BALLPARK - Feature Review','notused','XS',1.000,1.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (272,'BALLPARK - Feature Review','unused','S',2.000,2.000,'TASKB', null);
+     VALUES (272,'BALLPARK - Feature Review','notused','S',2.000,2.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (273,'BALLPARK - Feature Review','unused','M',3.000,3.000,'TASKB', null);
+     VALUES (273,'BALLPARK - Feature Review','notused','M',3.000,3.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (274,'BALLPARK - Feature Review','unused','L',5.000,6.000,'TASKB', null);
+     VALUES (274,'BALLPARK - Feature Review','notused','L',5.000,6.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (275,'BALLPARK - Feature Review','unused','XL',8.000,9.000,'TASKB', null);
+     VALUES (275,'BALLPARK - Feature Review','notused','XL',8.000,9.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (276,'BALLPARK - UX','unused','XS',2.130,2.000,'TASKB', null);
+     VALUES (276,'BALLPARK - UX','notused','XS',2.130,2.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (277,'BALLPARK - UX','unused','S',4.260,5.000,'TASKB', null);
+     VALUES (277,'BALLPARK - UX','notused','S',4.260,5.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (278,'BALLPARK - UX','unused','M',8.510,10.000,'TASKB', null);
+     VALUES (278,'BALLPARK - UX','notused','M',8.510,10.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (279,'BALLPARK - UX','unused','L',17.020,20.000,'TASKB', null);
+     VALUES (279,'BALLPARK - UX','notused','L',17.020,20.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (280,'BALLPARK - UX','unused','XL',35.000,42.000,'TASKB', null);
+     VALUES (280,'BALLPARK - UX','notused','XL',35.000,42.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (281,'BALLPARK - Tech Planning','unused','XS',1.060,1.000,'TASKB', null);
+     VALUES (281,'BALLPARK - Tech Planning','notused','XS',1.060,1.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (282,'BALLPARK - Tech Planning','unused','S',2.130,2.000,'TASKB', null);
+     VALUES (282,'BALLPARK - Tech Planning','notused','S',2.130,2.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (283,'BALLPARK - Tech Planning','unused','M',4.260,5.000,'TASKB', null);
+     VALUES (283,'BALLPARK - Tech Planning','notused','M',4.260,5.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (284,'BALLPARK - Tech Planning','unused','L',8.510,10.000,'TASKB', null);
+     VALUES (284,'BALLPARK - Tech Planning','notused','L',8.510,10.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (285,'BALLPARK - Tech Planning','unused','XL',16.000,19.000,'TASKB', null);
+     VALUES (285,'BALLPARK - Tech Planning','notused','XL',16.000,19.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (286,'BALLPARK - Development','unused','XS',4.000,4.000,'TASKB', null);
+     VALUES (286,'BALLPARK - Development','notused','XS',4.000,4.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (287,'BALLPARK - Development','unused','S',16.000,19.000,'TASKB', null);
+     VALUES (287,'BALLPARK - Development','notused','S',16.000,19.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (288,'BALLPARK - Development','unused','M',24.000,28.000,'TASKB', null);
+     VALUES (288,'BALLPARK - Development','notused','M',24.000,28.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (289,'BALLPARK - Development','unused','L',40.000,48.000,'TASKB', null);
+     VALUES (289,'BALLPARK - Development','notused','L',40.000,48.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (290,'BALLPARK - Development','unused','XL',48.000,57.000,'TASKB', null);
+     VALUES (290,'BALLPARK - Development','notused','XL',48.000,57.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (291,'BALLPARK - Alpha Test','unused','XS',1.060,1.000,'TASKB', null);
+     VALUES (291,'BALLPARK - Alpha Test','notused','XS',1.060,1.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (292,'BALLPARK - Alpha Test','unused','S',2.130,2.000,'TASKB', null);
+     VALUES (292,'BALLPARK - Alpha Test','notused','S',2.130,2.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (293,'BALLPARK - Alpha Test','unused','M',4.260,5.000,'TASKB', null);
+     VALUES (293,'BALLPARK - Alpha Test','notused','M',4.260,5.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (294,'BALLPARK - Alpha Test','unused','L',8.510,10.000,'TASKB', null);
+     VALUES (294,'BALLPARK - Alpha Test','notused','L',8.510,10.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (295,'BALLPARK - Alpha Test','unused','XL',16.000,19.000,'TASKB', null);
+     VALUES (295,'BALLPARK - Alpha Test','notused','XL',16.000,19.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (296,'BALLPARK - Developer Support','unused','XS',1.000,1.000,'TASKB', null);
+     VALUES (296,'BALLPARK - Developer Support','notused','XS',1.000,1.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (297,'BALLPARK - Developer Support','unused','S',2.000,2.000,'TASKB', null);
+     VALUES (297,'BALLPARK - Developer Support','notused','S',2.000,2.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (298,'BALLPARK - Developer Support','unused','M',3.000,3.000,'TASKB', null);
+     VALUES (298,'BALLPARK - Developer Support','notused','M',3.000,3.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (299,'BALLPARK - Developer Support','unused','L',5.000,6.000,'TASKB', null);
+     VALUES (299,'BALLPARK - Developer Support','notused','L',5.000,6.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (300,'BALLPARK - Developer Support','unused','XL',8.000,9.000,'TASKB', null);
+     VALUES (300,'BALLPARK - Developer Support','notused','XL',8.000,9.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (301,'BALLPARK - QA/UAT Support','unused','XS',1.000,1.000,'TASKB', null);
+     VALUES (301,'BALLPARK - QA/UAT Support','notused','XS',1.000,1.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (302,'BALLPARK - QA/UAT Support','unused','S',2.000,2.000,'TASKB', null);
+     VALUES (302,'BALLPARK - QA/UAT Support','notused','S',2.000,2.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (303,'BALLPARK - QA/UAT Support','unused','M',3.000,3.000,'TASKB', null);
+     VALUES (303,'BALLPARK - QA/UAT Support','notused','M',3.000,3.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (304,'BALLPARK - QA/UAT Support','unused','L',5.000,6.000,'TASKB', null);
+     VALUES (304,'BALLPARK - QA/UAT Support','notused','L',5.000,6.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (305,'BALLPARK - QA/UAT Support','unused','XL',8.000,9.000,'TASKB', null);
+     VALUES (305,'BALLPARK - QA/UAT Support','notused','XL',8.000,9.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (306,'BALLPARK - Subtask','unused','XS',2.130,2.000,'TASKB', null);
+     VALUES (306,'BALLPARK - Subtask','notused','XS',2.130,2.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (307,'BALLPARK - Subtask','unused','S',4.260,5.000,'TASKB', null);
+     VALUES (307,'BALLPARK - Subtask','notused','S',4.260,5.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (308,'BALLPARK - Subtask','unused','M',8.510,10.000,'TASKB', null);
+     VALUES (308,'BALLPARK - Subtask','notused','M',8.510,10.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (309,'BALLPARK - Subtask','unused','L',17.020,20.000,'TASKB', null);
+     VALUES (309,'BALLPARK - Subtask','notused','L',17.020,20.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (310,'BALLPARK - Subtask','unused','XL',35.000,42.000,'TASKB', null);
+     VALUES (310,'BALLPARK - Subtask','notused','XL',35.000,42.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (311,'BALLPARK - Demand','unused','XS',30.000,45.000,'TASKB', null);
+     VALUES (311,'BALLPARK - Demand','notused','XS',30.000,45.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (312,'BALLPARK - Demand','unused','S',80.000,120.000,'TASKB', null);
+     VALUES (312,'BALLPARK - Demand','notused','S',80.000,120.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (313,'BALLPARK - Demand','unused','M',120.000,180.000,'TASKB', null);
+     VALUES (313,'BALLPARK - Demand','notused','M',120.000,180.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (314,'BALLPARK - Demand','unused','L',240.000,360.000,'TASKB', null);
+     VALUES (314,'BALLPARK - Demand','notused','L',240.000,360.000,'TASKB', null);
 
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (315,'BALLPARK - Subtask','unused','XL',35.000,42.000, null, 1);
+     VALUES (315,'BALLPARK - Subtask','notused','XL',35.000,42.000, null, 1);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (316,'BALLPARK - Demand','unused','XS',30.000,45.000, null, 1);
+     VALUES (316,'BALLPARK - Demand','notused','XS',30.000,45.000, null, 1);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (317,'BALLPARK - Demand','unused','S',80.000,120.000, null, 1);
+     VALUES (317,'BALLPARK - Demand','notused','S',80.000,120.000, null, 1);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (318,'BALLPARK - Demand','unused','M',120.000,180.000, null, 1);
+     VALUES (318,'BALLPARK - Demand','notused','M',120.000,180.000, null, 1);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (319,'BALLPARK - Demand','unused','L',240.000,360.000, null, 1);
+     VALUES (319,'BALLPARK - Demand','notused','L',240.000,360.000, null, 1);
