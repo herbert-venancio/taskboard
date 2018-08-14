@@ -405,7 +405,7 @@
 
                                 <div class="tb-text step__text">
                                     <p>
-                                        If you didn't modify the Sizing Spreadsheet, skip this step clicking the "Ok" button.<br>
+                                        If you didn't modify the Sizing Spreadsheet, skip this step clicking the "Next" button.<br>
                                         Otherwise, click on "Advanced Mapping".
                                     </p>
                                 </div>
@@ -864,9 +864,10 @@
                 },
 
                 showStepThree: function(response) {
-                    this.spreadsheetDataHeader = response.headers;
-                    this.spreadsheetDataRows = response.rows;
-                    this.spreadsheetDataTotalLines = response.totalLinesCount;
+                    var sheet = response.scopePreview;
+                    this.spreadsheetDataHeader = sheet.headers;
+                    this.spreadsheetDataRows = sheet.rows;
+                    this.spreadsheetDataTotalLines = sheet.totalLinesCount;
                     this.goToStep(3);
                     this.loadingDisable();
                 },

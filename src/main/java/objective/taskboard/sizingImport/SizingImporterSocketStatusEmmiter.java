@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import objective.taskboard.auth.CredentialsHolder;
-import objective.taskboard.sizingImport.SizingImporter.SizingImporterListener;
+import objective.taskboard.sizingImport.SizingImporterNotifier.SizingImporterListener;
 
 class SizingImporterSocketStatusEmmiter implements SizingImporterListener {
     
@@ -22,10 +22,13 @@ class SizingImporterSocketStatusEmmiter implements SizingImporterListener {
         this.messagingTemplate = messagingTemplate;
     }
 
-    @Override
-    public void onImportStarted(int totalLinesCount, int linesToImportCount) {
+    public void onImportStarted(int linesToImportCount) {
         this.linesToImportCount = linesToImportCount;
         emmitStatus();
+    }
+
+    @Override
+    public void onSheetImportStarted(int totalLinesCount, int linesToImportCount) {
     }
 
     @Override
@@ -33,7 +36,7 @@ class SizingImporterSocketStatusEmmiter implements SizingImporterListener {
     }
     
     @Override
-    public void onLineImportFinished(SizingImportLine line, String featureIssueKey) {
+    public void onLineImportFinished(SizingImportLine line, String issueKey) {
         this.importedLinesCount++;
         emmitStatus();
     }
@@ -45,7 +48,7 @@ class SizingImporterSocketStatusEmmiter implements SizingImporterListener {
     }
 
     @Override
-    public void onImportFinished() {
+    public void onSheetImportFinished() {
     }
 
     private void emmitStatus() {

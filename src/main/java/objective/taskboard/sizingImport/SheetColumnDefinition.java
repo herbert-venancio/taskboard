@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 
-class SheetColumnDefinition {
+public class SheetColumnDefinition {
     private final String name;
     private final PreviewBehavior previewBehavior;
     private final Map<String, String> tags;
@@ -50,7 +50,7 @@ class SheetColumnDefinition {
         SHOW, HIDE;
     }
     
-    static class ColumnTag {
+    public static class ColumnTag {
         private final String key;
         private final String value;
 

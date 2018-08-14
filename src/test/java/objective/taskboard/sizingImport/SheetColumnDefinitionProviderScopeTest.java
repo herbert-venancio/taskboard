@@ -2,7 +2,7 @@ package objective.taskboard.sizingImport;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toMap;
-import static objective.taskboard.sizingImport.SheetColumnDefinitionProvider.EXTRA_FIELD_ID_TAG;
+import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.EXTRA_FIELD_ID_TAG;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -21,9 +21,9 @@ import objective.taskboard.jira.client.JiraCreateIssue;
 import objective.taskboard.sizingImport.SizingImportConfig.SheetMap.DefaultColumn;
 import objective.taskboard.sizingImport.SizingImportConfig.SheetMap.ExtraField;
 
-public class SheetColumnDefinitionProviderTest {
+public class SheetColumnDefinitionProviderScopeTest {
         
-    private SheetColumnDefinitionProvider subject;
+    private SheetColumnDefinitionProviderScope subject;
     private JiraFacade jiraFacade = mock(JiraFacade.class);
 
     @Before
@@ -46,7 +46,7 @@ public class SheetColumnDefinitionProviderTest {
         
         importConfig.getSheetMap().setDefaultColumns(asList(defaultColumnCf2));
         
-        subject = new SheetColumnDefinitionProvider(importConfig, jiraFacade);
+        subject = new SheetColumnDefinitionProviderScope(importConfig, jiraFacade);
     }
     
     @Test
@@ -57,12 +57,13 @@ public class SheetColumnDefinitionProviderTest {
 
         StaticMappingDefinition mappingDefinition = mappingDefinitions.get(0);
         assertEquals("Phase", mappingDefinition.getColumnDefinition().getName());
+        assertEquals("A", mappingDefinition.getColumnLetter());
 
         mappingDefinition = mappingDefinitions.get(6);
         assertEquals("Assumptions", mappingDefinition.getColumnDefinition().getName());
         assertEquals("T", mappingDefinition.getColumnLetter());
         assertEquals("f9", mappingDefinition.getColumnDefinition().getTagValue(EXTRA_FIELD_ID_TAG));
-        
+
         mappingDefinition = mappingDefinitions.get(7);
         assertEquals("Acceptance Criteria", mappingDefinition.getColumnDefinition().getName());
         assertEquals("Z", mappingDefinition.getColumnLetter());

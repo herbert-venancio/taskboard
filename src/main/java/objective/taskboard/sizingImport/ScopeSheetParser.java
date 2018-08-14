@@ -17,20 +17,20 @@ import objective.taskboard.google.SpreadsheetUtils;
 import objective.taskboard.sizingImport.SizingImportLine.ImportValue;
 
 @Component
-class SizingSheetParser {
+class ScopeSheetParser {
 
     private final SizingImportConfig properties;
     
     @Autowired
-    public SizingSheetParser(SizingImportConfig properties) {
+    public ScopeSheetParser(SizingImportConfig properties) {
         this.properties = properties;
     }
 
-    public List<SizingImportLine> parse(List<List<Object>> rows, SheetDefinition sheetDefinition, List<SheetColumnMapping> columnMappings) {
+    public List<SizingImportLineScope> parse(List<List<Object>> rows, SheetDefinition sheetDefinition, List<SheetColumnMapping> columnMappings) {
         if (rows == null || rows.isEmpty())
             return Collections.emptyList();
 
-        List<SizingImportLine> lines = new ArrayList<>();
+        List<SizingImportLineScope> lines = new ArrayList<>();
         int startingRowIndex = properties.getDataStartingRowIndex();
         List<SheetColumn> columns = getSheetColumns(sheetDefinition, columnMappings);
         
@@ -43,8 +43,8 @@ class SizingSheetParser {
             lines.add(parseRow(row, i, columns));
         }
 
-        List<SizingImportLine> includedLines = lines.stream()
-                .filter(SizingImportLine::isInclude)
+        List<SizingImportLineScope> includedLines = lines.stream()
+                .filter(SizingImportLineScope::isInclude)
                 .collect(toList());
 
         return includedLines;
@@ -67,7 +67,7 @@ class SizingSheetParser {
         return columns;
     }
 
-    private SizingImportLine parseRow(List<Object> row, int rowIndex, List<SheetColumn> columns) {
+    private SizingImportLineScope parseRow(List<Object> row, int rowIndex, List<SheetColumn> columns) {
         List<ImportValue> values = columns.stream()
                 .map(column -> {
                     String value = getValue(row, column.getLetter());
@@ -80,10 +80,11 @@ class SizingSheetParser {
                 .collect(toList());
         
         
-        return new SizingImportLine(rowIndex, values);
+        return new SizingImportLineScope(rowIndex, values);
     }
 
-    private String getValue(List<Object> row, int index) {
+    private String getValue(List<Object> row, String columnLetter) {
+        int index = SpreadsheetUtils.columnLetterToIndex(columnLetter);
         if (index >= row.size())
             return null;
         
@@ -94,11 +95,6 @@ class SizingSheetParser {
         }
 
         return value;
-    }
-    
-    private String getValue(List<Object> row, String columnLetter) {
-        int index = SpreadsheetUtils.columnLetterToIndex(columnLetter);
-        return getValue(row, index);
     }
 
 }

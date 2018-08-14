@@ -2,7 +2,7 @@ package objective.taskboard.sizingImport;
 
 import objective.taskboard.utils.ObjectUtils;
 
-class SheetColumn {
+public class SheetColumn {
     private final SheetColumnDefinition definition;
     private final String letter;
 

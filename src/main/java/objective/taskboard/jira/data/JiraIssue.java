@@ -106,6 +106,10 @@ public class JiraIssue {
             return field("assignee", fieldBuilder);
         }
 
+        public T originalEstimate(String value) {
+            return field("timetracking", singletonMap("originalEstimate", value));
+        }
+
         public T field(String field, FieldBuilder fieldBuilder) {
             fieldBuilder.op.accept(this, field);
             return self;

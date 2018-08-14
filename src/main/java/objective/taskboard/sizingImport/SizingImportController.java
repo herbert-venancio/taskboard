@@ -24,6 +24,7 @@ import objective.taskboard.google.GoogleApiService;
 import objective.taskboard.google.SpreadsheetsManager.SpreadsheetException;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.sizingImport.PreviewBuilder.ImportPreview;
+import objective.taskboard.sizingImport.PreviewBuilder.ImportSheetPreview;
 import objective.taskboard.sizingImport.SizingImportValidator.ValidationResult;
 import retrofit.RetrofitError;
 
@@ -63,7 +64,7 @@ public class SizingImportController {
         if (!authorizer.hasPermissionInProject(ADMINISTRATIVE, projectKey))
             return ResponseEntity.notFound().build();
 
-        ValidationResult validationResult = sizingImportService.validateSpreadsheet(projectKey, spreadsheetId);
+        ValidationResult validationResult = sizingImportService.validateSpreadsheet(spreadsheetId);
         return ResponseEntity.ok(new SpreadsheetValidationResultDto(validationResult));
     }
 
@@ -213,11 +214,23 @@ public class SizingImportController {
     }
     
     protected static class ImportPreviewDto {
+        public final ImportSheetPreviewDto scopePreview;
+        public final ImportSheetPreviewDto costPreview;
+
+        public ImportPreviewDto(ImportPreview object) {
+            this.scopePreview = new ImportSheetPreviewDto(object.getScopePreview());
+            this.costPreview = new ImportSheetPreviewDto(object.getCostPreview());
+        }
+    }
+
+    protected static class ImportSheetPreviewDto {
+        public final String sheetTitle;
         public final List<String> headers;
         public final List<List<String>> rows;
         public final int totalLinesCount;
 
-        public ImportPreviewDto(ImportPreview object) {
+        public ImportSheetPreviewDto(ImportSheetPreview object) {
+            this.sheetTitle = object.getSheetTitle();
             this.headers = object.getHeaders();
             this.rows = object.getRows();
             this.totalLinesCount = object.getTotalLinesCount();

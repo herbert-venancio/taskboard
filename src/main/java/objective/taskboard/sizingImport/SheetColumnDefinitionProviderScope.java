@@ -23,7 +23,7 @@ import objective.taskboard.sizingImport.SheetColumnDefinition.PreviewBehavior;
 import objective.taskboard.sizingImport.SizingImportConfig.SheetMap.DefaultColumn;
 
 @Component
-class SheetColumnDefinitionProvider {
+class SheetColumnDefinitionProviderScope {
     public static final SheetColumnDefinition PHASE    = new SheetColumnDefinition("Phase");
     public static final SheetColumnDefinition DEMAND   = new SheetColumnDefinition("Demand");
     public static final SheetColumnDefinition FEATURE  = new SheetColumnDefinition("Feature / Task");
@@ -39,7 +39,7 @@ class SheetColumnDefinitionProvider {
     private final List<StaticMappingDefinition> staticMappings = new ArrayList<>();
 
     @Autowired
-    public SheetColumnDefinitionProvider(SizingImportConfig importConfig, JiraFacade jiraFacade) {
+    public SheetColumnDefinitionProviderScope(SizingImportConfig importConfig, JiraFacade jiraFacade) {
         this.importConfig = importConfig;
         this.jiraFacade = jiraFacade;
         

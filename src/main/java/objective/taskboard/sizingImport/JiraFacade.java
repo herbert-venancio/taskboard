@@ -1,6 +1,7 @@
 package objective.taskboard.sizingImport;
 
 import static java.util.stream.Collectors.toList;
+import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byKey;
 import static objective.taskboard.utils.StreamUtils.instancesOf;
 
 import java.util.Collection;
@@ -13,9 +14,11 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import objective.taskboard.jira.FrontEndMessageException;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.client.JiraCreateIssue;
 import objective.taskboard.jira.client.JiraIssueDto;
+import objective.taskboard.jira.client.JiraIssueTypeDto;
 import objective.taskboard.jira.client.JiraLinkDto;
 import objective.taskboard.jira.client.JiraLinkTypeDto;
 import objective.taskboard.jira.data.JiraIssue;
@@ -25,9 +28,10 @@ import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
 import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.jira.properties.JiraProperties.IssueType.IssueTypeDetails;
 import objective.taskboard.utils.ObjectUtils;
+import retrofit.RetrofitError;
 
 @Component
-class JiraFacade {
+public class JiraFacade {
 
     private final JiraEndpointAsLoggedInUser jiraEndpoint;
     private final JiraProperties jiraProperties;
@@ -74,7 +78,27 @@ class JiraFacade {
         
         return issue;
     }
-   
+
+    public JiraIssue createIndirectCost(String projectKey, Long parentTypeId, Long subtaskTypeId, String summary, String originalEstimate) {
+        try {
+            JiraIssue.InputBuilder<?> builder = JiraIssue.Input.builder(jiraProperties, projectKey, parentTypeId)
+                    .summary(summary)
+                    .originalEstimate(originalEstimate);
+
+            JiraIssue parent = createIssue(builder.build());
+
+            JiraIssue.InputBuilder<?> subtaskBuilder = JiraIssue.Input.builder(jiraProperties, projectKey, subtaskTypeId)
+                    .parent(byKey(parent.key))
+                    .summary(summary);
+
+            createIssue(subtaskBuilder.build());
+
+            return parent;
+        } catch (RetrofitError e) {
+            throw new FrontEndMessageException(e);
+        }
+    }
+
     public Optional<String> getDemandKeyGivenFeature(JiraIssueDto feature) {
         String demandIssueLinkName = getDemandLink().name;
 
@@ -125,8 +149,11 @@ class JiraFacade {
     public String getJiraUrl() {
         return jiraProperties.getUrl();
     }
-    
-    
+
+    public JiraIssueTypeDto getIssueTypeById(Long issueTypeId) {
+        return metadataService.getIssueTypeById(issueTypeId);
+    }
+
     abstract static class IssueFieldValue {
         private final String fieldId;
 
