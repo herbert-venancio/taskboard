@@ -1,7 +1,11 @@
 package objective.taskboard.it;
 
+import static objective.taskboard.testUtils.ProjectInfo.TASKB;
+
 import org.junit.Before;
 import org.junit.Test;
+
+import objective.taskboard.testUtils.ProjectInfo;
 
 public class ProjectProfileConfigurationIT extends AuthenticatedIntegrationTest {
 
@@ -14,7 +18,7 @@ public class ProjectProfileConfigurationIT extends AuthenticatedIntegrationTest 
     
     @Test
     public void shouldPersist() {
-        openFromProjectConfig("TASKB")
+        openFromProjectConfig(TASKB)
             .addItem()
             .setRoleName(0, "Dev")
             .setPeopleCount(0, "10")
@@ -37,7 +41,7 @@ public class ProjectProfileConfigurationIT extends AuthenticatedIntegrationTest 
     
     @Test
     public void shouldEdit() {
-        openFromProjectConfig("TASKB")
+        openFromProjectConfig(TASKB)
             .addItem()
             .setRoleName(0, "Dev")
             .setPeopleCount(0, "10")
@@ -61,14 +65,14 @@ public class ProjectProfileConfigurationIT extends AuthenticatedIntegrationTest 
             .save()
             .assertSnackbarSavedIsOpen()
             .refresh()
-    
+
             .assertItems("X-Dev | 1 | 03/24/2018 | 03/25/2018");
     }
 
-    private ProjectProfileConfigPage openFromProjectConfig(String projectKey) {
-        ProjectConfigurationOperator.openFromMainMenu(mainPage, "TASKB")
-            .editProjectProfile();
-        
-        return new ProjectProfileConfigPage(webDriver).assertPageIsOpen();
+    private ProjectProfileConfigurationTab openFromProjectConfig(ProjectInfo projectInfo) {
+        return ProjectConfigurationOperator.openFromMainMenu(mainPage, projectInfo)
+            .openAdvancedConfigurations()
+            .selectProfileTab()
+            .assertTabIsOpen();
     }
 }

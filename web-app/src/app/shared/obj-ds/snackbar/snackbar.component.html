@@ -3,8 +3,16 @@
      [class.success]="item.level == levels.Success"
      [class.error]="item.level == levels.Error">
     <h4 class="obj-title-small title">{{item.title}}</h4>
-    <div class="description" *ngIf="item.description">{{item.description}}</div>
-
+    <ul class="description" *ngIf="item.description && !isArray(item.description)">
+        <li class="description-item">
+            {{item.description}}
+        </li>
+    </ul>
+    <ul class="description" *ngIf="item.description && isArray(item.description)">
+        <li class="description-item" *ngFor="let descriptionItem of item.description">
+            {{descriptionItem}}
+        </li>
+    </ul>
     <button type="button" obj-icon-button class="close-button" (click)="close(item)">
         <obj-icon iconName="clear" class="small"></obj-icon>
     </button>

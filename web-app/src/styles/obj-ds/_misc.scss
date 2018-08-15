@@ -1,3 +1,9 @@
+%_obj_text_ellipsis {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
 .obj-empty {
     font-size: 14px;

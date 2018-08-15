@@ -28,6 +28,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
+import objective.taskboard.testUtils.ProjectInfo;
+
 public class MenuFilters extends AbstractUiFragment {
     @FindBy(tagName = "card-field-filters")
     private WebElement cardFieldFilters;
@@ -72,15 +74,15 @@ public class MenuFilters extends AbstractUiFragment {
         return this;
     }
 
-    public ProjectConfigurationDialog openProjectConfigurationModal(String projectKey) {
+    public ProjectConfigurationDialog openProjectConfigurationModal(ProjectInfo projectInfo) {
         WebElement projectItemButton = projectsConfigurationItem.stream()
-            .filter(el -> projectKey.equals(el.getText()))
+            .filter(el -> projectInfo.key.equals(el.getText()))
             .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("Element  for project key " + projectKey + " filter  not found"));
+            .orElseThrow(() -> new IllegalArgumentException("Element  for project key " + projectInfo.key + " filter  not found"));
 
         waitForClick(projectItemButton);
 
-        return new ProjectConfigurationDialog(webDriver, projectKey).assertIsOpen();
+        return new ProjectConfigurationDialog(webDriver, projectInfo).assertIsOpen();
     }
 
     public MenuFilters clickFilterFieldValue(String cardFieldFilterType, String filterFieldValueName) {

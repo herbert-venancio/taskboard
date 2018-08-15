@@ -156,6 +156,7 @@ paper-button.tb-button.tb-button--type_button {
 
 paper-button.tb-button.tb-button--type_link {
     background: none;
+    padding: 0;
     color: #333;
 }
 
