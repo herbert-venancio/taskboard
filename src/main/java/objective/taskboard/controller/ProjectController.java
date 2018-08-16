@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * [/LICENSE]
@@ -29,13 +29,16 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
+import objective.taskboard.domain.Project;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import objective.taskboard.auth.Authorizer;
 import objective.taskboard.controller.ProjectCreationData.ProjectCreationDataTeam;
@@ -70,17 +73,17 @@ public class ProjectController {
     @Autowired
     private Authorizer authorizer;
 
-    @RequestMapping
+    @GetMapping
     public List<ProjectData> getProjectsVisibleOnTaskboard() {
-        return projectService.getTaskboardProjects(projectService::isNonArchivedAndUserHasAccess).stream()
-                .map(pfc -> generateProjectData(pfc))
+        return projectService.getNonArchivedJiraProjectsForUser().stream()
+                .map(this::generateProjectData)
                 .collect(toList());
     }
 
     @RequestMapping("/dashboard")
     public List<ProjectData> getProjectsVisibleOnDashboard() {
         return projectService.getTaskboardProjects(projectService::isNonArchivedAndUserHasAccess, DASHBOARD_TACTICAL, DASHBOARD_OPERATIONAL).stream()
-                .map(pfc -> generateProjectData(pfc))
+                .map(this::generateProjectData)
                 .collect(toList());
     }
 
@@ -105,12 +108,12 @@ public class ProjectController {
 
         validateTeamDoesntExist(data.defaultTeam.name);
 
-        ProjectCreationDataTeam defaultTeam = data.defaultTeam; 
+        ProjectCreationDataTeam defaultTeam = data.defaultTeam;
         TeamFilterConfiguration team = createTeamAndConfigurations(defaultTeam.name, data.teamLeader, data.teamLeader, defaultTeam.members);
 
         projectService.saveTaskboardProject(new ProjectFilterConfiguration(data.projectKey, team.getId()));
     }
-    
+
     private void validateTeamDoesntExist(String teamName) {
         if (teamRepository.exists(teamName))
             throw new IllegalArgumentException("Team '" + teamName + "' already exists.");
@@ -132,12 +135,22 @@ public class ProjectController {
         return teamFilterConfigurationRepository.save(teamFilterConfiguration);
     }
 
+    private ProjectData generateProjectData(Project project) {
+        String projectDisplayName = project.getKey() + " - " + project.getName();
+        return generateProjectData(project.getKey(), projectDisplayName);
+    }
+
     private ProjectData generateProjectData(ProjectFilterConfiguration projectFilterConfiguration) {
+        return generateProjectData(projectFilterConfiguration.getProjectKey(), projectFilterConfiguration.getProjectKey());
+    }
+
+    private ProjectData generateProjectData(String projectKey, String projectDisplayName) {
         ProjectData projectData = new ProjectData();
-        projectData.projectKey = projectFilterConfiguration.getProjectKey();
-        projectData.followUpDataHistory = followUpFacade.getHistoryGivenProject(projectData.projectKey);
-        projectData.roles = authorizer.getRolesForProject(projectFilterConfiguration.getProjectKey());
-       
+        projectData.projectKey = projectKey;
+        projectData.projectDisplayName = projectDisplayName;
+        projectData.followUpDataHistory = followUpFacade.getHistoryGivenProject(projectKey);
+        projectData.roles = authorizer.getRolesForProject(projectKey);
+
         return projectData;
     }
 }

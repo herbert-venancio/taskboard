@@ -8,6 +8,7 @@ import objective.taskboard.it.FollowupReportType.FollowupReportTypeData;
 
 public class FollowupReportUiIT extends AuthenticatedIntegrationTest {
     private static final String DEV = "Dev";
+    private static final String REV = "Reviewer";
     private static final String REPORT_TYPE_TEST = "Report Type Test";
 
     @Test
@@ -122,7 +123,7 @@ public class FollowupReportUiIT extends AuthenticatedIntegrationTest {
                 .assertDateIsToday()
                 .assertDateDropdownIsDisabled()
                 .assertGenerateButtonIsDisabled()
-            .setProject("PROJ1")
+            .setProject("PROJ1 - Project 1")
                 .assertDateIsToday()
                 .assertDateDropdownIsEnabled()
                 .assertGenerateButtonIsEnabled()
@@ -149,19 +150,38 @@ public class FollowupReportUiIT extends AuthenticatedIntegrationTest {
                 .assertDateDropdownIsDisabled()
                 .assertGenerateButtonIsDisabled()
             .selectReportType(REPORT_TYPE_TEST)
-            .setProject("PROJ3")
+            .setProject("PROJ3 - Project 3")
                 .assertProjectNotFoundIsNotVisible()
             .selectReportType(DEV)
                 .assertDateDropdownIsDisabled()
                 .assertGenerateButtonIsDisabled()
-            .setProject("PROJ3")
+            .setProject("PROJ3 - Project 3")
                 .assertProjectNotFoundIsVisible()
                 .assertDateDropdownIsDisabled()
                 .assertGenerateButtonIsDisabled()
-            .setProject("PROJ1")
+            .setProject("PROJ1 - Project 1")
                 .assertProjectNotFoundIsNotVisible()
                 .assertDateDropdownIsEnabled()
                 .assertGenerateButtonIsEnabled();
     }
 
+    @Test
+    public void whenOnlyOneProjectIsAvailable_ProjectShouldBeSelected() {
+        MainPage mainPage = MainPage.produce(webDriver);
+        FollowupReport reportWindow = mainPage.assertFollowupButtonIsVisible()
+                .openFollowUpReport();
+
+        reportWindow
+                .clickAddLink()
+                .tryCreateReportType(new FollowupReportTypeData().withName(REV).withFile().withRoles("Reviewer"))
+                .waitClose();
+
+        reportWindow
+                .assertReportTypes(asList(REV))
+                .selectReportType(REV)
+                .assertProject("TASKB - Taskboard")
+                .assertProjectIsEnabled()
+                .assertDateDropdownIsEnabled()
+                .assertGenerateButtonIsEnabled();
+    }
 }

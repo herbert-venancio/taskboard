@@ -28,14 +28,14 @@ public class FollowupReport extends AbstractUiFragment {
 
     @FindBy(css=".followup-button")
     private WebElement followupButton;
-    
+
     @FindBy(id="followupReport")
     private WebElement followupReport;
-    
+
     public static FollowupReport open(WebDriver webDriver) {
         return initElements(webDriver, FollowupReport.class).open();
     }
-    
+
     private FollowupReport open() {
         waitForClick(followupButton);
         waitVisibilityOfElement(followupReport);
@@ -67,7 +67,7 @@ public class FollowupReport extends AbstractUiFragment {
         waitElementIsDisabled(generateButton);
         return this;
     }
-    
+
     public FollowupReport assertGenerateButtonIsEnabled() {
         waitElementIsEnabled(generateButton);
         return this;
@@ -151,7 +151,7 @@ public class FollowupReport extends AbstractUiFragment {
     }
 
     public FollowupReport setProject(String name) {
-        WebElement input = projectAutocomplete.findElement(By.cssSelector("paper-input input")); 
+        WebElement input = projectAutocomplete.findElement(By.cssSelector("paper-input input"));
         input.sendKeys(Keys.CONTROL,"a");
         input.sendKeys(Keys.DELETE);
         input.sendKeys(name);
@@ -160,7 +160,7 @@ public class FollowupReport extends AbstractUiFragment {
     }
 
     public FollowupReport clearProject() {
-        WebElement input = projectAutocomplete.findElement(By.cssSelector("paper-input input")); 
+        WebElement input = projectAutocomplete.findElement(By.cssSelector("paper-input input"));
         input.sendKeys(Keys.CONTROL,"a");
         input.sendKeys(Keys.DELETE);
         waitAttributeValueInElement(input, "value", "");
@@ -178,6 +178,12 @@ public class FollowupReport extends AbstractUiFragment {
             WebElement iconNotFound = projectAutocomplete.findElement(By.className("icon-not-found"));
             waitInvisibilityOfElement(iconNotFound);
         } catch (NoSuchElementException e) { }
+        return this;
+    }
+
+    public FollowupReport assertProject(String name) {
+        WebElement input = projectAutocomplete.findElement(By.cssSelector("paper-input input"));
+        waitAttributeValueInElement(input, "value", name);
         return this;
     }
 

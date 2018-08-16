@@ -27,6 +27,7 @@ import java.util.List;
 
 public class ProjectData {
     public String projectKey;
+    public String projectDisplayName;
     public String defaultTeam;
     public List<LocalDate> followUpDataHistory = new ArrayList<>();
     public List<String> roles = new ArrayList<String>();

@@ -116,12 +116,12 @@
                                      class="tb-paper-input"
                                      items="[[projectsTemplate]]"
                                      value-property="projectKey"
-                                     text-property="projectKey"
+                                     text-property="projectDisplayName"
                                      placeholder="Search"
                                      label="Select a project"
                                      always-float-label
                                      selected="{{selectedProjectKey}}"
-                                     text="{{typedProjectKey}}"
+                                     text="{{typedText}}"
                                      disable-clear="true"
                                      show-search-icon="[[_hasMoreThanOneProject(projectsTemplate)]]"
                                      disabled="[[_hasNoProject(projectsTemplate)]]"
@@ -167,7 +167,7 @@
                     selectedProjectKey: {
                         type: String
                     },
-                    typedProjectKey: {
+                    typedText: {
                         type: String
                     },
                     templates: {
@@ -203,7 +203,7 @@
 
                 observers: [
                     '_onSelectTemplate(selectedTemplate)',
-                    '_filterDates(typedProjectKey)'
+                    '_filterDates(typedText)'
                 ],
 
                 ready: function() {
@@ -217,7 +217,7 @@
                     this.set('projects', undefined);
                     this.set('projectsTemplate', []);
                     this.set('selectedProjectKey', '');
-                    this.set('typedProjectKey', '');
+                    this.set('typedText', '');
                     this.set('templates', undefined);
                     this.set('selectedTemplate', undefined);
                     this.set('disableDateSelect', true)
@@ -240,15 +240,15 @@
                 },
 
                 _filterProjects: function() {
-                    this.set('typedProjectKey', '');
+                    this.set('typedText', '');
                     this.set('selectedProjectKey', '');
 
                     var template = this.selectedTemplate;
                     this.set('projectsTemplate', _.filter(this.projects, function(p) {
                         return template && _.intersection(p.roles, template.roles).length > 0;
                     }));
-                    this.set('typedProjectKey', this.projectsTemplate.length == 1 ? this.projectsTemplate[0].projectKey : '');
-                    this.set('selectedProjectKey', this.typedProjectKey);
+                    this.set('typedText', this.projectsTemplate.length == 1 ? this.projectsTemplate[0].projectDisplayName : '');
+                    this.set('selectedProjectKey', this.typedText);
 
                     this._filterDates();
                 },
@@ -264,7 +264,7 @@
 
                 _getSelectedProject: function() {
                     var self = this;
-                    return _.find(this.projectsTemplate, function(p) { return p.projectKey.toLowerCase() === self.typedProjectKey.toLowerCase(); });
+                    return _.find(this.projectsTemplate, function(p) { return p.projectDisplayName === self.typedText; });
                 },
 
                 _clearSelectedDate: function() {
