@@ -57,12 +57,13 @@ public class FollowupClusterProvider {
         
         allItems.stream()
             .filter(i-> i.getBaseCluster().isPresent())
+            .sorted(Comparator.comparing(SizingClusterItem::getId))
             .forEach(i ->  clusterItemsMap.put(generateMapKey(i),
                                                convertToFollowUpClusterItem(project, i)));
 
         allItems.stream()
             .filter(i-> i.getProjectKey().isPresent())
-            .sorted(Comparator.comparing(SizingClusterItem::getId).reversed())
+            .sorted(Comparator.comparing(SizingClusterItem::getId))
             .forEach(i -> clusterItemsMap.put(generateMapKey(i),
                                               convertToFollowUpClusterItem(project, i)));
 

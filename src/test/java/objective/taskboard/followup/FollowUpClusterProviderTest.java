@@ -120,13 +120,22 @@ public class FollowUpClusterProviderTest {
         
         List<SizingClusterItem> itemsProjectThreeMock = generateProjectItemsMock(baseCluster, TASKB_THREE_PROJECT_KEY);
         
-        SizingClusterItem item4 = new SizingClusterItem(BALLPARK_DEV,   NOTUSED, "M",  4.0, 0.0, null, baseCluster);
+        SizingClusterItem item4 = new SizingClusterItem(BALLPARK_DEV,   NOTUSED, "M",  4.0, 0.0, TASKB_THREE_PROJECT_KEY, null);
         item4.setId(4L);
-        SizingClusterItem item5 = new SizingClusterItem(BALLPARK_ALPHA, NOTUSED, "M",  8.0, 0.0, null, baseCluster);
-        item4.setId(5L);
+        SizingClusterItem item5 = new SizingClusterItem(BALLPARK_ALPHA, NOTUSED, "M",  8.0, 0.0, TASKB_THREE_PROJECT_KEY, null);
+        item5.setId(5L);
+        SizingClusterItem item6 = new SizingClusterItem(BALLPARK_ALPHA, NOTUSED, "M",  18.0, 1.0, TASKB_THREE_PROJECT_KEY, null);
+        item6.setId(6L);
+        SizingClusterItem item7 = new SizingClusterItem(DEV,            NOTUSED, "S",  12.0, 1.0, TASKB_THREE_PROJECT_KEY, null);
+        item7.setId(7L);
+        SizingClusterItem item8 = new SizingClusterItem(DEV,            NOTUSED, "M",  1.0, 0.0, null, baseCluster);
+        item8.setId(8L);
         
         itemsProjectThreeMock.add(item4);
         itemsProjectThreeMock.add(item5);
+        itemsProjectThreeMock.add(item6);
+        itemsProjectThreeMock.add(item7);
+        itemsProjectThreeMock.add(item8);
         
         when(clusterItemRepository.findByProjectKeyOrBaseCluster(TASKB_THREE_PROJECT_KEY, baseCluster))
             .thenReturn(Optional.of(itemsProjectThreeMock));
@@ -138,10 +147,11 @@ public class FollowUpClusterProviderTest {
         ProjectFilterConfiguration expectedProject = new ProjectFilterConfiguration(TASKB_THREE_PROJECT_KEY, 3L, 3L);
         
         List<FollowUpClusterItem> expectedItems = Arrays.asList(
-                new FollowUpClusterItem(expectedProject, BALLPARK_ALPHA, NOTUSED, "M", 8.0, 0.0),
+                new FollowUpClusterItem(expectedProject, BALLPARK_ALPHA, NOTUSED, "M", 18.0, 1.0),
                 new FollowUpClusterItem(expectedProject, BALLPARK_ALPHA, NOTUSED, "XS", 1.0, 0.0),
-                new FollowUpClusterItem(expectedProject, BALLPARK_DEV, NOTUSED, "M", 5.0, 0.0),
-                new FollowUpClusterItem(expectedProject, DEV, NOTUSED, "S", 2.0, 0.0)
+                new FollowUpClusterItem(expectedProject, BALLPARK_DEV, NOTUSED, "M", 4.0, 0.0),
+                new FollowUpClusterItem(expectedProject, DEV, NOTUSED, "M", 1.0, 0.0),
+                new FollowUpClusterItem(expectedProject, DEV, NOTUSED, "S", 12.0, 1.0)
                 );
         
         assertFollowUpItemsEquals(expectedItems, clusterItems);
