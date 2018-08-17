@@ -8,6 +8,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
@@ -15,9 +16,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import objective.taskboard.followup.kpi.IssueStatusFlow;
+import objective.taskboard.followup.kpi.IssueStatusFlowBuilder;
+import objective.taskboard.followup.kpi.IssueStatusFlowService;
 import objective.taskboard.followup.kpi.WipKPIService;
 import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.jira.properties.StatusConfiguration.StatusCountingOnWip;
@@ -32,6 +37,9 @@ public class WipKpiServiceTest {
     @Mock
     private JiraProperties jiraProperties;
 
+    @Mock
+    private IssueStatusFlowService issueService;
+        
     @Spy
     @InjectMocks
     private WipKPIService wipKpiService = new WipKPIService();
@@ -45,9 +53,44 @@ public class WipKpiServiceTest {
         statusCountingOnWip.setSubtasks(new String[] { "Doing"});
 
         when(jiraProperties.getStatusCountingOnWip()).thenReturn(statusCountingOnWip);
+        
+        IssueStatusFlow demand = new IssueStatusFlowBuilder("I-1")
+                                    .type("Demand")
+                                    .addChain("To Do",parseDateTime("2017-09-25"))
+                                    .addChain("Doing",parseDateTime("2017-09-26"))
+                                    .addChain("Done",parseDateTime("2017-09-27"))
+                                    .build();
+        
+        IssueStatusFlow os = new IssueStatusFlowBuilder("I-2")
+                .type("OS")
+                .addChain("To Do",parseDateTime("2017-09-25"))
+                .addChain("Doing",parseDateTime("2017-09-26"))
+                .addChain("Done")
+                .build();
+        
+        IssueStatusFlow feature = new IssueStatusFlowBuilder("I-3")
+                .type("Feature")
+                .addChain("To Do",parseDateTime("2017-09-25"))
+                .addChain("Doing",parseDateTime("2017-09-26"))
+                .addChain("Done")
+                .build();
+        
+        IssueStatusFlow subtask = new IssueStatusFlowBuilder("I-4")
+                .type("Sub-task")
+                .addChain("To Do",parseDateTime("2017-09-25"))
+                .addChain("Doing")
+                .addChain("Done")
+                .build();
+        
+        when(issueService.getIssues(Mockito.any()))
+            .thenReturn(Arrays.asList(demand,os))
+            .thenReturn(Arrays.asList(feature))
+            .thenReturn(Arrays.asList(subtask));
+
 
     }
-
+    
+   
     @Test
     public void checkWipRows() {
         List<WipDataSet> wipDataSets = wipKpiService.getData(getDefaultFollowupData());
