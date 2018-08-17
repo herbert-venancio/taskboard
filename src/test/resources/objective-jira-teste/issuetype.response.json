@@ -133,5 +133,23 @@
     "name": "Task",
     "subtask": false,
     "avatarId": 12262
+  },
+  {
+    "self": "http://localhost:4567/rest/api/latest/issuetype/10400",
+    "id": "10400",
+    "description": "",
+    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=11008&avatarType=issuetype",
+    "name": "Management",
+    "subtask": false,
+    "avatarId": 11008
+  },
+  {
+    "self": "http://localhost:4567/rest/api/latest/issuetype/10200",
+    "id": "10200",
+    "description": "",
+    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=10801&avatarType=issuetype",
+    "name": "Continuous",
+    "subtask": true,
+    "avatarId": 10801
   }
 ]

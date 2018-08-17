@@ -21,7 +21,7 @@ import objective.taskboard.jira.data.JiraIssue;
 import objective.taskboard.sizingImport.JiraFacade;
 import objective.taskboard.sizingImport.SheetColumn;
 import objective.taskboard.sizingImport.SizingImportConfig;
-import objective.taskboard.sizingImport.SizingImporterNotifier;
+import objective.taskboard.sizingImport.SizingSheetImporterNotifier;
 import objective.taskboard.sizingImport.SizingImporterRecorder;
 import objective.taskboard.sizingImport.SizingImportConfig.IndirectCosts;
 import objective.taskboard.sizingImport.SizingImportLine.ImportValue;
@@ -40,7 +40,7 @@ public class CostImporterTest {
 
     private final SizingImportConfig importConfig = new SizingImportConfig();
     private final JiraFacade jiraFacade = mock(JiraFacade.class);
-    private final SizingImporterNotifier importerNotifier = new SizingImporterNotifier();
+    private final SizingSheetImporterNotifier importerNotifier = new SizingSheetImporterNotifier();
     private final SizingImporterRecorder recorder = new SizingImporterRecorder();
 
     private final CostImporter subject = new CostImporter(importConfig, jiraFacade, importerNotifier);

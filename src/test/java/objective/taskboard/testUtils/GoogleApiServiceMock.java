@@ -1,8 +1,12 @@
 package objective.taskboard.testUtils;
 
 import static java.util.Arrays.asList;
+import static objective.taskboard.sizingImport.SizingImportConfig.SHEET_COST;
+import static objective.taskboard.sizingImport.SizingImportConfig.SHEET_SCOPE;
+import static objective.taskboard.sizingImport.SizingImportConfig.SHEET_SIZING_METADATA;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -38,13 +42,9 @@ public class GoogleApiServiceMock implements GoogleApiService {
         
         SpreadsheetsManager spreadsheetsManager = mock(SpreadsheetsManager.class);
         
-        List<List<Object>> rows = getSizingTemplateRows();
-        
-        String lastColumnLetter = SpreadsheetUtils.columnIndexToLetter(rows.get(0).size() - 1);
-        
-        when(spreadsheetsManager.readRange(anyString(), anyString())).thenReturn(rows);
-
-        when(spreadsheetsManager.getLastColumnLetter(anyString(), anyString())).thenReturn(lastColumnLetter);
+        mockSheetRows(spreadsheetsManager, SHEET_SCOPE);
+        mockSheetRows(spreadsheetsManager, SHEET_COST);
+        mockSheetRows(spreadsheetsManager, SHEET_SIZING_METADATA);
         
         when(spreadsheetsManager.getSheetId(anyString(), anyString())).thenReturn(1);
         
@@ -54,12 +54,23 @@ public class GoogleApiServiceMock implements GoogleApiService {
             String spreadsheetId = invocation.getArgumentAt(0, String.class);
             
             if ("spreadsheet-without-scope-sheet".equals(spreadsheetId))
-                return asList("Timeline", "Cost");
+                return asList("Timeline", SHEET_COST, SHEET_SIZING_METADATA);
 
-            return asList("Scope", "Timeline", "Cost");
+            if ("spreadsheet-without-cost-sheet".equals(spreadsheetId))
+                return asList(SHEET_SCOPE, "Timeline", SHEET_SIZING_METADATA);
+
+            return asList(SHEET_SCOPE, "Timeline", SHEET_COST, SHEET_SIZING_METADATA);
         });
         
         return spreadsheetsManager;
+    }
+
+    private void mockSheetRows(SpreadsheetsManager spreadsheetsManager, String sheet) {
+        List<List<Object>> rows = getSizingTemplateRows(sheet);
+        String lastColumnLetter = SpreadsheetUtils.columnIndexToLetter(rows.get(0).size() - 1);
+
+        when(spreadsheetsManager.readRange(anyString(), eq("'" + sheet + "'"))).thenReturn(rows);
+        when(spreadsheetsManager.getLastColumnLetter(anyString(), eq(sheet))).thenReturn(lastColumnLetter);
     }
 
     @Override
@@ -75,11 +86,10 @@ public class GoogleApiServiceMock implements GoogleApiService {
     public void removeCredential() {
     }
     
-    private List<List<Object>> getSizingTemplateRows() {
+    private List<List<Object>> getSizingTemplateRows(String sheet) {
         List<List<Object>> rows = new ArrayList<>();
         try {
-            Reader in;
-            in = new FileReader("src/test/resources/objective-jira-teste/sizing-template-scope.csv");
+            Reader in = new FileReader("src/test/resources/objective-jira-teste/sizing-template/" + sheet + ".csv");
             Iterable<CSVRecord> records = CSVFormat.EXCEL.parse(in);
             for (CSVRecord record : records) {
                 ArrayList<Object> row = new ArrayList<>();

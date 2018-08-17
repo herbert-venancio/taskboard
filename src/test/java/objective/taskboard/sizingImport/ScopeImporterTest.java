@@ -48,7 +48,7 @@ public class ScopeImporterTest {
 
     private final SizingImportConfig importConfig = new SizingImportConfig();
     private final JiraFacade jiraFacade = mock(JiraFacade.class);
-    private final SizingImporterNotifier importerNotifier = new SizingImporterNotifier();
+    private final SizingSheetImporterNotifier importerNotifier = new SizingSheetImporterNotifier();
     private final SizingImporterRecorder recorder = new SizingImporterRecorder();
 
     private final Map<String, JiraCreateIssue.FieldInfoMetadata> featureMetadataFields = new HashMap<>();

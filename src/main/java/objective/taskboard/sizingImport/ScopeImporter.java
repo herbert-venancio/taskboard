@@ -7,6 +7,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.EXTRA_FIELD_ID_TAG;
 import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.SIZING_FIELD_ID_TAG;
+import static objective.taskboard.sizingImport.SizingImportConfig.SHEET_SCOPE;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.util.ArrayList;
@@ -37,9 +38,9 @@ class ScopeImporter {
 
     private final SizingImportConfig importConfig;
     private final JiraFacade jiraFacade;
-    private final SizingImporterNotifier importerNotifier;
+    private final SizingSheetImporterNotifier importerNotifier;
 
-    public ScopeImporter(SizingImportConfig importConfig, JiraFacade jiraFacade, SizingImporterNotifier importerNotifier) {
+    public ScopeImporter(SizingImportConfig importConfig, JiraFacade jiraFacade, SizingSheetImporterNotifier importerNotifier) {
         this.importConfig = importConfig;
         this.jiraFacade = jiraFacade;
         this.importerNotifier = importerNotifier;
@@ -50,7 +51,7 @@ class ScopeImporter {
                 .filter(SizingImportLineScope::isNotImported)
                 .collect(toList());
         
-        importerNotifier.notifySheetImportStarted(allLines.size(), linesToImport.size());
+        importerNotifier.notifySheetImportStarted(SHEET_SCOPE, allLines.size(), linesToImport.size());
 
         JiraProject project = jiraFacade.getProject(projectKey);
 
@@ -89,7 +90,7 @@ class ScopeImporter {
             importerNotifier.notifyLineImportFinished(line, featureIssueKey);
         }
 
-        importerNotifier.notifyImportFinished();
+        importerNotifier.notifySheetImportFinished();
     }
 
     private List<String> getValidationErrors(SizingImportLineScope line, Map<String, JiraCreateIssue.IssueTypeMetadata> featureTypesByName) {

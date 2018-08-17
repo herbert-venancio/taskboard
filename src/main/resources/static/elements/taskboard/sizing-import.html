@@ -260,8 +260,18 @@
                 padding-left: 30px;
             }
 
+            .sizing__confirmation-border {
+                width: 100%;
+                overflow: hidden;
+                border: 1px solid #E5E5E5;
+                border-top: none;
+                border-radius: 0 0 4px 4px;
+                padding: 16px;
+            }
+
             .sizing__confirmation-wrapper {
                 width: 100%;
+                height: 235px;
                 overflow-x: auto;
             }
 
@@ -423,7 +433,7 @@
 
                                             <div class="tb-text step__text">
                                                 <p>
-                                                    Please, associate the task types with the columns of the spreadsheet.
+                                                    Please, associate the task types with the columns of the spreadsheet ("Scope" sheet).
                                                     {{ fixedFieldsFormattedText }}
                                                 </p>
                                             </div>
@@ -475,11 +485,11 @@
                                         <paper-button class="sizing__cancel" raised on-tap="cancelImportation" title="Cancel importation">
                                             Cancel
                                         </paper-button>
+                                    </div>
+                                    <div class="step__buttons-right">
                                         <paper-button class="sizing__back" raised on-tap="previousStep" title="Previous step">
                                             Back
                                         </paper-button>
-                                    </div>
-                                    <div class="step__buttons-right">
                                         <paper-button class="sizing__submit colorful" raised on-tap="submitStepTwo" title="Next">
                                             Next
                                         </paper-button>
@@ -495,43 +505,50 @@
                                 </h3>
 
                                 <div class="tb-text step__text">
-                                    <p>These are a sample data of the spreadsheet for each column you have selected. You can step back to some adjustments. Click on the "Confirm" button to start the importation.</p>
+                                    <p>These are a sample data of the spreadsheet. You can step back to some adjustments. Click on the "Confirm" button to start the importation.</p>
                                 </div>
 
                                 <form class="tb-form">
 
                                     <div class="step__content">
 
-                                        <div class="tb-text step__text">
-                                            <h4>
-                                                Total: {{spreadsheetDataTotalLines}} features found on the spreadsheet.
-                                            </h4>
-                                        </div>
+                                        <ul class="tb-tabs">
+                                            <template is="dom-repeat" items="[[sheets]]" as="sheet">
+                                                <li class$="tb-tab [[_getSheetActiveClass(sheet, selectedSheet)]]">
+                                                    <a class="tb-tab-link tb-truncate" data-sheet="[[sheet]]" on-tap="_selectSheet"
+                                                       title="[[sheet.sheetTitle]] (Total: [[sheet.totalLinesCount]])">
+                                                        [[sheet.sheetTitle]] (Total: [[sheet.totalLinesCount]])
+                                                    </a>
+                                                </li>
+                                            </template>
+                                        </ul><!-- .tb-tabs -->
 
-                                        <div class="sizing__confirmation-wrapper">
+                                        <div class="sizing__confirmation-border">
+                                            <div class="sizing__confirmation-wrapper">
 
-                                            <table class="tb-table sizing__confirmation">
-                                                <thead class="tb-table__header">
-                                                    <tr>
-                                                        <template is="dom-repeat" items="{{spreadsheetDataHeader}}" as="header">
-                                                            <th class="tb-table__column tb-table__column--header sizing__confirmation-header-value">{{removeFromString(header, " TSize")}}</th>
-                                                        </template>
-                                                    </tr>
-                                                </thead>
-                                                <tbody id="jira-issuefields" class="tb-table__content">
-                                                    <template  is="dom-repeat" items="{{spreadsheetDataRows}}" as="row">
-                                                        <tr class="sizing__confirmation-row">
-                                                            <template is="dom-repeat" items="{{row}}" as="rowItem">
-                                                                <td class="tb-table__column tb-truncate sizing__confirmation-row-value">
-                                                                    {{rowItem}}
-                                                                </td>
+                                                <table class="tb-table sizing__confirmation">
+                                                    <thead class="tb-table__header">
+                                                        <tr>
+                                                            <template is="dom-repeat" items="[[selectedSheet.headers]]" as="header">
+                                                                <th class="tb-table__column tb-table__column--header sizing__confirmation-header-value">{{removeFromString(header, " TSize")}}</th>
                                                             </template>
                                                         </tr>
-                                                    </template>
-                                                </tbody><!-- .tb-table__content -->
-                                            </table><!-- .tb-table -->
+                                                    </thead>
+                                                    <tbody id="jira-issuefields" class="tb-table__content">
+                                                        <template  is="dom-repeat" items="[[selectedSheet.rows]]" as="row">
+                                                            <tr class="sizing__confirmation-row">
+                                                                <template is="dom-repeat" items="[[row]]" as="rowItem">
+                                                                    <td class="tb-table__column tb-truncate sizing__confirmation-row-value">
+                                                                        {{rowItem}}
+                                                                    </td>
+                                                                </template>
+                                                            </tr>
+                                                        </template>
+                                                    </tbody><!-- .tb-table__content -->
+                                                </table><!-- .tb-table -->
 
-                                        </div><!-- .sizing__confirmation-wrapper -->
+                                            </div><!-- .sizing__confirmation-wrapper -->
+                                        </div><!-- .sizing__confirmation-border -->
 
                                     </div><!-- .step__content -->
 
@@ -540,11 +557,11 @@
                                             <paper-button class="sizing__cancel" raised on-tap="cancelImportation" title="Cancel importation">
                                                 Cancel
                                             </paper-button>
+                                        </div>
+                                        <div class="step__buttons-right">
                                             <paper-button class="sizing__back" raised on-tap="previousStep" title="Previous step">
                                                 Back
                                             </paper-button>
-                                        </div>
-                                        <div class="step__buttons-right">
                                             <paper-button class="sizing__submit colorful" raised on-tap="submitStepThree" title="Confirm">
                                                 Confirm and start to import
                                             </paper-button>
@@ -565,6 +582,43 @@
                                 </div><!-- .step__content -->
 
                                 <template is="dom-if" if="{{isImportationCompleted}}">
+                                    <table class="tb-table sizing__importation--summary">
+                                        <thead class="tb-table__header">
+                                            <tr>
+                                                <th class="tb-table__column tb-table__column--label"></th>
+                                                <template is="dom-repeat" items="[[sheetsStatus]]" as="sheet">
+                                                    <th class="tb-table__column tb-table__column--header">[[sheet.sheetTitle]]</th>
+                                                </template>
+                                            </tr>
+                                        </thead><!-- .tb-table__header -->
+                                        <tbody class="tb-table__content">
+                                            <tr>
+                                                <th class="tb-table__column tb-table__column--label">Total lines</th>
+                                                <template is="dom-repeat" items="[[sheetsStatus]]" as="sheet">
+                                                    <td class="tb-table__column tb-truncate">[[sheet.totalLines]]</td>
+                                                </template>
+                                            </tr>
+                                            <tr>
+                                                <th class="tb-table__column tb-table__column--label">Lines to import</th>
+                                                <template is="dom-repeat" items="[[sheetsStatus]]" as="sheet">
+                                                    <td class="tb-table__column tb-truncate">[[sheet.linesToImport]]</td>
+                                                </template>
+                                            </tr>
+                                            <tr>
+                                                <th class="tb-table__column tb-table__column--label">Imported lines</th>
+                                                <template is="dom-repeat" items="[[sheetsStatus]]" as="sheet">
+                                                    <td class="tb-table__column tb-truncate">[[sheet.importedLines]]</td>
+                                                </template>
+                                            </tr>
+                                            <tr>
+                                                <th class="tb-table__column tb-table__column--label">Failed lines</th>
+                                                <template is="dom-repeat" items="[[sheetsStatus]]" as="sheet">
+                                                    <td class="tb-table__column tb-truncate">[[sheet.failedLines]]</td>
+                                                </template>
+                                            </tr>
+                                        </tbody><!-- .tb-table__content -->
+                                    </table><!-- .tb-table -->
+
                                     <div class="step__buttons">
                                         <div class="step__buttons-left">
                                         </div>
@@ -629,14 +683,8 @@
                     lastColumn: {
                         type: String
                     },
-                    spreadsheetDataRows: {
+                    sheets: {
                         type: Array
-                    },
-                    spreadsheetDataHeader: {
-                        type: Array
-                    },
-                    spreadsheetDataTotalLines: {
-                        type: Number
                     },
                     statusPercent: {
                         type: Number,
@@ -864,10 +912,11 @@
                 },
 
                 showStepThree: function(response) {
-                    var sheet = response.scopePreview;
-                    this.spreadsheetDataHeader = sheet.headers;
-                    this.spreadsheetDataRows = sheet.rows;
-                    this.spreadsheetDataTotalLines = sheet.totalLinesCount;
+                    var sheets = [ response.scopePreview ];
+                    if (response.costPreview)
+                        sheets = sheets.concat(response.costPreview);
+                    this.set('sheets', sheets);
+                    this.set('selectedSheet', response.scopePreview);
                     this.goToStep(3);
                     this.loadingDisable();
                 },
@@ -906,6 +955,7 @@
                     this.isImportationCompleted = false;
                     this.statusPercent = 0;
                     this.statusMessage = "Starting to import...";
+                    this.sheetsStatus = null;
 
                     this.goToStep(4);
                 },
@@ -915,18 +965,29 @@
                         return;
 
                     var status = event.detail.status;
+                    var currentSheetStatus = status.currentSheetStatus;
+
+                    if (!currentSheetStatus) {
+                        this.statusMessage = "Importation started...";
+                        return;
+                    }
+
                     var totalImported = status.importedLines + status.failedLines;
                     var completed = totalImported == status.totalLines;
+                    var totalSheetImported = currentSheetStatus.importedLines + currentSheetStatus.failedLines;
 
                     this.isImportationCompleted = completed;
                     this.statusPercent = status.totalLines == 0 ? 100 : Math.round((totalImported / status.totalLines) * 100);
-                    this.statusMessage = completed
-                                ? "Importation completed."
-                                : "Importing " + status.totalLines + " " + (status.totalLines == 1 ? "line" : "lines") + "...";
+                    this.statusMessage = "Importing " + currentSheetStatus.sheetTitle + " sheet... " +
+                        totalSheetImported + " of " + currentSheetStatus.linesToImport + " " + (currentSheetStatus.linesToImport == 1 ? "line" : "lines") + "...";
 
-                    if (completed && status.failedLines > 0) {
-                        var lines = status.failedLines > 1 ? "lines" : "line";
-                        this.statusMessage = "Failed to import " + status.failedLines + " " + lines + ". Please fix the errors and import the spreadsheet again.";
+                    if (completed) {
+                        if (status.failedLines > 0)
+                            this.statusMessage = "Importation completed with failed lines. Please fix the errors and import the spreadsheet again.";
+                        else
+                            this.statusMessage = "Importation completed successfully.";
+                        this.sheetsStatus = status.sheetsStatus;
+                        this.$.modal.notifyResize();
                     }
                 },
 
@@ -1100,6 +1161,16 @@
                 goToStep: function(stepNumber) {
                     this.stepNumber = stepNumber;
                     this.$.modal.notifyResize();
+                },
+
+                _getSheetActiveClass: function(currentSheet, selectedSheet) {
+                    if (currentSheet.sheetTitle === selectedSheet.sheetTitle)
+                        return 'active';
+                    return '';
+                },
+
+                _selectSheet: function(event) {
+                    this.set('selectedSheet', event.target.dataSheet);
                 }
             });
         })();

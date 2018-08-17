@@ -2,6 +2,7 @@ package objective.taskboard.sizingImport.cost;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
+import static objective.taskboard.sizingImport.SizingImportConfig.SHEET_COST;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import objective.taskboard.jira.data.JiraIssue;
 import objective.taskboard.sizingImport.JiraFacade;
 import objective.taskboard.sizingImport.SizingImportConfig;
-import objective.taskboard.sizingImport.SizingImporterNotifier;
+import objective.taskboard.sizingImport.SizingSheetImporterNotifier;
 
 public class CostImporter {
 
@@ -21,9 +22,9 @@ public class CostImporter {
 
     private final SizingImportConfig importConfig;
     private final JiraFacade jiraFacade;
-    private final SizingImporterNotifier importerNotifier;
+    private final SizingSheetImporterNotifier importerNotifier;
 
-    public CostImporter(SizingImportConfig importConfig, JiraFacade jiraFacade, SizingImporterNotifier importerNotifier) {
+    public CostImporter(SizingImportConfig importConfig, JiraFacade jiraFacade, SizingSheetImporterNotifier importerNotifier) {
         this.importConfig = importConfig;
         this.jiraFacade = jiraFacade;
         this.importerNotifier = importerNotifier;
@@ -34,7 +35,7 @@ public class CostImporter {
                 .filter(SizingImportLineCost::isNotImported)
                 .collect(toList());
 
-        importerNotifier.notifySheetImportStarted(allLines.size(), linesToImport.size());
+        importerNotifier.notifySheetImportStarted(SHEET_COST, allLines.size(), linesToImport.size());
 
         for (SizingImportLineCost line : linesToImport) {
             importerNotifier.notifyLineImportStarted(line);
@@ -60,7 +61,7 @@ public class CostImporter {
             importerNotifier.notifyLineImportFinished(line, indirectCostIssueKey);
         }
 
-        importerNotifier.notifyImportFinished();
+        importerNotifier.notifySheetImportFinished();
     }
 
     private List<String> getValidationErrors(SizingImportLineCost line) {
