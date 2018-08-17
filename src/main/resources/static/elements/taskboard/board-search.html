@@ -150,6 +150,7 @@
                 },
 
                 searchIssue: _.debounce(function () {
+                    taskboard.unselectIssue();
                     if (this.isReleaseConfigured())
                         clearReleaseButton.hidden = this.releaseSelected ? false : true;
 

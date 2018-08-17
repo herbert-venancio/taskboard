@@ -23,6 +23,7 @@ package objective.taskboard.it;
 import java.util.List;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -37,6 +38,17 @@ class TestIssue extends AbstractUiFragment {
 
     public TestIssue click() {
         waitForClick(issueElement);
+        return this;
+    }
+    
+    public TestIssue clickHoldingCtrl() {
+        waitForClickHoldingAKey(issueElement, Keys.CONTROL);
+        return this;
+    }
+
+    public TestIssue moveToTop() {
+        WebElement moveToTopButton = issueElement.findElement(By.className("arrow-box"));
+        waitForClick(moveToTopButton);
         return this;
     }
 
@@ -111,4 +123,5 @@ class TestIssue extends AbstractUiFragment {
 
         return issues.get(0);
     }
+    
 }

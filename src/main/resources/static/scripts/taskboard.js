@@ -1,30 +1,10 @@
-/*-
- * [LICENSE]
- * Taskboard
- * - - -
- * Copyright (C) 2015 - 2016 Objective Solutions
- * - - -
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * [/LICENSE]
- */
-
 function Taskboard() {
     var self = this;
 
     var _cardFieldFilters;
     var _issuesBySteps;
     var _laneConfiguration;
+    var  _selectedIssueComponent = null;
 
     this.urlJira = null;
     this.urlLinkGraph = null
@@ -541,6 +521,18 @@ function Taskboard() {
             .concat(this._getRegularIssues(issues));
     };
 
+    this.getOrderedIssueKeysPrioritizingSelected = function(issues) {
+        var issue =  _selectedIssueComponent.item;
+
+        var regularIssuesWithoutSelected = this._getRegularIssues(issues)
+            .filter( i => i.issueKey !== issue.issueKey);
+
+        return this._getExpediteIssues(issues)
+            .concat(issue)
+            .concat(regularIssuesWithoutSelected)
+            .map(i => i.issueKey);
+    };
+
     this._getExpediteIssues = function(issues) {
         return filterInArray(issues, function(issue) {
             return self.isIssueExpedite(issue.classOfServiceValue);
@@ -585,6 +577,40 @@ function Taskboard() {
             issueKey: issueKey,
             errorMessage: message
         }});
+    };
+
+    this.setSelectedIssue = function(issue) {
+        if (this.hasIssueSelected())
+            this._unselectIssue();
+
+        _selectedIssueComponent = issue;
+        this._makeAllStepsUnsortable();
+    }
+
+    this.hasIssueSelected = function() {
+        return !_.isEmpty(_selectedIssueComponent)
+    }
+
+    this.unselectIssue = function() {
+        if (this.hasIssueSelected()) {
+            this._unselectIssue();
+            this._makeAllStepsSortable();
+        }
+    }
+
+    this._unselectIssue = function() {
+        _selectedIssueComponent.isSelected = false;
+        _selectedIssueComponent = null;
+    }
+
+    this._makeAllStepsSortable = function() {
+        document.querySelectorAll('board-step')
+            .forEach(step => step.makeStepSortable());
+    }
+
+    this._makeAllStepsUnsortable = function() {
+        document.querySelectorAll('board-step')
+            .forEach(step => step.makeStepUnsortable());        
     }
 
     this.init();
