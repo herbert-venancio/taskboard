@@ -3,14 +3,36 @@ package objective.taskboard.it;
 import org.junit.Test;
 
 public class CardTeamsIT extends AuthenticatedIntegrationTest {
+
     @Test
     public void whenIssueIsOpenWithouTeam_ShouldHaveDefaultTeam(){
+        MainPage mainPage = MainPage.produce(webDriver);
+        TestIssue issue = mainPage.issue("TASKB-601");
+        issue
+            .click()
+            .issueDetails()
+            .assertIsDefaultTeam("TASKBOARD 1");
+    }
+
+    @Test
+    public void whenIssueIsOpenWithouTeam_ButProjectHasTeamByIssueType_ShouldHaveTeamByIssueType(){
+        MainPage mainPage = MainPage.produce(webDriver);
+        TestIssue issue = mainPage.issue("TASKB-637");
+        issue
+            .click()
+            .issueDetails()
+            .assertIssueType("Task")
+            .assertIsTeamByIssueType("TASKBOARD 1", "Task", "Taskboard");
+    }
+
+    @Test
+    public void whenIssueHasTeamInheritedFromParent_ShouldntHaveReplaceButton(){
         MainPage mainPage = MainPage.produce(webDriver);
         TestIssue issue = mainPage.issue("TASKB-625");
         issue
             .click()
             .issueDetails()
-            .assertIsDefaultTeam("TASKBOARD 1");
+            .assertAreInheritedTeams("TASKBOARD 1");
     }
 
     @Test
@@ -27,7 +49,7 @@ public class CardTeamsIT extends AuthenticatedIntegrationTest {
     @Test
     public void whenTeamIsReplaced_ShouldUpdateIssueImmediatlyWithNewTeam(){
         MainPage mainPage = MainPage.produce(webDriver);
-        TestIssue issue = mainPage.issue("TASKB-625");
+        TestIssue issue = mainPage.issue("TASKB-601");
         issue
             .click()
             .issueDetails()

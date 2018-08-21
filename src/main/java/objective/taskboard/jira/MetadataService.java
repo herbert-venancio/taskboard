@@ -56,6 +56,10 @@ public class MetadataService {
                 .orElseThrow(() -> new IllegalArgumentException("There's no Issue Type with given ID: " + id));
     }
 
+    public boolean issueTypeExistsByIdAsLoggedInUser(Long id) {
+        return getIssueTypeMetadataAsLoggedInUser().containsKey(id);
+    }
+
     public Status getStatusById(Long id) {
         Status status = getStatusesMetadata().get(id);
         if (status == null)

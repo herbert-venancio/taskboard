@@ -14,6 +14,8 @@ import {TabsRouterComponent} from './tabs/tabs-router/tabs-router.component';
 import {TabRouterComponent} from './tabs/tabs-router/tab-router/tab-router.component';
 import {RouterModule} from '@angular/router';
 import {DataTableTopComponent} from './data-table/top/data-table-top.component';
+import {TitleComponent} from './title/title.component';
+import {HeaderContentComponent} from './header-content/header-content.component';
 
 @NgModule({
     imports: [
@@ -34,6 +36,8 @@ import {DataTableTopComponent} from './data-table/top/data-table-top.component';
         TabsRouterComponent,
         TabRouterComponent,
         DataTableTopComponent,
+        TitleComponent,
+        HeaderContentComponent
     ],
     exports: [
         AvatarComponent,
@@ -47,6 +51,8 @@ import {DataTableTopComponent} from './data-table/top/data-table-top.component';
         TabsRouterComponent,
         TabRouterComponent,
         DataTableTopComponent,
+        TitleComponent,
+        HeaderContentComponent
     ],
     schemas: [
         NO_ERRORS_SCHEMA

@@ -24,6 +24,7 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -180,25 +181,38 @@ public class Issue extends IssueScratch implements Serializable {
     public String getColor() {
         return issueColorService.getColor(getClassOfServiceId());
     }
-    
+
     public Set<String> getMismatchingUsers() {
         return issueTeamService.getMismatchingUsers(this);
     }
 
+
     public Set<CardTeam> getTeams() {
+        // This method follows the following order:
+
+        // 1 - Card Teams
         Set<CardTeam> issueTeams = new LinkedHashSet<>(issueTeamService.getTeamsForIds(getRawAssignedTeamsIds()));
         if (!issueTeams.isEmpty())
             return issueTeams;
 
+        // 2 - Parent teams (if the parent is using its parent or if it has some set team)
         Optional<Issue> parentCardOpt = getParentCard();
+        if (parentCardOpt.isPresent() &&  (parentCardOpt.get().getRawAssignedTeamsIds().size() > 0 || parentCardOpt.get().isUsingParentTeam()))
+            return parentCardOpt.get().getTeams();
+
+        // 3 - Team By Issue Type
+        Optional<CardTeam> teamByIssueType = issueTeamService.getCardTeamByIssueType(this);
+        if (teamByIssueType.isPresent())
+            return Collections.singleton(teamByIssueType.get());
+
+        // 4 - Parent teams
         if (parentCardOpt.isPresent())
             return parentCardOpt.get().getTeams();
 
-        issueTeams.add(issueTeamService.getDefaultTeam(getProjectKey()));
-
-        return issueTeams;
+        // 5 - Default team
+        return Collections.singleton(issueTeamService.getDefaultTeam(this));
     }
-    
+
     /**
      * Returns the value of assigned teams id in jira field. The default team will never be returned here.
      * 
@@ -209,19 +223,21 @@ public class Issue extends IssueScratch implements Serializable {
     }
 
     public boolean isUsingDefaultTeam() {
-        if (getRawAssignedTeamsIds().size() > 0)
+        if (getRawAssignedTeamsIds().size() > 0 || isUsingTeamByIssueType())
             return false;
         Optional<Issue> parentCard = getParentCard();
         return parentCard.map(Issue::isUsingDefaultTeam).orElse(true);
     }
 
-    public boolean isUsingParentTeam() {
-        if (parentCard == null)
-            return false;
-
+    public boolean isUsingTeamByIssueType() {
         if (getRawAssignedTeamsIds().size() > 0)
             return false;
+        return issueTeamService.getCardTeamByIssueType(this).isPresent();
+    }
 
+    public boolean isUsingParentTeam() {
+        if (parentCard == null || getRawAssignedTeamsIds().size() > 0 || isUsingTeamByIssueType())
+            return false;
         return !parentCard.isUsingDefaultTeam();
     }
 
@@ -704,7 +720,13 @@ public class Issue extends IssueScratch implements Serializable {
         if (isUsingDefaultTeam())
             assignedTeamsIds.add(issueTeamService.getDefaultTeamId(this));
 
-        if (isUsingParentTeam())
+        else if (isUsingTeamByIssueType()) {
+            Optional<CardTeam> teamByIssueType = issueTeamService.getCardTeamByIssueType(this);
+            if (teamByIssueType.isPresent())
+                assignedTeamsIds.add(teamByIssueType.get().id);
+        }
+
+        else if (isUsingParentTeam())
             assignedTeamsIds.addAll(parentCard.getRawAssignedTeamsIds());
 
         if (!assignedTeamsIds.contains(teamToAdd.getId()))
@@ -785,7 +807,18 @@ public class Issue extends IssueScratch implements Serializable {
 
     public Issue copy() {
         Issue copy = SerializationUtils.clone(this);
-        copy.restoreServices(
+        restoreServicesToIssue(copy);
+
+        if (this.parentCard != null) {
+            Issue parentCopy = this.parentCard.copy();
+            copy.setParentCard(parentCopy);
+        }
+
+        return copy;
+    }
+
+    private void restoreServicesToIssue(Issue issue) {
+        issue.restoreServices(
                 jiraProperties,
                 metaDataService,
                 issueTeamService,
@@ -795,13 +828,6 @@ public class Issue extends IssueScratch implements Serializable {
                 projectService,
                 issueColorService,
                 issuePriorityService);
-
-        if (this.parentCard != null) {
-            Issue parentCopy = SerializationUtils.clone(this.parentCard);
-            copy.setParentCard(parentCopy);
-        }
-
-        return copy;
     }
 
     public void restoreDefaultTeams() {

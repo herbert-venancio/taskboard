@@ -2,6 +2,7 @@ package objective.taskboard.team;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -22,7 +23,7 @@ public class UserTeamService {
     private final TeamCachedRepository teamRepo;
     private final TeamFilterConfigurationService teamFilterConfigurationService;
     private final LoggedUserDetails loggedInUser;
-    
+
     @Autowired
     public UserTeamService(
             UserTeamCachedRepository userTeamRepo, 
@@ -50,11 +51,11 @@ public class UserTeamService {
         }
         return false;
     }
-    
+
     public Set<Team> getTeamsVisibleToLoggedInUser() {
         if (loggedInUser.isAdmin())
             return new HashSet<>(teamRepo.getCache());
-        
+
         List<UserTeam> userTeam = userTeamRepo.findByUserName(loggedInUser.getUsername());
         Set<Team> userTeams = userTeam.stream().map(ut->teamRepo.findByName(ut.getTeam())).filter(t->t!=null).distinct().collect(Collectors.toSet());
 
@@ -63,4 +64,16 @@ public class UserTeamService {
 
         return userTeams;
     }
+
+    public Optional<Team> getTeamVisibleToLoggedInUserById(Long id) {
+        return getTeamsVisibleToLoggedInUser().stream()
+            .filter(t -> t.getId().equals(id))
+            .findFirst();
+    }
+
+    public Team getTeamVisibleToLoggedInUserByIdOrCry(Long id) {
+        return getTeamVisibleToLoggedInUserById(id)
+                .orElseThrow(() -> new IllegalStateException("Team \""+ id +"\" not found to logged in user."));
+    }
+
 }

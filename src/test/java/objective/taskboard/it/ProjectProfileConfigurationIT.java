@@ -72,7 +72,7 @@ public class ProjectProfileConfigurationIT extends AuthenticatedIntegrationTest 
     private ProjectProfileConfigurationTab openFromProjectConfig(ProjectInfo projectInfo) {
         return ProjectConfigurationOperator.openFromMainMenu(mainPage, projectInfo)
             .openAdvancedConfigurations()
-            .selectProfileTab()
+            .selectProfileConfiguration()
             .assertTabIsOpen();
     }
 }

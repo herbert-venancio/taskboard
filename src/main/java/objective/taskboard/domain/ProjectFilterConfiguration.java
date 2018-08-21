@@ -8,18 +8,34 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import objective.taskboard.project.ProjectDefaultTeamByIssueType;
 
 @Entity
 @Table(name = "project_filter_configuration")
 public class ProjectFilterConfiguration implements Serializable {
+
+    private static final Logger log = LoggerFactory.getLogger(ProjectFilterConfiguration.class);
+
     private static final long serialVersionUID = 765599368694090438L;
 
     private static final int DEFAULT_PROJECTION_TIMESPAN = 20;
@@ -36,7 +52,7 @@ public class ProjectFilterConfiguration implements Serializable {
 
     @Column
     private LocalDate deliveryDate;//NOSONAR
-    
+
     @Column
     private Long defaultTeam;
 
@@ -48,24 +64,49 @@ public class ProjectFilterConfiguration implements Serializable {
 
     @Column
     private Integer projectionTimespan;
-    
+
     @Column
     private LocalDate baselineDate;//NOSONAR
     
     @Column
     private Long baseClusterId;
 
-    protected ProjectFilterConfiguration() {} //NOSONAR
+    @OneToMany(fetch=FetchType.EAGER, cascade=CascadeType.ALL, orphanRemoval=true, mappedBy="project")
+    @Fetch(value = FetchMode.SUBSELECT)
+    private List<ProjectDefaultTeamByIssueType> teamsByIssueTypes;
+
+    protected ProjectFilterConfiguration() { //NOSONAR
+        this.teamsByIssueTypes = new ArrayList<>();
+    }
 
     public ProjectFilterConfiguration(String projectKey, Long defaultTeamId) {
         this.setDefaultTeam(defaultTeamId);
         this.setProjectKey(projectKey);
+        this.teamsByIssueTypes = new ArrayList<>();
     }
-    
+
     public ProjectFilterConfiguration(String projectKey, Long defaultTeamId, Long baseClusterId) {
         this.setDefaultTeam(defaultTeamId);
         this.setProjectKey(projectKey);
         this.setBasepClusterId(baseClusterId);
+        this.teamsByIssueTypes = new ArrayList<>();
+    }
+
+    public Optional<Long> getTeamByIssueTypeId(Long issueTypeId) {
+        return teamsByIssueTypes.stream()
+                .filter(item -> item.getIssueTypeId().equals(issueTypeId))
+                .map(item -> item.getTeamId())
+                .findFirst();
+    }
+
+    public void addProjectTeamForIssueType(Long teamId, Long issueTypeId) {
+        teamsByIssueTypes.add(new ProjectDefaultTeamByIssueType(this, teamId, issueTypeId));
+    }
+
+    public void removeDefaultTeamForIssueType(ProjectDefaultTeamByIssueType projectTeamByIssueType) {
+        boolean wasRemoved = teamsByIssueTypes.removeIf(item -> projectTeamByIssueType.equals(item));
+        if (!wasRemoved)
+            log.warn("removeDefaultTeamForIssueType: ProjectTeamByIssueType with id \""+ projectTeamByIssueType.getId() +"\" not found.");
     }
 
     public Integer getId() {
@@ -100,7 +141,7 @@ public class ProjectFilterConfiguration implements Serializable {
         validateProjectDates(this.startDate, deliveryDate);
         this.deliveryDate = deliveryDate;
     }
-    
+
     private static void validateProjectDates(LocalDate startDate, LocalDate deliveryDate) {
         if (startDate != null && deliveryDate != null && startDate.isAfter(deliveryDate))
             throw new IllegalArgumentException("'startDate' should be before or equal to 'deliveryDate'");
@@ -146,11 +187,11 @@ public class ProjectFilterConfiguration implements Serializable {
         notNull(defaultTeamId);
         this.defaultTeam = defaultTeamId;
     }
-    
+
     public void setBaselineDate(LocalDate baselineDate) {
         this.baselineDate = baselineDate;
     }
-    
+
     public Optional<LocalDate> getBaselineDate() {
         return Optional.ofNullable(baselineDate);
     }
@@ -163,11 +204,17 @@ public class ProjectFilterConfiguration implements Serializable {
         this.baseClusterId = baseClusterId;
     }
 
+    public List<ProjectDefaultTeamByIssueType> getTeamsByIssueTypes() {
+        return Collections.unmodifiableList(teamsByIssueTypes);
+    }
+
     @Override
     public String toString() {
         return "ProjectFilterConfiguration [id=" + id + ", projectKey=" + projectKey + ", startDate=" + startDate
                 + ", deliveryDate=" + deliveryDate + ", defaultTeam=" + defaultTeam + ", isArchived=" + isArchived
                 + ", riskPercentage=" + riskPercentage + ", projectionTimespan=" + projectionTimespan
-                + ", baselineDate=" + baselineDate + ", baseClusterId=" + baseClusterId + "]";
+                + ", baselineDate=" + baselineDate + ", baseClusterId=" + baseClusterId + ", teamsByIssueTypes="
+                + teamsByIssueTypes + "]";
     }
+
 }

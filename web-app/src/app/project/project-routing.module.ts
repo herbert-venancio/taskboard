@@ -1,6 +1,7 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 import {ProjectProfileComponent} from './config/profile/project-profile.component';
+import {ProjectTeamsComponent} from './config/teams/project-teams.component';
 import {ProjectConfigComponent} from "./config/project-config.component";
 
 const routes: Routes = [
@@ -15,6 +16,10 @@ const routes: Routes = [
                         path: 'profile',
                         component: ProjectProfileComponent
                     },
+                    {
+                        path: 'teams',
+                        component: ProjectTeamsComponent
+                    }
                 ]
             }
         ]

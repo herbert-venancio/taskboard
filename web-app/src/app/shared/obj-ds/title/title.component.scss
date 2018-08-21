@@ -1,0 +1,12 @@
+@import "obj-ds/utils/all";
+
+:host {
+    flex: 1;
+
+    display: block;
+    font-family: $obj-font-ptsans;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 18px;
+    color: $obj-color-black;
+}

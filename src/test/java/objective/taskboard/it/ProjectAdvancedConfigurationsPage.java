@@ -1,6 +1,7 @@
 package objective.taskboard.it;
 
 import static objective.taskboard.it.ProjectProfileConfigurationTab.PROJECT_PROFILE_CONFIGURATION_TAG;
+import static objective.taskboard.it.ProjectDefaultTeamsConfiguration.PROJECT_TEAMS_CONFIGURATION_TAG;
 import static objective.taskboard.it.components.TabsRouterComponent.TABS_ROUTER_TAG;
 import static org.openqa.selenium.By.cssSelector;
 import static org.openqa.selenium.support.PageFactory.initElements;
@@ -26,12 +27,17 @@ public class ProjectAdvancedConfigurationsPage extends AbstractUiFragment {
         this.projectInfo = projectInfo;
         initElements(driver, this);
         assertPageIsOpen();
-        tabs = new TabsRouterComponent(driver, cssSelector(TABS_ROUTER_TAG), "Profile");
+        tabs = new TabsRouterComponent(driver, cssSelector(TABS_ROUTER_TAG), "Profile", "Teams");
     }
 
-    public ProjectProfileConfigurationTab selectProfileTab() {
+    public ProjectProfileConfigurationTab selectProfileConfiguration() {
         tabs.select("Profile", PROJECT_PROFILE_CONFIGURATION_TAG);
         return new ProjectProfileConfigurationTab(webDriver, projectInfo).assertTabIsOpen();
+    }
+
+    public ProjectDefaultTeamsConfiguration selectTeamsConfiguration() {
+        tabs.select("Teams", PROJECT_TEAMS_CONFIGURATION_TAG);
+        return new ProjectDefaultTeamsConfiguration(webDriver, projectInfo).assertTabIsOpen();
     }
 
     private ProjectAdvancedConfigurationsPage assertPageIsOpen() {

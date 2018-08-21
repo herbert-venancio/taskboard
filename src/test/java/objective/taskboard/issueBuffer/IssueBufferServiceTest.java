@@ -217,6 +217,7 @@ public class IssueBufferServiceTest {
         issueBufferService.updateByEvent(payload1.webhookEvent, "TASKB-1", Optional.of(payload1.issue));
         when(jiraBean.getIssueByKey("TASKB-1")).thenReturn(Optional.of(payload1.issue));
         when(issueTeamService.getDefaultTeamId(Mockito.any())).thenReturn(1L);
+        when(issueTeamService.getCardTeamByIssueType(Mockito.any())).thenReturn(Optional.empty());
 
         issueBufferService.addTeamToIssue("TASKB-1", 13L);
 

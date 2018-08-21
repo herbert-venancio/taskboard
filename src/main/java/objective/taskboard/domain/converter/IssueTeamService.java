@@ -53,23 +53,7 @@ public class IssueTeamService {
     
     @Autowired
     private ProjectFilterConfigurationCachedRepository projectRepo;
-    
-    public Long getDefaultTeamId(Issue issue) {
-        Optional<ProjectFilterConfiguration> projectOpt = projectRepo.getProjectByKey(issue.getProjectKey());
-        if (!projectOpt.isPresent()) {
-            log.warn("Project not found for issue " + issue.getIssueKey() + ". This situation should be impossible");
-            return null;
-        }
-        
-        Optional<Team> team = teamRepo.findById(projectOpt.get().getDefaultTeam());
-        if (!team.isPresent()) { 
-            log.warn("Default team ID " + projectOpt.get().getDefaultTeam() + " for project " + issue.getProjectKey() + " not found!");
-            return null;
-        }
-        
-        return team.get().getId();
-    }
-    
+
     public Set<CardTeam> getTeamsForIds(List<Long> ids) {
         Set<CardTeam> issueTeams = new LinkedHashSet<>();
         for (Long teamId : ids) {
@@ -82,17 +66,37 @@ public class IssueTeamService {
         }
         return issueTeams;
     }
-    
-    public CardTeam getDefaultTeam(String projectKey) {
-        Optional<ProjectFilterConfiguration> projectOpt = projectRepo.getProjectByKey(projectKey);
-        if (!projectOpt.isPresent())
-            throw new IllegalArgumentException(projectKey + " project not found.");
 
-        Optional<Team> team = teamRepo.findById(projectOpt.get().getDefaultTeam());
-        if (team.isPresent())
-            return CardTeam.from(team.get());
+    public Long getDefaultTeamId(Issue issue) {
+        return this.getDefaultTeam(issue).id;
+    }
 
-        throw new IllegalStateException("Default team ID " + projectOpt.get().getDefaultTeam() + " for project " + projectKey + " not found!");
+    public CardTeam getDefaultTeam(Issue issue) {
+        Optional<ProjectFilterConfiguration> project = projectRepo.getProjectByKey(issue.getProjectKey());
+        if (!project.isPresent())
+            throw new IllegalStateException("Project not found for issue \"" + issue.getIssueKey() + "\".");
+
+        Optional<Team> team = teamRepo.findById(project.get().getDefaultTeam());
+        if (!team.isPresent())
+            throw new IllegalStateException("Default team \""+ project.get().getDefaultTeam() +"\" for project \"" + issue.getProjectKey() + "\" not found.");
+
+        return CardTeam.from(team.get());
+    }
+
+    public Optional<CardTeam> getCardTeamByIssueType(Issue issue) {
+        Optional<ProjectFilterConfiguration> project = projectRepo.getProjectByKey(issue.getProjectKey());
+        if (!project.isPresent())
+            throw new IllegalStateException("Project not found for issue \"" + issue.getIssueKey() + "\".");
+
+        Optional<Long> teamByIssueType = project.get().getTeamByIssueTypeId(issue.getType());
+        if (!teamByIssueType.isPresent())
+            return Optional.empty();
+
+        Optional<Team> team = teamRepo.findById(teamByIssueType.get());
+        if (!team.isPresent())
+            log.warn("Default team \""+ teamByIssueType.get() +"\" by issue type \""+ issue.getType() +"\" for project \"" + issue.getProjectKey() + "\" not found.");
+
+        return Optional.of(CardTeam.from(team.get()));
     }
 
     /**
@@ -116,6 +120,7 @@ public class IssueTeamService {
                 mismatches.add(user.name);
         }
 
-        return mismatches;    
+        return mismatches;
     }
+
 }

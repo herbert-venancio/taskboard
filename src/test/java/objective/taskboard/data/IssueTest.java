@@ -1,7 +1,10 @@
 package objective.taskboard.data;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
@@ -16,13 +19,13 @@ import java.util.stream.Collectors;
 
 import org.apache.tomcat.util.buf.StringUtils;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.mockito.internal.util.collections.Sets;
 
 import objective.taskboard.data.Issue.CardTeam;
 import objective.taskboard.domain.converter.IssueTeamService;
 
 public class IssueTest {
+
     @Test
     public void ensureAllScratchFieldsAreCopied() throws IllegalArgumentException, IllegalAccessException {
         IssueScratch issueScratch = makeIssueScratch();
@@ -35,10 +38,10 @@ public class IssueTest {
             assertEquals(field.get(issueScratch), field.get(subject));
         }
     }
-    
+
     private IssueScratch makeIssueScratch(Long ...teamId)  {
         LinkedList<Long> assignedTeamsIds = new LinkedList<>(Arrays.asList(teamId));
-        
+
         IssueScratch issueScratch = new IssueScratch(
                 66l,
                 "K-66",
@@ -88,22 +91,25 @@ public class IssueTest {
 
         return issueScratch;
     }
-    
+
     @Test
     public void addTeam_IfAddingATeamThatIsNotTheDefault_MakeSureTheDefaultIsIncludedInTheNextResult() {
-        IssueTeamService is = Mockito.mock(IssueTeamService.class);
-        Mockito.when(is.getDefaultTeamId(Mockito.any())).thenReturn(1L);
+        IssueTeamService is = mock(IssueTeamService.class);
+        when(is.getDefaultTeamId(any())).thenReturn(1L);
+        when(is.getCardTeamByIssueType(any())).thenReturn(Optional.empty());
         Issue subject = new Issue(makeIssueScratch(), null, null, is, null, null, null, null, null, null);
         Team teamToAdd = new Team();
         teamToAdd.setId(13L);
         subject.addTeam(teamToAdd );
         assertEquals("1,13", subject.getRawAssignedTeamsIds().stream().sorted().map(s->""+s).collect(Collectors.joining(",")));
     }
-    
+
     @Test
     public void addTeam_IfAddingATeamThatIsNotTheDefault_MakeSureTheParentTeamIsIncludedInTheNextResult() {
-        IssueTeamService is = Mockito.mock(IssueTeamService.class);
-        Mockito.when(is.getDefaultTeamId(Mockito.any())).thenReturn(1L);
+        IssueTeamService is = mock(IssueTeamService.class);
+        when(is.getDefaultTeamId(any())).thenReturn(1L);
+        when(is.getCardTeamByIssueType(any())).thenReturn(Optional.empty());
+
         Issue subject = new Issue(makeIssueScratch(), null, null, is, null, null, null, null, null, null);
         Issue parent = new Issue(makeIssueScratch(37L), null, null, is, null, null, null, null, null, null);
         subject.setParentCard(parent);
@@ -114,9 +120,27 @@ public class IssueTest {
     }
 
     @Test
+    public void addTeam_IfAddingATeamThatIsNotTheDefault_MakeSureTheTeamByIssueTypeIsIncludedInTheNextResult() {
+        long teamIdByIssueType = 10L;
+        long teamToAddId = 13L;
+
+        IssueTeamService is = mock(IssueTeamService.class);
+        when(is.getCardTeamByIssueType(any())).thenReturn(Optional.of(new CardTeam("Team 1", teamIdByIssueType)));
+
+        Issue subject = new Issue(makeIssueScratch(), null, null, is, null, null, null, null, null, null);
+        Team teamToAdd = new Team();
+
+        teamToAdd.setId(teamToAddId);
+        subject.addTeam(teamToAdd);
+        assertEquals(teamIdByIssueType+","+teamToAddId, subject.getRawAssignedTeamsIds().stream().map(s->""+s).collect(Collectors.joining(",")));
+    }
+
+    @Test
     public void removeTeam_IfRemovingInheritedTeam_setTheTeamListToBeTheInheritedMinusTheRemoved() {
-        IssueTeamService is = Mockito.mock(IssueTeamService.class);
-        Mockito.when(is.getDefaultTeamId(Mockito.any())).thenReturn(1L);
+        IssueTeamService is = mock(IssueTeamService.class);
+        when(is.getDefaultTeamId(any())).thenReturn(1L);
+        when(is.getCardTeamByIssueType(any())).thenReturn(Optional.empty());
+
         Issue subject = new Issue(makeIssueScratch(), null, null, is, null, null, null, null, null, null);
         Issue parent = new Issue(makeIssueScratch(37L), null, null, is, null, null, null, null, null, null);
         subject.setParentCard(parent);
@@ -131,8 +155,8 @@ public class IssueTest {
     
     @Test
     public void replaceTeam_ShouldReplaceAnExistingTeamByAnother() {
-        IssueTeamService is = Mockito.mock(IssueTeamService.class);
-        Mockito.when(is.getDefaultTeamId(Mockito.any())).thenReturn(1L);
+        IssueTeamService is = mock(IssueTeamService.class);
+        when(is.getDefaultTeamId(any())).thenReturn(1L);
         Issue subject = new Issue(makeIssueScratch(), null, null, is, null, null, null, null, null, null);
         Team replacementTeam = new Team();
         replacementTeam.setId(13L);
@@ -144,26 +168,27 @@ public class IssueTest {
     }
 
     @Test
-    public void addTeamThatIsNotTheDefault_ShouldNotReaddTheDefaul() {
-        IssueTeamService is = Mockito.mock(IssueTeamService.class);
-        Mockito.when(is.getDefaultTeamId(Mockito.any())).thenReturn(1L);
+    public void addTeamThatIsNotTheDefault_ShouldNotReadTheDefault() {
+        IssueTeamService is = mock(IssueTeamService.class);
+        when(is.getDefaultTeamId(any())).thenReturn(1L);
+
         Issue subject = new Issue(makeIssueScratch(), null, null, is, null, null, null, null, null, null);
         Team replacementTeam = new Team();
         replacementTeam.setId(13L);
         Team teamToReplace = new Team();
         teamToReplace.setId(1L);
         subject.replaceTeam(Optional.of(teamToReplace), replacementTeam);
-        
+
         Team anotherTeam = new Team();
         anotherTeam.setId(3L);
         subject.addTeam(anotherTeam );
-        
+
         assertEquals("3,13", subject.getRawAssignedTeamsIds().stream().sorted().map(s->""+s).collect(Collectors.joining(",")));
     }
 
     @Test
     public void whenGetTeams_ShouldReturnTeamNamesForIdsInTeamCustomField(){
-        IssueTeamService is = Mockito.mock(IssueTeamService.class);
+        IssueTeamService is = mock(IssueTeamService.class);
         when(is.getTeamsForIds(Arrays.asList(37L))).thenReturn(Sets.newSet(new CardTeam("bravo1337", 37L)));
 
         Issue subject = new Issue(makeIssueScratch(37L), null, null, is, null, null, null, null, null, null);
@@ -173,32 +198,64 @@ public class IssueTest {
     }
 
     @Test
-    public void whenIssueHasNoTeamAndNoParent_ShouldReturnDefaultProjectTeam(){
-        IssueTeamService is = Mockito.mock(IssueTeamService.class);
-        when(is.getDefaultTeam(Mockito.any())).thenReturn(new CardTeam("default project team", 1l));
+    public void whenIssueHasNoTeamNoTeamByIssueTypeAndNoParent_ShouldReturnDefaultProjectTeam(){
+        IssueTeamService is = mock(IssueTeamService.class);
+        when(is.getDefaultTeam(any())).thenReturn(new CardTeam("default project team", 1l));
+        when(is.getCardTeamByIssueType(any())).thenReturn(Optional.empty());
+
         Issue subject = new Issue(makeIssueScratch(), null, null, is, null, null, null, null, null, null);
 
         List<String> issueTeams = toStringSet(subject.getTeams());
         assertEquals("default project team", StringUtils.join(issueTeams));
+        assertTrue(subject.isUsingDefaultTeam());
+        assertFalse(subject.isUsingParentTeam());
+        assertFalse(subject.isUsingTeamByIssueType());
     }
 
     @Test
-    public void whenIssueHasNoTeamAndHasParent_ShouldReturnParentTeam(){
-        IssueTeamService is = Mockito.mock(IssueTeamService.class);
-        when(is.getTeamsForIds(Arrays.asList(37L))).thenReturn(Sets.newSet(new CardTeam("bravo1337", 37L)));
+    public void whenIssueHasNoTeamButHasTeamByIssueTypeAndHasParentWithTeam_ShouldReturnParentTeam(){
+        IssueTeamService is = mock(IssueTeamService.class);
 
         Issue subject = new Issue(makeIssueScratch(), null, null, is, null, null, null, null, null, null);
         Issue parent = new Issue(makeIssueScratch(37L), null, null, is, null, null, null, null, null, null);
         subject.setParentCard(parent);
 
+        when(is.getTeamsForIds(Arrays.asList(37L))).thenReturn(Sets.newSet(new CardTeam("bravo1337", 37L)));
+        when(is.getTeamsForIds(Arrays.asList())).thenReturn(Sets.newSet());
+        when(is.getCardTeamByIssueType(subject)).thenReturn(Optional.of(new CardTeam("bravo1337", 37L)));
+        when(is.getCardTeamByIssueType(parent)).thenReturn(Optional.empty());
+
         List<String> issueTeams = toStringSet(subject.getTeams());
         assertEquals("bravo1337", StringUtils.join(issueTeams));
+
+        assertFalse(subject.isUsingDefaultTeam());
+        assertTrue(subject.isUsingParentTeam());
+        assertFalse(subject.isUsingTeamByIssueType());
     }
 
     @Test
-    public void whenIssueHasNoTeamAndHasParentWithoutTeam_ShouldReturnDefaultTeam(){
-        IssueTeamService is = Mockito.mock(IssueTeamService.class);
-        when(is.getDefaultTeam(Mockito.any())).thenReturn(new CardTeam("default project team", 1l));
+    public void whenIssueHasNoTeamButHasTeamByIssueTypeAndHasParentWithoutTeam_ShouldReturnTheTeamByIssueType(){
+        IssueTeamService is = mock(IssueTeamService.class);
+
+        Issue subject = new Issue(makeIssueScratch(), null, null, is, null, null, null, null, null, null);
+        Issue parent = new Issue(makeIssueScratch(), null, null, is, null, null, null, null, null, null);
+        subject.setParentCard(parent);
+
+        when(is.getCardTeamByIssueType(subject)).thenReturn(Optional.of(new CardTeam("bravo1337", 37L)));
+
+        List<String> issueTeams = toStringSet(subject.getTeams());
+        assertEquals("bravo1337", StringUtils.join(issueTeams));
+
+        assertFalse(subject.isUsingDefaultTeam());
+        assertFalse(subject.isUsingParentTeam());
+        assertTrue(subject.isUsingTeamByIssueType());
+    }
+
+    @Test
+    public void whenIssueHasNoTeamNoTeamByIssueTypeAndHasParentWithoutTeam_ShouldReturnDefaultTeam(){
+        IssueTeamService is = mock(IssueTeamService.class);
+        when(is.getDefaultTeam(any())).thenReturn(new CardTeam("default project team", 1l));
+        when(is.getCardTeamByIssueType(any())).thenReturn(Optional.empty());
 
         Issue subject = new Issue(makeIssueScratch(), null, null, is, null, null, null, null, null, null);
         Issue parent = new Issue(makeIssueScratch(), null, null, is, null, null, null, null, null, null);
@@ -206,6 +263,10 @@ public class IssueTest {
 
         List<String> issueTeams = toStringSet(subject.getTeams());
         assertEquals("default project team", StringUtils.join(issueTeams));
+
+        assertTrue(subject.isUsingDefaultTeam());
+        assertFalse(subject.isUsingParentTeam());
+        assertFalse(subject.isUsingTeamByIssueType());
     }
 
     @Test

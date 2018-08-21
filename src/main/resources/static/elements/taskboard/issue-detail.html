@@ -509,12 +509,12 @@
                 margin: auto 2px auto 5px;
             }
 
-            .default-team {
+            .default-team, .team-by-issue-type {
                 background-color: #8e8e8e !important;
                 cursor: pointer;
             }
 
-            .default-team iron-icon {
+            .default-team iron-icon, .team-by-issue-type iron-icon {
                 color: #e5e5e5 !important;
             }
 
@@ -1261,7 +1261,7 @@
                 },
 
                 showReplaceAction: function() {
-                    return this.item.usingDefaultTeam;
+                    return this.item.usingDefaultTeam || this.item.usingTeamByIssueType;
                 },
 
                 showRemoveAction: function() {
@@ -1269,12 +1269,14 @@
                 },
 
                 canReturnToDefault: function() {
-                    return !this.item.usingDefaultTeam && !this.item.usingParentTeam;
+                    return !this.item.usingDefaultTeam && !this.item.usingTeamByIssueType && !this.item.usingParentTeam;
                 },
 
                 teamClasses: function() {
                     if (this.item.usingDefaultTeam)
                         return "default-team";
+                    if (this.item.usingTeamByIssueType)
+                        return "team-by-issue-type";
                     if (this.item.usingParentTeam)
                         return "parent-team";
                     return "";
@@ -1283,6 +1285,8 @@
                 titleForTeam: function(team) {
                     if (this.item.usingDefaultTeam)
                         return team.name + " is the default team for project " + this.item.project;
+                    if (this.item.usingTeamByIssueType)
+                        return team.name + " is the default team for issue type " + this.getIssueTypeName(this.item.type) + " on project " + this.item.project;
                     if (this.item.usingParentTeam)
                         return "Team " + team.name + " was inherited from parent issue " + this.item.parent;
                     return "";
@@ -1315,7 +1319,7 @@
 
                 _showReplaceTeamPicker: function(e) {
                     e.stopPropagation();
-                    if (!this.item.usingDefaultTeam)
+                    if (!this.item.usingDefaultTeam && !this.item.usingTeamByIssueType)
                         return;
 
                     this._closeAllPickers();

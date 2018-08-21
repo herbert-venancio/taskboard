@@ -54,7 +54,7 @@ public class ProjectConfigurationIT extends AuthenticatedIntegrationTest {
     public void shouldGoToEditProfile() {
         ProjectConfigurationOperator.openFromMainMenu(mainPage, TASKB)
             .openAdvancedConfigurations()
-            .selectProfileTab()
+            .selectProfileConfiguration()
             .assertTabIsOpen();
     }
 

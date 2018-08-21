@@ -51,6 +51,7 @@ public class CardDto {
     public Set<String> mismatchingUsers;
     public List<String> teamNames;
     public List<CardTeam> teams;
+    public boolean usingTeamByIssueType;
     public boolean usingDefaultTeam;
     public boolean usingParentTeam;
     public String classOfServiceValue;
@@ -122,7 +123,9 @@ public class CardDto {
         
         cardDto.subtasks = issue.getSubtasks();
         cardDto.teams = filterTeams(issue.getTeams(), visibleTeams);
-        cardDto.teamNames = cardDto.teams.stream().map(t->t.name).distinct().collect(Collectors.toList()); 
+        cardDto.teamNames = cardDto.teams.stream().map(t->t.name).distinct().collect(Collectors.toList());
+
+        cardDto.usingTeamByIssueType = issue.isUsingTeamByIssueType();
         cardDto.usingDefaultTeam = issue.isUsingDefaultTeam();
         cardDto.usingParentTeam= issue.isUsingParentTeam();
         
@@ -175,6 +178,7 @@ public class CardDto {
                 , dto.releaseId
                 , dto.mismatchingUsers
                 , dto.teamNames
+                , dto.usingTeamByIssueType
                 , dto.usingDefaultTeam
                 , dto.usingParentTeam
                 , dto.subTask
