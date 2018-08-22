@@ -33,6 +33,7 @@ import java.util.function.Predicate;
 
 import javax.annotation.PostConstruct;
 
+import objective.taskboard.issueBuffer.IssueBufferService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +59,7 @@ public class ProjectService {
     private final JiraProjectService jiraProjectService;
     private final Authorizer authorizer;
     private final ProjectBaselineProvider baselineProvider;
+    private final IssueBufferService issueBufferService;
 
     @Autowired
     public ProjectService(
@@ -65,12 +67,14 @@ public class ProjectService {
             ProjectProfileItemRepository projectProfileItemRepository, 
             JiraProjectService jiraProjectService,
             Authorizer authorizer, 
-            ProjectBaselineProvider baselineProvider) {
+            ProjectBaselineProvider baselineProvider,
+            IssueBufferService issueBufferService) {
         this.projectRepository = projectRepository;
         this.projectProfileItemRepository = projectProfileItemRepository;
         this.jiraProjectService = jiraProjectService;
         this.authorizer = authorizer;
         this.baselineProvider = baselineProvider;
+        this.issueBufferService = issueBufferService;
     }
 
     @PostConstruct
@@ -159,6 +163,7 @@ public class ProjectService {
 
     public void saveTaskboardProject(ProjectFilterConfiguration project) {
         projectRepository.save(project);
+        issueBufferService.notifyProjectConfigurationUpdated(project.getProjectKey());
     }
 
     public Version getVersion(String versionId) {
