@@ -202,6 +202,14 @@ public class IssueBufferService {
         projectsUpdatedByEvent.add(projectKey);
     }
 
+    public synchronized void notifyProjectConfigurationUpdated(final String projectKey) {
+        this.startBatchUpdate();
+        this.getAllIssues().stream()
+                .filter(i -> i.getProjectKey().equals(projectKey))
+                .forEach(i -> notifyIssueUpdate(i));
+        this.finishBatchUpdate();
+    }
+
     public synchronized void notifyIssueUpdate(final Issue issue) {
         issuesUpdatedByEvent.add(new IssueUpdate(issue, IssueUpdateType.UPDATED));
     }
