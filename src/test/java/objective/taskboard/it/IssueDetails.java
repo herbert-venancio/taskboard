@@ -138,7 +138,7 @@ class IssueDetails extends AbstractUiFragment {
         assertIsOpened();
         assertListOfItems(cssSelector(".teams .parent-team span"), teamList);
         Stream.of(teamList).forEach(team -> {
-            waitElementNotExistsOrInvisible(replaceButtonSelector(team));
+            waitElementExistenceAndVisibilityIs(true, replaceButtonSelector(team));
         });
         return this;
     }

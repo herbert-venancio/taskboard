@@ -97,6 +97,8 @@ public class IssueTest {
         IssueTeamService is = mock(IssueTeamService.class);
         when(is.getDefaultTeamId(any())).thenReturn(1L);
         when(is.getCardTeamByIssueType(any())).thenReturn(Optional.empty());
+        when(is.resolveTeamsOrigin(any())).thenCallRealMethod();
+
         Issue subject = new Issue(makeIssueScratch(), null, null, is, null, null, null, null, null, null);
         Team teamToAdd = new Team();
         teamToAdd.setId(13L);
@@ -109,6 +111,8 @@ public class IssueTest {
         IssueTeamService is = mock(IssueTeamService.class);
         when(is.getDefaultTeamId(any())).thenReturn(1L);
         when(is.getCardTeamByIssueType(any())).thenReturn(Optional.empty());
+        when(is.resolveTeams(any())).thenCallRealMethod();
+        when(is.resolveTeamsOrigin(any())).thenCallRealMethod();
 
         Issue subject = new Issue(makeIssueScratch(), null, null, is, null, null, null, null, null, null);
         Issue parent = new Issue(makeIssueScratch(37L), null, null, is, null, null, null, null, null, null);
@@ -126,6 +130,7 @@ public class IssueTest {
 
         IssueTeamService is = mock(IssueTeamService.class);
         when(is.getCardTeamByIssueType(any())).thenReturn(Optional.of(new CardTeam("Team 1", teamIdByIssueType)));
+        when(is.resolveTeamsOrigin(any())).thenCallRealMethod();
 
         Issue subject = new Issue(makeIssueScratch(), null, null, is, null, null, null, null, null, null);
         Team teamToAdd = new Team();
@@ -140,15 +145,17 @@ public class IssueTest {
         IssueTeamService is = mock(IssueTeamService.class);
         when(is.getDefaultTeamId(any())).thenReturn(1L);
         when(is.getCardTeamByIssueType(any())).thenReturn(Optional.empty());
+        when(is.resolveTeams(any())).thenCallRealMethod();
+        when(is.resolveTeamsOrigin(any())).thenCallRealMethod();
 
         Issue subject = new Issue(makeIssueScratch(), null, null, is, null, null, null, null, null, null);
-        Issue parent = new Issue(makeIssueScratch(37L), null, null, is, null, null, null, null, null, null);
+        Issue parent = new Issue(makeIssueScratch(), null, null, is, null, null, null, null, null, null);
         subject.setParentCard(parent);
         Team teamToAdd = new Team();
         teamToAdd.setId(37L);
         parent.addTeam(teamToAdd);
         Team teamToRemove = new Team();
-        teamToRemove.setId(13L);
+        teamToRemove.setId(1L);
         subject.removeTeam(teamToRemove);
         assertEquals("37", subject.getRawAssignedTeamsIds().stream().map(s->""+s).collect(Collectors.joining(",")));
     }
@@ -190,6 +197,8 @@ public class IssueTest {
     public void whenGetTeams_ShouldReturnTeamNamesForIdsInTeamCustomField(){
         IssueTeamService is = mock(IssueTeamService.class);
         when(is.getTeamsForIds(Arrays.asList(37L))).thenReturn(Sets.newSet(new CardTeam("bravo1337", 37L)));
+        when(is.resolveTeams(any())).thenCallRealMethod();
+        when(is.resolveTeamsOrigin(any())).thenCallRealMethod();
 
         Issue subject = new Issue(makeIssueScratch(37L), null, null, is, null, null, null, null, null, null);
 
@@ -202,6 +211,8 @@ public class IssueTest {
         IssueTeamService is = mock(IssueTeamService.class);
         when(is.getDefaultTeam(any())).thenReturn(new CardTeam("default project team", 1l));
         when(is.getCardTeamByIssueType(any())).thenReturn(Optional.empty());
+        when(is.resolveTeams(any())).thenCallRealMethod();
+        when(is.resolveTeamsOrigin(any())).thenCallRealMethod();
 
         Issue subject = new Issue(makeIssueScratch(), null, null, is, null, null, null, null, null, null);
 
@@ -224,6 +235,8 @@ public class IssueTest {
         when(is.getTeamsForIds(Arrays.asList())).thenReturn(Sets.newSet());
         when(is.getCardTeamByIssueType(subject)).thenReturn(Optional.of(new CardTeam("bravo1337", 37L)));
         when(is.getCardTeamByIssueType(parent)).thenReturn(Optional.empty());
+        when(is.resolveTeams(any())).thenCallRealMethod();
+        when(is.resolveTeamsOrigin(any())).thenCallRealMethod();
 
         List<String> issueTeams = toStringSet(subject.getTeams());
         assertEquals("bravo1337", StringUtils.join(issueTeams));
@@ -242,6 +255,8 @@ public class IssueTest {
         subject.setParentCard(parent);
 
         when(is.getCardTeamByIssueType(subject)).thenReturn(Optional.of(new CardTeam("bravo1337", 37L)));
+        when(is.resolveTeams(any())).thenCallRealMethod();
+        when(is.resolveTeamsOrigin(any())).thenCallRealMethod();
 
         List<String> issueTeams = toStringSet(subject.getTeams());
         assertEquals("bravo1337", StringUtils.join(issueTeams));
@@ -256,6 +271,8 @@ public class IssueTest {
         IssueTeamService is = mock(IssueTeamService.class);
         when(is.getDefaultTeam(any())).thenReturn(new CardTeam("default project team", 1l));
         when(is.getCardTeamByIssueType(any())).thenReturn(Optional.empty());
+        when(is.resolveTeams(any())).thenCallRealMethod();
+        when(is.resolveTeamsOrigin(any())).thenCallRealMethod();
 
         Issue subject = new Issue(makeIssueScratch(), null, null, is, null, null, null, null, null, null);
         Issue parent = new Issue(makeIssueScratch(), null, null, is, null, null, null, null, null, null);

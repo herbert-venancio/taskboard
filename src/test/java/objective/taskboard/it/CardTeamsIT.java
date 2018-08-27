@@ -26,13 +26,23 @@ public class CardTeamsIT extends AuthenticatedIntegrationTest {
     }
 
     @Test
-    public void whenIssueHasTeamInheritedFromParent_ShouldntHaveReplaceButton(){
+    public void whenIssueHasTeamInheritedFromParent_ShouldHaveSameTeamsAsItsParent(){
         MainPage mainPage = MainPage.produce(webDriver);
+
+        final String expectedTeamByIssueType = "TASKBOARD 1";
+
+        TestIssue parent = mainPage.issue("TASKB-624");
+        parent
+            .click()
+            .issueDetails()
+            .assertIsTeamByIssueType(expectedTeamByIssueType, "Task", "Taskboard")
+            .closeDialog();
+
         TestIssue issue = mainPage.issue("TASKB-625");
         issue
             .click()
             .issueDetails()
-            .assertAreInheritedTeams("TASKBOARD 1");
+            .assertAreInheritedTeams(expectedTeamByIssueType);
     }
 
     @Test

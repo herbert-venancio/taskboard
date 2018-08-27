@@ -989,7 +989,7 @@
                                             <iron-icon class="add-people-icon" icon="taskboard-icons:add-team"></iron-icon>
                                             <span>Team</span>
                                         </div>
-                                        <template is="dom-if" if="{{canReturnToDefault(item)}}">
+                                        <template is="dom-if" if="{{!showReplaceAction(item)}}">
                                             <div id="restoreTeamButton" class="people-action-link" on-tap="_restoreDefaultTeams" title="Restore issue default teams">
                                                 <iron-icon class="restore-icon" icon="taskboard-icons:restore"></iron-icon>
                                                 <span>Restore default</span>
@@ -1261,15 +1261,11 @@
                 },
 
                 showReplaceAction: function() {
-                    return this.item.usingDefaultTeam || this.item.usingTeamByIssueType;
+                    return this.item.usingDefaultTeam || this.item.usingTeamByIssueType || this.item.usingParentTeam;
                 },
 
                 showRemoveAction: function() {
                     return this.item.teams.length > 1;
-                },
-
-                canReturnToDefault: function() {
-                    return !this.item.usingDefaultTeam && !this.item.usingTeamByIssueType && !this.item.usingParentTeam;
                 },
 
                 teamClasses: function() {
@@ -1319,7 +1315,7 @@
 
                 _showReplaceTeamPicker: function(e) {
                     e.stopPropagation();
-                    if (!this.item.usingDefaultTeam && !this.item.usingTeamByIssueType)
+                    if (!this.showReplaceAction())
                         return;
 
                     this._closeAllPickers();

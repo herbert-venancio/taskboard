@@ -24,7 +24,6 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -44,6 +43,7 @@ import objective.taskboard.database.IssuePriorityService;
 import objective.taskboard.domain.IssueColorService;
 import objective.taskboard.domain.converter.CardVisibilityEvalService;
 import objective.taskboard.domain.converter.IssueTeamService;
+import objective.taskboard.domain.converter.IssueTeamService.TeamOrigin;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.data.Version;
@@ -186,31 +186,8 @@ public class Issue extends IssueScratch implements Serializable {
         return issueTeamService.getMismatchingUsers(this);
     }
 
-
     public Set<CardTeam> getTeams() {
-        // This method follows the following order:
-
-        // 1 - Card Teams
-        Set<CardTeam> issueTeams = new LinkedHashSet<>(issueTeamService.getTeamsForIds(getRawAssignedTeamsIds()));
-        if (!issueTeams.isEmpty())
-            return issueTeams;
-
-        // 2 - Parent teams (if the parent is using its parent or if it has some set team)
-        Optional<Issue> parentCardOpt = getParentCard();
-        if (parentCardOpt.isPresent() &&  (parentCardOpt.get().getRawAssignedTeamsIds().size() > 0 || parentCardOpt.get().isUsingParentTeam()))
-            return parentCardOpt.get().getTeams();
-
-        // 3 - Team By Issue Type
-        Optional<CardTeam> teamByIssueType = issueTeamService.getCardTeamByIssueType(this);
-        if (teamByIssueType.isPresent())
-            return Collections.singleton(teamByIssueType.get());
-
-        // 4 - Parent teams
-        if (parentCardOpt.isPresent())
-            return parentCardOpt.get().getTeams();
-
-        // 5 - Default team
-        return Collections.singleton(issueTeamService.getDefaultTeam(this));
+        return issueTeamService.resolveTeams(this);
     }
 
     /**
@@ -223,22 +200,15 @@ public class Issue extends IssueScratch implements Serializable {
     }
 
     public boolean isUsingDefaultTeam() {
-        if (getRawAssignedTeamsIds().size() > 0 || isUsingTeamByIssueType())
-            return false;
-        Optional<Issue> parentCard = getParentCard();
-        return parentCard.map(Issue::isUsingDefaultTeam).orElse(true);
+        return issueTeamService.resolveTeamsOrigin(this) == TeamOrigin.DEFAULT_BY_PROJECT;
     }
 
     public boolean isUsingTeamByIssueType() {
-        if (getRawAssignedTeamsIds().size() > 0)
-            return false;
-        return issueTeamService.getCardTeamByIssueType(this).isPresent();
+        return issueTeamService.resolveTeamsOrigin(this) == TeamOrigin.DEFAULT_BY_ISSUE_TYPE;
     }
 
     public boolean isUsingParentTeam() {
-        if (parentCard == null || getRawAssignedTeamsIds().size() > 0 || isUsingTeamByIssueType())
-            return false;
-        return !parentCard.isUsingDefaultTeam();
+        return issueTeamService.resolveTeamsOrigin(this) == TeamOrigin.INHERITED;
     }
 
     public void setParentCard(Issue parentCard) {

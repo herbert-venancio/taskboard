@@ -20,6 +20,12 @@
  */
 package objective.taskboard.domain.converter;
 
+import static objective.taskboard.domain.converter.IssueTeamService.TeamOrigin.DEFAULT_BY_ISSUE_TYPE;
+import static objective.taskboard.domain.converter.IssueTeamService.TeamOrigin.DEFAULT_BY_PROJECT;
+import static objective.taskboard.domain.converter.IssueTeamService.TeamOrigin.INHERITED;
+import static objective.taskboard.domain.converter.IssueTeamService.TeamOrigin.SPECIFIC;
+
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -47,10 +53,10 @@ public class IssueTeamService {
 
     @Autowired
     private TeamFilterConfigurationService teamFilterConfigurationService;
-    
+
     @Autowired
     private TeamCachedRepository teamRepo;
-    
+
     @Autowired
     private ProjectFilterConfigurationCachedRepository projectRepo;
 
@@ -94,7 +100,7 @@ public class IssueTeamService {
 
         Optional<Team> team = teamRepo.findById(teamByIssueType.get());
         if (!team.isPresent())
-            log.warn("Default team \""+ teamByIssueType.get() +"\" by issue type \""+ issue.getType() +"\" for project \"" + issue.getProjectKey() + "\" not found.");
+            throw new IllegalStateException("Default team \""+ teamByIssueType.get() +"\" by issue type \""+ issue.getType() +"\" for project \"" + issue.getProjectKey() + "\" not found.");
 
         return Optional.of(CardTeam.from(team.get()));
     }
@@ -121,6 +127,54 @@ public class IssueTeamService {
         }
 
         return mismatches;
+    }
+
+    public Set<CardTeam> resolveTeams(Issue issue) {
+        TeamOrigin teamsOrigin = resolveTeamsOrigin(issue);
+
+        if (teamsOrigin == SPECIFIC)
+            return getTeamsForIds(issue.getRawAssignedTeamsIds());
+
+        Optional<CardTeam> teamByIssueType = getCardTeamByIssueType(issue);
+        if (teamsOrigin == DEFAULT_BY_ISSUE_TYPE && teamByIssueType.isPresent())
+            return Collections.singleton(teamByIssueType.get());
+
+        Optional<Issue> parent = issue.getParentCard();
+        if (teamsOrigin == INHERITED && parent.isPresent())
+            return resolveTeams(parent.get());
+
+        return Collections.singleton(getDefaultTeam(issue));
+    }
+
+    public TeamOrigin resolveTeamsOrigin(Issue issue) {
+        Optional<Issue> parentCard = issue.getParentCard();
+
+        if (!issue.getRawAssignedTeamsIds().isEmpty())
+            return SPECIFIC;
+
+        if (!hasParentWithSpecificOrigin(issue) && getCardTeamByIssueType(issue).isPresent())
+            return DEFAULT_BY_ISSUE_TYPE;
+
+        if (parentCard.isPresent() && resolveTeamsOrigin(parentCard.get()) != DEFAULT_BY_PROJECT)
+            return INHERITED;
+
+        return DEFAULT_BY_PROJECT;
+    }
+
+    private boolean hasParentWithSpecificOrigin(Issue issue) {
+        Optional<Issue> parentCard = issue.getParentCard();
+        if (!parentCard.isPresent())
+            return false;
+        if (resolveTeamsOrigin(parentCard.get()) == SPECIFIC)
+            return true;
+        return hasParentWithSpecificOrigin(parentCard.get());
+    }
+
+    public static enum TeamOrigin {
+        SPECIFIC,
+        DEFAULT_BY_ISSUE_TYPE,
+        INHERITED,
+        DEFAULT_BY_PROJECT;
     }
 
 }

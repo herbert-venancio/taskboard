@@ -227,7 +227,7 @@ public class JiraIssueToIssueConverterTest {
 
         Issue.CardTeam cardTeam = new Issue.CardTeam();
         cardTeam.name = "team";
-        when(issueTeamService.getTeamsForIds(any())).thenReturn(Sets.newSet(cardTeam));
+        when(issueTeamService.resolveTeams(any())).thenReturn(Sets.newSet(cardTeam));
 
         objective.taskboard.data.Issue converted = subject.convertSingleIssue(issue, buildProvider());
 
