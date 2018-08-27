@@ -24,12 +24,12 @@
                 opacity: .6;
             }
 
-            paper-button[disabled].colorful {
-                opacity: .6;
-            }
-            
             paper-dropdown-menu {
                 display: block;
+            }
+
+            .advanced-configurations {
+                margin-right: auto;
             }
         </style>
 
@@ -68,7 +68,7 @@
                                  maxlength="[[dateFormatPlaceholder.length]]"
                                  validator="dateValidator"
                                  error-message="Please enter a valid date"></paper-input>
-                   <paper-input id="projectRisk" always-float-label
+                    <paper-input id="projectRisk" always-float-label
                                  label="Risk *"
                                  value="{{projectConfiguration.risk}}"
                                  on-input="setFormDirty"
@@ -133,7 +133,8 @@
             </modal-wrap-content>
 
             <modal-wrap-footer>
-                <tb-button button="[[_editProjectProfileButton]]"></tb-button>
+                <tb-button class="advanced-configurations" button="[[_advancedConfigurationsButton]]"></tb-button>
+                <tb-button button="[[_cancelButton]]"></tb-button>
                 <tb-button button="[[_updateButton]]"></tb-button>
             </modal-wrap-footer>
 
@@ -156,11 +157,15 @@
                     dateFormatPlaceholder: {
                         type: String
                     },
+                    _cancelButton: {
+                        type: Object,
+                        value: function () { return {} }
+                    },
                     _updateButton: {
                         type: Object,
                         value: function () { return {} }
                     },
-                    _editProjectProfileButton: {
+                    _advancedConfigurationsButton: {
                         type: Object,
                         value: function () { return {} }
                     },
@@ -193,16 +198,26 @@
                 ],
 
                 ready: function() {
-                    var updateButton = ButtonBuilder('Update').id('updateProjectConfiguration').onClick(this.updateConfiguration.bind(this)).build();
+                    var updateButton = ButtonBuilder('Update')
+                        .id('updateProjectConfiguration')
+                        .onClick(this.updateConfiguration.bind(this))
+                        .build();
                     this.set('_updateButton', updateButton);
 
-                    var editProfile = ButtonBuilder('Edit Project Profile')
-                        .id('editProjectProfileConfiguration')
+                    var cancelButton = ButtonBuilder('Cancel')
+                        .id('cancelProjectConfiguration')
                         .type(buttonTypes.LINK)
-                        .onClick(this.editProjectProfile.bind(this))
+                        .onClick(() => { this.$.modal.close() })
+                        .build();
+                    this.set('_cancelButton', cancelButton);
+
+                    var advancedConfigurationsButton = ButtonBuilder('Advanced Configurations')
+                        .id('advancedConfigurations')
+                        .type(buttonTypes.LINK)
+                        .onClick(this.advancedConfigurations.bind(this))
                         .build();
 
-                    this.set('_editProjectProfileButton', editProfile);
+                    this.set('_advancedConfigurationsButton', advancedConfigurationsButton);
 
                     this.availableTeams = taskboard.getAvailableTeams();
                     var self = this;
@@ -355,22 +370,22 @@
                     });
                 },
                 
-                editProjectProfile: function() {                    
+                advancedConfigurations: function() {
                     var self = this;
                     
                     if (!this.formDirty) {
-                        self._goToProjectProfile();
+                        self._goToAdvancedConfigurations();
                         return;
                     }
 
                     var confirmCallback = function() {
                         self._saveConfiguration().done(function () { 
-                    	    self._goToProjectProfile();
+                    	    self._goToAdvancedConfigurations();
                     	});
                     }
                     
                     var cancelCallback = function() {
-                        self._goToProjectProfile()
+                        self._goToAdvancedConfigurations()
                     }
                     
                     this.$.saveProjectConfigurationConfirmModal.openDialog(
@@ -380,7 +395,7 @@
                             cancelCallback);
                 },
                 
-                _goToProjectProfile: function() {
+                _goToAdvancedConfigurations: function() {
                     var projectKey = this.projectConfiguration.projectKey;
                     window.location = '/app/project/' + projectKey + '/config/profile';
                 },

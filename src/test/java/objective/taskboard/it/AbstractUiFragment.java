@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -175,6 +176,38 @@ public abstract class AbstractUiFragment {
         return webDriver.findElements(by);
     }
 
+    protected void waitUntilChildElementExists(WebElement element, By by) {
+        waitUntil(new ExpectedCondition<Boolean>() {
+            @Override
+            public Boolean apply(WebDriver input) {
+                return childElementExists(element, by);
+            }
+        });
+    }
+
+    protected void waitUntilChildElementNotExists(WebElement element, By by) {
+        waitUntil(new ExpectedCondition<Boolean>() {
+            @Override
+            public Boolean apply(WebDriver input) {
+                return childElementExists(element, by) == false;
+            }
+        });
+    }
+
+    protected boolean childElementExists(WebElement element, By by) {
+        return element.findElements(by).size() > 0;
+    }
+
+    protected WebElement getChildElementWhenExists(WebElement element, By by) {
+        waitUntilChildElementExists(element, by);
+        return element.findElement(by);
+    }
+
+    protected List<WebElement> getChildrenElementsWhenTheyExists(WebElement element, By by) {
+        waitUntilChildElementExists(element, by);
+        return element.findElements(by);
+    }
+
     protected void waitForClick(WebElement element) {
         waitVisibilityOfElement(element);
         waitUntil(elementToBeClickable(element));
@@ -309,12 +342,21 @@ public abstract class AbstractUiFragment {
 
     protected boolean isElementVisibleAndExists(By selector) {
         List<WebElement> elements = webDriver.findElements(selector);
-        if (elements.size() == 0)
-            return false;
-        WebElement we = elements.get(0);
-        if (!we.isDisplayed())
-            return false;
-        return true;
+        return elements.size() > 0 && elements.get(0).isDisplayed();
+    }
+
+    protected void waitElementNotExistsOrInvisible(By selector) {
+        waitUntil(new ExpectedCondition<Boolean>() {
+            @Override
+            public Boolean apply(WebDriver input) {
+                List<WebElement> elements = webDriver.findElements(selector);
+                return elements.size() == 0 || !elements.get(0).isDisplayed();
+            }
+        });
+    }
+
+    protected boolean hasClass(WebElement element, String className) {
+        return Stream.of(element.getAttribute("class").split(" ")).anyMatch(classItem -> classItem.equals(className));
     }
 
     private void executeJavascript(String script, Object... args) {

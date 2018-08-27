@@ -12,16 +12,12 @@ import {SnackbarControl, SnackbarLevel} from 'app/shared/obj-ds/snackbar/snackba
 @Component({
     selector: 'tb-project-profile',
     templateUrl: './project-profile.component.html',
-    styleUrls: ['./project-profile.component.scss'],
-    host: {
-        class: 'tb-fixed-page'
-    }
+    styleUrls: ['./project-profile.component.scss']
 })
 export class ProjectProfileComponent implements OnInit {
     private projectKey: string;
     private nextRowId = 0;
 
-    projectName: string;
     items: ProjectProfileItemRow[] = [];
     newItem: ProjectProfileItemRow;
     snackbar = new SnackbarControl();
@@ -35,7 +31,7 @@ export class ProjectProfileComponent implements OnInit {
     ) {}
 
     ngOnInit() {
-        this.route.paramMap.subscribe((params: ParamMap) => {
+        this.route.parent.paramMap.subscribe((params: ParamMap) => {
             this.projectKey = params.get('key');
             this.refresh();
         });
@@ -46,8 +42,7 @@ export class ProjectProfileComponent implements OnInit {
         this.nextRowId = 0;
 
         this.projectProfileService.getData(this.projectKey).subscribe(data => {
-            this.projectName = data.projectName;
-            this.items = data.items.map(dto => new ProjectProfileItemRow(this.nextRowId++, dto));
+            this.items = data.map(dto => new ProjectProfileItemRow(this.nextRowId++, dto));
             this.pageLoader.hide();
         });
     }

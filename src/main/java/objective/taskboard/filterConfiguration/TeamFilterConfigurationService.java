@@ -15,7 +15,6 @@ import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.data.Team;
 import objective.taskboard.domain.TeamFilterConfiguration;
 import objective.taskboard.jira.ProjectService;
-import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.repository.TeamFilterConfigurationCachedRepository;
 import objective.taskboard.repository.UserTeamCachedRepository;
@@ -31,9 +30,6 @@ public class TeamFilterConfigurationService {
 
     @Autowired
     private ProjectService projectService;
-
-    @Autowired
-    private ProjectFilterConfigurationCachedRepository projectFilterConfiguration;
 
     @Autowired
     private UserTeamCachedRepository userTeamRepository;
@@ -61,19 +57,6 @@ public class TeamFilterConfigurationService {
         return teamRepository.getCache()
                 .stream()
                 .filter(t -> teamsIds.contains(t.getId()))
-                .collect(toList());
-    }
-
-    public List<String> getConfiguredTeamsNamesByUserAndProject(String user, String projectKey) {
-        Set<Long> teamsIdsProject = projectFilterConfiguration.getProjects()
-            .stream()
-            .filter(pf -> Objects.equals(pf.getProjectKey(), projectKey))
-            .map(pf -> pf.getDefaultTeam())
-            .collect(toSet());
-
-        return getConfiguredTeamsByUser(user).stream()
-                .filter(t -> teamsIdsProject.contains(t.getId()))
-                .map(t -> t.getName())
                 .collect(toList());
     }
 

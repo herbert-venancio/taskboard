@@ -1,9 +1,11 @@
 package objective.taskboard.it;
 
+import static objective.taskboard.testUtils.ProjectInfo.TASKB;
+
 import org.junit.Before;
 import org.junit.Test;
 
-public class ProjectConfigurationUiIT extends AuthenticatedIntegrationTest {
+public class ProjectConfigurationIT extends AuthenticatedIntegrationTest {
 
     private MainPage mainPage;
     
@@ -14,7 +16,7 @@ public class ProjectConfigurationUiIT extends AuthenticatedIntegrationTest {
     
     @Test
     public void shouldValidate() {
-        ProjectConfigurationOperator.openFromMainMenu(mainPage, "TASKB")
+        ProjectConfigurationOperator.openFromMainMenu(mainPage, TASKB)
             .setStartDate("99999")
             .setDeliveryDate("99/20/2018")
             .setRisk("-50")
@@ -32,7 +34,7 @@ public class ProjectConfigurationUiIT extends AuthenticatedIntegrationTest {
     
     @Test
     public void shouldPersist() {
-        ProjectConfigurationOperator.openFromMainMenu(mainPage, "TASKB")
+        ProjectConfigurationOperator.openFromMainMenu(mainPage, TASKB)
             .setStartDate("01/25/2018")
             .setDeliveryDate("10/20/2018")
             .setRisk("60.99")
@@ -41,7 +43,7 @@ public class ProjectConfigurationUiIT extends AuthenticatedIntegrationTest {
             .assertSuccessAlertIsOpen()
             .closeSuccessAlert();
         
-        ProjectConfigurationOperator.openFromMainMenu(mainPage, "TASKB")
+        ProjectConfigurationOperator.openFromMainMenu(mainPage, TASKB)
             .assertStartDate("01/25/2018")
             .assertDeliveryDate("10/20/2018")
             .assertRisk("60.99")
@@ -50,27 +52,23 @@ public class ProjectConfigurationUiIT extends AuthenticatedIntegrationTest {
     
     @Test
     public void shouldGoToEditProfile() {
-        ProjectConfigurationOperator.openFromMainMenu(mainPage, "TASKB")
-            .editProjectProfile();
-        
-        new ProjectProfileConfigPage(webDriver)
-            .assertPageIsOpen();
+        ProjectConfigurationOperator.openFromMainMenu(mainPage, TASKB)
+            .openAdvancedConfigurations()
+            .selectProfileConfiguration()
+            .assertTabIsOpen();
     }
 
     @Test
     public void whenFormHasPendingChanges_ShouldConfirmSaveBeforeGoToEditProfile() {
-        ProjectConfigurationOperator.openFromMainMenu(mainPage, "TASKB")
+        ProjectConfigurationOperator.openFromMainMenu(mainPage, TASKB)
             .setRisk("10.1")
-            .editProjectProfile()
+            .clickAdvancedConfigurationsExpectingConfirmation()
             .assertSaveConfirmModalIsOpen()
             .confirmSave();
         
-        new ProjectProfileConfigPage(webDriver)
-            .assertPageIsOpen()
-            .backToProject();
-        
-        new ProjectConfigurationDialog(webDriver, "TASKB")
-            .assertIsOpen()
+        new ProjectProfileConfigurationTab(webDriver, TASKB)
+            .assertTabIsOpen()
+            .backToProject()
             .assertRisk("10.1");
     }
 }

@@ -24,6 +24,7 @@ import static org.openqa.selenium.By.cssSelector;
 import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
 
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
@@ -118,9 +119,27 @@ class IssueDetails extends AbstractUiFragment {
         return this;
     }
 
-    public IssueDetails assertIsDefaultTeam(String defaultTeamName) {
+    public IssueDetails assertIsDefaultTeam(String team) {
         assertIsOpened();
-        assertListOfItems(cssSelector(".teams .default-team span"), defaultTeamName);
+        assertListOfItems(cssSelector(".teams .default-team span"), team);
+        waitElementExistenceAndVisibilityIs(true, replaceButtonSelector(team));
+        return this;
+    }
+
+    public IssueDetails assertIsTeamByIssueType(String team, String issueType, String project) {
+        assertIsOpened();
+        assertListOfItems(cssSelector(".teams .team-by-issue-type span"), team);
+        waitUntilElementExists(cssSelector(".teams .team-by-issue-type[title='" +team +" is the default team for issue type "+ issueType +" on project "+ project +"']"));
+        waitElementExistenceAndVisibilityIs(true, replaceButtonSelector(team));
+        return this;
+    }
+
+    public IssueDetails assertAreInheritedTeams(String... teamList) {
+        assertIsOpened();
+        assertListOfItems(cssSelector(".teams .parent-team span"), teamList);
+        Stream.of(teamList).forEach(team -> {
+            waitElementExistenceAndVisibilityIs(true, replaceButtonSelector(team));
+        });
         return this;
     }
 
@@ -227,6 +246,12 @@ class IssueDetails extends AbstractUiFragment {
         return this;
     }
 
+    public IssueDetails assertIssueType(String issueTypeExpected) {
+        assertIsOpened();
+        waitUntilElementExistsWithText(cssSelector(".issue-detail.issue-type .text"), issueTypeExpected);
+        return this;
+    }
+
     public IssueDetails assertColor(String colorExpected) {
         assertIsOpened();
         waitAttributeValueInElement(issueDetailRoot, "background-color", colorExpected);
@@ -236,7 +261,7 @@ class IssueDetails extends AbstractUiFragment {
     private void assertIsOpened() {
         waitAttributeValueInElement(issueDetailRoot, "data-status", "opened");
     }
-    
+
     public void assertListOfItems(By by, String... expectedItemList) {
         waitUntil(new ExpectedCondition<Boolean>() {
             private String[] actualTeamList;
@@ -279,4 +304,9 @@ class IssueDetails extends AbstractUiFragment {
 
         return this;
     }
+
+    private By replaceButtonSelector(String team) {
+        return cssSelector(".assignee-button[title='Replace "+ team +" by another team']");
+    }
+
 }

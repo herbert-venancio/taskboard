@@ -1,0 +1,21 @@
+@import "obj-ds/utils/all";
+
+:host {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.title {
+    flex: 1;
+
+    font-family: $obj-font-ptsans;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 18px;
+    color: $obj-color-black;
+}
+
+.actions {
+    flex: 0 0 auto;
+}

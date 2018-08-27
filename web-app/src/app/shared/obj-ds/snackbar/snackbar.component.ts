@@ -32,6 +32,10 @@ export class SnackbarComponent {
         const index = this.items.indexOf(item);
         this.items.splice(index, 1);
     }
+
+    isArray(item: any) {
+        return Array.isArray(item);
+    }
 }
 
 class SnackbarItem {
@@ -39,6 +43,6 @@ class SnackbarItem {
 
     constructor(
         readonly title: string,
-        readonly description: string,
+        readonly description: string | Array<string>,
         readonly level: SnackbarLevel) {}
 }

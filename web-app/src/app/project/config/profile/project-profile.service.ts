@@ -8,19 +8,14 @@ export class ProjectProfileService {
 
     constructor(private http: HttpClient) {}
 
-    getData(projectKey: string): Observable<ProjectProfileDataDto> {
-        return this.http.get<ProjectProfileDataDto>(`/ws/project/config/project-profile/${projectKey}/data`)
+    getData(projectKey: string): Observable<ProjectProfileItemDto[]> {
+        return this.http.get<ProjectProfileItemDto[]>(`/ws/project/config/project-profile/${projectKey}/data`)
             .pipe(retry(3));
     }
 
     updateItems(projectKey: string, items: ProjectProfileItemDto[]): Observable<any> {
         return this.http.put(`/ws/project/config/project-profile/${projectKey}/items`, items);
     }
-}
-
-export class ProjectProfileDataDto {
-    projectName: string;
-    items: ProjectProfileItemDto[];
 }
 
 export class ProjectProfileItemDto {

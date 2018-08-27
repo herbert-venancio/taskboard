@@ -1,6 +1,7 @@
 package objective.taskboard.it;
 
 import static java.util.stream.Collectors.joining;
+import static objective.taskboard.it.components.SnackBarComponent.SNACK_BAR_TAG;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.openqa.selenium.support.PageFactory.initElements;
 
@@ -9,11 +10,13 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
-public class ProjectProfileConfigPage extends AbstractUiFragment {
+import objective.taskboard.it.components.SnackBarComponent;
+import objective.taskboard.testUtils.ProjectInfo;
 
-    @FindBy(id="tb-page-title")
-    private WebElement pageTitle;
-    
+public class ProjectProfileConfigurationTab extends AbstractUiFragment {
+
+    public static final String PROJECT_PROFILE_CONFIGURATION_TAG = "tb-project-profile";
+
     @FindBy(id="tb-project-profile-add-item")
     private WebElement addItemButton;
 
@@ -26,70 +29,74 @@ public class ProjectProfileConfigPage extends AbstractUiFragment {
     @FindBy(id="tb-project-profile-items")
     private WebElement itemsTable;
     
-    @FindBy(css="#tb-project-profile-snackbar .title")
-    private WebElement snackabarTitle;
+    private SnackBarComponent snackbar;
 
-    public ProjectProfileConfigPage(WebDriver driver) {
+    private ProjectInfo projectInfo;
+
+    public ProjectProfileConfigurationTab(WebDriver driver, ProjectInfo projectInfo) {
         super(driver);
         initElements(driver, this);
+        this.snackbar = new SnackBarComponent(driver, By.cssSelector(SNACK_BAR_TAG +"#tb-project-profile-snackbar"));
+        this.projectInfo = projectInfo;
     }
 
-    public ProjectProfileConfigPage assertPageIsOpen() {
-        waitTextInElement(pageTitle, "Taskboard > Project Profile");
+    public ProjectProfileConfigurationTab assertTabIsOpen() {
+        waitUntilElementExists(By.tagName(PROJECT_PROFILE_CONFIGURATION_TAG));
         return this;
     }
-    
-    public ProjectProfileConfigPage backToProject() {
+
+    public ProjectConfigurationDialog backToProject() {
         waitForClick(backToProjectButton);
-        return this;
+        return new ProjectConfigurationDialog(webDriver, projectInfo).assertIsOpen();
     }
-    
-    public ProjectProfileConfigPage refresh() {
+
+    public ProjectProfileConfigurationTab refresh() {
         webDriver.navigate().refresh();
-        assertPageIsOpen();
+        assertTabIsOpen();
         return this;
     }
     
-    public ProjectProfileConfigPage save() {
+    public ProjectProfileConfigurationTab save() {
         waitForClick(saveButton);
         return this;
     }
     
-    public ProjectProfileConfigPage addItem() {
+    public ProjectProfileConfigurationTab addItem() {
         waitForClick(addItemButton);
         return this;
     }
     
-    public ProjectProfileConfigPage setRoleName(int rowIndex, String value) {
+    public ProjectProfileConfigurationTab setRoleName(int rowIndex, String value) {
         setInputValue(selectElementInsideRow(rowIndex, "input[name='roleName']"), value);
         return this;
     }
     
-    public ProjectProfileConfigPage setPeopleCount(int rowIndex, String value) {
+    public ProjectProfileConfigurationTab setPeopleCount(int rowIndex, String value) {
         setInputValue(selectElementInsideRow(rowIndex, "input[name='peopleCount']"), value);
         return this;
     }
     
-    public ProjectProfileConfigPage setAllocationStart(int rowIndex, String value) {
+    public ProjectProfileConfigurationTab setAllocationStart(int rowIndex, String value) {
         setInputValue(selectElementInsideRow(rowIndex, "input[name='allocationStart']"), value);
         return this;
     }
     
-    public ProjectProfileConfigPage setAllocationEnd(int rowIndex, String value) {
+    public ProjectProfileConfigurationTab setAllocationEnd(int rowIndex, String value) {
         setInputValue(selectElementInsideRow(rowIndex, "input[name='allocationEnd']"), value);
         return this;
     }
 
     private WebElement selectElementInsideRow(int rowIndex, String elementSelector) {
-        return itemsTable.findElement(By.cssSelector("tbody tr:nth-of-type(" + (rowIndex + 1) + ") " + elementSelector));
+        By rowElementSelector = By.cssSelector("tbody tr:nth-of-type(" + (rowIndex + 1) + ") " + elementSelector);
+        return getChildElementWhenExists(itemsTable, rowElementSelector);
     }
     
-    public ProjectProfileConfigPage assertSnackbarSavedIsOpen() {
-        waitTextInElement(snackabarTitle, "Project profile saved");
+    public ProjectProfileConfigurationTab assertSnackbarSavedIsOpen() {
+        snackbar.waitTitleToBe("Project profile saved");
         return this;
     }
 
-    public ProjectProfileConfigPage assertItems(String... expectedRows) {
+    public ProjectProfileConfigurationTab assertItems(String... expectedRows) {
         waitAssertEquals(join(expectedRows, "\n"), () -> {
             return itemsTable.findElements(By.cssSelector("tbody tr")).stream()
                     .map(row -> row.findElements(By.tagName("input")).stream().map(e -> e.getAttribute("value")).collect(joining(" | ")))
@@ -99,7 +106,7 @@ public class ProjectProfileConfigPage extends AbstractUiFragment {
         return this;
     }
 
-    public ProjectProfileConfigPage remove(int i) {
+    public ProjectProfileConfigurationTab remove(int i) {
         WebElement removeButton = selectElementInsideRow(i, ".remove-button");
         waitForClick(removeButton);
         return this;

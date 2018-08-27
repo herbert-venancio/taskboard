@@ -1,0 +1,85 @@
+<form #projectTeamsForm="ngForm" (ngSubmit)="save(projectTeamsForm)" tbLeaveConfirmation>
+
+    <obj-header-content
+        title="Default Team"
+        ></obj-header-content>
+
+    <ng-select id="tb-project-default-team"
+               name="defaultTeam"
+               [(ngModel)]="defaultTeamId"
+               [items]="teams"
+               [disabled]="defaultTeamDisabled"
+               bindLabel="name"
+               bindValue="id"
+               placeholder="Select a Team"
+               #issueType="objSelectField"
+               tbNotEmpty
+               [title]="defaultTeamDisabled ? 'You don\'t have permission to edit this value' : ''"
+               ></ng-select>
+    <obj-error-messages [for]="issueType">
+        <obj-error-message error="notEmpty">Team is required.</obj-error-message>
+    </obj-error-messages>
+
+    <obj-data-table-top title="Teams by Issue Type">
+        <button id="tb-project-teams-add-item" type="button" obj-flat-button (click)="addDefaultTeamByIssueType()">
+            <obj-icon iconName="plus"></obj-icon> Add Item
+        </button>
+    </obj-data-table-top>
+
+    <table id="tb-project-teams-items" class="obj-data-table inline-input" *ngIf="defaultTeamsByIssueType.length > 0">
+        <thead>
+            <tr>
+                <th class="role-name-col">Issue Type</th>
+                <th>Team</th>
+                <th class="actions-col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let item of defaultTeamsByIssueType"
+                ngModelGroup="default-team-by-issue-type-{{item.groupId}}"
+                [title]="item.dto.isDisabled ? 'You don\'t have permission to edit this value' : ''">
+                <td>
+                    <ng-select name="issueType"
+                               [(ngModel)]="item.dto.issueTypeId"
+                               [items]="issueTypes"
+                               [disabled]="item.dto.isDisabled"
+                               bindLabel="name"
+                               bindValue="id"
+                               placeholder="Select an Issue Type"
+                               #issueType="objSelectField"
+                               tbNotEmpty
+                               ></ng-select>
+                    <obj-error-messages [for]="issueType">
+                        <obj-error-message error="notEmpty">Issue Type is required.</obj-error-message>
+                    </obj-error-messages>
+                </td>
+                <td>
+                    <ng-select name="team"
+                               [(ngModel)]="item.dto.teamId"
+                               [items]="teams"
+                               [disabled]="item.dto.isDisabled"
+                               bindLabel="name"
+                               bindValue="id"
+                               placeholder="Select a Team"
+                               #team="objSelectField"
+                               tbNotEmpty
+                               ></ng-select>
+                    <obj-error-messages [for]="team">
+                        <obj-error-message error="notEmpty">Team is required.</obj-error-message>
+                    </obj-error-messages>
+                </td>
+                <td class="col-right">
+                    <button [disabled]="item.dto.isDisabled" type="button" obj-flat-button class="remove-button" (click)="removeDefaultTeamByIssueType(item)">Remove</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="obj-empty" *ngIf="defaultTeamsByIssueType.length === 0">No items registered.</div>
+
+    <div class="footer">
+        <button type="button" id="tb-project-teams-back-to-project" obj-button (click)="backToProject()">Back to Project</button>
+        <button type="submit" id="tb-project-teams-save" obj-button class="primary">Save</button>
+    </div>
+</form>
+
+<obj-snackbar id="tb-project-teams-snackbar" [control]="snackbar"></obj-snackbar>

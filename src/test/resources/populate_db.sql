@@ -850,6 +850,12 @@ Insert into user_preferences (JIRA_USER,PREFERENCES) values ('diego.prandini','{
 Insert into user_preferences (JIRA_USER,PREFERENCES) values ('taskboard','{"levelPreferences":[{"level":"Demand","showLevel":true,"showLaneTeam":false,"showHeader":false,"weightLevel":1.2592900752850273},{"level":"Deployable","showLevel":true,"showLaneTeam":false,"showHeader":false,"weightLevel":0.8025279575128927},{"level":"Operational","showLevel":true,"showLaneTeam":false,"showHeader":false,"weightLevel":0.93818196720208}],"filterPreferences":{"4":true,"11":true,"12":true,"10600":true,"10601":true,"10602":true,"10603":true,"10604":true,"10605":true,"10606":true,"10607":true,"10608":true,"10609":true,"10610":true,"10611":true,"TASKB":true,"TASKBOARD 1":true,"TASKBOARD 2":true},"visibilityConfiguration":{"showSynthetic":false},"laneConfiguration":[{"showCount":true}]}');
 Insert into user_preferences (JIRA_USER,PREFERENCES) values ('jean.takano','{"levelPreferences":[],"filterPreferences":{"4":true,"11":true,"12":true,"10600":true,"10601":true,"10602":true,"10603":true,"10604":true,"10605":true,"10606":true,"10607":true,"10608":true,"10609":true,"10610":true,"10611":true,"TASKB":true,"TASKBOARD 1":true,"TASKBOARD 2":true},"visibilityConfiguration":{"showSynthetic":false},"laneConfiguration":[{"showCount":false}]}');
 
+-- INSERTING INTO project_team_by_issue_type
+INSERT INTO project_default_team_issuetype (id, project_id, team_id, issue_type_id) VALUES (1, 158, 522, 4);
+INSERT INTO project_default_team_issuetype (id, project_id, team_id, issue_type_id) VALUES (2, 158, 522, 11);
+INSERT INTO project_default_team_issuetype (id, project_id, team_id, issue_type_id) VALUES (3, 158, 521, 12);
+INSERT INTO project_default_team_issuetype (id, project_id, team_id, issue_type_id) VALUES (4, 160, 260, 10611);
+
 -- INSERTING INTO sizing_cluster_item for dashboards
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
      VALUES (211,'Alpha Test','notused','XS',1.060,1.000,'TASKB', null);

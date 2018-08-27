@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import objective.taskboard.domain.Project;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.project.ProjectProfileItem;
@@ -44,22 +43,15 @@ public class ProjectProfileConfigurationController {
     @GetMapping("{projectKey}/data")
     public ResponseEntity<?> getData(@PathVariable("projectKey") String projectKey) {
         Optional<ProjectFilterConfiguration> project = projectService.getTaskboardProject(projectKey, PermissionRepository.ADMINISTRATIVE);
-        
+
         if (!project.isPresent())
             return ResponseEntity.notFound().build();
 
-        Optional<Project> jiraProject = projectService.getJiraProjectAsUser(projectKey);
-
-        if (!jiraProject.isPresent())
-            throw new IllegalStateException();
-        
         List<ProjectProfileItem> projectProfile = projectService.getProjectProfile(projectKey);
 
-        ProjectProfileDataDto dataDto = new ProjectProfileDataDto();
-        dataDto.projectName = jiraProject.get().getName();
-        dataDto.items = projectProfile.stream().map(ProjectProfileItemDto::new).collect(toList());
+        List<ProjectProfileItemDto> items = projectProfile.stream().map(ProjectProfileItemDto::new).collect(toList());
 
-        return ResponseEntity.ok(dataDto);
+        return ResponseEntity.ok(items);
     }
     
     @PutMapping("{projectKey}/items")
@@ -108,11 +100,6 @@ public class ProjectProfileConfigurationController {
                 .forEach(i -> itemRepository.remove(i));
     }
 
-    public static class ProjectProfileDataDto {
-        public String projectName;
-        public List<ProjectProfileItemDto> items;
-    }
-    
     public static class ProjectProfileItemDto {
         public Long id;
         public String roleName;

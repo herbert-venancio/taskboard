@@ -1,17 +1,3 @@
-
 @mixin obj-border-box-radius {
     border-radius: 4px;
-}
-
-%obj-border-box {
-    @include obj-border-box-radius;
-    border: 1px solid $obj-color-dark-snow;
-
-    &.valid {
-        border-color: $obj-color-success;
-    }
-
-    &.invalid {
-        border-color: $obj-color-error;
-    }
 }

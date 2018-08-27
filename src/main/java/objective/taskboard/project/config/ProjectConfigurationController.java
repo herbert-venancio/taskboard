@@ -2,6 +2,7 @@ package objective.taskboard.project.config;
 
 import static java.util.stream.Collectors.toList;
 import static objective.taskboard.repository.PermissionRepository.ADMINISTRATIVE;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import objective.taskboard.domain.Project;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.jira.ProjectService;
 
@@ -33,7 +35,7 @@ public class ProjectConfigurationController {
                 .map(ProjectListItemDto::from)
                 .collect(toList());
     }
-    
+
     @GetMapping("edit/{projectKey}/init-data")
     public ResponseEntity<?> editGetInitData(@PathVariable("projectKey") String projectKey) {
         Optional<ProjectFilterConfiguration> project = projectService.getTaskboardProject(projectKey, ADMINISTRATIVE);
@@ -66,6 +68,21 @@ public class ProjectConfigurationController {
         projectService.saveTaskboardProject(project);
 
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("{projectKey}/name")
+    public ResponseEntity<?> getName(@PathVariable("projectKey") String projectKey){
+        Optional<ProjectFilterConfiguration> project = projectService.getTaskboardProject(projectKey, ADMINISTRATIVE);
+
+        String errorMessage = "Project \""+ projectKey +"\" not found.";
+        if (!project.isPresent())
+            return new ResponseEntity<>(errorMessage, NOT_FOUND);
+
+        Optional<Project> jiraProject = projectService.getJiraProjectAsUser(projectKey);
+        if (!jiraProject.isPresent())
+            throw new IllegalStateException(errorMessage);
+
+        return ResponseEntity.ok(jiraProject.get().getName());
     }
 
     public static class ProjectListItemDto {

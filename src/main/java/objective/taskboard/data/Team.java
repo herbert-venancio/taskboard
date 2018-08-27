@@ -38,6 +38,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
 @Entity
 @Table(name = "TEAM")
 public class Team implements Serializable {
@@ -68,6 +71,7 @@ public class Team implements Serializable {
 
     @OneToMany(fetch=FetchType.EAGER, cascade=CascadeType.ALL, orphanRemoval=true)
     @JoinColumn(name="team", referencedColumnName="name")
+    @Fetch(value = FetchMode.SUBSELECT)
     private List<UserTeam> members;
 
     public Team() {

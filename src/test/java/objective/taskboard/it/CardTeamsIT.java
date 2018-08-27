@@ -3,14 +3,46 @@ package objective.taskboard.it;
 import org.junit.Test;
 
 public class CardTeamsIT extends AuthenticatedIntegrationTest {
+
     @Test
     public void whenIssueIsOpenWithouTeam_ShouldHaveDefaultTeam(){
         MainPage mainPage = MainPage.produce(webDriver);
-        TestIssue issue = mainPage.issue("TASKB-625");
+        TestIssue issue = mainPage.issue("TASKB-601");
         issue
             .click()
             .issueDetails()
             .assertIsDefaultTeam("TASKBOARD 1");
+    }
+
+    @Test
+    public void whenIssueIsOpenWithouTeam_ButProjectHasTeamByIssueType_ShouldHaveTeamByIssueType(){
+        MainPage mainPage = MainPage.produce(webDriver);
+        TestIssue issue = mainPage.issue("TASKB-637");
+        issue
+            .click()
+            .issueDetails()
+            .assertIssueType("Task")
+            .assertIsTeamByIssueType("TASKBOARD 1", "Task", "Taskboard");
+    }
+
+    @Test
+    public void whenIssueHasTeamInheritedFromParent_ShouldHaveSameTeamsAsItsParent(){
+        MainPage mainPage = MainPage.produce(webDriver);
+
+        final String expectedTeamByIssueType = "TASKBOARD 1";
+
+        TestIssue parent = mainPage.issue("TASKB-624");
+        parent
+            .click()
+            .issueDetails()
+            .assertIsTeamByIssueType(expectedTeamByIssueType, "Task", "Taskboard")
+            .closeDialog();
+
+        TestIssue issue = mainPage.issue("TASKB-625");
+        issue
+            .click()
+            .issueDetails()
+            .assertAreInheritedTeams(expectedTeamByIssueType);
     }
 
     @Test
@@ -27,7 +59,7 @@ public class CardTeamsIT extends AuthenticatedIntegrationTest {
     @Test
     public void whenTeamIsReplaced_ShouldUpdateIssueImmediatlyWithNewTeam(){
         MainPage mainPage = MainPage.produce(webDriver);
-        TestIssue issue = mainPage.issue("TASKB-625");
+        TestIssue issue = mainPage.issue("TASKB-601");
         issue
             .click()
             .issueDetails()

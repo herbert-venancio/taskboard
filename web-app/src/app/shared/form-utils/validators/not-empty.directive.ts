@@ -8,8 +8,13 @@ import {Directive} from '@angular/core';
 export class NotEmptyDirective implements Validator {
 
     validate(c: AbstractControl): ValidationErrors | null {
-        const value: string = c.value;
-        return value == null || value.trim().length === 0 ? {'notEmpty': true} : null;
+        return this.isEmpty(c.value) ? {'notEmpty': true} : null;
+    }
+
+    private isEmpty(value: any): boolean {
+        if (value === null || value === undefined)
+            return true;
+        return typeof value === 'string' && value.trim().length === 0;
     }
 
 }

@@ -2,6 +2,7 @@ package objective.taskboard.issueBuffer;
 
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static java.util.stream.Collectors.joining;
+import static objective.taskboard.domain.converter.IssueTeamService.TeamOrigin.DEFAULT_BY_PROJECT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -216,7 +217,9 @@ public class IssueBufferServiceTest {
         WebHookBody payload1 = payload("create-TASKB-1.json");
         issueBufferService.updateByEvent(payload1.webhookEvent, "TASKB-1", Optional.of(payload1.issue));
         when(jiraBean.getIssueByKey("TASKB-1")).thenReturn(Optional.of(payload1.issue));
+
         when(issueTeamService.getDefaultTeamId(Mockito.any())).thenReturn(1L);
+        when(issueTeamService.resolveTeamsOrigin(Mockito.any())).thenReturn(DEFAULT_BY_PROJECT);
 
         issueBufferService.addTeamToIssue("TASKB-1", 13L);
 

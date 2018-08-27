@@ -1,0 +1,115 @@
+$obj-icon-small: (
+    size: 16px,
+    margin: 3px
+);
+$obj-icon-medium: (
+    size: 24px,
+    margin: 3px
+);
+$obj-icon-large: (
+    size: 32px,
+    margin: 4px
+);
+$obj-icon-extra-large: (
+    size: 48px,
+    margin: 5px
+);
+
+@mixin obj-icon-size($icon) {
+    $size: map-get($icon, size);
+    $margin: map-get($icon, margin);
+
+    & > .icon-container {
+        width: $size;
+        height: $size;
+        padding: $margin;
+
+        & > svg {
+            width: $size - ($margin * 2);
+            fill: currentColor;
+        }
+    }
+}
+
+%obj-icon-small {
+    @include obj-icon-size($obj-icon-small);
+}
+
+%obj-icon-medium {
+    @include obj-icon-size($obj-icon-medium);
+}
+
+%obj-icon-large {
+    @include obj-icon-size($obj-icon-large);
+}
+
+%obj-icon-extra-large {
+    @include obj-icon-size($obj-icon-extra-large);
+}
+
+@mixin obj-icon-small-arrow-down($icon-wrapper, $icon, $icon-hover:null, $icon-selected:null) {
+    $size: map-get($obj-icon-small, size);
+    $margin: map-get($obj-icon-small, margin);
+
+    #{$icon-wrapper} {
+        width: $size;
+        height: $size;
+        padding: $margin;
+
+        #{$icon} {
+            border-right: 2px solid $obj-color-smoke;
+            border-bottom: 2px solid $obj-color-smoke;
+            padding: 3px;
+            top: -1px;
+            left: 1px;
+            position: relative;
+            display: block;
+            transform: rotate(45deg);
+        }
+    }
+
+    @if $icon-hover {
+        #{$icon-hover} {
+            border-color: $obj-color-dark-smoke;
+        }
+    }
+
+    @if $icon-selected {
+        #{$icon-selected} {
+            border-color: $obj-color-blue;
+        }
+    }
+}
+
+@mixin obj-icon-small-clear-x-inserted($icon-wrapper, $icon, $icon-hover:null, $icon-selected:null) {
+    $size: map-get($obj-icon-small, size);
+    $margin: map-get($obj-icon-small, margin);
+
+    #{$icon-wrapper} {
+        width: $size;
+        height: $size;
+        padding: $margin;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        #{$icon} {
+            height: $size;
+            line-height: $size;
+            font-size: $size+2;
+            color: $obj-color-smoke;
+        }
+    }
+
+    @if $icon-hover {
+        #{$icon-hover} {
+            color: $obj-color-dark-smoke;
+        }
+    }
+
+    @if $icon-selected {
+        #{$icon-selected} {
+            color: $obj-color-blue;
+        }
+    }
+}

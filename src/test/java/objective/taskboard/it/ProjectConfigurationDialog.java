@@ -8,11 +8,13 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
+import objective.taskboard.testUtils.ProjectInfo;
+
 public class ProjectConfigurationDialog extends AbstractUiFragment {
 
     private static final String SUCCESS_MESSAGE = "Configuration for project {0} has been updated.";
 
-    private final String projectKey;
+    private final ProjectInfo projectInfo;
 
     @FindBy(id="projectConfigurationModal")
     private WebElement dialog;
@@ -47,19 +49,19 @@ public class ProjectConfigurationDialog extends AbstractUiFragment {
     @FindBy(id="updateProjectConfiguration")
     private WebElement updateButton;
 
-    @FindBy(id="editProjectProfileConfiguration")
+    @FindBy(id="advancedConfigurations")
     private WebElement editProjectProfileButton;
 
-    public ProjectConfigurationDialog(WebDriver driver, String projectKey) {
+    public ProjectConfigurationDialog(WebDriver driver, ProjectInfo projectInfo) {
         super(driver);
-        this.projectKey = projectKey;
+        this.projectInfo = projectInfo;
         initElements(driver, this);
     }
 
     public ProjectConfigurationDialog assertIsOpen() {
         waitVisibilityOfElement(dialog);
         waitVisibilityOfElements(dialogTitle, startDateInput, deliveryDateInput, riskInput, updateButton);
-        waitTextInElement(dialogTitle, "Project Configuration for " + projectKey);
+        waitTextInElement(dialogTitle, "Project Configuration for " + projectInfo);
 
         return this;
     }
@@ -119,12 +121,17 @@ public class ProjectConfigurationDialog extends AbstractUiFragment {
         waitForClick(updateButton);
         return this;
     }
-    
-    public ProjectConfigurationDialog editProjectProfile() {
+
+    public ProjectConfigurationDialog clickAdvancedConfigurationsExpectingConfirmation() {
         waitForClick(editProjectProfileButton);
         return this;
     }
-   
+
+    public ProjectAdvancedConfigurationsPage openAdvancedConfigurations() {
+        waitForClick(editProjectProfileButton);
+        return new ProjectAdvancedConfigurationsPage(webDriver, projectInfo);
+    }
+
     public ProjectConfigurationDialog assertGlobalError(String message) {
         waitTextInElement(globalError, message);
         return this;
@@ -137,7 +144,7 @@ public class ProjectConfigurationDialog extends AbstractUiFragment {
 
     public ProjectConfigurationDialog assertSuccessAlertIsOpen() {
         WebElement successMessage = dialog.findElement(By.cssSelector("#alertModalConfiguration .text"));
-        waitTextInElement(successMessage, format(SUCCESS_MESSAGE, projectKey));
+        waitTextInElement(successMessage, format(SUCCESS_MESSAGE, projectInfo));
         return this;
     }
 

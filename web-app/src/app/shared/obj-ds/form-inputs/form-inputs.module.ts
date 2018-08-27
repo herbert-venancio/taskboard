@@ -4,7 +4,7 @@ import {TextFieldDirective} from './text-field.directive';
 import {FormsModule} from '@angular/forms';
 import {ErrorMessagesComponent} from './error-messages/error-messages.component';
 import {ErrorMessageComponent} from './error-messages/error-message.component';
-
+import {SelectFieldDirective} from './select/select-field.directive';
 
 @NgModule({
     imports: [
@@ -13,11 +13,13 @@ import {ErrorMessageComponent} from './error-messages/error-message.component';
     ],
     declarations: [
         TextFieldDirective,
+        SelectFieldDirective,
         ErrorMessagesComponent,
         ErrorMessageComponent,
     ],
     exports: [
         TextFieldDirective,
+        SelectFieldDirective,
         ErrorMessagesComponent,
         ErrorMessageComponent,
     ]
