@@ -33,17 +33,17 @@ import java.util.function.Predicate;
 
 import javax.annotation.PostConstruct;
 
-import objective.taskboard.issueBuffer.IssueBufferService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import objective.taskboard.auth.Authorizer;
 import objective.taskboard.domain.Project;
 import objective.taskboard.domain.ProjectFilterConfiguration;
-import objective.taskboard.jira.data.JiraProject;
 import objective.taskboard.jira.client.JiraCreateIssue;
+import objective.taskboard.jira.data.JiraProject;
 import objective.taskboard.jira.data.Version;
 import objective.taskboard.project.ProjectBaselineProvider;
 import objective.taskboard.project.ProjectProfileItem;
@@ -59,7 +59,7 @@ public class ProjectService {
     private final JiraProjectService jiraProjectService;
     private final Authorizer authorizer;
     private final ProjectBaselineProvider baselineProvider;
-    private final IssueBufferService issueBufferService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Autowired
     public ProjectService(
@@ -68,13 +68,13 @@ public class ProjectService {
             JiraProjectService jiraProjectService,
             Authorizer authorizer, 
             ProjectBaselineProvider baselineProvider,
-            IssueBufferService issueBufferService) {
+            ApplicationEventPublisher eventPublisher) {
         this.projectRepository = projectRepository;
         this.projectProfileItemRepository = projectProfileItemRepository;
         this.jiraProjectService = jiraProjectService;
         this.authorizer = authorizer;
         this.baselineProvider = baselineProvider;
-        this.issueBufferService = issueBufferService;
+        this.eventPublisher = eventPublisher;
     }
 
     @PostConstruct
@@ -163,7 +163,7 @@ public class ProjectService {
 
     public void saveTaskboardProject(ProjectFilterConfiguration project) {
         projectRepository.save(project);
-        issueBufferService.notifyProjectConfigurationUpdated(project.getProjectKey());
+        eventPublisher.publishEvent(new ProjectUpdateEvent(this, project.getProjectKey()));
     }
 
     public Version getVersion(String versionId) {
