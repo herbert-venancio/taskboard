@@ -135,7 +135,7 @@ public class ThroughputKPIServiceTest {
     
     private void assertRow(ThroughputRow tpRow, ZonedDateTime date, String type, Long count) {
         assertThat(tpRow.date,is(date));
-        assertThat(tpRow.type,is(type));
+        assertThat(tpRow.issueType,is(type));
         assertThat(tpRow.count,is(count));
     }
     

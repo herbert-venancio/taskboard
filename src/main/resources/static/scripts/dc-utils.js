@@ -193,5 +193,116 @@ function DcUtils() {
                 link.remove();
             }); 
     };
+
+    this.registerOptions = function(widget) {
+        const options = [
+            {
+                icon:'taskboard-icons:dashboard-filter'
+                , title: 'Filters'
+                , tap: () => widget.$$('.filters-modal').open()
+                , hidden: true
+            },
+            {
+                icon: 'taskboard-icons:settings'
+                , title: 'Settings'
+                , tap: () => {
+                    widget.settingIssueLevel = widget._getSavedLevel();
+                    widget.$$('.settings-modal').open();
+                }
+                , cssClasses: ''
+            }
+        ]
+        widget.options = options;
+    };
+
+    this.configureDefaultStackedChart = function(chart) {
+        chart
+            .margins({top: 15, right: 20, bottom: 20, left: 250})
+            .legend(this.getDefaultLegend())
+            .colors(this.getDefaultColors())
+            .transitionDuration(0)
+            // mouse interaction
+            .brushOn(false) // don't select with drag-n-drop
+            .renderHorizontalGridLines(true)
+            .elasticY(true);
+    };
+
+    this.reverseLegendOrder = function(chart) {
+        chart.__legendables = chart.legendables;
+        chart.legendables = () => {
+            const items = chart.__legendables();
+            return items.reverse();
+        };
+    };
+
+    this.insertPlotDataIntoChart = function (chart, plotData, layerNamesKey) {
+        const xScale = d3.time.scale().domain([plotData.startDate, plotData.endDate]);
+        chart.x(xScale);
+        chart.dimension(plotData.dimension);
+        
+        function stackAccessor (layerName) {
+            return (item) => item.value[layerName];
+        }
+        
+        const tooltipAccessor = function (item) {
+            const dateParse = d3.time.format('%B %d, %Y');
+            const date = dateParse(item.key);
+            const value = item.value[this.layer];
+            return `${date}: [${this.layer}] ${value}`;
+        };
+        const layerNames = plotData[layerNamesKey];
+        for (let i = 0; i < layerNames.length; i++) {
+            const layerName = layerNames[i];
+            if (i === 0) {
+                // first stack group must be added as group
+                chart.group(plotData.dateGroup, layerName, stackAccessor(layerName));
+            } else {
+                chart.stack(plotData.dateGroup, layerName, stackAccessor(layerName));
+            }
+            chart.title(layerName, tooltipAccessor);
+        }
+    };
+
+    this.createPaperListFilter = function (div, dimension, promptValue, promptText) {
+        const list = dc.paperList(div);
+        list
+            .dimension(dimension)
+            .group(dimension.group())
+            .multiple(true)
+            .title((item) => item.key)
+            .promptValue(promptValue)
+            .promptText(promptText);
+        const all = list.data().map(list.keyAccessor());
+        list.replaceFilter([all]);
+        return list;
+    };
+
+    this.groupChartDataByGroupKey = function (crossfilterGroup, groupPropertyNameKey, valuePropertyNameKey) {
+        const reduceAdd = (p, v) => {
+            if (!p) {
+                p = {};
+            }
+            if (!p[v[groupPropertyNameKey]]) {
+                p[v[groupPropertyNameKey]] = 0;
+            }
+            p[v[groupPropertyNameKey]] += v[valuePropertyNameKey];
+            return p;
+        };
+        const reduceSub = (p, v) => {
+            if (!p) {
+                p = {};
+            }
+            if (!p[v[groupPropertyNameKey]]) {
+                p[v[groupPropertyNameKey]] = 0;
+            }
+            p[v[groupPropertyNameKey]] -= v[valuePropertyNameKey];
+            return p;
+        };
+        const reduceInit = () => {
+            return {};
+        };
+        crossfilterGroup.reduce(reduceAdd, reduceSub, reduceInit)
+    }
+
 }
 var dcUtils = new DcUtils();

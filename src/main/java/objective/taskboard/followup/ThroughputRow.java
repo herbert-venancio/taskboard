@@ -9,18 +9,18 @@ import objective.taskboard.utils.DateTimeUtils;
 public class ThroughputRow implements TransitionDataRow {
 
     public final ZonedDateTime date;
-    public final String type;
+    public final String issueType;
     public final Long count;
 
-    public ThroughputRow(ZonedDateTime date, String type, Long count) {
+    public ThroughputRow(ZonedDateTime date, String issueType, Long count) {
         this.date = date;
-        this.type = type;
+        this.issueType = issueType;
         this.count = count;
     }
 
     @Override
     public List<String> getAsStringList() {
-        return Arrays.asList(DateTimeUtils.toStringExcelFormat(date),type,count.toString());
+        return Arrays.asList(DateTimeUtils.toStringExcelFormat(date),issueType,count.toString());
     }
     
 }

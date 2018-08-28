@@ -363,7 +363,7 @@ public class FollowUpReportGenerator {
             for(ThroughputRow tpRow : dataSet.rows) {
                 SheetRow row = sheet.createRow();
                 row.addColumn(tpRow.date);
-                row.addColumn(tpRow.type);
+                row.addColumn(tpRow.issueType);
                 row.addColumn(tpRow.count);
             }
             sheet.save();

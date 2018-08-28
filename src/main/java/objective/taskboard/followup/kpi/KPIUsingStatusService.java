@@ -70,9 +70,9 @@ public abstract class KPIUsingStatusService<DS,R> {
 
         List<IssueStatusFlow> issues = issueStatusFlowService.getIssues(ds);
 
-        if(issues.isEmpty())
+        if (issues.isEmpty())
             return Arrays.asList();
-        
+
         Map<String, List<IssueStatusFlow>> byType = getIssuesByType(issues);
         
         List<R> rows = new LinkedList<>();

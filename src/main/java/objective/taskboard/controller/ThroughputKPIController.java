@@ -16,14 +16,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import objective.taskboard.auth.Authorizer;
-import objective.taskboard.followup.WipKPIDataProvider;
+import objective.taskboard.followup.ThroughputKPIDataProvider;
 import objective.taskboard.jira.ProjectService;
 
 @RestController
-public class WipKPIController {
-
+public class ThroughputKPIController {
     @Autowired
-    private WipKPIDataProvider wipDataProvider;
+    private ThroughputKPIDataProvider throughputDataProvider;
     
     @Autowired
     private Authorizer authorizer;
@@ -31,21 +30,22 @@ public class WipKPIController {
     @Autowired
     private ProjectService projectService;
     
-    @RequestMapping(value = "/api/projects/{project}/followup/wip", produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/api/projects/{project}/followup/throughput", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> data(
             @PathVariable("project") String projectKey,
             @RequestParam("timezone") String zoneId,
             @RequestParam("level") String level) {
-        
+
         if (!authorizer.hasPermissionInProject(DASHBOARD_TACTICAL, projectKey) 
                 && !authorizer.hasPermissionInProject(DASHBOARD_OPERATIONAL, projectKey))
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
         if (!projectService.taskboardProjectExists(projectKey))
             return new ResponseEntity<>("Project not found: " + projectKey + ".", HttpStatus.NOT_FOUND);
-        
+
         ZoneId timezone = determineTimeZoneId(zoneId);
-        
-        return new ResponseEntity<>(wipDataProvider.getDataSet(projectKey, level, timezone), HttpStatus.OK);
+
+        return new ResponseEntity<>(throughputDataProvider.getDataSet(projectKey, level, timezone), HttpStatus.OK);
     }
 }
+

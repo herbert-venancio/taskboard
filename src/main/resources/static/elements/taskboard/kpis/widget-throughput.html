@@ -18,26 +18,26 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
   [/LICENSE]
   -->
-<dom-module id="widget-wip"> 
+<dom-module id="widget-throughput"> 
   <template>
 
     <style>
     </style>
 
-    <widget-wrap title="WIP" is-ready="{{isReady}}" tags="{{tags}}"
+    <widget-wrap title="Throughput" is-ready="{{isReady}}" tags="{{tags}}"
         error-message="{{errorMessage}}" options="{{options}}"
         chart="{{chart}}">
-      <div id="wip" class="tb-chart"></div>
+      <div id="throughput" class="tb-chart"></div>
     </widget-wrap> 
     <modal-wrap class="filters-modal" title="Filters">
       <modal-wrap-content>
         <h3 class="tb-label">Issue Types</h3>
         <div class="config-slot-0 dc-chart--no-float"></div>
-        </modal-wrap-content>
-        <modal-wrap-footer> 
+      </modal-wrap-content>
+      <modal-wrap-footer> 
         <tb-button button=[[_btFilterClose]]></tb-button>
-        </modal-wrap-footer>
-      </modal-wrap>
+      </modal-wrap-footer>
+    </modal-wrap>
     <modal-wrap class="settings-modal" title="Settings">
       <modal-wrap-content>
         <h3 class="tb-label">Level</h3>
@@ -59,8 +59,7 @@
   <script>
         (function () {
             Polymer({
-                is: 'widget-wip',
-
+                is: 'widget-throughput',
                 properties: {
                     selectedProjectKey: {
                         type: String,
@@ -92,8 +91,7 @@
                     settingIssueLevel: {
                         type: String,
                         notify: true,
-                        value: 'Subtask',
-                        observer: '_onSettingIssueLevelChanged'
+                        value: 'Subtask'
                     },
                     localStorageLevelItemName: {
                         type: String,
@@ -108,11 +106,8 @@
                         value: null
                     }
                 },
-
-                _onProjectSelected: function (newSelectedProjectKey, previousSelectedProjectKey) {
-                    if (newSelectedProjectKey === previousSelectedProjectKey) {
-                        return;
-                    }
+        
+                _onProjectSelected: function (newSelectedProjectKey, oldSelectedProjectKey) {
                     this.reloadChart();
                 },
 
@@ -121,13 +116,13 @@
                 },
 
                 computeLocalStorageLevelItemName: function (selectedProjectKey) {
-                    return `dashboard.wip-chart.${selectedProjectKey}.level`;
+                    return `dashboard.throughput-chart.${selectedProjectKey}.level`;
                 },
 
                 ready: function () {
                     dcUtils.registerOptions(this);
                     this._btFilterClose = ButtonBuilder('Ok').onClick(() => this.$$('.filters-modal').close()).build();
-                    this._btLevelSave = ButtonBuilder('Ok').onClick(() => {
+                    this._btLevelSave = ButtonBuilder('Save').onClick(() => {
                         let savedLevel = this._getSavedLevel();
                         if (savedLevel === this.settingIssueLevel) {
                             this.$$('.settings-modal').close();
@@ -154,30 +149,30 @@
                         this.chart = null;
                     }
                 },
-
                 handleError: function (error, data) {
                     if (error) {
                         this.errorMessage = error.responseText;
                         return true;
                     }
                     if (!data.rows.length) {
-                        this.errorMessage = 'WIP has no data';
+                        this.errorMessage = 'Throughput has no data';
                         return true;
                     }
                     return false;
                 },
-
+        
                 reloadChart: function () {
                     this.reset();
                     const savedLevel = this._getSavedLevel();
                     const timezone = taskboard.getTimeZoneIdFromBrowser();
                     this.tags = [savedLevel];
-                    const url = `/api/projects/${this.selectedProjectKey}/followup/wip?level=${savedLevel}&timezone=${timezone}`;
+                    const url = `/api/projects/${this.selectedProjectKey}/followup/throughput?level=${savedLevel}&timezone=${timezone}`;
                     this.xhr = d3.json(url, (error, data) => {
                         if (this.handleError(error, data)) {
                             return;
                         }
                         data = data.rows;
+        
                         const plotData = this.prepareData(data);
                         this.issueListFilter = this.createIssueListFilter(plotData.ndx);
                         this.chart = this.createChart(plotData);
@@ -190,26 +185,24 @@
                     // parsing data from controller
                     data.forEach((item) => {
                         item.date = new Date(Number(item.date));
-                        item.wip = Number(item.count);
+                        item.throughput = Number(item.count);
                         // clean-up
                         delete item.count;
                     });
-
                     const [startDate, endDate] = d3.extent(data, (item) => item.date);
-
                     const ndx = dc.crossfilter(data);
                     // Date as dimension
                     const dimension = ndx.dimension((item) => item.date);
-                    // extract statuses into a array without repetition
-                    const issueStatuses = [...new Set(data.map((item) => item.status))];
+                    // extract issue types into a array without repetition
+                    const issueTypes = [...new Set(data.map((item) => item.issueType))];
                     const dateGroup = dimension.group();
-                    dcUtils.groupChartDataByGroupKey(dateGroup, 'status', 'wip');
+                    dcUtils.groupChartDataByGroupKey(dateGroup, 'issueType', 'throughput');
                     return Object.freeze({
                         ndx: ndx,
                         dimension: dimension,
                         startDate: startDate,
                         endDate: endDate,
-                        issueStatuses: issueStatuses,
+                        issueTypes: issueTypes,
                         dateGroup: dateGroup
                     });
                 },
@@ -217,7 +210,7 @@
                 createIssueListFilter: function (ndx) {
                     this.set('options.0.hidden', false);
                     const div = this.$$('.config-slot-0');
-                    const typeDimension = ndx.dimension((item) => item.type);
+                    const typeDimension = ndx.dimension((item) => item.issueType);
                     const list = dcUtils.createPaperListFilter(div, typeDimension, '-none-', 'All Issues');
                     list.render();
                     list.on('filtered', () => {
@@ -228,9 +221,9 @@
                 },
 
                 createChart: function (plotData) {
-                    const chart = dc.barChart('#wip');
+                    const chart = dc.barChart('#throughput');
                     dcUtils.configureDefaultStackedChart(chart);
-                    dcUtils.insertPlotDataIntoChart(chart, plotData, 'issueStatuses');
+                    dcUtils.insertPlotDataIntoChart(chart, plotData, 'issueTypes');
                     // present legends in reverse order
                     dcUtils.reverseLegendOrder(chart);
                     dcUtils.setupChartDateTicks(chart, plotData.startDate, plotData.endDate, 12);
