@@ -42,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 
 import objective.taskboard.auth.Authorizer;
@@ -62,6 +63,7 @@ import objective.taskboard.jira.FrontEndMessageException;
 import objective.taskboard.jira.JiraIssueService;
 import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.ProjectService;
+import objective.taskboard.jira.ProjectUpdateEvent;
 import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.data.Transition;
 import objective.taskboard.jira.data.WebhookEvent;
@@ -70,7 +72,7 @@ import objective.taskboard.task.IssueEventProcessScheduler;
 import objective.taskboard.task.JiraEventProcessor;
 
 @Service
-public class IssueBufferService {
+public class IssueBufferService implements ApplicationListener<ProjectUpdateEvent> {
     private static final String CACHE_FILENAME = "issues.dat";
 
     private static final Logger log = LoggerFactory.getLogger(IssueBufferService.class);
@@ -202,7 +204,12 @@ public class IssueBufferService {
         projectsUpdatedByEvent.add(projectKey);
     }
 
-    public synchronized void notifyProjectConfigurationUpdated(final String projectKey) {
+    @Override
+    public void onApplicationEvent(ProjectUpdateEvent event) {
+        notifyProjectConfigurationUpdated(event.getProjectKey());
+    }
+
+    private synchronized void notifyProjectConfigurationUpdated(final String projectKey) {
         this.startBatchUpdate();
         this.getAllIssues().stream()
                 .filter(i -> i.getProjectKey().equals(projectKey))
@@ -525,4 +532,5 @@ public class IssueBufferService {
 
         private static final long serialVersionUID = 1L;
     }
+
 }

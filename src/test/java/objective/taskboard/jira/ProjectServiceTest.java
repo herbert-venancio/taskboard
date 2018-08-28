@@ -18,9 +18,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import objective.taskboard.issueBuffer.IssueBufferService;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.context.ApplicationEventPublisher;
 
 import objective.taskboard.auth.Authorizer;
 import objective.taskboard.domain.Project;
@@ -46,8 +46,8 @@ public class ProjectServiceTest {
     private JiraProjectService jiraProjectService = mock(JiraProjectService.class);
     private Authorizer authorizer = mock(Authorizer.class);
     private ProjectBaselineProvider projectBaselineProvider = mock(ProjectBaselineProvider.class);
-    private IssueBufferService issueBufferService = mock(IssueBufferService.class);
-    private ProjectService subject = new ProjectService(projectRepository, projectProfileItemRepository, jiraProjectService, authorizer, projectBaselineProvider, issueBufferService);
+    private ApplicationEventPublisher eventPublisher = mock(ApplicationEventPublisher.class);;
+    private ProjectService subject = new ProjectService(projectRepository, projectProfileItemRepository, jiraProjectService, authorizer, projectBaselineProvider, eventPublisher);
 
     @Before
     public void setup() {
