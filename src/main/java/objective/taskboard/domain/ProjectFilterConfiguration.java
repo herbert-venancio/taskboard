@@ -85,13 +85,6 @@ public class ProjectFilterConfiguration implements Serializable {
         this.teamsByIssueTypes = new ArrayList<>();
     }
 
-    public ProjectFilterConfiguration(String projectKey, Long defaultTeamId, Long baseClusterId) {
-        this.setDefaultTeam(defaultTeamId);
-        this.setProjectKey(projectKey);
-        this.setBasepClusterId(baseClusterId);
-        this.teamsByIssueTypes = new ArrayList<>();
-    }
-
     public Optional<Long> getTeamByIssueTypeId(Long issueTypeId) {
         return teamsByIssueTypes.stream()
                 .filter(item -> item.getIssueTypeId().equals(issueTypeId))
@@ -196,11 +189,11 @@ public class ProjectFilterConfiguration implements Serializable {
         return Optional.ofNullable(baselineDate);
     }
 
-    public Long getBaseClusterId() {
-        return baseClusterId;
+    public Optional<Long> getBaseClusterId() {
+        return Optional.ofNullable(baseClusterId);
     }
 
-    public void setBasepClusterId(Long baseClusterId) {
+    public void setBaseClusterId(Long baseClusterId) {
         this.baseClusterId = baseClusterId;
     }
 

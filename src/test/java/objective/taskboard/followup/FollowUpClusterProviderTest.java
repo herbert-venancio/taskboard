@@ -64,25 +64,57 @@ public class FollowUpClusterProviderTest {
     }
     
     @Test
-    public void shouldReturnOnlyItemsByProject() {
+    public void shouldReturnOnlyItemsByProject_whenProjectHasNotCluster() {
         
-        when(clusterRepository.findById(Mockito.anyLong()))
-            .thenReturn(baseCluster);
+        when(clusterRepository.findById(Optional.empty()))
+            .thenReturn(Optional.empty());
         
-        ProjectFilterConfiguration projectOne = new ProjectFilterConfiguration(TASKB_PROJECT_KEY, 1L, 1L);
+        ProjectFilterConfiguration projectOne = new ProjectFilterConfiguration(TASKB_PROJECT_KEY, 1L);
         
         List<SizingClusterItem> itemsByProjectMock = generateProjectItemsMock(baseCluster, TASKB_PROJECT_KEY);
         
         when(projectRepository.getProjectByKey(TASKB_PROJECT_KEY))
             .thenReturn(Optional.of(projectOne));
         
-        when(clusterItemRepository.findByProjectKeyOrBaseCluster(TASKB_PROJECT_KEY, baseCluster))
+        when(clusterItemRepository.findByProjectKeyOrBaseCluster(TASKB_PROJECT_KEY, Optional.empty()))
             .thenReturn(Optional.of(itemsByProjectMock));
         
         FollowupCluster followupCluster = followupClusterProvider.getForProject(TASKB_PROJECT_KEY);
         List<FollowUpClusterItem> clusterItems = followupCluster.getClusterItems();
         
-        ProjectFilterConfiguration expectedProject = new ProjectFilterConfiguration(TASKB_PROJECT_KEY, 1L, 1L);
+        ProjectFilterConfiguration expectedProject = new ProjectFilterConfiguration(TASKB_PROJECT_KEY, 1L);
+        
+        List<FollowUpClusterItem> expectedItems = Arrays.asList(
+                new FollowUpClusterItem(expectedProject, BALLPARK_ALPHA, NOTUSED, "XS", 1.0, 0.0),
+                new FollowUpClusterItem(expectedProject, BALLPARK_DEV, NOTUSED, "M", 5.0, 0.0),
+                new FollowUpClusterItem(expectedProject, DEV, NOTUSED, "S", 2.0, 0.0)
+                );
+        
+        assertFollowUpItemsEquals(expectedItems, clusterItems);
+    }
+    
+    @Test
+    public void shouldReturnOnlyItemsByProject_whenProjectHasClusterWithoutItems() {
+        
+        when(clusterRepository.findById(Optional.ofNullable(baseCluster.getId())))
+            .thenReturn(Optional.ofNullable(baseCluster));
+        
+        ProjectFilterConfiguration projectOne = new ProjectFilterConfiguration(TASKB_PROJECT_KEY, 1L);
+        projectOne.setBaseClusterId(1L);
+        
+        List<SizingClusterItem> itemsByProjectMock = generateProjectItemsMock(baseCluster, TASKB_PROJECT_KEY);
+        
+        when(projectRepository.getProjectByKey(TASKB_PROJECT_KEY))
+            .thenReturn(Optional.of(projectOne));
+        
+        when(clusterItemRepository.findByProjectKeyOrBaseCluster(TASKB_PROJECT_KEY, Optional.ofNullable(baseCluster)))
+            .thenReturn(Optional.of(itemsByProjectMock));
+        
+        FollowupCluster followupCluster = followupClusterProvider.getForProject(TASKB_PROJECT_KEY);
+        List<FollowUpClusterItem> clusterItems = followupCluster.getClusterItems();
+        
+        ProjectFilterConfiguration expectedProject = new ProjectFilterConfiguration(TASKB_PROJECT_KEY, 1L);
+        expectedProject.setBaseClusterId(1L);
         
         List<FollowUpClusterItem> expectedItems = Arrays.asList(
                 new FollowUpClusterItem(expectedProject, BALLPARK_ALPHA, NOTUSED, "XS", 1.0, 0.0),
@@ -95,7 +127,7 @@ public class FollowUpClusterProviderTest {
     
     @Test
     public void shouldReturnEmptyWhen_projectFoundWithoutItems() {
-        ProjectFilterConfiguration projectTwo = new ProjectFilterConfiguration(TASKB_TWO_PROJECT_KEY, 2L, 2L);
+        ProjectFilterConfiguration projectTwo = new ProjectFilterConfiguration(TASKB_TWO_PROJECT_KEY, 2L);
 
         when(projectRepository.getProjectByKey(TASKB_TWO_PROJECT_KEY))
             .thenReturn(Optional.of(projectTwo));
@@ -110,10 +142,11 @@ public class FollowUpClusterProviderTest {
     @Test
     public void shouldReturnItemsByProjectAndByClusterWhen_hasOverride() {
         
-        when(clusterRepository.findById(Mockito.anyLong()))
-            .thenReturn(baseCluster);
+        when(clusterRepository.findById(Optional.ofNullable(baseCluster.getId())))
+            .thenReturn(Optional.ofNullable(baseCluster));
 
-        ProjectFilterConfiguration projectThree = new ProjectFilterConfiguration(TASKB_THREE_PROJECT_KEY, 3L, 3L);
+        ProjectFilterConfiguration projectThree = new ProjectFilterConfiguration(TASKB_THREE_PROJECT_KEY, 3L);
+        projectThree.setBaseClusterId(1L);
         
         when(projectRepository.getProjectByKey(TASKB_THREE_PROJECT_KEY))
             .thenReturn(Optional.of(projectThree));
@@ -137,14 +170,15 @@ public class FollowUpClusterProviderTest {
         itemsProjectThreeMock.add(item7);
         itemsProjectThreeMock.add(item8);
         
-        when(clusterItemRepository.findByProjectKeyOrBaseCluster(TASKB_THREE_PROJECT_KEY, baseCluster))
+        when(clusterItemRepository.findByProjectKeyOrBaseCluster(TASKB_THREE_PROJECT_KEY, Optional.ofNullable(baseCluster)))
             .thenReturn(Optional.of(itemsProjectThreeMock));
         
         FollowupCluster followupCluster = followupClusterProvider.getForProject(TASKB_THREE_PROJECT_KEY);
         
         List<FollowUpClusterItem> clusterItems = followupCluster.getClusterItems();
         
-        ProjectFilterConfiguration expectedProject = new ProjectFilterConfiguration(TASKB_THREE_PROJECT_KEY, 3L, 3L);
+        ProjectFilterConfiguration expectedProject = new ProjectFilterConfiguration(TASKB_THREE_PROJECT_KEY, 3L);
+        expectedProject.setBaseClusterId(1L);
         
         List<FollowUpClusterItem> expectedItems = Arrays.asList(
                 new FollowUpClusterItem(expectedProject, BALLPARK_ALPHA, NOTUSED, "M", 18.0, 1.0),
