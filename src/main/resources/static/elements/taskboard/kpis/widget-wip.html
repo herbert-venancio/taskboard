@@ -1,0 +1,340 @@
+<!--
+  [LICENSE]
+  Taskboard
+  ---
+  Copyright (C) 2015 - 2018 Objective Solutions
+  ---
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  [/LICENSE]
+  -->
+<dom-module id="widget-wip"> 
+  <template>
+
+    <style>
+    </style>
+
+    <widget-wrap title="WIP" is-ready="{{isReady}}" tags="{{tags}}"
+        error-message="{{errorMessage}}" options="{{options}}"
+        chart="{{chart}}">
+      <div id="wip" class="tb-chart"></div>
+    </widget-wrap> 
+    <modal-wrap class="filters-modal" title="Filters">
+      <modal-wrap-content>
+        <h3 class="tb-label">Issue Types</h3>
+        <div class="config-slot-0 dc-chart--no-float"></div>
+      </modal-wrap-content>
+      <modal-wrap-footer> 
+        <tb-button button=[[_btFilterClose]]></tb-button>
+      </modal-wrap-footer>
+    </modal-wrap>
+    <modal-wrap
+        class="settings-modal" title="Settings">
+      <modal-wrap-content>
+        <h3 class="tb-label">Level</h3>
+        <div>
+          <label id="labelLevel"></label>
+          <paper-radio-group class="radio-group" selected="{{settingIssueLevel}}"
+              aria-labelledby="labelLevel"> 
+            <paper-radio-button name="Demand">Demand</paper-radio-button> 
+            <paper-radio-button name="Feature">Feature</paper-radio-button> 
+            <paper-radio-button name="Subtask">Subtask</paper-radio-button> 
+          </paper-radio-group>
+        </div>
+      </modal-wrap-content> 
+      <modal-wrap-footer> 
+        <tb-button button="[[_btLevelSave]]"></tb-button> 
+      </modal-wrap-footer> 
+    </modal-wrap> 
+  </template>
+  <script>
+        (function () {
+            Polymer({
+                is: 'widget-wip',
+
+                properties: {
+                    selectedProjectKey: {
+                        type: String,
+                        notify: true
+                    },
+                    tags: {
+                        type: Array
+                    },
+                    isReady: {
+                        type: Boolean,
+                        notify: true,
+                        value: false
+                    },
+                    errorMessage: {
+                        type: String,
+                        notify: true
+                    },
+                    chart: {
+                        type: Object,
+                        notify: true,
+                        value: null
+                    },
+                    options: {
+                        type: Array,
+                        value: null
+                    }
+                    ,
+                    settingIssueLevel: {
+                        type: String,
+                        notify: true,
+                        value: 'Subtask'
+                    },
+                    _btFilterClose: {
+                        type: Object,
+                        value: null
+                    },
+                    _btLevelSave: {
+                        type: Object,
+                        value: null
+                    }
+                },
+
+                observers: [
+                    '_onProjectSelected(selectedProjectKey)',
+                ],
+
+                ready: function()  {
+                    this.set('options', [
+                        {
+                            icon:'taskboard-icons:dashboard-filter'
+                            , title: 'Filters'
+                            , tap: () => this.$$('.filters-modal').open()
+                            , hidden: true
+                        },
+                        {
+                            icon: 'taskboard-icons:settings'
+                            , title: 'Settings'
+                            , tap: () => {
+                                this.settingIssueLevel = this._getSavedLevel();
+                                this.$$('.settings-modal').open();
+                            }
+                            , cssClasses: ''
+                        }
+                    ]);
+
+                    let btFilterClose = ButtonBuilder('Ok').onClick(() => this.$$('.filters-modal').close()).build();
+                    this.set('_btFilterClose', btFilterClose);
+
+                    let btLevelSave = ButtonBuilder('Save').onClick(() => {
+                        let savedLevel = this._getSavedLevel();
+                        if (savedLevel === this.settingIssueLevel) {
+                            this.$$('.settings-modal').close();
+                            return;
+                        }
+                        localStorage.setItem(`dashboard.wip-chart.${this.selectedProjectKey}.level`, this.settingIssueLevel);
+                        this.$$('.settings-modal').close();
+                        this.reloadChart();
+                    }).build();
+                    this.set('_btLevelSave', btLevelSave);
+                },
+
+                _getSavedLevel: function() {
+                    return localStorage.getItem(`dashboard.wip-chart.${this.selectedProjectKey}.level`) || 'Subtask';
+                },
+
+                _onProjectSelected: function(selectedProjectKey) {
+                    this.reloadChart();
+                },
+
+                reset: function() {
+                    this.set('isReady', false);
+                    this.set('errorMessage', '');
+                    this.set('options.0.cssClasses', '');
+                    this.set('options.0.hidden', true);
+                    if(this.xhr) {
+                        this.xhr.abort();
+                        this.xhr = null;
+                    }
+                    if (!_.isEmpty(this.chart)) {
+                        dcDateRangeChartsService.deregisterChartInRange(this.chart);
+                        dc.deregisterChart(this.chart);
+                        this.set('chart', {});
+                    }
+                },
+
+                handleError: function(error, data) {
+                    if (error) {
+                        this.set('errorMessage', error.responseText);
+                        return true;
+                    }
+
+                    if (!data.rows.length) {
+                        this.set('errorMessage', 'WIP has no data');
+                        return true;
+                    }
+
+                    return false;
+                },
+                
+                reloadChart: function () {
+                    this.reset();
+
+                    var self = this;                    
+
+                    let savedLevel = self._getSavedLevel();
+                    let timezone = taskboard.getTimeZoneIdFromBrowser();
+                    self.set('tags', [savedLevel]);
+                    let url = `/api/projects/${self.selectedProjectKey}/followup/wip?level=${savedLevel}&timezone=${timezone}`;
+                    this.xhr = d3.json(url, function(error, data) {
+                        if(self.handleError(error, data))
+                            return;
+
+                        data = data.rows;
+                        
+                        self.prepareData(data);
+                        self.createIssueListFilter();
+                        self.createChart(data);
+
+                        self.set('isReady', true);
+                    });
+                    
+                },
+
+                createIssueListFilter: function() {
+                    this.set('options.0.hidden', false);
+                    let div = this.$$('.config-slot-0');
+                    let list = dc.paperList(div);
+
+                    this.typeDim = this.ndx.dimension((item) => item.type);
+                    this.typeGroup = this.typeDim.group();
+
+                    list
+                        .dimension(this.typeDim)
+                        .group(this.typeGroup)
+                        .multiple(true)
+                        .title((item) => item.key)
+                        .promptValue('-none-')
+                        .promptText('All Issues');
+
+                    let all = list.data().map(list.keyAccessor());
+                    list.replaceFilter([all]);
+
+                    list.render();
+
+                    var highlightButton = () => {
+                        this.set('options.0.cssClasses', list.isAllSelected() ? '' : 'widget__button_highlighted');
+                    };
+                    list.on('filtered', highlightButton);
+
+                    this.issueListFilter = list;
+                },
+
+
+                prepareData: function(data) {
+                    var self = this;                    
+
+                    // parsing data from controller
+                    data.forEach((item) => {
+                        item.date = new Date(Number(item.date));
+                        item.wip = Number(item.count);
+                        // clean-up
+                        delete item.count;
+                    });
+                    
+                    self.ndx = crossfilter(data);
+                    // Date as dimension
+                    self.dimension = self.ndx.dimension((item) => item.date);
+                     // extract statuses into a array without repetition
+                    self.statuses = [...new Set(data.map((item) => item.status))];
+                    self.dateGroup = self.dimension.group().reduce(
+                        // reduce add function
+                        (p, v, nf) => {
+                            if (!p)
+                                p = {}
+                            if (!p[v.status])
+                                p[v.status] = 0
+                            p[v.status] += v.wip;
+                            return p;
+                        },
+                        // reduce sub function
+                        (p, v, nf) => {
+                            if (!p)
+                                p = {}
+                            if (!p[v.status])
+                                p[v.status] = 0
+                            p[v.status] -= v.wip;
+                            return p;
+                        },
+                        // reduce init function
+                        () => {
+                            return {};
+                        }
+                    )
+                },
+
+                createChart: function(data) {
+                    var self = this;                    
+
+                    let chart = dc.barChart('#wip');
+                    let dates = data.map((item) => item.date);
+                    let startDate = d3.time.day.offset(d3.min(dates), -1);
+                    let endDate = d3.time.day.offset(d3.max(dates), 1);
+
+                    chart
+                        .margins({top: 15, right: 20, bottom: 20, left: 250})
+                        .legend(dcUtils.getDefaultLegend())
+                        .colors(dcUtils.getDefaultColors())
+                        .transitionDuration(0)
+                        // mouse interaction
+                        .brushOn(false)       // don't select with drag-n-drop
+                        // axis
+                        .x(d3.time.scale().domain([startDate, endDate]))
+                        .renderHorizontalGridLines(true)
+                        .elasticY(true);
+
+                    // inserting data
+                    chart.dimension(self.dimension);
+
+                    function stackAccessor(status) {
+                        return function(item) {
+                            return item.value[status];
+                        }
+                    }
+                    let dateParse = d3.time.format('%B %d, %Y');
+                    for (i = 0; i < self.statuses.length; i++) {
+                        let status = self.statuses[i];
+                        if (i == 0)
+                            // first stack group must be added as group
+                            chart.group(self.dateGroup, status, stackAccessor(status));
+                        else 
+                            chart.stack(self.dateGroup, status, stackAccessor(status));
+
+                        chart.title(status, function(item) {
+                            let date = dateParse(item.key);
+                            let status = this.layer;
+                            let wip = item.value[status];
+                            return `${date}: [${status}] ${wip}`;
+                        });
+                    }
+
+                    // present legends in reverse order
+                    chart.__legendables = chart.legendables;
+                    chart.legendables = function() {
+                        var items = chart.__legendables();
+                        return items.reverse();
+                    };
+
+                    dcUtils.setupChartDateTicks(chart, startDate, endDate, 12);
+                    self.set('chart', chart);
+                    dcDateRangeChartsService.registerChartInRangeAndRender(chart);
+
+                }
+            });
+        })();
+    </script> 
+</dom-module>
