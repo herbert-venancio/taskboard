@@ -27,6 +27,9 @@ public abstract class KPIUsingStatusService<DS,R> {
     @Autowired
     protected JiraProperties jiraProperties;
     
+    @Autowired
+    private IssueStatusFlowService issueStatusFlowService;
+    
     public List<DS> getData(FollowUpData followupData) {
         StatusConfiguration configuration = getConfiguration();
 
@@ -65,8 +68,11 @@ public abstract class KPIUsingStatusService<DS,R> {
             return Arrays.asList();
         AnalyticsTransitionsDataSet ds = analyticTransitionDs.get();
 
-        List<IssueStatusFlow> issues = new IssueStatusFlowFactory(ds).getIssues();
+        List<IssueStatusFlow> issues = issueStatusFlowService.getIssues(ds);
 
+        if(issues.isEmpty())
+            return Arrays.asList();
+        
         Map<String, List<IssueStatusFlow>> byType = getIssuesByType(issues);
         
         List<R> rows = new LinkedList<>();

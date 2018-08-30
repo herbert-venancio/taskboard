@@ -4,18 +4,15 @@ import java.time.ZonedDateTime;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+
 import objective.taskboard.followup.AnalyticsTransitionsDataRow;
 import objective.taskboard.followup.AnalyticsTransitionsDataSet;
 
-public class IssueStatusFlowFactory {
+@Service
+public class IssueStatusFlowService {
     
-    private AnalyticsTransitionsDataSet ds;
-
-    public IssueStatusFlowFactory(AnalyticsTransitionsDataSet ds) {
-        this.ds = ds;
-    }
-
-    public List<IssueStatusFlow> getIssues(){
+    public List<IssueStatusFlow> getIssues(AnalyticsTransitionsDataSet ds){
         List<IssueStatusFlow> issues = new LinkedList<>();
         for (AnalyticsTransitionsDataRow row : ds.rows) {
             List<String> statusesheader = ds.getStatusHeader();

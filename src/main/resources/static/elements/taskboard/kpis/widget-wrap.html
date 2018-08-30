@@ -179,18 +179,20 @@
                 <template is="dom-repeat" items="{{tags}}" as="tag">
                     <span class="widget__tag">[[tag]]</span>
                 </template>
-                <template is="dom-if" if="[[_shouldShowOptions(isReady,errorMessage)]]">
+                <template is="dom-if" if="[[isReady]]">
                     <div class="widget__options">
                         <template is="dom-if" if="{{_isChartFiltered}}">
                             <a class="widget__reset widget__option" on-tap="_onTapReset">Reset</a>
                         </template>
-                        <paper-icon-button id="download-button"
-                            disabled="[[_isEdge()]]"
-                            icon='taskboard-icons:download'
-                            title="[[_getDownloadButtonTitle()]]"
-                            class$="widget__button {{option.cssClasses}}"
-                            on-tap="_onTapDownload">
-                        </paper-icon-button>
+                        <template is="dom-if" if="[[_shouldShowOptions(isReady,errorMessage)]]">
+                            <paper-icon-button id="download-button"
+                                disabled="[[_isEdge()]]"
+                                icon='taskboard-icons:download'
+                                title="[[_getDownloadButtonTitle()]]"
+                                class$="widget__button {{option.cssClasses}}"
+                                on-tap="_onTapDownload">
+                            </paper-icon-button>
+                        </template>
                         <template is="dom-repeat" items="{{options}}" as="option">
                             <template is="dom-if" if="{{!option.hidden}}">
                                 <paper-icon-button
@@ -199,7 +201,7 @@
                                     title="{{option.title}}"
                                     class$="widget__button {{option.cssClasses}}"
                                     on-tap="_onOptionTap"
-                                    ></paper-icon-button>
+                                ></paper-icon-button>
                             </template>
                         </template>
                     </div>
