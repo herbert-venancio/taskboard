@@ -122,9 +122,7 @@ function Taskboard() {
     };
 
     this.getIssueByKey = function(issueKey) {
-        var issue = findInArray(this.issues, function(i) {
-            return i.issueKey === issueKey
-        });
+        var issue = this.findIssueByKey(issueKey);
 
         if(issue)
             return issue;
@@ -138,6 +136,10 @@ function Taskboard() {
         });
         return issue;
     };
+
+    this.findIssueByKey = function(issueKey){
+        return findInArray(this.issues, i => i.issueKey === issueKey);
+    }
 
     this.setLaneConfiguration = function(laneConfiguration) {
         _laneConfiguration = laneConfiguration;
@@ -204,7 +206,7 @@ function Taskboard() {
             if(!item.parents || !item.issue.parent)
                 return;
 
-            var parentIssue = self.getIssueByKey(item.issue.parent);
+            var parentIssue = self.findIssueByKey(item.issue.parent);
             if (parentIssue)
                 queue.push({issue:parentIssue, parents:true});
         }
@@ -214,7 +216,7 @@ function Taskboard() {
                 return;
 
             forEachInArray(item.issue.subtasks, function(subtaskSample) {
-                var subtask = self.getIssueByKey(subtaskSample.issueKey);
+                var subtask = self.findIssueByKey(subtaskSample.issueKey);
                 if (subtask)
                     queue.push({issue:subtask, children:true});
             });

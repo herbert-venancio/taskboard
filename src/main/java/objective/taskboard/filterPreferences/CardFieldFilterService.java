@@ -48,7 +48,6 @@ public class CardFieldFilterService {
         List<LaneConfiguration> lanesConfiguration = taskboardDatabaseService.laneConfiguration();
         userPreferencesService.applyLoggedUserPreferencesOnLaneConfiguration(lanesConfiguration);
         List<IssuesConfiguration> issuesConfToShow = lanesConfiguration.stream()
-                .filter(laneConfiguration -> laneConfiguration.isShowLevel())
                 .flatMap(laneConfiguration -> laneConfiguration.getStages().stream())
                 .flatMap(stage -> stage.getSteps().stream())
                 .flatMap(step -> step.getIssuesConfiguration().stream())

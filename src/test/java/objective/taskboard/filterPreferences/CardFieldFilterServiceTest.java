@@ -174,7 +174,6 @@ public class CardFieldFilterServiceTest {
         when(stageConf.getSteps()).thenReturn(asList(stepConf));
 
         LaneConfiguration laneConf = mock(LaneConfiguration.class);
-        when(laneConf.isShowLevel()).thenReturn(true);
         when(laneConf.getStages()).thenReturn(asList(stageConf));
 
         when(taskboardDatabaseService.laneConfiguration()).thenReturn(asList(laneConf));
