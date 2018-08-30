@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SizingClusterItemRepository extends JpaRepository<SizingClusterItem, Long> {
 
-    Optional<List<SizingClusterItem>> findByProjectKeyOrBaseCluster(String projectKey, SizingCluster baseCluster);
+    Optional<List<SizingClusterItem>> findByProjectKeyOrBaseCluster(String projectKey, Optional<SizingCluster> baseCluster);
 
 }
