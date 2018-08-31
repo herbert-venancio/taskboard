@@ -106,12 +106,13 @@ public class ProjectController {
         if (data.defaultTeam == null)
             throw new IllegalArgumentException("Default team is mandatory");
 
-        validateTeamDoesntExist(data.defaultTeam.name);
-
         ProjectCreationDataTeam defaultTeam = data.defaultTeam;
+
+        validateTeamDoesntExist(defaultTeam.name);
+
         TeamFilterConfiguration team = createTeamAndConfigurations(defaultTeam.name, data.teamLeader, data.teamLeader, defaultTeam.members);
 
-        projectService.saveTaskboardProject(new ProjectFilterConfiguration(data.projectKey, team.getId()));
+        projectService.saveTaskboardProject(new ProjectFilterConfiguration(data.projectKey, team.getTeamId()));
     }
 
     private void validateTeamDoesntExist(String teamName) {
