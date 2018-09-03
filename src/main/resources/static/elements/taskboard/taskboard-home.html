@@ -557,13 +557,20 @@
                         contentType: 'application/json',
                         url: '/ws/user-preferences/update'
                     }).done(function () {
-                        if (customEvent.type !== 'iron-signal-level-weight-changed')
-                            self.$$('board-table').fetchIssues();
+                        self.hasIssuesVisibilityChanged(customEvent, self);
                     }).fail(function (jqXHR, textStatus, errorThrown) {
                         console.error(errorThrown);
                         self.set('errorMessage', 'An unexpected error ocurred. Could not save your preferences on server.');
                         toastError.open();
                     });
+                },
+
+                hasIssuesVisibilityChanged: function(customEvent, self){
+                    if (customEvent.type !== 'iron-signal-level-weight-changed'
+                            && customEvent.type !== 'iron-signal-level-visibility-changed'
+                            && customEvent.type !== 'iron-signal-level-config-changed'
+                            && customEvent.type !== 'iron-signal-level-show-header-changed')
+                        self.$$('board-table').fetchIssues();
                 },
 
                 currentLevelPreferences: function () {
