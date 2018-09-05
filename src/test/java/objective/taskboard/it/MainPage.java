@@ -145,12 +145,17 @@ public class MainPage extends AbstractUiFragment {
     }
 
     public MainPage assertUpdatedIssues(String ... expectedIssueKeyList) {
-        assertIssues(cssSelector("paper-material.issue.issue-UPDATED"), expectedIssueKeyList);
+        assertIssues(cssSelector("paper-material.issue.issue-UPDATED"), null, expectedIssueKeyList);
         return this;
     }
 
     public MainPage assertVisibleIssues(String... expectedIssueKeyList) {
-        assertIssues(cssSelector("paper-material.issue"), expectedIssueKeyList);
+        assertIssues(cssSelector("paper-material.issue"), null, expectedIssueKeyList);
+        return this;
+    }
+    
+    public MainPage assertSelectedIssues(String... expectedIssueKeyList) {
+        assertIssues(cssSelector("issue-item"), cssSelector(".issue-selection-area"), expectedIssueKeyList);
         return this;
     }
 
@@ -194,31 +199,6 @@ public class MainPage extends AbstractUiFragment {
         waitVisibilityOfElement(webDriver.findElement(className("issue-state-initialisationError")));
     }
 
-    private void assertIssues(By by, String... expectedIssueKeyList) {
-        waitUntil(new ExpectedCondition<Boolean>() {
-            private String[] actualIssueKeyList;
-            @Override
-            public Boolean apply(WebDriver driver) {
-                try {
-                    actualIssueKeyList = driver.findElements(by).stream()
-                        .filter(i -> i.isDisplayed())
-                        .map(i -> i.findElement(cssSelector(".key.issue-item")))
-                        .map(i-> i.getAttribute("data-issue-key").trim())
-                        .toArray(String[]::new);
-                    return Arrays.equals(expectedIssueKeyList, actualIssueKeyList);
-                } catch (StaleElementReferenceException e) {
-                    return null;
-                }
-            }
-            @Override
-            public String toString() {
-                return String.format("issue key list to be \"%s\". Current issue key list: \"%s\"",
-                        StringUtils.join(expectedIssueKeyList, ","),
-                        StringUtils.join(actualIssueKeyList, ","));
-            }
-        });
-    }
-
     public MainPage assertFollowupButtonIsVisible() {
         return assertButtonExistsAndVisible("followup-button");
     }
@@ -252,4 +232,34 @@ public class MainPage extends AbstractUiFragment {
         return this;
     }
 
+    private void assertIssues(By by, By bySubSelector, String... expectedIssueKeyList) {
+        waitUntil(new ExpectedCondition<Boolean>() {
+            private String[] actualIssueKeyList;
+            @Override
+            public Boolean apply(WebDriver driver) {
+                try {
+                    actualIssueKeyList = driver.findElements(by).stream()
+                        .filter(i -> getElement(i, bySubSelector).isDisplayed())
+                        .map(i -> i.findElement(cssSelector(".key.issue-item")))
+                        .map(i-> i.getAttribute("data-issue-key").trim())
+                        .toArray(String[]::new);
+                    return Arrays.equals(expectedIssueKeyList, actualIssueKeyList);
+                } catch (StaleElementReferenceException e) {
+                    return null;
+                }
+            }
+            @Override
+            public String toString() {
+                return String.format("issue key list to be \"%s\". Current issue key list: \"%s\"",
+                        StringUtils.join(expectedIssueKeyList, ","),
+                        StringUtils.join(actualIssueKeyList, ","));
+            }
+            private WebElement getElement(WebElement element, By bySubSelector) {
+                if(bySubSelector != null)
+                    return element.findElement(bySubSelector);
+                
+                return element;
+            }
+        });
+    }
 }

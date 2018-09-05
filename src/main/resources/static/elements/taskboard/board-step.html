@@ -1,24 +1,3 @@
-<!--
-  [LICENSE]
-  Taskboard
-  ---
-  Copyright (C) 2015 - 2016 Objective Solutions
-  ---
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU Affero General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
-  
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-  
-  You should have received a copy of the GNU Affero General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  [/LICENSE]
-  -->
-
 <dom-module id="board-step">
 
     <template>
@@ -87,7 +66,10 @@
                             local-states="[[localStates]]"
                             style$="[[getOptimalIssueWidth(columns, issue, filterUpdatedHook)]]"
                             data-expedite$="[[_isExpedite(issue.classOfServiceValue)]]"
-                            ></issue-item>
+                            on-selected-issue="_onSelectIssue"
+                            on-unselect-issue="_onUnselectIssue"
+                            on-move-to-top-clicked="_reorderSelected">
+                    </issue-item>
                     <issue-item-synthetic
                             item="[[issue]]"
                             parent-type-icon="[[showParentIconInSynthetic(parentLaneConfig)]]"
@@ -191,73 +173,10 @@
                 },
 
                 makeStepSortable: function() {
-                    var self = this;
-                    var stopHandler = function(e,ui) {
-                        var orderBeforeSort = self._filteredIssuesKeys;
-                        var newOrder = self.getIssueKeysRenderedOrder();
-                        if (_.isEqual(orderBeforeSort, newOrder))
-                            return;
+                    var stopHandler = ((e, ui) => this._reorderIssues(this, ui));
+                    
+                    this.makeStepUnsortable();
 
-                        if(!self.canChangePrioritization) {
-                            self.showCannotChangePrioritizationError();
-                            self.stepItem().sortable( "cancel" );
-                            flash($(ui.item).find('.issue'), 'red');
-                            return;
-                        }
-
-                        self._reprioritizationCount++;
-                        self._setStepLocalState(true);
-                        $.ajax({
-                            url: '/ws/issues/reorder',
-                            type: 'post',
-                            contentType: 'application/json',
-                            data: JSON.stringify(newOrder),
-                            success: function(updatedIssueList) {
-                                self._reprioritizationCount--;
-                                if (self._reprioritizationCount === 0) {
-                                    var converted = taskboard.convertAndRegisterIssues(updatedIssueList);
-                                    var issueByKey = [];
-                                    converted.forEach(function(issue) {
-                                        issueByKey[issue.issueKey] = issue;
-                                    });
-                                    self.issues.forEach(function(issue, index) {
-                                        if (!issueByKey[issue.issueKey]) return;
-                                        self.issues[index] = issueByKey[issue.issueKey];
-                                    });
-                                    self.filterAndForceUpdate();
-                                    self._setStepLocalState(false);
-                                    self._issuesWithReprioritizationError.clear();
-                                }
-                            },
-                            error: function (jqXhr, textStatus, errorThrown) {
-                                textStatus = jqXhr.responseJSON ? jqXhr.responseJSON.message : textStatus;
-                                self._reprioritizationCount--;
-                                Object.values(ui.item).forEach( function(item) {
-                                    self._issuesWithReprioritizationError.set(item.id, item);
-                                });
-                                if (self._reprioritizationCount === 0) {
-                                    taskboard.showError(self,
-                                        "Reprioritization failed. Reason: status ("
-                                        + jqXhr.status
-                                        + ") " + textStatus
-                                    );
-                                    var parent = ui.item.closest(".board-lane.table-wrapper");
-                                    self.filterAndForceUpdate();
-                                    self._issuesWithReprioritizationError.forEach( function(issueItem) {
-                                        var card = $('issue-item#' + issueItem.id + ' .issue');
-                                        flash(card, 'red');
-                                    });
-                                    parent.animate({
-                                        scrollTop: ui.item.offset().top - parent.offset().top
-                                    });
-                                    self._setStepLocalState(false);
-                                    self._issuesWithReprioritizationError.clear();
-                                }
-                            }
-                         });
-                    };
-                    if (this.stepItem().hasClass('ui-sortable'))
-                        this.stepItem().sortable('destroy');
                     this.stepItem().sortable({
                         items: 'issue-item:not([data-expedite])',
                         opacity: 0.7,
@@ -268,11 +187,23 @@
                     });
                 },
 
+                makeStepUnsortable: function() {
+                    if (this.stepItem().hasClass('ui-sortable'))
+                        this.stepItem().sortable('destroy');
+                },
+
                 getIssueKeysRenderedOrder: function() {
                     return this.stepItem()
                         .find('issue-item [name="issueKey"]')
-                        .map(function(i,e) { return e.value; })
+                        .map((i,e) => e.value)
                         .get();
+                },
+
+                getIssueKeysInNewOrder: function() {
+                    if (taskboard.hasIssueSelected()){
+                        return taskboard.getOrderedIssueKeysPrioritizingSelected(this.issues);
+                    }
+                    return this.getIssueKeysRenderedOrder();
                 },
 
                 stepItem: function() {
@@ -512,7 +443,103 @@
                         var stepLocalState = new StepLocalStateBuilder(this.stepMetadata.id).isUpdating(isUpdating).build();
                         this.set('localStates.steps.' + this.stepMetadata.id, stepLocalState);
                     }
+                },
+
+                _onSelectIssue: function(e) {
+                    taskboard.setSelectedIssue(e.detail);
+                },
+
+                _onUnselectIssue: function() {
+                    taskboard.unselectIssue();
+                },
+
+                _reorderSelected: function() {
+                    this._reorderIssues(this)
+                    taskboard.unselectIssue();
+                    this._scrollUp();
+                },
+
+                _reorderIssues: function(self, ui) {
+                    var orderBeforeSort = self._filteredIssuesKeys;
+                    var newOrder = self.getIssueKeysInNewOrder();
+                    if (_.isEqual(orderBeforeSort, newOrder))
+                        return;
+
+                    if(!self.canChangePrioritization) {
+                        self.showCannotChangePrioritizationError();
+                        if (!taskboard.hasIssueSelected()) {
+                            self.stepItem().sortable( "cancel" );
+                            flash($(ui.item).find('.issue'), 'red');
+                        }
+                        return;
+                    }
+
+                    var issuesBeingReprioritized =
+                        newOrder
+                            .filter((issue, i) => issue !== orderBeforeSort[i]);
+                    
+                    self._reprioritizationCount++;
+                    self._setStepLocalState(true);
+                    $.ajax({
+                        url: '/ws/issues/reorder',
+                        type: 'post',
+                        contentType: 'application/json',
+                        data: JSON.stringify(newOrder),
+                        success: function(updatedIssueList) {
+                            self._reprioritizationCount--;
+                            if (self._reprioritizationCount === 0) {
+                                var converted = taskboard.convertAndRegisterIssues(updatedIssueList);
+                                var issueByKey = [];
+                                converted.forEach(function(issue) {
+                                    issueByKey[issue.issueKey] = issue;
+                                });
+                                self.issues.forEach(function(issue, index) {
+                                    if (!issueByKey[issue.issueKey]) return;
+                                    self.issues[index] = issueByKey[issue.issueKey];
+                                });
+                                self.filterAndForceUpdate();
+                                self._setStepLocalState(false);
+                                self._issuesWithReprioritizationError.clear();
+
+                                self._flashReorderedCards(issuesBeingReprioritized);                                
+                            }
+                        },
+                        error: function (jqXhr, textStatus, errorThrown) {
+                            textStatus = jqXhr.responseJSON ? jqXhr.responseJSON.message : textStatus;
+                            self._reprioritizationCount--;
+                            Object.values(ui.item).forEach( function(item) {
+                                self._issuesWithReprioritizationError.set(item.id, item);
+                            });
+                            if (self._reprioritizationCount === 0) {
+                                taskboard.showError(self,
+                                    "Reprioritization failed. Reason: status ("
+                                    + jqXhr.status
+                                    + ") " + textStatus
+                                );
+                                var parent = ui.item.closest(".board-lane.table-wrapper");
+                                self.filterAndForceUpdate();
+                                self._issuesWithReprioritizationError.forEach( function(issueItem) {
+                                    var card = $('issue-item#' + issueItem.id + ' .issue');
+                                    flash(card, 'red');
+                                });
+                                parent.animate({
+                                    scrollTop: ui.item.offset().top - parent.offset().top
+                                });
+                                self._setStepLocalState(false);
+                                self._issuesWithReprioritizationError.clear();
+                            }
+                        }
+                    });
+                },
+
+                _flashReorderedCards: function(issuesBeingReprioritized) {
+                    issuesBeingReprioritized.forEach(i => flash($('issue-item#' + i + ' .issue'), 'yellow'));
+                },
+
+                _scrollUp: function() {
+                    $(this).closest(".table-wrapper").animate({ scrollTop: 0 });
                 }
+
             });
         })();
     </script>
