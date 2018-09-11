@@ -113,8 +113,8 @@ function isEdge() {
     return window.navigator.userAgent.indexOf("Edge") > -1;
 }
 
-function isCtrlPressed(event) {
-    return event.detail.sourceEvent.ctrlKey
+function isSelectionKeyPressed(event) {
+    return event.detail.sourceEvent.ctrlKey || event.detail.sourceEvent.metaKey
 }
 
 if (!Object.values) {
