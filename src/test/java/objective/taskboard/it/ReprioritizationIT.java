@@ -143,7 +143,7 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
             .assertIssueList(issuesStep);
 
         mainPage.issue("TASKB-614")
-            .clickHoldingCtrl()
+            .select()
             .click();
         
         mainPage.errorToast().assertErrorMessage("Cannot open details of selected Issue. Hold ctrl and click to unselect.");
@@ -163,7 +163,7 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
         stepToReview.assertIssueList(issuesStep);
 
         mainPage.issue(TASK535)
-            .clickHoldingCtrl();
+            .select();
         
         mainPage.assertSelectedIssues(TASK535);
 
@@ -185,7 +185,7 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
         stepToReview.assertIssueList(issuesStep);
 
         mainPage.issue("TASKB-614")
-            .clickHoldingCtrl()
+            .select()
             .moveToTop();
         
         stepToReview.assertIssueList("TASKB-614", "TASKB-535");
@@ -203,12 +203,12 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
         stepToReview.assertIssueList(issuesStep);
 
         mainPage.issue(TASK614)
-            .clickHoldingCtrl();
+            .select();
         
         mainPage.assertSelectedIssues(TASK614);
         
         mainPage.issue(TASK614)
-            .clickHoldingCtrl();
+            .select();
         
         mainPage.assertSelectedIssues();
         
@@ -219,7 +219,7 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
         stepToReview.assertIssueList(TASK614, TASK535);
         
         mainPage.issue(TASK535)
-            .clickHoldingCtrl()
+            .select()
             .moveToTop();
     
         stepToReview.assertIssueList(TASK535, TASK614);
@@ -235,7 +235,7 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
 
         TestIssue expediteIssue = mainPage.issue("TASKB-637");
         
-        expediteIssue.clickHoldingCtrl();
+        expediteIssue.select();
         
         mainPage.assertSelectedIssues();
         
@@ -269,12 +269,12 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
             .assertIssueList(issuesStep);
 
         mainPage.issue("TASKB-625")
-            .clickHoldingCtrl();
+            .select();
 
         mainPage.assertSelectedIssues("TASKB-625");
         
         mainPage.issue("TASKB-627")
-            .clickHoldingCtrl();
+            .select();
         
         mainPage.assertSelectedIssues("TASKB-627");
         

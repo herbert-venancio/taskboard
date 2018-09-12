@@ -57,7 +57,7 @@
                 transition: opacity .3s ease;
                 cursor: initial;
             }
-            
+
             .issue-selection-area[data-selected] {
                 opacity: 1;
                 pointer-events: initial;
@@ -341,7 +341,7 @@
                           on-iron-signal-issues-updated="updateIssue"
                           on-iron-signal-clear-highlight="clearHighlight"
                           ></iron-signals>
-                          
+
             <paper-material id="issueCard" class$="issue {{_classes}} {{highlightClass}}" elevation="0" style$="{{getIssueColor(item)}}"
                             on-tap="_onIssueClicked" title="Issue details">
                 <template is="dom-if" if="{{item.blocked}}">
@@ -584,18 +584,18 @@
                 },
 
                 _onIssueClicked: function(event) {
- 
+
                     if (this._shouldOpenDetails(event)) {
                         navigatorService.openCard(this.item.issueKey);
                         this._onUnselectIssue();
 
-                    } else if(isCtrlPressed(event)) {
+                    } else if(isSelectionKeyPressed(event)) {
                         this._performCtrlClick();
 
                     } else {
-                        taskboard.showError(this, "Cannot open details of selected Issue. Hold ctrl and click to unselect.");                        
+                        taskboard.showError(this, "Cannot open details of selected Issue. Hold ctrl and click to unselect.");
                         event.stopPropagation();
-                        
+
                     }
                 },
 
@@ -657,7 +657,7 @@
                 _shouldOpenDetails: function(e) {
                     var isExpedite = taskboard.isIssueExpedite(this.item.classOfServiceValue);
 
-                    return isExpedite || (!this.isSelected && !isCtrlPressed(e));
+                    return isExpedite || (!this.isSelected && !isSelectionKeyPressed(e));
                 }
             });
 

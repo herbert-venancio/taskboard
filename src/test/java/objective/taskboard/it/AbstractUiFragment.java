@@ -1,24 +1,3 @@
-/*-
- * [LICENSE]
- * Taskboard
- * ---
- * Copyright (C) 2015 - 2017 Objective Solutions
- * ---
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * [/LICENSE]
- */
-
 package objective.taskboard.it;
 
 import static org.junit.Assert.assertEquals;
@@ -58,7 +37,7 @@ public abstract class AbstractUiFragment {
     public void waitUntil(ExpectedCondition<?> condition) {
         PageWait.wait(webDriver).until((Function<? super WebDriver, ?>) condition);
     }
-    
+
     public <T> void waitAssertEquals(T expected, Supplier<T> actualSupplier) {
         try {
             waitUntil(w -> {
@@ -77,7 +56,7 @@ public abstract class AbstractUiFragment {
         waitVisibilityOfElement(element);
         waitUntil(textToBePresentInElement(element, expected));
     }
-    
+
     protected void waitUntilElementExistsWithText(By by, String valueToSelect) {
         waitUntil(new ExpectedCondition<Boolean>() {
             @Override
@@ -149,7 +128,7 @@ public abstract class AbstractUiFragment {
             }
         });
     }
-    
+
     protected void waitUntilElementsShowsUpCountTimes(By by, int count) {
         waitUntil(new ExpectedCondition<Boolean>() {
             @Override
@@ -215,17 +194,18 @@ public abstract class AbstractUiFragment {
         waitUntil(elementToBeClickable(element));
         element.click();
     }
-    
+
     protected void waitForClickHoldingAKey(WebElement element, Keys keyHolding) {
         waitVisibilityOfElement(element);
         waitUntil(elementToBeClickable(element));
-        
+
         new Actions(webDriver)
+            .moveToElement(element)
             .keyDown(keyHolding)
-            .click(element)
+            .click()
             .perform();
     }
-    
+
     protected void waitForClick(By by) {
         waitUntil(new ExpectedCondition<Boolean>() {
             @Override
@@ -252,7 +232,7 @@ public abstract class AbstractUiFragment {
         waitAttributeValueInElement(input, "value", value);
         executeJavascript("arguments[0].blur()", input);
     }
-    
+
     protected void waitPaperDropdownMenuSelectedTextToBe(WebElement element, String expected) {
         waitVisibilityOfElement(element);
 
@@ -372,9 +352,9 @@ public abstract class AbstractUiFragment {
     }
 
     private void executeJavascript(String script, Object... args) {
-        if (!(webDriver instanceof RemoteWebDriver)) 
+        if (!(webDriver instanceof RemoteWebDriver))
             throw new RuntimeException("WebDriver " + webDriver + " is unable to execute javascript");
-        
+
         RemoteWebDriver remoteWebDriver = (RemoteWebDriver) webDriver;
         remoteWebDriver.executeScript(script, args);
     }
@@ -383,7 +363,7 @@ public abstract class AbstractUiFragment {
      * Geckodriver implements a webdriver spec that requires inputs to be visible during interactions.
      * On the other hand, it's common to set file inputs hidden and use a placeholder for better looking.
      * This method turns the field temporary visible to allow the "sendKeys" command execution.<br>
-     * 
+     *
      * https://github.com/w3c/webdriver/issues/1230
      */
     protected void sendKeysToFileInput(WebElement fileInput, String value) {
