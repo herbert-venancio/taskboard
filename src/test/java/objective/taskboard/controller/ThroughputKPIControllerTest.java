@@ -15,13 +15,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 
 import objective.taskboard.auth.Authorizer;
-import objective.taskboard.followup.WipChartDataSet;
-import objective.taskboard.followup.WipKPIDataProvider;
+import objective.taskboard.followup.ThroughputKPIDataProvider;
+import objective.taskboard.followup.kpi.ThroughputChartDataSet;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.testUtils.ControllerTestUtils.AssertResponse;
 
 @RunWith(MockitoJUnitRunner.class)
-public class WipKpiControllerTest {
+public class ThroughputKPIControllerTest {
     
     @Mock
     private Authorizer authorizer;
@@ -30,10 +30,10 @@ public class WipKpiControllerTest {
     private ProjectService projectService;
     
     @Mock
-    private WipKPIDataProvider wipDataProvider;
+    private ThroughputKPIDataProvider throughputDataProvider;
 
     @InjectMocks
-    private WipKPIController subject;
+    private ThroughputKPIController subject;
     
     private String projectKey;
 
@@ -50,46 +50,46 @@ public class WipKpiControllerTest {
         when(authorizer.hasPermissionInProject(DASHBOARD_TACTICAL, projectKey)).thenReturn(true);
         when(authorizer.hasPermissionInProject(DASHBOARD_OPERATIONAL, projectKey)).thenReturn(true);
         when(projectService.taskboardProjectExists(projectKey)).thenReturn(true);
-        when(wipDataProvider.getWipChartDataSet(projectKey, level, timezone))
-            .thenReturn(new WipChartDataSet(null));
+        when(throughputDataProvider.getDataSet(projectKey, level, timezone))
+            .thenReturn(new ThroughputChartDataSet(null));
     }
     
     @Test
-    public void requestWipChartData_happydays() {
+    public void requestThroughputChartData_happydays() {
         AssertResponse.of(subject.data(projectKey, zoneId, level))
             .httpStatus(HttpStatus.OK)
-            .bodyClass(WipChartDataSet.class);
+            .bodyClass(ThroughputChartDataSet.class);
     }
     
     @Test
-    public void requestWipChartData_withoutPermission() {
+    public void requestThroughputChartData_withoutPermission() {
         when(authorizer.hasPermissionInProject(DASHBOARD_TACTICAL, projectKey)).thenReturn(false);
         when(authorizer.hasPermissionInProject(DASHBOARD_OPERATIONAL, projectKey)).thenReturn(false);
 
         AssertResponse.of(subject.data(projectKey, zoneId, level))
-            .httpStatus(HttpStatus.FORBIDDEN);
+            .httpStatus(HttpStatus.NOT_FOUND);
     }
     
     @Test
-    public void requestWipChartData_withTacticalPermissionOnly() {
+    public void requestThroughputChartData_withTacticalPermissionOnly() {
         when(authorizer.hasPermissionInProject(DASHBOARD_OPERATIONAL, projectKey)).thenReturn(false);
         
         AssertResponse.of(subject.data(projectKey, zoneId, level))
             .httpStatus(HttpStatus.OK)
-            .bodyClass(WipChartDataSet.class);
+            .bodyClass(ThroughputChartDataSet.class);
     }
     
     @Test
-    public void requestWipChartData_withOperationalPermissionOnly() {
+    public void requestThroughputChartData_withOperationalPermissionOnly() {
         when(authorizer.hasPermissionInProject(DASHBOARD_TACTICAL, projectKey)).thenReturn(false);
         
         AssertResponse.of(subject.data(projectKey, zoneId, level))
             .httpStatus(HttpStatus.OK)
-            .bodyClass(WipChartDataSet.class);
+            .bodyClass(ThroughputChartDataSet.class);
     }
     
     @Test
-    public void requestWipChartData_projectDoesNotExists() {
+    public void requestThroughputChartData_projectDoesNotExists() {
         when(projectService.taskboardProjectExists(projectKey)).thenReturn(false);
         
         AssertResponse.of(subject.data(projectKey, zoneId, level))

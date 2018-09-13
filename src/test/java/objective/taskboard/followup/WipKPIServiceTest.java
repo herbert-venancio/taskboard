@@ -28,7 +28,7 @@ import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.jira.properties.StatusConfiguration.StatusCountingOnWip;
 
 @RunWith(MockitoJUnitRunner.class)
-public class WipKpiServiceTest {
+public class WipKPIServiceTest {
 
     private static final int DEMAND_TRANSITIONS_DATASET_INDEX = 0;
     private static final int FEATURES_TRANSITIONS_DATASET_INDEX = 1;

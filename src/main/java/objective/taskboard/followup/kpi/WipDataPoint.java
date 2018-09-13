@@ -1,4 +1,4 @@
-package objective.taskboard.followup;
+package objective.taskboard.followup.kpi;
 
 import java.time.ZonedDateTime;
 import java.util.Date;

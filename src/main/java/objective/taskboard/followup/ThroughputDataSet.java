@@ -7,8 +7,8 @@ public class ThroughputDataSet extends TransitionDataSet<ThroughputRow>{
     
     private static List<String> headers = Arrays.asList("Date","Type","Throughput");
 
-    public ThroughputDataSet(String issueType, List<ThroughputRow> rows) {
-        super(issueType, headers, rows);
+    public ThroughputDataSet(String issueLevel, List<ThroughputRow> rows) {
+        super(issueLevel, headers, rows);
     }
 
 }

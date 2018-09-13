@@ -12,24 +12,23 @@ import org.apache.commons.lang3.Range;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import objective.taskboard.followup.kpi.WipChartDataSet;
-import objective.taskboard.followup.kpi.WipDataPoint;
-import objective.taskboard.followup.kpi.WipKPIService;
+import objective.taskboard.followup.kpi.ThroughputChartDataSet;
+import objective.taskboard.followup.kpi.ThroughputDataPoint;
+import objective.taskboard.followup.kpi.ThroughputKPIService;
 import objective.taskboard.utils.DateTimeUtils;
 
 @Component
-public class WipKPIDataProvider extends KPIByLevelDataProvider<WipChartDataSet,WipDataSet> {
+public class ThroughputKPIDataProvider extends KPIByLevelDataProvider<ThroughputChartDataSet,ThroughputDataSet> {
 
     @Autowired
-    private WipKPIService wipService;
-    
+    private ThroughputKPIService throughputService;
+
     @Override
-    protected WipChartDataSet transform(List<WipDataSet> wipDatas, FollowUpTimeline timeline, ZoneId timezone) {
+    protected ThroughputChartDataSet transform(List<ThroughputDataSet> dataSets, FollowUpTimeline timeline, ZoneId timezone) {
         
-        final List<WipDataPoint> rowsFilteredByTimeline = new LinkedList<>();
-        for (int i = 0; i < wipDatas.size(); ++i) {
-            
-            WipDataSet ds = wipDatas.get(i);
+        final List<ThroughputDataPoint> rowsFilteredByTimeline = new LinkedList<>();
+        for (int i = 0; i < dataSets.size(); ++i) {
+            ThroughputDataSet ds = dataSets.get(i);
 
             if(isEmpty(ds.rows))
                 continue;
@@ -37,19 +36,19 @@ public class WipKPIDataProvider extends KPIByLevelDataProvider<WipChartDataSet,W
             Range<ZonedDateTime> dateRange = getDateRange(timeline, ds, timezone);
             rowsFilteredByTimeline.addAll(ds.rows.stream()
                     .filter(row -> dateRange.contains(row.date))
-                    .map(row -> new WipDataPoint(row.date, row.type, row.status, row.count))
+                    .map(row -> new ThroughputDataPoint(row.date, row.issueType, row.count))
                     .collect(Collectors.toList()));
         }
-
-        return new WipChartDataSet(rowsFilteredByTimeline);
+        return new ThroughputChartDataSet(rowsFilteredByTimeline);
     }
+
     
     @Override
-    protected List<WipDataSet> getDataSets(FollowUpData followupData) {
-        return wipService.getData(followupData);
+    protected List<ThroughputDataSet> getDataSets(FollowUpData followupData) {
+        return throughputService.getData(followupData);
     }
-
-    private Range<ZonedDateTime> getDateRange(FollowUpTimeline timeline, WipDataSet ds, ZoneId timezone) {
+    
+    private Range<ZonedDateTime> getDateRange(FollowUpTimeline timeline, ThroughputDataSet ds, ZoneId timezone) {
         ZonedDateTime startDate = timeline.getStart()
                 .map(d -> d.atStartOfDay(timezone))
                 .orElseGet(() -> ds.rows.get(0).date);

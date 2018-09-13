@@ -26,10 +26,12 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.cluster.EmptyFollowupCluster;
+import objective.taskboard.followup.kpi.WipChartDataSet;
+import objective.taskboard.followup.kpi.WipDataPoint;
 import objective.taskboard.followup.kpi.WipKPIService;
 
 @RunWith(MockitoJUnitRunner.class)
-public class WipKpiDataProviderTest {
+public class WipKPIDataProviderTest {
 
     public static final String TYPE_DEMAND = "Demand";
     public static final String TYPE_FEATURES = "Features";
@@ -62,7 +64,7 @@ public class WipKpiDataProviderTest {
                 .withDemands().withFeatures().withSubtasks()
                 .configure();
 
-        WipChartDataSet dsSubtasks = subject.getWipChartDataSet(projectKey, issueLevel, ZONE_ID);
+        WipChartDataSet dsSubtasks = subject.getDataSet(projectKey, issueLevel, ZONE_ID);
 
         assertThat(dsSubtasks.rows.size(), is(4));
         assertRow(dsSubtasks.rows.get(0), "Dev", "Doing", 0L, "2017-09-25");
@@ -81,7 +83,7 @@ public class WipKpiDataProviderTest {
                 .withDemands().withFeatures().withSubtasks()
                 .configure();
 
-        WipChartDataSet dsSubtasks = subject.getWipChartDataSet(projectKey, issueLevel, ZONE_ID);
+        WipChartDataSet dsSubtasks = subject.getDataSet(projectKey, issueLevel, ZONE_ID);
 
         assertThat(dsSubtasks.rows.size(), is(0));
     }
@@ -96,7 +98,7 @@ public class WipKpiDataProviderTest {
             .withDemands().withFeatures().withSubtasks()
             .configure();
 
-        WipChartDataSet dsSubtasks = subject.getWipChartDataSet(projectKey, issueLevel, ZONE_ID);
+        WipChartDataSet dsSubtasks = subject.getDataSet(projectKey, issueLevel, ZONE_ID);
 
         assertThat(dsSubtasks.rows.size(), is(0));
     }
@@ -111,7 +113,7 @@ public class WipKpiDataProviderTest {
             .withDemands().withFeatures().withSubtasks()
             .configure();
 
-        WipChartDataSet dsAllLevels = subject.getWipChartDataSet(projectKey, issueLevel, ZONE_ID);
+        WipChartDataSet dsAllLevels = subject.getDataSet(projectKey, issueLevel, ZONE_ID);
 
         assertThat(dsAllLevels.rows.size(), is(12));
         assertRow(dsAllLevels.rows.get(0), "Demand", "Doing", 0L, "2017-09-25");
@@ -137,7 +139,7 @@ public class WipKpiDataProviderTest {
             .withDemands().withFeatures()
             .configure();
 
-        final WipChartDataSet dsAllLevels = subject.getWipChartDataSet(projectKey, issueLevel, ZONE_ID);
+        final WipChartDataSet dsAllLevels = subject.getDataSet(projectKey, issueLevel, ZONE_ID);
 
         assertThat(dsAllLevels.rows.size(), is(8));
         assertRow(dsAllLevels.rows.get(0), "Demand", "Doing", 0L, "2017-09-25");
@@ -158,7 +160,7 @@ public class WipKpiDataProviderTest {
         new TestEnvConfigurator(projectKey)
                 .configure();
 
-        final WipChartDataSet ds = subject.getWipChartDataSet(projectKey, issueLevel, ZONE_ID);
+        final WipChartDataSet ds = subject.getDataSet(projectKey, issueLevel, ZONE_ID);
 
         assertThat(ds.rows.size(), is(0));
     }
