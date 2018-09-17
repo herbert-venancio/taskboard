@@ -158,6 +158,11 @@ public class MainPage extends AbstractUiFragment {
         assertIssues(cssSelector("issue-item"), cssSelector(".issue-selection-area"), expectedIssueKeyList);
         return this;
     }
+    
+    public MainPage assertSelectedIssuesWithMoveToTopButton(String... expectedIssueKeyList) {
+        assertIssues(cssSelector("issue-item"), cssSelector(".arrow-box"), expectedIssueKeyList);
+        return this;
+    }
 
     public TestIssue issue(String issueKey) {
         return new TestIssue(webDriver, issueKey);

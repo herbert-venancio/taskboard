@@ -66,8 +66,6 @@
                             local-states="[[localStates]]"
                             style$="[[getOptimalIssueWidth(columns, issue, filterUpdatedHook)]]"
                             data-expedite$="[[_isExpedite(issue.classOfServiceValue)]]"
-                            on-selected-issue="_onSelectIssue"
-                            on-unselect-issue="_onUnselectIssue"
                             on-move-to-top-clicked="_reorderSelected">
                     </issue-item>
                     <issue-item-synthetic
@@ -172,10 +170,10 @@
                     return taskboard.isIssueExpedite(classOfServiceValue);
                 },
 
-                makeStepSortable: function() {
+                enableReprioritization: function() {
                     var stopHandler = ((e, ui) => this._reorderIssues(this, ui));
-                    
-                    this.makeStepUnsortable();
+
+                    this._removeSortable();
 
                     this.stepItem().sortable({
                         items: 'issue-item:not([data-expedite])',
@@ -187,9 +185,8 @@
                     });
                 },
 
-                makeStepUnsortable: function() {
-                    if (this.stepItem().hasClass('ui-sortable'))
-                        this.stepItem().sortable('destroy');
+                disableReprioritization: function() {
+                    this._removeSortable()
                 },
 
                 getIssueKeysRenderedOrder: function() {
@@ -200,7 +197,7 @@
                 },
 
                 getIssueKeysInNewOrder: function() {
-                    if (taskboard.hasIssueSelected()){
+                    if (issueSelectorService.hasAnyIssueSelected()) {
                         return taskboard.getOrderedIssueKeysPrioritizingSelected(this.issues);
                     }
                     return this.getIssueKeysRenderedOrder();
@@ -235,7 +232,7 @@
                 filter: function() {
                     this.set('filteredIssues', taskboard.getOrderedIssues(this.issues));
                     this._filteredIssuesKeys = this.getIssueKeysRenderedOrder();
-                    this.makeStepSortable();
+                    this.enableReprioritization();
                 },
 
                 filterAndForceUpdate: function() {
@@ -249,6 +246,7 @@
                     var weight = this.stepMetadata.weight;
                     var size = rowNode.offsetWidth * weight / totalStepWeight;
                     this.columns = Math.min(Math.max(Math.floor(size / this.idealIssueSize), 1), this.filteredIssues.length);
+                    issueSelectorService.setSelectionElementsStyle(this.stepMetadata.id, this.columns);
                 },
 
                 preferencesUpdated: function() {
@@ -382,7 +380,7 @@
                         domXissueKey[this.getAttribute("id")] = this;
                     });
 
-                    var issueOrderBeforeUpdate = this.filteredIssues; 
+                    var issueOrderBeforeUpdate = this.filteredIssues;
                     var issueOrderAfterUpdate = taskboard.getOrderedIssues(this.issues);
 
                     var transitions = [];
@@ -445,17 +443,9 @@
                     }
                 },
 
-                _onSelectIssue: function(e) {
-                    taskboard.setSelectedIssue(e.detail);
-                },
-
-                _onUnselectIssue: function() {
-                    taskboard.unselectIssue();
-                },
-
                 _reorderSelected: function() {
                     this._reorderIssues(this)
-                    taskboard.unselectIssue();
+                    issueSelectorService.unselectAllIssues();
                     this._scrollUp();
                 },
 
@@ -467,7 +457,7 @@
 
                     if(!self.canChangePrioritization) {
                         self.showCannotChangePrioritizationError();
-                        if (!taskboard.hasIssueSelected()) {
+                        if (!issueSelectorService.hasAnyIssueSelected()) {
                             self.stepItem().sortable( "cancel" );
                             flash($(ui.item).find('.issue'), 'red');
                         }
@@ -477,7 +467,7 @@
                     var issuesBeingReprioritized =
                         newOrder
                             .filter((issue, i) => issue !== orderBeforeSort[i]);
-                    
+
                     self._reprioritizationCount++;
                     self._setStepLocalState(true);
                     $.ajax({
@@ -501,7 +491,7 @@
                                 self._setStepLocalState(false);
                                 self._issuesWithReprioritizationError.clear();
 
-                                self._flashReorderedCards(issuesBeingReprioritized);                                
+                                self._flashReorderedCards(issuesBeingReprioritized);
                             }
                         },
                         error: function (jqXhr, textStatus, errorThrown) {
@@ -538,8 +528,12 @@
 
                 _scrollUp: function() {
                     $(this).closest(".table-wrapper").animate({ scrollTop: 0 });
-                }
+                },
 
+                _removeSortable: function() {
+                    if (this.stepItem().hasClass('ui-sortable'))
+                        this.stepItem().sortable('destroy');
+                }
             });
         })();
     </script>

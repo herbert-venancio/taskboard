@@ -4,16 +4,16 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class ReprioritizationIT extends AuthenticatedIntegrationTest {
-    
+
     private MainPage mainPage;
-    
+
     @Before
     public void before() {
         mainPage = MainPage.produce(webDriver);
     }
 
     @Test
-    public void whenTryingToChangePriorityOrderOfAExpediteIssue_nothingChanges() {        
+    public void whenTryingToChangePriorityOrderOfAExpediteIssue_nothingChanges() {
         mainPage.errorToast().close();
 
         final String EXPEDITE_ISSUE_1 = "TASKB-638";
@@ -49,7 +49,7 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
     @Test
     public void whenIssueIsDragged_AfterReloadItShouldKeepOrder() {
         mainPage.errorToast().close();
-        
+
         LaneFragment operational = mainPage.lane("Operational");
         operational.boardStep("Doing").assertIssueList(
                 "TASKB-601",
@@ -92,23 +92,23 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
                 };
 
         createAndSwitchToNewTab();
-        
+
         MainPage secondTabPage = MainPage.to(webDriver);
         secondTabPage.waitUserLabelToBe("Foo");
         secondTabPage.errorToast().close();
-        
+
         LaneFragment operationalInSecondTab = secondTabPage.lane("Operational");
         operationalInSecondTab.boardStep("Doing").assertIssueList(expectedIssueListBefore);
         secondTabPage.issue("TASKB-572").dragOver("TASKB-601");
         operationalInSecondTab.boardStep("Doing").assertIssueList(expectedIssueListAfter);
-        
+
         switchToFirstTab();
-                
+
         mainPage.errorToast().close();
         mainPage.refreshToast().assertVisible();
         LaneFragment operational = mainPage.lane("Operational");
         operational.boardStep("Doing").assertIssueList(expectedIssueListAfter);
-        
+
         mainPage.refreshToast().close();
         // makes sure the model is correctly updated
         mainPage.typeSearch("TASKB-625");
@@ -133,11 +133,11 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
 
         mainPage.assertVisibleIssues();
     }
-    
+
     @Test
     public void whenDoASingleClickInASelectCard_shouldKeepSelectedAndShowMessage() {
         String[] issuesStep = new String[] {"TASKB-535", "TASKB-614"};
-        
+
         mainPage.lane("Operational")
             .boardStep("To Review")
             .assertIssueList(issuesStep);
@@ -145,57 +145,57 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
         mainPage.issue("TASKB-614")
             .select()
             .click();
-        
+
         mainPage.errorToast().assertErrorMessage("Cannot open details of selected Issue. Hold ctrl and click to unselect.");
     }
-    
+
     @Test
     public void whenIssueIsSelected_dragInDropOfIssuesShouldBeDisabled() {
         final String TASK535 = "TASKB-535";
         final String TASK614 = "TASKB-614";
-        
+
         String[] issuesStep = new String[] {TASK535, TASK614};
-        
+
         BoardStepFragment stepToReview = mainPage
                 .lane("Operational")
                 .boardStep("To Review");
-        
+
         stepToReview.assertIssueList(issuesStep);
 
         mainPage.issue(TASK535)
             .select();
-        
+
         mainPage.assertSelectedIssues(TASK535);
 
         mainPage
             .issue(TASK614)
             .dragOver(TASK535);
-        
+
         stepToReview.assertIssueList(issuesStep);
     }
-    
+
     @Test
-    public void whenMoveToTopIsPressed_theCardShouldBeReorderedToTop() {        
+    public void whenMoveToTopIsPressed_theCardShouldBeReorderedToTop() {
         String[] issuesStep = new String[] {"TASKB-535", "TASKB-614"};
-        
+
         BoardStepFragment stepToReview = mainPage
                 .lane("Operational")
                 .boardStep("To Review");
-        
+
         stepToReview.assertIssueList(issuesStep);
 
         mainPage.issue("TASKB-614")
             .select()
             .moveToTop();
-        
+
         stepToReview.assertIssueList("TASKB-614", "TASKB-535");
     }
-    
+
     @Test
-    public void whenTheCardIsSelectedAndUnselected_dragAndDropAndMoveToTopShouldWork() {        
+    public void whenTheCardIsSelectedAndUnselected_dragAndDropAndMoveToTopShouldWork() {
         final String TASK535 = "TASKB-535";
         final String TASK614 = "TASKB-614";
-        
+
         String[] issuesStep = new String[] {TASK535, TASK614};
 
         BoardStepFragment stepToReview = mainPage.lane("Operational")
@@ -204,48 +204,48 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
 
         mainPage.issue(TASK614)
             .select();
-        
+
         mainPage.assertSelectedIssues(TASK614);
-        
+
         mainPage.issue(TASK614)
             .select();
-        
+
         mainPage.assertSelectedIssues();
-        
+
         mainPage
             .issue(TASK614)
             .dragOver(TASK535);
-        
+
         stepToReview.assertIssueList(TASK614, TASK535);
-        
+
         mainPage.issue(TASK535)
             .select()
             .moveToTop();
-    
+
         stepToReview.assertIssueList(TASK535, TASK614);
     }
-    
+
     @Test
     public void whenTrySelectedAExpediteCard_theCardShouldNotBeSelectedAndShowDetails() {
         String[] issuesStep = new String[] {"TASKB-637", "TASKB-626", "TASKB-639", "TASKB-685"};
-        
+
         mainPage.lane("Deployable")
             .boardStep("To Feature Review")
             .assertIssueList(issuesStep);
 
         TestIssue expediteIssue = mainPage.issue("TASKB-637");
-        
+
         expediteIssue.select();
-        
+
         mainPage.assertSelectedIssues();
-        
+
         expediteIssue.issueDetails()
             .assertCardName("TASKB-637 teste6")
             .assertClassOfService("Expedite");
     }
-    
+
     @Test
-    public void whenSelectTwoCardsInSequenceAndDoASingleClickOnThird_shouldOpenIssueDetailsOfThirdAndRemoveSelection() {       
+    public void whenSelectTwoCardsInSequenceAndDoASingleClickOnThird_shouldOpenIssueDetailsOfThirdAndRemoveSelection() {
         String[] issuesStep = new String[]
             {
                 "TASKB-680",
@@ -263,7 +263,7 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
                 "TASKB-684",
                 "TASKB-686"
              };
-        
+
         mainPage.lane("Operational")
             .boardStep("To Do")
             .assertIssueList(issuesStep);
@@ -272,19 +272,126 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
             .select();
 
         mainPage.assertSelectedIssues("TASKB-625");
-        
+
         mainPage.issue("TASKB-627")
             .select();
-        
-        mainPage.assertSelectedIssues("TASKB-627");
-        
+
+        mainPage.assertSelectedIssues("TASKB-625", "TASKB-627");
+
         mainPage.issue("TASKB-643")
             .click()
             .issueDetails()
             .assertCardName("TASKB-643 yyy")
             .assertClassOfService("Standard")
             .closeDialog();
-        
+
         mainPage.assertSelectedIssues();
+    }
+
+    @Test
+    public void whenTwoOrMoreIssuesAreSelected_allOfThemShouldBeMovedToTop() {
+        String[] issuesStep = new String[] {
+                "TASKB-680",
+                "TASKB-625",
+                "TASKB-627",
+                "TASKB-643",
+                "TASKB-644",
+                "TASKB-659",
+                "TASKB-661",
+                "TASKB-663",
+                "TASKB-664",
+                "TASKB-681",
+                "TASKB-682",
+                "TASKB-683",
+                "TASKB-684",
+                "TASKB-686"
+        };
+
+        BoardStepFragment toDo = mainPage.lane("Operational").boardStep("To Do");
+
+        toDo.assertIssueList(issuesStep);
+
+        toDo.scrollTo("TASKB-627");
+        mainPage
+            .issue("TASKB-627")
+            .select();
+
+        toDo.scrollTo("TASKB-643");
+        mainPage
+            .issue("TASKB-643")
+            .select();
+
+        mainPage.assertSelectedIssues("TASKB-627", "TASKB-643");
+
+        mainPage.issue("TASKB-627").moveToTop();
+
+        toDo.assertIssueList(
+                "TASKB-680",
+                "TASKB-627",
+                "TASKB-643",
+                "TASKB-625",
+                "TASKB-644",
+                "TASKB-659",
+                "TASKB-661",
+                "TASKB-663",
+                "TASKB-664",
+                "TASKB-681",
+                "TASKB-682",
+                "TASKB-683",
+                "TASKB-684",
+                "TASKB-686");
+    }
+
+    @Test
+    public void whenTwoOrMoreIssuesAreSelectedFromBottomToTop_OnlyFirstInBlockShouldHaveArrowButton() {
+        String[] issuesStep = new String[] {
+                "TASKB-680",
+                "TASKB-625",
+                "TASKB-627",
+                "TASKB-643",
+                "TASKB-644",
+                "TASKB-659",
+                "TASKB-661",
+                "TASKB-663",
+                "TASKB-664",
+                "TASKB-681",
+                "TASKB-682",
+                "TASKB-683",
+                "TASKB-684",
+                "TASKB-686"
+        };
+
+        BoardStepFragment toDo = mainPage.lane("Operational").boardStep("To Do");
+
+        toDo.assertIssueList(issuesStep);
+
+        toDo.scrollTo("TASKB-681");
+        mainPage
+            .issue("TASKB-681")
+            .select();
+
+        toDo.scrollTo("TASKB-663");
+        mainPage
+            .issue("TASKB-663")
+            .select();
+        toDo.scrollTo("TASKB-661");
+        mainPage
+            .issue("TASKB-661")
+            .select();
+        toDo.scrollTo("TASKB-659");
+        mainPage
+            .issue("TASKB-659")
+            .select();
+
+        toDo.scrollTo("TASKB-643");
+        mainPage
+            .issue("TASKB-643")
+            .select();
+        toDo.scrollTo("TASKB-627");
+        mainPage
+            .issue("TASKB-627")
+            .select();
+
+        mainPage.assertSelectedIssuesWithMoveToTopButton("TASKB-627", "TASKB-659", "TASKB-681");
     }
 }

@@ -4,7 +4,6 @@ function Taskboard() {
     var _cardFieldFilters;
     var _issuesBySteps;
     var _laneConfiguration;
-    var  _selectedIssueComponent = null;
 
     this.urlJira = null;
     this.urlLinkGraph = null
@@ -25,7 +24,7 @@ function Taskboard() {
     this.getLoggedUser = function() {
         return window.user;
     }
-    
+
     this.getAvailableTeams = function() {
         return TEAMS;
     }
@@ -352,8 +351,8 @@ function Taskboard() {
         var ids = relevantEvents.map(function(i) { return i.issueId })
 
         $.post({
-            url:"/ws/issues/byids", 
-            contentType: 'application/json', 
+            url:"/ws/issues/byids",
+            contentType: 'application/json',
             data: JSON.stringify(ids)
         })
         .done(function(issues) {
@@ -471,7 +470,7 @@ function Taskboard() {
 
     this.convertAndRegisterIssue = function(issue) {
         var converted = this.resolveIssueFields(issue);
-        
+
         var previousInstance = getPreviousIssueInstanceById(issue.id);
         if (previousInstance === null)
             self.issues.push(converted)
@@ -480,7 +479,7 @@ function Taskboard() {
         setIssuesBySteps(self.issues);
         return converted;
     }
-    
+
     this.resolveIssueFields = function(issue) {
         if (issue.additionalEstimatedHoursField)
             issue.additionalEstimatedHoursField.name = this.getFieldName(issue.additionalEstimatedHoursField);
@@ -488,7 +487,7 @@ function Taskboard() {
         issue.subtasksTshirtSizes.forEach(function(ts) {
             ts.name = this.getFieldName(ts);
         }.bind(this))
-        
+
         return issue;
     }
 
@@ -522,15 +521,17 @@ function Taskboard() {
     };
 
     this.getOrderedIssueKeysPrioritizingSelected = function(issues) {
-        var issue =  _selectedIssueComponent.item;
+        var expediteIssueItems = this._getExpediteIssues(issues);
+        var regularIssueItems = this._getRegularIssues(issues);
+        var selectedIssueItems = issueSelectionData.getSelectedIssues().map(i=> i.item);
 
-        var regularIssuesWithoutSelected = this._getRegularIssues(issues)
-            .filter( i => i.issueKey !== issue.issueKey);
+        var regularIssueItemsWithoutSelected = _.difference(regularIssueItems, selectedIssueItems);
+        var selectedIssuesItemKeepingOriginalOrder = _.intersection(regularIssueItems, selectedIssueItems);
 
-        return this._getExpediteIssues(issues)
-            .concat(issue)
-            .concat(regularIssuesWithoutSelected)
-            .map(i => i.issueKey);
+        return expediteIssueItems
+                .concat(selectedIssuesItemKeepingOriginalOrder)
+                .concat(regularIssueItemsWithoutSelected)
+                    .map(i => i.issueKey);
     };
 
     this._getExpediteIssues = function(issues) {
@@ -571,7 +572,7 @@ function Taskboard() {
     this.showError = function(source, message, actions, hideClose) {
         source.fire("iron-signal", {name:"show-error-message", data: { message: message, actions: actions, hideClose: hideClose}});
     };
-    
+
     this.showIssueError = function(source, issueKey, message) {
         source.fire("iron-signal", {name:"show-issue-error-message", data: {
             issueKey: issueKey,
@@ -579,38 +580,14 @@ function Taskboard() {
         }});
     };
 
-    this.setSelectedIssue = function(issue) {
-        if (this.hasIssueSelected())
-            this._unselectIssue();
-
-        _selectedIssueComponent = issue;
-        this._makeAllStepsUnsortable();
-    }
-
-    this.hasIssueSelected = function() {
-        return !_.isEmpty(_selectedIssueComponent)
-    }
-
-    this.unselectIssue = function() {
-        if (this.hasIssueSelected()) {
-            this._unselectIssue();
-            this._makeAllStepsSortable();
-        }
-    }
-
-    this._unselectIssue = function() {
-        _selectedIssueComponent.isSelected = false;
-        _selectedIssueComponent = null;
-    }
-
-    this._makeAllStepsSortable = function() {
+    this.makeAllStepsSortable = function() {
         document.querySelectorAll('board-step')
-            .forEach(step => step.makeStepSortable());
+            .forEach(step => step.enableReprioritization());
     }
 
-    this._makeAllStepsUnsortable = function() {
+    this.makeAllStepsUnsortable = function() {
         document.querySelectorAll('board-step')
-            .forEach(step => step.makeStepUnsortable());        
+            .forEach(step => step.disableReprioritization());
     }
 
     this.init();
