@@ -90,7 +90,7 @@
                     chart: {
                         type: Object,
                         notify: true,
-                        value: function() { return {}; }
+                        value: null
                     },
                     tags: {
                         type: Array
@@ -98,7 +98,7 @@
                     options: {
                         type: Array,
                         readOnly: true,
-                        value: function() { return []; }
+                        value: null
                     },
                     settingLevel: {
                         type: String,
@@ -107,11 +107,11 @@
                     },
                     _btFilterClose: {
                         type: Object,
-                        value: function() { return {}; }
+                        value: null
                     },
                     _btLevelSave: {
                         type: Object,
-                        value: function() { return {}; }
+                        value: null
                     }
                 },
 
@@ -124,141 +124,44 @@
                         {
                             icon:'taskboard-icons:dashboard-filter'
                             , title: 'Filters'
-                            , tap: this._openFiltersModal.bind(this)
+                            , tap: () => this.$$('.filters-modal').open()
                             , hidden: true
                         },
                         {
                             icon: 'taskboard-icons:settings'
                             , title: 'Settings'
-                            , tap: this._openSettingsModal.bind(this)
+                            , tap: () => {
+                                this.settingLevel = this._getSavedLevel();
+                                this.$$('.settings-modal').open();
+                            }
                             , cssClasses: ''
                         }
                     ]);
 
-                    var btFilterClose = ButtonBuilder('Ok').onClick(this._closeFiltersModal.bind(this)).build();
+                    var btFilterClose = ButtonBuilder('Ok').onClick(() => { 
+                        this.$$('.filters-modal').close();
+                    }).build();
                     this.set('_btFilterClose', btFilterClose);
 
-                    var btLevelSave = ButtonBuilder('Save').onClick(this._saveSettings.bind(this)).build();
+                    var btLevelSave = ButtonBuilder('Save').onClick(() => {
+                        let savedLevel = this._getSavedLevel();
+                        if (savedLevel === this.settingLevel) {
+                            this.$$('.settings-modal').close();
+                            return;
+                        }
+                        localStorage.setItem(`dashboard.cfd-chart.${this.selectedProjectKey}.level`, this.settingLevel);
+                        this.$$('.settings-modal').close();
+                        this.loadCfdChart();
+                    }).build();
                     this.set('_btLevelSave', btLevelSave);
+                },
+
+                _getSavedLevel: function() {
+                    return localStorage.getItem(`dashboard.cfd-chart.${this.selectedProjectKey}.level`) || 'Subtask';
                 },
 
                 _onProjectSelected: function() {
                     this.loadCfdChart();
-                },
-
-                groupByDate: function(cfdData) {
-                    var status = Object.keys(cfdData.dataByStatus).reverse();
-                    var graphData = [];
-                    // regroup based on date
-                    status.forEach(function(stat) {
-                        cfdData.dataByStatus[stat].forEach(function(d) {
-                            graphData.push({
-                                date: new Date(d.date),
-                                status: stat,
-                                count: d.count,
-                                issueType: d.type
-                            });
-                        })
-                    });
-
-                    return graphData;
-                },
-
-                loadCfdChart: function() {
-                    this.reset();
-
-                    var self = this;
-
-                    var savedLevel = self._getSavedLevel();
-                    self.set('tags', [savedLevel]);
-                    self.xhr = d3.json("/api/projects/"+ self.selectedProjectKey + "/followup/cfd?level=" + savedLevel, function(error, cfdData) {
-                        if(self.handleErrors(error, cfdData))
-                            return;
-
-                        var status = Object.keys(cfdData.dataByStatus).reverse();
-
-                        self.cfdData = self.groupByDate(cfdData);
-                        var startDate = self.cfdData[0].date;
-                        var endDate = self.cfdData[self.cfdData.length-1].date;
-
-                        self.ndx = crossfilter(self.cfdData);
-                        // the (run) dimension is the dimension on which dc will iterate and will become the "X" axis
-                        self.cfdDim = self.ndx.dimension(function(d) {
-                            return d.date;
-                        });
-
-                        function compose(p, v, signal){
-                            if (!p.plotData)
-                                p.plotData = {}
-
-                            if (!p.plotData[v.status])
-                                p.plotData[v.status] = 0;
-
-                            p.plotData[v.status] += signal * v.count;
-                            return p;
-                        }
-
-                        self.cfdGroup = self.cfdDim.group()
-                            .reduce(function(p, v) {
-                                    return compose(p, v, 1)
-                                },
-                                function(p, v) {
-                                    return compose(p, v, -1)
-                                },
-                                function() {
-                                    return {plotData:{}};
-                                }
-                            );
-
-                        self.createChart(startDate, endDate);
-                        self.createIssueListFilter();
-
-                        // function to access correct data for each stack
-                        function stackAccessor(status) {
-                            return function(d) {
-                                return d.value.plotData[status];
-                            };
-                        }
-
-                        self.chart
-                            .dimension(self.cfdDim)
-                            .group(self.cfdGroup, status[0], stackAccessor(status[0])) // the first stack must be added as a group
-                            .x(d3.time.scale().domain([startDate, endDate]));
-
-                        status.forEach(function(stat) {
-                            // stackTitle(stat) generates a callback to generate the label for points in this stack
-                            self.chart.title(stat, function (d){
-                                var label = d.key.toLocaleDateString() + "\n\n";
-                                var total = 0;
-                                label +="** " + stat +": "+d.value.plotData[stat]+ " **\n";
-                                Object.keys(d.value.plotData).reverse().forEach(function(key) {
-                                    if (key !== stat)
-                                        label += key+": "+d.value.plotData[key]+ "\n";
-                                    total += d.value.plotData[key];
-                                });
-                                return label+="\nTotal: " + total;
-                            });
-                        });
-
-                        // remove the first status because it was already added in the "group" invocation above
-                        status = status.splice(1);
-
-                        // add the other stacks, one for each remaining status
-                        status.forEach(function(stat) {
-                            // stack the status data; stackAccessor(stat) generates a callback that tells dc how to read this stack data
-                            self.chart.stack(self.cfdGroup, stat, stackAccessor(stat))
-                        });
-
-                        self.chart.__legendables = self.chart.legendables;
-                        self.chart.legendables = function() {
-                            var items = self.chart.__legendables();
-                            return items.reverse();
-                        };
-
-                        dcDateRangeChartsService.registerChartInRangeAndRender(self.chart);
-
-                        self.isReady = true;
-                    });
                 },
 
                 reset: function() {
@@ -295,28 +198,6 @@
                     return false;
                 },
 
-                createChart: function(startDate, endDate) {
-                    var chart = dc.lineChart("#cfd");
-
-                    // basic chart configuration
-                    chart
-                        .margins({top: 15, right: 20, bottom: 20, left: 170})
-                        .legend(
-                            dcUtils.getDefaultLegend()
-                        )
-                        .colors(
-                            dcUtils.getDefaultColors()
-                        )
-                        .renderArea(true)
-                        .brushOn(false)       // don't select with drag-n-drop
-                        .mouseZoomable(false)  // zoom with mouse wheel
-                        .elasticY(true)       // y axis will adjust to the data
-
-                    dcUtils.setupChartDateTicks(chart, startDate, endDate, 14);
-
-                    this.set('chart', chart);
-                },
-
                 createIssueListFilter: function() {
                     this.set('options.0.hidden', false);
                     var div = this.$$('.config-slot-0');
@@ -350,34 +231,171 @@
                     this.issueListFilter = list;
                 },
 
-                _openFiltersModal: function() {
-                    this.$$('.filters-modal').open();
+                groupByDate: function(cfdData) {
+                    var status = Object.keys(cfdData.dataByStatus).reverse();
+                    var graphData = [];
+                    // regroup based on date
+                    status.forEach(function(stat) {
+                        cfdData.dataByStatus[stat].forEach(function(d) {
+                            graphData.push({
+                                date: new Date(d.date),
+                                status: stat,
+                                count: d.count,
+                                issueType: d.type
+                            });
+                        })
+                    });
+
+                    return graphData;
                 },
 
-                _closeFiltersModal: function() {
-                    this.$$('.filters-modal').close();
+                loadCfdChart: function() {
+                    this.reset();
+
+                    var self = this;
+
+                    var savedLevel = self._getSavedLevel();
+                    self.set('tags', [savedLevel]);
+                    self.xhr = d3.json(`/api/projects/${self.selectedProjectKey}/followup/cfd?level=${savedLevel}`, function(error, cfdData) {
+                        if(self.handleErrors(error, cfdData))
+                            return;
+
+                        var status = Object.keys(cfdData.dataByStatus).reverse();
+
+                        self.cfdData = self.groupByDate(cfdData);
+                        var startDate = self.cfdData[0].date;
+                        var endDate = self.cfdData[self.cfdData.length-1].date;
+
+                        self.ndx = crossfilter(self.cfdData);
+                        // the (run) dimension is the dimension on which dc will iterate and will become the "X" axis
+                        self.cfdDim = self.ndx.dimension(function(d) {
+                            return d.date;
+                        });
+
+                        function compose(p, v, signal){
+                            if (!p.plotData[v.status]) 
+                            	p.plotData[v.status] = 0;
+
+                            p.plotData[v.status] += signal * v.count;
+                            return p;
+                        }
+
+                        self.cfdGroup = self.cfdDim.group()
+                            .reduce(
+                                // reduce add
+                                (p, v) => compose(p, v, 1),
+                                // reduce sub
+                                (p, v) => compose(p, v, -1),
+                                // reduce init
+                                () => ({plotData: {}})
+                            );
+                        
+                        self.createChart(startDate, endDate);
+                        self.createIssueListFilter();
+                        
+                        // function to access correct data for each stack
+                        function stackAccessor(status) {
+                            return function(d) {
+                                return d.value.plotData[status];
+                            };
+                        }
+                        
+                        function yAxisRescale (baseStackStatus) {
+                        	return function (chart) {
+                                let dim = chart.dimension();
+                                let firstDate = chart.xAxisMin();
+                                let lastDate = chart.xAxisMax();
+                                let firstDateItems = dim.filter(firstDate).top(Infinity);
+                                let reducer = (acc, cur) => acc + cur;
+                                // minY it's the value of the stack base of the first visible day on chart 
+                                let minY = firstDateItems
+                                    .filter((item) => item.status === baseStackStatus)
+                                    .map((item) => item.count)
+                                    .reduce(reducer, 0);
+                                // maxY it's the sum of the values of the last visible day on chart
+                                let lastDateItems = dim.filter(lastDate).top(Infinity);
+                                let maxY = lastDateItems
+                                    .map((item) => item.count)
+                                    .reduce(reducer, 0);
+                                let padding = maxY * .1;
+                                let yScale = d3.scale.linear().domain([minY, maxY + padding]);
+                                chart.y(yScale);
+                            }
+                        }
+                        
+                        let baseStackStatus = status[0];
+                        
+                        self.chart
+                            .dimension(self.cfdDim)
+                             // the first stack must be added as a group (lib requirement)
+                            .group(self.cfdGroup, baseStackStatus, stackAccessor(baseStackStatus))
+                            .x(d3.time.scale().domain([startDate, endDate]));
+                        
+                        self.chart.on('zoomed', yAxisRescale(baseStackStatus));
+                        
+                        status.forEach(function(stat) {
+                            // stackTitle(stat) generates a callback to generate the label for points in this stack
+                            self.chart.title(stat, function (d){
+                                let total = 0;
+                                let tokens = [
+                                    `${d.key.toLocaleDateString()}\n`,
+                                    `** ${stat}: ${d.value.plotData[stat]}**`
+                                ];
+                                Object.keys(d.value.plotData).reverse().forEach((key) => {
+                                    if (key !== stat)
+                                        tokens.push(`${key}: ${d.value.plotData[key]}`);
+                                    total += d.value.plotData[key];
+                                });
+                                tokens.push(`\nTotal: ${total}`);
+                                let label = tokens.join('\n')
+                                return label;
+                            });
+                        });
+
+                        // remove the first status because it was already added in the "group" invocation above
+                        status = status.splice(1);
+
+                        // add the other stacks, one for each remaining status
+                        status.forEach(function(stat) {
+                            // stack the status data; stackAccessor(stat) generates a callback
+                            // that tells dc how to read this stack data
+                            self.chart.stack(self.cfdGroup, stat, stackAccessor(stat))
+                        });
+
+                        self.chart.__legendables = self.chart.legendables;
+                        self.chart.legendables = function() {
+                            var items = self.chart.__legendables();
+                            return items.reverse();
+                        };
+
+                        dcDateRangeChartsService.registerChartInRangeAndRender(self.chart);
+
+                        self.isReady = true;
+                    });
                 },
 
-                _openSettingsModal: function() {
-                    this.settingLevel = this._getSavedLevel();
-                    this.$$('.settings-modal').open();
+
+                createChart: function(startDate, endDate) {
+                    var chart = dc.lineChart("#cfd");
+
+                    // basic chart configuration
+                    chart
+                        .margins({top: 15, right: 20, bottom: 20, left: 170})
+                        .legend(
+                            dcUtils.getDefaultLegend()
+                        )
+                        .colors(
+                            dcUtils.getDefaultColors()
+                        )
+                        .renderArea(true)
+                        .brushOn(false)       // don't select with drag-n-drop
+                        .mouseZoomable(false)  // zoom with mouse wheel
+                        .elasticY(false)       // must be false so that y axis will be customibly rescalabe
+
+                    dcUtils.setupChartDateTicks(chart, startDate, endDate, 14);
+
+                    this.set('chart', chart);
                 },
-
-                _saveSettings: function() {
-                    var savedLevel = this._getSavedLevel();
-                    if (savedLevel === this.settingLevel) {
-                        this.$$('.settings-modal').close();
-                        return;
-                    }
-                    localStorage.setItem("dashboard.cfd-chart." + this.selectedProjectKey + ".level", this.settingLevel);
-                    this.$$('.settings-modal').close();
-                    this.loadCfdChart();
-                },
-
-                _getSavedLevel: function() {
-                    return localStorage.getItem("dashboard.cfd-chart." + this.selectedProjectKey + ".level") || "Subtask";
-                }
-
             });
         })();
     </script>
