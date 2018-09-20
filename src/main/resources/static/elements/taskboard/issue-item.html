@@ -10,10 +10,10 @@
 
             .sortable-issue-item {
                 position: relative;
-                width: calc(100% - 6px);
-                margin-right: 3px;
-                margin-left: 3px;
-                margin-top: 5px;
+                width: calc(100% - 8px);
+                margin-right: 4px;
+                margin-left: 4px;
+                margin-top: 8px;
             }
 
             .issue {
@@ -64,7 +64,36 @@
                 transition: opacity .3s ease;
             }
 
+            .issue-selection-area[hide-top-border] {
+                border-top: none;
+                border-top-right-radius: 0px;
+                border-top-left-radius: 0px;
+                transition: opacity .3s ease;
+            }
+
+            .issue-selection-area[hide-bottom-border] {
+                border-bottom: none;
+                border-bottom-right-radius: 0px;
+                border-bottom-left-radius: 0px;
+                transition: opacity .3s ease;
+            }
+
+            .issue-selection-area[hide-left-border] {
+                border-left: none;
+                border-top-left-radius: 0px;
+                border-bottom-left-radius: 0px;
+                transition: opacity .3s ease;
+            }
+
+            .issue-selection-area[hide-right-border] {
+                border-right: none;
+                border-top-right-radius: 0px;
+                border-bottom-right-radius: 0px;
+                transition: opacity .3s ease;
+            }
+
             .arrow-box {
+                opacity: 0;
                 position: absolute;
                 right: -2px;
                 top: -2px;
@@ -75,6 +104,13 @@
                 align-items: center;
                 justify-content: center;
                 background-color: #5DAFFF;
+                pointer-events: none;
+                cursor: initial;
+            }
+
+            .arrow-box[data-selected] {
+                opacity: 1;
+                pointer-events: initial;
                 cursor: pointer;
             }
 
@@ -323,8 +359,11 @@
 
         <div class="sortable-issue-item" style$="[[display]]">
 
-            <div class="issue-selection-area" data-selected$="[[isSelected]]" on-tap="_onIssueClicked">
-                <div class="arrow-box" title="Move to top" on-tap="_onClickMoveToTop">
+            <div class="issue-selection-area" data-selected$="[[selection.isSelected]]"
+                hide-top-border$="[[selection.isTopBorderHidden]]" hide-bottom-border$="[[selection.isBottomBorderHidden]]"
+                hide-left-border$="[[selection.isLeftBorderHidden]]" hide-right-border$="[[selection.isRightBorderHidden]]"
+                on-tap="_onIssueClicked">
+                <div class="arrow-box" title="Move all selects issue to top" data-selected$="[[selection.isMoveToTopButtonVisible]]" on-tap="_onClickMoveToTop">
                     <iron-icon icon="taskboard-icons:arrow-up"></iron-icon>
                 </div>
             </div>
@@ -438,9 +477,18 @@
                     display: {
                         type: String
                     },
-                    isSelected: {
-                        type: Boolean,
-                        value: false,
+                    selection: {
+                        type: Object,
+                        value: function() {
+                            return {
+                                isSelected: false,
+                                isMoveToTopButtonVisible: false,
+                                isTopBorderHidden: false,
+                                isBottomBorderHidden: false,
+                                isLeftBorderHidden: false,
+                                isRightBorderHidden: false
+                            };
+                        }
                     }
                 },
 
@@ -552,7 +600,7 @@
                 },
 
                 hierarchyFilterClick: function(event) {
-                    taskboard.unselectIssue();
+                    issueSelectorService.unselectAllIssues();
                     event.stopPropagation();
                     if (!taskboard.urlLinkGraph)
                         return this.applyFilter();
@@ -587,9 +635,9 @@
 
                     if (this._shouldOpenDetails(event)) {
                         navigatorService.openCard(this.item.issueKey);
-                        this._onUnselectIssue();
+                        issueSelectorService.unselectAllIssues();
 
-                    } else if(isSelectionKeyPressed(event)) {
+                    } else if(issueSelectorService.isSelectionKeyPressed(event)) {
                         this._performCtrlClick();
 
                     } else {
@@ -630,14 +678,10 @@
                 },
 
                 _performCtrlClick: function(event) {
-                    if(this.isSelected) {
-                        this.set("isSelected", false)
-                        this._onUnselectIssue()
-
+                    if(this.selection.isSelected) {
+                        issueSelectorService.unselect(this)
                     } else {
-                        this.set("isSelected", true)
-                        this._onSelectIssue()
-
+                        issueSelectorService.select(this)
                     }
                 },
 
@@ -646,18 +690,10 @@
                     this.fire("move-to-top-clicked")
                 },
 
-                _onSelectIssue: function() {
-                    this.fire("selected-issue", this)
-                },
-
-                _onUnselectIssue: function() {
-                    this.fire("unselect-issue")
-                },
-
                 _shouldOpenDetails: function(e) {
                     var isExpedite = taskboard.isIssueExpedite(this.item.classOfServiceValue);
 
-                    return isExpedite || (!this.isSelected && !isSelectionKeyPressed(e));
+                    return isExpedite || (!this.selection.isSelected && !issueSelectorService.isSelectionKeyPressed(e));
                 }
             });
 
