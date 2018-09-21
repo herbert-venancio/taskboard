@@ -7,6 +7,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClick
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.not;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElement;
+import static org.openqa.selenium.support.ui.ExpectedConditions.textToBe;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
 
@@ -58,22 +59,8 @@ public abstract class AbstractUiFragment {
     }
 
     protected void waitUntilElementExistsWithText(By by, String valueToSelect) {
-        waitUntil(new ExpectedCondition<Boolean>() {
-            @Override
-            public Boolean apply(WebDriver element) {
-                try {
-                	List<WebElement> elements = element.findElements(by);
-                	if (elements.size() == 0)
-                		return false;
-                	WebElement we = elements.get(0);
-                	if (!we.isDisplayed())
-                		return false;
-                    return we.getText().trim().equals(valueToSelect);
-                }catch(StaleElementReferenceException ex) {
-                    return false;
-                }
-            }
-        });
+        waitVisibilityOfElement(getElementWhenItExists(by));
+        waitUntil(textToBe(by, valueToSelect));
     }
 
     protected void waitAttributeValueInElement(WebElement element, String attribute, String expected) {
