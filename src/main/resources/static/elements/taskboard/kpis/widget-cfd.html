@@ -317,8 +317,7 @@
                                 let maxY = lastDateItems
                                     .map((item) => item.count)
                                     .reduce(reducer, 0);
-                                let padding = maxY * .1;
-                                let yScale = d3.scale.linear().domain([minY, maxY + padding]);
+                                let yScale = d3.scale.linear().domain([minY, maxY]);
                                 chart.y(yScale);
                             }
                         }
@@ -331,7 +330,7 @@
                             .group(self.cfdGroup, baseStackStatus, stackAccessor(baseStackStatus))
                             .x(d3.time.scale().domain([startDate, endDate]));
                         
-                        self.chart.on('zoomed', yAxisRescale(baseStackStatus));
+                        self.chart.on('preRedraw', yAxisRescale(baseStackStatus));
                         
                         status.forEach(function(stat) {
                             // stackTitle(stat) generates a callback to generate the label for points in this stack
