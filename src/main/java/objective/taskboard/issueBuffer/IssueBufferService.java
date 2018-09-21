@@ -64,12 +64,14 @@ import objective.taskboard.jira.JiraIssueService;
 import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.ProjectUpdateEvent;
+import objective.taskboard.jira.RetrofitErrorParser;
 import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.data.Transition;
 import objective.taskboard.jira.data.WebhookEvent;
 import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.task.IssueEventProcessScheduler;
 import objective.taskboard.task.JiraEventProcessor;
+import retrofit.RetrofitError;
 
 @Service
 public class IssueBufferService implements ApplicationListener<ProjectUpdateEvent> {
@@ -162,6 +164,10 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
         } catch(RequiresReindexException e) {
             updateState(IssueBufferState.requiresReindex);
             log.error("objective.taskboard.issueBuffer.IssueBufferService.updateIssueBuffer", e);
+        } catch(RetrofitError e) {
+            updateState(state.error());
+            String message = RetrofitErrorParser.parseExceptionMessage(e);
+            log.error("objective.taskboard.issueBuffer.IssueBufferService.updateIssueBuffer - Failed to bring issues - Errors:\n" + message, e);
         }catch(Exception e) {
             updateState(state.error());
             log.error("objective.taskboard.issueBuffer.IssueBufferService.updateIssueBuffer - Failed to bring issues", e);
