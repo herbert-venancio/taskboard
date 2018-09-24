@@ -20,6 +20,7 @@
  */
 package objective.taskboard.jira.properties;
 
+import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toSet;
 
 import java.util.ArrayList;
@@ -328,6 +329,10 @@ public class JiraProperties {
 
             public String getExtraLarge() {
                 return this.extraLarge;
+            }
+
+            public List<String> getSizes() {
+                return asList(extraSmall, small, medium, large, extraLarge);
             }
 
             public void setIds(final List<String> ids) {

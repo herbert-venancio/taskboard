@@ -77,7 +77,7 @@ public class FollowUpClusterProviderTest {
             .thenReturn(Optional.of(projectOne));
         
         when(clusterItemRepository.findByProjectKeyOrBaseCluster(TASKB_PROJECT_KEY, Optional.empty()))
-            .thenReturn(Optional.of(itemsByProjectMock));
+            .thenReturn(itemsByProjectMock);
         
         FollowupCluster followupCluster = followupClusterProvider.getForProject(TASKB_PROJECT_KEY);
         List<FollowUpClusterItem> clusterItems = followupCluster.getClusterItems();
@@ -108,7 +108,7 @@ public class FollowUpClusterProviderTest {
             .thenReturn(Optional.of(projectOne));
         
         when(clusterItemRepository.findByProjectKeyOrBaseCluster(TASKB_PROJECT_KEY, Optional.ofNullable(baseCluster)))
-            .thenReturn(Optional.of(itemsByProjectMock));
+            .thenReturn(itemsByProjectMock);
         
         FollowupCluster followupCluster = followupClusterProvider.getForProject(TASKB_PROJECT_KEY);
         List<FollowUpClusterItem> clusterItems = followupCluster.getClusterItems();
@@ -133,7 +133,7 @@ public class FollowUpClusterProviderTest {
             .thenReturn(Optional.of(projectTwo));
 
         when(clusterItemRepository.findByProjectKeyOrBaseCluster(Mockito.anyString(), Mockito.any()))
-            .thenReturn(Optional.empty());
+            .thenReturn(Arrays.asList());
         
         FollowupCluster followupCluster = followupClusterProvider.getForProject(TASKB_TWO_PROJECT_KEY);
         assertTrue(followupCluster.getClusterItems().isEmpty());
@@ -171,7 +171,7 @@ public class FollowUpClusterProviderTest {
         itemsProjectThreeMock.add(item8);
         
         when(clusterItemRepository.findByProjectKeyOrBaseCluster(TASKB_THREE_PROJECT_KEY, Optional.ofNullable(baseCluster)))
-            .thenReturn(Optional.of(itemsProjectThreeMock));
+            .thenReturn(itemsProjectThreeMock);
         
         FollowupCluster followupCluster = followupClusterProvider.getForProject(TASKB_THREE_PROJECT_KEY);
         

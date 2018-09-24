@@ -40,12 +40,12 @@ public class FollowupClusterProvider {
 
     public FollowupCluster getFor(final ProjectFilterConfiguration project) {
         Optional<SizingCluster> cluster = clusterRepository.findById(project.getBaseClusterId());
-        final Optional<List<SizingClusterItem>> sizingClusterItems = clusterItemRepository.findByProjectKeyOrBaseCluster(project.getProjectKey(), cluster);
+        final List<SizingClusterItem> sizingClusterItems = clusterItemRepository.findByProjectKeyOrBaseCluster(project.getProjectKey(), cluster);
             
-        if(!sizingClusterItems.isPresent())
+        if(sizingClusterItems.isEmpty())
             return new EmptyFollowupCluster();
 
-        List<FollowUpClusterItem> followUpItems = toFollowUpClusterItems(project, sizingClusterItems.get());
+        List<FollowUpClusterItem> followUpItems = toFollowUpClusterItems(project, sizingClusterItems);
         
         return new FollowupClusterImpl(followUpItems);
     }
