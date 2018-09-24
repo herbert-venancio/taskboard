@@ -19,9 +19,10 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import objective.taskboard.followup.kpi.IssueStatusFlow;
-import objective.taskboard.followup.kpi.IssueStatusFlowBuilder;
-import objective.taskboard.followup.kpi.IssueStatusFlowService;
+import objective.taskboard.followup.kpi.IssueKpi;
+import objective.taskboard.followup.kpi.IssueKpiBuilder;
+import objective.taskboard.followup.kpi.IssueKpiService;
+import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.ThroughputKPIService;
 import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.jira.properties.StatusConfiguration.FinalStatuses;
@@ -37,7 +38,7 @@ public class ThroughputKPIServiceTest {
     private JiraProperties jiraProperties;
     
     @Mock
-    private IssueStatusFlowService issueService;
+    private IssueKpiService issueService;
     
     @Spy
     @InjectMocks
@@ -56,29 +57,25 @@ public class ThroughputKPIServiceTest {
         
         when(jiraProperties.getFinalStatuses()).thenReturn(finalStatuses);
         
-        IssueStatusFlow demand = new IssueStatusFlowBuilder("I-1")
-                .type("Demand")
+        IssueKpi demand = new IssueKpiBuilder("I-1","Demand",KpiLevel.DEMAND)
                 .addChain("To Do",parseDateTime("2017-09-25"))
                 .addChain("Doing",parseDateTime("2017-09-26"))
                 .addChain("Done",parseDateTime("2017-09-27"))
                 .build();
         
-        IssueStatusFlow os = new IssueStatusFlowBuilder("I-2")
-                .type("OS")
+        IssueKpi os = new IssueKpiBuilder("I-2","OS",KpiLevel.FEATURES)
                 .addChain("To Do",parseDateTime("2017-09-25"))
                 .addChain("Doing",parseDateTime("2017-09-26"))
                 .addChain("Done")
                 .build();
         
-        IssueStatusFlow feature = new IssueStatusFlowBuilder("I-3")
-                .type("Feature")
+        IssueKpi feature = new IssueKpiBuilder("I-3","Feature",KpiLevel.FEATURES)
                 .addChain("To Do",parseDateTime("2017-09-25"))
                 .addChain("Doing",parseDateTime("2017-09-26"))
                 .addChain("Done")
                 .build();
         
-        IssueStatusFlow subtask = new IssueStatusFlowBuilder("I-4")
-                .type("Sub-task")
+        IssueKpi subtask = new IssueKpiBuilder("I-4","Sub-task",KpiLevel.SUBTASKS)
                 .addChain("To Do",parseDateTime("2017-09-25"))
                 .addChain("Doing")
                 .addChain("Done")

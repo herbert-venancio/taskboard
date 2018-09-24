@@ -106,6 +106,10 @@ public abstract class FollowUpDataGeneratorTestBase {
 
     @Mock
     private IssuePriorityService issuePriorityService;
+    
+    @Spy
+    @InjectMocks
+    private IssueTransitionService transitionService = new IssueTransitionService();
 
     protected CustomField propertiesCustomField;
     protected TShirtSize tshirtSizeInfo;

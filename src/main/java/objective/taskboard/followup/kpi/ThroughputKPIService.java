@@ -15,7 +15,7 @@ import objective.taskboard.jira.properties.StatusConfiguration;
 public class ThroughputKPIService extends KPIUsingStatusService<ThroughputDataSet,ThroughputRow> {
 
     @Override
-    protected List<ThroughputRow> makeRows(String[] statuses, Map<String, List<IssueStatusFlow>> issues, ZonedDateTime date) {
+    protected List<ThroughputRow> makeRows(String[] statuses, Map<String, List<IssueKpi>> issues, ZonedDateTime date) {
 
         return issues.entrySet().stream().sorted((e1, e2) -> e1.getKey().compareTo(e2.getKey()))
                 .map(entry -> new ThroughputRow(date, entry.getKey(),countIssuesThroughput(entry.getValue(), date, statuses)))
@@ -32,7 +32,7 @@ public class ThroughputKPIService extends KPIUsingStatusService<ThroughputDataSe
         return new ThroughputDataSet(type, rows);
     }
     
-    private Long countIssuesThroughput(List<IssueStatusFlow> issues, ZonedDateTime date, String... statuses) {
+    private Long countIssuesThroughput(List<IssueKpi> issues, ZonedDateTime date, String... statuses) {
         return issues.stream().filter( i -> i.hasTransitedToAnyStatusOnDay(date, statuses)).count();
     }
 

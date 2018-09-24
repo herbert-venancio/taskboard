@@ -16,7 +16,7 @@ import objective.taskboard.jira.properties.StatusConfiguration;
 public class WipKPIService extends KPIUsingStatusService<WipDataSet,WipRow>{
  
     @Override
-    protected List<WipRow> makeRows(String[] statuses, Map<String, List<IssueStatusFlow>> issues, ZonedDateTime date) {
+    protected List<WipRow> makeRows(String[] statuses, Map<String, List<IssueKpi>> issues, ZonedDateTime date) {
         List<WipRow> rows = new LinkedList<>();
         
         for (String status : statuses) {
@@ -26,7 +26,7 @@ public class WipKPIService extends KPIUsingStatusService<WipDataSet,WipRow>{
         return rows;
     }
     
-    private List<WipRow> makeRows(Map<String, List<IssueStatusFlow>> issues, String status, ZonedDateTime date) {
+    private List<WipRow> makeRows(Map<String, List<IssueKpi>> issues, String status, ZonedDateTime date) {
         
         return issues.entrySet().stream()
                 .sorted((e1, e2) -> e1.getKey().compareTo(e2.getKey()))
@@ -35,7 +35,7 @@ public class WipKPIService extends KPIUsingStatusService<WipDataSet,WipRow>{
 
     }
 
-    private Long countIssuesInWip(List<IssueStatusFlow> issues, ZonedDateTime date,String status) {
+    private Long countIssuesInWip(List<IssueKpi> issues, ZonedDateTime date, String status) {
         return issues.stream().filter(i -> i.isOnStatusOnDay(status, date)).count();
     }
 

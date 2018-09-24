@@ -28,7 +28,7 @@ public abstract class KPIUsingStatusService<DS,R> {
     protected JiraProperties jiraProperties;
     
     @Autowired
-    private IssueStatusFlowService issueStatusFlowService;
+    private IssueKpiService issueStatusFlowService;
     
     public List<DS> getData(FollowUpData followupData) {
         StatusConfiguration configuration = getConfiguration();
@@ -51,7 +51,7 @@ public abstract class KPIUsingStatusService<DS,R> {
 
     protected abstract DS makeDataSet(String type, List<R> rows);
     
-    protected abstract List<R> makeRows(String[] statuses, Map<String, List<IssueStatusFlow>> byType, ZonedDateTime date);
+    protected abstract List<R> makeRows(String[] statuses, Map<String, List<IssueKpi>> byType, ZonedDateTime date);
     
     private Optional<AnalyticsTransitionsDataSet> findAnalyticTransitionDs(List<AnalyticsTransitionsDataSet> dataSets, String type) {
         if(isEmpty(dataSets))
@@ -59,24 +59,21 @@ public abstract class KPIUsingStatusService<DS,R> {
         return dataSets.stream().filter(a -> type.equals(a.issueType)).findFirst();
     }
     
-    private Map<String, List<IssueStatusFlow>> getIssuesByType(List<IssueStatusFlow> issues) {
-        return issues.stream().collect(Collectors.groupingBy(IssueStatusFlow::getIssueType));
+    private Map<String, List<IssueKpi>> getIssuesByType(List<IssueKpi> issues) {
+        return issues.stream().collect(Collectors.groupingBy(IssueKpi::getIssueType));
     }
     
     private List<R> getRows(String[] statuses, Optional<AnalyticsTransitionsDataSet> analyticTransitionDs) {
-        if (!analyticTransitionDs.isPresent())
+        
+        List<IssueKpi> issues = issueStatusFlowService.getIssues(analyticTransitionDs);
+
+        if(issues.isEmpty() || !analyticTransitionDs.isPresent())
             return Arrays.asList();
-        AnalyticsTransitionsDataSet ds = analyticTransitionDs.get();
-
-        List<IssueStatusFlow> issues = issueStatusFlowService.getIssues(ds);
-
-        if (issues.isEmpty())
-            return Arrays.asList();
-
-        Map<String, List<IssueStatusFlow>> byType = getIssuesByType(issues);
+        
+        Map<String, List<IssueKpi>> byType = getIssuesByType(issues);
         
         List<R> rows = new LinkedList<>();
-        Range<ZonedDateTime> dateRange = FollowUpTransitionsDataProvider.calculateInterval(ds);
+        Range<ZonedDateTime> dateRange = FollowUpTransitionsDataProvider.calculateInterval(analyticTransitionDs.get());//TODO pensar em uma alternativa
 
         for (ZonedDateTime date = dateRange.getMinimum(); !date.isAfter(dateRange.getMaximum()); date = date.plusDays(1)) {
             List<R> tpRows = makeRows(statuses, byType, date);
