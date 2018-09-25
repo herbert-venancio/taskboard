@@ -15,4 +15,8 @@ public interface StatusTransitionChain {
     
     Optional<ZonedDateTime> getDate();
     
+    public static StatusTransitionChain create(String status, ZonedDateTime date, StatusTransitionChain next) {
+        return (date == null) ? new NoDateStatusTransition(status,next) : new StatusTransition(status, date,next);
+    }
+    
 }

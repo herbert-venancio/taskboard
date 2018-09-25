@@ -137,7 +137,7 @@ public class FollowUpDataGeneratorTransitionsTest extends FollowUpDataGeneratorT
                     .transition("Reviewing", "2020-01-05")
                     .transition("Done", "2020-01-06")
                     .transition("Cancelled", "2020-01-07").issueStatus(statusCancelled),
-                subtask().id(100).key("PROJ-100").issueType(alphaIssueType)
+                subtask().id(101).key("PROJ-101").issueType(alphaIssueType)
                     .transition("Open", "2020-01-08")
                     .transition("To Do", "2020-01-09")
                     .transition("Doing", "2020-01-10")
@@ -168,7 +168,7 @@ public class FollowUpDataGeneratorTransitionsTest extends FollowUpDataGeneratorT
         assertThat(devTransitionsDates.get(6), is(parseDateTime("2020-01-01")));
         
         AnalyticsTransitionsDataRow alphaTransitions = dataList.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows.get(1);
-        assertThat(alphaTransitions.issueKey, is("PROJ-100"));
+        assertThat(alphaTransitions.issueKey, is("PROJ-101"));
         List<ZonedDateTime> alphaTransitionsDates = alphaTransitions.transitionsDates;
         assertThat(alphaTransitionsDates.size(), is(7));
         assertThat(alphaTransitionsDates.get(0), is(parseDateTime("2020-01-14")));

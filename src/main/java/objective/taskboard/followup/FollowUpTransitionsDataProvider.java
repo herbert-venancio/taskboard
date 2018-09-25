@@ -1,13 +1,10 @@
 package objective.taskboard.followup;
 
-import static org.apache.commons.lang3.ArrayUtils.INDEX_NOT_FOUND;
-
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,25 +14,20 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.Range;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
 import com.google.common.primitives.Ints;
 
-import objective.taskboard.data.Changelog;
 import objective.taskboard.data.Issue;
+import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.utils.DateTimeUtils;
 
 public class FollowUpTransitionsDataProvider {
     
-    private static final Logger LOG = LoggerFactory.getLogger(FollowUpTransitionsDataProvider.class);
-
     public static final String TYPE_DEMAND = "Demand";
     public static final String TYPE_FEATURES = "Features";
     public static final String TYPE_SUBTASKS = "Subtasks";
@@ -48,9 +40,11 @@ public class FollowUpTransitionsDataProvider {
 
     private JiraProperties jiraProperties;
     private MetadataService metadataService;
+    private IssueTransitionService transitionService;
 
-    public FollowUpTransitionsDataProvider(JiraProperties jiraProperties, MetadataService metadataService) {
+    public FollowUpTransitionsDataProvider(JiraProperties jiraProperties, IssueTransitionService transitionService, MetadataService metadataService) {
         this.jiraProperties = jiraProperties;
+        this.transitionService = transitionService;
         this.metadataService = metadataService;
     }
 
@@ -68,51 +62,33 @@ public class FollowUpTransitionsDataProvider {
         });
 
         List<AnalyticsTransitionsDataSet> analyticsTransitionsDSs = new LinkedList<>();
-        analyticsTransitionsDSs.add(getAnalyticsTransitionsDs(TYPE_DEMAND, jiraProperties.getStatusPriorityOrder().getDemandsInOrder(), demands, timezone));
-        analyticsTransitionsDSs.add(getAnalyticsTransitionsDs(TYPE_FEATURES, jiraProperties.getStatusPriorityOrder().getTasksInOrder(), features, timezone));
-        analyticsTransitionsDSs.add(getAnalyticsTransitionsDs(TYPE_SUBTASKS, jiraProperties.getStatusPriorityOrder().getSubtasksInOrder(), subtasks, timezone));
+        analyticsTransitionsDSs.add(getAnalyticsTransitionsDs(KpiLevel.DEMAND, demands, timezone));
+        analyticsTransitionsDSs.add(getAnalyticsTransitionsDs(KpiLevel.FEATURES, features, timezone));
+        analyticsTransitionsDSs.add(getAnalyticsTransitionsDs(KpiLevel.SUBTASKS, subtasks, timezone));
         return analyticsTransitionsDSs;
     }
 
-    private AnalyticsTransitionsDataSet getAnalyticsTransitionsDs(String issueType, String[] statuses, List<Issue> issuesVisibleToUser, ZoneId timezone) {
+    private AnalyticsTransitionsDataSet getAnalyticsTransitionsDs(KpiLevel level, List<Issue> issuesVisibleToUser, ZoneId timezone) {
         List<String> headers = new LinkedList<>();
         headers.add(HEADER_ISSUE_KEY_COLUMN_NAME);
         headers.add(HEADER_ISSUE_TYPE_COLUMN_NAME);
-        Collections.addAll(headers, statuses);
-        List<AnalyticsTransitionsDataRow> rows = getAnalyticsTransitionsDataRows(statuses, issuesVisibleToUser, timezone);
-        return new AnalyticsTransitionsDataSet(issueType, headers, rows);
+        Collections.addAll(headers, level.getStatusPriorityOrder(jiraProperties));
+        List<AnalyticsTransitionsDataRow> rows = getAnalyticsTransitionsDataRows(level, issuesVisibleToUser, timezone);
+        return new AnalyticsTransitionsDataSet(level.getName(), headers, rows);
     }
 
-    private List<AnalyticsTransitionsDataRow> getAnalyticsTransitionsDataRows(String[] statuses, List<Issue> issuesVisibleToUser, ZoneId timezone) {
-        List<AnalyticsTransitionsDataRow> rows = new LinkedList<>();
-        for (Issue issue : issuesVisibleToUser) {
-            Map<String, ZonedDateTime> lastTransitionDate = mapStatusLastTransitionDates(issue, statuses, timezone);
-            rows.add(new AnalyticsTransitionsDataRow(issue.getIssueKey(), issue.getIssueTypeName(),
-                    new LinkedList<>(lastTransitionDate.values())));
-        }
+    private List<AnalyticsTransitionsDataRow> getAnalyticsTransitionsDataRows(KpiLevel level, List<Issue> issuesVisibleToUser, ZoneId timezone) {
+        
+        String[] statuses = level.getStatusPriorityOrder(jiraProperties);
+        
+        List<AnalyticsTransitionsDataRow> rows = issuesVisibleToUser.stream()
+                .map( issue -> { 
+                    Map<String,ZonedDateTime> transitions = transitionService.getTransitions(issue, timezone, statuses);
+                    return new AnalyticsTransitionsDataRow(issue.getIssueKey(), issue.getIssueTypeName(), new LinkedList<>(transitions.values()));
+                })
+                .collect(Collectors.toList());
+        
         return rows;
-    }
-
-    private Map<String, ZonedDateTime> mapStatusLastTransitionDates(Issue issue, String[] statuses, ZoneId timezone) {
-        final String firstState = statuses[statuses.length - 1];
-        Map<String, ZonedDateTime> lastTransitionDate = new LinkedHashMap<>();
-        for (String status : statuses)
-            lastTransitionDate.put(status, null);
-        lastTransitionDate.put(firstState, DateTimeUtils.get(issue.getCreated(), timezone));
-        int lastStatusIndex = ArrayUtils.indexOf(statuses, issue.getStatusName());
-        for (Changelog change : issue.getChangelog()) {
-            if (!"status".equals(change.field))
-                continue;
-            int statusIndex = ArrayUtils.indexOf(statuses, change.to);
-            
-            if (lastStatusIndex != INDEX_NOT_FOUND && statusIndex >= lastStatusIndex) {
-                lastTransitionDate.put(change.to, DateTimeUtils.get(change.timestamp, timezone));
-
-                if (change.timestamp == null)
-                    logWarning(issue);
-            }
-        }
-        return lastTransitionDate;
     }
 
     public List<SyntheticTransitionsDataSet> getSyntheticTransitionsDsList(List<AnalyticsTransitionsDataSet> analyticsTransitionsDSs) {
@@ -251,11 +227,4 @@ public class FollowUpTransitionsDataProvider {
         return Optional.ofNullable(index);
     }
     
-    private void logWarning(Issue issue) {
-        StringBuilder history = new StringBuilder();
-        issue.getChangelog().forEach(history::append);
-        
-        String warningMessage = String.format("Issue with transition date/hour without fill, Issue: %s, %s.", issue.getIssueKey(), history.toString());
-        LOG.warn(warningMessage);
-    }
 }

@@ -26,6 +26,7 @@ import objective.taskboard.Constants;
 import objective.taskboard.data.Issue;
 import objective.taskboard.followup.cluster.FollowupCluster;
 import objective.taskboard.followup.cluster.FollowupClusterProvider;
+import objective.taskboard.followup.kpi.FollowupIssueFilter;
 import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.client.JiraCreateIssue;
@@ -39,17 +40,20 @@ public class FollowUpDataGenerator {
     private final MetadataService metadataService;
     private final IssueBufferService issueBufferService;
     private final FollowupClusterProvider clusterProvider;
+    private final IssueTransitionService transitionService;
 
     @Autowired
     public FollowUpDataGenerator(
             JiraProperties jiraProperties, 
             MetadataService metadataService, 
             IssueBufferService issueBufferService,
-            FollowupClusterProvider clusterProvider) {
+            FollowupClusterProvider clusterProvider,
+            IssueTransitionService transitionService) {
         this.jiraProperties = jiraProperties;
         this.metadataService = metadataService;
         this.issueBufferService = issueBufferService;
         this.clusterProvider = clusterProvider;
+        this.transitionService = transitionService;
     }
 
     public FollowUpData generate(ZoneId timezone, FollowupCluster cluster, String projectKey) {
@@ -80,14 +84,14 @@ public class FollowUpDataGenerator {
         }
 
         public FollowUpData generate() {
+            
             List<Issue> issuesVisibleToUser = issueBufferService.getAllIssues().stream()
-                    .filter(issue -> projectKey.equals(issue.getProjectKey()))
-                    .filter(issue -> isAllowedStatus(issue.getStatus()))
+                    .filter(new FollowupIssueFilter(jiraProperties, projectKey))
                     .collect(Collectors.toList());
 
             FromJiraDataSet fromJiraDs = getFromJiraDs(issuesVisibleToUser, timezone);
 
-            FollowUpTransitionsDataProvider transitions = new FollowUpTransitionsDataProvider(jiraProperties, metadataService);
+            FollowUpTransitionsDataProvider transitions = new FollowUpTransitionsDataProvider(jiraProperties, transitionService,metadataService);
             List<AnalyticsTransitionsDataSet> analyticsTransitionsDsList = transitions.getAnalyticsTransitionsDsList(issuesVisibleToUser, timezone);
             List<SyntheticTransitionsDataSet> syntheticsTransitionsDsList = transitions.getSyntheticTransitionsDsList(analyticsTransitionsDsList);
 
@@ -142,11 +146,7 @@ public class FollowUpDataGenerator {
                             .filter(fields::contains))
                     .collect(toLinkedHashSet());
         }
-
-        private boolean isAllowedStatus(long status) {
-            return !jiraProperties.getFollowup().getStatusExcludedFromFollowup().contains(status);
-        }
-
+        
         private Map<String, Issue> makeDemandBallparks(LinkedList<Issue> issues, ZoneId timezone) {
             Map<String, Issue> demands = new LinkedHashMap<>();
             Iterator<Issue> it = issues.iterator();

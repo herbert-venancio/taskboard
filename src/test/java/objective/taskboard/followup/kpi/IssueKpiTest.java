@@ -6,7 +6,7 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
-public class IssueStatusFlowTest {
+public class IssueKpiTest {
     
     @Test
     public void checkStatusOnDay_happyDay() {
@@ -14,7 +14,7 @@ public class IssueStatusFlowTest {
         StatusTransitionChain done = makeStatus("Done","2020-01-03",new TerminalStateTransition());
         StatusTransitionChain doing = makeStatus("Doing","2020-01-02",done);
         StatusTransitionChain todo = makeStatus("To Do","2020-01-01",doing);
-        IssueStatusFlow issue = makeIssue("PROJ-01",todo);
+        IssueKpi issue = makeIssue("PROJ-01",todo);
         
         assertThat(issue.isOnStatusOnDay("To Do", parseDateTime("2020-01-01")), is(true));
         assertThat(issue.isOnStatusOnDay("Doing", parseDateTime("2020-01-01")), is(false));
@@ -37,7 +37,7 @@ public class IssueStatusFlowTest {
         StatusTransitionChain done = makeStatus("Done","2020-01-03",new TerminalStateTransition());
         StatusTransitionChain doing = new NoDateStatusTransition("Doing",done);
         StatusTransitionChain todo = makeStatus("To Do","2020-01-01",doing);
-        IssueStatusFlow issue = makeIssue("PROJ-01",todo);
+        IssueKpi issue = makeIssue("PROJ-01",todo);
         
         assertThat(issue.isOnStatusOnDay("To Do", parseDateTime("2020-01-01")), is(true));
         assertThat(issue.isOnStatusOnDay("Doing", parseDateTime("2020-01-01")), is(false));
@@ -60,7 +60,7 @@ public class IssueStatusFlowTest {
     @Test
     public void checkStatusOnDay_openIssue() {
         StatusTransitionChain todo = makeStatus("To Do","2020-01-01",new TerminalStateTransition());
-        IssueStatusFlow issue = makeIssue("PROJ-01",todo);
+        IssueKpi issue = makeIssue("PROJ-01",todo);
         
         assertThat(issue.isOnStatusOnDay("To Do", parseDateTime("2020-01-01")), is(true));
         assertThat(issue.isOnStatusOnDay("Doing", parseDateTime("2020-01-01")), is(false));
@@ -74,7 +74,7 @@ public class IssueStatusFlowTest {
         StatusTransitionChain done = makeStatus("Done","2020-01-04",new TerminalStateTransition());
         StatusTransitionChain doing = makeStatus("Doing","2020-01-03",done);
         StatusTransitionChain todo = makeStatus("To Do","2020-01-02",doing);
-        IssueStatusFlow issue = makeIssue("PROJ-01",todo);
+        IssueKpi issue = makeIssue("PROJ-01",todo);
         
         assertThat(issue.isOnStatusOnDay("To Do", parseDateTime("2020-01-01")), is(false));
         assertThat(issue.isOnStatusOnDay("Doing", parseDateTime("2020-01-01")), is(false));
@@ -91,7 +91,7 @@ public class IssueStatusFlowTest {
         StatusTransitionChain done = makeStatus("Done","2020-01-03",new TerminalStateTransition());
         StatusTransitionChain doing = makeStatus("Doing","2020-01-02",done);
         StatusTransitionChain todo = makeStatus("To Do","2020-01-01",doing);
-        IssueStatusFlow issue = makeIssue("PROJ-01",todo);
+        IssueKpi issue = makeIssue("PROJ-01",todo);
         
         assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-01"), "Done"),is (false));
         assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-02"), "Done"),is (false));
@@ -103,7 +103,7 @@ public class IssueStatusFlowTest {
         StatusTransitionChain done = makeStatus("Done","2020-01-03",new TerminalStateTransition());
         StatusTransitionChain doing = makeStatus("Doing","2020-01-02",done);
         StatusTransitionChain todo = makeStatus("To Do","2020-01-01",doing);
-        IssueStatusFlow issue = makeIssue("PROJ-01",todo);
+        IssueKpi issue = makeIssue("PROJ-01",todo);
         
         assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-01"), "Integrating","Cancelled"),is (false));
         assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-02"), "Integrating","Cancelled"),is (false));
@@ -115,7 +115,7 @@ public class IssueStatusFlowTest {
         StatusTransitionChain done = makeStatus("Done","2020-01-03",new TerminalStateTransition());
         StatusTransitionChain doing = new NoDateStatusTransition("Doing",done);
         StatusTransitionChain todo = makeStatus("To Do","2020-01-01",doing);
-        IssueStatusFlow issue = makeIssue("PROJ-01",todo);
+        IssueKpi issue = makeIssue("PROJ-01",todo);
         
         assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-01"), "Doing","Done"),is (false));
         assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-02"), "Doing","Done"),is (false));
@@ -127,7 +127,7 @@ public class IssueStatusFlowTest {
         StatusTransitionChain done = makeStatus("Done","2020-01-03",new TerminalStateTransition());
         StatusTransitionChain doing = new NoDateStatusTransition("Doing",done);
         StatusTransitionChain todo = makeStatus("To Do","2020-01-01",doing);
-        IssueStatusFlow issue = makeIssue("PROJ-01",todo);
+        IssueKpi issue = makeIssue("PROJ-01",todo);
         
         assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-01"), "Doing"),is (false));
         assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-02"), "Doing"),is (false));
@@ -139,7 +139,7 @@ public class IssueStatusFlowTest {
         StatusTransitionChain done = makeStatus("Done","2020-01-03",new TerminalStateTransition());
         StatusTransitionChain doing = makeStatus("Doing","2020-01-02",done);
         StatusTransitionChain todo = makeStatus("To Do","2020-01-01",doing);
-        IssueStatusFlow issue = makeIssue("PROJ-01",todo);
+        IssueKpi issue = makeIssue("PROJ-01",todo);
         
         assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-01"), "Doing","Done"),is (false));
         assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-02"), "Doing","Done"),is (true));
@@ -147,8 +147,8 @@ public class IssueStatusFlowTest {
     }
     
    
-    private IssueStatusFlow makeIssue(String pKey, StatusTransitionChain firstStatus) {
-        return new IssueStatusFlow(pKey,"Subtask", firstStatus);
+    private IssueKpi makeIssue(String pKey, StatusTransitionChain firstStatus) {
+        return new IssueKpi(pKey,"Subtask",KpiLevel.SUBTASKS, firstStatus);
         
     }
 

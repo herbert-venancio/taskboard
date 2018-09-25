@@ -78,4 +78,8 @@ public class MetadataService {
         Map<Long, Status> metadata = getStatusesMetadata();
         return metadata.entrySet().stream().filter(entry -> entry.getValue().name.equals(name)).findFirst().map(entry -> entry.getKey()).orElse(null);
     }
+    
+    public Optional<JiraIssueTypeDto> getIssueTypeByName(String issueType) {
+        return getIssueTypeMetadata().values().stream().filter(type -> type.getName().equalsIgnoreCase(issueType)).findFirst();
+    }
 }

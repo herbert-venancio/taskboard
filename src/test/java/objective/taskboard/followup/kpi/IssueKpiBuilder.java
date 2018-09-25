@@ -3,22 +3,20 @@ package objective.taskboard.followup.kpi;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
-public class IssueStatusFlowBuilder {
+public class IssueKpiBuilder {
 
-    private String pKey;
-    private String type;
+    private final String pKey;
+    private final String type;
+    private final KpiLevel level;
     private ChainDto firstChainDto = new ChainDto();
 
-    public IssueStatusFlowBuilder(String pKey) {
+    public IssueKpiBuilder(String pKey, String type, KpiLevel level) {
         this.pKey = pKey;
-    }
-
-    public IssueStatusFlowBuilder type(String type) {
         this.type = type;
-        return this;
+        this.level = level;
     }
 
-    public IssueStatusFlowBuilder addChain(String status) {
+    public IssueKpiBuilder addChain(String status) {
         ChainDto chainDto = new ChainDto(status, firstChainDto);
         addChain(chainDto);
         return this;
@@ -41,15 +39,15 @@ public class IssueStatusFlowBuilder {
         before.next = Optional.of(chainDto);
     }
 
-    public IssueStatusFlowBuilder addChain(String status, ZonedDateTime date) {
+    public IssueKpiBuilder addChain(String status, ZonedDateTime date) {
         ChainDto chainDto = new ChainDto(status, date, firstChainDto);
         addChain(chainDto);
         return this;
     }
 
-    public IssueStatusFlow build() {
+    public IssueKpi build() {
         StatusTransitionChain firstChain = firstChainDto.buildChain();
-        return new IssueStatusFlow(pKey, type, firstChain);
+        return new IssueKpi(pKey, type, level, firstChain);
     }
 
     private static class ChainDto {

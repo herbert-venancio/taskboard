@@ -2,18 +2,23 @@ package objective.taskboard.followup.kpi;
 
 import java.time.ZonedDateTime;
 import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class IssueStatusFlow {
+public class IssueKpi {
 
     private String pKey;
     private StatusTransitionChain firstStatus;
     private String issueType;
+    private List<IssueKpi> children = new LinkedList<>();
+    private KpiLevel level;
 
-    public IssueStatusFlow(String pKey, String issueType, StatusTransitionChain firstStatus) {
+    public IssueKpi(String pKey, String issueType, KpiLevel level, StatusTransitionChain firstStatus) {
         this.pKey = pKey;
         this.issueType = issueType;
+        this.level = level;
         this.firstStatus = firstStatus;
     }
 
@@ -48,6 +53,22 @@ public class IssueStatusFlow {
     @Override
     public String toString() {
         return String.format("[%s]", pKey);
+    }
+    
+    public String getIssueKey() {
+        return pKey;
+    }
+    
+    public KpiLevel getLevel() {
+        return level;
+    }
+
+    public void addChild(IssueKpi issueKpi) {
+        children.add(issueKpi);
+    }
+
+    List<IssueKpi> getChildren() {
+        return children;
     }
 
 }
