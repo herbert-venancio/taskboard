@@ -240,6 +240,11 @@
                         type: Object,
                         notify: true
                     },
+                    highchartsChart: {
+                        type: Object,
+                        notify: false,
+                        value: null
+                    },
                     _isChartFiltered: {
                         type: Boolean,
                         value: false
@@ -357,7 +362,19 @@
 
                 _onTapDownload: function() {
                     var fileName = this.title.replace(/ /g, '_') + "_" + getDateHour();
-                    dcUtils.downloadElementAsJpegImage(this.$$('.widget__body'), fileName);
+                    if (!this.highchartsChart) {
+                        dcUtils.downloadElementAsJpegImage(this.$$('.widget__body'), fileName);
+                        return;
+                    }
+                    const exportOptions = {
+                        filename: fileName
+                    }
+                    const chartOptions = {
+                        chart: {
+                            backgroundColor: '#565656'
+                        }
+                    }
+                    this.highchartsChart.exportChartLocal(exportOptions, chartOptions);
                 }
             });
         })();

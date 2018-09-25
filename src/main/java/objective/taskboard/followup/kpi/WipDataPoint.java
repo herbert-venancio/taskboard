@@ -5,14 +5,14 @@ import java.util.Date;
 
 public class WipDataPoint {
     public final Date date;
-    public final String type;
-    public final String status;
-    public final Long count;
+    public final String issueType;
+    public final String issueStatus;
+    public final double average;
 
-    public WipDataPoint(ZonedDateTime date, String type, String status, Long count) {
+    public WipDataPoint(ZonedDateTime date, String type, String status, double average) {
         this.date = Date.from(date.toInstant());
-        this.type = type;
-        this.status = status;
-        this.count = count;
+        this.issueType = type;
+        this.issueStatus = status;
+        this.average = average;
     }
 }
