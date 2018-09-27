@@ -49,8 +49,12 @@ public class TeamFilterConfigurationService {
                 .stream()
                 .map(p -> p.getTeamId())
                 .collect(toSet());
-
+        
         return getTeamsByIds(visibleTeamsIds);
+    }
+    
+    public List<Team> getGloballyVisibleTeams() {
+        return teamRepository.findGloballyVisibles();
     }
 
     private List<Team> getTeamsByIds(Set<Long> teamsIds) {
