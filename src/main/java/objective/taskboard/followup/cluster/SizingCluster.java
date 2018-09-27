@@ -2,6 +2,7 @@ package objective.taskboard.followup.cluster;
 
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
@@ -19,10 +20,10 @@ public class SizingCluster extends TaskboardEntity {
 
     private String name;
 
-    @OneToMany(mappedBy = "baseCluster", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "baseCluster", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @Fetch(value = FetchMode.SUBSELECT)
     private List<SizingClusterItem> items;
-    
+
     public SizingCluster() {
     }
 
@@ -30,7 +31,7 @@ public class SizingCluster extends TaskboardEntity {
         this.setId(id);
         this.setName(name);
     }
-    
+
     public SizingCluster(String name) {
         this.setName(name);
     }
