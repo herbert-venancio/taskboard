@@ -53,6 +53,10 @@ public abstract class AbstractUiFragment {
         }
     }
 
+    public void waitTrue(Supplier<Boolean> actualSupplier) {
+        waitAssertEquals(true, actualSupplier);
+    }
+
     protected void scroolToElement(WebElement element) {
         executeJavascript("arguments[0].scrollIntoView(true);", element);
     }

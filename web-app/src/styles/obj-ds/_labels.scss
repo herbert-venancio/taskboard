@@ -1,0 +1,29 @@
+@import "utils/fonts";
+@import "utils/colors";
+@import "misc";
+
+%_obj-label-base {
+    font-family: $obj-font-ptsans;
+    @extend %_obj_text_ellipsis;
+}
+
+%_obj-label-small {
+    @extend %_obj-label-base;
+    font-size: 12px;
+    line-height: 12px;
+    color: $obj-color-smoke;
+}
+
+%_obj-label-medium {
+    @extend %_obj-label-base;
+    font-size: 14px;
+    line-height: 14px;
+    color: $obj-color-black;
+}
+
+%_obj-label-large {
+    @extend %_obj-label-base;
+    font-size: 16px;
+    line-height: 16px;
+    color: $obj-color-black;
+}

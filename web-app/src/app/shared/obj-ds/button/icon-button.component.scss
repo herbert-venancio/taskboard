@@ -26,5 +26,14 @@
         &:active {
             color: $obj-color-dark-smoke;
         }
+
+        &.primary {
+            color: $obj-color-blue;
+
+            &:hover,
+            &:active {
+                color: $obj-color-dark-blue;
+            }
+        }
     }
 }

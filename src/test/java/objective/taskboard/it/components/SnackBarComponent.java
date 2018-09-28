@@ -21,9 +21,13 @@ public class SnackBarComponent extends AbstractComponent {
     }
 
     public void waitDescriptionsToBe(String... descriptions) {
-        List<WebElement> descriptionsElements = getChildrenElementsWhenTheyExists(component(), cssSelector(".description-item"));
-        for(int i = 0; i < descriptions.length; i++)
-            waitTextInElement(descriptionsElements.get(i), descriptions[i]); 
+        if (descriptions.length == 0) {
+            waitUntilChildElementNotExists(component(), cssSelector(".description-item"));
+        } else {
+            List<WebElement> descriptionsElements = getChildrenElementsWhenTheyExists(component(), cssSelector(".description-item"));
+            for(int i = 0; i < descriptions.length; i++)
+                waitTextInElement(descriptionsElements.get(i), descriptions[i]);
+        }
     }
 
 }

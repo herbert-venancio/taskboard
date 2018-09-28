@@ -70,6 +70,57 @@ $obj-input-padding: 0 16px;
     @extend %_obj-input-base;
 }
 
+.obj-search-field {
+    @include obj-input-generator(
+            "&",
+            "&[disabled]",
+            "&[readonly]",
+            "&.obj-search-focused",
+            "&.valid",
+            "&.valid.obj-search-focused",
+            "&.invalid",
+            "&.invalid.obj-search-focused");
+
+    & {
+        display: flex;
+        align-items: center;
+
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    .icon {
+        flex: 0 0 auto;
+        margin-right: 4px;
+        color: $obj-color-dark-snow;
+        pointer-events: none;
+    }
+
+    .text {
+        flex: 1;
+
+        border: none;
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        height: 100%;
+
+        font: inherit;
+
+        &:focus {
+            outline: none;
+        }
+    }
+
+    .clear {
+        flex: 0 0 auto;
+        margin-left: 4px;
+
+        cursor: pointer;
+        color: $obj-color-smoke;
+    }
+}
+
 .obj-select-field.ng-select {
     @include obj-input-generator(
             ".ng-select-container",

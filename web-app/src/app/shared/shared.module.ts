@@ -4,6 +4,7 @@ import {CommonModule} from '@angular/common';
 
 import {ObjDsModule} from './obj-ds/obj-ds.module';
 import {FormUtilsModule} from './form-utils/form-utils.module';
+import {ObjFilterPipe} from "./pipes/obj-filter/obj-filter.pipe";
 
 @NgModule({
     imports: [
@@ -16,7 +17,11 @@ import {FormUtilsModule} from './form-utils/form-utils.module';
         CommonModule,
         FormsModule,
         FormUtilsModule,
-        ObjDsModule
-    ]
+        ObjDsModule,
+        ObjFilterPipe
+    ],
+    declarations: [
+        ObjFilterPipe
+    ],
 })
 export class SharedModule {}

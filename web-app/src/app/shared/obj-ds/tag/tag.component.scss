@@ -1,0 +1,25 @@
+@import '../../../../styles/obj-ds/utils/colors';
+
+:root {
+    display: inline-block;
+}
+
+.tag {
+    display: inline-flex;
+    align-items: center;
+
+    background-color: $obj-color-dark-smoke;
+    max-width: 136px;
+    height: 24px;
+    padding: 4px 8px;
+    border-radius: 4px;
+
+    &[type="row-added"] {
+        background-color: $obj-color-dark-green;
+    }
+}
+
+.text {
+    font-size: 12px;
+    color: #FFF;
+}

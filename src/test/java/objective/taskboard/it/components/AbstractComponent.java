@@ -19,4 +19,8 @@ abstract class AbstractComponent extends AbstractUiFragment {
         return getElementWhenItExists(componentSelector);
     }
 
+    public boolean isVisible() {
+        return isElementVisibleAndExists(componentSelector);
+    }
+
 }

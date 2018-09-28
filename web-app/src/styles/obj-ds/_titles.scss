@@ -4,6 +4,10 @@
     font-weight: bold;
     color: $obj-color-dark-smoke;
 
+    [routerLink] {
+        cursor: pointer;
+    }
+
     .separator {
         color: rgba($obj-color-smoke, 0.3);
         font-weight: normal;

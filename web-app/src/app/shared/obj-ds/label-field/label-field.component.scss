@@ -1,0 +1,14 @@
+@import "../../../../styles/obj-ds/labels";
+
+:root {
+    display: block;
+}
+
+.label-field {
+    & > .label {
+        @extend %_obj-label-small;
+        margin-bottom: 8px;
+    }
+    & > .field {
+    }
+}

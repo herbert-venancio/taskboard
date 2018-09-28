@@ -23,27 +23,13 @@ package objective.taskboard.it;
 
 import org.junit.Before;
 
+import objective.taskboard.testUtils.LoginUtils;
+
 public abstract class AuthenticatedIntegrationTest extends AbstractUIWithCoverageIntegrationTest {
 
     @Before
     public final void doLogin() {
-        LoginPage loginPage = LoginPage.to(webDriver);
-        loginPage.login("foo", "bar");
-
-        MainPage mainPage = MainPage.produce(webDriver);
-        mainPage.waitUserLabelToBe("Foo");
-        mainPage.lane("Operational")
-            .boardStep("Done")
-            .assertIssueList(
-                    "TASKB-638",
-                    "TASKB-678",
-                    "TASKB-679",
-                    "TASKB-656",
-                    "TASKB-657",
-                    "TASKB-658",
-                    "TASKB-660",
-                    "TASKB-662"
-                    );
+        LoginUtils.doLoginAsProjectAdministrator(webDriver);
     }
 
 }

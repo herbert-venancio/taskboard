@@ -16,6 +16,8 @@ import {RouterModule} from '@angular/router';
 import {DataTableTopComponent} from './data-table/top/data-table-top.component';
 import {TitleComponent} from './title/title.component';
 import {HeaderContentComponent} from './header-content/header-content.component';
+import {LabelFieldComponent} from './label-field/label-field.component';
+import {TagComponent} from './tag/tag.component';
 
 @NgModule({
     imports: [
@@ -37,7 +39,9 @@ import {HeaderContentComponent} from './header-content/header-content.component'
         TabRouterComponent,
         DataTableTopComponent,
         TitleComponent,
-        HeaderContentComponent
+        HeaderContentComponent,
+        LabelFieldComponent,
+        TagComponent
     ],
     exports: [
         AvatarComponent,
@@ -52,7 +56,9 @@ import {HeaderContentComponent} from './header-content/header-content.component'
         TabRouterComponent,
         DataTableTopComponent,
         TitleComponent,
-        HeaderContentComponent
+        HeaderContentComponent,
+        LabelFieldComponent,
+        TagComponent
     ],
     schemas: [
         NO_ERRORS_SCHEMA
