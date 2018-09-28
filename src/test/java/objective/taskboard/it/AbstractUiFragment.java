@@ -35,8 +35,12 @@ public abstract class AbstractUiFragment {
         this.webDriver = driver;
     }
 
+    public static void waitUntil(WebDriver driver, ExpectedCondition<?> condition) {
+        PageWait.wait(driver).until((Function<? super WebDriver, ?>) condition);
+    }
+
     public void waitUntil(ExpectedCondition<?> condition) {
-        PageWait.wait(webDriver).until((Function<? super WebDriver, ?>) condition);
+        waitUntil(webDriver, condition);
     }
 
     public <T> void waitAssertEquals(T expected, Supplier<T> actualSupplier) {
