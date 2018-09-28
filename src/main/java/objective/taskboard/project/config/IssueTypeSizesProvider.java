@@ -1,63 +1,76 @@
 package objective.taskboard.project.config;
 
-import static java.util.Arrays.asList;
+import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
+import objective.taskboard.jira.MetadataService;
+import objective.taskboard.jira.client.JiraIssueTypeDto;
 import objective.taskboard.jira.properties.JiraProperties;
 
-@Component
+@Service
 public class IssueTypeSizesProvider {
 
     private final JiraProperties jiraProperties;
+    private final MetadataService metadataService;
 
     @Autowired
-    public IssueTypeSizesProvider(JiraProperties jiraProperties) {
+    public IssueTypeSizesProvider(
+            JiraProperties jiraProperties,
+            MetadataService metadataService
+            ) {
         this.jiraProperties = jiraProperties;
+        this.metadataService = metadataService;
     }
 
     public List<IssueTypeSize> get() {
-        List<String> issueType = asList(
-                "Alpha Bug",
-                "Alpha Test",
-                "Backend Development",
-                "BALLPARK - Alpha Test",
-                "BALLPARK - Backend Development",
-                "BALLPARK - Demand",
-                "BALLPARK - Developer Support",
-                "BALLPARK - Development",
-                "BALLPARK - Feature Review",
-                "BALLPARK - Frontend Development",
-                "BALLPARK - Planning",
-                "BALLPARK - QA/UAT Support",
-                "BALLPARK - Subtask",
-                "BALLPARK - Tech Planning",
-                "BALLPARK - UX",
-                "Dev Support",
-                "Feature Planning",
-                "Feature Review",
-                "Frontend Development",
-                "QA",
-                "Sub-Task",
-                "Tech Planning",
-                "UAT",
-                "UX");
+        HashSet<String> issueTypes = getIssueTypes();
 
-        List<String> sizes = jiraProperties.getCustomfield().getTShirtSize().getSizes();
+        List<String> sizes = jiraProperties.getCustomfield()
+                .getTShirtSize()
+                .getSizes();
 
-        return issueType.stream()
+        return issueTypes.stream()
             .flatMap(type -> toIssueTypeSizes(type, sizes).stream())
+            .sorted(comparing(IssueTypeSize::getIssueType))
             .collect(toList());
     }
 
     private List<IssueTypeSize> toIssueTypeSizes(String issueType, List<String> sizes) {
         return sizes.stream()
-            .map(size -> new IssueTypeSize(issueType, size))
-            .collect(toList());
+                .map(size -> new IssueTypeSize(issueType, size))
+                .collect(toList());
+    }
+
+    private HashSet<String> getIssueTypes() {
+        HashSet<String> issueTypes = new HashSet<>();
+        HashSet<Long> jiraIssueTypeIds = new HashSet<>();
+
+        jiraProperties.getFollowup().getBallparkMappings().values()
+            .forEach(ballparks ->
+                ballparks.forEach(it -> {
+                    issueTypes.add(it.getIssueType());
+                    jiraIssueTypeIds.addAll(it.getJiraIssueTypes());
+                })
+            );
+        issueTypes.addAll(getJiraIssueTypeNames(jiraIssueTypeIds));
+
+        return issueTypes;
+    }
+
+    private List<String> getJiraIssueTypeNames(final HashSet<Long> jiraIssueTypeIds) {
+        Map<Long, JiraIssueTypeDto> issueTypeMetadata = this.metadataService.getIssueTypeMetadata();
+
+        return jiraIssueTypeIds.stream()
+                .filter(id -> issueTypeMetadata.containsKey(id))
+                .map(id -> issueTypeMetadata.get(id).getName())
+                .collect(toList());
     }
 
     static class IssueTypeSize {
@@ -77,5 +90,4 @@ public class IssueTypeSizesProvider {
             return size;
         }
     }
-
 }
