@@ -1,0 +1,57 @@
+<section class="tb-page-content">
+
+    <h2 id="tb-page-title" class="obj-title-large title">
+        Teams
+    </h2>
+
+    <div class="content">
+
+        <obj-label-field label="Filter teams">
+            <obj-search name="teams-filter-by-name"
+                        placeholder="Filter teams"
+                        [(ngModel)]="filterTeamsByFields"
+                        ></obj-search>
+        </obj-label-field>
+
+        <table id="tb-teams-list" class="obj-data-table inline-input" *ngIf="teams.length > 0">
+            <thead>
+                <tr>
+                    <th>Team</th>
+                    <th>Manager</th>
+                    <th>Members</th>
+                    <th class="actions-col col-right"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="editable-row"
+                    [attr.data-team-name]="team.name"
+                    *ngFor="let team of teams | objFilter: { keys: ['name', 'manager', 'members'], searchFor: filterTeamsByFields }"
+                    [routerLink]="team.name">
+                    <td>
+                        {{ team.name }}
+                    </td>
+                    <td>
+                        {{ team.manager }}
+                    </td>
+                    <td>
+                        <span class="ellipsis">
+                            {{ team.members.join(', ') }}
+                        </span>
+                    </td>
+                    <td class="col-right">
+                        <button class="edit-button primary" obj-icon-button [routerLink]="team.name">
+                            <obj-icon iconName="edit" class="small"></obj-icon>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="obj-empty" *ngIf="teams.length === 0">No teams registered.</div>
+
+        <div class="footer">
+            <button type="button" id="tb-teams-back-to-home" obj-button (click)="backToHome()">Back to home</button>
+        </div>
+
+    </div>
+
+</section>

@@ -45,6 +45,10 @@
                 <config-projects projects-configurations="[[projectsConfigurations]]"></config-projects>
             </template>
 
+            <template is="dom-if" if="[[_isAdmin()]]">
+                <config-teams></config-teams>
+            </template>
+
         </paper-material>
 
     </template>
@@ -76,6 +80,10 @@
                     $.get('/ws/project/config/items', function(data) {
                         self.set('projectsConfigurations', data);
                     });
+                },
+
+                _isAdmin: function () {
+                    return authorizer.isAdmin();
                 }
             });
         })();

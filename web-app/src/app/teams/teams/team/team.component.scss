@@ -1,0 +1,61 @@
+@import "../../../../styles/obj-ds/utils/all";
+
+.tb-page-content {
+    width: 900px;
+    padding: 24px;
+}
+
+.title {
+    margin-bottom: 16px;
+}
+
+.content {
+    border: 1px solid $obj-color-dark-snow;
+    background: $obj-color-white;
+    padding: 24px;
+}
+
+.actions-col {
+    width: 70px;
+}
+
+obj-data-table-top, table, .obj-empty {
+    margin-top: 16px;
+}
+
+.tag-field {
+    display: flex;
+    align-items: center;
+    .tag-field__tag {
+        flex: 0 0 auto;
+        margin-right: 8px;
+    }
+    .tag-field__field {
+        flex: 1;
+    }
+}
+
+.obj-data-table.inline-input {
+    td {
+        height: auto;
+        padding-top: 8px;
+        padding-bottom: 8px;
+
+        obj-error-messages.has-messages {
+            margin-top: 2px;
+        }
+    }
+
+    td > input {
+        width: 100%;
+    }
+}
+
+.footer {
+    padding-top: 16px;
+    text-align: right;
+
+    > * {
+        margin-left: 10px;
+    }
+}

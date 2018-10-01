@@ -1,5 +1,6 @@
 package objective.taskboard.team;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -8,7 +9,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -25,13 +25,35 @@ import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.repository.UserTeamCachedRepository;
 
 public class UserTeamServiceTest {
-    
+
     private UserTeamCachedRepository userTeamRepo = mock(UserTeamCachedRepository.class);
     private TeamCachedRepository teamRepo = mock(TeamCachedRepository.class);
     private TeamFilterConfigurationService teamFilterConfigurationService = mock(TeamFilterConfigurationService.class);
     private LoggedUserDetails loggedInUser = mock(LoggedUserDetails.class);
     private UserTeamService subject = new UserTeamService(userTeamRepo, teamRepo, teamFilterConfigurationService, loggedInUser);
-    
+
+    @Test
+    public void getTeamsThatUserCanAdmin_ifUserIsAdmin_shouldReturnAllTeams() {
+        when(loggedInUser.isAdmin()).thenReturn(true);
+
+        when(teamRepo.getCache()).thenReturn(asList(
+                new Team("Extra" , "sue", "sue", emptyList()),
+                new Team("Super", "joe", "joe", emptyList())));
+
+        assertTeams("Extra, Super", subject.getTeamsThatUserCanAdmin());
+    }
+
+    @Test
+    public void getTeamsThatUserCanAdmin_ifUserIsNotAdmin_shouldReturnEmptyList() {
+        when(loggedInUser.isAdmin()).thenReturn(false);
+
+        when(teamRepo.getCache()).thenReturn(asList(
+                new Team("Extra" , "sue", "sue", emptyList()),
+                new Team("Super", "joe", "joe", emptyList())));
+
+        assertTeams("", subject.getTeamsThatUserCanAdmin());
+    }
+
     @Test
     public void getTeamsVisibleToLoggedInUser_regularUser_shouldReturnTeamsWhereUserIsMemberOf() {
         withTeams()
@@ -116,7 +138,7 @@ public class UserTeamServiceTest {
 
         public DSLBuilder userIsMemberOf(String ...teams) {
             when(userTeamRepo.findByUserName("mary")).thenReturn(
-                    streamOf(Arrays.asList(teams))
+                    streamOf(asList(teams))
                         .map(teamName -> new UserTeam("mary", teamName))
                         .collect(toList()));
 

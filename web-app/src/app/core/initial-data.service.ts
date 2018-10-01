@@ -39,4 +39,5 @@ export class LoggedInUserDto {
     username: string;
     name: string;
     avatarUrl: string;
+    isAdmin: boolean;
 }
