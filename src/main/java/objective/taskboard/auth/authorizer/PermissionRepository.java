@@ -42,22 +42,33 @@ class PermissionRepository {
     private void generatePermissions() {
         TaskboardAdministrationPermission taskboardPermission = new TaskboardAdministrationPermission(TASKBOARD_ADMINISTRATION);
 
-        permissionsMap.put(TASKBOARD_ADMINISTRATION,           taskboardPermission);
+        permissionsMap.put(TASKBOARD_ADMINISTRATION, taskboardPermission);
 
-        permissionsMap.put(USER_VISIBILITY,                    new PerUserVisibilityOfUserPermission(USER_VISIBILITY, taskboardPermission, userTeamService));
+        permissionsMap.put(USER_VISIBILITY,
+                new PerUserVisibilityOfUserPermission(USER_VISIBILITY, taskboardPermission, userTeamService));
 
-        permissionsMap.put(PROJECT_ADMINISTRATION,             new PerProjectPermission(PROJECT_ADMINISTRATION,        PROJECT_ADMINISTRATORS));
-        permissionsMap.put(PROJECT_DASHBOARD_VIEW,             new AnyProjectPermission(PROJECT_DASHBOARD_VIEW,    PROJECT_ADMINISTRATORS, PROJECT_DEVELOPERS, PROJECT_KPI));
-        permissionsMap.put(PROJECT_DASHBOARD_TACTICAL,         new PerProjectPermission(PROJECT_DASHBOARD_TACTICAL,    PROJECT_ADMINISTRATORS, PROJECT_DEVELOPERS, PROJECT_KPI));
-        permissionsMap.put(PROJECT_DASHBOARD_OPERATIONAL,      new PerProjectPermission(PROJECT_DASHBOARD_OPERATIONAL, PROJECT_ADMINISTRATORS, PROJECT_DEVELOPERS));
+        permissionsMap.put(PROJECT_ADMINISTRATION,
+                new PerProjectPermission(PROJECT_ADMINISTRATION, PROJECT_ADMINISTRATORS));
 
-        permissionsMap.put(FOLLOWUP_TEMPLATE_EDIT,             new AnyProjectPermission(FOLLOWUP_TEMPLATE_EDIT,             PROJECT_ADMINISTRATORS));
+        permissionsMap.put(PROJECT_DASHBOARD_VIEW,
+                new AnyProjectPermission(PROJECT_DASHBOARD_VIEW, PROJECT_ADMINISTRATORS, PROJECT_DEVELOPERS, PROJECT_KPI));
 
-        permissionsMap.put(SIZING_IMPORT_VIEW,                 new AnyProjectPermission(SIZING_IMPORT_VIEW,                 PROJECT_ADMINISTRATORS));
+        permissionsMap.put(PROJECT_DASHBOARD_TACTICAL,
+                new PerProjectPermission(PROJECT_DASHBOARD_TACTICAL, PROJECT_ADMINISTRATORS, PROJECT_DEVELOPERS, PROJECT_KPI));
+
+        permissionsMap.put(PROJECT_DASHBOARD_OPERATIONAL,
+                new PerProjectPermission(PROJECT_DASHBOARD_OPERATIONAL,   PROJECT_ADMINISTRATORS, PROJECT_DEVELOPERS));
+
+        permissionsMap.put(FOLLOWUP_TEMPLATE_EDIT,
+                new AnyProjectPermission(FOLLOWUP_TEMPLATE_EDIT, PROJECT_ADMINISTRATORS));
+
+        permissionsMap.put(SIZING_IMPORT_VIEW,
+                new AnyProjectPermission(SIZING_IMPORT_VIEW, PROJECT_ADMINISTRATORS));
+
     }
 
     public List<Permission> findAll() {
-        return new ArrayList<Permission>(permissionsMap.values());
+        return new ArrayList<>(permissionsMap.values());
     }
 
     public Permission findByName(String name) {

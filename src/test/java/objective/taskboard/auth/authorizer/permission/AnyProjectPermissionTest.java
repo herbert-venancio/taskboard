@@ -1,7 +1,7 @@
 package objective.taskboard.auth.authorizer.permission;
 
+import static objective.taskboard.auth.LoggedUserDetailsMockBuilder.loggedUser;
 import static objective.taskboard.auth.authorizer.permission.PermissionTestUtils.role;
-import static objective.taskboard.auth.authorizer.permission.PermissionTestUtils.userWithRoles;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -32,27 +32,23 @@ public class AnyProjectPermissionTest implements PermissionTest {
 
         Permission subject = new AnyProjectPermission("PERMISSION_NAME", "role1", "role2");
 
-        LoggedUserDetails userDetails = userWithRoles(
-                role("role1", "PROJ1"),
-                role("role3", "PROJ1")
-                );
-        subject.accepts(userDetails, new PermissionContext("target"));
+        subject.accepts(loggedUser().build(), new PermissionContext("target"));
     }
 
     @Test
     public void testAccepts() {
         Permission subject = new AnyProjectPermission("PERMISSION_NAME", "role1", "role2");
 
-        LoggedUserDetails userWithPermission = userWithRoles(
+        LoggedUserDetails userWithPermission = loggedUser().withRoles(
                 role("role1", "PROJ1"),
                 role("role3", "PROJ1")
-                );
+                ).build();
         assertTrue(subject.accepts(userWithPermission, PermissionContext.empty()));
 
-        LoggedUserDetails userWithoutPermission = userWithRoles(
+        LoggedUserDetails userWithoutPermission = loggedUser().withRoles(
                 role("role3", "PROJ1"),
                 role("role4", "PROJ1")
-                );
+                ).build();
         assertFalse(subject.accepts(userWithoutPermission, PermissionContext.empty()));
     }
 
