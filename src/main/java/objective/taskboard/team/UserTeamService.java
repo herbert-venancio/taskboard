@@ -61,7 +61,8 @@ public class UserTeamService {
 
         List<Team> teamsInProjectsVisibleToUser = teamFilterConfigurationService.getDefaultTeamsInProjectsVisibleToUser();
         userTeams.addAll(teamsInProjectsVisibleToUser);
-
+        userTeams.addAll(teamFilterConfigurationService.getGloballyVisibleTeams());
+        
         return userTeams;
     }
 

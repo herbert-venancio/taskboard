@@ -24,6 +24,7 @@ package objective.taskboard.repository;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
@@ -67,6 +68,10 @@ public class TeamCachedRepository {
                 return Optional.of(team);
         }
         return Optional.empty();
+    }
+    
+    public List<Team> findGloballyVisibles() {
+        return cache.stream().filter(t->t.isGloballyVisible()).collect(Collectors.toList());
     }
 
     public Boolean exists(String teamName) {

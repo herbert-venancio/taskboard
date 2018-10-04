@@ -68,6 +68,8 @@ public class Team implements Serializable {
     private String jiraEquipe;
 
     private String jiraSubequipe;
+    
+    private boolean globallyVisible;
 
     @OneToMany(fetch=FetchType.EAGER, cascade=CascadeType.ALL, orphanRemoval=true)
     @JoinColumn(name="team", referencedColumnName="name")
@@ -92,12 +94,16 @@ public class Team implements Serializable {
         this.jiraSubequipe = jiraSubequipe;
         this.members = members;
     }
-
     public Team(String name, String manager, String coach, List<String> members) {
+        this(name, manager, coach, members, false);
+    }
+
+    public Team(String name, String manager, String coach, List<String> members, boolean globallyVisible) {
         this.name = name;
         this.manager = manager;
         this.coach = coach;
         this.members = stringListToUserTeamList(members);
+        this.globallyVisible = globallyVisible;
     }
 
     private List<UserTeam> stringListToUserTeamList(List<String> members) {
@@ -194,6 +200,14 @@ public class Team implements Serializable {
 
     public void setMembers(List<UserTeam> members) {
         this.members = members;
+    }
+    
+    public boolean isGloballyVisible() {
+        return globallyVisible;
+    }
+    
+    public void setGloballyVisible(boolean globallyVisible) {
+        this.globallyVisible = globallyVisible;
     }
 
     @Override
