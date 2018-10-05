@@ -1,0 +1,42 @@
+@import "../../../styles/obj-ds/utils/all";
+@import "../../../styles/obj-ds/misc";
+
+.tb-page-content {
+    width: 900px;
+    padding: 24px;
+}
+
+.title {
+    margin-bottom: 16px;
+}
+
+.content {
+    border: 1px solid $obj-color-dark-snow;
+    background: $obj-color-white;
+    padding: 24px;
+}
+
+table, .obj-empty {
+    margin-top: 16px;
+}
+
+.editable-row {
+    cursor: pointer;
+}
+
+.actions-col {
+    width: 70px;
+}
+
+.ellipsis {
+    @extend %_obj_text_ellipsis;
+}
+
+.footer {
+    padding-top: 16px;
+    text-align: right;
+
+    > * {
+        margin-left: 10px;
+    }
+}

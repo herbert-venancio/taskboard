@@ -1,33 +1,18 @@
 package objective.taskboard.it;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
+import objective.taskboard.testUtils.LoginUtils;
+
 public class LoginIT extends AbstractUIWithCoverageIntegrationTest {
-    
+
     private static final String INCORRECT_USER_OR_PASSWORD = "Incorrect user or password";
     private static final String THE_PASSWORD_CAN_T_BE_EMPTY = "The password can't be empty";
-    private LoginPage loginPage;
-    private MainPage mainPage;
-    
-    @Before
-    public void beforeTest() {
-        loginPage = LoginPage.to(webDriver);
-        mainPage = MainPage.produce(webDriver);
-    }
-    
-    @After
-    public void afterTest() {
-        loginPage = null;
-        mainPage = null;
-    }
-    
-    @Test
-    public void givenAdminUser_whenLogin_thenHasAdminAccess() {
-        loginPage.login("foo", "bar");
 
-        mainPage.waitUserLabelToBe("Foo");
+    @Test
+    public void givenProjectAdministratorUser_whenLogin_thenProjectAdministratorAccess() {
+        MainPage mainPage = LoginUtils.doLoginAsProjectAdministrator(webDriver);
+
         mainPage.assertFollowupButtonIsVisible()
             .assertDashboardButtonIsVisible()
             .assertSizingImportButtonIsVisible();
@@ -35,9 +20,8 @@ public class LoginIT extends AbstractUIWithCoverageIntegrationTest {
 
     @Test
     public void givenDeveloperUser_whenLogin_thenHasDeveloperAccess() {
-        loginPage.login("thomas.developer", "thomas.developer");
+        MainPage mainPage = LoginUtils.doLoginAsDeveloper(webDriver);
 
-        mainPage.waitUserLabelToBe("Thomas.developer");
         mainPage.assertFollowupButtonIsNotVisible()
             .assertDashboardButtonIsVisible()
             .assertSizingImportButtonIsNotVisible();
@@ -45,24 +29,23 @@ public class LoginIT extends AbstractUIWithCoverageIntegrationTest {
 
     @Test
     public void givenCustomerUser_whenLogin_thenHasCustomerAccess() {
-        loginPage.login("albert.customer", "albert.customer");
+        MainPage mainPage = LoginUtils.doLoginAsCustomer(webDriver);
 
-        mainPage.waitUserLabelToBe("Albert.customer");
         mainPage.assertFollowupButtonIsNotVisible()
             .assertDashboardButtonIsNotVisible()
             .assertSizingImportButtonIsNotVisible();
     }
-    
+
     @Test
     public void givenIncorrectUser_whenLogin_thenHasIncorrectUserOrPasswordMessage() {
-        loginPage
+        LoginPage.to(webDriver)
             .login("unknownuser", "xxxxxxxx")
             .assertValidationMessage(INCORRECT_USER_OR_PASSWORD);
     }
-    
+
     @Test
     public void givenNoPassword_whenLogin_thenHasPasswordCantBeEmpty() {
-        loginPage
+        LoginPage.to(webDriver)
             .login("foo", "")
             .assertValidationMessage(THE_PASSWORD_CAN_T_BE_EMPTY);
     }

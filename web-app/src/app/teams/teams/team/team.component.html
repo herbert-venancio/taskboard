@@ -1,0 +1,115 @@
+<section class="tb-page-content">
+
+    <h2 id="tb-page-title" class="obj-title-large title">
+        <span routerLink="..">Teams</span>
+        <span class="separator"> &gt; </span>
+        {{ teamName }}
+    </h2>
+
+    <div class="content">
+        <form #teamForm="ngForm" (ngSubmit)="save()" *ngIf="team">
+
+            <obj-header-content
+                title="Manager"
+                ></obj-header-content>
+
+            <ng-select name="manager"
+                       [items]="managerAsyncSearch.items$ | async"
+                       [(ngModel)]="team.manager"
+                       [typeahead]="managerAsyncSearch.itemsInput$"
+                       [loading]="managerAsyncSearch.isLoading"
+                       [clearSearchOnAdd]="true"
+                       placeholder="Search member by name"
+                       tbNotEmpty
+                       #managerField="objSelectField"
+                       ></ng-select>
+            <obj-error-messages [for]="managerField">
+                <obj-error-message error="notEmpty">Manager is required.</obj-error-message>
+            </obj-error-messages>
+
+            <obj-data-table-top title="Members">
+                <button id="tb-team-add-member" type="button" obj-flat-button (click)="addMember()">
+                    <obj-icon iconName="plus"></obj-icon> Add member
+                </button>
+            </obj-data-table-top>
+
+            <obj-label-field label="Filter members by name">
+                <obj-search id="tb-team-filter-members"
+                            name="teams-filter-by-member"
+                            placeholder="Filter member by name"
+                            [(ngModel)]="filterMembersByName"
+                ></obj-search>
+            </obj-label-field>
+
+            <table id="tb-team-members" class="obj-data-table inline-input" *ngIf="team.members.length > 0 || newMembers.length > 0">
+                <thead>
+                    <tr>
+                        <th>Member</th>
+                        <th class="actions-col col-right"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let newMember of newMembers | objFilter: { key: 'dto', searchFor: filterMembersByName }; let i = index"
+                        ngModelGroup="new-member-{{ newMember.groupId }}"
+                        >
+                        <td [attr.data-member]="newMember.dto ? newMember.dto : ''">
+                            <div class="tag-field">
+                                <obj-tag class="tag-field__tag" text="New" type="row-added"></obj-tag>
+                                <div class="tag-field__field">
+                                    <ng-container *ngIf="!newMember.dto; else hasMemberSelected">
+                                        <ng-select name="new-member"
+                                                   [(ngModel)]="newMember.dto"
+                                                   [items]="newMember.memberAsyncSearch.items$ | async"
+                                                   [typeahead]="newMember.memberAsyncSearch.itemsInput$"
+                                                   [loading]="newMember.memberAsyncSearch.isLoading"
+                                                   [clearSearchOnAdd]="true"
+                                                   placeholder="Search members by name"
+                                                   tbNotEmpty
+                                                   #newMemberField="objSelectField"
+                                                   ></ng-select>
+                                        <obj-error-messages [for]="newMemberField">
+                                            <obj-error-message error="notEmpty">Member is required.</obj-error-message>
+                                        </obj-error-messages>
+                                    </ng-container>
+                                    <ng-template #hasMemberSelected>
+                                        <input type="text"
+                                               name="new-member"
+                                               objTextField
+                                               [(ngModel)]="newMember.dto"
+                                               readonly />
+                                    </ng-template>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="actions-col col-right">
+                            <button type="button" obj-flat-button class="remove-button" (click)="removeNewMember(newMember)">Remove</button>
+                        </td>
+                    </tr>
+                    <tr *ngFor="let member of team.members | objFilter: filterMembersByName; let i = index"
+                        ngModelGroup="member-{{ member }}">
+                        <td [attr.data-member]="member ? member : ''">
+                            <input type="text"
+                                   name="member"
+                                   objTextField
+                                   [(ngModel)]="team.members[i]"
+                                   readonly />
+                        </td>
+                        <td class="col-right">
+                            <button type="button" obj-flat-button class="remove-button" (click)="removeMember(member)">Remove</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="obj-empty" *ngIf="team.members.length === 0 && newMembers.length === 0">No members registered.</div>
+
+            <div class="footer">
+                <button type="button" id="tb-team-back-to-teams" obj-button routerLink="..">Back to teams</button>
+                <button type="submit" id="tb-team-save" obj-button class="primary" [disabled]="teamForm.pristine">Save</button>
+            </div>
+
+        </form>
+    </div>
+
+</section>
+
+<obj-snackbar id="tb-team-snackbar" [control]="snackbar"></obj-snackbar>

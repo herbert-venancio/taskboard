@@ -1,0 +1,52 @@
+<dom-module id="config-teams">
+
+    <template>
+
+        <style>
+            paper-toolbar {
+                height: 40px;
+            }
+
+            paper-toolbar ::shadow #topBar {
+                height: 40px;
+            }
+
+            .config-item {
+                display: flex;
+                align-items: center;
+            }
+
+            .config-icon {
+                flex: 0 0 auto;
+            }
+
+            .config-title {
+                flex: 1;
+            }
+        </style>
+
+        <paper-material>
+            <paper-toolbar on-tap="openTeamsConfiguration">
+                <paper-material class="config-item flex layout horizontal" elevation=0>
+                    <iron-icon id="toggleIcon" class="config-icon icon-small" icon="chevron-right"></iron-icon>
+                    <paper-material class="config-title" elevation=0>Teams Configuration</paper-material>
+                </paper-material>
+            </paper-toolbar>
+        </paper-material>
+
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'config-teams',
+
+                openTeamsConfiguration: () => {
+                    window.location = '/app/teams';
+                }
+
+            });
+        })();
+    </script>
+
+</dom-module>

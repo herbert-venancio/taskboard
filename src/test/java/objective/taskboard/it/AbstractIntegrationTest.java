@@ -90,6 +90,10 @@ public abstract class AbstractIntegrationTest {
         return "http://localhost:8900";
     }
 
+    public static String getAppBaseUrl() {
+        return getSiteBase() + "/app/";
+    }
+
     protected void resetIssueBuffer() {
         RequestBuilder.url(getSiteBase()+"/test/resetbuffer").credentials("foo", "bar").get();
     }

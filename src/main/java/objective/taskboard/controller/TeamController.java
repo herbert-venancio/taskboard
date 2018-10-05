@@ -1,5 +1,3 @@
-package objective.taskboard.controller;
-
 /*-
  * [LICENSE]
  * Taskboard
@@ -21,86 +19,52 @@ package objective.taskboard.controller;
  * [/LICENSE]
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+package objective.taskboard.controller;
 
-import java.util.ArrayList;
-import java.util.Iterator;
+import static org.springframework.http.HttpStatus.GONE;
+
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import objective.taskboard.data.Team;
-import objective.taskboard.data.UserTeam;
-import objective.taskboard.repository.TeamCachedRepository;
-
+@Deprecated
 @RestController
 @RequestMapping("/api/teams")
 public class TeamController {
-    
-    @Autowired
-    private TeamCachedRepository teamRepo;
-    
-    @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<List<TeamControllerData>> getTeams() {
-        List<Team> cache = teamRepo.getCache();
-        ArrayList<TeamControllerData> availableTeams = new ArrayList<>();
-        for (Team team : cache) {
-            availableTeams.add(new TeamControllerData(team));
-        }
-        
-        return new ResponseEntity<>(availableTeams, HttpStatus.OK);
-    }
-    
-    @RequestMapping(path="{teamName}", method = RequestMethod.GET)
-    public ResponseEntity<TeamControllerData> getTeamMembers(@PathVariable("teamName") String teamName) {
-        Team team = teamRepo.findByName(teamName);
-        if (team == null) 
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        
-        TeamControllerData teamController = new TeamControllerData(team);
-        
-        return new ResponseEntity<>(teamController, HttpStatus.OK);
-    }
-    
-    @RequestMapping(method = RequestMethod.PATCH, consumes="application/json")
-    public ResponseEntity<Void> updateTeamMembers(@RequestBody TeamControllerData [] data) {
-        for (TeamControllerData teamData : data)
-            updateTeamMembers(teamData.teamName, teamData);
 
-        return ResponseEntity.ok().build();
+    @RequestMapping(method = RequestMethod.GET)
+    public ResponseEntity<Void> getTeams() {
+        throw new TeamApiDiscontinuedException();
     }
-    
+
+    @RequestMapping(path="{teamName}", method = RequestMethod.GET)
+    public ResponseEntity<String> getTeamMembers(@PathVariable("teamName") String teamName) {
+        throw new TeamApiDiscontinuedException();
+    }
+
+    @RequestMapping(method = RequestMethod.PATCH, consumes="application/json")
+    public ResponseEntity<String> updateTeamMembers(@RequestBody List<TeamControllerData> data) {
+        throw new TeamApiDiscontinuedException();
+    }
+
     @RequestMapping(path="{teamName}", method = RequestMethod.PATCH, consumes="application/json")
-    public ResponseEntity<Void> updateTeamMembers(@PathVariable("teamName") String teamName, @RequestBody TeamControllerData data) {
-        Team team = teamRepo.findByName(teamName);
-        if (team == null) 
-            return ResponseEntity.notFound().build();
-        
-        if (data.manager != null)
-            team.setManager(data.manager);
-        
-        Iterator<UserTeam> it = team.getMembers().iterator();
-        while(it.hasNext()) {
-            UserTeam userInTeam = it.next();
-            if (!data.teamMembers.contains(userInTeam.getUserName()))
-                it.remove();
-            else
-                data.teamMembers.remove(userInTeam.getUserName());
-        }
-        for (String memberName : data.teamMembers)
-            if(isNotEmpty(memberName))
-                team.getMembers().add(new UserTeam(memberName, teamName));
-        
-        teamRepo.save(team);
-        
-        return ResponseEntity.ok().build();
+    public ResponseEntity<String> updateTeamMembers(@PathVariable("teamName") String teamName, @RequestBody TeamControllerData data) {
+        throw new TeamApiDiscontinuedException();
     }
-            
+
+    @ResponseStatus(value = GONE, reason="Team API was discontinued.")
+    public static class TeamApiDiscontinuedException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+        public TeamApiDiscontinuedException() {
+            super();
+        }
+    }
+
+
 }

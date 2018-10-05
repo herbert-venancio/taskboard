@@ -19,4 +19,8 @@ public class ButtonComponent extends AbstractComponent {
         return component().getAttribute("disabled") != null;
     }
 
+    public void waitDisabledBe(boolean disabled) {
+        waitAssertEquals(disabled, () -> isDisabled());
+    }
+
 }

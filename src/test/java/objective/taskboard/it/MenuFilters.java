@@ -31,6 +31,9 @@ import org.openqa.selenium.support.FindBy;
 import objective.taskboard.testUtils.ProjectInfo;
 
 public class MenuFilters extends AbstractUiFragment {
+
+    private static final String CONFIG_TEAMS_SELECTOR = "config-teams";
+
     @FindBy(tagName = "card-field-filters")
     private WebElement cardFieldFilters;
 
@@ -49,6 +52,9 @@ public class MenuFilters extends AbstractUiFragment {
     @FindBy(css = "config-table")
     private WebElement boardFeatures;
 
+    @FindBy(css = CONFIG_TEAMS_SELECTOR)
+    private WebElement teamsConfigurationButton;
+
     public MenuFilters(WebDriver webDriver) {
         super(webDriver);
     }
@@ -61,6 +67,16 @@ public class MenuFilters extends AbstractUiFragment {
     public MenuFilters openProjectsConfiguration() {
         waitForClick(projectsConfigurationButton);
         return this;
+    }
+
+    public MenuFilters assertTeamsConfigurationExistenceBe(boolean exists) {
+        waitElementExistenceAndVisibilityIs(exists, By.cssSelector(CONFIG_TEAMS_SELECTOR));
+        return this;
+    }
+
+    public TeamsPage openTeamsConfiguration() {
+        waitForClick(teamsConfigurationButton);
+        return new TeamsPage(webDriver);
     }
 
     public MenuFilters clickCheckAllFilter(String filterName) {

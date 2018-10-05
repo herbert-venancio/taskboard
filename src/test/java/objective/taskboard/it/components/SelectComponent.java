@@ -20,11 +20,16 @@ public class SelectComponent extends AbstractComponent {
     }
 
     public void select(String optionName) {
+        select(optionName, false);
+    }
+
+    public void select(String optionName, boolean elementRemovedAfterSelection) {
         waitForClick(selectContainerEl());
         waitDropdownIsOpened();
         autocompleteValue(optionName);
         waitForClick(optionEl(optionName));
-        waitValueIsSelected(optionName);
+        if (!elementRemovedAfterSelection)
+            waitValueIsSelected(optionName);
     }
 
     private void autocompleteValue(String text) {
@@ -58,6 +63,11 @@ public class SelectComponent extends AbstractComponent {
         return getChildElementWhenExists(component(), cssSelector(".ng-select-container"));
     }
 
+
+    private WebElement selectedValueEl() {
+        return getChildElementWhenExists(selectContainerEl(), selectedOptionLabel);
+    }
+
     private WebElement inputEl() {
         return getChildElementWhenExists(component(), cssSelector(".ng-input input"));
     }
@@ -66,15 +76,16 @@ public class SelectComponent extends AbstractComponent {
         return getChildElementWhenExists(component(), cssSelector("ng-dropdown-panel"));
     }
 
+    private List<WebElement> optionsEl() {
+        return getChildrenElementsWhenTheyExists(component(), cssSelector(".ng-option-label"));
+    }
+
     private WebElement optionEl(String optionName) {
-        List<WebElement> options = component().findElements(cssSelector(".ng-option-label"));
-        return options.stream()
+        waitTrue(() -> optionsEl().stream().anyMatch(option -> option.getText().equals(optionName)));
+        return optionsEl().stream()
             .filter(option -> option.getText().equals(optionName))
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("Option \""+ optionName + "\" not found."));
     }
 
-    private WebElement selectedValueEl() {
-        return getChildElementWhenExists(selectContainerEl(), selectedOptionLabel);
-    }
 }

@@ -5,8 +5,9 @@ import {APP_BASE_HREF} from '@angular/common';
 
 import {AppRoutingModule} from './app.routing.module';
 import {AppComponent} from './app.component';
-import {ProjectModule} from './project/project.module';
 import {CoreModule} from './core/core.module';
+import {ProjectModule} from './project/project.module';
+import {TeamsModule} from "./teams/teams.module";
 
 @NgModule({
     imports: [
@@ -15,6 +16,7 @@ import {CoreModule} from './core/core.module';
         CoreModule,
 
         ProjectModule,
+        TeamsModule,
 
         AppRoutingModule // Order matters and this should be the last import.
     ],

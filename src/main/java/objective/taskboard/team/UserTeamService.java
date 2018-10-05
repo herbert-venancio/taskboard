@@ -52,6 +52,12 @@ public class UserTeamService {
         return false;
     }
 
+    public Set<Team> getTeamsThatUserCanAdmin() {
+        if (loggedInUser.isAdmin())
+            return new HashSet<>(teamRepo.getCache());
+        return new HashSet<>();
+    }
+
     public Set<Team> getTeamsVisibleToLoggedInUser() {
         if (loggedInUser.isAdmin())
             return new HashSet<>(teamRepo.getCache());
@@ -75,6 +81,10 @@ public class UserTeamService {
     public Team getTeamVisibleToLoggedInUserByIdOrCry(Long id) {
         return getTeamVisibleToLoggedInUserById(id)
                 .orElseThrow(() -> new IllegalStateException("Team \""+ id +"\" not found to logged in user."));
+    }
+
+    public Team saveTeam(Team team) {
+        return teamRepo.save(team);
     }
 
 }

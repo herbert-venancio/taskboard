@@ -1,0 +1,17 @@
+<obj-icon class="icon medium"
+          iconName="search"
+          ></obj-icon>
+
+<input type="text"
+       class="text"
+       #searchInput
+       [value]="searchText ? searchText : ''"
+       [placeholder]="placeholder"
+       (input)="writeValue(searchInput.value)"
+       >
+
+<obj-icon *ngIf="showClear(searchText)"
+          class="clear small"
+          iconName="clear"
+          (click)="clear($event)"
+          ></obj-icon>

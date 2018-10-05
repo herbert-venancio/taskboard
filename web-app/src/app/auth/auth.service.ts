@@ -18,7 +18,11 @@ export class AuthService {
         private legacyAppRouter: LegacyAppRouter) {
 
         this.loggedInUser = this.initialDataService.getData()
-            .pipe(map(data => new LoggedInUser(data.loggedInUser.username, data.loggedInUser.name, data.loggedInUser.avatarUrl)));
+            .pipe(
+                map(data =>
+                    new LoggedInUser(data.loggedInUser.username, data.loggedInUser.name, data.loggedInUser.avatarUrl, data.loggedInUser.isAdmin)
+                )
+            );
     }
 
     getLoggedInUser(): Observable<LoggedInUser> {
