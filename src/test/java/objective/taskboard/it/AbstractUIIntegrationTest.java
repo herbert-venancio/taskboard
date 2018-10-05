@@ -22,6 +22,7 @@ package objective.taskboard.it;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Locale;
 
 import org.junit.After;
 import org.junit.Before;
@@ -40,14 +41,17 @@ import com.safaribooks.junitattachments.CaptureFile;
 import com.safaribooks.junitattachments.RecordAttachmentRule;
 
 public abstract class AbstractUIIntegrationTest extends AbstractIntegrationTest {
+
     protected WebDriver webDriver;
 
     @Before
     public final void setupUIIntegrationTest() {
-        if (System.getProperty("webdriver.gecko.driver") == null)
-            System.setProperty("webdriver.gecko.driver", "drivers/linux/marionette/64bit/geckodriver");
+        String driverPath = "drivers/"+ getOs() +"/marionette/64bit/geckodriver";
 
-        if (!new File("drivers/linux/marionette/64bit/geckodriver").exists()) 
+        if (System.getProperty("webdriver.gecko.driver") == null)
+            System.setProperty("webdriver.gecko.driver", driverPath);
+
+        if (!new File(driverPath).exists()) 
             throw new IllegalStateException("To run integration tests, you must run 'mvn clean install' at least once to download gecko driver");
 
         FirefoxOptions options = new FirefoxOptions();
@@ -60,7 +64,16 @@ public abstract class AbstractUIIntegrationTest extends AbstractIntegrationTest 
         webDriver = new FirefoxDriver(options);
         webDriver.manage().window().setSize(new Dimension(1280,1080));
     }
-    
+
+    private String getOs() {
+        String osName = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
+        if (osName.startsWith("mac"))
+            return "osx";
+        else if (osName.startsWith("win"))
+            return "windows";
+        return "linux";
+    }
+
     @CaptureFile(extension = "html")
     public String capturedDom = null;
 
@@ -73,7 +86,7 @@ public abstract class AbstractUIIntegrationTest extends AbstractIntegrationTest 
         try {
             // capture the dom
             capturedDom = webDriver.getPageSource();
-    
+
             // capture a screenshot
             if (webDriver instanceof TakesScreenshot) {
                 capturePage = ((TakesScreenshot) webDriver)
@@ -81,13 +94,13 @@ public abstract class AbstractUIIntegrationTest extends AbstractIntegrationTest 
             }
 
             ((JavascriptExecutor) webDriver).executeScript("return window.jsErrors");
-    
+
             webDriver.quit();
         }catch (Exception e) {
             e.printStackTrace();
         }
     }
-    
+
     @Rule
     public RecordAttachmentRule recordArtifactRule = new RecordAttachmentRule(this);
 
@@ -105,4 +118,5 @@ public abstract class AbstractUIIntegrationTest extends AbstractIntegrationTest 
         webDriver.switchTo().window(tabs.get(1));
         return tabs;
     }
+
 }
