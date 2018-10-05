@@ -3,48 +3,30 @@ package objective.taskboard.followup.kpi;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
-public class StatusTransition implements StatusTransitionChain{
+public class StatusTransition {
     
-    public final String status;
-    public final ZonedDateTime date;
-    private StatusTransitionChain next;
+    protected final String status;
+    protected final Optional<StatusTransition> next;
 
-    public StatusTransition(String status, ZonedDateTime date, StatusTransitionChain next) {
+    public StatusTransition(String status, Optional<StatusTransition> next) {
         this.status = status;
-        this.date = date;
         this.next = next;
     }
-    
-    @Override
-    public Optional<StatusTransitionChain> givenDate(ZonedDateTime date) {
-        
-        if(next.isWithinDate(date))
-            return next.givenDate(date);
-       
-        if(this.isWithinDate(date))
-            return Optional.of(this);
-        
-       return Optional.empty();
+
+    public Optional<StatusTransition> givenDate(ZonedDateTime date) {
+        return next.map(n-> n.givenDate(date)).orElse(Optional.empty());
     }
 
-    @Override
     public boolean isWithinDate(ZonedDateTime date) {
-        return !this.date.toLocalDate().isAfter(date.toLocalDate());
+        return next.map(n -> n.isWithinDate(date)).orElse(false);
     }
 
-    @Override
     public boolean isStatus(String status) {
         return this.status.equals(status);
     }
 
-    @Override
-    public StatusTransitionChain find(String status) {
-        return this.status.equals(status) ? this : next.find(status);
+    public Optional<DatedStatusTransition> findWithTransition(String status) {
+        return next.map(n -> n.findWithTransition(status)).orElse(Optional.empty());
     }
-    
-    @Override
-    public Optional<ZonedDateTime> getDate() {
-        return Optional.of(date);
-    }
-  
+
 }

@@ -1,41 +1,52 @@
 package objective.taskboard.followup.kpi;
 
+import static objective.taskboard.followup.kpi.StatusTransitionBuilder.DefaultStatus.DOING;
+import static objective.taskboard.followup.kpi.StatusTransitionBuilder.DefaultStatus.DONE;
+import static objective.taskboard.followup.kpi.StatusTransitionBuilder.DefaultStatus.TODO;
 import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+
+import java.util.Optional;
 
 import org.junit.Test;
 
 public class StatusTransitionTest {
     @Test
     public void checkDate_fullTransition() {
-        StatusTransitionChain done = new StatusTransition("Done", parseDateTime("2020-01-03"), new TerminalStateTransition());
-        StatusTransitionChain doing = new StatusTransition("Doing", parseDateTime("2020-01-02"), done);
-        StatusTransitionChain todo = new StatusTransition("To Do", parseDateTime("2020-01-01"), doing);
-
-        assertThat(todo.givenDate(parseDateTime("2020-01-01")).get(), is(todo));
-        assertThat(todo.givenDate(parseDateTime("2020-01-02")).get(), is(doing));
-        assertThat(todo.givenDate(parseDateTime("2020-01-03")).get(), is(done));
-        assertThat(todo.givenDate(parseDateTime("2020-01-04")).get(), is(done));
+        StatusTransitionBuilder builder = new StatusTransitionBuilder()
+                                                .addTransition(TODO, "2020-01-01")
+                                                .addTransition(DOING, "2020-01-02")
+                                                .addTransition(DONE, "2020-01-03");
+        
+        StatusTransition first = builder.buildOrCry();
+                        
+        assertThat(first.givenDate(parseDateTime("2020-01-01")).get(), is(builder.getTransition(TODO)));
+        assertThat(first.givenDate(parseDateTime("2020-01-02")).get(), is(builder.getTransition(DOING)));
+        assertThat(first.givenDate(parseDateTime("2020-01-03")).get(), is(builder.getTransition(DONE)));
+        assertThat(first.givenDate(parseDateTime("2020-01-04")).get(), is(builder.getTransition(DONE)));
     }
     
     @Test
     public void checkDate_withoutIntermediateTransition() {
-        StatusTransitionChain done = new StatusTransition("Done", parseDateTime("2020-01-03"), new TerminalStateTransition());
-        StatusTransitionChain doing = new NoDateStatusTransition("Doing", done);
-        StatusTransitionChain todo = new StatusTransition("To Do", parseDateTime("2020-01-01"), doing);
+        
+        StatusTransitionBuilder builder = new StatusTransitionBuilder()
+                .addTransition(TODO, "2020-01-01")
+                .addTransition(DOING)
+                .addTransition(DONE, "2020-01-03");
 
-        assertThat(todo.givenDate(parseDateTime("2020-01-01")).get(), is(todo));
-        assertThat(todo.givenDate(parseDateTime("2020-01-02")).get(), is(todo));
-        assertThat(todo.givenDate(parseDateTime("2020-01-03")).get(), is(done));
-        assertThat(todo.givenDate(parseDateTime("2020-01-04")).get(), is(done));
+        StatusTransition first = builder.buildOrCry();
+
+        assertThat(first.givenDate(parseDateTime("2020-01-01")).get(), is(builder.getTransition(TODO)));
+        assertThat(first.givenDate(parseDateTime("2020-01-02")).get(), is(builder.getTransition(TODO)));
+        assertThat(first.givenDate(parseDateTime("2020-01-03")).get(), is(builder.getTransition(DONE)));
+        assertThat(first.givenDate(parseDateTime("2020-01-04")).get(), is(builder.getTransition(DONE)));
 
     }
     
     @Test
     public void checkDate_openIssue() {
-        StatusTransitionChain statusTransitions = new StatusTransition("To Do", parseDateTime("2020-01-01"),
-                new TerminalStateTransition());
+        StatusTransition statusTransitions = new DatedStatusTransition("To Do", parseDateTime("2020-01-01"),Optional.empty());
 
         assertThat(statusTransitions.givenDate(parseDateTime("2020-01-01")).get(), is(statusTransitions));
         assertThat(statusTransitions.givenDate(parseDateTime("2020-01-02")).get(), is(statusTransitions));
@@ -43,14 +54,18 @@ public class StatusTransitionTest {
     
     @Test
     public void checkDate_futureIssue() {
-        StatusTransitionChain done = new StatusTransition("Done", parseDateTime("2020-01-04"), new TerminalStateTransition());
-        StatusTransitionChain doing = new StatusTransition("Doing", parseDateTime("2020-01-03"), done);
-        StatusTransitionChain todo = new StatusTransition("To Do", parseDateTime("2020-01-02"), doing);
+        
+        StatusTransitionBuilder builder = new StatusTransitionBuilder()
+                .addTransition(TODO, "2020-01-02")
+                .addTransition(DOING,"2020-01-03")
+                .addTransition(DONE, "2020-01-04");
 
-        assertThat(todo.givenDate(parseDateTime("2020-01-01")).isPresent(), is(false) );
-        assertThat(todo.givenDate(parseDateTime("2020-01-02")).get(), is(todo));
-        assertThat(todo.givenDate(parseDateTime("2020-01-03")).get(), is(doing));
-        assertThat(todo.givenDate(parseDateTime("2020-01-04")).get(), is(done));
+        StatusTransition first = builder.buildOrCry();
+
+        assertThat(first.givenDate(parseDateTime("2020-01-01")).isPresent(), is(false) );
+        assertThat(first.givenDate(parseDateTime("2020-01-02")).get(), is(builder.getTransition(TODO)));
+        assertThat(first.givenDate(parseDateTime("2020-01-03")).get(), is(builder.getTransition(DOING)));
+        assertThat(first.givenDate(parseDateTime("2020-01-04")).get(), is(builder.getTransition(DONE)));
     }
 
 }

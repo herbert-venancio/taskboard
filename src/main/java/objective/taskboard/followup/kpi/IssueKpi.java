@@ -1,5 +1,6 @@
 package objective.taskboard.followup.kpi;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -10,12 +11,12 @@ import java.util.stream.Stream;
 public class IssueKpi {
 
     private String pKey;
-    private StatusTransitionChain firstStatus;
+    private Optional<StatusTransition> firstStatus;
     private String issueType;
     private List<IssueKpi> children = new LinkedList<>();
     private KpiLevel level;
 
-    public IssueKpi(String pKey, String issueType, KpiLevel level, StatusTransitionChain firstStatus) {
+    public IssueKpi(String pKey, String issueType, KpiLevel level, Optional<StatusTransition> firstStatus) {
         this.pKey = pKey;
         this.issueType = issueType;
         this.level = level;
@@ -23,27 +24,30 @@ public class IssueKpi {
     }
 
     public boolean isOnStatusOnDay(String status, ZonedDateTime date) {
-        Optional<StatusTransitionChain> issueStatus = firstStatus.givenDate(date);
-        if (!issueStatus.isPresent())
-            return false;
-        return issueStatus.get().isStatus(status);
+        Optional<StatusTransition> issueStatus = firstStatus.map(s -> s.givenDate(date)).orElse(Optional.empty());
+        return issueStatus.map(s -> s.isStatus(status)).orElse(false);
     }
 
     public boolean hasTransitedToAnyStatusOnDay(ZonedDateTime date, String... statuses) {
-        Stream<StatusTransitionChain> all = getStatusesWithTransition(statuses);
-        Optional<ZonedDateTime> earliestTransition = earliestOfStatuses(all);
+        Stream<DatedStatusTransition> all = getStatusesWithTransition(statuses);
+        Optional<LocalDate> earliestTransition = earliestOfStatuses(all);
         
-        return earliestTransition.isPresent() && earliestTransition.get().toLocalDate().equals(date.toLocalDate());
+        return earliestTransition.map(ld -> ld.equals(date.toLocalDate())).orElse(false);
     }
 
-    private Optional<ZonedDateTime> earliestOfStatuses(Stream<StatusTransitionChain> all) {
-        return all.map(s -> s.getDate().get()).min(Comparator.naturalOrder());
+    private Optional<LocalDate> earliestOfStatuses(Stream<DatedStatusTransition> all) {
+        Optional<ZonedDateTime> minimum = all.map(s -> s.getDate()).min(Comparator.naturalOrder());
+        return minimum.map(zd -> Optional.of(zd.toLocalDate())).orElse(Optional.empty());
     }
 
-    private Stream<StatusTransitionChain> getStatusesWithTransition(String... statuses) {
+    private Stream<DatedStatusTransition> getStatusesWithTransition(String... statuses) {
+        if(!firstStatus.isPresent())
+            return Stream.empty();
+        
         return Stream.of(statuses)
-                .map(s -> firstStatus.find(s))
-                .filter(s -> s.getDate().isPresent());
+                .map(s -> firstStatus.get().findWithTransition(s))
+                .filter(s -> s.isPresent())
+                .map(s -> s.get());
     }
 
     public String getIssueType() {

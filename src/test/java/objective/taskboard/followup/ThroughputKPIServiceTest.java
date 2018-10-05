@@ -1,6 +1,9 @@
 package objective.taskboard.followup;
 
 import static objective.taskboard.followup.FollowUpHelper.getDefaultFollowupData;
+import static objective.taskboard.followup.kpi.StatusTransitionBuilder.DefaultStatus.DOING;
+import static objective.taskboard.followup.kpi.StatusTransitionBuilder.DefaultStatus.DONE;
+import static objective.taskboard.followup.kpi.StatusTransitionBuilder.DefaultStatus.TODO;
 import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -58,27 +61,27 @@ public class ThroughputKPIServiceTest {
         when(jiraProperties.getFinalStatuses()).thenReturn(finalStatuses);
         
         IssueKpi demand = new IssueKpiBuilder("I-1","Demand",KpiLevel.DEMAND)
-                .addChain("To Do",parseDateTime("2017-09-25"))
-                .addChain("Doing",parseDateTime("2017-09-26"))
-                .addChain("Done",parseDateTime("2017-09-27"))
+                .addTransition(TODO,"2017-09-25")
+                .addTransition(DOING,"2017-09-26")
+                .addTransition(DONE,"2017-09-27")
                 .build();
         
         IssueKpi os = new IssueKpiBuilder("I-2","OS",KpiLevel.FEATURES)
-                .addChain("To Do",parseDateTime("2017-09-25"))
-                .addChain("Doing",parseDateTime("2017-09-26"))
-                .addChain("Done")
+                .addTransition(TODO,"2017-09-25")
+                .addTransition(DOING,"2017-09-26")
+                .addTransition(DONE)
                 .build();
         
         IssueKpi feature = new IssueKpiBuilder("I-3","Feature",KpiLevel.FEATURES)
-                .addChain("To Do",parseDateTime("2017-09-25"))
-                .addChain("Doing",parseDateTime("2017-09-26"))
-                .addChain("Done")
+                .addTransition(TODO,"2017-09-25")
+                .addTransition(DOING,"2017-09-26")
+                .addTransition(DONE)
                 .build();
         
         IssueKpi subtask = new IssueKpiBuilder("I-4","Sub-task",KpiLevel.SUBTASKS)
-                .addChain("To Do",parseDateTime("2017-09-25"))
-                .addChain("Doing")
-                .addChain("Done")
+                .addTransition(TODO,"2017-09-25")
+                .addTransition(DOING)
+                .addTransition(DONE)
                 .build();
         
         when(issueService.getIssues(Mockito.any()))
