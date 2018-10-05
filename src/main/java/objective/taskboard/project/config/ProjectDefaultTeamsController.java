@@ -3,7 +3,7 @@ package objective.taskboard.project.config;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
-import static objective.taskboard.repository.PermissionRepository.ADMINISTRATIVE;
+import static objective.taskboard.auth.authorizer.Permissions.PROJECT_ADMINISTRATION;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
@@ -55,7 +55,7 @@ public class ProjectDefaultTeamsController {
 
     @GetMapping
     public ResponseEntity<?> getDefaultTeams(@PathVariable("projectKey") String projectKey) {
-        Optional<ProjectFilterConfiguration> projectOpt = projectService.getTaskboardProject(projectKey, ADMINISTRATIVE);
+        Optional<ProjectFilterConfiguration> projectOpt = projectService.getTaskboardProject(projectKey, PROJECT_ADMINISTRATION);
         if (!projectOpt.isPresent())
             return new ResponseEntity<>("Project \""+ projectKey +"\" not found.", NOT_FOUND);
 
@@ -94,7 +94,7 @@ public class ProjectDefaultTeamsController {
     @PutMapping
     @Transactional
     public ResponseEntity<?> updateDefaultTeams(@PathVariable("projectKey") String projectKey, @RequestBody ProjectDefaultTeamsUpdateDto teamsUpdateDto) {
-        Optional<ProjectFilterConfiguration> projectOpt = projectService.getTaskboardProject(projectKey, ADMINISTRATIVE);
+        Optional<ProjectFilterConfiguration> projectOpt = projectService.getTaskboardProject(projectKey, PROJECT_ADMINISTRATION);
         if (!projectOpt.isPresent())
             return new ResponseEntity<>("Project \""+ projectKey +"\" not found.", NOT_FOUND);
 

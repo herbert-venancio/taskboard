@@ -90,7 +90,7 @@
 
                 <div class="sub-header">
                     Select a report type
-                    <template is="dom-if" if="[[isAdminUser]]">
+                    <template is="dom-if" if="[[hasProjectAdministrationViewPermission]]">
                         <span class="add-link" on-tap="_addTemplate" title="Add Report Type">+ Type</span>
                     </template>
                 </div>
@@ -100,7 +100,7 @@
                         <template id="templateList" is="dom-repeat" items="{{templates}}">
                             <paper-radio-button title="[[item.name]]" class="tb-paper-radio-button" value="[[item]]">
                                 <div class="labelRadioButton">[[item.name]]</div>
-                                <template is="dom-if" if="[[isAdminUser]]">
+                                <template is="dom-if" if="[[hasProjectAdministrationViewPermission]]">
                                     <paper-icon-button id="editButton" class="tb-paper-icon-button" title="Edit" icon="taskboard-icons:edit"
                                                        item$="[[item]]" on-tap="_editTemplate"></paper-icon-button>
                                     <paper-icon-button id="deleteButton"class="tb-paper-icon-button"  title="Delete" icon="taskboard-icons:delete"
@@ -185,7 +185,7 @@
                     selectedDate: {
                         type: String
                     },
-                    isAdminUser: {
+                    hasProjectAdministrationViewPermission: {
                         type: Boolean
                     },
                     showLoadingSpinner: {
@@ -223,7 +223,7 @@
                     this.set('disableDateSelect', true)
                     this.set('availableDates', []);
                     this.set('selectedDate', '');
-                    this.set('isAdminUser', authorizer.hasPermissionInAnyProject(authorizer.permissions.ADMINISTRATIVE));
+                    this.set('hasProjectAdministrationViewPermission', authorizer.hasPermission(Permission.PROJECT_ADMINISTRATION_VIEW));
                     this._closeErrorMessage();
                     this._showLoading(true);
                     this.$.ajaxProjects.generateRequest();

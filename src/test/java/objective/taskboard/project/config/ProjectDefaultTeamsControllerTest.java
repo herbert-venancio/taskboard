@@ -5,7 +5,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
-import static objective.taskboard.repository.PermissionRepository.ADMINISTRATIVE;
+import static objective.taskboard.auth.authorizer.Permissions.PROJECT_ADMINISTRATION;
 import static org.assertj.core.util.Lists.emptyList;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -431,8 +431,8 @@ public class ProjectDefaultTeamsControllerTest {
     }
 
     private void setupProjectService() {
-        when(projectService.getTaskboardProject(any(), eq(ADMINISTRATIVE))).thenReturn(Optional.ofNullable(INEXISTENT_PROJECT));
-        when(projectService.getTaskboardProject(PROJECT_KEY, ADMINISTRATIVE)).thenReturn(Optional.ofNullable(PROJECT_MOCK));
+        when(projectService.getTaskboardProject(any(), eq(PROJECT_ADMINISTRATION))).thenReturn(Optional.ofNullable(INEXISTENT_PROJECT));
+        when(projectService.getTaskboardProject(PROJECT_KEY, PROJECT_ADMINISTRATION)).thenReturn(Optional.ofNullable(PROJECT_MOCK));
     }
 
     private void setupMetaDataService(Long... idsToRegister) {

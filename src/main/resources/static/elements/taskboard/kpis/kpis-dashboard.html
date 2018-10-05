@@ -459,8 +459,8 @@
                 },
 
                 verifyPermissions: function() {
-                    this.set('_showTactical', authorizer.hasPermissionInProject(authorizer.permissions.DASHBOARD_TACTICAL, this.selectedProjectKey));
-                    this.set('_showOperational', authorizer.hasPermissionInProject(authorizer.permissions.DASHBOARD_OPERATIONAL, this.selectedProjectKey));
+                    this.set('_showTactical', authorizer.hasPermission(Permission.PROJECT_DASHBOARD_TACTICAL, this.selectedProjectKey));
+                    this.set('_showOperational', authorizer.hasPermission(Permission.PROJECT_DASHBOARD_OPERATIONAL, this.selectedProjectKey));
                 }
 
             });

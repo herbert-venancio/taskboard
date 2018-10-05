@@ -1,7 +1,6 @@
 package objective.taskboard.controller;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -12,9 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import objective.taskboard.auth.Authorizer;
-import objective.taskboard.auth.LoggedUserDetails;
-import objective.taskboard.auth.Authorizer.ProjectPermissionsData;
+import objective.taskboard.auth.authorizer.Authorizer;
 import objective.taskboard.cycletime.HolidayService;
 import objective.taskboard.data.Team;
 import objective.taskboard.data.User;
@@ -53,9 +50,6 @@ public class HomeController {
     @Autowired
     private FollowUpFacade followupFacade;
 
-    @Autowired
-    private LoggedUserDetails loggedInUser;
-
     @RequestMapping("/")
     public String home(Model model) {
         User user = jiraService.getLoggedUser();
@@ -67,9 +61,9 @@ public class HomeController {
         model.addAttribute("jiraTransitionsWithRequiredCommentNames", serialize(jiraPropeties.getTransitionsWithRequiredCommentNames()));
         model.addAttribute("holidays", serialize(holidayService.getHolidays()));
         model.addAttribute("googleClientId", googleApiConfig.getClientId());
-        model.addAttribute("permissions", serialize(new PermissionsDto(loggedInUser.isAdmin(), authorizer.getProjectsPermission())));
+        model.addAttribute("permissions", serialize(authorizer.getPermissions()));
         model.addAttribute("fieldNames", getFieldNames());
-        
+
         Set<Team> teamsVisibleToUser = userTeamService.getTeamsVisibleToLoggedInUser();
         model.addAttribute("teams", serialize(
                 teamsVisibleToUser.stream()
@@ -96,13 +90,4 @@ public class HomeController {
                 .collect(Collectors.toMap(JiraFieldDataDto::getId, JiraFieldDataDto::getName));
     }
 
-    static class PermissionsDto {
-        public boolean isAdmin;
-        public List<ProjectPermissionsData> projectsPermissions;
-
-        private PermissionsDto(boolean isAdmin, List<ProjectPermissionsData> projectsPermissions) {
-            this.isAdmin = isAdmin;
-            this.projectsPermissions = projectsPermissions;
-        }
-    }
 }

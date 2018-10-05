@@ -1,5 +1,6 @@
 package objective.taskboard.team;
 import static java.util.stream.Collectors.toList;
+import static objective.taskboard.auth.authorizer.Permissions.TASKBOARD_ADMINISTRATION;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import objective.taskboard.auth.LoggedUserDetails;
+import objective.taskboard.auth.authorizer.Authorizer;
 import objective.taskboard.data.Team;
 import objective.taskboard.data.UserTeam;
 
@@ -30,20 +31,20 @@ import objective.taskboard.data.UserTeam;
 @RequestMapping("/ws/teams")
 class TeamsController {
 
-    private LoggedUserDetails loggedInUser;
+    private Authorizer authorizer;
     private UserTeamService userTeamService;
 
     @Autowired
     public TeamsController(
-            LoggedUserDetails loggedInUser,
+            Authorizer authorizer,
             UserTeamService userTeamService) {
-        this.loggedInUser = loggedInUser;
+        this.authorizer = authorizer;
         this.userTeamService = userTeamService;
     }
 
     @GetMapping
     public ResponseEntity<?> getTeams() {
-        if (!loggedInUser.isAdmin())
+        if (!authorizer.hasPermission(TASKBOARD_ADMINISTRATION))
             return new ResponseEntity<>(NOT_FOUND);
 
         return new ResponseEntity<>(TeamDto.from(userTeamService.getTeamsThatUserCanAdmin()), OK);
@@ -51,7 +52,7 @@ class TeamsController {
 
     @GetMapping(value="{teamName}")
     public ResponseEntity<?> getTeam(@PathVariable String teamName) {
-        if (!loggedInUser.isAdmin())
+        if (!authorizer.hasPermission(TASKBOARD_ADMINISTRATION))
             return new ResponseEntity<>(NOT_FOUND);
 
         Optional<Team> team = findTeam(teamName);
@@ -64,7 +65,7 @@ class TeamsController {
     @PutMapping(value="{teamName}")
     @Transactional
     public ResponseEntity<?> updateTeam(@PathVariable String teamName, @RequestBody TeamDto teamDto) {
-        if (!loggedInUser.isAdmin())
+        if (!authorizer.hasPermission(TASKBOARD_ADMINISTRATION))
             return new ResponseEntity<>(NOT_FOUND);
 
         List<String> errors = validateTeam(teamDto);

@@ -1,5 +1,7 @@
 package objective.taskboard.project.config;
 
+import static objective.taskboard.auth.authorizer.Permissions.PROJECT_ADMINISTRATION;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -14,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.jira.ProjectService;
-import objective.taskboard.repository.PermissionRepository;
+
 
 @RestController
 @RequestMapping("/ws/project/config/cluster/")
@@ -31,7 +33,7 @@ public class ProjectClusterController {
 
     @GetMapping("{projectKey}")
     public ResponseEntity<List<ProjectClusterItemDto>> get(@PathVariable("projectKey") String projectKey) {
-        Optional<ProjectFilterConfiguration> project = projectService.getTaskboardProject(projectKey, PermissionRepository.ADMINISTRATIVE);
+        Optional<ProjectFilterConfiguration> project = projectService.getTaskboardProject(projectKey, PROJECT_ADMINISTRATION);
 
         if (!project.isPresent())
             return ResponseEntity.notFound().build();
@@ -41,7 +43,7 @@ public class ProjectClusterController {
 
     @PutMapping("{projectKey}")
     public ResponseEntity<?> update(@PathVariable("projectKey") String projectKey, @RequestBody List<ProjectClusterItemDto> clusterItemDtos) {
-        Optional<ProjectFilterConfiguration> project = projectService.getTaskboardProject(projectKey, PermissionRepository.ADMINISTRATIVE);
+        Optional<ProjectFilterConfiguration> project = projectService.getTaskboardProject(projectKey, PROJECT_ADMINISTRATION);
 
         if (!project.isPresent())
             return ResponseEntity.notFound().build();

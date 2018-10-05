@@ -9,7 +9,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import objective.taskboard.auth.LoggedUserDetails.Role;
+import objective.taskboard.auth.LoggedUserDetails.JiraRole;
 import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.user.TaskboardUser;
@@ -53,8 +53,8 @@ public class AuthenticationService {
     }
 
     private LoggedUserDetails getPrincipal(TaskboardUser taskboardUser) {
-        List<Role> roles = jiraService.getUserRoles(taskboardUser.getUsername()).stream()
-                .map(r -> new LoggedUserDetails.Role(r.id, r.name, r.projectKey))
+        List<JiraRole> roles = jiraService.getUserRoles(taskboardUser.getUsername()).stream()
+                .map(r -> new LoggedUserDetails.JiraRole(r.id, r.name, r.projectKey))
                 .collect(toList());
 
         return new LoggedUserDetails(taskboardUser.getUsername(), roles, taskboardUser.isAdmin());

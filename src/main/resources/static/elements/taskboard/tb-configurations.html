@@ -45,7 +45,7 @@
                 <config-projects projects-configurations="[[projectsConfigurations]]"></config-projects>
             </template>
 
-            <template is="dom-if" if="[[_isAdmin()]]">
+            <template is="dom-if" if="[[_hasAuthorization()]]">
                 <config-teams></config-teams>
             </template>
 
@@ -82,8 +82,8 @@
                     });
                 },
 
-                _isAdmin: function () {
-                    return authorizer.isAdmin();
+                _hasAuthorization: function() {
+                    return authorizer.hasPermission(Permission.TASKBOARD_ADMINISTRATION);
                 }
             });
         })();

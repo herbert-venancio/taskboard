@@ -47,7 +47,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import objective.taskboard.auth.Authorizer;
+import objective.taskboard.auth.authorizer.Authorizer;
 import objective.taskboard.followup.FollowUpFacade;
 import objective.taskboard.followup.FollowUpHistoryKeeper;
 import objective.taskboard.followup.FollowUpReportGenerator.InvalidTableRangeException;

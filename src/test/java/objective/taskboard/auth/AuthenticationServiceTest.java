@@ -25,7 +25,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
 import objective.taskboard.auth.AuthenticationService.AuthenticationResult;
-import objective.taskboard.auth.LoggedUserDetails.Role;
+import objective.taskboard.auth.LoggedUserDetails.JiraRole;
 import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.data.plugin.UserDetail;
 import objective.taskboard.jira.properties.JiraProperties;
@@ -70,7 +70,7 @@ public class AuthenticationServiceTest {
 
         assertEquals("jose", result.getPrincipal().getUsername());
         assertTrue(result.getPrincipal().isAdmin());
-        assertRoles(result.getPrincipal().getUserRoles(), 
+        assertRoles(result.getPrincipal().getJiraRoles(),
                 "1 | dev | PX",
                 "2 | adm | SP");
         
@@ -121,8 +121,8 @@ public class AuthenticationServiceTest {
         assertEquals("Failed to login", result.getMessage());
     }
 
-    private static void assertRoles(List<Role> actualRoles, String... expectedRoles) {
-        Function<Role, String> roleToString = r -> r.id + " | " + r.name + " | " + r.projectKey;
+    private static void assertRoles(List<JiraRole> actualRoles, String... expectedRoles) {
+        Function<JiraRole, String> roleToString = r -> r.id + " | " + r.name + " | " + r.projectKey;
         assertEquals(StringUtils.join(expectedRoles, "\n"), collectionToString(actualRoles, roleToString, "\n"));
     }
 

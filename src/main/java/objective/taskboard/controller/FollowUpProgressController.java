@@ -1,5 +1,6 @@
 package objective.taskboard.controller;
 
+import static objective.taskboard.auth.authorizer.Permissions.PROJECT_DASHBOARD_TACTICAL;
 import static objective.taskboard.utils.DateTimeUtils.determineTimeZoneId;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -25,14 +26,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.base.Objects;
 
-import objective.taskboard.auth.Authorizer;
+import objective.taskboard.auth.authorizer.Authorizer;
 import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.ProjectDatesNotConfiguredException;
 import objective.taskboard.followup.cluster.ClusterNotConfiguredException;
 import objective.taskboard.followup.data.FollowupProgressCalculator;
 import objective.taskboard.followup.data.ProgressData;
-import objective.taskboard.repository.PermissionRepository;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 
 @RestController
@@ -64,7 +64,7 @@ public class FollowUpProgressController {
             @PathVariable("project") String projectKey,
             @RequestParam("timezone") String zoneId,
             @RequestParam("projection") Optional<Integer> projectionTimespan) {
-        if (!authorizer.hasPermissionInProject(PermissionRepository.DASHBOARD_TACTICAL, projectKey))
+        if (!authorizer.hasPermission(PROJECT_DASHBOARD_TACTICAL, projectKey))
             return new ResponseEntity<>("Resource not found.", HttpStatus.NOT_FOUND);
 
         String today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);

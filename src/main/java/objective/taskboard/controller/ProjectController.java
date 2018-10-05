@@ -22,8 +22,8 @@
 package objective.taskboard.controller;
 
 import static java.util.stream.Collectors.toList;
-import static objective.taskboard.repository.PermissionRepository.DASHBOARD_OPERATIONAL;
-import static objective.taskboard.repository.PermissionRepository.DASHBOARD_TACTICAL;
+import static objective.taskboard.auth.authorizer.Permissions.PROJECT_DASHBOARD_OPERATIONAL;
+import static objective.taskboard.auth.authorizer.Permissions.PROJECT_DASHBOARD_TACTICAL;
 
 import java.util.List;
 
@@ -40,7 +40,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import objective.taskboard.auth.Authorizer;
+import objective.taskboard.auth.authorizer.Authorizer;
 import objective.taskboard.controller.ProjectCreationData.ProjectCreationDataTeam;
 import objective.taskboard.data.Team;
 import objective.taskboard.domain.ProjectFilterConfiguration;
@@ -82,7 +82,7 @@ public class ProjectController {
 
     @RequestMapping("/dashboard")
     public List<ProjectData> getProjectsVisibleOnDashboard() {
-        return projectService.getTaskboardProjects(projectService::isNonArchivedAndUserHasAccess, DASHBOARD_TACTICAL, DASHBOARD_OPERATIONAL).stream()
+        return projectService.getTaskboardProjects(projectService::isNonArchivedAndUserHasAccess, PROJECT_DASHBOARD_TACTICAL, PROJECT_DASHBOARD_OPERATIONAL).stream()
                 .map(this::generateProjectData)
                 .collect(toList());
     }

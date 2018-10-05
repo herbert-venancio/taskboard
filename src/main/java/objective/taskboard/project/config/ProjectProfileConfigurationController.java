@@ -2,6 +2,7 @@ package objective.taskboard.project.config;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import static objective.taskboard.auth.authorizer.Permissions.PROJECT_ADMINISTRATION;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -25,7 +26,6 @@ import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.project.ProjectProfileItem;
 import objective.taskboard.project.ProjectProfileItemRepository;
-import objective.taskboard.repository.PermissionRepository;
 
 @RestController
 @RequestMapping("/ws/project/config/project-profile/")
@@ -42,7 +42,7 @@ public class ProjectProfileConfigurationController {
 
     @GetMapping("{projectKey}/data")
     public ResponseEntity<?> getData(@PathVariable("projectKey") String projectKey) {
-        Optional<ProjectFilterConfiguration> project = projectService.getTaskboardProject(projectKey, PermissionRepository.ADMINISTRATIVE);
+        Optional<ProjectFilterConfiguration> project = projectService.getTaskboardProject(projectKey, PROJECT_ADMINISTRATION);
 
         if (!project.isPresent())
             return ResponseEntity.notFound().build();
@@ -57,7 +57,7 @@ public class ProjectProfileConfigurationController {
     @PutMapping("{projectKey}/items")
     @Transactional
     public ResponseEntity<?> updateItems(@PathVariable("projectKey") String projectKey, @RequestBody List<ProjectProfileItemDto> itemsDto) {
-        Optional<ProjectFilterConfiguration> project = projectService.getTaskboardProject(projectKey, PermissionRepository.ADMINISTRATIVE);
+        Optional<ProjectFilterConfiguration> project = projectService.getTaskboardProject(projectKey, PROJECT_ADMINISTRATION);
         
         if (!project.isPresent())
             return ResponseEntity.notFound().build();

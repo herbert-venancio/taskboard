@@ -5,17 +5,17 @@ import java.util.List;
 public class LoggedUserDetails {
 
     private final String username;
-    private final List<Role> roles;
+    private final List<JiraRole> jiraRoles;
     private final boolean isAdmin;
 
-    public LoggedUserDetails(String username, List<Role> roles, boolean isAdmin) {
+    public LoggedUserDetails(String username, List<JiraRole> jiraRoles, boolean isAdmin) {
         this.username = username;
-        this.roles = roles;
+        this.jiraRoles = jiraRoles;
         this.isAdmin = isAdmin;
     }
 
-    public List<Role> getUserRoles() {
-        return roles;
+    public List<JiraRole> getJiraRoles() {
+        return jiraRoles;
     }
 
     public String getUsername() {
@@ -31,14 +31,16 @@ public class LoggedUserDetails {
         return username;
     }
 
-    public static class Role {
+    public static class JiraRole {
+        public static final String PROJECT_ADMINISTRATORS = "Administrators";
+        public static final String PROJECT_DEVELOPERS = "Developers";
+        public static final String PROJECT_KPI = "KPI";
+
         public Long id;
         public String name;
         public String projectKey;
 
-        public Role() {}
-
-        public Role(Long id, String name, String projectKey) {
+        public JiraRole(Long id, String name, String projectKey) {
             this.id = id;
             this.name = name;
             this.projectKey = projectKey;
