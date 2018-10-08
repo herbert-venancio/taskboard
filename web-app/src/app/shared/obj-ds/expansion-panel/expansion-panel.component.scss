@@ -1,0 +1,74 @@
+@import "obj-ds/utils/all";
+
+:host {
+    border: 1px solid $obj-color-dark-snow;
+    @include obj-border-box-radius;
+    background-color: #FFF;
+    display: block;
+    margin-bottom: 16px;
+
+    &.collapsed {
+        .header {
+            border-bottom: none;
+        }
+    
+        .content {
+            animation: CLOSING 0.3s forwards;
+        }
+    }
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    height: 48px;
+    border-bottom: 1px solid $obj-color-dark-snow;
+    cursor: pointer;
+}
+
+.title {
+    padding: 0 16px;
+    flex: 1;
+}
+
+.collapse-icon {
+    margin-right: 16px;
+}
+
+.content {
+    padding: 16px;
+    min-height: 40px;
+    max-height: 300px;
+    overflow: auto;
+    animation: SHOWING 0.3s forwards;
+}
+
+@keyframes SHOWING {
+    0% {
+        opacity: 0;
+        padding: 0;
+        min-height: 0;
+        max-height: 0;
+    }
+    100% {
+        opacity: 1;
+        padding: 16px;
+        min-height: 40px;
+        max-height: 300px;
+    }
+}
+
+@keyframes CLOSING {
+    0% {
+        opacity: 1;
+        padding: 16px;
+        min-height: 40px;
+        max-height: 300px;
+    }
+    100% {
+        opacity: 0;
+        padding: 0;
+        min-height: 0;
+        max-height: 0;
+    }
+}

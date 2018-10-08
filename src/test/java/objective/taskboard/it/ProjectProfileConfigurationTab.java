@@ -30,13 +30,14 @@ public class ProjectProfileConfigurationTab extends AbstractUiFragment {
     private WebElement itemsTable;
     
     private SnackBarComponent snackbar;
-
+    private ProjectAdvancedConfigurationsPage projectAdvancedPage;
     private ProjectInfo projectInfo;
 
     public ProjectProfileConfigurationTab(WebDriver driver, ProjectInfo projectInfo) {
         super(driver);
         initElements(driver, this);
         this.snackbar = new SnackBarComponent(driver, By.cssSelector(SNACK_BAR_TAG +"#tb-project-profile-snackbar"));
+        this.projectAdvancedPage = new ProjectAdvancedConfigurationsPage(driver, projectInfo);
         this.projectInfo = projectInfo;
     }
 
@@ -110,5 +111,9 @@ public class ProjectProfileConfigurationTab extends AbstractUiFragment {
         WebElement removeButton = selectElementInsideRow(i, ".remove-button");
         waitForClick(removeButton);
         return this;
+    }
+
+    public ProjectClusterConfiguration goToClusterConfiguration() {
+        return projectAdvancedPage.selectClusterConfiguration();
     }
 }

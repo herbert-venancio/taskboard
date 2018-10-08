@@ -1,6 +1,6 @@
 $obj-input-padding: 0 16px;
 
-@mixin obj-input-generator($input, $disabled, $readonly, $focused, $valid, $valid-focused, $invalid, $invalid-focused) {
+@mixin obj-input-generator($input, $disabled, $readonly, $focused, $valid, $invalid, $dirty) {
 
     #{$input} {
         @include obj-border-box-radius;
@@ -31,26 +31,21 @@ $obj-input-padding: 0 16px;
 
     #{$focused} {
         outline: none;
-        border-color: $obj-color-blue;
-        box-shadow: 0 0 0 2px rgba($obj-color-blue, 0.2);
+        border-color: $obj-color-blue !important;
+        box-shadow: 0 0 0 2px rgba($obj-color-blue, 0.2) !important;
     }
 
     #{$valid} {
         border-color: $obj-color-success;
     }
 
-    #{$valid-focused} {
-        border-color: $obj-color-success;
-        box-shadow: 0 0 0 2px rgba($obj-color-success, 0.2);
-    }
-
     #{$invalid} {
         border-color: $obj-color-error;
     }
 
-    #{$invalid-focused} {
-        border-color: $obj-color-error;
-        box-shadow: 0 0 0 2px rgba($obj-color-error, 0.2);
+    #{$dirty} {
+        border-color: $obj-color-dark-snow;
+        background-color: rgba($obj-color-light-blue, 0.4);
     }
 }
 
@@ -61,9 +56,8 @@ $obj-input-padding: 0 16px;
             "&[readonly]",
             "&:not([readonly]):focus",
             "&.valid",
-            "&.valid:not([readonly]):focus",
             "&.invalid",
-            "&.invalid:not([readonly]):focus");
+            "&.ng-dirty:not(.invalid)");
 }
 
 .obj-text-field {
@@ -77,9 +71,8 @@ $obj-input-padding: 0 16px;
             "&[readonly]",
             "&.obj-search-focused",
             "&.valid",
-            "&.valid.obj-search-focused",
             "&.invalid",
-            "&.invalid.obj-search-focused");
+            "&.search-dirty:not(.invalid)");
 
     & {
         display: flex;
@@ -128,9 +121,8 @@ $obj-input-padding: 0 16px;
             "&[readonly] .ng-select-container",
             "&.ng-select-focused:not([readonly]) .ng-select-container",
             "&.valid:not([readonly]) .ng-select-container",
-            "&.ng-select-focused.valid:not([readonly]) .ng-select-container",
             "&.invalid:not([readonly]) .ng-select-container",
-            "&.ng-select-focused.invalid:not([readonly]) .ng-select-container");
+            "&.select-dirty:not([readonly]):not(.invalid) .ng-select-container");
 
     @include obj-icon-small-clear-x-inserted("&:not([readonly]) .ng-clear-wrapper", "&:not([readonly]) .ng-clear", "&:hover:not([readonly]):not([disabled]) .ng-clear");
 

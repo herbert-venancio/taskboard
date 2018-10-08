@@ -11,6 +11,7 @@
     background-color: $obj-color-snow;
     border-bottom: 1px solid $obj-color-dark-snow;
     display: flex;
+    border-radius: 4px 4px 0 0;
 }
 
 ::ng-deep tb-tab-router {

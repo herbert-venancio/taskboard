@@ -9,6 +9,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
+import objective.taskboard.it.components.guards.LeaveConfirmationGuard;
+
 public class TabsRouterComponent extends AbstractComponent {
 
     public static final String TABS_ROUTER_TAG = "tb-tabs-router";
@@ -20,10 +22,22 @@ public class TabsRouterComponent extends AbstractComponent {
         waitAllTabsExists(tabsNames);
     }
 
-    public void select(String tabName, String componentTag) {
+    public void select(String tabName, String componentTag, Boolean leaveConfirmation) {
         WebElement tab = tabButtonEl(tabName);
         waitForClick(tab);
+
+        if (leaveConfirmation)
+            LeaveConfirmationGuard.leave(webDriver);
+        else
+            LeaveConfirmationGuard.waitIsClosed(webDriver);
+
         waitIsSelected(tab, componentTag);
+    }
+
+    public void selectButStay(String tabName) {
+        WebElement tab = tabButtonEl(tabName);
+        waitForClick(tab);
+        LeaveConfirmationGuard.stay(webDriver);
     }
 
     private void waitAllTabsExists(String... tabsNames) {
