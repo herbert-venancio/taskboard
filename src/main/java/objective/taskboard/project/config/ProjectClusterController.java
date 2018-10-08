@@ -1,7 +1,5 @@
 package objective.taskboard.project.config;
 
-import static java.util.stream.Collectors.toList;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -16,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.jira.ProjectService;
-import objective.taskboard.project.config.ProjectClusterService.ProjectClusterItem;
 import objective.taskboard.repository.PermissionRepository;
 
 @RestController
@@ -39,11 +36,7 @@ public class ProjectClusterController {
         if (!project.isPresent())
             return ResponseEntity.notFound().build();
 
-        List<ProjectClusterItemDto> itemDtos = projectClusterService.getItems(project.get()).stream()
-                .map(item -> new ProjectClusterItemDto(item))
-                .collect(toList());
-
-        return ResponseEntity.ok(itemDtos);
+        return ResponseEntity.ok(projectClusterService.getItems(project.get()));
     }
 
     @PutMapping("{projectKey}")
@@ -53,33 +46,9 @@ public class ProjectClusterController {
         if (!project.isPresent())
             return ResponseEntity.notFound().build();
 
-        List<ProjectClusterItem> items = clusterItemDtos.stream()
-            .map(itemDto -> itemDto.toObject())
-            .collect(toList());
-
-        projectClusterService.updateItems(project.get(), items);
+        projectClusterService.updateItems(project.get(), clusterItemDtos);
 
         return ResponseEntity.ok().build();
-    }
-
-    protected static class ProjectClusterItemDto {
-        public String issueType;
-        public String sizing;
-        public Double effort;
-        public Double cycle;
-
-        public ProjectClusterItemDto() {}
-
-        public ProjectClusterItemDto(ProjectClusterItem object) {
-            this.issueType = object.getIssueType();
-            this.sizing = object.getSizing();
-            this.effort = object.getEffort();
-            this.cycle = object.getCycle();
-        }
-
-        public ProjectClusterItem toObject() {
-            return new ProjectClusterItem(issueType, sizing, effort, cycle);
-        }
     }
 
 }
