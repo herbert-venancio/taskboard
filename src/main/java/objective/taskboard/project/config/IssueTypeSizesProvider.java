@@ -73,7 +73,7 @@ public class IssueTypeSizesProvider {
                 .collect(toList());
     }
 
-    static class IssueTypeSize {
+    public static class IssueTypeSize {
         private final String issueType;
         private final String size;
 
