@@ -444,9 +444,34 @@
                 },
 
                 _reorderSelected: function() {
-                    this._reorderIssues(this)
+                    this._reorderIssues(this);
+                    this._reorderFeatureSubtasks();
                     issueSelectorService.unselectAllIssues();
                     this._scrollUp();
+                },
+
+                _reorderFeatureSubtasks: function() {
+                    _.chain(issueSelectionData.getSelectedIssues())
+                        .filter(i => i.item.feature)
+                        .map(i => i.item.subtasks)
+                        .flatten()
+                        .reduce((groups, subtask) => {
+                            var issue = document.querySelector('issue-item#' + subtask.issueKey);
+                            if(issue) {
+                                var step = taskboard.getIssueStep(issue.item);
+                                if(step) {
+                                    if(!_.has(groups, step.id))
+                                        groups[step.id] = [];
+                                    groups[step.id].push(issue);
+                                }
+                            }
+                            return groups;
+                        }, {})
+                        .each((issues, stepId) => {
+                            issueSelectorService.setSelection(issues);
+                            var step = document.querySelector('board-step#step-' + stepId);
+                            step._reorderIssues(step);
+                        });
                 },
 
                 _reorderIssues: function(self, ui) {
