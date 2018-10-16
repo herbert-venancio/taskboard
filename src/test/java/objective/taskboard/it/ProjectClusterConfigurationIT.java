@@ -43,13 +43,13 @@ public class ProjectClusterConfigurationIT extends AuthenticatedIntegrationTest 
     public void whenLeaveWithoutSave_shouldConfirm() {
         goToClusterConfiguration(TASKB)
             .setEffort("Alpha Test", "S", "3.13")
-            .tryToGoToProfileConfigurationButStay()
+            .selectProfileTab().expectConfirmationAndStay()
 
             .save()
-            .goToProfileConfigurationWithoutLeaveConfirmation()
+            .selectProfileTab().expectNoConfirmation()
             .goToClusterConfiguration()
             .setEffort("Alpha Test", "S", "2.13")
-            .goToProfileConfigurationWithLeaveConfirmation()
+            .selectProfileTab().expectConfirmationAndLeave()
 
             .goToClusterConfiguration()
             .assertEffort("Alpha Test", "S", "3.13");

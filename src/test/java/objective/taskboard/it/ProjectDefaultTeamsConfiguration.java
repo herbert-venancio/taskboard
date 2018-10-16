@@ -6,7 +6,6 @@ import static objective.taskboard.it.components.SelectComponent.SELECT_TAG;
 import static objective.taskboard.it.components.SnackBarComponent.SNACK_BAR_TAG;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.openqa.selenium.By.cssSelector;
-import static org.openqa.selenium.By.tagName;
 import static org.openqa.selenium.support.PageFactory.initElements;
 
 import java.util.List;
@@ -20,10 +19,13 @@ import org.openqa.selenium.support.FindBy;
 import objective.taskboard.it.components.ButtonComponent;
 import objective.taskboard.it.components.SelectComponent;
 import objective.taskboard.it.components.SnackBarComponent;
+import objective.taskboard.it.components.TabComponent;
+import objective.taskboard.it.components.TabsRouterComponent;
 import objective.taskboard.testUtils.ProjectInfo;
 
-public class ProjectDefaultTeamsConfiguration extends AbstractUiFragment {
+public class ProjectDefaultTeamsConfiguration extends ProjectAdvancedConfigurationTab<ProjectDefaultTeamsConfiguration> {
 
+    public static final String TEAMS_TAB_NAME = "Teams";
     public static final String PROJECT_TEAMS_CONFIGURATION_TAG = "tb-project-teams";
 
     private static final String TEAM_SELECTOR = SELECT_TAG +"[name='team']";
@@ -48,19 +50,15 @@ public class ProjectDefaultTeamsConfiguration extends AbstractUiFragment {
     private SelectComponent defaultTeam;
     private SnackBarComponent snackbar;
 
-    private ProjectInfo projectInfo;
+    public static TabsRouterComponent.TabFactory<ProjectDefaultTeamsConfiguration> factory(ProjectInfo projectInfo) {
+        return (webDriver, tab) -> new ProjectDefaultTeamsConfiguration(webDriver, tab, projectInfo);
+    }
 
-    public ProjectDefaultTeamsConfiguration(WebDriver webDriver, ProjectInfo projectInfo) {
-        super(webDriver);
+    public ProjectDefaultTeamsConfiguration(WebDriver webDriver, TabComponent<ProjectDefaultTeamsConfiguration> tab, ProjectInfo projectInfo) {
+        super(webDriver, tab, projectInfo);
         initElements(webDriver, this);
         snackbar = new SnackBarComponent(webDriver, cssSelector(SNACK_BAR_TAG +"#tb-project-teams-snackbar"));
         defaultTeam = new SelectComponent(webDriver, cssSelector(SELECT_TAG + "[name='defaultTeam']"));
-        this.projectInfo = projectInfo;
-    }
-
-    public ProjectDefaultTeamsConfiguration assertTabIsOpen() {
-        waitUntilElementExists(tagName(PROJECT_TEAMS_CONFIGURATION_TAG));
-        return this;
     }
 
     public ProjectDefaultTeamsConfiguration setDefaultTeam(String teamName) {
@@ -86,12 +84,6 @@ public class ProjectDefaultTeamsConfiguration extends AbstractUiFragment {
     public ProjectConfigurationDialog backToProject() {
         waitForClick(backToProjectButton);
         return new ProjectConfigurationDialog(webDriver, projectInfo).assertIsOpen();
-    }
-
-    public ProjectDefaultTeamsConfiguration refresh() {
-        webDriver.navigate().refresh();
-        assertTabIsOpen();
-        return this;
     }
 
     public ProjectDefaultTeamsConfiguration save() {

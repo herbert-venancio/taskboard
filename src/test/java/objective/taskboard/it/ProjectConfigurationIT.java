@@ -65,9 +65,9 @@ public class ProjectConfigurationIT extends AuthenticatedIntegrationTest {
             .clickAdvancedConfigurationsExpectingConfirmation()
             .assertSaveConfirmModalIsOpen()
             .confirmSave();
-        
-        new ProjectProfileConfigurationTab(webDriver, TASKB)
-            .assertTabIsOpen()
+
+        new ProjectAdvancedConfigurationsPage(webDriver, TASKB)
+            .selectProfileConfiguration()
             .backToProject()
             .assertRisk("10.1");
     }
