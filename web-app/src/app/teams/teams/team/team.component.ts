@@ -29,7 +29,7 @@ export class TeamComponent extends ComponentLeaveConfirmation implements OnInit 
 
     teamName: string;
     team: TeamDto;
-    filterMembersByName: string;
+    filterMembersByName: string = '';
     newMembers: NewTeamMemberRow[];
 
     managerAsyncSearch: SelectFieldAsyncSearchDto;
