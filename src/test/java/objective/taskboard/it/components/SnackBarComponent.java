@@ -20,6 +20,10 @@ public class SnackBarComponent extends AbstractComponent {
         waitTextInElement(getChildElementWhenExists(component(), cssSelector(".title")), title);
     }
 
+    public void waitDescriptionToBe(String description) {
+        waitTextInElement(getChildElementWhenExists(component(), cssSelector(".description")), description);
+    }
+
     public void waitDescriptionsToBe(String... descriptions) {
         if (descriptions.length == 0) {
             waitUntilChildElementNotExists(component(), cssSelector(".description-item"));

@@ -1,24 +1,3 @@
-/*-
- * [LICENSE]
- * Taskboard
- * ---
- * Copyright (C) 2015 - 2017 Objective Solutions
- * ---
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * [/LICENSE]
- */
-
 package objective.taskboard.it;
 
 import java.util.List;
@@ -28,11 +7,13 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
+import objective.taskboard.it.basecluster.BaseClusterSearchPage;
 import objective.taskboard.testUtils.ProjectInfo;
 
 public class MenuFilters extends AbstractUiFragment {
 
     private static final String CONFIG_TEAMS_SELECTOR = "config-teams";
+    private static final String CONFIG_BASE_CLUSTER_SELECTOR = "config-base-clusters";
 
     @FindBy(tagName = "card-field-filters")
     private WebElement cardFieldFilters;
@@ -54,6 +35,9 @@ public class MenuFilters extends AbstractUiFragment {
 
     @FindBy(css = CONFIG_TEAMS_SELECTOR)
     private WebElement teamsConfigurationButton;
+
+    @FindBy(css = CONFIG_BASE_CLUSTER_SELECTOR)
+    private WebElement baseClusterConfigurationButton;
 
     public MenuFilters(WebDriver webDriver) {
         super(webDriver);
@@ -133,5 +117,20 @@ public class MenuFilters extends AbstractUiFragment {
     public void closeMenuFilters() {
         waitForClick(webDriver.findElement(By.id("scrim")));
         waitInvisibilityOfElement(cardFieldFilters);
+    }
+
+    public MenuFilters assertBaseClusterButtonVisible() {
+        waitElementExistenceAndVisibilityIs(true, By.cssSelector(CONFIG_BASE_CLUSTER_SELECTOR));
+        return this;
+    }
+
+    public MenuFilters assertBaseClusterButtonNotVisible() {
+        waitElementExistenceAndVisibilityIs(false, By.cssSelector(CONFIG_BASE_CLUSTER_SELECTOR));
+        return this;
+    }
+
+    public BaseClusterSearchPage openBaseClusterSearch() {
+        waitForClick(baseClusterConfigurationButton);
+        return new BaseClusterSearchPage(webDriver);
     }
 }

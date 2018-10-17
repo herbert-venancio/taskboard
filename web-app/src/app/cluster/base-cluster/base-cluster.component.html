@@ -1,0 +1,101 @@
+<section class="tb-page-content">
+
+    <h2 id="tb-page-title" class="obj-title-large title">
+        Base Cluster
+        <span class="separator"> &gt; </span>
+        {{ baseClusterId ? baseClusterName : 'new' }}
+    </h2>
+
+    <div class="content">
+
+        <form #baseClusterForm="ngForm" class="cluster-form" (ngSubmit)="save()" autocomplete="off" tbLeaveConfirmation>
+
+            <label>Name</label>
+
+            <input type="text"
+                name="baseClusterName"
+                objTextField
+                [(ngModel)]="baseClusterName"
+                #clusterInput
+                #name="objTextField"
+                required
+                tbNotEmpty/>
+
+            <obj-error-messages [for]="name">
+                <obj-error-message error="notEmpty">Name name is required.</obj-error-message>
+            </obj-error-messages>
+
+            <label>Items</label>
+
+            <div class="body-with-scroll">
+
+                <obj-expansion-panel *ngFor="let issueType of baseItemsGroups" [title]="issueType.subtaskTypeName"
+                    [attr.data-issue-type]="issueType.subtaskTypeName" [ngModelGroup]="issueType.subtaskTypeName">
+
+                    <table class="obj-data-table inline-input">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th *ngFor="let s of issueType.items">{{s.sizing}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Effort</td>
+                                <td class="input" *ngFor="let s of issueType.items">
+                                    <input id="{{issueType.subtaskTypeName}}-effort-{{s.sizing}}"
+                                        name="effort-{{s.sizing}}"
+                                        #effort="objTextField"
+                                        type="number"
+                                        [(ngModel)]="s.effort"
+                                        min="0"
+                                        tbMin="0"
+                                        step="any"
+                                        objTextField
+                                        #clusterInput
+                                        required
+                                        tbIsNumber/>
+
+                                    <obj-error-messages [for]="effort">
+                                        <obj-error-message error="min, isNumber">Should be positive</obj-error-message>
+                                        <obj-error-message error="required">Required</obj-error-message>
+                                    </obj-error-messages>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Cycle</td>
+                                <td *ngFor="let s of issueType.items">
+                                    <input id="{{issueType.subtaskTypeName}}-cycle-{{s.sizing}}"
+                                        name="cycle-{{s.sizing}}"
+                                        #cycle="objTextField"
+                                        type="number"
+                                        [(ngModel)]="s.cycle"
+                                        min="0"
+                                        tbMin="0"
+                                        step="any"
+                                        objTextField
+                                        #clusterInput
+                                        required
+                                        tbIsNumber/>
+
+                                    <obj-error-messages [for]="cycle">
+                                        <obj-error-message error="min, isNumber">Should be positive</obj-error-message>
+                                        <obj-error-message error="required">Required</obj-error-message>
+                                    </obj-error-messages>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </obj-expansion-panel>
+            </div>
+
+            <div class="footer">
+                <span class="small">(All values are in hours)</span>
+                <button type="button" obj-button routerLink="/base-cluster-search">Back to Search</button>
+                <button type="submit" obj-button class="primary" [disabled]="baseClusterForm.pristine">Save</button>
+            </div>
+        </form>
+    </div>
+
+    <obj-snackbar id="tb-base-cluster-snackbar" [control]="snackbar"></obj-snackbar>
+</section>

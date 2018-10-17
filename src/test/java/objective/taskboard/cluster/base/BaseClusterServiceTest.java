@@ -309,6 +309,36 @@ public class BaseClusterServiceTest {
         );
     }
 
+    @Test
+    public void getNewBaseClusterModel() {
+        issueTypeSizes(
+            issueTypeSize("BALLPARK - Alpha", "XS"),
+            issueTypeSize("BALLPARK - Alpha", "S"),
+            issueTypeSize("BALLPARK - Alpha", "M"),
+            issueTypeSize("BALLPARK - Alpha", "L"),
+            issueTypeSize("BALLPARK - Alpha", "XL"),
+            issueTypeSize("Support", "XS"),
+            issueTypeSize("Support", "S"),
+            issueTypeSize("Support", "M"),
+            issueTypeSize("Support", "L"),
+            issueTypeSize("Support", "XL")
+        );
+        BaseClusterDto baseClusterModel = service.getNewModel();
+
+        assertBaseCluster(baseClusterModel, null, "",
+            "BALLPARK - Alpha | XS | 0.0 | 0.0",
+            "BALLPARK - Alpha | S | 0.0 | 0.0",
+            "BALLPARK - Alpha | M | 0.0 | 0.0",
+            "BALLPARK - Alpha | L | 0.0 | 0.0",
+            "BALLPARK - Alpha | XL | 0.0 | 0.0",
+            "Support | XS | 0.0 | 0.0",
+            "Support | S | 0.0 | 0.0",
+            "Support | M | 0.0 | 0.0",
+            "Support | L | 0.0 | 0.0",
+            "Support | XL | 0.0 | 0.0"
+        );
+    }
+
     private void mockBaseCluster(final SizingCluster cluster) {
         repository.save(cluster);
     }

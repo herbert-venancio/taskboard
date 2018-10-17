@@ -148,6 +148,15 @@ public abstract class AbstractUiFragment {
         return webDriver.findElement(by);
     }
 
+    protected WebElement getElementWhenItExistsAndIsVisible(By by) {
+        waitUntilElementExistsAndIsVisible(by);
+        return webDriver.findElement(by);
+    }
+
+    protected void waitUntilElementExistsAndIsVisible(By by) {
+        waitUntil(c -> isElementVisibleAndExists(by));
+    }
+
     protected List<WebElement> getElementsWhenTheyExists(By by) {
         waitUntilElementExists(by);
         return webDriver.findElements(by);
