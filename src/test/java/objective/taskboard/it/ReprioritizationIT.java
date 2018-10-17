@@ -192,6 +192,82 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
     }
 
     @Test
+    public void whenFeatureIsMovedToTop_shouldAlsoMoveAllSubtasksToTop() {
+        // given
+        final String TASKB194 = "TASKB-194"; // Feature in "Doing" step with 2 sub-tasks
+        final String TASKB342 = "TASKB-342"; // Sub-task in "To Do" step
+        final String TASKB273 = "TASKB-273"; // Sub-task in "To Do" step, will be moved to "To Review" step
+
+        final String[] expectedDeployableToDoListBefore = new String[] {
+                "TASKB-186",
+                TASKB194
+        };
+
+        final String[] expectedDeployableToDoListAfter = new String[] {
+                TASKB194,
+                "TASKB-186"
+        };
+
+        final String[] expectedOperationalDoingListBefore = new String[] {
+                "TASKB-601",
+                "TASKB-572",
+                TASKB342,
+                "TASKB-646"
+        };
+
+        final String[] expectedOperationalDoingListAfter = new String[] {
+                TASKB342,
+                "TASKB-601",
+                "TASKB-572",
+                "TASKB-646"
+        };
+
+        final String[] expectedOperationalToReviewListBefore = new String[] {
+                "TASKB-535",
+                TASKB273,
+                "TASKB-614"
+        };
+
+        final String[] expectedOperationalToReviewListAfter = new String[] {
+                TASKB273,
+                "TASKB-535",
+                "TASKB-614"
+        };
+
+        BoardStepFragment deployableStep = mainPage
+                .lane("Deployable")
+                .boardStep("To Do");
+        BoardStepFragment operationalDoingStep = mainPage
+                .lane("Operational")
+                .boardStep("Doing");
+        BoardStepFragment operationalToReviewStep = mainPage
+                .lane("Operational")
+                .boardStep("To Review");
+
+        // move one sub-task to a different step, to make sure it works regardless
+        operationalDoingStep.scrollTo(TASKB273);
+        mainPage.issue(TASKB273)
+                .click()
+                .issueDetails()
+                .transitionClick("To Review")
+                .confirm();
+
+        deployableStep.assertIssueList(expectedDeployableToDoListBefore);
+        operationalDoingStep.assertIssueList(expectedOperationalDoingListBefore);
+        operationalToReviewStep.assertIssueList(expectedOperationalToReviewListBefore);
+
+        // when move feature to top
+        mainPage.issue(TASKB194)
+                .select()
+                .moveToTop();
+
+        // then
+        deployableStep.assertIssueList(expectedDeployableToDoListAfter);
+        operationalDoingStep.assertIssueList(expectedOperationalDoingListAfter);
+        operationalToReviewStep.assertIssueList(expectedOperationalToReviewListAfter);
+    }
+
+    @Test
     public void whenTheCardIsSelectedAndUnselected_dragAndDropAndMoveToTopShouldWork() {
         final String TASK535 = "TASKB-535";
         final String TASK614 = "TASKB-614";

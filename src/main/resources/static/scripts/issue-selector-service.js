@@ -27,7 +27,14 @@ class IssueSelectorService {
         }
     }
 
-    unselectAllIssues() {
+    setSelection(issues) {
+        this._internalUnselectAllIssues();
+        forEachInArray(issues, (issue) => {
+            this.select(issue);
+        });
+    }
+
+    _internalUnselectAllIssues() {
         const selectedIssues = issueSelectionData.getSelectedIssues();
         if (_.isEmpty(selectedIssues))
             return;
@@ -41,6 +48,10 @@ class IssueSelectorService {
             IssueSelectionUtils.setIsRightBorderHidden(i, false);
         });
         selectedIssues.splice(0);
+    }
+
+    unselectAllIssues() {
+        this._internalUnselectAllIssues();
         taskboard.makeAllStepsSortable();
     }
 
