@@ -43,6 +43,9 @@ public class TeamCachedRepository {
     @Autowired
     private TeamRepository teamRepository;
 
+    @Autowired
+    private UserTeamCachedRepository userTeamRepository;
+
     private List<Team> cache;
 
     @PostConstruct
@@ -88,6 +91,7 @@ public class TeamCachedRepository {
     public Team save(Team team) {
         Team saved = teamRepository.save(team);
         loadCache();
+        userTeamRepository.loadCache();
         return saved;
     }
 }
