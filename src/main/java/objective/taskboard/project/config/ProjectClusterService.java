@@ -12,103 +12,59 @@ import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.cluster.FollowUpClusterItem;
 import objective.taskboard.followup.cluster.FollowupCluster;
 import objective.taskboard.followup.cluster.FollowupClusterProvider;
-import objective.taskboard.followup.cluster.SizingClusterItem;
 
 @Service
 public class ProjectClusterService {
 
     private final FollowupClusterProvider clusterProvider;
     private final IssueTypeSizesProvider issueTypeSizesProvider;
-    private final ProjectClusterItemDao projectClusterItemDao;
+    private final ProjectClusterItemRepository projectClusterItemRepository;
 
     @Autowired
     public ProjectClusterService(
             FollowupClusterProvider clusterProvider,
             IssueTypeSizesProvider issueTypeSizesProvider,
-            ProjectClusterItemDao projectClusterItemDao) {
+            ProjectClusterItemRepository projectClusterItemRepository) {
         this.clusterProvider = clusterProvider;
         this.issueTypeSizesProvider = issueTypeSizesProvider;
-        this.projectClusterItemDao = projectClusterItemDao;
+        this.projectClusterItemRepository = projectClusterItemRepository;
     }
 
-    public List<ProjectClusterItem> getItems(ProjectFilterConfiguration project) {
+    public List<ProjectClusterItemDto> getItems(ProjectFilterConfiguration project) {
         FollowupCluster cluster = clusterProvider.getFor(project);
 
         return issueTypeSizesProvider.get().stream()
-                .map(typeSize -> toProjectClusterItem(cluster, typeSize.getIssueType(), typeSize.getSize()))
+                .map(typeSize -> toProjectClusterItemDto(cluster, typeSize.getIssueType(), typeSize.getSize(), project.getProjectKey()))
                 .collect(Collectors.toList());
     }
 
     @Transactional
-    public void updateItems(ProjectFilterConfiguration project, List<ProjectClusterItem> itemsUpdate) {
-        List<SizingClusterItem> clusterItems = projectClusterItemDao.findByProjectKey(project.getProjectKey());
+    public void updateItems(ProjectFilterConfiguration project, List<ProjectClusterItemDto> itemsUpdate) {
+        FollowupCluster cluster = clusterProvider.getFor(project);
 
-        for (ProjectClusterItem itemUpdate : itemsUpdate) {
-            Optional<SizingClusterItem> matchedItem = findCorrespondingClusterItem(clusterItems, itemUpdate);
-
-            if (matchedItem.isPresent()) {
-                projectClusterItemDao.update(matchedItem.get(), itemUpdate);
-                continue;
+        itemsUpdate.forEach(itemUpdate -> {
+            Optional<FollowUpClusterItem> matchedItemOptional = cluster.getClusterFor(itemUpdate.getIssueType(), itemUpdate.getSizing());
+            if (!matchedItemOptional.isPresent()) {
+                if (itemUpdate.getEffort() > 0D || itemUpdate.getCycle() > 0D)
+                    projectClusterItemRepository.create(itemUpdate);
+                return;
             }
-            projectClusterItemDao.create(project, itemUpdate);
-        }
+
+            FollowUpClusterItem matchedItem = matchedItemOptional.get();
+            if (matchedItem.isFromBaseCluster()) {
+                if (!matchedItem.getEffort().equals(itemUpdate.getEffort()) || !matchedItem.getCycle().equals(itemUpdate.getCycle()))
+                    projectClusterItemRepository.create(itemUpdate);
+                return;
+            }
+            projectClusterItemRepository.update(matchedItem.getEntityId(), itemUpdate);
+        });
     }
 
-    private ProjectClusterItem toProjectClusterItem(FollowupCluster cluster, String issueType, String size) {
+    private ProjectClusterItemDto toProjectClusterItemDto(FollowupCluster cluster, String issueType, String size, String projectKey) {
         Optional<FollowUpClusterItem> matchedItem = cluster.getClusterFor(issueType, size);
         if (matchedItem.isPresent())
-            return new ProjectClusterItem(matchedItem.get());
-        return new ProjectClusterItem(issueType, size, 0D, 0D);
-    }
-
-    private Optional<SizingClusterItem> findCorrespondingClusterItem(List<SizingClusterItem> clusterItems, ProjectClusterItem itemUpdate) {
-        if (clusterItems.isEmpty())
-            return Optional.empty();
-
-        return clusterItems.stream()
-                .filter(item -> matchesClusterItem(item, itemUpdate.issueType, itemUpdate.sizing))
-                .findFirst();
-    }
-
-    private boolean matchesClusterItem(SizingClusterItem item, String issueType, String sizing) {
-        return item.getSubtaskTypeName().equals(issueType) && item.getSizing().equals(sizing);
-    }
-
-    public static class ProjectClusterItem {
-        private final String issueType;
-        private final String sizing;
-        private final Double effort;
-        private final Double cycle;
-
-        public ProjectClusterItem(String issueType, String sizing, Double effort, Double cycle) {
-            this.issueType = issueType;
-            this.sizing = sizing;
-            this.effort = effort;
-            this.cycle = cycle;
-        }
-
-        public ProjectClusterItem(FollowUpClusterItem clusterItem) {
-            this.issueType = clusterItem.getSubtaskTypeName();
-            this.sizing = clusterItem.getSizing();
-            this.effort = clusterItem.getEffort();
-            this.cycle = clusterItem.getCycle();
-        }
-
-        public String getIssueType() {
-            return issueType;
-        }
-
-        public String getSizing() {
-            return sizing;
-        }
-
-        public Double getEffort() {
-            return effort;
-        }
-
-        public Double getCycle() {
-            return cycle;
-        }
+            return new ProjectClusterItemDto(matchedItem.get());
+        return new ProjectClusterItemDto(projectKey, issueType, size, 0D, 0D, false);
     }
 
 }

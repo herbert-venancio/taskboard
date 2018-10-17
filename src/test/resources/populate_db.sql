@@ -861,16 +861,6 @@ INSERT INTO project_default_team_issuetype (id, project_id, team_id, issue_type_
 
 -- INSERTING INTO sizing_cluster_item for dashboards
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (211,'Alpha Test','notused','XS',1.060,1.000,'TASKB', null);
-INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (212,'Alpha Test','notused','S',2.130,2.000,'TASKB', null);
-INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (213,'Alpha Test','notused','M',4.260,5.000,'TASKB', null);
-INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (214,'Alpha Test','notused','L',8.510,10.000,'TASKB', null);
-INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
-     VALUES (215,'Alpha Test','notused','XL',16.000,19.000,'TASKB', null);
-INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
      VALUES (216,'Alpha Bug','notused','XS',1.060,1.000,'TASKB', null);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
      VALUES (217,'Alpha Bug','notused','S',2.130,2.000,'TASKB', null);
@@ -1079,3 +1069,13 @@ INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing
      VALUES (318,'BALLPARK - Demand','notused','M',120.000,180.000, null, 1);
 INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
      VALUES (319,'BALLPARK - Demand','notused','L',240.000,360.000, null, 1);
+INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
+     VALUES (320,'Alpha Test','notused','XS',1.060,1.000, null, 1);
+INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
+     VALUES (321,'Alpha Test','notused','S',2.130,2.000, null, 1);
+INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
+     VALUES (322,'Alpha Test','notused','M',4.260,5.000, null, 1);
+INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
+     VALUES (323,'Alpha Test','notused','L',8.510,10.000, null, 1);
+INSERT INTO sizing_cluster_item (id, subtask_type_name, parent_type_name, sizing, effort, cycle, project_key, base_cluster_id)
+     VALUES (324,'Alpha Test','notused','XL',16.000,19.000, null, 1);

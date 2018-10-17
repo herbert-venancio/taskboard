@@ -5,6 +5,8 @@ import static objective.taskboard.it.components.SnackBarComponent.SNACK_BAR_TAG;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.openqa.selenium.support.PageFactory.initElements;
 
+import objective.taskboard.it.components.TabComponent;
+import objective.taskboard.it.components.TabsRouterComponent;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -13,8 +15,9 @@ import org.openqa.selenium.support.FindBy;
 import objective.taskboard.it.components.SnackBarComponent;
 import objective.taskboard.testUtils.ProjectInfo;
 
-public class ProjectProfileConfigurationTab extends AbstractUiFragment {
+public class ProjectProfileConfigurationTab extends ProjectAdvancedConfigurationTab<ProjectProfileConfigurationTab> {
 
+    public static final String PROFILE_TAB_NAME = "Profile";
     public static final String PROJECT_PROFILE_CONFIGURATION_TAG = "tb-project-profile";
 
     @FindBy(id="tb-project-profile-add-item")
@@ -31,18 +34,17 @@ public class ProjectProfileConfigurationTab extends AbstractUiFragment {
     
     private SnackBarComponent snackbar;
 
-    private ProjectInfo projectInfo;
-
-    public ProjectProfileConfigurationTab(WebDriver driver, ProjectInfo projectInfo) {
-        super(driver);
-        initElements(driver, this);
-        this.snackbar = new SnackBarComponent(driver, By.cssSelector(SNACK_BAR_TAG +"#tb-project-profile-snackbar"));
-        this.projectInfo = projectInfo;
+    public static TabsRouterComponent.TabFactory<ProjectProfileConfigurationTab> factory(ProjectInfo projectInfo) {
+        return (webDriver, tab) -> new ProjectProfileConfigurationTab(webDriver, tab, projectInfo);
     }
 
-    public ProjectProfileConfigurationTab assertTabIsOpen() {
-        waitUntilElementExists(By.tagName(PROJECT_PROFILE_CONFIGURATION_TAG));
-        return this;
+    public ProjectProfileConfigurationTab(
+            WebDriver driver,
+            TabComponent<ProjectProfileConfigurationTab> tab,
+            ProjectInfo projectInfo) {
+        super(driver, tab, projectInfo);
+        initElements(driver, this);
+        this.snackbar = new SnackBarComponent(driver, By.cssSelector(SNACK_BAR_TAG +"#tb-project-profile-snackbar"));
     }
 
     public ProjectConfigurationDialog backToProject() {
@@ -50,12 +52,6 @@ public class ProjectProfileConfigurationTab extends AbstractUiFragment {
         return new ProjectConfigurationDialog(webDriver, projectInfo).assertIsOpen();
     }
 
-    public ProjectProfileConfigurationTab refresh() {
-        webDriver.navigate().refresh();
-        assertTabIsOpen();
-        return this;
-    }
-    
     public ProjectProfileConfigurationTab save() {
         waitForClick(saveButton);
         return this;

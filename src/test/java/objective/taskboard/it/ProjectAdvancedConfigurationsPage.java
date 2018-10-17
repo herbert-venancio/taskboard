@@ -1,6 +1,10 @@
 package objective.taskboard.it;
 
+import static objective.taskboard.it.ProjectClusterConfiguration.CLUSTER_TAB_NAME;
+import static objective.taskboard.it.ProjectDefaultTeamsConfiguration.TEAMS_TAB_NAME;
+import static objective.taskboard.it.ProjectProfileConfigurationTab.PROFILE_TAB_NAME;
 import static objective.taskboard.it.ProjectProfileConfigurationTab.PROJECT_PROFILE_CONFIGURATION_TAG;
+import static objective.taskboard.it.ProjectClusterConfiguration.PROJECT_CLUSTER_CONFIGURATION_TAG;
 import static objective.taskboard.it.ProjectDefaultTeamsConfiguration.PROJECT_TEAMS_CONFIGURATION_TAG;
 import static objective.taskboard.it.components.TabsRouterComponent.TABS_ROUTER_TAG;
 import static org.openqa.selenium.By.cssSelector;
@@ -27,22 +31,27 @@ public class ProjectAdvancedConfigurationsPage extends AbstractUiFragment {
         this.projectInfo = projectInfo;
         initElements(driver, this);
         assertPageIsOpen();
-        tabs = new TabsRouterComponent(driver, cssSelector(TABS_ROUTER_TAG), "Profile", "Teams");
+        tabs = new TabsRouterComponent(driver, cssSelector(TABS_ROUTER_TAG));
+        tabs.addTab(PROFILE_TAB_NAME, PROJECT_PROFILE_CONFIGURATION_TAG, ProjectProfileConfigurationTab.factory(projectInfo));
+        tabs.addTab(TEAMS_TAB_NAME  , PROJECT_TEAMS_CONFIGURATION_TAG  , ProjectDefaultTeamsConfiguration.factory(projectInfo));
+        tabs.addTab(CLUSTER_TAB_NAME, PROJECT_CLUSTER_CONFIGURATION_TAG, ProjectClusterConfiguration.factory(projectInfo));
+        tabs.waitAllTabsExists();
     }
 
     public ProjectProfileConfigurationTab selectProfileConfiguration() {
-        tabs.select("Profile", PROJECT_PROFILE_CONFIGURATION_TAG);
-        return new ProjectProfileConfigurationTab(webDriver, projectInfo).assertTabIsOpen();
+        return tabs.<ProjectProfileConfigurationTab>selectTab(PROFILE_TAB_NAME).waitLoaded();
     }
 
     public ProjectDefaultTeamsConfiguration selectTeamsConfiguration() {
-        tabs.select("Teams", PROJECT_TEAMS_CONFIGURATION_TAG);
-        return new ProjectDefaultTeamsConfiguration(webDriver, projectInfo).assertTabIsOpen();
+        return tabs.<ProjectDefaultTeamsConfiguration>selectTab(TEAMS_TAB_NAME).waitLoaded();
+    }
+
+    public ProjectClusterConfiguration selectClusterConfiguration() {
+        return tabs.<ProjectClusterConfiguration>selectTab(CLUSTER_TAB_NAME).waitLoaded();
     }
 
     private ProjectAdvancedConfigurationsPage assertPageIsOpen() {
         waitTextInElement(pageTitle, projectInfo.name +" > Advanced Configurations");
         return this;
     }
-
 }

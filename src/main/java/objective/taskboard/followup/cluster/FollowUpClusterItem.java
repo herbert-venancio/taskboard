@@ -6,12 +6,14 @@ import objective.taskboard.domain.ProjectFilterConfiguration;
 
 public class FollowUpClusterItem {
 
+    private Long entityId;
     private ProjectFilterConfiguration project;
     private String subtaskTypeName;
     private String parentTypeName;
     private String sizing;
     private Double effort;
     private Double cycle;
+    private Boolean isFromBaseCluster;
     
     public FollowUpClusterItem(
             ProjectFilterConfiguration project,
@@ -21,18 +23,44 @@ public class FollowUpClusterItem {
             Double effort,
             Double cycle
             ) {
+        setEntityId(0L);
         setProject(project);
         setSubtaskTypeName(subtaskTypeName);
         setParentTypeName(parentTypeName);
         setSizing(sizing);
         setEffort(effort);
         setCycle(cycle);
+        isFromBaseCluster(false);
     }
-    
-    protected FollowUpClusterItem() {
-        //JPA
+
+    public FollowUpClusterItem(
+            Long entityId,
+            ProjectFilterConfiguration project,
+            String subtaskTypeName,
+            String parentTypeName,
+            String sizing,
+            Double effort,
+            Double cycle,
+            Boolean isFromBaseCluster
+            ) {
+        setEntityId(entityId);
+        setProject(project);
+        setSubtaskTypeName(subtaskTypeName);
+        setParentTypeName(parentTypeName);
+        setSizing(sizing);
+        setEffort(effort);
+        setCycle(cycle);
+        isFromBaseCluster(isFromBaseCluster);
     }
-    
+
+    public Long getEntityId() {
+        return entityId;
+    }
+
+    public void setEntityId(Long entityId) {
+        this.entityId = entityId;
+    }
+
     public ProjectFilterConfiguration getProject() { 
         return project; 
     } 
@@ -85,9 +113,18 @@ public class FollowUpClusterItem {
         this.cycle = cycle;
     }
 
+    public Boolean isFromBaseCluster() {
+        return isFromBaseCluster;
+    }
+
+    public void isFromBaseCluster(Boolean isFromBaseCluster) {
+        this.isFromBaseCluster = isFromBaseCluster;
+    }
+
     @Override
     public String toString() {
-        return "FollowUpClusterItem [project=" + project + ", subtaskTypeName=" + subtaskTypeName + ", parentTypeName="
-                + parentTypeName + ", sizing=" + sizing + ", effort=" + effort + ", cycle=" + cycle + "]";
+        return "FollowUpClusterItem [entityId=" + entityId + ", project=" + project + ", subtaskTypeName="
+                + subtaskTypeName + ", parentTypeName=" + parentTypeName + ", sizing=" + sizing + ", effort=" + effort
+                + ", cycle=" + cycle + ", isFromBaseCluster=" + isFromBaseCluster + "]";
     }
 }

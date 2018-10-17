@@ -1,0 +1,7 @@
+<div class="header" (click)="toggleCollapsed()">
+    <span class="obj-title-small title">{{title}}</span>
+    <obj-icon [iconName]="collapsed ? 'chevron-bottom' : 'chevron-top'" class="collapse-icon small"></obj-icon>
+</div>
+<div class="content">
+    <ng-content></ng-content>
+</div>

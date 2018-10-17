@@ -3,6 +3,7 @@ import {ProjectRoutingModule} from './project-routing.module';
 import {SharedModule} from 'app/shared/shared.module';
 import {ProjectProfileComponent} from './config/profile/project-profile.component';
 import {ProjectTeamsComponent} from './config/teams/project-teams.component';
+import {ProjectClusterComponent} from './config/cluster/project-cluster.component';
 import {FormsModule} from '@angular/forms';
 import {NgSelectModule} from '@ng-select/ng-select';
 import {ProjectConfigComponent} from "./config/project-config.component";
@@ -17,6 +18,7 @@ import {ProjectConfigComponent} from "./config/project-config.component";
     declarations: [
         ProjectProfileComponent,
         ProjectTeamsComponent,
+        ProjectClusterComponent,
         ProjectConfigComponent
     ]
 })

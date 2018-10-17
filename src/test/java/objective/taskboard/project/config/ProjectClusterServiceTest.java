@@ -8,8 +8,10 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import objective.taskboard.domain.ProjectFilterConfiguration;
@@ -17,7 +19,6 @@ import objective.taskboard.followup.cluster.FollowUpClusterItem;
 import objective.taskboard.followup.cluster.FollowupClusterImpl;
 import objective.taskboard.followup.cluster.FollowupClusterProvider;
 import objective.taskboard.project.config.IssueTypeSizesProvider.IssueTypeSize;
-import objective.taskboard.project.config.ProjectClusterService.ProjectClusterItem;
 
 public class ProjectClusterServiceTest {
 
@@ -25,13 +26,18 @@ public class ProjectClusterServiceTest {
 
     private FollowupClusterProvider clusterProvider = mock(FollowupClusterProvider.class);
     private IssueTypeSizesProvider issueTypeSizesProvider = mock(IssueTypeSizesProvider.class);
-    private ProjectClusterItemDaoMock projectClusterItemDaoMock = new ProjectClusterItemDaoMock();
+    private ProjectClusterItemRepositoryMock projectClusterItemRepositoryMock = new ProjectClusterItemRepositoryMock();
     private ProjectFilterConfiguration project = mock(ProjectFilterConfiguration.class);
 
-    private ProjectClusterService subject = new ProjectClusterService(clusterProvider, issueTypeSizesProvider, projectClusterItemDaoMock);
+    private ProjectClusterService subject = new ProjectClusterService(clusterProvider, issueTypeSizesProvider, projectClusterItemRepositoryMock);
+    
+    @Before
+    public void setUp() {
+        when(project.getProjectKey()).thenReturn(PROJ);
+    }
 
     @Test
-    public void whenGetProjectCluster_thenShouldReturnClusterSuccessfully() {
+    public void whenGetItems_thenShouldReturnAllItems() {
         issueTypeSizes(
             issueTypeSize("Alpha Test", "XS"),
             issueTypeSize("Alpha Test", "S"),
@@ -51,46 +57,59 @@ public class ProjectClusterServiceTest {
         );
 
         followUpCluster(
-            followUpClusterItem("Alpha Test", "XS", 1D, 1D),
-            followUpClusterItem("Alpha Test", "S", 2D, 2D),
-            followUpClusterItem("Alpha Test", "M", 3D, 3D),
-            followUpClusterItem("Alpha Test", "L", 4D, 4D),
-            followUpClusterItem("Alpha Test", "XL", 5D, 5D),
-            followUpClusterItem("Backend Development", "XS", 1D, 1D),
-            followUpClusterItem("Backend Development", "S", 2D, 2D),
-            followUpClusterItem("Backend Development", "M", 3D, 3D)
+            followUpClusterItem(1L, "Alpha Test", "XS", 1D, 1D, true),
+            followUpClusterItem(2L, "Alpha Test", "S", 2D, 2D, true),
+            followUpClusterItem(3L, "Alpha Test", "M", 3D, 3D, true),
+            followUpClusterItem(4L, "Alpha Test", "L", 4D, 4D, false),
+            followUpClusterItem(5L, "Alpha Test", "XL", 5D, 5D, false),
+            followUpClusterItem(6L, "Backend Development", "XS", 1D, 1D, true),
+            followUpClusterItem(7L, "Backend Development", "S", 2D, 2D, true),
+            followUpClusterItem(8L, "Backend Development", "M", 3D, 3D, true)
         );
 
-        List<ProjectClusterItem> projectClusterItems = subject.getItems(project);
+        List<ProjectClusterItemDto> projectClusterItemsDto = subject.getItems(project);
 
-        assertEquals(15, projectClusterItems.size());
-        assertItems(projectClusterItems,
-                "Alpha Test | XS | 1 | 1",
-                "Alpha Test | S | 2 | 2",
-                "Alpha Test | M | 3 | 3",
-                "Alpha Test | L | 4 | 4",
-                "Alpha Test | XL | 5 | 5",
-                "Backend Development | XS | 1 | 1",
-                "Backend Development | S | 2 | 2",
-                "Backend Development | M | 3 | 3",
-                "Backend Development | L | 0 | 0",
-                "Backend Development | XL | 0 | 0",
-                "Feature Planning | XS | 0 | 0",
-                "Feature Planning | S | 0 | 0",
-                "Feature Planning | M | 0 | 0",
-                "Feature Planning | L | 0 | 0",
-                "Feature Planning | XL | 0 | 0");
+        assertEquals(15, projectClusterItemsDto.size());
+        assertItems(projectClusterItemsDto,
+                "PROJ | Alpha Test | XS | 1 | 1 | true",
+                "PROJ | Alpha Test | S | 2 | 2 | true",
+                "PROJ | Alpha Test | M | 3 | 3 | true",
+                "PROJ | Alpha Test | L | 4 | 4 | false",
+                "PROJ | Alpha Test | XL | 5 | 5 | false",
+                "PROJ | Backend Development | XS | 1 | 1 | true",
+                "PROJ | Backend Development | S | 2 | 2 | true",
+                "PROJ | Backend Development | M | 3 | 3 | true",
+                "PROJ | Backend Development | L | 0 | 0 | false",
+                "PROJ | Backend Development | XL | 0 | 0 | false",
+                "PROJ | Feature Planning | XS | 0 | 0 | false",
+                "PROJ | Feature Planning | S | 0 | 0 | false",
+                "PROJ | Feature Planning | M | 0 | 0 | false",
+                "PROJ | Feature Planning | L | 0 | 0 | false",
+                "PROJ | Feature Planning | XL | 0 | 0 | false");
     }
 
     @Test
-    public void giveNoProjectCluster_whenUpdateProjectCluster_thenShouldCreate() {
-        when(project.getProjectKey()).thenReturn(PROJ);
+    public void givenNoItems_whenUpdateItems_thenShouldCreateOnlyItemsWithEffortOrCycleGreaterThanZero() {
+        followUpCluster();
 
-        projectClusterItemDaoMock.assertItems();
+        projectClusterItemRepositoryMock.assertItems();
 
-        subject.updateItems(project, requestForUpdate());
+        List<ProjectClusterItemDtoBuilder> builders = new ArrayList<>();
+        builders.add(projectClusterItem().issueType("Alpha Test").sizing("XS").effort(2D).cycle(2D));
+        builders.add(projectClusterItem().issueType("Alpha Test").sizing("S").effort(3D).cycle(3D));
+        builders.add(projectClusterItem().issueType("Alpha Test").sizing("M").effort(4D).cycle(4D));
+        builders.add(projectClusterItem().issueType("Alpha Test").sizing("L").effort(5D).cycle(5D));
+        builders.add(projectClusterItem().issueType("Alpha Test").sizing("XL").effort(6D).cycle(6D));
+        builders.add(projectClusterItem().issueType("Backend Development").sizing("XS").effort(2D).cycle(2D));
+        builders.add(projectClusterItem().issueType("Backend Development").sizing("S").effort(3D).cycle(3D));
+        builders.add(projectClusterItem().issueType("Backend Development").sizing("M").effort(0D).cycle(4D));
+        builders.add(projectClusterItem().issueType("Backend Development").sizing("L").effort(5D).cycle(0D));
+        builders.add(projectClusterItem().issueType("Backend Development").sizing("XL").effort(0D).cycle(0D));
+        List<ProjectClusterItemDto> itemsDtoUpdate = builders.stream().map(b -> b.build()).collect(Collectors.toList());
 
-        projectClusterItemDaoMock.assertItems(
+        subject.updateItems(project, itemsDtoUpdate);
+
+        projectClusterItemRepositoryMock.assertItems(
                 "Alpha Test | notused | XS | 2 | 2 | PROJ | null",
                 "Alpha Test | notused | S | 3 | 3 | PROJ | null",
                 "Alpha Test | notused | M | 4 | 4 | PROJ | null",
@@ -98,14 +117,19 @@ public class ProjectClusterServiceTest {
                 "Alpha Test | notused | XL | 6 | 6 | PROJ | null",
                 "Backend Development | notused | XS | 2 | 2 | PROJ | null",
                 "Backend Development | notused | S | 3 | 3 | PROJ | null",
-                "Backend Development | notused | M | 4 | 4 | PROJ | null",
-                "Backend Development | notused | L | 5 | 5 | PROJ | null",
-                "Backend Development | notused | XL | 6 | 6 | PROJ | null");
+                "Backend Development | notused | M | 0 | 4 | PROJ | null",
+                "Backend Development | notused | L | 5 | 0 | PROJ | null");
     }
 
     @Test
-    public void givenProjectCluster_whenUpdateProjectCluster_thenShouldUpdate() {
-        when(project.getProjectKey()).thenReturn(PROJ);
+    public void givenProjectClusterItems_whenUpdateItems_thenShouldUpdateThem() {
+        followUpCluster(
+            followUpClusterItem(1L, "Alpha Test", "XS", 1D, 1D, false),
+            followUpClusterItem(2L, "Alpha Test", "S", 2D, 2D, false),
+            followUpClusterItem(3L, "Alpha Test", "M", 3D, 3D, false),
+            followUpClusterItem(4L, "Alpha Test", "L", 4D, 4D, false),
+            followUpClusterItem(5L, "Alpha Test", "XL", 5D, 5D, false)
+        );
 
         projectCluster(
             projectClusterItem().issueType("Alpha Test").sizing("XS").effort(1D).cycle(1D),
@@ -115,16 +139,16 @@ public class ProjectClusterServiceTest {
             projectClusterItem().issueType("Alpha Test").sizing("XL").effort(5D).cycle(5D)
         );
 
-        List<ProjectClusterItem> itemsUpdate = new ArrayList<>();
-        itemsUpdate.add(projectClusterItem().issueType("Alpha Test").sizing("XS").effort(2D).cycle(2D).build());
-        itemsUpdate.add(projectClusterItem().issueType("Alpha Test").sizing("S").effort(3D).cycle(3D).build());
-        itemsUpdate.add(projectClusterItem().issueType("Alpha Test").sizing("M").effort(4D).cycle(4D).build());
-        itemsUpdate.add(projectClusterItem().issueType("Alpha Test").sizing("L").effort(5D).cycle(5D).build());
-        itemsUpdate.add(projectClusterItem().issueType("Alpha Test").sizing("XL").effort(6D).cycle(6D).build());
+        List<ProjectClusterItemDto> itemsDtoUpdate = new ArrayList<>();
+        itemsDtoUpdate.add(projectClusterItem().issueType("Alpha Test").sizing("XS").effort(2D).cycle(2D).build());
+        itemsDtoUpdate.add(projectClusterItem().issueType("Alpha Test").sizing("S").effort(3D).cycle(3D).build());
+        itemsDtoUpdate.add(projectClusterItem().issueType("Alpha Test").sizing("M").effort(4D).cycle(4D).build());
+        itemsDtoUpdate.add(projectClusterItem().issueType("Alpha Test").sizing("L").effort(5D).cycle(5D).build());
+        itemsDtoUpdate.add(projectClusterItem().issueType("Alpha Test").sizing("XL").effort(6D).cycle(6D).build());
 
-        subject.updateItems(project, itemsUpdate);
+        subject.updateItems(project, itemsDtoUpdate);
 
-        projectClusterItemDaoMock.assertItems(
+        projectClusterItemRepositoryMock.assertItems(
                 "Alpha Test | notused | XS | 2 | 2 | PROJ | null",
                 "Alpha Test | notused | S | 3 | 3 | PROJ | null",
                 "Alpha Test | notused | M | 4 | 4 | PROJ | null",
@@ -133,8 +157,19 @@ public class ProjectClusterServiceTest {
     }
 
     @Test
-    public void givenNoMatchedProjectCluster_whenUpdateProjectCluster_thenShouldCreate() {
-        when(project.getProjectKey()).thenReturn(PROJ);
+    public void givenProjectClusterItemsFromBaseCluster_whenUpdateItems_thenShouldCreateOnlyWhenChanged() {
+        followUpCluster(
+            followUpClusterItem(1L, "Alpha Test", "XS", 1D, 1D, false),
+            followUpClusterItem(2L, "Alpha Test", "S", 2D, 2D, false),
+            followUpClusterItem(3L, "Alpha Test", "M", 3D, 3D, false),
+            followUpClusterItem(4L, "Alpha Test", "L", 4D, 4D, false),
+            followUpClusterItem(5L, "Alpha Test", "XL", 5D, 5D, false),
+            followUpClusterItem(6L, "Backend Development", "XS", 1D, 1D, true),
+            followUpClusterItem(7L, "Backend Development", "S", 2D, 3D, true),
+            followUpClusterItem(8L, "Backend Development", "M", 4D, 3D, true),
+            followUpClusterItem(9L, "Backend Development", "L", 5D, 5D, true),
+            followUpClusterItem(10L, "Backend Development", "XL", 6D, 6D, true)
+        );
 
         projectCluster(
             projectClusterItem().issueType("Alpha Test").sizing("XS").effort(1D).cycle(1D),
@@ -144,9 +179,22 @@ public class ProjectClusterServiceTest {
             projectClusterItem().issueType("Alpha Test").sizing("XL").effort(5D).cycle(5D)
         );
 
-        subject.updateItems(project, requestForUpdate());
+        List<ProjectClusterItemDtoBuilder> builders = new ArrayList<>();
+        builders.add(projectClusterItem().issueType("Alpha Test").sizing("XS").effort(2D).cycle(2D));
+        builders.add(projectClusterItem().issueType("Alpha Test").sizing("S").effort(3D).cycle(3D));
+        builders.add(projectClusterItem().issueType("Alpha Test").sizing("M").effort(4D).cycle(4D));
+        builders.add(projectClusterItem().issueType("Alpha Test").sizing("L").effort(5D).cycle(5D));
+        builders.add(projectClusterItem().issueType("Alpha Test").sizing("XL").effort(6D).cycle(6D));
+        builders.add(projectClusterItem().issueType("Backend Development").sizing("XS").effort(2D).cycle(2D));
+        builders.add(projectClusterItem().issueType("Backend Development").sizing("S").effort(3D).cycle(3D));
+        builders.add(projectClusterItem().issueType("Backend Development").sizing("M").effort(4D).cycle(4D));
+        builders.add(projectClusterItem().issueType("Backend Development").sizing("L").effort(5D).cycle(5D));
+        builders.add(projectClusterItem().issueType("Backend Development").sizing("XL").effort(7D).cycle(7D));
+        List<ProjectClusterItemDto> itemsDtoUpdate = builders.stream().map(b -> b.build()).collect(Collectors.toList());
 
-        projectClusterItemDaoMock.assertItems(
+        subject.updateItems(project, itemsDtoUpdate);
+
+        projectClusterItemRepositoryMock.assertItems(
                 "Alpha Test | notused | XS | 2 | 2 | PROJ | null",
                 "Alpha Test | notused | S | 3 | 3 | PROJ | null",
                 "Alpha Test | notused | M | 4 | 4 | PROJ | null",
@@ -155,8 +203,7 @@ public class ProjectClusterServiceTest {
                 "Backend Development | notused | XS | 2 | 2 | PROJ | null",
                 "Backend Development | notused | S | 3 | 3 | PROJ | null",
                 "Backend Development | notused | M | 4 | 4 | PROJ | null",
-                "Backend Development | notused | L | 5 | 5 | PROJ | null",
-                "Backend Development | notused | XL | 6 | 6 | PROJ | null");
+                "Backend Development | notused | XL | 7 | 7 | PROJ | null");
     }
 
     private void issueTypeSizes(IssueTypeSize... issueTypeSizes) {
@@ -171,51 +218,51 @@ public class ProjectClusterServiceTest {
         when(clusterProvider.getFor(project)).thenReturn(new FollowupClusterImpl(asList(followUpClusterItems)));
     }
 
-    private FollowUpClusterItem followUpClusterItem(String issueType, String size, Double effort, Double cycle) {
-        return new FollowUpClusterItem(project, issueType, "notused", size, effort, cycle);
+    private FollowUpClusterItem followUpClusterItem(Long entityId, String issueType, String size, Double effort, Double cycle, Boolean isFromBaseCluster) {
+        return new FollowUpClusterItem(entityId, project, issueType, "notused", size, effort, cycle, isFromBaseCluster);
     }
 
-    private void projectCluster(ProjectClusterItemBuilder... builders) {
+    private void projectCluster(ProjectClusterItemDtoBuilder... builders) {
         asList(builders).stream()
-            .forEach(builder -> projectClusterItemDaoMock.create(project, builder.build()));
+            .forEach(builder -> projectClusterItemRepositoryMock.create(builder.build()));
     }
 
-    private ProjectClusterItemBuilder projectClusterItem() {
-        return new ProjectClusterItemBuilder();
+    private ProjectClusterItemDtoBuilder projectClusterItem() {
+        return new ProjectClusterItemDtoBuilder();
     }
 
-    private class ProjectClusterItemBuilder {
+    private class ProjectClusterItemDtoBuilder {
         private String issueType;
         private String sizing;
         private Double effort;
         private Double cycle;
 
-        private ProjectClusterItemBuilder issueType(String issueType) {
+        private ProjectClusterItemDtoBuilder issueType(String issueType) {
             this.issueType = issueType;
             return this;
         }
 
-        private ProjectClusterItemBuilder cycle(Double cycle) {
+        private ProjectClusterItemDtoBuilder cycle(Double cycle) {
             this.cycle = cycle;
             return this;
         }
 
-        private ProjectClusterItemBuilder effort(Double effort) {
+        private ProjectClusterItemDtoBuilder effort(Double effort) {
             this.effort = effort;
             return this;
         }
 
-        private ProjectClusterItemBuilder sizing(String sizing) {
+        private ProjectClusterItemDtoBuilder sizing(String sizing) {
             this.sizing = sizing;
             return this;
         }
 
-        private ProjectClusterItem build() {
-            return new ProjectClusterItem(issueType, sizing, effort, cycle);
+        private ProjectClusterItemDto build() {
+            return new ProjectClusterItemDto(PROJ, issueType, sizing, effort, cycle, false);
         }
     }
 
-    private void assertItems(List<ProjectClusterItem> clusterItems, String... expectedItems) {
+    private void assertItems(List<ProjectClusterItemDto> clusterItems, String... expectedItems) {
         String expected = Stream.of(expectedItems)
                 .map(item -> item.replaceAll("\\s+", " "))
                 .collect(joining("\n"));
@@ -227,27 +274,14 @@ public class ProjectClusterServiceTest {
         assertEquals(expected, actual);
     }
 
-    private String toString(ProjectClusterItem item) {
-        return String.format("%s | %s | %.0f | %.0f",
+    private String toString(ProjectClusterItemDto item) {
+        return String.format("%s | %s | %s | %.0f | %.0f | %b",
+                item.getProjectKey(),
                 item.getIssueType(),
                 item.getSizing(),
                 item.getEffort(),
-                item.getCycle());
-    }
-
-    private List<ProjectClusterItem> requestForUpdate() {
-        List<ProjectClusterItem> items = new ArrayList<>();
-        items.add(projectClusterItem().issueType("Alpha Test").sizing("XS").effort(2D).cycle(2D).build());
-        items.add(projectClusterItem().issueType("Alpha Test").sizing("S").effort(3D).cycle(3D).build());
-        items.add(projectClusterItem().issueType("Alpha Test").sizing("M").effort(4D).cycle(4D).build());
-        items.add(projectClusterItem().issueType("Alpha Test").sizing("L").effort(5D).cycle(5D).build());
-        items.add(projectClusterItem().issueType("Alpha Test").sizing("XL").effort(6D).cycle(6D).build());
-        items.add(projectClusterItem().issueType("Backend Development").sizing("XS").effort(2D).cycle(2D).build());
-        items.add(projectClusterItem().issueType("Backend Development").sizing("S").effort(3D).cycle(3D).build());
-        items.add(projectClusterItem().issueType("Backend Development").sizing("M").effort(4D).cycle(4D).build());
-        items.add(projectClusterItem().issueType("Backend Development").sizing("L").effort(5D).cycle(5D).build());
-        items.add(projectClusterItem().issueType("Backend Development").sizing("XL").effort(6D).cycle(6D).build());
-        return items;
+                item.getCycle(),
+                item.isFromBaseCluster());
     }
 
 }

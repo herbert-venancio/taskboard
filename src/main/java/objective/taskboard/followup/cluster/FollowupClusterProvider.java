@@ -80,6 +80,14 @@ public class FollowupClusterProvider {
     }
 
     private FollowUpClusterItem convertToFollowUpClusterItem(final ProjectFilterConfiguration project, final SizingClusterItem item) {
-        return new FollowUpClusterItem(project, item.getSubtaskTypeName(), item.getParentTypeName(), item.getSizing(), item.getEffort(), item.getCycle());
+        return new FollowUpClusterItem(
+                item.getId(),
+                project,
+                item.getSubtaskTypeName(),
+                item.getParentTypeName(),
+                item.getSizing(),
+                item.getEffort(),
+                item.getCycle(),
+                item.getBaseCluster().isPresent());
     }
 }
