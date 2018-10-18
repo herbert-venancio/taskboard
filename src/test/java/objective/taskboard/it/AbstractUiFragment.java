@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
@@ -328,16 +329,21 @@ public abstract class AbstractUiFragment {
     }
 
     protected boolean isElementVisibleAndExists(By selector) {
-        List<WebElement> elements = webDriver.findElements(selector);
-        return elements.size() > 0 && elements.get(0).isDisplayed();
+        try {
+            WebElement element = webDriver.findElement(selector);
+            return element.isDisplayed();
+        } catch (NoSuchElementException e) {
+            return false;
+        } catch (StaleElementReferenceException e) {
+            return false;
+        }
     }
 
     protected void waitElementNotExistsOrInvisible(By selector) {
         waitUntil(new ExpectedCondition<Boolean>() {
             @Override
             public Boolean apply(WebDriver input) {
-                List<WebElement> elements = webDriver.findElements(selector);
-                return elements.size() == 0 || !elements.get(0).isDisplayed();
+                return !isElementVisibleAndExists(selector);
             }
         });
     }
