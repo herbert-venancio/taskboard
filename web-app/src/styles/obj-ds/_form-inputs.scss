@@ -64,6 +64,19 @@ $obj-input-padding: 0 16px;
     @extend %_obj-input-base;
 }
 
+.obj-number-field-without-spin {
+    @extend %_obj-input-base;
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+    }
+
+    &[type='number'] {
+        -moz-appearance: textfield;
+    }
+}
+
 .obj-search-field {
     @include obj-input-generator(
             "&",
