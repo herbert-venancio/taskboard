@@ -15,13 +15,13 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td>Effort <span class="small">(in hours)</span></td>
+                        <td>Effort</td>
                         <td class="input" *ngFor="let s of clusterType.sizings">
                             <input type="number"
                                    attr.name="effort-{{s.sizing}}"
                                    name="effort-{{s.sizing}}"
-                                   objTextField
-                                   #effort="objTextField"
+                                   objNumberFieldWithoutSpin
+                                   #effort="objNumberFieldWithoutSpin"
                                    #sizingInput
                                    [(ngModel)]="s.effort"
                                    required
@@ -36,13 +36,13 @@
                         </td>
                     </tr>
                     <tr>
-                        <td>Cycle <span class="small">(in days)</span></td>
+                        <td>Cycle</td>
                         <td class="input" *ngFor="let s of clusterType.sizings">
                             <input type="number"
                                    attr.name="cycle-{{s.sizing}}"
                                    name="cycle-{{s.sizing}}"
-                                   objTextField
-                                   #cycle="objTextField"
+                                   objNumberFieldWithoutSpin
+                                   #cycle="objNumberFieldWithoutSpin"
                                    #sizingInput
                                    [(ngModel)]="s.cycle"
                                    required
@@ -62,7 +62,10 @@
     </div>
 
     <div class="footer">
-        <span class="small" *ngIf="hasBaseCluster">* Base cluster</span>
+        <div class="footer-caption">
+            <p class="small">(All the numbers are in hours)</p>
+            <p class="small" *ngIf="hasBaseCluster">* Base cluster</p>
+        </div>
         <button type="button" id="tb-project-cluster-back-to-project" obj-button (click)="backToProject()">Back to Project</button>
         <button type="submit" id="tb-project-cluster-save" obj-button class="primary" [disabled]="projectClusterForm.pristine">Save</button>
     </div>

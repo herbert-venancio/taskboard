@@ -39,16 +39,17 @@ obj-expansion-panel:last-of-type {
     font-family: $obj-font-ptsans;
     font-size: 12px;
     color: $obj-color-smoke;
+    line-height: 14px;
 }
 
 .footer {
+    display: flex;
     padding-top: 16px;
-    text-align: right;
+    align-items: center;
 
-    span {
-        float: left;
-        margin-left: 0px;
-        margin-top: 10px;
+    .footer-caption {
+        flex: 1;
+        margin-left: 0;
     }
 
     > * {
