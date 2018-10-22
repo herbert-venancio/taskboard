@@ -22,7 +22,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import objective.taskboard.auth.Authorizer;
+import objective.taskboard.auth.authorizer.Authorizer;
 import objective.taskboard.followup.FollowUpFacade;
 import objective.taskboard.followup.FollowUpHistoryKeeper;
 import objective.taskboard.followup.TemplateService;

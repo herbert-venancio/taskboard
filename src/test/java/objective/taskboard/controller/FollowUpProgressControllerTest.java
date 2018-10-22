@@ -1,7 +1,7 @@
 package objective.taskboard.controller;
 
+import static objective.taskboard.auth.authorizer.Permissions.PROJECT_DASHBOARD_TACTICAL;
 import static objective.taskboard.config.CacheConfiguration.DASHBOARD_PROGRESS_DATA;
-import static objective.taskboard.repository.PermissionRepository.DASHBOARD_TACTICAL;
 import static objective.taskboard.utils.DateTimeUtils.determineTimeZoneId;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -26,7 +26,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.guava.GuavaCacheManager;
 
-import objective.taskboard.auth.Authorizer;
+import objective.taskboard.auth.authorizer.Authorizer;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.ProjectDatesNotConfiguredException;
 import objective.taskboard.followup.cluster.ClusterNotConfiguredException;
@@ -66,7 +66,7 @@ public class FollowUpProgressControllerTest {
         setupValidProject();
 
         MockitoAnnotations.initMocks(this);
-        when(authorizer.hasPermissionInProject(DASHBOARD_TACTICAL, PROJECT_KEY)).thenReturn(true);
+        when(authorizer.hasPermission(PROJECT_DASHBOARD_TACTICAL, PROJECT_KEY)).thenReturn(true);
         when(cacheManager.getCache(DASHBOARD_PROGRESS_DATA)).thenReturn(new GuavaCacheManager(DASHBOARD_PROGRESS_DATA).getCache(DASHBOARD_PROGRESS_DATA));
         when(projects.getProjectByKey(PROJECT_KEY)).thenReturn(Optional.of(project));
         when(calculator.calculate(eq(determineTimeZoneId(ZONE_ID)), eq(PROJECT_KEY), anyInt())).thenReturn(new ProgressData());
@@ -103,7 +103,7 @@ public class FollowUpProgressControllerTest {
 
     @Test
     public void ifUserHasNoPermissionInTactical_returnResourceNotFound() throws Exception {
-        when(authorizer.hasPermissionInProject(DASHBOARD_TACTICAL, PROJECT_KEY)).thenReturn(false);
+        when(authorizer.hasPermission(PROJECT_DASHBOARD_TACTICAL, PROJECT_KEY)).thenReturn(false);
 
         AssertResponse.of(subject.progress(PROJECT_KEY, ZONE_ID, Optional.empty()))
                 .httpStatus(NOT_FOUND)

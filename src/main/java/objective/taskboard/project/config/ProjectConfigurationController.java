@@ -1,7 +1,7 @@
 package objective.taskboard.project.config;
 
 import static java.util.stream.Collectors.toList;
-import static objective.taskboard.repository.PermissionRepository.ADMINISTRATIVE;
+import static objective.taskboard.auth.authorizer.Permissions.PROJECT_ADMINISTRATION;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 import java.math.BigDecimal;
@@ -31,14 +31,14 @@ public class ProjectConfigurationController {
 
     @GetMapping("items")
     public List<ProjectListItemDto> getItems() {
-        return projectService.getTaskboardProjects(ADMINISTRATIVE).stream()
+        return projectService.getTaskboardProjects(PROJECT_ADMINISTRATION).stream()
                 .map(ProjectListItemDto::from)
                 .collect(toList());
     }
 
     @GetMapping("edit/{projectKey}/init-data")
     public ResponseEntity<?> editGetInitData(@PathVariable("projectKey") String projectKey) {
-        Optional<ProjectFilterConfiguration> project = projectService.getTaskboardProject(projectKey, ADMINISTRATIVE);
+        Optional<ProjectFilterConfiguration> project = projectService.getTaskboardProject(projectKey, PROJECT_ADMINISTRATION);
         
         if (!project.isPresent())
             return ResponseEntity.notFound().build();
@@ -51,7 +51,7 @@ public class ProjectConfigurationController {
 
     @PostMapping("edit/{projectKey}")
     public ResponseEntity<?> editUpdate(@PathVariable("projectKey") String projectKey, @RequestBody ProjectConfigurationDto configDto) {
-        Optional<ProjectFilterConfiguration> optConfiguration = projectService.getTaskboardProject(projectKey, ADMINISTRATIVE);
+        Optional<ProjectFilterConfiguration> optConfiguration = projectService.getTaskboardProject(projectKey, PROJECT_ADMINISTRATION);
         if (!optConfiguration.isPresent())
             return ResponseEntity.notFound().build();
 
@@ -72,7 +72,7 @@ public class ProjectConfigurationController {
 
     @GetMapping("{projectKey}/name")
     public ResponseEntity<?> getName(@PathVariable("projectKey") String projectKey){
-        Optional<ProjectFilterConfiguration> project = projectService.getTaskboardProject(projectKey, ADMINISTRATIVE);
+        Optional<ProjectFilterConfiguration> project = projectService.getTaskboardProject(projectKey, PROJECT_ADMINISTRATION);
 
         String errorMessage = "Project \""+ projectKey +"\" not found.";
         if (!project.isPresent())

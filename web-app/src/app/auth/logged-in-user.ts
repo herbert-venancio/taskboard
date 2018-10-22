@@ -4,7 +4,10 @@ export class LoggedInUser {
         readonly username: string,
         readonly name: string,
         readonly avatarUrl: string,
-        readonly isAdmin: boolean
-    ) {
+        readonly permissions: string[]
+    ) {}
+
+    hasPermission(permission: string): boolean {
+        return this.permissions && this.permissions.some(tp => tp === permission);
     }
 }

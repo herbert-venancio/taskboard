@@ -1,5 +1,6 @@
 package objective.taskboard.project.config;
 
+import static objective.taskboard.auth.authorizer.Permissions.PROJECT_ADMINISTRATION;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -18,7 +19,6 @@ import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.project.ProjectProfileItem;
 import objective.taskboard.project.config.ProjectProfileConfigurationController.ProjectProfileItemDto;
-import objective.taskboard.repository.PermissionRepository;
 
 public class ProjectProfileConfigurationControllerTest {
     
@@ -31,7 +31,7 @@ public class ProjectProfileConfigurationControllerTest {
     @Before
     public void setup() {
         when(superProject.getProjectKey()).thenReturn("SP");
-        when(projectService.getTaskboardProject("SP", PermissionRepository.ADMINISTRATIVE)).thenReturn(Optional.of(superProject));
+        when(projectService.getTaskboardProject("SP", PROJECT_ADMINISTRATION)).thenReturn(Optional.of(superProject));
     }
 
     @Test
@@ -61,7 +61,7 @@ public class ProjectProfileConfigurationControllerTest {
 
     @Test
     public void updateItems_UserIsNotAllowedToAdminTheProject_ShouldReturnNotFound() {
-        when(projectService.getTaskboardProject("SP", PermissionRepository.ADMINISTRATIVE)).thenReturn(Optional.empty());
+        when(projectService.getTaskboardProject("SP", PROJECT_ADMINISTRATION)).thenReturn(Optional.empty());
         
         ProjectProfileItem devItem = new ProjectProfileItem(superProject, "Dev", 10.0, LocalDate.parse("2018-01-01"), LocalDate.parse("2018-03-01"));
         itemRepository.add(devItem);

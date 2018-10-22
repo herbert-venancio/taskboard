@@ -1,7 +1,7 @@
 package objective.taskboard.controller;
 
-import static objective.taskboard.repository.PermissionRepository.DASHBOARD_OPERATIONAL;
-import static objective.taskboard.repository.PermissionRepository.DASHBOARD_TACTICAL;
+import static objective.taskboard.auth.authorizer.Permissions.PROJECT_DASHBOARD_OPERATIONAL;
+import static objective.taskboard.auth.authorizer.Permissions.PROJECT_DASHBOARD_TACTICAL;
 import static objective.taskboard.utils.DateTimeUtils.determineTimeZoneId;
 
 import java.time.ZoneId;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import objective.taskboard.auth.Authorizer;
+import objective.taskboard.auth.authorizer.Authorizer;
 import objective.taskboard.followup.ThroughputKPIDataProvider;
 import objective.taskboard.jira.ProjectService;
 
@@ -36,8 +36,8 @@ public class ThroughputKPIController {
             @RequestParam("timezone") String zoneId,
             @RequestParam("level") String level) {
 
-        if (!authorizer.hasPermissionInProject(DASHBOARD_TACTICAL, projectKey) 
-                && !authorizer.hasPermissionInProject(DASHBOARD_OPERATIONAL, projectKey))
+        if (!authorizer.hasPermission(PROJECT_DASHBOARD_TACTICAL, projectKey)
+                && !authorizer.hasPermission(PROJECT_DASHBOARD_OPERATIONAL, projectKey))
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
         if (!projectService.taskboardProjectExists(projectKey))

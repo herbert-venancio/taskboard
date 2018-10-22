@@ -39,7 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
-import objective.taskboard.auth.Authorizer;
+import objective.taskboard.auth.authorizer.Authorizer;
 import objective.taskboard.domain.Project;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.jira.client.JiraCreateIssue;

@@ -3,6 +3,7 @@ package objective.taskboard.team;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
+import static objective.taskboard.auth.authorizer.Permissions.TASKBOARD_ADMINISTRATION;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -19,7 +20,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import objective.taskboard.auth.LoggedUserDetails;
+import objective.taskboard.auth.authorizer.Authorizer;
 import objective.taskboard.data.Team;
 import objective.taskboard.team.TeamsController.TeamDto;
 import objective.taskboard.testUtils.ControllerTestUtils.AssertResponse;
@@ -30,7 +31,7 @@ public class TeamsControllerTest {
     @Test
     public void getTeams_ifLoggedUserIsntAdmin_returnNotFound() {
         TeamsController subject = TeamsControllerMockBuilder.init()
-            .withLoggedUserIsAdmin(false)
+            .withTaskboardAdministrationPermission(false)
             .build();
 
         AssertResponse.of(subject.getTeams())
@@ -41,7 +42,7 @@ public class TeamsControllerTest {
     @Test
     public void getTeams_ifLoggedUserIsAdmin_returnOkWithSortedValues() {
         TeamsController subject = TeamsControllerMockBuilder.init()
-            .withLoggedUserIsAdmin(true)
+            .withTaskboardAdministrationPermission(true)
             .withTeamsThatUserCanAdmin(
                     new Team("TASKBOARD", "john", "", asList("liam", "emma", "mia")),
                     new Team("A", "john", "", asList("liam", "mary")),
@@ -73,7 +74,7 @@ public class TeamsControllerTest {
     @Test
     public void getTeam_ifLoggedUserIsntAdmin_returnNotFound() {
         TeamsController subject = TeamsControllerMockBuilder.init()
-            .withLoggedUserIsAdmin(false)
+            .withTaskboardAdministrationPermission(false)
             .build();
 
         AssertResponse.of(subject.getTeam("ANY"))
@@ -84,7 +85,7 @@ public class TeamsControllerTest {
     @Test
     public void getTeam_ifLoggedUserIsAdminButHeCantAdminOrTeamDoesntExist_returnBadRequestWithMessage() {
         TeamsController subject = TeamsControllerMockBuilder.init()
-            .withLoggedUserIsAdmin(true)
+            .withTaskboardAdministrationPermission(true)
             .build();
 
         AssertResponse.of(subject.getTeam("ANY"))
@@ -95,7 +96,7 @@ public class TeamsControllerTest {
     @Test
     public void getTeam_ifLoggedUserIsAdmin_returnOkWithValue() {
         TeamsController subject = TeamsControllerMockBuilder.init()
-            .withLoggedUserIsAdmin(true)
+            .withTaskboardAdministrationPermission(true)
             .withTeamsThatUserCanAdmin(
                     new Team("SDLC", "john", "", asList("james", "mary"))
             )
@@ -115,7 +116,7 @@ public class TeamsControllerTest {
     @Test
     public void updateTeam_ifLoggedUserIsntAdmin_returnNotFound() {
         TeamsController subject = TeamsControllerMockBuilder.init()
-            .withLoggedUserIsAdmin(false)
+            .withTaskboardAdministrationPermission(false)
             .build();
 
         AssertResponse.of(subject.updateTeam("ANY", new TeamDto()))
@@ -126,7 +127,7 @@ public class TeamsControllerTest {
     @Test
     public void updateTeam_ifLoggedUserIsAdminButDataIsInvalid_returnBadRequestWithMessage() throws Exception {
         TeamsController subject = TeamsControllerMockBuilder.init()
-            .withLoggedUserIsAdmin(true)
+            .withTaskboardAdministrationPermission(true)
             .build();
 
         TeamDto TeamDto = TeamDtoBuilder.init()
@@ -157,7 +158,7 @@ public class TeamsControllerTest {
     @Test
     public void updateTeam_ifLoggedUserIsAdminButHeCantAdminOrTeamDoesntExist_returnBadRequestWithMessage() {
         TeamsController subject = TeamsControllerMockBuilder.init()
-            .withLoggedUserIsAdmin(true)
+            .withTaskboardAdministrationPermission(true)
             .build();
 
         TeamDto TeamDto = TeamDtoBuilder.init()
@@ -173,7 +174,7 @@ public class TeamsControllerTest {
     @Test
     public void updateTeam_ifLoggedUserIsAdminAndDataIsValid_saveValuesAndReturnOk() {
         TeamsController subject = TeamsControllerMockBuilder.init()
-                .withLoggedUserIsAdmin(true)
+                .withTaskboardAdministrationPermission(true)
                 .withTeamsThatUserCanAdmin(
                         new Team("SDLC", "", "", asList())
                 )
@@ -195,17 +196,17 @@ public class TeamsControllerTest {
 
     private static class TeamsControllerMockBuilder {
 
-        private static LoggedUserDetails loggedInUser = mock(LoggedUserDetails.class);
+        private static Authorizer authorizer = mock(Authorizer.class);
         private static UserTeamService userTeamService = mock(UserTeamService.class);
 
-        private TeamsController subject = new TeamsController(loggedInUser, userTeamService);
+        private TeamsController subject = new TeamsController(authorizer, userTeamService);
 
         public static TeamsControllerMockBuilder init() {
             return new TeamsControllerMockBuilder();
         }
 
-        public TeamsControllerMockBuilder withLoggedUserIsAdmin(boolean isAdmin) {
-            when(loggedInUser.isAdmin()).thenReturn(isAdmin);
+        public TeamsControllerMockBuilder withTaskboardAdministrationPermission(boolean withPermission) {
+            when(authorizer.hasPermission(TASKBOARD_ADMINISTRATION)).thenReturn(withPermission);
             return this;
         }
 

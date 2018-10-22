@@ -3,7 +3,7 @@ package objective.taskboard.jira;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
-import static objective.taskboard.repository.PermissionRepository.ADMINISTRATIVE;
+import static objective.taskboard.auth.authorizer.Permissions.PROJECT_ADMINISTRATION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -22,7 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.ApplicationEventPublisher;
 
-import objective.taskboard.auth.Authorizer;
+import objective.taskboard.auth.authorizer.Authorizer;
 import objective.taskboard.domain.Project;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.jira.client.JiraCreateIssue;
@@ -128,7 +128,7 @@ public class ProjectServiceTest {
 
     @Test
     public void getTaskboardProjects_withPermissionsParam_showOnlyProjectsThatUserHasPermission_sortedByProjectKey() {
-        List<ProjectFilterConfiguration> projects = subject.getTaskboardProjects(ADMINISTRATIVE);
+        List<ProjectFilterConfiguration> projects = subject.getTaskboardProjects(PROJECT_ADMINISTRATION);
         assertTrue(projectRepository.getProjects().size() != projects.size() && projects.size() == 4);
         assertTrue(projects.stream().anyMatch(p -> p.getProjectKey().equals(PROJECT_REGULAR_1)));
         assertTrue(projects.stream().anyMatch(p -> p.getProjectKey().equals(PROJECT_REGULAR_2)));
@@ -139,7 +139,7 @@ public class ProjectServiceTest {
 
     @Test
     public void getTaskboardProjects_withPermissionsAndFilterParams_showOnlyProjectsThatUserHasPermission_respectingTheFilter_sortedByProjectKey() {
-        List<ProjectFilterConfiguration> projectsNonArchivedAdmin = subject.getTaskboardProjects(subject::isNonArchivedAndUserHasAccess, ADMINISTRATIVE);
+        List<ProjectFilterConfiguration> projectsNonArchivedAdmin = subject.getTaskboardProjects(subject::isNonArchivedAndUserHasAccess, PROJECT_ADMINISTRATION);
         assertTrue(projectRepository.getProjects().size() != projectsNonArchivedAdmin.size() && projectsNonArchivedAdmin.size() == 3);
         assertTrue(projectsNonArchivedAdmin.stream().anyMatch(p -> p.getProjectKey().equals(PROJECT_REGULAR_1)));
         assertTrue(projectsNonArchivedAdmin.stream().anyMatch(p -> p.getProjectKey().equals(PROJECT_REGULAR_2)));
@@ -155,7 +155,7 @@ public class ProjectServiceTest {
         assertFalse(projectsNonArchived.stream().anyMatch(p -> p.getProjectKey().equals(PROJECT_WITHOUT_ACCESS)));
         assertIsSortedByProjectkey(projectsNonArchived);
 
-        List<ProjectFilterConfiguration> projects = subject.getTaskboardProjects(projectKey -> projectKey.equals(PROJECT_REGULAR_1), ADMINISTRATIVE);
+        List<ProjectFilterConfiguration> projects = subject.getTaskboardProjects(projectKey -> projectKey.equals(PROJECT_REGULAR_1), PROJECT_ADMINISTRATION);
         assertTrue(projectRepository.getProjects().size() != projects.size() && projects.size() == 1);
         assertTrue(projects.stream().anyMatch(p -> p.getProjectKey().equals(PROJECT_REGULAR_1)));
         assertFalse(projects.stream().anyMatch(p -> p.getProjectKey().equals(PROJECT_REGULAR_2)));
@@ -225,19 +225,19 @@ public class ProjectServiceTest {
 
     @Test
     public void getTaskboardProject_withPermissionsParam_ifProjectExistsAndUserHasPermission_returnValue() {
-        Optional<ProjectFilterConfiguration> projectRegular1 = subject.getTaskboardProject(PROJECT_REGULAR_1, ADMINISTRATIVE);
+        Optional<ProjectFilterConfiguration> projectRegular1 = subject.getTaskboardProject(PROJECT_REGULAR_1, PROJECT_ADMINISTRATION);
         assertTrue(projectRegular1.isPresent());
 
-        Optional<ProjectFilterConfiguration> projectRegular2 = subject.getTaskboardProject(PROJECT_REGULAR_2, ADMINISTRATIVE);
+        Optional<ProjectFilterConfiguration> projectRegular2 = subject.getTaskboardProject(PROJECT_REGULAR_2, PROJECT_ADMINISTRATION);
         assertTrue(projectRegular2.isPresent());
 
-        Optional<ProjectFilterConfiguration> projectArchived = subject.getTaskboardProject(PROJECT_ARCHIVED, ADMINISTRATIVE);
+        Optional<ProjectFilterConfiguration> projectArchived = subject.getTaskboardProject(PROJECT_ARCHIVED, PROJECT_ADMINISTRATION);
         assertTrue(projectArchived.isPresent());
 
-        Optional<ProjectFilterConfiguration> projectWithoutAccess = subject.getTaskboardProject(PROJECT_WITHOUT_ACCESS, ADMINISTRATIVE);
+        Optional<ProjectFilterConfiguration> projectWithoutAccess = subject.getTaskboardProject(PROJECT_WITHOUT_ACCESS, PROJECT_ADMINISTRATION);
         assertFalse(projectWithoutAccess.isPresent());
 
-        Optional<ProjectFilterConfiguration> projectInvalid = subject.getTaskboardProject(PROJECT_INVALID, ADMINISTRATIVE);
+        Optional<ProjectFilterConfiguration> projectInvalid = subject.getTaskboardProject(PROJECT_INVALID, PROJECT_ADMINISTRATION);
         assertFalse(projectInvalid.isPresent());
     }
 

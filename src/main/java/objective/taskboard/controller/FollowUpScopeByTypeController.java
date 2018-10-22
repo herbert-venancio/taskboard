@@ -1,5 +1,6 @@
 package objective.taskboard.controller;
 
+import static objective.taskboard.auth.authorizer.Permissions.PROJECT_DASHBOARD_TACTICAL;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
@@ -18,11 +19,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import objective.taskboard.auth.Authorizer;
+import objective.taskboard.auth.authorizer.Authorizer;
 import objective.taskboard.followup.FollowUpScopeByTypeDataProvider;
 import objective.taskboard.followup.FollowUpScopeByTypeDataSet;
 import objective.taskboard.followup.cluster.ClusterNotConfiguredException;
-import objective.taskboard.repository.PermissionRepository;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 
 @RestController
@@ -45,7 +45,7 @@ public class FollowUpScopeByTypeController {
             @RequestParam("date") Optional<LocalDate> date, 
             @RequestParam("timezone") String timezone) {
 
-        if (!authorizer.hasPermissionInProject(PermissionRepository.DASHBOARD_TACTICAL, projectKey))
+        if (!authorizer.hasPermission(PROJECT_DASHBOARD_TACTICAL, projectKey))
             return new ResponseEntity<>("Resource not found.", HttpStatus.NOT_FOUND);
 
         if (isEmpty(projectKey))

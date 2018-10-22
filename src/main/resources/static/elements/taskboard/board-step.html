@@ -264,7 +264,7 @@
 
                 listInvalidPermissionProjects: function() {
                     return _.filter(taskboard.getVisibleProjectKeys(), function(projectKey) {
-                        return !authorizer.hasPermissionInProject(authorizer.permissions.ADMINISTRATIVE, projectKey);
+                        return !authorizer.hasPermission(Permission.PROJECT_ADMINISTRATION, projectKey);
                     });
                 },
 
