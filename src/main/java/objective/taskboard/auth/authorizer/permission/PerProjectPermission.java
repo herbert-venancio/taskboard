@@ -4,15 +4,16 @@ import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
+import java.util.Optional;
 
 import objective.taskboard.auth.LoggedUserDetails;
 
-public class SpecificProjectPermission implements TargettedPermission {
+public class PerProjectPermission implements TargettedPermission {
 
     private final String name;
     private final List<String> acceptedRoles;
 
-    public SpecificProjectPermission(String name, String... acceptedRoles) {
+    public PerProjectPermission(String name, String... acceptedRoles) {
         this.name = name;
         this.acceptedRoles = asList(acceptedRoles);
     }
@@ -32,11 +33,12 @@ public class SpecificProjectPermission implements TargettedPermission {
     }
 
     @Override
-    public List<String> applicableTargets(LoggedUserDetails userDetails) {
-        return userDetails.getJiraRoles().stream()
+    public Optional<List<String>> applicableTargets(LoggedUserDetails userDetails) {
+        List<String> applicableTargets = userDetails.getJiraRoles().stream()
                 .filter(role -> acceptedRoles.contains(role.name))
                 .map(role -> role.projectKey)
                 .collect(toList());
+        return Optional.of(applicableTargets);
     }
 
 }

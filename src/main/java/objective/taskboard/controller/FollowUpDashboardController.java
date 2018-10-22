@@ -1,7 +1,6 @@
 package objective.taskboard.controller;
 
-import static objective.taskboard.auth.authorizer.Permissions.PROJECT_DASHBOARD_OPERATIONAL_VIEW;
-import static objective.taskboard.auth.authorizer.Permissions.PROJECT_DASHBOARD_TACTICAL_VIEW;
+import static objective.taskboard.auth.authorizer.Permissions.PROJECT_DASHBOARD_VIEW;
 
 import java.io.IOException;
 
@@ -30,8 +29,7 @@ public class FollowUpDashboardController {
 
     @RequestMapping("/followup-dashboard")
     public String followUpDashboard(Model model) {
-        if (!authorizer.hasPermission(PROJECT_DASHBOARD_TACTICAL_VIEW) &&
-                !authorizer.hasPermission(PROJECT_DASHBOARD_OPERATIONAL_VIEW))
+        if (!authorizer.hasPermission(PROJECT_DASHBOARD_VIEW))
             throw new ResourceNotFoundException();
 
         User user = jiraService.getLoggedUser();

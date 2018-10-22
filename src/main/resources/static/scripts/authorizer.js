@@ -44,10 +44,10 @@ class PermissionDto {
 
 class Permission {
     static get TASKBOARD_ADMINISTRATION() { return 'taskboard.administration'; }
-    static get PROJECT_DASHBOARD_TACTICAL() { return 'project.dashboard.tactical'; }
-    static get PROJECT_DASHBOARD_TACTICAL_VIEW() { return 'project.dashboard.tactical.view'; }
-    static get PROJECT_DASHBOARD_OPERATIONAL() { return 'project.dashboard.operational'; }
-    static get PROJECT_DASHBOARD_OPERATIONAL_VIEW() { return 'project.dashboard.operational.view'; }
     static get PROJECT_ADMINISTRATION() { return 'project.administration'; }
-    static get PROJECT_ADMINISTRATION_VIEW() { return 'project.administration.view'; }
+    static get PROJECT_DASHBOARD_VIEW() { return 'project.dashboard.view'; }
+    static get PROJECT_DASHBOARD_TACTICAL() { return 'project.dashboard.tactical'; }
+    static get PROJECT_DASHBOARD_OPERATIONAL() { return 'project.dashboard.operational'; }
+    static get FOLLOWUP_TEMPLATE_EDIT() { return 'followup.template.edit'; }
+    static get SIZING_IMPORT_VIEW() { return 'sizing.import.view'; }
 }

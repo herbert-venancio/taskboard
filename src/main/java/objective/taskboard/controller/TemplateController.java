@@ -1,6 +1,6 @@
 package objective.taskboard.controller;
 
-import static objective.taskboard.auth.authorizer.Permissions.PROJECT_ADMINISTRATION_VIEW;
+import static objective.taskboard.auth.authorizer.Permissions.FOLLOWUP_TEMPLATE_EDIT;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
@@ -34,7 +34,7 @@ public class TemplateController {
 
     @RequestMapping
     public List<TemplateData> get() {
-        if (!authorizer.hasPermission(PROJECT_ADMINISTRATION_VIEW))
+        if (!authorizer.hasPermission(FOLLOWUP_TEMPLATE_EDIT))
             return followUpFacade.getTemplatesForCurrentUser();
         return followUpFacade.getTemplates();
     }
@@ -44,7 +44,7 @@ public class TemplateController {
             , @RequestParam("name") String templateName
             , @RequestParam("roles") List<String> roles) throws IOException {
 
-        if (!authorizer.hasPermission(PROJECT_ADMINISTRATION_VIEW))
+        if (!authorizer.hasPermission(FOLLOWUP_TEMPLATE_EDIT))
             throw new ResourceNotFoundException();
 
         followUpFacade.createTemplate(templateName, roles, file);
@@ -56,7 +56,7 @@ public class TemplateController {
             , @RequestParam("name") String templateName
             , @RequestParam("roles") List<String> roles) throws IOException {
 
-        if (!authorizer.hasPermission(PROJECT_ADMINISTRATION_VIEW))
+        if (!authorizer.hasPermission(FOLLOWUP_TEMPLATE_EDIT))
             throw new ResourceNotFoundException();
 
         followUpFacade.updateTemplate(id, templateName, roles, file);
@@ -64,7 +64,7 @@ public class TemplateController {
 
     @RequestMapping(value = "{id}", method = RequestMethod.DELETE)
     public void delete(@PathVariable("id") Long id) throws IOException {
-        if (!authorizer.hasPermission(PROJECT_ADMINISTRATION_VIEW))
+        if (!authorizer.hasPermission(FOLLOWUP_TEMPLATE_EDIT))
             throw new ResourceNotFoundException();
 
         followUpFacade.deleteTemplate(id);
@@ -72,7 +72,7 @@ public class TemplateController {
 
     @RequestMapping("{id}")
     public ResponseEntity<Object> downloadSavedTemplate(@PathVariable("id") Long id) {
-        if (!authorizer.hasPermission(PROJECT_ADMINISTRATION_VIEW))
+        if (!authorizer.hasPermission(FOLLOWUP_TEMPLATE_EDIT))
             return new ResponseEntity<>("Template not found.", NOT_FOUND);
 
         try {

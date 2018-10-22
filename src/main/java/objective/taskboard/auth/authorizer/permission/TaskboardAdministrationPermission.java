@@ -2,11 +2,11 @@ package objective.taskboard.auth.authorizer.permission;
 
 import objective.taskboard.auth.LoggedUserDetails;
 
-public class TaskboardPermission implements TargetlessPermission {
+public class TaskboardAdministrationPermission implements TargetlessPermission {
 
     private final String name;
 
-    public TaskboardPermission(String name) {
+    public TaskboardAdministrationPermission(String name) {
         this.name = name;
     }
 

@@ -21,11 +21,11 @@ export class AccessGuard implements CanActivate {
         return true;
     }
 
-    private hasRequirements(requirements: Requirements): boolean {
+    private hasRequirements(requirements: AuthRequirements): boolean {
         return requirements !== undefined && requirements !== null && requirements.permissions.length > 0;
     }
 
-    private isAllowed(user: LoggedInUser, requirements: Requirements): boolean {
+    private isAllowed(user: LoggedInUser, requirements: AuthRequirements): boolean {
         return requirements.permissions.every(tp => {
             return user.hasPermission(tp);
         });
@@ -33,24 +33,24 @@ export class AccessGuard implements CanActivate {
 
 }
 
-export class Requirements {
+export class AuthRequirements {
     permissions: string[] = [];
 }
 
-export class RequirementsBuilder {
+export class AuthRequirementsBuilder {
 
-    private requirements = new Requirements();
+    private requirements = new AuthRequirements();
 
-    public static new(): RequirementsBuilder {
-        return new RequirementsBuilder();
+    public static new(): AuthRequirementsBuilder {
+        return new AuthRequirementsBuilder();
     }
 
-    public permissions(permissions: string[]): RequirementsBuilder {
+    public permissions(permissions: string[]): AuthRequirementsBuilder {
         this.requirements.permissions = permissions;
         return this;
     }
 
-    public build(): Requirements {
+    public build(): AuthRequirements {
         return this.requirements;
     }
 }

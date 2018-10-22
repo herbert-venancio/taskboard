@@ -2,7 +2,7 @@ import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 import {TeamsComponent} from './teams/teams.component';
 import {TeamComponent} from './teams/team/team.component';
-import {AccessGuard, RequirementsBuilder} from '../auth/access-guard';
+import {AccessGuard, AuthRequirementsBuilder} from '../auth/access-guard';
 import {LeaveConfirmationGuard} from '../shared/form-utils/leave-confirmation/guard/leave-confirmation.guard';
 import {TASKBOARD_ADMINISTRATION} from "../auth/permissions";
 
@@ -11,7 +11,7 @@ const routes: Routes = [
         path: 'teams',
         component: TeamsComponent,
         data: {
-            requirements: RequirementsBuilder.new()
+            requirements: AuthRequirementsBuilder.new()
                 .permissions([TASKBOARD_ADMINISTRATION])
                 .build()
         },
@@ -21,7 +21,7 @@ const routes: Routes = [
         path: 'teams/:teamName',
         component: TeamComponent,
         data: {
-            requirements: RequirementsBuilder.new()
+            requirements: AuthRequirementsBuilder.new()
                 .permissions([TASKBOARD_ADMINISTRATION])
                 .build()
         },
