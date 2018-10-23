@@ -815,11 +815,9 @@
                 },
 
                 verifyPermissions: function() {
-                    var hasProjectAdministrationViewPermission = authorizer.hasPermission(Permission.PROJECT_ADMINISTRATION_VIEW);
-                    var hasProjectDashboardViewPermission = authorizer.hasPermission(Permission.PROJECT_DASHBOARD_TACTICAL_VIEW) || authorizer.hasPermission(Permission.PROJECT_DASHBOARD_OPERATIONAL_VIEW);
-                    this.set('_showFollowupReportButton', HAS_FOLLOWUP_TEMPLATE_AVAILABLE || hasProjectAdministrationViewPermission);
-                    this.set('_showFollowupDashboardButton', hasProjectDashboardViewPermission);
-                    this.set('_showSizingImportButton', hasProjectAdministrationViewPermission);
+                    this.set('_showFollowupReportButton', HAS_FOLLOWUP_TEMPLATE_AVAILABLE || authorizer.hasPermission(Permission.FOLLOWUP_TEMPLATE_EDIT));
+                    this.set('_showFollowupDashboardButton', authorizer.hasPermission(Permission.PROJECT_DASHBOARD_VIEW));
+                    this.set('_showSizingImportButton', authorizer.hasPermission(Permission.SIZING_IMPORT_VIEW));
                 }
             });
         })();

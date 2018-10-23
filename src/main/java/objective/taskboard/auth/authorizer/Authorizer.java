@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,8 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import objective.taskboard.auth.LoggedUserDetails;
-import objective.taskboard.auth.authorizer.permission.Permission.PermissionDto;
+import objective.taskboard.auth.authorizer.permission.Permission;
 import objective.taskboard.auth.authorizer.permission.PermissionContext;
+import objective.taskboard.auth.authorizer.permission.TargetlessPermission;
+import objective.taskboard.auth.authorizer.permission.TargettedPermission;
 
 @Service
 public class Authorizer {
@@ -40,18 +43,13 @@ public class Authorizer {
     }
 
     public List<PermissionDto> getPermissions() {
-        List<PermissionDto> permissions = new ArrayList<>();
-
-        permissionRepository.findAll().stream()
-            .forEach(p -> p.toDto(userDetails).ifPresent(dto -> permissions.add(dto)));
-
-        return permissions;
+        return PermissionDto.from(permissionRepository.findAll(), userDetails);
     }
 
     public List<String> getAllowedProjectsForPermissions(String... permissions) {
-        return permissionRepository.findAllSpecificProjectPermissions().stream()
+        return permissionRepository.findAllPerProjectPermissions().stream()
                 .filter(permission -> asList(permissions).contains(permission.name()))
-                .flatMap(permission -> permission.applicableTargets(userDetails).stream())
+                .flatMap(permission -> permission.applicableTargets(userDetails).orElseThrow(IllegalStateException::new).stream())
                 .distinct()
                 .collect(toList());
     }
@@ -66,6 +64,40 @@ public class Authorizer {
                 .filter(role -> role.projectKey.equals(projectKey))
                 .map(role -> role.name)
                 .collect(toList());
+    }
+
+    public static class PermissionDto {
+        public final String name;
+        public final List<String> applicableTargets;
+
+        private PermissionDto(String name, List<String> applicableTargets) {
+            this.name = name;
+            this.applicableTargets = applicableTargets;
+        }
+
+        public static List<PermissionDto> from(List<Permission> permissions, LoggedUserDetails userDetails) {
+            List<PermissionDto> dtoList = new ArrayList<>();
+            permissions
+                .forEach(p -> PermissionDto.from(p, userDetails).ifPresent(dto -> dtoList.add(dto)));
+            return dtoList;
+        }
+
+        private static Optional<PermissionDto> from(Permission permission, LoggedUserDetails userDetails) {
+            Optional<List<String>> applicableTargets = permission.applicableTargets(userDetails);
+
+            if (isTargetlessPermitted(permission, userDetails) || isTargettedPermitted(permission, applicableTargets))
+                return Optional.of(new PermissionDto(permission.name(), applicableTargets.orElse(null)));
+
+            return Optional.empty();
+        }
+
+        private static boolean isTargetlessPermitted(Permission permission, LoggedUserDetails userDetails) {
+            return permission instanceof TargetlessPermission && permission.accepts(userDetails, PermissionContext.empty());
+        }
+
+        private static boolean isTargettedPermitted(Permission permission, Optional<List<String>> applicableTargets) {
+            return permission instanceof TargettedPermission && applicableTargets.isPresent() && applicableTargets.get().size() > 0;
+        }
     }
 
 }

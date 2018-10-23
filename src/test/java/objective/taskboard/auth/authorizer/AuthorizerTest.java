@@ -1,6 +1,8 @@
 package objective.taskboard.auth.authorizer;
 
 import static java.util.Arrays.asList;
+import static objective.taskboard.auth.authorizer.permission.PermissionBuilder.permission;
+import static objective.taskboard.auth.authorizer.permission.PermissionTestUtils.role;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -16,141 +18,64 @@ import org.junit.Test;
 
 import objective.taskboard.auth.LoggedUserDetails;
 import objective.taskboard.auth.LoggedUserDetails.JiraRole;
-import objective.taskboard.auth.authorizer.permission.AnyProjectPermission;
+import objective.taskboard.auth.authorizer.Authorizer.PermissionDto;
 import objective.taskboard.auth.authorizer.permission.Permission;
-import objective.taskboard.auth.authorizer.permission.Permission.PermissionDto;
-import objective.taskboard.auth.authorizer.permission.SpecificProjectPermission;
-import objective.taskboard.auth.authorizer.permission.TaskboardPermission;
 
 public class AuthorizerTest {
 
     @Test
-    public void givenUserWithTaskboardAdministrationPermission_whenVerifyThatPermission_thenShouldReturnTrue() {
-        Authorizer subject = AuthorizerDSLBuilder.init()
-            .withLoggedUserIsAdmin(true)
-            .withPermissionsInRepository(
-                    new TaskboardPermission("taskboard.admin.test")
-                    )
-            .build();
+    public void hasPermission_givenUserWithPermission_returnTrue() {
+        Authorizer subject = authorizer()
+                .withPermissions(
+                        permission().withName("taskboard.admin.test").withAccepts(true).asTargetless()
+                        )
+                .build();
 
         assertTrue(subject.hasPermission("taskboard.admin.test"));
     }
 
     @Test
-    public void givenUserWithoutTaskboardAdministrationPermission_whenVerifyThatPermission_thenShouldReturnFalse() {
-        Authorizer subject = AuthorizerDSLBuilder.init()
-            .withLoggedUserIsAdmin(false)
-            .withPermissionsInRepository(
-                    new TaskboardPermission("taskboard.admin.test")
-                    )
-            .build();
+    public void hasPermission_givenUserWithoutPermission_returnFalse() {
+        Authorizer subject = authorizer()
+                .withPermissions(
+                        permission().withName("taskboard.admin.test").withAccepts(false).asTargetless()
+                        )
+                .build();
 
         assertFalse(subject.hasPermission("taskboard.admin.test"));
     }
 
     @Test
-    public void givenUserRoles_whenVerifyPermissionThatContainsAny_thenShouldReturnTrue() {
-        Authorizer subject = AuthorizerDSLBuilder.init()
-            .withLoggedUserJiraRoles(
-                    role("Administrators", "PROJ1"),
-                    role("Administrators", "PROJ2"),
-                    role("Developers", "PROJ3")
-                    )
-            .withPermissionsInRepository(
-                    new AnyProjectPermission("permission.test", "Administrators")
-                    )
-            .build();
-
-        assertTrue(subject.hasPermission("permission.test"));
-    }
-
-    @Test
-    public void givenUserRoles_whenVerifyPermissionThatNotContainsAny_thenShouldReturnFalse() {
-        Authorizer subject = AuthorizerDSLBuilder.init()
-                .withLoggedUserJiraRoles(
-                        role("Administrators", "PROJ1"),
-                        role("Administrators", "PROJ2"),
-                        role("Developers", "PROJ3")
-                        )
-                .withPermissionsInRepository(
-                        new AnyProjectPermission("permission.test", "Reviewer")
+    public void getPermissions_returnTargettedIfHApplicableTargetsIsntEmptyAndTargetlessIfAcceptsEqualsTrue() {
+        Authorizer subject = authorizer()
+                .withPermissions(
+                        permission().withName("permission.a").withAccepts(true).withApplicableTargets("PROJ1", "PROJ2").asTargetted(),
+                        permission().withName("permission.a.view").withAccepts(true).asTargetless(),
+                        permission().withName("permission.b").withAccepts(true).withApplicableTargets("PROJ1").asTargetted(),
+                        permission().withName("permission.b.view").withAccepts(true).asTargetless(),
+                        permission().withName("permission.not").withAccepts(false).withApplicableTargets().asTargetted(),
+                        permission().withName("permission.not.view").withAccepts(false).asTargetless()
                         )
                 .build();
 
-        assertFalse(subject.hasPermission("permission.test"));
+        assertPermissionDtoList(subject.getPermissions(),
+                "permission.a: [PROJ1, PROJ2]," +
+                "permission.a.view: null," +
+                "permission.b: [PROJ1]," +
+                "permission.b.view: null"
+                );
     }
 
     @Test
-    public void givenUserHasNoRoles_whenVerifyPermission_thenShouldReturnFalse() {
-        Authorizer subject = AuthorizerDSLBuilder.init()
-                .withLoggedUserJiraRoles(
-                        )
-                .withPermissionsInRepository(
-                        new AnyProjectPermission("permission.test", "Reviewer")
-                        )
-                .build();
-
-        assertFalse(subject.hasPermission("permission.test"));
-    }
-
-    @Test
-    public void givenUserRoles_whenVerifyPermissionInProjectThatContainsAny_thenShouldReturnTrue() {
-        Authorizer subject = AuthorizerDSLBuilder.init()
-                .withLoggedUserJiraRoles(
-                        role("Administrators", "PROJ1"),
-                        role("Administrators", "PROJ2"),
-                        role("Developers", "PROJ3")
-                        )
-                .withPermissionsInRepository(
-                        new SpecificProjectPermission("permission.test", "Developers")
-                        )
-                .build();
-
-        assertTrue(subject.hasPermission("permission.test", "PROJ3"));
-    }
-
-    @Test
-    public void givenUserRoles_whenVerifyPermissionInProjectThatNotContainsAny_thenShouldReturnFalse() {
-        Authorizer subject = AuthorizerDSLBuilder.init()
-                .withLoggedUserJiraRoles(
-                        role("Administrators", "PROJ1"),
-                        role("Administrators", "PROJ2"),
-                        role("Developers", "PROJ3")
-                        )
-                .withPermissionsInRepository(
-                        new SpecificProjectPermission("permission.test", "Administrators")
-                        )
-                .build();
-
-        assertFalse(subject.hasPermission("permission.test", "PROJ3"));
-    }
-
-    @Test
-    public void givenUserHasNoRoles_whenVerifyPermissionInProject_thenShouldReturnFalse() {
-        Authorizer subject = AuthorizerDSLBuilder.init()
-                .withLoggedUserJiraRoles(
-                        )
-                .withPermissionsInRepository(
-                        new SpecificProjectPermission("permission.test", "Administrators")
-                        )
-                .build();
-
-        assertFalse(subject.hasPermission("permission.test", "PROJ3"));
-    }
-
-    @Test
-    public void givenUserHasPermissionsInSomeProjects_whenGetAllowedProjectForAPermission_thenShouldReturnTheProjectThatHasPermission() {
-        Authorizer subject = AuthorizerDSLBuilder.init()
-                .withLoggedUserJiraRoles(
-                        role("Administrators", "PROJ1"),
-                        role("Administrators", "PROJ2"),
-                        role("Developers", "PROJ3")
-                        )
-                .withPermissionsInRepository(
-                        new SpecificProjectPermission("permission.a", "Administrators"),
-                        new SpecificProjectPermission("permission.b", "Developers"),
-                        new SpecificProjectPermission("permission.c", "Administrators", "Developers"),
-                        new SpecificProjectPermission("permission.d", "Reviewer")
+    public void getAllowedProjectsForPermissions_returnApplicableTargetsList() {
+        Authorizer subject = authorizer()
+                .withPermissions(
+                        permission().withName("permission.y").withApplicableTargets("PROJ4", "PROJ5").asTargetted(),
+                        permission().withName("permission.x").withApplicableTargets("PROJ1", "PROJ4").asTargetted(),
+                        permission().withName("permission.a").withApplicableTargets("PROJ1", "PROJ2").asPerProjectPermission(),
+                        permission().withName("permission.b").withApplicableTargets("PROJ3").asPerProjectPermission(),
+                        permission().withName("permission.c").withApplicableTargets("PROJ1", "PROJ2").asPerProjectPermission(),
+                        permission().withName("permission.d").withApplicableTargets().asPerProjectPermission()
                         )
                 .build();
 
@@ -165,14 +90,14 @@ public class AuthorizerTest {
     }
 
     @Test
-    public void givenUserRoles_whenVerifyIfHasAnyRoleInProjects_thenShouldReturnCorrectly() {
-        Authorizer subject = AuthorizerDSLBuilder.init()
+    public void getRolesForProject_returnCorrectlyValues() {
+        Authorizer subject = authorizer()
                 .withLoggedUserJiraRoles(
                         role("Administrators", "PROJ1"),
                         role("Administrators", "PROJ2"),
                         role("Developers", "PROJ3")
                         )
-                .withPermissionsInRepository(
+                .withPermissions(
                         )
                 .build();
 
@@ -184,15 +109,15 @@ public class AuthorizerTest {
     }
 
     @Test
-    public void givenUserRoles_whenGetRolesForProject_thenShouldReturnCorrectly() {
-        Authorizer subject = AuthorizerDSLBuilder.init()
+    public void getRolesForProject_thenShouldReturnCorrectly() {
+        Authorizer subject = authorizer()
                 .withLoggedUserJiraRoles(
                         role("Administrators", "PROJ1"),
                         role("Developers", "PROJ1"),
                         role("Administrators", "PROJ2"),
                         role("Developers", "PROJ3")
                         )
-                .withPermissionsInRepository(
+                .withPermissions(
                         )
                 .build();
 
@@ -206,40 +131,8 @@ public class AuthorizerTest {
                 .containsExactly("Developers");
     }
 
-    @Test
-    public void givenSomePermissions_whenVerifyPermission_thenShouldReturnOnlyAllowedPermissions() {
-        Authorizer subject = AuthorizerDSLBuilder.init()
-                .withLoggedUserIsAdmin(true)
-                .withLoggedUserJiraRoles(
-                        role("Administrators", "PROJ1"),
-                        role("Administrators", "PROJ2"),
-                        role("Developers", "PROJ3")
-                        )
-                .withPermissionsInRepository(
-                        new TaskboardPermission("taskboard.permission.a"),
-                        new SpecificProjectPermission("permission.a", "Administrators"),
-                        new AnyProjectPermission("permission.a.view", "Administrators"),
-                        new SpecificProjectPermission("permission.b", "Developers"),
-                        new AnyProjectPermission("permission.b.view", "Developers"),
-                        new SpecificProjectPermission("permission.c", "Administrators", "Developers"),
-                        new AnyProjectPermission("permission.c.view", "Administrators", "Developers"),
-                        new SpecificProjectPermission("permission.d", "Reviewer")
-                        )
-                .build();
-
-        assertPermissionDtoList(subject.getPermissions(),
-                "taskboard.permission.a: null," +
-                "permission.a: [PROJ1, PROJ2]," +
-                "permission.a.view: null," +
-                "permission.b: [PROJ3]," +
-                "permission.b.view: null," +
-                "permission.c: [PROJ1, PROJ2, PROJ3]," +
-                "permission.c.view: null"
-                );
-    }
-
-    private static JiraRole role(String roleName, String projectKey) {
-        return new JiraRole(1L, roleName, projectKey);
+    private static DSLBuilder authorizer() {
+        return new DSLBuilder();
     }
 
     private static void assertPermissionDtoList(List<PermissionDto> permissions, String expertedPermissions) {
@@ -254,37 +147,28 @@ public class AuthorizerTest {
                 );
     }
 
-    private static class AuthorizerDSLBuilder {
+    private static class DSLBuilder {
 
         private LoggedUserDetails userDetails = mock(LoggedUserDetails.class);
         private PermissionRepository permissionRepository = mock(PermissionRepository.class);
 
-        public static AuthorizerDSLBuilder init() {
-            return new AuthorizerDSLBuilder();
-        }
+        public DSLBuilder withPermissions(Permission... permissions) {
+            List<Permission> permissionsList = asList(permissions);
 
-        public AuthorizerDSLBuilder withLoggedUserIsAdmin(boolean isAdmin) {
-            when(userDetails.isAdmin()).thenReturn(isAdmin);
-            return this;
-        }
-
-        public AuthorizerDSLBuilder withLoggedUserJiraRoles(JiraRole... jiraRoles) {
-            when(userDetails.getJiraRoles()).thenReturn(asList(jiraRoles));
-            return this;
-        }
-
-        public AuthorizerDSLBuilder withPermissionsInRepository(Permission... supportedPermissions) {
-            List<Permission> permissions = asList(supportedPermissions);
-
-            when(permissionRepository.findAll()).thenReturn(permissions);
+            when(permissionRepository.findAll()).thenReturn(permissionsList);
 
             when(permissionRepository.findByName(any())).thenAnswer(invocation -> {
                 String name = (String) invocation.getArguments()[0];
-                return permissions.stream().filter(p -> p.name().equals(name)).findFirst().orElseThrow(IllegalArgumentException::new);
+                return permissionsList.stream().filter(p -> p.name().equals(name)).findFirst().orElseThrow(IllegalArgumentException::new);
             });
 
-            when(permissionRepository.findAllSpecificProjectPermissions()).thenCallRealMethod();
+            when(permissionRepository.findAllPerProjectPermissions()).thenCallRealMethod();
 
+            return this;
+        }
+
+        public DSLBuilder withLoggedUserJiraRoles(JiraRole... jiraRoles) {
+            when(userDetails.getJiraRoles()).thenReturn(asList(jiraRoles));
             return this;
         }
 
