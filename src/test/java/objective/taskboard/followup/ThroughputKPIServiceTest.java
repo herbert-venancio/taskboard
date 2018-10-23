@@ -1,9 +1,6 @@
 package objective.taskboard.followup;
 
 import static objective.taskboard.followup.FollowUpHelper.getDefaultFollowupData;
-import static objective.taskboard.followup.kpi.StatusTransitionBuilder.DefaultStatus.DOING;
-import static objective.taskboard.followup.kpi.StatusTransitionBuilder.DefaultStatus.DONE;
-import static objective.taskboard.followup.kpi.StatusTransitionBuilder.DefaultStatus.TODO;
 import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -23,10 +20,12 @@ import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import objective.taskboard.followup.kpi.IssueKpi;
-import objective.taskboard.followup.kpi.IssueKpiBuilder;
 import objective.taskboard.followup.kpi.IssueKpiService;
+import objective.taskboard.followup.kpi.IssueTypeKpi;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.ThroughputKPIService;
+import objective.taskboard.followup.kpi.enviroment.IssueKpiBuilder;
+import objective.taskboard.followup.kpi.enviroment.StatusTransitionBuilder.DefaultStatus;
 import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.jira.properties.StatusConfiguration.FinalStatuses;
 
@@ -36,6 +35,10 @@ public class ThroughputKPIServiceTest {
     private static final int DEMAND_TRANSITIONS_DATASET_INDEX = 0;
     private static final int FEATURES_TRANSITIONS_DATASET_INDEX = 1;
     private static final int SUBTASK_TRANSITIONS_DATASET_INDEX = 2;
+    
+    private static final DefaultStatus TODO = new DefaultStatus("To Do",false); 
+    private static final DefaultStatus DOING = new DefaultStatus("Doing",true); 
+    private static final DefaultStatus DONE = new DefaultStatus("Done",false);
     
     @Mock
     private JiraProperties jiraProperties;
@@ -60,25 +63,25 @@ public class ThroughputKPIServiceTest {
         
         when(jiraProperties.getFinalStatuses()).thenReturn(finalStatuses);
         
-        IssueKpi demand = new IssueKpiBuilder("I-1","Demand",KpiLevel.DEMAND)
+        IssueKpi demand = new IssueKpiBuilder("I-1",new IssueTypeKpi(1l,"Demand"),KpiLevel.DEMAND)
                 .addTransition(TODO,"2017-09-25")
                 .addTransition(DOING,"2017-09-26")
                 .addTransition(DONE,"2017-09-27")
                 .build();
         
-        IssueKpi os = new IssueKpiBuilder("I-2","OS",KpiLevel.FEATURES)
+        IssueKpi os = new IssueKpiBuilder("I-2",new IssueTypeKpi(2l,"OS"),KpiLevel.FEATURES)
                 .addTransition(TODO,"2017-09-25")
                 .addTransition(DOING,"2017-09-26")
                 .addTransition(DONE)
                 .build();
         
-        IssueKpi feature = new IssueKpiBuilder("I-3","Feature",KpiLevel.FEATURES)
+        IssueKpi feature = new IssueKpiBuilder("I-3",new IssueTypeKpi(3l,"Feature"),KpiLevel.FEATURES)
                 .addTransition(TODO,"2017-09-25")
                 .addTransition(DOING,"2017-09-26")
                 .addTransition(DONE)
                 .build();
         
-        IssueKpi subtask = new IssueKpiBuilder("I-4","Sub-task",KpiLevel.SUBTASKS)
+        IssueKpi subtask = new IssueKpiBuilder("I-4",new IssueTypeKpi(4l,"Sub-task"),KpiLevel.SUBTASKS)
                 .addTransition(TODO,"2017-09-25")
                 .addTransition(DOING)
                 .addTransition(DONE)

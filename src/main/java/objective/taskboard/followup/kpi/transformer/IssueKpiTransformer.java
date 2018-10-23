@@ -24,8 +24,8 @@ import objective.taskboard.followup.kpi.properties.KPIProperties;
 public class IssueKpiTransformer {
     
     private Map<String,IssueKpi> issuesKpi = new LinkedHashMap<>();
-    private Map<String,IssueKpiDataItemAdapter> items = new LinkedHashMap<>();;
-    private Map<String,Issue> originalIssues = new LinkedHashMap<>();;
+    private Map<String,IssueKpiDataItemAdapter> items = new LinkedHashMap<>();
+    private Map<String,Issue> originalIssues = new LinkedHashMap<>();
     private KPIProperties kpiProperties;
     private boolean mappingHierarchically = false;
     private boolean settingWorklog = false;
