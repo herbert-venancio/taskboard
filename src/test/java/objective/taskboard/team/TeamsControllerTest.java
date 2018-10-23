@@ -1,9 +1,10 @@
 package objective.taskboard.team;
 
 import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
-import static objective.taskboard.auth.authorizer.Permissions.TASKBOARD_ADMINISTRATION;
+import static objective.taskboard.auth.authorizer.Permissions.TEAMS_EDIT_VIEW;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -12,7 +13,6 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
 
-import java.util.Arrays;
 import java.util.Set;
 
 import org.junit.Test;
@@ -28,10 +28,13 @@ import objective.taskboard.testUtils.ControllerTestUtils.AssertResponse;
 @RunWith(MockitoJUnitRunner.class)
 public class TeamsControllerTest {
 
+    private Authorizer authorizer = mock(Authorizer.class);
+    private UserTeamService userTeamService = mock(UserTeamService.class);
+
     @Test
-    public void getTeams_ifLoggedUserIsntAdmin_returnNotFound() {
-        TeamsController subject = TeamsControllerMockBuilder.init()
-            .withTaskboardAdministrationPermission(false)
+    public void getTeams_ifLoggedUserDoesNotHaveRequiredPermission_returnNotFound() {
+        TeamsController subject = teamsControllerBuilder()
+            .withoutTeamsEditViewPermission()
             .build();
 
         AssertResponse.of(subject.getTeams())
@@ -40,9 +43,9 @@ public class TeamsControllerTest {
     }
 
     @Test
-    public void getTeams_ifLoggedUserIsAdmin_returnOkWithSortedValues() {
-        TeamsController subject = TeamsControllerMockBuilder.init()
-            .withTaskboardAdministrationPermission(true)
+    public void getTeams_ifLoggedUserHasTaskboardAdministrationPermission_returnOkWithSortedValues() {
+        TeamsController subject = teamsControllerBuilder()
+            .withTeamsEditViewPermission()
             .withTeamsThatUserCanAdmin(
                     new Team("TASKBOARD", "john", "", asList("liam", "emma", "mia")),
                     new Team("A", "john", "", asList("liam", "mary")),
@@ -72,34 +75,64 @@ public class TeamsControllerTest {
     }
 
     @Test
-    public void getTeam_ifLoggedUserIsntAdmin_returnNotFound() {
-        TeamsController subject = TeamsControllerMockBuilder.init()
-            .withTaskboardAdministrationPermission(false)
-            .build();
-
-        AssertResponse.of(subject.getTeam("ANY"))
-            .httpStatus(NOT_FOUND)
-            .emptyBody();
-    }
-
-    @Test
-    public void getTeam_ifLoggedUserIsAdminButHeCantAdminOrTeamDoesntExist_returnBadRequestWithMessage() {
-        TeamsController subject = TeamsControllerMockBuilder.init()
-            .withTaskboardAdministrationPermission(true)
-            .build();
-
-        AssertResponse.of(subject.getTeam("ANY"))
-            .httpStatus(BAD_REQUEST)
-            .bodyAsString("Team \"ANY\" not found.");
-    }
-
-    @Test
-    public void getTeam_ifLoggedUserIsAdmin_returnOkWithValue() {
-        TeamsController subject = TeamsControllerMockBuilder.init()
-            .withTaskboardAdministrationPermission(true)
+    public void getTeams_ifLoggedUserHasTeamsEditViewPermission_returnOkWithPermittedTeams() {
+        TeamsController subject = teamsControllerBuilder()
+            .withTeamsEditViewPermission()
             .withTeamsThatUserCanAdmin(
+                    new Team("TASKBOARD", "john", "", asList("liam", "emma", "mia")),
                     new Team("SDLC", "john", "", asList("james", "mary"))
             )
+            .build();
+
+        AssertResponse.of(subject.getTeams())
+            .httpStatus(OK)
+            .bodyClassWhenList(0, TeamDto.class)
+            .bodyAsJson(
+                    "[" +
+                        "{" +
+                            "\"name\" : \"SDLC\"," +
+                            "\"manager\" : \"john\"," +
+                            "\"members\" : [ \"james\", \"mary\" ]" +
+                        "},{" +
+                            "\"name\" : \"TASKBOARD\"," +
+                            "\"manager\" : \"john\"," +
+                            "\"members\" : [ \"emma\", \"liam\", \"mia\" ]" +
+                        "}" +
+                    "]");
+    }
+
+    @Test
+    public void getTeam_ifLoggedUserDoesNotHaveTeamEditViewPermission_returnNotFound() {
+        TeamsController subject = teamsControllerBuilder()
+                .withoutTeamsEditViewPermission()
+                .build();
+        
+        AssertResponse.of(subject.getTeam("ANY"))
+                .httpStatus(NOT_FOUND)
+                .emptyBody();
+    }
+
+    @Test
+    public void getTeam_ifLoggedUserCantAdminRequestedTeam_returnNotFound() {
+        TeamsController subject = teamsControllerBuilder()
+            .withTeamsEditViewPermission()
+            .withTeamsThatUserCanAdmin(
+                    new Team("ONE", "john", "", asList("james", "mary"))
+            )
+            .build();
+
+        AssertResponse.of(subject.getTeam("ANOTHER"))
+            .httpStatus(NOT_FOUND)
+            .bodyAsString("Team \"ANOTHER\" not found.");
+    }
+
+    @Test
+    public void getTeam_ifLoggedUserHasValidPermissions_returnOkWithValue() {
+        TeamsController subject = teamsControllerBuilder()
+                .withTeamsEditViewPermission()
+                .withTeamsThatUserCanAdmin(
+                        new Team("SDLC", "john", "", asList("james", "mary"))
+                )
             .build();
 
         AssertResponse.of(subject.getTeam("SDLC"))
@@ -114,9 +147,9 @@ public class TeamsControllerTest {
     }
 
     @Test
-    public void updateTeam_ifLoggedUserIsntAdmin_returnNotFound() {
-        TeamsController subject = TeamsControllerMockBuilder.init()
-            .withTaskboardAdministrationPermission(false)
+    public void updateTeam_ifLoggedUserDoesNotHaveTeamEditViewPermission_returnNotFound() {
+        TeamsController subject = teamsControllerBuilder()
+            .withoutTeamsEditViewPermission()
             .build();
 
         AssertResponse.of(subject.updateTeam("ANY", new TeamDto()))
@@ -125,9 +158,9 @@ public class TeamsControllerTest {
     }
 
     @Test
-    public void updateTeam_ifLoggedUserIsAdminButDataIsInvalid_returnBadRequestWithMessage() throws Exception {
-        TeamsController subject = TeamsControllerMockBuilder.init()
-            .withTaskboardAdministrationPermission(true)
+    public void updateTeam_ifLoggedUserHasTeamEditViewPermissionButDataIsInvalid_returnBadRequestWithMessage() throws Exception {
+        TeamsController subject = teamsControllerBuilder()
+            .withTeamsEditViewPermission()
             .build();
 
         TeamDto TeamDto = TeamDtoBuilder.init()
@@ -156,9 +189,10 @@ public class TeamsControllerTest {
     }
 
     @Test
-    public void updateTeam_ifLoggedUserIsAdminButHeCantAdminOrTeamDoesntExist_returnBadRequestWithMessage() {
-        TeamsController subject = TeamsControllerMockBuilder.init()
-            .withTaskboardAdministrationPermission(true)
+    public void updateTeam_ifLoggedUserCantAdminRequestedTeam_returnNotFoundWithMessage() {
+        TeamsController subject = teamsControllerBuilder()
+            .withTeamsEditViewPermission()
+            .withTeamsThatUserCanAdmin(new Team("ONE", "", "", asList()))
             .build();
 
         TeamDto TeamDto = TeamDtoBuilder.init()
@@ -166,21 +200,24 @@ public class TeamsControllerTest {
                 .withManager("ANY")
                 .build();
 
-        AssertResponse.of(subject.updateTeam("ANY", TeamDto))
-            .httpStatus(BAD_REQUEST)
-            .bodyAsString("Team \"ANY\" not found.");
+        AssertResponse.of(subject.updateTeam("ANOTHER", TeamDto))
+            .httpStatus(NOT_FOUND)
+            .bodyAsString("Team \"ANOTHER\" not found.");
     }
 
     @Test
-    public void updateTeam_ifLoggedUserIsAdminAndDataIsValid_saveValuesAndReturnOk() {
-        TeamsController subject = TeamsControllerMockBuilder.init()
-                .withTaskboardAdministrationPermission(true)
+    public void updateTeam_ifLoggedUserHasValidPermissionsAndDataIsValid_saveValuesAndReturnOk() {
+        DLSBuilder builder = teamsControllerBuilder()
+                .withTeamsEditViewPermission()
                 .withTeamsThatUserCanAdmin(
                         new Team("SDLC", "", "", asList())
-                )
+                );
+
+        TeamsController subject = builder
                 .build();
 
         TeamDto TeamDto = TeamDtoBuilder.init()
+                .withManager("new-manager")
                 .withTeamName("new-name")
                 .withManager("new-manager")
                 .withMembers(
@@ -191,43 +228,45 @@ public class TeamsControllerTest {
         AssertResponse.of(subject.updateTeam("SDLC", TeamDto))
             .httpStatus(OK);
 
-        TeamsControllerMockBuilder.teamSavedWithCorrectValues(TeamDto);
+        teamSavedWithCorrectValues(TeamDto);
     }
 
-    private static class TeamsControllerMockBuilder {
+    public DLSBuilder teamsControllerBuilder() {
+        return new DLSBuilder();
+    }
 
-        private static Authorizer authorizer = mock(Authorizer.class);
-        private static UserTeamService userTeamService = mock(UserTeamService.class);
+    public void teamSavedWithCorrectValues(TeamDto TeamDto) {
+        ArgumentCaptor<Team> teamParam = ArgumentCaptor.forClass(Team.class);
+        verify(userTeamService).saveTeam(teamParam.capture());
+        Team team = teamParam.getValue();
+
+        assertEquals(TeamDto.name, team.getName());
+        assertEquals(TeamDto.manager, team.getManager());
+        assertEquals(TeamDto.members.stream().collect(joining(",")), team.getMembers().stream().map(member -> member.getUserName()).collect(joining(",")));
+    }
+
+    private class DLSBuilder {
 
         private TeamsController subject = new TeamsController(authorizer, userTeamService);
 
-        public static TeamsControllerMockBuilder init() {
-            return new TeamsControllerMockBuilder();
-        }
-
-        public TeamsControllerMockBuilder withTaskboardAdministrationPermission(boolean withPermission) {
-            when(authorizer.hasPermission(TASKBOARD_ADMINISTRATION)).thenReturn(withPermission);
+        public DLSBuilder withTeamsEditViewPermission() {
+            when(authorizer.hasPermission(TEAMS_EDIT_VIEW)).thenReturn(true);
             return this;
         }
 
-        public TeamsControllerMockBuilder withTeamsThatUserCanAdmin(Team... teams) {
-            Set<Team> teamsList = Arrays.stream(teams).collect(toSet());
+        public DLSBuilder withoutTeamsEditViewPermission() {
+            when(authorizer.hasPermission(TEAMS_EDIT_VIEW)).thenReturn(false);
+            return this;
+        }
+
+        public DLSBuilder withTeamsThatUserCanAdmin(Team... teams) {
+            Set<Team> teamsList = stream(teams).collect(toSet());
             when(userTeamService.getTeamsThatUserCanAdmin()).thenReturn(teamsList);
             return this;
         }
 
         public TeamsController build() {
             return subject;
-        }
-
-        public static void teamSavedWithCorrectValues(TeamDto TeamDto) {
-            ArgumentCaptor<Team> teamParam = ArgumentCaptor.forClass(Team.class);
-            verify(userTeamService).saveTeam(teamParam.capture());
-            Team team = teamParam.getValue();
-
-            assertEquals(TeamDto.name, team.getName());
-            assertEquals(TeamDto.manager, team.getManager());
-            assertEquals(TeamDto.members.stream().collect(joining(",")), team.getMembers().stream().map(member -> member.getUserName()).collect(joining(",")));
         }
 
     }
@@ -260,6 +299,5 @@ public class TeamsControllerTest {
         }
 
     }
-
 
 }

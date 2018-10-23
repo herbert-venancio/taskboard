@@ -1,9 +1,12 @@
 package objective.taskboard.team;
 
 import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static objective.taskboard.auth.authorizer.Permissions.TASKBOARD_ADMINISTRATION;
+import static objective.taskboard.auth.authorizer.Permissions.TEAM_EDIT;
 import static objective.taskboard.utils.StreamUtils.streamOf;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -18,6 +21,7 @@ import java.util.Map;
 import org.junit.Test;
 
 import objective.taskboard.auth.LoggedUserDetails;
+import objective.taskboard.auth.authorizer.Authorizer;
 import objective.taskboard.data.Team;
 import objective.taskboard.data.UserTeam;
 import objective.taskboard.filterConfiguration.TeamFilterConfigurationService;
@@ -27,31 +31,23 @@ import objective.taskboard.repository.UserTeamCachedRepository;
 public class UserTeamServiceTest {
 
     private UserTeamCachedRepository userTeamRepo = mock(UserTeamCachedRepository.class);
+    private Authorizer authorizer = mock(Authorizer.class);
     private TeamCachedRepository teamRepo = mock(TeamCachedRepository.class);
     private TeamFilterConfigurationService teamFilterConfigurationService = mock(TeamFilterConfigurationService.class);
     private LoggedUserDetails loggedInUser = mock(LoggedUserDetails.class);
-    private UserTeamService subject = new UserTeamService(userTeamRepo, teamRepo, teamFilterConfigurationService, loggedInUser);
+    private UserTeamService subject = new UserTeamService(userTeamRepo, teamRepo, teamFilterConfigurationService, loggedInUser, authorizer);
 
     @Test
-    public void getTeamsThatUserCanAdmin_ifUserIsAdmin_shouldReturnAllTeams() {
-        when(loggedInUser.isAdmin()).thenReturn(true);
-
-        when(teamRepo.getCache()).thenReturn(asList(
-                new Team("Extra" , "sue", "sue", emptyList()),
-                new Team("Super", "joe", "joe", emptyList())));
+    public void getTeamsThatUserCanAdmin_shouldReturnOnlyPermittedTeams() {
+        withTeams()
+            .team("Rocket")
+            .team("Super")
+            .team("Extra")
+            .and()
+       .user()
+           .hasTeamEditPermissionFor("Super", "Extra");
 
         assertTeams("Extra, Super", subject.getTeamsThatUserCanAdmin());
-    }
-
-    @Test
-    public void getTeamsThatUserCanAdmin_ifUserIsNotAdmin_shouldReturnEmptyList() {
-        when(loggedInUser.isAdmin()).thenReturn(false);
-
-        when(teamRepo.getCache()).thenReturn(asList(
-                new Team("Extra" , "sue", "sue", emptyList()),
-                new Team("Super", "joe", "joe", emptyList())));
-
-        assertTeams("", subject.getTeamsThatUserCanAdmin());
     }
 
     @Test
@@ -60,8 +56,10 @@ public class UserTeamServiceTest {
             .team("Rocket")
             .team("Super")
             .team("Extra")
-        .userIsMemberOf("Super", "Extra")
-        .userIsNotAdmin();
+            .and()
+        .user()
+            .isMemberOf("Super", "Extra")
+            .hasNotTaskboardAdministrationPermission();
 
         assertTeams("Extra, Super", subject.getTeamsVisibleToLoggedInUser());
     }
@@ -72,9 +70,10 @@ public class UserTeamServiceTest {
             .team("Rocket").isDefaultInAVisibleProject()
             .team("Super")
             .team("Extra")
-        .userIsMemberOf()
-        .userIsNotAdmin();
-        
+            .and()
+        .user()
+            .hasNotTaskboardAdministrationPermission();
+
         assertTeams("Rocket", subject.getTeamsVisibleToLoggedInUser());
     }
 
@@ -83,9 +82,10 @@ public class UserTeamServiceTest {
         withTeams()
             .team("Super")
             .team("Extra")
-        .userIsMemberOf()
-        .userIsAdmin();
-        
+            .and()
+        .user()
+            .hasTaskboardAdministrationPermission();
+
         assertTeams("Extra, Super", subject.getTeamsVisibleToLoggedInUser());
     }
 
@@ -94,8 +94,10 @@ public class UserTeamServiceTest {
         withTeams()
             .team("Global").isGloballyVisible()
             .team("Extra")
-        .userIsMemberOf()
-        .userIsNotAdmin();
+            .and()
+        .user()
+            .isMemberOf()
+            .hasNotTaskboardAdministrationPermission();
 
         assertTeams("Global", subject.getTeamsVisibleToLoggedInUser());
     }
@@ -128,21 +130,8 @@ public class UserTeamServiceTest {
             return new DSLTeam(teamName);
         }
 
-        public void userIsNotAdmin() {
-            when(loggedInUser.isAdmin()).thenReturn(false);
-        }
-
-        public void userIsAdmin() {
-            when(loggedInUser.isAdmin()).thenReturn(true);
-        }
-
-        public DSLBuilder userIsMemberOf(String ...teams) {
-            when(userTeamRepo.findByUserName("mary")).thenReturn(
-                    streamOf(asList(teams))
-                        .map(teamName -> new UserTeam("mary", teamName))
-                        .collect(toList()));
-
-            return this;
+        public DSLUser user() {
+            return new DSLUser();
         }
 
         class DSLTeam {
@@ -161,13 +150,42 @@ public class UserTeamServiceTest {
                 return DSLBuilder.this;
             }
 
-            public DSLBuilder userIsMemberOf(String ...teams) {
-                return DSLBuilder.this.userIsMemberOf(teams);
-            }
-
             public DSLTeam team(String anotherTeam) {
                 return DSLBuilder.this.team(anotherTeam);
             }
+
+            public DSLBuilder and() {
+                return DSLBuilder.this;
+            }
         }
+
+        class DSLUser {
+
+            public DSLUser isMemberOf(String ...teams) {
+                when(userTeamRepo.findByUserName("mary")).thenReturn(
+                        streamOf(asList(teams))
+                            .map(teamName -> new UserTeam("mary", teamName))
+                            .collect(toList()));
+
+                return this;
+            }
+
+            public DSLUser hasTaskboardAdministrationPermission() {
+                when(authorizer.hasPermission(TASKBOARD_ADMINISTRATION)).thenReturn(true);
+                return this;
+            }
+
+            public DSLUser hasNotTaskboardAdministrationPermission() {
+                when(authorizer.hasPermission(TASKBOARD_ADMINISTRATION)).thenReturn(false);
+                return this;
+            }
+
+            public DSLUser hasTeamEditPermissionFor(String... teamsName) {
+                stream(teamsName).forEach(name -> when(authorizer.hasPermission(TEAM_EDIT, name)).thenReturn(true));
+                return this;
+            }
+
+        }
+
     }
 }

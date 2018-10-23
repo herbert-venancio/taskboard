@@ -14,6 +14,9 @@ public class Permissions {
     public static final String FOLLOWUP_TEMPLATE_EDIT = "followup.template.edit";
     public static final String SIZING_IMPORT_VIEW = "sizing.import.view";
 
+    public static final String TEAMS_EDIT_VIEW = "teams.edit.view";
+    public static final String TEAM_EDIT = "team.edit";
+
     private Permissions() {}
 
 }

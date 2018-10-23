@@ -1,5 +1,9 @@
 package objective.taskboard.team;
 
+import static java.util.stream.Collectors.toSet;
+import static objective.taskboard.auth.authorizer.Permissions.TASKBOARD_ADMINISTRATION;
+import static objective.taskboard.auth.authorizer.Permissions.TEAM_EDIT;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -10,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import objective.taskboard.auth.LoggedUserDetails;
+import objective.taskboard.auth.authorizer.Authorizer;
 import objective.taskboard.data.Team;
 import objective.taskboard.data.UserTeam;
 import objective.taskboard.filterConfiguration.TeamFilterConfigurationService;
@@ -23,17 +28,20 @@ public class UserTeamService {
     private final TeamCachedRepository teamRepo;
     private final TeamFilterConfigurationService teamFilterConfigurationService;
     private final LoggedUserDetails loggedInUser;
+    private final Authorizer authorizer;
 
     @Autowired
     public UserTeamService(
             UserTeamCachedRepository userTeamRepo, 
             TeamCachedRepository teamRepo,
             TeamFilterConfigurationService teamFilterConfigurationService, 
-            LoggedUserDetails loggedInUser) {
+            LoggedUserDetails loggedInUser,
+            Authorizer authorizer) {
         this.userTeamRepo = userTeamRepo;
         this.teamRepo = teamRepo;
         this.teamFilterConfigurationService = teamFilterConfigurationService;
         this.loggedInUser = loggedInUser;
+        this.authorizer = authorizer;
     }
 
     public List<Long> getIdsOfTeamsVisibleToUser() {
@@ -41,13 +49,13 @@ public class UserTeamService {
     }
 
     public Set<Team> getTeamsThatUserCanAdmin() {
-        if (loggedInUser.isAdmin())
-            return new HashSet<>(teamRepo.getCache());
-        return new HashSet<>();
+        return teamRepo.getCache().stream()
+                .filter(t -> authorizer.hasPermission(TEAM_EDIT, t.getName()))
+                .collect(toSet());
     }
 
     public Set<Team> getTeamsVisibleToLoggedInUser() {
-        if (loggedInUser.isAdmin())
+        if (authorizer.hasPermission(TASKBOARD_ADMINISTRATION))
             return new HashSet<>(teamRepo.getCache());
 
         List<UserTeam> userTeam = userTeamRepo.findByUserName(loggedInUser.getUsername());

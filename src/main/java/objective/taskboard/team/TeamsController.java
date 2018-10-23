@@ -1,6 +1,6 @@
 package objective.taskboard.team;
 import static java.util.stream.Collectors.toList;
-import static objective.taskboard.auth.authorizer.Permissions.TASKBOARD_ADMINISTRATION;
+import static objective.taskboard.auth.authorizer.Permissions.TEAMS_EDIT_VIEW;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -44,7 +44,7 @@ class TeamsController {
 
     @GetMapping
     public ResponseEntity<?> getTeams() {
-        if (!authorizer.hasPermission(TASKBOARD_ADMINISTRATION))
+        if (!authorizer.hasPermission(TEAMS_EDIT_VIEW))
             return new ResponseEntity<>(NOT_FOUND);
 
         return new ResponseEntity<>(TeamDto.from(userTeamService.getTeamsThatUserCanAdmin()), OK);
@@ -52,12 +52,12 @@ class TeamsController {
 
     @GetMapping(value="{teamName}")
     public ResponseEntity<?> getTeam(@PathVariable String teamName) {
-        if (!authorizer.hasPermission(TASKBOARD_ADMINISTRATION))
+        if (!authorizer.hasPermission(TEAMS_EDIT_VIEW))
             return new ResponseEntity<>(NOT_FOUND);
 
         Optional<Team> team = findTeam(teamName);
         if (!team.isPresent())
-            return new ResponseEntity<>("Team \""+ teamName +"\" not found.", BAD_REQUEST);
+            return new ResponseEntity<>("Team \""+ teamName +"\" not found.", NOT_FOUND);
 
         return new ResponseEntity<>(TeamDto.from(team.get()), OK);
     }
@@ -65,7 +65,7 @@ class TeamsController {
     @PutMapping(value="{teamName}")
     @Transactional
     public ResponseEntity<?> updateTeam(@PathVariable String teamName, @RequestBody TeamDto teamDto) {
-        if (!authorizer.hasPermission(TASKBOARD_ADMINISTRATION))
+        if (!authorizer.hasPermission(TEAMS_EDIT_VIEW))
             return new ResponseEntity<>(NOT_FOUND);
 
         List<String> errors = validateTeam(teamDto);
@@ -74,7 +74,7 @@ class TeamsController {
 
         Optional<Team> team = findTeam(teamName);
         if (!team.isPresent())
-            return new ResponseEntity<>("Team \""+ teamName +"\" not found.", BAD_REQUEST);
+            return new ResponseEntity<>("Team \""+ teamName +"\" not found.", NOT_FOUND);
 
         updateTeam(teamDto, team.get());
 

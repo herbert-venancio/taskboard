@@ -118,8 +118,6 @@ public class IssueTeamService {
         Set<String> mismatches = new LinkedHashSet<>();
 
         for (User user : assignees) {
-            if (!user.isAssigned()) continue;
-
             List<Team> teams = teamFilterConfigurationService.getConfiguredTeamsByUser(user.name);
             
             if (!teams.stream().anyMatch(t -> validTeams.contains(t.getName())))

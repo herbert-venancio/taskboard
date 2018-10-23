@@ -14,6 +14,11 @@ public class LoggedUserDetailsMockBuilder {
         return new LoggedUserDetailsMockBuilder();
     }
 
+    public LoggedUserDetailsMockBuilder withName(String name) {
+        when(mock.getUsername()).thenReturn(name);
+        return this;
+    }
+
     public LoggedUserDetailsMockBuilder withIsAdmin(boolean isAdmin) {
         when(mock.isAdmin()).thenReturn(isAdmin);
         return this;
