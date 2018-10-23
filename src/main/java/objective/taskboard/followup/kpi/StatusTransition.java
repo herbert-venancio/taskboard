@@ -46,7 +46,9 @@ public class StatusTransition {
         return isProgressingStatus;
     }
     
-    boolean hasAnyNextThatRecievesWorklog(Worklog worklog) {
+    boolean hasAnyNextThatReceivesWorklog(Worklog worklog) {
+        if (hasNextProgressingStatusThatReceivesWorklog(worklog))
+            return true;
         
         Optional<DatedStatusTransition> nextWithDate = next.flatMap(n -> n.withDate());
         
