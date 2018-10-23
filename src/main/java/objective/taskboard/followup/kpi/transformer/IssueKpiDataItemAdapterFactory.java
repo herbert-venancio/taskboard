@@ -15,6 +15,7 @@ import objective.taskboard.data.Issue;
 import objective.taskboard.followup.AnalyticsTransitionsDataRow;
 import objective.taskboard.followup.AnalyticsTransitionsDataSet;
 import objective.taskboard.followup.IssueTransitionService;
+import objective.taskboard.followup.kpi.IssueTypeKpi;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.client.JiraIssueTypeDto;
@@ -53,16 +54,24 @@ public class IssueKpiDataItemAdapterFactory {
         KpiLevel level = KpiLevel.of(issue);
         Map<String, ZonedDateTime> transitions = transitionService.getTransitions(issue,timezone,level.getStatusPriorityOrder(jiraProperties));
         
-        return new IssueDataItemAdapter(issue, level, transitions);
+        return new IssueDataItemAdapter(issue, getType(issue), level, transitions);
     }
 
     private IssueKpiDataItemAdapter makeItem(AnalyticsTransitionsDataRow row, List<String> headers) {
 
         Optional<JiraIssueTypeDto> type = metadataService.getIssueTypeByName(row.issueType); 
 
-        return new AnalyticDataRowAdapter(row,headers,getLevel(type));
+        return new AnalyticDataRowAdapter(row,getType(type), headers,getLevel(type));
     }
     
+    private Optional<IssueTypeKpi> getType(Optional<JiraIssueTypeDto> type) {
+        return type.flatMap(t -> Optional.of(new IssueTypeKpi(t.getId(), t.getName())));
+    }
+    
+    private Optional<IssueTypeKpi> getType(Issue issue) {
+        return Optional.of(new IssueTypeKpi(issue.getType(), issue.getIssueTypeName()));
+    }
+
     private KpiLevel getLevel(Optional<JiraIssueTypeDto> type) {
         if(!type.isPresent())
             return KpiLevel.UNMAPPED;

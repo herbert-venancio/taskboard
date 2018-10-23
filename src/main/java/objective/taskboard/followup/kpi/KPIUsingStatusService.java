@@ -60,7 +60,7 @@ public abstract class KPIUsingStatusService<DS,R> {
     }
     
     private Map<String, List<IssueKpi>> getIssuesByType(List<IssueKpi> issues) {
-        return issues.stream().collect(Collectors.groupingBy(IssueKpi::getIssueType));
+        return issues.stream().collect(Collectors.groupingBy(IssueKpi::getIssueTypeName));
     }
     
     private List<R> getRows(String[] statuses, Optional<AnalyticsTransitionsDataSet> analyticTransitionDs) {
@@ -73,7 +73,7 @@ public abstract class KPIUsingStatusService<DS,R> {
         Map<String, List<IssueKpi>> byType = getIssuesByType(issues);
         
         List<R> rows = new LinkedList<>();
-        Range<ZonedDateTime> dateRange = FollowUpTransitionsDataProvider.calculateInterval(analyticTransitionDs.get());//TODO pensar em uma alternativa
+        Range<ZonedDateTime> dateRange = FollowUpTransitionsDataProvider.calculateInterval(analyticTransitionDs.get());
 
         for (ZonedDateTime date = dateRange.getMinimum(); !date.isAfter(dateRange.getMaximum()); date = date.plusDays(1)) {
             List<R> tpRows = makeRows(statuses, byType, date);

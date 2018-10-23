@@ -2,8 +2,10 @@ package objective.taskboard.followup.kpi.transformer;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
+import java.util.Optional;
 
 import objective.taskboard.data.Issue;
+import objective.taskboard.followup.kpi.IssueTypeKpi;
 import objective.taskboard.followup.kpi.KpiLevel;
 
 public class IssueDataItemAdapter implements IssueKpiDataItemAdapter {
@@ -11,9 +13,11 @@ public class IssueDataItemAdapter implements IssueKpiDataItemAdapter {
     private Issue issue;
     private Map<String, ZonedDateTime> transitions;
     private KpiLevel level;
+    private Optional<IssueTypeKpi> type;
 
-    IssueDataItemAdapter(Issue issue,KpiLevel level, Map<String,ZonedDateTime> transitions) {
+    IssueDataItemAdapter(Issue issue,Optional<IssueTypeKpi> type, KpiLevel level, Map<String,ZonedDateTime> transitions) {
         this.issue = issue;
+        this.type = type;
         this.level = level;
         this.transitions = transitions;
     }
@@ -29,8 +33,8 @@ public class IssueDataItemAdapter implements IssueKpiDataItemAdapter {
     }
 
     @Override
-    public String getIssueType() {
-        return issue.getIssueTypeName();
+    public Optional<IssueTypeKpi> getIssueType() {
+        return type;
     }
 
     @Override

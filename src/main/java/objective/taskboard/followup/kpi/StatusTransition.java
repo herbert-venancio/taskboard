@@ -1,16 +1,25 @@
 package objective.taskboard.followup.kpi;
 
 import java.time.ZonedDateTime;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
+
+import com.google.common.base.Function;
+
+import objective.taskboard.data.Worklog;
 
 public class StatusTransition {
     
     protected final String status;
     protected final Optional<StatusTransition> next;
+    protected final boolean isProgressingStatus;
+    private List<Worklog> worklogs = new LinkedList<>();
 
-    public StatusTransition(String status, Optional<StatusTransition> next) {
+    public StatusTransition(String status, boolean isProgressingStatus, Optional<StatusTransition> next) {
         this.status = status;
         this.next = next;
+        this.isProgressingStatus = isProgressingStatus;
     }
 
     public Optional<StatusTransition> givenDate(ZonedDateTime date) {
@@ -28,5 +37,69 @@ public class StatusTransition {
     public Optional<DatedStatusTransition> findWithTransition(String status) {
         return next.map(n -> n.findWithTransition(status)).orElse(Optional.empty());
     }
+    
+    void addWorklog(Worklog worklog) { 
+        this.worklogs.add(worklog);
+    }
+    
+    boolean isProgressingStatus() {
+        return isProgressingStatus;
+    }
+    
+    boolean hasAnyNextThatRecievesWorklog(Worklog worklog) {
+        
+        Optional<DatedStatusTransition> nextWithDate = next.flatMap(n -> n.withDate());
+        
+        boolean nextIsOnDate = nextWithDate.map(n -> n.isOnDate(worklog)).orElse(false);
+        boolean nextReceiveWorklog = nextWithDate.map(n -> n.isProgressingStatus || n.hasNextOnDateThatCouldReceiveWorklog(worklog, true)).orElse(false); 
 
+        return nextIsOnDate && (nextReceiveWorklog && nextWithDate.isPresent()); 
+    }
+    
+    boolean hasNextProgressingStatusThatReceivesWorklog(Worklog worklog) {
+        Optional<StatusTransition> nextProgressing = next.flatMap(n-> n.whichIsProgressing()); 
+        return nextProgressing.map(n -> n.hasNextOnDateThatCouldReceiveWorklog(worklog, false)).orElse(false);
+    }
+    
+    public Long getEffort() { 
+        return worklogs.stream().mapToLong(w -> Long.valueOf(w.timeSpentSeconds)).reduce(Long::sum).orElse(0); 
+    } 
+ 
+    public Optional<DatedStatusTransition> withDate() { 
+        return next.flatMap(n -> n.withDate()); 
+    } 
+ 
+    public Optional<StatusTransition> whichIsProgressing() { 
+        return this.isProgressingStatus() ? Optional.of(this) : flatNext(n -> n.whichIsProgressing()); 
+    } 
+    
+    protected boolean hasNextOnDateThatCouldReceiveWorklog(Worklog worklog, boolean couldReceive) { 
+        Optional<DatedStatusTransition> nextWithDate = next.flatMap(n -> n.withDate()); 
+        return nextWithDate.map(n -> (n.isProgressingStatus == couldReceive) && n.isOnDate(worklog)).orElse(false); 
+    }
+
+    public Optional<StatusTransition> find(String status) {
+        return this.status.equalsIgnoreCase(status)? Optional.of(this) : flatNext(n->n.find(status));
+    }
+
+    Optional<StatusTransition> flatNext(Function<? super StatusTransition, Optional<StatusTransition>> mapper) { 
+        return next.flatMap(mapper); 
+    }
+
+    public Long totalEffort() {
+        Long effort = getEffort();
+        return effort + next.map(n -> n.totalEffort()).orElse(0l);
+    }
+    
+    List<Worklog> getWorklogs(){
+        return this.worklogs;
+    }
+
+    public List<Worklog> collectWorklog() {
+        List<Worklog> allWorklogs = next.map(n -> n.collectWorklog()).orElseGet(LinkedList::new);
+        allWorklogs.addAll(this.worklogs);
+        return allWorklogs;
+    }
+   
+    
 }
