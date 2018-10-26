@@ -40,18 +40,6 @@ public class UserTeamService {
         return getTeamsVisibleToLoggedInUser().stream().map(ut->ut.getId()).collect(Collectors.toList());
     }
 
-    public boolean isUserVisibleToLoggedUser(String username) {
-        Set<Team> teams = getTeamsVisibleToLoggedInUser();
-        for (Team team : teams) {
-            List<UserTeam> members = team.getMembers();
-            for (UserTeam userTeam : members) {
-                if (userTeam.getUserName().equals(username))
-                    return true;
-            }
-        }
-        return false;
-    }
-
     public Set<Team> getTeamsThatUserCanAdmin() {
         if (loggedInUser.isAdmin())
             return new HashSet<>(teamRepo.getCache());
