@@ -13,6 +13,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -69,6 +70,7 @@ public class JiraIssueToIssueConverterMockFactory implements FactoryBean<JiraIss
                     0L,
                     parentKey,
                     new LinkedList<>(),
+                    new ArrayList<>(),
                     new LinkedList<>(),
                     User.from(jiraIssue.getAssignee()),
                     jiraIssue.getPriority() != null ? jiraIssue.getPriority().getId() : 0L,

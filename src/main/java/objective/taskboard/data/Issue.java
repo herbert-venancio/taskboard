@@ -97,6 +97,7 @@ public class Issue extends IssueScratch implements Serializable {
         this.startDateStepMillis = scratch.startDateStepMillis;
         this.parent = scratch.parent;
         this.dependencies = scratch.dependencies;
+        this.bugs = scratch.bugs;
         this.assignee = scratch.assignee;
         this.priority = scratch.priority;
         this.dueDate = scratch.dueDate;
@@ -360,10 +361,6 @@ public class Issue extends IssueScratch implements Serializable {
         return this.id;
     }
 
-    public String getIssueKey() {
-        return this.issueKey;
-    }
-
     public String getProjectKey() {
         return this.projectKey;
     }
@@ -410,6 +407,10 @@ public class Issue extends IssueScratch implements Serializable {
 
     public List<String> getDependencies() {
         return this.dependencies;
+    }
+
+    public List<String> getBugs() {
+        return bugs;
     }
 
     public List<User> getCoAssignees() {
@@ -520,6 +521,10 @@ public class Issue extends IssueScratch implements Serializable {
 
     public void setDependencies(final List<String> dependencies) {
         this.dependencies = dependencies;
+    }
+
+    public void setBugs(final List<String> bugs) {
+        this.bugs = bugs;
     }
 
     public void setAssignee(final User assignee) {

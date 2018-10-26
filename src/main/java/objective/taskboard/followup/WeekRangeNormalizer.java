@@ -7,7 +7,7 @@ import java.time.temporal.TemporalAdjusters;
 
 import org.apache.commons.lang3.Range;
 
-import objective.taskboard.utils.DateTimeUtils;
+import objective.taskboard.utils.RangeUtils;
 
 public class WeekRangeNormalizer {
 
@@ -21,7 +21,7 @@ public class WeekRangeNormalizer {
         ZonedDateTime normalizedStartDate = findPreviousSunday(baseStartDate);
         ZonedDateTime normalizedEndDate = findNextSaturday(baseEndDate);
         
-        return DateTimeUtils.range(normalizedStartDate, normalizedEndDate);
+        return RangeUtils.between(normalizedStartDate, normalizedEndDate);
     }
 
     private static ZonedDateTime findNextSaturday(ZonedDateTime baseEndDate) {

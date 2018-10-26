@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class IssueScratch implements Serializable {
     private static final long serialVersionUID = -8643342601909365442L;
-    
+
     protected Long id = 0L;
     protected String issueKey;
     protected String projectKey;
@@ -21,6 +21,7 @@ public class IssueScratch implements Serializable {
     protected long startDateStepMillis;
     protected String parent;
     protected List<String> dependencies; //NOSONAR
+    protected List<String> bugs; // NOSONAR
     protected User assignee;
     protected List<User> coAssignees; //NOSONAR
     protected long priority;
@@ -65,7 +66,8 @@ public class IssueScratch implements Serializable {
             long status, 
             long startDateStepMillis, 
             String parent, 
-            List<String> dependencies, 
+            List<String> dependencies,
+            List<String> bugs,
             List<User> subResponsaveis, 
             User assignee, 
             long priority, 
@@ -98,6 +100,7 @@ public class IssueScratch implements Serializable {
         this.startDateStepMillis = startDateStepMillis;
         this.parent = parent;
         this.dependencies = dependencies;
+        this.bugs = bugs;
         this.coAssignees = subResponsaveis == null? new LinkedList<>(): subResponsaveis;
         this.assignee = assignee;
         this.priority = priority;

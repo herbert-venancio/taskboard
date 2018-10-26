@@ -234,6 +234,17 @@ public class IssueFieldsExtractor {
                 .collect(toList());
     }
 
+    public static List<String> extractLinkedBugs(JiraProperties jiraProperties, JiraIssueDto issue) {
+        if (isEmpty(issue.getIssueLinks()))
+            return newArrayList();
+
+        List<String> bugs = jiraProperties.getIssuelink().getBugs();
+
+        return issue.getIssueLinks().stream()
+                .filter(link -> bugs.contains(link.getIssueLinkType().getName()) && link.getIssueLinkType().getDirection() == JiraIssueLinkTypeDto.Direction.OUTBOUND)
+                .map(JiraLinkDto::getTargetIssueKey)
+                .collect(toList());
+    }
 
     public static CustomField extractAdditionalEstimatedHours(JiraProperties jiraProperties, JiraIssueDto issue) {
         String additionalHoursId = jiraProperties.getCustomfield().getAdditionalEstimatedHours().getId();

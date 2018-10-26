@@ -22,6 +22,7 @@ package objective.taskboard.domain.converter;
 
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
@@ -95,6 +96,8 @@ public class IssueFieldsExtractorTest {
     private static final String LINK_TYPE_DESC_DEMAND = "is demanded by";
     private static final String LINK_TYPE_NAME_DEPENDENCY = "Dependency";
     private static final String LINK_TYPE_DESC_DEPENDENCY = "is a dependency of";
+    private static final String LINK_TYPE_NAME_BUG = "Root Cause";
+    private static final String LINK_TYPE_DESC_BUG = "causes";
     private static final String ISSUE_KEY = "ISSUE-1";
 
     private static final long DEMAND_ISSUETYPE_ID = 1L;
@@ -574,6 +577,34 @@ public class IssueFieldsExtractorTest {
     @Test
     public void extractComponentsNull() {
         assertTrue("Components should be empty", IssueFieldsExtractor.extractComponents(issue).isEmpty());
+    }
+
+    @Test
+    public void extractLinkedBugs_outwards() {
+        when(issueLinkProperty.getBugs()).thenReturn(singletonList(LINK_TYPE_NAME_BUG));
+        when(issueLinkType.getDirection()).thenReturn(JiraIssueLinkTypeDto.Direction.OUTBOUND);
+        when(issueLinkType.getName()).thenReturn(LINK_TYPE_NAME_BUG);
+        when(issueLinkType.getDescription()).thenReturn(LINK_TYPE_DESC_BUG);
+        when(issueLink.getIssueLinkType()).thenReturn(issueLinkType);
+        when(issueLink.getTargetIssue()).thenReturn(linkedToDemand(ISSUE_KEY));
+        when(issue.getIssueLinks()).thenReturn(singletonList(issueLink));
+
+        List<String> linkedBugsKey = IssueFieldsExtractor.extractLinkedBugs(jiraProperties, issue);
+        assertEquals(1, linkedBugsKey.size());
+        assertEquals(ISSUE_KEY, linkedBugsKey.get(0));
+    }
+
+    @Test
+    public void extractLinkedBugs_inwards() {
+        when(issueLinkProperty.getBugs()).thenReturn(singletonList(LINK_TYPE_NAME_BUG));
+        when(issueLinkType.getDirection()).thenReturn(JiraIssueLinkTypeDto.Direction.INBOUND);
+        when(issueLinkType.getName()).thenReturn(LINK_TYPE_NAME_BUG);
+        when(issueLinkType.getDescription()).thenReturn(LINK_TYPE_DESC_BUG);
+        when(issueLink.getIssueLinkType()).thenReturn(issueLinkType);
+        when(issueLink.getTargetIssue()).thenReturn(linkedToDemand(ISSUE_KEY));
+        when(issue.getIssueLinks()).thenReturn(singletonList(issueLink));
+
+        assertEquals(0, IssueFieldsExtractor.extractLinkedBugs(jiraProperties, issue).size());
     }
 
     private JiraLinkDto.LinkedIssue linkedToDemand(String issueKey) {

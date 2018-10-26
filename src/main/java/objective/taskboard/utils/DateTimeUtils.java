@@ -154,17 +154,12 @@ public class DateTimeUtils {
         return date.toInstant().atZone(zone).toLocalDate();
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T extends Temporal & Comparable<T>, S extends T> Range<S> range(T fromInclusive, T toInclusive) {
-        return (Range<S>) Range.between(fromInclusive, toInclusive);
-    }
-
     public static Stream<LocalDate> dayStream(LocalDate fromInclusive, LocalDate toInclusive) {
-        return dayStream(range(fromInclusive, toInclusive));
+        return dayStream(RangeUtils.between(fromInclusive, toInclusive));
     }
 
     public static Stream<ZonedDateTime> dayStream(ZonedDateTime fromInclusive, ZonedDateTime toInclusive) {
-        return dayStream(range(fromInclusive, toInclusive));
+        return dayStream(RangeUtils.between(fromInclusive, toInclusive));
     }
 
     @SuppressWarnings("unchecked")

@@ -22,6 +22,7 @@ import com.google.common.collect.Multimaps;
 
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.utils.DateTimeUtils;
+import objective.taskboard.utils.RangeUtils;
 
 @Component
 public class CumulativeFlowDiagramDataProvider {
@@ -92,7 +93,7 @@ public class CumulativeFlowDiagramDataProvider {
         private final List<String> reverseStatuses;
 
         public Sampler(SyntheticTransitionsDataSet ds) {
-            dateRange = DateTimeUtils.range(ds.rows.get(0).date, ds.rows.get(ds.rows.size() - 1).date);
+            dateRange = RangeUtils.between(ds.rows.get(0).date, ds.rows.get(ds.rows.size() - 1).date);
             dateRowMap = ds.rows
                     .stream()
                     .collect(Multimaps.toMultimap(
@@ -143,7 +144,7 @@ public class CumulativeFlowDiagramDataProvider {
                 .map(d -> d.atStartOfDay(zone))
                 .orElseGet(() -> ds.rows.get(ds.rows.size()-1).date);
 
-        return DateTimeUtils.range(startDate, endDate);
+        return RangeUtils.between(startDate, endDate);
     }
 
     private static <K, V> Map<K, List<V>> asMap(ListMultimap<K, V> multimap) {

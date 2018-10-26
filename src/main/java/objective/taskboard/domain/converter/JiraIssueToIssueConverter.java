@@ -34,6 +34,7 @@ import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractD
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractExtraFields;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractLabels;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractLastBlockReason;
+import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractLinkedBugs;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractParentKey;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractReleaseId;
 import static objective.taskboard.domain.converter.IssueFieldsExtractor.extractTShirtSizes;
@@ -137,6 +138,7 @@ public class JiraIssueToIssueConverter {
                 startDateStepService.get(jiraIssue),
                 extractParentKey(jiraProperties, jiraIssue, parentIssueLinks),
                 extractDependenciesIssues(jiraProperties, jiraIssue),
+                extractLinkedBugs(jiraProperties, jiraIssue),
                 coAssignees.stream().filter(c -> !c.getName().equals(assignedUid)).map(x -> User.from(x)).collect(toList()),
                 User.from(jiraIssue.getAssignee()),
                 jiraIssue.getPriority() != null ? jiraIssue.getPriority().getId() : 0l,

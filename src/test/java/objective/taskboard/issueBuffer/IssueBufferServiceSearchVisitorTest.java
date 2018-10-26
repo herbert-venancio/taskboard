@@ -1,6 +1,7 @@
 package objective.taskboard.issueBuffer;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Collections.emptyList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
@@ -109,7 +110,8 @@ public class IssueBufferServiceSearchVisitorTest {
         when(issueColorService.getColor(any())).thenReturn("#FFFFFF");
         
         IssueLink issuelink = new IssueLink();
-        issuelink.setDependencies(Arrays.asList());
+        issuelink.setDependencies(emptyList());
+        issuelink.setBugs(emptyList());
         properties.setIssuelink(issuelink);
         
         when(cardVisibilityEvalService.calculateVisibleUntil(any(), any(), any())).thenReturn(Optional.empty());
