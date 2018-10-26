@@ -59,8 +59,13 @@ public class UserTeam implements Serializable {
     protected UserTeam() {}
 
     public UserTeam(String memberName, String teamName) {
+        this(memberName, teamName, UserTeamRole.MEMBER);
+    }
+
+    public UserTeam(String memberName, String teamName, UserTeamRole role) {
         this.userName = memberName;
         this.team = teamName;
+        this.role = role;
     }
 
     public Long getId() {

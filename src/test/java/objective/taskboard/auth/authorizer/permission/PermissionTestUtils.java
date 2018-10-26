@@ -11,9 +11,7 @@ public class PermissionTestUtils {
     }
 
     public static UserTeam userTeam(String memberName, String teamName, UserTeamRole role) {
-        UserTeam userTeam = new UserTeam(memberName, teamName);
-        userTeam.setRole(role);
-        return userTeam;
+        return new UserTeam(memberName, teamName, role);
     }
 
     public static interface PermissionTest {

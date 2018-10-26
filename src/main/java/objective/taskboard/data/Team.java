@@ -23,9 +23,9 @@ package objective.taskboard.data;
 
 import java.io.Serializable;
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -40,6 +40,8 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+
+import objective.taskboard.data.UserTeam.UserTeamRole;
 
 @Entity
 @Table(name = "TEAM")
@@ -74,7 +76,7 @@ public class Team implements Serializable {
     @OneToMany(fetch=FetchType.EAGER, cascade=CascadeType.ALL, orphanRemoval=true)
     @JoinColumn(name="team", referencedColumnName="name")
     @Fetch(value = FetchMode.SUBSELECT)
-    private List<UserTeam> members;
+    private List<UserTeam> members = new ArrayList<>();
 
     public Team() {
     }
@@ -102,16 +104,21 @@ public class Team implements Serializable {
         this.name = name;
         this.manager = manager;
         this.coach = coach;
-        this.members = stringListToUserTeamList(members);
         this.globallyVisible = globallyVisible;
+        addMembers(members);
     }
 
-    private List<UserTeam> stringListToUserTeamList(List<String> members) {
-        return members.stream()
-                .filter(Objects::nonNull)
-                .distinct()
-                .map(teamMember -> new UserTeam(teamMember, getName()))
-                .collect(Collectors.toList());
+    private void addMembers(List<String> membersName) {
+        membersName.stream()
+            .filter(Objects::nonNull)
+            .distinct()
+            .forEach(memberName -> addMember(memberName));
+    }
+
+    public UserTeam addMember(String memberName) {
+        UserTeam member = new UserTeam(memberName, getName(), UserTeamRole.MEMBER);
+        this.members.add(member);
+        return member;
     }
 
     public Long getId() {

@@ -26,28 +26,29 @@ import static objective.taskboard.auth.authorizer.Permissions.PROJECT_DASHBOARD_
 import static objective.taskboard.auth.authorizer.Permissions.PROJECT_DASHBOARD_TACTICAL;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.transaction.Transactional;
 
-import objective.taskboard.domain.Project;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import objective.taskboard.auth.authorizer.Authorizer;
 import objective.taskboard.controller.ProjectCreationData.ProjectCreationDataTeam;
 import objective.taskboard.data.Team;
+import objective.taskboard.data.UserTeam;
+import objective.taskboard.data.UserTeam.UserTeamRole;
+import objective.taskboard.domain.Project;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.domain.TeamFilterConfiguration;
 import objective.taskboard.followup.FollowUpFacade;
 import objective.taskboard.jira.ProjectService;
-import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.repository.TeamFilterConfigurationCachedRepository;
 
@@ -55,23 +56,29 @@ import objective.taskboard.repository.TeamFilterConfigurationCachedRepository;
 @RequestMapping("/api/projects")
 public class ProjectController {
 
-    @Autowired
-    ProjectFilterConfigurationCachedRepository projectRepository;
+    private final TeamCachedRepository teamRepository;
+
+    private final TeamFilterConfigurationCachedRepository teamFilterConfigurationRepository;
+
+    private final ProjectService projectService;
+
+    private final FollowUpFacade followUpFacade;
+
+    private final Authorizer authorizer;
 
     @Autowired
-    TeamCachedRepository teamRepository;
-
-    @Autowired
-    TeamFilterConfigurationCachedRepository teamFilterConfigurationRepository;
-
-    @Autowired
-    private ProjectService projectService;
-
-    @Autowired
-    private FollowUpFacade followUpFacade;
-
-    @Autowired
-    private Authorizer authorizer;
+    public ProjectController(
+        TeamCachedRepository teamRepository,
+        TeamFilterConfigurationCachedRepository teamFilterConfigurationRepository,
+        ProjectService projectService,
+        FollowUpFacade followUpFacade,
+        Authorizer authorizer) {
+        this.teamRepository = teamRepository;
+        this.teamFilterConfigurationRepository = teamFilterConfigurationRepository;
+        this.projectService = projectService;
+        this.followUpFacade = followUpFacade;
+        this.authorizer = authorizer;
+    }
 
     @GetMapping
     public List<ProjectData> getProjectsVisibleOnTaskboard() {
@@ -127,7 +134,17 @@ public class ProjectController {
 
     private Team createTeam(String name, String manager, String coach, List<String> members) {
         final Team team = new Team(name, manager, coach, members);
+        addManagerToTeam(team, manager);
         return teamRepository.save(team);
+    }
+
+    private void addManagerToTeam(Team team, String managerUsername) {
+        Optional<UserTeam> managerOptional = team.getMembers().stream()
+            .filter(m -> m.getUserName().equals(managerUsername))
+            .findAny();
+
+        UserTeam manager = managerOptional.orElseGet(() -> team.addMember(managerUsername));
+        manager.setRole(UserTeamRole.MANAGER);
     }
 
     private TeamFilterConfiguration createTeamFilterConfiguration(Team team) {
