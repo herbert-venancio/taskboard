@@ -1,13 +1,18 @@
+import {
+    Component,
+    OnInit,
+    ViewChild
+} from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { NgForm } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Component, OnInit, ViewChild, ViewChildren, QueryList, ElementRef } from '@angular/core';
 
 import { PageSpinner } from 'app/core/page-spinner/page-spinner';
 import { SnackbarControl, SnackbarLevel } from 'app/shared/obj-ds/snackbar/snackbar-control';
-import { BaseClusterService, BaseClusterItemDto, BaseClusterDto } from 'app/cluster/base-cluster.service';
-import { ExpansionPanelComponent } from 'app/shared/obj-ds/expansion-panel/expansion-panel.component';
+import { BaseClusterService } from 'app/cluster/base-cluster.service';
 import { ComponentLeaveConfirmation } from 'app/shared/form-utils/leave-confirmation/guard/component-leave-confirmation';
+import { BaseClusterDto } from './base-cluster-dto.model';
+import { ClusterItemDto } from 'app/shared/tb-ds/forms/tb-cluster/cluster-item-dto.model';
+import { TbClusterComponent } from 'app/shared/tb-ds/forms/tb-cluster/tb-cluster.component';
 
 @Component({
   selector: 'tb-base-cluster',
@@ -19,14 +24,13 @@ import { ComponentLeaveConfirmation } from 'app/shared/form-utils/leave-confirma
 })
 export class BaseClusterComponent extends ComponentLeaveConfirmation implements OnInit {
 
-    @ViewChild('baseClusterForm') form: NgForm;
-    @ViewChildren('clusterInput') inputs: QueryList<ElementRef>;
-    @ViewChildren(ExpansionPanelComponent) expansionPanels: QueryList<ExpansionPanelComponent>;
-
     baseClusterId: number;
     baseClusterName: string;
-    baseItemsGroups: BaseClusterItemDtoGroup[] = [];
+
     snackbar = new SnackbarControl();
+    @ViewChild(TbClusterComponent) clusterComponent: TbClusterComponent;
+
+    clusterItems: ClusterItemDto[] = [];
 
     constructor(
         private title: Title,
@@ -45,26 +49,18 @@ export class BaseClusterComponent extends ComponentLeaveConfirmation implements 
     }
 
     canDeactivate(): boolean {
-        return this.form.pristine;
+        return this.clusterComponent.isPristine();
     }
 
-    save() {
+    save(itemsToUpdate: any) {
         try {
             this.spinner.show();
 
-            if (this.form.invalid) {
-                this.showMessage('Error', 'Please review the form', SnackbarLevel.Error);
-                this.expandAllPanels();
-                this.focusOnFirstInputWithError();
-                return;
-            }
             const baseClusterDto = new BaseClusterDto();
             baseClusterDto.id = this.baseClusterId;
             baseClusterDto.name = this.baseClusterName;
 
-            this.baseItemsGroups.forEach(group =>
-                group.items.forEach(i => baseClusterDto.items.push(i))
-            );
+            baseClusterDto.items = itemsToUpdate;
 
             if (this.baseClusterId)
                 this.update(baseClusterDto);
@@ -76,6 +72,14 @@ export class BaseClusterComponent extends ComponentLeaveConfirmation implements 
         } finally {
             this.spinner.hide();
         }
+    }
+
+    callSaveOfClusterComponent() {
+        this.clusterComponent.save();
+    }
+
+    showErrorFormMessage(message: string) {
+        this.showMessage('Error', message, SnackbarLevel.Error);
     }
 
     private loadCluster(baseClusterId: number) {
@@ -93,14 +97,14 @@ export class BaseClusterComponent extends ComponentLeaveConfirmation implements 
         this.service.update(this.baseClusterId, dto)
             .subscribe(() => {
                 this.showMessage('Success', 'Base cluster saved', SnackbarLevel.Success);
-                this.form.control.markAsPristine();
+                this.markAsPristine();
             });
     }
 
     private create(dto: BaseClusterDto) {
         this.service.create(dto)
             .subscribe(response => {
-                this.form.control.markAsPristine();
+                this.markAsPristine();
 
                 const location = response.headers.get('location');
                 const idGenerated = location.substr(location.lastIndexOf('/') + 1 );
@@ -108,13 +112,17 @@ export class BaseClusterComponent extends ComponentLeaveConfirmation implements 
             });
     }
 
+    private markAsPristine(): any {
+        this.clusterComponent.markAsPristine();
+    }
+
     private findBaseCluster(baseClusterId: number) {
         this.service.findOne(baseClusterId)
             .subscribe(baseCluster => {
-                    this.setCurrentBaseCluster(baseCluster);
-                    this.showCreatedMessageIfNewBaseCluster();
+                this.setCurrentBaseCluster(baseCluster);
+                this.showCreatedMessageIfNewBaseCluster();
                 },
-                error => this.showMessage('Error', 'Error to find the base cluster. Error: ' + error, SnackbarLevel.Error)
+                error => this.showMessage('Error', 'Error to find the base cluster. Error: ' + JSON.stringify(error), SnackbarLevel.Error)
             );
     }
 
@@ -123,32 +131,9 @@ export class BaseClusterComponent extends ComponentLeaveConfirmation implements 
             .subscribe(m => this.setCurrentBaseCluster(m));
     }
 
-    private expandAllPanels(): void {
-        this.expansionPanels
-            .filter(p => {
-                const panelControl = this.form.controls[p.title];
-                return panelControl && panelControl.invalid;
-            })
-            .forEach(p => p.open());
-    }
-
-    private focusOnFirstInputWithError(): void {
-        this.inputs.find(i => !i.nativeElement.validity.valid)
-            .nativeElement.focus();
-    }
-
     private setCurrentBaseCluster(dto: BaseClusterDto) {
         this.baseClusterName = dto.name;
-
-        dto.items.forEach(i => {
-            let groupFound = this.baseItemsGroups.find(item =>  item.subtaskTypeName === i.subtaskTypeName);
-
-            if (!groupFound) {
-                groupFound = new BaseClusterItemDtoGroup(i.subtaskTypeName);
-                this.baseItemsGroups.push(groupFound);
-            }
-            groupFound.items.push(i);
-        });
+        this.clusterItems = dto.items;
     }
 
     private showCreatedMessageIfNewBaseCluster() {
@@ -164,14 +149,5 @@ export class BaseClusterComponent extends ComponentLeaveConfirmation implements 
             description: message,
             level: messageLevel
         });
-    }
-}
-
-class BaseClusterItemDtoGroup {
-    subtaskTypeName: string;
-    items: BaseClusterItemDto[] = [];
-
-    constructor(subtaskTypeName: string) {
-        this.subtaskTypeName = subtaskTypeName;
     }
 }

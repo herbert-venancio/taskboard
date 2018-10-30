@@ -5,7 +5,7 @@ import objective.taskboard.followup.cluster.SizingClusterItem;
 
 class BaseClusterItemDto {
 
-    private String subtaskTypeName;
+    private String issueType;
     private String sizing;
     private Double effort;
     private Double cycle;
@@ -14,26 +14,26 @@ class BaseClusterItemDto {
     public BaseClusterItemDto() {
     }
 
-    public BaseClusterItemDto(String subtaskTypeName, String sizing, Double effort, Double cycle) {
-        this.subtaskTypeName = subtaskTypeName;
+    public BaseClusterItemDto(String issueType, String sizing, Double effort, Double cycle) {
+        this.issueType = issueType;
         this.sizing = sizing;
         this.effort = effort;
         this.cycle = cycle;
     }
 
     public BaseClusterItemDto(SizingClusterItem sizingClusterItem) {
-        this.subtaskTypeName = sizingClusterItem.getSubtaskTypeName();
+        this.issueType = sizingClusterItem.getSubtaskTypeName();
         this.sizing = sizingClusterItem.getSizing();
         this.effort = sizingClusterItem.getEffort();
         this.cycle = sizingClusterItem.getCycle();
     }
 
-    public String getSubtaskTypeName() {
-        return subtaskTypeName;
+    public String getIssueType() {
+        return issueType;
     }
 
-    public void setSubtaskTypeName(String subtaskTypeName) {
-        this.subtaskTypeName = subtaskTypeName;
+    public void setIssueType(String issueType) {
+        this.issueType = issueType;
     }
 
     public String getSizing() {
@@ -61,6 +61,6 @@ class BaseClusterItemDto {
     }
 
     public SizingClusterItem toEntity(SizingCluster clusterSaved) {
-        return new SizingClusterItem(this.subtaskTypeName, NOTUSED, this.sizing, this.effort, this.cycle, null, clusterSaved);
+        return new SizingClusterItem(this.issueType, NOTUSED, this.sizing, this.effort, this.cycle, null, clusterSaved);
     }
 }

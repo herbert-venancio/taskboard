@@ -1,24 +1,12 @@
 @import "../../../styles/obj-ds/utils/all";
 @import "../../../styles/obj-ds/misc";
 
-.base-cluster-name-input {
-    margin-bottom: 16px;
-    font-size: 12px;
-}
-
-.body-with-scroll {
-    display: flex;
-    flex-direction: column;
-    max-height: 530px;
-    overflow-x: auto;
-}
-
 .content {
     margin: 10px auto;
     background-color: $obj-color-white;
     border: 1px solid $obj-color-dark-snow;
     border-radius: 4px;
-    padding: 24px;
+    padding: 24px 16px 24px 24px;
 }
 
 .footer {
@@ -38,14 +26,6 @@ input {
     &[type='number']{
         -moz-appearance:textfield;
     }
-}
-
-label {
-    font-family: "PT Sans", Verdana, Arial, Helvetica, sans-serif;
-    font-size: 12px;
-    color: $obj-color-smoke;
-    margin-bottom: 10px;
-    display:inline-block
 }
 
 obj-expansion-panel:last-of-type {

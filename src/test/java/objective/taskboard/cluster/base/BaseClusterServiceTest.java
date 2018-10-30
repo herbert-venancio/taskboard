@@ -351,8 +351,8 @@ public class BaseClusterServiceTest {
         return new BaseClusterDto(clusterId, clusterName, asList(items));
     }
 
-    private BaseClusterItemDto itemDto(final String subtaskTypeName, final String sizing, final Double effort, final Double cycle) {
-        return new BaseClusterItemDto(subtaskTypeName, sizing, effort, cycle);
+    private BaseClusterItemDto itemDto(final String issueType, final String sizing, final Double effort, final Double cycle) {
+        return new BaseClusterItemDto(issueType, sizing, effort, cycle);
     }
 
     private SizingCluster cluster(final String clusterName, final SizingClusterItem...items) {
@@ -384,12 +384,14 @@ public class BaseClusterServiceTest {
     private void assertSizingClusterItems(final List<String> expetedItems, final List<SizingClusterItem> actualItems) {
         String expected = StringUtils.join(expetedItems, "\n");
         String current = actualItems.stream()
-            .map(i -> i.getSubtaskTypeName() + " | " +
-                i.getParentTypeName() + " | " +
-                i.getSizing() + " | " +
-                i.getEffort() + " | " +
-                i.getCycle() + " | " +
-                i.getProjectKey().orElse("null"))
+            .map(i ->
+                    i.getSubtaskTypeName() + " | " +
+                    i.getParentTypeName() + " | " +
+                    i.getSizing() + " | " +
+                    i.getEffort() + " | " +
+                    i.getCycle() + " | " +
+                    i.getProjectKey().orElse("null")
+                )
             .collect(joining("\n"));
 
         assertEquals(expected, current);
@@ -404,10 +406,11 @@ public class BaseClusterServiceTest {
     private void assertBaseClusterItems(final List<String> expetedItems, final List<BaseClusterItemDto> actualItems) {
         String expected = StringUtils.join(expetedItems, "\n");
         String current = actualItems.stream()
-            .map(i -> i.getSubtaskTypeName() + " | " +
-                i.getSizing() + " | " +
-                i.getEffort() + " | " +
-                i.getCycle()
+            .map(i ->
+                    i.getIssueType() + " | " +
+                    i.getSizing() + " | " +
+                    i.getEffort() + " | " +
+                    i.getCycle()
                 )
             .collect(joining("\n"));
 

@@ -99,7 +99,7 @@ public class BaseClusterService {
             return empty();
 
         return itemsSaved.stream()
-            .filter(i -> matchesSizingClusterItem(i, item.getSubtaskTypeName(), item.getSizing()))
+            .filter(i -> matchesSizingClusterItem(i, item.getIssueType(), item.getSizing()))
             .findFirst();
     }
 

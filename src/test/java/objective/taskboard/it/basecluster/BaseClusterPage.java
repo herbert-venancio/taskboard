@@ -24,10 +24,10 @@ public class BaseClusterPage extends AbstractAppUiFragment {
     @FindBy(css=PAGE_TAG + " input[name=baseClusterName]")
     private WebElement name;
 
-    @FindBy(css=PAGE_TAG + " button[type=submit]")
+    @FindBy(css=PAGE_TAG + " button#tb-project-cluster-save")
     private WebElement saveButton;
 
-    @FindBy(css=PAGE_TAG + " button[type=button]")
+    @FindBy(css=PAGE_TAG + " button#tb-project-cluster-back-to-project")
     private WebElement backToSearchButton;
 
     private SnackBarComponent snackbar;

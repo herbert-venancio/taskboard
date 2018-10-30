@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 
 import { Observable } from 'rxjs/internal/Observable';
 import { retry } from 'rxjs/operators';
+import { BaseClusterDto } from './base-cluster/base-cluster-dto.model';
 
 @Injectable({
     providedIn: 'root'
@@ -41,17 +42,4 @@ export class BaseClusterService {
         return this.http.get<BaseClusterDto>(creationURI)
             .pipe(retry(3));
     }
-}
-
-export class BaseClusterDto {
-    id: number;
-    name: string;
-    items: BaseClusterItemDto[] = [];
-}
-
-export class BaseClusterItemDto {
-    subtaskTypeName: string;
-    sizing: string;
-    effort: number;
-    cycle: number;
 }

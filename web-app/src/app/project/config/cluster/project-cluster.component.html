@@ -1,74 +1,14 @@
-<form #projectClusterForm="ngForm" (ngSubmit)="save()">
+<tb-cluster [clusterItems]="clusterItems"
+    (saveEvent)="save($event)" (errorEvent)="showErrorFormMessage($event)">
+</tb-cluster>
 
-    <div class="body">
-        <obj-expansion-panel *ngFor="let clusterType of clusterIssueTypes" [attr.data-issue-type]="clusterType.issueType"
-                             [title]="clusterType.issueType" [ngModelGroup]="clusterType.issueType">
-            <table class="obj-data-table inline-input">
-                <thead>
-                    <tr>
-                        <th></th>
-                        <th *ngFor="let s of clusterType.sizings" [attr.data-sizing]="s.sizing">
-                            <span>{{s.sizing}}</span>
-                            <span class="from-base-cluster" *ngIf="s.fromBaseCluster">*</span>
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Effort</td>
-                        <td class="input" *ngFor="let s of clusterType.sizings">
-                            <input type="number"
-                                   attr.name="effort-{{s.sizing}}"
-                                   name="effort-{{s.sizing}}"
-                                   objNumberFieldWithoutSpin
-                                   #effort="objNumberFieldWithoutSpin"
-                                   #sizingInput
-                                   [(ngModel)]="s.effort"
-                                   required
-                                   tbIsNumber
-                                   min="0"
-                                   tbMin="0"
-                                   step="any" />
-                            <obj-error-messages [for]="effort">
-                                <obj-error-message error="min, isNumber">Should be positive</obj-error-message>
-                                <obj-error-message error="required">Required</obj-error-message>
-                            </obj-error-messages>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Cycle</td>
-                        <td class="input" *ngFor="let s of clusterType.sizings">
-                            <input type="number"
-                                   attr.name="cycle-{{s.sizing}}"
-                                   name="cycle-{{s.sizing}}"
-                                   objNumberFieldWithoutSpin
-                                   #cycle="objNumberFieldWithoutSpin"
-                                   #sizingInput
-                                   [(ngModel)]="s.cycle"
-                                   required
-                                   tbIsNumber
-                                   min="0"
-                                   tbMin="0"
-                                   step="any" />
-                            <obj-error-messages [for]="cycle">
-                                <obj-error-message error="min, isNumber">Should be positive</obj-error-message>
-                                <obj-error-message error="required">Required</obj-error-message>
-                            </obj-error-messages>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </obj-expansion-panel>
+<div class="footer">
+    <div class="footer-caption">
+        <p class="small">(All the numbers are in hours)</p>
+        <p class="small" *ngIf="hasBaseCluster">* Base cluster</p>
     </div>
-
-    <div class="footer">
-        <div class="footer-caption">
-            <p class="small">(All the numbers are in hours)</p>
-            <p class="small" *ngIf="hasBaseCluster">* Base cluster</p>
-        </div>
-        <button type="button" id="tb-project-cluster-back-to-project" obj-button (click)="backToProject()">Back to Project</button>
-        <button type="submit" id="tb-project-cluster-save" obj-button class="primary" [disabled]="projectClusterForm.pristine">Save</button>
-    </div>
-</form>
+    <button type="button" id="tb-project-cluster-back-to-project" obj-button (click)="backToProject()">Back to Project</button>
+    <button type="button" id="tb-project-cluster-save" (click)="callSaveOfClusterComponent()" [disabled]="this.clusterComponent.isPristine()" obj-button class="primary">Save</button>
+</div>
 
 <obj-snackbar id="tb-project-cluster-snackbar" [control]="snackbar"></obj-snackbar>

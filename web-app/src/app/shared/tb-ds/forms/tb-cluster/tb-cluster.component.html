@@ -1,0 +1,88 @@
+<form id="tbClusterForm" #tbClusterForm="ngForm" (ngSubmit)="sendSaveEvent()" autocomplete="off" tbLeaveConfirmation>
+    <div *ngIf="showBaseClusterName">
+        <label>Name</label>
+
+        <input type="text"
+            name="baseClusterName"
+            objTextField
+            [(ngModel)]="baseClusterName"
+            #clusterInput
+            #name="objTextField"
+            required
+            tbNotEmpty/>
+
+        <obj-error-messages [for]="name">
+            <obj-error-message error="notEmpty">Name is required.</obj-error-message>
+        </obj-error-messages>
+
+        <label>Items</label>
+    </div>
+
+    <div class="body-with-scroll">
+
+        <obj-expansion-panel *ngFor="let group of groupedItems"
+            [title]="group.issueType"
+            [attr.data-issue-type]="group.issueType"
+            [ngModelGroup]="group.issueType">
+
+            <table class="obj-data-table inline-input">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th *ngFor="let s of group.items" [attr.data-sizing]="s.sizing">
+                            <span>{{s.sizing}}</span>
+                            <span class="from-base-cluster" *ngIf="s.fromBaseCluster">*</span>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Effort</td>
+                        <td class="input" *ngFor="let s of group.items">
+                            <input id="{{group.issueType}}-effort-{{s.sizing}}"
+                                type="number"
+                                attr.name="effort-{{s.sizing}}"
+                                name="effort-{{s.sizing}}"
+                                objNumberFieldWithoutSpin
+                                #effort="objNumberFieldWithoutSpin"
+                                #sizingInput
+                                [(ngModel)]="s.effort"
+                                required
+                                tbIsNumber
+                                min="0"
+                                tbMin="0"
+                                step="any"/>
+                            <obj-error-messages [for]="effort">
+                                <obj-error-message error="min, isNumber">Should be positive</obj-error-message>
+                                <obj-error-message error="required">Required</obj-error-message>
+                            </obj-error-messages>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Cycle</td>
+                        <td class="input" *ngFor="let s of group.items">
+                            <input id="{{group.issueType}}-cycle-{{s.sizing}}"
+                                type="number"
+                                attr.name="cycle-{{s.sizing}}"
+                                name="cycle-{{s.sizing}}"
+                                objNumberFieldWithoutSpin
+                                #cycle="objNumberFieldWithoutSpin"
+                                #sizingInput
+                                [(ngModel)]="s.cycle"
+                                required
+                                tbIsNumber
+                                min="0"
+                                tbMin="0"
+                                step="any"/>
+                            <obj-error-messages [for]="cycle">
+                                <obj-error-message error="min, isNumber">Should be positive</obj-error-message>
+                                <obj-error-message error="required">Required</obj-error-message>
+                            </obj-error-messages>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </obj-expansion-panel>
+    </div>
+    <button type="submit">Save</button>
+</form>
