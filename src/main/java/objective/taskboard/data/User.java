@@ -66,7 +66,12 @@ public class User implements Serializable {
     public static User from(IssueCoAssignee x) {
         return new User(x.getName(), x.getName(), null);
     }
-    
+
+    @Override
+    public String toString() {
+        return name;
+    }
+
     @Override
     public int hashCode() {
         if (name == null)

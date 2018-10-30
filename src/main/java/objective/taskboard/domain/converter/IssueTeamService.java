@@ -43,22 +43,22 @@ import objective.taskboard.data.Issue.CardTeam;
 import objective.taskboard.data.Team;
 import objective.taskboard.data.User;
 import objective.taskboard.domain.ProjectFilterConfiguration;
-import objective.taskboard.filterConfiguration.TeamFilterConfigurationService;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.repository.TeamCachedRepository;
+import objective.taskboard.team.UserTeamService;
 
 @Service
 public class IssueTeamService {
     private static final Logger log = LoggerFactory.getLogger(IssueTeamService.class);    
 
     @Autowired
-    private TeamFilterConfigurationService teamFilterConfigurationService;
-
-    @Autowired
     private TeamCachedRepository teamRepo;
 
     @Autowired
     private ProjectFilterConfigurationCachedRepository projectRepo;
+
+    @Autowired
+    private UserTeamService userTeamService;
 
     public Set<CardTeam> getTeamsForIds(List<Long> ids) {
         Set<CardTeam> issueTeams = new LinkedHashSet<>();
@@ -114,13 +114,17 @@ public class IssueTeamService {
         List<User> assignees = new LinkedList<>();
         assignees.addAll(issue.getAssignees());
         
-        Set<String> validTeams = issue.getTeams().stream().map(t->t.name).collect(Collectors.toSet());
+        Set<String> validTeamsForIssue = issue.getTeams().stream().map(t->t.name).collect(Collectors.toSet());
         Set<String> mismatches = new LinkedHashSet<>();
 
         for (User user : assignees) {
-            List<Team> teams = teamFilterConfigurationService.getConfiguredTeamsByUser(user.name);
-            
-            if (!teams.stream().anyMatch(t -> validTeams.contains(t.getName())))
+            List<Team> validTeamsForUser = userTeamService.getTeamsThatUserIsAValidAssignee(user.name);
+
+            boolean isValidAssignee = validTeamsForUser.stream()
+                    .map(team -> team.getName())
+                    .anyMatch(validTeamsForIssue::contains);
+
+            if (!isValidAssignee)
                 mismatches.add(user.name);
         }
 

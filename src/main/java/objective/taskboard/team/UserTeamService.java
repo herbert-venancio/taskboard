@@ -1,11 +1,15 @@
 package objective.taskboard.team;
 
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static objective.taskboard.auth.authorizer.Permissions.TASKBOARD_ADMINISTRATION;
 import static objective.taskboard.auth.authorizer.Permissions.TEAM_EDIT;
+import static objective.taskboard.data.UserTeam.UserTeamRole.MANAGER;
+import static objective.taskboard.data.UserTeam.UserTeamRole.MEMBER;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -52,6 +56,15 @@ public class UserTeamService {
         return teamRepo.getCache().stream()
                 .filter(t -> authorizer.hasPermission(TEAM_EDIT, t.getName()))
                 .collect(toSet());
+    }
+
+    public List<Team> getTeamsThatUserIsAValidAssignee(String username) {
+        return userTeamRepo.findByUserName(username).stream()
+                .filter(userTeam -> userTeam.getRole() == MANAGER || userTeam.getRole() == MEMBER)
+                .map(ut -> teamRepo.findByName(ut.getTeam()))
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(toList());
     }
 
     public Set<Team> getTeamsVisibleToLoggedInUser() {

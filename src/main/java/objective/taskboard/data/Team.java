@@ -208,13 +208,18 @@ public class Team implements Serializable {
     public void setMembers(List<UserTeam> members) {
         this.members = members;
     }
-    
+
     public boolean isGloballyVisible() {
         return globallyVisible;
     }
-    
+
     public void setGloballyVisible(boolean globallyVisible) {
         this.globallyVisible = globallyVisible;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 
     @Override

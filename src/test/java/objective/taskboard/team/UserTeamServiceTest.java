@@ -7,11 +7,15 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static objective.taskboard.auth.authorizer.Permissions.TASKBOARD_ADMINISTRATION;
 import static objective.taskboard.auth.authorizer.Permissions.TEAM_EDIT;
+import static objective.taskboard.data.UserTeam.UserTeamRole.MANAGER;
+import static objective.taskboard.data.UserTeam.UserTeamRole.MEMBER;
+import static objective.taskboard.data.UserTeam.UserTeamRole.VIEWER;
 import static objective.taskboard.utils.StreamUtils.streamOf;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -24,6 +28,7 @@ import objective.taskboard.auth.LoggedUserDetails;
 import objective.taskboard.auth.authorizer.Authorizer;
 import objective.taskboard.data.Team;
 import objective.taskboard.data.UserTeam;
+import objective.taskboard.data.UserTeam.UserTeamRole;
 import objective.taskboard.filterConfiguration.TeamFilterConfigurationService;
 import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.repository.UserTeamCachedRepository;
@@ -44,7 +49,7 @@ public class UserTeamServiceTest {
             .team("Super")
             .team("Extra")
             .and()
-       .user()
+       .loggedUser()
            .hasTeamEditPermissionFor("Super", "Extra");
 
         assertTeams("Extra, Super", subject.getTeamsThatUserCanAdmin());
@@ -57,7 +62,7 @@ public class UserTeamServiceTest {
             .team("Super")
             .team("Extra")
             .and()
-        .user()
+        .loggedUser()
             .isMemberOf("Super", "Extra")
             .hasNotTaskboardAdministrationPermission();
 
@@ -71,7 +76,7 @@ public class UserTeamServiceTest {
             .team("Super")
             .team("Extra")
             .and()
-        .user()
+        .loggedUser()
             .hasNotTaskboardAdministrationPermission();
 
         assertTeams("Rocket", subject.getTeamsVisibleToLoggedInUser());
@@ -83,7 +88,7 @@ public class UserTeamServiceTest {
             .team("Super")
             .team("Extra")
             .and()
-        .user()
+        .loggedUser()
             .hasTaskboardAdministrationPermission();
 
         assertTeams("Extra, Super", subject.getTeamsVisibleToLoggedInUser());
@@ -95,11 +100,29 @@ public class UserTeamServiceTest {
             .team("Global").isGloballyVisible()
             .team("Extra")
             .and()
-        .user()
+        .loggedUser()
             .isMemberOf()
             .hasNotTaskboardAdministrationPermission();
 
         assertTeams("Global", subject.getTeamsVisibleToLoggedInUser());
+    }
+
+    @Test
+    public void getTeamsThatUserIsAValidAssignee_shouldReturnOnlyTeamsWhereUserIsAManagerOrMember() {
+        withTeams()
+            .team("Global")
+            .team("Rocket")
+            .team("Extra")
+            .team("Blue")
+            .team("Super")
+            .and()
+        .user("my.user")
+            .belongsToTeam("Rocket").withRole(MANAGER)
+            .belongsToTeam("Extra").withRole(MEMBER)
+            .belongsToTeam("Blue").withRole(MEMBER)
+            .belongsToTeam("Super").withRole(VIEWER);
+
+        assertTeams("Blue, Extra, Rocket", subject.getTeamsThatUserIsAValidAssignee("my.user"));
     }
 
     private static void assertTeams(String expectedNames, Collection<Team> actual) {
@@ -130,8 +153,12 @@ public class UserTeamServiceTest {
             return new DSLTeam(teamName);
         }
 
-        public DSLUser user() {
-            return new DSLUser();
+        public DSLLoggedUser loggedUser() {
+            return new DSLLoggedUser();
+        }
+
+        public DSLUser user(String username) {
+            return new DSLUser(username);
         }
 
         class DSLTeam {
@@ -159,9 +186,40 @@ public class UserTeamServiceTest {
             }
         }
 
+
         class DSLUser {
 
-            public DSLUser isMemberOf(String ...teams) {
+            private String lastUsername;
+            private UserTeam lastUserTeam;
+            private final Map<String, List<UserTeam>> userTeams = new HashMap<>();
+
+            DSLUser(String username) {
+                if (!userTeams.containsKey(username)) {
+                    List<UserTeam> userTeamList = new ArrayList<>();
+                    userTeams.put(username, userTeamList);
+                    when(userTeamRepo.findByUserName(username)).thenReturn(userTeamList);
+                }
+
+                lastUsername = username;
+            }
+
+            public DSLUser belongsToTeam(String team) {
+                UserTeam userTeam = mock(UserTeam.class);
+                when(userTeam.getTeam()).thenReturn(team);
+                userTeams.get(lastUsername).add(userTeam);
+                lastUserTeam = userTeam;
+                return this;
+            }
+
+            public DSLUser withRole(UserTeamRole userTeamRole) {
+                when(lastUserTeam.getRole()).thenReturn(userTeamRole);
+                return this;
+            }
+
+        }
+
+        class DSLLoggedUser {
+            public DSLLoggedUser isMemberOf(String ...teams) {
                 when(userTeamRepo.findByUserName("mary")).thenReturn(
                         streamOf(asList(teams))
                             .map(teamName -> new UserTeam("mary", teamName))
@@ -170,17 +228,17 @@ public class UserTeamServiceTest {
                 return this;
             }
 
-            public DSLUser hasTaskboardAdministrationPermission() {
+            public DSLLoggedUser hasTaskboardAdministrationPermission() {
                 when(authorizer.hasPermission(TASKBOARD_ADMINISTRATION)).thenReturn(true);
                 return this;
             }
 
-            public DSLUser hasNotTaskboardAdministrationPermission() {
+            public DSLLoggedUser hasNotTaskboardAdministrationPermission() {
                 when(authorizer.hasPermission(TASKBOARD_ADMINISTRATION)).thenReturn(false);
                 return this;
             }
 
-            public DSLUser hasTeamEditPermissionFor(String... teamsName) {
+            public DSLLoggedUser hasTeamEditPermissionFor(String... teamsName) {
                 stream(teamsName).forEach(name -> when(authorizer.hasPermission(TEAM_EDIT, name)).thenReturn(true));
                 return this;
             }
