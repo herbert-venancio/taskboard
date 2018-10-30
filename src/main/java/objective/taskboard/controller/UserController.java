@@ -1,6 +1,7 @@
 package objective.taskboard.controller;
 
 import static java.util.stream.Collectors.toList;
+import static objective.taskboard.auth.authorizer.Permissions.USER_VISIBILITY;
 import static org.springframework.http.HttpStatus.OK;
 
 import java.util.List;
@@ -14,9 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import objective.taskboard.auth.authorizer.Authorizer;
 import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.data.JiraUser.UserDetails;
-import objective.taskboard.team.UserTeamService;
 
 @RestController
 @RequestMapping("/ws/users")
@@ -26,7 +27,7 @@ public class UserController {
     private JiraService jiraBean;
 
     @Autowired
-    private UserTeamService userTeamService;
+    private Authorizer authorizer;
 
     @GetMapping(path = "search")
     public ResponseEntity<?> usersWhoseNameContains(
@@ -48,7 +49,7 @@ public class UserController {
     private List<UserDetails> getUsersVisibleToLoggedInUserByQuery(String userQuery) {
         List<UserDetails> usersFound = jiraBean.findUsers(userQuery);
         return usersFound.stream()
-                .filter(user -> userTeamService.isUserVisibleToLoggedUser(user.name))
+                .filter(user -> authorizer.hasPermission(USER_VISIBILITY, user.name))
                 .collect(toList());
     }
 

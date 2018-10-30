@@ -4,6 +4,8 @@ public class Permissions {
 
     public static final String TASKBOARD_ADMINISTRATION = "taskboard.administration";
 
+    public static final String USER_VISIBILITY = "user.visibility";
+
     public static final String PROJECT_ADMINISTRATION = "project.administration";
     public static final String PROJECT_DASHBOARD_VIEW = "project.dashboard.view";
     public static final String PROJECT_DASHBOARD_TACTICAL = "project.dashboard.tactical";
