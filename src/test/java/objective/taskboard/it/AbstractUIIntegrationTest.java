@@ -20,10 +20,12 @@
  */
 package objective.taskboard.it;
 
+import static org.junit.Assert.assertFalse;
+
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Locale;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -34,6 +36,7 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 
@@ -44,8 +47,11 @@ public abstract class AbstractUIIntegrationTest extends AbstractIntegrationTest 
 
     protected WebDriver webDriver;
 
+    private static boolean ABORT_FLAG = false;
+
     @Before
     public final void setupUIIntegrationTest() {
+        assertFalse("UI Integration Tests Aborted", ABORT_FLAG);
         String driverPath = "drivers/"+ getOs() +"/marionette/64bit/geckodriver";
 
         if (System.getProperty("webdriver.gecko.driver") == null)
@@ -61,15 +67,20 @@ public abstract class AbstractUIIntegrationTest extends AbstractIntegrationTest 
         options.addPreference("browser.link.open_newwindow.restriction", 2);
         options.addPreference("intl.accept_languages", "en");
 
-        webDriver = new FirefoxDriver(options);
+        try {
+            webDriver = new FirefoxDriver(options);
+        } catch (WebDriverException ex) {
+            ABORT_FLAG = true;
+            throw new RuntimeException("*** Could not get a reference to FirefoxDriver ***" +
+                    "\nAborting all UI Integration Tests as it may leak multiple processes", ex);
+        }
         webDriver.manage().window().setSize(new Dimension(1280,1080));
     }
 
     private String getOs() {
-        String osName = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
-        if (osName.startsWith("mac"))
+        if (SystemUtils.IS_OS_MAC)
             return "osx";
-        else if (osName.startsWith("win"))
+        else if (SystemUtils.IS_OS_WINDOWS)
             return "windows";
         return "linux";
     }
