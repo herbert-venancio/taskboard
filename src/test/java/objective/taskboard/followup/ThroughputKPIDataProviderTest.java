@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -25,6 +26,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import objective.taskboard.domain.ProjectFilterConfiguration;
@@ -36,9 +38,10 @@ import objective.taskboard.followup.kpi.ThroughputKPIService;
 @RunWith(MockitoJUnitRunner.class)
 public class ThroughputKPIDataProviderTest {
 
-    public static final String LEVEL_DEMANDS = "Demand";
-    public static final String LEVEL_FEATURES = "Feature";
-    public static final String LEVEL_SUBTASKS = "Subtask";
+    private static final String LEVEL_ALL = "All";
+    private static final String LEVEL_DEMANDS = "Demand";
+    private static final String LEVEL_FEATURES = "Feature";
+    private static final String LEVEL_SUBTASKS = "Subtask";
     private static final ZoneId ZONE_ID = ZoneId.systemDefault();
 
     @Rule
@@ -52,564 +55,528 @@ public class ThroughputKPIDataProviderTest {
 
     @Mock
     private ThroughputKPIService throughputKpiService;
+    
+    @Spy
+    private WeekRangeNormalizer weekRangeNormalizer = new WeekRangeNormalizer();
 
     @InjectMocks
     private ThroughputKPIDataProvider subject = new ThroughputKPIDataProvider();
 
     @Test
-    public void getThroughputChartDataSet_happyPath() {
+    public void getThroughputChartDataSet_whenTimelineRangeEqualsDataSetRange_thenNotFiltering() {
         String projectKey = "TASKB";
-        String issueLevel = LEVEL_SUBTASKS;
+        String issueLevel = LEVEL_ALL;
         
         new TestEnvConfigurator(projectKey)
-            .withTimelineReferenceDate("2017-09-25")
-            .withTimelineStartDate("2017-09-25")
-            .withTimelineDeliveryDate("2017-09-28")
-            .withTimelineBaselineDate("2017-09-25")
+            .withTimelineReferenceDate("2018-09-25")
+            .withTimelineStartDate("2018-09-25")
+            .withTimelineDeliveryDate("2018-10-05")
+            .withTimelineBaselineDate("2018-09-25")
             .withDemands(
-                    row("Demand").at("2017-09-25").withThroughput(1),
-                    row("Demand").at("2017-09-26").withThroughput(2),
-                    row("Demand").at("2017-09-27").withThroughput(0),
-                    row("Demand").at("2017-09-28").withThroughput(1))
+                    row("Demand").at("2018-09-25").withThroughput(1),
+                    row("Demand").at("2018-09-26").withThroughput(0),
+                    row("Demand").at("2018-09-27").withThroughput(0),
+                    row("Demand").at("2018-09-28").withThroughput(2),
+                    row("Demand").at("2018-09-29").withThroughput(0),
+                    row("Demand").at("2018-09-30").withThroughput(0),
+                    row("Demand").at("2018-10-01").withThroughput(0),
+                    row("Demand").at("2018-10-02").withThroughput(0),
+                    row("Demand").at("2018-10-03").withThroughput(0),
+                    row("Demand").at("2018-10-04").withThroughput(0),
+                    row("Demand").at("2018-10-05").withThroughput(3))
             .withFeatures(
-                    row("Bug").at("2017-09-25").withThroughput(0),
-                    row("Task").at("2017-09-25").withThroughput(2),
-                    row("Bug").at("2017-09-26").withThroughput(1),
-                    row("Task").at("2017-09-26").withThroughput(4),
-                    row("Bug").at("2017-09-27").withThroughput(0),
-                    row("Task").at("2017-09-27").withThroughput(1),
-                    row("Bug").at("2017-09-28").withThroughput(1),
-                    row("Task").at("2017-09-28").withThroughput(2))
+                    row("Bug").at("2018-09-25").withThroughput(0),
+                    row("Task").at("2018-09-25").withThroughput(2),
+                    row("Bug").at("2018-09-26").withThroughput(0),
+                    row("Task").at("2018-09-26").withThroughput(4),
+                    row("Bug").at("2018-09-27").withThroughput(0),
+                    row("Task").at("2018-09-27").withThroughput(1),
+                    row("Bug").at("2018-09-28").withThroughput(0),
+                    row("Task").at("2018-09-28").withThroughput(2),
+                    row("Bug").at("2018-09-29").withThroughput(0),
+                    row("Task").at("2018-09-29").withThroughput(0),
+                    row("Bug").at("2018-09-30").withThroughput(0),
+                    row("Task").at("2018-09-30").withThroughput(0),
+                    row("Bug").at("2018-10-01").withThroughput(1),
+                    row("Task").at("2018-10-01").withThroughput(1),
+                    row("Bug").at("2018-10-02").withThroughput(0),
+                    row("Task").at("2018-10-02").withThroughput(0),
+                    row("Bug").at("2018-10-03").withThroughput(0),
+                    row("Task").at("2018-10-03").withThroughput(2),
+                    row("Bug").at("2018-10-04").withThroughput(1),
+                    row("Task").at("2018-10-04").withThroughput(0),
+                    row("Bug").at("2018-10-05").withThroughput(0),
+                    row("Task").at("2018-10-05").withThroughput(2))
             .withSubtasks(
-                    row("Alpha Bug").at("2017-09-25").withThroughput(0),
-                    row("Alpha Test").at("2017-09-25").withThroughput(3),
-                    row("Backend Development").at("2017-09-25").withThroughput(6),
-                    row("Alpha Bug").at("2017-09-26").withThroughput(1),
-                    row("Alpha Test").at("2017-09-26").withThroughput(4),
-                    row("Backend Development").at("2017-09-26").withThroughput(8),
-                    row("Alpha Bug").at("2017-09-27").withThroughput(0),
-                    row("Alpha Test").at("2017-09-27").withThroughput(3),
-                    row("Backend Development").at("2017-09-27").withThroughput(4),
-                    row("Alpha Bug").at("2017-09-28").withThroughput(1),
-                    row("Alpha Test").at("2017-09-28").withThroughput(2),
-                    row("Backend Development").at("2017-09-28").withThroughput(5))
+                    row("Alpha Test").at("2018-09-25").withThroughput(1),
+                    row("Backend Development").at("2018-09-25").withThroughput(6),
+                    row("Alpha Test").at("2018-09-26").withThroughput(4),
+                    row("Backend Development").at("2018-09-26").withThroughput(8),
+                    row("Alpha Test").at("2018-09-27").withThroughput(0),
+                    row("Backend Development").at("2018-09-27").withThroughput(4),
+                    row("Alpha Test").at("2018-09-28").withThroughput(1),
+                    row("Backend Development").at("2018-09-28").withThroughput(4),
+                    row("Alpha Test").at("2018-09-29").withThroughput(0),
+                    row("Backend Development").at("2018-09-29").withThroughput(0),
+                    row("Alpha Test").at("2018-09-30").withThroughput(0),
+                    row("Backend Development").at("2018-09-30").withThroughput(0),
+                    row("Alpha Test").at("2018-10-01").withThroughput(0),
+                    row("Backend Development").at("2018-10-01").withThroughput(2),
+                    row("Alpha Test").at("2018-10-02").withThroughput(2),
+                    row("Backend Development").at("2018-10-02").withThroughput(3),
+                    row("Alpha Test").at("2018-10-03").withThroughput(0),
+                    row("Backend Development").at("2018-10-03").withThroughput(4),
+                    row("Alpha Test").at("2018-10-04").withThroughput(1),
+                    row("Backend Development").at("2018-10-04").withThroughput(5),
+                    row("Alpha Test").at("2018-10-05").withThroughput(0),
+                    row("Backend Development").at("2018-10-05").withThroughput(4))
             .configure();
 
-        ThroughputChartDataSet dsSubtasks = subject.getDataSet(projectKey, issueLevel, ZONE_ID);
+        ThroughputChartDataSet ds = subject.getDataSet(projectKey, issueLevel, ZONE_ID);
 
-        assertThat(dsSubtasks.rows.size(), is(12));
-        assertRow(dsSubtasks.rows.get(0), "Alpha Bug", 0L, "2017-09-25");
-        assertRow(dsSubtasks.rows.get(1), "Alpha Test", 3L, "2017-09-25");
-        assertRow(dsSubtasks.rows.get(2), "Backend Development", 6L, "2017-09-25");
-        assertRow(dsSubtasks.rows.get(3), "Alpha Bug", 1L, "2017-09-26");
-        assertRow(dsSubtasks.rows.get(4), "Alpha Test", 4L, "2017-09-26");
-        assertRow(dsSubtasks.rows.get(5), "Backend Development", 8L, "2017-09-26");
-        assertRow(dsSubtasks.rows.get(6), "Alpha Bug", 0L, "2017-09-27");
-        assertRow(dsSubtasks.rows.get(7), "Alpha Test", 3L, "2017-09-27");
-        assertRow(dsSubtasks.rows.get(8), "Backend Development", 4L, "2017-09-27");
-        assertRow(dsSubtasks.rows.get(9), "Alpha Bug", 1L, "2017-09-28");
-        assertRow(dsSubtasks.rows.get(10), "Alpha Test", 2L, "2017-09-28");
-        assertRow(dsSubtasks.rows.get(11), "Backend Development", 5L, "2017-09-28");
+        assertThat(ds.rows.size(), is(10));
+        assertRow(ds.rows.get(0), "Demand", 3L, "2018-09-23");
+        assertRow(ds.rows.get(1), "Demand", 3L, "2018-09-30");
+        assertRow(ds.rows.get(2), "Bug", 0L, "2018-09-23");
+        assertRow(ds.rows.get(3), "Task", 9L, "2018-09-23");
+        assertRow(ds.rows.get(4), "Bug", 2L, "2018-09-30");
+        assertRow(ds.rows.get(5), "Task", 5L, "2018-09-30");
+        assertRow(ds.rows.get(6), "Alpha Test", 6L, "2018-09-23");
+        assertRow(ds.rows.get(7), "Backend Development", 22L, "2018-09-23");
+        assertRow(ds.rows.get(8), "Alpha Test", 3L, "2018-09-30");
+        assertRow(ds.rows.get(9), "Backend Development", 18L, "2018-09-30");
     }
 
     @Test
-    public void getThroughputChartDataSet_timelineRangeBeforeDateRangeFromData() {
+    public void getThroughputChartDataSet_whenTimelineRangeBeforeDataSetDateRange_thenReturnsEmptyDataSet() {
         String projectKey = "TASKB";
         String issueLevel = LEVEL_SUBTASKS;
         
         new TestEnvConfigurator(projectKey)
-            .withTimelineReferenceDate("2017-09-25")
-            .withTimelineStartDate("2017-09-20")
-            .withTimelineDeliveryDate("2017-09-23")
-            .withTimelineBaselineDate("2017-09-20")
-            .withDemands(
-                    row("Demand").at("2017-09-25").withThroughput(1),
-                    row("Demand").at("2017-09-26").withThroughput(2),
-                    row("Demand").at("2017-09-27").withThroughput(0),
-                    row("Demand").at("2017-09-28").withThroughput(1))
-            .withFeatures(
-                    row("Bug").at("2017-09-25").withThroughput(0),
-                    row("Task").at("2017-09-25").withThroughput(2),
-                    row("Bug").at("2017-09-26").withThroughput(1),
-                    row("Task").at("2017-09-26").withThroughput(4),
-                    row("Bug").at("2017-09-27").withThroughput(0),
-                    row("Task").at("2017-09-27").withThroughput(1),
-                    row("Bug").at("2017-09-28").withThroughput(1),
-                    row("Task").at("2017-09-28").withThroughput(2))
+            .withTimelineReferenceDate("2018-09-25")
+            .withTimelineStartDate("2018-09-17")
+            .withTimelineDeliveryDate("2018-09-21")
+            .withTimelineBaselineDate("2018-09-17")
             .withSubtasks(
-                    row("Alpha Bug").at("2017-09-25").withThroughput(0),
-                    row("Alpha Test").at("2017-09-25").withThroughput(3),
-                    row("Backend Development").at("2017-09-25").withThroughput(6),
-                    row("Alpha Bug").at("2017-09-26").withThroughput(1),
-                    row("Alpha Test").at("2017-09-26").withThroughput(4),
-                    row("Backend Development").at("2017-09-26").withThroughput(8),
-                    row("Alpha Bug").at("2017-09-27").withThroughput(0),
-                    row("Alpha Test").at("2017-09-27").withThroughput(3),
-                    row("Backend Development").at("2017-09-27").withThroughput(4),
-                    row("Alpha Bug").at("2017-09-28").withThroughput(1),
-                    row("Alpha Test").at("2017-09-28").withThroughput(2),
-                    row("Backend Development").at("2017-09-28").withThroughput(5))
+                    row("Alpha Test").at("2018-09-25").withThroughput(1),
+                    row("Backend Development").at("2018-09-25").withThroughput(6),
+                    row("Alpha Test").at("2018-09-26").withThroughput(4),
+                    row("Backend Development").at("2018-09-26").withThroughput(8),
+                    row("Alpha Test").at("2018-09-27").withThroughput(0),
+                    row("Backend Development").at("2018-09-27").withThroughput(4),
+                    row("Alpha Test").at("2018-09-28").withThroughput(1),
+                    row("Backend Development").at("2018-09-28").withThroughput(4),
+                    row("Alpha Test").at("2018-09-29").withThroughput(0),
+                    row("Backend Development").at("2018-09-29").withThroughput(0),
+                    row("Alpha Test").at("2018-09-30").withThroughput(0),
+                    row("Backend Development").at("2018-09-30").withThroughput(0),
+                    row("Alpha Test").at("2018-10-01").withThroughput(0),
+                    row("Backend Development").at("2018-10-01").withThroughput(2),
+                    row("Alpha Test").at("2018-10-02").withThroughput(2),
+                    row("Backend Development").at("2018-10-02").withThroughput(3),
+                    row("Alpha Test").at("2018-10-03").withThroughput(0),
+                    row("Backend Development").at("2018-10-03").withThroughput(4),
+                    row("Alpha Test").at("2018-10-04").withThroughput(1),
+                    row("Backend Development").at("2018-10-04").withThroughput(5),
+                    row("Alpha Test").at("2018-10-05").withThroughput(0),
+                    row("Backend Development").at("2018-10-05").withThroughput(4))
             .configure();
         
-        ThroughputChartDataSet dsSubtasks = subject.getDataSet(projectKey, issueLevel, ZONE_ID);
+        ThroughputChartDataSet ds = subject.getDataSet(projectKey, issueLevel, ZONE_ID);
 
-        assertThat(dsSubtasks.rows.size(), is(0));
+        assertThat(ds.rows.size(), is(0));
     }
 
     @Test
-    public void getThroughputChartDataSet_timelineRangeAfterDataRangeFromData() {
+    public void getThroughputChartDataSet_whenTimelineRangeAfterDataSetDateRange_thenReturnsEmptyDateSet() {
         String projectKey = "TASKB";
         String issueLevel = LEVEL_SUBTASKS;
         
         new TestEnvConfigurator(projectKey)
-            .withTimelineReferenceDate("2017-09-25")
-            .withTimelineStartDate("2017-09-29")
-            .withTimelineDeliveryDate("2017-09-30")
-            .withTimelineBaselineDate("2017-09-29")
-            .withDemands(
-                    row("Demand").at("2017-09-25").withThroughput(1),
-                    row("Demand").at("2017-09-26").withThroughput(2),
-                    row("Demand").at("2017-09-27").withThroughput(0),
-                    row("Demand").at("2017-09-28").withThroughput(1))
-            .withFeatures(
-                    row("Bug").at("2017-09-25").withThroughput(0),
-                    row("Task").at("2017-09-25").withThroughput(2),
-                    row("Bug").at("2017-09-26").withThroughput(1),
-                    row("Task").at("2017-09-26").withThroughput(4),
-                    row("Bug").at("2017-09-27").withThroughput(0),
-                    row("Task").at("2017-09-27").withThroughput(1),
-                    row("Bug").at("2017-09-28").withThroughput(1),
-                    row("Task").at("2017-09-28").withThroughput(2))
+            .withTimelineReferenceDate("2018-09-25")
+            .withTimelineStartDate("2018-10-08")
+            .withTimelineDeliveryDate("2018-10-12")
+            .withTimelineBaselineDate("2018-10-08")
             .withSubtasks(
-                    row("Alpha Bug").at("2017-09-25").withThroughput(0),
-                    row("Alpha Test").at("2017-09-25").withThroughput(3),
-                    row("Backend Development").at("2017-09-25").withThroughput(6),
-                    row("Alpha Bug").at("2017-09-26").withThroughput(1),
-                    row("Alpha Test").at("2017-09-26").withThroughput(4),
-                    row("Backend Development").at("2017-09-26").withThroughput(8),
-                    row("Alpha Bug").at("2017-09-27").withThroughput(0),
-                    row("Alpha Test").at("2017-09-27").withThroughput(3),
-                    row("Backend Development").at("2017-09-27").withThroughput(4),
-                    row("Alpha Bug").at("2017-09-28").withThroughput(1),
-                    row("Alpha Test").at("2017-09-28").withThroughput(2),
-                    row("Backend Development").at("2017-09-28").withThroughput(5))
+                    row("Alpha Test").at("2018-09-25").withThroughput(1),
+                    row("Backend Development").at("2018-09-25").withThroughput(6),
+                    row("Alpha Test").at("2018-09-26").withThroughput(4),
+                    row("Backend Development").at("2018-09-26").withThroughput(8),
+                    row("Alpha Test").at("2018-09-27").withThroughput(0),
+                    row("Backend Development").at("2018-09-27").withThroughput(4),
+                    row("Alpha Test").at("2018-09-28").withThroughput(1),
+                    row("Backend Development").at("2018-09-28").withThroughput(4),
+                    row("Alpha Test").at("2018-09-29").withThroughput(0),
+                    row("Backend Development").at("2018-09-29").withThroughput(0),
+                    row("Alpha Test").at("2018-09-30").withThroughput(0),
+                    row("Backend Development").at("2018-09-30").withThroughput(0),
+                    row("Alpha Test").at("2018-10-01").withThroughput(0),
+                    row("Backend Development").at("2018-10-01").withThroughput(2),
+                    row("Alpha Test").at("2018-10-02").withThroughput(2),
+                    row("Backend Development").at("2018-10-02").withThroughput(3),
+                    row("Alpha Test").at("2018-10-03").withThroughput(0),
+                    row("Backend Development").at("2018-10-03").withThroughput(4),
+                    row("Alpha Test").at("2018-10-04").withThroughput(1),
+                    row("Backend Development").at("2018-10-04").withThroughput(5),
+                    row("Alpha Test").at("2018-10-05").withThroughput(0),
+                    row("Backend Development").at("2018-10-05").withThroughput(4))
             .configure();
 
-        ThroughputChartDataSet dsSubtasks = subject.getDataSet(projectKey, issueLevel, ZONE_ID);
+        ThroughputChartDataSet ds = subject.getDataSet(projectKey, issueLevel, ZONE_ID);
 
-        assertThat(dsSubtasks.rows.size(), is(0));
-    }
-    
-    @Test
-    public void getThroughputChartDataSet_timelineRangeStartsBeforeDataRangeFromData() {
-        String projectKey = "TASKB";
-        String issueLevel = LEVEL_SUBTASKS;
-        
-        new TestEnvConfigurator(projectKey)
-            .withTimelineReferenceDate("2017-09-25")
-            .withTimelineStartDate("2017-09-20")
-            .withTimelineDeliveryDate("2017-09-28")
-            .withTimelineBaselineDate("2017-09-25")
-            .withDemands(
-                    row("Demand").at("2017-09-25").withThroughput(1),
-                    row("Demand").at("2017-09-26").withThroughput(2),
-                    row("Demand").at("2017-09-27").withThroughput(0),
-                    row("Demand").at("2017-09-28").withThroughput(1))
-            .withFeatures(
-                    row("Bug").at("2017-09-25").withThroughput(0),
-                    row("Task").at("2017-09-25").withThroughput(2),
-                    row("Bug").at("2017-09-26").withThroughput(1),
-                    row("Task").at("2017-09-26").withThroughput(4),
-                    row("Bug").at("2017-09-27").withThroughput(0),
-                    row("Task").at("2017-09-27").withThroughput(1),
-                    row("Bug").at("2017-09-28").withThroughput(1),
-                    row("Task").at("2017-09-28").withThroughput(2))
-            .withSubtasks(
-                    row("Alpha Bug").at("2017-09-25").withThroughput(0),
-                    row("Alpha Test").at("2017-09-25").withThroughput(3),
-                    row("Backend Development").at("2017-09-25").withThroughput(6),
-                    row("Alpha Bug").at("2017-09-26").withThroughput(1),
-                    row("Alpha Test").at("2017-09-26").withThroughput(4),
-                    row("Backend Development").at("2017-09-26").withThroughput(8),
-                    row("Alpha Bug").at("2017-09-27").withThroughput(0),
-                    row("Alpha Test").at("2017-09-27").withThroughput(3),
-                    row("Backend Development").at("2017-09-27").withThroughput(4),
-                    row("Alpha Bug").at("2017-09-28").withThroughput(1),
-                    row("Alpha Test").at("2017-09-28").withThroughput(2),
-                    row("Backend Development").at("2017-09-28").withThroughput(5))
-            .configure();
-
-        ThroughputChartDataSet dsSubtasks = subject.getDataSet(projectKey, issueLevel, ZONE_ID);
-
-        assertThat(dsSubtasks.rows.size(), is(12));
-        assertRow(dsSubtasks.rows.get(0), "Alpha Bug", 0L, "2017-09-25");
-        assertRow(dsSubtasks.rows.get(1), "Alpha Test", 3L, "2017-09-25");
-        assertRow(dsSubtasks.rows.get(2), "Backend Development", 6L, "2017-09-25");
-        assertRow(dsSubtasks.rows.get(3), "Alpha Bug", 1L, "2017-09-26");
-        assertRow(dsSubtasks.rows.get(4), "Alpha Test", 4L, "2017-09-26");
-        assertRow(dsSubtasks.rows.get(5), "Backend Development", 8L, "2017-09-26");
-        assertRow(dsSubtasks.rows.get(6), "Alpha Bug", 0L, "2017-09-27");
-        assertRow(dsSubtasks.rows.get(7), "Alpha Test", 3L, "2017-09-27");
-        assertRow(dsSubtasks.rows.get(8), "Backend Development", 4L, "2017-09-27");
-        assertRow(dsSubtasks.rows.get(9), "Alpha Bug", 1L, "2017-09-28");
-        assertRow(dsSubtasks.rows.get(10), "Alpha Test", 2L, "2017-09-28");
-        assertRow(dsSubtasks.rows.get(11), "Backend Development", 5L, "2017-09-28");
+        assertThat(ds.rows.size(), is(0));
     }
     
     @Test
-    public void getThroughputChartDataSet_timelineRangeEndsAfterDataRangeFromData() {
+    public void getThroughputChartDataSet_whenTimelineRangeStartsBeforeAndEndsWithinDataSetDateRange_thenFiltersEndOnly() {
         String projectKey = "TASKB";
         String issueLevel = LEVEL_SUBTASKS;
         
         new TestEnvConfigurator(projectKey)
-            .withTimelineReferenceDate("2017-09-25")
-            .withTimelineStartDate("2017-09-25")
-            .withTimelineDeliveryDate("2017-09-30")
-            .withTimelineBaselineDate("2017-09-25")
-            .withDemands(
-                    row("Demand").at("2017-09-25").withThroughput(1),
-                    row("Demand").at("2017-09-26").withThroughput(2),
-                    row("Demand").at("2017-09-27").withThroughput(0),
-                    row("Demand").at("2017-09-28").withThroughput(1))
-            .withFeatures(
-                    row("Bug").at("2017-09-25").withThroughput(0),
-                    row("Task").at("2017-09-25").withThroughput(2),
-                    row("Bug").at("2017-09-26").withThroughput(1),
-                    row("Task").at("2017-09-26").withThroughput(4),
-                    row("Bug").at("2017-09-27").withThroughput(0),
-                    row("Task").at("2017-09-27").withThroughput(1),
-                    row("Bug").at("2017-09-28").withThroughput(1),
-                    row("Task").at("2017-09-28").withThroughput(2))
+            .withTimelineReferenceDate("2018-09-25")
+            .withTimelineStartDate("2018-09-20")
+            .withTimelineDeliveryDate("2018-09-29")
+            .withTimelineBaselineDate("2018-09-20")
             .withSubtasks(
-                    row("Alpha Bug").at("2017-09-25").withThroughput(0),
-                    row("Alpha Test").at("2017-09-25").withThroughput(3),
-                    row("Backend Development").at("2017-09-25").withThroughput(6),
-                    row("Alpha Bug").at("2017-09-26").withThroughput(1),
-                    row("Alpha Test").at("2017-09-26").withThroughput(4),
-                    row("Backend Development").at("2017-09-26").withThroughput(8),
-                    row("Alpha Bug").at("2017-09-27").withThroughput(0),
-                    row("Alpha Test").at("2017-09-27").withThroughput(3),
-                    row("Backend Development").at("2017-09-27").withThroughput(4),
-                    row("Alpha Bug").at("2017-09-28").withThroughput(1),
-                    row("Alpha Test").at("2017-09-28").withThroughput(2),
-                    row("Backend Development").at("2017-09-28").withThroughput(5))
+                    row("Alpha Test").at("2018-09-25").withThroughput(1),
+                    row("Backend Development").at("2018-09-25").withThroughput(6),
+                    row("Alpha Test").at("2018-09-26").withThroughput(4),
+                    row("Backend Development").at("2018-09-26").withThroughput(8),
+                    row("Alpha Test").at("2018-09-27").withThroughput(0),
+                    row("Backend Development").at("2018-09-27").withThroughput(4),
+                    row("Alpha Test").at("2018-09-28").withThroughput(1),
+                    row("Backend Development").at("2018-09-28").withThroughput(4),
+                    row("Alpha Test").at("2018-09-29").withThroughput(0),
+                    row("Backend Development").at("2018-09-29").withThroughput(0),
+                    row("Alpha Test").at("2018-09-30").withThroughput(0),
+                    row("Backend Development").at("2018-09-30").withThroughput(0),
+                    row("Alpha Test").at("2018-10-01").withThroughput(0),
+                    row("Backend Development").at("2018-10-01").withThroughput(2),
+                    row("Alpha Test").at("2018-10-02").withThroughput(2),
+                    row("Backend Development").at("2018-10-02").withThroughput(3),
+                    row("Alpha Test").at("2018-10-03").withThroughput(0),
+                    row("Backend Development").at("2018-10-03").withThroughput(4),
+                    row("Alpha Test").at("2018-10-04").withThroughput(1),
+                    row("Backend Development").at("2018-10-04").withThroughput(5),
+                    row("Alpha Test").at("2018-10-05").withThroughput(0),
+                    row("Backend Development").at("2018-10-05").withThroughput(4))
             .configure();
 
-        ThroughputChartDataSet dsSubtasks = subject.getDataSet(projectKey, issueLevel, ZONE_ID);
+        ThroughputChartDataSet ds = subject.getDataSet(projectKey, issueLevel, ZONE_ID);
 
-        assertThat(dsSubtasks.rows.size(), is(12));
-        assertRow(dsSubtasks.rows.get(0), "Alpha Bug", 0L, "2017-09-25");
-        assertRow(dsSubtasks.rows.get(1), "Alpha Test", 3L, "2017-09-25");
-        assertRow(dsSubtasks.rows.get(2), "Backend Development", 6L, "2017-09-25");
-        assertRow(dsSubtasks.rows.get(3), "Alpha Bug", 1L, "2017-09-26");
-        assertRow(dsSubtasks.rows.get(4), "Alpha Test", 4L, "2017-09-26");
-        assertRow(dsSubtasks.rows.get(5), "Backend Development", 8L, "2017-09-26");
-        assertRow(dsSubtasks.rows.get(6), "Alpha Bug", 0L, "2017-09-27");
-        assertRow(dsSubtasks.rows.get(7), "Alpha Test", 3L, "2017-09-27");
-        assertRow(dsSubtasks.rows.get(8), "Backend Development", 4L, "2017-09-27");
-        assertRow(dsSubtasks.rows.get(9), "Alpha Bug", 1L, "2017-09-28");
-        assertRow(dsSubtasks.rows.get(10), "Alpha Test", 2L, "2017-09-28");
-        assertRow(dsSubtasks.rows.get(11), "Backend Development", 5L, "2017-09-28");
+        assertThat(ds.rows.size(), is(2));
+        assertRow(ds.rows.get(0), "Alpha Test", 6L, "2018-09-23");
+        assertRow(ds.rows.get(1), "Backend Development", 22L, "2018-09-23");
     }
     
     @Test
-    public void getThroughputChartDataSet_timelineRangeContainsDataRangeFromData() {
+    public void getThroughputChartDataSet_whenTimelineRangeStartsWithinAndEndsAfterDataSetDateRange_thenFiltersBeginOnly() {
         String projectKey = "TASKB";
         String issueLevel = LEVEL_SUBTASKS;
         
         new TestEnvConfigurator(projectKey)
-            .withTimelineReferenceDate("2017-09-25")
-            .withTimelineStartDate("2017-09-23")
-            .withTimelineDeliveryDate("2017-09-30")
-            .withTimelineBaselineDate("2017-09-25")
-            .withDemands(
-                    row("Demand").at("2017-09-25").withThroughput(1),
-                    row("Demand").at("2017-09-26").withThroughput(2),
-                    row("Demand").at("2017-09-27").withThroughput(0),
-                    row("Demand").at("2017-09-28").withThroughput(1))
-            .withFeatures(
-                    row("Bug").at("2017-09-25").withThroughput(0),
-                    row("Task").at("2017-09-25").withThroughput(2),
-                    row("Bug").at("2017-09-26").withThroughput(1),
-                    row("Task").at("2017-09-26").withThroughput(4),
-                    row("Bug").at("2017-09-27").withThroughput(0),
-                    row("Task").at("2017-09-27").withThroughput(1),
-                    row("Bug").at("2017-09-28").withThroughput(1),
-                    row("Task").at("2017-09-28").withThroughput(2))
+            .withTimelineReferenceDate("2018-09-25")
+            .withTimelineStartDate("2018-09-30")
+            .withTimelineDeliveryDate("2018-10-08")
+            .withTimelineBaselineDate("2018-09-25")
             .withSubtasks(
-                    row("Alpha Bug").at("2017-09-25").withThroughput(0),
-                    row("Alpha Test").at("2017-09-25").withThroughput(3),
-                    row("Backend Development").at("2017-09-25").withThroughput(6),
-                    row("Alpha Bug").at("2017-09-26").withThroughput(1),
-                    row("Alpha Test").at("2017-09-26").withThroughput(4),
-                    row("Backend Development").at("2017-09-26").withThroughput(8),
-                    row("Alpha Bug").at("2017-09-27").withThroughput(0),
-                    row("Alpha Test").at("2017-09-27").withThroughput(3),
-                    row("Backend Development").at("2017-09-27").withThroughput(4),
-                    row("Alpha Bug").at("2017-09-28").withThroughput(1),
-                    row("Alpha Test").at("2017-09-28").withThroughput(2),
-                    row("Backend Development").at("2017-09-28").withThroughput(5))
+                    row("Alpha Test").at("2018-09-25").withThroughput(1),
+                    row("Backend Development").at("2018-09-25").withThroughput(6),
+                    row("Alpha Test").at("2018-09-26").withThroughput(4),
+                    row("Backend Development").at("2018-09-26").withThroughput(8),
+                    row("Alpha Test").at("2018-09-27").withThroughput(0),
+                    row("Backend Development").at("2018-09-27").withThroughput(4),
+                    row("Alpha Test").at("2018-09-28").withThroughput(1),
+                    row("Backend Development").at("2018-09-28").withThroughput(4),
+                    row("Alpha Test").at("2018-09-29").withThroughput(0),
+                    row("Backend Development").at("2018-09-29").withThroughput(0),
+                    row("Alpha Test").at("2018-09-30").withThroughput(0),
+                    row("Backend Development").at("2018-09-30").withThroughput(0),
+                    row("Alpha Test").at("2018-10-01").withThroughput(0),
+                    row("Backend Development").at("2018-10-01").withThroughput(2),
+                    row("Alpha Test").at("2018-10-02").withThroughput(2),
+                    row("Backend Development").at("2018-10-02").withThroughput(3),
+                    row("Alpha Test").at("2018-10-03").withThroughput(0),
+                    row("Backend Development").at("2018-10-03").withThroughput(4),
+                    row("Alpha Test").at("2018-10-04").withThroughput(1),
+                    row("Backend Development").at("2018-10-04").withThroughput(5),
+                    row("Alpha Test").at("2018-10-05").withThroughput(0),
+                    row("Backend Development").at("2018-10-05").withThroughput(4))
             .configure();
 
-        ThroughputChartDataSet dsSubtasks = subject.getDataSet(projectKey, issueLevel, ZONE_ID);
+        ThroughputChartDataSet ds = subject.getDataSet(projectKey, issueLevel, ZONE_ID);
 
-        assertThat(dsSubtasks.rows.size(), is(12));
-        assertRow(dsSubtasks.rows.get(0), "Alpha Bug", 0L, "2017-09-25");
-        assertRow(dsSubtasks.rows.get(1), "Alpha Test", 3L, "2017-09-25");
-        assertRow(dsSubtasks.rows.get(2), "Backend Development", 6L, "2017-09-25");
-        assertRow(dsSubtasks.rows.get(3), "Alpha Bug", 1L, "2017-09-26");
-        assertRow(dsSubtasks.rows.get(4), "Alpha Test", 4L, "2017-09-26");
-        assertRow(dsSubtasks.rows.get(5), "Backend Development", 8L, "2017-09-26");
-        assertRow(dsSubtasks.rows.get(6), "Alpha Bug", 0L, "2017-09-27");
-        assertRow(dsSubtasks.rows.get(7), "Alpha Test", 3L, "2017-09-27");
-        assertRow(dsSubtasks.rows.get(8), "Backend Development", 4L, "2017-09-27");
-        assertRow(dsSubtasks.rows.get(9), "Alpha Bug", 1L, "2017-09-28");
-        assertRow(dsSubtasks.rows.get(10), "Alpha Test", 2L, "2017-09-28");
-        assertRow(dsSubtasks.rows.get(11), "Backend Development", 5L, "2017-09-28");
+        assertThat(ds.rows.size(), is(2));
+        assertRow(ds.rows.get(0), "Alpha Test", 3L, "2018-09-30");
+        assertRow(ds.rows.get(1), "Backend Development", 18L, "2018-09-30");
     }
     
     @Test
-    public void getThroughputChartDataSet_timelineRangeWithinDataRangeFromData() {
+    public void getThroughputChartDataSet_whenTimelineRangeContainsDataSetDateRange_thenReturnsWholeDataSet() {
         String projectKey = "TASKB";
         String issueLevel = LEVEL_SUBTASKS;
         
         new TestEnvConfigurator(projectKey)
-            .withTimelineReferenceDate("2017-09-25")
-            .withTimelineStartDate("2017-09-26")
-            .withTimelineDeliveryDate("2017-09-27")
-            .withTimelineBaselineDate("2017-09-26")
-            .withDemands(
-                    row("Demand").at("2017-09-25").withThroughput(1),
-                    row("Demand").at("2017-09-26").withThroughput(2),
-                    row("Demand").at("2017-09-27").withThroughput(0),
-                    row("Demand").at("2017-09-28").withThroughput(1))
-            .withFeatures(
-                    row("Bug").at("2017-09-25").withThroughput(0),
-                    row("Task").at("2017-09-25").withThroughput(2),
-                    row("Bug").at("2017-09-26").withThroughput(1),
-                    row("Task").at("2017-09-26").withThroughput(4),
-                    row("Bug").at("2017-09-27").withThroughput(0),
-                    row("Task").at("2017-09-27").withThroughput(1),
-                    row("Bug").at("2017-09-28").withThroughput(1),
-                    row("Task").at("2017-09-28").withThroughput(2))
+            .withTimelineReferenceDate("2018-09-25")
+            .withTimelineStartDate("2018-09-23")
+            .withTimelineDeliveryDate("2018-10-06")
+            .withTimelineBaselineDate("2018-09-25")
             .withSubtasks(
-                    row("Alpha Bug").at("2017-09-25").withThroughput(0),
-                    row("Alpha Test").at("2017-09-25").withThroughput(3),
-                    row("Backend Development").at("2017-09-25").withThroughput(6),
-                    row("Alpha Bug").at("2017-09-26").withThroughput(1),
-                    row("Alpha Test").at("2017-09-26").withThroughput(4),
-                    row("Backend Development").at("2017-09-26").withThroughput(8),
-                    row("Alpha Bug").at("2017-09-27").withThroughput(0),
-                    row("Alpha Test").at("2017-09-27").withThroughput(3),
-                    row("Backend Development").at("2017-09-27").withThroughput(4),
-                    row("Alpha Bug").at("2017-09-28").withThroughput(1),
-                    row("Alpha Test").at("2017-09-28").withThroughput(2),
-                    row("Backend Development").at("2017-09-28").withThroughput(5))
+                    row("Alpha Test").at("2018-09-25").withThroughput(1),
+                    row("Backend Development").at("2018-09-25").withThroughput(6),
+                    row("Alpha Test").at("2018-09-26").withThroughput(4),
+                    row("Backend Development").at("2018-09-26").withThroughput(8),
+                    row("Alpha Test").at("2018-09-27").withThroughput(0),
+                    row("Backend Development").at("2018-09-27").withThroughput(4),
+                    row("Alpha Test").at("2018-09-28").withThroughput(1),
+                    row("Backend Development").at("2018-09-28").withThroughput(4),
+                    row("Alpha Test").at("2018-09-29").withThroughput(0),
+                    row("Backend Development").at("2018-09-29").withThroughput(0),
+                    row("Alpha Test").at("2018-09-30").withThroughput(0),
+                    row("Backend Development").at("2018-09-30").withThroughput(0),
+                    row("Alpha Test").at("2018-10-01").withThroughput(0),
+                    row("Backend Development").at("2018-10-01").withThroughput(2),
+                    row("Alpha Test").at("2018-10-02").withThroughput(2),
+                    row("Backend Development").at("2018-10-02").withThroughput(3),
+                    row("Alpha Test").at("2018-10-03").withThroughput(0),
+                    row("Backend Development").at("2018-10-03").withThroughput(4),
+                    row("Alpha Test").at("2018-10-04").withThroughput(1),
+                    row("Backend Development").at("2018-10-04").withThroughput(5),
+                    row("Alpha Test").at("2018-10-05").withThroughput(0),
+                    row("Backend Development").at("2018-10-05").withThroughput(4))
             .configure();
 
-        ThroughputChartDataSet dsSubtasks = subject.getDataSet(projectKey, issueLevel, ZONE_ID);
+        ThroughputChartDataSet ds = subject.getDataSet(projectKey, issueLevel, ZONE_ID);
 
-        assertThat(dsSubtasks.rows.size(), is(6));
-        assertRow(dsSubtasks.rows.get(0), "Alpha Bug", 1L, "2017-09-26");
-        assertRow(dsSubtasks.rows.get(1), "Alpha Test", 4L, "2017-09-26");
-        assertRow(dsSubtasks.rows.get(2), "Backend Development", 8L, "2017-09-26");
-        assertRow(dsSubtasks.rows.get(3), "Alpha Bug", 0L, "2017-09-27");
-        assertRow(dsSubtasks.rows.get(4), "Alpha Test", 3L, "2017-09-27");
-        assertRow(dsSubtasks.rows.get(5), "Backend Development", 4L, "2017-09-27");
+        assertThat(ds.rows.size(), is(4));
+        assertRow(ds.rows.get(0), "Alpha Test", 6L, "2018-09-23");
+        assertRow(ds.rows.get(1), "Backend Development", 22L, "2018-09-23");
+        assertRow(ds.rows.get(2), "Alpha Test", 3L, "2018-09-30");
+        assertRow(ds.rows.get(3), "Backend Development", 18L, "2018-09-30");
     }
     
     @Test
-    public void getThroughputChartDataSet_timelineDatesNotSet() {
+    public void getThroughputChartDataSet_whenTimelineRangeWithinDataSetRange_thenReturnsFilteredDataSet() {
+        String projectKey = "TASKB";
+        String issueLevel = LEVEL_SUBTASKS;
+        
+        new TestEnvConfigurator(projectKey)
+            .withTimelineReferenceDate("2018-09-25")
+            .withTimelineStartDate("2018-09-30")
+            .withTimelineDeliveryDate("2018-10-06")
+            .withTimelineBaselineDate("2018-09-26")
+            .withSubtasks(
+                    row("Alpha Test").at("2018-09-23").withThroughput(0),
+                    row("Backend Development").at("2018-09-23").withThroughput(0),
+                    row("Alpha Test").at("2018-09-24").withThroughput(0),
+                    row("Backend Development").at("2018-09-24").withThroughput(0),
+                    row("Alpha Test").at("2018-09-25").withThroughput(1),
+                    row("Backend Development").at("2018-09-25").withThroughput(6),
+                    row("Alpha Test").at("2018-09-26").withThroughput(4),
+                    row("Backend Development").at("2018-09-26").withThroughput(8),
+                    row("Alpha Test").at("2018-09-27").withThroughput(0),
+                    row("Backend Development").at("2018-09-27").withThroughput(4),
+                    row("Alpha Test").at("2018-09-28").withThroughput(1),
+                    row("Backend Development").at("2018-09-28").withThroughput(4),
+                    row("Alpha Test").at("2018-09-29").withThroughput(0),
+                    row("Backend Development").at("2018-09-29").withThroughput(0),
+                    row("Alpha Test").at("2018-09-30").withThroughput(0),
+                    row("Backend Development").at("2018-09-30").withThroughput(0),
+                    row("Alpha Test").at("2018-10-01").withThroughput(0),
+                    row("Backend Development").at("2018-10-01").withThroughput(2),
+                    row("Alpha Test").at("2018-10-02").withThroughput(2),
+                    row("Backend Development").at("2018-10-02").withThroughput(3),
+                    row("Alpha Test").at("2018-10-03").withThroughput(0),
+                    row("Backend Development").at("2018-10-03").withThroughput(4),
+                    row("Alpha Test").at("2018-10-04").withThroughput(1),
+                    row("Backend Development").at("2018-10-04").withThroughput(5),
+                    row("Alpha Test").at("2018-10-05").withThroughput(0),
+                    row("Backend Development").at("2018-10-05").withThroughput(4))
+            .configure();
+
+        ThroughputChartDataSet ds = subject.getDataSet(projectKey, issueLevel, ZONE_ID);
+
+        assertThat(ds.rows.size(), is(2));
+        assertRow(ds.rows.get(0), "Alpha Test", 3L, "2018-09-30");
+        assertRow(ds.rows.get(1), "Backend Development", 18L, "2018-09-30");
+    }
+    
+    @Test
+    public void getThroughputChartDataSet__whenTimelineDatesNotSet_thenNotFiltering() {
         String projectKey = "TASKB";
         String issueLevel = LEVEL_DEMANDS;
 
         new TestEnvConfigurator(projectKey)
-            .withTimelineReferenceDate("2017-09-25")
+            .withTimelineReferenceDate("2018-09-25")
             .withDemands(
-                    row("Demand").at("2017-09-25").withThroughput(1),
-                    row("Demand").at("2017-09-26").withThroughput(2),
-                    row("Demand").at("2017-09-27").withThroughput(0),
-                    row("Demand").at("2017-09-28").withThroughput(1))
-            .withFeatures(
-                    row("Bug").at("2017-09-25").withThroughput(0),
-                    row("Task").at("2017-09-25").withThroughput(2),
-                    row("Bug").at("2017-09-26").withThroughput(1),
-                    row("Task").at("2017-09-26").withThroughput(4),
-                    row("Bug").at("2017-09-27").withThroughput(0),
-                    row("Task").at("2017-09-27").withThroughput(1),
-                    row("Bug").at("2017-09-28").withThroughput(1),
-                    row("Task").at("2017-09-28").withThroughput(2))
-            .withSubtasks(
-                    row("Alpha Bug").at("2017-09-25").withThroughput(0),
-                    row("Alpha Test").at("2017-09-25").withThroughput(3),
-                    row("Backend Development").at("2017-09-25").withThroughput(6),
-                    row("Alpha Bug").at("2017-09-26").withThroughput(1),
-                    row("Alpha Test").at("2017-09-26").withThroughput(4),
-                    row("Backend Development").at("2017-09-26").withThroughput(8),
-                    row("Alpha Bug").at("2017-09-27").withThroughput(0),
-                    row("Alpha Test").at("2017-09-27").withThroughput(3),
-                    row("Backend Development").at("2017-09-27").withThroughput(4),
-                    row("Alpha Bug").at("2017-09-28").withThroughput(1),
-                    row("Alpha Test").at("2017-09-28").withThroughput(2),
-                    row("Backend Development").at("2017-09-28").withThroughput(5))
+                    row("Demand").at("2018-09-25").withThroughput(1),
+                    row("Demand").at("2018-09-26").withThroughput(0),
+                    row("Demand").at("2018-09-27").withThroughput(0),
+                    row("Demand").at("2018-09-28").withThroughput(2),
+                    row("Demand").at("2018-09-29").withThroughput(0),
+                    row("Demand").at("2018-09-30").withThroughput(0),
+                    row("Demand").at("2018-10-01").withThroughput(0),
+                    row("Demand").at("2018-10-02").withThroughput(0),
+                    row("Demand").at("2018-10-03").withThroughput(0),
+                    row("Demand").at("2018-10-04").withThroughput(0),
+                    row("Demand").at("2018-10-05").withThroughput(3))
             .configure();
 
-        final ThroughputChartDataSet dsAllLevels = subject.getDataSet(projectKey, issueLevel, ZONE_ID);
-        // when timeline dates aren't set returns all data
-        assertThat(dsAllLevels.rows.size(), is(4));
-        assertRow(dsAllLevels.rows.get(0), "Demand", 1L, "2017-09-25");
-        assertRow(dsAllLevels.rows.get(1), "Demand", 2L, "2017-09-26");
-        assertRow(dsAllLevels.rows.get(2), "Demand", 0L, "2017-09-27");
-        assertRow(dsAllLevels.rows.get(3), "Demand", 1L, "2017-09-28");
+        final ThroughputChartDataSet ds = subject.getDataSet(projectKey, issueLevel, ZONE_ID);
+        
+        assertThat(ds.rows.size(), is(2));
+        assertRow(ds.rows.get(0), "Demand", 3L, "2018-09-23");
+        assertRow(ds.rows.get(1), "Demand", 3L, "2018-09-30");
     }
 
     @Test
-    public void getThroughputChartDataSet_fetchDataFromAllLevels() {
-        String projectKey = "TASKB";
-        String issueLevel = "All";
-
-        new TestEnvConfigurator(projectKey)
-            .withTimelineReferenceDate("2017-09-25")
-            .withTimelineStartDate("2017-09-25")
-            .withTimelineDeliveryDate("2017-09-28")
-            .withTimelineBaselineDate("2017-09-25")
-            .withDemands(
-                    row("Demand").at("2017-09-25").withThroughput(1),
-                    row("Demand").at("2017-09-26").withThroughput(2),
-                    row("Demand").at("2017-09-27").withThroughput(0),
-                    row("Demand").at("2017-09-28").withThroughput(1))
-            .withFeatures(
-                    row("Bug").at("2017-09-25").withThroughput(0),
-                    row("Task").at("2017-09-25").withThroughput(2),
-                    row("Bug").at("2017-09-26").withThroughput(1),
-                    row("Task").at("2017-09-26").withThroughput(4),
-                    row("Bug").at("2017-09-27").withThroughput(0),
-                    row("Task").at("2017-09-27").withThroughput(1),
-                    row("Bug").at("2017-09-28").withThroughput(1),
-                    row("Task").at("2017-09-28").withThroughput(2))
-            .withSubtasks(
-                    row("Alpha Bug").at("2017-09-25").withThroughput(0),
-                    row("Alpha Test").at("2017-09-25").withThroughput(3),
-                    row("Backend Development").at("2017-09-25").withThroughput(6),
-                    row("Alpha Bug").at("2017-09-26").withThroughput(1),
-                    row("Alpha Test").at("2017-09-26").withThroughput(4),
-                    row("Backend Development").at("2017-09-26").withThroughput(8),
-                    row("Alpha Bug").at("2017-09-27").withThroughput(0),
-                    row("Alpha Test").at("2017-09-27").withThroughput(3),
-                    row("Backend Development").at("2017-09-27").withThroughput(4),
-                    row("Alpha Bug").at("2017-09-28").withThroughput(1),
-                    row("Alpha Test").at("2017-09-28").withThroughput(2),
-                    row("Backend Development").at("2017-09-28").withThroughput(5))
-            .configure();
-
-        ThroughputChartDataSet dsAllLevels = subject.getDataSet(projectKey, issueLevel, ZONE_ID);
-
-        assertThat(dsAllLevels.rows.size(), is(24));
-        assertRow(dsAllLevels.rows.get(0), "Demand", 1L, "2017-09-25");
-        assertRow(dsAllLevels.rows.get(1), "Demand", 2L, "2017-09-26");
-        assertRow(dsAllLevels.rows.get(2), "Demand", 0L, "2017-09-27");
-        assertRow(dsAllLevels.rows.get(3), "Demand", 1L, "2017-09-28");
-        assertRow(dsAllLevels.rows.get(4), "Bug", 0L, "2017-09-25");
-        assertRow(dsAllLevels.rows.get(5), "Task", 2L, "2017-09-25");
-        assertRow(dsAllLevels.rows.get(6), "Bug", 1L, "2017-09-26");
-        assertRow(dsAllLevels.rows.get(7), "Task", 4L, "2017-09-26");
-        assertRow(dsAllLevels.rows.get(8), "Bug", 0L, "2017-09-27");
-        assertRow(dsAllLevels.rows.get(9), "Task", 1L, "2017-09-27");
-        assertRow(dsAllLevels.rows.get(10), "Bug", 1L, "2017-09-28");
-        assertRow(dsAllLevels.rows.get(11), "Task", 2L, "2017-09-28");
-        assertRow(dsAllLevels.rows.get(12), "Alpha Bug", 0L, "2017-09-25");
-        assertRow(dsAllLevels.rows.get(13), "Alpha Test", 3L, "2017-09-25");
-        assertRow(dsAllLevels.rows.get(14), "Backend Development", 6L, "2017-09-25");
-        assertRow(dsAllLevels.rows.get(15), "Alpha Bug", 1L, "2017-09-26");
-        assertRow(dsAllLevels.rows.get(16), "Alpha Test", 4L, "2017-09-26");
-        assertRow(dsAllLevels.rows.get(17), "Backend Development", 8L, "2017-09-26");
-        assertRow(dsAllLevels.rows.get(18), "Alpha Bug", 0L, "2017-09-27");
-        assertRow(dsAllLevels.rows.get(19), "Alpha Test", 3L, "2017-09-27");
-        assertRow(dsAllLevels.rows.get(20), "Backend Development", 4L, "2017-09-27");
-        assertRow(dsAllLevels.rows.get(21), "Alpha Bug", 1L, "2017-09-28");
-        assertRow(dsAllLevels.rows.get(22), "Alpha Test", 2L, "2017-09-28");
-        assertRow(dsAllLevels.rows.get(23), "Backend Development", 5L, "2017-09-28");
-    }
-
-    @Test
-    public void getThroughputChartDataSet_withoutSubtasksDataSet() {
+    public void getThroughputChartDataSet_whenDataSetWithoutSubtasksAndRequestingFeatures_thenReturnsSuccessfully() {
         String projectKey = "TASKB";
         String issueLevel = LEVEL_FEATURES;
         
         
         new TestEnvConfigurator(projectKey)
-            .withTimelineReferenceDate("2017-09-25")
+            .withTimelineReferenceDate("2018-09-25")
+            .withTimelineStartDate("2018-09-25")
+            .withTimelineDeliveryDate("2018-10-05")
+            .withTimelineBaselineDate("2018-09-25")
             .withDemands(
-                    row("Demand").at("2017-09-25").withThroughput(1),
-                    row("Demand").at("2017-09-26").withThroughput(2),
-                    row("Demand").at("2017-09-27").withThroughput(0),
-                    row("Demand").at("2017-09-28").withThroughput(1))
+                    row("Demand").at("2018-09-25").withThroughput(1),
+                    row("Demand").at("2018-09-26").withThroughput(0),
+                    row("Demand").at("2018-09-27").withThroughput(0),
+                    row("Demand").at("2018-09-28").withThroughput(2),
+                    row("Demand").at("2018-09-29").withThroughput(0),
+                    row("Demand").at("2018-09-30").withThroughput(0),
+                    row("Demand").at("2018-10-01").withThroughput(0),
+                    row("Demand").at("2018-10-02").withThroughput(0),
+                    row("Demand").at("2018-10-03").withThroughput(0),
+                    row("Demand").at("2018-10-04").withThroughput(0),
+                    row("Demand").at("2018-10-05").withThroughput(3))
             .withFeatures(
-                    row("Bug").at("2017-09-25").withThroughput(0),
-                    row("Task").at("2017-09-25").withThroughput(2),
-                    row("Bug").at("2017-09-26").withThroughput(1),
-                    row("Task").at("2017-09-26").withThroughput(4),
-                    row("Bug").at("2017-09-27").withThroughput(0),
-                    row("Task").at("2017-09-27").withThroughput(1),
-                    row("Bug").at("2017-09-28").withThroughput(1),
-                    row("Task").at("2017-09-28").withThroughput(2))
-            .configure();
-
-        final ThroughputChartDataSet dsAllLevels = subject.getDataSet(projectKey, issueLevel, ZONE_ID);
-        assertThat(dsAllLevels.rows.size(), is(8));
-        assertRow(dsAllLevels.rows.get(0), "Bug", 0L, "2017-09-25");
-        assertRow(dsAllLevels.rows.get(1), "Task", 2L, "2017-09-25");
-        assertRow(dsAllLevels.rows.get(2), "Bug", 1L, "2017-09-26");
-        assertRow(dsAllLevels.rows.get(3), "Task", 4L, "2017-09-26");
-        assertRow(dsAllLevels.rows.get(4), "Bug", 0L, "2017-09-27");
-        assertRow(dsAllLevels.rows.get(5), "Task", 1L, "2017-09-27");
-        assertRow(dsAllLevels.rows.get(6), "Bug", 1L, "2017-09-28");
-        assertRow(dsAllLevels.rows.get(7), "Task", 2L, "2017-09-28");
-    }
-    
-    @Test
-    public void getThroughputChartDataSet_demandsDataSetOnly() {
-        String projectKey = "TASKB";
-        String issueLevel = "All";
-        
-        
-        new TestEnvConfigurator(projectKey)
-            .withTimelineReferenceDate("2017-09-25")
-            .withTimelineStartDate("2017-09-25")
-            .withTimelineDeliveryDate("2017-09-28")
-            .withTimelineBaselineDate("2017-09-25")
-            .withDemands(
-                    row("Demand").at("2017-09-25").withThroughput(1),
-                    row("Demand").at("2017-09-26").withThroughput(2),
-                    row("Demand").at("2017-09-27").withThroughput(0),
-                    row("Demand").at("2017-09-28").withThroughput(1))
-            .configure();
-
-        final ThroughputChartDataSet dsAllLevels = subject.getDataSet(projectKey, issueLevel, ZONE_ID);
-        assertThat(dsAllLevels.rows.size(), is(4));
-        assertRow(dsAllLevels.rows.get(0), "Demand", 1L, "2017-09-25");
-        assertRow(dsAllLevels.rows.get(1), "Demand", 2L, "2017-09-26");
-        assertRow(dsAllLevels.rows.get(2), "Demand", 0L, "2017-09-27");
-        assertRow(dsAllLevels.rows.get(3), "Demand", 1L, "2017-09-28");
-    }
-
-    @Test
-    public void getThroughputChartDataSet_timelineDatesNotSetDatasetEmpty() {
-        String projectKey = "TASKB";
-        String issueLevel = "All";
-
-        new TestEnvConfigurator(projectKey)
-            .withTimelineReferenceDate("2017-09-25")
+                    row("Bug").at("2018-09-25").withThroughput(0),
+                    row("Task").at("2018-09-25").withThroughput(2),
+                    row("Bug").at("2018-09-26").withThroughput(0),
+                    row("Task").at("2018-09-26").withThroughput(4),
+                    row("Bug").at("2018-09-27").withThroughput(0),
+                    row("Task").at("2018-09-27").withThroughput(1),
+                    row("Bug").at("2018-09-28").withThroughput(0),
+                    row("Task").at("2018-09-28").withThroughput(2),
+                    row("Bug").at("2018-09-29").withThroughput(0),
+                    row("Task").at("2018-09-29").withThroughput(0),
+                    row("Bug").at("2018-09-30").withThroughput(0),
+                    row("Task").at("2018-09-30").withThroughput(0),
+                    row("Bug").at("2018-10-01").withThroughput(1),
+                    row("Task").at("2018-10-01").withThroughput(1),
+                    row("Bug").at("2018-10-02").withThroughput(0),
+                    row("Task").at("2018-10-02").withThroughput(0),
+                    row("Bug").at("2018-10-03").withThroughput(0),
+                    row("Task").at("2018-10-03").withThroughput(2),
+                    row("Bug").at("2018-10-04").withThroughput(1),
+                    row("Task").at("2018-10-04").withThroughput(0),
+                    row("Bug").at("2018-10-05").withThroughput(0),
+                    row("Task").at("2018-10-05").withThroughput(2))
             .configure();
 
         final ThroughputChartDataSet ds = subject.getDataSet(projectKey, issueLevel, ZONE_ID);
+        assertThat(ds.rows.size(), is(4));
+        assertRow(ds.rows.get(0), "Bug", 0L, "2018-09-23");
+        assertRow(ds.rows.get(1), "Task", 9L, "2018-09-23");
+        assertRow(ds.rows.get(2), "Bug", 2L, "2018-09-30");
+        assertRow(ds.rows.get(3), "Task", 5L, "2018-09-30");
+    }
+    
+    @Test
+    public void getDataSet_whenRequestingFeaturesAndDataSetOnlyHasDemands_thenReturnsEmptyDataSet() {
+        String projectKey = "TASKB";
+        String issueLevel = LEVEL_FEATURES;
+        
+        
+        new TestEnvConfigurator(projectKey)
+            .withTimelineReferenceDate("2018-09-25")
+            .withTimelineStartDate("2018-09-25")
+            .withTimelineDeliveryDate("2018-09-28")
+            .withTimelineBaselineDate("2018-09-25")
+            .withDemands(
+                    row("Demand").at("2018-09-25").withThroughput(1),
+                    row("Demand").at("2018-09-26").withThroughput(0),
+                    row("Demand").at("2018-09-27").withThroughput(0),
+                    row("Demand").at("2018-09-28").withThroughput(2),
+                    row("Demand").at("2018-09-29").withThroughput(0),
+                    row("Demand").at("2018-09-30").withThroughput(0),
+                    row("Demand").at("2018-10-01").withThroughput(0),
+                    row("Demand").at("2018-10-02").withThroughput(0),
+                    row("Demand").at("2018-10-03").withThroughput(0),
+                    row("Demand").at("2018-10-04").withThroughput(0),
+                    row("Demand").at("2018-10-05").withThroughput(3))
+            .configure();
+
+        final ThroughputChartDataSet ds = subject.getDataSet(projectKey, issueLevel, ZONE_ID);
+        
+        assertThat(ds.rows.size(), is(0));
+    }
+    
+    @Test
+    public void getThroughputChartDataSet_whenTimelineStartDateWithinAndEndDateNotSet_thenFiltersBeginOnly() {
+        String projectKey = "TASKB";
+        String issueLevel = LEVEL_FEATURES;
+        
+        
+        new TestEnvConfigurator(projectKey)
+            .withTimelineReferenceDate("2018-09-25")
+            .withTimelineStartDate("2018-09-30")
+            .withTimelineBaselineDate("2018-09-25")
+            .withFeatures(
+                    row("Bug").at("2018-09-25").withThroughput(0),
+                    row("Task").at("2018-09-25").withThroughput(2),
+                    row("Bug").at("2018-09-26").withThroughput(0),
+                    row("Task").at("2018-09-26").withThroughput(4),
+                    row("Bug").at("2018-09-27").withThroughput(0),
+                    row("Task").at("2018-09-27").withThroughput(1),
+                    row("Bug").at("2018-09-28").withThroughput(0),
+                    row("Task").at("2018-09-28").withThroughput(2),
+                    row("Bug").at("2018-09-29").withThroughput(0),
+                    row("Task").at("2018-09-29").withThroughput(0),
+                    row("Bug").at("2018-09-30").withThroughput(0),
+                    row("Task").at("2018-09-30").withThroughput(0),
+                    row("Bug").at("2018-10-01").withThroughput(1),
+                    row("Task").at("2018-10-01").withThroughput(1),
+                    row("Bug").at("2018-10-02").withThroughput(0),
+                    row("Task").at("2018-10-02").withThroughput(0),
+                    row("Bug").at("2018-10-03").withThroughput(0),
+                    row("Task").at("2018-10-03").withThroughput(2),
+                    row("Bug").at("2018-10-04").withThroughput(1),
+                    row("Task").at("2018-10-04").withThroughput(0),
+                    row("Bug").at("2018-10-05").withThroughput(0),
+                    row("Task").at("2018-10-05").withThroughput(2))
+            .configure();
+
+        final ThroughputChartDataSet ds = subject.getDataSet(projectKey, issueLevel, ZONE_ID);
+        
+        assertThat(ds.rows.size(), is(2));
+        assertRow(ds.rows.get(0), "Bug", 2L, "2018-09-30");
+        assertRow(ds.rows.get(1), "Task", 5L, "2018-09-30");
+    }
+
+    @Test
+    public void getThroughputChartDataSet_whenTimelineDatesNotSetDatasetEmpty_thenReturnsEmptyDataSet() {
+        String projectKey = "TASKB";
+        String issueLevel = LEVEL_ALL;
+
+        new TestEnvConfigurator(projectKey)
+            .withTimelineReferenceDate("2018-09-25")
+            .configure();
+
+        final ThroughputChartDataSet ds = subject.getDataSet(projectKey, issueLevel, ZONE_ID);
+        
         assertThat(ds.rows.size(), is(0));
     }
 
-    private void assertRow(ThroughputDataPoint throughputDataPoint, String issueType, Long throughputCount, String date) {
-        assertThat(throughputDataPoint.issueType, is(issueType));
-        assertThat(throughputDataPoint.date, is(Date.from(parseDateTime(date).toInstant())));
-        assertThat(throughputDataPoint.count, is(throughputCount));
+    private void assertRow(ThroughputDataPoint actual, String expectedIssueType, Long expectedThroughputWeekCount, String date) {
+        assertThat(actual.issueType, is(expectedIssueType));
+        final ZonedDateTime expectedDate = parseDateTime(date);
+        assertThat(DayOfWeek.SUNDAY, is(expectedDate.getDayOfWeek()));
+        assertThat(actual.date, is(Date.from(expectedDate.toInstant())));
+        assertThat(actual.count, is(expectedThroughputWeekCount));
     }
     
     private ThroughputRowBuilder row(String issueType) {
@@ -624,6 +591,7 @@ public class ThroughputKPIDataProviderTest {
         private Optional<LocalDate> deliveryDate = Optional.empty();
         private Optional<LocalDate> baselineDate = Optional.empty();
         private LocalDate referenceDate;
+        private List<ThroughputDataSet> dataSets;
     
         private TestEnvConfigurator(String projectKey) {
             this.projectKey = projectKey;
@@ -675,15 +643,15 @@ public class ThroughputKPIDataProviderTest {
             if (referenceDate == null) {
                 throw new RuntimeException("Timeline reference Date must be set!");
             }
-            List<ThroughputDataSet> dataSets = Arrays.asList(
+            dataSets = Arrays.asList(
                     dsBuilders.get(LEVEL_DEMANDS).build(), 
                     dsBuilders.get(LEVEL_FEATURES).build(), 
                     dsBuilders.get(LEVEL_SUBTASKS).build());
             when(dataRepository.getFirstDate(projectKey)).thenReturn(startDate);
-            mockThroughputKpiService(dataSets);
+            mockThroughputKpiService();
         }
         
-        private void mockThroughputKpiService(List<ThroughputDataSet> dataSets) {
+        private void mockThroughputKpiService() {
             ProjectFilterConfiguration projectFilter = createProjectFilter();
             final FollowUpSnapshot snapshot = mockFollowUpSnapshot(projectFilter);
             when(throughputKpiService.getData(snapshot.getData())).thenReturn(dataSets);

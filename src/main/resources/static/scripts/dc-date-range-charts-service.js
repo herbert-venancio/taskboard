@@ -8,6 +8,8 @@ function DcDateRangeChartsService() {
 
     self._registeredCharts = new Map();
 
+    self._highchartCharts = new Map();
+
     self._isBrushing = false;
 
     self.resizeOptions = {
@@ -91,17 +93,36 @@ function DcDateRangeChartsService() {
         if (!self._rangeChart.filter() || !self._rangeChart.brushOn())
             self._resetSelection();
         else
-            self._applySelection();
+            self.applySelectionToAll();
     };
 
-    self._applySelection = function() {
+    self.applySelectionToAll = function() {
+        const timelineRange = self._brushRange.value();
         self._registeredCharts.forEach(function(registeredChart) {
-            if (!dcUtils.rangesEqual(self._brushRange.value(), registeredChart.filter())) {
+            if (!dcUtils.rangesEqual(timelineRange, registeredChart.filter())) {
                 dc.events.trigger(function () {
                     self._applyFocusOnChart(registeredChart);
                 });
             }
         });
+        self._highchartCharts.forEach((chart) => {
+            const min = timelineRange[0].getTime();
+            const max = timelineRange[1].getTime();
+            chart.xAxis[0].setExtremes(min, max);
+        })
+    };
+
+    self.applySelection = function(chartName) {
+        const chart = self._highchartCharts.get(chartName);
+
+        if (!chart) {
+            return;
+        } 
+
+        const timelineRange = self._brushRange.value();
+        const min = timelineRange[0].getTime();
+        const max = timelineRange[1].getTime();
+        chart.xAxis[0].setExtremes(min, max);
     };
 
     self._resetSelection = function() {
@@ -124,6 +145,14 @@ function DcDateRangeChartsService() {
             });
         });
     };
+
+    self.registerHighchartsChart = function (chartName, chart) {
+        self._highchartCharts.set(chartName, chart);
+    }
+
+    self.deregisterHighchartsChart = function (chartName) {
+        self._highchartCharts.delete(chartName);
+    }
 
 }
 

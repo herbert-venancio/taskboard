@@ -380,6 +380,19 @@
                 ready: function () {
                     this.populateProjects();
                     this.set('user', taskboard.getLoggedUser());
+                    // register callback to resize all highcharts charts 
+                    // when the browser window is resized
+                    window.addEventListener('resize', function() {
+                        ChartUtils.scheduleResize(200);
+                    });
+
+                    // adds the reversed option in the tooltip
+                    Highcharts.wrap(Highcharts.Tooltip.prototype, "refresh", function(proceed, items, event) {
+                        if(this.options.reversed && this.options.shared) {
+                            items.reverse();
+                        }
+                        proceed.call(this, items, event);
+                    });
                 },
 
                 populateProjects: function() {
@@ -445,6 +458,7 @@
                     var categoryClicked = event.target.dataset.category;
                     this._activeCategory(categoryClicked);
 
+                    ChartUtils.resizeAllHighchartsCharts();
                     dc.renderAll();
                 },
 

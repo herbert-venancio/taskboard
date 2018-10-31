@@ -279,29 +279,25 @@ function DcUtils() {
 
     this.groupChartDataByGroupKey = function (crossfilterGroup, groupPropertyNameKey, valuePropertyNameKey) {
         const reduceAdd = (p, v) => {
-            if (!p) {
-                p = {};
+            const groupingKey = v[groupPropertyNameKey];
+            if (p[groupingKey] === undefined) {
+                p[groupingKey] = 0;
             }
-            if (!p[v[groupPropertyNameKey]]) {
-                p[v[groupPropertyNameKey]] = 0;
-            }
-            p[v[groupPropertyNameKey]] += v[valuePropertyNameKey];
+            p[groupingKey] += v[valuePropertyNameKey];
             return p;
         };
         const reduceSub = (p, v) => {
-            if (!p) {
-                p = {};
+            const groupingKey = v[groupPropertyNameKey];
+            if (p[groupingKey] === undefined) {
+                p[groupingKey] = 0;
             }
-            if (!p[v[groupPropertyNameKey]]) {
-                p[v[groupPropertyNameKey]] = 0;
-            }
-            p[v[groupPropertyNameKey]] -= v[valuePropertyNameKey];
+            p[groupingKey] -= v[valuePropertyNameKey];
             return p;
         };
         const reduceInit = () => {
             return {};
         };
-        crossfilterGroup.reduce(reduceAdd, reduceSub, reduceInit)
+        crossfilterGroup.reduce(reduceAdd, reduceSub, reduceInit);
     }
 
 }

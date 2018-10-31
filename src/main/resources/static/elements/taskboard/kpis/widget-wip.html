@@ -22,22 +22,30 @@
   <template>
 
     <style>
+        .widget__body {
+            display: flex;
+        }
+        #wip {
+            display: flex;
+            height: 100%;
+            width: 100%;
+        }
     </style>
 
     <widget-wrap title="WIP" is-ready="{{isReady}}" tags="{{tags}}"
         error-message="{{errorMessage}}" options="{{options}}"
-        chart="{{chart}}">
+        highcharts-chart="{{chart}}">
       <div id="wip" class="tb-chart"></div>
     </widget-wrap> 
     <modal-wrap class="filters-modal" title="Filters">
       <modal-wrap-content>
         <h3 class="tb-label">Issue Types</h3>
-        <div class="config-slot-0 dc-chart--no-float"></div>
-        </modal-wrap-content>
-        <modal-wrap-footer> 
+        <div id="issueTypes" class="config-slot-0 dc-chart--no-float"></div>
+      </modal-wrap-content>
+      <modal-wrap-footer> 
         <tb-button button=[[_btFilterClose]]></tb-button>
-        </modal-wrap-footer>
-      </modal-wrap>
+      </modal-wrap-footer>
+    </modal-wrap>
     <modal-wrap class="settings-modal" title="Settings">
       <modal-wrap-content>
         <h3 class="tb-label">Level</h3>
@@ -92,12 +100,15 @@
                     settingIssueLevel: {
                         type: String,
                         notify: true,
-                        value: 'Subtask',
-                        observer: '_onSettingIssueLevelChanged'
+                        value: 'Subtask'
                     },
                     localStorageLevelItemName: {
                         type: String,
                         computed: 'computeLocalStorageLevelItemName(selectedProjectKey)'
+                    },
+                    plotData: {
+                        type: Object,
+                        value: null
                     },
                     _btFilterClose: {
                         type: Object,
@@ -117,7 +128,7 @@
                 },
 
                 _getSavedLevel: function () {
-                    return window.localStorage.getItem(this.localStorageLevelItemName) || 'Subtask';
+                    return localStorage.getItem(this.localStorageLevelItemName) || 'Subtask';
                 },
 
                 computeLocalStorageLevelItemName: function (selectedProjectKey) {
@@ -133,7 +144,7 @@
                             this.$$('.settings-modal').close();
                             return;
                         }
-                        window.localStorage.setItem(this.localStorageLevelItemName, this.settingIssueLevel);
+                        localStorage.setItem(this.localStorageLevelItemName, this.settingIssueLevel);
                         this.$$('.settings-modal').close();
                         this.reloadChart();
                     }).build();
@@ -149,22 +160,10 @@
                         this.xhr = null;
                     }
                     if (this.chart) {
-                        dcDateRangeChartsService.deregisterChartInRange(this.chart);
-                        dc.deregisterChart(this.chart);
+                        dcDateRangeChartsService.deregisterHighchartsChart(this.chart.title.textStr);
+                        this.chart.destroy();
                         this.chart = null;
                     }
-                },
-
-                handleError: function (error, data) {
-                    if (error) {
-                        this.errorMessage = error.responseText;
-                        return true;
-                    }
-                    if (!data.rows.length) {
-                        this.errorMessage = 'WIP has no data';
-                        return true;
-                    }
-                    return false;
                 },
 
                 reloadChart: function () {
@@ -173,16 +172,20 @@
                     const timezone = taskboard.getTimeZoneIdFromBrowser();
                     this.tags = [savedLevel];
                     const url = `/api/projects/${this.selectedProjectKey}/followup/wip?level=${savedLevel}&timezone=${timezone}`;
-                    this.xhr = d3.json(url, (error, data) => {
-                        if (this.handleError(error, data)) {
+                    this.xhr = $.getJSON(url);
+                    this.xhr.done((data) => {
+                        data = data.rows;
+                        if (!data.length) {
+                            this.errorMessage = 'WIP has no data';
                             return;
                         }
-                        data = data.rows;
-                        const plotData = this.prepareData(data);
-                        this.issueListFilter = this.createIssueListFilter(plotData.ndx);
-                        this.chart = this.createChart(plotData);
-                        dcDateRangeChartsService.registerChartInRangeAndRender(this.chart);
+                        this.plotData = this.prepareData(data);
+                        this.createIssueTypeFilter();
+                        this.createChart();
                         this.isReady = true;
+                    });
+                    this.xhr.fail((error) => {
+                        this.errorMessage = error.responseText;
                     });
                 },
 
@@ -190,53 +193,78 @@
                     // parsing data from controller
                     data.forEach((item) => {
                         item.date = new Date(Number(item.date));
-                        item.wip = Number(item.count);
+                        item.date.setHours(0, 0, 0, 0);
+                        item.wip = Number(item.average);
                         // clean-up
-                        delete item.count;
+                        delete item.average;
                     });
+                    const issueStatuses = _.chain(data).map((item) => item.issueStatus).unique().value();
+                    const issueTypes = _.chain(data).map((item) => item.issueType).unique().value();
 
-                    const [startDate, endDate] = d3.extent(data, (item) => item.date);
+                    const startDate = data[0].date;
+                    const endDate = data[data.length - 1].date;
 
-                    const ndx = dc.crossfilter(data);
+                    const ndx = crossfilter(data);
                     // Date as dimension
-                    const dimension = ndx.dimension((item) => item.date);
-                    // extract statuses into a array without repetition
-                    const issueStatuses = [...new Set(data.map((item) => item.status))];
-                    const dateGroup = dimension.group();
-                    dcUtils.groupChartDataByGroupKey(dateGroup, 'status', 'wip');
+                    const dateDimension = ndx.dimension((item) => item.date);
+                    const typeDimension = ndx.dimension((item) => item.issueType);
+
+                    const dateGroup = dateDimension.group();
+                    dcUtils.groupChartDataByGroupKey(dateGroup, 'issueStatus', 'wip');
                     return Object.freeze({
                         ndx: ndx,
-                        dimension: dimension,
+                        dateDimension: dateDimension,
+                        typeDimension: typeDimension,
                         startDate: startDate,
                         endDate: endDate,
                         issueStatuses: issueStatuses,
+                        issueTypes: issueTypes,
                         dateGroup: dateGroup
                     });
                 },
 
-                createIssueListFilter: function (ndx) {
+                createIssueTypeFilter: function () {
                     this.set('options.0.hidden', false);
-                    const div = this.$$('.config-slot-0');
-                    const typeDimension = ndx.dimension((item) => item.type);
-                    const list = dcUtils.createPaperListFilter(div, typeDimension, '-none-', 'All Issues');
-                    list.render();
-                    list.on('filtered', () => {
-                        const className = list.isAllSelected() ? '' : 'widget__button_highlighted';
-                        this.set('options.0.cssClasses', className);
+                    const div = this.$.issueTypes;
+                    ChartUtils.createIssueTypeFilter(div, this.plotData.issueTypes, () => {
+                        const checkboxes = this.querySelectorAll('input[name=issueType]');
+                        const selectedTypes = Array.from(checkboxes).filter((cb) => cb.checked).map((cb) => cb.value);
+                        this.plotData.typeDimension.filterFunction((issueType) => selectedTypes.includes(issueType));
+                        const toggleAllCheckbox = this.querySelector('input[name=allTypesToggle]');
+                        this.set('options.0.cssClasses', toggleAllCheckbox.checked ? '' : 'widget__button_highlighted');
+                        this.createChart();
                     });
-                    return list;
                 },
 
-                createChart: function (plotData) {
-                    const chart = dc.barChart('#wip');
-                    dcUtils.configureDefaultStackedChart(chart);
-                    dcUtils.insertPlotDataIntoChart(chart, plotData, 'issueStatuses');
-                    // present legends in reverse order
-                    dcUtils.reverseLegendOrder(chart);
-                    dcUtils.setupChartDateTicks(chart, plotData.startDate, plotData.endDate, 12);
-                    return chart;
+                createChart: function () {
+                    const dataGroupedByDate = this.plotData.dateGroup.all();
+                    const series = new Map();
+                    const oneWeekInMillis = 7 * 24 * 3600 * 1000;
+                    this.plotData.issueStatuses.forEach((status) => {
+                        series.set(status, {
+                            name: status,
+                            data: [],
+                            pointStart: this.plotData.startDate.getTime(),
+                            pointInterval: oneWeekInMillis
+                        });
+                    });
+                    dataGroupedByDate.forEach((item) => {
+                        this.plotData.issueStatuses.forEach((status) => {
+                            const wipAvg = Number(item.value[status].toFixed(5));
+                            series.get(status).data.push(wipAvg);
+                        });
+                    });
+                    const seriesPlot = [...series.values()];
+                    const builder = new WeeklyChartBuilder('wip')
+                        .withTitle('WIP')
+                        .withChartType('column')
+                        .withTooltipNumberOfDecimals(2)
+                        .withSeriesData(seriesPlot);
+                    this.chart = builder.build();
+                    dcDateRangeChartsService.registerHighchartsChart(this.chart.title.textStr, this.chart);
+                    dcDateRangeChartsService.applySelection(this.chart.title.textStr);
                 }
             });
         })();
-  </script> 
+    </script> 
 </dom-module>
