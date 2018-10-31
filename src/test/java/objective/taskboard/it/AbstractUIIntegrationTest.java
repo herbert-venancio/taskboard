@@ -20,8 +20,6 @@
  */
 package objective.taskboard.it;
 
-import static org.junit.Assert.assertFalse;
-
 import java.io.File;
 import java.util.ArrayList;
 
@@ -51,7 +49,7 @@ public abstract class AbstractUIIntegrationTest extends AbstractIntegrationTest 
 
     @Before
     public final void setupUIIntegrationTest() {
-        assertFalse("UI Integration Tests Aborted", ABORT_FLAG);
+        
         String driverPath = "drivers/"+ getOs() +"/marionette/64bit/geckodriver";
 
         if (System.getProperty("webdriver.gecko.driver") == null)
@@ -70,9 +68,9 @@ public abstract class AbstractUIIntegrationTest extends AbstractIntegrationTest 
         try {
             webDriver = new FirefoxDriver(options);
         } catch (WebDriverException ex) {
-            ABORT_FLAG = true;
-            throw new RuntimeException("*** Could not get a reference to FirefoxDriver ***" +
-                    "\nAborting all UI Integration Tests as it may leak multiple processes", ex);
+            System.err.println("UI Integration Tests Aborted: It wasn't possible to instantiate the WebDriver.");
+            System.err.println("You could check if Firefox AND geckodriver are up to date.");
+            System.exit(1);
         }
         webDriver.manage().window().setSize(new Dimension(1280,1080));
     }
