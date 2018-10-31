@@ -5,7 +5,7 @@ void testMariaDBMigration() {
     try {
         flyway.startMariaDBContainer()
         timeout(1) {
-            flyway.testMysqlFlywayInstall()
+            flyway.testMariaDBFlywayInstall()
         }
     } finally {
         flyway.destroyContainer()
@@ -43,7 +43,7 @@ class Flyway implements Serializable {
             -d mariadb:5.5'
         , returnStdout: true).trim()
         DATABASE_IP = extractIP()
-        waitMysqlAcceptConnections()
+        waitMariaDBAcceptConnections()
     }
 
     void startOracleContainer() {
@@ -64,7 +64,7 @@ class Flyway implements Serializable {
         script.echo "'docker stop' exit code: $dockerStop, 'docker rm' exit code: $dockerRm"
     }
 
-    void testMysqlFlywayInstall() {
+    void testMariaDBFlywayInstall() {
         // plugin acts strange in parallel
         script.lock(resource: 'flyway') {
             script.sh """
@@ -97,7 +97,7 @@ class Flyway implements Serializable {
         """, returnStdout: true).trim()
     }
 
-    private waitMysqlAcceptConnections() {
+    private waitMariaDBAcceptConnections() {
         script.echo "Waiting for database ready for connections..."
         try {
             script.timeout(1) {
@@ -105,7 +105,12 @@ class Flyway implements Serializable {
                         , returnStatus: true)
             }
         } catch (ex) {
-            // ignore
+            def logs = script.sh(script: "sudo docker logs $CONTAINER_ID", returnStdout: true)
+            script.echo """Timed-out waiting for MariaDB to accept connections
+*** Start of container logs ***
+$logs
+*** End of container logs ***
+"""
         }
     }
 
@@ -117,7 +122,12 @@ class Flyway implements Serializable {
                         , returnStatus: true)
             }
         } catch (ex) {
-            // ignore
+            def logs = script.sh(script: "sudo docker logs $CONTAINER_ID", returnStdout: true)
+            script.echo """Timed-out waiting for Oracle to accept connections
+*** Start of container logs ***
+$logs
+*** End of container logs ***
+"""
         }
     }
 
