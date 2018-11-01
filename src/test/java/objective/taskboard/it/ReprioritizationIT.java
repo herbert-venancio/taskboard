@@ -344,20 +344,20 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
             .boardStep("To Do")
             .assertIssueList(issuesStep);
 
-        mainPage.issue("TASKB-625")
+        mainPage.issue("TASKB-601")
             .select();
 
-        mainPage.assertSelectedIssues("TASKB-625");
+        mainPage.assertSelectedIssues("TASKB-601");
 
-        mainPage.issue("TASKB-627")
+        mainPage.issue("TASKB-572")
             .select();
 
-        mainPage.assertSelectedIssues("TASKB-625", "TASKB-627");
+        mainPage.assertSelectedIssues("TASKB-601", "TASKB-572");
 
-        mainPage.issue("TASKB-643")
+        mainPage.issue("TASKB-342")
             .click()
             .issueDetails()
-            .assertCardName("TASKB-643 yyy")
+            .assertCardName("TASKB-342 Alfa")
             .assertClassOfService("Standard")
             .closeDialog();
 
