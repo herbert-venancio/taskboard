@@ -1,0 +1,48 @@
+@import 'obj-ds/utils/all';
+
+.base-cluster-name-input {
+    margin-bottom: 16px;
+    font-size: 12px;
+}
+
+.body-with-scroll {
+    max-height: calc(100vh - 350px);
+    overflow-y: auto;
+    width: calc(100% + 16px);
+    padding-right: 16px;
+}
+
+obj-expansion-panel:last-of-type {
+    margin-bottom: 0px;
+}
+
+.obj-data-table.inline-input {
+    td {
+        height: auto;
+        padding-top: 8px;
+        padding-bottom: 8px;
+
+        &.input {
+            vertical-align: top;
+        }
+        obj-error-messages.has-messages {
+            margin-top: 2px;
+        }
+    }
+}
+
+.from-base-cluster {
+    font-size: 14px;
+}
+
+ button {
+     visibility: hidden;
+ }
+
+label {
+    font-family: "PT Sans", Verdana, Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    color: $obj-color-smoke;
+    margin-bottom: 10px;
+    display:inline-block
+}

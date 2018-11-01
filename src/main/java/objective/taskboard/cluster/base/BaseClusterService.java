@@ -85,12 +85,21 @@ public class BaseClusterService {
         return Optional.ofNullable(toBaseClusterDto(clusteUpdated));
     }
 
+    public BaseClusterDto getNewModel() {
+        List<BaseClusterItemDto> items =
+            issueTypeSizesProvider.get().stream()
+                .map(i-> new BaseClusterItemDto(i.getIssueType() , i.getSize(), 0.0, 0.0))
+                .collect(toList());
+
+        return new BaseClusterDto(null, "", items);
+    }
+
     private Optional<SizingClusterItem> findCorrespondingSizingClusterItem(final BaseClusterItemDto item, final List<SizingClusterItem> itemsSaved) {
         if (itemsSaved.isEmpty())
             return empty();
 
         return itemsSaved.stream()
-            .filter(i -> matchesSizingClusterItem(i, item.getSubtaskTypeName(), item.getSizing()))
+            .filter(i -> matchesSizingClusterItem(i, item.getIssueType(), item.getSizing()))
             .findFirst();
     }
 

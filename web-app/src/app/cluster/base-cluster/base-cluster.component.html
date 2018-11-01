@@ -1,0 +1,22 @@
+<section class="tb-page-content">
+
+    <h2 id="tb-page-title" class="obj-title-large title">
+        Base Cluster
+        <span class="separator"> &gt; </span>
+        {{ baseClusterId ? baseClusterName : 'new' }}
+    </h2>
+
+    <div class="content">
+        <tb-cluster [clusterItems]="clusterItems" [showBaseClusterName]="true" [(baseClusterName)]="baseClusterName"
+            (saveEvent)="save($event)" (errorEvent)="showErrorFormMessage($event)">
+        </tb-cluster>
+
+        <div class="footer">
+            <span class="small">(All values are in hours)</span>
+            <button id="tb-project-cluster-back-to-project" type="button" obj-button routerLink="/base-cluster-search">Back to Search</button>
+            <button id="tb-project-cluster-save" type="button" obj-button class="primary" (click)="callSaveOfClusterComponent()" [disabled]="this.canDeactivate()">Save</button>
+        </div>
+    </div>
+
+    <obj-snackbar id="tb-base-cluster-snackbar" [control]="snackbar"></obj-snackbar>
+</section>

@@ -1,0 +1,54 @@
+@import "../../../styles/obj-ds/utils/all";
+@import "../../../styles/obj-ds/misc";
+
+.actions-col {
+    width: 70px;
+}
+
+.body-with-scroll {
+    display: block;
+    max-height: 530px;
+    overflow-y: auto;
+}
+
+.content {
+    margin: 10px auto;
+    background-color:$obj-color-white;
+    border: 1px solid $obj-color-dark-snow;
+    border-radius: 4px;
+    padding: 24px;
+}
+
+.ellipsis {
+    @extend %_obj_text_ellipsis;
+}
+
+.editable-row {
+    cursor: pointer;
+}
+
+.edit-button {
+    color: $obj-color-blue;
+}
+
+.footer {
+    padding-top: 16px;
+    text-align: right;
+
+    > * {
+        margin-left: 10px;
+    }
+}
+
+.tb-page-content {
+    width: 900px;
+    padding: 24px;
+}
+
+.title {
+    margin-bottom: 16px;
+}
+
+table, .obj-empty {
+    margin-top: 16px;
+}

@@ -1,0 +1,58 @@
+<dom-module id="config-base-clusters">
+
+    <template>
+
+        <style>
+            paper-toolbar {
+                height: 40px;
+                transition: all 0.3s ease;
+            }
+
+            paper-toolbar:hover {
+                cursor: pointer;
+                background: #6273d1;
+                transition: all 0.3s ease;
+            }
+
+            paper-toolbar ::shadow #topBar {
+                height: 40px;
+            }
+
+            .config-item {
+                display: flex;
+                align-items: center;
+            }
+
+            .config-icon {
+                flex: 0 0 auto;
+            }
+
+            .config-title {
+                flex: 1;
+            }
+        </style>
+
+        <paper-material>
+            <paper-toolbar on-tap="openBaseClustersConfiguration">
+                <paper-material class="config-item flex layout horizontal" elevation=0>
+                    <iron-icon id="toggleIcon" class="config-icon icon-small"></iron-icon>
+                    <paper-material class="config-title" elevation=0>Base Clusters Configuration</paper-material>
+                </paper-material>
+            </paper-toolbar>
+        </paper-material>
+
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'config-base-clusters',
+
+                openBaseClustersConfiguration: () => {
+                    window.location = '/app/base-cluster-search';
+                }
+            });
+        })();
+    </script>
+
+</dom-module>

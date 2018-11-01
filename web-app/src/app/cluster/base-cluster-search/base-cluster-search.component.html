@@ -1,0 +1,47 @@
+<section class="tb-page-content">
+
+    <h2 id="tb-page-title" class="obj-title-large title">
+        Base Clusters
+    </h2>
+
+    <div class="content">
+
+        <obj-data-table-top title="Clusters">
+            <button id="create-blase-cluster" type="button" obj-flat-button routerLink="/base-cluster/new">
+                <obj-icon iconName="plus"></obj-icon>Add cluster
+            </button>
+        </obj-data-table-top>
+
+        <obj-label-field label="Filter">
+            <obj-search name="clusters-filter-by-name"
+                placeholder="Filter base clusters"
+                [(ngModel)]="filterClustersByFields">
+            </obj-search>
+        </obj-label-field>
+
+        <table id="tb-base-clusters-list" class="obj-data-table inline-input" *ngIf="baseClusters.length > 0">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th class="actions-col col-right"></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr class="editable-row"
+                    *ngFor="let cluster of baseClusters | objFilter: { keys: ['name'], searchFor: filterClustersByFields }"
+                    [routerLink]="['/base-cluster', cluster.id]">
+                    <td>{{ cluster.name }}</td>
+                    <td class="col-right">
+                        <obj-icon class="edit-button small" iconName="edit"></obj-icon>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="obj-empty" *ngIf="baseClusters.length === 0">No base clusters registered.</div>
+
+        <div class="footer">
+            <button type="button" obj-button (click)="backToHome()">Back to home</button>
+        </div>
+    </div>
+</section>

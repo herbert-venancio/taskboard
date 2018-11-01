@@ -78,12 +78,14 @@ public class ProjectClusterConfiguration extends ProjectAdvancedConfigurationTab
     }
 
     public ProjectClusterConfiguration assertSnackbarSavedIsOpen() {
-        snackbar.waitTitleToBe("Project cluster saved");
+        snackbar.waitTitleToBe("Success");
+        snackbar.waitDescriptionToBe("Project cluster saved");
         return this;
     }
 
     public ProjectClusterConfiguration assertSnackbarErrorIsOpen() {
-        snackbar.waitTitleToBe("Please review the form");
+        snackbar.waitTitleToBe("Error");
+        snackbar.waitDescriptionToBe("Please review the form");
         return this;
     }
 
