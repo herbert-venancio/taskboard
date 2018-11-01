@@ -33,6 +33,7 @@ import org.springframework.http.ResponseEntity;
 
 import objective.taskboard.data.Team;
 import objective.taskboard.domain.ProjectFilterConfiguration;
+import objective.taskboard.jira.AuthorizedProjectsService;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.client.JiraIssueTypeDto;
@@ -40,6 +41,7 @@ import objective.taskboard.project.ProjectDefaultTeamByIssueType;
 import objective.taskboard.project.config.ProjectDefaultTeamsController.ProjectTeamByIssueTypeDto;
 import objective.taskboard.project.config.ProjectDefaultTeamsController.ProjectDefaultTeamsDto;
 import objective.taskboard.project.config.ProjectDefaultTeamsController.ProjectDefaultTeamsUpdateDto;
+import objective.taskboard.team.UserTeamPermissionService;
 import objective.taskboard.team.UserTeamService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -64,14 +66,16 @@ public class ProjectDefaultTeamsControllerTest {
     private ProjectFilterConfiguration INEXISTENT_PROJECT = null;
 
     private ProjectService projectService = mock(ProjectService.class);
+    private AuthorizedProjectsService authorizedProjectsService = mock(AuthorizedProjectsService.class);
     private MetadataService metaDataService = mock(MetadataService.class);
     private UserTeamService userTeamService = mock(UserTeamService.class);
+    private UserTeamPermissionService userTeamPermissionService = mock(UserTeamPermissionService.class);
 
     private ProjectDefaultTeamsController subject;
 
     @Before
     public void setup() {
-        subject = new ProjectDefaultTeamsController(projectService,metaDataService, userTeamService);
+        subject = new ProjectDefaultTeamsController(projectService, authorizedProjectsService, metaDataService, userTeamService, userTeamPermissionService);
     }
 
     @Test
@@ -431,8 +435,8 @@ public class ProjectDefaultTeamsControllerTest {
     }
 
     private void setupProjectService() {
-        when(projectService.getTaskboardProject(any(), eq(PROJECT_ADMINISTRATION))).thenReturn(Optional.ofNullable(INEXISTENT_PROJECT));
-        when(projectService.getTaskboardProject(PROJECT_KEY, PROJECT_ADMINISTRATION)).thenReturn(Optional.ofNullable(PROJECT_MOCK));
+        when(authorizedProjectsService.getTaskboardProject(any(), eq(PROJECT_ADMINISTRATION))).thenReturn(Optional.ofNullable(INEXISTENT_PROJECT));
+        when(authorizedProjectsService.getTaskboardProject(PROJECT_KEY, PROJECT_ADMINISTRATION)).thenReturn(Optional.ofNullable(PROJECT_MOCK));
     }
 
     private void setupMetaDataService(Long... idsToRegister) {
@@ -456,7 +460,7 @@ public class ProjectDefaultTeamsControllerTest {
                 .map(id -> createTeam(id))
                 .collect(toSet());
 
-        when(userTeamService.getTeamsVisibleToLoggedInUser()).thenAnswer(i -> teams);
+        when(userTeamPermissionService.getTeamsVisibleToLoggedInUser()).thenAnswer(i -> teams);
 
         when(userTeamService.getTeamVisibleToLoggedInUserById(any())).thenAnswer(invocation -> {
             Long id = (Long) invocation.getArguments()[0];

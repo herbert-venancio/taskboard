@@ -37,7 +37,7 @@ import objective.taskboard.auth.authorizer.permission.Permission;
 import objective.taskboard.auth.authorizer.permission.TaskboardAdministrationPermission;
 import objective.taskboard.data.UserTeam.UserTeamRole;
 import objective.taskboard.repository.UserTeamCachedRepository;
-import objective.taskboard.team.UserTeamService;
+import objective.taskboard.team.UserTeamPermissionService;
 
 @Service
 class PermissionRepository {
@@ -48,7 +48,7 @@ class PermissionRepository {
     private Map<String, Permission> permissionsMap = new HashMap<>();
 
     @Autowired
-    private UserTeamService userTeamService;
+    private UserTeamPermissionService userTeamPermissionService;
 
     @PostConstruct
     private void generatePermissions() {
@@ -56,7 +56,7 @@ class PermissionRepository {
 
         List<Permission> permissions = asList(
                 taskboardAdministration,
-                new PerUserVisibilityOfUserPermission(USER_VISIBILITY, taskboardAdministration, userTeamService),
+                new PerUserVisibilityOfUserPermission(USER_VISIBILITY, taskboardAdministration, userTeamPermissionService),
                 new PerProjectPermission(PROJECT_ADMINISTRATION, PROJECT_ADMINISTRATORS),
                 new AnyProjectPermission(PROJECT_DASHBOARD_VIEW, PROJECT_ADMINISTRATORS, PROJECT_DEVELOPERS, PROJECT_KPI),
                 new PerProjectPermission(PROJECT_DASHBOARD_TACTICAL, PROJECT_ADMINISTRATORS, PROJECT_DEVELOPERS, PROJECT_KPI),

@@ -4,18 +4,21 @@ import java.util.List;
 import java.util.Optional;
 
 import objective.taskboard.auth.LoggedUserDetails;
-import objective.taskboard.team.UserTeamService;
+import objective.taskboard.team.UserTeamPermissionService;
 
 public class PerUserVisibilityOfUserPermission implements TargettedPermission {
 
     private final String name;
-    private final UserTeamService userTeamService;
+    private final UserTeamPermissionService userTeamPermissionService;
     private final TaskboardAdministrationPermission taskboardAdministrationPermission;
 
-    public PerUserVisibilityOfUserPermission(String name, TaskboardAdministrationPermission taskboardAdministrationPermission, UserTeamService userTeamService) {
+    public PerUserVisibilityOfUserPermission(
+            String name,
+            TaskboardAdministrationPermission taskboardAdministrationPermission,
+            UserTeamPermissionService userTeamPermissionService) {
         this.name = name;
         this.taskboardAdministrationPermission = taskboardAdministrationPermission;
-        this.userTeamService = userTeamService;
+        this.userTeamPermissionService = userTeamPermissionService;
     }
 
     @Override
@@ -33,7 +36,7 @@ public class PerUserVisibilityOfUserPermission implements TargettedPermission {
     }
 
     private boolean isThereSomeTeamInCommon(PermissionContext permissionContext) {
-        return userTeamService.getTeamsVisibleToLoggedInUser().stream()
+        return userTeamPermissionService.getTeamsVisibleToLoggedInUser().stream()
                 .flatMap(team -> team.getMembers().stream())
                 .anyMatch(userTeam -> userTeam.getUserName().equals(permissionContext.target));
     }

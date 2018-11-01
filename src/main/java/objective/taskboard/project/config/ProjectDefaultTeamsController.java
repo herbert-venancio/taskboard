@@ -28,10 +28,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import objective.taskboard.domain.ProjectFilterConfiguration;
+import objective.taskboard.jira.AuthorizedProjectsService;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.client.JiraIssueTypeDto;
 import objective.taskboard.project.ProjectDefaultTeamByIssueType;
+import objective.taskboard.team.UserTeamPermissionService;
 import objective.taskboard.team.UserTeamService;
 import objective.taskboard.utils.NameableDto;
 
@@ -40,22 +42,28 @@ import objective.taskboard.utils.NameableDto;
 public class ProjectDefaultTeamsController {
 
     private final ProjectService projectService;
+    private final AuthorizedProjectsService authorizedProjectsService;
     private final MetadataService metaDataService;
     private final UserTeamService userTeamService;
+    private final UserTeamPermissionService userTeamPermissionService;
 
     @Autowired
     public ProjectDefaultTeamsController(
             ProjectService projectService,
+            AuthorizedProjectsService authorizedProjectsService,
             MetadataService metaDataService,
-            UserTeamService userTeamService) {
+            UserTeamService userTeamService,
+            UserTeamPermissionService userTeamPermissionService) {
         this.projectService = projectService;
+        this.authorizedProjectsService = authorizedProjectsService;
         this.metaDataService = metaDataService;
         this.userTeamService = userTeamService;
+        this.userTeamPermissionService = userTeamPermissionService;
     }
 
     @GetMapping
     public ResponseEntity<?> getDefaultTeams(@PathVariable("projectKey") String projectKey) {
-        Optional<ProjectFilterConfiguration> projectOpt = projectService.getTaskboardProject(projectKey, PROJECT_ADMINISTRATION);
+        Optional<ProjectFilterConfiguration> projectOpt = authorizedProjectsService.getTaskboardProject(projectKey, PROJECT_ADMINISTRATION);
         if (!projectOpt.isPresent())
             return new ResponseEntity<>("Project \""+ projectKey +"\" not found.", NOT_FOUND);
 
@@ -78,7 +86,7 @@ public class ProjectDefaultTeamsController {
     }
 
     private List<NameableDto<Long>> getTeamsSortedByNameAsLoggedInUser() {
-        return userTeamService.getTeamsVisibleToLoggedInUser().stream()
+        return userTeamPermissionService.getTeamsVisibleToLoggedInUser().stream()
                 .map(team -> new NameableDto<Long>(team.getId(), team.getName()))
                 .sorted(Comparator.comparing(dto -> dto.name))
                 .collect(toList());
@@ -94,7 +102,7 @@ public class ProjectDefaultTeamsController {
     @PutMapping
     @Transactional
     public ResponseEntity<?> updateDefaultTeams(@PathVariable("projectKey") String projectKey, @RequestBody ProjectDefaultTeamsUpdateDto teamsUpdateDto) {
-        Optional<ProjectFilterConfiguration> projectOpt = projectService.getTaskboardProject(projectKey, PROJECT_ADMINISTRATION);
+        Optional<ProjectFilterConfiguration> projectOpt = authorizedProjectsService.getTaskboardProject(projectKey, PROJECT_ADMINISTRATION);
         if (!projectOpt.isPresent())
             return new ResponseEntity<>("Project \""+ projectKey +"\" not found.", NOT_FOUND);
 

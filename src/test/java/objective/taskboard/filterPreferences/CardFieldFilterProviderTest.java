@@ -24,7 +24,7 @@ import objective.taskboard.domain.Project;
 import objective.taskboard.issueTypeVisibility.IssueTypeVisibilityService;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.client.JiraIssueTypeDto;
-import objective.taskboard.team.UserTeamService;
+import objective.taskboard.team.UserTeamPermissionService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CardFieldFilterProviderTest {
@@ -33,7 +33,7 @@ public class CardFieldFilterProviderTest {
 
     @Before
     public void setup() {
-        subject = new CardFieldFilterProvider(getIssueTypeVisibilityServiceMock(), getUserTeamServiceMock(), getProjectServiceMock());
+        subject = new CardFieldFilterProvider(getIssueTypeVisibilityServiceMock(), getUserTeamPermissionServiceMock(), getProjectServiceMock());
     }
 
     @Test
@@ -72,14 +72,14 @@ public class CardFieldFilterProviderTest {
         return issueTypeVisibilityService;
     }
 
-    private UserTeamService getUserTeamServiceMock() {
-        UserTeamService userTeamService = mock(UserTeamService.class);
-        when(userTeamService.getTeamsVisibleToLoggedInUser()).thenReturn(Stream.of(
+    private UserTeamPermissionService getUserTeamPermissionServiceMock() {
+        UserTeamPermissionService userTeamPermissionService = mock(UserTeamPermissionService.class);
+        when(userTeamPermissionService.getTeamsVisibleToLoggedInUser()).thenReturn(Stream.of(
                 new Team("TEAM_1", null, null, asList()),
                 new Team("TEAM_2", null, null, asList()),
                 new Team("TEAM_3", null, null, asList())
                 ).collect(Collectors.toSet()));
-        return userTeamService;
+        return userTeamPermissionService;
     }
 
     private ProjectService getProjectServiceMock() {

@@ -23,6 +23,7 @@ import objective.taskboard.data.Team;
 import objective.taskboard.data.UserTeam;
 import objective.taskboard.data.UserTeam.UserTeamRole;
 import objective.taskboard.followup.FollowUpFacade;
+import objective.taskboard.jira.AuthorizedProjectsService;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.repository.TeamFilterConfigurationCachedRepository;
@@ -41,6 +42,9 @@ public class ProjectControllerTest {
     private ProjectService projectService;
 
     @Mock
+    private AuthorizedProjectsService authorizedProjectsService;
+
+    @Mock
     private FollowUpFacade followUpFacade;
 
     @Mock
@@ -53,7 +57,7 @@ public class ProjectControllerTest {
 
     @Before
     public void setup() {
-        controller = new ProjectController(teamRepository, teamFilterConfigurationRepository, projectService, followUpFacade, authorizer);
+        controller = new ProjectController(teamRepository, teamFilterConfigurationRepository, projectService, authorizedProjectsService, followUpFacade, authorizer);
 
         when(teamRepository.save(any(Team.class))).thenAnswer(invocation -> {
             Team team  = (Team) invocation.getArguments()[0];

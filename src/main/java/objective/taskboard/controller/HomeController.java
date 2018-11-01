@@ -1,5 +1,7 @@
 package objective.taskboard.controller;
 
+import static java.util.Comparator.comparing;
+
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
@@ -21,7 +23,7 @@ import objective.taskboard.jira.FieldMetadataService;
 import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.client.JiraFieldDataDto;
 import objective.taskboard.jira.properties.JiraProperties;
-import objective.taskboard.team.UserTeamService;
+import objective.taskboard.team.UserTeamPermissionService;
 
 @Controller
 public class HomeController {
@@ -45,7 +47,7 @@ public class HomeController {
     private FieldMetadataService fieldMetadataService;
 
     @Autowired
-    private UserTeamService userTeamService;
+    private UserTeamPermissionService userTeamPermissionService;
 
     @Autowired
     private FollowUpFacade followupFacade;
@@ -64,11 +66,11 @@ public class HomeController {
         model.addAttribute("permissions", serialize(authorizer.getPermissions()));
         model.addAttribute("fieldNames", getFieldNames());
 
-        Set<Team> teamsVisibleToUser = userTeamService.getTeamsVisibleToLoggedInUser();
+        Set<Team> teamsVisibleToUser = userTeamPermissionService.getTeamsVisibleToLoggedInUser();
         model.addAttribute("teams", serialize(
                 teamsVisibleToUser.stream()
                     .map(t->new TeamControllerData(t))
-                    .sorted((a,b)->a.teamName.compareTo(b.teamName))
+                    .sorted(comparing(a -> a.teamName))
                     .collect(Collectors.toList())));
 
         model.addAttribute("hasFollowupTemplateAvailable", followupFacade.getTemplatesForCurrentUser().size() > 0);

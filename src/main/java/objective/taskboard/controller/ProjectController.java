@@ -48,6 +48,7 @@ import objective.taskboard.domain.Project;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.domain.TeamFilterConfiguration;
 import objective.taskboard.followup.FollowUpFacade;
+import objective.taskboard.jira.AuthorizedProjectsService;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.repository.TeamFilterConfigurationCachedRepository;
@@ -62,6 +63,8 @@ public class ProjectController {
 
     private final ProjectService projectService;
 
+    private final AuthorizedProjectsService authorizedProjectsService;
+
     private final FollowUpFacade followUpFacade;
 
     private final Authorizer authorizer;
@@ -71,11 +74,13 @@ public class ProjectController {
         TeamCachedRepository teamRepository,
         TeamFilterConfigurationCachedRepository teamFilterConfigurationRepository,
         ProjectService projectService,
+        AuthorizedProjectsService authorizedProjectsService,
         FollowUpFacade followUpFacade,
         Authorizer authorizer) {
         this.teamRepository = teamRepository;
         this.teamFilterConfigurationRepository = teamFilterConfigurationRepository;
         this.projectService = projectService;
+        this.authorizedProjectsService = authorizedProjectsService;
         this.followUpFacade = followUpFacade;
         this.authorizer = authorizer;
     }
@@ -89,7 +94,7 @@ public class ProjectController {
 
     @RequestMapping("/dashboard")
     public List<ProjectData> getProjectsVisibleOnDashboard() {
-        return projectService.getTaskboardProjects(projectService::isNonArchivedAndUserHasAccess, PROJECT_DASHBOARD_TACTICAL, PROJECT_DASHBOARD_OPERATIONAL).stream()
+        return authorizedProjectsService.getTaskboardProjects(projectService::isNonArchivedAndUserHasAccess, PROJECT_DASHBOARD_TACTICAL, PROJECT_DASHBOARD_OPERATIONAL).stream()
                 .map(this::generateProjectData)
                 .collect(toList());
     }

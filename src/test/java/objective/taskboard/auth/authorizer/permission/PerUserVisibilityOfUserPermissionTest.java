@@ -22,7 +22,7 @@ import objective.taskboard.auth.LoggedUserDetails;
 import objective.taskboard.auth.authorizer.permission.PermissionTestUtils.PermissionTest;
 import objective.taskboard.data.Team;
 import objective.taskboard.data.UserTeam;
-import objective.taskboard.team.UserTeamService;
+import objective.taskboard.team.UserTeamPermissionService;
 
 public class PerUserVisibilityOfUserPermissionTest implements PermissionTest {
 
@@ -116,9 +116,9 @@ public class PerUserVisibilityOfUserPermissionTest implements PermissionTest {
     private static class DSLBuilder {
 
         private TaskboardAdministrationPermission tbAdminPermission = mock(TaskboardAdministrationPermission.class);
-        private UserTeamService userTeamService = mock(UserTeamService.class);
+        private UserTeamPermissionService userTeamPermissionService = mock(UserTeamPermissionService.class);
 
-        private String permissionName = "";
+        private final String permissionName;
 
         private DSLBuilder(String permissionName) {
             this.permissionName = permissionName;
@@ -131,12 +131,12 @@ public class PerUserVisibilityOfUserPermissionTest implements PermissionTest {
 
         public DSLBuilder withVisibleTeams(Team... teams) {
             Set<Team> visibleTeams = stream(teams).collect(toSet());
-            when(userTeamService.getTeamsVisibleToLoggedInUser()).thenReturn(visibleTeams);
+            when(userTeamPermissionService.getTeamsVisibleToLoggedInUser()).thenReturn(visibleTeams);
             return this;
         }
 
         public PerUserVisibilityOfUserPermission build() {
-            return new PerUserVisibilityOfUserPermission(permissionName, tbAdminPermission, userTeamService);
+            return new PerUserVisibilityOfUserPermission(permissionName, tbAdminPermission, userTeamPermissionService);
         }
 
     }
