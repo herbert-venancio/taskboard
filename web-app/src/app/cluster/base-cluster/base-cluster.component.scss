@@ -1,6 +1,11 @@
 @import "../../../styles/obj-ds/utils/all";
 @import "../../../styles/obj-ds/misc";
 
+.base-cluster-name-input {
+    margin-bottom: 10px;
+    font-size: 12px;
+}
+
 .content {
     margin: 10px auto;
     background-color: $obj-color-white;
@@ -30,6 +35,14 @@ input {
 
 obj-expansion-panel:last-of-type {
     margin-bottom: 0px;
+}
+
+label {
+    font-family: "PT Sans", Verdana, Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    color: $obj-color-smoke;
+    margin-bottom: 10px;
+    display:inline-block
 }
 
 .small {

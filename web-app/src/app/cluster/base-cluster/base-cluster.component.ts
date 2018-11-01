@@ -1,10 +1,12 @@
 import {
     Component,
     OnInit,
-    ViewChild
+    ViewChild,
+    ElementRef
 } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
+import { NgForm } from '@angular/forms';
 
 import { PageSpinner } from 'app/core/page-spinner/page-spinner';
 import { SnackbarControl, SnackbarLevel } from 'app/shared/obj-ds/snackbar/snackbar-control';
@@ -28,9 +30,11 @@ export class BaseClusterComponent extends ComponentLeaveConfirmation implements 
     baseClusterName: string;
 
     snackbar = new SnackbarControl();
+    @ViewChild('baseClusterForm') baseClusterForm: NgForm;
     @ViewChild(TbClusterComponent) clusterComponent: TbClusterComponent;
 
     clusterItems: ClusterItemDto[] = [];
+    isBaseClusterFormVerified: boolean = false;
 
     constructor(
         private title: Title,
@@ -49,17 +53,32 @@ export class BaseClusterComponent extends ComponentLeaveConfirmation implements 
     }
 
     canDeactivate(): boolean {
-        return this.clusterComponent.isPristine();
+        return this.clusterComponent.isPristine() && this.baseClusterForm.form.pristine;
+    }
+
+    saveBaseCluster() {
+         if (this.isBaseClusterFormVerified)
+             return;
+
+        this.callSaveOfClusterComponent();
+    }
+
+    emitBaseClusterFormSubmit() {
+        (this.baseClusterForm as any).submitted = true;
+        this.baseClusterForm.ngSubmit.emit();
     }
 
     save(itemsToUpdate: any) {
         try {
             this.spinner.show();
 
+            if (this.baseClusterForm.invalid) {
+                this.handleError('Please review the form');
+                return;
+            }
             const baseClusterDto = new BaseClusterDto();
             baseClusterDto.id = this.baseClusterId;
             baseClusterDto.name = this.baseClusterName;
-
             baseClusterDto.items = itemsToUpdate;
 
             if (this.baseClusterId)
@@ -71,6 +90,7 @@ export class BaseClusterComponent extends ComponentLeaveConfirmation implements 
             this.showMessage('Error', error, SnackbarLevel.Error);
         } finally {
             this.spinner.hide();
+            this.isBaseClusterFormVerified = true;
         }
     }
 
@@ -78,8 +98,13 @@ export class BaseClusterComponent extends ComponentLeaveConfirmation implements 
         this.clusterComponent.save();
     }
 
-    showErrorFormMessage(message: string) {
+    handleError(message: string) {
+        if (!this.isBaseClusterFormVerified) {
+            this.isBaseClusterFormVerified = true;
+            this.emitBaseClusterFormSubmit();
+        }
         this.showMessage('Error', message, SnackbarLevel.Error);
+        this.isBaseClusterFormVerified = false;
     }
 
     private loadCluster(baseClusterId: number) {
@@ -113,6 +138,7 @@ export class BaseClusterComponent extends ComponentLeaveConfirmation implements 
     }
 
     private markAsPristine(): any {
+        this.baseClusterForm.form.markAsPristine();
         this.clusterComponent.markAsPristine();
     }
 
@@ -122,7 +148,7 @@ export class BaseClusterComponent extends ComponentLeaveConfirmation implements 
                 this.setCurrentBaseCluster(baseCluster);
                 this.showCreatedMessageIfNewBaseCluster();
                 },
-                error => this.showMessage('Error', 'Error to find the base cluster. Error: ' + JSON.stringify(error), SnackbarLevel.Error)
+                error => this.showMessage('Error', error.error, SnackbarLevel.Error)
             );
     }
 
