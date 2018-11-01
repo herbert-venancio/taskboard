@@ -324,24 +324,15 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
     public void whenSelectTwoCardsInSequenceAndDoASingleClickOnThird_shouldOpenIssueDetailsOfThirdAndRemoveSelection() {
         String[] issuesStep = new String[]
             {
-                "TASKB-680",
-                "TASKB-625",
-                "TASKB-627",
-                "TASKB-643",
-                "TASKB-644",
-                "TASKB-659",
-                "TASKB-661",
-                "TASKB-663",
-                "TASKB-664",
-                "TASKB-681",
-                "TASKB-682",
-                "TASKB-683",
-                "TASKB-684",
-                "TASKB-686"
+                "TASKB-601",
+                "TASKB-572",
+                "TASKB-342",
+                "TASKB-273",
+                "TASKB-646"
              };
 
         mainPage.lane("Operational")
-            .boardStep("To Do")
+            .boardStep("Doing")
             .assertIssueList(issuesStep);
 
         mainPage.issue("TASKB-601")
