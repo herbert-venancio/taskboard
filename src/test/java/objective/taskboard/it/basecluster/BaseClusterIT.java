@@ -24,7 +24,7 @@ public class BaseClusterIT extends AbstractUIWithCoverageIntegrationTest {
     }
 
     @Test
-    public void acessBaseClusterSearchAnd_baseClusterListShouldHasItems() {
+    public void accessBaseClusterSearchAnd_baseClusterListShouldHasItems() {
         MainPage mainPage = LoginUtils.doLoginAsAdmin(webDriver);
 
         mainPage

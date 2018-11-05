@@ -7,15 +7,51 @@
     </h2>
 
     <div class="content">
-        <tb-cluster [clusterItems]="clusterItems" [showBaseClusterName]="true" [(baseClusterName)]="baseClusterName"
-            (saveEvent)="save($event)" (errorEvent)="showErrorFormMessage($event)">
+
+        <form #baseClusterForm="ngForm" (ngSubmit)="saveBaseCluster()" autocomplete="off" tbLeaveConfirmation>
+            <label>Name</label>
+
+            <input class="base-cluster-name-input"
+                type="text"
+                name="baseClusterName"
+                objTextField
+                [(ngModel)]="baseClusterName"
+                #clusterInput
+                #name="objTextField"
+                required
+                tbNotEmpty/>
+
+            <obj-error-messages [for]="name">
+                <obj-error-message error="notEmpty">Name is required.</obj-error-message>
+            </obj-error-messages>
+
+            <label>Items</label>
+
+        </form>
+
+        <tb-cluster [clusterItems]="clusterItems"
+            (saveEvent)="save($event)" (errorEvent)="handleError($event)">
         </tb-cluster>
 
         <div class="footer">
             <span class="small">(All values are in hours)</span>
-            <button id="tb-project-cluster-back-to-project" type="button" obj-button routerLink="/base-cluster-search">Back to Search</button>
-            <button id="tb-project-cluster-save" type="button" obj-button class="primary" (click)="callSaveOfClusterComponent()" [disabled]="this.canDeactivate()">Save</button>
+
+            <button id="tb-cluster-back-to-project"
+                type="button"
+                obj-button
+                routerLink="/base-cluster-search">
+                Back to Search
+            </button>
+
+            <button id="tb-cluster-save"
+                type="button"
+                obj-button class="primary"
+                (click)="emitBaseClusterFormSubmit()"
+                [disabled]="this.canDeactivate()">
+                Save
+            </button>
         </div>
+
     </div>
 
     <obj-snackbar id="tb-base-cluster-snackbar" [control]="snackbar"></obj-snackbar>

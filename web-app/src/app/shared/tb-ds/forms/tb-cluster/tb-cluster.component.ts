@@ -24,22 +24,6 @@ import { ExpansionPanelComponent } from 'app/shared/obj-ds/expansion-panel/expan
 })
 export class TbClusterComponent implements OnChanges {
     @Input() clusterItems: ClusterItemDto[] = [];
-    @Input() showBaseClusterName: boolean = false;
-
-    baseClusterNameValue: string;
-
-    @Output()
-    baseClusterNameChange = new EventEmitter<string>();
-
-    @Input()
-    get baseClusterName() {
-        return this.baseClusterNameValue;
-    }
-
-    set baseClusterName(value: string) {
-        this.baseClusterNameValue = value;
-        this.baseClusterNameChange.emit(this.baseClusterNameValue);
-    }
 
     @Output() saveEvent = new EventEmitter();
     @Output() errorEvent = new EventEmitter();

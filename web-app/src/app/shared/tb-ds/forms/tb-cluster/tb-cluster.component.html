@@ -1,22 +1,4 @@
 <form id="tbClusterForm" #tbClusterForm="ngForm" (ngSubmit)="sendSaveEvent()" autocomplete="off" tbLeaveConfirmation>
-    <div *ngIf="showBaseClusterName">
-        <label>Name</label>
-
-        <input type="text"
-            name="baseClusterName"
-            objTextField
-            [(ngModel)]="baseClusterName"
-            #clusterInput
-            #name="objTextField"
-            required
-            tbNotEmpty/>
-
-        <obj-error-messages [for]="name">
-            <obj-error-message error="notEmpty">Name is required.</obj-error-message>
-        </obj-error-messages>
-
-        <label>Items</label>
-    </div>
 
     <div class="body-with-scroll">
 
