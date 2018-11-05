@@ -2,7 +2,9 @@ package objective.taskboard.followup.kpi.transformer;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
+import java.util.Optional;
 
+import objective.taskboard.followup.kpi.IssueTypeKpi;
 import objective.taskboard.followup.kpi.KpiLevel;
 
 public interface IssueKpiDataItemAdapter {
@@ -11,8 +13,8 @@ public interface IssueKpiDataItemAdapter {
 
     String getIssueKey();
 
-    String getIssueType();
+    Optional<IssueTypeKpi> getIssueType();
 
     KpiLevel getLevel();
-
+    
 }

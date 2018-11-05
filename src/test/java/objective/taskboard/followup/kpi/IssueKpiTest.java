@@ -1,15 +1,23 @@
 package objective.taskboard.followup.kpi;
 
-import static objective.taskboard.followup.kpi.StatusTransitionBuilder.DefaultStatus.DOING;
-import static objective.taskboard.followup.kpi.StatusTransitionBuilder.DefaultStatus.DONE;
-import static objective.taskboard.followup.kpi.StatusTransitionBuilder.DefaultStatus.TODO;
 import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
+import java.util.List;
+
 import org.junit.Test;
 
+import objective.taskboard.data.Worklog;
+import objective.taskboard.followup.kpi.enviroment.IssueKpiBuilder;
+import objective.taskboard.followup.kpi.enviroment.StatusTransitionBuilder.DefaultStatus;
+import objective.taskboard.utils.DateTimeUtils;
+
 public class IssueKpiTest {
+    
+    private static DefaultStatus TODO = new DefaultStatus("To Do",false);
+    private static DefaultStatus DOING = new DefaultStatus("Doing",true);
+    private static DefaultStatus DONE = new DefaultStatus("Done",false);
     
     @Test
     public void checkStatusOnDay_happyDay() {
@@ -40,7 +48,6 @@ public class IssueKpiTest {
     
     @Test
     public void checkStatusOnDay_emptyTransitions() {
-        
         IssueKpi issue = builder()
                 .addTransition(TODO,"2020-01-01")
                 .addTransition(DOING)
@@ -164,7 +171,105 @@ public class IssueKpiTest {
         assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-03"), "Doing","Done"),is (false));
     }
     
+    @Test
+    public void getWorklogFromChildren() {
+        Worklog worklog = new Worklog("a.developer", DateTimeUtils.parseStringToDate("2020-010-2"), 300);
+        
+        IssueKpi issue = builder()
+                .addTransition(TODO,"2020-01-01")
+                .addTransition(DOING,"2020-01-02")
+                .addTransition(DONE,"2020-01-03")
+                .addWorklog(worklog)
+                .build();
+        
+        IssueKpi fatherIssue = new IssueKpiBuilder("PROJ-02", new IssueTypeKpi(2l,"Feature"), KpiLevel.FEATURES )
+                .addTransition(TODO,"2020-01-01")
+                .addTransition(DOING,"2020-01-02")
+                .addTransition(DONE,"2020-01-03")
+                .addChild(issue)
+                .build();
+        List<Worklog> childrenWorklog = fatherIssue.getWorklogFromChildren(1l);
+        
+        assertThat(childrenWorklog.size(),is(1));
+        assertThat(childrenWorklog.get(0),is(worklog));
+        assertThat(issue.getEffort("Doing"),is(300l));
+    }
+    
+    @Test
+    public void wrongConfiguration_dontGetWorklogFromChildren() {
+        Worklog worklog = new Worklog("a.developer", DateTimeUtils.parseStringToDate("2020-01-02"), 300);
+        
+        IssueKpi issue = new IssueKpiBuilder("PROJ-01", null, KpiLevel.SUBTASKS)
+                .addTransition(TODO,"2020-01-01")
+                .addTransition(DOING,"2020-01-02")
+                .addTransition(DONE,"2020-01-03")
+                .addWorklog(worklog)
+                .build();
+        
+        IssueKpi fatherIssue = new IssueKpiBuilder("PROJ-02", new IssueTypeKpi(2l,"Feature"), KpiLevel.FEATURES )
+                .addTransition(TODO,"2020-01-01")
+                .addTransition(DOING,"2020-01-02")
+                .addTransition(DONE,"2020-01-03")
+                .addChild(issue)
+                .build();
+        List<Worklog> childrenWorklog = fatherIssue.getWorklogFromChildren(1l);
+        
+        assertThat(childrenWorklog.size(),is(0));
+    }
+    
+    @Test
+    public void getWorklogFromChildrenStatus_happyDay() {
+        Worklog worklog = new Worklog("a.developer", DateTimeUtils.parseStringToDate("2020-01-02"), 300);
+        
+        IssueKpi issue = builder()
+                .addTransition(TODO,"2020-01-01")
+                .addTransition(DOING,"2020-01-02")
+                .addTransition(DONE,"2020-01-03")
+                .addWorklog(worklog)
+                .build();
+        
+        IssueKpi fatherIssue = new IssueKpiBuilder("PROJ-02", new IssueTypeKpi(2l,"Feature"), KpiLevel.FEATURES )
+                .addTransition(TODO,"2020-01-01")
+                .addTransition(DOING,"2020-01-02")
+                .addTransition(DONE,"2020-01-03")
+                .addChild(issue)
+                .build();
+        List<Worklog> childrenWorklog = fatherIssue.getWorklogFromChildrenStatus("To Do");
+        assertThat(childrenWorklog.size(),is(0));
+        
+        childrenWorklog = fatherIssue.getWorklogFromChildrenStatus("Doing");
+        assertThat(childrenWorklog.size(),is(1));
+        assertThat(childrenWorklog.get(0),is(worklog));
+        assertThat(issue.getEffort("Doing"),is(300l));
+        
+    }
+    
+    @Test
+    public void wrongConfiguration_dontGetWorklogFromChildrenStatus() {
+        Worklog worklog = new Worklog("a.developer", DateTimeUtils.parseStringToDate("2020-01-02"), 300);
+        
+        IssueKpi issue = builder()
+                .addTransition(TODO,"2020-01-01")
+                .addTransition(DOING,"2020-01-02")
+                .addTransition(DONE,"2020-01-03")
+                .addWorklog(worklog)
+                .build();
+        
+        IssueKpi fatherIssue = new IssueKpiBuilder("PROJ-02", new IssueTypeKpi(2l,"Feature"), KpiLevel.FEATURES )
+                .addTransition(TODO,"2020-01-01")
+                .addTransition(DOING,"2020-01-02")
+                .addTransition(DONE,"2020-01-03")
+                .addChild(issue)
+                .build();
+        List<Worklog> childrenWorklog = fatherIssue.getWorklogFromChildrenStatus("To Do");
+        assertThat(childrenWorklog.size(),is(0));
+        
+        childrenWorklog = fatherIssue.getWorklogFromChildrenStatus("Inexistent");
+        assertThat(childrenWorklog.size(),is(0));
+                
+    }
+    
     private IssueKpiBuilder builder() {
-        return new IssueKpiBuilder("PROJ-01", "Subtask", KpiLevel.SUBTASKS);
+        return new IssueKpiBuilder("PROJ-01", new IssueTypeKpi(1l,"Subtask"), KpiLevel.SUBTASKS);
     }
 }

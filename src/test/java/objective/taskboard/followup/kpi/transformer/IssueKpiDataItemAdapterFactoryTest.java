@@ -26,12 +26,12 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import objective.taskboard.data.Issue;
 import objective.taskboard.followup.AnalyticsTransitionsDataRow;
 import objective.taskboard.followup.AnalyticsTransitionsDataSet;
 import objective.taskboard.followup.FollowUpHelper;
 import objective.taskboard.followup.IssueTransitionService;
 import objective.taskboard.followup.kpi.KpiLevel;
+import objective.taskboard.followup.kpi.enviroment.KPIEnvironmentBuilder;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.client.JiraIssueTypeDto;
 import objective.taskboard.jira.properties.JiraProperties;
@@ -42,9 +42,6 @@ import objective.taskboard.utils.DateTimeUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class IssueKpiDataItemAdapterFactoryTest {
-    private static final long STATUS_DOING = 3l;
-    private static final long STATUS_DONE = 4l;
-    private static final String[] STATUSES = new String[] {"Done","Doing","To Do","Open"};
 
     private static final int DEMAND_TRANSITIONS_DATASET_INDEX = 0;
 
@@ -68,37 +65,42 @@ public class IssueKpiDataItemAdapterFactoryTest {
     
     @Test
     public void convertIssues() { 
-        Issue i1 = new IssueMockBuilder(STATUSES)
-                .withKey("I-1")
-                .withProjectKey("PROJ")
-                .withType("Dev")
-                .withLevel(SUBTASKS)
-                .withStatusId(STATUS_DOING)
-                .addTransition("Open", "2020-01-01")
-                .addTransition("To Do", "2020-01-02")
-                .addTransition("Doing", "2020-01-03")
-                .setIssueTransitionService(transitionService) //TODO check best place
-                .mockIssue();
-        Issue i2 = new IssueMockBuilder(STATUSES)
-                .withKey("I-2")
-                .withProjectKey("PROJ")
-                .withType("Alpha")
-                .withLevel(SUBTASKS)
-                .withStatusId(STATUS_DONE)
-                .addTransition("Open", "2020-01-01")
-                .addTransition("To Do", "2020-01-02")
-                .addTransition("Doing", "2020-01-03")
-                .addTransition("Done", "2020-01-04")
-                .setIssueTransitionService(transitionService)
-                .mockIssue();
         
-        List<IssueKpiDataItemAdapter> items = subject.getItems(Arrays.asList(i1,i2), ZoneId.systemDefault());
+        KPIEnvironmentBuilder builder = new KPIEnvironmentBuilder(transitionService);
+        
+        builder.addStatus(1l, "Open", false)
+                .addStatus(2l, "To Do", false)
+                .addStatus(3l, "Doing", true)
+                .addStatus(4l, "Done", false);
+        
+        builder.addSubtaskType(1l, "Dev")
+                .addSubtaskType(2l, "Alpha");
+        
+         builder.withMockingIssue("I-1", "Dev",KpiLevel.SUBTASKS)
+                    .setProjectKeyToCurrentIssue("PROJ")
+                    .setCurrentStatusToCurrentIssue("Doing")
+                    .addTransition("Open", "2020-01-01")
+                    .addTransition("To Do", "2020-01-02")
+                    .addTransition("Doing", "2020-01-03")
+                    .addTransition("Done");
+        
+        builder.withMockingIssue("I-2", "Alpha",KpiLevel.SUBTASKS)
+                .setProjectKeyToCurrentIssue("PROJ")
+                .setCurrentStatusToCurrentIssue("Done")
+                .addTransition("Open", "2020-01-01")
+                .addTransition("To Do", "2020-01-02")
+                .addTransition("Doing", "2020-01-03")
+                .addTransition("Done", "2020-01-04");
+        
+        List<IssueKpiDataItemAdapter> items = subject.getItems(builder.mockAllIssues(), ZoneId.systemDefault());
         assertThat(items.size(),is(2));
         IssueKpiDataItemAdapter issue = items.get(0);
         assertThat(issue.getIssueKey(),is("I-1"));
-        assertThat(issue.getIssueType(),is("Dev"));
         assertThat(issue.getLevel(),is(SUBTASKS));
         
+        String devType = issue.getIssueType().map(t -> t.getType()).orElse("Unmapped");
+        assertThat(devType,is("Dev"));
+                
         Map<String, ZonedDateTime> transitions = issue.getTransitions();
         assertThat(transitions.keySet().toString(),is("[Done, Doing, To Do, Open]"));
         assertThat(transitions.get("Open"),is(parseDateTime("2020-01-01")));
@@ -109,8 +111,11 @@ public class IssueKpiDataItemAdapterFactoryTest {
         
         IssueKpiDataItemAdapter issue2 = items.get(1);
         assertThat(issue2.getIssueKey(),is("I-2"));
-        assertThat(issue2.getIssueType(),is("Alpha"));
         assertThat(issue2.getLevel(),is(SUBTASKS));
+        
+        String alphaType = issue2.getIssueType().map(t -> t.getType()).orElse("Unmapped");
+        assertThat(alphaType,is("Alpha"));
+        
         
         Map<String, ZonedDateTime> transitions2 = issue2.getTransitions();
         assertThat(transitions2.keySet().toString(),is("[Done, Doing, To Do, Open]"));
@@ -130,8 +135,10 @@ public class IssueKpiDataItemAdapterFactoryTest {
         IssueKpiDataItemAdapter os = demands.get(1);
         
         assertThat(demand.getIssueKey(),is("I-1"));
-        assertThat(demand.getIssueType(),is("Demand"));
         assertThat(demand.getLevel(),is(DEMAND));
+        
+        String type = demand.getIssueType().map(t -> t.getType()).orElse("Unmapped");
+        assertThat(type,is("Demand"));
         
         Map<String, ZonedDateTime> transitionsDemand = demand.getTransitions();
         assertThat(transitionsDemand.keySet().toString(),is("[Done, Doing, To Do]"));
@@ -141,8 +148,10 @@ public class IssueKpiDataItemAdapterFactoryTest {
         
         
         assertThat(os.getIssueKey(),is("I-4"));
-        assertThat(os.getIssueType(),is("OS"));
         assertThat(os.getLevel(),is(FEATURES));
+        
+        type = os.getIssueType().map(t -> t.getType()).orElse("Unmapped");
+        assertThat(type,is("OS"));
         
         Map<String, ZonedDateTime> transitionsOS = os.getTransitions();
         assertThat(transitionsOS.keySet().toString(),is("[Done, Doing, To Do]"));
@@ -188,10 +197,11 @@ public class IssueKpiDataItemAdapterFactoryTest {
     }
     
     private void setupPriorityOrder() {
+        String[] statuses = new String[] {"Done","Doing","To Do","Open"};
         StatusPriorityOrder statusPriorityOrder = new StatusPriorityOrder();
-        statusPriorityOrder.setDemands(STATUSES);
-        statusPriorityOrder.setTasks(STATUSES);
-        statusPriorityOrder.setSubtasks(STATUSES);
+        statusPriorityOrder.setDemands(statuses);
+        statusPriorityOrder.setTasks(statuses);
+        statusPriorityOrder.setSubtasks(statuses);
         when(jiraProperties.getStatusPriorityOrder()).thenReturn(statusPriorityOrder);
     }
     

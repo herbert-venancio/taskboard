@@ -20,9 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -43,9 +41,6 @@ public class WipKPIDataProviderTest {
     private static final String LEVEL_FEATURES = "Feature";
     private static final String LEVEL_SUBTASKS = "Subtask";
     private static final ZoneId ZONE_ID = ZoneId.systemDefault();
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     @Mock
     private FollowUpDataRepository dataRepository;

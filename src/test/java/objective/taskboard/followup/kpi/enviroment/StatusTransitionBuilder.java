@@ -1,32 +1,23 @@
-package objective.taskboard.followup.kpi;
+package objective.taskboard.followup.kpi.enviroment;
 
 import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
 
 import java.time.ZonedDateTime;
-import java.util.EnumMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Optional;
 
-public class StatusTransitionBuilder {
-    
-    public enum DefaultStatus {
-            OPEN("Open"), 
-            TODO("To Do"), 
-            DOING("Doing"), 
-            TO_REVIEW("To Review"), 
-            REVIEW("Review"), 
-            DONE("Done");
-            
-            private String name;
+import org.hamcrest.Matchers;
+import org.junit.Assert;
 
-            private DefaultStatus(String name) {
-                this.name = name;
-            }
-        
-    };
-    
+import objective.taskboard.followup.kpi.DatedStatusTransition;
+import objective.taskboard.followup.kpi.StatusTransition;
+
+public class StatusTransitionBuilder {
+     
     private ChainDto firstChainDto = new ChainDto();
-    private Map<DefaultStatus,StatusTransition> transitions = new EnumMap<>(DefaultStatus.class);
+    private Map<DefaultStatus,StatusTransition> transitions = new LinkedHashMap<>();
     
     public StatusTransition getTransition(DefaultStatus status) {
         if(!transitions.containsKey(status))
@@ -44,6 +35,54 @@ public class StatusTransitionBuilder {
         ChainDto chainDto = new ChainDto(transition, date, firstChainDto);
         addChain(chainDto);
         return this;
+    }
+    
+    public Map<String,ZonedDateTime> getReversedTransitions() {
+        LinkedList<ChainDto> reversedOrder = new LinkedList<>();
+        
+        
+        ChainDto currentIndex = firstChainDto;
+        while(currentIndex.next.isPresent()) {
+           reversedOrder.push(currentIndex);
+           currentIndex = currentIndex.next.get();
+        }
+        
+        Map<String,ZonedDateTime> transitions = new LinkedHashMap<>();
+        for (ChainDto chainDto : reversedOrder) {
+            transitions.put(chainDto.transition.name, chainDto.date.orElse(null));
+        }
+        
+        return transitions;
+    }
+    
+    public Long lastTransitionStatusId() {
+        
+        ChainDto currentIndex = firstChainDto;
+        Optional<ChainDto> lastOne = Optional.empty();
+        while(currentIndex.next.isPresent()) {
+           
+           if(currentIndex.date.isPresent()) {
+               ZonedDateTime currentDate = currentIndex.date.get();
+               boolean isLastOne = lastOne.map( l-> !l.date.get().isAfter(currentDate)).orElse(true);
+               if(isLastOne)
+                   lastOne = Optional.of(currentIndex);
+           }
+           currentIndex = currentIndex.next.get();
+        }
+        
+        return lastOne.map(l -> l.transition.id).orElse(0l);
+    }
+    
+    public String[] getReversedStatusOrder() {
+        LinkedList<String> reversedOrder = new LinkedList<>();
+        ChainDto currentIndex = firstChainDto;
+        
+        while(currentIndex.next.isPresent()) {
+            reversedOrder.push(currentIndex.transition.name);
+            currentIndex = currentIndex.next.get();
+        }
+        
+        return reversedOrder.toArray(new String[0]);
     }
     
     private void addChain(ChainDto chainDto) {
@@ -73,6 +112,11 @@ public class StatusTransitionBuilder {
             throw new IllegalArgumentException("Statuses misconfigured");
         return first.get();
     }
+    
+    public void assertEffort(DefaultStatus status, Long effort) {
+        Assert.assertTrue(transitions.containsKey(status));
+        Assert.assertThat(transitions.get(status).getEffort(), Matchers.is(effort));
+    }
    
     
     private static class ChainDto {
@@ -94,7 +138,7 @@ public class StatusTransitionBuilder {
         }
         
         private Optional<StatusTransition> buildChain(Map<DefaultStatus,StatusTransition> transitions,Optional<StatusTransition> nextChain) {
-            StatusTransition chain = date.isPresent() ? new DatedStatusTransition(transition.name, date.get(), nextChain) : new StatusTransition(transition.name, nextChain);
+            StatusTransition chain = date.isPresent() ? new DatedStatusTransition(transition.name, date.get(),transition.isProgressingStatus, nextChain) : new StatusTransition(transition.name, transition.isProgressingStatus,nextChain);
             transitions.put(transition, chain);
             return Optional.of(chain);
         }
@@ -108,8 +152,22 @@ public class StatusTransitionBuilder {
             return buildChain(transitions, nextChain);
         }
 
-
     }
     
+    public static class DefaultStatus {
+        public Long id;
+        public String name;
+        public boolean isProgressingStatus;
+
+        public DefaultStatus(Long id, String name, boolean isProgressingStatus) {
+            this(name,isProgressingStatus);
+            this.id = id;
+        }
+        
+        public DefaultStatus(String name, boolean isProgressingStatus) {
+            this.name = name;
+            this.isProgressingStatus = isProgressingStatus;
+        }
+    }
 
 }
