@@ -461,4 +461,23 @@ public class ReprioritizationIT extends AuthenticatedIntegrationTest {
 
         mainPage.assertSelectedIssuesWithMoveToTopButton("TASKB-627", "TASKB-659", "TASKB-681");
     }
+
+    @Test
+    public void whenTheCardIsSelectedAndUnselected_HierarchicalFilterShouldWork() {
+        TestIssue issue = mainPage.issue("TASKB-606");
+
+        issue.select();
+        mainPage.assertSelectedIssues("TASKB-606");
+
+        issue.select()
+            .enableHierarchicalFilter();
+
+        mainPage.assertVisibleIssues(
+            "TASKB-606",
+            "TASKB-186",
+            "TASKB-235",
+            "TASKB-601",
+            "TASKB-572"
+        );
+    }
 }
