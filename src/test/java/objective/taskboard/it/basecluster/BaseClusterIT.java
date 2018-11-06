@@ -119,6 +119,9 @@ public class BaseClusterIT extends AbstractUIWithCoverageIntegrationTest {
         searchPage
             .edit("Second Base Sizing Cluster")
             .assertSaveButtonDisabled()
+                .setName("   ")
+            .save()
+            .assertErrorMessageIsOpen()
                 .setName("Second Base Sizing Cluster CHANGED TOO")
             .save()
             .assertSuccessMessageIsOpen()
