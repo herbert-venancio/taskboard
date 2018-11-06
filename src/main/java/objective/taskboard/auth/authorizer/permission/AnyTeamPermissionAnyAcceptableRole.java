@@ -8,22 +8,15 @@ import objective.taskboard.auth.LoggedUserDetails;
 import objective.taskboard.data.UserTeam.UserTeamRole;
 import objective.taskboard.repository.UserTeamCachedRepository;
 
-public class AnyTeamPermissionAnyAcceptableRole implements TargetlessPermission {
+public class AnyTeamPermissionAnyAcceptableRole extends BasePermission implements TargetlessPermission {
 
     private final UserTeamCachedRepository userTeamRepository;
-
-    private final String name;
     private final List<UserTeamRole> acceptedRoles;
 
     public AnyTeamPermissionAnyAcceptableRole(String name, UserTeamCachedRepository userTeamRepository, UserTeamRole... acceptedRoles) {
-        this.name = name;
+        super(name);
         this.userTeamRepository = userTeamRepository;
         this.acceptedRoles = asList(acceptedRoles);
-    }
-
-    @Override
-    public String name() {
-        return name;
     }
 
     @Override

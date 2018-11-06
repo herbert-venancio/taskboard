@@ -8,19 +8,13 @@ import java.util.Optional;
 
 import objective.taskboard.auth.LoggedUserDetails;
 
-public class PerProjectPermission implements TargettedPermission {
+public class PerProjectPermission extends BasePermission implements TargettedPermission {
 
-    private final String name;
     private final List<String> acceptedRoles;
 
     public PerProjectPermission(String name, String... acceptedRoles) {
-        this.name = name;
+        super(name);
         this.acceptedRoles = asList(acceptedRoles);
-    }
-
-    @Override
-    public String name() {
-        return name;
     }
 
     @Override

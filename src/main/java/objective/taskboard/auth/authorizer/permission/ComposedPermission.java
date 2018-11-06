@@ -9,19 +9,13 @@ import java.util.stream.Stream;
 
 import objective.taskboard.auth.LoggedUserDetails;
 
-public abstract class ComposedPermission implements Permission {
+public abstract class ComposedPermission extends BasePermission {
 
-    private final String name;
     protected final List<Permission> permissions;
 
     public ComposedPermission(String name, Permission... permissions) {
-        this.name = name;
+        super(name);
         this.permissions = asList(permissions);
-    }
-
-    @Override
-    public String name() {
-        return name;
     }
 
     @Override

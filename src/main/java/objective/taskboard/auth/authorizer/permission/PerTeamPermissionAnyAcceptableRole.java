@@ -10,22 +10,15 @@ import objective.taskboard.auth.LoggedUserDetails;
 import objective.taskboard.data.UserTeam.UserTeamRole;
 import objective.taskboard.repository.UserTeamCachedRepository;
 
-public class PerTeamPermissionAnyAcceptableRole implements TargettedPermission {
+public class PerTeamPermissionAnyAcceptableRole extends BasePermission implements TargettedPermission {
 
     private final UserTeamCachedRepository userTeamRepository;
-
-    private final String name;
     private final List<UserTeamRole> acceptedRoles;
 
     public PerTeamPermissionAnyAcceptableRole(String name, UserTeamCachedRepository userTeamRepository, UserTeamRole... acceptedRoles) {
-        this.name = name;
+        super(name);
         this.userTeamRepository = userTeamRepository;
         this.acceptedRoles = asList(acceptedRoles);
-    }
-
-    @Override
-    public String name() {
-        return name;
     }
 
     @Override

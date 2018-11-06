@@ -7,11 +7,10 @@ import org.springframework.stereotype.Service;
 import objective.taskboard.auth.LoggedUserDetails;
 
 @Service
-public class TaskboardAdministrationPermission implements TargetlessPermission {
+public class TaskboardAdministrationPermission extends BasePermission implements TargetlessPermission {
 
-    @Override
-    public String name() {
-        return TASKBOARD_ADMINISTRATION;
+    public TaskboardAdministrationPermission() {
+        super(TASKBOARD_ADMINISTRATION);
     }
 
     @Override

@@ -12,7 +12,7 @@ import objective.taskboard.auth.LoggedUserDetails;
 import objective.taskboard.team.UserTeamPermissionService;
 
 @Service
-public class UserVisibilityPermission implements TargettedPermission {
+public class UserVisibilityPermission extends BasePermission implements TargettedPermission {
 
     private final UserTeamPermissionService userTeamPermissionService;
     private final TaskboardAdministrationPermission taskboardAdministrationPermission;
@@ -21,13 +21,9 @@ public class UserVisibilityPermission implements TargettedPermission {
     public UserVisibilityPermission(
             TaskboardAdministrationPermission taskboardAdministrationPermission,
             UserTeamPermissionService userTeamPermissionService) {
+        super(USER_VISIBILITY);
         this.taskboardAdministrationPermission = taskboardAdministrationPermission;
         this.userTeamPermissionService = userTeamPermissionService;
-    }
-
-    @Override
-    public String name() {
-        return USER_VISIBILITY;
     }
 
     @Override

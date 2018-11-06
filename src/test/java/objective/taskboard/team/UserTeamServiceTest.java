@@ -20,7 +20,7 @@ public class UserTeamServiceTest {
     private TeamCachedRepository teamRepo = mock(TeamCachedRepository.class);
     private TeamFilterConfigurationService teamFilterConfigurationService = mock(TeamFilterConfigurationService.class);
     private UserTeamPermissionService userTeamPermissionService = mock(UserTeamPermissionService.class);
-    private UserTeamService subject = new UserTeamService(userTeamRepo, teamRepo, userTeamPermissionService, authorizer);
+    private UserTeamService subject = new UserTeamService(userTeamRepo, teamRepo, userTeamPermissionService, authorizer, teamEditPermission);
 
     private UserTeamTestUtils testUtils = new UserTeamTestUtils(teamFilterConfigurationService, teamRepo, userTeamRepo, authorizer, null);
 
