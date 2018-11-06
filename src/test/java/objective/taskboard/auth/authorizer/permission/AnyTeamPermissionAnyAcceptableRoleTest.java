@@ -7,6 +7,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -22,9 +23,11 @@ public class AnyTeamPermissionAnyAcceptableRoleTest implements PermissionTest {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
+    private LoggedUserDetails loggedUserDetails = mock(LoggedUserDetails.class);
+
     @Test
     public void testName() {
-        Permission subject = new AnyTeamPermissionAnyAcceptableRole("PERMISSION_NAME", userTeamRepository().build(), UserTeamRole.MANAGER);
+        Permission subject = new AnyTeamPermissionAnyAcceptableRole("PERMISSION_NAME", loggedUserDetails, userTeamRepository().build(), UserTeamRole.MANAGER);
         assertEquals("PERMISSION_NAME", subject.name());
     }
 
@@ -33,9 +36,9 @@ public class AnyTeamPermissionAnyAcceptableRoleTest implements PermissionTest {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage(is("Only PermissionContext.empty() is allowed for permission PERMISSION_NAME."));
 
-        Permission subject = new AnyTeamPermissionAnyAcceptableRole("PERMISSION_NAME", userTeamRepository().build(), UserTeamRole.MANAGER);
+        Permission subject = new AnyTeamPermissionAnyAcceptableRole("PERMISSION_NAME", loggedUser().build(), userTeamRepository().build(), UserTeamRole.MANAGER);
 
-        subject.accepts(loggedUser().build(), new PermissionContext("target"));
+        subject.accepts(new PermissionContext("target"));
     }
 
     @Test
@@ -51,13 +54,13 @@ public class AnyTeamPermissionAnyAcceptableRoleTest implements PermissionTest {
                         userTeam("USER2", "TEAM2", UserTeamRole.VIEWER)
                 ).build();
 
-        Permission subject = new AnyTeamPermissionAnyAcceptableRole("PERMISSION_NAME", userTeamRepo, UserTeamRole.MANAGER, UserTeamRole.MEMBER);
-
         LoggedUserDetails userWithPermission = loggedUser().withName("USER1").build();
-        assertTrue(subject.accepts(userWithPermission, PermissionContext.empty()));
+        Permission subject = new AnyTeamPermissionAnyAcceptableRole("PERMISSION_NAME", userWithPermission, userTeamRepo, UserTeamRole.MANAGER, UserTeamRole.MEMBER);
+        assertTrue(subject.accepts(PermissionContext.empty()));
 
         LoggedUserDetails userWithoutPermission = loggedUser().withName("USER2").build();
-        assertFalse(subject.accepts(userWithoutPermission, PermissionContext.empty()));
+        subject = new AnyTeamPermissionAnyAcceptableRole("PERMISSION_NAME", userWithoutPermission, userTeamRepo, UserTeamRole.MANAGER, UserTeamRole.MEMBER);
+        assertFalse(subject.accepts(PermissionContext.empty()));
     }
 
 }

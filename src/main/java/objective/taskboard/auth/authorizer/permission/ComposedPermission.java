@@ -13,18 +13,18 @@ public abstract class ComposedPermission extends BasePermission {
 
     protected final List<Permission> permissions;
 
-    public ComposedPermission(String name, Permission... permissions) {
-        super(name);
+    public ComposedPermission(String name, LoggedUserDetails loggedUserDetails, Permission... permissions) {
+        super(name, loggedUserDetails);
         this.permissions = asList(permissions);
     }
 
     @Override
-    public Optional<List<String>> applicableTargets(LoggedUserDetails userDetails) {
+    public Optional<List<String>> applicableTargets() {
         if (!permissions.stream().anyMatch(p -> p instanceof TargettedPermission))
             return Optional.empty();
 
         List<String> applicableTargets = permissions.stream()
-                .flatMap(p -> p.applicableTargets(userDetails).map(List::stream).orElseGet(Stream::empty))
+                .flatMap(p -> p.applicableTargets().map(List::stream).orElseGet(Stream::empty))
                 .distinct()
                 .collect(toList());
         return Optional.of(applicableTargets);

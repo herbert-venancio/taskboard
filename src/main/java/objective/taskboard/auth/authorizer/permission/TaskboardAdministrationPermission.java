@@ -9,15 +9,15 @@ import objective.taskboard.auth.LoggedUserDetails;
 @Service
 public class TaskboardAdministrationPermission extends BasePermission implements TargetlessPermission {
 
-    public TaskboardAdministrationPermission() {
-        super(TASKBOARD_ADMINISTRATION);
+    public TaskboardAdministrationPermission(LoggedUserDetails loggedUserDetails) {
+        super(TASKBOARD_ADMINISTRATION, loggedUserDetails);
     }
 
     @Override
-    public boolean accepts(LoggedUserDetails userDetails, PermissionContext permissionContext) {
+    public boolean accepts(PermissionContext permissionContext) {
         validate(permissionContext);
 
-        return userDetails.isAdmin();
+        return getLoggedUser().isAdmin();
     }
 
 }

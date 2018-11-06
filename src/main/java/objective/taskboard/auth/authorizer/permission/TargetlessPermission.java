@@ -3,11 +3,9 @@ package objective.taskboard.auth.authorizer.permission;
 import java.util.List;
 import java.util.Optional;
 
-import objective.taskboard.auth.LoggedUserDetails;
-
 public interface TargetlessPermission extends Permission {
 
-    default Optional<List<String>> applicableTargets(LoggedUserDetails userDetails) {
+    default Optional<List<String>> applicableTargets() {
         return Optional.empty();
     }
 

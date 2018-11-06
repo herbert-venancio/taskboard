@@ -1,6 +1,7 @@
 package objective.taskboard.auth.authorizer;
 
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 import static objective.taskboard.auth.authorizer.permission.PermissionBuilder.permission;
 import static objective.taskboard.auth.authorizer.permission.PermissionTestUtils.role;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,6 +20,7 @@ import org.junit.Test;
 import objective.taskboard.auth.LoggedUserDetails;
 import objective.taskboard.auth.LoggedUserDetails.JiraRole;
 import objective.taskboard.auth.authorizer.Authorizer.PermissionDto;
+import objective.taskboard.auth.authorizer.permission.PerProjectPermission;
 import objective.taskboard.auth.authorizer.permission.Permission;
 
 public class AuthorizerTest {
@@ -162,7 +164,11 @@ public class AuthorizerTest {
                 return permissionsList.stream().filter(p -> p.name().equals(name)).findFirst().orElseThrow(IllegalArgumentException::new);
             });
 
-            when(permissionRepository.findAllPerProjectPermissions()).thenCallRealMethod();
+            List<PerProjectPermission> perProject = permissionsList.stream()
+                    .filter(PerProjectPermission.class::isInstance)
+                    .map(PerProjectPermission.class::cast)
+                    .collect(toList());
+            when(permissionRepository.findAllPerProjectPermissions()).thenReturn(perProject);
 
             return this;
         }

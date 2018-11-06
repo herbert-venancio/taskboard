@@ -29,6 +29,8 @@ public class UserVisibilityPermissionTest implements PermissionTest {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
+    private LoggedUserDetails loggedUserDetails = mock(LoggedUserDetails.class);
+
     @Test
     public void testName() {
         Permission subject = permission()
@@ -45,9 +47,7 @@ public class UserVisibilityPermissionTest implements PermissionTest {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage(is("Empty PermissionContext isn't allowed for permission user.visibility."));
 
-        LoggedUserDetails userDetails = mock(LoggedUserDetails.class);
-
-        subject.accepts(userDetails, PermissionContext.empty());
+        subject.accepts(PermissionContext.empty());
     }
 
     @Test
@@ -65,9 +65,7 @@ public class UserVisibilityPermissionTest implements PermissionTest {
                 .withVisibleTeams()
                 .build();
 
-        LoggedUserDetails userDetails = mock(LoggedUserDetails.class);
-
-        return subject.accepts(userDetails, new PermissionContext("USER_A"));
+        return subject.accepts(new PermissionContext("USER_A"));
     }
 
     private boolean givenUserWithoutTaskboardAdministrationPermission_butWithTeamInCommonUserTargettedUser() {
@@ -78,9 +76,7 @@ public class UserVisibilityPermissionTest implements PermissionTest {
                         teamWithMembers("Peter", "Joseph"))
                 .build();
 
-        LoggedUserDetails userDetails = mock(LoggedUserDetails.class);
-
-        return subject.accepts(userDetails, new PermissionContext("John"));
+        return subject.accepts(new PermissionContext("John"));
     }
 
     private boolean givenUserWithoutTaskboardAdministrationPermission_andNoTeamInCommonUserTargettedUser() {
@@ -91,9 +87,7 @@ public class UserVisibilityPermissionTest implements PermissionTest {
                         teamWithMembers("Peter", "Joseph"))
                 .build();
 
-        LoggedUserDetails userDetails = mock(LoggedUserDetails.class);
-
-        return subject.accepts(userDetails, new PermissionContext("Mark"));
+        return subject.accepts(new PermissionContext("Mark"));
     }
 
     private Team teamWithMembers(String... members) {
@@ -113,13 +107,13 @@ public class UserVisibilityPermissionTest implements PermissionTest {
         return new DSLBuilder();
     }
 
-    private static class DSLBuilder {
+    private class DSLBuilder {
 
         private TaskboardAdministrationPermission tbAdminPermission = mock(TaskboardAdministrationPermission.class);
         private UserTeamPermissionService userTeamPermissionService = mock(UserTeamPermissionService.class);
 
         public DSLBuilder withUserTaskboardAdministrationPermission(boolean hasPermission) {
-            when(tbAdminPermission.accepts(any(), any())).thenReturn(hasPermission);
+            when(tbAdminPermission.accepts(any())).thenReturn(hasPermission);
             return this;
         }
 
@@ -130,7 +124,7 @@ public class UserVisibilityPermissionTest implements PermissionTest {
         }
 
         public UserVisibilityPermission build() {
-            return new UserVisibilityPermission(tbAdminPermission, userTeamPermissionService);
+            return new UserVisibilityPermission(tbAdminPermission, loggedUserDetails, userTeamPermissionService);
         }
 
     }

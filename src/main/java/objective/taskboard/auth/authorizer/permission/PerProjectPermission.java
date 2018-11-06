@@ -12,23 +12,23 @@ public class PerProjectPermission extends BasePermission implements TargettedPer
 
     private final List<String> acceptedRoles;
 
-    public PerProjectPermission(String name, String... acceptedRoles) {
-        super(name);
+    public PerProjectPermission(String name, LoggedUserDetails loggedUserDetails, String... acceptedRoles) {
+        super(name, loggedUserDetails);
         this.acceptedRoles = asList(acceptedRoles);
     }
 
     @Override
-    public boolean accepts(LoggedUserDetails userDetails, PermissionContext permissionContext) {
+    public boolean accepts(PermissionContext permissionContext) {
         validate(permissionContext);
 
-        return userDetails.getJiraRoles().stream()
+        return getLoggedUser().getJiraRoles().stream()
                 .filter(role -> role.projectKey.equals(permissionContext.target))
                 .anyMatch(role -> acceptedRoles.contains(role.name));
     }
 
     @Override
-    public Optional<List<String>> applicableTargets(LoggedUserDetails userDetails) {
-        List<String> applicableTargets = userDetails.getJiraRoles().stream()
+    public Optional<List<String>> applicableTargets() {
+        List<String> applicableTargets = getLoggedUser().getJiraRoles().stream()
                 .filter(role -> acceptedRoles.contains(role.name))
                 .map(role -> role.projectKey)
                 .collect(toList());

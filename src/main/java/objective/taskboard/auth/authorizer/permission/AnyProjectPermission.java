@@ -10,16 +10,16 @@ public class AnyProjectPermission extends BasePermission implements TargetlessPe
 
     private final List<String> acceptedRoles;
 
-    public AnyProjectPermission(String name, String... acceptedRoles) {
-        super(name);
+    public AnyProjectPermission(String name, LoggedUserDetails loggedUserDetails, String... acceptedRoles) {
+        super(name, loggedUserDetails);
         this.acceptedRoles = asList(acceptedRoles);
     }
 
     @Override
-    public boolean accepts(LoggedUserDetails userDetails, PermissionContext permissionContext) {
+    public boolean accepts(PermissionContext permissionContext) {
         validate(permissionContext);
 
-        return userDetails.getJiraRoles().stream()
+        return getLoggedUser().getJiraRoles().stream()
                 .anyMatch(role -> acceptedRoles.contains(role.name));
     }
 

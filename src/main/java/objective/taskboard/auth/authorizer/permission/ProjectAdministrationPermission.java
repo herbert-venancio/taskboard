@@ -5,11 +5,13 @@ import static objective.taskboard.auth.authorizer.Permissions.PROJECT_ADMINISTRA
 
 import org.springframework.stereotype.Service;
 
+import objective.taskboard.auth.LoggedUserDetails;
+
 @Service
 public class ProjectAdministrationPermission extends PerProjectPermission {
 
-    public ProjectAdministrationPermission() {
-        super(PROJECT_ADMINISTRATION, PROJECT_ADMINISTRATORS);
+    public ProjectAdministrationPermission(LoggedUserDetails loggedUserDetails) {
+        super(PROJECT_ADMINISTRATION, loggedUserDetails, PROJECT_ADMINISTRATORS);
     }
 
 }

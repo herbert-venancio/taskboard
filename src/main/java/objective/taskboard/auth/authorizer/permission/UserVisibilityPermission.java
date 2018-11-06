@@ -20,17 +20,18 @@ public class UserVisibilityPermission extends BasePermission implements Targette
     @Autowired
     public UserVisibilityPermission(
             TaskboardAdministrationPermission taskboardAdministrationPermission,
+            LoggedUserDetails loggedUserDetails,
             UserTeamPermissionService userTeamPermissionService) {
-        super(USER_VISIBILITY);
+        super(USER_VISIBILITY, loggedUserDetails);
         this.taskboardAdministrationPermission = taskboardAdministrationPermission;
         this.userTeamPermissionService = userTeamPermissionService;
     }
 
     @Override
-    public boolean accepts(LoggedUserDetails userDetails, PermissionContext permissionContext) {
+    public boolean accepts(PermissionContext permissionContext) {
         validate(permissionContext);
 
-        boolean hasPermissionToSeeAllUsers = taskboardAdministrationPermission.accepts(userDetails, PermissionContext.empty());
+        boolean hasPermissionToSeeAllUsers = taskboardAdministrationPermission.accepts(PermissionContext.empty());
 
         return hasPermissionToSeeAllUsers || isThereSomeTeamInCommon(permissionContext);
     }
@@ -42,7 +43,7 @@ public class UserVisibilityPermission extends BasePermission implements Targette
     }
 
     @Override
-    public Optional<List<String>> applicableTargets(LoggedUserDetails userDetails) {
+    public Optional<List<String>> applicableTargets() {
         return Optional.empty();
     }
 

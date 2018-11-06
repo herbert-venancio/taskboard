@@ -6,11 +6,13 @@ import static objective.taskboard.auth.authorizer.Permissions.PROJECT_DASHBOARD_
 
 import org.springframework.stereotype.Service;
 
+import objective.taskboard.auth.LoggedUserDetails;
+
 @Service
 public class ProjectDashboardOperationalPermission extends PerProjectPermission {
 
-    public ProjectDashboardOperationalPermission() {
-        super(PROJECT_DASHBOARD_OPERATIONAL, PROJECT_ADMINISTRATORS, PROJECT_DEVELOPERS);
+    public ProjectDashboardOperationalPermission(LoggedUserDetails loggedUserDetails) {
+        super(PROJECT_DASHBOARD_OPERATIONAL, loggedUserDetails, PROJECT_ADMINISTRATORS, PROJECT_DEVELOPERS);
     }
 
 }

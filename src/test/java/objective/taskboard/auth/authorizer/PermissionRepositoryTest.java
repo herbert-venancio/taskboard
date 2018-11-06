@@ -22,6 +22,7 @@ public class PermissionRepositoryTest {
     private List<Permission> permissions = new ArrayList<>();
     private List<PerProjectPermission> perProjectPermissions = new ArrayList<>();
     private PermissionRepository subject = new PermissionRepository(permissions, perProjectPermissions);
+    private LoggedUserDetails loggedUserDetails = mock(LoggedUserDetails.class);
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -39,8 +40,8 @@ public class PermissionRepositoryTest {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage(is("Empty PermissionContext isn't allowed for permission permission.name."));
 
-        Permission permission = new PerProjectPermission("permission.name", "any_role_1", "any_role_1");
-        permission.accepts(mock(LoggedUserDetails.class), PermissionContext.empty());
+        Permission permission = new PerProjectPermission("permission.name", loggedUserDetails, "any_role_1", "any_role_1");
+        permission.accepts(PermissionContext.empty());
     }
 
     @Test
@@ -48,8 +49,8 @@ public class PermissionRepositoryTest {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage(is("Only PermissionContext.empty() is allowed for permission permission.name."));
 
-        Permission permission = new AnyProjectPermission("permission.name", "any_role_1", "any_role_1");
-        permission.accepts(mock(LoggedUserDetails.class), new PermissionContext("target"));
+        Permission permission = new AnyProjectPermission("permission.name", loggedUserDetails, "any_role_1", "any_role_1");
+        permission.accepts(new PermissionContext("target"));
     }
 
     @Test
@@ -57,8 +58,8 @@ public class PermissionRepositoryTest {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage(is("Only PermissionContext.empty() is allowed for permission taskboard.administration."));
 
-        Permission permission = new TaskboardAdministrationPermission();
-        permission.accepts(mock(LoggedUserDetails.class), new PermissionContext("target"));
+        Permission permission = new TaskboardAdministrationPermission(loggedUserDetails);
+        permission.accepts(new PermissionContext("target"));
     }
 
 }

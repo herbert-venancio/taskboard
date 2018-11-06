@@ -5,11 +5,13 @@ import static objective.taskboard.auth.authorizer.Permissions.FOLLOWUP_TEMPLATE_
 
 import org.springframework.stereotype.Service;
 
+import objective.taskboard.auth.LoggedUserDetails;
+
 @Service
 public class FollowUpTemplateEditPermission extends AnyProjectPermission {
 
-    public FollowUpTemplateEditPermission() {
-        super(FOLLOWUP_TEMPLATE_EDIT, PROJECT_ADMINISTRATORS);
+    public FollowUpTemplateEditPermission(LoggedUserDetails loggedUserDetails) {
+        super(FOLLOWUP_TEMPLATE_EDIT, loggedUserDetails, PROJECT_ADMINISTRATORS);
     }
 
 }

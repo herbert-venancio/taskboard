@@ -1,14 +1,11 @@
 package objective.taskboard.auth.authorizer.permission;
 
 import static java.util.Arrays.asList;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
-
-import objective.taskboard.auth.LoggedUserDetails;
 
 public class PermissionBuilder {
 
@@ -44,7 +41,7 @@ public class PermissionBuilder {
     public PerProjectPermission asPerProjectPermission() {
         PerProjectPermission permission = mock(PerProjectPermission.class);
         when(permission.name()).thenReturn(dto.name);
-        when(permission.applicableTargets(any())).thenReturn(dto.applicableTargets);
+        when(permission.applicableTargets()).thenReturn(dto.applicableTargets);
         return permission;
     }
 
@@ -55,7 +52,7 @@ public class PermissionBuilder {
         public String name() {
             return this.name;
         }
-        public boolean accepts(LoggedUserDetails userDetails, PermissionContext permissionContext) {
+        public boolean accepts(PermissionContext permissionContext) {
             return this.accepts;
         }
     }
@@ -76,7 +73,7 @@ public class PermissionBuilder {
             this.accepts = dto.accepts;
             this.applicableTargets = dto.applicableTargets;
         }
-        public Optional<List<String>> applicableTargets(LoggedUserDetails userDetails) {
+        public Optional<List<String>> applicableTargets() {
             return applicableTargets;
         }
     }

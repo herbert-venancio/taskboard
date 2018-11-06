@@ -33,26 +33,26 @@ public class Authorizer {
     }
 
     public boolean hasPermission(String permission) {
-        boolean accepts = permissionRepository.findByName(permission).accepts(userDetails, PermissionContext.empty());
+        boolean accepts = permissionRepository.findByName(permission).accepts(PermissionContext.empty());
         log.debug("Authorize permission \"{}\": {}", permission, accepts);
         return accepts;
     }
 
     public boolean hasPermission(String permission, String target) {
         boolean accepts = permissionRepository.findByName(permission)
-                .accepts(userDetails, new PermissionContext(target));
+                .accepts(new PermissionContext(target));
         log.debug("Authorize permission \"{}\" for target \"{}\": {}", permission, target, accepts);
         return accepts;
     }
 
     public List<PermissionDto> getPermissions() {
-        return PermissionDto.from(permissionRepository.findAll(), userDetails);
+        return PermissionDto.from(permissionRepository.findAll());
     }
 
     public List<String> getAllowedProjectsForPermissions(String... permissions) {
         return permissionRepository.findAllPerProjectPermissions().stream()
                 .filter(permission -> asList(permissions).contains(permission.name()))
-                .flatMap(permission -> permission.applicableTargets(userDetails).orElseThrow(IllegalStateException::new).stream())
+                .flatMap(permission -> permission.applicableTargets().orElseThrow(IllegalStateException::new).stream())
                 .distinct()
                 .collect(toList());
     }
@@ -78,24 +78,24 @@ public class Authorizer {
             this.applicableTargets = applicableTargets;
         }
 
-        public static List<PermissionDto> from(List<Permission> permissions, LoggedUserDetails userDetails) {
+        public static List<PermissionDto> from(List<Permission> permissions) {
             List<PermissionDto> dtoList = new ArrayList<>();
             permissions
-                .forEach(p -> PermissionDto.from(p, userDetails).ifPresent(dto -> dtoList.add(dto)));
+                .forEach(p -> PermissionDto.from(p).ifPresent(dto -> dtoList.add(dto)));
             return dtoList;
         }
 
-        private static Optional<PermissionDto> from(Permission permission, LoggedUserDetails userDetails) {
-            Optional<List<String>> applicableTargets = permission.applicableTargets(userDetails);
+        private static Optional<PermissionDto> from(Permission permission) {
+            Optional<List<String>> applicableTargets = permission.applicableTargets();
 
-            if (isTargetlessPermitted(permission, userDetails) || isTargettedPermitted(permission, applicableTargets))
+            if (isTargetlessPermitted(permission) || isTargettedPermitted(permission, applicableTargets))
                 return Optional.of(new PermissionDto(permission.name(), applicableTargets.orElse(null)));
 
             return Optional.empty();
         }
 
-        private static boolean isTargetlessPermitted(Permission permission, LoggedUserDetails userDetails) {
-            return permission instanceof TargetlessPermission && permission.accepts(userDetails, PermissionContext.empty());
+        private static boolean isTargetlessPermitted(Permission permission) {
+            return permission instanceof TargetlessPermission && permission.accepts(PermissionContext.empty());
         }
 
         private static boolean isTargettedPermitted(Permission permission, Optional<List<String>> applicableTargets) {

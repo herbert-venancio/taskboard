@@ -15,24 +15,28 @@ public class PerTeamPermissionAnyAcceptableRole extends BasePermission implement
     private final UserTeamCachedRepository userTeamRepository;
     private final List<UserTeamRole> acceptedRoles;
 
-    public PerTeamPermissionAnyAcceptableRole(String name, UserTeamCachedRepository userTeamRepository, UserTeamRole... acceptedRoles) {
-        super(name);
+    public PerTeamPermissionAnyAcceptableRole(
+            String name,
+            LoggedUserDetails loggedUserDetails,
+            UserTeamCachedRepository userTeamRepository,
+            UserTeamRole... acceptedRoles) {
+        super(name, loggedUserDetails);
         this.userTeamRepository = userTeamRepository;
         this.acceptedRoles = asList(acceptedRoles);
     }
 
     @Override
-    public boolean accepts(LoggedUserDetails userDetails, PermissionContext permissionContext) {
+    public boolean accepts(PermissionContext permissionContext) {
         validate(permissionContext);
 
-        return userTeamRepository.findByUserName(userDetails.getUsername()).stream()
+        return userTeamRepository.findByUserName(getLoggedUser().getUsername()).stream()
                 .filter(userTeam -> userTeam.getTeam().equals(permissionContext.target))
                 .anyMatch(userTeam -> acceptedRoles.contains(userTeam.getRole()));
     }
 
     @Override
-    public Optional<List<String>> applicableTargets(LoggedUserDetails userDetails) {
-        List<String> applicableTargets = userTeamRepository.findByUserName(userDetails.getUsername()).stream()
+    public Optional<List<String>> applicableTargets() {
+        List<String> applicableTargets = userTeamRepository.findByUserName(getLoggedUser().getUsername()).stream()
                 .filter(userTeam -> acceptedRoles.contains(userTeam.getRole()))
                 .map(userTeam -> userTeam.getTeam())
                 .collect(toList());
