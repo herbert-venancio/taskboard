@@ -22,8 +22,12 @@ public class IssueTransitionService {
     private static final Logger LOG = LoggerFactory.getLogger(IssueTransitionService.class);
     
     public Map<String, ZonedDateTime> getTransitions(Issue issue, ZoneId timezone,String[] statuses) {
-        final String firstState = statuses[statuses.length - 1];
         Map<String, ZonedDateTime> lastTransitionDateByStatus = new LinkedHashMap<>();
+        
+        if(statuses.length == 0)
+            return lastTransitionDateByStatus;
+        
+        final String firstState = statuses[statuses.length - 1];
         for (String status : statuses)
             lastTransitionDateByStatus.put(status, null);
         lastTransitionDateByStatus.put(firstState, DateTimeUtils.get(issue.getCreated(), timezone));

@@ -76,11 +76,14 @@ public class FullCycleEffortTest {
         
         mockSubtasks();
         
+        mockTaskContinuous("Continuous","PROJ-20","PROJ-01","2018-01-01","2018-01-03","2018-01-10");
+        mockTaskContinuous("SubTask Continuous","PROJ-21","PROJ-20","2018-01-01","2018-01-03","2018-01-10");
+        
         addWorklogs();
-
+        
         List<Issue> allIssues = builder.mockAllIssues();
         when(issueBufferService.getAllIssues()).thenReturn(allIssues);
-        when(factory.getItems(allIssues,ZONE_ID)).thenReturn(builder.buildAllIssuesAsAdapter());
+        when(factory.getItems(allIssues ,ZONE_ID)).thenReturn(builder.buildAllIssuesAsAdapterUnless("PROJ-20","PROJ-21"));
         
         Map<KpiLevel, List<IssueKpi>> allIssuesKpi = service.getIssuesFromCurrentState("PROJ", ZONE_ID);
         
@@ -117,6 +120,16 @@ public class FullCycleEffortTest {
         assertSubtaskEffort(subtasks.get("PROJ-18"),21l,2l,0l);
         assertSubtaskEffort(subtasks.get("PROJ-19"),12l,0l,0l);
             
+    }
+
+    private void mockTaskContinuous(String type, String pKey, String fatherKey, String open, String doing, String done) {
+        builder.withMockingIssue(pKey, type, KpiLevel.UNMAPPED)
+            .addTransition("Open",open)
+            .addTransition("Doing",doing)
+            .addTransition("Done",done)
+            .setFatherToCurrentIssue(fatherKey)
+            .setProjectKeyToCurrentIssue("PROJ");
+        builder.withIssue(fatherKey).addChild(pKey);
     }
 
     private void assertSubtaskEffort(IssueKpi subtask, long doingHours, long reviewingHours, long mergingHours) {
@@ -212,6 +225,9 @@ public class FullCycleEffortTest {
         builder.withIssue("PROJ-19")
                 .addWorklog("2018-01-17",getHourInMilis(10))
                 .addWorklog("2018-01-18",getHourInMilis(2));
+        
+        builder.withIssue("PROJ-21")
+            .addWorklog("2018-01-05",getHourInMilis(8));
     }
     
     private void assertHours(IssueKpi kpi, String status, long hours) {
@@ -398,5 +414,5 @@ public class FullCycleEffortTest {
                 .addSubtaskType(16l, "QA");
         
     }
-    
+       
 }

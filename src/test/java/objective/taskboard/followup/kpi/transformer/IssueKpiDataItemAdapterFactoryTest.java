@@ -196,6 +196,56 @@ public class IssueKpiDataItemAdapterFactoryTest {
         assertThat(issues.get(0).getLevel(),is(KpiLevel.UNMAPPED));
     }
     
+    @Test
+    public void getIssuesFromService_inexistentLevelType() {
+        KPIEnvironmentBuilder builder = new KPIEnvironmentBuilder(transitionService);
+        
+        builder.addStatus(1l, "Open", false)
+                .addStatus(2l, "To Do", false)
+                .addStatus(3l, "Doing", true)
+                .addStatus(4l, "Done", false);
+        
+        builder.addFeatureType(1l, "Feature")
+                .addSubtaskType(2l, "Continuos")
+                .addSubtaskType(3l, "Subtask Continuous");
+                
+        
+         builder.withMockingIssue("I-1", "Continuous",KpiLevel.UNMAPPED)
+                    .setProjectKeyToCurrentIssue("PROJ")
+                    .setCurrentStatusToCurrentIssue("Doing")
+                    .addTransition("Open", "2020-01-01")
+                    .addTransition("To Do", "2020-01-02")
+                    .addTransition("Doing", "2020-01-03")
+                    .addTransition("Done");
+        
+        builder.withMockingIssue("I-2", "Subtask Continunous",KpiLevel.UNMAPPED)
+                .setProjectKeyToCurrentIssue("PROJ")
+                .setCurrentStatusToCurrentIssue("Done")
+                .addTransition("Open", "2020-01-01")
+                .addTransition("To Do", "2020-01-02")
+                .addTransition("Doing", "2020-01-03")
+                .addTransition("Done", "2020-01-04")
+                .setFatherToCurrentIssue("I-1");
+        builder.withIssue("I-1").addChild("I-2");
+        
+        builder.withMockingIssue("I-3", "Feature", KpiLevel.FEATURES)
+                .addTransition("Open", "2020-01-01")
+                .addTransition("To Do", "2020-01-02")
+                .addTransition("Doing", "2020-01-03")
+                .addTransition("Done", "2020-01-04");
+        
+        List<IssueKpiDataItemAdapter> items = subject.getItems(builder.mockAllIssues(), ZoneId.systemDefault());
+        assertThat(items.size(),is(1));
+        
+        IssueKpiDataItemAdapter issue = items.get(0);
+        assertThat(issue.getIssueKey(),is("I-3"));
+        assertThat(issue.getLevel(),is(KpiLevel.FEATURES));
+        
+        String featureType = issue.getIssueType().map(t -> t.getType()).orElse("Unmapped");
+        assertThat(featureType,is("Feature"));
+        
+    }
+    
     private void setupPriorityOrder() {
         String[] statuses = new String[] {"Done","Doing","To Do","Open"};
         StatusPriorityOrder statusPriorityOrder = new StatusPriorityOrder();

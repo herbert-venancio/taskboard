@@ -40,7 +40,7 @@ public class IssueKpi {
     }
     
     public String getIssueTypeName() {
-        return issueType.map(t -> t.getType()).orElse("Unampped");
+        return issueType.map(t -> t.getType()).orElse("Unmapped");
     }
 
     @Override

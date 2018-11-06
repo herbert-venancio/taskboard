@@ -112,6 +112,10 @@ public class IssueKpiBuilder {
         }
     }
     
+    public String getIssueKey() {
+        return pKey;
+    }
+    
     public Issue mockIssue(IssueTransitionService transitionService) {
         Issue issue = Mockito.mock(Issue.class);
         when(issue.getProjectKey()).thenReturn(projectKey);

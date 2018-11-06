@@ -47,7 +47,9 @@ public class IssueKpiDataItemAdapterFactory {
     
     public List<IssueKpiDataItemAdapter> getItems(List<Issue> issues,ZoneId timezone){
      
-        return issues.stream().map(i -> makeItem(i,timezone)).collect(Collectors.toList());
+        return issues.stream()
+                .filter(i -> KpiLevel.of(i) != KpiLevel.UNMAPPED)
+                .map(i -> makeItem(i,timezone)).collect(Collectors.toList());
     }
     
     private IssueKpiDataItemAdapter makeItem(Issue issue,ZoneId timezone) {
@@ -73,9 +75,7 @@ public class IssueKpiDataItemAdapterFactory {
     }
 
     private KpiLevel getLevel(Optional<JiraIssueTypeDto> type) {
-        if(!type.isPresent())
-            return KpiLevel.UNMAPPED;
-        return KpiLevel.given(jiraProperties,type.get());
+        return type.map(t -> KpiLevel.given(jiraProperties, t)).orElse(KpiLevel.UNMAPPED);
     }
     
 }
