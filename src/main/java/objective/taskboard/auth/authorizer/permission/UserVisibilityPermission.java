@@ -1,29 +1,33 @@
 package objective.taskboard.auth.authorizer.permission;
 
+import static objective.taskboard.auth.authorizer.Permissions.USER_VISIBILITY;
+
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import objective.taskboard.auth.LoggedUserDetails;
 import objective.taskboard.team.UserTeamPermissionService;
 
-public class PerUserVisibilityOfUserPermission implements TargettedPermission {
+@Service
+public class UserVisibilityPermission implements TargettedPermission {
 
-    private final String name;
     private final UserTeamPermissionService userTeamPermissionService;
     private final TaskboardAdministrationPermission taskboardAdministrationPermission;
 
-    public PerUserVisibilityOfUserPermission(
-            String name,
+    @Autowired
+    public UserVisibilityPermission(
             TaskboardAdministrationPermission taskboardAdministrationPermission,
             UserTeamPermissionService userTeamPermissionService) {
-        this.name = name;
         this.taskboardAdministrationPermission = taskboardAdministrationPermission;
         this.userTeamPermissionService = userTeamPermissionService;
     }
 
     @Override
     public String name() {
-        return name;
+        return USER_VISIBILITY;
     }
 
     @Override

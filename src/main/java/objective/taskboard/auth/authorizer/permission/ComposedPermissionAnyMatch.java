@@ -2,7 +2,7 @@ package objective.taskboard.auth.authorizer.permission;
 
 import objective.taskboard.auth.LoggedUserDetails;
 
-public class ComposedPermissionAnyMatch extends ComposedPermission {
+public abstract class ComposedPermissionAnyMatch extends ComposedPermission {
 
     public ComposedPermissionAnyMatch(String name, Permission... permissions) {
         super(name, permissions);

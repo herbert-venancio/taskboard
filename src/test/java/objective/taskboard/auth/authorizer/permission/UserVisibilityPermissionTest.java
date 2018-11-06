@@ -24,26 +24,26 @@ import objective.taskboard.data.Team;
 import objective.taskboard.data.UserTeam;
 import objective.taskboard.team.UserTeamPermissionService;
 
-public class PerUserVisibilityOfUserPermissionTest implements PermissionTest {
+public class UserVisibilityPermissionTest implements PermissionTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
     @Test
     public void testName() {
-        Permission subject = perUserVisibilityOfUserPermission("PERMISSION_NAME")
+        Permission subject = permission()
                 .build();
 
-        assertEquals("PERMISSION_NAME", subject.name());
+        assertEquals("user.visibility", subject.name());
     }
 
     @Test
     public void testAcceptsArguments() {
-        Permission subject = perUserVisibilityOfUserPermission("PERMISSION_NAME")
+        Permission subject = permission()
                 .build();
 
         expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage(is("Empty PermissionContext isn't allowed for permission PERMISSION_NAME."));
+        expectedException.expectMessage(is("Empty PermissionContext isn't allowed for permission user.visibility."));
 
         LoggedUserDetails userDetails = mock(LoggedUserDetails.class);
 
@@ -60,7 +60,7 @@ public class PerUserVisibilityOfUserPermissionTest implements PermissionTest {
     }
 
     private boolean givenUserWithTaskboardAdministrationPermission() {
-        Permission subject = perUserVisibilityOfUserPermission("PERMISSION_NAME")
+        Permission subject = permission()
                 .withUserTaskboardAdministrationPermission(true)
                 .withVisibleTeams()
                 .build();
@@ -71,7 +71,7 @@ public class PerUserVisibilityOfUserPermissionTest implements PermissionTest {
     }
 
     private boolean givenUserWithoutTaskboardAdministrationPermission_butWithTeamInCommonUserTargettedUser() {
-        Permission subject = perUserVisibilityOfUserPermission("PERMISSION_NAME")
+        Permission subject = permission()
                 .withUserTaskboardAdministrationPermission(false)
                 .withVisibleTeams(
                         teamWithMembers("John", "Mary"),
@@ -84,7 +84,7 @@ public class PerUserVisibilityOfUserPermissionTest implements PermissionTest {
     }
 
     private boolean givenUserWithoutTaskboardAdministrationPermission_andNoTeamInCommonUserTargettedUser() {
-        Permission subject = perUserVisibilityOfUserPermission("PERMISSION_NAME")
+        Permission subject = permission()
                 .withUserTaskboardAdministrationPermission(false)
                 .withVisibleTeams(
                         teamWithMembers("John", "Mary"),
@@ -109,20 +109,14 @@ public class PerUserVisibilityOfUserPermissionTest implements PermissionTest {
         return team;
     }
 
-    public DSLBuilder perUserVisibilityOfUserPermission(String permissionName) {
-        return new DSLBuilder(permissionName);
+    public DSLBuilder permission() {
+        return new DSLBuilder();
     }
 
     private static class DSLBuilder {
 
         private TaskboardAdministrationPermission tbAdminPermission = mock(TaskboardAdministrationPermission.class);
         private UserTeamPermissionService userTeamPermissionService = mock(UserTeamPermissionService.class);
-
-        private final String permissionName;
-
-        private DSLBuilder(String permissionName) {
-            this.permissionName = permissionName;
-        }
 
         public DSLBuilder withUserTaskboardAdministrationPermission(boolean hasPermission) {
             when(tbAdminPermission.accepts(any(), any())).thenReturn(hasPermission);
@@ -135,8 +129,8 @@ public class PerUserVisibilityOfUserPermissionTest implements PermissionTest {
             return this;
         }
 
-        public PerUserVisibilityOfUserPermission build() {
-            return new PerUserVisibilityOfUserPermission(permissionName, tbAdminPermission, userTeamPermissionService);
+        public UserVisibilityPermission build() {
+            return new UserVisibilityPermission(tbAdminPermission, userTeamPermissionService);
         }
 
     }

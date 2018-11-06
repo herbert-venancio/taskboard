@@ -10,9 +10,9 @@ import org.junit.rules.ExpectedException;
 
 import objective.taskboard.auth.LoggedUserDetails;
 import objective.taskboard.auth.authorizer.permission.AnyProjectPermission;
+import objective.taskboard.auth.authorizer.permission.PerProjectPermission;
 import objective.taskboard.auth.authorizer.permission.Permission;
 import objective.taskboard.auth.authorizer.permission.PermissionContext;
-import objective.taskboard.auth.authorizer.permission.PerProjectPermission;
 import objective.taskboard.auth.authorizer.permission.TaskboardAdministrationPermission;
 
 public class PermissionRepositoryTest {
@@ -59,9 +59,9 @@ public class PermissionRepositoryTest {
     @Test
     public void taskboardPermission_givenNonEmptyContext_shouldThrowError() {
         expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage(is("Only PermissionContext.empty() is allowed for permission permission.name."));
+        expectedException.expectMessage(is("Only PermissionContext.empty() is allowed for permission taskboard.administration."));
 
-        Permission permission = new TaskboardAdministrationPermission("permission.name");
+        Permission permission = new TaskboardAdministrationPermission();
         permission.accepts(mock(LoggedUserDetails.class), new PermissionContext("target"));
     }
 

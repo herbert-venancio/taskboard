@@ -19,23 +19,23 @@ public class TaskboardAdministrationPermissionTest implements PermissionTest {
 
     @Test
     public void testName() {
-        Permission subject = new TaskboardAdministrationPermission("PERMISSION_NAME");
-        assertEquals("PERMISSION_NAME", subject.name());
+        Permission subject = new TaskboardAdministrationPermission();
+        assertEquals("taskboard.administration", subject.name());
     }
 
     @Test
     public void testAcceptsArguments() {
         expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage(is("Only PermissionContext.empty() is allowed for permission PERMISSION_NAME."));
+        expectedException.expectMessage(is("Only PermissionContext.empty() is allowed for permission taskboard.administration."));
 
-        Permission subject = new TaskboardAdministrationPermission("PERMISSION_NAME");
+        Permission subject = new TaskboardAdministrationPermission();
 
         subject.accepts(loggedUser().withIsAdmin(true).build(), new PermissionContext("target"));
     }
 
     @Test
     public void testAccepts() {
-        Permission subject = new TaskboardAdministrationPermission("PERMISSION_NAME");
+        Permission subject = new TaskboardAdministrationPermission();
 
         assertTrue(subject.accepts(loggedUser().withIsAdmin(true).build(), PermissionContext.empty()));
 
