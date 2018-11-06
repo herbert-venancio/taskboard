@@ -1,8 +1,10 @@
 package objective.taskboard.auth.authorizer;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -17,7 +19,9 @@ import objective.taskboard.auth.authorizer.permission.TaskboardAdministrationPer
 
 public class PermissionRepositoryTest {
 
-    private PermissionRepository subject = new PermissionRepository();
+    private List<Permission> permissions = new ArrayList<>();
+    private List<PerProjectPermission> perProjectPermissions = new ArrayList<>();
+    private PermissionRepository subject = new PermissionRepository(permissions, perProjectPermissions);
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -28,14 +32,6 @@ public class PermissionRepositoryTest {
         expectedException.expectMessage(is("Permission INVALID_PERMISSION is invalid."));
 
         subject.findByName("INVALID_PERMISSION");
-    }
-
-    @Test
-    public void findAllSpecificProjectPermissions_shouldReturnOnlySpecificProjectPermissions() {
-        subject.findAllPerProjectPermissions()
-                .forEach(permission -> {
-                    assertTrue(permission instanceof PerProjectPermission);
-                });
     }
 
     @Test
