@@ -40,7 +40,7 @@
     <modal-wrap class="filters-modal" title="Filters">
       <modal-wrap-content>
         <h3 class="tb-label">Issue Types</h3>
-        <div id="issueTypes" class="config-slot-0 dc-chart--no-float"></div>
+        <div id="wipIssueTypes" class="config-slot-0 dc-chart--no-float"></div>
       </modal-wrap-content>
       <modal-wrap-footer> 
         <tb-button button=[[_btFilterClose]]></tb-button>
@@ -105,10 +105,6 @@
                     localStorageLevelItemName: {
                         type: String,
                         computed: 'computeLocalStorageLevelItemName(selectedProjectKey)'
-                    },
-                    plotData: {
-                        type: Object,
-                        value: null
                     },
                     _btFilterClose: {
                         type: Object,
@@ -223,12 +219,12 @@
                     });
                 },
 
-               createIssueTypeFilter: function () {
+                createIssueTypeFilter: function () {
                     this.set('options.0.hidden', false);
                     
-                    new IssueTypeFilter(this.plotData.issueTypes,this.$.issueTypes, (selectedTypes, isToggledAll) => {
-                        this.plotData.typeDimension.filterFunction((issueType) => selectedTypes.includes(issueType))
-                        this.set('options.0.cssClasses', isToggledAll ? '' : 'widget__button_highlighted')
+                    new IssueTypeFilter(this.plotData.issueTypes, this.$.issueTypes, (selectedTypes, isToggledAll) => {
+                        this.plotData.typeDimension.filterFunction((issueType) => selectedTypes.includes(issueType));
+                        this.set('options.0.cssClasses', isToggledAll ? '' : 'widget__button_highlighted');
                         this.createChart();
                     });
 

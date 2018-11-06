@@ -2,7 +2,7 @@
   [LICENSE]
   Taskboard
   ---
-  Copyright (C) 2015 - 2016 Objective Solutions
+  Copyright (C) 2015 - 2018 Objective Solutions
   ---
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU Affero General Public License as published by
@@ -23,9 +23,19 @@
     <template>
 
         <style>
+            .widget__body {
+                display: flex;
+            }
+            #cfd {
+                display: flex;
+                height: 100%;
+                width: 100%;
+            }
         </style>
 
-        <widget-wrap title="CFD" is-ready="{{isReady}}" tags="{{tags}}" options="{{options}}" chart="{{chart}}" error-message="{{errorMessage}}">
+        <widget-wrap title="CFD" is-ready="{{isReady}}" tags="{{tags}}" 
+                options="{{options}}" highcharts-chart="{{chart}}" 
+                error-message="{{errorMessage}}">
             <div id="cfd" class="tb-chart"></div>
         </widget-wrap>
 
@@ -34,7 +44,7 @@
                     >
             <modal-wrap-content>
                 <h3 class="tb-label">Issue Types</h3>
-                <div class="config-slot-0 dc-chart--no-float"></div>
+                <div id="issueTypes" class="config-slot-0 dc-chart--no-float"></div>
             </modal-wrap-content>
             <modal-wrap-footer>
                 <tb-button button=[[_btFilterClose]]></tb-button>
@@ -48,7 +58,7 @@
                 <h3 class="tb-label">Level</h3>
                 <div>
                     <label id="labelLevel"></label>
-                    <paper-radio-group class="radio-group" selected="{{settingLevel}}" aria-labelledby="labelLevel">
+                    <paper-radio-group class="radio-group" selected="{{settingIssueLevel}}" aria-labelledby="labelLevel">
                         <paper-radio-button name="Demand">Demand</paper-radio-button>
                         <paper-radio-button name="Feature">Feature</paper-radio-button>
                         <paper-radio-button name="Subtask">Subtask</paper-radio-button>
@@ -97,13 +107,16 @@
                     },
                     options: {
                         type: Array,
-                        readOnly: true,
                         value: null
                     },
-                    settingLevel: {
+                    settingIssueLevel: {
                         type: String,
                         notify: true,
                         value: 'Subtask'
+                    },
+                    localStorageLevelItemName: {
+                        type: String,
+                        computed: 'computeLocalStorageLevelItemName(selectedProjectKey)'
                     },
                     _btFilterClose: {
                         type: Object,
@@ -119,54 +132,56 @@
                     '_onProjectSelected(selectedProjectKey, selectedDate)'
                 ],
 
-                ready: function() {
-                    this._setOptions([
-                        {
-                            icon:'taskboard-icons:dashboard-filter'
-                            , title: 'Filters'
-                            , tap: () => this.$$('.filters-modal').open()
-                            , hidden: true
-                        },
-                        {
-                            icon: 'taskboard-icons:settings'
-                            , title: 'Settings'
-                            , tap: () => {
-                                this.settingLevel = this._getSavedLevel();
-                                this.$$('.settings-modal').open();
-                            }
-                            , cssClasses: ''
-                        }
-                    ]);
-
-                    var btFilterClose = ButtonBuilder('Ok').onClick(() => { 
-                        this.$$('.filters-modal').close();
-                    }).build();
-                    this.set('_btFilterClose', btFilterClose);
-
-                    var btLevelSave = ButtonBuilder('Save').onClick(() => {
-                        let savedLevel = this._getSavedLevel();
-                        if (savedLevel === this.settingLevel) {
-                            this.$$('.settings-modal').close();
-                            return;
-                        }
-                        localStorage.setItem(`dashboard.cfd-chart.${this.selectedProjectKey}.level`, this.settingLevel);
-                        this.$$('.settings-modal').close();
-                        this.loadCfdChart();
-                    }).build();
-                    this.set('_btLevelSave', btLevelSave);
+                _onProjectSelected: function (newSelectedProjectKey, previousSelectedProjectKey) {
+                    if (newSelectedProjectKey === previousSelectedProjectKey) {
+                        return;
+                    }
+                    this.reloadChart();
                 },
 
                 _getSavedLevel: function() {
                     return localStorage.getItem(`dashboard.cfd-chart.${this.selectedProjectKey}.level`) || 'Subtask';
                 },
 
-                _onProjectSelected: function() {
-                    this.loadCfdChart();
+                _getStatusOrderLUT: function (data) {
+                    const statusesOrderLUT = new Map();
+                    const statuses = Object.keys(data).reverse();
+                    Object.entries(statuses).forEach(([index, status]) => 
+                        statusesOrderLUT.set(status, Number(index)));
+                    return statusesOrderLUT;
+                },
+
+                _hashmapToArray: function (data) {
+                    const flattenData = Object.entries(data)
+                        .map(([status, dataPoints]) => 
+                            dataPoints.map((dataPoint) => 
+                                Object.assign(dataPoint, {status: status})))
+                        .flat();
+                    return flattenData;
+                },
+
+                computeLocalStorageLevelItemName: function (selectedProjectKey) {
+                    return `dashboard.cfd-chart.${selectedProjectKey}.level`;
+                },
+
+                ready: function() {
+                    dcUtils.registerOptions(this);
+                    this._btFilterClose = ButtonBuilder('Ok').onClick(() => this.$$('.filters-modal').close()).build();
+                    this._btLevelSave = ButtonBuilder('Save').onClick(() => {
+                        let savedLevel = this._getSavedLevel();
+                        if (savedLevel === this.settingIssueLevel) {
+                            this.$$('.settings-modal').close();
+                            return;
+                        }
+                        localStorage.setItem(this.localStorageLevelItemName, this.settingIssueLevel);
+                        this.$$('.settings-modal').close();
+                        this.reloadChart();
+                    }).build();
                 },
 
                 reset: function() {
-                    this.set('isReady', false);
-                    this.set('errorMessage', '');
+                    this.isReady = false;
+                    this.errorMessage = '';
                     this.set('options.0.cssClasses', '');
                     this.set('options.0.hidden', true);
 
@@ -174,23 +189,19 @@
                         this.xhr.abort();
                         this.xhr = null;
                     }
-                    if (!_.isEmpty(this.chart)) {
-                        dcDateRangeChartsService.deregisterChartInRange(this.chart);
-                        dc.deregisterChart(this.chart);
-                        this.set('chart', {});
-                    }
-                    if (this.issueListFilter) {
-                        dc.deregisterChart(this.issueListFilter);
-                        delete this.issueListFilter;
+                    if (this.chart) {
+                        dcDateRangeChartsService.deregisterHighchartsChart(this.chart.title.textStr);
+                        this.chart.destroy();
+                        this.chart = null;
                     }
                 },
 
-                handleErrors: function(error, cfdData) {
+                handleErrors: function(error, data) {
                     if(error) {
                         this.set('errorMessage', error.message);
                         return true;
                     }
-                    if(!Object.keys(cfdData.dataByStatus).length) {
+                    if(!Object.keys(data.dataByStatus).length) {
                         this.set('errorMessage', 'Impossible to generate CFD. No data for this project.');
                         return true;
                     }
@@ -200,201 +211,102 @@
 
                 createIssueListFilter: function() {
                     this.set('options.0.hidden', false);
-                    var div = this.$$('.config-slot-0');
-                    var list = dc.paperList(div);
-
-                    this.typeDim = this.ndx.dimension(function(d) {
-                        return d.issueType;
+                    const div = this.$.cfdIssueTypes;
+                    new IssueTypeFilter(this.plotData.issueTypes, this.$.issueTypes, (selectedTypes, isToggledAll) => {
+                        this.plotData.typeDimension.filterFunction((issueType) => selectedTypes.includes(issueType));
+                        this.set('options.0.cssClasses', isToggledAll ? '' : 'widget__button_highlighted');
+                        this.createChart();
                     });
-                    this.typeGroup = this.typeDim.group();
-
-                    list
-                        .dimension(this.typeDim)
-                        .group(this.typeGroup)
-                        .multiple(true)
-                        .title(function(d) {
-                            return d.key;
-                        })
-                        .promptValue('-none-')
-                        .promptText('All Issues');
-
-                    var all = list.data().map(list.keyAccessor());
-                    list.replaceFilter([all]);
-
-                    list.render();
-
-                    var highlightButton = function() {
-                        this.set('options.0.cssClasses', list.isAllSelected() ? '' : 'widget__button_highlighted');
-                    }.bind(this);
-                    list.on('filtered', highlightButton);
-
-                    this.issueListFilter = list;
                 },
 
-                groupByDate: function(cfdData) {
-                    var status = Object.keys(cfdData.dataByStatus).reverse();
-                    var graphData = [];
-                    // regroup based on date
-                    status.forEach(function(stat) {
-                        cfdData.dataByStatus[stat].forEach(function(d) {
-                            graphData.push({
-                                date: new Date(d.date),
-                                status: stat,
-                                count: d.count,
-                                issueType: d.type
-                            });
-                        })
-                    });
-
-                    return graphData;
-                },
-
-                loadCfdChart: function() {
+                reloadChart: function() {
                     this.reset();
-
-                    var self = this;
-
-                    var savedLevel = self._getSavedLevel();
-                    self.set('tags', [savedLevel]);
-                    self.xhr = d3.json(`/api/projects/${self.selectedProjectKey}/followup/cfd?level=${savedLevel}`, function(error, cfdData) {
-                        if(self.handleErrors(error, cfdData))
+                    const savedLevel = this._getSavedLevel();
+                    this.tags = [savedLevel];
+                    const url = `/api/projects/${this.selectedProjectKey}/followup/cfd?level=${savedLevel}`;
+                    this.xhr = $.getJSON(url);
+                    this.xhr.done((data) => {
+                        if(_.isEmpty(data.dataByStatus)){
+                            this.errorMessage = 'CFD has no data';
                             return;
-
-                        var status = Object.keys(cfdData.dataByStatus).reverse();
-
-                        self.cfdData = self.groupByDate(cfdData);
-                        var startDate = self.cfdData[0].date;
-                        var endDate = self.cfdData[self.cfdData.length-1].date;
-
-                        self.ndx = crossfilter(self.cfdData);
-                        // the (run) dimension is the dimension on which dc will iterate and will become the "X" axis
-                        self.cfdDim = self.ndx.dimension(function(d) {
-                            return d.date;
-                        });
-
-                        function compose(p, v, signal){
-                            if (!p.plotData[v.status]) 
-                            	p.plotData[v.status] = 0;
-
-                            p.plotData[v.status] += signal * v.count;
-                            return p;
                         }
 
-                        self.cfdGroup = self.cfdDim.group()
-                            .reduce(
-                                // reduce add
-                                (p, v) => compose(p, v, 1),
-                                // reduce sub
-                                (p, v) => compose(p, v, -1),
-                                // reduce init
-                                () => ({plotData: {}})
-                            );
-                        
-                        self.createChart(startDate, endDate);
-                        self.createIssueListFilter();
-                        
-                        // function to access correct data for each stack
-                        function stackAccessor(status) {
-                            return function(d) {
-                                return d.value.plotData[status];
-                            };
-                        }
-                        
-                        function yAxisRescale (baseStackStatus) {
-                        	return function (chart) {
-                                let dim = chart.dimension();
-                                let firstDate = chart.xAxisMin();
-                                let lastDate = chart.xAxisMax();
-                                let firstDateItems = dim.filter(firstDate).top(Infinity);
-                                let reducer = (acc, cur) => acc + cur;
-                                // minY it's the value of the stack base of the first visible day on chart 
-                                let minY = firstDateItems
-                                    .filter((item) => item.status === baseStackStatus)
-                                    .map((item) => item.count)
-                                    .reduce(reducer, 0);
-                                // maxY it's the sum of the values of the last visible day on chart
-                                let lastDateItems = dim.filter(lastDate).top(Infinity);
-                                let maxY = lastDateItems
-                                    .map((item) => item.count)
-                                    .reduce(reducer, 0);
-                                let yScale = d3.scale.linear().domain([minY, maxY]);
-                                chart.y(yScale);
-                            }
-                        }
-                        
-                        let baseStackStatus = status[0];
-                        
-                        self.chart
-                            .dimension(self.cfdDim)
-                             // the first stack must be added as a group (lib requirement)
-                            .group(self.cfdGroup, baseStackStatus, stackAccessor(baseStackStatus))
-                            .x(d3.time.scale().domain([startDate, endDate]));
-                        
-                        self.chart.on('preRedraw', yAxisRescale(baseStackStatus));
-                        
-                        status.forEach(function(stat) {
-                            // stackTitle(stat) generates a callback to generate the label for points in this stack
-                            self.chart.title(stat, function (d){
-                                let total = 0;
-                                let tokens = [
-                                    `${d.key.toLocaleDateString()}\n`,
-                                    `** ${stat}: ${d.value.plotData[stat]}**`
-                                ];
-                                Object.keys(d.value.plotData).reverse().forEach((key) => {
-                                    if (key !== stat)
-                                        tokens.push(`${key}: ${d.value.plotData[key]}`);
-                                    total += d.value.plotData[key];
-                                });
-                                tokens.push(`\nTotal: ${total}`);
-                                let label = tokens.join('\n')
-                                return label;
-                            });
-                        });
-
-                        // remove the first status because it was already added in the "group" invocation above
-                        status = status.splice(1);
-
-                        // add the other stacks, one for each remaining status
-                        status.forEach(function(stat) {
-                            // stack the status data; stackAccessor(stat) generates a callback
-                            // that tells dc how to read this stack data
-                            self.chart.stack(self.cfdGroup, stat, stackAccessor(stat))
-                        });
-
-                        self.chart.__legendables = self.chart.legendables;
-                        self.chart.legendables = function() {
-                            var items = self.chart.__legendables();
-                            return items.reverse();
-                        };
-
-                        dcDateRangeChartsService.registerChartInRangeAndRender(self.chart);
-
-                        self.isReady = true;
+                        this.plotData = this.prepareData(data);
+                        this.createIssueListFilter();
+                        this.createChart();
+                        this.isReady = true;
+                    });
+                    this.xhr.fail((error) => {
+                        this.errorMessage = error.responseText;
                     });
                 },
 
+                prepareData: function (data) {
+                    data = data.dataByStatus;
+                    const statusesOrderLUT = this._getStatusOrderLUT(data);
+                    const flattenedData = this._hashmapToArray(data);
 
-                createChart: function(startDate, endDate) {
-                    var chart = dc.lineChart("#cfd");
+                    flattenedData.forEach((dataPoint) => {
+                        dataPoint.date = new Date(Number(dataPoint.date));
+                        dataPoint.date.setHours(0, 0, 0, 0);
+                        dataPoint.date = dataPoint.date.getTime();
+                    });
 
-                    // basic chart configuration
-                    chart
-                        .margins({top: 15, right: 20, bottom: 20, left: 170})
-                        .legend(
-                            dcUtils.getDefaultLegend()
-                        )
-                        .colors(
-                            dcUtils.getDefaultColors()
-                        )
-                        .renderArea(true)
-                        .brushOn(false)       // don't select with drag-n-drop
-                        .mouseZoomable(false)  // zoom with mouse wheel
-                        .elasticY(false)       // must be false so that y axis will be customibly rescalabe
+                    const issueTypes = _.chain(flattenedData).map((item) => item.type).unique().value();
 
-                    dcUtils.setupChartDateTicks(chart, startDate, endDate, 14);
+                    const ndx = crossfilter(flattenedData);
+                    const statusesDimension = ndx.dimension('status');
+                    const typeDimension = ndx.dimension('type');
 
-                    this.set('chart', chart);
+                    const reduceAdd = (previous, current) => {
+                        if (previous[current.date] === undefined) {
+                            previous[current.date] = 0;
+                        }
+                        previous[current.date] += current.count;
+                        return previous;
+                    };
+
+                    const reduceSub = (previous, current) => {
+                        if (previous[current.date] === undefined) {
+                            previous[current.date] = 0;
+                        }
+                        previous[current.date] -= current.count;
+                        return previous;
+                    };
+
+                    const reduceInit = () => ( { } );
+
+                    const statusesGroup = statusesDimension.group();
+                    statusesGroup.reduce(reduceAdd, reduceSub, reduceInit);
+
+                    return Object.freeze({
+                        issueTypes: issueTypes,
+                        statusesOrderLUT: statusesOrderLUT,
+                        statusesGroup: statusesGroup,
+                        typeDimension: typeDimension
+                    });
                 },
+
+                createChart: function() {
+                    const cumulativeFlowByStatusByDate = this.plotData.statusesGroup.all();
+                    let series = cumulativeFlowByStatusByDate.map(
+                        ({key: status, value: cumulativeFlowByDate}) => 
+                            ({
+                                name: status, 
+                                data: Object.entries(cumulativeFlowByDate)
+                                    .map(([date, cumulativeFlow]) => [Number(date), cumulativeFlow])
+                            })
+                    );
+                    const statusesOrderLUT = this.plotData.statusesOrderLUT;
+                    series = series.sort((a, b) => statusesOrderLUT.get(a.name) - statusesOrderLUT.get(b.name));
+                    const builder = new CFDChartBuilder('cfd')
+                        .withTitle('CFD')
+                        .withChartType('area')
+                        .withSeriesData(series);
+                    this.chart = builder.build();
+                    dcDateRangeChartsService.registerHighchartsChart(this.chart.title.textStr, this.chart);
+                    dcDateRangeChartsService.applySelection(this.chart.title.textStr);
+                }
             });
         })();
     </script>
