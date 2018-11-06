@@ -46,12 +46,7 @@ public class ClusterAlgorithmExecution extends BackgroundTask<Map<String, Cluste
     }
 
     public long getExecutionId() {
-        read.lock();
-        try {
-            return executionId;
-        } finally {
-            read.unlock();
-        }
+        return executionId;
     }
 
     @Override

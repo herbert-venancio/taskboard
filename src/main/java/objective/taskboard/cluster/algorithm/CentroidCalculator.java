@@ -40,10 +40,6 @@ public class CentroidCalculator<T> {
         this.dimensions.put(name, new Dimension<>(valueExtractor));
     }
 
-    public Map<String, Dimension<T>> getDimensions() {
-        return Collections.unmodifiableMap(dimensions);
-    }
-
     public Centroid calculate(T point) {
         return calculate(singletonList(point))
                 .orElseThrow(() -> new RuntimeException("Unexpected empty returned"));
