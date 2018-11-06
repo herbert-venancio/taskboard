@@ -90,7 +90,7 @@ export class BaseClusterComponent extends ComponentLeaveConfirmation implements 
             this.showMessage('Error', error, SnackbarLevel.Error);
         } finally {
             this.spinner.hide();
-            this.isBaseClusterFormVerified = true;
+            this.isBaseClusterFormVerified = false;
         }
     }
 
