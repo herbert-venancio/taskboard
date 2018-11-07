@@ -1,6 +1,5 @@
 package objective.taskboard.team;
 import static java.util.stream.Collectors.toList;
-import static objective.taskboard.auth.authorizer.Permissions.TEAMS_EDIT_VIEW;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -23,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import objective.taskboard.auth.authorizer.Authorizer;
+import objective.taskboard.auth.authorizer.permission.TeamsEditViewPermission;
 import objective.taskboard.data.Team;
 import objective.taskboard.data.UserTeam;
 
@@ -31,20 +30,20 @@ import objective.taskboard.data.UserTeam;
 @RequestMapping("/ws/teams")
 class TeamsController {
 
-    private Authorizer authorizer;
     private UserTeamService userTeamService;
+    private TeamsEditViewPermission teamsEditViewPermission;
 
     @Autowired
     public TeamsController(
-            Authorizer authorizer,
-            UserTeamService userTeamService) {
-        this.authorizer = authorizer;
+            UserTeamService userTeamService,
+            TeamsEditViewPermission teamsEditViewPermission) {
         this.userTeamService = userTeamService;
+        this.teamsEditViewPermission = teamsEditViewPermission;
     }
 
     @GetMapping
     public ResponseEntity<?> getTeams() {
-        if (!authorizer.hasPermission(TEAMS_EDIT_VIEW))
+        if (!teamsEditViewPermission.isAuthorized())
             return new ResponseEntity<>(NOT_FOUND);
 
         return new ResponseEntity<>(TeamDto.from(userTeamService.getTeamsThatUserCanAdmin()), OK);
@@ -52,7 +51,7 @@ class TeamsController {
 
     @GetMapping(value="{teamName}")
     public ResponseEntity<?> getTeam(@PathVariable String teamName) {
-        if (!authorizer.hasPermission(TEAMS_EDIT_VIEW))
+        if (!teamsEditViewPermission.isAuthorized())
             return new ResponseEntity<>(NOT_FOUND);
 
         Optional<Team> team = findTeam(teamName);
@@ -65,7 +64,7 @@ class TeamsController {
     @PutMapping(value="{teamName}")
     @Transactional
     public ResponseEntity<?> updateTeam(@PathVariable String teamName, @RequestBody TeamDto teamDto) {
-        if (!authorizer.hasPermission(TEAMS_EDIT_VIEW))
+        if (!teamsEditViewPermission.isAuthorized())
             return new ResponseEntity<>(NOT_FOUND);
 
         List<String> errors = validateTeam(teamDto);

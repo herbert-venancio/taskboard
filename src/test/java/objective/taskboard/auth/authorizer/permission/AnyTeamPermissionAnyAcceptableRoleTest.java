@@ -36,9 +36,9 @@ public class AnyTeamPermissionAnyAcceptableRoleTest implements PermissionTest {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage(is("Only PermissionContext.empty() is allowed for permission PERMISSION_NAME."));
 
-        Permission subject = new AnyTeamPermissionAnyAcceptableRole("PERMISSION_NAME", loggedUser().build(), userTeamRepository().build(), UserTeamRole.MANAGER);
+        AnyTeamPermissionAnyAcceptableRole subject = new AnyTeamPermissionAnyAcceptableRole("PERMISSION_NAME", loggedUser().build(), userTeamRepository().build(), UserTeamRole.MANAGER);
 
-        subject.isAuthorized(new PermissionContext("target"));
+        subject.isAuthorizedFor("target");
     }
 
     @Test
@@ -55,12 +55,12 @@ public class AnyTeamPermissionAnyAcceptableRoleTest implements PermissionTest {
                 ).build();
 
         LoggedUserDetails userWithPermission = loggedUser().withName("USER1").build();
-        Permission subject = new AnyTeamPermissionAnyAcceptableRole("PERMISSION_NAME", userWithPermission, userTeamRepo, UserTeamRole.MANAGER, UserTeamRole.MEMBER);
-        assertTrue(subject.isAuthorized(PermissionContext.empty()));
+        AnyTeamPermissionAnyAcceptableRole subject = new AnyTeamPermissionAnyAcceptableRole("PERMISSION_NAME", userWithPermission, userTeamRepo, UserTeamRole.MANAGER, UserTeamRole.MEMBER);
+        assertTrue(subject.isAuthorized());
 
         LoggedUserDetails userWithoutPermission = loggedUser().withName("USER2").build();
         subject = new AnyTeamPermissionAnyAcceptableRole("PERMISSION_NAME", userWithoutPermission, userTeamRepo, UserTeamRole.MANAGER, UserTeamRole.MEMBER);
-        assertFalse(subject.isAuthorized(PermissionContext.empty()));
+        assertFalse(subject.isAuthorized());
     }
 
 }

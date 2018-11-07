@@ -33,9 +33,9 @@ public class AnyProjectPermissionTest implements PermissionTest {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage(is("Only PermissionContext.empty() is allowed for permission PERMISSION_NAME."));
 
-        Permission subject = new AnyProjectPermission("PERMISSION_NAME", loggedUser().build(), "role1", "role2");
+        AnyProjectPermission subject = new AnyProjectPermission("PERMISSION_NAME", loggedUser().build(), "role1", "role2");
 
-        subject.isAuthorized(new PermissionContext("target"));
+        subject.isAuthorizedFor("target");
     }
 
     @Test
@@ -44,9 +44,9 @@ public class AnyProjectPermissionTest implements PermissionTest {
                 role("role1", "PROJ1"),
                 role("role3", "PROJ1")
                 ).build();
-        Permission subject = new AnyProjectPermission("PERMISSION_NAME", userWithPermission, "role1", "role2");
+        AnyProjectPermission subject = new AnyProjectPermission("PERMISSION_NAME", userWithPermission, "role1", "role2");
         
-        assertTrue(subject.isAuthorized(PermissionContext.empty()));
+        assertTrue(subject.isAuthorized());
 
         LoggedUserDetails userWithoutPermission = loggedUser().withRoles(
                 role("role3", "PROJ1"),
@@ -54,6 +54,6 @@ public class AnyProjectPermissionTest implements PermissionTest {
                 ).build();
         subject = new AnyProjectPermission("PERMISSION_NAME", userWithoutPermission, "role1", "role2");
         
-        assertFalse(subject.isAuthorized(PermissionContext.empty()));
+        assertFalse(subject.isAuthorized());
     }
 }

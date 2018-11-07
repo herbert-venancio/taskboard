@@ -2,7 +2,6 @@ package objective.taskboard.team;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-import static objective.taskboard.auth.authorizer.Permissions.TEAM_EDIT;
 import static objective.taskboard.data.UserTeam.UserTeamRole.MANAGER;
 import static objective.taskboard.data.UserTeam.UserTeamRole.MEMBER;
 
@@ -14,7 +13,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import objective.taskboard.auth.authorizer.Authorizer;
+import objective.taskboard.auth.authorizer.permission.TeamEditPermission;
 import objective.taskboard.data.Team;
 import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.repository.UserTeamCachedRepository;
@@ -25,18 +24,18 @@ public class UserTeamService {
     private final UserTeamCachedRepository userTeamRepo;
     private final TeamCachedRepository teamRepo;
     private final UserTeamPermissionService userTeamPermissionService;
-    private final Authorizer authorizer;
+    private final TeamEditPermission teamEditPermission;
 
     @Autowired
     public UserTeamService(
             UserTeamCachedRepository userTeamRepo, 
             TeamCachedRepository teamRepo,
             UserTeamPermissionService userTeamPermissionService,
-            Authorizer authorizer) {
+            TeamEditPermission teamEditPermission) {
         this.userTeamRepo = userTeamRepo;
         this.teamRepo = teamRepo;
         this.userTeamPermissionService = userTeamPermissionService;
-        this.authorizer = authorizer;
+        this.teamEditPermission = teamEditPermission;
     }
 
     public List<Long> getIdsOfTeamsVisibleToUser() {
@@ -47,7 +46,7 @@ public class UserTeamService {
 
     public Set<Team> getTeamsThatUserCanAdmin() {
         return teamRepo.getCache().stream()
-                .filter(t -> authorizer.hasPermission(TEAM_EDIT, t.getName()))
+                .filter(t -> teamEditPermission.isAuthorizedFor(t.getName()))
                 .collect(toSet());
     }
 

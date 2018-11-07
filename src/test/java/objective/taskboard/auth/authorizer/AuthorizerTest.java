@@ -26,28 +26,6 @@ import objective.taskboard.auth.authorizer.permission.Permission;
 public class AuthorizerTest {
 
     @Test
-    public void hasPermission_givenUserWithPermission_returnTrue() {
-        Authorizer subject = authorizer()
-                .withPermissions(
-                        permission().withName("taskboard.admin.test").withIsAuthorized(true).asTargetless()
-                        )
-                .build();
-
-        assertTrue(subject.hasPermission("taskboard.admin.test"));
-    }
-
-    @Test
-    public void hasPermission_givenUserWithoutPermission_returnFalse() {
-        Authorizer subject = authorizer()
-                .withPermissions(
-                        permission().withName("taskboard.admin.test").withIsAuthorized(false).asTargetless()
-                        )
-                .build();
-
-        assertFalse(subject.hasPermission("taskboard.admin.test"));
-    }
-
-    @Test
     public void getPermissions_returnTargettedIfHApplicableTargetsIsntEmptyAndTargetlessIfIsAuthorizedEqualsTrue() {
         Authorizer subject = authorizer()
                 .withPermissions(

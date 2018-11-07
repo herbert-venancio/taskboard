@@ -1,7 +1,5 @@
 package objective.taskboard.controller;
 
-import static objective.taskboard.auth.authorizer.Permissions.PROJECT_DASHBOARD_VIEW;
-
 import java.io.IOException;
 
 import org.codehaus.jackson.map.ObjectMapper;
@@ -12,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import objective.taskboard.TaskboardProperties;
 import objective.taskboard.auth.authorizer.Authorizer;
+import objective.taskboard.auth.authorizer.permission.ProjectDashboardViewPermission;
 import objective.taskboard.data.User;
 import objective.taskboard.jira.JiraService;
 
@@ -27,9 +26,12 @@ public class FollowUpDashboardController {
     @Autowired
     private Authorizer authorizer;
 
+    @Autowired
+    private ProjectDashboardViewPermission projectDashboardViewPermission;
+
     @RequestMapping("/followup-dashboard")
     public String followUpDashboard(Model model) {
-        if (!authorizer.hasPermission(PROJECT_DASHBOARD_VIEW))
+        if (!projectDashboardViewPermission.isAuthorized())
             throw new ResourceNotFoundException();
 
         User user = jiraService.getLoggedUser();

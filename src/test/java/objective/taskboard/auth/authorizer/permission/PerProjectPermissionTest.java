@@ -33,9 +33,9 @@ public class PerProjectPermissionTest implements PermissionTest {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage(is("Empty PermissionContext isn't allowed for permission PERMISSION_NAME."));
 
-        Permission subject = new PerProjectPermission("PERMISSION_NAME", loggedUser().build(), "role1", "role2");
+        PerProjectPermission subject = new PerProjectPermission("PERMISSION_NAME", loggedUser().build(), "role1", "role2");
 
-        subject.isAuthorized(PermissionContext.empty());
+        subject.isAuthorized();
     }
 
     @Test
@@ -44,15 +44,15 @@ public class PerProjectPermissionTest implements PermissionTest {
                 role("role1", "PROJ1"),
                 role("role3", "PROJ1")
                 ).build();
-        Permission subject = new PerProjectPermission("PERMISSION_NAME", userWithPermission, "role1", "role2");
-        assertTrue(subject.isAuthorized(new PermissionContext("PROJ1")));
+        PerProjectPermission subject = new PerProjectPermission("PERMISSION_NAME", userWithPermission, "role1", "role2");
+        assertTrue(subject.isAuthorizedFor("PROJ1"));
 
         LoggedUserDetails userWithoutPermission = loggedUser().withRoles(
                 role("role1", "PROJ2"),
                 role("role3", "PROJ2")
                 ).build();
         subject = new PerProjectPermission("PERMISSION_NAME", userWithoutPermission, "role1", "role2");
-        assertFalse(subject.isAuthorized(new PermissionContext("PROJ1")));
+        assertFalse(subject.isAuthorizedFor("PROJ1"));
     }
 
 }

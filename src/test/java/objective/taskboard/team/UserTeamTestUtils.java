@@ -5,8 +5,6 @@ import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
-import static objective.taskboard.auth.authorizer.Permissions.TASKBOARD_ADMINISTRATION;
-import static objective.taskboard.auth.authorizer.Permissions.TEAM_EDIT;
 import static objective.taskboard.utils.StreamUtils.streamOf;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -20,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import objective.taskboard.auth.LoggedUserDetails;
-import objective.taskboard.auth.authorizer.Authorizer;
+import objective.taskboard.auth.authorizer.permission.TeamEditPermission;
 import objective.taskboard.data.Team;
 import objective.taskboard.data.UserTeam;
 import objective.taskboard.data.UserTeam.UserTeamRole;
@@ -33,19 +31,19 @@ public class UserTeamTestUtils {
     private final TeamFilterConfigurationService teamFilterConfigurationService;
     private final TeamCachedRepository teamRepo;
     private final UserTeamCachedRepository userTeamRepo;
-    private final Authorizer authorizer;
+    private final TeamEditPermission teamEditPermission;
     private final LoggedUserDetails loggedUserDetails;
 
     public UserTeamTestUtils(
             TeamFilterConfigurationService teamFilterConfigurationService,
             TeamCachedRepository teamRepo,
             UserTeamCachedRepository userTeamRepo,
-            Authorizer authorizer,
+            TeamEditPermission teamEditPermission,
             LoggedUserDetails loggedUserDetails) {
         this.teamFilterConfigurationService = teamFilterConfigurationService;
         this.teamRepo = teamRepo;
         this.userTeamRepo = userTeamRepo;
-        this.authorizer = authorizer;
+        this.teamEditPermission = teamEditPermission;
         this.loggedUserDetails = loggedUserDetails;
     }
 
@@ -151,18 +149,8 @@ public class UserTeamTestUtils {
                 return this;
             }
 
-            public DSLLoggedUser hasTaskboardAdministrationPermission() {
-                when(authorizer.hasPermission(TASKBOARD_ADMINISTRATION)).thenReturn(true);
-                return this;
-            }
-
-            public DSLLoggedUser hasNotTaskboardAdministrationPermission() {
-                when(authorizer.hasPermission(TASKBOARD_ADMINISTRATION)).thenReturn(false);
-                return this;
-            }
-
             public DSLLoggedUser hasTeamEditPermissionFor(String... teamsName) {
-                stream(teamsName).forEach(name -> when(authorizer.hasPermission(TEAM_EDIT, name)).thenReturn(true));
+                stream(teamsName).forEach(name -> when(teamEditPermission.isAuthorizedFor(name)).thenReturn(true));
                 return this;
             }
 

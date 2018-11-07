@@ -1,6 +1,5 @@
 package objective.taskboard.controller;
 
-import static objective.taskboard.auth.authorizer.Permissions.FOLLOWUP_TEMPLATE_EDIT;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
@@ -18,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import objective.taskboard.auth.authorizer.Authorizer;
+import objective.taskboard.auth.authorizer.permission.FollowUpTemplateEditPermission;
 import objective.taskboard.followup.FollowUpFacade;
 
 @RestController
@@ -30,11 +29,11 @@ public class TemplateController {
     private FollowUpFacade followUpFacade;
 
     @Autowired
-    private Authorizer authorizer;
+    private FollowUpTemplateEditPermission followUpTemplateEditPermission;
 
     @RequestMapping
     public List<TemplateData> get() {
-        if (!authorizer.hasPermission(FOLLOWUP_TEMPLATE_EDIT))
+        if (!followUpTemplateEditPermission.isAuthorized())
             return followUpFacade.getTemplatesForCurrentUser();
         return followUpFacade.getTemplates();
     }
@@ -44,7 +43,7 @@ public class TemplateController {
             , @RequestParam("name") String templateName
             , @RequestParam("roles") List<String> roles) throws IOException {
 
-        if (!authorizer.hasPermission(FOLLOWUP_TEMPLATE_EDIT))
+        if (!followUpTemplateEditPermission.isAuthorized())
             throw new ResourceNotFoundException();
 
         followUpFacade.createTemplate(templateName, roles, file);
@@ -56,7 +55,7 @@ public class TemplateController {
             , @RequestParam("name") String templateName
             , @RequestParam("roles") List<String> roles) throws IOException {
 
-        if (!authorizer.hasPermission(FOLLOWUP_TEMPLATE_EDIT))
+        if (!followUpTemplateEditPermission.isAuthorized())
             throw new ResourceNotFoundException();
 
         followUpFacade.updateTemplate(id, templateName, roles, file);
@@ -64,7 +63,7 @@ public class TemplateController {
 
     @RequestMapping(value = "{id}", method = RequestMethod.DELETE)
     public void delete(@PathVariable("id") Long id) throws IOException {
-        if (!authorizer.hasPermission(FOLLOWUP_TEMPLATE_EDIT))
+        if (!followUpTemplateEditPermission.isAuthorized())
             throw new ResourceNotFoundException();
 
         followUpFacade.deleteTemplate(id);
@@ -72,7 +71,7 @@ public class TemplateController {
 
     @RequestMapping("{id}")
     public ResponseEntity<Object> downloadSavedTemplate(@PathVariable("id") Long id) {
-        if (!authorizer.hasPermission(FOLLOWUP_TEMPLATE_EDIT))
+        if (!followUpTemplateEditPermission.isAuthorized())
             return new ResponseEntity<>("Template not found.", NOT_FOUND);
 
         try {

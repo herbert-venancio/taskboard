@@ -1,7 +1,5 @@
 package objective.taskboard.controller;
 
-import static objective.taskboard.auth.authorizer.Permissions.PROJECT_DASHBOARD_OPERATIONAL;
-import static objective.taskboard.auth.authorizer.Permissions.PROJECT_DASHBOARD_TACTICAL;
 import static objective.taskboard.utils.DateTimeUtils.determineTimeZoneId;
 
 import java.time.ZoneId;
@@ -15,7 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import objective.taskboard.auth.authorizer.Authorizer;
+import objective.taskboard.auth.authorizer.permission.ProjectDashboardOperationalPermission;
+import objective.taskboard.auth.authorizer.permission.ProjectDashboardTacticalPermission;
 import objective.taskboard.followup.WipKPIDataProvider;
 import objective.taskboard.jira.ProjectService;
 
@@ -26,10 +25,13 @@ public class WipKPIController {
     private WipKPIDataProvider wipDataProvider;
     
     @Autowired
-    private Authorizer authorizer;
-    
-    @Autowired
     private ProjectService projectService;
+
+    @Autowired
+    private ProjectDashboardTacticalPermission dashboardTacticalPermission;
+
+    @Autowired
+    private ProjectDashboardOperationalPermission projectDashboardOperationalPermission;
     
     @RequestMapping(value = "/api/projects/{project}/followup/wip", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> data(
@@ -37,8 +39,8 @@ public class WipKPIController {
             @RequestParam("timezone") String zoneId,
             @RequestParam("level") String level) {
         
-        if (!authorizer.hasPermission(PROJECT_DASHBOARD_TACTICAL, projectKey)
-                && !authorizer.hasPermission(PROJECT_DASHBOARD_OPERATIONAL, projectKey))
+        if (!dashboardTacticalPermission.isAuthorizedFor(projectKey)
+                && !projectDashboardOperationalPermission.isAuthorizedFor(projectKey))
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
         if (!projectService.taskboardProjectExists(projectKey))

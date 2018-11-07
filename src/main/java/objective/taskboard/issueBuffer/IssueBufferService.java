@@ -21,7 +21,6 @@
 package objective.taskboard.issueBuffer;
 
 import static java.util.stream.Collectors.toList;
-import static objective.taskboard.auth.authorizer.Permissions.PROJECT_ADMINISTRATION;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,7 +45,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 
 import objective.taskboard.auth.CredentialsHolder;
-import objective.taskboard.auth.authorizer.Authorizer;
+import objective.taskboard.auth.authorizer.permission.ProjectAdministrationPermission;
 import objective.taskboard.data.Issue;
 import objective.taskboard.data.ProjectsUpdateEvent;
 import objective.taskboard.data.TaskboardIssue;
@@ -104,13 +103,13 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
     private CardRepoService cardsRepoService;
 
     @Autowired
-    private Authorizer authorizer;
-
-    @Autowired
     private TeamCachedRepository teamRepo;
 
     @Autowired
     private CardStatusOrderCalculator statusOrderCalculator;
+
+    @Autowired
+    private ProjectAdministrationPermission projectAdministrationPermission;
     
     private CardRepo cardsRepo;
     
@@ -523,7 +522,7 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
                     .map(IssueBufferService.this::getIssueByKey)
                     .map(Issue::getProjectKey)
                     .distinct()
-                    .filter(projectKey -> !authorizer.hasPermission(PROJECT_ADMINISTRATION, projectKey))
+                    .filter(projectKey -> !projectAdministrationPermission.isAuthorizedFor(projectKey))
                     .collect(Collectors.toSet());
             if(!projectsWithoutPermission.isEmpty()) {
                 throw new FrontEndMessageException("User doesn't have permission to reoder issues of " + projectsWithoutPermission);

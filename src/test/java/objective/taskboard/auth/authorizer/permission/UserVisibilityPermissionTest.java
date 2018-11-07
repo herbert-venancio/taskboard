@@ -7,7 +7,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -41,13 +40,13 @@ public class UserVisibilityPermissionTest implements PermissionTest {
 
     @Test
     public void testIsAuthorizedArguments() {
-        Permission subject = permission()
+        UserVisibilityPermission subject = permission()
                 .build();
 
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage(is("Empty PermissionContext isn't allowed for permission user.visibility."));
 
-        subject.isAuthorized(PermissionContext.empty());
+        subject.isAuthorized();
     }
 
     @Test
@@ -60,34 +59,34 @@ public class UserVisibilityPermissionTest implements PermissionTest {
     }
 
     private boolean givenUserWithTaskboardAdministrationPermission() {
-        Permission subject = permission()
+        UserVisibilityPermission subject = permission()
                 .withUserTaskboardAdministrationPermission(true)
                 .withVisibleTeams()
                 .build();
 
-        return subject.isAuthorized(new PermissionContext("USER_A"));
+        return subject.isAuthorizedFor("USER_A");
     }
 
     private boolean givenUserWithoutTaskboardAdministrationPermission_butWithTeamInCommonUserTargettedUser() {
-        Permission subject = permission()
+        UserVisibilityPermission subject = permission()
                 .withUserTaskboardAdministrationPermission(false)
                 .withVisibleTeams(
                         teamWithMembers("John", "Mary"),
                         teamWithMembers("Peter", "Joseph"))
                 .build();
 
-        return subject.isAuthorized(new PermissionContext("John"));
+        return subject.isAuthorizedFor("John");
     }
 
     private boolean givenUserWithoutTaskboardAdministrationPermission_andNoTeamInCommonUserTargettedUser() {
-        Permission subject = permission()
+        UserVisibilityPermission subject = permission()
                 .withUserTaskboardAdministrationPermission(false)
                 .withVisibleTeams(
                         teamWithMembers("John", "Mary"),
                         teamWithMembers("Peter", "Joseph"))
                 .build();
 
-        return subject.isAuthorized(new PermissionContext("Mark"));
+        return subject.isAuthorizedFor("Mark");
     }
 
     private Team teamWithMembers(String... members) {
@@ -113,7 +112,7 @@ public class UserVisibilityPermissionTest implements PermissionTest {
         private UserTeamPermissionService userTeamPermissionService = mock(UserTeamPermissionService.class);
 
         public DSLBuilder withUserTaskboardAdministrationPermission(boolean hasPermission) {
-            when(tbAdminPermission.isAuthorized(any())).thenReturn(hasPermission);
+            when(tbAdminPermission.isAuthorized()).thenReturn(hasPermission);
             return this;
         }
 

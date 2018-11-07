@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,8 +19,6 @@ import objective.taskboard.auth.authorizer.permission.TargettedPermission;
 @Service
 public class Authorizer {
 
-    private static final Logger log = LoggerFactory.getLogger(Authorizer.class);
-
     private LoggedUserDetails userDetails;
     private PermissionRepository permissionRepository;
 
@@ -30,19 +26,6 @@ public class Authorizer {
     public Authorizer(LoggedUserDetails userDetails, PermissionRepository permissionRepository) {
         this.userDetails = userDetails;
         this.permissionRepository = permissionRepository;
-    }
-
-    public boolean hasPermission(String permission) {
-        boolean isAuthorized = permissionRepository.findByName(permission).isAuthorized(PermissionContext.empty());
-        log.debug("Authorize permission \"{}\": {}", permission, isAuthorized);
-        return isAuthorized;
-    }
-
-    public boolean hasPermission(String permission, String target) {
-        boolean isAuthorized = permissionRepository.findByName(permission)
-                .isAuthorized(new PermissionContext(target));
-        log.debug("Authorize permission \"{}\" for target \"{}\": {}", permission, target, isAuthorized);
-        return isAuthorized;
     }
 
     public List<PermissionDto> getPermissions() {

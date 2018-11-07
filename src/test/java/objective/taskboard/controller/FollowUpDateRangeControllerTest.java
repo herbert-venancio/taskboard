@@ -1,7 +1,5 @@
 package objective.taskboard.controller;
 
-import static objective.taskboard.auth.authorizer.Permissions.PROJECT_DASHBOARD_OPERATIONAL;
-import static objective.taskboard.auth.authorizer.Permissions.PROJECT_DASHBOARD_TACTICAL;
 import static objective.taskboard.testUtils.ControllerTestUtils.asJsonStringResponseOnly;
 import static objective.taskboard.testUtils.ControllerTestUtils.getDefaultMockMvc;
 import static objective.taskboard.testUtils.ControllerTestUtils.getLocalDateSerialized;
@@ -23,7 +21,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
-import objective.taskboard.auth.authorizer.Authorizer;
+import objective.taskboard.auth.authorizer.permission.ProjectDashboardOperationalPermission;
+import objective.taskboard.auth.authorizer.permission.ProjectDashboardTacticalPermission;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.FollowUpDateRangeProvider;
 import objective.taskboard.followup.FollowUpDateRangeProvider.FollowUpProjectDataRangeDTO;
@@ -40,7 +39,10 @@ public class FollowUpDateRangeControllerTest {
     private MockMvc mockMvc;
 
     @Mock
-    private Authorizer authorizer;
+    private ProjectDashboardTacticalPermission projectDashboardTacticalPermission;
+
+    @Mock
+    private ProjectDashboardOperationalPermission projectDashboardOperationalPermission;
 
     @Mock
     private ProjectService projectService;
@@ -66,8 +68,8 @@ public class FollowUpDateRangeControllerTest {
         taskboardProject.setStartDate(startDate);
         taskboardProject.setDeliveryDate(deliveryDate);
 
-        when(authorizer.hasPermission(PROJECT_DASHBOARD_TACTICAL, PROJECT_KEY)).thenReturn(true);
-        when(authorizer.hasPermission(PROJECT_DASHBOARD_OPERATIONAL, PROJECT_KEY)).thenReturn(true);
+        when(projectDashboardTacticalPermission.isAuthorizedFor(PROJECT_KEY)).thenReturn(true);
+        when(projectDashboardOperationalPermission.isAuthorizedFor(PROJECT_KEY)).thenReturn(true);
         when(projectService.taskboardProjectExists(PROJECT_KEY)).thenReturn(true);
         when(provider.getDateRangeData(PROJECT_KEY)).thenReturn(new FollowUpProjectDataRangeDTO(taskboardProject));
 
@@ -85,8 +87,8 @@ public class FollowUpDateRangeControllerTest {
     public void ifThereIsNoStartOrDeliveryDate_returnInternalServerError() throws Exception {
         final String expectedError = "No \"Start Date\" or \"Delivery Date\" configuration found for project " + PROJECT_KEY + ".";
 
-        when(authorizer.hasPermission(PROJECT_DASHBOARD_TACTICAL, PROJECT_KEY)).thenReturn(true);
-        when(authorizer.hasPermission(PROJECT_DASHBOARD_OPERATIONAL, PROJECT_KEY)).thenReturn(true);
+        when(projectDashboardTacticalPermission.isAuthorizedFor(PROJECT_KEY)).thenReturn(true);
+        when(projectDashboardOperationalPermission.isAuthorizedFor(PROJECT_KEY)).thenReturn(true);
         when(projectService.taskboardProjectExists(PROJECT_KEY)).thenReturn(true);
         when(provider.getDateRangeData(PROJECT_KEY)).thenThrow(new FrontEndMessageException(expectedError));
 
@@ -99,15 +101,15 @@ public class FollowUpDateRangeControllerTest {
     public void ifUserHasNoPermissionInTacticalOrOperational_returnResourceNotFound() throws Exception {
         final String expectedError = "Resource not found.";
 
-        when(authorizer.hasPermission(PROJECT_DASHBOARD_TACTICAL, PROJECT_KEY)).thenReturn(true);
-        when(authorizer.hasPermission(PROJECT_DASHBOARD_OPERATIONAL, PROJECT_KEY)).thenReturn(false);
+        when(projectDashboardTacticalPermission.isAuthorizedFor(PROJECT_KEY)).thenReturn(true);
+        when(projectDashboardOperationalPermission.isAuthorizedFor(PROJECT_KEY)).thenReturn(false);
 
         mockMvc.perform(get("/api/projects/"+PROJECT_KEY+"/followup/date-range"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().json(asJsonStringResponseOnly(expectedError)));
 
-        when(authorizer.hasPermission(PROJECT_DASHBOARD_TACTICAL, PROJECT_KEY)).thenReturn(false);
-        when(authorizer.hasPermission(PROJECT_DASHBOARD_OPERATIONAL, PROJECT_KEY)).thenReturn(true);
+        when(projectDashboardTacticalPermission.isAuthorizedFor(PROJECT_KEY)).thenReturn(false);
+        when(projectDashboardOperationalPermission.isAuthorizedFor(PROJECT_KEY)).thenReturn(true);
 
         mockMvc.perform(get("/api/projects/"+PROJECT_KEY+"/followup/date-range"))
                 .andExpect(status().isNotFound())
@@ -118,8 +120,8 @@ public class FollowUpDateRangeControllerTest {
     public void ifProjectDoesntExist_returnProjectNotFound() throws Exception {
         final String expectedError = "Project not found: " + PROJECT_KEY + ".";
 
-        when(authorizer.hasPermission(PROJECT_DASHBOARD_TACTICAL, PROJECT_KEY)).thenReturn(true);
-        when(authorizer.hasPermission(PROJECT_DASHBOARD_OPERATIONAL, PROJECT_KEY)).thenReturn(true);
+        when(projectDashboardTacticalPermission.isAuthorizedFor(PROJECT_KEY)).thenReturn(true);
+        when(projectDashboardOperationalPermission.isAuthorizedFor(PROJECT_KEY)).thenReturn(true);
         when(projectService.taskboardProjectExists(PROJECT_KEY)).thenReturn(false);
 
         mockMvc.perform(get("/api/projects/"+PROJECT_KEY+"/followup/date-range"))

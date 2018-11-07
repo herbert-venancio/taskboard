@@ -15,21 +15,21 @@ public class ComposedPermissionAnyMatchTest {
 
     @Test
     public void isAuthorized_everyPermissionIsNotAuthorized_shouldReturnFalse() {
-        Permission permission = new ComposedPermissionAnyMatchImpl("ANY", loggedUserDetails,
+        ComposedPermissionAnyMatch permission = new ComposedPermissionAnyMatchImpl("ANY", loggedUserDetails,
                 permission().withIsAuthorized(false).asTargetted(),
                 permission().withIsAuthorized(false).asTargetless());
 
-        assertFalse(permission.isAuthorized(null));
+        assertFalse(permission.isAuthorized());
     }
 
     @Test
     public void isAuthorized_onePermissionIsAuthorized_shouldReturnTrue() {
-        Permission permission = new ComposedPermissionAnyMatchImpl("ANY", loggedUserDetails,
+        ComposedPermissionAnyMatch permission = new ComposedPermissionAnyMatchImpl("ANY", loggedUserDetails,
                 permission().withIsAuthorized(false).asTargetted(),
                 permission().withIsAuthorized(true).asTargetless(),
                 permission().withIsAuthorized(false).asTargetted());
         
-        assertTrue(permission.isAuthorized(null));
+        assertTrue(permission.isAuthorized());
     }
 
     private static class ComposedPermissionAnyMatchImpl extends ComposedPermissionAnyMatch {

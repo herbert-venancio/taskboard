@@ -36,9 +36,9 @@ public class PerTeamPermissionAnyAcceptableRoleTest implements PermissionTest {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage(is("Empty PermissionContext isn't allowed for permission PERMISSION_NAME."));
 
-        Permission subject = new PerTeamPermissionAnyAcceptableRole("PERMISSION_NAME", loggedUser().build(), userTeamRepository().build(), UserTeamRole.MANAGER);
+        PerTeamPermissionAnyAcceptableRole subject = new PerTeamPermissionAnyAcceptableRole("PERMISSION_NAME", loggedUser().build(), userTeamRepository().build(), UserTeamRole.MANAGER);
 
-        subject.isAuthorized(PermissionContext.empty());
+        subject.isAuthorized();
     }
 
     @Test
@@ -50,13 +50,13 @@ public class PerTeamPermissionAnyAcceptableRoleTest implements PermissionTest {
                 userTeam("USER", "TEAM3", UserTeamRole.VIEWER)
                 ).build();
 
-        Permission subject = new PerTeamPermissionAnyAcceptableRole("PERMISSION_NAME", loggedUser().withName("USER").build(), userTeamRepo, UserTeamRole.MANAGER, UserTeamRole.MEMBER);
+        PerTeamPermissionAnyAcceptableRole subject = new PerTeamPermissionAnyAcceptableRole("PERMISSION_NAME", loggedUser().withName("USER").build(), userTeamRepo, UserTeamRole.MANAGER, UserTeamRole.MEMBER);
 
-        assertTrue(subject.isAuthorized(new PermissionContext("TEAM1")));
+        assertTrue(subject.isAuthorizedFor("TEAM1"));
 
-        assertTrue(subject.isAuthorized(new PermissionContext("TEAM2")));
+        assertTrue(subject.isAuthorizedFor("TEAM2"));
 
-        assertFalse(subject.isAuthorized(new PermissionContext("TEAM3")));
+        assertFalse(subject.isAuthorizedFor("TEAM3"));
     }
 
 }

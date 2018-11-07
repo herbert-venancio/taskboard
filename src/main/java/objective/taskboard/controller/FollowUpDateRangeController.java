@@ -1,7 +1,5 @@
 package objective.taskboard.controller;
 
-import static objective.taskboard.auth.authorizer.Permissions.PROJECT_DASHBOARD_OPERATIONAL;
-import static objective.taskboard.auth.authorizer.Permissions.PROJECT_DASHBOARD_TACTICAL;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 
@@ -14,7 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import objective.taskboard.auth.authorizer.Authorizer;
+import objective.taskboard.auth.authorizer.permission.ProjectDashboardOperationalPermission;
+import objective.taskboard.auth.authorizer.permission.ProjectDashboardTacticalPermission;
 import objective.taskboard.followup.FollowUpDateRangeProvider;
 import objective.taskboard.jira.FrontEndMessageException;
 import objective.taskboard.jira.ProjectService;
@@ -23,17 +22,21 @@ import objective.taskboard.jira.ProjectService;
 public class FollowUpDateRangeController {
 
     @Autowired
-    private Authorizer authorizer;
-
-    @Autowired
     private ProjectService projectService;
 
     @Autowired
     private FollowUpDateRangeProvider provider;
 
+    @Autowired
+    private ProjectDashboardTacticalPermission dashboardTacticalPermission;
+
+    @Autowired
+    private ProjectDashboardOperationalPermission projectDashboardOperationalPermission;
+
+
     @RequestMapping(value = "/api/projects/{projectKey}/followup/date-range", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> getDateRangeByProjectKey(@PathVariable("projectKey") String projectKey) {
-        if (!authorizer.hasPermission(PROJECT_DASHBOARD_TACTICAL, projectKey) || !authorizer.hasPermission(PROJECT_DASHBOARD_OPERATIONAL, projectKey))
+        if (!dashboardTacticalPermission.isAuthorizedFor(projectKey) || !projectDashboardOperationalPermission.isAuthorizedFor(projectKey))
             return new ResponseEntity<>("Resource not found.", HttpStatus.NOT_FOUND);
 
         if (!projectService.taskboardProjectExists(projectKey))
