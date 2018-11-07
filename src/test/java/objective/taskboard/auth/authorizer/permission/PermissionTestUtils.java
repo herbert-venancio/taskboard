@@ -16,8 +16,8 @@ public class PermissionTestUtils {
 
     public static interface PermissionTest {
         void testName();
-        void testAcceptsArguments();
-        void testAccepts();
+        void testIsAuthorizedArguments();
+        void testIsAuthorized();
     }
 
 }

@@ -18,7 +18,7 @@ public class PerProjectPermission extends BasePermission implements TargettedPer
     }
 
     @Override
-    public boolean accepts(PermissionContext permissionContext) {
+    public boolean isAuthorized(PermissionContext permissionContext) {
         validate(permissionContext);
 
         return getLoggedUser().getJiraRoles().stream()

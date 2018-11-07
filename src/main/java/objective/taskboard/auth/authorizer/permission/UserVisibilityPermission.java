@@ -28,10 +28,10 @@ public class UserVisibilityPermission extends BasePermission implements Targette
     }
 
     @Override
-    public boolean accepts(PermissionContext permissionContext) {
+    public boolean isAuthorized(PermissionContext permissionContext) {
         validate(permissionContext);
 
-        boolean hasPermissionToSeeAllUsers = taskboardAdministrationPermission.accepts(PermissionContext.empty());
+        boolean hasPermissionToSeeAllUsers = taskboardAdministrationPermission.isAuthorized(PermissionContext.empty());
 
         return hasPermissionToSeeAllUsers || isThereSomeTeamInCommon(permissionContext);
     }

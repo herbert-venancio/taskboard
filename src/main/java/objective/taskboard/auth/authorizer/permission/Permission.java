@@ -7,7 +7,7 @@ public interface Permission {
 
     String name();
 
-    boolean accepts(PermissionContext permissionContext);
+    boolean isAuthorized(PermissionContext permissionContext);
 
     Optional<List<String>> applicableTargets();
 

@@ -20,8 +20,8 @@ public class PermissionBuilder {
         return this;
     }
 
-    public PermissionBuilder withAccepts(boolean accepts) {
-        dto.accepts = accepts;
+    public PermissionBuilder withIsAuthorized(boolean isAuthorized) {
+        dto.isAuthorized = isAuthorized;
         return this;
     }
 
@@ -47,13 +47,13 @@ public class PermissionBuilder {
 
     private static class PermissionMockDto  {
         protected String name;
-        protected boolean accepts;
+        protected boolean isAuthorized;
         protected Optional<List<String>> applicableTargets;
         public String name() {
             return this.name;
         }
-        public boolean accepts(PermissionContext permissionContext) {
-            return this.accepts;
+        public boolean isAuthorized(PermissionContext permissionContext) {
+            return this.isAuthorized;
         }
     }
 
@@ -63,14 +63,14 @@ public class PermissionBuilder {
                 throw new IllegalArgumentException("TargettedPermission doesn't accept applicableTargets.");
 
             this.name = dto.name;
-            this.accepts = dto.accepts;
+            this.isAuthorized = dto.isAuthorized;
         }
     }
 
     public static class TargettedPermissionMock extends PermissionMockDto implements TargettedPermission {
         public TargettedPermissionMock(PermissionMockDto dto) {
             this.name = dto.name;
-            this.accepts = dto.accepts;
+            this.isAuthorized = dto.isAuthorized;
             this.applicableTargets = dto.applicableTargets;
         }
         public Optional<List<String>> applicableTargets() {

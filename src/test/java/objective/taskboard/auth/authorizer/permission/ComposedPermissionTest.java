@@ -44,7 +44,7 @@ public class ComposedPermissionTest {
             super(name, loggedUserDetails, permissions);
         }
         @Override
-        public boolean accepts(PermissionContext permissionContext) {
+        public boolean isAuthorized(PermissionContext permissionContext) {
             return false;
         }
     }

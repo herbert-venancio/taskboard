@@ -29,7 +29,7 @@ public class AuthorizerTest {
     public void hasPermission_givenUserWithPermission_returnTrue() {
         Authorizer subject = authorizer()
                 .withPermissions(
-                        permission().withName("taskboard.admin.test").withAccepts(true).asTargetless()
+                        permission().withName("taskboard.admin.test").withIsAuthorized(true).asTargetless()
                         )
                 .build();
 
@@ -40,7 +40,7 @@ public class AuthorizerTest {
     public void hasPermission_givenUserWithoutPermission_returnFalse() {
         Authorizer subject = authorizer()
                 .withPermissions(
-                        permission().withName("taskboard.admin.test").withAccepts(false).asTargetless()
+                        permission().withName("taskboard.admin.test").withIsAuthorized(false).asTargetless()
                         )
                 .build();
 
@@ -48,15 +48,15 @@ public class AuthorizerTest {
     }
 
     @Test
-    public void getPermissions_returnTargettedIfHApplicableTargetsIsntEmptyAndTargetlessIfAcceptsEqualsTrue() {
+    public void getPermissions_returnTargettedIfHApplicableTargetsIsntEmptyAndTargetlessIfIsAuthorizedEqualsTrue() {
         Authorizer subject = authorizer()
                 .withPermissions(
-                        permission().withName("permission.a").withAccepts(true).withApplicableTargets("PROJ1", "PROJ2").asTargetted(),
-                        permission().withName("permission.a.view").withAccepts(true).asTargetless(),
-                        permission().withName("permission.b").withAccepts(true).withApplicableTargets("PROJ1").asTargetted(),
-                        permission().withName("permission.b.view").withAccepts(true).asTargetless(),
-                        permission().withName("permission.not").withAccepts(false).withApplicableTargets().asTargetted(),
-                        permission().withName("permission.not.view").withAccepts(false).asTargetless()
+                        permission().withName("permission.a").withIsAuthorized(true).withApplicableTargets("PROJ1", "PROJ2").asTargetted(),
+                        permission().withName("permission.a.view").withIsAuthorized(true).asTargetless(),
+                        permission().withName("permission.b").withIsAuthorized(true).withApplicableTargets("PROJ1").asTargetted(),
+                        permission().withName("permission.b.view").withIsAuthorized(true).asTargetless(),
+                        permission().withName("permission.not").withIsAuthorized(false).withApplicableTargets().asTargetted(),
+                        permission().withName("permission.not.view").withIsAuthorized(false).asTargetless()
                         )
                 .build();
 

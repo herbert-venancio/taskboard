@@ -16,7 +16,7 @@ public class AnyProjectPermission extends BasePermission implements TargetlessPe
     }
 
     @Override
-    public boolean accepts(PermissionContext permissionContext) {
+    public boolean isAuthorized(PermissionContext permissionContext) {
         validate(permissionContext);
 
         return getLoggedUser().getJiraRoles().stream()

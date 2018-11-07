@@ -28,22 +28,22 @@ public class TaskboardAdministrationPermissionTest implements PermissionTest {
     }
 
     @Test
-    public void testAcceptsArguments() {
+    public void testIsAuthorizedArguments() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage(is("Only PermissionContext.empty() is allowed for permission taskboard.administration."));
 
         Permission subject = new TaskboardAdministrationPermission(loggedUser().withIsAdmin(true).build());
 
-        subject.accepts(new PermissionContext("target"));
+        subject.isAuthorized(new PermissionContext("target"));
     }
 
     @Test
-    public void testAccepts() {
+    public void testIsAuthorized() {
         Permission subject = new TaskboardAdministrationPermission(loggedUser().withIsAdmin(true).build());
-        assertTrue(subject.accepts(PermissionContext.empty()));
+        assertTrue(subject.isAuthorized(PermissionContext.empty()));
 
         subject = new TaskboardAdministrationPermission(loggedUser().withIsAdmin(false).build());
-        assertFalse(subject.accepts(PermissionContext.empty()));
+        assertFalse(subject.isAuthorized(PermissionContext.empty()));
     }
 
 }

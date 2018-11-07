@@ -14,7 +14,7 @@ public class TaskboardAdministrationPermission extends BasePermission implements
     }
 
     @Override
-    public boolean accepts(PermissionContext permissionContext) {
+    public boolean isAuthorized(PermissionContext permissionContext) {
         validate(permissionContext);
 
         return getLoggedUser().isAdmin();

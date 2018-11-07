@@ -41,7 +41,7 @@ public class PermissionRepositoryTest {
         expectedException.expectMessage(is("Empty PermissionContext isn't allowed for permission permission.name."));
 
         Permission permission = new PerProjectPermission("permission.name", loggedUserDetails, "any_role_1", "any_role_1");
-        permission.accepts(PermissionContext.empty());
+        permission.isAuthorized(PermissionContext.empty());
     }
 
     @Test
@@ -50,7 +50,7 @@ public class PermissionRepositoryTest {
         expectedException.expectMessage(is("Only PermissionContext.empty() is allowed for permission permission.name."));
 
         Permission permission = new AnyProjectPermission("permission.name", loggedUserDetails, "any_role_1", "any_role_1");
-        permission.accepts(new PermissionContext("target"));
+        permission.isAuthorized(new PermissionContext("target"));
     }
 
     @Test
@@ -59,7 +59,7 @@ public class PermissionRepositoryTest {
         expectedException.expectMessage(is("Only PermissionContext.empty() is allowed for permission taskboard.administration."));
 
         Permission permission = new TaskboardAdministrationPermission(loggedUserDetails);
-        permission.accepts(new PermissionContext("target"));
+        permission.isAuthorized(new PermissionContext("target"));
     }
 
 }

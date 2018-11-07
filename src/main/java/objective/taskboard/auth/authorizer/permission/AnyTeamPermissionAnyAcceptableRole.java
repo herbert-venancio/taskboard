@@ -24,7 +24,7 @@ public class AnyTeamPermissionAnyAcceptableRole extends BasePermission implement
     }
 
     @Override
-    public boolean accepts(PermissionContext permissionContext) {
+    public boolean isAuthorized(PermissionContext permissionContext) {
         validate(permissionContext);
 
         return userTeamRepository.findByUserName(getLoggedUser().getUsername()).stream()

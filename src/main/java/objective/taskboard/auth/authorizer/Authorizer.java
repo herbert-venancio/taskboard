@@ -33,16 +33,16 @@ public class Authorizer {
     }
 
     public boolean hasPermission(String permission) {
-        boolean accepts = permissionRepository.findByName(permission).accepts(PermissionContext.empty());
-        log.debug("Authorize permission \"{}\": {}", permission, accepts);
-        return accepts;
+        boolean isAuthorized = permissionRepository.findByName(permission).isAuthorized(PermissionContext.empty());
+        log.debug("Authorize permission \"{}\": {}", permission, isAuthorized);
+        return isAuthorized;
     }
 
     public boolean hasPermission(String permission, String target) {
-        boolean accepts = permissionRepository.findByName(permission)
-                .accepts(new PermissionContext(target));
-        log.debug("Authorize permission \"{}\" for target \"{}\": {}", permission, target, accepts);
-        return accepts;
+        boolean isAuthorized = permissionRepository.findByName(permission)
+                .isAuthorized(new PermissionContext(target));
+        log.debug("Authorize permission \"{}\" for target \"{}\": {}", permission, target, isAuthorized);
+        return isAuthorized;
     }
 
     public List<PermissionDto> getPermissions() {
@@ -95,7 +95,7 @@ public class Authorizer {
         }
 
         private static boolean isTargetlessPermitted(Permission permission) {
-            return permission instanceof TargetlessPermission && permission.accepts(PermissionContext.empty());
+            return permission instanceof TargetlessPermission && permission.isAuthorized(PermissionContext.empty());
         }
 
         private static boolean isTargettedPermitted(Permission permission, Optional<List<String>> applicableTargets) {
