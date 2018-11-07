@@ -24,7 +24,7 @@ import com.google.common.collect.Tables;
 import objective.taskboard.followup.kpi.WipChartDataSet;
 import objective.taskboard.followup.kpi.WipDataPoint;
 import objective.taskboard.followup.kpi.WipKPIService;
-import objective.taskboard.utils.DateTimeUtils;
+import objective.taskboard.utils.RangeUtils;
 
 @Component
 public class WipKPIDataProvider extends KPIByLevelDataProvider<WipChartDataSet, WipDataSet> {
@@ -44,7 +44,7 @@ public class WipKPIDataProvider extends KPIByLevelDataProvider<WipChartDataSet, 
 
             final ZonedDateTime dsStartDate = ds.rows.get(0).date;
             final ZonedDateTime dsEndDate = ds.rows.get(ds.rows.size() - 1).date;
-            final Range<ZonedDateTime> dataSetDateRange = DateTimeUtils.range(dsStartDate, dsEndDate);
+            final Range<ZonedDateTime> dataSetDateRange = RangeUtils.between(dsStartDate, dsEndDate);
 
             final Range<ZonedDateTime> resultDateRange = WeekRangeNormalizer.normalizeWeekRange(timeline,
                     dataSetDateRange, timezone);
@@ -58,19 +58,19 @@ public class WipKPIDataProvider extends KPIByLevelDataProvider<WipChartDataSet, 
             filteredRows.forEach((sunday, rowsByWeek) -> {
                 Table<String, String, LongStream> weekWipByTypeAndStatus = rowsByWeek.stream()
                         .collect(Tables.toTable(
-                                row -> row.type, 
-                                row -> row.status, 
-                                row -> LongStream.of(row.count), 
-                                LongStream::concat, 
+                                row -> row.type,
+                                row -> row.status,
+                                row -> LongStream.of(row.count),
+                                LongStream::concat,
                                 HashBasedTable::create));
 
                 rowsFilteredByTimeline.addAll(
                         weekWipByTypeAndStatus.cellSet().stream()
-                                .map(cell -> 
+                                .map(cell ->
                                     new WipDataPoint(
-                                        sunday, 
-                                        cell.getRowKey(), 
-                                        cell.getColumnKey(), 
+                                        sunday,
+                                        cell.getRowKey(),
+                                        cell.getColumnKey(),
                                         cell.getValue().average().orElse(0.0)))
                                 .collect(Collectors.toList()));
             });

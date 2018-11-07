@@ -464,6 +464,7 @@ public abstract class FollowUpDataGeneratorTestBase {
                     startDateStepMillis, //startDateStepMillis
                     parent,
                     emptyList(),//dependencies
+                    emptyList(),//bugs
                     coAssignees, //subResponsaveis
                     new User(assignee),
                     0L, //priority

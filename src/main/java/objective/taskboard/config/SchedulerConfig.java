@@ -2,9 +2,11 @@ package objective.taskboard.config;
 
 import objective.taskboard.TaskboardProperties;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
+import org.springframework.scheduling.concurrent.ForkJoinPoolFactoryBean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
@@ -30,6 +32,13 @@ public class SchedulerConfig implements SchedulingConfigurer {
         conditionalThreadPoolTaskScheduler.initialize();
 
         scheduledTaskRegistrar.setTaskScheduler(conditionalThreadPoolTaskScheduler);
+    }
+
+    @Bean
+    public ForkJoinPoolFactoryBean forkJoinPoolFactory() {
+        ForkJoinPoolFactoryBean factory = new ForkJoinPoolFactoryBean();
+        factory.setCommonPool(true);
+        return factory;
     }
 
     @SuppressWarnings("serial")

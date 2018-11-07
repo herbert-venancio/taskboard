@@ -587,12 +587,19 @@ public class JiraProperties {
         @DecimalMin("1")
         private Integer demandId;
 
+        @NotNull
+        public List<String> bugs;
+
         public List<String> getDependencies() {
             return this.dependencies;
         }
 
         public Integer getDemandId() {
             return this.demandId;
+        }
+
+        public List<String> getBugs() {
+            return bugs;
         }
 
         public void setDependencies(final List<String> dependencies) {
@@ -603,31 +610,8 @@ public class JiraProperties {
             this.demandId = demandId;
         }
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            IssueLink issueLink = (IssueLink) o;
-
-            if (dependencies != null ? !dependencies.equals(issueLink.dependencies) : issueLink.dependencies != null)
-                return false;
-            return demandId != null ? demandId.equals(issueLink.demandId) : issueLink.demandId == null;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = dependencies != null ? dependencies.hashCode() : 0;
-            result = 31 * result + (demandId != null ? demandId.hashCode() : 0);
-            return result;
-        }
-
-        @Override
-        public String toString() {
-            return "IssueLink{" +
-                    "dependencies=" + dependencies +
-                    ", demandId=" + demandId +
-                    '}';
+        public void setBugs(final List<String> bugs) {
+            this.bugs = bugs;
         }
     }
 

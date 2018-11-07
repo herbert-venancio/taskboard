@@ -19,7 +19,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import objective.taskboard.utils.DateTimeUtils;
+import objective.taskboard.utils.RangeUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class WeekRangeNormalizerTest {
@@ -218,7 +218,7 @@ public class WeekRangeNormalizerTest {
     private Range<ZonedDateTime> createDateRange(String startDate, String endDate, ZoneId zone) {
         ZonedDateTime dataSetStartDate = LocalDate.parse(startDate).atStartOfDay(zone);
         ZonedDateTime dataSetEndDate = LocalDate.parse(endDate).atStartOfDay(zone);
-        return DateTimeUtils.range(dataSetStartDate, dataSetEndDate);
+        return RangeUtils.between(dataSetStartDate, dataSetEndDate);
     }
 
     private void assertDayOfWeekBoundaries(Range<ZonedDateTime> dateRange, DayOfWeek startDayOfWeek, DayOfWeek endDayOfWeek) {

@@ -19,14 +19,14 @@ import org.springframework.stereotype.Component;
 import objective.taskboard.followup.kpi.ThroughputChartDataSet;
 import objective.taskboard.followup.kpi.ThroughputDataPoint;
 import objective.taskboard.followup.kpi.ThroughputKPIService;
-import objective.taskboard.utils.DateTimeUtils;
+import objective.taskboard.utils.RangeUtils;
 
 @Component
 public class ThroughputKPIDataProvider extends KPIByLevelDataProvider<ThroughputChartDataSet,ThroughputDataSet> {
 
     @Autowired
     private ThroughputKPIService throughputService;
-    
+
 
     @Override
     protected ThroughputChartDataSet transform(List<ThroughputDataSet> dataSets, FollowUpTimeline timeline, ZoneId timezone) {
@@ -39,17 +39,17 @@ public class ThroughputKPIDataProvider extends KPIByLevelDataProvider<Throughput
 
             final ZonedDateTime dsStartDate = ds.rows.get(0).date;
             final ZonedDateTime dsEndDate = ds.rows.get(ds.rows.size() - 1).date;
-            final Range<ZonedDateTime> dataSetDateRange = DateTimeUtils.range(dsStartDate, dsEndDate);
+            final Range<ZonedDateTime> dataSetDateRange = RangeUtils.between(dsStartDate, dsEndDate);
 
             final Range<ZonedDateTime> resultDateRange = WeekRangeNormalizer.normalizeWeekRange(timeline,
                     dataSetDateRange, timezone);
-            
+
             final Map<ZonedDateTime, List<ThroughputRow>> filteredRows = ds.rows.stream()
                     .filter(row -> resultDateRange.contains(row.date))
                     .collect(Collectors.groupingBy(
                             row -> row.date.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY)),
                             LinkedHashMap::new, Collectors.toList()));
-            
+
             filteredRows.forEach((sunday, rowsByWeek) -> {
                 Map<String, Long> dataByType = rowsByWeek.stream()
                         .collect(Collectors.groupingBy(
@@ -66,6 +66,6 @@ public class ThroughputKPIDataProvider extends KPIByLevelDataProvider<Throughput
     @Override
     protected List<ThroughputDataSet> getDataSets(FollowUpData followupData) {
         return throughputService.getData(followupData);
-    }    
+    }
 
 }

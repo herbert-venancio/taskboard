@@ -25,6 +25,7 @@ import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.utils.DateTimeUtils;
+import objective.taskboard.utils.RangeUtils;
 
 public class FollowUpTransitionsDataProvider {
     
@@ -211,7 +212,7 @@ public class FollowUpTransitionsDataProvider {
         if (firstDate == null || lastDate == null)
             throw new IllegalArgumentException("Invalid dates.");
 
-        return DateTimeUtils.range(DateTimeUtils.roundDown(firstDate), DateTimeUtils.roundUp(lastDate));
+        return RangeUtils.between(DateTimeUtils.roundDown(firstDate), DateTimeUtils.roundUp(lastDate));
     }
 
     private static Optional<Integer> getTransitionIndexByDate(AnalyticsTransitionsDataRow row, ZonedDateTime date) {
