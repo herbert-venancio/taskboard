@@ -45,8 +45,6 @@ public abstract class AbstractUIIntegrationTest extends AbstractIntegrationTest 
 
     protected WebDriver webDriver;
 
-    private static boolean ABORT_FLAG = false;
-
     @Before
     public final void setupUIIntegrationTest() {
         

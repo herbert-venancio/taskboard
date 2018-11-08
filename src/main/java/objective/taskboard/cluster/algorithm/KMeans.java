@@ -115,7 +115,7 @@ public class KMeans {
         }
 
         private void clearClusters() {
-            for (Cluster cluster : clusters) {
+            for (Cluster<T> cluster : clusters) {
                 cluster.getPoints().clear();
             }
         }
