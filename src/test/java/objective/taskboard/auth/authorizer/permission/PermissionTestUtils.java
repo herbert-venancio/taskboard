@@ -1,11 +1,8 @@
 package objective.taskboard.auth.authorizer.permission;
 
-import static java.util.Arrays.asList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import objective.taskboard.auth.LoggedUserDetails;
 import objective.taskboard.auth.LoggedUserDetails.JiraRole;
+import objective.taskboard.data.UserTeam;
+import objective.taskboard.data.UserTeam.UserTeamRole;
 
 public class PermissionTestUtils {
 
@@ -13,16 +10,8 @@ public class PermissionTestUtils {
         return new JiraRole(1L, roleName, projectKey);
     }
 
-    public static LoggedUserDetails userWithIsAdmin(boolean isAdmin) {
-        final LoggedUserDetails userDetails = mock(LoggedUserDetails.class);
-        when(userDetails.isAdmin()).thenReturn(isAdmin);
-        return userDetails;
-    }
-
-    public static LoggedUserDetails userWithRoles(JiraRole... roles) {
-        final LoggedUserDetails userDetails = mock(LoggedUserDetails.class);
-        when(userDetails.getJiraRoles()).thenReturn(asList(roles));
-        return userDetails;
+    public static UserTeam userTeam(String memberName, String teamName, UserTeamRole role) {
+        return new UserTeam(memberName, teamName, role);
     }
 
     public static interface PermissionTest {

@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import objective.taskboard.domain.Project;
 import objective.taskboard.domain.ProjectFilterConfiguration;
+import objective.taskboard.jira.AuthorizedProjectsService;
 import objective.taskboard.jira.ProjectService;
 
 @RestController
@@ -29,16 +30,19 @@ public class ProjectConfigurationController {
     @Autowired
     private ProjectService projectService;
 
+    @Autowired
+    private AuthorizedProjectsService authorizedProjectsService;
+
     @GetMapping("items")
     public List<ProjectListItemDto> getItems() {
-        return projectService.getTaskboardProjects(PROJECT_ADMINISTRATION).stream()
+        return authorizedProjectsService.getTaskboardProjects(PROJECT_ADMINISTRATION).stream()
                 .map(ProjectListItemDto::from)
                 .collect(toList());
     }
 
     @GetMapping("edit/{projectKey}/init-data")
     public ResponseEntity<?> editGetInitData(@PathVariable("projectKey") String projectKey) {
-        Optional<ProjectFilterConfiguration> project = projectService.getTaskboardProject(projectKey, PROJECT_ADMINISTRATION);
+        Optional<ProjectFilterConfiguration> project = authorizedProjectsService.getTaskboardProject(projectKey, PROJECT_ADMINISTRATION);
         
         if (!project.isPresent())
             return ResponseEntity.notFound().build();
@@ -51,7 +55,7 @@ public class ProjectConfigurationController {
 
     @PostMapping("edit/{projectKey}")
     public ResponseEntity<?> editUpdate(@PathVariable("projectKey") String projectKey, @RequestBody ProjectConfigurationDto configDto) {
-        Optional<ProjectFilterConfiguration> optConfiguration = projectService.getTaskboardProject(projectKey, PROJECT_ADMINISTRATION);
+        Optional<ProjectFilterConfiguration> optConfiguration = authorizedProjectsService.getTaskboardProject(projectKey, PROJECT_ADMINISTRATION);
         if (!optConfiguration.isPresent())
             return ResponseEntity.notFound().build();
 
@@ -72,7 +76,7 @@ public class ProjectConfigurationController {
 
     @GetMapping("{projectKey}/name")
     public ResponseEntity<?> getName(@PathVariable("projectKey") String projectKey){
-        Optional<ProjectFilterConfiguration> project = projectService.getTaskboardProject(projectKey, PROJECT_ADMINISTRATION);
+        Optional<ProjectFilterConfiguration> project = authorizedProjectsService.getTaskboardProject(projectKey, PROJECT_ADMINISTRATION);
 
         String errorMessage = "Project \""+ projectKey +"\" not found.";
         if (!project.isPresent())

@@ -50,9 +50,9 @@ import objective.taskboard.data.Issue.CardTeam;
 import objective.taskboard.data.Team;
 import objective.taskboard.data.User;
 import objective.taskboard.domain.ProjectFilterConfiguration;
-import objective.taskboard.filterConfiguration.TeamFilterConfigurationService;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.repository.TeamCachedRepository;
+import objective.taskboard.team.UserTeamService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class IssueTeamServiceTest {
@@ -61,13 +61,13 @@ public class IssueTeamServiceTest {
     private IssueTeamService subject;
 
     @Mock
-    private TeamFilterConfigurationService teamFilterConfigurationService;
-
-    @Mock
     private ProjectFilterConfigurationCachedRepository projectRepo;
 
     @Mock
     private TeamCachedRepository teamRepo;
+
+    @Mock
+    private UserTeamService userTeamService;
 
     private Issue issue = new Issue();
     private Team team1337;
@@ -94,13 +94,13 @@ public class IssueTeamServiceTest {
     }
 
     @Test
-    public void getMismatchingUsers_whenThereAreUsersOutsideIssueTeam_shouldReturnTheirNames() {
+    public void getMismatchingUsers_whenUsersAreNotValidAssignees_shouldReturnTheirNames() {
         Issue i = mock(Issue.class);
         when(i.getRawAssignedTeamsIds()).thenReturn(asList(7331L));
         when(i.getTeams()).thenReturn(new HashSet<>(asList(Issue.CardTeam.from(bravo7331))));
 
-        when(teamFilterConfigurationService.getConfiguredTeamsByUser("fulano")).thenReturn(asList(team1337));
-        when(teamFilterConfigurationService.getConfiguredTeamsByUser("beltrano")).thenReturn(asList(bravo7331));
+        when(userTeamService.getTeamsThatUserIsAValidAssignee("fulano")).thenReturn(asList());
+        when(userTeamService.getTeamsThatUserIsAValidAssignee("beltrano")).thenReturn(asList(bravo7331));
         when(i.getAssignees()).thenReturn(asList(new User("fulano"), new User("beltrano")));
 
         Set<String> mismatchingUsers = subject.getMismatchingUsers(i);

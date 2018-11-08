@@ -17,29 +17,29 @@ import objective.taskboard.domain.Project;
 import objective.taskboard.issueTypeVisibility.IssueTypeVisibilityService;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.client.JiraIssueTypeDto;
-import objective.taskboard.team.UserTeamService;
+import objective.taskboard.team.UserTeamPermissionService;
 
 @Service
 class CardFieldFilterProvider {
 
     private IssueTypeVisibilityService issueTypeVisibilityService;
-    private UserTeamService userTeamService;
+    private UserTeamPermissionService userTeamPermissionService;
     private ProjectService projectService;
 
     @Autowired
     public CardFieldFilterProvider(
             IssueTypeVisibilityService issueTypeVisibilityService,
-            UserTeamService userTeamService,
+            UserTeamPermissionService userTeamPermissionService,
             ProjectService projectService
             ) {
         this.issueTypeVisibilityService = issueTypeVisibilityService;
-        this.userTeamService = userTeamService;
+        this.userTeamPermissionService = userTeamPermissionService;
         this.projectService = projectService;
     }
 
     public List<CardFieldFilter> getDefaultList() {
         List<JiraIssueTypeDto> visibleIssueTypes = issueTypeVisibilityService.getVisibleIssueTypes();
-        Set<Team> teamsVisibleToUser = userTeamService.getTeamsVisibleToLoggedInUser();
+        Set<Team> teamsVisibleToUser = userTeamPermissionService.getTeamsVisibleToLoggedInUser();
         List<Project> nonArchivedJiraProjectsForUser = projectService.getNonArchivedJiraProjectsForUser();
 
         return Stream.of(

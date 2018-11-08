@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import objective.taskboard.domain.ProjectFilterConfiguration;
+import objective.taskboard.jira.AuthorizedProjectsService;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.project.ProjectProfileItem;
 import objective.taskboard.project.ProjectProfileItemRepository;
@@ -32,17 +33,22 @@ import objective.taskboard.project.ProjectProfileItemRepository;
 public class ProjectProfileConfigurationController {
     
     private final ProjectService projectService;
+    private final AuthorizedProjectsService authorizedProjectsService;
     private final ProjectProfileItemRepository itemRepository;
 
     @Autowired
-    public ProjectProfileConfigurationController(ProjectService projectService, ProjectProfileItemRepository itemRepository) {
+    public ProjectProfileConfigurationController(
+            ProjectService projectService,
+            AuthorizedProjectsService authorizedProjectsService,
+            ProjectProfileItemRepository itemRepository) {
         this.projectService = projectService;
+        this.authorizedProjectsService = authorizedProjectsService;
         this.itemRepository = itemRepository;
     }
 
     @GetMapping("{projectKey}/data")
     public ResponseEntity<?> getData(@PathVariable("projectKey") String projectKey) {
-        Optional<ProjectFilterConfiguration> project = projectService.getTaskboardProject(projectKey, PROJECT_ADMINISTRATION);
+        Optional<ProjectFilterConfiguration> project = authorizedProjectsService.getTaskboardProject(projectKey, PROJECT_ADMINISTRATION);
 
         if (!project.isPresent())
             return ResponseEntity.notFound().build();
@@ -57,7 +63,7 @@ public class ProjectProfileConfigurationController {
     @PutMapping("{projectKey}/items")
     @Transactional
     public ResponseEntity<?> updateItems(@PathVariable("projectKey") String projectKey, @RequestBody List<ProjectProfileItemDto> itemsDto) {
-        Optional<ProjectFilterConfiguration> project = projectService.getTaskboardProject(projectKey, PROJECT_ADMINISTRATION);
+        Optional<ProjectFilterConfiguration> project = authorizedProjectsService.getTaskboardProject(projectKey, PROJECT_ADMINISTRATION);
         
         if (!project.isPresent())
             return ResponseEntity.notFound().build();

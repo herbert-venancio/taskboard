@@ -29,7 +29,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 import javax.annotation.PostConstruct;
 
@@ -39,7 +38,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
-import objective.taskboard.auth.authorizer.Authorizer;
 import objective.taskboard.domain.Project;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.jira.client.JiraCreateIssue;
@@ -57,7 +55,6 @@ public class ProjectService {
     private final ProjectFilterConfigurationCachedRepository projectRepository;
     private final ProjectProfileItemRepository projectProfileItemRepository;
     private final JiraProjectService jiraProjectService;
-    private final Authorizer authorizer;
     private final ProjectBaselineProvider baselineProvider;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -66,13 +63,11 @@ public class ProjectService {
             ProjectFilterConfigurationCachedRepository projectRepository,
             ProjectProfileItemRepository projectProfileItemRepository, 
             JiraProjectService jiraProjectService,
-            Authorizer authorizer, 
             ProjectBaselineProvider baselineProvider,
             ApplicationEventPublisher eventPublisher) {
         this.projectRepository = projectRepository;
         this.projectProfileItemRepository = projectProfileItemRepository;
         this.jiraProjectService = jiraProjectService;
-        this.authorizer = authorizer;
         this.baselineProvider = baselineProvider;
         this.eventPublisher = eventPublisher;
     }
@@ -97,27 +92,7 @@ public class ProjectService {
 
     public List<ProjectFilterConfiguration> getTaskboardProjects() {
         return projectRepository.getProjects().stream()
-                .sorted((p1, p2) -> p1.getProjectKey().compareTo(p2.getProjectKey()))
-                .collect(toList());
-    }
-
-    public List<ProjectFilterConfiguration> getTaskboardProjects(String... permissions) {
-        List<String> allowedProjectsKeys = authorizer.getAllowedProjectsForPermissions(permissions);
-
-        return getTaskboardProjects().stream()
-                .filter(projectFilterConfiguration -> allowedProjectsKeys.contains(projectFilterConfiguration.getProjectKey()))
-                .collect(toList());
-    }
-
-    public List<ProjectFilterConfiguration> getTaskboardProjects(Predicate<String> filterProjectByKey) {
-        return getTaskboardProjects().stream()
-                .filter(projectFilterConfiguration -> filterProjectByKey.test(projectFilterConfiguration.getProjectKey()))
-                .collect(toList());
-    }
-
-    public List<ProjectFilterConfiguration> getTaskboardProjects(Predicate<String> filterProjectByKey, String... permissions) {
-        return getTaskboardProjects(permissions).stream()
-                .filter(projectFilterConfiguration -> filterProjectByKey.test(projectFilterConfiguration.getProjectKey()))
+                .sorted(comparing(ProjectFilterConfiguration::getProjectKey))
                 .collect(toList());
     }
 
@@ -156,10 +131,6 @@ public class ProjectService {
         return projectRepository.getProjectByKeyOrCry(projectKey);
     }
 
-    public Optional<ProjectFilterConfiguration> getTaskboardProject(String projectKey, String... permissions) {
-        List<String> allowedProjectsKeys = authorizer.getAllowedProjectsForPermissions(permissions);
-        return allowedProjectsKeys.contains(projectKey) ? getTaskboardProject(projectKey) : Optional.empty();
-    }
 
     public void saveTaskboardProject(ProjectFilterConfiguration project) {
         projectRepository.save(project);

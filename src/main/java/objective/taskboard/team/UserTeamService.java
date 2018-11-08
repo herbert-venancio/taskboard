@@ -1,18 +1,21 @@
 package objective.taskboard.team;
 
-import java.util.HashSet;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+import static objective.taskboard.auth.authorizer.Permissions.TEAM_EDIT;
+import static objective.taskboard.data.UserTeam.UserTeamRole.MANAGER;
+import static objective.taskboard.data.UserTeam.UserTeamRole.MEMBER;
+
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import objective.taskboard.auth.LoggedUserDetails;
+import objective.taskboard.auth.authorizer.Authorizer;
 import objective.taskboard.data.Team;
-import objective.taskboard.data.UserTeam;
-import objective.taskboard.filterConfiguration.TeamFilterConfigurationService;
 import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.repository.UserTeamCachedRepository;
 
@@ -21,59 +24,44 @@ public class UserTeamService {
 
     private final UserTeamCachedRepository userTeamRepo;
     private final TeamCachedRepository teamRepo;
-    private final TeamFilterConfigurationService teamFilterConfigurationService;
-    private final LoggedUserDetails loggedInUser;
+    private final UserTeamPermissionService userTeamPermissionService;
+    private final Authorizer authorizer;
 
     @Autowired
     public UserTeamService(
             UserTeamCachedRepository userTeamRepo, 
             TeamCachedRepository teamRepo,
-            TeamFilterConfigurationService teamFilterConfigurationService, 
-            LoggedUserDetails loggedInUser) {
+            UserTeamPermissionService userTeamPermissionService,
+            Authorizer authorizer) {
         this.userTeamRepo = userTeamRepo;
         this.teamRepo = teamRepo;
-        this.teamFilterConfigurationService = teamFilterConfigurationService;
-        this.loggedInUser = loggedInUser;
+        this.userTeamPermissionService = userTeamPermissionService;
+        this.authorizer = authorizer;
     }
 
     public List<Long> getIdsOfTeamsVisibleToUser() {
-        return getTeamsVisibleToLoggedInUser().stream().map(ut->ut.getId()).collect(Collectors.toList());
-    }
-
-    public boolean isUserVisibleToLoggedUser(String username) {
-        Set<Team> teams = getTeamsVisibleToLoggedInUser();
-        for (Team team : teams) {
-            List<UserTeam> members = team.getMembers();
-            for (UserTeam userTeam : members) {
-                if (userTeam.getUserName().equals(username))
-                    return true;
-            }
-        }
-        return false;
+        return userTeamPermissionService.getTeamsVisibleToLoggedInUser().stream()
+                .map(ut -> ut.getId())
+                .collect(toList());
     }
 
     public Set<Team> getTeamsThatUserCanAdmin() {
-        if (loggedInUser.isAdmin())
-            return new HashSet<>(teamRepo.getCache());
-        return new HashSet<>();
+        return teamRepo.getCache().stream()
+                .filter(t -> authorizer.hasPermission(TEAM_EDIT, t.getName()))
+                .collect(toSet());
     }
 
-    public Set<Team> getTeamsVisibleToLoggedInUser() {
-        if (loggedInUser.isAdmin())
-            return new HashSet<>(teamRepo.getCache());
-
-        List<UserTeam> userTeam = userTeamRepo.findByUserName(loggedInUser.getUsername());
-        Set<Team> userTeams = userTeam.stream().map(ut->teamRepo.findByName(ut.getTeam())).filter(t->t!=null).distinct().collect(Collectors.toSet());
-
-        List<Team> teamsInProjectsVisibleToUser = teamFilterConfigurationService.getDefaultTeamsInProjectsVisibleToUser();
-        userTeams.addAll(teamsInProjectsVisibleToUser);
-        userTeams.addAll(teamFilterConfigurationService.getGloballyVisibleTeams());
-        
-        return userTeams;
+    public List<Team> getTeamsThatUserIsAValidAssignee(String username) {
+        return userTeamRepo.findByUserName(username).stream()
+                .filter(userTeam -> userTeam.getRole() == MANAGER || userTeam.getRole() == MEMBER)
+                .map(ut -> teamRepo.findByName(ut.getTeam()))
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(toList());
     }
 
     public Optional<Team> getTeamVisibleToLoggedInUserById(Long id) {
-        return getTeamsVisibleToLoggedInUser().stream()
+        return userTeamPermissionService.getTeamsVisibleToLoggedInUser().stream()
             .filter(t -> t.getId().equals(id))
             .findFirst();
     }

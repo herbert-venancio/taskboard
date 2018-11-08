@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import objective.taskboard.domain.ProjectFilterConfiguration;
+import objective.taskboard.jira.AuthorizedProjectsService;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.project.ProjectProfileItem;
 import objective.taskboard.project.config.ProjectProfileConfigurationController.ProjectProfileItemDto;
@@ -23,15 +24,17 @@ import objective.taskboard.project.config.ProjectProfileConfigurationController.
 public class ProjectProfileConfigurationControllerTest {
     
     private ProjectService projectService = mock(ProjectService.class);
+
+    AuthorizedProjectsService authorizedProjectsService = mock(AuthorizedProjectsService.class);
     private ProjectProfileItemMockRepository itemRepository = new ProjectProfileItemMockRepository();
-    private ProjectProfileConfigurationController subject = new ProjectProfileConfigurationController(projectService, itemRepository);
+    private ProjectProfileConfigurationController subject = new ProjectProfileConfigurationController(projectService, authorizedProjectsService, itemRepository);
     
     private ProjectFilterConfiguration superProject = mock(ProjectFilterConfiguration.class);
     
     @Before
     public void setup() {
         when(superProject.getProjectKey()).thenReturn("SP");
-        when(projectService.getTaskboardProject("SP", PROJECT_ADMINISTRATION)).thenReturn(Optional.of(superProject));
+        when(authorizedProjectsService.getTaskboardProject("SP", PROJECT_ADMINISTRATION)).thenReturn(Optional.of(superProject));
     }
 
     @Test
@@ -61,7 +64,7 @@ public class ProjectProfileConfigurationControllerTest {
 
     @Test
     public void updateItems_UserIsNotAllowedToAdminTheProject_ShouldReturnNotFound() {
-        when(projectService.getTaskboardProject("SP", PROJECT_ADMINISTRATION)).thenReturn(Optional.empty());
+        when(authorizedProjectsService.getTaskboardProject("SP", PROJECT_ADMINISTRATION)).thenReturn(Optional.empty());
         
         ProjectProfileItem devItem = new ProjectProfileItem(superProject, "Dev", 10.0, LocalDate.parse("2018-01-01"), LocalDate.parse("2018-03-01"));
         itemRepository.add(devItem);

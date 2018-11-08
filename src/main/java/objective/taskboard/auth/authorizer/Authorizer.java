@@ -33,13 +33,16 @@ public class Authorizer {
     }
 
     public boolean hasPermission(String permission) {
-        log.debug("Authorize permission \"{}\"", permission);
-        return permissionRepository.findByName(permission).accepts(userDetails, PermissionContext.empty());
+        boolean accepts = permissionRepository.findByName(permission).accepts(userDetails, PermissionContext.empty());
+        log.debug("Authorize permission \"{}\": {}", permission, accepts);
+        return accepts;
     }
 
     public boolean hasPermission(String permission, String target) {
-        log.debug("Authorize permission \"{}\" for target \"{}\"", permission, target);
-        return permissionRepository.findByName(permission).accepts(userDetails, new PermissionContext(target));
+        boolean accepts = permissionRepository.findByName(permission)
+                .accepts(userDetails, new PermissionContext(target));
+        log.debug("Authorize permission \"{}\" for target \"{}\": {}", permission, target, accepts);
+        return accepts;
     }
 
     public List<PermissionDto> getPermissions() {

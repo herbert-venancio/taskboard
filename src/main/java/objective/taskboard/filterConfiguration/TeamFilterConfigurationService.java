@@ -4,7 +4,6 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,6 @@ import objective.taskboard.domain.TeamFilterConfiguration;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.repository.TeamFilterConfigurationCachedRepository;
-import objective.taskboard.repository.UserTeamCachedRepository;
 
 @Service
 public class TeamFilterConfigurationService {
@@ -30,9 +28,6 @@ public class TeamFilterConfigurationService {
 
     @Autowired
     private ProjectService projectService;
-
-    @Autowired
-    private UserTeamCachedRepository userTeamRepository;
 
     @Cacheable(CacheConfiguration.CONFIGURED_TEAMS)
     private List<Team> getConfiguredTeams() {
@@ -64,18 +59,4 @@ public class TeamFilterConfigurationService {
                 .collect(toList());
     }
 
-    public List<Team> getConfiguredTeamsByUser(String user) {
-        return userTeamRepository.findByUserName(user)
-                .stream()
-                .map(ut -> getConfiguredTeamByName(ut.getTeam()))
-                .filter(Objects::nonNull)
-                .collect(toList());
-    }
-
-    private Team getConfiguredTeamByName(String teamName) {
-        return getConfiguredTeams().stream()
-                .filter(t -> Objects.equals(t.getName(), teamName))
-                .findFirst()
-                .orElse(null);
-    }
 }

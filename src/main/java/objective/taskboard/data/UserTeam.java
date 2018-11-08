@@ -24,6 +24,8 @@ import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -32,10 +34,6 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "USER_TEAM")
 public class UserTeam implements Serializable {
-    public UserTeam(String memberName, String teamName) {
-        this.userName = memberName;
-        this.team = teamName;
-    }
 
     private static final long serialVersionUID = 1L;
 
@@ -54,6 +52,21 @@ public class UserTeam implements Serializable {
     private Date createdAt;
 
     private Date updatedAt;
+
+    @Enumerated(EnumType.STRING)
+    private UserTeamRole role;
+
+    protected UserTeam() {}
+
+    public UserTeam(String memberName, String teamName) {
+        this(memberName, teamName, UserTeamRole.MEMBER);
+    }
+
+    public UserTeam(String memberName, String teamName, UserTeamRole role) {
+        this.userName = memberName;
+        this.team = teamName;
+        this.role = role;
+    }
 
     public Long getId() {
         return this.id;
@@ -81,6 +94,10 @@ public class UserTeam implements Serializable {
 
     public Date getUpdatedAt() {
         return this.updatedAt;
+    }
+
+    public UserTeamRole getRole() {
+        return role;
     }
 
     public void setId(final Long id) {
@@ -111,59 +128,20 @@ public class UserTeam implements Serializable {
         this.updatedAt = updatedAt;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        UserTeam userTeam = (UserTeam) o;
-
-        if (id != null ? !id.equals(userTeam.id) : userTeam.id != null) return false;
-        if (userName != null ? !userName.equals(userTeam.userName) : userTeam.userName != null) return false;
-        if (team != null ? !team.equals(userTeam.team) : userTeam.team != null) return false;
-        if (endDate != null ? !endDate.equals(userTeam.endDate) : userTeam.endDate != null) return false;
-        if (isEspecificador != null ? !isEspecificador.equals(userTeam.isEspecificador) : userTeam.isEspecificador != null)
-            return false;
-        if (createdAt != null ? !createdAt.equals(userTeam.createdAt) : userTeam.createdAt != null) return false;
-        return updatedAt != null ? updatedAt.equals(userTeam.updatedAt) : userTeam.updatedAt == null;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + (userName != null ? userName.hashCode() : 0);
-        result = 31 * result + (team != null ? team.hashCode() : 0);
-        result = 31 * result + (endDate != null ? endDate.hashCode() : 0);
-        result = 31 * result + (isEspecificador != null ? isEspecificador.hashCode() : 0);
-        result = 31 * result + (createdAt != null ? createdAt.hashCode() : 0);
-        result = 31 * result + (updatedAt != null ? updatedAt.hashCode() : 0);
-        return result;
+    public void setRole(UserTeamRole role) {
+        this.role = role;
     }
 
     @Override
     public String toString() {
-        return "UserTeam{" +
-                "id=" + id +
-                ", userName='" + userName + '\'' +
-                ", team='" + team + '\'' +
-                ", endDate=" + endDate +
-                ", isEspecificador=" + isEspecificador +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                '}';
+        return userName + " - " + team + "(" + role + ")";
     }
 
-    public UserTeam() {
+
+    public static enum UserTeamRole {
+        MANAGER,
+        MEMBER,
+        VIEWER
     }
 
-    @java.beans.ConstructorProperties({"id", "userName", "team", "endDate", "isEspecificador", "createdAt", "updatedAt"})
-    public UserTeam(final Long id, final String userName, final String team, final Date endDate, final Integer isEspecificador, final Date createdAt, final Date updatedAt) {
-        this.id = id;
-        this.userName = userName;
-        this.team = team;
-        this.endDate = endDate;
-        this.isEspecificador = isEspecificador;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-    }
 }

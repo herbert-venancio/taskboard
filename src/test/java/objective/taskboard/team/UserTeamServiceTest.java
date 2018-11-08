@@ -1,25 +1,14 @@
 package objective.taskboard.team;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
-import static objective.taskboard.utils.StreamUtils.streamOf;
-import static org.junit.Assert.assertEquals;
+import static objective.taskboard.data.UserTeam.UserTeamRole.MANAGER;
+import static objective.taskboard.data.UserTeam.UserTeamRole.MEMBER;
+import static objective.taskboard.data.UserTeam.UserTeamRole.VIEWER;
+import static objective.taskboard.team.UserTeamTestUtils.assertTeams;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 
 import org.junit.Test;
 
-import objective.taskboard.auth.LoggedUserDetails;
-import objective.taskboard.data.Team;
-import objective.taskboard.data.UserTeam;
+import objective.taskboard.auth.authorizer.Authorizer;
 import objective.taskboard.filterConfiguration.TeamFilterConfigurationService;
 import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.repository.UserTeamCachedRepository;
@@ -27,147 +16,48 @@ import objective.taskboard.repository.UserTeamCachedRepository;
 public class UserTeamServiceTest {
 
     private UserTeamCachedRepository userTeamRepo = mock(UserTeamCachedRepository.class);
+    private Authorizer authorizer = mock(Authorizer.class);
     private TeamCachedRepository teamRepo = mock(TeamCachedRepository.class);
     private TeamFilterConfigurationService teamFilterConfigurationService = mock(TeamFilterConfigurationService.class);
-    private LoggedUserDetails loggedInUser = mock(LoggedUserDetails.class);
-    private UserTeamService subject = new UserTeamService(userTeamRepo, teamRepo, teamFilterConfigurationService, loggedInUser);
+    private UserTeamPermissionService userTeamPermissionService = mock(UserTeamPermissionService.class);
+    private UserTeamService subject = new UserTeamService(userTeamRepo, teamRepo, userTeamPermissionService, authorizer);
+
+    private UserTeamTestUtils testUtils = new UserTeamTestUtils(teamFilterConfigurationService, teamRepo, userTeamRepo, authorizer, null);
 
     @Test
-    public void getTeamsThatUserCanAdmin_ifUserIsAdmin_shouldReturnAllTeams() {
-        when(loggedInUser.isAdmin()).thenReturn(true);
-
-        when(teamRepo.getCache()).thenReturn(asList(
-                new Team("Extra" , "sue", "sue", emptyList()),
-                new Team("Super", "joe", "joe", emptyList())));
-
-        assertTeams("Extra, Super", subject.getTeamsThatUserCanAdmin());
-    }
-
-    @Test
-    public void getTeamsThatUserCanAdmin_ifUserIsNotAdmin_shouldReturnEmptyList() {
-        when(loggedInUser.isAdmin()).thenReturn(false);
-
-        when(teamRepo.getCache()).thenReturn(asList(
-                new Team("Extra" , "sue", "sue", emptyList()),
-                new Team("Super", "joe", "joe", emptyList())));
-
-        assertTeams("", subject.getTeamsThatUserCanAdmin());
-    }
-
-    @Test
-    public void getTeamsVisibleToLoggedInUser_regularUser_shouldReturnTeamsWhereUserIsMemberOf() {
+    public void getTeamsThatUserCanAdmin_shouldReturnOnlyPermittedTeams() {
         withTeams()
             .team("Rocket")
             .team("Super")
             .team("Extra")
-        .userIsMemberOf("Super", "Extra")
-        .userIsNotAdmin();
+            .and()
+       .loggedUser()
+           .hasTeamEditPermissionFor("Super", "Extra");
 
-        assertTeams("Extra, Super", subject.getTeamsVisibleToLoggedInUser());
+        assertTeams("Extra, Super", subject.getTeamsThatUserCanAdmin());
     }
 
+
     @Test
-    public void getTeamsVisibleToLoggedInUser_regularUser_shouldReturnDefaultTeamsOfVisibleProjects() {
+    public void getTeamsThatUserIsAValidAssignee_shouldReturnOnlyTeamsWhereUserIsAManagerOrMember() {
         withTeams()
-            .team("Rocket").isDefaultInAVisibleProject()
+            .team("Global")
+            .team("Rocket")
+            .team("Extra")
+            .team("Blue")
             .team("Super")
-            .team("Extra")
-        .userIsMemberOf()
-        .userIsNotAdmin();
-        
-        assertTeams("Rocket", subject.getTeamsVisibleToLoggedInUser());
+            .and()
+        .user("my.user")
+            .belongsToTeam("Rocket").withRole(MANAGER)
+            .belongsToTeam("Extra").withRole(MEMBER)
+            .belongsToTeam("Blue").withRole(MEMBER)
+            .belongsToTeam("Super").withRole(VIEWER);
+
+        assertTeams("Blue, Extra, Rocket", subject.getTeamsThatUserIsAValidAssignee("my.user"));
     }
 
-    @Test
-    public void getTeamsVisibleToLoggedInUser_adminUser_shouldReturnAllTeams() {
-        withTeams()
-            .team("Super")
-            .team("Extra")
-        .userIsMemberOf()
-        .userIsAdmin();
-        
-        assertTeams("Extra, Super", subject.getTeamsVisibleToLoggedInUser());
+    private UserTeamTestUtils.DSLBuilder withTeams() {
+        return testUtils.withTeams();
     }
 
-    @Test
-    public void getTeamsVisibleToLoggedInUser_shouldReturnGloballyVisibleTeams() {
-        withTeams()
-            .team("Global").isGloballyVisible()
-            .team("Extra")
-        .userIsMemberOf()
-        .userIsNotAdmin();
-
-        assertTeams("Global", subject.getTeamsVisibleToLoggedInUser());
-    }
-
-    private static void assertTeams(String expectedNames, Collection<Team> actual) {
-        assertEquals(expectedNames, actual.stream().map(t -> t.getName()).sorted().collect(joining(", ")));
-    }
-
-    private DSLBuilder withTeams() {
-        return new DSLBuilder();
-    }
-
-    private class DSLBuilder {
-        List<Team> defaulTeamsInProjects = new LinkedList<Team>();
-        List<Team> globallyVisibleTeams = new LinkedList<Team>();
-        Map<String, Team> teamByName = new HashMap<>();
-
-        public DSLBuilder() {
-            when(loggedInUser.getUsername()).thenReturn("mary");
-            when(teamFilterConfigurationService.getDefaultTeamsInProjectsVisibleToUser()).thenReturn(defaulTeamsInProjects);
-            when(teamRepo.getCache()).thenAnswer(i->teamByName.values().stream().collect(toList()));
-            when(teamFilterConfigurationService.getGloballyVisibleTeams()).thenReturn(globallyVisibleTeams);
-        }
-
-        public DSLTeam team(String teamName) {
-            Team team = new Team(teamName, "sue", "sue", emptyList());
-            teamByName.put(teamName, team);
-
-            when(teamRepo.findByName(teamName)).thenReturn(team);
-            return new DSLTeam(teamName);
-        }
-
-        public void userIsNotAdmin() {
-            when(loggedInUser.isAdmin()).thenReturn(false);
-        }
-
-        public void userIsAdmin() {
-            when(loggedInUser.isAdmin()).thenReturn(true);
-        }
-
-        public DSLBuilder userIsMemberOf(String ...teams) {
-            when(userTeamRepo.findByUserName("mary")).thenReturn(
-                    streamOf(asList(teams))
-                        .map(teamName -> new UserTeam("mary", teamName))
-                        .collect(toList()));
-
-            return this;
-        }
-
-        class DSLTeam {
-            private String teamName;
-            public DSLTeam(String teamName) {
-                this.teamName = teamName;
-            }
-
-            public DSLBuilder isGloballyVisible() {
-                globallyVisibleTeams.add(teamByName.get(teamName));
-                return DSLBuilder.this;
-            }
-
-            public DSLBuilder isDefaultInAVisibleProject() {
-                defaulTeamsInProjects.add(teamByName.get(teamName));
-                return DSLBuilder.this;
-            }
-
-            public DSLBuilder userIsMemberOf(String ...teams) {
-                return DSLBuilder.this.userIsMemberOf(teams);
-            }
-
-            public DSLTeam team(String anotherTeam) {
-                return DSLBuilder.this.team(anotherTeam);
-            }
-        }
-    }
 }

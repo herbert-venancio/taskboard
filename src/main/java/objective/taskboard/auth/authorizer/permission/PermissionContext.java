@@ -2,6 +2,8 @@ package objective.taskboard.auth.authorizer.permission;
 
 public class PermissionContext {
 
+    private static final PermissionContext EMPTY = new PermissionContext(null);
+
     public final String target;
 
     public PermissionContext(String target) {
@@ -9,7 +11,7 @@ public class PermissionContext {
     }
 
     public static PermissionContext empty() {
-        return new PermissionContext(null);
+        return EMPTY;
     }
 
     public boolean isEmpty() {

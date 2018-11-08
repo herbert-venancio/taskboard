@@ -15,25 +15,27 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import objective.taskboard.domain.ProjectFilterConfiguration;
-import objective.taskboard.jira.ProjectService;
+import objective.taskboard.jira.AuthorizedProjectsService;
 
 
 @RestController
 @RequestMapping("/ws/project/config/cluster/")
 public class ProjectClusterController {
 
-    private final ProjectService projectService;
+    private final AuthorizedProjectsService authorizedProjectsService;
     private final ProjectClusterService projectClusterService;
 
     @Autowired
-    public ProjectClusterController(ProjectService projectService, ProjectClusterService projectClusterService) {
-        this.projectService = projectService;
+    public ProjectClusterController(
+            AuthorizedProjectsService authorizedProjectsService,
+            ProjectClusterService projectClusterService) {
+        this.authorizedProjectsService = authorizedProjectsService;
         this.projectClusterService = projectClusterService;
     }
 
     @GetMapping("{projectKey}")
     public ResponseEntity<List<ProjectClusterItemDto>> get(@PathVariable("projectKey") String projectKey) {
-        Optional<ProjectFilterConfiguration> project = projectService.getTaskboardProject(projectKey, PROJECT_ADMINISTRATION);
+        Optional<ProjectFilterConfiguration> project = authorizedProjectsService.getTaskboardProject(projectKey, PROJECT_ADMINISTRATION);
 
         if (!project.isPresent())
             return ResponseEntity.notFound().build();
@@ -43,7 +45,7 @@ public class ProjectClusterController {
 
     @PutMapping("{projectKey}")
     public ResponseEntity<?> update(@PathVariable("projectKey") String projectKey, @RequestBody List<ProjectClusterItemDto> clusterItemDtos) {
-        Optional<ProjectFilterConfiguration> project = projectService.getTaskboardProject(projectKey, PROJECT_ADMINISTRATION);
+        Optional<ProjectFilterConfiguration> project = authorizedProjectsService.getTaskboardProject(projectKey, PROJECT_ADMINISTRATION);
 
         if (!project.isPresent())
             return ResponseEntity.notFound().build();
