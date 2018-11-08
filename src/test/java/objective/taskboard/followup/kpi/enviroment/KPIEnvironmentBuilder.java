@@ -252,4 +252,17 @@ public class KPIEnvironmentBuilder {
         return this.issues.values().stream().map(b -> b.buildAdapter()).collect(Collectors.toList());
     }
 
+    public List<IssueKpi> buildAllIssuesAsKpi() {
+        
+        return this.issues.values().stream().map(b -> b.build()).collect(Collectors.toList());
+    }
+
+    public List<IssueKpiDataItemAdapter> buildAllIssuesAsAdapterUnless(String... issuesKeys) {
+        List<String> issuesKeysList = Arrays.asList(issuesKeys);
+        return this.issues.values().stream()
+                   .filter(i -> !issuesKeysList.contains(i.getIssueKey()))
+                   .map(i -> i.buildAdapter())
+                   .collect(Collectors.toList());
+    }
+
 }
