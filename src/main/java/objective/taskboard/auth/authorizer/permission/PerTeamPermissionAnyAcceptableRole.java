@@ -4,13 +4,12 @@ import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
-import java.util.Optional;
 
 import objective.taskboard.auth.LoggedUserDetails;
 import objective.taskboard.data.UserTeam.UserTeamRole;
 import objective.taskboard.repository.UserTeamCachedRepository;
 
-public class PerTeamPermissionAnyAcceptableRole extends BasePermission implements TargettedPermission {
+public class PerTeamPermissionAnyAcceptableRole extends BaseTargettedPermission {
 
     private final UserTeamCachedRepository userTeamRepository;
     private final List<UserTeamRole> acceptedRoles;
@@ -26,21 +25,19 @@ public class PerTeamPermissionAnyAcceptableRole extends BasePermission implement
     }
 
     @Override
-    public boolean isAuthorized(PermissionContext permissionContext) {
-        validate(permissionContext);
-
-        return userTeamRepository.findByUserName(getLoggedUser().getUsername()).stream()
-                .filter(userTeam -> userTeam.getTeam().equals(permissionContext.target))
+    protected boolean isAuthorized(LoggedUserDetails loggedUserDetails, String target) {
+        return userTeamRepository.findByUserName(loggedUserDetails.getUsername()).stream()
+                .filter(userTeam -> userTeam.getTeam().equals(target))
                 .anyMatch(userTeam -> acceptedRoles.contains(userTeam.getRole()));
     }
 
     @Override
-    public Optional<List<String>> applicableTargets() {
+    public List<String> applicableTargets() {
         List<String> applicableTargets = userTeamRepository.findByUserName(getLoggedUser().getUsername()).stream()
                 .filter(userTeam -> acceptedRoles.contains(userTeam.getRole()))
                 .map(userTeam -> userTeam.getTeam())
                 .collect(toList());
-        return Optional.of(applicableTargets);
+        return applicableTargets;
     }
 
 }

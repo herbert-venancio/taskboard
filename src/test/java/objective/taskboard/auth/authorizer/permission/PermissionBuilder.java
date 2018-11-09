@@ -5,7 +5,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Optional;
 
 public class PermissionBuilder {
 
@@ -26,7 +25,7 @@ public class PermissionBuilder {
     }
 
     public PermissionBuilder withApplicableTargets(String... applicableTargets) {
-        dto.applicableTargets = Optional.of(asList(applicableTargets));
+        dto.applicableTargets = asList(applicableTargets);
         return this;
     }
 
@@ -48,12 +47,9 @@ public class PermissionBuilder {
     private static class PermissionMockDto  {
         protected String name;
         protected boolean isAuthorized;
-        protected Optional<List<String>> applicableTargets;
+        protected List<String> applicableTargets;
         public String name() {
             return this.name;
-        }
-        public boolean isAuthorized(PermissionContext permissionContext) {
-            return this.isAuthorized;
         }
     }
 
@@ -65,6 +61,11 @@ public class PermissionBuilder {
             this.name = dto.name;
             this.isAuthorized = dto.isAuthorized;
         }
+
+        @Override
+        public boolean isAuthorized() {
+            return isAuthorized;
+        }
     }
 
     public static class TargettedPermissionMock extends PermissionMockDto implements TargettedPermission {
@@ -73,7 +74,14 @@ public class PermissionBuilder {
             this.isAuthorized = dto.isAuthorized;
             this.applicableTargets = dto.applicableTargets;
         }
-        public Optional<List<String>> applicableTargets() {
+
+        @Override
+        public boolean isAuthorizedFor(String target) {
+            return isAuthorized;
+        }
+
+        @Override
+        public List<String> applicableTargets() {
             return applicableTargets;
         }
     }

@@ -1,6 +1,7 @@
 package objective.taskboard.auth.authorizer;
 
-import static org.hamcrest.CoreMatchers.is;
+import static java.util.Arrays.asList;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
@@ -10,56 +11,53 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import objective.taskboard.auth.LoggedUserDetails;
-import objective.taskboard.auth.authorizer.permission.AnyProjectPermission;
 import objective.taskboard.auth.authorizer.permission.PerProjectPermission;
-import objective.taskboard.auth.authorizer.permission.Permission;
-import objective.taskboard.auth.authorizer.permission.PermissionContext;
-import objective.taskboard.auth.authorizer.permission.TaskboardAdministrationPermission;
+import objective.taskboard.auth.authorizer.permission.TargetlessPermission;
+import objective.taskboard.auth.authorizer.permission.TargettedPermission;
 
 public class PermissionRepositoryTest {
 
-    private List<Permission> permissions = new ArrayList<>();
+    private List<TargetlessPermission> targetLessPermissions = new ArrayList<>();
+    private List<TargettedPermission> targettedPermissions = new ArrayList<>();
     private List<PerProjectPermission> perProjectPermissions = new ArrayList<>();
-    private PermissionRepository subject = new PermissionRepository(permissions, perProjectPermissions);
-    private LoggedUserDetails loggedUserDetails = mock(LoggedUserDetails.class);
+    private PermissionRepository subject = new PermissionRepository(targetLessPermissions, targettedPermissions, perProjectPermissions);
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
     @Test
-    public void findByName_givenInvalidPermissionName_throwException() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage(is("Permission INVALID_PERMISSION is invalid."));
+    public void findAllTargetless_shouldReturnUnmodifiedListWithTargetlessPermissions() {
+        targetLessPermissions.addAll(asList(mock(TargetlessPermission.class), mock(TargetlessPermission.class)));
 
-        subject.findByName("INVALID_PERMISSION");
+        List<TargetlessPermission> allTargetless = subject.findAllTargetless();
+
+        assertEquals(targetLessPermissions, allTargetless);
+        assertIsUnmodifiable(allTargetless);
     }
 
     @Test
-    public void specificProjectPermission_givenEmptyContext_shouldThrowError() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage(is("Empty PermissionContext isn't allowed for permission permission.name."));
+    public void findAllTargetted_shouldReturnUnmodifiedListWithTargettedPermissions() {
+        targettedPermissions.addAll(asList(mock(TargettedPermission.class), mock(TargettedPermission.class)));
 
-        Permission permission = new PerProjectPermission("permission.name", loggedUserDetails, "any_role_1", "any_role_1");
-        permission.isAuthorized(PermissionContext.empty());
+        List<TargettedPermission> allTargetted = subject.findAllTargetted();
+
+        assertEquals(targettedPermissions, allTargetted);
+        assertIsUnmodifiable(allTargetted);
     }
 
     @Test
-    public void anyProjectPermission_givenNonEmptyContext_shouldThrowError() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage(is("Only PermissionContext.empty() is allowed for permission permission.name."));
+    public void findAllPerProject_shouldReturnUnmodifiedListWithPerProjectPermissions() {
+        perProjectPermissions.addAll(asList(mock(PerProjectPermission.class), mock(PerProjectPermission.class)));
 
-        Permission permission = new AnyProjectPermission("permission.name", loggedUserDetails, "any_role_1", "any_role_1");
-        permission.isAuthorized(new PermissionContext("target"));
+        List<PerProjectPermission> allPerProject = subject.findAllPerProjectPermissions();
+
+        assertEquals(perProjectPermissions, allPerProject);
+        assertIsUnmodifiable(allPerProject);
     }
 
-    @Test
-    public void taskboardPermission_givenNonEmptyContext_shouldThrowError() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage(is("Only PermissionContext.empty() is allowed for permission taskboard.administration."));
-
-        Permission permission = new TaskboardAdministrationPermission(loggedUserDetails);
-        permission.isAuthorized(new PermissionContext("target"));
+    private void assertIsUnmodifiable(List<?> list) {
+        expectedException.expect(UnsupportedOperationException.class);
+        list.clear();
     }
 
 }

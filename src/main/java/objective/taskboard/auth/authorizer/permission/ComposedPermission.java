@@ -1,15 +1,14 @@
 package objective.taskboard.auth.authorizer.permission;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 import objective.taskboard.auth.LoggedUserDetails;
 
-public abstract class ComposedPermission extends BasePermission {
+public abstract class ComposedPermission extends BaseTargettedPermission {
 
     protected final List<Permission> permissions;
 
@@ -19,18 +18,17 @@ public abstract class ComposedPermission extends BasePermission {
     }
 
     @Override
-    public Optional<List<String>> applicableTargets() {
+    public List<String> applicableTargets() {
         if (!permissions.stream().anyMatch(p -> p instanceof TargettedPermission))
-            return Optional.empty();
+            return emptyList();
 
         List<String> applicableTargets = permissions.stream()
-                .flatMap(p -> p.applicableTargets().map(List::stream).orElseGet(Stream::empty))
+                .filter(TargettedPermission.class::isInstance)
+                .map(TargettedPermission.class::cast)
+                .flatMap(p -> p.applicableTargets().stream())
                 .distinct()
                 .collect(toList());
-        return Optional.of(applicableTargets);
+        return applicableTargets;
     }
-
-    @Override
-    public void validate(PermissionContext permissionContext) {}
 
 }

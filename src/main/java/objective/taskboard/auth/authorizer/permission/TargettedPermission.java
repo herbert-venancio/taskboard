@@ -1,10 +1,11 @@
 package objective.taskboard.auth.authorizer.permission;
 
+import java.util.List;
+
 public interface TargettedPermission extends Permission {
 
-    default void validate(PermissionContext permissionContext) {
-        if (permissionContext.isEmpty())
-            throw new IllegalArgumentException("Empty PermissionContext isn't allowed for permission "+ name() +".");
-    }
+    boolean isAuthorizedFor(String target);
+
+    List<String> applicableTargets();
 
 }

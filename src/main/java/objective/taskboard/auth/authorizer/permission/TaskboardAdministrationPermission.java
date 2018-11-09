@@ -7,17 +7,15 @@ import org.springframework.stereotype.Service;
 import objective.taskboard.auth.LoggedUserDetails;
 
 @Service
-public class TaskboardAdministrationPermission extends BasePermission implements TargetlessPermission {
+public class TaskboardAdministrationPermission extends BaseTargetlessPermission {
 
     public TaskboardAdministrationPermission(LoggedUserDetails loggedUserDetails) {
         super(TASKBOARD_ADMINISTRATION, loggedUserDetails);
     }
 
     @Override
-    public boolean isAuthorized(PermissionContext permissionContext) {
-        validate(permissionContext);
-
-        return getLoggedUser().isAdmin();
+    protected boolean isAuthorized(LoggedUserDetails loggedUserDetails) {
+        return loggedUserDetails.isAdmin();
     }
 
 }

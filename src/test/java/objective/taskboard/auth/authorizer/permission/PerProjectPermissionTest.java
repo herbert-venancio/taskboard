@@ -2,7 +2,6 @@ package objective.taskboard.auth.authorizer.permission;
 
 import static objective.taskboard.auth.LoggedUserDetailsMockBuilder.loggedUser;
 import static objective.taskboard.auth.authorizer.permission.PermissionTestUtils.role;
-import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -23,22 +22,14 @@ public class PerProjectPermissionTest implements PermissionTest {
     private LoggedUserDetails loggedUserDetails = mock(LoggedUserDetails.class);
 
     @Test
+    @Override
     public void testName() {
         Permission subject = new PerProjectPermission("PERMISSION_NAME", loggedUserDetails, "role1", "role2");
         assertEquals("PERMISSION_NAME", subject.name());
     }
 
     @Test
-    public void testIsAuthorizedArguments() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage(is("Empty PermissionContext isn't allowed for permission PERMISSION_NAME."));
-
-        PerProjectPermission subject = new PerProjectPermission("PERMISSION_NAME", loggedUser().build(), "role1", "role2");
-
-        subject.isAuthorized();
-    }
-
-    @Test
+    @Override
     public void testIsAuthorized() {
         LoggedUserDetails userWithPermission = loggedUser().withRoles(
                 role("role1", "PROJ1"),

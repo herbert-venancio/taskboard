@@ -4,11 +4,10 @@ import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
-import java.util.Optional;
 
 import objective.taskboard.auth.LoggedUserDetails;
 
-public class PerProjectPermission extends BasePermission implements TargettedPermission {
+public class PerProjectPermission extends BaseTargettedPermission {
 
     private final List<String> acceptedRoles;
 
@@ -18,21 +17,19 @@ public class PerProjectPermission extends BasePermission implements TargettedPer
     }
 
     @Override
-    public boolean isAuthorized(PermissionContext permissionContext) {
-        validate(permissionContext);
-
-        return getLoggedUser().getJiraRoles().stream()
-                .filter(role -> role.projectKey.equals(permissionContext.target))
+    protected boolean isAuthorized(LoggedUserDetails loggedUserDetails, String target) {
+        return loggedUserDetails.getJiraRoles().stream()
+                .filter(role -> role.projectKey.equals(target))
                 .anyMatch(role -> acceptedRoles.contains(role.name));
     }
 
     @Override
-    public Optional<List<String>> applicableTargets() {
+    public List<String> applicableTargets() {
         List<String> applicableTargets = getLoggedUser().getJiraRoles().stream()
                 .filter(role -> acceptedRoles.contains(role.name))
                 .map(role -> role.projectKey)
                 .collect(toList());
-        return Optional.of(applicableTargets);
+        return applicableTargets;
     }
 
 }

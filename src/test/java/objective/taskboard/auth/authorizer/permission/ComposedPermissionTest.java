@@ -3,11 +3,10 @@ package objective.taskboard.auth.authorizer.permission;
 import static java.lang.String.join;
 import static objective.taskboard.auth.authorizer.permission.PermissionBuilder.permission;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.Test;
 
@@ -19,22 +18,22 @@ public class ComposedPermissionTest {
 
     @Test
     public void applicableTargets_withoutTargettedPermission_shouldReturnEmpty() {
-        Permission permission = new ComposedPermissionImpl("ANY", loggedUserDetails,
+        ComposedPermission permission = new ComposedPermissionImpl("ANY", loggedUserDetails,
                 permission().asTargetless(),
                 permission().asTargetless());
 
-        Optional<List<String>> applicableTargets = permission.applicableTargets();
-        assertFalse(applicableTargets.isPresent());
+        List<String> applicableTargets = permission.applicableTargets();
+        assertTrue(applicableTargets.isEmpty());
     }
 
     @Test
     public void applicableTargets_withTargettedPermission_shouldReturnAllApplicableTargetsDistincted() {
-        Permission permission = new ComposedPermissionImpl("ANY", loggedUserDetails,
+        ComposedPermission permission = new ComposedPermissionImpl("ANY", loggedUserDetails,
                 permission().withApplicableTargets("TARGET_A", "TARGET_B").asTargetted(),
                 permission().withApplicableTargets("TARGET_A", "TARGET_C").asTargetted(),
                 permission().asTargetless());
 
-        List<String> applicableTargets = permission.applicableTargets().orElseThrow(IllegalStateException::new);
+        List<String> applicableTargets = permission.applicableTargets();
 
         assertEquals("TARGET_A, TARGET_B, TARGET_C", join(", ", applicableTargets));
     }
@@ -44,7 +43,7 @@ public class ComposedPermissionTest {
             super(name, loggedUserDetails, permissions);
         }
         @Override
-        public boolean isAuthorized(PermissionContext permissionContext) {
+        protected boolean isAuthorized(LoggedUserDetails loggedUserDetails, String target) {
             return false;
         }
     }

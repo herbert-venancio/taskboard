@@ -9,14 +9,12 @@ public abstract class ComposedPermissionAnyMatch extends ComposedPermission {
     }
 
     @Override
-    public boolean isAuthorized(PermissionContext permissionContext) {
+    protected boolean isAuthorized(LoggedUserDetails loggedUserDetails, String target) {
         return permissions.stream().anyMatch(p -> {
-            PermissionContext context = permissionContext;
-
             if (p instanceof TargetlessPermission)
-                context = PermissionContext.empty();
+                return ((TargetlessPermission)p).isAuthorized();
 
-            return p.isAuthorized(context);
+            return ((TargettedPermission)p).isAuthorizedFor(target);
         });
     }
 

@@ -3,16 +3,13 @@ package objective.taskboard.auth.authorizer;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import objective.taskboard.auth.LoggedUserDetails;
-import objective.taskboard.auth.authorizer.permission.Permission;
-import objective.taskboard.auth.authorizer.permission.PermissionContext;
 import objective.taskboard.auth.authorizer.permission.TargetlessPermission;
 import objective.taskboard.auth.authorizer.permission.TargettedPermission;
 
@@ -29,15 +26,19 @@ public class Authorizer {
     }
 
     public List<PermissionDto> getPermissions() {
-        return PermissionDto.from(permissionRepository.findAll());
+        return PermissionDto.from(permissionRepository.findAllTargetless(), permissionRepository.findAllTargetted());
     }
 
     public List<String> getAllowedProjectsForPermissions(String... permissions) {
-        return permissionRepository.findAllPerProjectPermissions().stream()
-                .filter(permission -> asList(permissions).contains(permission.name()))
-                .flatMap(permission -> permission.applicableTargets().orElseThrow(IllegalStateException::new).stream())
+        List<String> permissionsList = asList(permissions);
+
+        List<String> targets = permissionRepository.findAllPerProjectPermissions().stream()
+                .filter(permission -> permissionsList.contains(permission.name()))
+                .flatMap(permission -> permission.applicableTargets().stream())
                 .distinct()
                 .collect(toList());
+
+        return targets;
     }
 
     public boolean hasAnyRoleInProjects(List<String> roles, List<String> projectKeys) {
@@ -61,29 +62,18 @@ public class Authorizer {
             this.applicableTargets = applicableTargets;
         }
 
-        public static List<PermissionDto> from(List<Permission> permissions) {
-            List<PermissionDto> dtoList = new ArrayList<>();
-            permissions
-                .forEach(p -> PermissionDto.from(p).ifPresent(dto -> dtoList.add(dto)));
-            return dtoList;
+        public static List<PermissionDto> from(List<TargetlessPermission> targetlessPermissions, List<TargettedPermission> targettedPermissions) {
+            Stream<PermissionDto> targetlessStream = targetlessPermissions.stream()
+                    .filter(p -> p.isAuthorized())
+                    .map(p -> new PermissionDto(p.name(), null));
+
+            Stream<PermissionDto> targettedStream = targettedPermissions.stream()
+                    .map(p -> new PermissionDto(p.name(), p.applicableTargets()))
+                    .filter(dto -> !dto.applicableTargets.isEmpty());
+
+            return Stream.concat(targetlessStream, targettedStream).collect(toList());
         }
 
-        private static Optional<PermissionDto> from(Permission permission) {
-            Optional<List<String>> applicableTargets = permission.applicableTargets();
-
-            if (isTargetlessPermitted(permission) || isTargettedPermitted(permission, applicableTargets))
-                return Optional.of(new PermissionDto(permission.name(), applicableTargets.orElse(null)));
-
-            return Optional.empty();
-        }
-
-        private static boolean isTargetlessPermitted(Permission permission) {
-            return permission instanceof TargetlessPermission && permission.isAuthorized(PermissionContext.empty());
-        }
-
-        private static boolean isTargettedPermitted(Permission permission, Optional<List<String>> applicableTargets) {
-            return permission instanceof TargettedPermission && applicableTargets.isPresent() && applicableTargets.get().size() > 0;
-        }
     }
 
 }

@@ -20,6 +20,13 @@ public class TeamsEditViewPermission extends ComposedPermissionAnyMatch {
         super(TEAMS_EDIT_VIEW,
                 loggedUserDetails, taskboardAdministrationPermission,
                 new AnyTeamPermissionAnyAcceptableRole(null, loggedUserDetails, userTeamCachedRepository, UserTeamRole.MANAGER));
+
+    }
+
+    public boolean isAuthorized() {
+        //FIXME remove method when composed permission is changed to aggregation
+        String aaaa = "intentional warning :p";
+        return isAuthorized(getLoggedUser(), null);
     }
 
 }

@@ -8,11 +8,11 @@ import objective.taskboard.auth.LoggedUserDetails;
 import objective.taskboard.data.UserTeam.UserTeamRole;
 import objective.taskboard.repository.UserTeamCachedRepository;
 
-public class AnyTeamPermissionAnyAcceptableRole extends BasePermission implements TargetlessPermission {
+public class AnyTeamPermissionAnyAcceptableRole extends BaseTargetlessPermission {
 
     private final UserTeamCachedRepository userTeamRepository;
-    private final List<UserTeamRole> acceptedRoles;
 
+    private final List<UserTeamRole> acceptedRoles;
     public AnyTeamPermissionAnyAcceptableRole(
             String name,
             LoggedUserDetails loggedUserDetails,
@@ -24,10 +24,8 @@ public class AnyTeamPermissionAnyAcceptableRole extends BasePermission implement
     }
 
     @Override
-    public boolean isAuthorized(PermissionContext permissionContext) {
-        validate(permissionContext);
-
-        return userTeamRepository.findByUserName(getLoggedUser().getUsername()).stream()
+    protected boolean isAuthorized(LoggedUserDetails loggedUserDetails) {
+        return userTeamRepository.findByUserName(loggedUserDetails.getUsername()).stream()
                 .anyMatch(userTeam -> acceptedRoles.contains(userTeam.getRole()));
     }
 

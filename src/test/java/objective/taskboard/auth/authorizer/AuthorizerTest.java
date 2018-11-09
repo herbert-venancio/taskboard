@@ -8,11 +8,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.junit.Test;
@@ -22,6 +22,8 @@ import objective.taskboard.auth.LoggedUserDetails.JiraRole;
 import objective.taskboard.auth.authorizer.Authorizer.PermissionDto;
 import objective.taskboard.auth.authorizer.permission.PerProjectPermission;
 import objective.taskboard.auth.authorizer.permission.Permission;
+import objective.taskboard.auth.authorizer.permission.TargetlessPermission;
+import objective.taskboard.auth.authorizer.permission.TargettedPermission;
 
 public class AuthorizerTest {
 
@@ -39,11 +41,19 @@ public class AuthorizerTest {
                 .build();
 
         assertPermissionDtoList(subject.getPermissions(),
-                "permission.a: [PROJ1, PROJ2]," +
-                "permission.a.view: null," +
-                "permission.b: [PROJ1]," +
-                "permission.b.view: null"
+                "permission.a.view: null",
+                "permission.b.view: null",
+                "permission.a: [PROJ1, PROJ2]",
+                "permission.b: [PROJ1]"
                 );
+    }
+
+    public static void main(String[] args) {
+        Optional<List<String>> opt = Optional.empty();
+        asList("aaa").stream()
+                .flatMap(permission -> opt.orElseThrow(IllegalStateException::new).stream())
+                .distinct()
+                .collect(toList());
     }
 
     @Test
@@ -115,15 +125,15 @@ public class AuthorizerTest {
         return new DSLBuilder();
     }
 
-    private static void assertPermissionDtoList(List<PermissionDto> permissions, String expertedPermissions) {
+    private static void assertPermissionDtoList(List<PermissionDto> permissions, String... expectedPermissions) {
         assertEquals(
-                expertedPermissions,
+                String.join("\n", expectedPermissions),
                 permissions.stream()
                     .map(permission -> {
                         String targetsAsString = permission.applicableTargets != null ? permission.applicableTargets.toString() : "null";
                         return permission.name +": "+ targetsAsString;
                     })
-                    .collect(Collectors.joining(","))
+                    .collect(Collectors.joining("\n"))
                 );
     }
 
@@ -135,12 +145,16 @@ public class AuthorizerTest {
         public DSLBuilder withPermissions(Permission... permissions) {
             List<Permission> permissionsList = asList(permissions);
 
-            when(permissionRepository.findAll()).thenReturn(permissionsList);
-
-            when(permissionRepository.findByName(any())).thenAnswer(invocation -> {
-                String name = (String) invocation.getArguments()[0];
-                return permissionsList.stream().filter(p -> p.name().equals(name)).findFirst().orElseThrow(IllegalArgumentException::new);
-            });
+            when(permissionRepository.findAllTargetless()).thenReturn(
+                    permissionsList.stream()
+                            .filter(TargetlessPermission.class::isInstance)
+                            .map(TargetlessPermission.class::cast)
+                            .collect(toList()));
+            when(permissionRepository.findAllTargetted()).thenReturn(
+                    permissionsList.stream()
+                            .filter(TargettedPermission.class::isInstance)
+                            .map(TargettedPermission.class::cast)
+                            .collect(toList()));
 
             List<PerProjectPermission> perProject = permissionsList.stream()
                     .filter(PerProjectPermission.class::isInstance)

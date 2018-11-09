@@ -14,9 +14,8 @@ public class PermissionTestUtils {
         return new UserTeam(memberName, teamName, role);
     }
 
-    public static interface PermissionTest {
+    public interface PermissionTest {
         void testName();
-        void testIsAuthorizedArguments();
         void testIsAuthorized();
     }
 

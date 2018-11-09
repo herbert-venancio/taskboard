@@ -1,7 +1,6 @@
 package objective.taskboard.auth.authorizer.permission;
 
 import static objective.taskboard.auth.LoggedUserDetailsMockBuilder.loggedUser;
-import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -22,22 +21,14 @@ public class TaskboardAdministrationPermissionTest implements PermissionTest {
     private LoggedUserDetails loggedUserDetails = mock(LoggedUserDetails.class);
 
     @Test
+    @Override
     public void testName() {
         Permission subject = new TaskboardAdministrationPermission(loggedUserDetails);
         assertEquals("taskboard.administration", subject.name());
     }
 
     @Test
-    public void testIsAuthorizedArguments() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage(is("Only PermissionContext.empty() is allowed for permission taskboard.administration."));
-
-        TaskboardAdministrationPermission subject = new TaskboardAdministrationPermission(loggedUser().withIsAdmin(true).build());
-
-        subject.isAuthorizedFor("target");
-    }
-
-    @Test
+    @Override
     public void testIsAuthorized() {
         TaskboardAdministrationPermission subject = new TaskboardAdministrationPermission(loggedUser().withIsAdmin(true).build());
         assertTrue(subject.isAuthorized());

@@ -1,9 +1,9 @@
 package objective.taskboard.auth.authorizer.permission;
 
+import static java.util.Collections.emptyList;
 import static objective.taskboard.auth.authorizer.Permissions.USER_VISIBILITY;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,7 +12,7 @@ import objective.taskboard.auth.LoggedUserDetails;
 import objective.taskboard.team.UserTeamPermissionService;
 
 @Service
-public class UserVisibilityPermission extends BasePermission implements TargettedPermission {
+public class UserVisibilityPermission extends BaseTargettedPermission {
 
     private final UserTeamPermissionService userTeamPermissionService;
     private final TaskboardAdministrationPermission taskboardAdministrationPermission;
@@ -28,23 +28,21 @@ public class UserVisibilityPermission extends BasePermission implements Targette
     }
 
     @Override
-    public boolean isAuthorized(PermissionContext permissionContext) {
-        validate(permissionContext);
-
+    protected boolean isAuthorized(LoggedUserDetails loggedUserDetails, String target) {
         boolean hasPermissionToSeeAllUsers = taskboardAdministrationPermission.isAuthorized();
 
-        return hasPermissionToSeeAllUsers || isThereSomeTeamInCommon(permissionContext);
+        return hasPermissionToSeeAllUsers || isThereSomeTeamInCommon(target);
     }
 
-    private boolean isThereSomeTeamInCommon(PermissionContext permissionContext) {
+    private boolean isThereSomeTeamInCommon(String target) {
         return userTeamPermissionService.getTeamsVisibleToLoggedInUser().stream()
                 .flatMap(team -> team.getMembers().stream())
-                .anyMatch(userTeam -> userTeam.getUserName().equals(permissionContext.target));
+                .anyMatch(userTeam -> userTeam.getUserName().equals(target));
     }
 
     @Override
-    public Optional<List<String>> applicableTargets() {
-        return Optional.empty();
+    public List<String> applicableTargets() {
+        return emptyList();
     }
 
 }

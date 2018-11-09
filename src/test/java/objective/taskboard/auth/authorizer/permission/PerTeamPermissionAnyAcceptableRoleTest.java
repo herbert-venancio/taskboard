@@ -3,7 +3,6 @@ package objective.taskboard.auth.authorizer.permission;
 import static objective.taskboard.auth.LoggedUserDetailsMockBuilder.loggedUser;
 import static objective.taskboard.auth.authorizer.permission.PermissionTestUtils.userTeam;
 import static objective.taskboard.repository.UserTeamRepositoryMockBuilder.userTeamRepository;
-import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -26,22 +25,14 @@ public class PerTeamPermissionAnyAcceptableRoleTest implements PermissionTest {
     private LoggedUserDetails loggedUserDetails = mock(LoggedUserDetails.class);
 
     @Test
+    @Override
     public void testName() {
         Permission subject = new PerTeamPermissionAnyAcceptableRole("PERMISSION_NAME", loggedUserDetails, userTeamRepository().build(), UserTeamRole.MANAGER);
         assertEquals("PERMISSION_NAME", subject.name());
     }
 
     @Test
-    public void testIsAuthorizedArguments() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage(is("Empty PermissionContext isn't allowed for permission PERMISSION_NAME."));
-
-        PerTeamPermissionAnyAcceptableRole subject = new PerTeamPermissionAnyAcceptableRole("PERMISSION_NAME", loggedUser().build(), userTeamRepository().build(), UserTeamRole.MANAGER);
-
-        subject.isAuthorized();
-    }
-
-    @Test
+    @Override
     public void testIsAuthorized() {
         UserTeamCachedRepository userTeamRepo = userTeamRepository().withUserTeamList(
                 "USER",
