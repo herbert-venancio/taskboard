@@ -20,9 +20,12 @@
  */
 package objective.taskboard.repository;
 
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
+
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 
@@ -34,6 +37,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.ImmutableList;
 
 import objective.taskboard.data.UserTeam;
+import objective.taskboard.data.UserTeam.UserTeamRole;
 
 @Service
 public class UserTeamCachedRepository {
@@ -56,7 +60,7 @@ public class UserTeamCachedRepository {
 
         return cache.stream()
                     .filter(ut -> ut.getUserName().equals(userName))
-                    .collect(Collectors.toList());
+                    .collect(toList());
     }
 
     public List<UserTeam> findByTeam(String team) {
@@ -65,7 +69,20 @@ public class UserTeamCachedRepository {
 
         return cache.stream()
                     .filter(ut -> Objects.equals(ut.getTeam(), team))
-                    .collect(Collectors.toList());
+                    .collect(toList());
+    }
+
+    public List<UserTeam> findByUsernameAndRoles(String username, UserTeamRole... roles) {
+        List<UserTeamRole> rolesList = asList(roles);
+        return findByUserName(username).stream()
+                .filter(ut -> rolesList.contains(ut.getRole()))
+                .collect(toList());
+    }
+
+    public Optional<UserTeam> findByUsernameTeamAndRoles(String username, String team, UserTeamRole... roles) {
+        return findByUsernameAndRoles(username, roles).stream()
+                .filter(ut -> ut.getTeam().equals(team))
+                .findAny();
     }
 
     public List<UserTeam> getCache() {
