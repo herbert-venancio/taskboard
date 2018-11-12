@@ -11,8 +11,8 @@ import objective.taskboard.repository.UserTeamCachedRepository;
 public class AnyTeamPermissionAnyAcceptableRole extends BaseTargetlessPermission {
 
     private final UserTeamCachedRepository userTeamRepository;
-
     private final List<UserTeamRole> acceptedRoles;
+
     public AnyTeamPermissionAnyAcceptableRole(
             String name,
             LoggedUserDetails loggedUserDetails,

@@ -1,88 +1,111 @@
 package objective.taskboard.auth.authorizer.permission;
 
-import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
 import java.util.List;
 
-public class PermissionBuilder {
+public abstract class PermissionBuilder {
 
-    private PermissionMockDto dto = new PermissionMockDto();
-
-    public static PermissionBuilder permission() {
-        return new PermissionBuilder();
+    public static TargetlessPermissionBuilder targetlessPermission() {
+        return new TargetlessPermissionBuilder();
+    }
+    public static TargetlessPermissionBuilder targetlessPermission(String name) {
+        return targetlessPermission().withName(name);
     }
 
-    public PermissionBuilder withName(String name) {
-        dto.name = name;
-        return this;
+    public static TargettedPermissionBuilder<TargettedPermission> targettedPermission() {
+        return new TargettedPermissionBuilder<TargettedPermission>() { };
     }
 
-    public PermissionBuilder withIsAuthorized(boolean isAuthorized) {
-        dto.isAuthorized = isAuthorized;
-        return this;
+    public static TargettedPermissionBuilder<TargettedPermission> targettedPermission(String name) {
+        return targettedPermission().withName(name);
     }
 
-    public PermissionBuilder withApplicableTargets(String... applicableTargets) {
-        dto.applicableTargets = asList(applicableTargets);
-        return this;
+    public static TargettedPermissionBuilder<PerProjectPermission> perProjectPermission() {
+        return new TargettedPermissionBuilder<PerProjectPermission>() { };
     }
 
-    public TargetlessPermissionMock asTargetless() {
-        return new TargetlessPermissionMock(dto);
+    public static TargettedPermissionBuilder<PerProjectPermission> perProjectPermission(String name) {
+        return perProjectPermission().withName(name);
     }
 
-    public TargettedPermissionMock asTargetted() {
-        return new TargettedPermissionMock(dto);
-    }
 
-    public PerProjectPermission asPerProjectPermission() {
-        PerProjectPermission permission = mock(PerProjectPermission.class);
-        when(permission.name()).thenReturn(dto.name);
-        when(permission.applicableTargets()).thenReturn(dto.applicableTargets);
-        return permission;
-    }
-
-    private static class PermissionMockDto  {
+    private static abstract class BasePermissionBuilder<T extends Permission> {
         protected String name;
-        protected boolean isAuthorized;
-        protected List<String> applicableTargets;
-        public String name() {
-            return this.name;
+
+        @SuppressWarnings("unchecked")
+		private Class<T> getPermissionClass() {
+            return (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+        }
+
+        protected T build() {
+            T permission = mock(getPermissionClass());
+            when(permission.name()).thenReturn(name);
+            return permission;
         }
     }
 
-    public static class TargetlessPermissionMock extends PermissionMockDto implements TargetlessPermission {
-        public TargetlessPermissionMock(PermissionMockDto dto) {
-            if (dto.applicableTargets != null)
-                throw new IllegalArgumentException("TargettedPermission doesn't accept applicableTargets.");
-
-            this.name = dto.name;
-            this.isAuthorized = dto.isAuthorized;
-        }
+    public static class TargetlessPermissionBuilder extends BasePermissionBuilder<TargetlessPermission> {
+        private boolean isAuthorized;
 
         @Override
-        public boolean isAuthorized() {
-            return isAuthorized;
+        protected TargetlessPermission build() {
+            TargetlessPermission permission = super.build();
+            when(permission.isAuthorized()).thenReturn(isAuthorized);
+            return permission;
+        }
+
+        public TargetlessPermissionBuilder withName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public TargetlessPermission authorized() {
+            isAuthorized = true;
+            return build();
+        }
+
+        public TargetlessPermission notAuthorized() {
+            isAuthorized = false;
+            return build();
         }
     }
 
-    public static class TargettedPermissionMock extends PermissionMockDto implements TargettedPermission {
-        public TargettedPermissionMock(PermissionMockDto dto) {
-            this.name = dto.name;
-            this.isAuthorized = dto.isAuthorized;
-            this.applicableTargets = dto.applicableTargets;
-        }
+
+    public static class TargettedPermissionBuilder<T extends TargettedPermission> extends BasePermissionBuilder<T> {
+        private List<String> applicableTargets = new ArrayList<>();
 
         @Override
-        public boolean isAuthorizedFor(String target) {
-            return isAuthorized;
+        protected T build() {
+            T permission = super.build();
+
+            for (String target : applicableTargets)
+                when(permission.isAuthorizedFor(target)).thenReturn(true);
+
+            when(permission.applicableTargets()).thenReturn(new ArrayList<>(applicableTargets));
+
+            return permission;
         }
 
-        @Override
-        public List<String> applicableTargets() {
-            return applicableTargets;
+        public TargettedPermissionBuilder<T> withName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public TargettedPermission applicableTo(String target, String... otherTargets) {
+            applicableTargets.add(target);
+            for (String t : otherTargets)
+                applicableTargets.add(t);
+            return build();
+        }
+
+        public TargettedPermission notApplicableToAnyTarget() {
+            if (!applicableTargets.isEmpty())
+                throw new IllegalStateException("A permission can't be applicable and not-applicable to the same target");
+            return build();
         }
     }
 

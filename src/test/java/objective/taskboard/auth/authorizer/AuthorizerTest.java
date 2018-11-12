@@ -2,7 +2,9 @@ package objective.taskboard.auth.authorizer;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
-import static objective.taskboard.auth.authorizer.permission.PermissionBuilder.permission;
+import static objective.taskboard.auth.authorizer.permission.PermissionBuilder.perProjectPermission;
+import static objective.taskboard.auth.authorizer.permission.PermissionBuilder.targetlessPermission;
+import static objective.taskboard.auth.authorizer.permission.PermissionBuilder.targettedPermission;
 import static objective.taskboard.auth.authorizer.permission.PermissionTestUtils.role;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -31,12 +33,12 @@ public class AuthorizerTest {
     public void getPermissions_returnTargettedIfHApplicableTargetsIsntEmptyAndTargetlessIfIsAuthorizedEqualsTrue() {
         Authorizer subject = authorizer()
                 .withPermissions(
-                        permission().withName("permission.a").withIsAuthorized(true).withApplicableTargets("PROJ1", "PROJ2").asTargetted(),
-                        permission().withName("permission.a.view").withIsAuthorized(true).asTargetless(),
-                        permission().withName("permission.b").withIsAuthorized(true).withApplicableTargets("PROJ1").asTargetted(),
-                        permission().withName("permission.b.view").withIsAuthorized(true).asTargetless(),
-                        permission().withName("permission.not").withIsAuthorized(false).withApplicableTargets().asTargetted(),
-                        permission().withName("permission.not.view").withIsAuthorized(false).asTargetless()
+                        targettedPermission("permission.a").applicableTo("PROJ1", "PROJ2"),
+                        targetlessPermission("permission.a.view").authorized(),
+                        targettedPermission("permission.b").applicableTo("PROJ1"),
+                        targetlessPermission("permission.b.view").authorized(),
+                        targettedPermission("permission.not").notApplicableToAnyTarget(),
+                        targetlessPermission("permission.not.view").notAuthorized()
                         )
                 .build();
 
@@ -60,12 +62,12 @@ public class AuthorizerTest {
     public void getAllowedProjectsForPermissions_returnApplicableTargetsList() {
         Authorizer subject = authorizer()
                 .withPermissions(
-                        permission().withName("permission.y").withApplicableTargets("PROJ4", "PROJ5").asTargetted(),
-                        permission().withName("permission.x").withApplicableTargets("PROJ1", "PROJ4").asTargetted(),
-                        permission().withName("permission.a").withApplicableTargets("PROJ1", "PROJ2").asPerProjectPermission(),
-                        permission().withName("permission.b").withApplicableTargets("PROJ3").asPerProjectPermission(),
-                        permission().withName("permission.c").withApplicableTargets("PROJ1", "PROJ2").asPerProjectPermission(),
-                        permission().withName("permission.d").withApplicableTargets().asPerProjectPermission()
+                        targettedPermission("permission.y").applicableTo("PROJ4", "PROJ5"),
+                        targettedPermission("permission.x").applicableTo("PROJ1", "PROJ4"),
+                        perProjectPermission("permission.a").applicableTo("PROJ1", "PROJ2"),
+                        perProjectPermission("permission.b").applicableTo("PROJ3"),
+                        perProjectPermission("permission.c").applicableTo("PROJ1", "PROJ2"),
+                        perProjectPermission("permission.d").notApplicableToAnyTarget()
                         )
                 .build();
 
