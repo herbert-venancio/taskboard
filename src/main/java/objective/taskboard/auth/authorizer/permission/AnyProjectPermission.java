@@ -6,7 +6,7 @@ import java.util.List;
 
 import objective.taskboard.auth.LoggedUserDetails;
 
-public class AnyProjectPermission extends BaseTargetlessPermission {
+public abstract class AnyProjectPermission extends BaseTargetlessPermission {
 
     private final List<String> acceptedRoles;
 

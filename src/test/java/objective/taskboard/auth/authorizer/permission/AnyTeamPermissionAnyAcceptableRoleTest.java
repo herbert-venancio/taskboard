@@ -8,9 +8,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import objective.taskboard.auth.LoggedUserDetails;
 import objective.taskboard.auth.authorizer.permission.PermissionTestUtils.PermissionTest;
@@ -18,9 +16,6 @@ import objective.taskboard.data.UserTeam.UserTeamRole;
 import objective.taskboard.repository.UserTeamCachedRepository;
 
 public class AnyTeamPermissionAnyAcceptableRoleTest implements PermissionTest {
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     private LoggedUserDetails loggedUserDetails = mock(LoggedUserDetails.class);
 

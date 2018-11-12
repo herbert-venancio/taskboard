@@ -14,6 +14,10 @@ public class LoggedUserDetailsMockBuilder {
         return new LoggedUserDetailsMockBuilder();
     }
 
+    public static JiraRole role(String project, String role) {
+        return new JiraRole(0L, role, project);
+    }
+
     public LoggedUserDetailsMockBuilder withName(String name) {
         when(mock.getUsername()).thenReturn(name);
         return this;

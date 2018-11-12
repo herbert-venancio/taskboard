@@ -6,17 +6,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import objective.taskboard.auth.LoggedUserDetails;
 import objective.taskboard.auth.authorizer.permission.PermissionTestUtils.PermissionTest;
 
 public class TaskboardAdministrationPermissionTest implements PermissionTest {
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     private LoggedUserDetails loggedUserDetails = mock(LoggedUserDetails.class);
 

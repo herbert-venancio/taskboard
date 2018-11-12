@@ -7,7 +7,7 @@ import java.util.List;
 
 import objective.taskboard.auth.LoggedUserDetails;
 
-public class PerProjectPermission extends BaseTargettedPermission {
+public abstract class PerProjectPermission extends BaseTargettedPermission {
 
     private final List<String> acceptedRoles;
 
@@ -28,6 +28,7 @@ public class PerProjectPermission extends BaseTargettedPermission {
         List<String> applicableTargets = getLoggedUser().getJiraRoles().stream()
                 .filter(role -> acceptedRoles.contains(role.name))
                 .map(role -> role.projectKey)
+                .distinct()
                 .collect(toList());
         return applicableTargets;
     }

@@ -12,9 +12,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import objective.taskboard.auth.LoggedUserDetails;
 import objective.taskboard.auth.authorizer.permission.PermissionTestUtils.PermissionTest;
@@ -23,9 +21,6 @@ import objective.taskboard.data.UserTeam;
 import objective.taskboard.team.UserTeamPermissionService;
 
 public class UserVisibilityPermissionTest implements PermissionTest {
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     private LoggedUserDetails loggedUserDetails = mock(LoggedUserDetails.class);
 
