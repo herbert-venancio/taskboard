@@ -54,7 +54,7 @@ public class UserTeamServiceTest {
             .belongsToTeam("Blue").withRole(MEMBER)
             .belongsToTeam("Super").withRole(VIEWER);
 
-        assertTeams("Blue, Extra, Rocket", subject.getTeamsThatUserIsAValidAssignee("my.user"));
+        assertTeams("Blue, Extra, Rocket", subject.getTeamsInWhichUserIsValidAsAssignee("my.user"));
     }
 
     private UserTeamTestUtils.DSLBuilder withTeams() {

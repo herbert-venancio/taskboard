@@ -50,7 +50,7 @@ public class UserTeamService {
                 .collect(toSet());
     }
 
-    public List<Team> getTeamsThatUserIsAValidAssignee(String username) {
+    public List<Team> getTeamsInWhichUserIsValidAsAssignee(String username) {
         return userTeamRepo.findByUserName(username).stream()
                 .filter(userTeam -> userTeam.getRole() == MANAGER || userTeam.getRole() == MEMBER)
                 .map(ut -> teamRepo.findByName(ut.getTeam()))
