@@ -211,7 +211,6 @@
 
                 createIssueListFilter: function() {
                     this.set('options.0.hidden', false);
-                    const div = this.$.cfdIssueTypes;
                     new IssueTypeFilter(this.plotData.issueTypes, this.$.issueTypes, (selectedTypes, isToggledAll) => {
                         this.plotData.typeDimension.filterFunction((issueType) => selectedTypes.includes(issueType));
                         this.set('options.0.cssClasses', isToggledAll ? '' : 'widget__button_highlighted');
