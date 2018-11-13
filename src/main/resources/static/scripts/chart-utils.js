@@ -124,12 +124,12 @@ class ChartUtils {
     }
 
     static resizeAllHighchartsCharts () {
-        /* 
+        /*
          * This function performs a resize on all Highchart charts.
-         *
-         * It is necessary because when the chart is first loaded, the 
-         * container (div) has no size set, then the chart's size falls 
-         * back to the lib's default size which gives an erroneous size.
+         * 
+         * It is necessary because when the chart is first loaded, the container
+         * (div) has no size set, then the chart's size falls back to the lib's
+         * default size which gives an erroneous size.
          */
         Highcharts.charts.forEach((chart) => {
             if (chart) {
@@ -155,28 +155,21 @@ class ChartUtils {
     }
 }
 
-class WeeklyChartBuilder {
-    constructor (divID) {
+class ChartBuilderBase {
+    constructor (divID){
         this.options = ChartUtils.getDefaultHighchartsOptions();
         this.options.chart.renderTo = divID;
-        const oneWeekInMillis = 7 * 24 * 3600 * 1000;
-        this.options.xAxis.tickInterval = oneWeekInMillis;
-        this.options.xAxis.labels = {
-            formatter: function () {
-                return Highcharts.dateFormat('%e %b %y', this.value);
-            }
-        };
+        this.options.credits = false;
         this.options.chart.events = {
-            selection: function (event) {
-                if (event.resetSelection) {
-                    this.resetZoomButton = this.resetZoomButton.destroy(); // hide reset button
-                    event.preventDefault(); // prevent zoom out
-                    this.yAxis[0].setExtremes(null, null); // reset Y
-                    dcDateRangeChartsService.applySelection(this.title.textStr); // reset X to timeline selection
+                selection: function (event) {
+                    if (event.resetSelection) {
+                        this.resetZoomButton = this.resetZoomButton.destroy(); // hide // button
+                        event.preventDefault(); // prevent zoom out
+                        this.yAxis[0].setExtremes(null, null); // reset Y
+                        dcDateRangeChartsService.applySelection(this.title.textStr); // reset X to timeline  selection
+                    }
                 }
-            }
         };
-        this.options.tooltip.xDateFormat = 'Week from %A, %b %e, %Y';
     }
 
     withTitle (title) {
@@ -202,5 +195,40 @@ class WeeklyChartBuilder {
     build () {
         const chart = Highcharts.chart(this.options);
         return chart;
+    }
+}
+
+class WeeklyChartBuilder extends ChartBuilderBase {
+    constructor (divID) {
+        
+    	super(divID);
+        const oneWeekInMillis = 7 * 24 * 3600 * 1000;
+        this.options.xAxis.tickInterval = oneWeekInMillis;
+        this.options.xAxis.labels = {
+            formatter: function () {
+                return Highcharts.dateFormat('%e %b %y', this.value);
+            }
+        };
+        
+        this.options.tooltip.xDateFormat = 'Week from %A, %b %e, %Y';
+    }
+}
+
+class ProgressChartBuilder extends ChartBuilderBase {
+    constructor(divID, startDate, endDate){
+
+        super(divID);		
+        this.options.yAxis.max = 100;
+        this.options.yAxis.labels.format = '{value}%';
+        this.options.yAxis.title.text = 'Progress %';
+        this.options.tooltip.headerFormat = null;
+        this.options.tooltip.footerFormat = null;
+        this.options.tooltip.pointFormat = '<b>{point.x:%d/%m/%Y}: {point.y:.1f}%</b>';
+        this.options.plotOptions = {
+                spline : {
+                    pointStart: startDate,
+                    pointEnd: endDate
+                }
+        }
     }
 }

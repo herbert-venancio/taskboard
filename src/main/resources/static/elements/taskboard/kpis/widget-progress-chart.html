@@ -23,11 +23,19 @@
     <template>
 
         <style>
+            .widget__body {
+                display: flex;
+            }
+            #progress-chart {
+                display: flex;
+                height: 100%;
+                width: 100%;
+            }
         </style>
 
         <iron-signals on-iron-signal-cfd-created="linkCfdBrush"></iron-signals>
 
-        <widget-wrap title="Progress Chart" is-ready="{{isReady}}" error-message="{{errorMessage}}" options="{{options}}" chart="{{chart}}">
+        <widget-wrap title="Progress Chart" is-ready="{{isReady}}" error-message="{{errorMessage}}" options="{{options}}" highcharts-chart="{{chart}}">
             <div id="progress-chart" class="tb-chart"></div>
         </widget-wrap>
 
@@ -48,10 +56,6 @@
                 </div>
             </modal-wrap-content>
 
-            <modal-wrap-footer>
-                <tb-button button="[[_btUpdate]]"></tb-button>
-            </modal-wrap-footer>
-
         </modal-wrap>
         
     </template>
@@ -64,7 +68,9 @@
                 properties: {
                     selectedProjectKey: {
                         type: String,
-                        notify: true
+                        notify: true,
+                        value: '',
+                        observer: '_onProjectSelected'
                     },
                     selectedDate: {
                         type: String,
@@ -100,158 +106,110 @@
                     }
                 },
 
-                observers: [
-                    '_resetProjectionTimespan(selectedProjectKey, selectedDate)',
-                    '_onProjectSelected(selectedProjectKey, selectedDate)',
-                ],
+                _onProjectSelected: function() {
+                    
+                    this.reloadChart();
+                },
                 
-                ready: function() {
-                    this._createChartOptions();
+                reloadChart: function(){
 
-                    var btUpdate = ButtonBuilder('Update chart').id('update').onClick(this.updateFilters.bind(this)).build();
-                    this.set('_btUpdate', btUpdate);
+                    this.reset();
+                    var url = `/api/projects/${this.selectedProjectKey}/followup/progress?timezone=${taskboard.getTimeZoneIdFromBrowser()}`;
+                    
+                    if (this.tempProjectionTimespan)
+                        url = url + "&projection=" + self.tempProjectionTimespan;
+                    
+                    this.xhr = $.getJSON(url);
+                    this.xhr.done((data) => {
+                        
+                        this.plotData = this.prepareData(data);
+                        this.createChart();
+                        this.isReady = true;
+                        
+                    });
+                    
+                    this.xhr.fail((error) => {
+                        this.errorMessage = error.responseText;
+                    });     
+                },
+                
+                prepareData: function(data){
+
+                    function formatPlotData(type, array, color) {
+                        var serie = {};
+                        serie.name = type;
+                        serie.data = [];
+                        serie.color = color;
+                        array.forEach( function(d){
+                            serie.data.push({
+                                x  : getDateFromIso(d.date),
+                                y  : d.progress * 100
+                            });
+                        });
+                
+                        return serie;
+                    }
+            
+                    var graphData = [];
+                    
+                    graphData.push(formatPlotData("Actual", data.actual, dcUtils.colors.DONE));
+                    graphData.push(formatPlotData("Projection", data.actualProjection, dcUtils.colors.DONE_PROJECTION));
+                    graphData.push(formatPlotData("Expected", data.expected, dcUtils.colors.EXPECTED));
+
+                    this.startDate = getDateFromIso(data.startingDate);
+                    this.endDate = getDateFromIso(data.endingDate);
+                    
+                    return graphData;
                 },
 
+                createChart: function(){
+                    const builder = new ProgressChartBuilder('progress-chart', this.startDate, this.EndDate)
+                        .withTitle('Progress Chart')
+                        .withChartType('spline')
+                        .withSeriesData(this.plotData);
+                    this.chart = builder.build();
+                    dcDateRangeChartsService.registerHighchartsChart(this.chart.title.textStr, this.chart);
+                    dcDateRangeChartsService.applySelection(this.chart.title.textStr);
+
+                },
+
+                ready: function () {
+                    this._createChartOptions();
+                },
+                
                 _createChartOptions: function() {
-                    var self = this;
                     this.set('options', [
                         {
-                            icon:'taskboard-icons:dashboard-filter',
-                            title: 'Chart filters',
-                            tap: function() {
-                                self.$.modal.open();
-                            },
-                            hidden: true
+                           icon:'taskboard-icons:dashboard-filter',
+                           title: 'Chart filters',
+                           tap: function() {
+                               this.$.modal.open();
+                           },
+                           hidden: true
                         }
                     ]);
                 },
 
-                _onProjectSelected: function(selectedProjectKey, selectedDate) {
-                    var self = this;
-
-                    self.reset();
-
-                    var url = "/api/projects/"+selectedProjectKey+"/followup/progress?timezone=" + taskboard.getTimeZoneIdFromBrowser();
-
-                    if (self.tempProjectionTimespan)
-                        url = url + "&projection=" + self.tempProjectionTimespan;
-
-                    self.xhr = d3.json(url, function(req, data) {
-                        (function(){
-
-                            if (req != null && req.status >= 400) {
-                                var msg = 'Impossible to generate Progress Chart. '+ req.responseText;
-                                self.set('errorMessage', msg);
-                                return;
-                            }
-
-                            if (!self.tempProjectionTimespan)
-                                self.set('tempProjectionTimespan', data.projectionTimespan);
-
-                            function plotCallback(type) {
-                                return function(d, index) {
-                                    graphData.push({
-                                        date   : getDateFromIso(d.date),
-                                        value  : d.progress * 100,
-                                        type   : type
-                                    })}
-                            }
-
-                            var graphData = [];
-                            data.actual.forEach(plotCallback("Actual"));
-                            data.actualProjection.forEach(plotCallback("Projection"));
-                            data.expected.forEach(plotCallback("Expected"));
-
-                            var dateDimension = crossfilter(graphData).dimension(function (d) {
-                                return [d.type, d.date];
-                            });
-
-                            var effortDoneByDayGroup = dateDimension.group().reduceSum(function(d) {
-                                return d.value
-                            });
-
-                            var startDate = getDateFromIso(data.startingDate);
-                            var endDate = getDateFromIso(data.endingDate);
-
-                            var chart = self.createChart(startDate, endDate);
-
-                            chart
-                                .x(d3.time.scale().domain([startDate, endDate]))
-                                .dimension(dateDimension)
-                                .group(effortDoneByDayGroup);
-
-                            dcDateRangeChartsService.registerChartInRangeAndRender(chart);
-
-                            self.set('chart', chart);
-                        })();
-
-                        self.set('isReady', true);
-                    })
-                },
-
-                createChart: function(startDate, endDate) {
-                    self = this;
-                    
-                    var chart = dc.seriesChart(this.$$("#progress-chart"));
-                    chart
-                        .chart(function(c) { return dc.lineChart(c).interpolate('monotone'); })
-                        .brushOn(false)
-                        .seriesAccessor(function(d) {return d.key[0];})
-                        .keyAccessor(function(d) {return d.key[1];})
-                        .title(function(d) {
-                            return d.key[1].toLocaleDateString() + " : " + dcUtils.percentFormat(d.value) + " %";}
-                        )
-                        .elasticY(false)
-                        .yAxisLabel("Progress %")
-                        .legend(
-                            dcUtils.getDefaultLegend()
-                                .x(80).y(20)
-                                .itemHeight(13)
-                                .itemWidth(90)
-                                .horizontal(1)
-                                .legendWidth(180)
-                        )
-                        .margins({top: 15, right: 20, bottom: 20, left: 50})
-                        .colors(
-                            self._getChartColors()
-                        );
-
-                    dcUtils.setupChartDateTicks(chart, startDate, endDate, 12);
-
-                    return chart;
-                },
-
-                _getChartColors: function() {
-                    var actual = dcUtils.colors.DONE,
-                        projection = dcUtils.colors.DONE_PROJECTION,
-                        expected = dcUtils.colors.EXPECTED;
-                    return dcUtils.getChartColorsFromArray([actual, expected, projection]);
-                },
-
-                reset: function() {
-                    this.set('isReady', false);
-                    this.set('errorMessage', '');
-
+                reset: function () {
+                    this.isReady = false;
+                    this.errorMessage = '';
+                    this.set('options.0.cssClasses', '');
+                    this.set('options.0.hidden', true);
                     if (this.xhr) {
                         this.xhr.abort();
                         this.xhr = null;
                     }
-                    if (!_.isEmpty(this.chart)) {
-                        dcDateRangeChartsService.deregisterChartInRange(this.chart);
-                        dc.deregisterChart(this.chart);
-                        this.set('chart', {});
+                    if (this.chart) {
+                        dcDateRangeChartsService.deregisterHighchartsChart(this.chart.title.textStr);
+                        this.chart.destroy();
+                        this.chart = null;
                     }
                 },
 
                 _resetProjectionTimespan: function() {
                     this.set('tempProjectionTimespan', null);
                 },
-
-                updateFilters: function() {
-                    this.$.modal.close();
-                    this._onProjectSelected(this.selectedProjectKey, this.selectedDate);
-                }
-
+ 
             });
         })();
     </script>
