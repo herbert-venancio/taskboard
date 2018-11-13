@@ -1,17 +1,20 @@
 package objective.taskboard.auth.authorizer;
 
 import static java.util.Arrays.asList;
-import static objective.taskboard.auth.authorizer.permission.PermissionBuilder.permission;
+import static java.util.stream.Collectors.toList;
+import static objective.taskboard.auth.authorizer.permission.PermissionBuilder.perProjectPermission;
+import static objective.taskboard.auth.authorizer.permission.PermissionBuilder.targetlessPermission;
+import static objective.taskboard.auth.authorizer.permission.PermissionBuilder.targettedPermission;
 import static objective.taskboard.auth.authorizer.permission.PermissionTestUtils.role;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.junit.Test;
@@ -19,63 +22,52 @@ import org.junit.Test;
 import objective.taskboard.auth.LoggedUserDetails;
 import objective.taskboard.auth.LoggedUserDetails.JiraRole;
 import objective.taskboard.auth.authorizer.Authorizer.PermissionDto;
+import objective.taskboard.auth.authorizer.permission.PerProjectPermission;
 import objective.taskboard.auth.authorizer.permission.Permission;
+import objective.taskboard.auth.authorizer.permission.TargetlessPermission;
+import objective.taskboard.auth.authorizer.permission.TargettedPermission;
 
 public class AuthorizerTest {
 
     @Test
-    public void hasPermission_givenUserWithPermission_returnTrue() {
+    public void getPermissions_returnTargettedIfHApplicableTargetsIsntEmptyAndTargetlessIfIsAuthorizedEqualsTrue() {
         Authorizer subject = authorizer()
                 .withPermissions(
-                        permission().withName("taskboard.admin.test").withAccepts(true).asTargetless()
-                        )
-                .build();
-
-        assertTrue(subject.hasPermission("taskboard.admin.test"));
-    }
-
-    @Test
-    public void hasPermission_givenUserWithoutPermission_returnFalse() {
-        Authorizer subject = authorizer()
-                .withPermissions(
-                        permission().withName("taskboard.admin.test").withAccepts(false).asTargetless()
-                        )
-                .build();
-
-        assertFalse(subject.hasPermission("taskboard.admin.test"));
-    }
-
-    @Test
-    public void getPermissions_returnTargettedIfHApplicableTargetsIsntEmptyAndTargetlessIfAcceptsEqualsTrue() {
-        Authorizer subject = authorizer()
-                .withPermissions(
-                        permission().withName("permission.a").withAccepts(true).withApplicableTargets("PROJ1", "PROJ2").asTargetted(),
-                        permission().withName("permission.a.view").withAccepts(true).asTargetless(),
-                        permission().withName("permission.b").withAccepts(true).withApplicableTargets("PROJ1").asTargetted(),
-                        permission().withName("permission.b.view").withAccepts(true).asTargetless(),
-                        permission().withName("permission.not").withAccepts(false).withApplicableTargets().asTargetted(),
-                        permission().withName("permission.not.view").withAccepts(false).asTargetless()
+                        targettedPermission("permission.a").applicableTo("PROJ1", "PROJ2"),
+                        targetlessPermission("permission.a.view").authorized(),
+                        targettedPermission("permission.b").applicableTo("PROJ1"),
+                        targetlessPermission("permission.b.view").authorized(),
+                        targettedPermission("permission.not").notApplicableToAnyTarget(),
+                        targetlessPermission("permission.not.view").notAuthorized()
                         )
                 .build();
 
         assertPermissionDtoList(subject.getPermissions(),
-                "permission.a: [PROJ1, PROJ2]," +
-                "permission.a.view: null," +
-                "permission.b: [PROJ1]," +
-                "permission.b.view: null"
+                "permission.a.view: null",
+                "permission.b.view: null",
+                "permission.a: [PROJ1, PROJ2]",
+                "permission.b: [PROJ1]"
                 );
+    }
+
+    public static void main(String[] args) {
+        Optional<List<String>> opt = Optional.empty();
+        asList("aaa").stream()
+                .flatMap(permission -> opt.orElseThrow(IllegalStateException::new).stream())
+                .distinct()
+                .collect(toList());
     }
 
     @Test
     public void getAllowedProjectsForPermissions_returnApplicableTargetsList() {
         Authorizer subject = authorizer()
                 .withPermissions(
-                        permission().withName("permission.y").withApplicableTargets("PROJ4", "PROJ5").asTargetted(),
-                        permission().withName("permission.x").withApplicableTargets("PROJ1", "PROJ4").asTargetted(),
-                        permission().withName("permission.a").withApplicableTargets("PROJ1", "PROJ2").asPerProjectPermission(),
-                        permission().withName("permission.b").withApplicableTargets("PROJ3").asPerProjectPermission(),
-                        permission().withName("permission.c").withApplicableTargets("PROJ1", "PROJ2").asPerProjectPermission(),
-                        permission().withName("permission.d").withApplicableTargets().asPerProjectPermission()
+                        targettedPermission("permission.y").applicableTo("PROJ4", "PROJ5"),
+                        targettedPermission("permission.x").applicableTo("PROJ1", "PROJ4"),
+                        perProjectPermission("permission.a").applicableTo("PROJ1", "PROJ2"),
+                        perProjectPermission("permission.b").applicableTo("PROJ3"),
+                        perProjectPermission("permission.c").applicableTo("PROJ1", "PROJ2"),
+                        perProjectPermission("permission.d").notApplicableToAnyTarget()
                         )
                 .build();
 
@@ -135,15 +127,15 @@ public class AuthorizerTest {
         return new DSLBuilder();
     }
 
-    private static void assertPermissionDtoList(List<PermissionDto> permissions, String expertedPermissions) {
+    private static void assertPermissionDtoList(List<PermissionDto> permissions, String... expectedPermissions) {
         assertEquals(
-                expertedPermissions,
+                String.join("\n", expectedPermissions),
                 permissions.stream()
                     .map(permission -> {
                         String targetsAsString = permission.applicableTargets != null ? permission.applicableTargets.toString() : "null";
                         return permission.name +": "+ targetsAsString;
                     })
-                    .collect(Collectors.joining(","))
+                    .collect(Collectors.joining("\n"))
                 );
     }
 
@@ -155,14 +147,22 @@ public class AuthorizerTest {
         public DSLBuilder withPermissions(Permission... permissions) {
             List<Permission> permissionsList = asList(permissions);
 
-            when(permissionRepository.findAll()).thenReturn(permissionsList);
+            when(permissionRepository.findAllTargetless()).thenReturn(
+                    permissionsList.stream()
+                            .filter(TargetlessPermission.class::isInstance)
+                            .map(TargetlessPermission.class::cast)
+                            .collect(toList()));
+            when(permissionRepository.findAllTargetted()).thenReturn(
+                    permissionsList.stream()
+                            .filter(TargettedPermission.class::isInstance)
+                            .map(TargettedPermission.class::cast)
+                            .collect(toList()));
 
-            when(permissionRepository.findByName(any())).thenAnswer(invocation -> {
-                String name = (String) invocation.getArguments()[0];
-                return permissionsList.stream().filter(p -> p.name().equals(name)).findFirst().orElseThrow(IllegalArgumentException::new);
-            });
-
-            when(permissionRepository.findAllPerProjectPermissions()).thenCallRealMethod();
+            List<PerProjectPermission> perProject = permissionsList.stream()
+                    .filter(PerProjectPermission.class::isInstance)
+                    .map(PerProjectPermission.class::cast)
+                    .collect(toList());
+            when(permissionRepository.findAllPerProjectPermissions()).thenReturn(perProject);
 
             return this;
         }

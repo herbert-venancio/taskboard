@@ -4,7 +4,6 @@ import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
-import static objective.taskboard.auth.authorizer.Permissions.TEAMS_EDIT_VIEW;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -20,7 +19,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import objective.taskboard.auth.authorizer.Authorizer;
+import objective.taskboard.auth.authorizer.permission.TeamsEditViewPermission;
 import objective.taskboard.data.Team;
 import objective.taskboard.team.TeamsController.TeamDto;
 import objective.taskboard.testUtils.ControllerTestUtils.AssertResponse;
@@ -28,7 +27,6 @@ import objective.taskboard.testUtils.ControllerTestUtils.AssertResponse;
 @RunWith(MockitoJUnitRunner.class)
 public class TeamsControllerTest {
 
-    private Authorizer authorizer = mock(Authorizer.class);
     private UserTeamService userTeamService = mock(UserTeamService.class);
 
     @Test
@@ -247,15 +245,16 @@ public class TeamsControllerTest {
 
     private class DLSBuilder {
 
-        private TeamsController subject = new TeamsController(authorizer, userTeamService);
+        private TeamsEditViewPermission teamsEditViewPermission = mock(TeamsEditViewPermission.class);
+        private TeamsController subject = new TeamsController(userTeamService, teamsEditViewPermission);
 
         public DLSBuilder withTeamsEditViewPermission() {
-            when(authorizer.hasPermission(TEAMS_EDIT_VIEW)).thenReturn(true);
+            when(teamsEditViewPermission.isAuthorized()).thenReturn(true);
             return this;
         }
 
         public DLSBuilder withoutTeamsEditViewPermission() {
-            when(authorizer.hasPermission(TEAMS_EDIT_VIEW)).thenReturn(false);
+            when(teamsEditViewPermission.isAuthorized()).thenReturn(false);
             return this;
         }
 

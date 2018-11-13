@@ -1,45 +1,35 @@
 package objective.taskboard.auth.authorizer.permission;
 
 import static objective.taskboard.auth.LoggedUserDetailsMockBuilder.loggedUser;
-import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
+import objective.taskboard.auth.LoggedUserDetails;
 import objective.taskboard.auth.authorizer.permission.PermissionTestUtils.PermissionTest;
 
 public class TaskboardAdministrationPermissionTest implements PermissionTest {
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    private LoggedUserDetails loggedUserDetails = mock(LoggedUserDetails.class);
 
     @Test
+    @Override
     public void testName() {
-        Permission subject = new TaskboardAdministrationPermission("PERMISSION_NAME");
-        assertEquals("PERMISSION_NAME", subject.name());
+        Permission subject = new TaskboardAdministrationPermission(loggedUserDetails);
+        assertEquals("taskboard.administration", subject.name());
     }
 
     @Test
-    public void testAcceptsArguments() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage(is("Only PermissionContext.empty() is allowed for permission PERMISSION_NAME."));
+    @Override
+    public void testIsAuthorized() {
+        TaskboardAdministrationPermission subject = new TaskboardAdministrationPermission(loggedUser().withIsAdmin(true).build());
+        assertTrue(subject.isAuthorized());
 
-        Permission subject = new TaskboardAdministrationPermission("PERMISSION_NAME");
-
-        subject.accepts(loggedUser().withIsAdmin(true).build(), new PermissionContext("target"));
-    }
-
-    @Test
-    public void testAccepts() {
-        Permission subject = new TaskboardAdministrationPermission("PERMISSION_NAME");
-
-        assertTrue(subject.accepts(loggedUser().withIsAdmin(true).build(), PermissionContext.empty()));
-
-        assertFalse(subject.accepts(loggedUser().withIsAdmin(false).build(), PermissionContext.empty()));
+        subject = new TaskboardAdministrationPermission(loggedUser().withIsAdmin(false).build());
+        assertFalse(subject.isAuthorized());
     }
 
 }

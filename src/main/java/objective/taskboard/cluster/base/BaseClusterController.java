@@ -18,8 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import objective.taskboard.auth.authorizer.Authorizer;
-import objective.taskboard.auth.authorizer.Permissions;
+import objective.taskboard.auth.authorizer.permission.TaskboardAdministrationPermission;
 import objective.taskboard.followup.cluster.SizingCluster;
 
 @RestController
@@ -29,15 +28,15 @@ public class BaseClusterController {
     private static final String CLUSTERS_NOT_FOUND = "Clusters not found.";
     private static final String CLUSTER_NOT_FOUND = "Cluster not found.";
     private final BaseClusterService service;
-    private final Authorizer authorizer;
+    private final TaskboardAdministrationPermission taskboardAdministrationPermission;
 
     @Autowired
     public BaseClusterController(
         final BaseClusterService service,
-        final Authorizer authorizer
+        final TaskboardAdministrationPermission taskboardAdministrationPermission
     ) {
         this.service = service;
-        this.authorizer = authorizer;
+        this.taskboardAdministrationPermission = taskboardAdministrationPermission;
     }
 
     @GetMapping("/{id}")
@@ -113,7 +112,7 @@ public class BaseClusterController {
     }
 
     private boolean hasTaskboardAdministrivePermission() {
-        return !authorizer.hasPermission(Permissions.TASKBOARD_ADMINISTRATION);
+        return !taskboardAdministrationPermission.isAuthorized();
     }
 
     private ResponseEntity<?> clusterNotFoundResponse() {

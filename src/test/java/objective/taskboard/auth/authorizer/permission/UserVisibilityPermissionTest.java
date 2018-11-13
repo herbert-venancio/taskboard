@@ -3,20 +3,16 @@ package objective.taskboard.auth.authorizer.permission;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import objective.taskboard.auth.LoggedUserDetails;
 import objective.taskboard.auth.authorizer.permission.PermissionTestUtils.PermissionTest;
@@ -24,34 +20,22 @@ import objective.taskboard.data.Team;
 import objective.taskboard.data.UserTeam;
 import objective.taskboard.team.UserTeamPermissionService;
 
-public class PerUserVisibilityOfUserPermissionTest implements PermissionTest {
+public class UserVisibilityPermissionTest implements PermissionTest {
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    private LoggedUserDetails loggedUserDetails = mock(LoggedUserDetails.class);
 
     @Test
+    @Override
     public void testName() {
-        Permission subject = perUserVisibilityOfUserPermission("PERMISSION_NAME")
+        Permission subject = permission()
                 .build();
 
-        assertEquals("PERMISSION_NAME", subject.name());
+        assertEquals("user.visibility", subject.name());
     }
 
     @Test
-    public void testAcceptsArguments() {
-        Permission subject = perUserVisibilityOfUserPermission("PERMISSION_NAME")
-                .build();
-
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage(is("Empty PermissionContext isn't allowed for permission PERMISSION_NAME."));
-
-        LoggedUserDetails userDetails = mock(LoggedUserDetails.class);
-
-        subject.accepts(userDetails, PermissionContext.empty());
-    }
-
-    @Test
-    public void testAccepts() {
+    @Override
+    public void testIsAuthorized() {
         assertTrue(givenUserWithTaskboardAdministrationPermission());
 
         assertTrue(givenUserWithoutTaskboardAdministrationPermission_butWithTeamInCommonUserTargettedUser());
@@ -60,40 +44,34 @@ public class PerUserVisibilityOfUserPermissionTest implements PermissionTest {
     }
 
     private boolean givenUserWithTaskboardAdministrationPermission() {
-        Permission subject = perUserVisibilityOfUserPermission("PERMISSION_NAME")
+        UserVisibilityPermission subject = permission()
                 .withUserTaskboardAdministrationPermission(true)
                 .withVisibleTeams()
                 .build();
 
-        LoggedUserDetails userDetails = mock(LoggedUserDetails.class);
-
-        return subject.accepts(userDetails, new PermissionContext("USER_A"));
+        return subject.isAuthorizedFor("USER_A");
     }
 
     private boolean givenUserWithoutTaskboardAdministrationPermission_butWithTeamInCommonUserTargettedUser() {
-        Permission subject = perUserVisibilityOfUserPermission("PERMISSION_NAME")
+        UserVisibilityPermission subject = permission()
                 .withUserTaskboardAdministrationPermission(false)
                 .withVisibleTeams(
                         teamWithMembers("John", "Mary"),
                         teamWithMembers("Peter", "Joseph"))
                 .build();
 
-        LoggedUserDetails userDetails = mock(LoggedUserDetails.class);
-
-        return subject.accepts(userDetails, new PermissionContext("John"));
+        return subject.isAuthorizedFor("John");
     }
 
     private boolean givenUserWithoutTaskboardAdministrationPermission_andNoTeamInCommonUserTargettedUser() {
-        Permission subject = perUserVisibilityOfUserPermission("PERMISSION_NAME")
+        UserVisibilityPermission subject = permission()
                 .withUserTaskboardAdministrationPermission(false)
                 .withVisibleTeams(
                         teamWithMembers("John", "Mary"),
                         teamWithMembers("Peter", "Joseph"))
                 .build();
 
-        LoggedUserDetails userDetails = mock(LoggedUserDetails.class);
-
-        return subject.accepts(userDetails, new PermissionContext("Mark"));
+        return subject.isAuthorizedFor("Mark");
     }
 
     private Team teamWithMembers(String... members) {
@@ -109,23 +87,17 @@ public class PerUserVisibilityOfUserPermissionTest implements PermissionTest {
         return team;
     }
 
-    public DSLBuilder perUserVisibilityOfUserPermission(String permissionName) {
-        return new DSLBuilder(permissionName);
+    public DSLBuilder permission() {
+        return new DSLBuilder();
     }
 
-    private static class DSLBuilder {
+    private class DSLBuilder {
 
         private TaskboardAdministrationPermission tbAdminPermission = mock(TaskboardAdministrationPermission.class);
         private UserTeamPermissionService userTeamPermissionService = mock(UserTeamPermissionService.class);
 
-        private final String permissionName;
-
-        private DSLBuilder(String permissionName) {
-            this.permissionName = permissionName;
-        }
-
         public DSLBuilder withUserTaskboardAdministrationPermission(boolean hasPermission) {
-            when(tbAdminPermission.accepts(any(), any())).thenReturn(hasPermission);
+            when(tbAdminPermission.isAuthorized()).thenReturn(hasPermission);
             return this;
         }
 
@@ -135,8 +107,8 @@ public class PerUserVisibilityOfUserPermissionTest implements PermissionTest {
             return this;
         }
 
-        public PerUserVisibilityOfUserPermission build() {
-            return new PerUserVisibilityOfUserPermission(permissionName, tbAdminPermission, userTeamPermissionService);
+        public UserVisibilityPermission build() {
+            return new UserVisibilityPermission(tbAdminPermission, loggedUserDetails, userTeamPermissionService);
         }
 
     }

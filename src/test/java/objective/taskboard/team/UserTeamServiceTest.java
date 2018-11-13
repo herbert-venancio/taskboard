@@ -8,7 +8,7 @@ import static org.mockito.Mockito.mock;
 
 import org.junit.Test;
 
-import objective.taskboard.auth.authorizer.Authorizer;
+import objective.taskboard.auth.authorizer.permission.TeamEditPermission;
 import objective.taskboard.filterConfiguration.TeamFilterConfigurationService;
 import objective.taskboard.repository.TeamCachedRepository;
 import objective.taskboard.repository.UserTeamCachedRepository;
@@ -16,13 +16,14 @@ import objective.taskboard.repository.UserTeamCachedRepository;
 public class UserTeamServiceTest {
 
     private UserTeamCachedRepository userTeamRepo = mock(UserTeamCachedRepository.class);
-    private Authorizer authorizer = mock(Authorizer.class);
+    private TeamEditPermission teamEditPermission = mock(TeamEditPermission.class);
     private TeamCachedRepository teamRepo = mock(TeamCachedRepository.class);
     private TeamFilterConfigurationService teamFilterConfigurationService = mock(TeamFilterConfigurationService.class);
     private UserTeamPermissionService userTeamPermissionService = mock(UserTeamPermissionService.class);
-    private UserTeamService subject = new UserTeamService(userTeamRepo, teamRepo, userTeamPermissionService, authorizer);
+    private UserTeamService subject = new UserTeamService(userTeamRepo, teamRepo, userTeamPermissionService, teamEditPermission);
 
-    private UserTeamTestUtils testUtils = new UserTeamTestUtils(teamFilterConfigurationService, teamRepo, userTeamRepo, authorizer, null);
+
+    private UserTeamTestUtils testUtils = new UserTeamTestUtils(teamFilterConfigurationService, teamRepo, userTeamRepo, teamEditPermission, null);
 
     @Test
     public void getTeamsThatUserCanAdmin_shouldReturnOnlyPermittedTeams() {
@@ -53,7 +54,7 @@ public class UserTeamServiceTest {
             .belongsToTeam("Blue").withRole(MEMBER)
             .belongsToTeam("Super").withRole(VIEWER);
 
-        assertTeams("Blue, Extra, Rocket", subject.getTeamsThatUserIsAValidAssignee("my.user"));
+        assertTeams("Blue, Extra, Rocket", subject.getTeamsInWhichUserIsValidAsAssignee("my.user"));
     }
 
     private UserTeamTestUtils.DSLBuilder withTeams() {

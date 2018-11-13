@@ -1,61 +1,56 @@
 package objective.taskboard.auth.authorizer.permission;
 
 import static objective.taskboard.auth.LoggedUserDetailsMockBuilder.loggedUser;
-import static objective.taskboard.auth.authorizer.permission.PermissionTestUtils.userTeam;
+import static objective.taskboard.data.UserTeam.UserTeamRole.MANAGER;
+import static objective.taskboard.data.UserTeam.UserTeamRole.MEMBER;
 import static objective.taskboard.repository.UserTeamRepositoryMockBuilder.userTeamRepository;
-import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import org.junit.Rule;
+import java.util.Optional;
+
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import objective.taskboard.auth.LoggedUserDetails;
 import objective.taskboard.auth.authorizer.permission.PermissionTestUtils.PermissionTest;
-import objective.taskboard.data.UserTeam.UserTeamRole;
+import objective.taskboard.data.UserTeam;
 import objective.taskboard.repository.UserTeamCachedRepository;
 
 public class PerTeamPermissionAnyAcceptableRoleTest implements PermissionTest {
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    private LoggedUserDetails loggedUserDetails = mock(LoggedUserDetails.class);
+
+    private UserTeamCachedRepository userTeamCachedRepository = mock(UserTeamCachedRepository.class);
 
     @Test
+    @Override
     public void testName() {
-        Permission subject = new PerTeamPermissionAnyAcceptableRole("PERMISSION_NAME", userTeamRepository().build(), UserTeamRole.MANAGER);
+        Permission subject = new PerTeamPermissionAnyAcceptableRole("PERMISSION_NAME", loggedUserDetails, userTeamRepository().build(), MANAGER);
         assertEquals("PERMISSION_NAME", subject.name());
     }
 
     @Test
-    public void testAcceptsArguments() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage(is("Empty PermissionContext isn't allowed for permission PERMISSION_NAME."));
+    @Override
+    public void testIsAuthorized() {
+        UserTeam userTeam = mock(UserTeam.class);
+        Optional<UserTeam> userTeamOpt = Optional.of(userTeam);
 
-        Permission subject = new PerTeamPermissionAnyAcceptableRole("PERMISSION_NAME", userTeamRepository().build(), UserTeamRole.MANAGER);
+        when(userTeamCachedRepository.findByUsernameTeamAndRoles("USER", "TEAM1", MANAGER, MEMBER)).thenReturn(userTeamOpt);
+        when(userTeamCachedRepository.findByUsernameTeamAndRoles("USER", "TEAM2", MANAGER, MEMBER)).thenReturn(userTeamOpt);
+        when(userTeamCachedRepository.findByUsernameTeamAndRoles("USER", "TEAM3", MANAGER, MEMBER)).thenReturn(Optional.empty());
 
-        subject.accepts(loggedUser().build(), PermissionContext.empty());
-    }
+        LoggedUserDetails loggedUserDetails = loggedUser().withName("USER").build();
 
-    @Test
-    public void testAccepts() {
-        UserTeamCachedRepository userTeamRepo = userTeamRepository().withUserTeamList(
-                "USER",
-                userTeam("USER", "TEAM1", UserTeamRole.MANAGER),
-                userTeam("USER", "TEAM2", UserTeamRole.MEMBER),
-                userTeam("USER", "TEAM3", UserTeamRole.VIEWER)
-                ).build();
+        PerTeamPermissionAnyAcceptableRole subject = new PerTeamPermissionAnyAcceptableRole("PERMISSION_NAME", loggedUserDetails, userTeamCachedRepository, MANAGER, MEMBER);
 
-        Permission subject = new PerTeamPermissionAnyAcceptableRole("PERMISSION_NAME", userTeamRepo, UserTeamRole.MANAGER, UserTeamRole.MEMBER);
+        assertTrue(subject.isAuthorizedFor("TEAM1"));
 
-        LoggedUserDetails user = loggedUser().withName("USER").build();
+        assertTrue(subject.isAuthorizedFor("TEAM2"));
 
-        assertTrue(subject.accepts(user, new PermissionContext("TEAM1")));
-
-        assertTrue(subject.accepts(user, new PermissionContext("TEAM2")));
-
-        assertFalse(subject.accepts(user, new PermissionContext("TEAM3")));
+        assertFalse(subject.isAuthorizedFor("TEAM3"));
     }
 
 }

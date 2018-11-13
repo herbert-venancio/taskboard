@@ -1,5 +1,7 @@
 package objective.taskboard.auth.authorizer.permission;
 
+import static org.junit.Assert.assertEquals;
+
 import objective.taskboard.auth.LoggedUserDetails.JiraRole;
 import objective.taskboard.data.UserTeam;
 import objective.taskboard.data.UserTeam.UserTeamRole;
@@ -14,10 +16,15 @@ public class PermissionTestUtils {
         return new UserTeam(memberName, teamName, role);
     }
 
-    public static interface PermissionTest {
+    public static void assertApplicableTargets(TargettedPermission permission, String... expectedTargets) {
+        assertEquals(
+                String.join("\n", permission.applicableTargets()),
+                String.join("\n", expectedTargets));
+    }
+
+    public interface PermissionTest {
         void testName();
-        void testAcceptsArguments();
-        void testAccepts();
+        void testIsAuthorized();
     }
 
 }

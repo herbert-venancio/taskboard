@@ -12,12 +12,12 @@ class Authorizer {
 
         this._validate(permission, target);
 
-        return permission.accepts(target);
+        return permission.isAuthorized(target);
     }
 
     _validate(permission, target) {
         if (permission.applicableTargets === null && target !== undefined)
-            throw 'Permission '+ permission.name +' doesn\'t accepts target.';
+            throw 'Permission '+ permission.name +' is not authorized for target.';
 
         else if (permission.applicableTargets !== null && target === undefined)
             throw 'Permission '+ permission.name +' requires target.';
@@ -37,7 +37,7 @@ class PermissionDto {
         return permissions.map(permission => new PermissionDto(permission));
     }
 
-    accepts(target) {
+    isAuthorized(target) {
         return this.applicableTargets === null ? true : this.applicableTargets.some(applicableTarget => applicableTarget === target);
     }
 }

@@ -1,7 +1,6 @@
 package objective.taskboard.sizingImport;
 
 import static java.util.stream.Collectors.toList;
-import static objective.taskboard.auth.authorizer.Permissions.PROJECT_ADMINISTRATION;
 
 import java.io.IOException;
 import java.util.List;
@@ -18,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import objective.taskboard.auth.authorizer.Authorizer;
+import objective.taskboard.auth.authorizer.permission.ProjectAdministrationPermission;
 import objective.taskboard.domain.Project;
 import objective.taskboard.google.GoogleApiService;
 import objective.taskboard.google.SpreadsheetsManager.SpreadsheetException;
@@ -36,20 +35,24 @@ public class SizingImportController {
     private final GoogleApiService googleApiService;
     private final ProjectService projectService;
     private final SizingImportService sizingImportService;
-    private final Authorizer authorizer;
+    private final ProjectAdministrationPermission projectAdministrationPermission;
 
     @Autowired
-    public SizingImportController(GoogleApiService googleApiService, ProjectService projectService, SizingImportService sizingImportService, Authorizer authorizer) {
+    public SizingImportController(
+            GoogleApiService googleApiService,
+            ProjectService projectService,
+            SizingImportService sizingImportService,
+            ProjectAdministrationPermission projectAdministrationPermission) {
         this.googleApiService = googleApiService;
         this.projectService = projectService;
         this.sizingImportService = sizingImportService;
-        this.authorizer = authorizer;
+        this.projectAdministrationPermission = projectAdministrationPermission;
     }
     
     @GetMapping("/initial-data")
     public InitialData getInitialData() throws IOException {
         List<ProjectDto> projects = projectService.getNonArchivedJiraProjectsForUser().stream()
-                .filter(p -> authorizer.hasPermission(PROJECT_ADMINISTRATION, p.getKey()))
+                .filter(p -> projectAdministrationPermission.isAuthorizedFor(p.getKey()))
                 .map(ProjectDto::new).collect(toList());
         boolean needsGoogleAuthorizarion = !googleApiService.verifyAuthorization();
 
@@ -61,7 +64,7 @@ public class SizingImportController {
             @PathVariable String projectKey, 
             @PathVariable String spreadsheetId) {
 
-        if (!authorizer.hasPermission(PROJECT_ADMINISTRATION, projectKey))
+        if (!projectAdministrationPermission.isAuthorizedFor(projectKey))
             return ResponseEntity.notFound().build();
 
         ValidationResult validationResult = sizingImportService.validateSpreadsheet(spreadsheetId);
@@ -80,7 +83,7 @@ public class SizingImportController {
             @RequestBody List<SheetColumnMappingDto> dynamicColumnsMappingDto) {
 
         try {
-            if (!authorizer.hasPermission(PROJECT_ADMINISTRATION, projectKey))
+            if (!projectAdministrationPermission.isAuthorizedFor(projectKey))
                 return ResponseEntity.notFound().build();
 
             List<SheetColumnMapping> dynamicColumnsMapping = dynamicColumnsMappingDto.stream()
@@ -99,7 +102,7 @@ public class SizingImportController {
     @GetMapping("/spreadsheet-details/{projectKey}/{spreadsheetId}")
     public ResponseEntity<?> spreadsheetDetails(@PathVariable String projectKey, @PathVariable String spreadsheetId) {
         try {
-            if (!authorizer.hasPermission(PROJECT_ADMINISTRATION, projectKey))
+            if (!projectAdministrationPermission.isAuthorizedFor(projectKey))
                 return ResponseEntity.notFound().build();
 
             SheetDefinition sheetDefinition = sizingImportService.getSheetDefinition(projectKey);
@@ -119,7 +122,7 @@ public class SizingImportController {
             @PathVariable String spreadsheetId,
             @RequestBody List<SheetColumnMappingDto> dynamicColumnsMappingDto) {
 
-        if (!authorizer.hasPermission(PROJECT_ADMINISTRATION, projectKey))
+        if (!projectAdministrationPermission.isAuthorizedFor(projectKey))
             return ResponseEntity.notFound().build();
 
         List<SheetColumnMapping> dynamicColumnsMapping = dynamicColumnsMappingDto.stream()

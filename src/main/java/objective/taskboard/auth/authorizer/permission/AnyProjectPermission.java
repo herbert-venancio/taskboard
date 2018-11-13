@@ -6,26 +6,19 @@ import java.util.List;
 
 import objective.taskboard.auth.LoggedUserDetails;
 
-public class AnyProjectPermission implements TargetlessPermission {
+public abstract class AnyProjectPermission extends BaseTargetlessPermission {
 
-    private final String name;
     private final List<String> acceptedRoles;
 
-    public AnyProjectPermission(String name, String... acceptedRoles) {
-        this.name = name;
+    public AnyProjectPermission(String name, LoggedUserDetails loggedUserDetails, String... acceptedRoles) {
+        super(name, loggedUserDetails);
         this.acceptedRoles = asList(acceptedRoles);
     }
 
     @Override
-    public String name() {
-        return name;
-    }
-
-    @Override
-    public boolean accepts(LoggedUserDetails userDetails, PermissionContext permissionContext) {
-        validate(permissionContext);
-
-        return userDetails.getJiraRoles().stream()
+    public boolean isAuthorized(LoggedUserDetails loggedUserDetails) {
+        return loggedUserDetails.getJiraRoles().stream()
                 .anyMatch(role -> acceptedRoles.contains(role.name));
     }
+
 }

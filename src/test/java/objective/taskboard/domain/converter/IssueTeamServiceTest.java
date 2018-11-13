@@ -99,8 +99,8 @@ public class IssueTeamServiceTest {
         when(i.getRawAssignedTeamsIds()).thenReturn(asList(7331L));
         when(i.getTeams()).thenReturn(new HashSet<>(asList(Issue.CardTeam.from(bravo7331))));
 
-        when(userTeamService.getTeamsThatUserIsAValidAssignee("fulano")).thenReturn(asList());
-        when(userTeamService.getTeamsThatUserIsAValidAssignee("beltrano")).thenReturn(asList(bravo7331));
+        when(userTeamService.getTeamsInWhichUserIsValidAsAssignee("fulano")).thenReturn(asList());
+        when(userTeamService.getTeamsInWhichUserIsValidAsAssignee("beltrano")).thenReturn(asList(bravo7331));
         when(i.getAssignees()).thenReturn(asList(new User("fulano"), new User("beltrano")));
 
         Set<String> mismatchingUsers = subject.getMismatchingUsers(i);

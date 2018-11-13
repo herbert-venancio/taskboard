@@ -1,63 +1,51 @@
 package objective.taskboard.auth.authorizer.permission;
 
+import static java.util.Collections.emptyList;
 import static objective.taskboard.auth.LoggedUserDetailsMockBuilder.loggedUser;
-import static objective.taskboard.auth.authorizer.permission.PermissionTestUtils.userTeam;
+import static objective.taskboard.data.UserTeam.UserTeamRole.MANAGER;
+import static objective.taskboard.data.UserTeam.UserTeamRole.MEMBER;
 import static objective.taskboard.repository.UserTeamRepositoryMockBuilder.userTeamRepository;
-import static org.hamcrest.CoreMatchers.is;
+import static org.codehaus.groovy.runtime.InvokerHelper.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import objective.taskboard.auth.LoggedUserDetails;
 import objective.taskboard.auth.authorizer.permission.PermissionTestUtils.PermissionTest;
-import objective.taskboard.data.UserTeam.UserTeamRole;
+import objective.taskboard.data.UserTeam;
 import objective.taskboard.repository.UserTeamCachedRepository;
 
 public class AnyTeamPermissionAnyAcceptableRoleTest implements PermissionTest {
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    private LoggedUserDetails loggedUserDetails = mock(LoggedUserDetails.class);
 
     @Test
+    @Override
     public void testName() {
-        Permission subject = new AnyTeamPermissionAnyAcceptableRole("PERMISSION_NAME", userTeamRepository().build(), UserTeamRole.MANAGER);
+        Permission subject = new AnyTeamPermissionAnyAcceptableRole("PERMISSION_NAME", loggedUserDetails, userTeamRepository().build(), MANAGER);
         assertEquals("PERMISSION_NAME", subject.name());
     }
 
     @Test
-    public void testAcceptsArguments() {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage(is("Only PermissionContext.empty() is allowed for permission PERMISSION_NAME."));
+    @Override
+    public void testIsAuthorized() {
+        UserTeamCachedRepository userTeamCachedRepository = mock(UserTeamCachedRepository.class);
+        UserTeam userTeam = mock(UserTeam.class);
 
-        Permission subject = new AnyTeamPermissionAnyAcceptableRole("PERMISSION_NAME", userTeamRepository().build(), UserTeamRole.MANAGER);
-
-        subject.accepts(loggedUser().build(), new PermissionContext("target"));
-    }
-
-    @Test
-    public void testAccepts() {
-        UserTeamCachedRepository userTeamRepo = userTeamRepository()
-                .withUserTeamList(
-                        "USER1",
-                        userTeam("USER1", "TEAM1", UserTeamRole.MANAGER),
-                        userTeam("USER1", "TEAM2", UserTeamRole.MEMBER)
-                ).withUserTeamList(
-                        "USER2",
-                        userTeam("USER2", "TEAM1", UserTeamRole.VIEWER),
-                        userTeam("USER2", "TEAM2", UserTeamRole.VIEWER)
-                ).build();
-
-        Permission subject = new AnyTeamPermissionAnyAcceptableRole("PERMISSION_NAME", userTeamRepo, UserTeamRole.MANAGER, UserTeamRole.MEMBER);
+        when(userTeamCachedRepository.findByUsernameAndRoles("USER1", MANAGER, MEMBER)).thenReturn(asList(userTeam));
+        when(userTeamCachedRepository.findByUsernameAndRoles("USER2", MANAGER, MEMBER)).thenReturn(emptyList());
 
         LoggedUserDetails userWithPermission = loggedUser().withName("USER1").build();
-        assertTrue(subject.accepts(userWithPermission, PermissionContext.empty()));
+        AnyTeamPermissionAnyAcceptableRole subject = new AnyTeamPermissionAnyAcceptableRole("PERMISSION_NAME", userWithPermission, userTeamCachedRepository, MANAGER, MEMBER);
+        assertTrue(subject.isAuthorized());
 
         LoggedUserDetails userWithoutPermission = loggedUser().withName("USER2").build();
-        assertFalse(subject.accepts(userWithoutPermission, PermissionContext.empty()));
+        subject = new AnyTeamPermissionAnyAcceptableRole("PERMISSION_NAME", userWithoutPermission, userTeamCachedRepository, MANAGER, MEMBER);
+        assertFalse(subject.isAuthorized());
     }
 
 }

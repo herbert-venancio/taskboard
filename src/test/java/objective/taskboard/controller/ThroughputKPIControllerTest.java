@@ -1,7 +1,5 @@
 package objective.taskboard.controller;
 
-import static objective.taskboard.auth.authorizer.Permissions.PROJECT_DASHBOARD_OPERATIONAL;
-import static objective.taskboard.auth.authorizer.Permissions.PROJECT_DASHBOARD_TACTICAL;
 import static org.mockito.Mockito.when;
 
 import java.time.ZoneId;
@@ -14,7 +12,8 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 
-import objective.taskboard.auth.authorizer.Authorizer;
+import objective.taskboard.auth.authorizer.permission.ProjectDashboardOperationalPermission;
+import objective.taskboard.auth.authorizer.permission.ProjectDashboardTacticalPermission;
 import objective.taskboard.followup.ThroughputKPIDataProvider;
 import objective.taskboard.followup.kpi.ThroughputChartDataSet;
 import objective.taskboard.jira.ProjectService;
@@ -24,7 +23,10 @@ import objective.taskboard.testUtils.ControllerTestUtils.AssertResponse;
 public class ThroughputKPIControllerTest {
     
     @Mock
-    private Authorizer authorizer;
+    private ProjectDashboardTacticalPermission projectDashboardTacticalPermission;
+
+    @Mock
+    private ProjectDashboardOperationalPermission projectDashboardOperationalPermission;
     
     @Mock
     private ProjectService projectService;
@@ -47,8 +49,8 @@ public class ThroughputKPIControllerTest {
         zoneId = "America/Sao_Paulo";
         final ZoneId timezone = ZoneId.of(zoneId);
         level = "Subtask";
-        when(authorizer.hasPermission(PROJECT_DASHBOARD_TACTICAL, projectKey)).thenReturn(true);
-        when(authorizer.hasPermission(PROJECT_DASHBOARD_OPERATIONAL, projectKey)).thenReturn(true);
+        when(projectDashboardTacticalPermission.isAuthorizedFor(projectKey)).thenReturn(true);
+        when(projectDashboardOperationalPermission.isAuthorizedFor(projectKey)).thenReturn(true);
         when(projectService.taskboardProjectExists(projectKey)).thenReturn(true);
         when(throughputDataProvider.getDataSet(projectKey, level, timezone))
             .thenReturn(new ThroughputChartDataSet(null));
@@ -63,8 +65,8 @@ public class ThroughputKPIControllerTest {
     
     @Test
     public void requestThroughputChartData_withoutPermission() {
-        when(authorizer.hasPermission(PROJECT_DASHBOARD_TACTICAL, projectKey)).thenReturn(false);
-        when(authorizer.hasPermission(PROJECT_DASHBOARD_OPERATIONAL, projectKey)).thenReturn(false);
+        when(projectDashboardTacticalPermission.isAuthorizedFor(projectKey)).thenReturn(false);
+        when(projectDashboardOperationalPermission.isAuthorizedFor(projectKey)).thenReturn(false);
 
         AssertResponse.of(subject.data(projectKey, zoneId, level))
             .httpStatus(HttpStatus.NOT_FOUND);
@@ -72,7 +74,7 @@ public class ThroughputKPIControllerTest {
     
     @Test
     public void requestThroughputChartData_withTacticalPermissionOnly() {
-        when(authorizer.hasPermission(PROJECT_DASHBOARD_OPERATIONAL, projectKey)).thenReturn(false);
+        when(projectDashboardOperationalPermission.isAuthorizedFor(projectKey)).thenReturn(false);
         
         AssertResponse.of(subject.data(projectKey, zoneId, level))
             .httpStatus(HttpStatus.OK)
@@ -81,7 +83,7 @@ public class ThroughputKPIControllerTest {
     
     @Test
     public void requestThroughputChartData_withOperationalPermissionOnly() {
-        when(authorizer.hasPermission(PROJECT_DASHBOARD_TACTICAL, projectKey)).thenReturn(false);
+        when(projectDashboardTacticalPermission.isAuthorizedFor(projectKey)).thenReturn(false);
         
         AssertResponse.of(subject.data(projectKey, zoneId, level))
             .httpStatus(HttpStatus.OK)

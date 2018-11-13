@@ -118,7 +118,7 @@ public class IssueTeamService {
         Set<String> mismatches = new LinkedHashSet<>();
 
         for (User user : assignees) {
-            List<Team> validTeamsForUser = userTeamService.getTeamsThatUserIsAValidAssignee(user.name);
+            List<Team> validTeamsForUser = userTeamService.getTeamsInWhichUserIsValidAsAssignee(user.name);
 
             boolean isValidAssignee = validTeamsForUser.stream()
                     .map(team -> team.getName())
