@@ -106,9 +106,7 @@ function DcDateRangeChartsService() {
             }
         });
         self._highchartCharts.forEach((chart) => {
-            const min = timelineRange[0].getTime();
-            const max = timelineRange[1].getTime();
-            chart.xAxis[0].setExtremes(min, max);
+            self.applySelection(chart.title.textStr)
         })
     };
 
@@ -120,8 +118,8 @@ function DcDateRangeChartsService() {
         } 
 
         const timelineRange = self._brushRange.value();
-        const min = timelineRange[0].getTime();
-        const max = timelineRange[1].getTime();
+        const min = ChartUtils.truncateDate(timelineRange[0].getTime());
+        const max = ChartUtils.ceilDate(timelineRange[1].getTime());
         chart.xAxis[0].setExtremes(min, max);
     };
 

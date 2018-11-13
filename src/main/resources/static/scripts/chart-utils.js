@@ -104,6 +104,22 @@ class ChartUtils {
             }, afterMillis);
         }
     }
+
+
+    static truncateDate (dateInMillis) {
+        const date = new Date(dateInMillis);
+        date.setHours(0, 0, 0, 0);
+        return date.getTime();
+    }
+
+    static ceilDate (dateInMillis) {
+        const date = new Date(dateInMillis);
+        if (date.getHours() + date.getMinutes() + date.getSeconds() + date.getMilliseconds() === 0) {
+            return date.getTime();
+        }
+        date.setDate(date.getDate() + 1);
+        return ChartUtils.truncateDate(date.getTime());
+    }
 }
 
 class ChartBuilderBase {
@@ -114,7 +130,7 @@ class ChartBuilderBase {
         this.options.chart.events = {
                 selection: function (event) {
                     if (event.resetSelection) {
-                        this.resetZoomButton = this.resetZoomButton.destroy(); // hide // button
+                        this.resetZoomButton = this.resetZoomButton.destroy(); // hide reset button
                         event.preventDefault(); // prevent zoom out
                         this.yAxis[0].setExtremes(null, null); // reset Y
                         dcDateRangeChartsService.applySelection(this.title.textStr); // reset X to timeline  selection
@@ -181,5 +197,101 @@ class ProgressChartBuilder extends ChartBuilderBase {
                     pointEnd: endDate
                 }
         }
+    }
+}
+
+class CFDChartBuilder extends ChartBuilderBase {
+    constructor (divID) {
+        super(divID)
+        Highcharts.merge(true, this.options, this._plotOptions);
+        Highcharts.merge(true, this.options, this._tooltipOptions);
+        Highcharts.merge(true, this.options, this._xAxisOptions);
+        Highcharts.merge(true, this.options, this._yAxisOptions);
+    }
+
+    withTitle (title) {
+        this.options.title.text = title;
+        return this;
+    }
+
+    withChartType(chartType) {
+        this.options.chart.type = chartType;
+        return this;
+    }
+
+    withSeriesData (seriesData) {
+        Highcharts.merge(true, this.options, {series: seriesData});
+        return this;
+    }
+
+    build () {
+        const chart = Highcharts.chart(this.options);
+        return chart;
+    }
+    get _plotOptions () {
+        return {
+            plotOptions: {
+                series: {
+                    marker: {
+                        enabled: false
+                    }
+                }
+            }
+        }
+    }
+
+    get _tooltipOptions () {
+        return {
+            xDateFormat: '%b %e, %Y'
+        };
+    }
+
+    get _xAxisOptions () {
+        return {
+            xAxis: {
+                tickInterval: 24 * 3600 * 1000,
+                events: this._xAxisEvents,
+                labels: this._xAxisLabels
+            }
+        };
+    }
+
+    get _xAxisEvents () {
+        return {
+            afterSetExtremes: (event) => {
+                const xMin = ChartUtils.truncateDate(event.min);
+                const xMax = ChartUtils.ceilDate(event.max);
+                if (xMin === null || xMax === null) {
+                    return;
+                }
+                const baseStackSeries = event.target.series[0];
+                const xMinPoint = baseStackSeries.points.find((p) => p.x === xMin)
+                const xMaxPoint = baseStackSeries.points.find((p) => p.x === xMax)
+                if (xMinPoint === undefined || xMaxPoint === undefined){
+                	return;                	
+                }
+                const yMin = xMinPoint.y;
+                const yMax = xMaxPoint.stackTotal;
+                const yAxis = event.target.chart.axes[1];
+                yAxis.setExtremes(yMin, yMax);
+            }
+        };
+    }
+
+    get _xAxisLabels () {
+        return {
+            formatter: function () {
+                return Highcharts.dateFormat('%e %b %y', this.value);
+            }
+        };
+    }
+
+    get _yAxisOptions () {
+        return {
+            yAxis: {
+                endOnTick: false,
+                startOnTick: false
+            }
+        };
     }
 }
