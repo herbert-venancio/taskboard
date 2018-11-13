@@ -4,6 +4,7 @@ import static objective.taskboard.followup.kpi.KpiLevel.DEMAND;
 import static objective.taskboard.followup.kpi.KpiLevel.FEATURES;
 import static objective.taskboard.followup.kpi.KpiLevel.SUBTASKS;
 import static objective.taskboard.followup.kpi.KpiLevel.UNMAPPED;
+import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
@@ -11,6 +12,7 @@ import static org.mockito.Mockito.when;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -20,14 +22,18 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import objective.taskboard.data.Issue;
+import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.kpi.enviroment.KPIEnvironmentBuilder;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
 import objective.taskboard.followup.kpi.transformer.IssueKpiDataItemAdapterFactory;
 import objective.taskboard.issueBuffer.IssueBufferService;
+import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.properties.JiraProperties;
+import objective.taskboard.utils.Clock;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FullCycleEffortTest {
@@ -47,6 +53,12 @@ public class FullCycleEffortTest {
     @Mock
     private IssueKpiDataItemAdapterFactory factory;
     
+    @Mock
+    private ProjectService projectService;
+    
+    @Mock
+    private Clock clock;
+    
     @InjectMocks
     private IssueKpiService service = new IssueKpiService();
     
@@ -59,14 +71,13 @@ public class FullCycleEffortTest {
         configureTypes();
         configureStatuses();
         configureHierarchy();
-        
+
+        configureClock();
+        configureProject();
         configureJiraProperties();
     }
     
-    private void configureJiraProperties() {
-        JiraProperties.Followup followup = new JiraProperties.Followup();
-        when(jiraProperties.getFollowup()).thenReturn(followup);
-    }
+
 
     @Test
     public void fullTest() {
@@ -414,5 +425,22 @@ public class FullCycleEffortTest {
                 .addSubtaskType(16l, "QA");
         
     }
-       
+    
+    private void configureProject() {
+        ProjectFilterConfiguration project = Mockito.mock(ProjectFilterConfiguration.class);
+        when(project.getStartDate()).thenReturn(Optional.of(parseDateTime("2018-01-01").toLocalDate()));
+        when(project.getDeliveryDate()).thenReturn(Optional.of(parseDateTime("2018-02-02").toLocalDate()));
+        
+        when(projectService.getTaskboardProjectOrCry("PROJ")).thenReturn(project);
+    }
+
+    private void configureJiraProperties() {
+        JiraProperties.Followup followup = new JiraProperties.Followup();
+        when(jiraProperties.getFollowup()).thenReturn(followup);
+    }
+    
+    private void configureClock() {
+        when(clock.now()).thenReturn(parseDateTime("2018-02-02").toInstant());
+    }
+    
 }

@@ -144,6 +144,44 @@ public class SubtaskWorklogDistributorTest {
 
     }
     
+    @Test
+    public void jumpingProgressingStatuses() {
+        StatusTransitionBuilder builder = new StatusTransitionBuilder()
+                .addTransition(TODO,"2020-01-01")
+                .addTransition(DOING)
+                .addTransition(TO_REVIEW,"2020-01-03")
+                .addTransition(REVIEW)
+                .addTransition(DONE,"2020-01-06");
+        
+        StatusTransition status = builder.buildOrCry();
+        
+        assertStatus(subject.findStatus(status,DAY_ONE),DOING);
+        assertStatus(subject.findStatus(status,DAY_TWO),DOING);
+        assertStatus(subject.findStatus(status,DAY_THREE),DOING);
+        assertStatus(subject.findStatus(status,DAY_FOUR),REVIEW);
+        assertStatus(subject.findStatus(status,DAY_FIVE),REVIEW);
+        assertStatus(subject.findStatus(status,DAY_SIX),REVIEW);
+    }
+    @Test
+    public void passingThroughProgressing_stoppingOnQueue() {
+        StatusTransitionBuilder builder = new StatusTransitionBuilder()
+                .addTransition(TODO,"2020-01-01")
+                .addTransition(DOING,"2020-01-03")
+                .addTransition(TO_REVIEW,"2020-01-03")
+                .addTransition(REVIEW,"2020-01-04")
+                .addTransition(DONE,"2020-01-04");
+        
+        StatusTransition status = builder.buildOrCry();
+        
+        assertStatus(subject.findStatus(status,DAY_ONE),DOING);
+        assertStatus(subject.findStatus(status,DAY_TWO),DOING);
+        assertStatus(subject.findStatus(status,DAY_THREE),DOING);
+        assertStatus(subject.findStatus(status,DAY_FOUR),REVIEW);
+        assertStatus(subject.findStatus(status,DAY_FIVE),REVIEW);
+        assertStatus(subject.findStatus(status,DAY_SIX),REVIEW);
+        
+    }
+     
     private void assertStatus(Optional<StatusTransition> statusTransition, DefaultStatus status) {
         String foundStatus = statusTransition.map(s -> s.status).orElse("Empty");
         assertEquals(status.name,foundStatus);

@@ -86,14 +86,6 @@ public class IssueKpiTransformerTest {
     }
 
     @Test
-    public void wrongConfiguration_noItemProvided() {
-        IssueKpiTransformer transformer = new IssueKpiTransformer(kpiProperties);
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("To map issues, at least a Collection of IssueKpiDataItemAdapter must be provided.");
-        transformer.transform();
-    }
-
-    @Test
     public void wrongConfiguration_toMapHierarchically() {
         
         KPIEnvironmentBuilder builder = getDefaultEnvironment();

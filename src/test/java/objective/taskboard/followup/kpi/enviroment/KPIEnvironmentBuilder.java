@@ -75,7 +75,7 @@ public class KPIEnvironmentBuilder {
     }
 
     public KPIProperties getMockedKPIProperties() {
-        this.mockProperties();
+        this.mockKpiProperties();
         return kpiProperties;
     }
         
@@ -102,7 +102,7 @@ public class KPIEnvironmentBuilder {
         return kpiBuilder.build();
     }
 
-    private void mockProperties() {
+    public void mockKpiProperties() {
         IssueTypeChildrenStatusHierarchy subtasksHierarchy = new IssueTypeChildrenStatusHierarchy();
         subtasksHierarchy.setHierarchies(getHierachies(FEATURES));
         Mockito.when(kpiProperties.getFeaturesHierarchy()).thenReturn(subtasksHierarchy);
@@ -138,6 +138,7 @@ public class KPIEnvironmentBuilder {
     }
 
     public KPIEnvironmentBuilder addTransition(String status, String dateTime) {
+        assertCurrentIssueSet();
         if(!statuses.containsKey(status))
             throw new IllegalArgumentException("Missing status configuration");
         if(dateTime == null)
@@ -148,6 +149,7 @@ public class KPIEnvironmentBuilder {
     }
     
     public KPIEnvironmentBuilder addTransition(String status) {
+        assertCurrentIssueSet();
         if(!statuses.containsKey(status))
             throw new IllegalArgumentException("Missing status configuration");
         currentIssue.ifPresent(kpiBuilder -> kpiBuilder.addTransition(statuses.get(status)));
@@ -200,10 +202,17 @@ public class KPIEnvironmentBuilder {
 
     public KPIEnvironmentBuilder withMockingIssue(String pkey, String type, KpiLevel level) {
         IssueTypeKpi typeKpi = getType(type, level);
+        return getIssueBuilder(pkey, level, typeKpi);
+    }
+
+    private KPIEnvironmentBuilder getIssueBuilder(String pkey, KpiLevel level, IssueTypeKpi typeKpi) {
         IssueKpiBuilder builder = new IssueKpiBuilder(pkey, typeKpi, level);
         issues.put(pkey, builder);
-        withIssue(pkey);
-        return this;
+        return withIssue(pkey);
+    }
+    
+    public KPIEnvironmentBuilder mockingSubtask(String pkey, String type) {
+        return getIssueBuilder(pkey, KpiLevel.SUBTASKS, subtasksType.get(type));
     }
 
     private IssueTypeKpi getType(String type, KpiLevel level) {

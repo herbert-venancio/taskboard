@@ -1,8 +1,12 @@
 package objective.taskboard.followup.kpi;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import objective.taskboard.data.Worklog;
 import objective.taskboard.utils.DateTimeUtils;
@@ -55,4 +59,31 @@ public class DatedStatusTransition extends StatusTransition {
     public Optional<DatedStatusTransition> withDate() {
         return Optional.of(this);
     }
+    
+    @Override
+    public Optional<ZonedDateTime> firstDateOnProgressing(ZoneId timezone) {
+        if(!this.isProgressingStatus)
+            return super.firstDateOnProgressing(timezone);
+        
+        ZonedDateTime currentDate = this.date;
+        List<ZonedDateTime> allDates = collectAllDates(currentDate.getZone());
+        allDates.add(currentDate);
+        return allDates.stream().min(Comparator.naturalOrder());
+    }
+
+    private List<ZonedDateTime> collectAllDates(ZoneId timezone) {
+        return this.getWorklogs().stream().map(w -> DateTimeUtils.get(w.started,timezone)).filter( d -> d != null).collect(Collectors.toList());
+    }
+
+    public boolean dateIsBefore(Worklog worklog) {
+        ZonedDateTime worklogZonedDateTime = DateTimeUtils.get(worklog.started,date.getZone()); 
+        if(worklogZonedDateTime == null) 
+            return false; 
+         
+        LocalDate worklogDate = worklogZonedDateTime.toLocalDate(); 
+         
+        return worklogDate.isAfter(date.toLocalDate());
+    }
+
+    
 }
