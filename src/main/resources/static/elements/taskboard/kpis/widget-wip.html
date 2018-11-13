@@ -223,17 +223,15 @@
                     });
                 },
 
-                createIssueTypeFilter: function () {
+               createIssueTypeFilter: function () {
                     this.set('options.0.hidden', false);
-                    const div = this.$.issueTypes;
-                    ChartUtils.createIssueTypeFilter(div, this.plotData.issueTypes, () => {
-                        const checkboxes = this.querySelectorAll('input[name=issueType]');
-                        const selectedTypes = Array.from(checkboxes).filter((cb) => cb.checked).map((cb) => cb.value);
-                        this.plotData.typeDimension.filterFunction((issueType) => selectedTypes.includes(issueType));
-                        const toggleAllCheckbox = this.querySelector('input[name=allTypesToggle]');
-                        this.set('options.0.cssClasses', toggleAllCheckbox.checked ? '' : 'widget__button_highlighted');
+                    
+                    new IssueTypeFilter(this.plotData.issueTypes,this.$.issueTypes, (selectedTypes, isToggledAll) => {
+                        this.plotData.typeDimension.filterFunction((issueType) => selectedTypes.includes(issueType))
+                        this.set('options.0.cssClasses', isToggledAll ? '' : 'widget__button_highlighted')
                         this.createChart();
                     });
+
                 },
 
                 createChart: function () {

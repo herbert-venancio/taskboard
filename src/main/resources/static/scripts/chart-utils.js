@@ -1,4 +1,3 @@
-
 class ChartUtils {
     static getDefaultHighchartsOptions () {
         const options = {
@@ -73,54 +72,6 @@ class ChartUtils {
             }
         };
         return options;
-    }
-
-    static createIssueTypeFilter (div, issueTypes, filterCallback) {
-
-        function createInputCheckbox (name, value, checked) {
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.name = name;
-            checkbox.value = value;
-            checkbox.checked = checked;
-            return checkbox;
-        }
-
-        function createFilterItem (labelText, checkboxName, checkboxValue, checkboxChecked) {
-            const label = document.createElement('label');
-            const checkbox = createInputCheckbox(checkboxName, checkboxValue, checkboxChecked);
-            checkbox.addEventListener('click', function () {
-                const checkboxes = document.querySelectorAll(`#${div.id} input[name=issueType]`);
-                const allSelected = checkboxes.length === Array.from(checkboxes).filter((cb) => cb.checked).length;
-                const toggleAllCheckbox = document.querySelector(`#${div.id} input[name=allTypesToggle]`);
-                toggleAllCheckbox.checked = allSelected;
-                filterCallback();
-            });
-            label.appendChild(checkbox);
-            label.appendChild(document.createTextNode(labelText));
-            return label;
-        }
-
-        while (div.firstChild) {
-            div.removeChild(div.firstChild);
-        }
-
-        const toggleAllCheckbox = createInputCheckbox('allTypesToggle', 'allTypesToggle', true);
-        toggleAllCheckbox.addEventListener('click', function () {
-            const checkboxes = document.querySelectorAll(`#${div.id} input[name=issueType]`);
-            checkboxes.forEach((cb) => cb.checked = this.checked);
-            filterCallback();
-        });
-        const label = document.createElement('label');
-        label.appendChild(toggleAllCheckbox);
-        label.appendChild(document.createTextNode('All Types'));
-        div.appendChild(label);
-        div.appendChild(document.createElement('hr'));
-        issueTypes.slice().reverse().forEach((issueType) => {
-            const item = createFilterItem(issueType, 'issueType', issueType, true);
-            div.appendChild(item);
-            div.appendChild(document.createElement('br'));
-        });
     }
 
     static resizeAllHighchartsCharts () {
