@@ -1,5 +1,6 @@
 package objective.taskboard.followup;
 
+import static java.util.stream.Collectors.toList;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 import java.time.ZoneId;
@@ -20,6 +21,9 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
 
+import objective.taskboard.followup.kpi.properties.KPIProperties;
+import objective.taskboard.jira.MetadataService;
+import objective.taskboard.jira.client.JiraIssueTypeDto;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.utils.DateTimeUtils;
 import objective.taskboard.utils.RangeUtils;
@@ -32,6 +36,12 @@ public class CumulativeFlowDiagramDataProvider {
 
     @Autowired
     private FollowUpSnapshotService snapshotService;
+
+    @Autowired
+    private KPIProperties kpiProperties;
+
+    @Autowired
+    private MetadataService metaDataService;
 
     public CumulativeFlowDiagramDataSet getCumulativeFlowDiagramDataSet(String project, String level) {
         if(!belongsToAnyProject(project))
@@ -59,13 +69,14 @@ public class CumulativeFlowDiagramDataProvider {
     }
 
     private CumulativeFlowDiagramDataSet transform(FollowUpSnapshot followUpDataSnapshot, Level selectedLevel) {
-        FollowUpData followupData = followUpDataSnapshot.getData();
+        List<SyntheticTransitionsDataSet> filteredSyntheticTransitions = getFilteredSyntheticTransitions(followUpDataSnapshot);
+
         ListMultimap<String, CumulativeFlowDiagramDataPoint> dataByStatus = LinkedListMultimap.create();
 
-        for (int i = 0; i < followupData.syntheticsTransitionsDsList.size(); ++i) {
+        for (int i = 0; i < filteredSyntheticTransitions.size(); ++i) {
             if(!selectedLevel.includeLevel(i))
                 continue;
-            SyntheticTransitionsDataSet ds = followupData.syntheticsTransitionsDsList.get(i);
+            SyntheticTransitionsDataSet ds = filteredSyntheticTransitions.get(i);
 
             if(isEmpty(ds.rows))
                 continue;
@@ -82,6 +93,26 @@ public class CumulativeFlowDiagramDataProvider {
 
     private boolean belongsToAnyProject(String projectKey) {
         return projectRepository.exists(projectKey);
+    }
+
+    private List<SyntheticTransitionsDataSet> getFilteredSyntheticTransitions(FollowUpSnapshot followUpDataSnapshot) {
+        if (kpiProperties.getCumulativeFlowDiagram().getExcludeIssueTypes().isEmpty())
+            return followUpDataSnapshot.getData().syntheticsTransitionsDsList;
+
+        return followUpDataSnapshot.getData().syntheticsTransitionsDsList.stream()
+                .map(syntheticsTransitions -> {
+                    List<SyntheticTransitionsDataRow> filteredRows = syntheticsTransitions.rows.stream()
+                        .filter(row -> !excludeIssueType(row.issueType))
+                        .collect(toList());
+
+                    return new SyntheticTransitionsDataSet(syntheticsTransitions.issueType, syntheticsTransitions.headers, filteredRows);
+                })
+                .collect(toList());
+    }
+
+    private boolean excludeIssueType(String issueTypeName) {
+        JiraIssueTypeDto issueType = metaDataService.getIssueTypeByName(issueTypeName).orElseThrow(IllegalStateException::new);
+        return kpiProperties.getCumulativeFlowDiagram().getExcludeIssueTypes().contains(issueType.getId());
     }
 
     private static class Sampler {
@@ -150,4 +181,5 @@ public class CumulativeFlowDiagramDataProvider {
     private static <K, V> Map<K, List<V>> asMap(ListMultimap<K, V> multimap) {
         return new LinkedHashMap<>(Multimaps.asMap(multimap));
     }
+
 }

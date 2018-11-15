@@ -1,6 +1,7 @@
 package objective.taskboard.followup;
 
 import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static objective.taskboard.followup.FixedFollowUpSnapshotValuesProvider.emptyValuesProvider;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,11 +17,11 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.tomcat.util.buf.StringUtils;
@@ -34,6 +35,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import objective.taskboard.Constants;
 import objective.taskboard.followup.cluster.EmptyFollowupCluster;
+import objective.taskboard.followup.kpi.properties.CumulativeFlowDiagramProperties;
+import objective.taskboard.followup.kpi.properties.KPIProperties;
+import objective.taskboard.jira.MetadataService;
+import objective.taskboard.jira.client.JiraIssueTypeDto;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
 import objective.taskboard.utils.DateTimeUtils;
 
@@ -48,10 +53,18 @@ public class CumulativeFlowDiagramDataProviderTest {
     @Mock
     private FollowUpSnapshotService snapshotService;
 
+    @Mock
+    private KPIProperties kpiProperties;
+
+    @Mock
+    private MetadataService metaDataService;
+
     @InjectMocks
     private CumulativeFlowDiagramDataProvider subject;
 
     private FollowUpData followupData;
+
+    private CumulativeFlowDiagramProperties cfdProperties = new CumulativeFlowDiagramProperties();
 
     @Before
     public void setup() {
@@ -65,6 +78,10 @@ public class CumulativeFlowDiagramDataProviderTest {
         FollowUpSnapshot emptySnapshot = new FollowUpSnapshot(timeline, emptyFollowupData, new EmptyFollowupCluster(), emptyValuesProvider());
         doReturn(emptySnapshot).when(snapshotService).getFromCurrentState(any(), eq("EMPTY"));
         doReturn(true).when(projectRepository).exists(eq("EMPTY"));
+
+        doReturn(cfdProperties).when(kpiProperties).getCumulativeFlowDiagram();
+
+        doReturn(Optional.of(new JiraIssueTypeDto(-1L, "Any", false))).when(metaDataService).getIssueTypeByName(any());
     }
 
     private List<SyntheticTransitionsDataSet> emptySynthetics() {
@@ -73,6 +90,21 @@ public class CumulativeFlowDiagramDataProviderTest {
                 .stream()
                 .map(ds -> new SyntheticTransitionsDataSet(ds.issueType, ds.headers, Collections.emptyList()))
                 .collect(toList());
+    }
+
+    private void excludeIssueTypes(String... issueTypes) {
+        List<Long> issueTypeIds = new ArrayList<>();
+
+        for (Long i = 0L; i < issueTypes.length; i++) {
+            issueTypeIds.add(i);
+
+            String issueTypeName = issueTypes[i.intValue()];
+            Optional<JiraIssueTypeDto> issueType = Optional.of(new JiraIssueTypeDto(i.longValue(), issueTypeName, false));
+
+            doReturn(issueType).when(metaDataService).getIssueTypeByName(eq(issueTypeName));
+        }
+
+        cfdProperties.setExcludeIssueTypes(issueTypeIds);
     }
 
     @Test
@@ -85,7 +117,7 @@ public class CumulativeFlowDiagramDataProviderTest {
         AnalyticsTransitionsDataSet subTaskAnalytics = followupData.analyticsTransitionsDsList.get(2);
 
         assertDates(subTaskAnalytics, cfdSubTask);
-        assertTypes(subTaskAnalytics, cfdSubTask);
+        assertTypes(cfdSubTask, "Development", "Review", "Sub-Task");
 
         CumulativeFlowDiagramDataSet cfdFeature = subject.getCumulativeFlowDiagramDataSet("TASKB", "Feature");
         String[] actualStatusFeature = cfdFeature.dataByStatus.keySet().toArray(new String[0]);
@@ -95,7 +127,17 @@ public class CumulativeFlowDiagramDataProviderTest {
         AnalyticsTransitionsDataSet featureAnalytics = followupData.analyticsTransitionsDsList.get(1);
 
         assertDates(featureAnalytics, cfdFeature);
-        assertTypes(featureAnalytics, cfdFeature);
+        assertTypes(cfdFeature, "Feature");
+    }
+
+    @Test
+    public void whenCfdPropertiesHasIssueTypesToExclude_theseIssueTypesMustBeExcluded() {
+        CumulativeFlowDiagramDataSet cfdSubTask = subject.getCumulativeFlowDiagramDataSet("TASKB", "SUBTASK");
+        assertTypes(cfdSubTask, "Development", "Review", "Sub-Task");
+
+        excludeIssueTypes("Review");
+        CumulativeFlowDiagramDataSet cfdSubTaskWithoutReview = subject.getCumulativeFlowDiagramDataSet("TASKB", "SUBTASK");
+        assertTypes(cfdSubTaskWithoutReview, "Development", "Sub-Task");
     }
 
     private void assertDates(AnalyticsTransitionsDataSet analytics, CumulativeFlowDiagramDataSet cfd) {
@@ -108,8 +150,7 @@ public class CumulativeFlowDiagramDataProviderTest {
                 .distinct()
                 .sorted()
                 .map(d -> format.format(d))
-                .collect(Collectors.toList())
-                .toString();
+                .collect(joining(","));
 
         SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
         String actualDates = cfd.dataByStatus.get("To Do").stream()
@@ -117,26 +158,19 @@ public class CumulativeFlowDiagramDataProviderTest {
             .map(d -> df.format(d))
             .distinct()
             .sorted()
-            .collect(Collectors.toList())
-            .toString();
+            .collect(joining(","));
 
         assertEquals(expectedDates, actualDates);
     }
 
-    private void assertTypes(AnalyticsTransitionsDataSet analytics, CumulativeFlowDiagramDataSet cfd) {
-        String expectedTypes = analytics.rows.stream()
-                .map(row -> row.issueType)
-                .distinct()
-                .sorted()
-                .collect(Collectors.toList())
-                .toString();
+    private void assertTypes(CumulativeFlowDiagramDataSet cfd, String... expectedIssueTypeNames) {
+        String expectedTypes = Stream.of(expectedIssueTypeNames).collect(joining(","));
 
         String actualTypes = cfd.dataByStatus.get("To Do").stream()
                 .map(each -> each.type)
                 .distinct()
                 .sorted()
-                .collect(Collectors.toList())
-                .toString();
+                .collect(joining(","));
 
         assertEquals(expectedTypes, actualTypes);
     }
