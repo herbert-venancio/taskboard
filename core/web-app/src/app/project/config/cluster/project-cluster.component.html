@@ -1,4 +1,19 @@
-<tb-cluster [clusterItems]="clusterItems"
+<tb-toolbar title="Project cluster - {{projectKey}}" [subtitle]="toolbarSubtitle">
+    <button obj-flat-button (click)="recalculateCluster.open()">
+        <obj-icon iconName="recalculate"></obj-icon>Recalculate
+    </button>
+</tb-toolbar>
+<tb-modal #recalculateCluster modal-title="Recalculate project cluster">
+    <tb-modal-content>
+        <tb-cluster-algorithm #clusterAlgorithmForm [project]="projectKey"></tb-cluster-algorithm>
+    </tb-modal-content>
+    <tb-modal-footer-right>
+        <button obj-button (click)="recalculateCluster.close()">Cancel</button>
+        <button class="primary" obj-button (click)="callSubmitOfClusterAlgorithmComponent()">Recalculate</button>
+    </tb-modal-footer-right>
+</tb-modal>
+
+<tb-cluster [clusterItems]="clusterItems" [changesCandidates]="changesCandidates"
     (saveEvent)="save($event)" (errorEvent)="showErrorFormMessage($event)">
 </tb-cluster>
 
@@ -8,7 +23,7 @@
         <p class="small" *ngIf="hasBaseCluster">* Base cluster</p>
     </div>
     <button type="button" id="tb-project-cluster-back-to-project" obj-button (click)="backToProject()">Back to Project</button>
-    <button type="button" id="tb-project-cluster-save" (click)="callSaveOfClusterComponent()" [disabled]="this.clusterComponent.isPristine()" obj-button class="primary">Save</button>
+    <button type="button" id="tb-project-cluster-save" (click)="callSaveOfClusterComponent()" [disabled]="this.clusterComponent.isPristine()" obj-button class="primary">{{changesCandidates.length === 0 ? 'Save' : 'Apply Selected'}}</button>
 </div>
 
 <obj-snackbar id="tb-project-cluster-snackbar" [control]="snackbar"></obj-snackbar>

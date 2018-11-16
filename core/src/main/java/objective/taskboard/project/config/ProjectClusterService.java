@@ -1,5 +1,7 @@
 package objective.taskboard.project.config;
 
+import static objective.taskboard.utils.NumberUtils.numberEquals;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -34,7 +36,7 @@ public class ProjectClusterService {
         FollowupCluster cluster = clusterProvider.getFor(project);
 
         return issueTypeSizesProvider.get().stream()
-                .map(typeSize -> toProjectClusterItemDto(cluster, typeSize.getIssueType(), typeSize.getSize(), project.getProjectKey()))
+                .map(typeSize -> toProjectClusterItemDto(cluster, typeSize.getIssueType(), typeSize.getSize()))
                 .collect(Collectors.toList());
     }
 
@@ -46,25 +48,27 @@ public class ProjectClusterService {
             Optional<FollowUpClusterItem> matchedItemOptional = cluster.getClusterFor(itemUpdate.getIssueType(), itemUpdate.getSizing());
             if (!matchedItemOptional.isPresent()) {
                 if (itemUpdate.getEffort() > 0D || itemUpdate.getCycle() > 0D)
-                    projectClusterItemRepository.create(itemUpdate);
+                    projectClusterItemRepository.create(project.getProjectKey(), itemUpdate);
                 return;
             }
 
             FollowUpClusterItem matchedItem = matchedItemOptional.get();
             if (matchedItem.isFromBaseCluster()) {
-                if (!matchedItem.getEffort().equals(itemUpdate.getEffort()) || !matchedItem.getCycle().equals(itemUpdate.getCycle()))
-                    projectClusterItemRepository.create(itemUpdate);
+                boolean equalEffort = numberEquals(matchedItem.getEffort(), itemUpdate.getEffort());
+                boolean equalCycle = numberEquals(matchedItem.getCycle(), itemUpdate.getCycle());
+                if (!equalEffort || !equalCycle)
+                    projectClusterItemRepository.create(project.getProjectKey(), itemUpdate);
                 return;
             }
             projectClusterItemRepository.update(matchedItem.getEntityId(), itemUpdate);
         });
     }
 
-    private ProjectClusterItemDto toProjectClusterItemDto(FollowupCluster cluster, String issueType, String size, String projectKey) {
+    private ProjectClusterItemDto toProjectClusterItemDto(FollowupCluster cluster, String issueType, String size) {
         Optional<FollowUpClusterItem> matchedItem = cluster.getClusterFor(issueType, size);
         if (matchedItem.isPresent())
             return new ProjectClusterItemDto(matchedItem.get());
-        return new ProjectClusterItemDto(projectKey, issueType, size, 0D, 0D, false);
+        return new ProjectClusterItemDto(issueType, size, 0D, 0D, false);
     }
 
 }

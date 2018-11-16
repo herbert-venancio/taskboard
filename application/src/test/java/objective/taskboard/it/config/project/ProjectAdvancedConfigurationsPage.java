@@ -1,13 +1,13 @@
-package objective.taskboard.it;
+package objective.taskboard.it.config.project;
 
-import static objective.taskboard.it.ProjectChangeRequestConfigurationTab.CHANGE_REQUEST_TAB_NAME;
-import static objective.taskboard.it.ProjectChangeRequestConfigurationTab.PROJECT_CHANGE_REQUEST_CONFIGURATION_TAG;
-import static objective.taskboard.it.ProjectClusterConfiguration.CLUSTER_TAB_NAME;
-import static objective.taskboard.it.ProjectClusterConfiguration.PROJECT_CLUSTER_CONFIGURATION_TAG;
-import static objective.taskboard.it.ProjectDefaultTeamsConfiguration.PROJECT_TEAMS_CONFIGURATION_TAG;
-import static objective.taskboard.it.ProjectDefaultTeamsConfiguration.TEAMS_TAB_NAME;
-import static objective.taskboard.it.ProjectProfileConfigurationTab.PROFILE_TAB_NAME;
-import static objective.taskboard.it.ProjectProfileConfigurationTab.PROJECT_PROFILE_CONFIGURATION_TAG;
+import static objective.taskboard.it.config.project.ProjectChangeRequestConfigurationTab.CHANGE_REQUEST_TAB_NAME;
+import static objective.taskboard.it.config.project.ProjectChangeRequestConfigurationTab.PROJECT_CHANGE_REQUEST_CONFIGURATION_TAG;
+import static objective.taskboard.it.config.project.ProjectClusterConfiguration.CLUSTER_TAB_NAME;
+import static objective.taskboard.it.config.project.ProjectClusterConfiguration.PROJECT_CLUSTER_CONFIGURATION_TAG;
+import static objective.taskboard.it.config.project.ProjectDefaultTeamsConfiguration.PROJECT_TEAMS_CONFIGURATION_TAG;
+import static objective.taskboard.it.config.project.ProjectDefaultTeamsConfiguration.TEAMS_TAB_NAME;
+import static objective.taskboard.it.config.project.ProjectProfileConfigurationTab.PROFILE_TAB_NAME;
+import static objective.taskboard.it.config.project.ProjectProfileConfigurationTab.PROJECT_PROFILE_CONFIGURATION_TAG;
 import static objective.taskboard.it.components.TabsRouterComponent.TABS_ROUTER_TAG;
 import static org.openqa.selenium.By.cssSelector;
 import static org.openqa.selenium.support.PageFactory.initElements;
@@ -16,6 +16,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
+import objective.taskboard.it.AbstractUiFragment;
 import objective.taskboard.it.components.TabsRouterComponent;
 import objective.taskboard.testUtils.ProjectInfo;
 

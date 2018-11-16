@@ -1,0 +1,19 @@
+<div class="modal">
+    <div class="modal__area">
+        <div class="modal__header">
+            <obj-icon *ngIf="modalIcon" [iconName]="modalIcon" class="modal__icon medium"></obj-icon>
+            <h2 class="modal__title">{{title}}</h2>
+            <div class="modal__close">
+                <obj-icon iconName="clear" class="medium" (click)="close()"></obj-icon>
+            </div>
+        </div>
+        <div class="modal__main">
+            <ng-content select="tb-modal-content"></ng-content>
+        </div>
+        <div class="modal__footer">
+            <ng-content select="tb-modal-footer-left"></ng-content>
+            <ng-content select="tb-modal-footer-right"></ng-content>
+        </div>
+    </div>
+</div>
+<div class="modal-background" (click)="doEasyClose()"></div>

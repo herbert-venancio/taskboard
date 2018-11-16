@@ -1,0 +1,34 @@
+<form #tbClusterAlgorithm="ngForm" (ngSubmit)="runAllClusterings()">
+
+    <obj-label-field label="Start date">
+        <input type="text"
+            name="startDate"
+            #startDateField="objTextField"
+            [placeholder]="dateDisplayFormat"
+            objTextField
+            tbDateInput
+            [(ngModel)]="startDate"
+            title="Calculate clusters selecting issues that were completed after this date."
+            />
+        <obj-error-messages [for]="startDateField">
+            <obj-error-message error="dateParse">Date format should be {{dateDisplayFormat}}</obj-error-message>
+        </obj-error-messages>
+    </obj-label-field>
+
+    <obj-label-field label="End date">
+        <input type="text"
+            name="endDate"
+            #endDateField="objTextField"
+            [placeholder]="dateDisplayFormat"
+            objTextField
+            tbDateInput
+            [(ngModel)]="endDate"
+            [tbSameOrAfter]="startDate"
+            title="Calculate clusters selecting issues that were completed before this date."
+            />
+        <obj-error-messages [for]="endDateField">
+            <obj-error-message error="dateParse">Date format should be {{dateDisplayFormat}}</obj-error-message>
+            <obj-error-message error="sameOrAfter">End date should be same or after Start date</obj-error-message>
+        </obj-error-messages>
+    </obj-label-field>
+</form>

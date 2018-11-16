@@ -1,10 +1,11 @@
-package objective.taskboard.it;
+package objective.taskboard.it.config.project;
 
 import static java.util.stream.Collectors.joining;
 import static objective.taskboard.it.components.SnackBarComponent.SNACK_BAR_TAG;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.openqa.selenium.support.PageFactory.initElements;
 
+import objective.taskboard.it.ProjectConfigurationDialog;
 import objective.taskboard.it.components.TabComponent;
 import objective.taskboard.it.components.TabsRouterComponent;
 import org.openqa.selenium.By;

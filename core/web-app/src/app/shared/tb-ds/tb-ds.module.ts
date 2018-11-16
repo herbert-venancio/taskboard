@@ -7,6 +7,10 @@ import { CommonModule } from '@angular/common';
 import { ObjDsModule } from '../obj-ds/obj-ds.module';
 import { FormUtilsModule } from './../form-utils/form-utils.module';
 import { TbClusterComponent } from './forms/tb-cluster/tb-cluster.component';
+import { TbModalComponent } from './modal/tb-modal.component';
+import { TbModalContentComponent } from './modal/tb-modal-content.component';
+import { TbModalFooterLeftComponent, TbModalFooterRightComponent } from './modal/tb-modal-footer.component';
+import { TbToolbarComponent } from './toolbar/tb-toolbar.component';
 
 @NgModule({
     imports: [
@@ -18,10 +22,20 @@ import { TbClusterComponent } from './forms/tb-cluster/tb-cluster.component';
         FormUtilsModule
     ],
     declarations: [
-        TbClusterComponent
+        TbClusterComponent,
+        TbModalComponent,
+        TbModalContentComponent,
+        TbModalFooterLeftComponent,
+        TbModalFooterRightComponent,
+        TbToolbarComponent
     ],
     exports: [
-        TbClusterComponent
+        TbClusterComponent,
+        TbModalComponent,
+        TbModalContentComponent,
+        TbModalFooterLeftComponent,
+        TbModalFooterRightComponent,
+        TbToolbarComponent
     ]
 })
 export class TbDsModule { }

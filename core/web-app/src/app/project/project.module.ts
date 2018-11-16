@@ -8,6 +8,7 @@ import {ProjectChangeRequestsComponent} from './config/changeRequests/project-ch
 import {FormsModule} from '@angular/forms';
 import {NgSelectModule} from '@ng-select/ng-select';
 import {ProjectConfigComponent} from "./config/project-config.component";
+import {TbClusterAlgorithmComponent} from 'app/cluster/cluster-algorithm/tb-cluster-algorithm.component';
 
 @NgModule({
     imports: [
@@ -21,7 +22,11 @@ import {ProjectConfigComponent} from "./config/project-config.component";
         ProjectTeamsComponent,
         ProjectClusterComponent,
         ProjectChangeRequestsComponent,
-        ProjectConfigComponent
+        ProjectConfigComponent,
+        TbClusterAlgorithmComponent
+    ],
+    exports: [
+        TbClusterAlgorithmComponent
     ]
 })
 export class ProjectModule {

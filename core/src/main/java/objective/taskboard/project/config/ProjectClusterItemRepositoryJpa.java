@@ -18,14 +18,14 @@ class ProjectClusterItemRepositoryJpa implements ProjectClusterItemRepository {
     }
 
     @Override
-    public void create(ProjectClusterItemDto itemUpdate) {
+    public void create(String projectKey, ProjectClusterItemDto itemUpdate) {
         SizingClusterItem newItem = new SizingClusterItem(
                 itemUpdate.getIssueType(),
                 NOTUSED,
                 itemUpdate.getSizing(),
                 itemUpdate.getEffort(),
                 itemUpdate.getCycle(),
-                itemUpdate.getProjectKey(),
+                projectKey,
                 null);
         clusterItemRepository.save(newItem);
     }

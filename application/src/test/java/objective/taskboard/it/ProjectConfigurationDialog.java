@@ -8,6 +8,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
+import objective.taskboard.it.config.project.ProjectAdvancedConfigurationsPage;
 import objective.taskboard.testUtils.ProjectInfo;
 
 public class ProjectConfigurationDialog extends AbstractUiFragment {

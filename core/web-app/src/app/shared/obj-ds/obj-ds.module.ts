@@ -19,6 +19,7 @@ import {HeaderContentComponent} from './header-content/header-content.component'
 import {LabelFieldComponent} from './label-field/label-field.component';
 import {TagComponent} from './tag/tag.component';
 import {ExpansionPanelComponent} from './expansion-panel/expansion-panel.component';
+import {ModalComponent} from './modal/modal.component';
 
 @NgModule({
     imports: [
@@ -43,7 +44,8 @@ import {ExpansionPanelComponent} from './expansion-panel/expansion-panel.compone
         HeaderContentComponent,
         LabelFieldComponent,
         TagComponent,
-        ExpansionPanelComponent
+        ExpansionPanelComponent,
+        ModalComponent
     ],
     exports: [
         AvatarComponent,
@@ -61,7 +63,8 @@ import {ExpansionPanelComponent} from './expansion-panel/expansion-panel.compone
         HeaderContentComponent,
         LabelFieldComponent,
         TagComponent,
-        ExpansionPanelComponent
+        ExpansionPanelComponent,
+        ModalComponent
     ],
     schemas: [
         NO_ERRORS_SCHEMA

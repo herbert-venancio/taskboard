@@ -14,14 +14,14 @@ class ProjectClusterItemRepositoryMock implements ProjectClusterItemRepository {
     private long id = 1;
 
     @Override
-    public void create(ProjectClusterItemDto itemUpdate) {
+    public void create(String projectKey, ProjectClusterItemDto itemUpdate) {
         SizingClusterItem newItem = new SizingClusterItem(
                 itemUpdate.getIssueType(),
                 "notused",
                 itemUpdate.getSizing(),
                 itemUpdate.getEffort(),
                 itemUpdate.getCycle(),
-                itemUpdate.getProjectKey(),
+                projectKey,
                 null);
         newItem.setId(id++);
         data.put(newItem.getId(), newItem);

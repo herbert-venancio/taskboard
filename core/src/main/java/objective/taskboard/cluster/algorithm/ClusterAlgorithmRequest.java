@@ -1,5 +1,6 @@
 package objective.taskboard.cluster.algorithm;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -12,7 +13,9 @@ public class ClusterAlgorithmRequest {
     private List<Long> featureDoneStatuses = Collections.emptyList();
     private List<Long> subtaskDoneStatuses = Collections.emptyList();
     private CycleStatuses subtaskCycleStatuses = null;
+    private ClusterGrouping clusterGrouping = ClusterGrouping.BALLPARK;
     private ClusteringType clusteringType = ClusteringType.EFFORT_AND_CYCLE;
+    private DateRange dateRange = new DateRange(null, null);
 
     public ClusterAlgorithmRequest() {
     }
@@ -75,12 +78,28 @@ public class ClusterAlgorithmRequest {
         this.subtaskCycleStatuses = subtaskCycleStatuses;
     }
 
+    public ClusterGrouping getClusterGrouping() {
+        return clusterGrouping;
+    }
+
+    public void setClusterGrouping(ClusterGrouping clusterGrouping) {
+        this.clusterGrouping = clusterGrouping;
+    }
+
     public ClusteringType getClusteringType() {
         return clusteringType;
     }
 
     public void setClusteringType(ClusteringType clusteringType) {
         this.clusteringType = Optional.ofNullable(clusteringType).orElse(ClusteringType.EFFORT_AND_CYCLE);
+    }
+
+    public DateRange getDateRange() {
+        return dateRange;
+    }
+
+    public void setDateRange(DateRange dateRange) {
+        this.dateRange = dateRange;
     }
 
     public static class CycleStatuses {
@@ -112,6 +131,11 @@ public class ClusterAlgorithmRequest {
         }
     }
 
+    public enum ClusterGrouping {
+        BALLPARK,
+        SUBTASK
+    }
+
     public enum ClusteringType {
 
         EFFORT_ONLY("Effort only"),
@@ -122,6 +146,35 @@ public class ClusterAlgorithmRequest {
 
         ClusteringType(String description) {
             this.description = description;
+        }
+    }
+
+    public static class DateRange {
+        private LocalDate startDate;
+        private LocalDate endDate;
+
+        public DateRange() {
+        }
+
+        public DateRange(LocalDate startDate, LocalDate endDate) {
+            this.startDate = startDate;
+            this.endDate = endDate;
+        }
+
+        public LocalDate getStartDate() {
+            return startDate;
+        }
+
+        public void setStartDate(LocalDate startDate) {
+            this.startDate = startDate;
+        }
+
+        public LocalDate getEndDate() {
+            return endDate;
+        }
+
+        public void setEndDate(LocalDate endDate) {
+            this.endDate = endDate;
         }
     }
 }

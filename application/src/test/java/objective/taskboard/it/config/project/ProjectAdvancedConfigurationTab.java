@@ -1,5 +1,6 @@
-package objective.taskboard.it;
+package objective.taskboard.it.config.project;
 
+import objective.taskboard.it.AbstractUiFragment;
 import objective.taskboard.it.components.TabComponent;
 import objective.taskboard.it.components.TabsRouterComponent;
 import objective.taskboard.testUtils.ProjectInfo;

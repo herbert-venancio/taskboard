@@ -1,0 +1,55 @@
+@import 'obj-ds/utils/all';
+
+.modal__area {
+    display: flex;
+    flex-direction: column;
+
+    min-width: 240px;
+    padding: 0;
+    margin: 0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.modal__header {
+    display: flex;
+    align-items: center;
+
+    background: $obj-color-dark-smoke;
+    padding: 0px 24px;
+    height: 56px;
+    color: $obj-color-snow;
+}
+
+.modal__icon {
+    margin-right: 8px;
+    color: $obj-color-snow;
+}
+
+.modal__title {
+    flex: 1;
+
+    margin: 0;
+    font-family: $obj-font-ptsans-caption;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.modal__close {
+    padding-left: 16px;
+    margin-left: auto;
+    cursor: pointer;
+
+    obj-icon {
+        color: $obj-color-snow;
+    }
+}
+
+.modal__main {
+    background: $obj-color-white;
+}
+
+.modal__footer {
+    background: $obj-color-white;
+}
+
