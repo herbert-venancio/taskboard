@@ -141,9 +141,12 @@ public class DateTimeUtils {
         try {
             return formatter.parse(yyyymmdd);
         } catch (ParseException e) {
-            e.printStackTrace();
+            throw new IllegalArgumentException(e);
         }
-        return null;
+    }
+
+    public static long parseDateStringAsMilliseconds(String date) {
+        return parseStringToDate(date).getTime();
     }
 
     public static Date toDate(LocalDate finalProjectDate, ZoneId zone) {
