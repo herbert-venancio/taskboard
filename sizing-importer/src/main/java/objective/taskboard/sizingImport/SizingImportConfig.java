@@ -129,6 +129,9 @@ public class SizingImportConfig {
         @NotNull
         private String include;
 
+        @NotNull
+        private String timebox;
+
         @Valid
         private List<DefaultColumn> defaultColumns = new ArrayList<>();
         
@@ -181,6 +184,14 @@ public class SizingImportConfig {
 
         public void setInclude(String include) {
             this.include = include;
+        }
+
+        public String getTimebox() {
+            return timebox;
+        }
+
+        public void setTimebox(String timebox) {
+            this.timebox = timebox;
         }
 
         public List<DefaultColumn> getDefaultColumns() {

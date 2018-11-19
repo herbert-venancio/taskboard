@@ -40,6 +40,7 @@ public class SheetColumnDefinitionProviderScopeTest {
         importConfig.getSheetMap().setType("D");
         importConfig.getSheetMap().setIssueKey("E");
         importConfig.getSheetMap().setInclude("F");
+        importConfig.getSheetMap().setTimebox("S");
         
         importConfig.getSheetMap().getExtraFields().add(new ExtraField("f8", "Acceptance Criteria", "Z"));
         importConfig.getSheetMap().getExtraFields().add(new ExtraField("f9", "Assumptions", "T"));
@@ -53,18 +54,22 @@ public class SheetColumnDefinitionProviderScopeTest {
     public void getStaticColumns() {
         List<StaticMappingDefinition> mappingDefinitions = subject.getStaticMappings();
 
-        assertEquals(8, mappingDefinitions.size());
+        assertEquals(9, mappingDefinitions.size());
 
         StaticMappingDefinition mappingDefinition = mappingDefinitions.get(0);
         assertEquals("Phase", mappingDefinition.getColumnDefinition().getName());
         assertEquals("A", mappingDefinition.getColumnLetter());
 
         mappingDefinition = mappingDefinitions.get(6);
+        assertEquals("Timebox", mappingDefinition.getColumnDefinition().getName());
+        assertEquals("S", mappingDefinition.getColumnLetter());
+
+        mappingDefinition = mappingDefinitions.get(7);
         assertEquals("Assumptions", mappingDefinition.getColumnDefinition().getName());
         assertEquals("T", mappingDefinition.getColumnLetter());
         assertEquals("f9", mappingDefinition.getColumnDefinition().getTagValue(EXTRA_FIELD_ID_TAG));
 
-        mappingDefinition = mappingDefinitions.get(7);
+        mappingDefinition = mappingDefinitions.get(8);
         assertEquals("Acceptance Criteria", mappingDefinition.getColumnDefinition().getName());
         assertEquals("Z", mappingDefinition.getColumnLetter());
         assertEquals("f8", mappingDefinition.getColumnDefinition().getTagValue(EXTRA_FIELD_ID_TAG));
