@@ -1,4 +1,4 @@
-package objective.taskboard.followup.kpi;
+package objective.taskboard.followup.kpi.touchTime;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -7,6 +7,8 @@ import java.util.function.Predicate;
 
 import org.apache.commons.lang3.Range;
 
+import objective.taskboard.followup.kpi.IssueKpi;
+import objective.taskboard.followup.kpi.ProjectTimelineRange;
 import objective.taskboard.utils.Clock;
 
 public class TouchTimeFilter implements Predicate<IssueKpi>{

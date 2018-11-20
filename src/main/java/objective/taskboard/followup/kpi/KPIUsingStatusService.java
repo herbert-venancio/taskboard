@@ -28,7 +28,7 @@ public abstract class KPIUsingStatusService<DS,R> {
     protected JiraProperties jiraProperties;
     
     @Autowired
-    private IssueKpiService issueStatusFlowService;
+    private IssueKpiService issueKpiService;
     
     public List<DS> getData(FollowUpData followupData) {
         StatusConfiguration configuration = getConfiguration();
@@ -65,7 +65,7 @@ public abstract class KPIUsingStatusService<DS,R> {
     
     private List<R> getRows(String[] statuses, Optional<AnalyticsTransitionsDataSet> analyticTransitionDs) {
         
-        List<IssueKpi> issues = issueStatusFlowService.getIssues(analyticTransitionDs);
+        List<IssueKpi> issues = issueKpiService.getIssues(analyticTransitionDs);
 
         if(issues.isEmpty() || !analyticTransitionDs.isPresent())
             return Arrays.asList();

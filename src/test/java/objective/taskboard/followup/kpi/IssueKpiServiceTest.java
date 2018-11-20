@@ -18,7 +18,6 @@ import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.junit.Before;
@@ -70,7 +69,7 @@ public class IssueKpiServiceTest {
     private ProjectService projectService;
     
     @Mock
-    private Clock clock; 
+    private Clock clock;
     
     @InjectMocks
     private IssueKpiService subject = new IssueKpiService();
@@ -148,15 +147,10 @@ public class IssueKpiServiceTest {
         when(issueBufferService.getAllIssues()).thenReturn(issues);
         when(factory.getItems(issues, ZONE_ID)).thenReturn(builder.buildAllIssuesAsAdapter());
         
-        
-        Map<KpiLevel, List<IssueKpi>> issuesKpi = subject.getIssuesFromCurrentState("PROJ", ZONE_ID);
-        
-        assertThat(issuesKpi.keySet().size(),is(4));
-        
-        List<IssueKpi> demandsIssues = issuesKpi.get(DEMAND);
-        List<IssueKpi> featuresIssues = issuesKpi.get(FEATURES);
-        List<IssueKpi> subtasksIssues = issuesKpi.get(SUBTASKS);
-        List<IssueKpi> unmappedIssues = issuesKpi.get(UNMAPPED);
+        List<IssueKpi> demandsIssues = subject.getIssuesFromCurrentState("PROJ", ZONE_ID, DEMAND);
+        List<IssueKpi> featuresIssues = subject.getIssuesFromCurrentState("PROJ", ZONE_ID, FEATURES);
+        List<IssueKpi> subtasksIssues = subject.getIssuesFromCurrentState("PROJ", ZONE_ID, SUBTASKS);
+        List<IssueKpi> unmappedIssues = subject.getIssuesFromCurrentState("PROJ", ZONE_ID, UNMAPPED);
         
         assertThat(demandsIssues.size(),is(0));
         assertThat(featuresIssues.size(),is(1));
@@ -183,7 +177,7 @@ public class IssueKpiServiceTest {
         assertThat(i2.getEffort("To Do"),is(0l));
         
         assertThat(i1.getChildren().size(),is(1));
-        assertThat(i1.getChildren().get(0),is(i2));
+        assertThat(i1.getChildren().get(0).getIssueKey(),is("I-2"));
     }
     
     @Test
@@ -234,9 +228,7 @@ public class IssueKpiServiceTest {
         when(issueBufferService.getAllIssues()).thenReturn(issues);
         when(factory.getItems(issues, ZONE_ID)).thenReturn(builder.buildAllIssuesAsAdapter());
         
-        
-        Map<KpiLevel, List<IssueKpi>> issuesKpi = subject.getIssuesFromCurrentState("PROJ", ZONE_ID);
-        List<IssueKpi> subtasks = issuesKpi.get(KpiLevel.SUBTASKS);
+        List<IssueKpi> subtasks = subject.getIssuesFromCurrentState("PROJ", ZONE_ID, SUBTASKS);
         
         assertExistingIssue(subtasks,"I-2",300l);
         assertNonExistingIssue(subtasks, "I-3");
@@ -290,11 +282,9 @@ public class IssueKpiServiceTest {
         List<Issue> issues = builder.mockAllIssues();
         when(issueBufferService.getAllIssues()).thenReturn(issues);
         when(factory.getItems(issues, ZONE_ID)).thenReturn(builder.buildAllIssuesAsAdapter());
-        
-        
-        Map<KpiLevel, List<IssueKpi>> issuesKpi = subject.getIssuesFromCurrentState("PROJ", ZONE_ID);
-        List<IssueKpi> subtasks = issuesKpi.get(KpiLevel.SUBTASKS);
-        
+
+        List<IssueKpi> subtasks = subject.getIssuesFromCurrentState("PROJ", ZONE_ID, SUBTASKS);
+
         assertNonExistingIssue(subtasks,"I-2");
         assertExistingIssue(subtasks, "I-3",0l);
         assertExistingIssue(subtasks,"I-4",500l);
