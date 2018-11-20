@@ -20,14 +20,17 @@ public class KPIProperties {
     @NotNull
     @Valid
     private IssueTypeChildrenStatusHierarchy featuresHierarchy;
-    
+
     @NotNull
     @Valid
     private IssueTypeChildrenStatusHierarchy demandHierarchy;
-    
+
     @NotEmpty
     @Valid
     private List<String> progressingStatuses; 
+
+    @Valid
+    private CumulativeFlowDiagramProperties CumulativeFlowDiagram = new CumulativeFlowDiagramProperties();
 
     public IssueTypeChildrenStatusHierarchy getFeaturesHierarchy() {
         return featuresHierarchy;
@@ -52,5 +55,13 @@ public class KPIProperties {
     public void setDemandHierarchy(IssueTypeChildrenStatusHierarchy demandHierarchy) {
         this.demandHierarchy = demandHierarchy;
     }
-    
+
+    public CumulativeFlowDiagramProperties getCumulativeFlowDiagram() {
+        return CumulativeFlowDiagram;
+    }
+
+    public void setCumulativeFlowDiagram(CumulativeFlowDiagramProperties cumulativeFlowDiagram) {
+        CumulativeFlowDiagram = cumulativeFlowDiagram;
+    }
+
 }
