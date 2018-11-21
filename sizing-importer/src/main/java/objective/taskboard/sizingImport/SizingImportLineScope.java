@@ -42,4 +42,7 @@ class SizingImportLineScope extends SizingImportLine {
         return getValue(SheetColumnDefinitionProviderScope.TYPE);
     }
 
+    public String getTimebox() {
+        return getValue(SheetColumnDefinitionProviderScope.TIMEBOX) == null ? "0" : getValue(SheetColumnDefinitionProviderScope.TIMEBOX);
+    }
 }

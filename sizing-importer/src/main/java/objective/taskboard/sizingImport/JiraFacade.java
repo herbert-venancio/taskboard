@@ -64,19 +64,17 @@ public class JiraFacade {
                 .summary(summary)
                 .release(release);
 
-        for (IssueFieldValue fv : fieldValues)
-            fv.setFieldValue(builder);
+        return createIssue(builder, demandKey, fieldValues);
+    }
 
-        JiraIssue issue = createIssue(builder.build());
-        
-        JiraLinkTypeDto demandLink = getDemandLink();
-        jiraEndpoint.request(JiraIssue.Service.class).linkIssue(JiraIssue.LinkInput.builder()
-                .type(demandLink.name)
-                .from(demandKey)
-                .to(issue.key)
-                .build());
-        
-        return issue;
+    public JiraIssue createTimebox(final String projectKey, final String demandKey, final Long featureTypeId, final String summary, final Version release, final Collection<IssueFieldValue> fieldValues, final String timebox) {
+        JiraIssue.InputBuilder<?> builder =
+            JiraIssue.Input.builder(jiraProperties, projectKey, featureTypeId)
+                .summary(summary)
+                .release(release)
+                .originalEstimate(timebox);
+
+        return createIssue(builder, demandKey, fieldValues);
     }
 
     public JiraIssue createIndirectCost(String projectKey, Long parentTypeId, Long subtaskTypeId, String summary, String originalEstimate) {
@@ -152,6 +150,23 @@ public class JiraFacade {
 
     public JiraIssueTypeDto getIssueTypeById(Long issueTypeId) {
         return metadataService.getIssueTypeById(issueTypeId);
+    }
+
+    private JiraIssue createIssue(final JiraIssue.InputBuilder<?> builder, final String demandKey, final Collection<IssueFieldValue> fieldValues) {
+
+        fieldValues.forEach(f -> f.setFieldValue(builder));
+
+        JiraIssue issue = createIssue(builder.build());
+
+        jiraEndpoint.request(JiraIssue.Service.class)
+            .linkIssue(
+                JiraIssue.LinkInput.builder()
+                    .type(getDemandLink().name)
+                    .from(demandKey)
+                    .to(issue.key)
+                    .build()
+            );
+        return issue;
     }
 
     abstract static class IssueFieldValue {

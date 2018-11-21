@@ -39,12 +39,14 @@ public class ScopeImporterTest {
     private static final Version VERSION_ONE = jiraVersion("One");
     private static final Long FEATURE_TYPE_ID = 30L;
     private static final Long TASK_TYPE_ID = 31L;
-    
+    private static final Long TIMEBOX_TYPE_ID = 10600L;
+
     private static final SheetColumn PHASE_COLUMN = new SheetColumn(SheetColumnDefinitionProviderScope.PHASE, "A");
     private static final SheetColumn DEMAND_COLUMN = new SheetColumn(SheetColumnDefinitionProviderScope.DEMAND, "B");
     private static final SheetColumn FEATURE_COLUMN = new SheetColumn(SheetColumnDefinitionProviderScope.FEATURE, "C");
     private static final SheetColumn TYPE_COLUMN = new SheetColumn(SheetColumnDefinitionProviderScope.TYPE, "D");
     private static final SheetColumn KEY_COLUMN = new SheetColumn(SheetColumnDefinitionProviderScope.KEY, "C");
+    private static final SheetColumn TIMEBOX_COLUMN = new SheetColumn(SheetColumnDefinitionProviderScope.TIMEBOX, "S");
 
     private final SizingImportConfig importConfig = new SizingImportConfig();
     private final JiraFacade jiraFacade = mock(JiraFacade.class);
@@ -53,6 +55,7 @@ public class ScopeImporterTest {
 
     private final Map<String, JiraCreateIssue.FieldInfoMetadata> featureMetadataFields = new HashMap<>();
     private final Map<String, JiraCreateIssue.FieldInfoMetadata> taskMetadataFields = new HashMap<>();
+    private final Map<String, JiraCreateIssue.FieldInfoMetadata> timeboxMetadataFields = new HashMap<>();
 
     private final ScopeImporter subject = new ScopeImporter(importConfig, jiraFacade, importerNotifier);
 
@@ -64,7 +67,8 @@ public class ScopeImporterTest {
 
         when(jiraFacade.requestFeatureTypes(PROJECT_X_KEY)).thenReturn(asList(
                 new JiraCreateIssue.IssueTypeMetadata(FEATURE_TYPE_ID, "Feature", false, featureMetadataFields),
-                new JiraCreateIssue.IssueTypeMetadata(TASK_TYPE_ID,    "Task",    false, taskMetadataFields)));
+                new JiraCreateIssue.IssueTypeMetadata(TASK_TYPE_ID,    "Task",    false, taskMetadataFields),
+                new JiraCreateIssue.IssueTypeMetadata(TIMEBOX_TYPE_ID, "Timebox", false, timeboxMetadataFields)));
 
         importerNotifier.addListener(recorder);
     }
@@ -134,7 +138,7 @@ public class ScopeImporterTest {
         assertEvents(
                 "Import started - Total lines count: 1 | lines to import: 1",
                 "Line import started - Row index: 0",
-                "Line error - Row index: 0 | errors: Type should be one of the following: Feature, Task",
+                "Line error - Row index: 0 | errors: Type should be one of the following: Feature, Task, Timebox",
                 "Import finished");
         
         verifyJiraFacadeNeverCreateItems();
@@ -213,6 +217,38 @@ public class ScopeImporterTest {
         verify(jiraFacade).createVersion(PROJECT_X_KEY, "One");
         verify(jiraFacade).createDemand(PROJECT_X_KEY, "Blue", VERSION_ONE);
         verify(jiraFacade).createFeature(PROJECT_X_KEY, "PX-1", FEATURE_TYPE_ID, "Banana", VERSION_ONE, emptyList());
+    }
+
+    @Test
+    public void shouldImportLineTimeboxType() {
+
+        when(jiraFacade.createDemand(any(), eq("Infrastructure"), any()))
+            .thenReturn(new JiraIssue("PX-1"));
+
+        when(jiraFacade.createTimebox(any(), any(), any(), any(), any(), any(), any()))
+            .thenReturn(new JiraIssue("PX-15"));
+
+        importConfig.getSheetMap().setTimebox("S");
+
+        List<SizingImportLineScope> lines = asList(
+            new SizingImportLineScope(0,
+                asList(
+                    new ImportValue(PHASE_COLUMN, VERSION_ONE.name),
+                    new ImportValue(DEMAND_COLUMN, "Infrastructure"),
+                    new ImportValue(FEATURE_COLUMN, "Proof of Concept"),
+                    new ImportValue(TYPE_COLUMN, "Timebox"),
+                    new ImportValue(TIMEBOX_COLUMN,    "80")
+                )
+            )
+        );
+        subject.executeImport(PROJECT_X_KEY, lines);
+
+        assertEvents(
+            "Import started - Total lines count: 1 | lines to import: 1",
+            "Line import started - Row index: 0",
+            "Line import finished - Row index: 0 | issue key: PX-15",
+            "Import finished"
+        );
     }
 
     @Test
