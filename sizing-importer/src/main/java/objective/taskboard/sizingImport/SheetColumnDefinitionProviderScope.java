@@ -26,7 +26,7 @@ import objective.taskboard.sizingImport.SizingImportConfig.SheetMap.DefaultColum
 class SheetColumnDefinitionProviderScope {
     public static final SheetColumnDefinition PHASE    = new SheetColumnDefinition("Phase");
     public static final SheetColumnDefinition DEMAND   = new SheetColumnDefinition("Demand");
-    public static final SheetColumnDefinition FEATURE  = new SheetColumnDefinition("Feature / Task");
+    public static final SheetColumnDefinition FEATURE  = new SheetColumnDefinition("Feature");
     public static final SheetColumnDefinition TYPE     = new SheetColumnDefinition("Type");
     public static final SheetColumnDefinition KEY      = new SheetColumnDefinition("Key",      PreviewBehavior.HIDE);
     public static final SheetColumnDefinition INCLUDE  = new SheetColumnDefinition("Include",  PreviewBehavior.HIDE);

@@ -22,6 +22,9 @@ public class SizingImportConfig {
     public static final String SHEET_SIZING_METADATA = "Sizing-Meta-Data";
 
     @NotNull
+    private Integer tabHeadersRowNumber = 2;
+
+    @NotNull
     private Integer dataStartingRowNumber;
 
     @Valid
@@ -40,6 +43,14 @@ public class SizingImportConfig {
     private Integer versionRowIndex = 1;
     @NotEmpty
     private String versionColumnLetter = "B";
+
+    public Integer getTabHeadersRowNumber() {
+        return tabHeadersRowNumber;
+    }
+
+    public void setTabHeadersRowNumber(Integer tabHeadersRowNumber) {
+        this.tabHeadersRowNumber = tabHeadersRowNumber;
+    }
 
     public Integer getDataStartingRowNumber() {
         return dataStartingRowNumber;

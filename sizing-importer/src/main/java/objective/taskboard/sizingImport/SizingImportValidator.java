@@ -91,7 +91,7 @@ public class SizingImportValidator {
         if (config.getDataStartingRowIndex() >= rows.size()) 
             return invalidDataStartingRow();
         
-        int headerRowIndex = config.getDataStartingRowIndex() - 1;
+        int headerRowIndex = config.getTabHeadersRowNumber() - 1;
         List<Object> headersCells = rows.get(headerRowIndex);
         if (headersCells == null || headersCells.isEmpty())
             return invalidDataStartingRow();

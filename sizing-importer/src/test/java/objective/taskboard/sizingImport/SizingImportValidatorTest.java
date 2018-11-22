@@ -41,12 +41,13 @@ public class SizingImportValidatorTest {
     
     @Before
     public void setup() {
+        config.setTabHeadersRowNumber(1);
         config.setDataStartingRowNumber(2);
 
         when(googleApiService.buildSpreadsheetsManager()).thenReturn(spreadsheetsManager);
 
         sheetScopeData = asList(
-                asList("Phase", "Demand", "Feature / Task",  "Include", "Dev", "UX"),
+                asList("Phase", "Demand", "Feature",  "Include", "Dev", "UX"),
                 asList("P1",    "MVP",    "Login",           "true",    "M",   "L"),
                 asList("P1",    "MVP",    "Home",            "true",    "S",   "L"));
 
@@ -144,14 +145,14 @@ public class SizingImportValidatorTest {
 
     private void assertInvalidSheetScopeFormat(ValidationResult result) {
         assertTrue(result.failed());
-        assertEquals("Invalid spreadsheet format: Row 1 of sheet “Scope” should contain the headers (e.g. Phase, Demand, Feature / Task).", result.errorMessage);
+        assertEquals("Invalid spreadsheet format: Row 1 of sheet “Scope” should contain the headers (e.g. Phase, Demand, Feature).", result.errorMessage);
         assertEquals("Activities to import should start at row 2.", result.errorDetail);
     }
 
     @Test
     public void shouldFailWhenSomeStaticColumnsAreMissing() {
         sheetScopeData = asList(
-                asList("Demand", "Feature / Task", "Dev", "UX"),
+                asList("Demand", "Feature", "Dev", "UX"),
                 asList("MVP",    "Login",          "M",   "L"));
         
         ValidationResult result = subject.validate(SPREADSHEET_ID);
@@ -164,7 +165,7 @@ public class SizingImportValidatorTest {
     @Test
     public void shouldFailWhenStaticColumnsAreDuplicated() {
         sheetScopeData = asList(
-                asList("Phase", "Demand", "Include", "Feature / Task", "Include", "Dev", "Dev"),
+                asList("Phase", "Demand", "Include", "Feature", "Include", "Dev", "Dev"),
                 asList("P1",    "MVP",    "true",    "Login",          "true",    "M",   "L"));
         
         ValidationResult result = subject.validate(SPREADSHEET_ID);
@@ -183,14 +184,14 @@ public class SizingImportValidatorTest {
                 new StaticMappingDefinition(INCLUDE, "Z")));
         
         sheetScopeData = asList(
-                asList("Phase", "Demand", "Include", "Feature / Task", "Dev"),
+                asList("Phase", "Demand", "Include", "Feature", "Dev"),
                 asList("P1",    "MVP",    "true",    "Login",          "L"));
         
         ValidationResult result = subject.validate(SPREADSHEET_ID);
 
         assertTrue(result.failed());
         assertEquals("Invalid spreadsheet format: Incorrectly positioned columns in “Scope“ sheet (row 1).", result.errorMessage);
-        assertEquals("“Feature / Task” column should be moved to position “C”, “Include” column should be moved to position “Z”.", result.errorDetail);
+        assertEquals("“Feature” column should be moved to position “C”, “Include” column should be moved to position “Z”.", result.errorDetail);
     }
 
     @Test
