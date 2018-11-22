@@ -91,7 +91,7 @@ public class UserTeamCachedRepository {
 
     public void loadCache() {
         log.info("------------------------------ > loadCache()");
-        this.cache = userTeamRepository.findByEndDate(null);
+        this.cache = userTeamRepository.findAll();
     }
 
 }
