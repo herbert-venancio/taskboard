@@ -72,6 +72,36 @@ To update the followup template:
 3. Create a folder named "credentials" and configure the "google-api.credential-store" property on `src/main/resources/application-[environment].properties`.\
 `google-api.credential-store-dir=[path to /credentials]`
 
+## How to test the migrations on Oracle
+
+To test the migrations on Oracle, you'll need to get an Oracle database instance. 
+
+1. First, you have to add the following line to your `/etc/docker/daemon.json` : 
+
+    ```
+    { "insecure-registries":["dockercb:5000"] }
+    ```
+2. Restart your docker daemon with the following command 
+
+    ```sudo docker restart```
+
+3. Start the Oracle container running the command: 
+
+    ```
+    sudo docker run -e ORACLE_HOME=/opt/oracle/product/11.2.0/dbhome_1 -h oracle11g --privileged -d dockercb:5000/ng-oracle
+    ```
+
+4. For last, set the lines below on application[-dev/prod].properties. Don't forget to comment any lines that make reference to MySql.
+
+    ```
+    spring.datasource.driverClassName=oracle.jdbc.driver.OracleDriver
+    spring.datasource.url=jdbc:oracle:thin:system/oracle@localhost:1521/orcl
+    spring.datasource.validation-query=select 1 from dual
+    spring.datasource.testWhileIdle=true
+    ...
+    flyway.locations=db/migration/oracle
+    ```
+
 ## How to solve when javascript code is "encrypted" in browser
 
 Execute `mvn clean package` or delete the folder `target/test-classes/static/`
