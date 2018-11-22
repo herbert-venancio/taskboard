@@ -155,7 +155,7 @@ class ChartBuilderBase {
     }
 
     withSeriesData (seriesData) {
-        this.options.series = seriesData;
+        Highcharts.merge(true, this.options, {series: seriesData});
         return this;
     }
 
@@ -209,25 +209,6 @@ class CFDChartBuilder extends ChartBuilderBase {
         Highcharts.merge(true, this.options, this._yAxisOptions);
     }
 
-    withTitle (title) {
-        this.options.title.text = title;
-        return this;
-    }
-
-    withChartType(chartType) {
-        this.options.chart.type = chartType;
-        return this;
-    }
-
-    withSeriesData (seriesData) {
-        Highcharts.merge(true, this.options, {series: seriesData});
-        return this;
-    }
-
-    build () {
-        const chart = Highcharts.chart(this.options);
-        return chart;
-    }
     get _plotOptions () {
         return {
             plotOptions: {
