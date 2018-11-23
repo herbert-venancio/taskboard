@@ -181,11 +181,50 @@ public class SubtaskWorklogDistributorTest {
         assertStatus(subject.findStatus(status,DAY_SIX),REVIEW);
         
     }
-     
+
+    @Test
+    public void issueClosedSameDayItWasDoing_worklogShouldGoToDoing() {
+        StatusTransitionBuilder builder = new StatusTransitionBuilder()
+                .addTransition(TODO,"2020-01-01")
+                .addTransition(DOING,"2020-01-04")
+                .addTransition(TO_REVIEW)
+                .addTransition(REVIEW)
+                .addTransition(DONE,"2020-01-04");
+
+        StatusTransition status = builder.buildOrCry();
+
+        assertStatus(subject.findStatus(status, DAY_ONE), DOING);
+        assertStatus(subject.findStatus(status, DAY_TWO), DOING);
+        assertStatus(subject.findStatus(status, DAY_THREE), DOING);
+        assertStatus(subject.findStatus(status, DAY_FOUR), DOING);
+        assertStatus(subject.findStatus(status, DAY_FIVE), REVIEW);
+        assertStatus(subject.findStatus(status, DAY_SIX), REVIEW);
+
+    }
+
+    @Test
+    public void givenAllTransitionsSameDay_whenWorklogsOnTransitionDay_thenShouldEnterOnLastProgressingStatus() {
+        StatusTransitionBuilder builder = new StatusTransitionBuilder()
+                .addTransition(TODO,"2020-01-03")
+                .addTransition(DOING,"2020-01-03")
+                .addTransition(TO_REVIEW,"2020-01-03")
+                .addTransition(REVIEW,"2020-01-03")
+                .addTransition(DONE,"2020-01-03");
+
+        StatusTransition status = builder.buildOrCry();
+
+        assertStatus(subject.findStatus(status, DAY_ONE), DOING);
+        assertStatus(subject.findStatus(status, DAY_TWO), DOING);
+        assertStatus(subject.findStatus(status, DAY_THREE), REVIEW);
+        assertStatus(subject.findStatus(status, DAY_FOUR), REVIEW);
+        assertStatus(subject.findStatus(status, DAY_FIVE), REVIEW);
+        assertStatus(subject.findStatus(status, DAY_SIX), REVIEW);
+
+    }
+
     private void assertStatus(Optional<StatusTransition> statusTransition, DefaultStatus status) {
         String foundStatus = statusTransition.map(s -> s.status).orElse("Empty");
         assertEquals(status.name,foundStatus);
     }
-    
-    
+
 }

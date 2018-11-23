@@ -14,7 +14,7 @@ import objective.taskboard.data.Worklog;
 import objective.taskboard.utils.DateTimeUtils;
 
 public class StatusTransition {
-    
+
     protected final String status;
     protected final Optional<StatusTransition> next;
     protected final boolean isProgressingStatus;
@@ -27,7 +27,7 @@ public class StatusTransition {
     }
 
     public Optional<StatusTransition> givenDate(ZonedDateTime date) {
-        return next.map(n-> n.givenDate(date)).orElse(Optional.empty());
+        return next.map(n -> n.givenDate(date)).orElse(Optional.empty());
     }
 
     public boolean isWithinDate(ZonedDateTime date) {
@@ -61,14 +61,11 @@ public class StatusTransition {
         
         return nextIsOnDate && nextReceiveWorklog;
     }
-    
+
     boolean hasNextProgressingStatusThatReceivesWorklog(Worklog worklog) {
-        Optional<StatusTransition> nextProgressing = next.flatMap(n-> n.whichIsProgressing()); 
-        
-        boolean shouldProceed = nextProgressing.map(n -> n.hasNextOnDateThatCouldReceiveWorklog(worklog, false)).orElse(false);
-        if(shouldProceed)
+        if(hasFutureProgressingStatusBeforeNonProgressingReceiver(worklog))
             return true;
-        
+
         Optional<DatedStatusTransition> nextWithDate = withDate();
         boolean nextIsProgressing = nextWithDate.map(n -> n.isProgressingStatus).orElse(false);
         boolean nextHasNextProgressing = nextWithDate.map(n -> n.hasNextProgressing()).orElse(false);
@@ -76,7 +73,12 @@ public class StatusTransition {
         
         return !nextIsProgressing && nextHasNextProgressing && worklogIsAfterNext;
     }
-    
+
+    boolean hasFutureProgressingStatusBeforeNonProgressingReceiver(Worklog worklog) { 
+        Optional<StatusTransition> nextProgressing = next.flatMap(n-> n.whichIsProgressing());  
+        return nextProgressing.map(n -> n.hasNextOnDateThatCouldReceiveWorklog(worklog, false)).orElse(false);  
+    }
+
     public Long getEffort() { 
         return worklogs.stream().mapToLong(w -> Long.valueOf(w.timeSpentSeconds)).reduce(Long::sum).orElse(0); 
     } 
