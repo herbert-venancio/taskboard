@@ -168,7 +168,7 @@ public class KPIEnvironmentBuilder {
 
         
         Hierarchy hierarchy = getHierarchy(level, fatherStatus);
-        hierarchy.setChldrenTypeId(typesId);
+        hierarchy.setChildrenTypeId(typesId);
         return this;
     }
 

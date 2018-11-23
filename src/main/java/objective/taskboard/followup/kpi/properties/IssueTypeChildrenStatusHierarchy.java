@@ -43,7 +43,7 @@ public class IssueTypeChildrenStatusHierarchy {
             return childrenTypeId;
         }
         
-        public void setChldrenTypeId(List<Long> childrenTypeId) {
+        public void setChildrenTypeId(List<Long> childrenTypeId) {
             this.childrenTypeId = childrenTypeId;
         }
 
