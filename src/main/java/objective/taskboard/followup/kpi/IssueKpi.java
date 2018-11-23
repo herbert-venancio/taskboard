@@ -1,6 +1,7 @@
 package objective.taskboard.followup.kpi;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.Comparator;
@@ -10,7 +11,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.Range;
+
 import objective.taskboard.data.Worklog;
+import objective.taskboard.utils.Clock;
+import objective.taskboard.utils.RangeUtils;
 
 public class IssueKpi {
 
@@ -115,6 +120,21 @@ public class IssueKpi {
                 .map(s -> s.getWorklogs())
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
+    }
+
+    public Optional<Range<ZonedDateTime>> getDateRangeBasedOnProgressinsStatuses(Clock clock,ZoneId timezone) {
+        Optional<ZonedDateTime> firstDateOp = firstStatus.flatMap(s -> s.firstDateOnProgressing(timezone));
+        if(!firstDateOp.isPresent())
+            return Optional.empty();
+        
+        ZonedDateTime firstDate = firstDateOp.get();
+        ZonedDateTime now = ZonedDateTime.ofInstant(clock.now(),timezone);
+        ZonedDateTime lastDate = firstStatus.flatMap(s -> s.getDateAfterLeavingLastProgressingStatus()).orElse(now);
+
+        if(firstDate.isAfter(lastDate))
+            return Optional.of(RangeUtils.between(firstDate, firstDate));
+        
+        return Optional.of(RangeUtils.between(firstDate, lastDate));
     }
 
 }

@@ -9,11 +9,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import objective.taskboard.data.Issue;
-import objective.taskboard.followup.kpi.DatedStatusTransition;
 import objective.taskboard.followup.kpi.ChildrenWorklogDistributor;
+import objective.taskboard.followup.kpi.DatedStatusTransition;
 import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.StatusTransition;
@@ -29,6 +30,7 @@ public class IssueKpiTransformer {
     private KPIProperties kpiProperties;
     private boolean mappingHierarchically = false;
     private boolean settingWorklog = false;
+    private List<Predicate<IssueKpi>> filters = new LinkedList<>();
 
     public IssueKpiTransformer(KPIProperties kpiProperties) { 
         this.kpiProperties = kpiProperties;
@@ -65,7 +67,8 @@ public class IssueKpiTransformer {
         if(settingWorklog)
             putWorklogs();
         
-        return new LinkedList<>(issuesKpi.values());
+        Predicate<IssueKpi> finalFilter = filters.stream().reduce(w -> true, Predicate::and); 
+        return issuesKpi.values().stream().filter(finalFilter).collect(Collectors.toList());
     }
 
     private void putWorklogs() {
@@ -133,14 +136,16 @@ public class IssueKpiTransformer {
     
     private void validateParameters() {
         
-        if(this.items.isEmpty())
-            throw new IllegalArgumentException("To map issues, at least a Collection of IssueKpiDataItemAdapter must be provided.");
-        
         if(this.mappingHierarchically && originalIssues.isEmpty())
             throw new IllegalArgumentException("To map issues hierarchically, the original issues must be provided");
         
         if(this.settingWorklog && originalIssues.isEmpty())
             throw new IllegalArgumentException("To map the issues worklogs, the original issues must be provided");
+    }
+
+    public IssueKpiTransformer filter(Predicate<IssueKpi> filter) {
+        this.filters.add(filter);
+        return this;
     }
 
 }

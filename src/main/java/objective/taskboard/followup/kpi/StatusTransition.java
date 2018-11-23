@@ -1,13 +1,17 @@
 package objective.taskboard.followup.kpi;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
+import org.eclipse.collections.impl.block.factory.Comparators;
+
 import com.google.common.base.Function;
 
 import objective.taskboard.data.Worklog;
+import objective.taskboard.utils.DateTimeUtils;
 
 public class StatusTransition {
     
@@ -54,13 +58,23 @@ public class StatusTransition {
         
         boolean nextIsOnDate = nextWithDate.map(n -> n.isOnDate(worklog)).orElse(false);
         boolean nextReceiveWorklog = nextWithDate.map(n -> n.isProgressingStatus || n.hasNextOnDateThatCouldReceiveWorklog(worklog, true)).orElse(false); 
-
-        return nextIsOnDate && (nextReceiveWorklog && nextWithDate.isPresent()); 
+        
+        return nextIsOnDate && nextReceiveWorklog;
     }
     
     boolean hasNextProgressingStatusThatReceivesWorklog(Worklog worklog) {
         Optional<StatusTransition> nextProgressing = next.flatMap(n-> n.whichIsProgressing()); 
-        return nextProgressing.map(n -> n.hasNextOnDateThatCouldReceiveWorklog(worklog, false)).orElse(false);
+        
+        boolean shouldProceed = nextProgressing.map(n -> n.hasNextOnDateThatCouldReceiveWorklog(worklog, false)).orElse(false);
+        if(shouldProceed)
+            return true;
+        
+        Optional<DatedStatusTransition> nextWithDate = withDate();
+        boolean nextIsProgressing = nextWithDate.map(n -> n.isProgressingStatus).orElse(false);
+        boolean nextHasNextProgressing = nextWithDate.map(n -> n.hasNextProgressing()).orElse(false);
+        boolean worklogIsAfterNext = nextWithDate.map( n -> n.dateIsBefore(worklog)).orElse(false);
+        
+        return !nextIsProgressing && nextHasNextProgressing && worklogIsAfterNext;
     }
     
     public Long getEffort() { 
@@ -70,6 +84,14 @@ public class StatusTransition {
     public Optional<DatedStatusTransition> withDate() { 
         return next.flatMap(n -> n.withDate()); 
     } 
+
+    protected Optional<ZonedDateTime> minimumDateFromWorklog(ZoneId timezone) {
+        return this.worklogs.stream().map(w -> DateTimeUtils.get(w.started, timezone)).min(Comparators.naturalOrder());
+    }
+
+    private boolean isProgressingWithWorklogs() {
+        return isProgressingStatus && !this.worklogs.isEmpty();
+    }
  
     public Optional<StatusTransition> whichIsProgressing() { 
         return this.isProgressingStatus() ? Optional.of(this) : flatNext(n -> n.whichIsProgressing()); 
@@ -102,6 +124,36 @@ public class StatusTransition {
         allWorklogs.addAll(this.worklogs);
         return allWorklogs;
     }
+    
+    public Optional<ZonedDateTime> firstDateOnProgressing(ZoneId timezone){
+        if(isProgressingWithWorklogs())
+            return minimumDateFromWorklog(timezone);
+        return next.flatMap(n -> n.firstDateOnProgressing(timezone));
+    }
+
+    public Optional<ZonedDateTime> getDateAfterLeavingLastProgressingStatus() {
+        Optional<StatusTransition> lastProgressingStatusOp = flatNext(s -> s.getLastProgressingStatus());
+        if(!lastProgressingStatusOp.isPresent())
+            return Optional.empty();
+        StatusTransition lastProgressingStatus = lastProgressingStatusOp.get();
+        
+        Optional<DatedStatusTransition> nextWithDate = lastProgressingStatus.next.flatMap(n -> n.withDate());
+        return nextWithDate.flatMap(s -> Optional.of(s.getDate()));
+    }
+
+    private Optional<StatusTransition> getLastProgressingStatus() {
+        Optional<StatusTransition> hasNext = flatNext(s -> s.getLastProgressingStatus());
+        if(hasNext.isPresent())
+            return hasNext;
+        
+        return isProgressingStatus ? Optional.of(this) : Optional.empty();
+    }
    
+    protected boolean hasNextProgressing() {
+        boolean nextIsProgressing = next.map(n -> n.isProgressingStatus).orElse(false);
+        if(nextIsProgressing)
+            return true;
+        return next.map(n -> n.hasNextProgressing()).orElse(false);
+    }
     
 }

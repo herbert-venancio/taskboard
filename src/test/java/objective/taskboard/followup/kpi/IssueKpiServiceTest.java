@@ -9,6 +9,7 @@ import static objective.taskboard.followup.kpi.KpiLevel.UNMAPPED;
 import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
 import static objective.taskboard.utils.DateTimeUtils.parseStringToDate;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
@@ -30,23 +31,25 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import objective.taskboard.data.Issue;
 import objective.taskboard.data.Worklog;
+import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.AnalyticsTransitionsDataRow;
 import objective.taskboard.followup.AnalyticsTransitionsDataSet;
 import objective.taskboard.followup.IssueTransitionService;
 import objective.taskboard.followup.kpi.enviroment.KPIEnvironmentBuilder;
-import objective.taskboard.followup.kpi.properties.IssueTypeChildrenStatusHierarchy;
-import objective.taskboard.followup.kpi.properties.IssueTypeChildrenStatusHierarchy.Hierarchy;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
 import objective.taskboard.followup.kpi.transformer.AnalyticDataRowAdapter;
 import objective.taskboard.followup.kpi.transformer.IssueKpiDataItemAdapterFactory;
 import objective.taskboard.issueBuffer.IssueBufferService;
+import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.properties.JiraProperties;
+import objective.taskboard.utils.Clock;
 import objective.taskboard.utils.DateTimeUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class IssueKpiServiceTest {
 
     private static final long STATUS_OPEN = 1l;
+    private static final ZoneId ZONE_ID = ZoneId.systemDefault();
 
     @Mock
     private JiraProperties jiraProperties;
@@ -63,6 +66,12 @@ public class IssueKpiServiceTest {
     @Mock
     private IssueTransitionService transitionService;
     
+    @Mock
+    private ProjectService projectService;
+    
+    @Mock
+    private Clock clock; 
+    
     @InjectMocks
     private IssueKpiService subject = new IssueKpiService();
     
@@ -71,16 +80,6 @@ public class IssueKpiServiceTest {
         JiraProperties.Followup followup = Mockito.mock(JiraProperties.Followup.class);
         when(jiraProperties.getFollowup()).thenReturn(followup);
         when(followup.getStatusExcludedFromFollowup()).thenReturn(Arrays.asList(STATUS_OPEN));
-        
-        when(kpiProperties.getProgressingStatuses()).thenReturn(Arrays.asList("Doing"));
-        
-        Hierarchy hierarch = new Hierarchy();
-        hierarch.setFatherStatus("Doing");
-        hierarch.setChldrenTypeId(asList(2l));
-        
-        IssueTypeChildrenStatusHierarchy subtasksHierarchy = new IssueTypeChildrenStatusHierarchy();
-        subtasksHierarchy.setHierarchies(Arrays.asList(hierarch));
-        Mockito.when(kpiProperties.getFeaturesHierarchy()).thenReturn(subtasksHierarchy);
         
      }
 
@@ -123,14 +122,9 @@ public class IssueKpiServiceTest {
     public void getIssues_currentState() {
         Worklog worklog = new Worklog("a.developer", parseStringToDate("2020-01-03"), 300);
         
-        KPIEnvironmentBuilder builder = new KPIEnvironmentBuilder(kpiProperties,transitionService);
-        builder.addFeatureType(1l, "Dev")
-                .addSubtaskType(2l, "Alpha");
-        
-        builder.addStatus(1l, "Open", false)
-                .addStatus(2l, "To Do" , false)
-                .addStatus(3l, "Doing", true)
-                .addStatus(4l, "Done", false);
+        configureProject("2020-01-01","2020-01-04");
+        configureClock("2020-01-04");
+        KPIEnvironmentBuilder builder = simpleEnvironment();
                 
         builder.withMockingIssue("I-1", "Dev", KpiLevel.FEATURES)
                 .setCurrentStatusToCurrentIssue("Doing")
@@ -151,13 +145,11 @@ public class IssueKpiServiceTest {
                 .addWorklog(worklog);
         
         List<Issue> issues = builder.mockAllIssues();
-        ZoneId timezone = ZoneId.systemDefault();
-        
         when(issueBufferService.getAllIssues()).thenReturn(issues);
-        when(factory.getItems(issues, timezone)).thenReturn(builder.buildAllIssuesAsAdapter());
+        when(factory.getItems(issues, ZONE_ID)).thenReturn(builder.buildAllIssuesAsAdapter());
         
         
-        Map<KpiLevel, List<IssueKpi>> issuesKpi = subject.getIssuesFromCurrentState("PROJ", timezone);
+        Map<KpiLevel, List<IssueKpi>> issuesKpi = subject.getIssuesFromCurrentState("PROJ", ZONE_ID);
         
         assertThat(issuesKpi.keySet().size(),is(4));
         
@@ -192,7 +184,161 @@ public class IssueKpiServiceTest {
         
         assertThat(i1.getChildren().size(),is(1));
         assertThat(i1.getChildren().get(0),is(i2));
+    }
+    
+    @Test
+    public void getIssuesFromCurrentState_filteringOpen() {
         
+        configureProject("2020-01-04","2020-01-10");
+        configureClock("2020-01-12");
+        KPIEnvironmentBuilder builder = simpleEnvironment();
+        
+        builder.withMockingIssue("I-1", "Dev", KpiLevel.FEATURES)
+                .setCurrentStatusToCurrentIssue("Doing")
+                .setProjectKeyToCurrentIssue("PROJ")
+                .addTransition("Open", "2020-01-01")
+                .addTransition("To Do","2020-01-02")
+                .addTransition("Doing","2020-01-03")
+                .addTransition("Done");
+          
+        builder.withMockingIssue("I-2", "Alpha", SUBTASKS)
+                .setCurrentStatusToCurrentIssue("Done")
+                .setProjectKeyToCurrentIssue("PROJ")
+                .setFatherToCurrentIssue("I-1")
+                .addTransition("Open", "2020-01-01")
+                .addTransition("To Do", "2020-01-02")
+                .addTransition("Doing", "2020-01-03")
+                .addTransition("Done", "2020-01-04")
+                .addWorklog("2020-01-03",300);
+        
+        builder.withMockingIssue("I-3", "Alpha", SUBTASKS)
+                .setCurrentStatusToCurrentIssue("To Do")
+                .setProjectKeyToCurrentIssue("PROJ")
+                .setFatherToCurrentIssue("I-1")
+                .addTransition("Open", "2020-01-01")
+                .addTransition("To Do","2020-01-02")
+                .addTransition("Doing")
+                .addTransition("Done");
+        
+        builder.withMockingIssue("I-4", "Alpha", SUBTASKS)
+                .setCurrentStatusToCurrentIssue("To Do")
+                .setProjectKeyToCurrentIssue("PROJ")
+                .setFatherToCurrentIssue("I-1")
+                .addTransition("Open", "2020-01-01")
+                .addTransition("To Do","2020-01-02")
+                .addTransition("Doing")
+                .addTransition("Done")
+                .addWorklog("2020-01-03",500);
+        
+        List<Issue> issues = builder.mockAllIssues();
+        when(issueBufferService.getAllIssues()).thenReturn(issues);
+        when(factory.getItems(issues, ZONE_ID)).thenReturn(builder.buildAllIssuesAsAdapter());
+        
+        
+        Map<KpiLevel, List<IssueKpi>> issuesKpi = subject.getIssuesFromCurrentState("PROJ", ZONE_ID);
+        List<IssueKpi> subtasks = issuesKpi.get(KpiLevel.SUBTASKS);
+        
+        assertExistingIssue(subtasks,"I-2",300l);
+        assertNonExistingIssue(subtasks, "I-3");
+        assertExistingIssue(subtasks,"I-4",500l);
+    
+    }
+    
+    @Test
+    public void getIssuesFromCurrentState_filteringClosedIssues() {
+        configureProject("2020-01-06","2020-01-10");
+        configureClock("2020-01-12");
+        KPIEnvironmentBuilder builder = simpleEnvironment();
+        
+        builder.withMockingIssue("I-1", "Dev", KpiLevel.FEATURES)
+                .setCurrentStatusToCurrentIssue("Doing")
+                .setProjectKeyToCurrentIssue("PROJ")
+                .addTransition("Open", "2020-01-01")
+                .addTransition("To Do","2020-01-02")
+                .addTransition("Doing","2020-01-03")
+                .addTransition("Done");
+          
+        builder.withMockingIssue("I-2", "Alpha", SUBTASKS)
+                .setCurrentStatusToCurrentIssue("Done")
+                .setProjectKeyToCurrentIssue("PROJ")
+                .setFatherToCurrentIssue("I-1")
+                .addTransition("Open", "2020-01-01")
+                .addTransition("To Do", "2020-01-02")
+                .addTransition("Doing", "2020-01-03")
+                .addTransition("Done", "2020-01-04")
+                .addWorklog("2020-01-03",300);
+        
+        builder.withMockingIssue("I-3", "Alpha", SUBTASKS)
+                .setCurrentStatusToCurrentIssue("Doin")
+                .setProjectKeyToCurrentIssue("PROJ")
+                .setFatherToCurrentIssue("I-1")
+                .addTransition("Open", "2020-01-01")
+                .addTransition("To Do","2020-01-02")
+                .addTransition("Doing","2020-01-07")
+                .addTransition("Done");
+        
+        builder.withMockingIssue("I-4", "Alpha", SUBTASKS)
+                .setCurrentStatusToCurrentIssue("To Do")
+                .setProjectKeyToCurrentIssue("PROJ")
+                .setFatherToCurrentIssue("I-1")
+                .addTransition("Open", "2020-01-01")
+                .addTransition("To Do","2020-01-02")
+                .addTransition("Doing")
+                .addTransition("Done")
+                .addWorklog("2020-01-09",500);
+        
+        List<Issue> issues = builder.mockAllIssues();
+        when(issueBufferService.getAllIssues()).thenReturn(issues);
+        when(factory.getItems(issues, ZONE_ID)).thenReturn(builder.buildAllIssuesAsAdapter());
+        
+        
+        Map<KpiLevel, List<IssueKpi>> issuesKpi = subject.getIssuesFromCurrentState("PROJ", ZONE_ID);
+        List<IssueKpi> subtasks = issuesKpi.get(KpiLevel.SUBTASKS);
+        
+        assertNonExistingIssue(subtasks,"I-2");
+        assertExistingIssue(subtasks, "I-3",0l);
+        assertExistingIssue(subtasks,"I-4",500l);
+    }
+    
+    private void assertExistingIssue(List<IssueKpi> subtasks, String issueKey, long doingEffort) {
+        Optional<IssueKpi> issue = subtasks.stream().filter(i -> issueKey.equals(i.getIssueKey())).findFirst();
+        
+        assertTrue(issue.isPresent());
+        assertThat(issue.get().getEffort("Doing"),is(doingEffort));
+    }
+    
+    private void assertNonExistingIssue(List<IssueKpi> subtasks, String issueKey) {
+        Optional<IssueKpi> issue = subtasks.stream().filter(i -> issueKey.equals(i.getIssueKey())).findFirst();
+        
+        assertFalse(issue.isPresent());
+    }
+
+    private void configureProject(String startDate, String endDate) {
+        ProjectFilterConfiguration project = Mockito.mock(ProjectFilterConfiguration.class);
+        when(project.getStartDate()).thenReturn(Optional.of(parseDateTime(startDate).toLocalDate()));
+        when(project.getDeliveryDate()).thenReturn(Optional.of(parseDateTime(endDate).toLocalDate()));
+        when(projectService.getTaskboardProjectOrCry("PROJ")).thenReturn(project);
+        
+    }
+
+    private void configureClock(String date) {
+        when(clock.now()).thenReturn(parseDateTime(date).toInstant());
+    }
+
+    private KPIEnvironmentBuilder simpleEnvironment() {
+        KPIEnvironmentBuilder builder = new KPIEnvironmentBuilder(kpiProperties,transitionService);
+        builder.addFeatureType(1l, "Dev")
+                .addSubtaskType(2l, "Alpha");
+        
+        builder.addStatus(1l, "Open", false)
+                .addStatus(2l, "To Do" , false)
+                .addStatus(3l, "Doing", true)
+                .addStatus(4l, "Done", false);
+        
+        builder.addSubtaskHierarchy(FEATURES, "Doing", "Alpha");
+        builder.mockKpiProperties();
+        
+        return builder;
     }
     
     
