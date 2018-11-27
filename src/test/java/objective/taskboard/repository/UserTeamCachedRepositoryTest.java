@@ -92,7 +92,7 @@ public class UserTeamCachedRepositoryTest {
     }
 
     private void mockUserTeamRepositoryToReturn(UserTeam... userTeams) {
-        when(userTeamRepository.findByEndDate(null)).thenReturn(asList(userTeams));
+        when(userTeamRepository.findAll()).thenReturn(asList(userTeams));
     }
 
     private UserTeam userTeam(String username, String team, UserTeamRole role) {

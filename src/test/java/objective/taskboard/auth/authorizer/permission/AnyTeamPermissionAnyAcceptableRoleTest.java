@@ -5,7 +5,7 @@ import static objective.taskboard.auth.LoggedUserDetailsMockBuilder.loggedUser;
 import static objective.taskboard.data.UserTeam.UserTeamRole.MANAGER;
 import static objective.taskboard.data.UserTeam.UserTeamRole.MEMBER;
 import static objective.taskboard.repository.UserTeamRepositoryMockBuilder.userTeamRepository;
-import static org.codehaus.groovy.runtime.InvokerHelper.asList;
+import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
