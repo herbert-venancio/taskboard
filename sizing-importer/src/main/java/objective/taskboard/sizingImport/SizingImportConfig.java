@@ -38,6 +38,10 @@ public class SizingImportConfig {
 
     @NotEmpty
     private String minimalVersionForCost = "4.1";
+
+    @NotEmpty
+    private String minimalVersionForTimebox = "4.2";
+
     @NotNull
     @Min(0)
     private Integer versionRowIndex = 1;
@@ -102,6 +106,10 @@ public class SizingImportConfig {
 
     public void setMinimalVersionForCost(String minimalVersionForCost) {
         this.minimalVersionForCost = minimalVersionForCost;
+    }
+
+    public String getMinimalVersionForTimebox() {
+        return minimalVersionForTimebox;
     }
 
     public Integer getVersionRowIndex() {
