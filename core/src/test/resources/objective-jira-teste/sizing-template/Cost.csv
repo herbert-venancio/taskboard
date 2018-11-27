@@ -1,0 +1,48 @@
+Progress,100%,Grand Total,,,XS,,S,,M,,L,,XL,,Total,,,,0.00%,0.00%,
+Direct Costs,Allocation,Role Level,Role,Hour($),Qty,Effort,Qty,Effort,Qty,Effort,Qty,Effort,Qty,Effort,Qty,Cycle,Effort,Total Cost,Margin,Taxes,Grand Total
+Feature Planning,20%,BackDeveloper,BackDeveloper,$225,7,14,4,18,0,0,0,0,0,0,11,47,31,"$7,020",$0,$0,"$7,020"
+Feature Planning,40%,Tech Lead,Tech lead,$225,14,27,9,35,0,0,0,0,0,0,22,94,62,"$14,040",$0,$0,"$14,040"
+Feature Planning,40%,PM,Practice Manager,$225,14,27,9,35,0,0,0,0,0,0,22,94,62,"$14,040",$0,$0,"$14,040"
+UX,100%,Tech Lead,Tech lead,$225,2,8,0,0,0,0,0,0,0,0,2,12,8,"$1,800",$0,$0,"$1,800"
+Backend Dev,100%,BackDeveloper,BackDeveloper,$225,9,36,25,400,19,760,1,56,0,0,54,1878,1252,"$281,700",$0,$0,"$281,700"
+Frontend Dev,100%,FrontDeveloper,FrontDeveloper,$225,5,20,21,252,19,456,4,160,0,0,49,1370,888,"$199,800",$0,$0,"$199,800"
+Alpha Test,60%,FrontDeveloper,FrontDeveloper,$225,16,32,14,58,3,18,2,14,0,0,35,184,122,"$27,540",$0,$0,"$27,540"
+Alpha Test,40%,Architect,Architect,$225,11,22,10,38,2,12,1,10,0,0,24,122,82,"$18,360",$0,$0,"$18,360"
+UAT Support,20%,FrontDeveloper,FrontDeveloper,$225,8,8,3,7,0,1,0,2,0,0,12,22,17,"$3,870",$0,$0,"$3,870"
+UAT Support,40%,Tech Lead,Tech lead,$225,16,16,7,14,0,2,0,3,0,0,24,44,34,"$7,740",$0,$0,"$7,740"
+UAT Support,40%,PM,Practice Manager,$225,16,16,7,14,0,2,0,3,0,0,24,44,34,"$7,740",$0,$0,"$7,740"
+Task,100%,Coach,Coach,$225,3,24,2,32,3,72,2,80,0,0,10,208,208,"$46,800",$0,$0,"$46,800"
+Feature Review,80%,Architect,Architect,$225,32,32,14,27,2,6,0,0,0,0,47,82,66,"$14,760",$0,$0,"$14,760"
+Feature Review,20%,BackDeveloper,BackDeveloper,$225,8,8,3,7,0,2,0,0,0,0,12,21,16,"$3,690",$0,$0,"$3,690"
+Total Direct Costs,0.0%,,,,160,290,128,936,49,1330,11,328,0,0,348,4220,2884,"$648,900",$0,$0,"$648,900"
+,,,,,,,,,,,,,,,,,,,,,
+Risk Management,,Role Level,Role,Hour($),XS,,S,,M,,L,,XL,,,Cycle,Effort,Total Cost,Margin,Taxes,Grand Total
+Risks,45%,Liferay AVG,Liferay AVG,$225,46%,10%,37%,32%,14%,46%,3%,11%,0%,0%,,163,16,"$3,600",$0,$0,"$3,600"
+Recommended (Min/Max),20%,40%,NO GO!,,83%,,,,14%,,3%,,,,,,,,,,
+Total with Risk,,,,,,,,,,,,,,,,"4,383","2,900","$652,500",$0,$0,"$652,500"
+,,,,,,,,,,,,,,,,,,,,,
+Indirect Costs,Key,Role Level,Role,Hour($),Weekly Hours,,% of Project,,,,,,,,,Work Days,Effort,Total Cost,Margin,Taxes,Grand Total
+Management,,EM,Engagement Manager,$225,,,50%,,,,,,,,,72,1450,"$326,250",$0,$0,"$326,250"
+Dev Suport,,Tech Lead,Tech lead,$225,5.0,,,,,,,,,,,102,73,"$16,416",$0,$0,"$16,416"
+Coach,,Coach,Coach,$225,,,25%,,,,,,,,,36,725,"$163,125",$0,$0,"$163,125"
+Practice Manager,,PM,Practice Manager,$225,1.0,,,,,,,,,,,20,,$657,$0,$0,$657
+,,Architect,Architect,$225,1.0,,,,,,,,,,,20,3,$657,$0,$0,$657
+Total Indirect Costs,,,,,,,,,,,,,,,,250,2254,"$507,104",$0,$0,"$507,104"
+,,,,,,,,,,,,,,,,,,,,,
+Grand Total,,,,,,,,,,,,,,,,"4,633","5,154","1,159,604",0,0,"1,159,604"
+,,,,,,,,,,,,,,,,,,,,,
+Maximum Sizes,Effort,,,,,,,,,,,,,,,,,,,AVG(Hour Rate),
+Demand,250,,,,,,,,,,,,,,,,,,,Grand Total,Direct Cost
+Feature,120,,,,,,,,,,,,,,,,,,,$225.00,$225.00
+,,,,,,,,,,,,,,,,,,,,,
+Risk Assessment Criteria for Closed-Scope (Bugs Included),,,,,,,,,,,,,,,,,,,,,
+Cluster Size,Risk,,,,,,,,,,,,,,,,,,,,
+70%+ Small,20-40%,,,,,,,,,,,,,,,,,,,,
+50-70% Small,40-60%,,,,,,,,,,,,,,,,,,,,
+50%- Small,50%+ (no go),,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,
+Notes,,,,,,,,,,,,,,,,,,,,,
+Focus on $ not Hours,,,,,,,,,,,,,,,,,,,,,
+Explicit values,,,,,,,,,,,,,,,,,,,,,
+New vs old scope,,,,,,,,,,,,,,,,,,,,,

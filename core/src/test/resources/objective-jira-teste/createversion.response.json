@@ -1,0 +1,8 @@
+{
+  "self": "http://localhost:4567/rest/api/latest/version/12676",
+  "id": "12676",
+  "name": "New Version",
+  "archived": false,
+  "released": false,
+  "projectId": 11411
+}

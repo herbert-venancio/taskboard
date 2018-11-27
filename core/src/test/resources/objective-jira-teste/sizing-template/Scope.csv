@@ -1,0 +1,52 @@
+,,,,,X,,X,X,,X,X,,X,X,,X,X,,X,X,,X,X,,X,X,,X,X,,X,X,X,X,,,,,X,,
+Phase,Demand,Feature,Type,Key,Assumptions,Accep. Criter.,MoSCoW,Include,Sized,Billing,Size,Cycle,Effort,Size,Cycle,Effort,Size,Cycle,Effort,Size,Cycle,Effort,Size,Cycle,Effort,Size,Cycle,Effort,,,,Size,Cycle,Effort,Cycle,Effort,Cycle,Effort,Cycle With Risk,Effort with Risk,
+Grand Total,6,13,,,,,,12,11,,9,54.6,42.0,8,109.2,84.0,8,130.0,100.0,8,161.2,124.0,13,93.6,72.0,10,50.7,39.0,13,101.4,76.0,11,44.2,34.0,42,32,786.5,603.0,943.8,723.6,
+Cluster Dimension,Liferay,,,,,,,,,,Feature Planning,,,UX,,,Frontend Development,,,Backend Development,,,Alpha Test,,,Dev Support,,,Feature Review,,,UAT Support,,,Other,,Total,Total,Total,Total,
+Phase,Demand,Feature / Task,Type,Key,Assumptions,Acceptance Criteria,MoSCoW,Include,Sized,Billing,Size,Cycle,Effort,Size,Cycle,Effort,Size,Cycle,Effort,Size,Cycle,Effort,Size,Cycle,Effort,Size,Cycle,Effort,Size,Cycle,Effort,Size,Cycle,Effort,Cycle,Effort,Cycle,Effort,Cycle with Risk,Effort with Risk,Qualified Name
+Phase 1,Demand 1,Feature 1,Feature,,bla bla bla,"- Linha 1
+- Linha 2
+
+- Linha 4, pois pulei a linha 3
+- Linha 5 com bold",Wont,TRUE,TRUE,Billable,XS,2.6,2.0,XS,5.2,4.0,XS,5.2,4.0,<NA>,0.0,0.0,XS,2.6,2.0,<NA>,0.00,0.00,M,10.4,8.0,<NA>,0.0,,0.0,,26.0,20.0,31.2,24.0,Demand 1-Feature 1
+Phase 1,Demand 1,Feature 3,Feature,,bla bla bla,"Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",Wont,FALSE,FALSE,Billable,<NA>,0.0,0.0,<NA>,0.0,0.0,,0.0,0.0,,0.0,0.0,XS,0.0,0.0,,0.00,0.00,XS,2.6,0.0,,0.0,0.0,0.0,,2.6,0.0,3.1,0.0,Demand 1-Feature 3
+Phase 1,Demand 1,Feature 4,Feature,,bla bla bla,,Should,TRUE,TRUE,Billable,M,10.4,8.0,L,31.2,24.0,L,41.6,32.0,XS,5.2,4.0,M,10.4,8.0,M,5.20,4.00,M,10.4,8.0,M,5.2,4.0,0.0,,119.6,92.0,143.5,110.4,Demand 1-Feature 4
+Phase 1,Demand 2,Feature 1,Feature,,bla bla bla,"Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",Must,TRUE,TRUE,Billable,S,5.2,4.0,<NA>,0.0,0.0,<NA>,0.0,0.0,S,10.4,8.0,S,5.2,4.0,S,2.60,2.00,S,5.2,4.0,S,2.6,2.0,0.0,,31.2,24.0,37.4,28.8,Demand 2-Feature 1
+Phase 1,Demand 2,Feature 3,Feature,,bla bla bla,,Must,TRUE,TRUE,Billable,S,5.2,4.0,S,10.4,8.0,S,10.4,8.0,S,10.4,8.0,S,5.2,4.0,S,2.60,2.00,S,5.2,4.0,S,2.6,2.0,0.0,,52.0,40.0,62.4,48.0,Demand 2-Feature 3
+Phase 1,Demand 2,Feature 4,Feature,,bla bla bla,"Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",Should,TRUE,TRUE,Billable,<NA>,0.0,0.0,<NA>,0.0,0.0,<NA>,0.0,0.0,<NA>,0.0,0.0,XS,2.6,2.0,<NA>,0.00,0.00,M,10.4,8.0,M,5.2,4.0,41.6,32.0,59.8,46.0,71.8,55.2,Demand 2-Feature 4
+Phase 1,Demand 2,Feature 1,Feature,,bla bla bla,,Must,TRUE,FALSE,Billable,,,,M,20.8,16.0,M,20.8,16.0,M,31.2,24.0,L,20.8,16.0,L,10.40,8.00,M,10.4,8.0,M,5.2,4.0,0.0,,119.6,92.0,143.5,110.4,Demand 2-Feature 1
+Phase 1,Demand 2,Feature 3,Feature,,bla bla bla,"Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",Could,TRUE,TRUE,Billable,M,10.4,8.0,S,10.4,8.0,S,10.4,8.0,M,31.2,24.0,S,5.2,4.0,S,2.60,2.00,S,5.2,4.0,S,2.6,2.0,0.0,,78.0,60.0,93.6,72.0,Demand 2-Feature 3
+Phase 1,Demand 2,Feature 4,Feature,,bla bla bla,,Must,TRUE,TRUE,Billable,XS,2.6,2.0,XS,5.2,4.0,S,10.4,8.0,<NA>,0.0,0.0,XS,2.6,2.0,S,2.60,2.00,S,5.2,4.0,S,2.6,2.0,0.0,,31.2,24.0,37.4,28.8,Demand 2-Feature 4
+Phase 2,Demand 3,Feature 1,Feature,,bla bla bla,"Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",Should,TRUE,TRUE,Billable,XS,2.6,2.0,XS,5.2,4.0,S,10.4,8.0,S,10.4,8.0,XS,2.6,2.0,XS,1.30,1.00,XS,2.6,2.0,XS,1.3,1.0,0.0,,36.4,28.0,43.7,33.6,Demand 3-Feature 1
+Phase 2,Demand 4,Feature 3,Feature,,bla bla bla,,Must,TRUE,TRUE,Billable,S,5.2,4.0,<NA>,0.0,0.0,<NA>,0.0,0.0,M,31.2,24.0,M,10.4,8.0,S,2.60,2.00,XS,2.6,2.0,XS,1.3,1.0,0.0,,53.3,41.0,64.0,49.2,Demand 4-Feature 3
+Phase 2,Demand 5,Feature 4,Feature,,bla bla bla,"Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",Could,TRUE,TRUE,Billable,<NA>,0.0,0.0,<NA>,0.0,0.0,<NA>,0.0,0.0,<NA>,0.0,0.0,S,5.2,4.0,L,10.40,8.00,L,20.8,16.0,L,10.4,8.0,0.0,,46.8,36.0,56.2,43.2,Demand 5-Feature 4
+Phase 1,Demand 6,Feature 1,Feature,,bla bla bla,,Should,TRUE,TRUE,Billable,M,10.4,8.0,M,20.8,16.0,M,20.8,16.0,M,31.2,24.0,L,20.8,16.0,L,10.40,8.00,M,10.4,8.0,M,5.2,4.0,0.0,,130.0,100.0,156.0,120.0,Demand 6-Feature 1
+,,,,,,,,,,Billable,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.00,0.00,,0.0,0.0,,0.0,0.0,0.0,,0.0,0.0,0.0,0.0,-
+,,,,,,,,,,Billable,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.00,0.00,,0.0,0.0,,0.0,0.0,0.0,,0.0,0.0,0.0,0.0,-
+,,,,,,,,,,Billable,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.00,0.00,,0.0,0.0,,0.0,0.0,0.0,,0.0,0.0,0.0,0.0,-
+,,,,,,,,,,Billable,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.00,0.00,,0.0,0.0,,0.0,0.0,0.0,,0.0,0.0,0.0,0.0,-
+,,,,,,,,,,Billable,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.00,0.00,,0.0,0.0,,0.0,0.0,0.0,,0.0,0.0,0.0,0.0,-
+,,,,,,,,,,Billable,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.00,0.00,,0.0,0.0,,0.0,0.0,0.0,,0.0,0.0,0.0,0.0,-
+,,,,,,,,,,Billable,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.00,0.00,,0.0,0.0,,0.0,0.0,0.0,,0.0,0.0,0.0,0.0,-
+,,,,,,,,,,Billable,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.00,0.00,,0.0,0.0,,0.0,0.0,0.0,,0.0,0.0,0.0,0.0,-
+,,,,,,,,,,Billable,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.00,0.00,,0.0,0.0,,0.0,0.0,0.0,,0.0,0.0,0.0,0.0,-
+,,,,,,,,,,Billable,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.00,0.00,,0.0,0.0,,0.0,0.0,0.0,,0.0,0.0,0.0,0.0,-
+,,,,,,,,,,Billable,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.00,0.00,,0.0,0.0,,0.0,0.0,0.0,,0.0,0.0,0.0,0.0,-
+,,,,,,,,,,Billable,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.00,0.00,,0.0,0.0,,0.0,0.0,0.0,,0.0,0.0,0.0,0.0,-
+,,,,,,,,,,Billable,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.00,0.00,,0.0,0.0,,0.0,0.0,0.0,,0.0,0.0,0.0,0.0,-
+,,,,,,,,,,Billable,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.00,0.00,,0.0,0.0,,0.0,0.0,0.0,,0.0,0.0,0.0,0.0,-
+,,,,,,,,,,Billable,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.00,0.00,,0.0,0.0,,0.0,0.0,0.0,,0.0,0.0,0.0,0.0,-
+,,,,,,,,,,Billable,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.00,0.00,,0.0,0.0,,0.0,0.0,0.0,,0.0,0.0,0.0,0.0,-
+,,,,,,,,,,Billable,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.00,0.00,,0.0,0.0,,0.0,0.0,0.0,,0.0,0.0,0.0,0.0,-
+,,,,,,,,,,Billable,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.00,0.00,,0.0,0.0,,0.0,0.0,0.0,,0.0,0.0,0.0,0.0,-
+,,,,,,,,,,Billable,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.00,0.00,,0.0,0.0,,0.0,0.0,0.0,,0.0,0.0,0.0,0.0,-
+,,,,,,,,,,Billable,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.00,0.00,,0.0,0.0,,0.0,0.0,0.0,,0.0,0.0,0.0,0.0,-
+,,,,,,,,,,Billable,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.00,0.00,,0.0,0.0,,0.0,0.0,0.0,,0.0,0.0,0.0,0.0,-
+,,,,,,,,,,Billable,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.00,0.00,,0.0,0.0,,0.0,0.0,0.0,,0.0,0.0,0.0,0.0,-
+,,,,,,,,,,Billable,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.00,0.00,,0.0,0.0,,0.0,0.0,0.0,,0.0,0.0,0.0,0.0,-
+,,,,,,,,,,Billable,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.00,0.00,,0.0,0.0,,0.0,0.0,0.0,,0.0,0.0,0.0,0.0,-
+,,,,,,,,,,Billable,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.00,0.00,,0.0,0.0,,0.0,0.0,0.0,,0.0,0.0,0.0,0.0,
+,,,,,,,,,,Billable,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.00,0.00,,0.0,0.0,,0.0,0.0,0.0,,0.0,0.0,0.0,0.0,
+,,,,,,,,,,Billable,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.00,0.00,,0.0,0.0,,0.0,0.0,0.0,,0.0,0.0,0.0,0.0,-
+,,,,,,,,,,Billable,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.00,0.00,,0.0,0.0,,0.0,0.0,0.0,,0.0,0.0,0.0,0.0,-
+,,,,,,,,,,,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.00,0.00,,0.0,0.0,,0.0,0.0,0.0,,0.0,0.0,0.0,0.0,-
+,,,,,,,,,,,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.0,0.0,,0.00,0.00,,0.0,0.0,,0.0,0.0,0.0,,0.0,0.0,0.0,0.0,-

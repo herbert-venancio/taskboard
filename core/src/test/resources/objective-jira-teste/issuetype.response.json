@@ -1,0 +1,155 @@
+[
+  {
+    "self": "http://localhost:4567/rest/api/latest/issuetype/4",
+    "id": "4",
+    "description": "A problem which impairs or prevents the functions of the product.",
+    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=11953&avatarType=issuetype",
+    "name": "Bug",
+    "subtask": false,
+    "avatarId": 11953
+  },
+  {
+    "self": "http://localhost:4567/rest/api/latest/issuetype/10604",
+    "id": "10604",
+    "description": "Taskboard",
+    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12254&avatarType=issuetype",
+    "name": "Feature Planning",
+    "subtask": true,
+    "avatarId": 12254
+  },
+  {
+    "self": "http://localhost:4567/rest/api/latest/issuetype/10605",
+    "id": "10605",
+    "description": "Taskboard",
+    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12255&avatarType=issuetype",
+    "name": "Frontend Development",
+    "subtask": true,
+    "avatarId": 12255
+  },
+  {
+    "self": "http://localhost:4567/rest/api/latest/issuetype/10607",
+    "id": "10607",
+    "description": "Taskboard",
+    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12257&avatarType=issuetype",
+    "name": "Tech Planning",
+    "subtask": true,
+    "avatarId": 12257
+  },
+  {
+    "self": "http://localhost:4567/rest/api/latest/issuetype/10610",
+    "id": "10610",
+    "description": "Taskboard",
+    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12261&avatarType=issuetype",
+    "name": "Backend Development",
+    "subtask": true,
+    "avatarId": 12261
+  },
+  {
+    "self": "http://localhost:4567/rest/api/latest/issuetype/10609",
+    "id": "10609",
+    "description": "Taskboard",
+    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12259&avatarType=issuetype",
+    "name": "UX",
+    "subtask": true,
+    "avatarId": 12259
+  },
+  {
+    "self": "http://localhost:4567/rest/api/latest/issuetype/12",
+    "id": "12",
+    "description": "Sub-task",
+    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=11958&avatarType=issuetype",
+    "name": "Sub-task",
+    "subtask": true,
+    "avatarId": 11958
+  },
+  {
+    "self": "http://localhost:4567/rest/api/latest/issuetype/10603",
+    "id": "10603",
+    "description": "Taskboard",
+    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12253&avatarType=issuetype",
+    "name": "Alpha Test",
+    "subtask": true,
+    "avatarId": 12253
+  },
+  {
+    "self": "http://localhost:4567/rest/api/latest/issuetype/10602",
+    "id": "10602",
+    "description": "Taskboard",
+    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12252&avatarType=issuetype",
+    "name": "Alpha Bug",
+    "subtask": true,
+    "avatarId": 12252
+  },
+  {
+    "self": "http://localhost:4567/rest/api/latest/issuetype/10606",
+    "id": "10606",
+    "description": "Taskboard",
+    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12256&avatarType=issuetype",
+    "name": "Feature Review",
+    "subtask": true,
+    "avatarId": 12256
+  },
+  {
+    "self": "http://localhost:4567/rest/api/latest/issuetype/10608",
+    "id": "10608",
+    "description": "Taskboard",
+    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12258&avatarType=issuetype",
+    "name": "UAT",
+    "subtask": true,
+    "avatarId": 12258
+  },
+  {
+    "self": "http://localhost:4567/rest/api/latest/issuetype/10611",
+    "id": "10611",
+    "description": "Taskboard",
+    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12260&avatarType=issuetype",
+    "name": "QA",
+    "subtask": true,
+    "avatarId": 12260
+  },
+  {
+    "self": "http://localhost:4567/rest/api/latest/issuetype/10600",
+    "id": "10600",
+    "description": "Taskboard",
+    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12250&avatarType=issuetype",
+    "name": "Demand",
+    "subtask": false,
+    "avatarId": 12250
+  },
+  {
+    "self": "http://localhost:4567/rest/api/latest/issuetype/10601",
+    "id": "10601",
+    "description": "Taskboard",
+    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12251&avatarType=issuetype",
+    "name": "Feature",
+    "subtask": false,
+    "avatarId": 12251
+  },
+  {
+    "self": "http://localhost:4567/rest/api/latest/issuetype/11",
+    "id": "11",
+    "description": "A task that needs to be done.",
+    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=12262&avatarType=issuetype",
+    "name": "Task",
+    "subtask": false,
+    "avatarId": 12262
+  },
+  {
+    "self": "http://localhost:4567/rest/api/latest/issuetype/10400",
+    "id": "10400",
+    "description": "",
+    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=11008&avatarType=issuetype",
+    "name": "Management",
+    "subtask": false,
+    "avatarId": 11008
+  },
+  {
+    "self": "http://localhost:4567/rest/api/latest/issuetype/10200",
+    "id": "10200",
+    "description": "",
+    "iconUrl": "http://localhost:4567/secure/viewavatar?size=xsmall&avatarId=10801&avatarType=issuetype",
+    "name": "Continuous",
+    "subtask": true,
+    "avatarId": 10801
+  }
+]
