@@ -5,6 +5,7 @@ import objective.taskboard.google.SpreadsheetUtils;
 import objective.taskboard.google.SpreadsheetsManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -16,6 +17,7 @@ public class SizingVersionProvider {
 
     private final SizingImportConfig importConfig;
     private final GoogleApiService googleApiService;
+    private final String SNAPSHOT = "-SNAPSHOT";
 
     @Autowired
     public SizingVersionProvider(
@@ -45,6 +47,7 @@ public class SizingVersionProvider {
 
         String version = String.valueOf(versionRow.get(versionColumnIndex));
         try {
+            version = version.replace(SNAPSHOT,"");
             return Double.parseDouble(version);
         } catch (NumberFormatException e) {
             return 0D;

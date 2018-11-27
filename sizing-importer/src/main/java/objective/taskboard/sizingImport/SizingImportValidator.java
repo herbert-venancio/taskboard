@@ -3,6 +3,7 @@ package objective.taskboard.sizingImport;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.TIMEBOX;
 import static objective.taskboard.sizingImport.SizingImportConfig.SHEET_SCOPE;
 import static org.apache.commons.lang3.StringUtils.join;
 
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,7 @@ public class SizingImportValidator {
     private final SizingImportConfig config;
     private final GoogleApiService googleApiService;
     private final SheetColumnDefinitionProviderScope columnDefinitionProvider;
+    private final TimeboxSkipper timeboxSkipper;
     private final CostValidator costValidator;
 
     @Autowired
@@ -35,12 +38,13 @@ public class SizingImportValidator {
             SizingImportConfig config, 
             GoogleApiService googleApiService, 
             SheetColumnDefinitionProviderScope columnDefinitionProvider,
-            CostValidator costValidator) {
-
+            CostValidator costValidator,
+            TimeboxSkipper timeboxSkipper) {
         this.config = config;
         this.googleApiService = googleApiService;
         this.columnDefinitionProvider = columnDefinitionProvider;
         this.costValidator = costValidator;
+        this.timeboxSkipper = timeboxSkipper;
     }
 
     public ValidationResult validate(String spreadsheetId) {
@@ -101,8 +105,11 @@ public class SizingImportValidator {
                 .map(StringUtils::trim)
                 .map(String::toLowerCase)
                 .collect(toList());
-        
+
+        Predicate<StaticMappingDefinition> filter = generateFilter(context.spreadsheetId);
+
         List<String> staticColumns = columnDefinitionProvider.getStaticMappings().stream()
+                .filter(filter)
                 .map(md -> md.getColumnDefinition().getName().toLowerCase())
                 .collect(toList());
         
@@ -114,10 +121,20 @@ public class SizingImportValidator {
             return invalidDataStartingRow();
 
         List<StaticColumnOccurrenceReport> occurenceReport = columnDefinitionProvider.getStaticMappings().stream()
+                .filter(filter)
                 .map(md -> new StaticColumnOccurrenceReport(md, spreadsheetHeaders))
                 .collect(toList());
         
         return validateStaticColumnsExistence(new ValidationContextWithStaticReport(context, headerRowIndex, occurenceReport));
+    }
+
+    private Predicate<StaticMappingDefinition> generateFilter(final String spreadsheetId) {
+        boolean shouldFilterTimebox = timeboxSkipper.shouldSkip(spreadsheetId);
+
+        Predicate<StaticMappingDefinition> filter = shouldFilterTimebox ?
+            md -> !TIMEBOX.equals(md.getColumnDefinition()) : md -> true;
+
+        return filter;
     }
 
     private ValidationResult invalidDataStartingRow() {

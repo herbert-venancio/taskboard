@@ -3,10 +3,7 @@ package objective.taskboard.sizingImport;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.DEMAND;
-import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.FEATURE;
-import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.INCLUDE;
-import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.PHASE;
+import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.*;
 import static objective.taskboard.sizingImport.SizingImportConfig.SHEET_COST;
 import static objective.taskboard.sizingImport.SizingImportConfig.SHEET_SCOPE;
 import static org.junit.Assert.assertEquals;
@@ -33,17 +30,19 @@ public class SizingImportValidatorTest {
     private SizingImportConfig config = new SizingImportConfig();
     private GoogleApiService googleApiService= mock(GoogleApiService.class);
     private SpreadsheetsManager spreadsheetsManager = mock(SpreadsheetsManager.class);
+    private TimeboxSkipper timeboxSkipper = mock(TimeboxSkipper.class);
     private SheetColumnDefinitionProviderScope scopeColumnProvider = mock(SheetColumnDefinitionProviderScope.class);
     private CostValidator costValidator = mock(CostValidator.class);
     private List<List<Object>> sheetScopeData;
 
-    private SizingImportValidator subject = new SizingImportValidator(config, googleApiService, scopeColumnProvider, costValidator);
+    private SizingImportValidator subject = new SizingImportValidator(config, googleApiService, scopeColumnProvider, costValidator, timeboxSkipper);
     
     @Before
     public void setup() {
         config.setTabHeadersRowNumber(1);
         config.setDataStartingRowNumber(2);
 
+        when(timeboxSkipper.shouldSkip(any())).thenReturn(false);
         when(googleApiService.buildSpreadsheetsManager()).thenReturn(spreadsheetsManager);
 
         sheetScopeData = asList(
@@ -54,11 +53,13 @@ public class SizingImportValidatorTest {
         when(spreadsheetsManager.getSheetsTitles(SPREADSHEET_ID)).thenReturn(asList(SHEET_SCOPE, "Timeline", SHEET_COST));
         when(spreadsheetsManager.readRange(SPREADSHEET_ID, format("'%s'", SHEET_SCOPE))).thenAnswer((i) -> sheetScopeData);
 
-        when(scopeColumnProvider.getStaticMappings()).thenReturn(asList(
+        when(scopeColumnProvider.getStaticMappings())
+            .thenReturn(asList(
                 new StaticMappingDefinition(PHASE,   "A"),
                 new StaticMappingDefinition(DEMAND,  "B"),
                 new StaticMappingDefinition(FEATURE, "C"),
-                new StaticMappingDefinition(INCLUDE, "D")));
+                new StaticMappingDefinition(INCLUDE, "D"))
+            );
 
         when(costValidator.validate(any())).thenReturn(ValidationResult.success());
     }
@@ -204,4 +205,77 @@ public class SizingImportValidatorTest {
         assertEquals("Invalid Cost sheet", result.errorMessage);
     }
 
+    @Test public void shouldImportTimeboxLineWithSuccess(){
+
+        when(scopeColumnProvider.getStaticMappings())
+            .thenReturn(asList(
+                new StaticMappingDefinition(PHASE,   "A"),
+                new StaticMappingDefinition(DEMAND,  "B"),
+                new StaticMappingDefinition(FEATURE, "C"),
+                new StaticMappingDefinition(TYPE, "D"),
+                new StaticMappingDefinition(INCLUDE, "E"),
+                new StaticMappingDefinition(TIMEBOX, "H")
+            )
+        );
+
+        sheetScopeData = asList(
+            asList("Phase", "Demand", "Feature",         "Type",    "Include", "Dev", "UX", "Timebox"),
+            asList("P1",    "MVP",    "Feature One",     "Feature", "true",    "M",   "L",  ""),
+            asList("P1",    "MVP",    "Task One",        "Task",    "true",    "S",   "L",  ""),
+            asList("P1",    "MVP",    "Timebox One",     "Timebox", "true",    "",    "",   "4"));
+
+        ValidationResult result = subject.validate(SPREADSHEET_ID);
+
+        assertTrue(result.success);
+    }
+
+    @Test public void importShouldFail_whenImportTimeboxHeaderIsNotFound(){
+        when(scopeColumnProvider.getStaticMappings())
+            .thenReturn(asList(
+                new StaticMappingDefinition(PHASE,   "A"),
+                new StaticMappingDefinition(DEMAND,  "B"),
+                new StaticMappingDefinition(FEATURE, "C"),
+                new StaticMappingDefinition(TYPE, "D"),
+                new StaticMappingDefinition(INCLUDE, "E"),
+                new StaticMappingDefinition(TIMEBOX, "H")
+            )
+        );
+
+        sheetScopeData = asList(
+            asList("Phase", "Demand", "Feature",         "Type",    "Include", "Dev", "UX", ""),
+            asList("P1",    "MVP",    "Feature One",     "Feature", "true",    "M",   "L",  ""),
+            asList("P1",    "MVP",    "Task One",        "Task",    "true",    "S",   "L",  ""),
+            asList("P1",    "MVP",    "Timebox One",     "Timebox", "true",    "",    "",   "4")
+        );
+
+        ValidationResult result = subject.validate(SPREADSHEET_ID);
+
+        assertTrue(result.failed());
+        assertEquals("Invalid spreadsheet format: Missing required columns in “Scope“ sheet (row 1).", result.errorMessage);
+        assertEquals("“Timebox” column should be placed at position “H”.", result.errorDetail);
+    }
+
+    @Test public void shouldValidateOk_skippingTimeboxHeader(){
+        when(timeboxSkipper.shouldSkip(any())).thenReturn(true);
+
+        when(scopeColumnProvider.getStaticMappings())
+            .thenReturn(asList(
+                new StaticMappingDefinition(PHASE,   "A"),
+                new StaticMappingDefinition(DEMAND,  "B"),
+                new StaticMappingDefinition(FEATURE, "C"),
+                new StaticMappingDefinition(TYPE, "D"),
+                new StaticMappingDefinition(INCLUDE, "E"),
+                new StaticMappingDefinition(TIMEBOX, "H")
+            )
+        );
+        sheetScopeData = asList(
+            asList("Phase", "Demand", "Feature",         "Type",    "Include", "Dev", "UX"),
+            asList("P1",    "MVP",    "Feature One",     "Feature", "true",    "M",   "L"),
+            asList("P1",    "MVP",    "Task One",        "Task",    "true",    "S",   "L")
+        );
+
+        ValidationResult result = subject.validate(SPREADSHEET_ID);
+
+        assertTrue(result.success);
+    }
 }
