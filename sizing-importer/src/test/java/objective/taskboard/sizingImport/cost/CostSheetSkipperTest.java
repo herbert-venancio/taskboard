@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
+import objective.taskboard.sizingImport.SizingVersionProvider;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -17,7 +18,6 @@ import objective.taskboard.google.GoogleApiService;
 import objective.taskboard.google.SpreadsheetsManager;
 import objective.taskboard.sizingImport.SizingImportConfig;
 import objective.taskboard.sizingImport.SizingImportConfig.IndirectCosts;
-import objective.taskboard.sizingImport.cost.CostSheetSkipper;
 
 public class CostSheetSkipperTest {
 
@@ -25,10 +25,11 @@ public class CostSheetSkipperTest {
 
     private final SizingImportConfig importConfig = new SizingImportConfig();
     private final GoogleApiService googleApiService = mock(GoogleApiService.class);
+    private final SizingVersionProvider versionProvider = mock(SizingVersionProvider.class);
     private final SpreadsheetsManager spreadsheetsManager = mock(SpreadsheetsManager.class);
     private List<List<Object>> sheetSizingMetaData;
 
-    private CostSheetSkipper subject = new CostSheetSkipper(importConfig, googleApiService);
+    private CostSheetSkipper subject = new CostSheetSkipper(importConfig, versionProvider);
 
     @Before
     public void before() {
@@ -43,10 +44,13 @@ public class CostSheetSkipperTest {
 
         when(spreadsheetsManager.getSheetsTitles(SPREADSHEET_ID)).thenReturn(asList(SHEET_SIZING_METADATA));
         when(spreadsheetsManager.readRange(SPREADSHEET_ID, format("'%s'", SHEET_SIZING_METADATA))).thenAnswer((i) -> sheetSizingMetaData);
+        when(versionProvider.get(SPREADSHEET_ID)).thenReturn(4.0);
     }
 
     @Test
     public void shouldReturnFalseWhenIndirectCostsPropertiesAreConfiguredAndSpreadsheetVersionIsValid() {
+        when(versionProvider.get(SPREADSHEET_ID)).thenReturn(4.1);
+
         assertFalse(subject.shouldSkip(SPREADSHEET_ID));
     }
 
