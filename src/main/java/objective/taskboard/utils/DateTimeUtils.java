@@ -147,10 +147,6 @@ public class DateTimeUtils {
         }
     }
 
-    public static long parseDateStringAsMilliseconds(String date) {
-        return parseStringToDate(date).getTime();
-    }
-
     public static Date toDate(LocalDate finalProjectDate, ZoneId zone) {
         return Date.from(finalProjectDate.atStartOfDay().atZone(zone).toInstant());
     }

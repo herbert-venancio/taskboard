@@ -10,5 +10,6 @@ CREATE TABLE change_request (
 );
 
 INSERT INTO change_request(project_id, `date`, name, budget_increase, is_baseline)
-     SELECT p.id, Coalesce(p.start_date, NOW()), 'Baseline', 0, TRUE
-       FROM project_filter_configuration as p;
+     SELECT p.id, p.start_date, 'Baseline', 0, TRUE
+       FROM project_filter_configuration as p
+            WHERE p.start_date IS NOT NULL;

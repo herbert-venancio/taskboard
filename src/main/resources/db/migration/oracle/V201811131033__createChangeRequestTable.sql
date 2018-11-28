@@ -10,5 +10,6 @@ CREATE TABLE change_request (
 );
 
 INSERT INTO change_request(id, project_id, "DATE", name, budget_increase, is_baseline)
-     (SELECT HIBERNATE_SEQUENCE.NEXTVAL, p.id, Coalesce(p.start_date, (SELECT sysdate dt FROM DUAL)), 'Baseline', 0, 1
-       FROM project_filter_configuration p);
+     (SELECT HIBERNATE_SEQUENCE.NEXTVAL, p.id, p.start_date, 'Baseline', 0, 1
+       FROM project_filter_configuration p
+            WHERE p.start_date IS NOT NULL) ;

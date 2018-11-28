@@ -82,8 +82,10 @@ public class ControllerTestUtils {
 
         public AssertResponse bodyAsJson(String expectedBodyJson) {
             try {
-                ObjectWriter writer = new ObjectMapper().writerWithDefaultPrettyPrinter();
-                Object expectedBody = new ObjectMapper().readValue(expectedBodyJson, Object.class);
+                ObjectMapper mapper = new ObjectMapper();
+                mapper.registerModule(new TaskboardJacksonModule());
+                ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
+                Object expectedBody = mapper.readValue(expectedBodyJson, Object.class);
 
                 String bodyJsonFormatted = writer.writeValueAsString(response.getBody());
                 String expectedBodyJsonFormatted = writer.writeValueAsString(expectedBody);
