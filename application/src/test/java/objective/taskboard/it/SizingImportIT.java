@@ -32,7 +32,7 @@ public class SizingImportIT extends AuthenticatedIntegrationTest {
         sizing
             .waitForStepThree()
             .assertScopeTabIsActive()
-            .assertHeader("Phase | Demand | Feature / Task | Type | Acceptance Criteria | Feature Planning | UX | Development | " +
+            .assertHeader("Phase | Demand | Feature | Type | Accep. Criter. | Feature Planning | UX | Development | " +
                     "Tech Planning | Alpha Test | QA Support | Feature Review | T-Shirt Size")
             .selectCostTab()
             .assertHeader("Indirect Costs | Effort")

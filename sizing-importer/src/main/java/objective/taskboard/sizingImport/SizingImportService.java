@@ -2,9 +2,11 @@ package objective.taskboard.sizingImport;
 
 import static java.lang.String.format;
 import static objective.taskboard.sizingImport.SizingImportConfig.SHEET_SCOPE;
+import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.TIMEBOX;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,6 +23,7 @@ import objective.taskboard.sizingImport.cost.CostSheetParser;
 class SizingImportService {
 
     private static final int PREVIEW_LINES_LIMIT = 5;
+    public static final int TYPE_INDEX = 3;
 
     private final GoogleApiService googleApiService;
     private final ScopeSheetParser scopeSheetParser;
@@ -29,17 +32,19 @@ class SizingImportService {
     private final SizingImportValidator importValidator;
     private final SizingImporter importer;
     private final CostSheetSkipper costSheetSkipper;
+    private final TimeboxSkipper timeboxSkipper;
     
     @Autowired
     public SizingImportService(
-            GoogleApiService googleApiService, 
-            ScopeSheetParser scopeSheetParser,
-            CostSheetParser costSheetParser,
-            SheetColumnDefinitionProviderScope columnDefinitionProviderScope,
-            SizingImportValidator importValidator,
-            SizingImporter importer,
-            CostSheetSkipper costSheetSkipper) {
-
+        GoogleApiService googleApiService,
+        ScopeSheetParser scopeSheetParser,
+        CostSheetParser costSheetParser,
+        SheetColumnDefinitionProviderScope columnDefinitionProviderScope,
+        SizingImportValidator importValidator,
+        SizingImporter importer,
+        CostSheetSkipper costSheetSkipper,
+        TimeboxSkipper timeboxSkipper
+    ) {
         this.googleApiService = googleApiService;
         this.scopeSheetParser = scopeSheetParser;
         this.costSheetParser = costSheetParser;
@@ -47,6 +52,7 @@ class SizingImportService {
         this.importValidator = importValidator;
         this.importer = importer;
         this.costSheetSkipper = costSheetSkipper;
+        this.timeboxSkipper = timeboxSkipper;
     }
 
     public ValidationResult validateSpreadsheet(String spreadsheetId) {
@@ -93,17 +99,40 @@ class SizingImportService {
     }
 
     private List<SizingImportLineScope> parseScopeSheet(
-            String projectKey, 
-            String spreadsheetId, 
-            List<SheetColumnMapping> columnsMapping, 
-            SpreadsheetsManager spreadsheetsManager) {
-
+        String projectKey,
+        String spreadsheetId,
+        List<SheetColumnMapping> columnsMapping,
+        SpreadsheetsManager spreadsheetsManager
+    ) {
         List<List<Object>> rows = spreadsheetsManager.readRange(spreadsheetId, format("'%s'", SHEET_SCOPE));
         SheetDefinition sheetDefinition = getSheetDefinition(projectKey);
+
+        filterTimeBoxBySpreadsheetVersion(spreadsheetId, rows, sheetDefinition);
+
         return scopeSheetParser.parse(rows, sheetDefinition, columnsMapping);
     }
 
     private List<SizingImportLineCost> parseCostSheet(String spreadsheetId) {
         return costSheetParser.parse(spreadsheetId);
+    }
+
+    private void filterTimeBoxBySpreadsheetVersion(
+        final String spreadsheetId,
+        final List<List<Object>> rows,
+        final SheetDefinition sheetDefinition
+    ) {
+        boolean shouldSkipTimebox = timeboxSkipper.shouldSkip(spreadsheetId);
+
+        Predicate<StaticMappingDefinition> columnRemoverFilter =
+            shouldSkipTimebox ? md -> TIMEBOX.getName().equalsIgnoreCase(md.getColumnDefinition().getName()) : md -> false;
+
+        sheetDefinition
+            .getStaticColumns()
+            .removeIf(columnRemoverFilter);
+
+        Predicate<List<Object>> rowRemoverFilter =
+            shouldSkipTimebox ? f -> f.size() > 0 && TIMEBOX.getName().equalsIgnoreCase((String) f.get(TYPE_INDEX)) : f -> false;
+
+        rows.removeIf(rowRemoverFilter);
     }
 }
