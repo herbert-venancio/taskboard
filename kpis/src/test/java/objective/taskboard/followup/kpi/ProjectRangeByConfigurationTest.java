@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
 import java.util.Optional;
 
 import org.apache.commons.lang3.Range;
@@ -75,8 +74,8 @@ public class ProjectRangeByConfigurationTest {
         return new ProjectMocker();
     }
     
-    private Range<ZonedDateTime> getRange(String startRange, String endRange) {
-        return RangeUtils.between(parseDateTime(startRange), parseDateTime(endRange));
+    private Range<LocalDate> getRange(String startRange, String endRange) {
+        return RangeUtils.between(LocalDate.parse(startRange), LocalDate.parse(endRange));
     }
     
     private class ProjectMocker {

@@ -1,7 +1,7 @@
 package objective.taskboard.followup.kpi.touchTime;
 
+import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -25,11 +25,11 @@ public class TouchTimeFilter implements Predicate<IssueKpi>{
 
     @Override
     public boolean test(IssueKpi issue) {
-        Optional<Range<ZonedDateTime>> opRange = getIssueDateRange(issue);
+        Optional<Range<LocalDate>> opRange = getIssueDateRange(issue);
         return opRange.map(issueRange -> this.rangeCalculationStrategy.isWithinRange(issueRange)).orElse(false);
     }
 
-    private Optional<Range<ZonedDateTime>> getIssueDateRange(IssueKpi issue) {
+    private Optional<Range<LocalDate>> getIssueDateRange(IssueKpi issue) {
         return issue.getDateRangeBasedOnProgressinsStatuses(clock, timezone);
     }
     
