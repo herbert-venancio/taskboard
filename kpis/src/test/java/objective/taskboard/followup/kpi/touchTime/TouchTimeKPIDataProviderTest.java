@@ -171,7 +171,7 @@ public class TouchTimeKPIDataProviderTest {
         }
 
         private void mockIssueKpiService() {
-            KPIEnvironmentBuilder builder = new KPIEnvironmentBuilder(kpiProperties);
+            KPIEnvironmentBuilder builder = new KPIEnvironmentBuilder().withKpiProperties(kpiProperties);
             statuses.forEach(s -> builder.addStatus(s.id, s.name, s.isProgressing));
             for (int i = 0; i < subtaskTypes.size(); i++) {
                 String type = subtaskTypes.get(i);

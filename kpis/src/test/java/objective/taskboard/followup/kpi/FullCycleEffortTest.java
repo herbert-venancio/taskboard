@@ -67,7 +67,7 @@ public class FullCycleEffortTest {
     
     @Before
     public void setupEnviroment() {
-        builder = new KPIEnvironmentBuilder(kpiProperties);
+        builder = new KPIEnvironmentBuilder().withKpiProperties(kpiProperties);
         configureTypes();
         configureStatuses();
         configureHierarchy();

@@ -3,9 +3,11 @@ package objective.taskboard.followup.kpi.enviroment;
 import static java.util.Arrays.asList;
 import static objective.taskboard.followup.kpi.KpiLevel.DEMAND;
 import static objective.taskboard.followup.kpi.KpiLevel.FEATURES;
+import static objective.taskboard.followup.kpi.KpiLevel.SUBTASKS;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,6 +31,7 @@ import objective.taskboard.followup.kpi.properties.KPIProperties;
 import objective.taskboard.followup.kpi.transformer.IssueKpiDataItemAdapter;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.client.JiraIssueTypeDto;
+import objective.taskboard.jira.properties.StatusConfiguration.StatusPriorityOrder;
 import objective.taskboard.utils.DateTimeUtils;
 
 public class KPIEnvironmentBuilder {
@@ -45,22 +48,24 @@ public class KPIEnvironmentBuilder {
     private Optional<IssueKpiBuilder> currentIssue = Optional.empty();
 
     private KPIProperties kpiProperties = Mockito.mock(KPIProperties.class);
+    private List<String> progressingStatuses;
+    
+    private StatusPriorityOrder priorityOrder = new StatusPriorityOrder();
+    
     private MetadataService metadataService = Mockito.mock(MetadataService.class);
     private IssueTransitionService transitionService = Mockito.mock(IssueTransitionService.class);
 
     public KPIEnvironmentBuilder() {}
 
-    public KPIEnvironmentBuilder(KPIProperties kpiProperties, IssueTransitionService transitionService) {
+    
+    public KPIEnvironmentBuilder withIssueTransitionService(IssueTransitionService transitionService) {
         this.transitionService = transitionService;
-        this.kpiProperties = kpiProperties;
+        return this;
     }
 
-    public KPIEnvironmentBuilder(IssueTransitionService transitionService) {
-        this.transitionService = transitionService;
-    }
-
-    public KPIEnvironmentBuilder(KPIProperties kpiProperties) {
+    public KPIEnvironmentBuilder withKpiProperties(KPIProperties kpiProperties) {
         this.kpiProperties = kpiProperties;
+        return this;
     }
 
     public KPIEnvironmentBuilder addFeatureType(Long id, String name) {
@@ -110,10 +115,15 @@ public class KPIEnvironmentBuilder {
         IssueTypeChildrenStatusHierarchy demandHierarchy = new IssueTypeChildrenStatusHierarchy();
         demandHierarchy.setHierarchies(getHierachies(DEMAND));
         Mockito.when(kpiProperties.getDemandHierarchy()).thenReturn(demandHierarchy);
+        
+        List<String> configuredProgresingStatuses = getConfiguredProgresingStatsues();
+        Mockito.when(kpiProperties.getProgressingStatuses()).thenReturn(configuredProgresingStatuses);
+    }
 
-        List<String> progressingStatuses = statuses.values().stream().filter(s -> s.isProgressingStatus).map(s -> s.name).collect(Collectors.toList());
-        Mockito.when(kpiProperties.getProgressingStatuses()).thenReturn(progressingStatuses);
-
+    private List<String> getConfiguredProgresingStatsues() {
+        if (progressingStatuses != null)
+            return progressingStatuses;
+        return statuses.values().stream().filter(s -> s.isProgressingStatus).map(s -> s.name).collect(Collectors.toList());
     }
 
     private List<Hierarchy> getHierachies(KpiLevel level) {
@@ -268,8 +278,17 @@ public class KPIEnvironmentBuilder {
     }
 
     public List<IssueKpi> buildAllIssuesAsKpi() {
-
         return this.issues.values().stream().map(b -> b.build()).collect(Collectors.toList());
+    }
+    
+    public Map<KpiLevel,List<IssueKpi>> buildMapOfIssuesKpi() {
+        List<IssueKpi> issuesKpi = this.issues.values().stream().map(b -> b.build()).collect(Collectors.toList());
+        Map<KpiLevel,List<IssueKpi>> issuesByLevel = new EnumMap<>(KpiLevel.class);
+        for (KpiLevel level : KpiLevel.values()) {
+            issuesByLevel.put(level, issuesKpi.stream().filter(i -> i.getLevel() == level).collect(Collectors.toList()));
+        }
+        
+        return issuesByLevel;
     }
 
     public List<IssueKpiDataItemAdapter> buildAllIssuesAsAdapterUnless(String... issuesKeys) {
@@ -283,6 +302,22 @@ public class KPIEnvironmentBuilder {
     private int hoursToSeconds(double hours) {
         final double hoursInMillis = hours * DateTimeUtils.HOUR_IN_SECONDS;
         return new Double(hoursInMillis).intValue();
+    }
+
+    public KPIEnvironmentBuilder addStatusPriorityOrder(KpiLevel level, String... statuses) {
+        if(level.equals(DEMAND))
+            this.priorityOrder.setDemands(statuses);
+        if(level.equals(FEATURES))
+            this.priorityOrder.setTasks(statuses);
+        if(level.equals(SUBTASKS))
+            this.priorityOrder.setSubtasks(statuses);
+        
+        return this;
+    }
+
+    public KPIEnvironmentBuilder mockProgressingStatuses(List<String> statuses) {
+        this.progressingStatuses = statuses;
+        return this;
     }
 
 }

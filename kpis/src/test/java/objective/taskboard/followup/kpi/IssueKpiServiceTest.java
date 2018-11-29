@@ -7,7 +7,6 @@ import static objective.taskboard.followup.kpi.KpiLevel.FEATURES;
 import static objective.taskboard.followup.kpi.KpiLevel.SUBTASKS;
 import static objective.taskboard.followup.kpi.KpiLevel.UNMAPPED;
 import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
-import static objective.taskboard.utils.DateTimeUtils.parseStringToDate;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
@@ -29,18 +28,20 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import objective.taskboard.data.Issue;
-import objective.taskboard.data.Worklog;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.AnalyticsTransitionsDataRow;
 import objective.taskboard.followup.AnalyticsTransitionsDataSet;
 import objective.taskboard.followup.IssueTransitionService;
 import objective.taskboard.followup.kpi.enviroment.KPIEnvironmentBuilder;
+import objective.taskboard.followup.kpi.properties.IssueTypeChildrenStatusHierarchy;
+import objective.taskboard.followup.kpi.properties.IssueTypeChildrenStatusHierarchy.Hierarchy;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
 import objective.taskboard.followup.kpi.transformer.AnalyticDataRowAdapter;
 import objective.taskboard.followup.kpi.transformer.IssueKpiDataItemAdapterFactory;
 import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.properties.JiraProperties;
+import objective.taskboard.testUtils.DateTimeUtilSupport;
 import objective.taskboard.utils.Clock;
 import objective.taskboard.utils.DateTimeUtils;
 
@@ -79,6 +80,16 @@ public class IssueKpiServiceTest {
         JiraProperties.Followup followup = Mockito.mock(JiraProperties.Followup.class);
         when(jiraProperties.getFollowup()).thenReturn(followup);
         when(followup.getStatusExcludedFromFollowup()).thenReturn(Arrays.asList(STATUS_OPEN));
+        
+        when(kpiProperties.getProgressingStatuses()).thenReturn(Arrays.asList("Doing"));
+        
+        Hierarchy hierarch = new Hierarchy();
+        hierarch.setFatherStatus("Doing");
+        hierarch.setChildrenTypeId(asList(2l));
+        
+        IssueTypeChildrenStatusHierarchy subtasksHierarchy = new IssueTypeChildrenStatusHierarchy();
+        subtasksHierarchy.setHierarchies(Arrays.asList(hierarch));
+        Mockito.when(kpiProperties.getFeaturesHierarchy()).thenReturn(subtasksHierarchy);
         
      }
 
@@ -119,11 +130,20 @@ public class IssueKpiServiceTest {
     
     @Test
     public void getIssues_currentState() {
-        Worklog worklog = new Worklog("a.developer", parseStringToDate("2020-01-03"), 300);
+        configureProject("2020-01-04","2020-01-10");
+        Mockito.when(clock.now()).thenReturn(DateTimeUtilSupport.getInstant("2020-01-04",ZONE_ID));
         
-        configureProject("2020-01-01","2020-01-04");
-        configureClock("2020-01-04");
-        KPIEnvironmentBuilder builder = simpleEnvironment();
+        KPIEnvironmentBuilder builder = new KPIEnvironmentBuilder();
+        builder.withKpiProperties(kpiProperties)
+                .withIssueTransitionService(transitionService);
+        
+        builder.addFeatureType(1l, "Dev")
+                .addSubtaskType(2l, "Alpha");
+        
+        builder.addStatus(1l, "Open", false)
+                .addStatus(2l, "To Do" , false)
+                .addStatus(3l, "Doing", true)
+                .addStatus(4l, "Done", false);
                 
         builder.withMockingIssue("I-1", "Dev", KpiLevel.FEATURES)
                 .setCurrentStatusToCurrentIssue("Doing")
@@ -141,7 +161,7 @@ public class IssueKpiServiceTest {
                 .addTransition("To Do", "2020-01-02")
                 .addTransition("Doing", "2020-01-03")
                 .addTransition("Done", "2020-01-04")
-                .addWorklog(worklog);
+                .addWorklog("2020-01-03",300);
         
         List<Issue> issues = builder.mockAllIssues();
         when(issueBufferService.getAllIssues()).thenReturn(issues);
@@ -316,7 +336,9 @@ public class IssueKpiServiceTest {
     }
 
     private KPIEnvironmentBuilder simpleEnvironment() {
-        KPIEnvironmentBuilder builder = new KPIEnvironmentBuilder(kpiProperties,transitionService);
+        KPIEnvironmentBuilder builder = new KPIEnvironmentBuilder()
+                                            .withKpiProperties(kpiProperties)
+                                            .withIssueTransitionService(transitionService);
         builder.addFeatureType(1l, "Dev")
                 .addSubtaskType(2l, "Alpha");
         
