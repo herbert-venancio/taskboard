@@ -128,14 +128,14 @@ class ChartBuilderBase {
         this.options.chart.renderTo = divID;
         this.options.credits = false;
         this.options.chart.events = {
-                selection: function (event) {
-                    if (event.resetSelection) {
-                        this.resetZoomButton = this.resetZoomButton.destroy(); // hide reset button
-                        event.preventDefault(); // prevent zoom out
-                        this.yAxis[0].setExtremes(null, null); // reset Y
-                        dcDateRangeChartsService.applySelection(this.title.textStr); // reset X to timeline  selection
-                    }
+            selection: function (event) {
+                if (event.resetSelection) {
+                    this.resetZoomButton = this.resetZoomButton.destroy(); // hide reset button
+                    event.preventDefault(); // prevent zoom out
+                    this.yAxis[0].setExtremes(null, null); // reset Y
+                    dcDateRangeChartsService.applySelection(this.title.textStr); // reset X to timeline  selection
                 }
+            }
         };
     }
 
@@ -167,8 +167,7 @@ class ChartBuilderBase {
 
 class WeeklyChartBuilder extends ChartBuilderBase {
     constructor (divID) {
-        
-    	super(divID);
+        super(divID);
         const oneWeekInMillis = 7 * 24 * 3600 * 1000;
         this.options.xAxis.tickInterval = oneWeekInMillis;
         this.options.xAxis.labels = {
@@ -176,7 +175,6 @@ class WeeklyChartBuilder extends ChartBuilderBase {
                 return Highcharts.dateFormat('%e %b %y', this.value);
             }
         };
-        
         this.options.tooltip.xDateFormat = 'Week from %A, %b %e, %Y';
     }
 }
@@ -192,17 +190,17 @@ class ProgressChartBuilder extends ChartBuilderBase {
         this.options.tooltip.footerFormat = null;
         this.options.tooltip.pointFormat = '<b>{point.x:%d/%m/%Y}: {point.y:.1f}%</b>';
         this.options.plotOptions = {
-                spline : {
-                    pointStart: startDate,
-                    pointEnd: endDate
-                }
-        }
+            spline : {
+                pointStart: startDate,
+                pointEnd: endDate
+            }
+        };
     }
 }
 
 class CFDChartBuilder extends ChartBuilderBase {
     constructor (divID) {
-        super(divID)
+        super(divID);
         Highcharts.merge(true, this.options, this._plotOptions);
         Highcharts.merge(true, this.options, this._tooltipOptions);
         Highcharts.merge(true, this.options, this._xAxisOptions);
@@ -218,12 +216,14 @@ class CFDChartBuilder extends ChartBuilderBase {
                     }
                 }
             }
-        }
+        };
     }
 
     get _tooltipOptions () {
         return {
-            xDateFormat: '%b %e, %Y'
+            tooltip: {
+                xDateFormat: '%b %e, %Y'
+            }
         };
     }
 
@@ -246,10 +246,10 @@ class CFDChartBuilder extends ChartBuilderBase {
                     return;
                 }
                 const baseStackSeries = event.target.series[0];
-                const xMinPoint = baseStackSeries.points.find((p) => p.x === xMin)
-                const xMaxPoint = baseStackSeries.points.find((p) => p.x === xMax)
+                const xMinPoint = baseStackSeries.points.find((p) => p.x === xMin);
+                const xMaxPoint = baseStackSeries.points.find((p) => p.x === xMax);
                 if (xMinPoint === undefined || xMaxPoint === undefined){
-                	return;                	
+                    return;
                 }
                 const yMin = xMinPoint.y;
                 const yMax = xMaxPoint.stackTotal;
@@ -272,6 +272,59 @@ class CFDChartBuilder extends ChartBuilderBase {
             yAxis: {
                 endOnTick: false,
                 startOnTick: false
+            }
+        };
+    }
+}
+
+class TouchTimeChartBuilder extends ChartBuilderBase {
+    constructor (divID) {
+        super(divID);
+        Highcharts.merge(true, this.options, this._chartOptions);
+        Highcharts.merge(true, this.options, this._tooltipOptions);
+        Highcharts.merge(true, this.options, this._xAxisOptions);        
+    }
+
+    withCategories (categories) {
+        this.options.xAxis.categories = categories;
+        return this;
+    }
+
+    get _chartOptions () {
+        return {
+            chart: {
+                events: {
+                    selection: undefined
+                },
+                zoomType: 'xy'
+            }
+        };
+    }
+
+    get _tooltipOptions () {
+        return {
+            tooltip: {
+                footerFormat: '<span style="font-style: italic; font-weight: bold; font-size: 1.1em;">Total: {point.total:.2f} (h)</span>',
+                valueSuffix: ' (h)'
+            }
+        };
+    }
+
+    get _xAxisOptions () {
+        return {
+            xAxis: {
+                type: 'category'
+            }
+        };
+    }
+
+    get _yAxisOptions () {
+        return {
+            yAxis: {
+                type: 'category',
+                title: {
+                    text: 'Effort (h)'
+                }
             }
         };
     }

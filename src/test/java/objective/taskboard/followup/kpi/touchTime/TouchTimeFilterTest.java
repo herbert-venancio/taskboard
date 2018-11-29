@@ -1,4 +1,4 @@
-package objective.taskboard.followup.kpi;
+package objective.taskboard.followup.kpi.touchTime;
 
 import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
 import static org.junit.Assert.assertFalse;
@@ -14,7 +14,10 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import objective.taskboard.domain.ProjectFilterConfiguration;
+import objective.taskboard.followup.kpi.IssueKpi;
+import objective.taskboard.followup.kpi.ProjectRangeByConfiguration;
 import objective.taskboard.followup.kpi.enviroment.KPIEnvironmentBuilder;
+import objective.taskboard.followup.kpi.touchTime.TouchTimeFilter;
 import objective.taskboard.testUtils.FixedClock;
 import objective.taskboard.utils.DateTimeUtils;
 

@@ -41,20 +41,20 @@ public class KPIEnvironmentBuilder {
     private IssueTypeKpi demandType = new IssueTypeKpi(1l, "Demand");
 
     private Map<KpiLevel,Map<String,Hierarchy>> hierarchies = new LinkedHashMap<>();
-    
+
     private Optional<IssueKpiBuilder> currentIssue = Optional.empty();
-    
+
     private KPIProperties kpiProperties = Mockito.mock(KPIProperties.class);
     private MetadataService metadataService = Mockito.mock(MetadataService.class);
     private IssueTransitionService transitionService = Mockito.mock(IssueTransitionService.class);
-    
+
     public KPIEnvironmentBuilder() {}
-    
+
     public KPIEnvironmentBuilder(KPIProperties kpiProperties, IssueTransitionService transitionService) {
         this.transitionService = transitionService;
         this.kpiProperties = kpiProperties;
     }
-    
+
     public KPIEnvironmentBuilder(IssueTransitionService transitionService) {
         this.transitionService = transitionService;
     }
@@ -68,7 +68,7 @@ public class KPIEnvironmentBuilder {
         Mockito.when(metadataService.getIssueTypeById(id)).thenReturn(new JiraIssueTypeDto(id, name, false));
         return this;
     }
-    
+
     public KPIEnvironmentBuilder addChildren(String... pKyes) {
         Stream.of(pKyes).forEach(pkey-> addChild(pkey));
         return this;
@@ -78,12 +78,12 @@ public class KPIEnvironmentBuilder {
         this.mockKpiProperties();
         return kpiProperties;
     }
-        
+
     public Issue mockCurrentIssue() {
         assertCurrentIssueSet();
         return currentIssue.get().mockIssue(transitionService);
     }
-    
+
     public IssueKpiDataItemAdapter buildCurrentIssueKPIAdapter() {
         assertCurrentIssueSet();
         return currentIssue.get().buildAdapter();
@@ -106,29 +106,29 @@ public class KPIEnvironmentBuilder {
         IssueTypeChildrenStatusHierarchy subtasksHierarchy = new IssueTypeChildrenStatusHierarchy();
         subtasksHierarchy.setHierarchies(getHierachies(FEATURES));
         Mockito.when(kpiProperties.getFeaturesHierarchy()).thenReturn(subtasksHierarchy);
-        
+
         IssueTypeChildrenStatusHierarchy demandHierarchy = new IssueTypeChildrenStatusHierarchy();
         demandHierarchy.setHierarchies(getHierachies(DEMAND));
         Mockito.when(kpiProperties.getDemandHierarchy()).thenReturn(demandHierarchy);
-        
+
         List<String> progressingStatuses = statuses.values().stream().filter(s -> s.isProgressingStatus).map(s -> s.name).collect(Collectors.toList());
         Mockito.when(kpiProperties.getProgressingStatuses()).thenReturn(progressingStatuses);
-        
+
     }
 
     private List<Hierarchy> getHierachies(KpiLevel level) {
         if(!hierarchies.containsKey(level))
             return Arrays.asList();
-        
+
         return new LinkedList<>(hierarchies.get(level).values());
     }
 
     public KPIEnvironmentBuilder addChild(String pkey) {
         assertCurrentIssueSet();
-        
+
        issueHierarcy.putIfAbsent(currentIssue.get(), new LinkedList<>());
        issueHierarcy.get(currentIssue.get()).add(issues.get(pkey));
-       
+
        return this;
     }
 
@@ -143,11 +143,11 @@ public class KPIEnvironmentBuilder {
             throw new IllegalArgumentException("Missing status configuration");
         if(dateTime == null)
             return addTransition(status);
-        
+
         currentIssue.ifPresent(kpiBuilder -> kpiBuilder.addTransition(statuses.get(status),dateTime));
         return this;
     }
-    
+
     public KPIEnvironmentBuilder addTransition(String status) {
         assertCurrentIssueSet();
         if(!statuses.containsKey(status))
@@ -160,13 +160,13 @@ public class KPIEnvironmentBuilder {
         statuses.put(status, new DefaultStatus(id,status, isProgressing));
         return this;
     }
-    
+
     public KPIEnvironmentBuilder addSubtaskHierarchy(KpiLevel level, String fatherStatus, String... childrenTypesNames) {
 
         List<Long> typesId = Stream.of(childrenTypesNames).filter(s -> subtasksType.containsKey(s))
                 .map(s -> subtasksType.get(s).getId()).collect(Collectors.toList());
 
-        
+
         Hierarchy hierarchy = getHierarchy(level, fatherStatus);
         hierarchy.setChildrenTypeId(typesId);
         return this;
@@ -175,20 +175,20 @@ public class KPIEnvironmentBuilder {
     private Hierarchy getHierarchy(KpiLevel level,String fatherStatus) {
         if(!hierarchies.containsKey(level))
             hierarchies.put(level, new LinkedHashMap<>());
-        
+
         Map<String, Hierarchy> hierarchiesByLevel = hierarchies.get(level);
-        
+
         if(!hierarchiesByLevel.containsKey(fatherStatus)) {
             Hierarchy h = new Hierarchy();
             h.setFatherStatus(fatherStatus);
             hierarchiesByLevel.put(fatherStatus,h);
         }
-        
+
         return hierarchiesByLevel.get(fatherStatus);
     }
-    
+
     public KPIEnvironmentBuilder addStatusHierarchy(KpiLevel level, String fatherStatus, String... childrenStatus) {
-        
+
         Hierarchy hierarchy = getHierarchy(level,fatherStatus);
         hierarchy.setChildrenStatus(asList(childrenStatus));
         return this;
@@ -210,7 +210,7 @@ public class KPIEnvironmentBuilder {
         issues.put(pkey, builder);
         return withIssue(pkey);
     }
-    
+
     public KPIEnvironmentBuilder mockingSubtask(String pkey, String type) {
         return getIssueBuilder(pkey, KpiLevel.SUBTASKS, subtasksType.get(type));
     }
@@ -239,7 +239,7 @@ public class KPIEnvironmentBuilder {
     public KPIEnvironmentBuilder setFatherToCurrentIssue(String fatherKey) {
         assertCurrentIssueSet();
         currentIssue.ifPresent(c -> c.withFather(fatherKey));
-        return this;        
+        return this;
     }
 
     public KPIEnvironmentBuilder addWorklog(Worklog worklog) {
@@ -247,9 +247,15 @@ public class KPIEnvironmentBuilder {
         currentIssue.ifPresent(c -> c.addWorklog(worklog));
         return this;
     }
-    
+
     public KPIEnvironmentBuilder addWorklog(String date, int time) {
         Worklog worklog = new Worklog("a.developer",DateTimeUtils.parseStringToDate(date),time);
+        return addWorklog(worklog);
+    }
+
+    public KPIEnvironmentBuilder addWorklog(String date, double hours) {
+        int time = hoursToSeconds(hours);
+        Worklog worklog = new Worklog("a.developer",DateTimeUtils.parseStringToDate(date), time);
         return addWorklog(worklog);
     }
 
@@ -262,7 +268,7 @@ public class KPIEnvironmentBuilder {
     }
 
     public List<IssueKpi> buildAllIssuesAsKpi() {
-        
+
         return this.issues.values().stream().map(b -> b.build()).collect(Collectors.toList());
     }
 
@@ -272,6 +278,11 @@ public class KPIEnvironmentBuilder {
                    .filter(i -> !issuesKeysList.contains(i.getIssueKey()))
                    .map(i -> i.buildAdapter())
                    .collect(Collectors.toList());
+    }
+
+    private int hoursToSeconds(double hours) {
+        final double hoursInMillis = hours * DateTimeUtils.HOUR_IN_SECONDS;
+        return new Double(hoursInMillis).intValue();
     }
 
 }

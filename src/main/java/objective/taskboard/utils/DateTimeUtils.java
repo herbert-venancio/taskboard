@@ -30,6 +30,8 @@ import com.google.gson.JsonSerializer;
 
 public class DateTimeUtils {
 
+    public static final int HOUR_IN_SECONDS = 1 * 60 * 60;
+
     public static ZonedDateTime parseDateTime(String yyyymmdd, String hhmmss) {
         return parseDateTime(yyyymmdd, hhmmss, ZoneId.systemDefault());
     }
@@ -44,7 +46,7 @@ public class DateTimeUtils {
 
         return LocalDateTime.parse(yyyymmdd + "T" + hhmmss, DateTimeFormatter.ISO_LOCAL_DATE_TIME).atZone(timezone);
     }
-    
+
     public static ZonedDateTime get(org.joda.time.DateTime dt) {
         if (dt == null)
             return null;
@@ -152,7 +154,7 @@ public class DateTimeUtils {
     public static Date toDate(LocalDate finalProjectDate, ZoneId zone) {
         return Date.from(finalProjectDate.atStartOfDay().atZone(zone).toInstant());
     }
-    
+
     public static LocalDate toLocalDate(Date date, ZoneId zone) {
         return date.toInstant().atZone(zone).toLocalDate();
     }
@@ -183,5 +185,9 @@ public class DateTimeUtils {
                 return current;
             }
         });
+    }
+
+    public static double secondsToHours(double seconds) {
+        return seconds / DateTimeUtils.HOUR_IN_SECONDS;
     }
 }

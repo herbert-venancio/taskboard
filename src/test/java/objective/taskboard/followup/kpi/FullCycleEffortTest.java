@@ -60,7 +60,7 @@ public class FullCycleEffortTest {
     private Clock clock;
     
     @InjectMocks
-    private IssueKpiService service = new IssueKpiService();
+    private IssueKpiService service;
     
     private KPIEnvironmentBuilder builder;
     
@@ -96,26 +96,24 @@ public class FullCycleEffortTest {
         when(issueBufferService.getAllIssues()).thenReturn(allIssues);
         when(factory.getItems(allIssues ,ZONE_ID)).thenReturn(builder.buildAllIssuesAsAdapterUnless("PROJ-20","PROJ-21"));
         
-        Map<KpiLevel, List<IssueKpi>> allIssuesKpi = service.getIssuesFromCurrentState("PROJ", ZONE_ID);
-        
-        assertThat(allIssuesKpi.get(DEMAND).size(),is(1));
-        assertThat(allIssuesKpi.get(FEATURES).size(),is(4));
-        assertThat(allIssuesKpi.get(SUBTASKS).size(),is(14));
-        assertThat(allIssuesKpi.get(UNMAPPED).size(),is(0));
-        
-        IssueKpi demand = allIssuesKpi.get(DEMAND).get(0);
+        List<IssueKpi> issuesDemand = service.getIssuesFromCurrentState("PROJ", ZONE_ID, DEMAND);
+        assertThat(issuesDemand.size(),is(1));
+        IssueKpi demand = issuesDemand.get(0);
         
         assertHours(demand, "Doing", 189l);
         assertHours(demand, "UATing", 7l);
         
-        Map<String,IssueKpi> features = map(FEATURES,allIssuesKpi);
-        
+        List<IssueKpi> issuesFeatures = service.getIssuesFromCurrentState("PROJ", ZONE_ID, FEATURES);
+        assertThat(issuesFeatures.size(),is(4));
+        Map<String,IssueKpi> features = map(FEATURES, issuesFeatures);
         assertFeatureEffort(features.get("PROJ-02"),0l,12l,0l,0l);
         assertFeatureEffort(features.get("PROJ-03"),0l,12l,0l,0l);
         assertFeatureEffort(features.get("PROJ-04"),0l,15l,0l,0l);
         assertFeatureEffort(features.get("PROJ-05"),13l,51l,74l,12l);
         
-        Map<String,IssueKpi> subtasks = map(SUBTASKS,allIssuesKpi);
+        List<IssueKpi> issuesSubtasks = service.getIssuesFromCurrentState("PROJ", ZONE_ID, SUBTASKS);
+        assertThat(issuesSubtasks.size(),is(14));
+        Map<String,IssueKpi> subtasks = map(SUBTASKS, issuesSubtasks);
         assertSubtaskEffort(subtasks.get("PROJ-06"),5l, 2l,0l);
         assertSubtaskEffort(subtasks.get("PROJ-07"),7l, 4l,1l);
         assertSubtaskEffort(subtasks.get("PROJ-08"),10l,2l,0l);
@@ -131,6 +129,8 @@ public class FullCycleEffortTest {
         assertSubtaskEffort(subtasks.get("PROJ-18"),21l,2l,0l);
         assertSubtaskEffort(subtasks.get("PROJ-19"),12l,0l,0l);
             
+        List<IssueKpi> issuesUnmapped = service.getIssuesFromCurrentState("PROJ", ZONE_ID, UNMAPPED);
+        assertThat(issuesUnmapped.size(),is(0));
     }
 
     private void mockTaskContinuous(String type, String pKey, String fatherKey, String open, String doing, String done) {
@@ -171,8 +171,8 @@ public class FullCycleEffortTest {
         
     }
 
-    private Map<String, IssueKpi> map(KpiLevel level, Map<KpiLevel, List<IssueKpi>> allIssuesKpi) {
-        return allIssuesKpi.get(level).stream().collect(Collectors.toMap(IssueKpi::getIssueKey, Function.identity()));
+    private Map<String, IssueKpi> map(KpiLevel level, List<IssueKpi> issues) {
+        return issues.stream().collect(Collectors.toMap(IssueKpi::getIssueKey, Function.identity()));
     }
 
     private void addWorklogs() {
