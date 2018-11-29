@@ -105,7 +105,6 @@ class ChartUtils {
         }
     }
 
-
     static truncateDate (dateInMillis) {
         const date = new Date(dateInMillis);
         date.setHours(0, 0, 0, 0);
@@ -120,20 +119,59 @@ class ChartUtils {
         date.setDate(date.getDate() + 1);
         return ChartUtils.truncateDate(date.getTime());
     }
+
+    static extractUniqueValuesOfPropertyFromArray (data, propertyName) {
+        return _.chain(data)
+            .map((item) => item[propertyName])
+            .unique()
+            .value();
+    }
+
+    static groupChartDataByGroupKey (crossfilterGroup, groupPropertyNameKey, valuePropertyNameKey) {
+        const reduceAdd = (accumulator, current) => {
+            const groupingKey = current[groupPropertyNameKey];
+            if (accumulator[groupingKey] === undefined) {
+                accumulator[groupingKey] = 0;
+            }
+            accumulator[groupingKey] += current[valuePropertyNameKey];
+            return accumulator;
+        };
+        const reduceSub = (accumulator, current) => {
+            const groupingKey = current[groupPropertyNameKey];
+            accumulator[groupingKey] -= current[valuePropertyNameKey];
+            return accumulator;
+        };
+        const reduceInit = () => {
+            return {};
+        };
+        crossfilterGroup.reduce(reduceAdd, reduceSub, reduceInit);
+    }
 }
 
 class ChartBuilderBase {
-    constructor (divID){
+    constructor (divID) {
         this.options = ChartUtils.getDefaultHighchartsOptions();
         this.options.chart.renderTo = divID;
         this.options.credits = false;
         this.options.chart.events = {
             selection: function (event) {
+                const hideResetButton = () => {
+                    this.resetZoomButton = this.resetZoomButton.destroy();
+                };
+                const preventZoomOut = (zoomOutEvent) => {
+                    zoomOutEvent.preventDefault();
+                };
+                const zoomOutYAxis = () => {
+                    this.yAxis[0].setExtremes(null, null);
+                };
+                const zoomOutXAxisToTimelineExtent = () => {
+                    dcDateRangeChartsService.applySelection(this.title.textStr);
+                };
                 if (event.resetSelection) {
-                    this.resetZoomButton = this.resetZoomButton.destroy(); // hide reset button
-                    event.preventDefault(); // prevent zoom out
-                    this.yAxis[0].setExtremes(null, null); // reset Y
-                    dcDateRangeChartsService.applySelection(this.title.textStr); // reset X to timeline  selection
+                    hideResetButton();
+                    preventZoomOut(event);
+                    zoomOutYAxis();
+                    zoomOutXAxisToTimelineExtent();
                 }
             }
         };
@@ -246,8 +284,8 @@ class CFDChartBuilder extends ChartBuilderBase {
                     return;
                 }
                 const baseStackSeries = event.target.series[0];
-                const xMinPoint = baseStackSeries.points.find((p) => p.x === xMin);
-                const xMaxPoint = baseStackSeries.points.find((p) => p.x === xMax);
+                const xMinPoint = baseStackSeries.points.find((point) => point.x === xMin);
+                const xMaxPoint = baseStackSeries.points.find((point) => point.x === xMax);
                 if (xMinPoint === undefined || xMaxPoint === undefined){
                     return;
                 }
