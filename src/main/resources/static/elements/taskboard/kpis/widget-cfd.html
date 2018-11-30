@@ -190,7 +190,7 @@
                         this.xhr = null;
                     }
                     if (this.chart) {
-                        dcDateRangeChartsService.deregisterHighchartsChart(this.chart.title.textStr);
+                        dcDateRangeChartsService.deregisterHighchartsChart(this.chart);
                         this.chart.destroy();
                         this.chart = null;
                     }
@@ -299,12 +299,11 @@
                     const statusesOrderLUT = this.plotData.statusesOrderLUT;
                     series = series.sort((a, b) => statusesOrderLUT.get(a.name) - statusesOrderLUT.get(b.name));
                     const builder = new CFDChartBuilder('cfd')
-                        .withTitle('CFD')
                         .withChartType('area')
                         .withSeriesData(series);
                     this.chart = builder.build();
-                    dcDateRangeChartsService.registerHighchartsChart(this.chart.title.textStr, this.chart);
-                    dcDateRangeChartsService.applySelection(this.chart.title.textStr);
+                    dcDateRangeChartsService.registerHighchartsChart(this.chart);
+                    dcDateRangeChartsService.applySelection(this.chart);
                 }
             });
         })();
