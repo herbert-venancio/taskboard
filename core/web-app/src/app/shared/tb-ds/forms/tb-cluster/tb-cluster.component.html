@@ -26,140 +26,140 @@
                     <ng-container *ngIf="group.hasChanges; then rowWithChangesCandidates; else rowWithoutChangesCandidates">
                     </ng-container>
                     <ng-template #rowWithChangesCandidates>
-                    <tr>
-                        <td rowspan="2">
-                            <input
-                                type="checkbox"
-                                name="accept-effort-changes"
-                                [(ngModel)]="group.acceptChanges.effort">
-                        </td>
-                        <td>Current Effort</td>
-                        <td class="input" *ngFor="let s of group.items">
-                            <input id="{{group.issueType}}-original-effort-{{s.sizing}}"
-                                type="number"
-                                name="original-effort-{{s.sizing}}"
-                                objNumberFieldWithoutSpin
-                                #currentEffort="objNumberFieldWithoutSpin"
-                                [(ngModel)]="s.effort"
-                                tbIsNumber
-                                disabled="true"
-                                min="0"
-                                tbMin="0"
-                                step="any"/>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>New Effort</td>
-                        <td class="input" *ngFor="let s of group.changes">
-                            <input id="{{group.issueType}}-effort-{{s.sizing}}"
-                                type="number"
-                                name="effort-{{s.sizing}}"
-                                objNumberFieldWithoutSpin
-                                #effort="objNumberFieldWithoutSpin"
-                                #sizingInput
-                                [(ngModel)]="s.effort"
-                                required
-                                tbIsNumber
-                                min="0"
-                                tbMin="0"
-                                step="any"
-                                title="Original: {{s.originalEffort}}h"
-                                (change)="group.acceptChanges.effort = true"/>
-                            <obj-error-messages [for]="effort">
-                                <obj-error-message error="min, isNumber">Should be positive</obj-error-message>
-                                <obj-error-message error="required">Required</obj-error-message>
-                            </obj-error-messages>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td rowspan="2">
-                            <input
-                                type="checkbox"
-                                name="accept-cycle-changes"
-                                [(ngModel)]="group.acceptChanges.cycle">
-                        </td>
-                        <td>Current Cycle</td>
-                        <td class="input" *ngFor="let s of group.items">
-                            <input id="{{group.issueType}}-original-cycle-{{s.sizing}}"
-                                type="number"
-                                name="original-cycle-{{s.sizing}}"
-                                objNumberFieldWithoutSpin
-                                #currentCycle="objNumberFieldWithoutSpin"
-                                [(ngModel)]="s.cycle"
-                                tbIsNumber
-                                disabled="true"
-                                min="0"
-                                tbMin="0"
-                                step="any"/>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>New Cycle</td>
-                        <td class="input" *ngFor="let s of group.changes">
-                            <input id="{{group.issueType}}-cycle-{{s.sizing}}"
-                                type="number"
-                                name="cycle-{{s.sizing}}"
-                                objNumberFieldWithoutSpin
-                                #cycle="objNumberFieldWithoutSpin"
-                                #sizingInput
-                                [(ngModel)]="s.cycle"
-                                required
-                                tbIsNumber
-                                min="0"
-                                tbMin="0"
-                                step="any"
-                                title="Original: {{s.originalCycle}}h"
-                                (change)="group.acceptChanges.cycle = true"/>
-                            <obj-error-messages [for]="cycle">
-                                <obj-error-message error="min, isNumber">Should be positive</obj-error-message>
-                                <obj-error-message error="required">Required</obj-error-message>
-                            </obj-error-messages>
-                        </td>
-                    </tr>
+                        <tr>
+                            <td rowspan="2">
+                                <input
+                                    type="checkbox"
+                                    name="accept-effort-changes"
+                                    [(ngModel)]="group.acceptChanges.effort">
+                            </td>
+                            <td>Current Effort</td>
+                            <td class="input" *ngFor="let s of group.items">
+                                <input id="{{group.issueType}}-original-effort-{{s.sizing}}"
+                                    type="number"
+                                    name="original-effort-{{s.sizing}}"
+                                    objNumberFieldWithoutSpin
+                                    #currentEffort="objNumberFieldWithoutSpin"
+                                    [(ngModel)]="s.effort"
+                                    tbIsNumber
+                                    disabled="true"
+                                    min="0"
+                                    tbMin="0"
+                                    step="any"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>New Effort</td>
+                            <td class="input" *ngFor="let s of group.changes">
+                                <input id="{{group.issueType}}-effort-{{s.sizing}}"
+                                    type="number"
+                                    name="effort-{{s.sizing}}"
+                                    objNumberFieldWithoutSpin
+                                    #effort="objNumberFieldWithoutSpin"
+                                    #sizingInput
+                                    [(ngModel)]="s.effort"
+                                    required
+                                    tbIsNumber
+                                    min="0"
+                                    tbMin="0"
+                                    step="any"
+                                    title="Original: {{s.originalEffort}}h"
+                                    (change)="group.acceptChanges.effort = true"/>
+                                <obj-error-messages [for]="effort">
+                                    <obj-error-message error="min, isNumber">Should be positive</obj-error-message>
+                                    <obj-error-message error="required">Required</obj-error-message>
+                                </obj-error-messages>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td rowspan="2">
+                                <input
+                                    type="checkbox"
+                                    name="accept-cycle-changes"
+                                    [(ngModel)]="group.acceptChanges.cycle">
+                            </td>
+                            <td>Current Cycle</td>
+                            <td class="input" *ngFor="let s of group.items">
+                                <input id="{{group.issueType}}-original-cycle-{{s.sizing}}"
+                                    type="number"
+                                    name="original-cycle-{{s.sizing}}"
+                                    objNumberFieldWithoutSpin
+                                    #currentCycle="objNumberFieldWithoutSpin"
+                                    [(ngModel)]="s.cycle"
+                                    tbIsNumber
+                                    disabled="true"
+                                    min="0"
+                                    tbMin="0"
+                                    step="any"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>New Cycle</td>
+                            <td class="input" *ngFor="let s of group.changes">
+                                <input id="{{group.issueType}}-cycle-{{s.sizing}}"
+                                    type="number"
+                                    name="cycle-{{s.sizing}}"
+                                    objNumberFieldWithoutSpin
+                                    #cycle="objNumberFieldWithoutSpin"
+                                    #sizingInput
+                                    [(ngModel)]="s.cycle"
+                                    required
+                                    tbIsNumber
+                                    min="0"
+                                    tbMin="0"
+                                    step="any"
+                                    title="Original: {{s.originalCycle}}h"
+                                    (change)="group.acceptChanges.cycle = true"/>
+                                <obj-error-messages [for]="cycle">
+                                    <obj-error-message error="min, isNumber">Should be positive</obj-error-message>
+                                    <obj-error-message error="required">Required</obj-error-message>
+                                </obj-error-messages>
+                            </td>
+                        </tr>
                     </ng-template>
                     <ng-template #rowWithoutChangesCandidates>
-                    <tr>
-                        <td>Effort</td>
-                        <td class="input" *ngFor="let s of group.items">
-                            <input id="{{group.issueType}}-effort-{{s.sizing}}"
-                                type="number"
-                                name="effort-{{s.sizing}}"
-                                objNumberFieldWithoutSpin
-                                #effort="objNumberFieldWithoutSpin"
-                                #sizingInput
-                                [(ngModel)]="s.effort"
-                                required
-                                tbIsNumber
-                                min="0"
-                                tbMin="0"
-                                step="any"/>
-                            <obj-error-messages [for]="effort">
-                                <obj-error-message error="min, isNumber">Should be positive</obj-error-message>
-                                <obj-error-message error="required">Required</obj-error-message>
-                            </obj-error-messages>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Cycle</td>
-                        <td class="input" *ngFor="let s of group.items">
-                            <input id="{{group.issueType}}-cycle-{{s.sizing}}"
-                                type="number"
-                                name="cycle-{{s.sizing}}"
-                                objNumberFieldWithoutSpin
-                                #cycle="objNumberFieldWithoutSpin"
-                                #sizingInput
-                                [(ngModel)]="s.cycle"
-                                required
-                                tbIsNumber
-                                min="0"
-                                tbMin="0"
-                                step="any"/>
-                            <obj-error-messages [for]="cycle">
-                                <obj-error-message error="min, isNumber">Should be positive</obj-error-message>
-                                <obj-error-message error="required">Required</obj-error-message>
-                            </obj-error-messages>
-                        </td>
-                    </tr>
+                        <tr>
+                            <td>Effort</td>
+                            <td class="input" *ngFor="let s of group.items">
+                                <input id="{{group.issueType}}-effort-{{s.sizing}}"
+                                    type="number"
+                                    name="effort-{{s.sizing}}"
+                                    objNumberFieldWithoutSpin
+                                    #effort="objNumberFieldWithoutSpin"
+                                    #sizingInput
+                                    [(ngModel)]="s.effort"
+                                    required
+                                    tbIsNumber
+                                    min="0"
+                                    tbMin="0"
+                                    step="any"/>
+                                <obj-error-messages [for]="effort">
+                                    <obj-error-message error="min, isNumber">Should be positive</obj-error-message>
+                                    <obj-error-message error="required">Required</obj-error-message>
+                                </obj-error-messages>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Cycle</td>
+                            <td class="input" *ngFor="let s of group.items">
+                                <input id="{{group.issueType}}-cycle-{{s.sizing}}"
+                                    type="number"
+                                    name="cycle-{{s.sizing}}"
+                                    objNumberFieldWithoutSpin
+                                    #cycle="objNumberFieldWithoutSpin"
+                                    #sizingInput
+                                    [(ngModel)]="s.cycle"
+                                    required
+                                    tbIsNumber
+                                    min="0"
+                                    tbMin="0"
+                                    step="any"/>
+                                <obj-error-messages [for]="cycle">
+                                    <obj-error-message error="min, isNumber">Should be positive</obj-error-message>
+                                    <obj-error-message error="required">Required</obj-error-message>
+                                </obj-error-messages>
+                            </td>
+                        </tr>
                     </ng-template>
                 </tbody>
             </table>

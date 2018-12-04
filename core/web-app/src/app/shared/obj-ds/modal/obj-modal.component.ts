@@ -1,28 +1,28 @@
-import { Component, ElementRef, HostBinding, Input } from '@angular/core';
+import { Component, HostBinding, Input } from '@angular/core';
 
 /**
- * Basic modal with just open/close functionality
+ * Extends base ModalComponent with header and footer for buttons
  */
 @Component({
     selector: 'obj-modal',
-    templateUrl: './modal.component.html',
-    styleUrls: ['./modal.component.scss']
+    templateUrl: './obj-modal.component.html',
+    styleUrls: ['./obj-modal.component.scss']
 })
 export class ModalComponent {
 
     private static modalsOpened: number = 0;
 
-    private element: any;
-
     @HostBinding('hidden')
     private hidden: boolean = true;
 
-    @Input('easy-close')
-    public easyClose: boolean = true;
+    @Input('close-on-backdrop')
+    public closeOnBackdrop: boolean = true;
 
-    constructor(el: ElementRef) {
-        this.element = el.nativeElement;
-    }
+    @Input('modal-title')
+    title: string;
+
+    @Input('modal-icon')
+    modalIcon: string;
 
     get isOpen() {
         return !this.hidden;
@@ -53,8 +53,8 @@ export class ModalComponent {
         this.hidden = true;
     }
 
-    doEasyClose() {
-        if (this.easyClose)
+    doCloseOnBackdrop() {
+        if (this.closeOnBackdrop)
             this.close();
     }
 }

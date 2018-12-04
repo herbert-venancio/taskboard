@@ -5,10 +5,10 @@ import { Moment } from 'moment';
 import { NgForm } from '@angular/forms';
 import * as _ from 'underscore';
 
-import { SnackbarControl, SnackbarLevel } from 'app/shared/obj-ds/snackbar/snackbar-control';
+import { SnackbarControl } from 'app/shared/obj-ds/snackbar/snackbar-control';
 import { DATE_INPUT_DISPLAY_FORMAT } from 'app/shared/form-utils/date-input.directive';
-import { ClusterGrouping, ClusteringType, DateRange, ClusterAlgorithmExecution } from './cluster-algorithm-model';
-import { ClusterAlgorithmService } from './cluster-algorithm.service';
+import { ClusterGrouping, ClusteringType, DateRange, ClusterAlgorithmExecution } from 'app/cluster/cluster-algorithm.model';
+import { ClusterAlgorithmService } from 'app/cluster/cluster-algorithm.service';
 import { ClusterItemDto } from 'app/shared/tb-ds/forms/tb-cluster/cluster-item-dto.model';
 
 @Component({
@@ -25,8 +25,10 @@ export class TbClusterAlgorithmComponent {
 
     @Output('results')
     results = new EventEmitter<ClusterItemDto[]>();
-    @Output('errors')
-    errors = new EventEmitter();
+    @Output('submitted')
+    submitted = new EventEmitter<boolean>();
+    @Output()
+    errorEvent = new EventEmitter();
 
     startDate: Moment;
     endDate: Moment;
@@ -55,9 +57,10 @@ export class TbClusterAlgorithmComponent {
     runAllClusterings() {
         if (this.tbClusterAlgorithm.invalid) {
             this.focusOnFirstError();
-            this.sendErrorEvent();
+            this.sendInvalidSubmitEvent();
             return;
         }
+        this.sendSubmittedEvent();
 
         const dateRange = this.buildDateRange();
 
@@ -66,14 +69,16 @@ export class TbClusterAlgorithmComponent {
         .executeAlgorithm([this.singleProject], ClusterGrouping.BALLPARK, ClusteringType.EFFORT_ONLY, dateRange)
         .pipe(this.waitFinished);
         // ballpark + cycle clustering algorithm execution
-        const ballparkCycle$ = this.clusterAlgorithmService.executeAlgorithm([this.singleProject], ClusterGrouping.BALLPARK, ClusteringType.CYCLE_ONLY, dateRange)
+        const ballparkCycle$ = this.clusterAlgorithmService
+        .executeAlgorithm([this.singleProject], ClusterGrouping.BALLPARK, ClusteringType.CYCLE_ONLY, dateRange)
         .pipe(this.waitFinished);
         // subtask + effort clustering algorithm execution
         const subtaskEffort$ = this.clusterAlgorithmService
         .executeAlgorithm([this.singleProject], ClusterGrouping.SUBTASK, ClusteringType.EFFORT_ONLY, dateRange)
         .pipe(this.waitFinished);
         // subtask + cycle clustering algorithm execution
-        const subtaskCycle$ = this.clusterAlgorithmService.executeAlgorithm([this.singleProject], ClusterGrouping.SUBTASK, ClusteringType.CYCLE_ONLY, dateRange)
+        const subtaskCycle$ = this.clusterAlgorithmService
+        .executeAlgorithm([this.singleProject], ClusterGrouping.SUBTASK, ClusteringType.CYCLE_ONLY, dateRange)
         .pipe(this.waitFinished);
 
         zip(ballparkEffort$, ballparkCycle$, subtaskEffort$, subtaskCycle$)
@@ -106,10 +111,8 @@ export class TbClusterAlgorithmComponent {
             })
         )
         .subscribe(
-            executions => {
-                this.results.emit(executions)
-            },
-            error => this.showError(error)
+            executions => this.results.emit(executions),
+            error => this.errorEvent.emit(error)
         );
     }
 
@@ -134,11 +137,11 @@ export class TbClusterAlgorithmComponent {
             this.endDateField.nativeElement.focus();
     }
 
-    private sendErrorEvent() {
-        this.errors.emit('Please review the form');
+    private sendSubmittedEvent() {
+        this.submitted.emit(true);
     }
 
-    private showError(error: any) {
-        this.snackbar.showInfo({title: error, level: SnackbarLevel.Error});
+    private sendInvalidSubmitEvent() {
+        this.submitted.emit(false);
     }
 }

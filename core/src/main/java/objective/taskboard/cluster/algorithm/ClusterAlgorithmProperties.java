@@ -1,4 +1,4 @@
-package objective.taskboard.jira.properties;
+package objective.taskboard.cluster.algorithm;
 
 import java.util.Collections;
 import java.util.List;
@@ -8,8 +8,6 @@ import javax.validation.constraints.NotNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
-
-import objective.taskboard.cluster.algorithm.ClusterAlgorithmRequest;
 
 @Component
 @ConfigurationProperties(prefix = "cluster-algorithm")

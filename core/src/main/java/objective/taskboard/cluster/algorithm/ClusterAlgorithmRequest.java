@@ -15,7 +15,7 @@ public class ClusterAlgorithmRequest {
     private CycleStatuses subtaskCycleStatuses = null;
     private ClusterGrouping clusterGrouping = ClusterGrouping.BALLPARK;
     private ClusteringType clusteringType = ClusteringType.EFFORT_AND_CYCLE;
-    private DateRange dateRange = new DateRange(null, null);
+    private DateRange dateRange = new DateRange();
 
     public ClusterAlgorithmRequest() {
     }
@@ -28,6 +28,21 @@ public class ClusterAlgorithmRequest {
         this.subtaskDoneStatuses = subtaskDoneStatuses;
         this.subtaskCycleStatuses = subtaskCycleStatuses;
         this.clusteringType = clusteringType;
+    }
+
+    public static ClusterAlgorithmRequest fromDefaults(ClusterAlgorithmProperties.Defaults defaults) {
+        if (defaults == null)
+            return new ClusterAlgorithmRequest();
+
+        return new ClusterAlgorithmRequest(
+                defaults.getProjects()
+                , defaults.getFeatureIssueTypes()
+                , defaults.getBugIssueTypes()
+                , defaults.getFeatureDoneStatuses()
+                , defaults.getSubtaskDoneStatuses()
+                , defaults.getCycleStatuses()
+                , defaults.getClusteringType()
+        );
     }
 
     public List<String> getProjects() {
@@ -106,14 +121,6 @@ public class ClusterAlgorithmRequest {
         private long first;
         private long last;
 
-        public CycleStatuses() {
-        }
-
-        public CycleStatuses(long first, long last) {
-            this.first = first;
-            this.last = last;
-        }
-
         public long getFirst() {
             return first;
         }
@@ -152,14 +159,6 @@ public class ClusterAlgorithmRequest {
     public static class DateRange {
         private LocalDate startDate;
         private LocalDate endDate;
-
-        public DateRange() {
-        }
-
-        public DateRange(LocalDate startDate, LocalDate endDate) {
-            this.startDate = startDate;
-            this.endDate = endDate;
-        }
 
         public LocalDate getStartDate() {
             return startDate;

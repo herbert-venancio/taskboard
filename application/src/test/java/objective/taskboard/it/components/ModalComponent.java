@@ -13,8 +13,15 @@ public class ModalComponent extends AbstractComponent {
         closeButton = new ButtonComponent(driver, new ByChained(by, By.cssSelector(".modal__close obj-icon")));
     }
 
-    public ModalComponent close() {
+    public void close() {
         closeButton.click();
-        return this;
+    }
+
+    public void assertIsOpen() {
+        waitVisibilityOfElement(component());
+    }
+
+    public void assertIsClosed() {
+        waitInvisibilityOfElement(component());
     }
 }

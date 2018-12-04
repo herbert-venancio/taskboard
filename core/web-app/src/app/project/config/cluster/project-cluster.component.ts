@@ -1,6 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, ParamMap } from '@angular/router';
-import { TbClusterAlgorithmComponent } from 'app/cluster/cluster-algorithm/tb-cluster-algorithm.component';
 import { LegacyAppRouter } from 'app/core/legacy-app-router';
 import { PageSpinner } from 'app/core/page-spinner/page-spinner';
 import { ComponentLeaveConfirmation } from 'app/shared/form-utils/leave-confirmation/guard/component-leave-confirmation';
@@ -8,7 +7,7 @@ import { SnackbarControl, SnackbarLevel } from 'app/shared/obj-ds/snackbar/snack
 import { ClusterItemDto } from 'app/shared/tb-ds/forms/tb-cluster/cluster-item-dto.model';
 import { TbClusterComponent } from 'app/shared/tb-ds/forms/tb-cluster/tb-cluster.component';
 import { ProjectClusterService } from './project-cluster.service';
-import { TbModalComponent } from 'app/shared/tb-ds/modal/tb-modal.component';
+import { RecalculateResult } from './project-cluster-recalculate-modal.component';
 import * as moment from 'moment';
 
 @Component({
@@ -24,8 +23,6 @@ export class ProjectClusterComponent extends ComponentLeaveConfirmation implemen
     snackbar = new SnackbarControl();
 
     @ViewChild(TbClusterComponent) clusterComponent: TbClusterComponent;
-    @ViewChild(TbClusterAlgorithmComponent) algorithmComponent: TbClusterAlgorithmComponent;
-    @ViewChild(TbModalComponent) algorithmComponentModal: TbModalComponent;
 
     clusterItems: ClusterItemDto[] = [];
     changesCandidates: ClusterItemDto[] = [];
@@ -45,7 +42,6 @@ export class ProjectClusterComponent extends ComponentLeaveConfirmation implemen
             this.projectKey = params.get('key');
             this.refresh();
         });
-        this.subscribeToClusterAlgorithmResults();
     }
 
     private refresh() {
@@ -94,38 +90,20 @@ export class ProjectClusterComponent extends ComponentLeaveConfirmation implemen
         return this.clusterComponent.isPristine();
     }
 
-    callSubmitOfClusterAlgorithmComponent() {
-        this.pageLoader.show();
-        this.algorithmComponentModal.close();
-        this.algorithmComponent.submit()
+    setChangesCandidates(results: RecalculateResult) {
+        this.changesCandidates = results.newClusters;
+        this.toolbarSubtitle = this.buildToolbarSubtitle(results.startDate, results.endDate);
     }
 
-    private subscribeToClusterAlgorithmResults() {
-        this.algorithmComponent.results
-        .pipe()
-        .subscribe(newClusters => {
-                this.pageLoader.hide();
-                this.changesCandidates = newClusters;
-                this.toolbarSubtitle = this.buildToolbarSubtitle();
-            },
-            error => {
-                this.pageLoader.hide();
-                this.showErrorFormMessage(JSON.stringify(error));
-            }
-        );
-    }
-
-    private buildToolbarSubtitle(): string {
+    private buildToolbarSubtitle(startDate: moment.Moment, endDate: moment.Moment): string {
         const format = moment.localeData().longDateFormat('L');
-        const s = this.algorithmComponent.startDate;
-        const e = this.algorithmComponent.endDate;
-        const start = s ? s.format(format) : '';
-        const end   = e ? e.format(format) : '';
-        if(start && end)
+        const start = startDate ? startDate.format(format) : '';
+        const end   = endDate   ? endDate.format(format) : '';
+        if (start && end)
             return `(between ${start} and ${end})`;
-        if(start)
+        if (start)
             return `(after ${start})`;
-        if(end)
+        if (end)
             return `(before ${end})`;
         return '';
     }

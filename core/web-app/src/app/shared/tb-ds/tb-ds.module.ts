@@ -7,10 +7,7 @@ import { CommonModule } from '@angular/common';
 import { ObjDsModule } from '../obj-ds/obj-ds.module';
 import { FormUtilsModule } from './../form-utils/form-utils.module';
 import { TbClusterComponent } from './forms/tb-cluster/tb-cluster.component';
-import { TbModalComponent } from './modal/tb-modal.component';
-import { TbModalContentComponent } from './modal/tb-modal-content.component';
-import { TbModalFooterLeftComponent, TbModalFooterRightComponent } from './modal/tb-modal-footer.component';
-import { TbToolbarComponent } from './toolbar/tb-toolbar.component';
+import { TbClusterAlgorithmComponent } from './forms/tb-cluster-algorithm/tb-cluster-algorithm.component';
 
 @NgModule({
     imports: [
@@ -23,19 +20,11 @@ import { TbToolbarComponent } from './toolbar/tb-toolbar.component';
     ],
     declarations: [
         TbClusterComponent,
-        TbModalComponent,
-        TbModalContentComponent,
-        TbModalFooterLeftComponent,
-        TbModalFooterRightComponent,
-        TbToolbarComponent
+        TbClusterAlgorithmComponent
     ],
     exports: [
         TbClusterComponent,
-        TbModalComponent,
-        TbModalContentComponent,
-        TbModalFooterLeftComponent,
-        TbModalFooterRightComponent,
-        TbToolbarComponent
+        TbClusterAlgorithmComponent
     ]
 })
 export class TbDsModule { }

@@ -1,17 +1,15 @@
-<tb-toolbar title="Project cluster - {{projectKey}}" [subtitle]="toolbarSubtitle">
+<obj-toolbar title="Project cluster - {{projectKey}}" [subtitle]="toolbarSubtitle">
     <button obj-flat-button (click)="recalculateCluster.open()">
         <obj-icon iconName="recalculate"></obj-icon>Recalculate
     </button>
-</tb-toolbar>
-<tb-modal #recalculateCluster modal-title="Recalculate project cluster">
-    <tb-modal-content>
-        <tb-cluster-algorithm #clusterAlgorithmForm [project]="projectKey"></tb-cluster-algorithm>
-    </tb-modal-content>
-    <tb-modal-footer-right>
-        <button obj-button (click)="recalculateCluster.close()">Cancel</button>
-        <button class="primary" obj-button (click)="callSubmitOfClusterAlgorithmComponent()">Recalculate</button>
-    </tb-modal-footer-right>
-</tb-modal>
+</obj-toolbar>
+
+<tb-project-cluster-recalculate-modal
+    #recalculateCluster
+    [project]="projectKey"
+    (result)="setChangesCandidates($event)"
+    (errorEvent)="showErrorFormMessage($event)">
+</tb-project-cluster-recalculate-modal>
 
 <tb-cluster [clusterItems]="clusterItems" [changesCandidates]="changesCandidates"
     (saveEvent)="save($event)" (errorEvent)="showErrorFormMessage($event)">

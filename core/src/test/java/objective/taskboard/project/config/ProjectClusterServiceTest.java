@@ -69,7 +69,6 @@ public class ProjectClusterServiceTest {
 
         List<ProjectClusterItemDto> projectClusterItemsDto = subject.getItems(project);
 
-        assertEquals(15, projectClusterItemsDto.size());
         assertItems(projectClusterItemsDto,
                 "Alpha Test | XS | 1 | 1 | true",
                 "Alpha Test | S | 2 | 2 | true",

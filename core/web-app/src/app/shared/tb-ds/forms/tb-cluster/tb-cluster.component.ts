@@ -89,9 +89,8 @@ export class TbClusterComponent implements OnChanges {
 
         const clusterItemsOutput: ClusterItemDto[] = [];
         this.groupedItems.forEach(group => {
-            _.zip(group.items, group.changes).forEach(pair => {
-                const item = pair[0];
-                const change = pair[1];
+            group.items.forEach((item, index) => {
+                const change = group.changes[index];
                 const changeCycle = group.acceptChanges.cycle && change;
                 const changeEffort = group.acceptChanges.effort && change;
                 const itemUpdated = new ClusterItemDto(
@@ -138,7 +137,18 @@ export class TbClusterComponent implements OnChanges {
         const changeKeys = new Set(Object.keys(changes));
         const allKeys = new Set([...Array.from(clusterKeys), ...Array.from(changeKeys)]);
 
-        // create or update all groups
+        this.createOrUpdateGroups(allKeys, clusterKeys, changeKeys, clusters, changes);
+        this.removeNonExistingGroups(allKeys);
+        this.sortGroups();
+    }
+
+    private createOrUpdateGroups(
+        allKeys: Set<string>,
+        clusterKeys: Set<string>,
+        changeKeys: Set<string>,
+        clusters: _.Dictionary<ClusterItemDto[]>,
+        changes: _.Dictionary<ClusterItemChangeDto[]>
+    ) {
         allKeys.forEach(issueType => {
             const group = this.getIssueTypeGroup(issueType);
             group.items = clusterKeys.has(issueType) ? clusters[issueType] : [];
@@ -146,15 +156,14 @@ export class TbClusterComponent implements OnChanges {
             group.acceptChanges.effort = false;
             group.acceptChanges.cycle = false;
         });
+    }
 
-        // remote non-existent groups
+    private removeNonExistingGroups(allKeys: Set<string>) {
         for (let i = this.groupedItems.length - 1; i >= 0; --i) {
             const group = this.groupedItems[i];
             if (!allKeys.has(group.issueType))
                 this.groupedItems.splice(i, 1);
         }
-
-        this.sortGroups();
     }
 
     private getIssueTypeGroup(issueType: string): ClusterItemDtoGroup {

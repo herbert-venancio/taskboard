@@ -147,15 +147,15 @@ public class ClusterAlgorithmExecution extends BackgroundTask<Map<String, Cluste
     private Table<String, Issue, IssueModel> buildClusteringModel(ClusterAlgorithmRequest.ClusterGrouping clusterGrouping, List<Issue> allFeatures, Multimap<Issue, Issue> allBugs) {
         switch(clusterGrouping) {
             case BALLPARK:
-                return buildFeatureClusteringModel(allFeatures, allBugs);
+                return buildBallParkClusteringModel(allFeatures, allBugs);
             case SUBTASK:
                 return buildSubtaskClusteringModel(allFeatures, allBugs);
             default:
-                throw new RuntimeException("Unknown cluster grouping: " + clusterGrouping.name());
+                throw new IllegalArgumentException("Unknown cluster grouping: " + clusterGrouping.name());
         }
     }
 
-    private Table<String, Issue, IssueModel> buildFeatureClusteringModel(List<Issue> allFeatures, Multimap<Issue, Issue> allBugs) {
+    private Table<String, Issue, IssueModel> buildBallParkClusteringModel(List<Issue> allFeatures, Multimap<Issue, Issue> allBugs) {
         // create a table group x feature, and each cell contains a
         // list of sub-tasks that matches that group and parent
         Table<String, Issue, List<Issue>> table = HashBasedTable.create();
@@ -269,18 +269,15 @@ public class ClusterAlgorithmExecution extends BackgroundTask<Map<String, Cluste
         if(dateRange == null || (dateRange.getStartDate() == null && dateRange.getEndDate() == null))
             return true;
 
-        // Reference JQLs:
-        // - status was not in (statuses) before startDate
-        // - status was not in (statuses) after endDate
         return issue.getChangelog().stream()
                 .filter(entry -> "status".equals(entry.field))
                 .filter(entry -> statuses.contains(Long.parseLong(entry.originalTo)))
-                .noneMatch(entry -> {
-                    boolean isBeforeStartDate = dateRange.getStartDate() != null
-                            && entry.timestamp.isBefore(dateRange.getStartDate().atStartOfDay(entry.timestamp.getZone()));
-                    boolean isAfterEndDate = dateRange.getEndDate() != null
-                            && entry.timestamp.isAfter(dateRange.getEndDate().atStartOfDay(entry.timestamp.getZone()));
-                    return isBeforeStartDate || isAfterEndDate;
+                .allMatch(entry -> {
+                    boolean isAfterStartDate = dateRange.getStartDate() == null
+                            || entry.timestamp.isAfter(dateRange.getStartDate().atStartOfDay(entry.timestamp.getZone()));
+                    boolean isBeforeEndDate = dateRange.getEndDate() == null
+                            || entry.timestamp.isBefore(dateRange.getEndDate().atStartOfDay(entry.timestamp.getZone()));
+                    return isAfterStartDate && isBeforeEndDate;
                 });
     }
 }

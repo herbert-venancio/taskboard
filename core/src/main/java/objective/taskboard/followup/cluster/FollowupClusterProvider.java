@@ -66,7 +66,7 @@ public class FollowupClusterProvider {
             .forEach(i -> clusterItemsMap.put(generateMapKey(i),
                                               convertToFollowUpClusterItem(project, i)));
 
-        return clusterItemsMap.values().parallelStream()
+        return clusterItemsMap.values().stream()
                     .sorted(Comparator.comparing(FollowUpClusterItem::getParentTypeName)
                                 .thenComparing(FollowUpClusterItem::getSubtaskTypeName)
                                 .thenComparing(FollowUpClusterItem::getSizing))
