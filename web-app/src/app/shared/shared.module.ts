@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { ObjDsModule } from './obj-ds/obj-ds.module';
 import { FormUtilsModule } from './form-utils/form-utils.module';
 import { ObjFilterPipe } from './pipes/obj-filter/obj-filter.pipe';
+import { SortByPipe } from './pipes/sortBy/sortby.pipe';
 import { TbDsModule } from './tb-ds/tb-ds.module';
 
 @NgModule({
@@ -21,10 +22,12 @@ import { TbDsModule } from './tb-ds/tb-ds.module';
         FormUtilsModule,
         ObjDsModule,
         ObjFilterPipe,
+        SortByPipe,
         TbDsModule
     ],
     declarations: [
-        ObjFilterPipe
+        ObjFilterPipe,
+        SortByPipe
     ],
 })
 export class SharedModule {}

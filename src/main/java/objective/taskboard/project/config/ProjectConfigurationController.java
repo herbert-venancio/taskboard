@@ -22,6 +22,7 @@ import objective.taskboard.domain.Project;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.jira.AuthorizedProjectsService;
 import objective.taskboard.jira.ProjectService;
+import objective.taskboard.project.config.changeRequest.ChangeRequestService;
 
 @RestController
 @RequestMapping("/ws/project/config")
@@ -29,6 +30,9 @@ public class ProjectConfigurationController {
 
     @Autowired
     private ProjectService projectService;
+
+    @Autowired
+    private ChangeRequestService changeRequestService;
 
     @Autowired
     private AuthorizedProjectsService authorizedProjectsService;
@@ -70,6 +74,7 @@ public class ProjectConfigurationController {
         project.setBaselineDate(configDto.baselineDate);
 
         projectService.saveTaskboardProject(project);
+        changeRequestService.updateBaselineChangeRequest(project, configDto.startDate);
 
         return ResponseEntity.ok().build();
     }

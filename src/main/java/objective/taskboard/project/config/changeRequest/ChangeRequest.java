@@ -1,6 +1,6 @@
 package objective.taskboard.project.config.changeRequest;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -20,7 +20,10 @@ import objective.taskboard.domain.TaskboardEntity;
 @NamedQueries({
     @NamedQuery(
             name="ChangeRequest.listByProject", 
-            query="SELECT p FROM ChangeRequest p WHERE p.project = :project ORDER BY p.date")
+            query="SELECT p FROM ChangeRequest p WHERE p.project = :project ORDER BY p.date DESC"),
+    @NamedQuery(
+            name="ChangeRequest.getBaseline",
+            query="SELECT p FROM ChangeRequest p WHERE p.project = :project AND p.isBaseline = true")
 })
 public class ChangeRequest extends TaskboardEntity {
 
@@ -29,11 +32,11 @@ public class ChangeRequest extends TaskboardEntity {
     private ProjectFilterConfiguration project;
 
     private String name;
-    private Date date;
+    private LocalDate date;
     private Integer budgetIncrease;
     private Boolean isBaseline;
 
-    public ChangeRequest(ProjectFilterConfiguration project, String name, Date date, int budgetIncrease, boolean isBaseline) {
+    public ChangeRequest(ProjectFilterConfiguration project, String name, LocalDate date, int budgetIncrease, boolean isBaseline) {
         setProject(project);
         setName(name);
         setDate(date);
@@ -61,11 +64,11 @@ public class ChangeRequest extends TaskboardEntity {
         this.name = name;
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         Validate.notNull(date);
         this.date = date;
     }

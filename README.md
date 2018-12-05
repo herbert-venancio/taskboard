@@ -116,6 +116,12 @@ There are many ways to do that. See [Spring Boot External Config](http://docs.sp
 2. Execute main on class `objective.taskboard.Application`.  
 The application will be available on: [http://localhost:8080/](http://localhost:8080/)
 
+3. Run the npm run watch command as below, so every change you make on the web app will be availabe immediately after saving.
+
+```
+npm run watch
+```
+
 ### Sonar
 
 To generate the sonar report locally, run the following command:

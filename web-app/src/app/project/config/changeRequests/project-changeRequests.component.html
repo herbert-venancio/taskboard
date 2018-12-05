@@ -1,0 +1,87 @@
+<form #projectChangeRequestsForm="ngForm" (ngSubmit)="save(projectChangeRequestsForm)" tbLeaveConfirmation>
+
+    <obj-data-table-top title="Change Requests">
+        <button id="tb-project-changeRequests-add-item" type="button" obj-flat-button (click)="addItem()">
+            <obj-icon iconName="plus"></obj-icon> Add Item
+        </button>
+    </obj-data-table-top>
+
+    <table id="tb-project-changeRequests-items" class="obj-data-table inline-input" *ngIf="items.length > 0" >
+        <thead>
+            <tr >
+                <th>Name</th>
+                <th>Date</th>
+                <th>Budget Increase</th>
+                <th class="actions-col"></th>
+            </tr>
+        </thead>
+        <tbody>
+           <tr *ngFor="let item of items" ngModelGroup="itemRow{{item.rowId}}"> 
+                <td>
+                    <input type="text"
+                           name="name"
+                           objTextField
+                           #name="objTextField"
+                           [(ngModel)]="item.name"
+                           (keydown.enter)="addItem(); false"
+                           required
+                           [tbFocus]="item == newItem"
+                           tbNotEmpty />
+                    <obj-error-messages [for]="name">
+                        <obj-error-message error="notEmpty">Name is required.</obj-error-message>
+                    </obj-error-messages>
+                </td>
+                <td>
+                    <input type="text"
+                           name="date"
+                           objTextField
+                           #date="objTextField"
+                           [(ngModel)]="item.date"
+                           (keydown.enter)="addItem(); false"
+                           required
+                           [placeholder]="dateDisplayFormat"
+                           tbDateInput
+                           required />
+                    <obj-error-messages [for]="date">
+                        <obj-error-message error="dateParse">Date format should be {{dateDisplayFormat}}</obj-error-message>
+                        <obj-error-message error="required">Date is required.</obj-error-message>
+                    </obj-error-messages>
+                </td>
+                <td>
+                    <input type="number"
+                           name="budgetIncrease"
+                           objTextField
+                           #budgetIncrease="objTextField"
+                           [(ngModel)]="item.budgetIncrease"
+                           (keydown.enter)="addItem(); false"
+                           required
+                           tbIsNumber
+                           tbMin="0"
+                           step="any" 
+                           (blur)="updateTotal()"/>
+                    <obj-error-messages [for]="budgetIncrease">
+                        <obj-error-message error="min, isNumber">Budget increase should be a positive number.</obj-error-message>
+                        <obj-error-message error="required">Budget increase is required.</obj-error-message>
+                    </obj-error-messages>
+                </td>
+                <td class="col-right">
+                    <button type="button" obj-flat-button class="remove-button" (click)="removeItem(item)" *ngIf="!item.isBaseline">Remove</button>
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td class="total-text">Total:</td>
+                <td><input id="total" class="obj-text-field total-number" type="text" value="{{total}}" readonly="readonly" /></td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="obj-empty" *ngIf="items.length == 0">No items registered.</div>
+
+    <div class="footer">
+        <button type="button" id="tb-project-changeRequests-back-to-project" obj-button (click)="backToProject()">Back to Project</button>
+        <button type="submit" id="tb-project-changeRequests-save" obj-button class="primary">Save</button>
+    </div>
+</form>
+
+<obj-snackbar id="tb-project-changeRequests-snackbar" [control]="snackbar"></obj-snackbar>

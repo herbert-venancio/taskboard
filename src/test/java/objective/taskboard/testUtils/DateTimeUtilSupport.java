@@ -1,5 +1,7 @@
 package objective.taskboard.testUtils;
 
+import static objective.taskboard.utils.DateTimeUtils.parseStringToDate;
+
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -24,5 +26,9 @@ public class DateTimeUtilSupport {
     
     public static Date date(LocalDate d, ZoneId zone) {
         return Date.from(d.atStartOfDay().atZone(zone).toInstant());
+    }
+    
+    public static long parseDateStringAsMilliseconds(String date) {
+        return parseStringToDate(date).getTime();
     }
 }
