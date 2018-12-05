@@ -32,7 +32,8 @@ class ChartUtils {
             title: {
                 style: {
                     color: '#8E8E8E'
-                }
+                },
+                text: undefined
             },
             tooltip: {
                 footerFormat: '<span style="font-style: italic; font-weight: bold; font-size: 1.1em;">Total: {point.total:.2f}</span>',
@@ -48,6 +49,8 @@ class ChartUtils {
                 lineColor: '#8E8E8E',
                 startOfWeek: 0,
                 tickColor: '#8E8E8E',
+                tickInterval: null,
+                tickPixelInterval: 100,
                 type: 'datetime'
             },
             yAxis: {
@@ -165,7 +168,7 @@ class ChartBuilderBase {
                     this.yAxis[0].setExtremes(null, null);
                 };
                 const zoomOutXAxisToTimelineExtent = () => {
-                    dcDateRangeChartsService.applySelection(this.title.textStr);
+                    dcDateRangeChartsService.applySelection(this);
                 };
                 if (event.resetSelection) {
                     hideResetButton();
@@ -192,6 +195,12 @@ class ChartBuilderBase {
         return this;
     }
 
+    withTooltipHeaderFormat (format) {
+        this.options.tooltip.headerFormat = format;
+        this.options.tooltip.useHTML = true;
+        return this;
+    }
+
     withSeriesData (seriesData) {
         Highcharts.merge(true, this.options, {series: seriesData});
         return this;
@@ -206,8 +215,6 @@ class ChartBuilderBase {
 class WeeklyChartBuilder extends ChartBuilderBase {
     constructor (divID) {
         super(divID);
-        const oneWeekInMillis = 7 * 24 * 3600 * 1000;
-        this.options.xAxis.tickInterval = oneWeekInMillis;
         this.options.xAxis.labels = {
             formatter: function () {
                 return Highcharts.dateFormat('%e %b %y', this.value);
@@ -268,7 +275,6 @@ class CFDChartBuilder extends ChartBuilderBase {
     get _xAxisOptions () {
         return {
             xAxis: {
-                tickInterval: 24 * 3600 * 1000,
                 events: this._xAxisEvents,
                 labels: this._xAxisLabels
             }

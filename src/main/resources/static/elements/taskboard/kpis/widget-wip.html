@@ -148,7 +148,7 @@
 
                 _resetChart: function () {
                     if (this.chart) {
-                        dcDateRangeChartsService.deregisterHighchartsChart(this.chart.title.textStr);
+                        dcDateRangeChartsService.deregisterHighchartsChart(this.chart);
                         this.chart.destroy();
                         this.chart = null;
                     }
@@ -210,15 +210,19 @@
                 _createChart: function () {
                     const series = this._transformToHighchartsSeries(this._plotData.statusesGroup, this._plotData.issueStatusesOrdered);
                     const builder = new WeeklyChartBuilder('wip')
-                        .withTitle('WIP')
                         .withChartType('column')
                         .withTooltipNumberOfDecimals(2)
+                        .withTooltipHeaderFormat(
+                            '<div class="highcharts-tooltip-header">' +
+                                '<p class="highcharts-tooltip-header__title">{point.key}</p>' +
+                                '<p class="highcharts-tooltip-header__subtitle">Values are shown in average</p>' +
+                            '</div>')
                         .withSeriesData(series);
 
                     this._resetChart();
                     this.chart = builder.build();
-                    dcDateRangeChartsService.registerHighchartsChart(this.chart.title.textStr, this.chart);
-                    dcDateRangeChartsService.applySelection(this.chart.title.textStr);
+                    dcDateRangeChartsService.registerHighchartsChart(this.chart);
+                    dcDateRangeChartsService.applySelection(this.chart);
                 },
 
                 _parseDates: function (data) {

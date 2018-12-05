@@ -13,7 +13,7 @@
             }
         </style>
 
-        <widget-wrap title="TouchTime" is-ready="{{isReady}}" tags="{{tags}}" 
+        <widget-wrap title="Touch Time by Issues" is-ready="{{isReady}}" tags="{{tags}}" 
                 options="{{options}}" highcharts-chart="{{chart}}" 
                 error-message="{{errorMessage}}">
             <div id="touchTime" class="tb-chart"></div>
@@ -214,7 +214,6 @@
                     const effortByStatusByIssueKey = [...this._plotData.statusesGroup.all()];
                     const series = this._transformToHighchartsSeries(effortByStatusByIssueKey, this._plotData.issueKeys);
                     this.chart = new TouchTimeChartBuilder('touchTime')
-                        .withTitle('Touch Time by Issues')
                         .withChartType('bar')
                         .withTooltipNumberOfDecimals(2)
                         .withCategories(this._plotData.issueKeys)

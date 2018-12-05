@@ -106,12 +106,11 @@ function DcDateRangeChartsService() {
             }
         });
         self._highchartCharts.forEach((chart) => {
-            self.applySelection(chart.title.textStr)
-        })
+            self.applySelection(chart);
+        });
     };
 
-    self.applySelection = function(chartName) {
-        const chart = self._highchartCharts.get(chartName);
+    self.applySelection = function (chart) {
 
         if (!chart) {
             return;
@@ -144,13 +143,15 @@ function DcDateRangeChartsService() {
         });
     };
 
-    self.registerHighchartsChart = function (chartName, chart) {
-        self._highchartCharts.set(chartName, chart);
-    }
+    self.registerHighchartsChart = function (chart) {
+        const chartKey = chart.options.chart.renderTo;
+        self._highchartCharts.set(chartKey, chart);
+    };
 
-    self.deregisterHighchartsChart = function (chartName) {
-        self._highchartCharts.delete(chartName);
-    }
+    self.deregisterHighchartsChart = function (chart) {
+        const chartKey = chart.options.chart.renderTo;
+        self._highchartCharts.delete(chartKey);
+    };
 
 }
 
