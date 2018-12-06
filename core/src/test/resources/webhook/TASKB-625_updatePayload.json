@@ -1,0 +1,299 @@
+{
+    "changelog": {
+        "id": "2127211",
+        "items": [
+            {
+                "field": "status",
+                "fieldtype": "jira",
+                "from": "10052",
+                "fromString": "To Do",
+                "to": "10652",
+                "toString": "Doing"
+            },
+            {
+                "field": "assignee",
+                "fieldtype": "jira",
+                "from": null,
+                "fromString": null,
+                "to": "gtakeuchi",
+                "toString": "Gabriel Takeuchi"
+            }
+        ]
+    },
+    "issue": {
+        "fields": {
+            "aggregateprogress": {
+                "progress": 0,
+                "total": 0
+            },
+            "aggregatetimeestimate": null,
+            "aggregatetimeoriginalestimate": null,
+            "aggregatetimespent": null,
+            "assignee": {
+                "active": true,
+                "avatarUrls": {
+                    "16x16": "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=16",
+                    "24x24": "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=24",
+                    "32x32": "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=32",
+                    "48x48": "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=48"
+                },
+                "displayName": "Gabriel Takeuchi",
+                "key": "gtakeuchi",
+                "name": "gtakeuchi",
+                "self": "http://54.68.128.117:8100/rest/api/2/user?username=gtakeuchi",
+                "timeZone": "America/Sao_Paulo"
+            },
+            "attachment": [],
+            "comment": {
+                "comments": [],
+                "maxResults": 0,
+                "startAt": 0,
+                "total": 0
+            },
+            "created": "2017-05-30T19:48:40.000+0000",
+            "creator": {
+                "active": true,
+                "avatarUrls": {
+                    "16x16": "http://www.gravatar.com/avatar/6a9dde9b22771e019aa288794f8013c1?d=mm&s=16",
+                    "24x24": "http://www.gravatar.com/avatar/6a9dde9b22771e019aa288794f8013c1?d=mm&s=24",
+                    "32x32": "http://www.gravatar.com/avatar/6a9dde9b22771e019aa288794f8013c1?d=mm&s=32",
+                    "48x48": "http://www.gravatar.com/avatar/6a9dde9b22771e019aa288794f8013c1?d=mm&s=48"
+                },
+                "displayName": "Jean Takano",
+                "key": "jean.takano",
+                "name": "jean.takano",
+                "self": "http://54.68.128.117:8100/rest/api/2/user?username=jean.takano",
+                "timeZone": "America/Sao_Paulo"
+            },
+            "customfield_10013": null,
+            "customfield_10062": null,
+            "customfield_10092": null,
+            "customfield_10093": null,
+            "customfield_10200": null,
+            "customfield_10201": null,
+            "customfield_10202": null,
+            "customfield_10260": null,
+            "customfield_10272": null,
+            "customfield_10273": null,
+            "customfield_10301": null,
+            "customfield_10302": null,
+            "customfield_10303": null,
+            "customfield_10330": null,
+            "customfield_10350": null,
+            "customfield_10370": null,
+            "customfield_10450": null,
+            "customfield_10540": null,
+            "customfield_10640": null,
+            "customfield_10641": null,
+            "customfield_10644": "9223372036854775807",
+            "customfield_10645": null,
+            "customfield_10647": null,
+            "customfield_10650": "0|i1092z:",
+            "customfield_10740": null,
+            "customfield_10841": null,
+            "customfield_10940": null,
+            "customfield_11041": null,
+            "customfield_11042": null,
+            "customfield_11043": null,
+            "customfield_11044": null,
+            "customfield_11045": null,
+            "customfield_11241": null,
+            "customfield_11242": null,
+            "customfield_11243": null,
+            "customfield_11244": null,
+            "customfield_11245": null,
+            "customfield_11246": null,
+            "customfield_11247": null,
+            "customfield_11340": null,
+            "customfield_11341": null,
+            "customfield_11440": {
+                "id": "12606",
+                "self": "http://54.68.128.117:8100/rest/api/2/customFieldOption/12606",
+                "value": "Standard"
+            },
+            "customfield_11451": null,
+            "customfield_11452": null,
+            "customfield_11453": null,
+            "customfield_11454": null,
+            "customfield_11455": null,
+            "customfield_11456": null,
+            "customfield_11457": {
+                "id": "12657",
+                "self": "http://54.68.128.117:8100/rest/api/2/customFieldOption/12657",
+                "value": "S"
+            },
+            "customfield_11540": null,
+            "customfield_11542": null,
+            "customfield_11543": null,
+            "customfield_11544": null,
+            "customfield_11545": null,
+            "customfield_11546": null,
+            "customfield_11547": null,
+            "customfield_11548": null,
+            "customfield_11550": null,
+            "customfield_11551": null,
+            "customfield_11640": null,
+            "customfield_11740": null,
+            "customfield_11741": null,
+            "customfield_11742": null,
+            "customfield_11743": null,
+            "customfield_11744": null,
+            "customfield_11745": null,
+            "customfield_11746": null,
+            "customfield_11747": null,
+            "description": null,
+            "duedate": null,
+            "environment": null,
+            "issuelinks": [],
+            "issuetype": {
+                "avatarId": 12256,
+                "description": "Taskboard",
+                "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12256&avatarType=issuetype",
+                "id": "10606",
+                "name": "Feature Review",
+                "self": "http://54.68.128.117:8100/rest/api/2/issuetype/10606",
+                "subtask": true
+            },
+            "labels": [],
+            "lastViewed": "2017-06-28T11:35:38.253+0000",
+            "parent": {
+                "fields": {
+                    "issuetype": {
+                        "avatarId": 12262,
+                        "description": "A task that needs to be done.",
+                        "iconUrl": "http://54.68.128.117:8100/secure/viewavatar?size=xsmall&avatarId=12262&avatarType=issuetype",
+                        "id": "11",
+                        "name": "Task",
+                        "self": "http://54.68.128.117:8100/rest/api/2/issuetype/11",
+                        "subtask": false
+                    },
+                    "priority": {
+                        "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
+                        "id": "9",
+                        "name": "M\u00e9dia",
+                        "self": "http://54.68.128.117:8100/rest/api/2/priority/9"
+                    },
+                    "status": {
+                        "description": "Taskboard",
+                        "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
+                        "id": "10657",
+                        "name": "To Feature Review",
+                        "self": "http://54.68.128.117:8100/rest/api/2/status/10657",
+                        "statusCategory": {
+                            "colorName": "yellow",
+                            "id": 4,
+                            "key": "indeterminate",
+                            "name": "In Progress",
+                            "self": "http://54.68.128.117:8100/rest/api/2/statuscategory/4"
+                        }
+                    },
+                    "summary": "teste3"
+                },
+                "id": "225879",
+                "key": "TASKB-624",
+                "self": "http://54.68.128.117:8100/rest/api/2/issue/225879"
+            },
+            "priority": {
+                "iconUrl": "http://54.68.128.117:8100/images/icons/priorities/minor.svg",
+                "id": "9",
+                "name": "M\u00e9dia",
+                "self": "http://54.68.128.117:8100/rest/api/2/priority/9"
+            },
+            "progress": {
+                "progress": 0,
+                "total": 0
+            },
+            "project": {
+                "avatarUrls": {
+                    "16x16": "http://54.68.128.117:8100/secure/projectavatar?size=xsmall&avatarId=11653",
+                    "24x24": "http://54.68.128.117:8100/secure/projectavatar?size=small&avatarId=11653",
+                    "32x32": "http://54.68.128.117:8100/secure/projectavatar?size=medium&avatarId=11653",
+                    "48x48": "http://54.68.128.117:8100/secure/projectavatar?avatarId=11653"
+                },
+                "id": "11315",
+                "key": "TASKB",
+                "name": "Taskboard",
+                "projectCategory": {
+                    "id": "10001",
+                    "name": "Externo",
+                    "self": "http://54.68.128.117:8100/rest/api/2/projectCategory/10001"
+                },
+                "self": "http://54.68.128.117:8100/rest/api/2/project/11315"
+            },
+            "reporter": {
+                "active": true,
+                "avatarUrls": {
+                    "16x16": "http://www.gravatar.com/avatar/6a9dde9b22771e019aa288794f8013c1?d=mm&s=16",
+                    "24x24": "http://www.gravatar.com/avatar/6a9dde9b22771e019aa288794f8013c1?d=mm&s=24",
+                    "32x32": "http://www.gravatar.com/avatar/6a9dde9b22771e019aa288794f8013c1?d=mm&s=32",
+                    "48x48": "http://www.gravatar.com/avatar/6a9dde9b22771e019aa288794f8013c1?d=mm&s=48"
+                },
+                "displayName": "Jean Takano",
+                "key": "jean.takano",
+                "name": "jean.takano",
+                "self": "http://54.68.128.117:8100/rest/api/2/user?username=jean.takano",
+                "timeZone": "America/Sao_Paulo"
+            },
+            "resolution": null,
+            "resolutiondate": null,
+            "status": {
+                "description": "Taskboard",
+                "iconUrl": "http://54.68.128.117:8100/images/icons/statuses/generic.png",
+                "id": "10652",
+                "name": "Doing",
+                "self": "http://54.68.128.117:8100/rest/api/2/status/10652",
+                "statusCategory": {
+                    "colorName": "yellow",
+                    "id": 4,
+                    "key": "indeterminate",
+                    "name": "In Progress",
+                    "self": "http://54.68.128.117:8100/rest/api/2/statuscategory/4"
+                }
+            },
+            "subtasks": [],
+            "summary": "Review of teste3",
+            "timeestimate": null,
+            "timeoriginalestimate": null,
+            "timespent": null,
+            "timetracking": {},
+            "updated": "2017-06-28T11:35:40.291+0000",
+            "versions": [],
+            "votes": {
+                "hasVoted": false,
+                "self": "http://54.68.128.117:8100/rest/api/2/issue/TASKB-625/votes",
+                "votes": 0
+            },
+            "watches": {
+                "isWatching": false,
+                "self": "http://54.68.128.117:8100/rest/api/2/issue/TASKB-625/watchers",
+                "watchCount": 1
+            },
+            "worklog": {
+                "maxResults": 20,
+                "startAt": 0,
+                "total": 0,
+                "worklogs": []
+            },
+            "workratio": -1
+        },
+        "id": "225880",
+        "key": "TASKB-625",
+        "self": "http://54.68.128.117:8100/rest/api/2/issue/225880"
+    },
+    "timestamp": 1498649741301,
+    "user": {
+        "active": true,
+        "avatarUrls": {
+            "16x16": "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=16",
+            "24x24": "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=24",
+            "32x32": "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=32",
+            "48x48": "http://www.gravatar.com/avatar/c2b78b1d52b346ff4528044ee123cc74?d=mm&s=48"
+        },
+        "displayName": "Gabriel Takeuchi",
+        "key": "gtakeuchi",
+        "name": "gtakeuchi",
+        "self": "http://54.68.128.117:8100/rest/api/2/user?username=gtakeuchi",
+        "timeZone": "America/Sao_Paulo"
+    },
+    "webhookEvent": "jira:issue_updated"
+}

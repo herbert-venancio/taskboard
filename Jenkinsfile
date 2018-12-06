@@ -34,7 +34,7 @@ node("single-executor") {
                 try {
                     timeout(time: 40, unit: TimeUnit.MINUTES) {
                         wrap([$class: 'Xvnc']) {
-                            sh "${mvnHome}/bin/mvn --batch-mode -V -U -Dmaven.test.failure.ignore=true clean verify -P packaging-war,dev"
+                            sh "${mvnHome}/bin/mvn --batch-mode -V -U -Dmaven.test.failure.ignore=true clean install -P packaging-war,dev"
                         }
                     }
                 } finally {
@@ -49,12 +49,6 @@ node("single-executor") {
                 return;
 
             stage('Sonar') {
-                sh """
-                    mkdir target/combined-reports
-                    cp target/surefire-reports/*.xml target/combined-reports/
-                    cp target/failsafe-reports/*.xml target/combined-reports/
-                """
-
                 def SONAR_URL = env.SONARQUBE_URL
                 if (isMasterBranch()) {
                     sh "${mvnHome}/bin/mvn --batch-mode -V sonar:sonar -Dsonar.host.url=${SONAR_URL} -Dsonar.buildbreaker.skip=true"
@@ -72,7 +66,7 @@ node("single-executor") {
             }
 
             stage('Flyway') {
-                def flyway = load 'src/main/jenkins/flyway.groovy'
+                def flyway = load 'core/src/main/jenkins/flyway.groovy'
                 parallel mariadb: {
                     flyway.testMariaDBMigration()
                 }, oracle: {
@@ -102,7 +96,7 @@ node("single-executor") {
                         git branch: 'master', credentialsId: 'objective-solutions-user-rsa', url: 'git@gitlab:sdlc/liferay-environment-bootstrap.git'
 
                         dir ('dockers/taskboard') {
-                            sh 'cp ../../../target/taskboard-*-SNAPSHOT.war ./taskboard.war'
+                            sh 'cp ../../../application/target/application-*-SNAPSHOT.war ./taskboard.war'
                             sh "sudo docker build -t dockercb:5000/taskboard-snapshot:$tag ."
                             sh "sudo docker push dockercb:5000/taskboard-snapshot:$tag"
                         }

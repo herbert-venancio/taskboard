@@ -1,0 +1,14 @@
+{
+  "timestamp": 1509448932478,
+  "webhookEvent": "jira:version_updated",
+  "version": {
+    "self": "http://localhost:4567/rest/api/latest/version/12550",
+    "id": "12550",
+    "description": "",
+    "name": "1.0-edited",
+    "archived": false,
+    "released": false,
+    "overdue": false,
+    "projectId": 11315
+  }
+}

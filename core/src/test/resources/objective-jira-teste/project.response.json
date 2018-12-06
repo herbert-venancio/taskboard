@@ -1,0 +1,135 @@
+[
+  {
+    "expand": "description,lead,url,projectKeys",
+    "self": "http://localhost:4567/rest/api/latest/project/11315",
+    "id": "11315",
+    "key": "TASKB",
+    "name": "Taskboard",
+    "avatarUrls": {
+      "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653",
+      "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+      "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+      "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653"
+    },
+    "projectCategory": {
+      "self": "http://localhost:4567/rest/api/latest/projectCategory/10001",
+      "id": "10001",
+      "name": "Externo"
+    },
+    "projectTypeKey": "software"
+  },
+  {
+    "expand": "description,lead,url,projectKeys",
+    "self": "http://localhost:4567/rest/api/latest/project/11317",
+    "id": "11317",
+    "key": "PROJ1",
+    "name": "Project 1",
+    "avatarUrls": {
+      "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653",
+      "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+      "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+      "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653"
+    },
+    "projectCategory": {
+      "self": "http://localhost:4567/rest/api/latest/projectCategory/10001",
+      "id": "10001",
+      "name": "Externo"
+    },
+    "projectTypeKey": "software"
+  },
+  {
+    "expand": "description,lead,url,projectKeys",
+    "self": "http://localhost:4567/rest/api/latest/project/11318",
+    "id": "11318",
+    "key": "PROJ2",
+    "name": "Project 2",
+    "avatarUrls": {
+      "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653",
+      "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+      "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+      "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653"
+    },
+    "projectCategory": {
+      "self": "http://localhost:4567/rest/api/latest/projectCategory/10001",
+      "id": "10001",
+      "name": "Externo"
+    },
+    "projectTypeKey": "software"
+  },
+  {
+    "expand": "description,lead,url,projectKeys",
+    "self": "http://localhost:4567/rest/api/latest/project/11319",
+    "id": "11319",
+    "key": "PROJ3",
+    "name": "Project 3",
+    "avatarUrls": {
+      "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653",
+      "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+      "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+      "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653"
+    },
+    "projectCategory": {
+      "self": "http://localhost:4567/rest/api/latest/projectCategory/10001",
+      "id": "10001",
+      "name": "Externo"
+    },
+    "projectTypeKey": "software"
+  },
+  {
+    "expand": "description,lead,url,projectKeys",
+    "self": "http://localhost:4567/rest/api/latest/project/11320",
+    "id": "11320",
+    "key": "PROJ4",
+    "name": "Project 4",
+    "avatarUrls": {
+      "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653",
+      "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+      "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+      "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653"
+    },
+    "projectCategory": {
+      "self": "http://localhost:4567/rest/api/latest/projectCategory/10001",
+      "id": "10001",
+      "name": "Externo"
+    },
+    "projectTypeKey": "software"
+  },
+  {
+    "expand": "description,lead,url,projectKeys",
+    "self": "http://localhost:4567/rest/api/latest/project/11321",
+    "id": "11321",
+    "key": "PROJ5",
+    "name": "Project 5",
+    "avatarUrls": {
+      "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653",
+      "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+      "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+      "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653"
+    },
+    "projectCategory": {
+      "self": "http://localhost:4567/rest/api/latest/projectCategory/10001",
+      "id": "10001",
+      "name": "Externo"
+    },
+    "projectTypeKey": "software"
+  },
+  {
+    "expand": "description,lead,url,projectKeys",
+    "self": "http://localhost:4567/rest/api/latest/project/11322",
+    "id": "11322",
+    "key": "PROJ6",
+    "name": "Project 6",
+    "avatarUrls": {
+      "48x48": "http://localhost:4567/secure/projectavatar?avatarId=11653",
+      "24x24": "http://localhost:4567/secure/projectavatar?size=small&avatarId=11653",
+      "16x16": "http://localhost:4567/secure/projectavatar?size=xsmall&avatarId=11653",
+      "32x32": "http://localhost:4567/secure/projectavatar?size=medium&avatarId=11653"
+    },
+    "projectCategory": {
+      "self": "http://localhost:4567/rest/api/latest/projectCategory/10001",
+      "id": "10001",
+      "name": "Externo"
+    },
+    "projectTypeKey": "software"
+  }   
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "id": 10002,
+    "name": "Administrators"
+  },
+  {
+    "id": 10200,
+    "name": "Customer"
+  },
+  {
+    "id": 10100,
+    "name": "Developers"
+  },
+  {
+    "id": 10205,
+    "name": "Project Manager"
+  },
+  {
+    "id": 10210,
+    "name": "Staff Assignee"
+  },
+  {
+    "id": 10211,
+    "name": "Users"
+  },
+  {
+    "id": 10400,
+    "name": "Customer Lead"
+  },
+  {
+    "id": 10209,
+    "name": "Reviewer"
+  },
+  {
+    "id": 10201,
+    "name": "Guest Developer"
+  },
+  {
+    "id": 10204,
+    "name": "Product Manager"
+  }
+]
