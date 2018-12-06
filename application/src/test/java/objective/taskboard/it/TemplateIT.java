@@ -113,7 +113,7 @@ public class TemplateIT extends AbstractIntegrationTest {
 
     @Test
     public void uploadImage() throws IOException, URISyntaxException, JSONException {
-        HttpResponse response = uploadTemplate(favicon());
+        HttpResponse response = uploadTemplate(nonZipFile());
         assertThat(response.getStatusLine().getStatusCode(), not(200));
         JSONObject json = new JSONObject(EntityUtils.toString(response.getEntity()));
         assertEquals("Invalid file, cannot be used as template", json.getString("message"));
@@ -185,7 +185,7 @@ public class TemplateIT extends AbstractIntegrationTest {
         return temp.toFile();
     }
 
-    private static File favicon() throws URISyntaxException {
-        return new File(TemplateIT.class.getResource("/static/favicon.ico").toURI());
+    private static File nonZipFile() throws URISyntaxException {
+        return new File(TemplateIT.class.getResource("/objective/taskboard/utils/file.xml").toURI());
     }
 }
