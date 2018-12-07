@@ -5,6 +5,7 @@ import static objective.taskboard.testUtils.ProjectInfo.TASKB;
 import org.junit.Before;
 import org.junit.Test;
 
+import objective.taskboard.it.config.project.ProjectClusterConfiguration;
 import objective.taskboard.testUtils.ProjectInfo;
 
 public class ProjectClusterConfigurationIT extends AuthenticatedIntegrationTest {
@@ -53,6 +54,37 @@ public class ProjectClusterConfigurationIT extends AuthenticatedIntegrationTest 
 
             .goToClusterConfiguration()
             .assertEffort("Alpha Test", "S", "3.13");
+    }
+
+    @Test
+    public void whenRecalculate_shouldShowCurrentValueAndNewValueFields() {
+        ProjectClusterConfiguration projectClusterConfigurationTab = goToClusterConfiguration(TASKB);
+        projectClusterConfigurationTab
+                .openRecalculate()
+                .setStartDate("asdf")
+                .setEndDate("99/99/9999")
+                .assertStartDateHasNoError()
+                .assertEndDateHasNoError()
+                .clickRecalculate()
+                .assertIsOpen()
+                .assertStartDateHasErrorMessage()
+                .assertEndDateHasErrorMessage()
+                .setStartDate("01/01/2015")
+                .setEndDate("12/31/2017")
+                .clickRecalculate()
+                .assertIsClosed();
+
+        projectClusterConfigurationTab
+                .assertCurrentValueNewValueIsShown("Alpha Test", "XS")
+                .assertCurrentValueNewValueIsShown("Alpha Bug", "S")
+                .assertCurrentValueNewValueIsShown("Backend Development", "M")
+                .assertCurrentValueNewValueIsShown("BALLPARK - Alpha Test", "L")
+                .assertCurrentValueNewValueIsShown("BALLPARK - Planning", "XL")
+                .setEffort("Alpha Test", "XS", "4.5")
+                .setCycle("BALLPARK - Alpha Test", "L", "14.5")
+                .save()
+                .assertEffort("Alpha Test", "XS", "4.5")
+                .assertCycle("BALLPARK - Alpha Test", "L", "14.5");
     }
 
     private ProjectClusterConfiguration goToClusterConfiguration(ProjectInfo projectInfo) {

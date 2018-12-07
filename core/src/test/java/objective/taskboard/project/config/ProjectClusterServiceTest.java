@@ -69,23 +69,22 @@ public class ProjectClusterServiceTest {
 
         List<ProjectClusterItemDto> projectClusterItemsDto = subject.getItems(project);
 
-        assertEquals(15, projectClusterItemsDto.size());
         assertItems(projectClusterItemsDto,
-                "PROJ | Alpha Test | XS | 1 | 1 | true",
-                "PROJ | Alpha Test | S | 2 | 2 | true",
-                "PROJ | Alpha Test | M | 3 | 3 | true",
-                "PROJ | Alpha Test | L | 4 | 4 | false",
-                "PROJ | Alpha Test | XL | 5 | 5 | false",
-                "PROJ | Backend Development | XS | 1 | 1 | true",
-                "PROJ | Backend Development | S | 2 | 2 | true",
-                "PROJ | Backend Development | M | 3 | 3 | true",
-                "PROJ | Backend Development | L | 0 | 0 | false",
-                "PROJ | Backend Development | XL | 0 | 0 | false",
-                "PROJ | Feature Planning | XS | 0 | 0 | false",
-                "PROJ | Feature Planning | S | 0 | 0 | false",
-                "PROJ | Feature Planning | M | 0 | 0 | false",
-                "PROJ | Feature Planning | L | 0 | 0 | false",
-                "PROJ | Feature Planning | XL | 0 | 0 | false");
+                "Alpha Test | XS | 1 | 1 | true",
+                "Alpha Test | S | 2 | 2 | true",
+                "Alpha Test | M | 3 | 3 | true",
+                "Alpha Test | L | 4 | 4 | false",
+                "Alpha Test | XL | 5 | 5 | false",
+                "Backend Development | XS | 1 | 1 | true",
+                "Backend Development | S | 2 | 2 | true",
+                "Backend Development | M | 3 | 3 | true",
+                "Backend Development | L | 0 | 0 | false",
+                "Backend Development | XL | 0 | 0 | false",
+                "Feature Planning | XS | 0 | 0 | false",
+                "Feature Planning | S | 0 | 0 | false",
+                "Feature Planning | M | 0 | 0 | false",
+                "Feature Planning | L | 0 | 0 | false",
+                "Feature Planning | XL | 0 | 0 | false");
     }
 
     @Test
@@ -224,7 +223,7 @@ public class ProjectClusterServiceTest {
 
     private void projectCluster(ProjectClusterItemDtoBuilder... builders) {
         asList(builders).stream()
-            .forEach(builder -> projectClusterItemRepositoryMock.create(builder.build()));
+            .forEach(builder -> projectClusterItemRepositoryMock.create(PROJ, builder.build()));
     }
 
     private ProjectClusterItemDtoBuilder projectClusterItem() {
@@ -258,7 +257,7 @@ public class ProjectClusterServiceTest {
         }
 
         private ProjectClusterItemDto build() {
-            return new ProjectClusterItemDto(PROJ, issueType, sizing, effort, cycle, false);
+            return new ProjectClusterItemDto(issueType, sizing, effort, cycle, false);
         }
     }
 
@@ -275,8 +274,7 @@ public class ProjectClusterServiceTest {
     }
 
     private String toString(ProjectClusterItemDto item) {
-        return String.format("%s | %s | %s | %.0f | %.0f | %b",
-                item.getProjectKey(),
+        return String.format("%s | %s | %.0f | %.0f | %b",
                 item.getIssueType(),
                 item.getSizing(),
                 item.getEffort(),

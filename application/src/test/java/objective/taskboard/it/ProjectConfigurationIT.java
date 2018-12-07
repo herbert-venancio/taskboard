@@ -5,6 +5,8 @@ import static objective.taskboard.testUtils.ProjectInfo.TASKB;
 import org.junit.Before;
 import org.junit.Test;
 
+import objective.taskboard.it.config.project.ProjectAdvancedConfigurationsPage;
+
 public class ProjectConfigurationIT extends AuthenticatedIntegrationTest {
 
     private MainPage mainPage;

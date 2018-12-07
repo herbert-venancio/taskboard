@@ -1,4 +1,4 @@
-package objective.taskboard.it;
+package objective.taskboard.it.config.project;
 
 import static java.lang.String.format;
 import static objective.taskboard.it.components.SnackBarComponent.SNACK_BAR_TAG;
@@ -33,32 +33,31 @@ public class ProjectClusterConfiguration extends ProjectAdvancedConfigurationTab
     }
 
     public ProjectClusterConfiguration assertEffort(String issueType, String size, String expectedEffort) {
-        WebElement input = getInputByIssueTypeAndSize(issueType, "effort-" + size);
+        WebElement input = getInputByIssueTypeAndSize(issueType, "effort", size);
         waitAttributeValueInElement(input, "value", expectedEffort);
         return this;
     }
 
     public ProjectClusterConfiguration setEffort(String issueType, String size, String effort) {
-        WebElement input = getInputByIssueTypeAndSize(issueType, "effort-" + size);
+        WebElement input = getInputByIssueTypeAndSize(issueType, "effort", size);
         setInputValue(input, effort);
         return this;
     }
 
     public ProjectClusterConfiguration assertCycle(String issueType, String size, String expectedCycle) {
-        WebElement input = getInputByIssueTypeAndSize(issueType, "cycle-" + size);
+        WebElement input = getInputByIssueTypeAndSize(issueType, "cycle", size);
         waitAttributeValueInElement(input, "value", expectedCycle);
         return this;
     }
 
     public ProjectClusterConfiguration setCycle(String issueType, String size, String cycle) {
-        WebElement input = getInputByIssueTypeAndSize(issueType, "cycle-" + size);
+        WebElement input = getInputByIssueTypeAndSize(issueType, "cycle", size);
         setInputValue(input, cycle);
         return this;
     }
 
-    private WebElement getInputByIssueTypeAndSize(String issueType, String inputName) {
-        By inputSelector = cssSelector(format("obj-expansion-panel[data-issue-type=\"%s\"] input[name=\"%s\"]", issueType, inputName));
-        return getElementWhenItExists(inputSelector);
+    private WebElement getInputByIssueTypeAndSize(String issueType, String input, String size) {
+        return getElementWhenItExistsAndIsVisible(By.id(issueType + "-" + input + "-" + size));
     }
 
     public ProjectClusterConfiguration assertIsFromBaseCluster(String issueType, String size, Boolean isVisible) {
@@ -89,4 +88,15 @@ public class ProjectClusterConfiguration extends ProjectAdvancedConfigurationTab
         return this;
     }
 
+    public ProjectClusterRecalculateModal openRecalculate() {
+        return new ProjectClusterRecalculateModal(webDriver).open();
+    }
+
+    public ProjectClusterConfiguration assertCurrentValueNewValueIsShown(String issueType, String tsize) {
+        getInputByIssueTypeAndSize(issueType, "original-effort", tsize);
+        getInputByIssueTypeAndSize(issueType, "effort", tsize);
+        getInputByIssueTypeAndSize(issueType, "original-cycle", tsize);
+        getInputByIssueTypeAndSize(issueType, "cycle", tsize);
+        return this;
+    }
 }

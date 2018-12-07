@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -49,6 +50,10 @@ public class ClusterAlgorithmExecution extends BackgroundTask<Map<String, Cluste
         return executionId;
     }
 
+    public ClusterAlgorithmRequest getRequest() {
+        return this.context.request;
+    }
+
     @Override
     protected Map<String, ClusterAlgorithmResult<IssueModel>> execute() throws Exception {
         return clusteringAlgorithm();
@@ -66,18 +71,18 @@ public class ClusterAlgorithmExecution extends BackgroundTask<Map<String, Cluste
         setProgress(0.4f);
 
         checkInterruption();
-        Table<String, Issue, IssueModel> featureModel = buildFeatureClusteringModel(allFeatures, allBugs);
+        Table<String, Issue, IssueModel> model = buildClusteringModel(context.request.getClusterGrouping(), allFeatures, allBugs);
         setProgress(0.6f);
 
         checkInterruption();
-        CentroidCalculator<IssueModel> centroidCalculator = createCentroidCalculator(context.request.getClusteringType(), featureModel.values());
-        Map<String, ClusterAlgorithmResult<IssueModel>> featureClusters = runClustering(featureModel, centroidCalculator);
+        CentroidCalculator<IssueModel> centroidCalculator = createCentroidCalculator(context.request.getClusteringType(), model.values());
+        Map<String, ClusterAlgorithmResult<IssueModel>> featureClusters = runClustering(model, centroidCalculator);
         setProgress(0.8f);
 
         return featureClusters;
     }
 
-    private CentroidCalculator<IssueModel> createCentroidCalculator(ClusterAlgorithmRequest.ClusteringType clusteringType, Collection<IssueModel> models) {
+    private static CentroidCalculator<IssueModel> createCentroidCalculator(ClusterAlgorithmRequest.ClusteringType clusteringType, Collection<IssueModel> models) {
         CentroidCalculator<IssueModel> centroidCalculator = new CentroidCalculator<>();
         switch(clusteringType) {
             case EFFORT_ONLY:
@@ -118,6 +123,7 @@ public class ClusterAlgorithmExecution extends BackgroundTask<Map<String, Cluste
                 .filter(issue -> context.request.getProjects().contains(issue.getProjectKey()))
                 .filter(issue -> context.request.getFeatureIssueTypes().contains(issue.getType()))
                 .filter(issue -> context.request.getFeatureDoneStatuses().contains(issue.getStatus()))
+                .filter(issue -> withinDateRange(issue, context.request.getDateRange(), context.request.getFeatureDoneStatuses()))
                 .collect(Collectors.toList());
     }
 
@@ -134,10 +140,22 @@ public class ClusterAlgorithmExecution extends BackgroundTask<Map<String, Cluste
     private List<Issue> getDoneSubtasks(Issue feature) {
         return feature.getSubtaskCards().stream()
                 .filter(issue -> context.request.getSubtaskDoneStatuses().contains(issue.getStatus()))
+                .filter(issue -> withinDateRange(issue, context.request.getDateRange(), context.request.getSubtaskDoneStatuses()))
                 .collect(Collectors.toList());
     }
 
-    private Table<String, Issue, IssueModel> buildFeatureClusteringModel(List<Issue> allFeatures, Multimap<Issue, Issue> allBugs) {
+    private Table<String, Issue, IssueModel> buildClusteringModel(ClusterAlgorithmRequest.ClusterGrouping clusterGrouping, List<Issue> allFeatures, Multimap<Issue, Issue> allBugs) {
+        switch(clusterGrouping) {
+            case BALLPARK:
+                return buildBallParkClusteringModel(allFeatures, allBugs);
+            case SUBTASK:
+                return buildSubtaskClusteringModel(allFeatures, allBugs);
+            default:
+                throw new IllegalArgumentException("Unknown cluster grouping: " + clusterGrouping.name());
+        }
+    }
+
+    private Table<String, Issue, IssueModel> buildBallParkClusteringModel(List<Issue> allFeatures, Multimap<Issue, Issue> allBugs) {
         // create a table group x feature, and each cell contains a
         // list of sub-tasks that matches that group and parent
         Table<String, Issue, List<Issue>> table = HashBasedTable.create();
@@ -187,6 +205,25 @@ public class ClusterAlgorithmExecution extends BackgroundTask<Map<String, Cluste
                         , HashBasedTable::create));
     }
 
+    private Table<String, Issue, IssueModel> buildSubtaskClusteringModel(List<Issue> allFeatures, Multimap<Issue, Issue> allBugs) {
+        Set<Long> issueTypes = context.ballparkMappings.values()
+                .stream()
+                .flatMap(Collection::stream)
+                .flatMap(ballpark -> ballpark.getJiraIssueTypes().stream())
+                .collect(Collectors.toSet());
+
+        return Stream.concat(allFeatures.stream(), allBugs.values().stream())
+                .flatMap(feat -> getDoneSubtasks(feat).stream())
+                .filter(subtask -> issueTypes.contains(subtask.getType()))
+                .distinct()
+                .collect(toTable(
+                        Issue::getIssueTypeName
+                        , Function.identity()
+                        , subtask -> IssueModel.createForSubtask(subtask, context.request.getSubtaskCycleStatuses())
+                        , HashBasedTable::create
+                ));
+    }
+
     private Map<String, ClusterAlgorithmResult<IssueModel>> runClustering(Table<String, Issue, IssueModel> modelTable, CentroidCalculator<IssueModel> centroidCalculator) {
         KMeans kmeans = new KMeans(CLUSTER_LABELS);
         Map<String, ClusterAlgorithmResult<IssueModel>> clusterResults = Collections.synchronizedMap(new HashMap<>());
@@ -196,8 +233,8 @@ public class ClusterAlgorithmExecution extends BackgroundTask<Map<String, Cluste
                     String group = cell.getKey();
                     Collection<IssueModel> issues = cell.getValue().values();
 
-                    // do 20 measurements
-                    Map<ClusterAlgorithmResult<IssueModel>, Long> measurements = IntStream.range(0, 10)
+                    // do 100 measurements
+                    Map<ClusterAlgorithmResult<IssueModel>, Long> measurements = IntStream.range(0, 100)
                             .parallel()
                             .mapToObj(i -> kmeans.calculateClusters(issues, centroidCalculator))
                             .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
@@ -228,4 +265,19 @@ public class ClusterAlgorithmExecution extends BackgroundTask<Map<String, Cluste
         return groups;
     }
 
+    private boolean withinDateRange(Issue issue, ClusterAlgorithmRequest.DateRange dateRange, List<Long> statuses) {
+        if(dateRange == null || (dateRange.getStartDate() == null && dateRange.getEndDate() == null))
+            return true;
+
+        return issue.getChangelog().stream()
+                .filter(entry -> "status".equals(entry.field))
+                .filter(entry -> statuses.contains(Long.parseLong(entry.originalTo)))
+                .allMatch(entry -> {
+                    boolean isAfterStartDate = dateRange.getStartDate() == null
+                            || entry.timestamp.isAfter(dateRange.getStartDate().atStartOfDay(entry.timestamp.getZone()));
+                    boolean isBeforeEndDate = dateRange.getEndDate() == null
+                            || entry.timestamp.isBefore(dateRange.getEndDate().atStartOfDay(entry.timestamp.getZone()));
+                    return isAfterStartDate && isBeforeEndDate;
+                });
+    }
 }

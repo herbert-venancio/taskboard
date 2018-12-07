@@ -1,0 +1,12 @@
+@import 'obj-ds/utils/all';
+
+form {
+    display: flex;
+}
+obj-label-field {
+    margin-left: 24px;
+
+    &:first-child {
+        margin-left: 0;
+    }
+}

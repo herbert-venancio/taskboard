@@ -1,5 +1,6 @@
 package objective.taskboard.cluster.algorithm;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -12,7 +13,9 @@ public class ClusterAlgorithmRequest {
     private List<Long> featureDoneStatuses = Collections.emptyList();
     private List<Long> subtaskDoneStatuses = Collections.emptyList();
     private CycleStatuses subtaskCycleStatuses = null;
+    private ClusterGrouping clusterGrouping = ClusterGrouping.BALLPARK;
     private ClusteringType clusteringType = ClusteringType.EFFORT_AND_CYCLE;
+    private DateRange dateRange = new DateRange();
 
     public ClusterAlgorithmRequest() {
     }
@@ -25,6 +28,21 @@ public class ClusterAlgorithmRequest {
         this.subtaskDoneStatuses = subtaskDoneStatuses;
         this.subtaskCycleStatuses = subtaskCycleStatuses;
         this.clusteringType = clusteringType;
+    }
+
+    public static ClusterAlgorithmRequest fromDefaults(ClusterAlgorithmProperties.Defaults defaults) {
+        if (defaults == null)
+            return new ClusterAlgorithmRequest();
+
+        return new ClusterAlgorithmRequest(
+                defaults.getProjects()
+                , defaults.getFeatureIssueTypes()
+                , defaults.getBugIssueTypes()
+                , defaults.getFeatureDoneStatuses()
+                , defaults.getSubtaskDoneStatuses()
+                , defaults.getCycleStatuses()
+                , defaults.getClusteringType()
+        );
     }
 
     public List<String> getProjects() {
@@ -75,6 +93,14 @@ public class ClusterAlgorithmRequest {
         this.subtaskCycleStatuses = subtaskCycleStatuses;
     }
 
+    public ClusterGrouping getClusterGrouping() {
+        return clusterGrouping;
+    }
+
+    public void setClusterGrouping(ClusterGrouping clusterGrouping) {
+        this.clusterGrouping = clusterGrouping;
+    }
+
     public ClusteringType getClusteringType() {
         return clusteringType;
     }
@@ -83,17 +109,17 @@ public class ClusterAlgorithmRequest {
         this.clusteringType = Optional.ofNullable(clusteringType).orElse(ClusteringType.EFFORT_AND_CYCLE);
     }
 
+    public DateRange getDateRange() {
+        return dateRange;
+    }
+
+    public void setDateRange(DateRange dateRange) {
+        this.dateRange = dateRange;
+    }
+
     public static class CycleStatuses {
         private long first;
         private long last;
-
-        public CycleStatuses() {
-        }
-
-        public CycleStatuses(long first, long last) {
-            this.first = first;
-            this.last = last;
-        }
 
         public long getFirst() {
             return first;
@@ -112,6 +138,11 @@ public class ClusterAlgorithmRequest {
         }
     }
 
+    public enum ClusterGrouping {
+        BALLPARK,
+        SUBTASK
+    }
+
     public enum ClusteringType {
 
         EFFORT_ONLY("Effort only"),
@@ -122,6 +153,27 @@ public class ClusterAlgorithmRequest {
 
         ClusteringType(String description) {
             this.description = description;
+        }
+    }
+
+    public static class DateRange {
+        private LocalDate startDate;
+        private LocalDate endDate;
+
+        public LocalDate getStartDate() {
+            return startDate;
+        }
+
+        public void setStartDate(LocalDate startDate) {
+            this.startDate = startDate;
+        }
+
+        public LocalDate getEndDate() {
+            return endDate;
+        }
+
+        public void setEndDate(LocalDate endDate) {
+            this.endDate = endDate;
         }
     }
 }

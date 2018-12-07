@@ -7,6 +7,7 @@ import { CommonModule } from '@angular/common';
 import { ObjDsModule } from '../obj-ds/obj-ds.module';
 import { FormUtilsModule } from './../form-utils/form-utils.module';
 import { TbClusterComponent } from './forms/tb-cluster/tb-cluster.component';
+import { TbClusterAlgorithmComponent } from './forms/tb-cluster-algorithm/tb-cluster-algorithm.component';
 
 @NgModule({
     imports: [
@@ -18,10 +19,12 @@ import { TbClusterComponent } from './forms/tb-cluster/tb-cluster.component';
         FormUtilsModule
     ],
     declarations: [
-        TbClusterComponent
+        TbClusterComponent,
+        TbClusterAlgorithmComponent
     ],
     exports: [
-        TbClusterComponent
+        TbClusterComponent,
+        TbClusterAlgorithmComponent
     ]
 })
 export class TbDsModule { }

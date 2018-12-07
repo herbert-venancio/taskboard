@@ -1,4 +1,17 @@
-<tb-cluster [clusterItems]="clusterItems"
+<obj-toolbar title="Project cluster - {{projectKey}}" [subtitle]="toolbarSubtitle">
+    <button obj-flat-button (click)="recalculateCluster.open()">
+        <obj-icon iconName="recalculate"></obj-icon>Recalculate
+    </button>
+</obj-toolbar>
+
+<tb-project-cluster-recalculate-modal
+    #recalculateCluster
+    [project]="projectKey"
+    (result)="setChangesCandidates($event)"
+    (errorEvent)="showErrorFormMessage($event)">
+</tb-project-cluster-recalculate-modal>
+
+<tb-cluster [clusterItems]="clusterItems" [changesCandidates]="changesCandidates"
     (saveEvent)="save($event)" (errorEvent)="showErrorFormMessage($event)">
 </tb-cluster>
 
@@ -8,7 +21,7 @@
         <p class="small" *ngIf="hasBaseCluster">* Base cluster</p>
     </div>
     <button type="button" id="tb-project-cluster-back-to-project" obj-button (click)="backToProject()">Back to Project</button>
-    <button type="button" id="tb-project-cluster-save" (click)="callSaveOfClusterComponent()" [disabled]="this.clusterComponent.isPristine()" obj-button class="primary">Save</button>
+    <button type="button" id="tb-project-cluster-save" (click)="callSaveOfClusterComponent()" [disabled]="this.clusterComponent.isPristine()" obj-button class="primary">{{changesCandidates.length === 0 ? 'Save' : 'Apply Selected'}}</button>
 </div>
 
 <obj-snackbar id="tb-project-cluster-snackbar" [control]="snackbar"></obj-snackbar>

@@ -43,6 +43,10 @@ public class IssueModel {
         return new IssueModel(feature.getIssueKey(), workTime(subtasks), cycleDays(subtasks, cycleStatuses).map(IssueModel::countDays).orElse(1));
     }
 
+    public static IssueModel createForSubtask(Issue subtask, ClusterAlgorithmRequest.CycleStatuses cycleStatuses) {
+        return new IssueModel(subtask.getIssueKey(), workTime(subtask), cycleDays(subtask, cycleStatuses).map(IssueModel::countDays).orElse(1));
+    }
+
     private static double workTime(List<Issue> subTasks) {
         return subTasks.stream()
                 .mapToDouble(IssueModel::workTime)

@@ -4,7 +4,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -67,8 +66,7 @@ public class FollowupClusterProvider {
             .forEach(i -> clusterItemsMap.put(generateMapKey(i),
                                               convertToFollowUpClusterItem(project, i)));
 
-        return clusterItemsMap.entrySet().parallelStream()
-                    .map(Entry<String, FollowUpClusterItem>::getValue)
+        return clusterItemsMap.values().stream()
                     .sorted(Comparator.comparing(FollowUpClusterItem::getParentTypeName)
                                 .thenComparing(FollowUpClusterItem::getSubtaskTypeName)
                                 .thenComparing(FollowUpClusterItem::getSizing))

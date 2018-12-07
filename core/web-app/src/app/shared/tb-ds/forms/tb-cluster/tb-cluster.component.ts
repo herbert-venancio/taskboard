@@ -10,11 +10,12 @@ import {
     QueryList,
     ElementRef
 } from '@angular/core';
-import { NgForm } from '@angular/forms';
+import { NgForm, FormGroup } from '@angular/forms';
 
 import { ClusterItemDto } from './cluster-item-dto.model';
-import { ClusterItemDtoGroup } from './cluster-item-dto-group.model';
+import { ClusterItemDtoGroup, ClusterItemChangeDto } from './cluster-item-dto-group.model';
 import { ExpansionPanelComponent } from 'app/shared/obj-ds/expansion-panel/expansion-panel.component';
+import * as _ from 'underscore';
 
 @Component({
     selector: 'tb-cluster',
@@ -24,6 +25,7 @@ import { ExpansionPanelComponent } from 'app/shared/obj-ds/expansion-panel/expan
 })
 export class TbClusterComponent implements OnChanges {
     @Input() clusterItems: ClusterItemDto[] = [];
+    @Input() changesCandidates: ClusterItemDto[] = [];
 
     @Output() saveEvent = new EventEmitter();
     @Output() errorEvent = new EventEmitter();
@@ -38,8 +40,8 @@ export class TbClusterComponent implements OnChanges {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        if (changes.clusterItems)
-            this.groupClusterItemsByIssueType(changes.clusterItems.currentValue);
+        if (changes.clusterItems || changes.changesCandidates)
+            this.groupClusterItemsByIssueType();
     }
 
     save(): void {
@@ -55,6 +57,28 @@ export class TbClusterComponent implements OnChanges {
         return this.tbClusterForm.pristine;
     }
 
+    isIndeterminate(group: ClusterItemDtoGroup): boolean {
+        const keys = Object.keys(group.acceptChanges);
+        const firstKey = keys[0];
+        return !keys.every(key => group.acceptChanges[key] === group.acceptChanges[firstKey]);
+    }
+
+    isAllChecked(group: ClusterItemDtoGroup): boolean {
+        const keys = Object.keys(group.acceptChanges);
+        return keys.every(key => group.acceptChanges[key]);
+    }
+
+    updateChecked(group: ClusterItemDtoGroup, ev: Event) {
+        const checked = (<HTMLInputElement>ev.target).checked;
+        const formGroup = <FormGroup>this.tbClusterForm.controls[group.issueType];
+        const checkboxes = [`accept-effort-changes`, `accept-cycle-changes`];
+        checkboxes.forEach(key => {
+            const control = formGroup.controls[key];
+            control.setValue(checked);
+            control.markAsDirty();
+        });
+    }
+
     sendSaveEvent(): void {
         if (this.tbClusterForm.invalid) {
             this.expandFirstErrorPanel();
@@ -65,14 +89,16 @@ export class TbClusterComponent implements OnChanges {
 
         const clusterItemsOutput: ClusterItemDto[] = [];
         this.groupedItems.forEach(group => {
-            group.items.forEach(s => {
+            group.items.forEach((item, index) => {
+                const change = group.changes[index];
+                const changeCycle = group.acceptChanges.cycle && change;
+                const changeEffort = group.acceptChanges.effort && change;
                 const itemUpdated = new ClusterItemDto(
-                    s.cycle,
-                    s.effort,
-                    s.fromBaseCluster,
-                    s.issueType,
-                    s.projectKey,
-                    s.sizing
+                    changeCycle ? change.cycle : item.cycle,
+                    changeEffort ? change.effort : item.effort,
+                    item.fromBaseCluster,
+                    item.issueType,
+                    item.sizing
                 );
                 clusterItemsOutput.push(itemUpdated);
             });
@@ -103,32 +129,60 @@ export class TbClusterComponent implements OnChanges {
             firstInvalidInput.nativeElement.focus();
     }
 
-    private groupClusterItemsByIssueType(clusterItems: ClusterItemDto[]): void {
-        clusterItems.forEach(item => {
-                const issueTypeGroup = this.getIssueTypeGroup(item);
-                this.setItemOnGroup(issueTypeGroup, item);
-            }
-        );
+    private groupClusterItemsByIssueType(): void {
+        const clusters = _.groupBy(this.clusterItems, item => item.issueType);
+        const changes = _.groupBy(this.changesCandidates.map(item => new ClusterItemChangeDto(item)), item => item.issueType);
+
+        const clusterKeys = new Set(Object.keys(clusters));
+        const changeKeys = new Set(Object.keys(changes));
+        const allKeys = new Set([...Array.from(clusterKeys), ...Array.from(changeKeys)]);
+
+        this.createOrUpdateGroups(allKeys, clusterKeys, changeKeys, clusters, changes);
+        this.removeNonExistingGroups(allKeys);
+        this.sortGroups();
     }
 
-    private getIssueTypeGroup(item: ClusterItemDto): ClusterItemDtoGroup {
-        let issueTypeFound = this.groupedItems.find(i => i.issueType === item.issueType);
+    private createOrUpdateGroups(
+        allKeys: Set<string>,
+        clusterKeys: Set<string>,
+        changeKeys: Set<string>,
+        clusters: _.Dictionary<ClusterItemDto[]>,
+        changes: _.Dictionary<ClusterItemChangeDto[]>
+    ) {
+        allKeys.forEach(issueType => {
+            const group = this.getIssueTypeGroup(issueType);
+            group.items = clusterKeys.has(issueType) ? clusters[issueType] : [];
+            group.changes = changeKeys.has(issueType) ? changes[issueType] : [];
+            group.acceptChanges.effort = false;
+            group.acceptChanges.cycle = false;
+        });
+    }
+
+    private removeNonExistingGroups(allKeys: Set<string>) {
+        for (let i = this.groupedItems.length - 1; i >= 0; --i) {
+            const group = this.groupedItems[i];
+            if (!allKeys.has(group.issueType))
+                this.groupedItems.splice(i, 1);
+        }
+    }
+
+    private getIssueTypeGroup(issueType: string): ClusterItemDtoGroup {
+        let issueTypeFound = this.groupedItems.find(i => i.issueType === issueType);
 
         if (!issueTypeFound) {
-            issueTypeFound = new ClusterItemDtoGroup(item.issueType);
+            issueTypeFound = new ClusterItemDtoGroup(issueType);
             this.groupedItems.push(issueTypeFound);
         }
         return issueTypeFound;
     }
 
-    private setItemOnGroup(issueTypeGroup: ClusterItemDtoGroup, item: ClusterItemDto): void {
-        const sizingFound = issueTypeGroup.items.find(s => s.sizing === item.sizing);
-        if (!sizingFound) {
-            issueTypeGroup.items.push(item);
-            return;
-        }
-        sizingFound.effort = item.effort;
-        sizingFound.cycle = item.cycle;
-        sizingFound.fromBaseCluster = item.fromBaseCluster;
+    private sortGroups() {
+        this.groupedItems.sort((a, b) => {
+            if (a.issueType < b.issueType)
+                return -1;
+            if (a.issueType > b.issueType)
+                return 1;
+            return 0;
+        });
     }
 }

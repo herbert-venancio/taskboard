@@ -1,4 +1,4 @@
-package objective.taskboard.it;
+package objective.taskboard.it.config.project;
 
 import static java.util.stream.Collectors.joining;
 import static objective.taskboard.it.components.SnackBarComponent.SNACK_BAR_TAG;
@@ -11,6 +11,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
+import objective.taskboard.it.ProjectConfigurationDialog;
 import objective.taskboard.it.components.SnackBarComponent;
 import objective.taskboard.it.components.TabComponent;
 import objective.taskboard.it.components.TabsRouterComponent;

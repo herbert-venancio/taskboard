@@ -19,6 +19,10 @@ import {HeaderContentComponent} from './header-content/header-content.component'
 import {LabelFieldComponent} from './label-field/label-field.component';
 import {TagComponent} from './tag/tag.component';
 import {ExpansionPanelComponent} from './expansion-panel/expansion-panel.component';
+import {ModalFooterLeftComponent, ModalFooterRightComponent} from './modal/obj-modal-footer.component';
+import {ModalComponent} from './modal/obj-modal.component';
+import {ModalContentComponent} from './modal/obj-modal-content.component';
+import {ToolbarComponent} from './toolbar/obj-toolbar.component';
 
 @NgModule({
     imports: [
@@ -43,7 +47,12 @@ import {ExpansionPanelComponent} from './expansion-panel/expansion-panel.compone
         HeaderContentComponent,
         LabelFieldComponent,
         TagComponent,
-        ExpansionPanelComponent
+        ExpansionPanelComponent,
+        ModalComponent,
+        ModalContentComponent,
+        ModalFooterLeftComponent,
+        ModalFooterRightComponent,
+        ToolbarComponent
     ],
     exports: [
         AvatarComponent,
@@ -61,7 +70,12 @@ import {ExpansionPanelComponent} from './expansion-panel/expansion-panel.compone
         HeaderContentComponent,
         LabelFieldComponent,
         TagComponent,
-        ExpansionPanelComponent
+        ExpansionPanelComponent,
+        ModalComponent,
+        ModalContentComponent,
+        ModalFooterLeftComponent,
+        ModalFooterRightComponent,
+        ToolbarComponent
     ],
     schemas: [
         NO_ERRORS_SCHEMA

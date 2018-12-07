@@ -5,6 +5,7 @@ import static objective.taskboard.testUtils.ProjectInfo.TASKB;
 import org.junit.Before;
 import org.junit.Test;
 
+import objective.taskboard.it.config.project.ProjectProfileConfigurationTab;
 import objective.taskboard.testUtils.ProjectInfo;
 
 public class ProjectProfileConfigurationIT extends AuthenticatedIntegrationTest {

@@ -3,17 +3,15 @@ package objective.taskboard.project.config;
 import objective.taskboard.followup.cluster.FollowUpClusterItem;
 
 class ProjectClusterItemDto {
-    private String projectKey;
     private String issueType;
     private String sizing;
-    private Double effort;
-    private Double cycle;
-    private Boolean isFromBaseCluster;
+    private double effort;
+    private double cycle;
+    private boolean isFromBaseCluster;
 
     public ProjectClusterItemDto() {}
 
-    public ProjectClusterItemDto(String projectKey, String issueType, String sizing, Double effort, Double cycle, Boolean isFromBaseCluster) {
-        this.projectKey = projectKey;
+    public ProjectClusterItemDto(String issueType, String sizing, double effort, double cycle, boolean isFromBaseCluster) {
         this.issueType = issueType;
         this.sizing = sizing;
         this.effort = effort;
@@ -22,20 +20,11 @@ class ProjectClusterItemDto {
     }
 
     public ProjectClusterItemDto(FollowUpClusterItem object) {
-        this.projectKey = object.getProject().getProjectKey();
         this.issueType = object.getSubtaskTypeName();
         this.sizing = object.getSizing();
         this.effort = object.getEffort();
         this.cycle = object.getCycle();
         this.isFromBaseCluster = object.isFromBaseCluster();
-    }
-
-    public String getProjectKey() {
-        return projectKey;
-    }
-
-    public void setProjectKey(String projectKey) {
-        this.projectKey = projectKey;
     }
 
     public String getIssueType() {
@@ -54,28 +43,27 @@ class ProjectClusterItemDto {
         this.sizing = sizing;
     }
 
-    public Double getEffort() {
+    public double getEffort() {
         return effort;
     }
 
-    public void setEffort(Double effort) {
+    public void setEffort(double effort) {
         this.effort = effort;
     }
 
-    public Double getCycle() {
+    public double getCycle() {
         return cycle;
     }
 
-    public void setCycle(Double cycle) {
+    public void setCycle(double cycle) {
         this.cycle = cycle;
     }
 
-    public Boolean isFromBaseCluster() {
+    public boolean isFromBaseCluster() {
         return isFromBaseCluster;
     }
 
-    public void isFromBaseCluster(Boolean isFromBaseCluster) {
-        this.isFromBaseCluster = isFromBaseCluster;
+    public void setFromBaseCluster(boolean fromBaseCluster) {
+        isFromBaseCluster = fromBaseCluster;
     }
-
 }

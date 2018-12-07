@@ -2,9 +2,6 @@
 import {Component, HostBinding, OnDestroy, OnInit} from '@angular/core';
 import {PageSpinner} from 'app/core/page-spinner/page-spinner';
 import {Subscription} from 'rxjs/internal/Subscription';
-import {debounce, distinctUntilChanged} from 'rxjs/operators';
-import {timer} from 'rxjs/internal/observable/timer';
-import {EMPTY} from 'rxjs/internal/observable/empty';
 
 @Component({
     selector: 'tb-page-spinner',
@@ -19,8 +16,6 @@ export class PageSpinnerComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.subscription = this.pageLoader.isOpen
-            .pipe(debounce(open => open ? timer(200) : EMPTY))
-            .pipe(distinctUntilChanged())
             .subscribe(open => this.isOpen = open);
     }
 

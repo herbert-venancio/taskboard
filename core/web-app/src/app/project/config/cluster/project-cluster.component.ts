@@ -1,13 +1,14 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, ParamMap } from '@angular/router';
-
 import { LegacyAppRouter } from 'app/core/legacy-app-router';
 import { PageSpinner } from 'app/core/page-spinner/page-spinner';
-import { SnackbarControl, SnackbarLevel } from 'app/shared/obj-ds/snackbar/snackbar-control';
 import { ComponentLeaveConfirmation } from 'app/shared/form-utils/leave-confirmation/guard/component-leave-confirmation';
-import { ProjectClusterService } from './project-cluster.service';
+import { SnackbarControl, SnackbarLevel } from 'app/shared/obj-ds/snackbar/snackbar-control';
 import { ClusterItemDto } from 'app/shared/tb-ds/forms/tb-cluster/cluster-item-dto.model';
 import { TbClusterComponent } from 'app/shared/tb-ds/forms/tb-cluster/tb-cluster.component';
+import { ProjectClusterService } from './project-cluster.service';
+import { RecalculateResult } from './project-cluster-recalculate-modal.component';
+import * as moment from 'moment';
 
 @Component({
     selector: 'tb-project-cluster',
@@ -16,7 +17,7 @@ import { TbClusterComponent } from 'app/shared/tb-ds/forms/tb-cluster/tb-cluster
 })
 export class ProjectClusterComponent extends ComponentLeaveConfirmation implements OnInit {
 
-    private projectKey: string;
+    projectKey: string;
 
     hasBaseCluster = false;
     snackbar = new SnackbarControl();
@@ -24,6 +25,8 @@ export class ProjectClusterComponent extends ComponentLeaveConfirmation implemen
     @ViewChild(TbClusterComponent) clusterComponent: TbClusterComponent;
 
     clusterItems: ClusterItemDto[] = [];
+    changesCandidates: ClusterItemDto[] = [];
+    toolbarSubtitle: string = '';
 
     constructor(
         private route: ActivatedRoute,
@@ -48,6 +51,7 @@ export class ProjectClusterComponent extends ComponentLeaveConfirmation implemen
     this.projectClusterService.get(this.projectKey)
         .subscribe(data => {
             this.clusterItems = data;
+            this.changesCandidates = [];
             this.hasBaseCluster = data.some(f => f.fromBaseCluster);
             this.pageLoader.hide();
         });
@@ -84,6 +88,24 @@ export class ProjectClusterComponent extends ComponentLeaveConfirmation implemen
 
     canDeactivate(): boolean {
         return this.clusterComponent.isPristine();
+    }
+
+    setChangesCandidates(results: RecalculateResult) {
+        this.changesCandidates = results.newClusters;
+        this.toolbarSubtitle = this.buildToolbarSubtitle(results.startDate, results.endDate);
+    }
+
+    private buildToolbarSubtitle(startDate: moment.Moment, endDate: moment.Moment): string {
+        const format = moment.localeData().longDateFormat('L');
+        const start = startDate ? startDate.format(format) : '';
+        const end   = endDate   ? endDate.format(format) : '';
+        if (start && end)
+            return `(between ${start} and ${end})`;
+        if (start)
+            return `(after ${start})`;
+        if (end)
+            return `(before ${end})`;
+        return '';
     }
 
     private showMessage(title: string, message: string, level: SnackbarLevel) {

@@ -1,0 +1,15 @@
+<obj-modal #recalculateCluster modal-title="Recalculate project cluster">
+    <obj-modal-content>
+        <tb-cluster-algorithm
+            #form
+            [project]="project"
+            (submitted)="closeModal($event)"
+            (results)="onResults($event)"
+            (errorEvent)="onErrors($event)">
+        </tb-cluster-algorithm>
+    </obj-modal-content>
+    <obj-modal-footer-right>
+        <button obj-button (click)="recalculateCluster.close()">Cancel</button>
+        <button class="primary" obj-button (click)="form.submit()">Recalculate</button>
+    </obj-modal-footer-right>
+</obj-modal>

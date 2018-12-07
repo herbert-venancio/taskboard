@@ -1,4 +1,4 @@
-package objective.taskboard.controller;
+package objective.taskboard.cluster.algorithm;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,10 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import objective.taskboard.cluster.algorithm.ClusterAlgorithmExecution;
-import objective.taskboard.cluster.algorithm.ClusterAlgorithmRequest;
-import objective.taskboard.cluster.algorithm.ClusterAlgorithmService;
 
 @RestController
 @RequestMapping("/ws/cluster/algorithm")
