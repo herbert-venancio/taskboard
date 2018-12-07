@@ -16,6 +16,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
+import objective.taskboard.data.UserTeam.UserTeamRole;
 import objective.taskboard.it.components.ButtonComponent;
 import objective.taskboard.it.components.SearchComponent;
 import objective.taskboard.it.components.SelectComponent;
@@ -29,6 +30,7 @@ public class TeamPage extends AbstractAppUiFragment {
 
     private static final String PAGE_TAG = "tb-team ";
     private static final String MEMBER_SELECTOR = "td:nth-child(1)";
+    private static final String ROLE_SELECTOR = "td:nth-child(2)";
     private static final String TAG_SELECTOR = TAG_TAG +".tag-field__tag";
     private static final String REMOVE_SELECTOR = BUTTON_TAG +".remove-button";
 
@@ -85,9 +87,11 @@ public class TeamPage extends AbstractAppUiFragment {
         return this;
     }
 
-    public TeamPage setMember(int groupIndex, String member) {
+    public TeamPage setMember(int groupIndex, String member, UserTeamRole role) {
         SelectComponent select = new SelectComponent(webDriver, getGroupElementSelector(groupIndex, MEMBER_SELECTOR + " ng-select"));
         select.select(member, true);
+        SelectComponent selectRole = new SelectComponent(webDriver, getGroupElementSelector(groupIndex, ROLE_SELECTOR + " ng-select"));
+        selectRole.select(role.toString(), true);
         return this;
     }
 

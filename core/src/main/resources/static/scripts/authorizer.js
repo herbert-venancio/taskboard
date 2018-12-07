@@ -50,4 +50,6 @@ class Permission {
     static get PROJECT_DASHBOARD_OPERATIONAL() { return 'project.dashboard.operational'; }
     static get FOLLOWUP_TEMPLATE_EDIT() { return 'followup.template.edit'; }
     static get SIZING_IMPORT_VIEW() { return 'sizing.import.view'; }
+    static get TEAMS_EDIT_VIEW() { return 'teams.edit.view'; }
+    static get TEAM_EDIT() { return 'team.edit'; }
 }

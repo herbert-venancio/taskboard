@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import javax.transaction.Transactional;
 
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import objective.taskboard.auth.authorizer.permission.TeamsEditViewPermission;
 import objective.taskboard.data.Team;
 import objective.taskboard.data.UserTeam;
+import objective.taskboard.data.UserTeam.UserTeamRole;
 
 @RestController
 @RequestMapping("/ws/teams")
@@ -89,14 +91,14 @@ class TeamsController {
         if (isEmpty(teamData.manager))
             errors.add("\"manager\" is required.");
 
-        boolean hasEmptyMember = teamData.members.stream().anyMatch(member -> isEmpty(member));
+        boolean hasEmptyMember = teamData.members.stream().anyMatch(member -> isEmpty(member.name));
         if (hasEmptyMember)
             errors.add("Empty member isn't allowed.");
 
         Set<String> teamMemberUnique = new HashSet<>();
         teamData.members.stream()
-            .filter(member -> !isEmpty(member) && !teamMemberUnique.add(member))
-            .forEach(member -> errors.add("Member \"" + member + "\" repeated."));
+            .filter(member -> !isEmpty(member.name) && !teamMemberUnique.add(member.name))
+            .forEach(member -> errors.add("Member \"" + member.name + "\" repeated."));
 
         return errors.stream()
                 .distinct()
@@ -113,34 +115,42 @@ class TeamsController {
     private void updateTeam(TeamDto data, Team team) {
         team.setName(data.name);
         team.setManager(data.manager);
+        team.setGloballyVisible(data.globallyVisible);
 
-        List<UserTeam> membersToRemove = team.getMembers().stream()
-            .filter(userTeam -> !data.members.contains(userTeam.getUserName()))
-            .collect(toList());
+        Stream<UserTeam> membersToRemove = team.getMembers().stream()
+            .filter(userTeam -> data.members.stream().noneMatch(member -> member.name.equals(userTeam.getUserName())));
         membersToRemove.forEach(userTeam -> team.getMembers().remove(userTeam));
 
-        List<UserTeam> membersToAdd = data.members.stream()
-            .filter(memberName -> team.getMembers().stream().noneMatch(userTeam -> userTeam.getUserName().equals(memberName)))
-            .map(memberName -> new UserTeam(memberName, data.name))
-            .collect(toList());
+        Stream<UserTeam> membersToAdd = data.members.stream()
+            .filter(member -> team.getMembers().stream().noneMatch(userTeam -> userTeam.getUserName().equals(member.name)))
+            .map(member -> new UserTeam(member.name, data.name, member.role));
         membersToAdd.forEach(userTeam -> team.getMembers().add(userTeam));
+
+        Stream<MemberDto> membersToUpdate = data.members.stream()
+            .filter(member -> team.getMembers().stream().noneMatch(userTeam -> {
+                return userTeam.getUserName().equals(member.name) && userTeam.getRole() == member.role; }));
+        membersToUpdate.forEach(member -> {
+            UserTeam userTeam = team.getMembers().stream().filter(user -> user.getUserName().equals(member.name)).findFirst().get();
+            userTeam.setRole(member.role);
+        });
 
         userTeamService.saveTeam(team);
     }
 
     static class TeamDto {
-
         public String name;
         public String manager;
-        public List<String> members = new ArrayList<>();
+        public boolean globallyVisible;
+        public List<MemberDto> members = new ArrayList<MemberDto>();
 
         public static TeamDto from(Team team) {
             TeamDto dto = new TeamDto();
             dto.name = team.getName();
             dto.manager = team.getManager();
+            dto.globallyVisible = team.isGloballyVisible();
             team.getMembers().stream()
                 .sorted((a,b) -> a.getUserName().compareTo(b.getUserName()))
-                .forEach(member -> dto.members.add(member.getUserName()));
+                .forEach(member -> dto.members.add(new MemberDto(member.getUserName(), member.getRole())));
             return dto;
         }
 
@@ -151,6 +161,19 @@ class TeamsController {
                     .collect(toList());
         }
 
+    }
+
+    static class MemberDto{
+        public String name;
+
+        public UserTeamRole role;
+
+        public MemberDto(){}
+
+        public MemberDto(String name, UserTeamRole role) {
+            this.name = name;
+            this.role = role;
+        }
     }
 
 }

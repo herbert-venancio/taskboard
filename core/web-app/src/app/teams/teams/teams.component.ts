@@ -2,7 +2,8 @@ import {Component, OnInit} from '@angular/core';
 import {TeamsService} from './teams.service';
 import {LegacyAppRouter} from '../../core/legacy-app-router';
 import {TeamDto} from './team-dto.model';
-import {PageSpinner} from "../../core/page-spinner/page-spinner";
+import {PageSpinner} from '../../core/page-spinner/page-spinner';
+import {MemberDto} from './member-dto.model';
 
 
 @Component({
@@ -35,6 +36,10 @@ export class TeamsComponent implements OnInit {
 
     backToHome() {
         this.legacyAppRouter.goToHome();
+    }
+
+    getListMembersName(members: MemberDto[]) {
+        return members.map(item => item.name).join(', ');
     }
 
 }

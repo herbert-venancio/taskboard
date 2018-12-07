@@ -42,13 +42,29 @@ export class ObjFilterPipe implements PipeTransform {
 
     private static getValueToBeTested(value: any, filterOptions: ObjFilterOptions): string {
         if (filterOptions.key)
-            return this.getValueAsString(value[filterOptions.key]);
+            return this.getValueAsString(this.getValueFromProperty(value, filterOptions.key));
         else if (filterOptions.keys)
             return filterOptions.keys
-                .map(key => this.getValueAsString(value[key]))
+                .map(key => this.getValueAsString(this.getValueFromProperty(value, key)))
                 .join('');
         else
             return this.getValueAsString(value);
+    }
+
+    private static getValueFromProperty(obj: any, pathProperty: string) {
+        let currentValue = obj;
+        let propInArray = false;
+        pathProperty.split('.').forEach(prop => {
+            if(prop.includes('[]')){
+                propInArray = true;
+                prop = prop.replace('[]','');
+            }else if(propInArray){
+                propInArray = false;
+                return currentValue = currentValue.map((item: any) => item[prop]);
+            }
+            return currentValue = currentValue[prop]
+        });
+        return currentValue;
     }
 
     private static getValueAsString(value: any) {

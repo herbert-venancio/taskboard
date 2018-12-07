@@ -73,11 +73,11 @@ public class SelectComponent extends AbstractComponent {
     }
 
     private WebElement dropdownEl() {
-        return getChildElementWhenExists(component(), cssSelector("ng-dropdown-panel"));
+        return getElementWhenItExistsAndIsVisible(cssSelector("ng-dropdown-panel"));
     }
 
     private List<WebElement> optionsEl() {
-        return getChildrenElementsWhenTheyExists(component(), cssSelector(".ng-option-label"));
+        return getChildrenElementsWhenTheyExists(dropdownEl(), cssSelector(".ng-option-label"));
     }
 
     private WebElement optionEl(String optionName) {

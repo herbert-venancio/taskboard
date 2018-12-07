@@ -2,6 +2,7 @@ package objective.taskboard.it;
 
 import org.junit.Test;
 
+import objective.taskboard.data.UserTeam.UserTeamRole;
 import objective.taskboard.it.components.guards.AccessGuard;
 import objective.taskboard.testUtils.LoginUtils;
 
@@ -51,7 +52,7 @@ public class TeamsIT  extends AbstractUIWithCoverageIntegrationTest {
             .addMember()
             .assertVisibleMembers("(row-added:New) ", "(row-added:New) ", "foo", "taskboard")
 
-            .setMember(1, "guilherme")
+            .setMember(1, "guilherme", UserTeamRole.VIEWER)
             .assertVisibleMembers("(row-added:New) ", "(row-added:New) guilherme", "foo", "taskboard")
 
             .assertSaveDisabled(false)
@@ -88,7 +89,7 @@ public class TeamsIT  extends AbstractUIWithCoverageIntegrationTest {
 
             .assertVisibleMembers("foo", "taskboard")
             .addMember()
-            .setMember(0, "guilherme")
+            .setMember(0, "guilherme", UserTeamRole.VIEWER)
             .assertVisibleMembers("(row-added:New) guilherme", "foo", "taskboard")
 
             .filterMembers("r")
@@ -108,7 +109,7 @@ public class TeamsIT  extends AbstractUIWithCoverageIntegrationTest {
             .assertVisibleMembers("(row-added:New) ", "foo", "taskboard")
             .addMember()
             .assertVisibleMembers("(row-added:New) ", "(row-added:New) ", "foo", "taskboard")
-            .setMember(1, "alexandre")
+            .setMember(1, "alexandre", UserTeamRole.VIEWER)
             .assertVisibleMembers("(row-added:New) ", "(row-added:New) alexandre", "foo", "taskboard")
             .removeMember(0)
             .removeMember(2)
@@ -149,7 +150,7 @@ public class TeamsIT  extends AbstractUIWithCoverageIntegrationTest {
             .assertSaveDisabled(true)
             .addMember()
             .assertSaveDisabled(false)
-            .setMember(0, "alexandre")
+            .setMember(0, "alexandre", UserTeamRole.VIEWER)
             .assertSaveDisabled(false)
 
             .backToTeamsAndLeave()
