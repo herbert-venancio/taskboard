@@ -9,23 +9,34 @@
     <div class="content">
         <form #teamForm="ngForm" (ngSubmit)="save()" *ngIf="team">
 
-            <obj-header-content
-                title="Manager"
-                ></obj-header-content>
+            <obj-label-field label="Manager">
+                <ng-select name="manager"
+                        [items]="managerAsyncSearch.items$ | async"
+                        [(ngModel)]="team.manager"
+                        [typeahead]="managerAsyncSearch.itemsInput$"
+                        [loading]="managerAsyncSearch.isLoading"
+                        [clearSearchOnAdd]="true"
+                        placeholder="Search member by name"
+                        tbNotEmpty
+                        #managerField="objSelectField"
+                        ></ng-select>
+                <obj-error-messages [for]="managerField">
+                    <obj-error-message error="notEmpty">Manager is required.</obj-error-message>
+                </obj-error-messages>
+            </obj-label-field>
 
-            <ng-select name="manager"
-                       [items]="managerAsyncSearch.items$ | async"
-                       [(ngModel)]="team.manager"
-                       [typeahead]="managerAsyncSearch.itemsInput$"
-                       [loading]="managerAsyncSearch.isLoading"
-                       [clearSearchOnAdd]="true"
-                       placeholder="Search member by name"
-                       tbNotEmpty
-                       #managerField="objSelectField"
-                       ></ng-select>
-            <obj-error-messages [for]="managerField">
-                <obj-error-message error="notEmpty">Manager is required.</obj-error-message>
-            </obj-error-messages>
+            <div class="form-row">
+
+                <div class="checkbox">
+                    <input id="globally-visible"
+                           name="globally-visible"
+                           type="checkbox"
+                           [(ngModel)]="team.globallyVisible"
+                            />
+                    <obj-label-field for="globally-visible" label="Globally Visible"></obj-label-field>
+                </div>
+
+            </div>
 
             <obj-data-table-top title="Members">
                 <button id="tb-team-add-member" type="button" obj-flat-button (click)="addMember()">
@@ -41,66 +52,105 @@
                 ></obj-search>
             </obj-label-field>
 
-            <table id="tb-team-members" class="obj-data-table inline-input" *ngIf="team.members.length > 0 || newMembers.length > 0">
-                <thead>
-                    <tr>
-                        <th>Member</th>
-                        <th class="actions-col col-right"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let newMember of newMembers | objFilter: { key: 'dto', searchFor: filterMembersByName }; let i = index"
-                        ngModelGroup="new-member-{{ newMember.groupId }}"
-                        >
-                        <td [attr.data-member]="newMember.dto ? newMember.dto : ''">
-                            <div class="tag-field">
-                                <obj-tag class="tag-field__tag" text="New" type="row-added"></obj-tag>
-                                <div class="tag-field__field">
-                                    <ng-container *ngIf="!newMember.dto; else hasMemberSelected">
-                                        <ng-select name="new-member"
-                                                   [(ngModel)]="newMember.dto"
-                                                   [items]="newMember.memberAsyncSearch.items$ | async"
-                                                   [typeahead]="newMember.memberAsyncSearch.itemsInput$"
-                                                   [loading]="newMember.memberAsyncSearch.isLoading"
-                                                   [clearSearchOnAdd]="true"
-                                                   placeholder="Search members by name"
-                                                   tbNotEmpty
-                                                   #newMemberField="objSelectField"
-                                                   ></ng-select>
-                                        <obj-error-messages [for]="newMemberField">
-                                            <obj-error-message error="notEmpty">Member is required.</obj-error-message>
-                                        </obj-error-messages>
-                                    </ng-container>
-                                    <ng-template #hasMemberSelected>
-                                        <input type="text"
-                                               name="new-member"
-                                               objTextField
-                                               [(ngModel)]="newMember.dto"
-                                               readonly />
-                                    </ng-template>
+            <div  #listMembers>
+                <table id="tb-team-members" class="obj-data-table inline-input table-body-scroll" *ngIf="team.members.length > 0 || newMembers.length > 0">
+                    <thead>
+                        <tr>
+                            <th>Member</th>
+                            <th>Role</th>
+                            <th class="actions-col col-right"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr #rowNewUserTeam *ngFor="let newMember of newMembers | objFilter: { key: 'dto.name', searchFor: filterMembersByName }; let i = index"
+                            ngModelGroup="new-member-{{ newMember.groupId }}"
+                            >
+                            <td [attr.data-member]="newMember.dto.name ? newMember.dto.name : ''">
+                                <div class="tag-field">
+                                    <obj-tag class="tag-field__tag" text="New" type="row-added"></obj-tag>
+                                    <div class="tag-field__field">
+                                        <ng-container *ngIf="!newMember.dto.name; else hasMemberSelected">
+                                            <ng-select name="new-member"
+                                                       [(ngModel)]="newMember.dto.name"
+                                                       [items]="newMember.memberAsyncSearch.items$ | async"
+                                                       [typeahead]="newMember.memberAsyncSearch.itemsInput$"
+                                                       [loading]="newMember.memberAsyncSearch.isLoading"
+                                                       [clearSearchOnAdd]="true"
+                                                       placeholder="Search members by name"
+                                                       tbNotEmpty
+                                                       #newMemberField="objSelectField"
+                                                       [tbFocus]="newMember === newMembers[0]"
+                                                       (change)="setFocusElement(i)"
+                                                       ></ng-select>
+                                            <obj-error-messages [for]="newMemberField">
+                                                <obj-error-message error="notEmpty">Member is required.</obj-error-message>
+                                            </obj-error-messages>
+                                        </ng-container>
+                                        <ng-template #hasMemberSelected>
+                                            <input type="text"
+                                                   name="new-member"
+                                                   objTextField
+                                                   [(ngModel)]="newMember.dto.name"
+                                                   readonly />
+                                        </ng-template>
+                                    </div>
                                 </div>
-                            </div>
-                        </td>
-                        <td class="actions-col col-right">
-                            <button type="button" obj-flat-button class="remove-button" (click)="removeNewMember(newMember)">Remove</button>
-                        </td>
-                    </tr>
-                    <tr *ngFor="let member of team.members | objFilter: filterMembersByName"
-                        ngModelGroup="member-{{ member }}">
-                        <td [attr.data-member]="member ? member : ''">
-                            <input type="text"
-                                   name="member"
-                                   objTextField
-                                   [(ngModel)]="team.members[team.members.indexOf(member)]"
-                                   readonly />
-                        </td>
-                        <td class="col-right">
-                            <button type="button" obj-flat-button class="remove-button" (click)="removeMember(member)">Remove</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <div class="obj-empty" *ngIf="team.members.length === 0 && newMembers.length === 0">No members registered.</div>
+                            </td>
+                            <td>
+                                <div class="tag-field">
+                                    <div class="tag-field__field">
+                                        <ng-container>
+                                            <ng-select class="role-select"
+                                                       name="new-member-role"
+                                                       [items]="roles"
+                                                       [(ngModel)]="newMember.dto.role"
+                                                       placeholder="Select role"
+                                                       #newRoleField="objSelectField"
+                                                       [tbFocus]="'new-member-role-'+i === focusOn"
+                                                       (blur)="clearFocusOn()"
+                                                       tbNotEmpty
+                                                       ></ng-select>
+                                            <obj-error-messages [for]="newRoleField">
+                                                <obj-error-message error="notEmpty">Role is required.</obj-error-message>
+                                            </obj-error-messages>
+                                        </ng-container>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="actions-col col-right">
+                                <button type="button" obj-flat-button class="remove-button" (click)="removeNewMember(newMember)">Remove</button>
+                            </td>
+                        </tr>
+                        <tr *ngFor="let member of team.members | objFilter: {keys: ['name'], searchFor : filterMembersByName } ; trackBy: trackByName"
+                            ngModelGroup="member-{{ member.name }}">
+                            <td [attr.data-member]="member ? member.name : ''">
+                                <input type="text"
+                                       name="memberName"
+                                       objTextField
+                                       [(ngModel)]="member.name"
+                                       readonly />
+                            </td>
+                            <td>
+                                <ng-select class="role-select"
+                                           name="memberRole"
+                                           [items]="roles"
+                                           [(ngModel)]="member.role"
+                                           placeholder="Select role"
+                                           #roleField="objSelectField"
+                                           tbNotEmpty
+                                           ></ng-select>
+                                <obj-error-messages [for]="roleField">
+                                    <obj-error-message error="notEmpty">Role is required.</obj-error-message>
+                                </obj-error-messages>
+                            </td>
+                            <td class="col-right">
+                                <button type="button" obj-flat-button class="remove-button" (click)="removeMember(member.name)">Remove {{ i }}</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="obj-empty" *ngIf="team.members.length === 0 && newMembers.length === 0">No members registered.</div>
+            </div>
 
             <div class="footer">
                 <button type="button" id="tb-team-back-to-teams" obj-button routerLink="..">Back to teams</button>

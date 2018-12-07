@@ -24,7 +24,8 @@ export class AuthService {
                         data.loggedInUser.username,
                         data.loggedInUser.name,
                         data.loggedInUser.avatarUrl,
-                        data.loggedInUser.permissions
+                        data.loggedInUser.permissions,
+                        data.loggedInUser.permissionsPerKey
                     )
                 )
             );

@@ -34,7 +34,7 @@ public class TeamEditPermission extends BaseTargettedPermission {
 
     @Override
     protected boolean isAuthorized(LoggedUserDetails loggedUserDetails, String target) {
-        return PermissionUtils.isAuthorizedForAnyPermission(target, taskboardAdministrationPermission);
+        return PermissionUtils.isAuthorizedForAnyPermission(target, taskboardAdministrationPermission, perTeamPermissionAnyAcceptableRole);
     }
 
 }

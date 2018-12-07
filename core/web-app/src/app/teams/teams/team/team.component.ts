@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, ViewChild, ElementRef} from '@angular/core';
 import {NgForm} from '@angular/forms';
 import {ActivatedRoute, ParamMap} from '@angular/router';
 import {FormGroupDto} from '../../../shared/model-utils/form-group-dto.model';
@@ -9,7 +9,8 @@ import {SelectFieldAsyncSearchDto} from '../../../shared/model-utils/select-fiel
 import {TeamDto} from '../team-dto.model';
 import {TeamService} from './team.service';
 import {ComponentLeaveConfirmation} from '../../../shared/form-utils/leave-confirmation/guard/component-leave-confirmation';
-
+import {MemberDto} from '../member-dto.model';
+import {Role} from 'app/shared/enum-utils/role-enum';
 
 @Component({
     selector: 'tb-team',
@@ -22,6 +23,7 @@ import {ComponentLeaveConfirmation} from '../../../shared/form-utils/leave-confi
 export class TeamComponent extends ComponentLeaveConfirmation implements OnInit {
 
     @ViewChild('teamForm') form: NgForm;
+    @ViewChild('listMembers') listMembers: ElementRef;
 
     private nextTeamGroupId: number;
 
@@ -31,6 +33,8 @@ export class TeamComponent extends ComponentLeaveConfirmation implements OnInit 
     team: TeamDto;
     filterMembersByName: string = '';
     newMembers: NewTeamMemberRow[];
+    roles: string[] = Object.keys(Role);
+    focusOn: string;
 
     managerAsyncSearch: SelectFieldAsyncSearchDto;
 
@@ -50,7 +54,7 @@ export class TeamComponent extends ComponentLeaveConfirmation implements OnInit 
         this.managerAsyncSearch = new SelectFieldAsyncSearchDto((term: string) => this.teamService.getUsersWith(term));
     }
 
-    private refreshPage(doneCallback?: Function) : void {
+    private refreshPage(doneCallback?: Function): void {
         this.pageLoader.show();
         this.nextTeamGroupId = 0;
         this.newMembers = [];
@@ -68,13 +72,14 @@ export class TeamComponent extends ComponentLeaveConfirmation implements OnInit 
             (term: string) => this.teamService.getUsersWith(term),
             (value: string) => !this.isAlreadySelected(value)
         );
-        const newMember = new NewTeamMemberRow(this.nextTeamGroupId++, null, memberAsyncSearch);
+        const newMember = new NewTeamMemberRow(this.nextTeamGroupId++, new MemberDto(), memberAsyncSearch);
         this.newMembers.unshift(newMember);
         this.form.control.markAsDirty();
+        this.listMembers.nativeElement.scrollTop = 0;
     }
 
     private isAlreadySelected(userName: string): boolean {
-        const isMember = this.team.members.some(member => member === userName);
+        const isMember = this.team.members.some(member => member.name === userName);
         const isNewMember = this.newMembers.some(member => member.dto === userName);
         return isMember || isNewMember;
     }
@@ -86,8 +91,7 @@ export class TeamComponent extends ComponentLeaveConfirmation implements OnInit 
     }
 
     removeMember(userName: string) {
-        const index = this.team.members.indexOf(userName);
-        this.team.members.splice(index, 1);
+        this.team.members = this.team.members.filter(member => member.name !== userName);
         this.form.control.markAsDirty();
     }
 
@@ -123,13 +127,25 @@ export class TeamComponent extends ComponentLeaveConfirmation implements OnInit 
         return this.form.pristine;
     }
 
+    setFocusElement(index: string) {
+        this.focusOn = 'new-member-role-' + index;
+    }
+
+    clearFocusOn() {
+        this.focusOn = '';
+    }
+
+    trackByName(index: number, member: MemberDto) {
+        return member.name;
+    }
+
 }
 
 export class NewTeamMemberRow extends FormGroupDto {
 
     memberAsyncSearch: SelectFieldAsyncSearchDto;
 
-    constructor(groupId: number, dto: any, memberAsyncSearch: SelectFieldAsyncSearchDto) {
+    constructor(groupId: number, dto: MemberDto, memberAsyncSearch: SelectFieldAsyncSearchDto) {
         super(groupId, dto);
         this.memberAsyncSearch = memberAsyncSearch;
     }

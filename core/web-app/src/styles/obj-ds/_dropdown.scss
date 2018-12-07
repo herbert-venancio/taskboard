@@ -43,5 +43,17 @@
 }
 
 ng-dropdown-panel.ng-dropdown-panel {
-    @include obj-dropdown-generator("&", ".ng-dropdown-panel-items", ".ng-option", ".ng-option-marked", ".ng-option-label", ".ng-option-icon", "&.ng-select-top")
+    @include obj-dropdown-generator("&", ".ng-dropdown-panel-items", ".ng-option", ".ng-option-marked", ".ng-option-label", ".ng-option-icon", "&.ng-select-top");
+
+    .ng-dropdown-panel-items {
+        opacity: 0;
+        &.animation {
+            animation: fadeIn .3s forwards;
+        }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
 }

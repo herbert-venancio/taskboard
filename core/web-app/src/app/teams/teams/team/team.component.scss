@@ -59,3 +59,50 @@ obj-data-table-top, table, .obj-empty {
         margin-left: 10px;
     }
 }
+
+.form-row {
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
+
+.checkbox {
+    label {
+        margin: 0;
+    }
+    input[type="checkbox"] {
+        vertical-align: middle;
+        margin: 0 5px 0 0;
+    }
+    display:flex
+}
+
+.role-select {
+    width: 120px;
+}
+
+.table-body-scroll tbody{
+    display: block;
+    max-height: calc(100vh - 478px);
+    width: calc(100% + 16px);
+    overflow-y: auto;
+    padding-right: 16px;
+}
+
+.table-body-scroll thead, tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+    padding-right: 16px;
+}
+
+.table-body-scroll tbody tr td:first-child, thead tr th:first-child {
+    width: 70%;
+}
+
+.table-body-scroll tbody tr td:nth-child(2), thead tr th:nth-child(2) {
+    width: 20%;
+}
+
+.table-body-scroll tbody tr td:nth-child(3), thead tr th:nth-child(3) {
+    width: 10%;
+}

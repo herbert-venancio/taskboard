@@ -40,4 +40,5 @@ export class LoggedInUserDto {
     name: string;
     avatarUrl: string;
     permissions: string[];
+    permissionsPerKey: { [permission: string]: string[]; };
 }

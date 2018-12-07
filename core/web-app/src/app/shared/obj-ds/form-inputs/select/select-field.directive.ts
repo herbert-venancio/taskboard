@@ -2,7 +2,7 @@ import {AfterViewInit, Directive, Host, OnDestroy, Optional, Renderer2, Self} fr
 import {NgControl, NgForm, RequiredValidator} from '@angular/forms';
 import {AbstractFormInput} from '../abstract-form-input';
 import {NgSelectComponent} from '@ng-select/ng-select';
-import {NotEmptyDirective} from "../../../form-utils/validators/not-empty.directive";
+import {NotEmptyDirective} from '../../../form-utils/validators/not-empty.directive';
 
 @Directive({
     selector: 'ng-select',
@@ -16,6 +16,7 @@ export class SelectFieldDirective extends AbstractFormInput implements AfterView
     private isOpen = false;
     private unsubscribeInputContainerMouseDown: Function;
     private ngSelectElement: Element;
+    private unsubscribeWindowMouseWheel: Function;
 
     constructor(@Optional() @Self() ngControl: NgControl,
                 @Optional() ngForm: NgForm,
@@ -27,6 +28,7 @@ export class SelectFieldDirective extends AbstractFormInput implements AfterView
         this.setDefaultValues();
     }
 
+
     private setDefaultValues(): void {
         this.ngSelectElement = this.ngSelect.elementRef.nativeElement;
 
@@ -37,10 +39,16 @@ export class SelectFieldDirective extends AbstractFormInput implements AfterView
             this.ngSelectElement.setAttribute('disabled', 'disabled');
             this.ngSelect.disabled = true;
         }
+
+        if (!this.ngSelectElement.hasAttribute('appendTo'))
+            this.ngSelect.appendTo = 'body';
+
     }
 
     ngAfterViewInit() {
         this.closeOnSecondClick();
+        this.fixDropdownPosition();
+        this.closeOnMouseWheel();
     }
 
     private closeOnSecondClick(): void {
@@ -51,14 +59,60 @@ export class SelectFieldDirective extends AbstractFormInput implements AfterView
             else
                 this.ngSelect.close();
         });
+
         this.ngSelect.closeEvent.subscribe(() => {
             this.isOpen = false;
+            this.unsubscribeCloseOnMouseWheel();
         });
+    }
+
+    private closeOnMouseWheel() {
+        this.ngSelect.openEvent.subscribe(() => {
+            this.subscribeCloseOnMouseWheel();
+        });
+        this.ngSelect.closeEvent.subscribe(() => {
+            this.unsubscribeCloseOnMouseWheel();
+        });
+    }
+
+    private subscribeCloseOnMouseWheel(): void {
+        if (this.unsubscribeWindowMouseWheel)
+            return;
+
+        this.unsubscribeWindowMouseWheel = this.renderer.listen('window', 'mousewheel', (event) => {
+            if (this.ngSelect.dropdownPanel) {
+                const isScrollOnDropdown = this.ngSelect.dropdownPanel.scrollElementRef.nativeElement.contains(event.target);
+                if (!isScrollOnDropdown)
+                    this.ngSelect.close();
+            }
+        });
+    }
+
+    private unsubscribeCloseOnMouseWheel(): void {
+        if (this.unsubscribeWindowMouseWheel) {
+            this.unsubscribeWindowMouseWheel();
+            this.unsubscribeWindowMouseWheel = undefined;
+        }
+    }
+
+    private fixDropdownPosition(): void {
+        if (this.ngSelect.appendTo) {
+            this.ngSelectElement.classList.add('ng-select-outside-dropdown');
+            this.ngSelect.openEvent.subscribe(() => {
+                this.ngSelect.detectChanges();
+                setTimeout(() => {
+                    this.ngSelect.dropdownPanel.scrollElementRef.nativeElement.classList.add('animation');
+                    this.ngSelect.updateDropdownPosition();
+                }, 5);
+            });
+        }
     }
 
     ngOnDestroy() {
         this.unsubscribeInputContainerMouseDown();
+        this.unsubscribeCloseOnMouseWheel();
         this.ngSelect.closeEvent.unsubscribe();
+        this.ngSelect.openEvent.unsubscribe();
         super.ngOnDestroy();
     }
 

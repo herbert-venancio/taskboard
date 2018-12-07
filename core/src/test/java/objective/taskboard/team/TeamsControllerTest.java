@@ -2,8 +2,8 @@ package objective.taskboard.team;
 
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
+import static objective.taskboard.data.UserTeam.UserTeamRole.MEMBER;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -12,7 +12,10 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,6 +24,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import objective.taskboard.auth.authorizer.permission.TeamsEditViewPermission;
 import objective.taskboard.data.Team;
+import objective.taskboard.data.UserTeam.UserTeamRole;
+import objective.taskboard.team.TeamsController.MemberDto;
 import objective.taskboard.team.TeamsController.TeamDto;
 import objective.taskboard.testUtils.ControllerTestUtils.AssertResponse;
 
@@ -59,15 +64,39 @@ public class TeamsControllerTest {
                         "{" +
                             "\"name\" : \"A\"," +
                             "\"manager\" : \"john\"," +
-                            "\"members\" : [ \"liam\", \"mary\" ]" +
+                            "\"globallyVisible\" : false," +
+                            "\"members\":[{" +
+                                "\"name\":\"liam\"," +
+                                "\"role\":\"MEMBER\"" +
+                            "},{" +
+                                "\"name\":\"mary\"," +
+                                "\"role\":\"MEMBER\"" +
+                            "}]" +
                         "},{" +
                             "\"name\" : \"SDLC\"," +
                             "\"manager\" : \"john\"," +
-                            "\"members\" : [ \"james\", \"mary\" ]" +
+                            "\"globallyVisible\" : false," +
+                            "\"members\":[{" +
+                                "\"name\":\"james\"," +
+                                "\"role\":\"MEMBER\"" +
+                            "},{" +
+                                "\"name\":\"mary\"," +
+                                "\"role\":\"MEMBER\"" +
+                            "}]" +
                         "},{" +
                             "\"name\" : \"TASKBOARD\"," +
                             "\"manager\" : \"john\"," +
-                            "\"members\" : [ \"emma\", \"liam\", \"mia\" ]" +
+                            "\"globallyVisible\" : false," +
+                            "\"members\":[{" +
+                                "\"name\":\"emma\"," +
+                                "\"role\":\"MEMBER\"" +
+                            "},{" +
+                                "\"name\":\"liam\"," +
+                                "\"role\":\"MEMBER\"" +
+                            "},{ " +
+                                "\"name\":\"mia\"," +
+                                "\"role\":\"MEMBER\"" +
+                            "}]" +
                         "}" +
                     "]");
     }
@@ -90,11 +119,28 @@ public class TeamsControllerTest {
                         "{" +
                             "\"name\" : \"SDLC\"," +
                             "\"manager\" : \"john\"," +
-                            "\"members\" : [ \"james\", \"mary\" ]" +
+                            "\"globallyVisible\" : false," +
+                            "\"members\":[{" +
+                                "\"name\":\"james\"," +
+                                "\"role\":\"MEMBER\"" +
+                            "},{" +
+                                "\"name\":\"mary\"," +
+                                "\"role\":\"MEMBER\"" +
+                            "}]" +
                         "},{" +
                             "\"name\" : \"TASKBOARD\"," +
                             "\"manager\" : \"john\"," +
-                            "\"members\" : [ \"emma\", \"liam\", \"mia\" ]" +
+                            "\"globallyVisible\" : false," +
+                            "\"members\":[{" +
+                                "\"name\":\"emma\"," +
+                                "\"role\":\"MEMBER\"" +
+                            "},{" +
+                                "\"name\":\"liam\"," +
+                                "\"role\":\"MEMBER\"" +
+                            "},{ " +
+                                "\"name\":\"mia\"," +
+                                "\"role\":\"MEMBER\"" +
+                            "}]" +
                         "}" +
                     "]");
     }
@@ -104,7 +150,7 @@ public class TeamsControllerTest {
         TeamsController subject = teamsControllerBuilder()
                 .withoutTeamsEditViewPermission()
                 .build();
-        
+
         AssertResponse.of(subject.getTeam("ANY"))
                 .httpStatus(NOT_FOUND)
                 .emptyBody();
@@ -140,7 +186,14 @@ public class TeamsControllerTest {
                     "{" +
                         "\"name\" : \"SDLC\"," +
                         "\"manager\" : \"john\"," +
-                        "\"members\" : [ \"james\", \"mary\" ]" +
+                        "\"globallyVisible\" : false," +
+                        "\"members\":[{" +
+                            "\"name\":\"james\"," +
+                            "\"role\":\"MEMBER\"" +
+                        "},{" +
+                            "\"name\":\"mary\"," +
+                            "\"role\":\"MEMBER\"" +
+                        "}]" +
                     "}");
     }
 
@@ -164,14 +217,16 @@ public class TeamsControllerTest {
         TeamDto TeamDto = TeamDtoBuilder.init()
                 .withTeamName("")
                 .withManager("")
-                .withMembers(
-                        "",
-                        "",
-                        "repeated-member1",
-                        "repeated-member1",
-                        "repeated-member1",
-                        "repeated-member2",
-                        "repeated-member2")
+                .withMembers(Arrays.asList(
+                        //new MemberDto("",MEMBER),
+                        //new MemberDto("",MEMBER),
+                        MemberDtoBuilder.init().emptyMember().build(),
+                        MemberDtoBuilder.init().emptyMember().build(),
+                        MemberDtoBuilder.init().withName("repeated-member1").withRole(MEMBER).build(),
+                        MemberDtoBuilder.init().withName("repeated-member1").withRole(MEMBER).build(),
+                        MemberDtoBuilder.init().withName("repeated-member1").withRole(MEMBER).build(),
+                        MemberDtoBuilder.init().withName("repeated-member2").withRole(MEMBER).build(),
+                        MemberDtoBuilder.init().withName("repeated-member2").withRole(MEMBER).build()))
                 .build();
 
         AssertResponse.of(subject.updateTeam("ANY", TeamDto))
@@ -217,10 +272,9 @@ public class TeamsControllerTest {
         TeamDto TeamDto = TeamDtoBuilder.init()
                 .withManager("new-manager")
                 .withTeamName("new-name")
-                .withManager("new-manager")
-                .withMembers(
-                        "new-member-1",
-                        "new-member-2")
+                .withMembers( Arrays.asList(
+                        MemberDtoBuilder.init().withName("new-member-1").withRole(MEMBER).build(),
+                        MemberDtoBuilder.init().withName("new-member-2").withRole(MEMBER).build()))
                 .build();
 
         AssertResponse.of(subject.updateTeam("SDLC", TeamDto))
@@ -240,7 +294,9 @@ public class TeamsControllerTest {
 
         assertEquals(TeamDto.name, team.getName());
         assertEquals(TeamDto.manager, team.getManager());
-        assertEquals(TeamDto.members.stream().collect(joining(",")), team.getMembers().stream().map(member -> member.getUserName()).collect(joining(",")));
+        List<String> membersSaved = team.getMembers().stream().map(a -> a.getUserName()+"-"+a.getRole()).collect(Collectors.toList());
+        List<String> membersToSaved = TeamDto.members.stream().map(a -> a.name+"-"+a.role).collect(Collectors.toList());
+        assertEquals(membersToSaved, membersSaved);
     }
 
     private class DLSBuilder {
@@ -288,8 +344,8 @@ public class TeamsControllerTest {
             return this;
         }
 
-        public TeamDtoBuilder withMembers(String... members) {
-            teamDto.members = asList(members);
+        public TeamDtoBuilder withMembers(List<MemberDto> members) {
+            teamDto.members = members;
             return this;
         }
 
@@ -297,6 +353,32 @@ public class TeamsControllerTest {
             return teamDto;
         }
 
+    }
+
+    private static class MemberDtoBuilder {
+        private MemberDto memberDto = new MemberDto();
+
+        public static MemberDtoBuilder init() {
+            return new MemberDtoBuilder();
+        }
+
+        private MemberDtoBuilder emptyMember() {
+            return this;
+        }
+
+        private MemberDtoBuilder withName(String name) {
+            memberDto.name = name;
+            return this;
+        }
+
+        private MemberDtoBuilder withRole(UserTeamRole role) {
+            memberDto.role = role;
+            return this;
+        }
+
+        public MemberDto build() {
+            return memberDto;
+        }
     }
 
 }

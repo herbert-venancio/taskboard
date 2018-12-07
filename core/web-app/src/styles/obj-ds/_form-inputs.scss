@@ -147,6 +147,10 @@ $obj-input-padding: 0 16px;
     &.ng-select-focused  {
     }
 
+    &.ng-select-outside-dropdown ng-dropdown-panel {
+        display: none;
+    }
+
     .ng-select-container {
         display: flex;
         align-items: center;
