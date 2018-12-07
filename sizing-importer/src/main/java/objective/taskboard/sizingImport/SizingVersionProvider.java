@@ -5,7 +5,6 @@ import objective.taskboard.google.SpreadsheetUtils;
 import objective.taskboard.google.SpreadsheetsManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
 

@@ -14,14 +14,13 @@ drivers
 
 # IDEs and editors
 /.idea
+*.iml
 .project
 .classpath
 .c9/
 *.launch
 .settings
 *.sublime-workspace
-
-# IDE - VSCode
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
@@ -48,7 +47,6 @@ application-liferay.properties
 application-liferay.yaml
 application-uat.properties
 application-uat.yml
-taskboard.iml
 
 # generated test resources
 .attach_pid*

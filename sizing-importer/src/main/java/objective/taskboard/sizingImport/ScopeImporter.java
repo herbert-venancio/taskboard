@@ -107,7 +107,7 @@ class ScopeImporter {
         if (StringUtils.isBlank(line.getType()))
             errors.add("Type should be informed");
 
-        if (TIMEBOX.getName().equals(line.getType()) && isInvalidTimeboxValue(line.getTimebox()))
+        if (isTimeBoxFeature(line.getType()) && isInvalidTimeboxValue(line.getTimebox()))
             errors.add("Timebox should be informed correctly");
 
         JiraCreateIssue.IssueTypeMetadata featureType = featureTypesByName.get(line.getType());
@@ -222,7 +222,7 @@ class ScopeImporter {
 
     private JiraIssue createFeature(String projectKey, Version release, String demandKey, JiraCreateIssue.IssueTypeMetadata featureType, SizingImportLineScope line) {
         String featureName = line.getFeature();
-        String timeboxHours = line.getTimebox();
+        String timeboxHours = line.getTimebox() + "h";
         log.debug("creating Feature: {}", featureName);
 
         Collection<IssueFieldValue> fieldValues = new ArrayList<>();
@@ -243,14 +243,14 @@ class ScopeImporter {
                 })
                 .collect(toList()));
 
-        if (isTimeBoxFeature(featureType))
-            return jiraFacade.createTimebox(projectKey, demandKey, featureType.id, featureName, release, fieldValues, toMinutes(timeboxHours));
+        if (isTimeBoxFeature(featureType.name))
+            return jiraFacade.createTimebox(projectKey, demandKey, featureType.id, featureName, release, fieldValues, timeboxHours);
 
         return jiraFacade.createFeature(projectKey, demandKey, featureType.id, featureName, release, fieldValues);
     }
 
-    private boolean isTimeBoxFeature(JiraCreateIssue.IssueTypeMetadata featureType) {
-        return TIMEBOX.getName().equals(featureType.name);
+    private boolean isTimeBoxFeature(final String typeLine) {
+            return TIMEBOX.getName().equalsIgnoreCase(typeLine);
     }
 
     private Optional<String> findFirstDemandKey(List<SizingImportLineScope> linesOfDemand) {
@@ -262,11 +262,6 @@ class ScopeImporter {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .findFirst();
-    }
-
-    private String toMinutes(final String hours) {
-        Long minutes = (new Long(hours) * 60);
-        return minutes.toString();
     }
 
     private boolean isInvalidTimeboxValue(final String timeboxValue) {

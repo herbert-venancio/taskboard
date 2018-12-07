@@ -27,9 +27,6 @@ public class CostSheetSkipper implements SizingSkipper {
 
         Double spreadsheetVersion = this.versionProvider.get(spreadsheetId);
         Double minimalVersion = importConfig.getMinimalVersionForCostDouble();
-        if (spreadsheetVersion < minimalVersion)
-            return true;
-
-        return false;
+        return spreadsheetVersion < minimalVersion;
     }
 }

@@ -69,7 +69,7 @@ public class ScopeImporterTestDSL {
         private String projectKey;
         private String projectName;
         private String version;
-        private DSLExistingIssues existingIssues;
+        private DSLIssues dslIssues;
 
         public DSLProjectJiraBuilder(final DSLJiraBuilder dslJiraBuilder) {
             this.dslJiraBuilder = dslJiraBuilder;
@@ -80,9 +80,9 @@ public class ScopeImporterTestDSL {
             return this;
         }
 
-        public DSLExistingIssues withExistingIssues() {
-            existingIssues = new DSLExistingIssues(this);
-            return existingIssues;
+        public DSLIssues withIssues() {
+            dslIssues = new DSLIssues(this);
+            return dslIssues;
         }
 
         public DSLFeatureTypeBuilder withFeatureType() {
@@ -125,12 +125,12 @@ public class ScopeImporterTestDSL {
         }
     }
 
-    class DSLExistingIssues {
+    class DSLIssues {
 
         DSLProjectJiraBuilder dslProjectJiraBuilder;
         private List<DSLIssue> issues = new ArrayList<>();
 
-        public DSLExistingIssues(final DSLProjectJiraBuilder dslProjectJiraBuilder) {
+        public DSLIssues(final DSLProjectJiraBuilder dslProjectJiraBuilder) {
             this.dslProjectJiraBuilder = dslProjectJiraBuilder;
         }
 
@@ -145,14 +145,14 @@ public class ScopeImporterTestDSL {
 
     class DSLIssue {
 
-        private DSLExistingIssues dslExistingIssues;
+        private DSLIssues dslIssues;
 
         private String demandKey = null;
         private String name = null;
         private boolean isDemand = false;
 
-        public DSLIssue(final DSLExistingIssues dslExistingIssues) {
-            this.dslExistingIssues = dslExistingIssues;
+        public DSLIssue(final DSLIssues dslIssues) {
+            this.dslIssues = dslIssues;
         }
 
         public DSLIssue key(final String demandKey) {
@@ -170,12 +170,7 @@ public class ScopeImporterTestDSL {
             return this;
         }
 
-        public DSLProjectJiraBuilder endIssues() {
-            dslExistingIssues.issues.add(this);
-            return dslExistingIssues.eoIs();
-        }
-
-        public DSLExistingIssues ofI() {
+        public DSLIssues eoI() {
             if (isDemand) {
                 when(jiraFacade.getDemandKeyGivenFeature(any()))
                         .thenReturn(Optional.of(demandKey));
@@ -198,7 +193,7 @@ public class ScopeImporterTestDSL {
                         .thenReturn(new JiraIssue(demandKey));
             }
 
-            return dslExistingIssues;
+            return dslIssues;
         }
     }
 
@@ -640,7 +635,7 @@ public class ScopeImporterTestDSL {
 
             int errorNumber = 0;
             if (hasText(errorLine)) {
-                int errorNumberIndex = new Integer(removeNonNumericCaracters(errorLine));
+                int errorNumberIndex = new Integer(removeNonNumericCharacters(errorLine));
                 errorNumber = errorNumberIndex + 1;
             }
             assertEquals(expectedLineError, errorNumber);
@@ -699,19 +694,19 @@ public class ScopeImporterTestDSL {
             return sizingBuilder;
         }
 
-        private String removeNonNumericCaracters(final String string) {
+        private String removeNonNumericCharacters(final String string) {
             return string.replaceAll("\\D+","");
         }
 
         private int getQuantityOfLinesToImport(final List<String> events) {
             String firstLineEvent = events.get(0);
 
-            if (hasText(firstLineEvent)) {
-                int linesToImportIndex = firstLineEvent.lastIndexOf(':') + 1;
-                String linesToImportString = firstLineEvent.substring(linesToImportIndex).trim();
-                return new Integer(linesToImportString);
-            }
-            return -1;
+            if (!hasText(firstLineEvent))
+                return -1;
+
+            int linesToImportIndex = firstLineEvent.lastIndexOf(':') + 1;
+            String linesToImportString = firstLineEvent.substring(linesToImportIndex).trim();
+            return new Integer(linesToImportString);
         }
 
         private String extractIssueKeys(final List<String> events) {

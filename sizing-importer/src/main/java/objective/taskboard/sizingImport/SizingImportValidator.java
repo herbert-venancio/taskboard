@@ -131,10 +131,10 @@ public class SizingImportValidator {
     private Predicate<StaticMappingDefinition> generateFilter(final String spreadsheetId) {
         boolean shouldFilterTimebox = timeboxSkipper.shouldSkip(spreadsheetId);
 
-        Predicate<StaticMappingDefinition> filter = shouldFilterTimebox ?
-            md -> !TIMEBOX.equals(md.getColumnDefinition()) : md -> true;
+        if (!shouldFilterTimebox)
+            return md -> true;
 
-        return filter;
+        return md -> !TIMEBOX.getName().equalsIgnoreCase(md.getColumnDefinition().getName());
     }
 
     private ValidationResult invalidDataStartingRow() {

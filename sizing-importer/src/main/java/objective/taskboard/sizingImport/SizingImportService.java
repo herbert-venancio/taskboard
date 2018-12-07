@@ -122,17 +122,23 @@ class SizingImportService {
         final SheetDefinition sheetDefinition
     ) {
         boolean shouldSkipTimebox = timeboxSkipper.shouldSkip(spreadsheetId);
+        if (!shouldSkipTimebox)
+            return;
 
         Predicate<StaticMappingDefinition> columnRemoverFilter =
-            shouldSkipTimebox ? md -> TIMEBOX.getName().equalsIgnoreCase(md.getColumnDefinition().getName()) : md -> false;
+            md -> isTimebox(md.getColumnDefinition().getName());
 
         sheetDefinition
             .getStaticColumns()
             .removeIf(columnRemoverFilter);
 
         Predicate<List<Object>> rowRemoverFilter =
-            shouldSkipTimebox ? f -> f.size() > 0 && TIMEBOX.getName().equalsIgnoreCase((String) f.get(TYPE_INDEX)) : f -> false;
+            f -> f.size() > 0 && isTimebox((String) f.get(TYPE_INDEX));
 
         rows.removeIf(rowRemoverFilter);
+    }
+
+    private boolean isTimebox(final String name) {
+        return TIMEBOX.getName().equalsIgnoreCase(name);
     }
 }
