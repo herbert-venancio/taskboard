@@ -117,8 +117,9 @@ class TeamsController {
         team.setManager(data.manager);
         team.setGloballyVisible(data.globallyVisible);
 
-        Stream<UserTeam> membersToRemove = team.getMembers().stream()
-            .filter(userTeam -> data.members.stream().noneMatch(member -> member.name.equals(userTeam.getUserName())));
+        List<UserTeam> membersToRemove = team.getMembers().stream()
+            .filter(userTeam -> data.members.stream().noneMatch(member -> member.name.equals(userTeam.getUserName())))
+            .collect(toList());
         membersToRemove.forEach(userTeam -> team.getMembers().remove(userTeam));
 
         Stream<UserTeam> membersToAdd = data.members.stream()
