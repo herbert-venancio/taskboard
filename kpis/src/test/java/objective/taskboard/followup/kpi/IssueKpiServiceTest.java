@@ -7,13 +7,14 @@ import static objective.taskboard.followup.kpi.KpiLevel.FEATURES;
 import static objective.taskboard.followup.kpi.KpiLevel.SUBTASKS;
 import static objective.taskboard.followup.kpi.KpiLevel.UNMAPPED;
 import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
-import static objective.taskboard.utils.DateTimeUtils.parseStringToDate;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -29,12 +30,13 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import objective.taskboard.data.Issue;
-import objective.taskboard.data.Worklog;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.AnalyticsTransitionsDataRow;
 import objective.taskboard.followup.AnalyticsTransitionsDataSet;
 import objective.taskboard.followup.IssueTransitionService;
 import objective.taskboard.followup.kpi.enviroment.KPIEnvironmentBuilder;
+import objective.taskboard.followup.kpi.properties.IssueTypeChildrenStatusHierarchy;
+import objective.taskboard.followup.kpi.properties.IssueTypeChildrenStatusHierarchy.Hierarchy;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
 import objective.taskboard.followup.kpi.transformer.AnalyticDataRowAdapter;
 import objective.taskboard.followup.kpi.transformer.IssueKpiDataItemAdapterFactory;
@@ -80,6 +82,16 @@ public class IssueKpiServiceTest {
         when(jiraProperties.getFollowup()).thenReturn(followup);
         when(followup.getStatusExcludedFromFollowup()).thenReturn(Arrays.asList(STATUS_OPEN));
         
+        when(kpiProperties.getProgressingStatuses()).thenReturn(Arrays.asList("Doing"));
+        
+        Hierarchy hierarch = new Hierarchy();
+        hierarch.setFatherStatus("Doing");
+        hierarch.setChildrenTypeId(asList(2l));
+        
+        IssueTypeChildrenStatusHierarchy subtasksHierarchy = new IssueTypeChildrenStatusHierarchy();
+        subtasksHierarchy.setHierarchies(Arrays.asList(hierarch));
+        Mockito.when(kpiProperties.getFeaturesHierarchy()).thenReturn(subtasksHierarchy);
+        
      }
 
     @Test
@@ -119,11 +131,21 @@ public class IssueKpiServiceTest {
     
     @Test
     public void getIssues_currentState() {
-        Worklog worklog = new Worklog("a.developer", parseStringToDate("2020-01-03"), 300);
+        configureProject("2020-01-04","2020-01-10");
         
-        configureProject("2020-01-01","2020-01-04");
-        configureClock("2020-01-04");
-        KPIEnvironmentBuilder builder = simpleEnvironment();
+        Mockito.when(clock.now()).thenReturn(getIntant("2020-01-04"));
+        
+        KPIEnvironmentBuilder builder = new KPIEnvironmentBuilder();
+        builder.withKpiProperties(kpiProperties)
+                .withIssueTransitionService(transitionService);
+        
+        builder.addFeatureType(1l, "Dev")
+                .addSubtaskType(2l, "Alpha");
+        
+        builder.addStatus(1l, "Open", false)
+                .addStatus(2l, "To Do" , false)
+                .addStatus(3l, "Doing", true)
+                .addStatus(4l, "Done", false);
                 
         builder.withMockingIssue("I-1", "Dev", KpiLevel.FEATURES)
                 .setCurrentStatusToCurrentIssue("Doing")
@@ -141,7 +163,7 @@ public class IssueKpiServiceTest {
                 .addTransition("To Do", "2020-01-02")
                 .addTransition("Doing", "2020-01-03")
                 .addTransition("Done", "2020-01-04")
-                .addWorklog(worklog);
+                .addWorklog("2020-01-03",300);
         
         List<Issue> issues = builder.mockAllIssues();
         when(issueBufferService.getAllIssues()).thenReturn(issues);
@@ -316,7 +338,9 @@ public class IssueKpiServiceTest {
     }
 
     private KPIEnvironmentBuilder simpleEnvironment() {
-        KPIEnvironmentBuilder builder = new KPIEnvironmentBuilder(kpiProperties,transitionService);
+        KPIEnvironmentBuilder builder = new KPIEnvironmentBuilder()
+                                            .withKpiProperties(kpiProperties)
+                                            .withIssueTransitionService(transitionService);
         builder.addFeatureType(1l, "Dev")
                 .addSubtaskType(2l, "Alpha");
         
@@ -330,6 +354,9 @@ public class IssueKpiServiceTest {
         
         return builder;
     }
-    
+
+    private Instant getIntant(String date) {
+    	return LocalDate.parse(date).atStartOfDay(ZONE_ID).toInstant();
+    }
     
 }

@@ -171,7 +171,7 @@ public class IssueKpiTransformerTest {
     }
 
     private KPIEnvironmentBuilder getDefaultEnvironment() {
-        KPIEnvironmentBuilder builder = new KPIEnvironmentBuilder(kpiProperties);
+        KPIEnvironmentBuilder builder = new KPIEnvironmentBuilder().withKpiProperties(kpiProperties);
         builder.addStatus(1l, "Open", false)
                 .addStatus(2l, "To Do", false)
                 .addStatus(3l, "Doing", true)

@@ -43,7 +43,7 @@ public class IssueKpi {
         
         return earliestTransition.map(ld -> ld.equals(date.toLocalDate())).orElse(false);
     }
-    
+
     public String getIssueTypeName() {
         return issueType.map(t -> t.getType()).orElse("Unmapped");
     }
@@ -69,7 +69,7 @@ public class IssueKpi {
     List<IssueKpi> getChildren() {
         return children;
     }
-    
+
     Optional<StatusTransition> firstStatus(){
         return firstStatus;
     }
@@ -77,6 +77,11 @@ public class IssueKpi {
     public Long getEffort(String status) {
         Optional<StatusTransition> statusTransition =  firstStatus.flatMap(f -> f.find(status));
         return statusTransition.map(s -> s.getEffort()).orElse(0l);
+    }
+    
+    public Long getEffortUntilDate(String status, ZonedDateTime dateLimit) {
+        Optional<StatusTransition> statusTransition =  firstStatus.flatMap(f -> f.find(status));
+        return statusTransition.map(s -> s.getEffortUntilDate(dateLimit)).orElse(0l);
     }
 
     public List<Worklog> getWorklogFromChildren(Long subtaskType) {
@@ -88,7 +93,7 @@ public class IssueKpi {
                 .collect(Collectors.toList());
         
     }
-    
+
     private List<Worklog> collectWorklogs() {
         return firstStatus.map(s -> s.collectWorklog()).orElseGet(Collections::emptyList);
     }
@@ -122,14 +127,14 @@ public class IssueKpi {
                 .collect(Collectors.toList());
     }
 
-    public Optional<Range<ZonedDateTime>> getDateRangeBasedOnProgressinsStatuses(Clock clock,ZoneId timezone) {
+    public Optional<Range<LocalDate>> getDateRangeBasedOnProgressingStatuses(Clock clock,ZoneId timezone) {
         Optional<ZonedDateTime> firstDateOp = firstStatus.flatMap(s -> s.firstDateOnProgressing(timezone));
         if(!firstDateOp.isPresent())
             return Optional.empty();
         
-        ZonedDateTime firstDate = firstDateOp.get();
-        ZonedDateTime now = ZonedDateTime.ofInstant(clock.now(),timezone);
-        ZonedDateTime lastDate = firstStatus.flatMap(s -> s.getDateAfterLeavingLastProgressingStatus()).orElse(now);
+        LocalDate firstDate = firstDateOp.get().toLocalDate();
+        LocalDate now = ZonedDateTime.ofInstant(clock.now(),timezone).toLocalDate();
+        LocalDate lastDate = firstStatus.flatMap(s -> s.getDateAfterLeavingLastProgressingStatus()).orElse(now);
 
         if(firstDate.isAfter(lastDate))
             return Optional.of(RangeUtils.between(firstDate, firstDate));

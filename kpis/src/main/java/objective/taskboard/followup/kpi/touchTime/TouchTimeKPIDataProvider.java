@@ -15,7 +15,7 @@ import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.utils.DateTimeUtils;
 
 @Service
-class TouchTimeKPIDataProvider {
+class TouchTimeKPIDataProvider implements TouchTimeProvider<TouchTimeChartDataSet>{
 
     private IssueKpiService issueKpiService;
 
@@ -30,6 +30,7 @@ class TouchTimeKPIDataProvider {
         this.kpiProperties = kpiProperties;
     }
 
+    @Override
     public TouchTimeChartDataSet getDataSet(String projectKey, KpiLevel kpiLevel, ZoneId timezone) {
         final List<IssueKpi> issues = issueKpiService.getIssuesFromCurrentState(projectKey, timezone, kpiLevel);
         final List<String> allProgressingStatuses = kpiProperties.getProgressingStatuses();

@@ -224,12 +224,12 @@ public class StatusTransitionTest {
     
         StatusTransition first = builder.buildOrCry();
         
-        String date = first.getDateAfterLeavingLastProgressingStatus().map(s -> s.toLocalDate().toString()).orElse("Not Found");
+        String date = first.getDateAfterLeavingLastProgressingStatus().map(s -> s.toString()).orElse("Not Found");
         assertThat(date,is("2020-01-06"));
     }
     
     @Test
-    public void getDateAfterLeavingLastProgressingStatus_skippingProgres(){
+    public void getDateAfterLeavingLastProgressingStatus_skippingProgress(){
         StatusTransitionBuilder builder = new StatusTransitionBuilder()
                 .addTransition(TODO, "2020-01-02")
                 .addTransition(DOING)
@@ -239,8 +239,36 @@ public class StatusTransitionTest {
     
         StatusTransition first = builder.buildOrCry();
         
-        String date = first.getDateAfterLeavingLastProgressingStatus().map(s -> s.toLocalDate().toString()).orElse("Not Found");
+        String date = first.getDateAfterLeavingLastProgressingStatus().map(s -> s.toString()).orElse("Not Found");
         assertThat(date,is("2020-01-06"));
+    }
+    
+    @Test
+    public void getDateAfterLeavingLastProgressingStatus_consideringWorklog(){
+        IssueKpi issue = new IssueKpiBuilder("I-1", new IssueTypeKpi(1l, "Development"), KpiLevel.SUBTASKS)
+                .addTransition(TODO,"2020-01-01")
+                .addTransition(DOING)
+                .addTransition(TO_REVIEW)
+                .addTransition(REVIEWING)
+                .addTransition(DONE,"2020-01-05")
+                .addWorklog("2020-01-04",300)
+                .build();
+        
+        StatusTransition first = issue.firstStatus().get();
+        String date = first.getDateAfterLeavingLastProgressingStatus().map(s -> s.toString()).orElse("Not Found");
+        assertThat(date, is("2020-01-05"));
+    }
+    
+    @Test
+    public void getDateAfterLeavingLastProgressingStatus_wrongConfiguration(){
+        StatusTransitionBuilder builder = new StatusTransitionBuilder()
+                .addTransition(TODO, "2020-01-02")
+                .addTransition(DONE);
+    
+        StatusTransition first = builder.buildOrCry();
+        
+        String date = first.getDateAfterLeavingLastProgressingStatus().map(s -> s.toString()).orElse("Not Found");
+        assertThat(date,is("Not Found"));
     }
     
     @Test
@@ -254,19 +282,7 @@ public class StatusTransitionTest {
     
         StatusTransition first = builder.buildOrCry();
         
-        String date = first.getDateAfterLeavingLastProgressingStatus().map(s -> s.toLocalDate().toString()).orElse("Not Found");
-        assertThat(date,is("Not Found"));
-    }
-    
-    @Test
-    public void getDateAfterLeavingLastProgressingStatus_wrongConfiguration(){
-        StatusTransitionBuilder builder = new StatusTransitionBuilder()
-                .addTransition(TODO, "2020-01-02")
-                .addTransition(DONE);
-    
-        StatusTransition first = builder.buildOrCry();
-        
-        String date = first.getDateAfterLeavingLastProgressingStatus().map(s -> s.toLocalDate().toString()).orElse("Not Found");
+        String date = first.getDateAfterLeavingLastProgressingStatus().map(s -> s.toString()).orElse("Not Found");
         assertThat(date,is("Not Found"));
     }
     

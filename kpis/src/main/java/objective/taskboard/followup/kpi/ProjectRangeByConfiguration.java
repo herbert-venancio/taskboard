@@ -1,13 +1,11 @@
 package objective.taskboard.followup.kpi;
 
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
 import java.util.Optional;
 
 import org.apache.commons.lang3.Range;
 
 import objective.taskboard.domain.ProjectFilterConfiguration;
-import objective.taskboard.utils.RangeUtils;
 
 public class ProjectRangeByConfiguration implements ProjectTimelineRange{
     
@@ -20,9 +18,8 @@ public class ProjectRangeByConfiguration implements ProjectTimelineRange{
     }
 
     @Override
-    public boolean isWithinRange(Range<ZonedDateTime> otherRange) {
-        Range<LocalDate> transformed = RangeUtils.between(otherRange.getMinimum().toLocalDate(), otherRange.getMaximum().toLocalDate());
-        return isTheBeginingOnRange(transformed) && isTheEndOnRange(transformed);
+    public boolean isWithinRange(Range<LocalDate> otherRange) {
+        return isTheBeginingOnRange(otherRange) && isTheEndOnRange(otherRange);
     }
        
     private boolean isTheBeginingOnRange(Range<LocalDate> range) {

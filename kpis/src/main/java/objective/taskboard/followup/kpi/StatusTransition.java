@@ -1,5 +1,6 @@
 package objective.taskboard.followup.kpi;
 
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.LinkedList;
@@ -82,7 +83,15 @@ public class StatusTransition {
     public Long getEffort() { 
         return worklogs.stream().mapToLong(w -> Long.valueOf(w.timeSpentSeconds)).reduce(Long::sum).orElse(0); 
     } 
- 
+    
+    public Long getEffortUntilDate(ZonedDateTime dateLimit) {
+        ZoneId zone = dateLimit.getZone();
+        LocalDate localDateLimit = dateLimit.toLocalDate();
+        return worklogs.stream()
+                .filter(w -> !DateTimeUtils.toLocalDate(w.started, zone).isAfter(localDateLimit))
+                .mapToLong(w -> Long.valueOf(w.timeSpentSeconds)).reduce(Long::sum).orElse(0); 
+    } 
+    
     public Optional<DatedStatusTransition> withDate() { 
         return next.flatMap(n -> n.withDate()); 
     } 
@@ -133,14 +142,14 @@ public class StatusTransition {
         return next.flatMap(n -> n.firstDateOnProgressing(timezone));
     }
 
-    public Optional<ZonedDateTime> getDateAfterLeavingLastProgressingStatus() {
+    public Optional<LocalDate> getDateAfterLeavingLastProgressingStatus() {
         Optional<StatusTransition> lastProgressingStatusOp = flatNext(s -> s.getLastProgressingStatus());
         if(!lastProgressingStatusOp.isPresent())
             return Optional.empty();
         StatusTransition lastProgressingStatus = lastProgressingStatusOp.get();
         
         Optional<DatedStatusTransition> nextWithDate = lastProgressingStatus.next.flatMap(n -> n.withDate());
-        return nextWithDate.flatMap(s -> Optional.of(s.getDate()));
+        return nextWithDate.flatMap(s -> Optional.of(s.getDate().toLocalDate()));
     }
 
     private Optional<StatusTransition> getLastProgressingStatus() {

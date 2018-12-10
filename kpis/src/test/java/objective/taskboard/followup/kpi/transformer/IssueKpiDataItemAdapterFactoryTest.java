@@ -66,7 +66,7 @@ public class IssueKpiDataItemAdapterFactoryTest {
     @Test
     public void convertIssues() { 
         
-        KPIEnvironmentBuilder builder = new KPIEnvironmentBuilder(transitionService);
+        KPIEnvironmentBuilder builder = new KPIEnvironmentBuilder().withIssueTransitionService(transitionService);
         
         builder.addStatus(1l, "Open", false)
                 .addStatus(2l, "To Do", false)
@@ -198,7 +198,7 @@ public class IssueKpiDataItemAdapterFactoryTest {
     
     @Test
     public void getIssuesFromService_inexistentLevelType() {
-        KPIEnvironmentBuilder builder = new KPIEnvironmentBuilder(transitionService);
+        KPIEnvironmentBuilder builder = new KPIEnvironmentBuilder().withIssueTransitionService(transitionService);
         
         builder.addStatus(1l, "Open", false)
                 .addStatus(2l, "To Do", false)
