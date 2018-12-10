@@ -17,13 +17,8 @@ import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.ProjectRangeByConfiguration;
 import objective.taskboard.followup.kpi.enviroment.KPIEnvironmentBuilder;
-import objective.taskboard.followup.kpi.touchTime.TouchTimeFilter;
-import objective.taskboard.testUtils.FixedClock;
-import objective.taskboard.utils.DateTimeUtils;
 
 public class TouchTimeFilterTest {
-    
-    private FixedClock clock = new FixedClock();
     private static final String START_RANGE = "2018-01-10";
     private static final String END_RANGE = "2018-01-20";
     private static final ZoneId timezone = ZoneId.systemDefault();
@@ -32,12 +27,10 @@ public class TouchTimeFilterTest {
     
     @Before
     public void setup() {
-        clock.setNow(DateTimeUtils.parseDateTime("2018-02-25").toInstant());
-        
         ProjectFilterConfiguration project = configureProject();
         
         ProjectRangeByConfiguration defaultRange = new ProjectRangeByConfiguration(project);
-        subject = new TouchTimeFilter(clock,timezone,defaultRange);
+        subject = new TouchTimeFilter(timezone,defaultRange);
     }
 
     private ProjectFilterConfiguration configureProject() {
@@ -52,7 +45,8 @@ public class TouchTimeFilterTest {
     @Test
     public void filterHappyDay() {
         KPIEnvironmentBuilder builder = getSimpleEnvironment();
-        
+        final String today = "2018-02-25";
+        builder.setNow(parseDateTime(today).toInstant());
         builder.mockingSubtask("I-1", "Development")
                 .addTransition("To Do","2018-01-11")
                 .addTransition("Doing","2018-01-12")
@@ -68,7 +62,8 @@ public class TouchTimeFilterTest {
     @Test
     public void issueBeforeRange() {
         KPIEnvironmentBuilder builder = getSimpleEnvironment();
-        
+        final String today = "2018-02-25";
+        builder.setNow(parseDateTime(today).toInstant());
         builder.mockingSubtask("I-1", "Development")
                 .addTransition("To Do","2018-01-02")
                 .addTransition("Doing","2018-01-03")
@@ -84,7 +79,8 @@ public class TouchTimeFilterTest {
     @Test
     public void issueRangeEndingAtStartOfTimelineRange() {
         KPIEnvironmentBuilder builder = getSimpleEnvironment();
-        
+        final String today = "2018-02-25";
+        builder.setNow(parseDateTime(today).toInstant());
         builder.mockingSubtask("I-1", "Development")
                 .addTransition("To Do","2018-01-02")
                 .addTransition("Doing","2018-01-03")
@@ -100,7 +96,8 @@ public class TouchTimeFilterTest {
     @Test
     public void issueStartingAtEndOfRange() {
         KPIEnvironmentBuilder builder = getSimpleEnvironment();
-        
+        final String today = "2018-02-25";
+        builder.setNow(parseDateTime(today).toInstant());
         builder.mockingSubtask("I-1", "Development")
                 .addTransition("To Do","2018-01-19")
                 .addTransition("Doing","2018-01-20")
@@ -116,7 +113,8 @@ public class TouchTimeFilterTest {
     @Test
     public void issueAfterRange() {
         KPIEnvironmentBuilder builder = getSimpleEnvironment();
-        
+        final String today = "2018-02-25";
+        builder.setNow(parseDateTime(today).toInstant());
         builder.mockingSubtask("I-1", "Development")
                 .addTransition("To Do","2018-01-20")
                 .addTransition("Doing","2018-01-23")
@@ -132,7 +130,8 @@ public class TouchTimeFilterTest {
     @Test
     public void issueWithSameRange() {
         KPIEnvironmentBuilder builder = getSimpleEnvironment();
-        
+        final String today = "2018-02-25";
+        builder.setNow(parseDateTime(today).toInstant());
         builder.mockingSubtask("I-1", "Development")
                 .addTransition("To Do","2018-01-09")
                 .addTransition("Doing","2018-01-10")
@@ -148,7 +147,8 @@ public class TouchTimeFilterTest {
     @Test
     public void openIssue() {
         KPIEnvironmentBuilder builder = getSimpleEnvironment();
-        
+        final String today = "2018-02-25";
+        builder.setNow(parseDateTime(today).toInstant());
         builder.mockingSubtask("I-1", "Development")
                 .addTransition("To Do","2018-01-15")
                 .addTransition("Doing")
@@ -164,7 +164,8 @@ public class TouchTimeFilterTest {
     @Test
     public void workingIssue_startingAfterInsideRange() {
         KPIEnvironmentBuilder builder = getSimpleEnvironment();
-        
+        final String today = "2018-02-25";
+        builder.setNow(parseDateTime(today).toInstant());
         builder.mockingSubtask("I-1", "Development")
                 .addTransition("To Do","2018-01-10")
                 .addTransition("Doing","2018-01-15")
@@ -180,6 +181,8 @@ public class TouchTimeFilterTest {
     @Test
     public void workingIssue_startingBeforeRange() {
         KPIEnvironmentBuilder builder = getSimpleEnvironment();
+        final String today = "2018-02-25";
+        builder.setNow(parseDateTime(today).toInstant());
         builder.mockingSubtask("I-1", "Development")
                 .addTransition("To Do","2018-01-08")
                 .addTransition("Doing","2018-01-09")

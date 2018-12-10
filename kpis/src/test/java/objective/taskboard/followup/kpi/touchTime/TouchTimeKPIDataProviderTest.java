@@ -1,9 +1,11 @@
 package objective.taskboard.followup.kpi.touchTime;
 
+import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.time.ZoneId;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -76,10 +78,14 @@ public class TouchTimeKPIDataProviderTest {
         givenDataSet(actual)
             .assertSize(4)
             .assertPoints()
-                .hasIssueKey("I-1").hasIssueType("Backend Development").hasIssueStatus("Doing").hasWorkInHours(2.0).and()
-                .hasIssueKey("I-1").hasIssueType("Backend Development").hasIssueStatus("Reviewing").hasWorkInHours(4.0).and()
-                .hasIssueKey("I-2").hasIssueType("Alpha Test").hasIssueStatus("Doing").hasWorkInHours(10.5).and()
-                .hasIssueKey("I-2").hasIssueType("Alpha Test").hasIssueStatus("Reviewing").hasWorkInHours(12.0);
+                .hasIssueKey("I-1").hasIssueType("Backend Development").hasIssueStatus("Doing").hasWorkInHours(2.0)
+                    .hasStartProgressingDate("2018-11-07").hasEndProgressingDate("2018-11-10").and()
+                .hasIssueKey("I-1").hasIssueType("Backend Development").hasIssueStatus("Reviewing").hasWorkInHours(4.0)
+                    .hasStartProgressingDate("2018-11-07").hasEndProgressingDate("2018-11-10").and()
+                .hasIssueKey("I-2").hasIssueType("Alpha Test").hasIssueStatus("Doing").hasWorkInHours(10.5)
+                    .hasStartProgressingDate("2018-11-07").hasEndProgressingDate("2018-11-10").and()
+                .hasIssueKey("I-2").hasIssueType("Alpha Test").hasIssueStatus("Reviewing").hasWorkInHours(12.0)
+                    .hasStartProgressingDate("2018-11-07").hasEndProgressingDate("2018-11-10");
     }
 
     @Test
@@ -365,6 +371,16 @@ public class TouchTimeKPIDataProviderTest {
                 if (iterator.hasNext()) {
                     this.currentPoint = iterator.next();
                 }
+                return this;
+            }
+
+            public TouchTimePointsAsserter hasStartProgressingDate(String date) {
+                assertThat(currentPoint.startProgressingDate, is(Date.from(parseDateTime(date).toInstant())));
+                return this;
+            }
+
+            public TouchTimePointsAsserter hasEndProgressingDate(String date) {
+                assertThat(currentPoint.endProgressingDate, is(Date.from(parseDateTime(date).toInstant())));
                 return this;
             }
         }

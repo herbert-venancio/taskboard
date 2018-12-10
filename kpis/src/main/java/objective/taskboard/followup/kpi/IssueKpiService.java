@@ -51,12 +51,12 @@ public class IssueKpiService {
                 .collect(Collectors.toList());
 
         List<IssueKpiDataItemAdapter> items = factory.getItems(issuesVisibleToUser,timezone);
-        List<IssueKpi> issuesKpi = new IssueKpiTransformer(kpiProperties)
+        List<IssueKpi> issuesKpi = new IssueKpiTransformer(kpiProperties, clock)
                                         .withItems(items)
                                         .withOriginalIssues(issuesVisibleToUser)
                                         .mappingHierarchically()
                                         .settingWorklog()
-                                        .filter(new TouchTimeFilter(clock,timezone, range))
+                                        .filter(new TouchTimeFilter(timezone, range))
                                         .transform();
 
         return issuesKpi.stream().filter(i -> i.getLevel() == kpiLevel).collect(Collectors.toList());
@@ -64,7 +64,7 @@ public class IssueKpiService {
 
     public List<IssueKpi> getIssues(Optional<AnalyticsTransitionsDataSet> analyticSet){
         List<IssueKpiDataItemAdapter> items = factory.getItems(analyticSet);
-        return new IssueKpiTransformer(kpiProperties).withItems(items).transform();
+        return new IssueKpiTransformer(kpiProperties, clock).withItems(items).transform();
     }
 
 }

@@ -10,6 +10,8 @@ function DcDateRangeChartsService() {
 
     self._highchartCharts = new Map();
 
+    self._highchartChartsNotifyOnly = new Map();
+
     self._isBrushing = false;
 
     self.resizeOptions = {
@@ -93,10 +95,10 @@ function DcDateRangeChartsService() {
         if (!self._rangeChart.filter() || !self._rangeChart.brushOn())
             self._resetSelection();
         else
-            self.applySelectionToAll();
+            self._applySelectionToAll();
     };
 
-    self.applySelectionToAll = function() {
+    self._applySelectionToAll = function() {
         const timelineRange = self._brushRange.value();
         self._registeredCharts.forEach(function(registeredChart) {
             if (!dcUtils.rangesEqual(timelineRange, registeredChart.filter())) {
@@ -108,6 +110,9 @@ function DcDateRangeChartsService() {
         self._highchartCharts.forEach((chart) => {
             self.applySelection(chart);
         });
+        self._highchartChartsNotifyOnly.forEach((chart) => {
+            chart.notify();
+        })
     };
 
     self.applySelection = function (chart) {
@@ -116,9 +121,7 @@ function DcDateRangeChartsService() {
             return;
         } 
 
-        const timelineRange = self._brushRange.value();
-        const min = ChartUtils.truncateDate(timelineRange[0].getTime());
-        const max = ChartUtils.ceilDate(timelineRange[1].getTime());
+        const [min, max] = self.getTimelineRange();
         chart.xAxis[0].setExtremes(min, max);
     };
 
@@ -151,8 +154,23 @@ function DcDateRangeChartsService() {
     self.deregisterHighchartsChart = function (chart) {
         const chartKey = chart.options.chart.renderTo;
         self._highchartCharts.delete(chartKey);
+        self._highchartChartsNotifyOnly.delete(chartKey);
     };
 
+    self.registerHighchartsNotifyOnlyChart = function (chart) {
+        self._highchartChartsNotifyOnly.set(chart.chartKey, chart);
+    };
+
+    self.deregisterHighchartsNotifyOnlyChart = function (chart) {
+        self._highchartChartsNotifyOnly.delete(chart.chartKey);
+    };
+
+    self.getTimelineRange = function () {
+        const timelineRange = self._brushRange.value();
+        const min = ChartUtils.truncateDate(timelineRange[0].getTime());
+        const max = ChartUtils.ceilDate(timelineRange[1].getTime());
+        return [min, max];
+    };
 }
 
 var dcDateRangeChartsService = new DcDateRangeChartsService();

@@ -9,16 +9,13 @@ import org.apache.commons.lang3.Range;
 
 import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.ProjectTimelineRange;
-import objective.taskboard.utils.Clock;
 
 public class TouchTimeFilter implements Predicate<IssueKpi>{
 
     private ProjectTimelineRange rangeCalculationStrategy;
-    private Clock clock;
     private ZoneId timezone;
     
-    public TouchTimeFilter(Clock clock, ZoneId timezone, ProjectTimelineRange range) {
-        this.clock = clock;
+    public TouchTimeFilter(ZoneId timezone, ProjectTimelineRange range) {
         this.rangeCalculationStrategy = range;
         this.timezone = timezone;
     }
@@ -30,9 +27,7 @@ public class TouchTimeFilter implements Predicate<IssueKpi>{
     }
 
     private Optional<Range<LocalDate>> getIssueDateRange(IssueKpi issue) {
-        return issue.getDateRangeBasedOnProgressingStatuses(clock, timezone);
+        return issue.getDateRangeBasedOnProgressingStatuses(timezone);
     }
-    
-    
 
 }

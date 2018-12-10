@@ -12,10 +12,11 @@ import org.junit.Test;
 import objective.taskboard.followup.kpi.enviroment.IssueKpiBuilder;
 import objective.taskboard.followup.kpi.enviroment.StatusTransitionBuilder;
 import objective.taskboard.followup.kpi.enviroment.StatusTransitionBuilder.DefaultStatus;
+import objective.taskboard.testUtils.FixedClock;
 
 public class StatusTransitionTest {
     
-    private static final DefaultStatus TODO = new DefaultStatus("To Do",false); 
+    private static final DefaultStatus TODO = new DefaultStatus("To Do",false);
     private static final DefaultStatus DOING = new DefaultStatus("Doing",true);
     private static final DefaultStatus TO_REVIEW = new DefaultStatus("To Review",false);
     private static final DefaultStatus REVIEWING = new DefaultStatus("Reviewing",true);
@@ -146,8 +147,10 @@ public class StatusTransitionTest {
 
     @Test
     public void getFirstDateOnProgressingStatus_happyDay_consideringWorklog() {
-               
-        IssueKpi issue = new IssueKpiBuilder("I-1", new IssueTypeKpi(1l, "Development"), KpiLevel.SUBTASKS)
+        FixedClock clock = new FixedClock();
+        final String today = "2020-01-05";
+        clock.setNow(parseDateTime(today).toInstant());
+        IssueKpi issue = new IssueKpiBuilder("I-1", new IssueTypeKpi(1l, "Development"), KpiLevel.SUBTASKS, clock)
                 .addTransition(TODO,"2020-01-01")
                 .addTransition(DOING,"2020-01-02")
                 .addTransition(TO_REVIEW,"2020-01-03")
@@ -163,8 +166,10 @@ public class StatusTransitionTest {
     
     @Test
     public void getFirstDateOnProgressingStatus_happyDay_consideringMultiplesWorklog() {
-               
-        IssueKpi issue = new IssueKpiBuilder("I-1", new IssueTypeKpi(1l, "Development"), KpiLevel.SUBTASKS)
+        FixedClock clock = new FixedClock();
+        final String today = "2020-01-05";
+        clock.setNow(parseDateTime(today).toInstant());
+        IssueKpi issue = new IssueKpiBuilder("I-1", new IssueTypeKpi(1l, "Development"), KpiLevel.SUBTASKS, clock)
                 .addTransition(TODO,"2020-01-01")
                 .addTransition(DOING,"2020-01-02")
                 .addTransition(TO_REVIEW,"2020-01-03")
@@ -181,8 +186,10 @@ public class StatusTransitionTest {
     
     @Test
     public void getFirstDateOnProgressingStatus_straightToReview_withWorklogOnDoing() {
-        
-        IssueKpi issue = new IssueKpiBuilder("I-1", new IssueTypeKpi(1l, "Development"), KpiLevel.SUBTASKS)
+        FixedClock clock = new FixedClock();
+        final String today = "2020-01-05";
+        clock.setNow(parseDateTime(today).toInstant());
+        IssueKpi issue = new IssueKpiBuilder("I-1", new IssueTypeKpi(1l, "Development"), KpiLevel.SUBTASKS, clock)
                 .addTransition(TODO,"2020-01-01")
                 .addTransition(DOING)
                 .addTransition(TO_REVIEW)
@@ -198,13 +205,15 @@ public class StatusTransitionTest {
     
     @Test
     public void getFirstDateOnProgressingStatus_doneWithoutTransintingToProgressingStatus_withWorklog() {
-        
-        IssueKpi issue = new IssueKpiBuilder("I-1", new IssueTypeKpi(1l, "Development"), KpiLevel.SUBTASKS)
+        FixedClock clock = new FixedClock();
+        final String today = "2020-01-05";
+        clock.setNow(parseDateTime(today).toInstant());
+        IssueKpi issue = new IssueKpiBuilder("I-1", new IssueTypeKpi(1l, "Development"), KpiLevel.SUBTASKS, clock)
                 .addTransition(TODO,"2020-01-01")
                 .addTransition(DOING)
                 .addTransition(TO_REVIEW)
                 .addTransition(REVIEWING)
-                .addTransition(DONE,"2020-01-05")
+                .addTransition(DONE,today)
                 .addWorklog("2020-01-06",300)
                 .build();
         

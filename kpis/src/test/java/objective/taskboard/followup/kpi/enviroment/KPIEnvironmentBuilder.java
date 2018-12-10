@@ -5,6 +5,7 @@ import static objective.taskboard.followup.kpi.KpiLevel.DEMAND;
 import static objective.taskboard.followup.kpi.KpiLevel.FEATURES;
 import static objective.taskboard.followup.kpi.KpiLevel.SUBTASKS;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -32,6 +33,7 @@ import objective.taskboard.followup.kpi.transformer.IssueKpiDataItemAdapter;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.client.JiraIssueTypeDto;
 import objective.taskboard.jira.properties.StatusConfiguration.StatusPriorityOrder;
+import objective.taskboard.testUtils.FixedClock;
 import objective.taskboard.utils.DateTimeUtils;
 
 public class KPIEnvironmentBuilder {
@@ -54,6 +56,8 @@ public class KPIEnvironmentBuilder {
     
     private MetadataService metadataService = Mockito.mock(MetadataService.class);
     private IssueTransitionService transitionService = Mockito.mock(IssueTransitionService.class);
+    
+    private FixedClock clock = new FixedClock();
 
     public KPIEnvironmentBuilder() {}
 
@@ -65,6 +69,11 @@ public class KPIEnvironmentBuilder {
 
     public KPIEnvironmentBuilder withKpiProperties(KPIProperties kpiProperties) {
         this.kpiProperties = kpiProperties;
+        return this;
+    }
+    
+    public KPIEnvironmentBuilder setNow(Instant now) {
+        clock.setNow(now);
         return this;
     }
 
@@ -216,7 +225,7 @@ public class KPIEnvironmentBuilder {
     }
 
     private KPIEnvironmentBuilder getIssueBuilder(String pkey, KpiLevel level, IssueTypeKpi typeKpi) {
-        IssueKpiBuilder builder = new IssueKpiBuilder(pkey, typeKpi, level);
+        IssueKpiBuilder builder = new IssueKpiBuilder(pkey, typeKpi, level, clock);
         issues.put(pkey, builder);
         return withIssue(pkey);
     }

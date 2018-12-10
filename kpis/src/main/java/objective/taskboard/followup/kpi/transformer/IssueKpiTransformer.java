@@ -21,6 +21,7 @@ import objective.taskboard.followup.kpi.StatusTransition;
 import objective.taskboard.followup.kpi.SubtaskWorklogDistributor;
 import objective.taskboard.followup.kpi.properties.IssueTypeChildrenStatusHierarchy;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
+import objective.taskboard.utils.Clock;
 
 public class IssueKpiTransformer {
     
@@ -28,12 +29,14 @@ public class IssueKpiTransformer {
     private Map<String,IssueKpiDataItemAdapter> items = new LinkedHashMap<>();
     private Map<String,Issue> originalIssues = new LinkedHashMap<>();
     private KPIProperties kpiProperties;
+    private Clock clock;
     private boolean mappingHierarchically = false;
     private boolean settingWorklog = false;
     private List<Predicate<IssueKpi>> filters = new LinkedList<>();
 
-    public IssueKpiTransformer(KPIProperties kpiProperties) { 
+    public IssueKpiTransformer(KPIProperties kpiProperties, Clock clock) {
         this.kpiProperties = kpiProperties;
+        this.clock = clock;
     }
     
     public IssueKpiTransformer withItems(List<IssueKpiDataItemAdapter> items) {
@@ -67,7 +70,7 @@ public class IssueKpiTransformer {
         if(settingWorklog)
             putWorklogs();
         
-        Predicate<IssueKpi> finalFilter = filters.stream().reduce(w -> true, Predicate::and); 
+        Predicate<IssueKpi> finalFilter = filters.stream().reduce(w -> true, Predicate::and);
         return issuesKpi.values().stream().filter(finalFilter).collect(Collectors.toList());
     }
 
@@ -119,7 +122,7 @@ public class IssueKpiTransformer {
                 next = Optional.of(statusTrasition);
             }
             KpiLevel level = itemProvider.getLevel();
-            IssueKpi issue = new IssueKpi(itemProvider.getIssueKey(),itemProvider.getIssueType(), level,next);
+            IssueKpi issue = new IssueKpi(itemProvider.getIssueKey(),itemProvider.getIssueType(), level,next, clock);
             
             issuesKpi.put(itemProvider.getIssueKey(), issue);
         }
@@ -131,7 +134,7 @@ public class IssueKpiTransformer {
 
     private StatusTransition create(String status, ZonedDateTime date, Optional<StatusTransition> next) {
         boolean isProgressingStatus = isProgressingStatus(status);
-        return (date == null) ? new StatusTransition(status,isProgressingStatus, next) :  new DatedStatusTransition(status, date,isProgressingStatus,next); 
+        return (date == null) ? new StatusTransition(status,isProgressingStatus, next) :  new DatedStatusTransition(status, date,isProgressingStatus,next);
     }
     
     private void validateParameters() {
