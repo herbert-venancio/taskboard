@@ -93,7 +93,7 @@ public class FollowUpProgressController {
             return new ResponseEntity<>("The projection timespan should be a positive number.", BAD_REQUEST);
 
         try {
-            ProgressData progressData = calculator.calculate(timezone, projectKey, projectionTimespan);
+            ProgressData progressData = calculator.calculate(timezone, projectKey, projectionTimespan, false);
             return ResponseEntity.ok().body(progressData);
             
         } catch (ClusterNotConfiguredException e) {//NOSONAR

@@ -33,7 +33,7 @@ public class FollowupProgressCalculator {
         this.snapshotService = snapshotService;
     }
 
-    public ProgressData calculate(ZoneId timezone, String projectKey, int projectionSampleSize) 
+    public ProgressData calculate(ZoneId timezone, String projectKey, int projectionSampleSize, boolean stopOnCompleteProjection) 
             throws ClusterNotConfiguredException, ProjectDatesNotConfiguredException {
 
         FollowUpSnapshot snapshot = snapshotService.getFromCurrentState(timezone, projectKey);
@@ -64,7 +64,7 @@ public class FollowupProgressCalculator {
         LocalDate finalProjectDate = projectDeliveryDate.isBefore(lastRow.date) ? lastRow.date : projectDeliveryDate;
 
         addExpectedProgress(progressData, projectStartDate, projectDeliveryDate, finalProjectDate);
-        addProjectionData(progressData, historyRows, startingDate, finalProjectDate, projectionSampleSize);
+        addProjectionData(progressData, historyRows, startingDate, finalProjectDate, projectionSampleSize, stopOnCompleteProjection);
 
         progressData.startingDate = projectStartDate;
         progressData.endingDate = finalProjectDate;
@@ -78,7 +78,8 @@ public class FollowupProgressCalculator {
             List<EffortHistoryRow> historyRows,
             LocalDate startingDate, 
             LocalDate finalProjectDate,
-            int progressSampleSize) 
+            int progressSampleSize,
+            boolean stopOnCompleteProjection) 
     {
         long totalDayCount = ChronoUnit.DAYS.between(startingDate.atStartOfDay(), finalProjectDate.atStartOfDay());
         EffortHistoryRow firstRow = historyRows.get(0);
@@ -96,7 +97,11 @@ public class FollowupProgressCalculator {
         progressData.actualProjection.add(progressData.actual.get(progressData.actual.size()-1));
         LocalDate startingDateIt = firstRow.date.plusDays(countOfExistingDays);
 
-        for (long i = countOfExistingDays; i <= totalDayCount; i++) {
+        long dayCount = countOfExistingDays;
+        boolean processProjection = finalProjectDate.isAfter(LocalDate.from(lastActualDate)) || stopOnCompleteProjection;
+        
+        while (processProjection) {
+            
             if(projectedProgress < 1.0 || projectedBacklog > 0.0) {
                 projectedProgress = Math.min(1.0, projectedProgress + projectedProgressFactor);
                 projectedActual += actualProjectionFactor;
@@ -104,6 +109,16 @@ public class FollowupProgressCalculator {
             }
             progressData.actualProjection.add(new ProgressDataPoint(startingDateIt, projectedProgress, projectedActual, projectedBacklog));
             startingDateIt = startingDateIt.plus(Period.ofDays(1));
+
+            if (stopOnCompleteProjection) {
+                if (projectedProgress >= 1)
+                    processProjection = false;
+            } else {
+                if (dayCount >= totalDayCount)
+                    processProjection = false;
+                else dayCount++;
+            }
+
         }
     }
 
