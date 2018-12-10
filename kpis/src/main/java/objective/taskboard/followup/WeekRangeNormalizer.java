@@ -5,8 +5,9 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAdjusters;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Iterator;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.apache.commons.lang3.Range;
 
@@ -27,48 +28,38 @@ public class WeekRangeNormalizer {
         
         return RangeUtils.between(normalizedStartDate, normalizedEndDate);
     }
-     
-    public static Range<LocalDate> normalizeWeekRange(Range<LocalDate> range, DayOfWeek startOfWeek, DayOfWeek endOfWeek){
-        LocalDate normalizedStartDate = findPrevious(range.getMinimum(), startOfWeek);
-        LocalDate normalizedEndDate = findNext(range.getMaximum(),endOfWeek);
-        
-        return RangeUtils.between(normalizedStartDate, normalizedEndDate);
-    }
-    public static List<Range<LocalDate>> splitByWeek(Range<LocalDate> range,DayOfWeek startOfWeek,DayOfWeek endOfWeek){
-        List<Range<LocalDate>> weeks = new LinkedList<>();
-        
-        LocalDate startOfRange = range.getMinimum();
-        LocalDate rangeIndex = startOfRange;
-        while(rangeIndex.isBefore(range.getMaximum()) ) {
-            
-            if(rangeIndex.getDayOfWeek().equals(endOfWeek)) {
-                weeks.add(RangeUtils.between(startOfRange, rangeIndex));
-                rangeIndex = rangeIndex.with(TemporalAdjusters.nextOrSame(startOfWeek));
-                startOfRange = rangeIndex;
-                continue;
+    
+    public static Stream<Range<LocalDate>> splitByWeek(Range<LocalDate> range, DayOfWeek startOfWeek, DayOfWeek endOfWeek){
+    	Iterable<Range<LocalDate>> it = () -> new Iterator<Range<LocalDate>>() {
+            LocalDate rangeIndex = range.getMinimum();
+
+            @Override
+            public boolean hasNext() {
+                return rangeIndex.isBefore(range.getMaximum());
             }
-            
-            rangeIndex = rangeIndex.plusDays(1);
-        }
-        
-        weeks.add(RangeUtils.between(startOfRange, rangeIndex));
-        
-        return weeks;
+
+            @Override
+            public Range<LocalDate> next() {
+                LocalDate startOfRange = rangeIndex;
+                LocalDate endOfRange = rangeIndex.with(TemporalAdjusters.next(endOfWeek));
+
+                if(!endOfRange.isBefore(range.getMaximum())) {
+                    endOfRange = range.getMaximum();
+                }
+                rangeIndex = rangeIndex.with(TemporalAdjusters.next(startOfWeek));
+                return RangeUtils.between(startOfRange, endOfRange);
+            }
+        };
+
+        return StreamSupport.stream(it.spliterator(), false);
     }
 
     private static ZonedDateTime findNext(ZonedDateTime baseEndDate, DayOfWeek endOfWeek) {
         return baseEndDate.with(TemporalAdjusters.nextOrSame(endOfWeek));
     }
     
-    private static LocalDate findNext(LocalDate baseEndDate, DayOfWeek startOfWeek) {
-        return baseEndDate.with(TemporalAdjusters.nextOrSame(startOfWeek));
-    }
-
     private static ZonedDateTime findPrevious(ZonedDateTime baseStartDate, DayOfWeek startOfWeek) {
         return baseStartDate.with(TemporalAdjusters.previousOrSame(startOfWeek));
     }
-    
-    private static LocalDate findPrevious(LocalDate baseStartDate, DayOfWeek startOfWeek) {
-        return baseStartDate.with(TemporalAdjusters.previousOrSame(startOfWeek));
-    }
+
 }

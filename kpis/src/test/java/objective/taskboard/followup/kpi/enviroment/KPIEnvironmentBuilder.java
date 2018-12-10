@@ -116,11 +116,11 @@ public class KPIEnvironmentBuilder {
         demandHierarchy.setHierarchies(getHierachies(DEMAND));
         Mockito.when(kpiProperties.getDemandHierarchy()).thenReturn(demandHierarchy);
         
-        List<String> configuredProgresingStatuses = getConfiguredProgresingStatsues();
+        List<String> configuredProgresingStatuses = getConfiguredProgressingStatuses();
         Mockito.when(kpiProperties.getProgressingStatuses()).thenReturn(configuredProgresingStatuses);
     }
 
-    private List<String> getConfiguredProgresingStatsues() {
+    private List<String> getConfiguredProgressingStatuses() {
         if (progressingStatuses != null)
             return progressingStatuses;
         return statuses.values().stream().filter(s -> s.isProgressingStatus).map(s -> s.name).collect(Collectors.toList());

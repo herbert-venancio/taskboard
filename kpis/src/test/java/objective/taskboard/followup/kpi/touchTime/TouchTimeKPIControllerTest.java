@@ -1,5 +1,6 @@
 package objective.taskboard.followup.kpi.touchTime;
 
+import static objective.taskboard.utils.DateTimeUtils.parseStringToDate;
 import static org.mockito.Mockito.when;
 
 import java.time.ZoneId;
@@ -31,7 +32,10 @@ public class TouchTimeKPIControllerTest {
 
     @Mock
     private TouchTimeKPIDataProvider touchTimeKpiDataProvider;
-
+    
+    @Mock
+    private TouchTimeByWeekDataProvider touchTimeByWeekDataProvider;
+    
     @InjectMocks
     private TouchTimeKPIController subject;
 
@@ -41,16 +45,18 @@ public class TouchTimeKPIControllerTest {
         final String level = "Subtasks";
         final String zoneId = "America/Sao_Paulo";
 
-        final List<TouchTimeDataPoint> emptyList = Arrays.asList(
+        final List<TouchTimeDataPoint> dataPoints = Arrays.asList(
                 new TouchTimeDataPoint("I-1", "Backend Development", "Doing", 5.0),
                 new TouchTimeDataPoint("I-2", "Backend Development", "Doing", 8.0),
                 new TouchTimeDataPoint("I-3", "Backend Development", "Reviewing", 2.0));
+        
+
         configureTestEnvironmentForProject(projectKey)
             .projectExists()
             .withOperationPermission()
-            .withSubtaskDataSet(new TouchTimeChartDataSet(emptyList));
-
-        AssertResponse.of(subject.byIssues(projectKey, zoneId, level))
+            .withSubtaskDataSet(new TouchTimeChartDataSet(dataPoints));
+        
+        AssertResponse.of(subject.getData("byissues",projectKey, zoneId, level))
             .httpStatus(HttpStatus.OK)
             .bodyClass(TouchTimeChartDataSet.class)
             .bodyAsJson(
@@ -77,6 +83,58 @@ public class TouchTimeKPIControllerTest {
                         + "]"
                    + "}");
     }
+    
+    @Test
+    public void requestTouchTimeByWeekChartData_happyPath() {
+        final String projectKey = "TEST";
+        final String level = "Subtasks";
+        final String zoneId = "America/Sao_Paulo";
+
+        final List<TouchTimeChartByWeekDataPoint> emptyList = Arrays.asList(
+                new TouchTimeChartByWeekDataPoint(parseStringToDate("2018-11-18"),"Doing",5d),
+                new TouchTimeChartByWeekDataPoint(parseStringToDate("2018-11-18"),"Reviewing",10d),
+                new TouchTimeChartByWeekDataPoint(parseStringToDate("2018-11-25"),"Doing",15d),
+                new TouchTimeChartByWeekDataPoint(parseStringToDate("2018-11-25"),"Reviewing",20d)
+                );
+        
+        configureTestEnvironmentForProject(projectKey)
+            .projectExists()
+            .withOperationPermission()
+            .withSubtaskByWeekDataSet(new TouchTimeChartByWeekDataSet(emptyList));
+
+        AssertResponse.of(subject.getData("byWeek",projectKey, zoneId, level))
+            .httpStatus(HttpStatus.OK)
+            .bodyClass(TouchTimeChartByWeekDataSet.class)
+            .bodyAsJson(
+                    "{\"points\":"
+                        + "["
+                            + "{"
+                                + "\"date\" : "+ getDateInMiliseconds("2018-11-18")+"," 
+                                + "\"status\": \"Doing\","
+                                + "\"effort\": 5.0"
+                            + "},"
+                            + "{"
+                                + "\"date\" : "+ getDateInMiliseconds("2018-11-18")+"," 
+                                + "\"status\": \"Reviewing\","
+                                + "\"effort\": 10.0"
+                            + "},"
+                            + "{"
+                                + "\"date\" : "+ getDateInMiliseconds("2018-11-25")+"," 
+                                + "\"status\": \"Doing\","
+                                + "\"effort\": 15.0"
+                            + "},"
+                            + "{"
+                                + "\"date\" : "+ getDateInMiliseconds("2018-11-25")+"," 
+                                + "\"status\": \"Reviewing\","
+                                + "\"effort\": 20.0"
+                            + "}"
+                        + "]"
+                   + "}");
+    }
+
+	private long getDateInMiliseconds(String date) {
+		return parseStringToDate(date).getTime();
+	}
 
     @Test
     public void requestTouchTimeChartData_whenNotHavePermission_thenStatusNotFound() {
@@ -88,7 +146,7 @@ public class TouchTimeKPIControllerTest {
             .projectExists()
             .withoutOperationalPermisson();
 
-        AssertResponse.of(subject.byIssues(projectKey, zoneId, level))
+        AssertResponse.of(subject.getData("byissues",projectKey, zoneId, level))
             .httpStatus(HttpStatus.NOT_FOUND);
     }
 
@@ -102,7 +160,7 @@ public class TouchTimeKPIControllerTest {
             .projectDoesntExist()
             .withOperationPermission();
 
-        AssertResponse.of(subject.byIssues(projectKey, zoneId, level))
+        AssertResponse.of(subject.getData("byissues",projectKey, zoneId, level))
             .httpStatus(HttpStatus.NOT_FOUND)
             .bodyAsString(String.format("Project not found: %s.", projectKey));
     }
@@ -117,9 +175,24 @@ public class TouchTimeKPIControllerTest {
             .projectExists()
             .withOperationPermission();
 
-        AssertResponse.of(subject.byIssues(projectKey, zoneId, level))
+        AssertResponse.of(subject.getData("byissues",projectKey, zoneId, level))
             .httpStatus(HttpStatus.BAD_REQUEST)
             .bodyAsString(String.format("Invalid level value: %s.", level));
+    }
+    
+    @Test
+    public void requestTouchTime_whenInvalidMethod_thenStatusNotFound() {
+        final String projectKey = "TEST";
+        final String level = "SUBTASKS";
+        final String zoneId = "America/Sao_Paulo";
+
+        configureTestEnvironmentForProject(projectKey)
+            .projectExists()
+            .withOperationPermission();
+
+        AssertResponse.of(subject.getData("inexistent",projectKey, zoneId, level))
+            .httpStatus(HttpStatus.NOT_FOUND)
+            .bodyAsString("Method not found: inexistent");
     }
 
     private TestEnvironmentDSL configureTestEnvironmentForProject(String projectKey) {
@@ -131,7 +204,6 @@ public class TouchTimeKPIControllerTest {
         private String projectKey;
 
         public TestEnvironmentDSL(String projectKey) {
-            super();
             this.projectKey = projectKey;
         }
 
@@ -152,6 +224,12 @@ public class TouchTimeKPIControllerTest {
 
         public TestEnvironmentDSL withoutOperationalPermisson() {
             when(projectDashboardOperationalPermission.isAuthorizedFor(projectKey)).thenReturn(false);
+            return this;
+        }
+        
+        public TestEnvironmentDSL withSubtaskByWeekDataSet(TouchTimeChartByWeekDataSet dataset) {
+            when(touchTimeByWeekDataProvider.getDataSet(projectKey, KpiLevel.SUBTASKS, ZONE_ID))
+                .thenReturn(dataset);
             return this;
         }
 

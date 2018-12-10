@@ -84,6 +84,14 @@ public class StatusTransition {
         return worklogs.stream().mapToLong(w -> Long.valueOf(w.timeSpentSeconds)).reduce(Long::sum).orElse(0); 
     } 
     
+    public Long getEffortUntilDate(ZonedDateTime dateLimit) {
+        ZoneId zone = dateLimit.getZone();
+        LocalDate localDateLimit = dateLimit.toLocalDate();
+        return worklogs.stream()
+                .filter(w -> !DateTimeUtils.toLocalDate(w.started, zone).isAfter(localDateLimit))
+                .mapToLong(w -> Long.valueOf(w.timeSpentSeconds)).reduce(Long::sum).orElse(0); 
+    } 
+    
     public Optional<DatedStatusTransition> withDate() { 
         return next.flatMap(n -> n.withDate()); 
     } 

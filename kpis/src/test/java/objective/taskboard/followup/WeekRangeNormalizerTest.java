@@ -1,7 +1,5 @@
 package objective.taskboard.followup;
 
-import static java.time.DayOfWeek.FRIDAY;
-import static java.time.DayOfWeek.MONDAY;
 import static java.time.DayOfWeek.SATURDAY;
 import static java.time.DayOfWeek.SUNDAY;
 import static java.time.DayOfWeek.THURSDAY;
@@ -17,6 +15,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.Range;
 import org.junit.Rule;
@@ -213,52 +212,11 @@ public class WeekRangeNormalizerTest {
     }
     
     @Test
-    public void normalizeWeekRange_simpleRange() {
-        Range<LocalDate> dataSetDateRange = createLocalDateRange("2018-09-04", "2018-09-21");
-    
-        assertLocalDateRange(dataSetDateRange)
-            .startsWith(TUESDAY).endsWith(FRIDAY);
-   
-        Range<LocalDate> actualWeekRange = WeekRangeNormalizer.normalizeWeekRange(dataSetDateRange, DayOfWeek.SUNDAY,DayOfWeek.SATURDAY);
-
-        assertLocalDateRange(actualWeekRange)
-            .startsAt("2018-09-02").endsAt("2018-09-22")
-            .startsWith(SUNDAY).endsWith(SATURDAY);
-        
-    }
-    
-    @Test
-    public void normalizeWeekRange_simpleRange_alreadyOnBoundaries() {
-        Range<LocalDate> dataSetDateRange = createLocalDateRange("2018-09-02", "2018-09-22");
-        assertLocalDateRange(dataSetDateRange)
-            .startsWith(SUNDAY).endsWith(SATURDAY);
-
-        Range<LocalDate> actualWeekRange = WeekRangeNormalizer.normalizeWeekRange(dataSetDateRange, DayOfWeek.SUNDAY,DayOfWeek.SATURDAY);
-    
-        assertLocalDateRange(actualWeekRange)
-            .startsAt("2018-09-02").endsAt("2018-09-22")
-            .startsWith(SUNDAY).endsWith(SATURDAY);
-    }
-    
-    @Test
-    public void normalizeWeekRange_simpleRange_shorterWeek() {
-        Range<LocalDate> dataSetDateRange = createLocalDateRange("2018-09-04", "2018-09-20");
-        assertLocalDateRange(dataSetDateRange)
-            .startsWith(TUESDAY).endsWith(THURSDAY);
-        
-        Range<LocalDate> actualWeekRange = WeekRangeNormalizer.normalizeWeekRange(dataSetDateRange, DayOfWeek.MONDAY,DayOfWeek.FRIDAY);
-    
-        assertLocalDateRange(actualWeekRange)
-            .startsAt("2018-09-03").endsAt("2018-09-21")
-            .startsWith(MONDAY).endsWith(FRIDAY);
-    }
-    
-    @Test
     public void splitByNormalizedWeek_happyDay(){
         Range<LocalDate> dateRange = createLocalDateRange("2018-09-23","2018-09-29");
         assertLocalDateRange(dateRange).startsWith(SUNDAY).endsWith(SATURDAY);
         
-        List<Range<LocalDate>> ranges = WeekRangeNormalizer.splitByWeek(dateRange, SUNDAY, SATURDAY);
+        List<Range<LocalDate>> ranges = WeekRangeNormalizer.splitByWeek(dateRange, SUNDAY, SATURDAY).collect(Collectors.toList());
         assertThat(ranges.size(),is(1));
         assertLocalDateRange(ranges.get(0))
             .startsAt("2018-09-23").endsAt("2018-09-29")
@@ -270,7 +228,7 @@ public class WeekRangeNormalizerTest {
         Range<LocalDate> dateRange = createLocalDateRange("2018-09-23","2018-10-06");
         assertLocalDateRange(dateRange).startsWith(SUNDAY).endsWith(SATURDAY);
         
-        List<Range<LocalDate>> ranges = WeekRangeNormalizer.splitByWeek(dateRange, SUNDAY, SATURDAY);
+        List<Range<LocalDate>> ranges = WeekRangeNormalizer.splitByWeek(dateRange, SUNDAY, SATURDAY).collect(Collectors.toList());
         assertThat(ranges.size(),is(2));
         assertLocalDateRange(ranges.get(0))
             .startsAt("2018-09-23").endsAt("2018-09-29")
@@ -285,7 +243,7 @@ public class WeekRangeNormalizerTest {
         Range<LocalDate> dateRange = createLocalDateRange("2018-09-20","2018-09-26");
         assertLocalDateRange(dateRange).startsWith(THURSDAY).endsWith(WEDNESDAY);
         
-        List<Range<LocalDate>> ranges = WeekRangeNormalizer.splitByWeek(dateRange, SUNDAY, SATURDAY);
+        List<Range<LocalDate>> ranges = WeekRangeNormalizer.splitByWeek(dateRange, SUNDAY, SATURDAY).collect(Collectors.toList());
         assertThat(ranges.size(),is(2));
         assertLocalDateRange(ranges.get(0))
             .startsAt("2018-09-20").endsAt("2018-09-22")
@@ -300,7 +258,7 @@ public class WeekRangeNormalizerTest {
         Range<LocalDate> dateRange = createLocalDateRange("2018-09-20","2018-10-02");
         assertLocalDateRange(dateRange).startsWith(THURSDAY).endsWith(TUESDAY);
         
-        List<Range<LocalDate>> ranges = WeekRangeNormalizer.splitByWeek(dateRange, SUNDAY, SATURDAY);
+        List<Range<LocalDate>> ranges = WeekRangeNormalizer.splitByWeek(dateRange, SUNDAY, SATURDAY).collect(Collectors.toList());
         assertThat(ranges.size(),is(3));
         assertLocalDateRange(ranges.get(0))
             .startsAt("2018-09-20").endsAt("2018-09-22")
@@ -330,8 +288,8 @@ public class WeekRangeNormalizerTest {
     }
 
     private Range<ZonedDateTime> createDateRange(String startDate, String endDate) {
-        ZonedDateTime dataSetStartDate = DateTimeUtils.parseDateTime(startDate);
-        ZonedDateTime dataSetEndDate = DateTimeUtils.parseDateTime(endDate);
+        ZonedDateTime dataSetStartDate = DateTimeUtils.parseDateTime(startDate,"00:00:00",ZONE_ID);
+        ZonedDateTime dataSetEndDate = DateTimeUtils.parseDateTime(endDate,"00:00:00",ZONE_ID);
         return RangeUtils.between(dataSetStartDate, dataSetEndDate);
     }
     

@@ -271,4 +271,19 @@ public class StatusTransitionTest {
         assertThat(date,is("Not Found"));
     }
     
+    @Test
+    public void getDateAfterLeavingLastProgressingStatus_openIssue(){
+        StatusTransitionBuilder builder = new StatusTransitionBuilder()
+                .addTransition(TODO, "2020-01-02")
+                .addTransition(DOING)
+                .addTransition(TO_REVIEW)
+                .addTransition(REVIEWING)
+                .addTransition(DONE);
+    
+        StatusTransition first = builder.buildOrCry();
+        
+        String date = first.getDateAfterLeavingLastProgressingStatus().map(s -> s.toString()).orElse("Not Found");
+        assertThat(date,is("Not Found"));
+    }
+    
 }

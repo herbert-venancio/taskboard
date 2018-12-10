@@ -290,7 +290,7 @@ public class IssueKpiTest {
                 .build();
         
         configureClock("2020-01-06");
-        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressinsStatuses(clock,ZONE_ID);
+        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressingStatuses(clock,ZONE_ID);
         assertRange(range, "2020-01-02","2020-01-05");
     }
     
@@ -306,7 +306,7 @@ public class IssueKpiTest {
                 .build();
         
         configureClock("2020-01-06");
-        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressinsStatuses(clock,ZONE_ID);
+        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressingStatuses(clock,ZONE_ID);
         assertRange(range, "2020-01-02","2020-01-06");
     }
     
@@ -322,7 +322,7 @@ public class IssueKpiTest {
                 .build();
         
         configureClock("2020-01-03");
-        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressinsStatuses(clock,ZONE_ID);
+        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressingStatuses(clock,ZONE_ID);
         assertRange(range, "2020-01-02","2020-01-03");
     }
 
@@ -339,7 +339,7 @@ public class IssueKpiTest {
                 .build();
         
         configureClock("2020-01-10");
-        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressinsStatuses(clock,ZONE_ID);
+        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressingStatuses(clock,ZONE_ID);
         assertRange(range, "2020-01-01","2020-01-08");
         assertThat(issue.getEffort("Doing"),is(300l));
         
@@ -357,7 +357,7 @@ public class IssueKpiTest {
                 .build();
         
         configureClock("2020-01-10");
-        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressinsStatuses(clock,ZONE_ID);
+        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressingStatuses(clock,ZONE_ID);
         assertRange(range, "2020-01-06","2020-01-10");
         assertThat(issue.getEffort("Doing"),is(0l));
         assertThat(issue.getEffort("Reviewing"),is(300l));
@@ -376,7 +376,7 @@ public class IssueKpiTest {
                 .build();
         
         configureClock("2020-01-10");
-        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressinsStatuses(clock,ZONE_ID);
+        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressingStatuses(clock,ZONE_ID);
         assertRange(range, "2020-01-03","2020-01-06");
         assertThat(issue.getEffort("Doing"),is(300l));
     }
@@ -394,7 +394,7 @@ public class IssueKpiTest {
                 .build();
         
         configureClock("2020-01-10");
-        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressinsStatuses(clock,ZONE_ID);
+        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressingStatuses(clock,ZONE_ID);
         assertRange(range, "2020-01-06","2020-01-06");
         assertThat(issue.getEffort("Reviewing"),is(300l));
     }
@@ -415,7 +415,7 @@ public class IssueKpiTest {
                 .build();
         
         configureClock("2020-01-10");
-        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressinsStatuses(clock,ZONE_ID);
+        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressingStatuses(clock,ZONE_ID);
         assertRange(range, "2020-01-02","2020-01-06");
         assertThat(issue.getEffort("Doing"),is(300l));
         assertThat(issue.getEffort("Reviewing"),is(700l));
@@ -433,7 +433,7 @@ public class IssueKpiTest {
                 .build();
         
         configureClock("2020-01-10");
-        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressinsStatuses(clock,ZONE_ID);
+        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressingStatuses(clock,ZONE_ID);
         assertRange(range, "Not Found","Not Found");
     }
     
@@ -449,7 +449,7 @@ public class IssueKpiTest {
                 .build();
         
         configureClock("2020-01-10");
-        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressinsStatuses(clock,ZONE_ID);
+        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressingStatuses(clock,ZONE_ID);
         assertRange(range, "Not Found","Not Found");
     }
     
@@ -465,11 +465,27 @@ public class IssueKpiTest {
                 .build();
         
         configureClock("2020-01-10");
-        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressinsStatuses(clock,ZONE_ID);
+        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressingStatuses(clock,ZONE_ID);
         assertRange(range, "2020-01-07","2020-01-07");
         assertThat(issue.getEffort("Doing"),is(0l));
         assertThat(issue.getEffort("Reviewing"),is(100l));
         
+    }
+    
+    @Test
+    public void getAllWorklog_untilDate() {
+        IssueKpi issue = builder()
+                .addTransition(TODO,"2020-01-01")
+                .addTransition(DOING,"2020-01-02")
+                .addTransition(DONE,"2020-01-03")
+                .addWorklog("2020-01-02",300)
+                .addWorklog("2020-01-03",500)
+                .build();
+        
+        assertThat(issue.getEffort("Doing"),is(800l));
+        assertThat(issue.getEffortUntilDate("Doing",parseDateTime("2020-01-02")),is(300l));
+        assertThat(issue.getEffortUntilDate("Doing",parseDateTime("2020-01-03")),is(800l));
+
     }
     
     private void configureClock(String date) {

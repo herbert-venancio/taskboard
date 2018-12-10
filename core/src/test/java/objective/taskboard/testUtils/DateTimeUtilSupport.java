@@ -1,6 +1,5 @@
 package objective.taskboard.testUtils;
 
-import java.time.Instant;
 import static objective.taskboard.utils.DateTimeUtils.parseStringToDate;
 
 import java.time.LocalDate;
@@ -31,9 +30,5 @@ public class DateTimeUtilSupport {
     
     public static long parseDateStringAsMilliseconds(String date) {
         return parseStringToDate(date).getTime();
-    }
-
-    public static Instant getInstant(String date, ZoneId zone) {
-        return LocalDate.parse(date).atStartOfDay(zone).toInstant();
     }
 }

@@ -78,6 +78,11 @@ public class IssueKpi {
         Optional<StatusTransition> statusTransition =  firstStatus.flatMap(f -> f.find(status));
         return statusTransition.map(s -> s.getEffort()).orElse(0l);
     }
+    
+    public Long getEffortUntilDate(String status, ZonedDateTime dateLimit) {
+        Optional<StatusTransition> statusTransition =  firstStatus.flatMap(f -> f.find(status));
+        return statusTransition.map(s -> s.getEffortUntilDate(dateLimit)).orElse(0l);
+    }
 
     public List<Worklog> getWorklogFromChildren(Long subtaskType) {
         return children.stream()
@@ -122,7 +127,7 @@ public class IssueKpi {
                 .collect(Collectors.toList());
     }
 
-    public Optional<Range<LocalDate>> getDateRangeBasedOnProgressinsStatuses(Clock clock,ZoneId timezone) {
+    public Optional<Range<LocalDate>> getDateRangeBasedOnProgressingStatuses(Clock clock,ZoneId timezone) {
         Optional<ZonedDateTime> firstDateOp = firstStatus.flatMap(s -> s.firstDateOnProgressing(timezone));
         if(!firstDateOp.isPresent())
             return Optional.empty();

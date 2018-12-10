@@ -30,7 +30,7 @@ public class TouchTimeFilter implements Predicate<IssueKpi>{
     }
 
     private Optional<Range<LocalDate>> getIssueDateRange(IssueKpi issue) {
-        return issue.getDateRangeBasedOnProgressinsStatuses(clock, timezone);
+        return issue.getDateRangeBasedOnProgressingStatuses(clock, timezone);
     }
     
     

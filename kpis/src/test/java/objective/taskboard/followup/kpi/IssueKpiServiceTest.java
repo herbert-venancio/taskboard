@@ -13,6 +13,8 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -41,7 +43,6 @@ import objective.taskboard.followup.kpi.transformer.IssueKpiDataItemAdapterFacto
 import objective.taskboard.issueBuffer.IssueBufferService;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.properties.JiraProperties;
-import objective.taskboard.testUtils.DateTimeUtilSupport;
 import objective.taskboard.utils.Clock;
 import objective.taskboard.utils.DateTimeUtils;
 
@@ -131,7 +132,8 @@ public class IssueKpiServiceTest {
     @Test
     public void getIssues_currentState() {
         configureProject("2020-01-04","2020-01-10");
-        Mockito.when(clock.now()).thenReturn(DateTimeUtilSupport.getInstant("2020-01-04",ZONE_ID));
+        
+        Mockito.when(clock.now()).thenReturn(getIntant("2020-01-04"));
         
         KPIEnvironmentBuilder builder = new KPIEnvironmentBuilder();
         builder.withKpiProperties(kpiProperties)
@@ -352,6 +354,9 @@ public class IssueKpiServiceTest {
         
         return builder;
     }
-    
+
+    private Instant getIntant(String date) {
+    	return LocalDate.parse(date).atStartOfDay(ZONE_ID).toInstant();
+    }
     
 }
