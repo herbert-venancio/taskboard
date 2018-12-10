@@ -1,22 +1,5 @@
 package objective.taskboard.sizingImport;
 
-import static java.util.stream.Collectors.toList;
-
-import java.io.IOException;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import objective.taskboard.auth.authorizer.permission.ProjectAdministrationPermission;
 import objective.taskboard.domain.Project;
 import objective.taskboard.google.GoogleApiService;
@@ -25,7 +8,23 @@ import objective.taskboard.jira.ProjectService;
 import objective.taskboard.sizingImport.PreviewBuilder.ImportPreview;
 import objective.taskboard.sizingImport.PreviewBuilder.ImportSheetPreview;
 import objective.taskboard.sizingImport.SizingImportValidator.ValidationResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PostMapping;
 import retrofit.RetrofitError;
+
+import java.io.IOException;
+import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 @RestController
 @RequestMapping("ws/sizing-import")
@@ -61,7 +60,7 @@ public class SizingImportController {
 
     @GetMapping("/validation/{projectKey}/{spreadsheetId}")
     public ResponseEntity<?> executeValidation(
-            @PathVariable String projectKey, 
+            @PathVariable String projectKey,
             @PathVariable String spreadsheetId) {
 
         if (!projectAdministrationPermission.isAuthorizedFor(projectKey))
@@ -105,7 +104,7 @@ public class SizingImportController {
             if (!projectAdministrationPermission.isAuthorizedFor(projectKey))
                 return ResponseEntity.notFound().build();
 
-            SheetDefinition sheetDefinition = sizingImportService.getSheetDefinition(projectKey);
+            SheetDefinition sheetDefinition = sizingImportService.getSheetDefinition(spreadsheetId, projectKey);
             String lastColumn = sizingImportService.getSheetLastColumn(spreadsheetId);
 
             return ResponseEntity.ok(new SpreadsheetDetailsDto(sheetDefinition, lastColumn));
