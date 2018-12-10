@@ -1,425 +1,552 @@
 package objective.taskboard.sizingImport;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
-import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.EXTRA_FIELD_ID_TAG;
-import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.SIZING_FIELD_ID_TAG;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import org.apache.commons.lang3.StringUtils;
-import org.junit.Before;
 import org.junit.Test;
-
-import objective.taskboard.jira.client.JiraCreateIssue;
-import objective.taskboard.jira.client.JiraIssueDto;
-import objective.taskboard.jira.data.JiraIssue;
-import objective.taskboard.jira.data.JiraProject;
-import objective.taskboard.jira.data.Version;
-import objective.taskboard.sizingImport.JiraFacade.IssueCustomFieldOptionValue;
-import objective.taskboard.sizingImport.JiraFacade.IssueFieldObjectValue;
-import objective.taskboard.sizingImport.SheetColumnDefinition.ColumnTag;
-import objective.taskboard.sizingImport.SizingImportConfig.SheetMap.ExtraField;
-import objective.taskboard.sizingImport.SizingImportLine.ImportValue;
 
 public class ScopeImporterTest {
 
-    private static final String PROJECT_X_KEY = "PX";
-    private static final Version VERSION_ONE = jiraVersion("One");
-    private static final Long FEATURE_TYPE_ID = 30L;
-    private static final Long TASK_TYPE_ID = 31L;
-    
-    private static final SheetColumn PHASE_COLUMN = new SheetColumn(SheetColumnDefinitionProviderScope.PHASE, "A");
-    private static final SheetColumn DEMAND_COLUMN = new SheetColumn(SheetColumnDefinitionProviderScope.DEMAND, "B");
-    private static final SheetColumn FEATURE_COLUMN = new SheetColumn(SheetColumnDefinitionProviderScope.FEATURE, "C");
-    private static final SheetColumn TYPE_COLUMN = new SheetColumn(SheetColumnDefinitionProviderScope.TYPE, "D");
-    private static final SheetColumn KEY_COLUMN = new SheetColumn(SheetColumnDefinitionProviderScope.KEY, "C");
+    private ScopeImporterTestDSL dsl = new ScopeImporterTestDSL();
 
-    private final SizingImportConfig importConfig = new SizingImportConfig();
-    private final JiraFacade jiraFacade = mock(JiraFacade.class);
-    private final SizingSheetImporterNotifier importerNotifier = new SizingSheetImporterNotifier();
-    private final SizingImporterRecorder recorder = new SizingImporterRecorder();
-
-    private final Map<String, JiraCreateIssue.FieldInfoMetadata> featureMetadataFields = new HashMap<>();
-    private final Map<String, JiraCreateIssue.FieldInfoMetadata> taskMetadataFields = new HashMap<>();
-
-    private final ScopeImporter subject = new ScopeImporter(importConfig, jiraFacade, importerNotifier);
-
-    @Before
-    public void setup() {
-        when(jiraFacade.createVersion(PROJECT_X_KEY, "One")).thenReturn(VERSION_ONE);
-        when(jiraFacade.getProject(PROJECT_X_KEY)).thenReturn(jiraProject(PROJECT_X_KEY, "Project X"));
-        when(jiraFacade.getDemandKeyGivenFeature(any())).thenReturn(Optional.of("PX-1"));
-
-        when(jiraFacade.requestFeatureTypes(PROJECT_X_KEY)).thenReturn(asList(
-                new JiraCreateIssue.IssueTypeMetadata(FEATURE_TYPE_ID, "Feature", false, featureMetadataFields),
-                new JiraCreateIssue.IssueTypeMetadata(TASK_TYPE_ID,    "Task",    false, taskMetadataFields)));
-
-        importerNotifier.addListener(recorder);
-    }
-    
     @Test
-    public void importEmptyLines() {
-        List<SizingImportLineScope> lines = emptyList();
+    public void importNoLines_shouldFinishWithSuccessWithoutLinesToImport() {
+        dsl.jira()
+            .withProject()
+                .key("PX")
+            .eoP();
 
-        subject.executeImport(PROJECT_X_KEY, lines);
-        
-        assertEvents(
-                "Import started - Total lines count: 0 | lines to import: 0",
-                "Import finished");
-        
-        verifyJiraFacadeNeverCreateItems();
-    }
-    
-    @Test
-    public void importLinesAlreadyImported() {
-        List<SizingImportLineScope> lines = asList(
-                new SizingImportLineScope(0, asList(
-                        new ImportValue(PHASE_COLUMN, "One"), 
-                        new ImportValue(DEMAND_COLUMN, "Blue"), 
-                        new ImportValue(FEATURE_COLUMN, "Banana"),
-                        new ImportValue(TYPE_COLUMN, "Feature"),
-                        new ImportValue(KEY_COLUMN, "PX-10"))));
-        
-        subject.executeImport(PROJECT_X_KEY, lines);
-        
-        assertEvents(
-                "Import started - Total lines count: 1 | lines to import: 0",
-                "Import finished");
-        
-        verifyJiraFacadeNeverCreateItems();
-    }
-    
-    @Test
-    public void importLineWithMissingRegularColumn() {
-        List<SizingImportLineScope> lines = asList(
-                new SizingImportLineScope(0, asList(
-                        new ImportValue(PHASE_COLUMN, "One"), 
-                        new ImportValue(DEMAND_COLUMN, "Blue"),
-                        new ImportValue(TYPE_COLUMN, "Feature"))));
-        
-        subject.executeImport(PROJECT_X_KEY, lines);
-        
-        assertEvents(
-                "Import started - Total lines count: 1 | lines to import: 1",
-                "Line import started - Row index: 0",
-                "Line error - Row index: 0 | errors: Feature should be informed",
-                "Import finished");
-
-        verifyJiraFacadeNeverCreateItems();
+        dsl.sizing()
+            .importedToProject("PX")
+            .then()
+                .withLinesToImport(0)
+                .importIsFinished()
+            .and()
+                .noIssuesHaveBeenCreated();
     }
 
     @Test
-    public void importLineWithInvalidType() {
-        List<SizingImportLineScope> lines = asList(
-                new SizingImportLineScope(0, asList(
-                        new ImportValue(PHASE_COLUMN, "One"), 
-                        new ImportValue(DEMAND_COLUMN, "Blue"),
-                        new ImportValue(FEATURE_COLUMN, "Banana"),
-                        new ImportValue(TYPE_COLUMN, "Bug"))));
-        
-        subject.executeImport(PROJECT_X_KEY, lines);
-        
-        assertEvents(
-                "Import started - Total lines count: 1 | lines to import: 1",
-                "Line import started - Row index: 0",
-                "Line error - Row index: 0 | errors: Type should be one of the following: Feature, Task",
-                "Import finished");
-        
-        verifyJiraFacadeNeverCreateItems();
+    public void importALineAlreadyImported_shouldFinishWithSuccessWithoutLinesToImport() {
+        dsl.jira()
+            .withProject()
+                .key("PX")
+                .withIssues()
+                    .issue()
+                        .key("PX-1")
+                        .isDemand()
+                    .eoI()
+                .eoIs()
+            .eoP();
+
+        dsl.sizing()
+            .lines()
+                .line()
+                    .number(1)
+                    .phase("One")
+                    .demand("Blue")
+                    .feature("Banana")
+                    .key("PX-10")
+                .eoL()
+            .eoLs()
+            .importedToProject("PX")
+            .then()
+                .withLinesToImport(0)
+                .importIsFinished()
+            .and()
+                .noIssuesHaveBeenCreated();
     }
 
     @Test
-    public void importLineWithEmptyRequiredSizingField() {
-        featureMetadataFields.put("f1", jiraRequiredField("f1", "Dev TSize"));
-        featureMetadataFields.put("f2", jiraOptionalField("f2", "UAT TSize"));
+    public void importLineMissingFeatureValue_shouldRejectLineAndReportError() {
+        dsl.jira()
+            .withProject()
+                .key("PX")
+                .withIssues()
+                    .issue()
+                        .key("PX-1")
+                    .eoI()
+                .eoIs()
+                .withFeatureType()
+                    .feature()
+                        .name("Feature")
+                    .eoF()
+                .eoFt()
+            .eoP();
 
-        when(jiraFacade.getSizingFieldIds()).thenReturn(asList("f1", "f2"));
-
-        List<SizingImportLineScope> lines = asList(
-                new SizingImportLineScope(0, asList(
-                        new ImportValue(PHASE_COLUMN, "One"), 
-                        new ImportValue(DEMAND_COLUMN, "Blue"),
-                        new ImportValue(FEATURE_COLUMN, "Banana"),
-                        new ImportValue(TYPE_COLUMN, "Feature"))));
-        
-        subject.executeImport(PROJECT_X_KEY, lines);
-        
-        assertEvents(
-                "Import started - Total lines count: 1 | lines to import: 1",
-                "Line import started - Row index: 0",
-                "Line error - Row index: 0 | errors: Dev TSize should be informed",
-                "Import finished");
-        
-        verifyJiraFacadeNeverCreateItems();
+        dsl.sizing()
+            .lines()
+                .line()
+                    .number(1)
+                    .phase("One")
+                    .demand("Blue")
+                    .feature("")
+                .eoL()
+            .eoLs()
+                .importedToProject("PX")
+            .then()
+                .withLinesToImport(1)
+                .withError("Feature should be informed")
+                .importIsFinished()
+            .and()
+                .noIssuesHaveBeenCreated();
     }
 
     @Test
-    public void importLineWithEmptyRequiredExtraField() {
-        featureMetadataFields.put("f9", jiraRequiredField("f9", "Use Cases"));
-        
-        importConfig.getSheetMap().getExtraFields().add(new ExtraField("f9", "Use Cases", "D"));
+    public void importLineWithInvalidType_shouldRejectLineAndReportError() {
+        dsl.jira()
+            .withProject()
+                .key("PX")
+                .withIssues()
+                    .issue()
+                        .key("PX-1")
+                        .name("Banana")
+                    .eoI()
+                .eoIs()
+                .withFeatureType()
+                    .feature()
+                        .name("Feature")
+                    .eoF()
+                    .feature()
+                        .name("Task")
+                    .eoF()
+                    .feature()
+                        .name("Timebox")
+                    .eoF()
+                .eoFt()
+            .eoP();
 
-        List<SizingImportLineScope> lines = asList(
-                new SizingImportLineScope(0, asList(
-                        new ImportValue(PHASE_COLUMN, "One"), 
-                        new ImportValue(DEMAND_COLUMN, "Blue"),
-                        new ImportValue(FEATURE_COLUMN, "Banana"),
-                        new ImportValue(TYPE_COLUMN, "Feature"))));
-        
-        subject.executeImport(PROJECT_X_KEY, lines);
-        
-        assertEvents(
-                "Import started - Total lines count: 1 | lines to import: 1",
-                "Line import started - Row index: 0",
-                "Line error - Row index: 0 | errors: Use Cases should be informed",
-                "Import finished");
-        
-        verifyJiraFacadeNeverCreateItems();
+        dsl.sizing()
+            .lines()
+                .line()
+                    .number(1)
+                    .phase("One")
+                    .demand("Blue")
+                    .name("Banana")
+                    .type("Bug")
+                .eoL()
+            .eoLs()
+                .importedToProject("PX")
+            .then()
+                .withLinesToImport(1)
+                .withError("Type should be one of the following: Feature, Task, Timebox")
+                .importIsFinished()
+            .and()
+                .noIssuesHaveBeenCreated();
     }
 
     @Test
-    public void importLineWithoutSizingAndExtraFields() {
-        when(jiraFacade.createDemand(any(), eq("Blue"), any())).thenReturn(new JiraIssue("PX-1"));
-        when(jiraFacade.createFeature(any(), any(), any(), eq("Banana"), any(), any())).thenReturn(new JiraIssue("PX-15"));
+    public void importLineWithMissingRequiredSizingFieldValue_ShouldRejectLineAndReportError() {
+        dsl.jira()
+            .withProject()
+                .key("PX")
+                .withIssues()
+                    .issue()
+                        .key("PX-1")
+                    .eoI()
+                .eoIs()
+                .withFeatureType()
+                    .feature()
+                        .name("Feature")
+                        .withCustomField()
+                            .name("Dev TSize")
+                            .withId("f1")
+                            .isRequired()
+                        .eoCf()
+                        .withCustomField()
+                            .name("UAT TSize")
+                            .withId("f2")
+                        .eoCf()
+                    .eoF()
+                .eoFt()
+            .eoP();
 
-        List<SizingImportLineScope> lines = asList(
-                new SizingImportLineScope(0, asList(
-                        new ImportValue(PHASE_COLUMN,   "One"), 
-                        new ImportValue(DEMAND_COLUMN,  "Blue"), 
-                        new ImportValue(FEATURE_COLUMN, "Banana"),
-                        new ImportValue(TYPE_COLUMN,    "Feature"),
-                        new ImportValue(KEY_COLUMN,     ""))));
-
-        subject.executeImport(PROJECT_X_KEY, lines);
-        
-        assertEvents(
-                "Import started - Total lines count: 1 | lines to import: 1",
-                "Line import started - Row index: 0",
-                "Line import finished - Row index: 0 | issue key: PX-15",
-                "Import finished");
-        
-        verify(jiraFacade).createVersion(PROJECT_X_KEY, "One");
-        verify(jiraFacade).createDemand(PROJECT_X_KEY, "Blue", VERSION_ONE);
-        verify(jiraFacade).createFeature(PROJECT_X_KEY, "PX-1", FEATURE_TYPE_ID, "Banana", VERSION_ONE, emptyList());
+        dsl.sizing()
+            .lines()
+                .line()
+                    .number(1)
+                    .phase("One")
+                    .demand("Blue")
+                    .feature("Banana")
+                .eoL()
+            .eoLs()
+            .importedToProject("PX")
+            .then()
+                .rejectLine(1)
+                .withError("Dev TSize should be informed")
+            .and()
+                .noIssuesHaveBeenCreated();
     }
 
     @Test
-    public void importHappyDay() {
-        JiraCreateIssue.FieldInfoMetadata devTSizeField = jiraOptionalField("f1", "Dev TSize");
-        JiraCreateIssue.FieldInfoMetadata uatTSizeField = jiraOptionalField("f2", "UAT TSize");
-        JiraCreateIssue.FieldInfoMetadata taskTSizeField = jiraOptionalField("f5", "Task TSize");
-        JiraCreateIssue.FieldInfoMetadata useCasesField = jiraOptionalField("f3", "Use Cases");
-        
-        featureMetadataFields.put(devTSizeField.id, devTSizeField);
-        featureMetadataFields.put(uatTSizeField.id, uatTSizeField);
-        featureMetadataFields.put(useCasesField.id, useCasesField);
-        taskMetadataFields.put(taskTSizeField.id, taskTSizeField);
-        
-        when(jiraFacade.getSizingFieldIds()).thenReturn(asList(devTSizeField.id, uatTSizeField.id, taskTSizeField.id));
-        importConfig.getSheetMap().getExtraFields().add(new ExtraField(useCasesField.id, "Use Cases", "H"));
-        
-        when(jiraFacade.createDemand(any(), eq("Blue"), any())).thenReturn(new JiraIssue("PX-2"));
-        when(jiraFacade.createDemand(any(), eq("Red"), any())).thenReturn(new JiraIssue("PX-3"));
-        when(jiraFacade.createFeature(any(), any(), any(), eq("Banana"), any(), any())).thenReturn(new JiraIssue("PX-15"));
-        when(jiraFacade.createFeature(any(), any(), any(), eq("Lemon"), any(), any())).thenReturn(new JiraIssue("PX-16"));
-        when(jiraFacade.createFeature(any(), any(), any(), eq("Grape"), any(), any())).thenReturn(new JiraIssue("PX-17"));
-        
-        SheetColumn devTSizeCol = new SheetColumn(new SheetColumnDefinition("Dev TSize", new ColumnTag(SIZING_FIELD_ID_TAG, "f1")), "E");
-        SheetColumn uatTSizeCol = new SheetColumn(new SheetColumnDefinition("UAT TSize", new ColumnTag(SIZING_FIELD_ID_TAG, "f2")), "F");
-        SheetColumn taskTSizeCol = new SheetColumn(new SheetColumnDefinition("Task TSize", new ColumnTag(SIZING_FIELD_ID_TAG, "f5")), "G");
-        SheetColumn useCasesCol = new SheetColumn(new SheetColumnDefinition("Use Cases", new ColumnTag(EXTRA_FIELD_ID_TAG,  "f3")), "H");
-        
-        List<SizingImportLineScope> lines = asList(
-                new SizingImportLineScope(0, asList(
-                        new ImportValue(PHASE_COLUMN,   "One"), 
-                        new ImportValue(DEMAND_COLUMN,  "Blue"), 
-                        new ImportValue(FEATURE_COLUMN, "Banana"),
-                        new ImportValue(TYPE_COLUMN,    "Feature"),
-                        new ImportValue(KEY_COLUMN,     ""))),
-                new SizingImportLineScope(1, asList(
-                        new ImportValue(PHASE_COLUMN,   "One"), 
-                        new ImportValue(DEMAND_COLUMN,  "Blue"), 
-                        new ImportValue(FEATURE_COLUMN, "Lemon"),
-                        new ImportValue(TYPE_COLUMN,    "Task"),
-                        new ImportValue(KEY_COLUMN,     ""),
-                        new ImportValue(taskTSizeCol,   "M"))),
-                new SizingImportLineScope(2, asList(
-                        new ImportValue(PHASE_COLUMN,   "One"), 
-                        new ImportValue(DEMAND_COLUMN,  "Red"), 
-                        new ImportValue(FEATURE_COLUMN, "Grape"),
-                        new ImportValue(TYPE_COLUMN,    "Feature"),
-                        new ImportValue(KEY_COLUMN,     ""),
-                        new ImportValue(devTSizeCol,    "X"),
-                        new ImportValue(uatTSizeCol,    "S"),
-                        new ImportValue(useCasesCol,    "User picks and eats"))),
-                new SizingImportLineScope(3, asList(
-                        new ImportValue(PHASE_COLUMN,   "One"), 
-                        new ImportValue(DEMAND_COLUMN,  "White"), 
-                        new ImportValue(FEATURE_COLUMN, "Jackfruit"),
-                        new ImportValue(TYPE_COLUMN,    "Feature"),
-                        new ImportValue(KEY_COLUMN,     "PX-1"))));
+    public void importLineWithMissingRequiredExtraFieldValue_ShouldRejectLineAndReportError() {
+        dsl.jira()
+            .withProject()
+                .key("PX")
+                .withIssues()
+                    .issue()
+                        .key("PX-1")
+                        .name("Blue")
+                    .eoI()
+                .eoIs()
+                .withFeatureType()
+                    .feature()
+                        .name("Feature")
+                        .withCustomField()
+                            .name("Use Cases")
+                            .withId("f9")
+                            .isRequired()
+                        .eoCf()
+                    .eoF()
+                .eoFt()
+            .eoP();
 
-        subject.executeImport(PROJECT_X_KEY, lines);
-        
-        assertEvents(
-                "Import started - Total lines count: 4 | lines to import: 3",
-                "Line import started - Row index: 0",
-                "Line import finished - Row index: 0 | issue key: PX-15",
-                "Line import started - Row index: 1",
-                "Line import finished - Row index: 1 | issue key: PX-16",
-                "Line import started - Row index: 2",
-                "Line import finished - Row index: 2 | issue key: PX-17",
-                "Import finished");
-        
-        verify(jiraFacade).createVersion(PROJECT_X_KEY, "One");
-        verify(jiraFacade).createDemand(PROJECT_X_KEY, "Blue", VERSION_ONE);
-        verify(jiraFacade).createDemand(PROJECT_X_KEY, "Red", VERSION_ONE);
-        verify(jiraFacade).createFeature(PROJECT_X_KEY, "PX-2", FEATURE_TYPE_ID, "Banana", VERSION_ONE, emptyList());
-        verify(jiraFacade).createFeature(PROJECT_X_KEY, "PX-2", TASK_TYPE_ID, "Lemon", VERSION_ONE, asList(
-                new IssueCustomFieldOptionValue("f5", "M", null)));
-        verify(jiraFacade).createFeature(PROJECT_X_KEY, "PX-3", FEATURE_TYPE_ID, "Grape", VERSION_ONE, asList(
-                new IssueCustomFieldOptionValue("f1", "X", null),
-                new IssueCustomFieldOptionValue("f2", "S", null),
-                new IssueFieldObjectValue("f3", "User picks and eats")));
+        dsl.sizing()
+            .lines()
+                .line()
+                    .number(1)
+                    .phase("One")
+                    .demand("Blue")
+                    .feature("Banana")
+                .eoL()
+            .eoLs()
+                .importedToProject("PX")
+            .then()
+                .rejectLine(1)
+                .withError("Use Cases should be informed")
+            .and()
+                .noIssuesHaveBeenCreated();
     }
 
     @Test
-    public void importLineWithUnsupportedFields() {
-        JiraCreateIssue.FieldInfoMetadata devTSizeField = jiraOptionalField("f1", "Dev TSize");
-        JiraCreateIssue.FieldInfoMetadata uatTSizeField = jiraOptionalField("f2", "UAT TSize");
-        
-        featureMetadataFields.put(devTSizeField.id, devTSizeField);
-        
-        when(jiraFacade.getSizingFieldIds()).thenReturn(asList(devTSizeField.id, uatTSizeField.id));
-        when(jiraFacade.createDemand(any(), eq("Blue"), any())).thenReturn(new JiraIssue("PX-1"));
-        when(jiraFacade.createFeature(any(), any(), any(), eq("Banana"), any(), any())).thenReturn(new JiraIssue("PX-15"));
-        
-        SheetColumn devTSizeCol = new SheetColumn(new SheetColumnDefinition("Dev TSize", new ColumnTag(SIZING_FIELD_ID_TAG, "f1")), "E");
-        SheetColumn uatTSizeCol = new SheetColumn(new SheetColumnDefinition("UAT TSize", new ColumnTag(SIZING_FIELD_ID_TAG, "f2")), "F");
-        SheetColumn useCasesCol = new SheetColumn(new SheetColumnDefinition("Use Cases", new ColumnTag(EXTRA_FIELD_ID_TAG,  "f3")), "G");
+    public void importLineWithoutSizingAndExtraFields_shouldImportWithSuccessAndReportIt() {
+        dsl.jira()
+            .withProject()
+                .key("PX")
+                .withIssues()
+                    .issue()
+                        .key("PX-1")
+                        .name("Blue")
+                        .isDemand()
+                    .eoI()
+                    .issue()
+                        .key("PX-15")
+                        .name("Banana")
+                    .eoI()
+                .eoIs()
+                .withFeatureType()
+                    .feature()
+                        .name("Feature")
+                    .eoF()
+                .eoFt()
+            .eoP();
 
-        List<SizingImportLineScope> lines = asList(
-                new SizingImportLineScope(0, asList(
-                        new ImportValue(PHASE_COLUMN,   "One"), 
-                        new ImportValue(DEMAND_COLUMN,  "Blue"), 
-                        new ImportValue(FEATURE_COLUMN, "Banana"),
-                        new ImportValue(TYPE_COLUMN,    "Feature"),
-                        new ImportValue(devTSizeCol,    "X"),
-                        new ImportValue(uatTSizeCol,    "S"),
-                        new ImportValue(useCasesCol,    "User picks and eats"))));
-
-        subject.executeImport(PROJECT_X_KEY, lines);
-        
-        assertEvents(
-                "Import started - Total lines count: 1 | lines to import: 1",
-                "Line import started - Row index: 0",
-                "Line error - Row index: 0 | errors: " + 
-                        "Column “UAT TSize” is not valid for the type Feature and should be left blank; " + 
-                        "Column “Use Cases” is not valid for the type Feature and should be left blank",
-                "Import finished");
-        
-        verifyJiraFacadeNeverCreateItems();
-    }
-    
-    @Test
-    public void importUsingAlreadyCreatedVersion() {
-        when(jiraFacade.getProject("PY")).thenReturn(jiraProject("PY", "Project Y", asList(jiraVersion("Two"))));
-        when(jiraFacade.createDemand(any(), eq("Blue"), any())).thenReturn(new JiraIssue("PY-1"));
-        when(jiraFacade.createFeature(any(), any(), any(), eq("Banana"), any(), any())).thenReturn(new JiraIssue("PY-15"));
-        when(jiraFacade.requestFeatureTypes("PY")).thenReturn(asList(new JiraCreateIssue.IssueTypeMetadata(FEATURE_TYPE_ID, "Feature", false, emptyMap())));
-
-        List<SizingImportLineScope> lines = asList(
-                new SizingImportLineScope(0, asList(
-                        new ImportValue(PHASE_COLUMN,   "Two"), 
-                        new ImportValue(DEMAND_COLUMN,  "Blue"), 
-                        new ImportValue(FEATURE_COLUMN, "Banana"),
-                        new ImportValue(TYPE_COLUMN,    "Feature"),
-                        new ImportValue(KEY_COLUMN,     ""))));
-
-        subject.executeImport("PY", lines);
-        
-        assertEvents(
-                "Import started - Total lines count: 1 | lines to import: 1",
-                "Line import started - Row index: 0",
-                "Line import finished - Row index: 0 | issue key: PY-15",
-                "Import finished");
-        
-        verify(jiraFacade, never()).createVersion(any(), eq("Two"));
+        dsl.sizing()
+            .lines()
+                .line()
+                    .number(1)
+                    .phase("One")
+                    .demand("Blue")
+                    .feature("Banana")
+                .eoL()
+            .eoLs()
+                .importedToProject("PX")
+            .then()
+                .importIsFinished()
+                .withSuccessfulIssueImported("PX-15");
     }
 
     @Test
-    public void recoverDemandFromPreviouslyImportedFeature() {
-        JiraIssueDto bananaIssue = mock(JiraIssueDto.class);
-        when(jiraFacade.getIssue("PX-10")).thenReturn(bananaIssue);
-        when(jiraFacade.getDemandKeyGivenFeature(bananaIssue)).thenReturn(Optional.of("PX-1"));
-        when(jiraFacade.createFeature(any(), any(), any(), eq("Lemon"), any(), any())).thenReturn(new JiraIssue("PX-15"));
+    public void importTimeboxLine_shouldImportWithSuccessAndReportHim() {
+        dsl.jira()
+            .withProject()
+                .key("PX")
+                .withIssues()
+                    .issue()
+                        .key("PX-1")
+                        .name("Blue")
+                        .isDemand()
+                    .eoI()
+                    .issue()
+                        .key("PX-15")
+                        .name("Banana")
+                    .eoI()
+                .eoIs()
+                .withFeatureType()
+                    .feature()
+                        .name("Timebox")
+                    .eoF()
+                .eoFt()
+            .eoP();
 
-        List<SizingImportLineScope> lines = asList(
-                new SizingImportLineScope(0, asList(
-                        new ImportValue(PHASE_COLUMN,   "One"), 
-                        new ImportValue(DEMAND_COLUMN,  "Blue"), 
-                        new ImportValue(FEATURE_COLUMN, "Banana"),
-                        new ImportValue(TYPE_COLUMN,    "Feature"),
-                        new ImportValue(KEY_COLUMN,     "PX-10"))),
-                new SizingImportLineScope(0, asList(
-                        new ImportValue(PHASE_COLUMN,   "One"), 
-                        new ImportValue(DEMAND_COLUMN,  "Blue"), 
-                        new ImportValue(FEATURE_COLUMN, "Lemon"),
-                        new ImportValue(TYPE_COLUMN,    "Feature"),
-                        new ImportValue(KEY_COLUMN,     ""))));
-
-        subject.executeImport(PROJECT_X_KEY, lines);
-        
-        assertEvents(
-                "Import started - Total lines count: 2 | lines to import: 1",
-                "Line import started - Row index: 0",
-                "Line import finished - Row index: 0 | issue key: PX-15",
-                "Import finished");
-        
-        verify(jiraFacade, never()).createDemand(any(), eq("Blue"), any());
-        verify(jiraFacade).createFeature(PROJECT_X_KEY, "PX-1", FEATURE_TYPE_ID, "Lemon", VERSION_ONE, emptyList());
-    }
-
-    private static JiraProject jiraProject(String key, String name, List<Version> versions) {
-        return new JiraProject("0", key, versions, name);
-    }
-    
-    private static JiraProject jiraProject(String key, String name) {
-        return jiraProject(key, name, emptyList());
-    }
-
-    private static JiraCreateIssue.FieldInfoMetadata jiraRequiredField(String id, String name) {
-        return new JiraCreateIssue.FieldInfoMetadata(id, true, name);
-    }
-    
-    private static JiraCreateIssue.FieldInfoMetadata jiraOptionalField(String id, String name) {
-        return new JiraCreateIssue.FieldInfoMetadata(id, false, name);
-    }
-    
-    private static Version jiraVersion(String name) {
-        return new Version("0", name);
-    }
-    
-    private void verifyJiraFacadeNeverCreateItems() {
-        verify(jiraFacade, never()).createVersion(any(), any());
-        verify(jiraFacade, never()).createDemand(any(), any(), any());
-        verify(jiraFacade, never()).createFeature(any(), any(), any(), any(), any(), any());
+        dsl.sizing()
+            .config()
+                .withTimeboxColumnLetter("S")
+            .eoC()
+            .lines()
+                .line()
+                    .number(1)
+                    .phase("One")
+                    .demand("Infrastructure")
+                    .name("Proof of Concept")
+                    .timebox("80")
+                .eoL()
+            .eoLs()
+                .importedToProject("PX")
+            .then()
+                .importIsFinished()
+                .withSuccessfulIssueImported("PX-15");
     }
 
-    private void assertEvents(String... expected) {
-        assertEquals(StringUtils.join(expected, "\n"), StringUtils.join(recorder.getEvents(), "\n"));
+    @Test
+    public void importFourLinesWithOneLineAlreadyImported_shouldImportThreeIssuesAndReportTheSuccess() {
+        dsl.jira()
+            .withProject()
+                .name("Project X")
+                .key("PX")
+                .withIssues()
+                    .issue()
+                        .key("PX-2")
+                        .name("Blue")
+                        .isDemand()
+                    .eoI()
+                    .issue()
+                        .key("PX-3")
+                        .name("Red")
+                        .isDemand()
+                    .eoI()
+                    .issue()
+                        .key("PX-15")
+                        .name("Banana")
+                    .eoI()
+                    .issue()
+                        .key("PX-16")
+                        .name("Lemon")
+                    .eoI()
+                    .issue()
+                        .key("PX-17")
+                        .name("Grape")
+                    .eoI()
+                .eoIs()
+                .withFeatureType()
+                    .feature()
+                        .name("Feature")
+                        .withCustomField()
+                            .name("Dev TSize")
+                            .withId("f1")
+                        .eoCf()
+                        .withCustomField()
+                            .name("UAT TSize")
+                            .withId("f2")
+                        .eoCf()
+                        .withCustomField()
+                            .name("Use Cases")
+                            .withId("f3")
+                        .eoCf()
+                    .eoF()
+                    .feature()
+                        .name("Task")
+                        .withCustomField()
+                            .name("Task TSize")
+                            .withId("f5")
+                        .eoCf()
+                    .eoF()
+                .eoFt()
+            .eoP();
+
+        dsl.sizing()
+            .config()
+                .extraField()
+                    .columnHeader("Dev TSize")
+                    .id("f1")
+                    .mappedToColumn("E")
+                .eoEf()
+                .extraField()
+                    .columnHeader("UAT TSize")
+                    .id("f2")
+                    .mappedToColumn("F")
+                .eoEf()
+                .extraField()
+                    .columnHeader("Task TSize")
+                    .id("f5")
+                    .mappedToColumn("G")
+                .eoEf()
+                .extraField()
+                    .columnHeader("Use Cases")
+                    .id("f3")
+                    .mappedToColumn("H")
+                .eoEf()
+            .eoC()
+            .lines()
+                .line()
+                    .phase("One")
+                    .demand("Blue")
+                    .feature("Banana")
+                .eoL()
+                .line()
+                    .phase("One")
+                    .demand("Blue")
+                    .task("Lemon")
+                    .withExtraColumns()
+                        .column()
+                            .name("Task TSize")
+                            .value("M")
+                            .isTypeSizing()
+                        .eoC()
+                    .eoEc()
+                .eoL()
+                .line()
+                    .phase("One")
+                    .demand("Red")
+                    .feature("Grape")
+                    .withExtraColumns()
+                        .column()
+                            .name("Dev TSize")
+                            .value("X")
+                            .isTypeSizing()
+                        .eoC()
+                        .column()
+                            .name("UAT TSize")
+                            .value("S")
+                        .eoC()
+                        .column()
+                            .name("Use Cases")
+                            .value("User picks and eats")
+                        .eoC()
+                    .eoEc()
+                .eoL()
+                .line()
+                    .phase("One")
+                    .demand("White")
+                    .feature("Jackfruit")
+                    .key("PX-1")
+                .eoL()
+            .eoLs()
+                .importedToProject("PX")
+            .then()
+                .withSuccessfulIssuesImported("PX-15", "PX-16", "PX-17")
+                .importIsFinished();
     }
 
+    @Test
+    public void importLineWithUnsupportedFields_shouldRejectLineReportingErrorToTwoExtraValuesOfLine() {
+        dsl.jira()
+            .withProject()
+                .key("PX")
+                .name("Project X")
+                .withIssues()
+                    .issue()
+                        .key("PX-1")
+                        .name("Blue")
+                        .isDemand()
+                    .eoI()
+                    .issue()
+                        .key("PX-15")
+                        .name("Banana")
+                    .eoI()
+                .eoIs()
+                .withFeatureType()
+                    .feature()
+                        .name("Feature")
+                        .withCustomField()
+                            .name("Dev TSize")
+                            .withId("f1")
+                        .eoCf()
+                    .eoF()
+                .eoFt()
+            .eoP();
+
+        dsl.sizing()
+            .config()
+                .extraField()
+                    .id("f1")
+                    .columnHeader("Dev TSize")
+                    .mappedToColumn("E")
+                .eoEf()
+                .extraField()
+                    .id("f3")
+                    .columnHeader("Use Cases")
+                    .mappedToColumn("G")
+                .eoEf()
+            .eoC()
+            .lines()
+                .line()
+                    .number(1)
+                    .phase("One")
+                    .demand("Blue")
+                    .feature("Banana")
+                    .withExtraColumns()
+                        .column()
+                            .name("Dev TSize")
+                            .value("X")
+                            .isTypeSizing()
+                        .eoC()
+                        .column()
+                            .name("UAT TSize")
+                            .value("S")
+                            .isTypeSizing()
+                        .eoC()
+                        .column()
+                            .name("Use Cases")
+                            .value("User picks and eats")
+                        .eoC()
+                    .eoEc()
+                .eoL()
+            .eoLs()
+                .importedToProject("PX")
+            .then()
+                .rejectLine(1)
+                .withError(
+                    "Column “UAT TSize” is not valid for the type Feature and should be left blank; " +
+                    "Column “Use Cases” is not valid for the type Feature and should be left blank"
+                )
+            .and()
+                .noIssuesHaveBeenCreated();
+    }
+
+    @Test
+    public void importALineWithExistingVersion_ensureToNotCreateAVersion() {
+        dsl.jira()
+            .withProject()
+                .key("PX")
+                .name("Project X")
+                .withVersion("One")
+                .withIssues()
+                    .issue()
+                        .key("PX-1")
+                        .name("Blue")
+                        .isDemand()
+                    .eoI()
+                    .issue()
+                        .key("PX-15")
+                        .name("Lemon")
+                    .eoI()
+                .eoIs()
+                .withFeatureType()
+                    .feature()
+                        .name("Feature")
+                    .eoF()
+                .eoFt()
+            .eoP();
+
+        dsl.sizing()
+            .lines()
+                .line()
+                    .number(1)
+                    .phase("One")
+                    .demand("Blue")
+                    .feature("Banana")
+                    .key("PX-10")
+                .eoL()
+                .line()
+                    .number(2)
+                    .phase("One")
+                    .demand("Blue")
+                    .feature("Lemon")
+                    .key("")
+                .eoL()
+            .eoLs()
+                .importedToProject("PX")
+            .then()
+                .importIsFinished()
+                .withSuccessfulIssueImported("PX-15")
+            .and()
+                .noVersionHaveBeenCreated();
+    }
 }

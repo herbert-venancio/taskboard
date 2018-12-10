@@ -1,23 +1,54 @@
-node_modules
+# compiled output
 dist
+tmp
+out-tsc
+target
+/data
+/bin/
+
+# dependencies
+node_modules
 bower_components
-.tmp
-.settings
+src/main/resources/static/bower_components
+drivers
+
+# IDEs and editors
+/.idea
+*.iml
 .project
 .classpath
+.c9/
+*.launch
+.settings
+*.sublime-workspace
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.tmp
 .idea
 .factorypath
-target
-src/main/resources/static/bower_components
-/bin/
-taskboard.iml
-drivers
+
+# misc
+/.sass-cache
+/connect.lock
+/coverage
+/libpeerconnection.log
+npm-debug.log
+yarn-error.log
+testem.log
+/typings
 db2.*
+
+# configs
 application-dev.yaml
 application-liferay.properties
 application-liferay.yaml
 application-uat.properties
 application-uat.yml
+
+# generated test resources
+.attach_pid*
 testbed
-/data
 rootDataTest

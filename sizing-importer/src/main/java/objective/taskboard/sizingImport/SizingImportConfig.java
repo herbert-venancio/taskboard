@@ -22,6 +22,9 @@ public class SizingImportConfig {
     public static final String SHEET_SIZING_METADATA = "Sizing-Meta-Data";
 
     @NotNull
+    private Integer tabHeadersRowNumber = 2;
+
+    @NotNull
     private Integer dataStartingRowNumber;
 
     @Valid
@@ -35,11 +38,23 @@ public class SizingImportConfig {
 
     @NotEmpty
     private String minimalVersionForCost = "4.1";
+
+    @NotEmpty
+    private String minimalVersionForTimebox = "4.2";
+
     @NotNull
     @Min(0)
     private Integer versionRowIndex = 1;
     @NotEmpty
     private String versionColumnLetter = "B";
+
+    public Integer getTabHeadersRowNumber() {
+        return tabHeadersRowNumber;
+    }
+
+    public void setTabHeadersRowNumber(Integer tabHeadersRowNumber) {
+        this.tabHeadersRowNumber = tabHeadersRowNumber;
+    }
 
     public Integer getDataStartingRowNumber() {
         return dataStartingRowNumber;
@@ -93,6 +108,10 @@ public class SizingImportConfig {
         this.minimalVersionForCost = minimalVersionForCost;
     }
 
+    public String getMinimalVersionForTimebox() {
+        return minimalVersionForTimebox;
+    }
+
     public Integer getVersionRowIndex() {
         return versionRowIndex;
     }
@@ -128,6 +147,9 @@ public class SizingImportConfig {
         
         @NotNull
         private String include;
+
+        @NotNull
+        private String timebox;
 
         @Valid
         private List<DefaultColumn> defaultColumns = new ArrayList<>();
@@ -181,6 +203,14 @@ public class SizingImportConfig {
 
         public void setInclude(String include) {
             this.include = include;
+        }
+
+        public String getTimebox() {
+            return timebox;
+        }
+
+        public void setTimebox(String timebox) {
+            this.timebox = timebox;
         }
 
         public List<DefaultColumn> getDefaultColumns() {

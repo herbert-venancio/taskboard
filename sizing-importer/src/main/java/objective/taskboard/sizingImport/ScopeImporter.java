@@ -5,8 +5,7 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.EXTRA_FIELD_ID_TAG;
-import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.SIZING_FIELD_ID_TAG;
+import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.*;
 import static objective.taskboard.sizingImport.SizingImportConfig.SHEET_SCOPE;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -107,7 +106,10 @@ class ScopeImporter {
         
         if (StringUtils.isBlank(line.getType()))
             errors.add("Type should be informed");
-        
+
+        if (isTimeBoxFeature(line.getType()) && isInvalidTimeboxValue(line.getTimebox()))
+            errors.add("Timebox should be informed correctly");
+
         JiraCreateIssue.IssueTypeMetadata featureType = featureTypesByName.get(line.getType());
         
         if (featureType == null) {
@@ -220,6 +222,7 @@ class ScopeImporter {
 
     private JiraIssue createFeature(String projectKey, Version release, String demandKey, JiraCreateIssue.IssueTypeMetadata featureType, SizingImportLineScope line) {
         String featureName = line.getFeature();
+        String timeboxHours = line.getTimebox() + "h";
         log.debug("creating Feature: {}", featureName);
 
         Collection<IssueFieldValue> fieldValues = new ArrayList<>();
@@ -240,7 +243,14 @@ class ScopeImporter {
                 })
                 .collect(toList()));
 
+        if (isTimeBoxFeature(featureType.name))
+            return jiraFacade.createTimebox(projectKey, demandKey, featureType.id, featureName, release, fieldValues, timeboxHours);
+
         return jiraFacade.createFeature(projectKey, demandKey, featureType.id, featureName, release, fieldValues);
+    }
+
+    private boolean isTimeBoxFeature(final String typeLine) {
+            return TIMEBOX.getName().equalsIgnoreCase(typeLine);
     }
 
     private Optional<String> findFirstDemandKey(List<SizingImportLineScope> linesOfDemand) {
@@ -252,6 +262,13 @@ class ScopeImporter {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .findFirst();
+    }
+
+    private boolean isInvalidTimeboxValue(final String timeboxValue) {
+        if (StringUtils.isBlank(timeboxValue))
+            return true;
+
+        return new Long(timeboxValue) <= 0;
     }
 
     private static class ImportedDemand {

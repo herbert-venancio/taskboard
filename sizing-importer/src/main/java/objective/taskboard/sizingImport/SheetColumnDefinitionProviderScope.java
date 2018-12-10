@@ -26,10 +26,11 @@ import objective.taskboard.sizingImport.SizingImportConfig.SheetMap.DefaultColum
 class SheetColumnDefinitionProviderScope {
     public static final SheetColumnDefinition PHASE    = new SheetColumnDefinition("Phase");
     public static final SheetColumnDefinition DEMAND   = new SheetColumnDefinition("Demand");
-    public static final SheetColumnDefinition FEATURE  = new SheetColumnDefinition("Feature / Task");
+    public static final SheetColumnDefinition FEATURE  = new SheetColumnDefinition("Feature");
     public static final SheetColumnDefinition TYPE     = new SheetColumnDefinition("Type");
     public static final SheetColumnDefinition KEY      = new SheetColumnDefinition("Key",      PreviewBehavior.HIDE);
     public static final SheetColumnDefinition INCLUDE  = new SheetColumnDefinition("Include",  PreviewBehavior.HIDE);
+    public static final SheetColumnDefinition TIMEBOX  = new SheetColumnDefinition("Timebox");
     
     public static final String SIZING_FIELD_ID_TAG = "sizing-field";
     public static final String EXTRA_FIELD_ID_TAG = "extra-field";
@@ -56,7 +57,9 @@ class SheetColumnDefinitionProviderScope {
                 new StaticMappingDefinition(FEATURE,  importConfig.getSheetMap().getIssueFeature()),
                 new StaticMappingDefinition(TYPE,     importConfig.getSheetMap().getType()),
                 new StaticMappingDefinition(KEY,      importConfig.getSheetMap().getIssueKey()),
-                new StaticMappingDefinition(INCLUDE,  importConfig.getSheetMap().getInclude()));
+                new StaticMappingDefinition(INCLUDE,  importConfig.getSheetMap().getInclude()),
+                new StaticMappingDefinition(TIMEBOX,  importConfig.getSheetMap().getTimebox())
+        );
     }
 
     private List<StaticMappingDefinition> getExtraFieldMappings() {
