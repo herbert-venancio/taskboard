@@ -124,6 +124,12 @@ paper-dialog, paper-dialog.tb-paper-dialog {
     height: 24px;
 }
 
+paper-toolbar:hover {
+    cursor: pointer;
+    background: #6273d1;
+    transition: all 0.3s ease;
+}
+
 /*
     Buttons
 */
@@ -201,7 +207,7 @@ paper-button.tb-button.tb-button--type_link[disabled] {
     display: block;
 }
 
-.tb-form input[type="text"], 
+.tb-form input[type="text"],
 .tb-form input[type="url"],
 .tb-form select {
     width: 100%;
@@ -212,9 +218,9 @@ paper-button.tb-button.tb-button--type_link[disabled] {
 }
 
 .tb-form input:-webkit-autofill,
-.tb-form input:-webkit-autofill:hover, 
+.tb-form input:-webkit-autofill:hover,
 .tb-form input:-webkit-autofill:focus
-.tb-form input:-webkit-autofill, 
+.tb-form input:-webkit-autofill,
 .tb-form textarea:-webkit-autofill,
 .tb-form textarea:-webkit-autofill:hover
 .tb-form textarea:-webkit-autofill:focus,
@@ -282,7 +288,7 @@ paper-button.tb-button.tb-button--type_link[disabled] {
     width: 30px;
 }
 
-      
+
 .tb-table .button {
     padding: 0;
     color: #4285f4;
@@ -351,7 +357,7 @@ paper-button.tb-button.tb-button--type_link[disabled] {
 	padding-right: 20px;
 }
 
-.tb-form .tb-table input[type="text"], 
+.tb-form .tb-table input[type="text"],
 .tb-form .tb-table input[type="url"],
 .tb-form .tb-table select {
     margin-bottom: 0;
