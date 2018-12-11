@@ -46,7 +46,7 @@ public class TouchTimeFilterTest {
     public void filterHappyDay() {
         KPIEnvironmentBuilder builder = getSimpleEnvironment();
         final String today = "2018-02-25";
-        builder.setNow(parseDateTime(today).toInstant());
+        builder.setNow(today);
         builder.mockingSubtask("I-1", "Development")
                 .addTransition("To Do","2018-01-11")
                 .addTransition("Doing","2018-01-12")
@@ -63,7 +63,7 @@ public class TouchTimeFilterTest {
     public void issueBeforeRange() {
         KPIEnvironmentBuilder builder = getSimpleEnvironment();
         final String today = "2018-02-25";
-        builder.setNow(parseDateTime(today).toInstant());
+        builder.setNow(today);
         builder.mockingSubtask("I-1", "Development")
                 .addTransition("To Do","2018-01-02")
                 .addTransition("Doing","2018-01-03")
@@ -80,7 +80,7 @@ public class TouchTimeFilterTest {
     public void issueRangeEndingAtStartOfTimelineRange() {
         KPIEnvironmentBuilder builder = getSimpleEnvironment();
         final String today = "2018-02-25";
-        builder.setNow(parseDateTime(today).toInstant());
+        builder.setNow(today);
         builder.mockingSubtask("I-1", "Development")
                 .addTransition("To Do","2018-01-02")
                 .addTransition("Doing","2018-01-03")
@@ -97,7 +97,7 @@ public class TouchTimeFilterTest {
     public void issueStartingAtEndOfRange() {
         KPIEnvironmentBuilder builder = getSimpleEnvironment();
         final String today = "2018-02-25";
-        builder.setNow(parseDateTime(today).toInstant());
+        builder.setNow(today);
         builder.mockingSubtask("I-1", "Development")
                 .addTransition("To Do","2018-01-19")
                 .addTransition("Doing","2018-01-20")
@@ -114,7 +114,7 @@ public class TouchTimeFilterTest {
     public void issueAfterRange() {
         KPIEnvironmentBuilder builder = getSimpleEnvironment();
         final String today = "2018-02-25";
-        builder.setNow(parseDateTime(today).toInstant());
+        builder.setNow(today);
         builder.mockingSubtask("I-1", "Development")
                 .addTransition("To Do","2018-01-20")
                 .addTransition("Doing","2018-01-23")
@@ -131,7 +131,7 @@ public class TouchTimeFilterTest {
     public void issueWithSameRange() {
         KPIEnvironmentBuilder builder = getSimpleEnvironment();
         final String today = "2018-02-25";
-        builder.setNow(parseDateTime(today).toInstant());
+        builder.setNow(today);
         builder.mockingSubtask("I-1", "Development")
                 .addTransition("To Do","2018-01-09")
                 .addTransition("Doing","2018-01-10")
@@ -148,7 +148,7 @@ public class TouchTimeFilterTest {
     public void openIssue() {
         KPIEnvironmentBuilder builder = getSimpleEnvironment();
         final String today = "2018-02-25";
-        builder.setNow(parseDateTime(today).toInstant());
+        builder.setNow(today);
         builder.mockingSubtask("I-1", "Development")
                 .addTransition("To Do","2018-01-15")
                 .addTransition("Doing")
@@ -165,7 +165,7 @@ public class TouchTimeFilterTest {
     public void workingIssue_startingAfterInsideRange() {
         KPIEnvironmentBuilder builder = getSimpleEnvironment();
         final String today = "2018-02-25";
-        builder.setNow(parseDateTime(today).toInstant());
+        builder.setNow(today);
         builder.mockingSubtask("I-1", "Development")
                 .addTransition("To Do","2018-01-10")
                 .addTransition("Doing","2018-01-15")
@@ -182,7 +182,7 @@ public class TouchTimeFilterTest {
     public void workingIssue_startingBeforeRange() {
         KPIEnvironmentBuilder builder = getSimpleEnvironment();
         final String today = "2018-02-25";
-        builder.setNow(parseDateTime(today).toInstant());
+        builder.setNow(today);
         builder.mockingSubtask("I-1", "Development")
                 .addTransition("To Do","2018-01-08")
                 .addTransition("Doing","2018-01-09")

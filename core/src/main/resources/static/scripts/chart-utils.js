@@ -403,7 +403,7 @@ class TouchTimeChartBuilder extends ChartBuilderBase {
     build () {
         const highchartChart = super.build();
         if (this._filterCallback === undefined) {
-            throw 'FilterCallback must be defined';
+            throw new Error('FilterCallback must be defined');
         }
         return new Chart(highchartChart, this._filterCallback);
     }
@@ -416,7 +416,7 @@ class Chart {
         this._filterCallback = filterCallback;
     }
 
-    notify () {
+    notifyTimelineChanged () {
         this._filterCallback();
     }
 

@@ -163,7 +163,7 @@
                     new IssueTypeFilter(this._plotData.issueTypes, this.$.issueTypes, (selectedTypes, isToggledAll) => {
                         this._plotData.typeDimension.filterFunction((issueType) => selectedTypes.includes(issueType));
                         this.set('options.0.cssClasses', isToggledAll ? '' : 'widget__button_highlighted');
-                        this._createChart();
+                        this.recreateChart();
                     });
                 },
 
@@ -231,13 +231,13 @@
                         .withTooltipNumberOfDecimals(2)
                         .withCategories(selectedIssueKeys)
                         .withSeriesData(series)
-                        .withTimelineFilterCallback(this._createChart.bind(this))
+                        .withTimelineFilterCallback(this.recreateChart.bind(this))
                         .build();
                     dcDateRangeChartsService.registerHighchartsNotifyOnlyChart(this.chart);
                 },
 
                 _transformToHighchartsSeries: function (effortByStatusByIssueKey, issueKeysOrderLUT) {
-                    const series = effortByStatusByIssueKey.map(
+                    return effortByStatusByIssueKey.map(
                         ({key: status, value: effortByIssueKey}) => {
                             return {
                                 name: status, 
@@ -245,8 +245,13 @@
                             };
                         }
                     );
-                    return series;
+                },
+
+                recreateChart: function () {
+                    this.chart.destroy();
+                    this._createChart();
                 }
+
             });
         })();
     </script>

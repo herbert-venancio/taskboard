@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Date;
 
 import org.junit.Before;
 import org.junit.Test;

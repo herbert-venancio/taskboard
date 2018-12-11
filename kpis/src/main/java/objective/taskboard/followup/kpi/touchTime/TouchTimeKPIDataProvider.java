@@ -44,7 +44,7 @@ class TouchTimeKPIDataProvider implements TouchTimeProvider<TouchTimeChartDataSe
 
     private List<TouchTimeDataPoint> transformToDataPoints(List<IssueKpi> issues, List<String> statuses, ZoneId timezone) {
         final List<TouchTimeDataPoint> points = new LinkedList<>();
-        issues.stream().forEach(issue -> {
+        issues.forEach(issue -> {
             statuses.forEach(status -> {
                 final Long effortInSeconds = issue.getEffort(status);
                 final double effortInHours = DateTimeUtils.secondsToHours(effortInSeconds);
@@ -56,8 +56,8 @@ class TouchTimeKPIDataProvider implements TouchTimeProvider<TouchTimeChartDataSe
                         issue.getIssueTypeName(),
                         status,
                         effortInHours,
-                        startProgressingDate,
-                        endProgressingDate);
+                        startProgressingDate.toInstant(),
+                        endProgressingDate.toInstant());
                 points.add(dataPoint);
             });
         });

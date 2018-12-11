@@ -71,11 +71,17 @@ public class KPIEnvironmentBuilder {
         this.kpiProperties = kpiProperties;
         return this;
     }
-    
+
     public KPIEnvironmentBuilder setNow(Instant now) {
         clock.setNow(now);
         return this;
     }
+
+    public KPIEnvironmentBuilder setNow(String date) {
+        clock.setNow(DateTimeUtils.parseDateTime(date).toInstant());
+        return this;
+    }
+
 
     public KPIEnvironmentBuilder addFeatureType(Long id, String name) {
         featuresType.put(name, new IssueTypeKpi(id, name));

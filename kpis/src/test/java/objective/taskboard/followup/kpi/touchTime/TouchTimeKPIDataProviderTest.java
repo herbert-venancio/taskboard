@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.time.ZoneId;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -375,12 +374,12 @@ public class TouchTimeKPIDataProviderTest {
             }
 
             public TouchTimePointsAsserter hasStartProgressingDate(String date) {
-                assertThat(currentPoint.startProgressingDate, is(Date.from(parseDateTime(date).toInstant())));
+                assertThat(currentPoint.startProgressingDate, is(parseDateTime(date).toInstant()));
                 return this;
             }
 
             public TouchTimePointsAsserter hasEndProgressingDate(String date) {
-                assertThat(currentPoint.endProgressingDate, is(Date.from(parseDateTime(date).toInstant())));
+                assertThat(currentPoint.endProgressingDate, is(parseDateTime(date).toInstant()));
                 return this;
             }
         }

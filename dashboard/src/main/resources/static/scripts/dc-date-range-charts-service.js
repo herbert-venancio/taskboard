@@ -111,8 +111,8 @@ function DcDateRangeChartsService() {
             self.applySelection(chart);
         });
         self._highchartChartsNotifyOnly.forEach((chart) => {
-            chart.notify();
-        })
+            chart.notifyTimelineChanged();
+        });
     };
 
     self.applySelection = function (chart) {

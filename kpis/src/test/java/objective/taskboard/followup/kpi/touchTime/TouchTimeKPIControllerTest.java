@@ -4,8 +4,8 @@ import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
 import static objective.taskboard.utils.DateTimeUtils.parseStringToDate;
 import static org.mockito.Mockito.when;
 
+import java.time.Instant;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -47,8 +47,8 @@ public class TouchTimeKPIControllerTest {
         final String level = "Subtasks";
         final String zoneId = "America/Sao_Paulo";
 
-        final ZonedDateTime startProgressingDate = parseDateTime("2018-12-06");
-        final ZonedDateTime endProgressingDate = parseDateTime("2018-12-07");
+        final Instant startProgressingDate = parseDateTime("2018-12-06").toInstant();
+        final Instant endProgressingDate = parseDateTime("2018-12-07").toInstant();
         final List<TouchTimeDataPoint> issuesList = Arrays.asList(
                 new TouchTimeDataPoint("I-1", "Backend Development", "Doing", 5.0, startProgressingDate, endProgressingDate),
                 new TouchTimeDataPoint("I-2", "Backend Development", "Doing", 8.0, startProgressingDate, endProgressingDate),
