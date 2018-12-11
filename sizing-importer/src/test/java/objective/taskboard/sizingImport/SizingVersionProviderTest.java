@@ -5,13 +5,13 @@ import objective.taskboard.google.SpreadsheetsManager;
 import org.junit.Before;
 import org.junit.Test;
 
-import static java.util.Arrays.asList;
 import java.util.List;
 
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static objective.taskboard.sizingImport.SizingImportConfig.SHEET_SIZING_METADATA;
 import static objective.taskboard.utils.NumberUtils.numberEquals;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -88,6 +88,16 @@ public class SizingVersionProviderTest {
         sheetSizingMetaData = asList(
             asList("WARNING: DON'T CHANGE ANY DATA IN THIS SHEET", ""),
             asList("templateVersion", "4.2")
+        );
+
+        assertTrue(numberEquals(4.2, subject.get(SPREADSHEET_ID)));
+    }
+
+    @Test
+    public void whenTheSheetIsFilledWithSnapshotVersion_shouldReturnTheCorrectVersion() {
+        sheetSizingMetaData = asList(
+            asList("WARNING: DON'T CHANGE ANY DATA IN THIS SHEET", ""),
+            asList("templateVersion", "4.2-SNAPSHOT")
         );
 
         assertTrue(numberEquals(4.2, subject.get(SPREADSHEET_ID)));

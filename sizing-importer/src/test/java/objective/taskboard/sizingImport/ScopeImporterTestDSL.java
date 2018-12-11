@@ -116,10 +116,6 @@ public class ScopeImporterTestDSL {
             return emptyList();
         }
 
-        private JiraProject jiraProject(String key, String name) {
-            return jiraProject(key, name, emptyList());
-        }
-
         private JiraProject jiraProject(String key, String name, List<Version> versions) {
             return new JiraProject("0", key, versions, name);
         }
@@ -128,7 +124,6 @@ public class ScopeImporterTestDSL {
     class DSLIssues {
 
         DSLProjectJiraBuilder dslProjectJiraBuilder;
-        private List<DSLIssue> issues = new ArrayList<>();
 
         public DSLIssues(final DSLProjectJiraBuilder dslProjectJiraBuilder) {
             this.dslProjectJiraBuilder = dslProjectJiraBuilder;
@@ -301,11 +296,9 @@ public class ScopeImporterTestDSL {
     class DSLSizingBuilder {
 
         private ScopeImporter scopeImporter = null;
-        private DSLConfigBuilder dslConfigBuilder;
         private DSLLines dslLines = new DSLLines(this);
 
         public DSLConfigBuilder config() {
-            dslConfigBuilder = new DSLConfigBuilder(this);
             return new DSLConfigBuilder(this);
         }
 
@@ -485,13 +478,10 @@ public class ScopeImporterTestDSL {
 
         private DSLLines dsLlines;
 
-        private int lineNumber;
         private String phase;
         private String name;
         private String featureName;
         private String timeboxValue;
-        private String columnLetter;
-        private String value;
         private String type;
         private String key;
 
@@ -499,11 +489,6 @@ public class ScopeImporterTestDSL {
 
         public DSLLine(final DSLLines dsLlines) {
             this.dsLlines = dsLlines;
-        }
-
-        public DSLLine number(final int lineNumber) {
-            this.lineNumber = lineNumber;
-            return this;
         }
 
         public DSLLine phase(final String phase) {
@@ -525,16 +510,6 @@ public class ScopeImporterTestDSL {
         public DSLLine task(final String featureName) {
             this.featureName = featureName;
             this.type = "Task";
-            return this;
-        }
-
-        public DSLLine column(final String columnLetter) {
-            this.columnLetter = columnLetter;
-            return this;
-        }
-
-        public DSLLine value(final String value) {
-            this.value = value;
             return this;
         }
 

@@ -1,23 +1,23 @@
 package objective.taskboard.sizingImport;
 
-import static java.lang.String.format;
-import static objective.taskboard.sizingImport.SizingImportConfig.SHEET_SCOPE;
-import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.TIMEBOX;
+import objective.taskboard.google.GoogleApiService;
+import objective.taskboard.google.SpreadsheetsManager;
+import objective.taskboard.sizingImport.PreviewBuilder.ImportPreview;
+import objective.taskboard.sizingImport.SizingImportValidator.ValidationResult;
+import objective.taskboard.sizingImport.cost.CostSheetParser;
+import objective.taskboard.sizingImport.cost.CostSheetSkipper;
+import objective.taskboard.sizingImport.cost.SizingImportLineCost;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import objective.taskboard.google.GoogleApiService;
-import objective.taskboard.google.SpreadsheetsManager;
-import objective.taskboard.sizingImport.PreviewBuilder.ImportPreview;
-import objective.taskboard.sizingImport.SizingImportValidator.ValidationResult;
-import objective.taskboard.sizingImport.cost.CostSheetSkipper;
-import objective.taskboard.sizingImport.cost.SizingImportLineCost;
-import objective.taskboard.sizingImport.cost.CostSheetParser;
+import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
+import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.TIMEBOX;
+import static objective.taskboard.sizingImport.SizingImportConfig.SHEET_SCOPE;
 
 @Component
 class SizingImportService {
@@ -64,11 +64,24 @@ class SizingImportService {
         return spreadsheetsManager.getLastColumnLetter(spreadsheetId, SHEET_SCOPE);
     }
     
-    public SheetDefinition getSheetDefinition(String projectKey) {
+    public SheetDefinition getSheetDefinition(final String spreadsheetId, final String projectKey) {
         List<StaticMappingDefinition> staticMappings = columnDefinitionProviderScope.getStaticMappings();
         List<DynamicMappingDefinition> dynamicMappings = columnDefinitionProviderScope.getDynamicMappings(projectKey);
-        
-        return new SheetDefinition(staticMappings, dynamicMappings);
+
+        boolean shouldSkipTimebox = timeboxSkipper.shouldSkip(spreadsheetId);
+        if (!shouldSkipTimebox)
+            return new SheetDefinition(staticMappings, dynamicMappings);
+
+        Predicate<StaticMappingDefinition> columnRemoverFilter =
+            md -> isNotTimebox(md.getColumnDefinition().getName());
+
+        List<StaticMappingDefinition> staticMappingDefinitionsWithoutTimebox =
+            staticMappings
+                .stream()
+                .filter(columnRemoverFilter)
+                .collect(toList());
+
+        return new SheetDefinition(staticMappingDefinitionsWithoutTimebox, dynamicMappings);
     }
 
     public ImportPreview getPreview(String projectKey, String spreadsheetId, List<SheetColumnMapping> columnsMapping) {
@@ -104,10 +117,8 @@ class SizingImportService {
         List<SheetColumnMapping> columnsMapping,
         SpreadsheetsManager spreadsheetsManager
     ) {
-        List<List<Object>> rows = spreadsheetsManager.readRange(spreadsheetId, format("'%s'", SHEET_SCOPE));
-        SheetDefinition sheetDefinition = getSheetDefinition(projectKey);
-
-        filterTimeBoxBySpreadsheetVersion(spreadsheetId, rows, sheetDefinition);
+        List<List<Object>> rows = getScopeRows(spreadsheetId, spreadsheetsManager);
+        SheetDefinition sheetDefinition = getSheetDefinition(spreadsheetId, projectKey);
 
         return scopeSheetParser.parse(rows, sheetDefinition, columnsMapping);
     }
@@ -116,29 +127,25 @@ class SizingImportService {
         return costSheetParser.parse(spreadsheetId);
     }
 
-    private void filterTimeBoxBySpreadsheetVersion(
+    private List<List<Object>> getScopeRows(
         final String spreadsheetId,
-        final List<List<Object>> rows,
-        final SheetDefinition sheetDefinition
+        final SpreadsheetsManager spreadsheetsManager
     ) {
+        List<List<Object>> rows = spreadsheetsManager.readRange(spreadsheetId, format("'%s'", SHEET_SCOPE));
+
         boolean shouldSkipTimebox = timeboxSkipper.shouldSkip(spreadsheetId);
         if (!shouldSkipTimebox)
-            return;
-
-        Predicate<StaticMappingDefinition> columnRemoverFilter =
-            md -> isTimebox(md.getColumnDefinition().getName());
-
-        sheetDefinition
-            .getStaticColumns()
-            .removeIf(columnRemoverFilter);
+            return rows;
 
         Predicate<List<Object>> rowRemoverFilter =
-            f -> f.size() > 0 && isTimebox((String) f.get(TYPE_INDEX));
+            f -> f.size() > 0 && isNotTimebox((String) f.get(TYPE_INDEX));
 
-        rows.removeIf(rowRemoverFilter);
+        return rows.stream()
+            .filter(rowRemoverFilter)
+            .collect(toList());
     }
 
-    private boolean isTimebox(final String name) {
-        return TIMEBOX.getName().equalsIgnoreCase(name);
+    private boolean isNotTimebox(final String name) {
+        return !TIMEBOX.getName().equalsIgnoreCase(name);
     }
 }
