@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -43,7 +45,8 @@
 		<sonar.sources>src/main/java</sonar.sources>
 		<sonar.exclusions>src/main/resources/static/bower_components/**,src/main/resources/static/scripts/3rd/**</sonar.exclusions>
 		<jacoco.reportPath>${project.build.directory}/jacoco-ut.exec</jacoco.reportPath>
-		<sonar.jacoco.reportPaths>${jacoco.reportPath}</sonar.jacoco.reportPaths>
+		<jacoco.itReportPath>${project.build.directory}/jacoco-it.exec</jacoco.itReportPath>
+		<sonar.jacoco.reportPaths>${multimoduleRootDirectory}/target/jacocoMerged.exec</sonar.jacoco.reportPaths>
 		<project.build.date>${maven.build.timestamp}</project.build.date>
 		<maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
 		<springboot.version>1.5.13.RELEASE</springboot.version>
@@ -147,6 +150,18 @@
 						</configuration>
 					</execution>
 				</executions>
+				<configuration>
+					<fileSets>
+						<fileSet
+							implementation="org.apache.maven.shared.model.fileset.FileSet">
+							<directory>${project.build.directory}</directory>
+							<includes>
+								<include>*.exec</include>
+							</includes>
+						</fileSet>
+					</fileSets>
+					<destFile>${sonar.jacoco.reportPaths}</destFile>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -161,6 +176,7 @@
 					</properties>
 				</configuration>
 			</plugin>
+
 		</plugins>
 		<pluginManagement>
 			<plugins>

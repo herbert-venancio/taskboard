@@ -10,10 +10,7 @@
 	<packaging>war</packaging>
 	<properties>
 		<sonar.sources>src/main/java,src/main/resources/static</sonar.sources>
-		<sonar.junit.reportsPaths>${project.build.directory}/surefire-reports, ${project.build.directory}/failsafe-reports</sonar.junit.reportsPaths>
-		<jacoco.reportPath>${project.build.directory}/jacoco-ut.exec</jacoco.reportPath>
-		<jacoco.itReportPath>${project.build.directory}/jacoco-it.exec</jacoco.itReportPath>
-		<sonar.jacoco.reportPaths>${jacoco.reportPath}, ${jacoco.itReportPath}</sonar.jacoco.reportPaths>
+		<sonar.junit.reportPaths>${project.build.directory}/surefire-reports, ${project.build.directory}/failsafe-reports</sonar.junit.reportPaths>
 		<sonar.javascript.lcov.reportPaths>${project.build.directory}/istanbul-reports/lcov.info</sonar.javascript.lcov.reportPaths>
 	</properties>
 	<dependencies>
