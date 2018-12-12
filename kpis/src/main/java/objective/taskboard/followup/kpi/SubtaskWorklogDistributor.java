@@ -13,7 +13,7 @@ public class SubtaskWorklogDistributor {
         
         worklogs.stream().forEach(w -> {
             Optional<StatusTransition> status = findStatus(issueKpi.firstStatus().get(), w);
-            status.ifPresent(s -> s.addWorklog(w));
+            status.ifPresent(s -> s.putWorklog(w));
         });
     }
 

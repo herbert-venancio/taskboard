@@ -214,7 +214,7 @@ public class SubtaskCycleEffortScenariosTest {
     
     private void addWorklogs(StatusTransition status, List<Worklog> worklogs) {
         SubtaskWorklogDistributor distributor = new SubtaskWorklogDistributor();
-        worklogs.stream().forEach(w -> distributor.findStatus(status, w).ifPresent(s -> s.addWorklog(w)));
+        worklogs.stream().forEach(w -> distributor.findStatus(status, w).ifPresent(s -> s.putWorklog(w)));
     }
     
 }
