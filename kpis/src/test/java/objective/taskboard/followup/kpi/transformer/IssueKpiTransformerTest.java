@@ -24,6 +24,7 @@ import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.enviroment.KPIEnvironmentBuilder;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
+import objective.taskboard.testUtils.FixedClock;
 
 @RunWith(MockitoJUnitRunner.class)
 public class IssueKpiTransformerTest {
@@ -52,8 +53,12 @@ public class IssueKpiTransformerTest {
                 .addTransition("Done");
         
         buildAlphaSubtask(builder);
-                
-        List<IssueKpi> issuesKpi = new IssueKpiTransformer(kpiProperties).withItems(builder.buildAllIssuesAsAdapter()).transform();
+
+        FixedClock clock = new FixedClock();
+        final String today = "2020-01-05";
+        clock.setNow(parseDateTime(today).toInstant());
+
+        List<IssueKpi> issuesKpi = new IssueKpiTransformer(kpiProperties, clock).withItems(builder.buildAllIssuesAsAdapter()).transform();
         assertThat(issuesKpi.size(),is(2));
         
         IssueKpi kpi1 = issuesKpi.get(0);
@@ -87,12 +92,15 @@ public class IssueKpiTransformerTest {
 
     @Test
     public void wrongConfiguration_toMapHierarchically() {
-        
         KPIEnvironmentBuilder builder = getDefaultEnvironment();
         
         buildAlphaSubtask(builder);
         
-        IssueKpiTransformer transformer = new IssueKpiTransformer(kpiProperties)
+        FixedClock clock = new FixedClock();
+        final String today = "2020-01-05";
+        clock.setNow(parseDateTime(today).toInstant());
+
+        IssueKpiTransformer transformer = new IssueKpiTransformer(kpiProperties, clock)
                                                     .withItems(builder.buildAllIssuesAsAdapter())
                                                     .mappingHierarchically();
         expectedException.expect(IllegalArgumentException.class);
@@ -102,11 +110,15 @@ public class IssueKpiTransformerTest {
     
     @Test
     public void wrongConfiguration_toSetWorklogs() {
+        FixedClock clock = new FixedClock();
+        final String today = "2020-01-05";
+        clock.setNow(parseDateTime(today).toInstant());
+
         KPIEnvironmentBuilder builder = getDefaultEnvironment();
         
         buildAlphaSubtask(builder);
         
-        IssueKpiTransformer transformer = new IssueKpiTransformer(kpiProperties)
+        IssueKpiTransformer transformer = new IssueKpiTransformer(kpiProperties, clock)
                                                   .withItems(builder.buildAllIssuesAsAdapter())
                                                   .settingWorklog();
         expectedException.expect(IllegalArgumentException.class);
@@ -116,7 +128,7 @@ public class IssueKpiTransformerTest {
     
     @Test
     public void simpleHierarch_checkWorklogs() {
-        
+
         KPIEnvironmentBuilder builder = new KPIEnvironmentBuilder();
         builder.addStatus(1l,"To Do", false)
                 .addStatus(2l,"Doing", true)
@@ -143,7 +155,11 @@ public class IssueKpiTransformerTest {
         IssueKpiDataItemAdapter demand = builder.withIssue("PROJ-01").buildCurrentIssueKPIAdapter();
         Issue demandIssue = builder.withIssue("PROJ-01").mockCurrentIssue();
 
-        IssueKpiTransformer transformer = new IssueKpiTransformer(builder.getMockedKPIProperties());
+        FixedClock clock = new FixedClock();
+        final String today = "2020-01-05";
+        clock.setNow(parseDateTime(today).toInstant());
+
+        IssueKpiTransformer transformer = new IssueKpiTransformer(builder.getMockedKPIProperties(), clock);
         List<IssueKpi> issuesKpi = transformer
             .withItems(Arrays.asList(demand))
             .withOriginalIssues(Arrays.asList(demandIssue))

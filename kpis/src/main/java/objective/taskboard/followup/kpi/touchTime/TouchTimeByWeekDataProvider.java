@@ -26,7 +26,6 @@ import objective.taskboard.followup.kpi.WeekTimelineRange;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.properties.JiraProperties;
-import objective.taskboard.utils.Clock;
 import objective.taskboard.utils.RangeUtils;
 
 @Service
@@ -39,21 +38,18 @@ public class TouchTimeByWeekDataProvider implements TouchTimeProvider<TouchTimeC
     private KPIProperties kpiProperties;
     
     private JiraProperties jiraProperties;
-
-    private Clock clock;
     
     @Autowired
     public TouchTimeByWeekDataProvider(
             IssueKpiService issueKpiService,
             ProjectService projectService,
             KPIProperties kpiProperties,
-            JiraProperties jiraProperties,
-            Clock clock) {
+            JiraProperties jiraProperties
+            ) {
         this.issueKpiService = issueKpiService;
         this.projectService = projectService;
         this.kpiProperties = kpiProperties;
         this.jiraProperties = jiraProperties;
-        this.clock = clock;
     }
 
     @Override
@@ -101,7 +97,7 @@ public class TouchTimeByWeekDataProvider implements TouchTimeProvider<TouchTimeC
         }
 
         private TouchTimeChartByWeekDataPoint getPointForDateAndStatus(Range<LocalDate> week, String status, List<IssueKpi> issues) {
-            TouchTimeFilter filter = new TouchTimeFilter(clock, timezone, new WeekTimelineRange(week));
+            TouchTimeFilter filter = new TouchTimeFilter(timezone, new WeekTimelineRange(week));
             List<IssueKpi> issuesToCount = issues.stream().filter(filter).collect(Collectors.toList());
             ZonedDateTime lastDayOfWeek = endOfWeek(week);
             double averageEffort = issuesToCount.stream().mapToLong(issue -> issue.getEffortUntilDate(status, lastDayOfWeek)).average().orElse(0d);

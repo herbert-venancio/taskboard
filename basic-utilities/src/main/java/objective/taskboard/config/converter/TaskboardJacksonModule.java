@@ -1,6 +1,7 @@
 package objective.taskboard.config.converter;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -25,6 +26,8 @@ public class TaskboardJacksonModule extends SimpleModule {
 
         addSerializer(LocalDate.class, new LocalDateSerializer());
         addDeserializer(LocalDate.class, new LocalDateDeserializer());
+        addSerializer(Instant.class, new InstantSerializer());
+        addDeserializer(Instant.class, new InstantDeserializer());
     }
     
     private static class LocalDateDeserializer extends JsonDeserializer<LocalDate> {
@@ -38,6 +41,20 @@ public class TaskboardJacksonModule extends SimpleModule {
         @Override
         public void serialize(LocalDate value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
             gen.writeString(value.format(DateTimeFormatter.ISO_LOCAL_DATE));
+        }
+    }
+
+    private static class InstantSerializer extends JsonSerializer<Instant> {
+        @Override
+        public void serialize(Instant value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+            gen.writeNumber(value.toEpochMilli());
+        }
+    }
+
+    private static class InstantDeserializer extends JsonDeserializer<Instant> {
+        @Override
+        public Instant deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+            return Instant.ofEpochMilli(p.getValueAsLong());
         }
     }
 }

@@ -41,7 +41,6 @@ import objective.taskboard.followup.kpi.touchTime.TouchTimeFilter;
 import objective.taskboard.jira.ProjectService;
 import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.jira.properties.StatusConfiguration.StatusPriorityOrder;
-import objective.taskboard.testUtils.FixedClock;
 import objective.taskboard.utils.DateTimeUtils;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -63,9 +62,7 @@ public class TouchTimeByWeekDataProviderTest {
     
     @Mock
     private JiraProperties jiraProperties;
-    
-    private FixedClock clock = new FixedClock();
-    
+
     private TouchTimeByWeekDataProvider subject;
     
     @Test
@@ -328,7 +325,7 @@ public class TouchTimeByWeekDataProviderTest {
     }
     
     private TouchTimeByWeekDataProvider getProvider() {
-        return new TouchTimeByWeekDataProvider(issueKpiService, projectService, kpiProperties, jiraProperties, clock);
+        return new TouchTimeByWeekDataProvider(issueKpiService, projectService, kpiProperties, jiraProperties);
     }
     
     private class TouchTimeDataSetAsserter{
@@ -398,7 +395,7 @@ public class TouchTimeByWeekDataProviderTest {
         }
         
         private Map<String,IssueKpi> filterIssues(Range<LocalDate> week) {
-            TouchTimeFilter filter = new TouchTimeFilter(clock, ZONE_ID, new WeekTimelineRange(week));
+            TouchTimeFilter filter = new TouchTimeFilter(ZONE_ID, new WeekTimelineRange(week));
             return this.issues.values().stream().filter(filter).collect(Collectors.toMap(IssueKpi::getIssueKey, Function.identity()));
         }
 

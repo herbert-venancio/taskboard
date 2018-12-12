@@ -29,6 +29,7 @@ import objective.taskboard.followup.kpi.enviroment.IssueKpiBuilder;
 import objective.taskboard.followup.kpi.enviroment.StatusTransitionBuilder.DefaultStatus;
 import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.jira.properties.StatusConfiguration.StatusCountingOnWip;
+import objective.taskboard.testUtils.FixedClock;
 
 @RunWith(MockitoJUnitRunner.class)
 public class WipKPIServiceTest {
@@ -37,8 +38,8 @@ public class WipKPIServiceTest {
     private static final int FEATURES_TRANSITIONS_DATASET_INDEX = 1;
     private static final int SUBTASK_TRANSITIONS_DATASET_INDEX = 2;
     
-    private static final DefaultStatus TODO = new DefaultStatus("To Do",false); 
-    private static final DefaultStatus DOING = new DefaultStatus("Doing",true); 
+    private static final DefaultStatus TODO = new DefaultStatus("To Do",false);
+    private static final DefaultStatus DOING = new DefaultStatus("Doing",true);
     private static final DefaultStatus DONE = new DefaultStatus("Done",false);
 
     @Mock
@@ -61,25 +62,29 @@ public class WipKPIServiceTest {
 
         when(jiraProperties.getStatusCountingOnWip()).thenReturn(statusCountingOnWip);
         
-        IssueKpi demand = new IssueKpiBuilder("I-1",new IssueTypeKpi(1l,"Demand"),KpiLevel.DEMAND)
+        FixedClock clock = new FixedClock();
+        final String today = "2017-09-28";
+        clock.setNow(parseDateTime(today).toInstant());
+        
+        IssueKpi demand = new IssueKpiBuilder("I-1",new IssueTypeKpi(1l,"Demand"),KpiLevel.DEMAND, clock)
                 .addTransition(TODO,"2017-09-25")
                 .addTransition(DOING,"2017-09-26")
                 .addTransition(DONE,"2017-09-27")
                 .build();
         
-        IssueKpi os = new IssueKpiBuilder("I-2",new IssueTypeKpi(2l,"OS"),KpiLevel.FEATURES)
+        IssueKpi os = new IssueKpiBuilder("I-2",new IssueTypeKpi(2l,"OS"),KpiLevel.FEATURES, clock)
                 .addTransition(TODO,"2017-09-25")
                 .addTransition(DOING,"2017-09-26")
                 .addTransition(DONE)
                 .build();
         
-        IssueKpi feature = new IssueKpiBuilder("I-3",new IssueTypeKpi(3l,"Feature"),KpiLevel.FEATURES)
+        IssueKpi feature = new IssueKpiBuilder("I-3",new IssueTypeKpi(3l,"Feature"),KpiLevel.FEATURES, clock)
                 .addTransition(TODO,"2017-09-25")
                 .addTransition(DOING,"2017-09-26")
                 .addTransition(DONE)
                 .build();
         
-        IssueKpi subtask = new IssueKpiBuilder("I-4",new IssueTypeKpi(4l,"Sub-task"),KpiLevel.SUBTASKS)
+        IssueKpi subtask = new IssueKpiBuilder("I-4",new IssueTypeKpi(4l,"Sub-task"),KpiLevel.SUBTASKS, clock)
                 .addTransition(TODO,"2017-09-25")
                 .addTransition(DOING)
                 .addTransition(DONE)

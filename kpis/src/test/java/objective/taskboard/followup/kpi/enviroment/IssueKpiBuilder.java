@@ -25,6 +25,8 @@ import objective.taskboard.followup.kpi.StatusTransition;
 import objective.taskboard.followup.kpi.SubtaskWorklogDistributor;
 import objective.taskboard.followup.kpi.enviroment.StatusTransitionBuilder.DefaultStatus;
 import objective.taskboard.followup.kpi.transformer.IssueKpiDataItemAdapter;
+import objective.taskboard.testUtils.FixedClock;
+import objective.taskboard.utils.Clock;
 import objective.taskboard.utils.DateTimeUtils;
 
 public class IssueKpiBuilder {
@@ -39,11 +41,17 @@ public class IssueKpiBuilder {
     private String projectKey;
     private DefaultStatus status;
     private String parentKey;
+    private Clock clock;
     
-    public IssueKpiBuilder(String pKey, IssueTypeKpi type, KpiLevel level) {
+    public IssueKpiBuilder(String pKey, IssueTypeKpi type, KpiLevel level, Clock clock) {
         this.pKey = pKey;
         this.type = Optional.ofNullable(type);
         this.level = level;
+        this.clock = clock;
+    }
+
+    public IssueKpiBuilder(String pKey, IssueTypeKpi type, KpiLevel level) {
+        this(pKey, type, level, new FixedClock());
     }
 
     public IssueKpiBuilder addTransition(DefaultStatus step) {
@@ -73,7 +81,7 @@ public class IssueKpiBuilder {
     }
     
     public IssueKpiBuilder addChild(IssueKpi child) {
-        children.add(child); 
+        children.add(child);
         return this;
     }
     
@@ -94,7 +102,7 @@ public class IssueKpiBuilder {
 
     public IssueKpi build() {
         Optional<StatusTransition> firstChain = firstStatus.isPresent() ? firstStatus: statusBuilder.build();
-        IssueKpi kpi = new IssueKpi(pKey, type, level,firstChain);
+        IssueKpi kpi = new IssueKpi(pKey, type, level,firstChain, clock);
         addChildren(kpi);
         SubtaskWorklogDistributor distributor = new SubtaskWorklogDistributor();
         distributor.distributeWorklogs(kpi, this.worklogs);

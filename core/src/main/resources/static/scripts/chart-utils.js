@@ -149,6 +149,27 @@ class ChartUtils {
         };
         crossfilterGroup.reduce(reduceAdd, reduceSub, reduceInit);
     }
+
+    static registerOptions (widget) {
+        const options = [
+            {
+                icon:'taskboard-icons:dashboard-filter',
+                title: 'Filters',
+                tap: () => widget.$$('.filters-modal').open(),
+                hidden: true
+            },
+            {
+                icon: 'taskboard-icons:settings',
+                title: 'Settings',
+                tap: () => {
+                    widget.settingIssueLevel = widget._getSavedLevel();
+                    widget.$$('.settings-modal').open();
+                },
+                cssClasses: ''
+            }
+        ];
+        widget.options = options;
+    }
 }
 
 class ChartBuilderBase {
@@ -326,7 +347,8 @@ class TouchTimeChartBuilder extends ChartBuilderBase {
         super(divID);
         Highcharts.merge(true, this.options, this._chartOptions);
         Highcharts.merge(true, this.options, this._tooltipOptions);
-        Highcharts.merge(true, this.options, this._xAxisOptions);        
+        Highcharts.merge(true, this.options, this._xAxisOptions);
+        this._filterCallback = undefined;
     }
 
     withCategories (categories) {
@@ -371,5 +393,34 @@ class TouchTimeChartBuilder extends ChartBuilderBase {
                 }
             }
         };
+    }
+
+    withTimelineFilterCallback (callback) {
+        this._filterCallback = callback;
+        return this;
+    }
+
+    build () {
+        const highchartChart = super.build();
+        if (this._filterCallback === undefined) {
+            throw new Error('FilterCallback must be defined');
+        }
+        return new Chart(highchartChart, this._filterCallback);
+    }
+}
+
+class Chart {
+    constructor (chart, filterCallback) {
+        this.chart = chart;
+        this.chartKey = chart.options.chart.renderTo;
+        this._filterCallback = filterCallback;
+    }
+
+    notifyTimelineChanged () {
+        this._filterCallback();
+    }
+
+    destroy () {
+        this.chart.destroy();
     }
 }

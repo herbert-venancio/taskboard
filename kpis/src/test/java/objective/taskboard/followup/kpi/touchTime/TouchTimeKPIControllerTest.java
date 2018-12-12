@@ -1,8 +1,10 @@
 package objective.taskboard.followup.kpi.touchTime;
 
+import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
 import static objective.taskboard.utils.DateTimeUtils.parseStringToDate;
 import static org.mockito.Mockito.when;
 
+import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
@@ -45,17 +47,17 @@ public class TouchTimeKPIControllerTest {
         final String level = "Subtasks";
         final String zoneId = "America/Sao_Paulo";
 
-        final List<TouchTimeDataPoint> dataPoints = Arrays.asList(
-                new TouchTimeDataPoint("I-1", "Backend Development", "Doing", 5.0),
-                new TouchTimeDataPoint("I-2", "Backend Development", "Doing", 8.0),
-                new TouchTimeDataPoint("I-3", "Backend Development", "Reviewing", 2.0));
-        
-
+        final Instant startProgressingDate = parseDateTime("2018-12-06").toInstant();
+        final Instant endProgressingDate = parseDateTime("2018-12-07").toInstant();
+        final List<TouchTimeDataPoint> issuesList = Arrays.asList(
+                new TouchTimeDataPoint("I-1", "Backend Development", "Doing", 5.0, startProgressingDate, endProgressingDate),
+                new TouchTimeDataPoint("I-2", "Backend Development", "Doing", 8.0, startProgressingDate, endProgressingDate),
+                new TouchTimeDataPoint("I-3", "Backend Development", "Reviewing", 2.0, startProgressingDate, endProgressingDate));
         configureTestEnvironmentForProject(projectKey)
             .projectExists()
             .withOperationPermission()
-            .withSubtaskDataSet(new TouchTimeChartDataSet(dataPoints));
-        
+            .withSubtaskDataSet(new TouchTimeChartDataSet(issuesList));
+
         AssertResponse.of(subject.getData("byissues",projectKey, zoneId, level))
             .httpStatus(HttpStatus.OK)
             .bodyClass(TouchTimeChartDataSet.class)
@@ -66,19 +68,25 @@ public class TouchTimeKPIControllerTest {
                                 + "\"issueKey\": \"I-1\","
                                 + "\"issueType\": \"Backend Development\","
                                 + "\"issueStatus\": \"Doing\","
-                                + "\"effortInHours\": 5.0"
+                                + "\"effortInHours\": 5.0,"
+                                + "\"startProgressingDate\": 1544061600000,"
+                                + "\"endProgressingDate\": 1544148000000"
                             + "},"
                             + "{"
                                 + "\"issueKey\": \"I-2\","
                                 + "\"issueType\": \"Backend Development\","
                                 + "\"issueStatus\": \"Doing\","
-                                + "\"effortInHours\":8.0"
+                                + "\"effortInHours\":8.0,"
+                                + "\"startProgressingDate\": 1544061600000,"
+                                + "\"endProgressingDate\": 1544148000000"
                             + "},"
                             + "{"
                                 + "\"issueKey\": \"I-3\","
                                 + "\"issueType\": \"Backend Development\","
                                 + "\"issueStatus\": \"Reviewing\","
-                                + "\"effortInHours\": 2.0"
+                                + "\"effortInHours\": 2.0,"
+                                + "\"startProgressingDate\": 1544061600000,"
+                                + "\"endProgressingDate\": 1544148000000"
                             + "}"
                         + "]"
                    + "}");
@@ -109,22 +117,22 @@ public class TouchTimeKPIControllerTest {
                     "{\"points\":"
                         + "["
                             + "{"
-                                + "\"date\" : "+ getDateInMiliseconds("2018-11-18")+"," 
+                                + "\"date\" : "+ getDateInMiliseconds("2018-11-18")+","
                                 + "\"status\": \"Doing\","
                                 + "\"effort\": 5.0"
                             + "},"
                             + "{"
-                                + "\"date\" : "+ getDateInMiliseconds("2018-11-18")+"," 
+                                + "\"date\" : "+ getDateInMiliseconds("2018-11-18")+","
                                 + "\"status\": \"Reviewing\","
                                 + "\"effort\": 10.0"
                             + "},"
                             + "{"
-                                + "\"date\" : "+ getDateInMiliseconds("2018-11-25")+"," 
+                                + "\"date\" : "+ getDateInMiliseconds("2018-11-25")+","
                                 + "\"status\": \"Doing\","
                                 + "\"effort\": 15.0"
                             + "},"
                             + "{"
-                                + "\"date\" : "+ getDateInMiliseconds("2018-11-25")+"," 
+                                + "\"date\" : "+ getDateInMiliseconds("2018-11-25")+","
                                 + "\"status\": \"Reviewing\","
                                 + "\"effort\": 20.0"
                             + "}"

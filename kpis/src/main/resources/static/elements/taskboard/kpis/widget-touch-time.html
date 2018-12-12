@@ -128,7 +128,7 @@
                 },
 
                 ready: function () {
-                    dcUtils.registerOptions(this);
+                    ChartUtils.registerOptions(this);
                     this._btFilterClose = ButtonBuilder('Ok').onClick(() => this.$$('.filters-modal').close()).build();
                     this._btLevelSave = ButtonBuilder('Save').onClick(() => {
                         let savedLevel = this._getSavedLevel();
@@ -163,7 +163,7 @@
                     new IssueTypeFilter(this._plotData.issueTypes, this.$.issueTypes, (selectedTypes, isToggledAll) => {
                         this._plotData.typeDimension.filterFunction((issueType) => selectedTypes.includes(issueType));
                         this.set('options.0.cssClasses', isToggledAll ? '' : 'widget__button_highlighted');
-                        this._createChart();
+                        this.recreateChart();
                     });
                 },
 
@@ -192,43 +192,51 @@
                 },
 
                 _prepareData: function (data) {
-                    const issueTypes = this._extractUniqueValuesOfProperty(data, 'issueType'); 
-                    const issueKeys = this._extractUniqueValuesOfProperty(data, 'issueKey');
-                    issueKeys.sort((a, b) => a.localeCompare(b, 'en', {numeric: true}));
+                    const issueTypes = ChartUtils.extractUniqueValuesOfPropertyFromArray(data, 'issueType'); 
+                    const issueKeys = ChartUtils.extractUniqueValuesOfPropertyFromArray(data, 'issueKey');
 
                     const ndx = crossfilter(data);
                     const statusesDimension = ndx.dimension('issueStatus');
                     const typeDimension = ndx.dimension('issueType');
+                    const startProgressingDateDimension = ndx.dimension('startProgressingDate');
+                    const endProgressingDateDimension = ndx.dimension('endProgressingDate');
                     const statusesGroup = statusesDimension.group();
-                    dcUtils.groupChartDataByGroupKey(statusesGroup, 'issueKey', 'effortInHours');
+                    ChartUtils.groupChartDataByGroupKey(statusesGroup, 'issueKey', 'effortInHours');
 
                     this._plotData = Object.freeze({
                         issueTypes: issueTypes,
                         issueKeys: issueKeys,
                         statusesGroup: statusesGroup,
-                        typeDimension: typeDimension
+                        typeDimension: typeDimension,
+                        startProgressingDateDimension: startProgressingDateDimension,
+                        endProgressingDateDimension: endProgressingDateDimension
                     });
                 },
 
                 _createChart: function () {
+                    const filterByTimeline = (timelineRange) => {
+                        timelineRange = [timelineRange[0], addDaysToDate(timelineRange[1], 1).getTime()];
+                        this._plotData.startProgressingDateDimension.filterRange(timelineRange);
+                        this._plotData.endProgressingDateDimension.filterRange(timelineRange);
+                        const selectedIssueKeys = [...new Set(this._plotData.endProgressingDateDimension.top(Infinity).map(i => i.issueKey))];
+                        return selectedIssueKeys;
+                    };
+                    const selectedIssueKeys = filterByTimeline(dcDateRangeChartsService.getTimelineRange());
+                    selectedIssueKeys.sort((a, b) => a.localeCompare(b, 'en', {numeric: true}));
                     const effortByStatusByIssueKey = [...this._plotData.statusesGroup.all()];
-                    const series = this._transformToHighchartsSeries(effortByStatusByIssueKey, this._plotData.issueKeys);
+                    const series = this._transformToHighchartsSeries(effortByStatusByIssueKey, selectedIssueKeys);
+
                     this.chart = new TouchTimeChartBuilder('touchTime')
                         .withChartType('bar')
                         .withTooltipNumberOfDecimals(2)
-                        .withCategories(this._plotData.issueKeys)
+                        .withCategories(selectedIssueKeys)
                         .withSeriesData(series)
+                        .withTimelineFilterCallback(this.recreateChart.bind(this))
                         .build();
+                    dcDateRangeChartsService.registerHighchartsNotifyOnlyChart(this.chart);
                 },
 
-                _extractUniqueValuesOfProperty: function (data, propertyName) {
-                    return _.chain(data)
-                        .map((item) => item[propertyName])
-                        .unique()
-                        .value();
-                },
-
-                _transformToHighchartsSeries(effortByStatusByIssueKey, issueKeysOrderLUT) {
+                _transformToHighchartsSeries: function (effortByStatusByIssueKey, issueKeysOrderLUT) {
                     return effortByStatusByIssueKey.map(
                         ({key: status, value: effortByIssueKey}) => {
                             return {
@@ -237,7 +245,13 @@
                             };
                         }
                     );
+                },
+
+                recreateChart: function () {
+                    this.chart.destroy();
+                    this._createChart();
                 }
+
             });
         })();
     </script>

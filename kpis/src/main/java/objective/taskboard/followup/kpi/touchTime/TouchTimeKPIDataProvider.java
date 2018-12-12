@@ -1,9 +1,12 @@
 package objective.taskboard.followup.kpi.touchTime;
 
+import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang3.Range;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,18 +38,26 @@ class TouchTimeKPIDataProvider implements TouchTimeProvider<TouchTimeChartDataSe
         final List<IssueKpi> issues = issueKpiService.getIssuesFromCurrentState(projectKey, timezone, kpiLevel);
         final List<String> allProgressingStatuses = kpiProperties.getProgressingStatuses();
         final List<String> statuses = kpiLevel.filterProgressingStatuses(allProgressingStatuses, jiraProperties);
-        final List<TouchTimeDataPoint> points = transformToDataPoints(issues, statuses);
+        final List<TouchTimeDataPoint> points = transformToDataPoints(issues, statuses, timezone);
         return new TouchTimeChartDataSet(points);
     }
 
-    private List<TouchTimeDataPoint> transformToDataPoints(List<IssueKpi> issues, List<String> statuses) {
+    private List<TouchTimeDataPoint> transformToDataPoints(List<IssueKpi> issues, List<String> statuses, ZoneId timezone) {
         final List<TouchTimeDataPoint> points = new LinkedList<>();
-        issues.stream().forEach(issue -> {
+        issues.forEach(issue -> {
             statuses.forEach(status -> {
                 final Long effortInSeconds = issue.getEffort(status);
                 final double effortInHours = DateTimeUtils.secondsToHours(effortInSeconds);
-                final TouchTimeDataPoint dataPoint = new TouchTimeDataPoint(issue.getIssueKey(),
-                        issue.getIssueTypeName(), status, effortInHours);
+                final Range<LocalDate> progressingRange = issue.getDateRangeBasedOnProgressingStatuses(timezone).get();
+                final ZonedDateTime startProgressingDate = progressingRange.getMinimum().atStartOfDay(timezone);
+                final ZonedDateTime endProgressingDate = progressingRange.getMaximum().atStartOfDay(timezone);
+                final TouchTimeDataPoint dataPoint = new TouchTimeDataPoint(
+                        issue.getIssueKey(),
+                        issue.getIssueTypeName(),
+                        status,
+                        effortInHours,
+                        startProgressingDate.toInstant(),
+                        endProgressingDate.toInstant());
                 points.add(dataPoint);
             });
         });

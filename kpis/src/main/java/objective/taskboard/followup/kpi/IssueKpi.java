@@ -24,12 +24,14 @@ public class IssueKpi {
     private Optional<IssueTypeKpi> issueType;
     private List<IssueKpi> children = new LinkedList<>();
     private KpiLevel level;
+    private Clock clock;
 
-    public IssueKpi(String pKey, Optional<IssueTypeKpi> issueType, KpiLevel level, Optional<StatusTransition> firstStatus) {
+    public IssueKpi(String pKey, Optional<IssueTypeKpi> issueType, KpiLevel level, Optional<StatusTransition> firstStatus, Clock clock) {
         this.pKey = pKey;
         this.issueType = issueType;
         this.level = level;
         this.firstStatus = firstStatus;
+        this.clock = clock;
     }
 
     public boolean isOnStatusOnDay(String status, ZonedDateTime date) {
@@ -127,7 +129,8 @@ public class IssueKpi {
                 .collect(Collectors.toList());
     }
 
-    public Optional<Range<LocalDate>> getDateRangeBasedOnProgressingStatuses(Clock clock,ZoneId timezone) {
+    public Optional<Range<LocalDate>> getDateRangeBasedOnProgressingStatuses(ZoneId timezone) {
+
         Optional<ZonedDateTime> firstDateOp = firstStatus.flatMap(s -> s.firstDateOnProgressing(timezone));
         if(!firstDateOp.isPresent())
             return Optional.empty();
