@@ -405,14 +405,14 @@ class TouchTimeChartBuilder extends ChartBuilderBase {
         if (this._filterCallback === undefined) {
             throw new Error('FilterCallback must be defined');
         }
-        return new Chart(highchartChart, this._filterCallback);
+        return new HighchartChartWrapper(highchartChart, this._filterCallback);
     }
 }
 
-class Chart {
-    constructor (chart, filterCallback) {
-        this.chart = chart;
-        this.chartKey = chart.options.chart.renderTo;
+class HighchartChartWrapper {
+    constructor (highchartChart, filterCallback) {
+        this.highchartChart = highchartChart;
+        this.chartKey = highchartChart.options.chart.renderTo;
         this._filterCallback = filterCallback;
     }
 
@@ -421,6 +421,6 @@ class Chart {
     }
 
     destroy () {
-        this.chart.destroy();
+        this.highchartChart.destroy();
     }
 }

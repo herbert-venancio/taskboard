@@ -14,7 +14,7 @@
         </style>
 
         <widget-wrap title="Touch Time by Issues" is-ready="{{isReady}}" tags="{{tags}}" 
-                options="{{options}}" highcharts-chart="{{chart}}" 
+                options="{{options}}" highcharts-chart="{{chartWrapper.highchartChart}}" 
                 error-message="{{errorMessage}}">
             <div id="touchTime" class="tb-chart"></div>
         </widget-wrap>
@@ -73,7 +73,7 @@
                         notify: true,
                         value: ''
                     },
-                    chart: {
+                    chartWrapper: {
                         type: Object,
                         notify: true,
                         value: null
@@ -152,9 +152,9 @@
                         this.xhr.abort();
                         this.xhr = null;
                     }
-                    if (this.chart) {
-                        this.chart.destroy();
-                        this.chart = null;
+                    if (this.chartWrapper) {
+                        this.chartWrapper.destroy();
+                        this.chartWrapper = null;
                     }
                 },
 
@@ -218,22 +218,43 @@
                         timelineRange = [timelineRange[0], addDaysToDate(timelineRange[1], 1).getTime()];
                         this._plotData.startProgressingDateDimension.filterRange(timelineRange);
                         this._plotData.endProgressingDateDimension.filterRange(timelineRange);
-                        const selectedIssueKeys = [...new Set(this._plotData.endProgressingDateDimension.top(Infinity).map(i => i.issueKey))];
+                        const selectedIssueKeys = new Set(this._plotData.endProgressingDateDimension.top(Infinity).map(i => i.issueKey));
                         return selectedIssueKeys;
                     };
                     const selectedIssueKeys = filterByTimeline(dcDateRangeChartsService.getTimelineRange());
-                    selectedIssueKeys.sort((a, b) => a.localeCompare(b, 'en', {numeric: true}));
                     const effortByStatusByIssueKey = [...this._plotData.statusesGroup.all()];
-                    const series = this._transformToHighchartsSeries(effortByStatusByIssueKey, selectedIssueKeys);
+                    const selectedIssueKeysOrdered = this._orderIssueKeysByTotalEffort(selectedIssueKeys, effortByStatusByIssueKey);
+                    const series = this._transformToHighchartsSeries(effortByStatusByIssueKey, selectedIssueKeysOrdered);
 
-                    this.chart = new TouchTimeChartBuilder('touchTime')
+                    this.chartWrapper = new TouchTimeChartBuilder('touchTime')
                         .withChartType('bar')
                         .withTooltipNumberOfDecimals(2)
-                        .withCategories(selectedIssueKeys)
+                        .withCategories(selectedIssueKeysOrdered)
                         .withSeriesData(series)
                         .withTimelineFilterCallback(this.recreateChart.bind(this))
                         .build();
-                    dcDateRangeChartsService.registerHighchartsNotifyOnlyChart(this.chart);
+                    dcDateRangeChartsService.registerHighchartsNotifyOnlyChart(this.chartWrapper);
+                },
+
+                _orderIssueKeysByTotalEffort: function (selectedIssueKeys, effortByStatusByIssueKey) {
+                    const totalEffortByIssueKey = effortByStatusByIssueKey
+                        .map(( { value: effortByIssueKey } ) => effortByIssueKey)
+                        .reduce((previous, current) => {
+                            Object.keys(current).forEach(issueKey => previous[issueKey] = (previous[issueKey] || 0) + current[issueKey]);
+                            return previous;
+                        }, {});
+
+                    return Object.entries(totalEffortByIssueKey)
+                        .sort((entry1, entry2) => this._sortTotalEffort(entry1[1], entry2[1], { ascending: false }))
+                        .map(entry => entry[0])
+                        .filter(issueKey => selectedIssueKeys.has(issueKey));
+                },
+
+                _sortTotalEffort: function (totalEffort1, totalEffort2, {ascending = true} = {}) {
+                    if (ascending) {
+                        return totalEffort1 - totalEffort2;
+                    }
+                    return totalEffort2 - totalEffort1;
                 },
 
                 _transformToHighchartsSeries: function (effortByStatusByIssueKey, issueKeysOrderLUT) {
@@ -248,7 +269,7 @@
                 },
 
                 recreateChart: function () {
-                    this.chart.destroy();
+                    this.chartWrapper.destroy();
                     this._createChart();
                 }
 
