@@ -1,508 +1,717 @@
 package objective.taskboard.followup.kpi;
 
-import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Optional;
-
-import org.apache.commons.lang3.Range;
 import org.junit.Test;
 
-import objective.taskboard.data.Worklog;
-import objective.taskboard.followup.kpi.enviroment.IssueKpiBuilder;
-import objective.taskboard.followup.kpi.enviroment.StatusTransitionBuilder.DefaultStatus;
-import objective.taskboard.testUtils.FixedClock;
-import objective.taskboard.utils.DateTimeUtils;
+import objective.taskboard.followup.kpi.enviroment.DSLKpi;
 
 public class IssueKpiTest {
     
-    private static DefaultStatus TODO = new DefaultStatus("To Do",false);
-    private static DefaultStatus DOING = new DefaultStatus("Doing",true);
-    private static DefaultStatus TO_REVIEW = new DefaultStatus("To Review", false);
-    private static DefaultStatus REVIEWING = new DefaultStatus("Reviewing", true);
-    private static DefaultStatus DONE = new DefaultStatus("Done",false);
-    
-    private static ZoneId ZONE_ID = ZoneId.systemDefault();
-    private FixedClock clock = new FixedClock();
+    private DSLKpi dsl = dsl();
     
     @Test
     public void checkStatusOnDay_happyDay() {
-        
-        IssueKpi issue = builder()
-                            .addTransition(TODO,"2020-01-01")
-                            .addTransition(DOING,"2020-01-02")
-                            .addTransition(DONE,"2020-01-03")
-                            .build();
-        
-        assertThat(issue.isOnStatusOnDay("To Do", parseDateTime("2020-01-01")), is(true));
-        assertThat(issue.isOnStatusOnDay("Doing", parseDateTime("2020-01-01")), is(false));
-        assertThat(issue.isOnStatusOnDay("Done", parseDateTime("2020-01-01")), is(false));
-        
-        assertThat(issue.isOnStatusOnDay("To Do", parseDateTime("2020-01-02")), is(false));
-        assertThat(issue.isOnStatusOnDay("Doing", parseDateTime("2020-01-02")), is(true));
-        assertThat(issue.isOnStatusOnDay("Done", parseDateTime("2020-01-02")), is(false));
-        
-        assertThat(issue.isOnStatusOnDay("To Do", parseDateTime("2020-01-03")), is(false));
-        assertThat(issue.isOnStatusOnDay("Doing", parseDateTime("2020-01-03")), is(false));
-        assertThat(issue.isOnStatusOnDay("Done", parseDateTime("2020-01-03")), is(true));
-        
-        assertThat(issue.isOnStatusOnDay("Review", parseDateTime("2020-01-01")), is(false));
-        assertThat(issue.isOnStatusOnDay("Doing", parseDateTime("2020-01-04")), is(false));
+        dsl
+        .environment()
+            .givenIssue("I-1")
+                .type("Subtask")
+                .isSubtask()
+                .withTransitions()
+                    .status("To Do").date("2020-01-01")
+                    .status("Doing").date("2020-01-02")
+                    .status("Done").date("2020-01-03")
+                .eoT()
+            .eoI()
+        .then()
+        .assertThat()
+            .issueKpi("I-1")
+            .atDate("2020-01-01")
+                .isOnStatus("To Do")
+                .isNotOnStatus("Doing")
+                .isNotOnStatus("Done").eoDc()
+            .atDate("2020-01-02")
+                .isNotOnStatus("To Do")
+                .isOnStatus("Doing")
+                .isNotOnStatus("Done").eoDc()
+            .atDate("2020-01-03")
+                .isNotOnStatus("To Do")
+                .isNotOnStatus("Doing")
+                .isOnStatus("Done").eoDc()
+            .atDate("2020-01-01")
+                .isNotOnStatus("Review").eoDc()
+            .atDate("2020-01-04")
+                .isNotOnStatus("Doing").eoDc();
     }
-    
+
     @Test
     public void checkStatusOnDay_emptyTransitions() {
-        IssueKpi issue = builder()
-                .addTransition(TODO,"2020-01-01")
-                .addTransition(DOING)
-                .addTransition(DONE,"2020-01-03")
-                .build();
-        
-        assertThat(issue.isOnStatusOnDay("To Do", parseDateTime("2020-01-01")), is(true));
-        assertThat(issue.isOnStatusOnDay("Doing", parseDateTime("2020-01-01")), is(false));
-        assertThat(issue.isOnStatusOnDay("Done", parseDateTime("2020-01-01")), is(false));
-        
-        assertThat(issue.isOnStatusOnDay("To Do", parseDateTime("2020-01-02")), is(true));
-        assertThat(issue.isOnStatusOnDay("Doing", parseDateTime("2020-01-02")), is(false));
-        assertThat(issue.isOnStatusOnDay("Done", parseDateTime("2020-01-02")), is(false));
-        
-        assertThat(issue.isOnStatusOnDay("To Do", parseDateTime("2020-01-03")), is(false));
-        assertThat(issue.isOnStatusOnDay("Doing", parseDateTime("2020-01-03")), is(false));
-        assertThat(issue.isOnStatusOnDay("Done", parseDateTime("2020-01-03")), is(true));
-        
-        assertThat(issue.isOnStatusOnDay("To Do", parseDateTime("2020-01-04")), is(false));
-        assertThat(issue.isOnStatusOnDay("Doing", parseDateTime("2020-01-04")), is(false));
-        assertThat(issue.isOnStatusOnDay("Done", parseDateTime("2020-01-04")), is(true));
-        
+        dsl
+        .environment()
+            .givenIssue("I-1")
+                .type("Subtask")
+                .isSubtask()
+                .withTransitions()
+                    .status("To Do").date("2020-01-01")
+                    .status("Doing").noDate()
+                    .status("Done").date("2020-01-03")
+                .eoT()
+            .eoI()
+        .then()
+            .assertThat()
+                .issueKpi("I-1")
+                .atDate("2020-01-01")
+                    .isOnStatus("To Do")
+                    .isNotOnStatus("Doing")
+                    .isNotOnStatus("Done").eoDc()
+                .atDate("2020-01-02")
+                    .isOnStatus("To Do")
+                    .isNotOnStatus("Doing")
+                    .isNotOnStatus("Done").eoDc()
+                .atDate("2020-01-03")
+                    .isNotOnStatus("To Do")
+                    .isNotOnStatus("Doing")
+                    .isOnStatus("Done").eoDc()
+                .atDate("2020-01-04")
+                    .isNotOnStatus("To Do")
+                    .isNotOnStatus("Doing")
+                    .isOnStatus("Done").eoDc();
     }
-    
+
     @Test
     public void checkStatusOnDay_openIssue() {
-        
-        IssueKpi issue = builder()
-                .addTransition(TODO,"2020-01-01")
-                .build();
-        
-        assertThat(issue.isOnStatusOnDay("To Do", parseDateTime("2020-01-01")), is(true));
-        assertThat(issue.isOnStatusOnDay("Doing", parseDateTime("2020-01-01")), is(false));
-        
-        assertThat(issue.isOnStatusOnDay("To Do", parseDateTime("2020-01-02")), is(true));
-        assertThat(issue.isOnStatusOnDay("Doing", parseDateTime("2020-01-02")), is(false));
+        dsl
+        .environment()
+            .givenIssue("I-1")
+                .type("Subtask")
+                .isSubtask()
+            .withTransitions()
+                    .status("To Do").date("2020-01-01")
+                    .eoT()
+            .eoI()
+        .then()
+            .assertThat()
+                .issueKpi("I-1")
+                .atDate("2020-01-01")
+                    .isOnStatus("To Do")
+                    .isNotOnStatus("Doing").eoDc()
+                .atDate("2020-01-02")
+                    .isOnStatus("To Do")
+                    .isNotOnStatus("Doing").eoDc();
     }
     
     @Test
     public void checkStatusOnDay_futureIssue() {
-        
-        IssueKpi issue = builder()
-                .addTransition(TODO,"2020-01-02")
-                .addTransition(DOING,"2020-01-03")
-                .addTransition(DONE,"2020-01-04")
-                .build();
-        
-        assertThat(issue.isOnStatusOnDay("To Do", parseDateTime("2020-01-01")), is(false));
-        assertThat(issue.isOnStatusOnDay("Doing", parseDateTime("2020-01-01")), is(false));
-        assertThat(issue.isOnStatusOnDay("Done", parseDateTime("2020-01-01")), is(false));
-        
-        assertThat(issue.isOnStatusOnDay("To Do", parseDateTime("2020-01-02")), is(true));
-        assertThat(issue.isOnStatusOnDay("Doing", parseDateTime("2020-01-02")), is(false));
-        assertThat(issue.isOnStatusOnDay("Done", parseDateTime("2020-01-02")), is(false));
-        
+        dsl
+        .environment()
+            .givenIssue("I-1")
+                .type("Subtask")
+                .isSubtask()
+                .withTransitions()
+                    .status("To Do").date("2020-01-02")
+                    .status("Doing").date("2020-01-03")
+                    .status("Done").date("2020-01-04")
+                .eoT()
+            .eoI()
+        .then()
+            .assertThat()
+                .issueKpi("I-1")
+                .atDate("2020-01-01")
+                    .isNotOnStatus("To Do")
+                    .isNotOnStatus("Doing")
+                    .isNotOnStatus("Done").eoDc()
+                .atDate("2020-01-02")
+                    .isOnStatus("To Do")
+                    .isNotOnStatus("Doing")
+                    .isNotOnStatus("Done").eoDc();
     }
     
     @Test
     public void hasTransitedToStatus_happyDay() {
-        IssueKpi issue = builder()
-                .addTransition(TODO,"2020-01-01")
-                .addTransition(DOING,"2020-01-02")
-                .addTransition(DONE,"2020-01-03")
-                .build();
-        
-        assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-01"), "Done"),is (false));
-        assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-02"), "Done"),is (false));
-        assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-03"), "Done"),is (true));
+        dsl
+        .environment()
+            .givenIssue("I-1")
+                .type("Subtask")
+                .isSubtask()
+                .withTransitions()
+                    .status("To Do").date("2020-01-01")
+                    .status("Doing").date("2020-01-02")
+                    .status("Done").date("2020-01-03")
+                .eoT()
+            .eoI()
+        .then()
+        .assertThat()
+            .issueKpi("I-1")
+            .atDate("2020-01-01")
+                .hasNotTransitedToAnyStatus("Done").eoDc()
+            .atDate("2020-01-02")
+                .hasNotTransitedToAnyStatus("Done").eoDc()
+            .atDate("2020-01-03")
+                .hasTransitedToAnyStatus("Done").eoDc();
     }
     
     @Test
     public void hasTransitedToStatus_nonExistentStatus() {
-        IssueKpi issue = builder()
-                .addTransition(TODO,"2020-01-01")
-                .addTransition(DOING,"2020-01-02")
-                .addTransition(DONE,"2020-01-03")
-                .build();
-        
-        assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-01"), "Integrating","Cancelled"),is (false));
-        assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-02"), "Integrating","Cancelled"),is (false));
-        assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-03"), "Integrating","Cancelled"),is (false));
+        dsl
+        .environment()
+            .givenIssue("I-1")
+                .type("Subtask")
+                .isSubtask()
+                .withTransitions()
+                    .status("To Do").date("2020-01-01")
+                    .status("Doing").date("2020-01-02")
+                    .status("Done").date("2020-01-03")
+                .eoT()
+            .eoI()
+        .then()
+        .assertThat()
+            .issueKpi("I-1")
+            .atDate("2020-01-01")
+                .hasNotTransitedToAnyStatus("Integrating","Cancelled").eoDc()
+            .atDate("2020-01-02")
+                .hasNotTransitedToAnyStatus("Integrating","Cancelled").eoDc()
+            .atDate("2020-01-03")
+                .hasNotTransitedToAnyStatus("Integrating","Cancelled").eoDc();
     }
-
+    
     @Test
     public void hasTransitedToStatus_onlyOneStatusTransited() {
-        IssueKpi issue = builder()
-                .addTransition(TODO,"2020-01-01")
-                .addTransition(DOING)
-                .addTransition(DONE,"2020-01-03")
-                .build();
-        
-        assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-01"), "Doing","Done"),is (false));
-        assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-02"), "Doing","Done"),is (false));
-        assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-03"), "Doing","Done"),is (true));
+        dsl
+        .environment()
+            .givenIssue("I-1")
+                .type("Subtask")
+                .isSubtask()
+                .withTransitions()
+                    .status("To Do").date("2020-01-01")
+                    .status("Doing").noDate()
+                    .status("Done").date("2020-01-03")
+                .eoT()
+            .eoI()
+        .then()
+            .assertThat()
+                .issueKpi("I-1")
+                .atDate("2020-01-01")
+                    .hasNotTransitedToAnyStatus("Doing","Done").eoDc()
+                .atDate("2020-01-02")
+                    .hasNotTransitedToAnyStatus("Doing","Done").eoDc()
+                .atDate("2020-01-03")
+                    .hasTransitedToAnyStatus("Doing","Done").eoDc();
     }
     
     @Test
     public void hasTransitedToStatus_onlyNotTransited() {
-        IssueKpi issue = builder()
-                .addTransition(TODO,"2020-01-01")
-                .addTransition(DOING)
-                .addTransition(DONE,"2020-01-03")
-                .build();
-        
-        assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-01"), "Doing"),is (false));
-        assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-02"), "Doing"),is (false));
-        assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-03"), "Doing"),is (false));
+        dsl
+        .environment()
+            .givenIssue("I-1")
+                .type("Subtask")
+                .isSubtask()
+                .withTransitions()
+                    .status("To Do").date("2020-01-01")
+                    .status("Doing").noDate()
+                    .status("Done").date("2020-01-03")
+                .eoT()
+            .eoI()
+        .then()
+            .assertThat()
+                .issueKpi("I-1")
+            .atDate("2020-01-01")
+                .hasNotTransitedToAnyStatus("Doing").eoDc()
+            .atDate("2020-01-02")
+                .hasNotTransitedToAnyStatus("Doing").eoDc()
+            .atDate("2020-01-03")
+                .hasNotTransitedToAnyStatus("Doing").eoDc();
     }
     
     @Test
     public void hasTransitedToStatus_earliestTransition() {
-        
-        IssueKpi issue = builder()
-                .addTransition(TODO,"2020-01-01")
-                .addTransition(DOING,"2020-01-02")
-                .addTransition(DONE,"2020-01-03")
-                .build();
-        
-        assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-01"), "Doing","Done"),is (false));
-        assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-02"), "Doing","Done"),is (true));
-        assertThat(issue.hasTransitedToAnyStatusOnDay(parseDateTime("2020-01-03"), "Doing","Done"),is (false));
+        dsl
+            .environment()
+                .givenIssue("I-1")
+                    .type("Subtask")
+                    .isSubtask()
+                    .withTransitions()
+                        .status("To Do").date("2020-01-01")
+                        .status("Doing").date("2020-01-02")
+                        .status("Done").date("2020-01-03")
+                    .eoT()
+                .eoI()
+            .then()
+                .assertThat()
+                    .issueKpi("I-1")
+                    .atDate("2020-01-01")
+                        .hasNotTransitedToAnyStatus("Doing","Done").eoDc()
+                    .atDate("2020-01-02")
+                        .hasTransitedToAnyStatus("Doing","Done").eoDc()
+                    .atDate("2020-01-03")
+                        .hasNotTransitedToAnyStatus("Doing","Done").eoDc();
     }
     
     @Test
     public void getWorklogFromChildren() {
-        Worklog worklog = new Worklog("a.developer", DateTimeUtils.parseStringToDate("2020-010-2"), 300);
-        
-        IssueKpi issue = builder()
-                .addTransition(TODO,"2020-01-01")
-                .addTransition(DOING,"2020-01-02")
-                .addTransition(DONE,"2020-01-03")
-                .addWorklog(worklog)
-                .build();
-        
-        IssueKpi fatherIssue = new IssueKpiBuilder("PROJ-02", new IssueTypeKpi(2l,"Feature"), KpiLevel.FEATURES, clock)
-                .addTransition(TODO,"2020-01-01")
-                .addTransition(DOING,"2020-01-02")
-                .addTransition(DONE,"2020-01-03")
-                .addChild(issue)
-                .build();
-        List<Worklog> childrenWorklog = fatherIssue.getWorklogFromChildren(1l);
-        
-        assertThat(childrenWorklog.size(),is(1));
-        assertThat(childrenWorklog.get(0),is(worklog));
-        assertThat(issue.getEffort("Doing"),is(300l));
+        dsl 
+        .environment()
+            .givenIssue("PROJ-01")
+                .type("Feature")
+                .isFeature()
+                .withTransitions()
+                    .status("To Do").date("2020-01-01")
+                    .status("Doing").date("2020-01-02")
+                    .status("Done").date("2020-01-03")
+                .eoT()
+            .subtask("PROJ-02")
+                .type("Subtask")
+                .isSubtask()
+                .withTransitions()
+                    .status("To Do").date("2020-01-01")
+                    .status("Doing").date("2020-01-02")
+                    .status("Done").date("2020-01-03")
+                .eoT()
+                .worklogs()
+                    .at("2020-01-01").timeSpentInSeconds(300)
+                .eoW()
+            .endOfSubtask()
+        .eoI()
+        .then()
+        .assertThat()
+            .issueKpi("PROJ-01")
+                .givenSubtaskType("Subtask")
+                    .hasTotalWorklogs(1).withTotalValue(300).eoSc()
+                .withChild("PROJ-02")
+                    .atStatus("Doing").hasTotalEffort(300l);
     }
     
     @Test
     public void wrongConfiguration_dontGetWorklogFromChildren() {
-        Worklog worklog = new Worklog("a.developer", DateTimeUtils.parseStringToDate("2020-01-02"), 300);
-        
-        IssueKpi issue = new IssueKpiBuilder("PROJ-01", null, KpiLevel.SUBTASKS, clock)
-                .addTransition(TODO,"2020-01-01")
-                .addTransition(DOING,"2020-01-02")
-                .addTransition(DONE,"2020-01-03")
-                .addWorklog(worklog)
-                .build();
-        
-        IssueKpi fatherIssue = new IssueKpiBuilder("PROJ-02", new IssueTypeKpi(2l,"Feature"), KpiLevel.FEATURES, clock)
-                .addTransition(TODO,"2020-01-01")
-                .addTransition(DOING,"2020-01-02")
-                .addTransition(DONE,"2020-01-03")
-                .addChild(issue)
-                .build();
-        List<Worklog> childrenWorklog = fatherIssue.getWorklogFromChildren(1l);
-        
-        assertThat(childrenWorklog.size(),is(0));
+        dsl
+        .environment()
+            .givenIssue("PROJ-01")
+                .type("Feature")
+                .isFeature()
+                .withTransitions()
+                    .status("To Do").date("2020-01-01")
+                    .status("Doing").date("2020-01-02")
+                    .status("Done").date("2020-01-03")
+                .eoT()
+            .subtask("PROJ-02")
+                .emptyType()
+                .isSubtask()
+                .withTransitions()
+                    .status("To Do").date("2020-01-01")
+                    .status("Doing").date("2020-01-02")
+                    .status("Done").date("2020-01-03")
+                .eoT()
+                .worklogs()
+                    .at("2020-01-01").timeSpentInSeconds(300)
+                .eoW()
+            .endOfSubtask()
+        .eoI()
+        .then()
+        .assertThat()
+            .issueKpi("PROJ-01")
+            .givenSubtaskType("Subtask")
+                .doesNotHaveWorklogs().eoSc()
+            .withChild("PROJ-02")
+                .atStatus("Doing").hasTotalEffort(300l);
     }
     
     @Test
     public void getWorklogFromChildrenStatus_happyDay() {
-        Worklog worklog = new Worklog("a.developer", DateTimeUtils.parseStringToDate("2020-01-02"), 300);
-        
-        IssueKpi issue = builder()
-                .addTransition(TODO,"2020-01-01")
-                .addTransition(DOING,"2020-01-02")
-                .addTransition(DONE,"2020-01-03")
-                .addWorklog(worklog)
-                .build();
-        
-        IssueKpi fatherIssue = new IssueKpiBuilder("PROJ-02", new IssueTypeKpi(2l,"Feature"), KpiLevel.FEATURES, clock)
-                .addTransition(TODO,"2020-01-01")
-                .addTransition(DOING,"2020-01-02")
-                .addTransition(DONE,"2020-01-03")
-                .addChild(issue)
-                .build();
-        List<Worklog> childrenWorklog = fatherIssue.getWorklogFromChildrenStatus("To Do");
-        assertThat(childrenWorklog.size(),is(0));
-        
-        childrenWorklog = fatherIssue.getWorklogFromChildrenStatus("Doing");
-        assertThat(childrenWorklog.size(),is(1));
-        assertThat(childrenWorklog.get(0),is(worklog));
-        assertThat(issue.getEffort("Doing"),is(300l));
-        
+        dsl. 
+        environment()
+            .givenIssue("PROJ-01")
+                .type("Feature")
+                .isFeature()
+                .withTransitions()
+                    .status("To Do").date("2020-01-01")
+                    .status("Doing").date("2020-01-02")
+                    .status("Done").date("2020-01-03")
+                    .eoT()
+                .subtask("PROJ-02")
+                    .type("Subtask")
+                    .isSubtask()
+                    .withTransitions()
+                        .status("To Do").date("2020-01-01")
+                        .status("Doing").date("2020-01-02")
+                        .status("Done").date("2020-01-03")
+                    .eoT()
+                    .worklogs()
+                        .at("2020-01-01").timeSpentInSeconds(300)
+                    .eoW()
+                .endOfSubtask()
+            .eoI()
+        .then()
+            .assertThat()
+                .issueKpi("PROJ-01")
+                .givenSubtaskStatus("To Do")
+                    .doesNotHaveWorklogs().eoSc()
+                .givenSubtaskStatus("Doing")
+                    .hasTotalWorklogs(1)
+                    .withTotalValue(300).eoSc()
+                .withChild("PROJ-02")
+                    .atStatus("Doing")
+                        .hasTotalEffort(300l);
     }
     
     @Test
     public void wrongConfiguration_dontGetWorklogFromChildrenStatus() {
-        Worklog worklog = new Worklog("a.developer", DateTimeUtils.parseStringToDate("2020-01-02"), 300);
-        
-        IssueKpi issue = builder()
-                .addTransition(TODO,"2020-01-01")
-                .addTransition(DOING,"2020-01-02")
-                .addTransition(DONE,"2020-01-03")
-                .addWorklog(worklog)
-                .build();
-        
-        IssueKpi fatherIssue = new IssueKpiBuilder("PROJ-02", new IssueTypeKpi(2l,"Feature"), KpiLevel.FEATURES, clock)
-                .addTransition(TODO,"2020-01-01")
-                .addTransition(DOING,"2020-01-02")
-                .addTransition(DONE,"2020-01-03")
-                .addChild(issue)
-                .build();
-       
-        List<Worklog> childrenWorklog = fatherIssue.getWorklogFromChildrenStatus("To Do");
-        assertThat(childrenWorklog.size(),is(0));
-        
-        childrenWorklog = fatherIssue.getWorklogFromChildrenStatus("Inexistent");
-        assertThat(childrenWorklog.size(),is(0));
+        dsl. 
+        environment()
+            .givenIssue("PROJ-01")
+                .type("Feature")
+                .isFeature()
+                .withTransitions()
+                    .status("To Do").date("2020-01-01")
+                    .status("Doing").date("2020-01-02")
+                    .status("Done").date("2020-01-03")
+                .eoT()
+                .subtask("PROJ-02")
+                    .type("Subtask")
+                    .isSubtask()
+                    .withTransitions()
+                        .status("To Do").date("2020-01-01")
+                        .status("Doing").date("2020-01-02")
+                        .status("Done").date("2020-01-03")
+                    .eoT()
+                    .worklogs()
+                        .at("2020-01-01").timeSpentInSeconds(300)
+                    .eoW()
+                .endOfSubtask()
+            .eoI()
+        .then()
+            .assertThat()
+                .issueKpi("PROJ-01")
+                .givenSubtaskStatus("To Do")
+                    .doesNotHaveWorklogs().eoSc()
+                .givenSubtaskStatus("Inexistent")
+                    .doesNotHaveWorklogs().eoSc();
     }
-    
+
     @Test
     public void getRangeByProgressingStatuses_happyDay() {
-        
-        IssueKpi issue = builder()
-                .addTransition(TODO,"2020-01-01")
-                .addTransition(DOING,"2020-01-02")
-                .addTransition(TO_REVIEW,"2020-01-03")
-                .addTransition(REVIEWING,"2020-01-04")
-                .addTransition(DONE,"2020-01-05")
-                .build();
-        
-        configureClock("2020-01-06");
-
-        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressingStatuses(ZONE_ID);
-        assertRange(range, "2020-01-02","2020-01-05");
+        dsl. 
+        environment()
+            .todayIs("2020-01-06")
+            .givenIssue("PROJ-01")
+                .type("Feature")
+                .isFeature()
+                .withTransitions()
+                    .status("To Do").date("2020-01-01")
+                    .status("Doing").date("2020-01-02")
+                    .status("To Review").date("2020-01-03")
+                    .status("Reviewing").date("2020-01-04")
+                    .status("Done").date("2020-01-05")
+                .eoT()
+            .eoI()
+        .then()
+            .assertThat()
+                .issueKpi("PROJ-01")
+                .rangeBasedOnProgressingStatuses()
+                        .startsOn("2020-01-02").endsOn("2020-01-05");
     }
+
     
     @Test
     public void getRangeByProgressingStatuses_onlyOneProgressingWithDate() {
-        
-        IssueKpi issue = builder()
-                .addTransition(TODO,"2020-01-01")
-                .addTransition(DOING,"2020-01-02")
-                .addTransition(TO_REVIEW)
-                .addTransition(REVIEWING)
-                .addTransition(DONE,"2020-01-06")
-                .build();
-        
-        configureClock("2020-01-06");
-        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressingStatuses(ZONE_ID);
-        assertRange(range, "2020-01-02","2020-01-06");
+        dsl. 
+        environment()
+            .todayIs("2020-01-06")
+            .givenIssue("PROJ-01")
+                .type("Feature")
+                .isFeature()
+                .withTransitions()
+                    .status("To Do").date("2020-01-01")
+                    .status("Doing").date("2020-01-02")
+                    .status("To Review").noDate()
+                    .status("Reviewing").noDate()
+                    .status("Done").date("2020-01-06")
+                .eoT()
+            .eoI()
+        .then()
+            .assertThat()
+                .issueKpi("PROJ-01")
+                .rangeBasedOnProgressingStatuses()
+                        .startsOn("2020-01-02").endsOn("2020-01-06");
     }
+    
     
     @Test
     public void getRangeByProgressingStatuses_doingIssue() {
-        
-        IssueKpi issue = builder()
-                .addTransition(TODO,"2020-01-01")
-                .addTransition(DOING,"2020-01-02")
-                .addTransition(TO_REVIEW)
-                .addTransition(REVIEWING)
-                .addTransition(DONE)
-                .build();
-        
-        configureClock("2020-01-03");
-        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressingStatuses(ZONE_ID);
-        assertRange(range, "2020-01-02","2020-01-03");
+        dsl. 
+        environment()
+            .todayIs("2020-01-03")
+            .givenIssue("PROJ-01")
+                .type("Feature")
+                .isFeature()
+                .withTransitions()
+                    .status("To Do").date("2020-01-01")
+                    .status("Doing").date("2020-01-02")
+                    .status("To Review").noDate()
+                    .status("Reviewing").noDate()
+                    .status("Done").noDate()
+                .eoT()
+            .eoI()
+        .then()
+            .assertThat()
+                .issueKpi("PROJ-01")
+                .rangeBasedOnProgressingStatuses()
+                        .startsOn("2020-01-02").endsOn("2020-01-03");
     }
-
+    
+    
     @Test
     public void getRangeByProgressingStatuses_straightToReview_workingOnDoing() {
         
-        IssueKpi issue = builder()
-                .addTransition(TODO,"2020-01-01")
-                .addTransition(DOING)
-                .addTransition(TO_REVIEW)
-                .addTransition(REVIEWING,"2020-01-06")
-                .addTransition(DONE,"2020-01-08")
-                .addWorklog("2020-01-01", 300)
-                .build();
-        
-        configureClock("2020-01-10");
-        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressingStatuses(ZONE_ID);
-        assertRange(range, "2020-01-01","2020-01-08");
-        assertThat(issue.getEffort("Doing"),is(300l));
-        
+        dsl. 
+        environment()
+            .todayIs("2020-01-10")
+            .givenIssue("PROJ-01")
+                .type("Feature")
+                .isFeature()
+                .withTransitions()
+                    .status("To Do").date("2020-01-01")
+                    .status("Doing").noDate()
+                    .status("To Review").noDate()
+                    .status("Reviewing").date("2020-01-06")
+                    .status("Done").date("2020-01-08")
+                .eoT()
+                .worklogs()
+                    .at("2020-01-01").timeSpentInSeconds(300)
+                .eoW()
+            .eoI()
+        .then()
+            .assertThat()
+                .issueKpi("PROJ-01")
+                .rangeBasedOnProgressingStatuses()
+                        .startsOn("2020-01-01").endsOn("2020-01-08")
+                .atStatus("Doing").hasTotalEffort(300l);
     }
+    
     @Test
     public void getRangeByProgressingStatuses_openIssue_workingOnReview() {
-        
-        IssueKpi issue = builder()
-                .addTransition(TODO,"2020-01-01")
-                .addTransition(DOING)
-                .addTransition(TO_REVIEW)
-                .addTransition(REVIEWING,"2020-01-06")
-                .addTransition(DONE)
-                .addWorklog("2020-01-06", 300)
-                .build();
-        
-        configureClock("2020-01-10");
-        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressingStatuses(ZONE_ID);
-        assertRange(range, "2020-01-06","2020-01-10");
-        assertThat(issue.getEffort("Doing"),is(0l));
-        assertThat(issue.getEffort("Reviewing"),is(300l));
+        dsl. 
+        environment()
+            .todayIs("2020-01-10")
+            .givenIssue("PROJ-01")
+                .type("Feature")
+                .isFeature()
+                .withTransitions()
+                    .status("To Do").date("2020-01-01")
+                    .status("Doing").noDate()
+                    .status("To Review").noDate()
+                    .status("Reviewing").date("2020-01-06")
+                    .status("Done").noDate()
+                .eoT()
+                .worklogs()
+                    .at("2020-01-06").timeSpentInSeconds(300)
+                .eoW()
+            .eoI()
+        .then()
+            .assertThat()
+                .issueKpi("PROJ-01")
+                .rangeBasedOnProgressingStatuses()
+                        .startsOn("2020-01-06").endsOn("2020-01-10")
+                .atStatus("Doing").doesNotHaveEffort()
+                .atStatus("Reviewing").hasTotalEffort(300l);
     }
     
     @Test
     public void getRangeByProgressingStatuses_straightToDone_workingOnDoing() {
-        
-        IssueKpi issue = builder()
-                .addTransition(TODO,"2020-01-01")
-                .addTransition(DOING)
-                .addTransition(TO_REVIEW)
-                .addTransition(REVIEWING)
-                .addTransition(DONE,"2020-01-06")
-                .addWorklog("2020-01-03", 300)
-                .build();
-        
-        configureClock("2020-01-10");
-        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressingStatuses(ZONE_ID);
-        assertRange(range, "2020-01-03","2020-01-06");
-        assertThat(issue.getEffort("Doing"),is(300l));
+        dsl. 
+        environment()
+            .todayIs("2020-01-10")
+            .givenIssue("PROJ-01")
+                .type("Feature")
+                .isFeature()
+                .withTransitions()
+                    .status("To Do").date("2020-01-01")
+                    .status("Doing").noDate()
+                    .status("To Review").noDate()
+                    .status("Reviewing").noDate()
+                    .status("Done").date("2020-01-06")
+                .eoT()
+                .worklogs()
+                    .at("2020-01-03").timeSpentInSeconds(300)
+                .eoW()
+            .eoI()
+        .then()
+            .assertThat()
+                .issueKpi("PROJ-01")
+                .rangeBasedOnProgressingStatuses()
+                        .startsOn("2020-01-03").endsOn("2020-01-06")
+                .atStatus("Doing").hasTotalEffort(300l);
     }
     
     @Test
     public void getRangeByProgressingStatuses_straightToDone_workingOnReview() {
-        
-        IssueKpi issue = builder()
-                .addTransition(TODO,"2020-01-01")
-                .addTransition(DOING)
-                .addTransition(TO_REVIEW)
-                .addTransition(REVIEWING)
-                .addTransition(DONE,"2020-01-06")
-                .addWorklog("2020-01-06", 300)
-                .build();
-        
-        configureClock("2020-01-10");
-        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressingStatuses(ZONE_ID);
-        assertRange(range, "2020-01-06","2020-01-06");
-        assertThat(issue.getEffort("Reviewing"),is(300l));
+        dsl. 
+        environment()
+            .todayIs("2020-01-10")
+            .givenIssue("PROJ-01")
+                .type("Feature")
+                .isFeature()
+                .withTransitions()
+                    .status("To Do").date("2020-01-01")
+                    .status("Doing").noDate()
+                    .status("To Review").noDate()
+                    .status("Reviewing").noDate()
+                    .status("Done").date("2020-01-06")
+                .eoT()
+                .worklogs()
+                    .at("2020-01-06").timeSpentInSeconds(300)
+                .eoW()
+            .eoI()
+        .then()
+            .assertThat()
+                .issueKpi("PROJ-01")
+                .rangeBasedOnProgressingStatuses()
+                        .startsOn("2020-01-06").endsOn("2020-01-06")
+                .atStatus("Reviewing").hasTotalEffort(300l);
     }
-    
+        
     @Test
     public void getRangeByProgressingStatuses_datesOnlyOnNoProgressingStatuses_worklogDistributed() {
-        
-        IssueKpi issue = builder()
-                .addTransition(TODO,"2020-01-01")
-                .addTransition(DOING)
-                .addTransition(TO_REVIEW,"2020-01-03")
-                .addTransition(REVIEWING)
-                .addTransition(DONE,"2020-01-06")
-                .addWorklog("2020-01-02", 100)
-                .addWorklog("2020-01-03", 200)
-                .addWorklog("2020-01-04", 300)
-                .addWorklog("2020-01-05", 400)
-                .build();
-        
-        configureClock("2020-01-10");
-
-        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressingStatuses(ZONE_ID);
-        assertRange(range, "2020-01-02","2020-01-06");
-        assertThat(issue.getEffort("Doing"),is(300l));
-        assertThat(issue.getEffort("Reviewing"),is(700l));
+        dsl. 
+        environment()
+            .todayIs("2020-01-10")
+            .givenIssue("PROJ-01")
+                .type("Feature")
+                .isFeature()
+                .withTransitions()
+                    .status("To Do").date("2020-01-01")
+                    .status("Doing").noDate()
+                    .status("To Review").date("2020-01-03")
+                    .status("Reviewing").noDate()
+                    .status("Done").date("2020-01-06")
+                .eoT()
+                .worklogs()
+                    .at("2020-01-02").timeSpentInSeconds(100)
+                    .at("2020-01-03").timeSpentInSeconds(200)
+                    .at("2020-01-04").timeSpentInSeconds(300)
+                    .at("2020-01-05").timeSpentInSeconds(400)
+                .eoW()
+            .eoI()
+        .then()
+            .assertThat()
+                .issueKpi("PROJ-01")
+                .rangeBasedOnProgressingStatuses()
+                        .startsOn("2020-01-02").endsOn("2020-01-06")
+                .atStatus("Doing").hasTotalEffort(300l).eoSa()
+                .atStatus("Reviewing").hasTotalEffort(700l);
     }
     
     @Test
     public void getRangeByProgressingStatuses_openIssue() {
-        
-        IssueKpi issue = builder()
-                .addTransition(TODO,"2020-01-01")
-                .addTransition(DOING)
-                .addTransition(TO_REVIEW)
-                .addTransition(REVIEWING)
-                .addTransition(DONE)
-                .build();
-        
-        configureClock("2020-01-10");
-        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressingStatuses(ZONE_ID);
-        assertRange(range, "Not Found","Not Found");
+        dsl. 
+        environment()
+            .todayIs("2020-01-10")
+            .givenIssue("PROJ-01")
+                .type("Feature")
+                .isFeature()
+                .withTransitions()
+                    .status("To Do").date("2020-01-01")
+                    .status("Doing").noDate()
+                    .status("To Review").noDate()
+                    .status("Reviewing").noDate()
+                    .status("Done").noDate()
+                .eoT()
+            .eoI()
+        .then()
+            .assertThat()
+                .issueKpi("PROJ-01")
+                .rangeBasedOnProgressingStatuses().isNotPresent();
     }
+    
     
     @Test
     public void getRangeByProgressingStatuses_closedIssue_WithoutWorking() {
-        
-        IssueKpi issue = builder()
-                .addTransition(TODO,"2020-01-01")
-                .addTransition(DOING)
-                .addTransition(TO_REVIEW)
-                .addTransition(REVIEWING)
-                .addTransition(DONE,"2020-01-01")
-                .build();
-        
-        configureClock("2020-01-10");
-        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressingStatuses(ZONE_ID);
-        assertRange(range, "Not Found","Not Found");
+        dsl. 
+        environment()
+            .todayIs("2020-01-10")
+            .givenIssue("PROJ-01")
+                .type("Feature")
+                .isFeature()
+                .withTransitions()
+                    .status("To Do").date("2020-01-01")
+                    .status("Doing").noDate()
+                    .status("To Review").noDate()
+                    .status("Reviewing").noDate()
+                    .status("Done").date("2020-01-01")
+                .eoT()
+            .eoI()
+        .then()
+            .assertThat()
+                .issueKpi("PROJ-01")
+                .rangeBasedOnProgressingStatuses().isNotPresent();
     }
     
     @Test
     public void getRangeByProgressingStatuses_straightToDone_worklogOnReviewAfterDone() {
-        IssueKpi issue = builder()
-                .addTransition(TODO,"2020-01-01")
-                .addTransition(DOING)
-                .addTransition(TO_REVIEW)
-                .addTransition(REVIEWING)
-                .addTransition(DONE,"2020-01-06")
-                .addWorklog("2020-01-07", 100)
-                .build();
-        
-        configureClock("2020-01-10");
-        Optional<Range<LocalDate>> range = issue.getDateRangeBasedOnProgressingStatuses(ZONE_ID);
-        assertRange(range, "2020-01-07","2020-01-07");
-        assertThat(issue.getEffort("Doing"),is(0l));
-        assertThat(issue.getEffort("Reviewing"),is(100l));
-        
+        dsl. 
+        environment()
+            .todayIs("2020-01-10")
+            .givenIssue("PROJ-01")
+                .type("Feature")
+                .isFeature()
+                .withTransitions()
+                    .status("To Do").date("2020-01-01")
+                    .status("Doing").noDate()
+                    .status("To Review").noDate()
+                    .status("Reviewing").noDate()
+                    .status("Done").date("2020-01-06")
+                .eoT()
+                .worklogs()
+                    .at("2020-01-07").timeSpentInSeconds(100)
+                .eoW()
+            .eoI()
+        .then()
+            .assertThat()
+                .issueKpi("PROJ-01")
+                .rangeBasedOnProgressingStatuses()
+                    .startsOn("2020-01-07").endsOn("2020-01-07")
+                .atStatus("Doing").doesNotHaveEffort()
+                .atStatus("Reviewing").hasTotalEffort(100l);
     }
     
     @Test
     public void getAllWorklog_untilDate() {
-        IssueKpi issue = builder()
-                .addTransition(TODO,"2020-01-01")
-                .addTransition(DOING,"2020-01-02")
-                .addTransition(DONE,"2020-01-03")
-                .addWorklog("2020-01-02",300)
-                .addWorklog("2020-01-03",500)
-                .build();
         
-        assertThat(issue.getEffort("Doing"),is(800l));
-        assertThat(issue.getEffortUntilDate("Doing",parseDateTime("2020-01-02")),is(300l));
-        assertThat(issue.getEffortUntilDate("Doing",parseDateTime("2020-01-03")),is(800l));
+        dsl. 
+        environment()
+            .todayIs("2020-01-10")
+            .givenIssue("PROJ-01")
+                .type("Feature")
+                .isFeature()
+                .withTransitions()
+                    .status("To Do").date("2020-01-01")
+                    .status("Doing").date("2020-01-02")
+                    .status("Done").date("2020-01-03")
+                .eoT()
+                .worklogs()
+                    .at("2020-01-02").timeSpentInSeconds(300)
+                    .at("2020-01-03").timeSpentInSeconds(500)
+                .eoW()
+            .eoI()
+        .then()
+            .assertThat()
+                .issueKpi("PROJ-01")
+                    .atStatus("Doing")
+                        .hasTotalEffort(800l)
+                        .untilDate("2020-01-02").hasEffort(300l)
+                        .untilDate("2020-01-03").hasEffort(800l)
+                    .eoSa();
+        
+    }
 
+    private DSLKpi dsl() {
+        this.dsl = new DSLKpi();
+        this.dsl.environment()
+            .withStatus("To Do").isNotProgressing()
+            .withStatus("Doing").isProgressing()
+            .withStatus("To Review").isNotProgressing()
+            .withStatus("Reviewing").isProgressing()
+            .withStatus("Done").isNotProgressing()
+            .withSubtaskType("Subtask")
+            .withFeatureType("Feature");
+
+        return this.dsl;
     }
     
-    private void configureClock(String date) {
-        ZonedDateTime zonedDate = DateTimeUtils.parseDateTime(date);
-        clock.setNow(zonedDate.toInstant());
-    }
-
-    private void assertRange(Optional<Range<LocalDate>> range, String expectedFirstDate, String expectedLastDate) {
-        String firstDate = range.map(r -> r.getMinimum().toString()).orElse("Not Found");
-        String lastDate = range.map(r -> r.getMaximum().toString()).orElse("Not Found");
-        assertThat(firstDate, is(expectedFirstDate));
-        assertThat(lastDate, is(expectedLastDate));
-    }
-    
-    private IssueKpiBuilder builder() {
-        return new IssueKpiBuilder("PROJ-01", new IssueTypeKpi(1l,"Subtask"), KpiLevel.SUBTASKS, clock);
-    }
 }

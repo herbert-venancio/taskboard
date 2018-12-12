@@ -1,213 +1,291 @@
 package objective.taskboard.followup.kpi.touchTime;
 
-import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Optional;
 
-import org.junit.Before;
+import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.ProjectRangeByConfiguration;
-import objective.taskboard.followup.kpi.enviroment.KPIEnvironmentBuilder;
+import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
+import objective.taskboard.testUtils.FixedClock;
+import objective.taskboard.utils.DateTimeUtils;
 
 public class TouchTimeFilterTest {
-    private static final String START_RANGE = "2018-01-10";
-    private static final String END_RANGE = "2018-01-20";
+    
     private static final ZoneId timezone = ZoneId.systemDefault();
-    
-    private TouchTimeFilter subject;
-    
-    @Before
-    public void setup() {
-        ProjectFilterConfiguration project = configureProject();
-        
-        ProjectRangeByConfiguration defaultRange = new ProjectRangeByConfiguration(project);
-        subject = new TouchTimeFilter(timezone,defaultRange);
-    }
-
-    private ProjectFilterConfiguration configureProject() {
-        ProjectFilterConfiguration project = Mockito.mock(ProjectFilterConfiguration.class);
-        LocalDate startDate = parseDateTime(START_RANGE).toLocalDate();
-        LocalDate endDate = parseDateTime(END_RANGE).toLocalDate();
-        when(project.getStartDate()).thenReturn(Optional.of(startDate));
-        when(project.getDeliveryDate()).thenReturn(Optional.of(endDate));
-        return project;
-    }
     
     @Test
     public void filterHappyDay() {
-        KPIEnvironmentBuilder builder = getSimpleEnvironment();
-        final String today = "2018-02-25";
-        builder.setNow(today);
-        builder.mockingSubtask("I-1", "Development")
-                .addTransition("To Do","2018-01-11")
-                .addTransition("Doing","2018-01-12")
-                .addTransition("To Review","2018-01-13")
-                .addTransition("Reviewing","2018-01-14")
-                .addTransition("Done","2018-01-15");
+        IssueKpi kpi = 
+        		environment()
+		        	.givenIssue("I-1")
+		        		.type("Development")
+		        		.withTransitions()
+		        			.status("To Do").date("2018-01-11")
+		        			.status("Doing").date("2018-01-12")
+		                    .status("To Review").date("2018-01-13")
+		                    .status("Reviewing").date("2018-01-14")
+		                    .status("Done").date("2018-01-15")
+		                    .eoT()
+		                .buildAsIssueKpi();
+        filter()
+        	.startingAt("2018-01-10").endingAt("2018-01-20")
+        	.todayIs("2018-02-25")
+        	.issueShouldBeAccepted(kpi);
         
-        IssueKpi issueKpi = builder.buildCurrentIssueAsKpi();
-                
-        assertTrue(subject.test(issueKpi));
     }
     
     @Test
     public void issueBeforeRange() {
-        KPIEnvironmentBuilder builder = getSimpleEnvironment();
-        final String today = "2018-02-25";
-        builder.setNow(today);
-        builder.mockingSubtask("I-1", "Development")
-                .addTransition("To Do","2018-01-02")
-                .addTransition("Doing","2018-01-03")
-                .addTransition("To Review","2018-01-05")
-                .addTransition("Reviewing","2018-01-07")
-                .addTransition("Done","2018-01-09");
+        IssueKpi kpi = 
+        		environment()
+		        	.givenIssue("I-1")
+		        		.type("Development")
+		        		.isSubtask()
+		        		.withTransitions()
+		        			.status("To Do").date("2018-01-02")
+		        			.status("Doing").date("2018-01-03")
+		                    .status("To Review").date("2018-01-05")
+		                    .status("Reviewing").date("2018-01-07")
+		                    .status("Done").date("2018-01-09")
+		                    .eoT()
+		                .buildAsIssueKpi();
         
-        IssueKpi issueKpi = builder.buildCurrentIssueAsKpi();
+        filter()
+	    	.startingAt("2018-01-10").endingAt("2018-01-20")
+	    	.todayIs("2018-02-25")
+	    	.issueShouldNotBeAccepted(kpi);
         
-        assertFalse(subject.test(issueKpi));
     }
     
     @Test
     public void issueRangeEndingAtStartOfTimelineRange() {
-        KPIEnvironmentBuilder builder = getSimpleEnvironment();
-        final String today = "2018-02-25";
-        builder.setNow(today);
-        builder.mockingSubtask("I-1", "Development")
-                .addTransition("To Do","2018-01-02")
-                .addTransition("Doing","2018-01-03")
-                .addTransition("To Review","2018-01-05")
-                .addTransition("Reviewing","2018-01-07")
-                .addTransition("Done","2018-01-10");
+        IssueKpi kpi = 
+        		environment()
+		        	.givenIssue("I-1")
+		        		.type("Development")
+		        		.isSubtask()
+		        		.withTransitions()
+		        			.status("To Do").date("2018-01-02")
+		        			.status("Doing").date("2018-01-03")
+		                    .status("To Review").date("2018-01-05")
+		                    .status("Reviewing").date("2018-01-07")
+		                    .status("Done").date("2018-01-10")
+		                    .eoT()
+		                .buildAsIssueKpi();
         
-        IssueKpi issueKpi = builder.buildCurrentIssueAsKpi();
-        
-        assertTrue(subject.test(issueKpi));
+        filter()
+	    	.startingAt("2018-01-10").endingAt("2018-01-20")
+	    	.todayIs("2018-02-25")
+	    	.issueShouldBeAccepted(kpi);
     }
     
     @Test
     public void issueStartingAtEndOfRange() {
-        KPIEnvironmentBuilder builder = getSimpleEnvironment();
-        final String today = "2018-02-25";
-        builder.setNow(today);
-        builder.mockingSubtask("I-1", "Development")
-                .addTransition("To Do","2018-01-19")
-                .addTransition("Doing","2018-01-20")
-                .addTransition("To Review","2018-01-25")
-                .addTransition("Reviewing","2018-01-27")
-                .addTransition("Done","2018-01-31");
+        IssueKpi kpi = 
+        		environment()
+		        	.givenIssue("I-1")
+		        		.type("Development")
+		        		.isSubtask()
+		        		.withTransitions()
+		        			.status("To Do").date("2018-01-19")
+		        			.status("Doing").date("2018-01-20")
+		                    .status("To Review").date("2018-01-25")
+		                    .status("Reviewing").date("2018-01-27")
+		                    .status("Done").date("2018-01-31")
+		                    .eoT()
+		                .buildAsIssueKpi();
         
-        IssueKpi issueKpi = builder.buildCurrentIssueAsKpi();
-        
-        assertTrue(subject.test(issueKpi));
+        filter()
+	    	.startingAt("2018-01-10").endingAt("2018-01-20")
+	    	.todayIs("2018-02-25")
+	    	.issueShouldBeAccepted(kpi);
     }
     
     @Test
     public void issueAfterRange() {
-        KPIEnvironmentBuilder builder = getSimpleEnvironment();
-        final String today = "2018-02-25";
-        builder.setNow(today);
-        builder.mockingSubtask("I-1", "Development")
-                .addTransition("To Do","2018-01-20")
-                .addTransition("Doing","2018-01-23")
-                .addTransition("To Review","2018-01-25")
-                .addTransition("Reviewing","2018-01-27")
-                .addTransition("Done","2018-01-31");
+        IssueKpi kpi = 
+        		environment()
+		        	.givenIssue("I-1")
+		        		.type("Development")
+		        		.isSubtask()
+		        		.withTransitions()
+		        			.status("To Do").date("2018-01-20")
+		        			.status("Doing").date("2018-01-23")
+		                    .status("To Review").date("2018-01-25")
+		                    .status("Reviewing").date("2018-01-27")
+		                    .status("Done").date("2018-01-31")
+		                    .eoT()
+		                .buildAsIssueKpi();
         
-        IssueKpi issueKpi = builder.buildCurrentIssueAsKpi();
-        
-        assertFalse(subject.test(issueKpi));
+        filter()
+	    	.startingAt("2018-01-10").endingAt("2018-01-20")
+	    	.todayIs("2018-02-25")
+	    	.issueShouldNotBeAccepted(kpi);
     }
     
     @Test
     public void issueWithSameRange() {
-        KPIEnvironmentBuilder builder = getSimpleEnvironment();
-        final String today = "2018-02-25";
-        builder.setNow(today);
-        builder.mockingSubtask("I-1", "Development")
-                .addTransition("To Do","2018-01-09")
-                .addTransition("Doing","2018-01-10")
-                .addTransition("To Review","2018-01-11")
-                .addTransition("Reviewing","2018-01-13")
-                .addTransition("Done","2018-01-20");
+    	IssueKpi kpi = 
+        		environment()
+		        	.givenIssue("I-1")
+		        		.type("Development")
+		        		.isSubtask()
+		        		.withTransitions()
+		        			.status("To Do").date("2018-01-09")
+		        			.status("Doing").date("2018-01-10")
+		                    .status("To Review").date("2018-01-11")
+		                    .status("Reviewing").date("2018-01-13")
+		                    .status("Done").date("2018-01-20")
+		                    .eoT()
+		                .buildAsIssueKpi();
         
-        IssueKpi issueKpi = builder.buildCurrentIssueAsKpi();
-        
-        assertTrue(subject.test(issueKpi));
+        filter()
+	    	.startingAt("2018-01-10").endingAt("2018-01-20")
+	    	.todayIs("2018-02-25")
+	    	.issueShouldBeAccepted(kpi);
     }
     
     @Test
     public void openIssue() {
-        KPIEnvironmentBuilder builder = getSimpleEnvironment();
-        final String today = "2018-02-25";
-        builder.setNow(today);
-        builder.mockingSubtask("I-1", "Development")
-                .addTransition("To Do","2018-01-15")
-                .addTransition("Doing")
-                .addTransition("To Review")
-                .addTransition("Reviewing")
-                .addTransition("Done");
+    	IssueKpi kpi = 
+        		environment()
+		        	.givenIssue("I-1")
+		        		.type("Development")
+		        		.isSubtask()
+		        		.withTransitions()
+		        			.status("To Do").date("2018-01-15")
+		        			.status("Doing").noDate()
+		                    .status("To Review").noDate()
+		                    .status("Reviewing").noDate()
+		                    .status("Done").noDate()
+		                    .eoT()
+		                .buildAsIssueKpi();
         
-        IssueKpi issueKpi = builder.buildCurrentIssueAsKpi();
-        
-        assertFalse(subject.test(issueKpi));
+        filter()
+	    	.startingAt("2018-01-10").endingAt("2018-01-20")
+	    	.todayIs("2018-02-25")
+	    	.issueShouldNotBeAccepted(kpi);
     }
     
     @Test
     public void workingIssue_startingAfterInsideRange() {
-        KPIEnvironmentBuilder builder = getSimpleEnvironment();
-        final String today = "2018-02-25";
-        builder.setNow(today);
-        builder.mockingSubtask("I-1", "Development")
-                .addTransition("To Do","2018-01-10")
-                .addTransition("Doing","2018-01-15")
-                .addTransition("To Review")
-                .addTransition("Reviewing")
-                .addTransition("Done");
+        IssueKpi kpi = 
+        		environment()
+		        	.givenIssue("I-1")
+		        		.type("Development")
+		        		.isSubtask()
+		        		.withTransitions()
+		        			.status("To Do").date("2018-01-10")
+		        			.status("Doing").date("2018-01-15")
+		                    .status("To Review").noDate()
+		                    .status("Reviewing").noDate()
+		                    .status("Done").noDate()
+		                    .eoT()
+		                .buildAsIssueKpi();
         
-        IssueKpi issueKpi = builder.buildCurrentIssueAsKpi();
-        
-        assertTrue(subject.test(issueKpi));
+        filter()
+	    	.startingAt("2018-01-10").endingAt("2018-01-20")
+	    	.todayIs("2018-02-25")
+	    	.issueShouldBeAccepted(kpi);
     }
     
     @Test
     public void workingIssue_startingBeforeRange() {
-        KPIEnvironmentBuilder builder = getSimpleEnvironment();
-        final String today = "2018-02-25";
-        builder.setNow(today);
-        builder.mockingSubtask("I-1", "Development")
-                .addTransition("To Do","2018-01-08")
-                .addTransition("Doing","2018-01-09")
-                .addTransition("To Review")
-                .addTransition("Reviewing")
-                .addTransition("Done");
+        IssueKpi kpi = 
+        		environment()
+        		    .todayIs("2018-02-25")
+		        	.givenIssue("I-1")
+		        		.type("Development")
+		        		.isSubtask()
+		        		.withTransitions()
+		        			.status("To Do").date("2018-01-08")
+		        			.status("Doing").date("2018-01-09")
+		                    .status("To Review").noDate()
+		                    .status("Reviewing").noDate()
+		                    .status("Done").noDate()
+		                    .eoT()
+		                .buildAsIssueKpi();
         
-        IssueKpi issueKpi = builder.buildCurrentIssueAsKpi();
-        
-        assertTrue(subject.test(issueKpi));
+        filter()
+	    	.startingAt("2018-01-10").endingAt("2018-01-20")
+	    	.issueShouldBeAccepted(kpi);
     }
     
-    private KPIEnvironmentBuilder getSimpleEnvironment() {
-        KPIEnvironmentBuilder builder = new KPIEnvironmentBuilder();
-        builder.addSubtaskType(1l, "Development")
-                .addSubtaskType(2l, "Alpha Test")
-                .addFeatureType(3l, "Feature");
-        
-        builder.addStatus(1l, "To Do", false)
-                .addStatus(2l, "Doing", true)
-                .addStatus(3l, "To Review", false)
-                .addStatus(4l, "Reviewing", true)
-                .addStatus(5l,"Done",false);
-        
-        return builder;
+    private TouchTimeFilterAsserter filter() {
+    	return new TouchTimeFilterAsserter();
+    }
+    
+    private KpiEnvironment environment() {
+    	KpiEnvironment environment = new KpiEnvironment();
+    	environment
+    		.withSubtaskType("Development")
+    		.withSubtaskType("Alpha Test")
+    		.withFeatureType("Feature")
+    		.withStatus("To Do").isNotProgressing()
+    		.withStatus("Doing").isProgressing()
+    		.withStatus("To Review").isNotProgressing()
+    		.withStatus("Reviewing").isProgressing()
+    		.withStatus("Done").isNotProgressing();
+    	return environment;
+    }
+
+    private class TouchTimeFilterAsserter {
+
+		private String projectStartDate;
+		private String projectEndDate;
+		private FixedClock clock = new FixedClock();
+
+		public TouchTimeFilterAsserter startingAt(String projectStartDate) {
+			this.projectStartDate = projectStartDate;
+			return this;
+		}
+
+		public void issueShouldNotBeAccepted(IssueKpi kpi) {
+	        TouchTimeFilter filter = getFilter();
+	        Assert.assertFalse(filter.test(kpi));
+		}
+
+		public void issueShouldBeAccepted(IssueKpi kpi) {
+	        TouchTimeFilter filter = getFilter();
+	        Assert.assertTrue(filter.test(kpi));
+			
+		}
+
+		public TouchTimeFilterAsserter todayIs(String today) {
+			clock.setNow(DateTimeUtils.parseDateTime(today).toInstant());
+			return this;
+		}
+
+		public TouchTimeFilterAsserter endingAt(String projectEndDate) {
+			this.projectEndDate = projectEndDate;
+			return this;
+		}
+		
+	    private ProjectFilterConfiguration configureProject() {
+	        ProjectFilterConfiguration project = Mockito.mock(ProjectFilterConfiguration.class);
+	        LocalDate startDate = LocalDate.parse(projectStartDate);
+	        LocalDate endDate = LocalDate.parse(projectEndDate);
+	        when(project.getStartDate()).thenReturn(Optional.of(startDate));
+	        when(project.getDeliveryDate()).thenReturn(Optional.of(endDate));
+	        return project;
+	    }
+	    
+		private TouchTimeFilter getFilter() {
+			ProjectFilterConfiguration project = configureProject();
+	        
+	        ProjectRangeByConfiguration defaultRange = new ProjectRangeByConfiguration(project);
+	        TouchTimeFilter filter = new TouchTimeFilter(timezone,defaultRange);
+			return filter;
+		}
+    	
     }
 
 }

@@ -28,14 +28,14 @@ public class ChildrenWorklogDistributor {
         childrenStatuses.stream()
             .map( s -> kpi.getWorklogFromChildrenStatus(s))
             .flatMap(List::stream)
-            .forEach(w -> status.addWorklog(w));
+            .forEach(w -> status.putWorklog(w));
     }
 
     private void setupWorklog(IssueKpi kpi, StatusTransition status, List<Long> subtasks) {
         subtasks.stream()
             .map( typeId -> kpi.getWorklogFromChildren(typeId))
             .flatMap(List::stream)
-            .forEach(w -> status.addWorklog(w));        
+            .forEach(w -> status.putWorklog(w));        
     }
     
 }

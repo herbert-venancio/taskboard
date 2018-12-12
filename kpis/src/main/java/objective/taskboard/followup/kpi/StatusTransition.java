@@ -43,7 +43,7 @@ public class StatusTransition {
         return next.map(n -> n.findWithTransition(status)).orElse(Optional.empty());
     }
     
-    void addWorklog(Worklog worklog) { 
+    public void putWorklog(Worklog worklog) { 
         this.worklogs.add(worklog);
     }
     
