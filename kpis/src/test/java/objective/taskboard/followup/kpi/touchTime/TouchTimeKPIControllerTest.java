@@ -58,7 +58,7 @@ public class TouchTimeKPIControllerTest {
             .withOperationPermission()
             .withSubtaskDataSet(new TouchTimeChartDataSet(issuesList));
 
-        AssertResponse.of(subject.getData("byissues",projectKey, zoneId, level))
+        AssertResponse.of(subject.getData("byIssues",projectKey, zoneId, level))
             .httpStatus(HttpStatus.OK)
             .bodyClass(TouchTimeChartDataSet.class)
             .bodyAsJson(

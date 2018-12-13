@@ -36,7 +36,7 @@ class ChartUtils {
                 text: undefined
             },
             tooltip: {
-                footerFormat: '<span style="font-style: italic; font-weight: bold; font-size: 1.1em;">Total: {point.total:.2f}</span>',
+                footerFormat: '<span class="highcharts-tooltip-footer">Total: {point.total:.2f}</span>',
                 shared: true,
                 reversed: true
             },
@@ -236,12 +236,20 @@ class ChartBuilderBase {
 class WeeklyChartBuilder extends ChartBuilderBase {
     constructor (divID) {
         super(divID);
-        this.options.xAxis.labels = {
-            formatter: function () {
-                return Highcharts.dateFormat('%e %b %y', this.value);
+        Highcharts.merge(true, this.options, {
+            tooltip: {
+                xDateFormat: 'Week from %A, %b %e, %Y'
             }
-        };
-        this.options.tooltip.xDateFormat = 'Week from %A, %b %e, %Y';
+        });
+        Highcharts.merge(true, this.options, {
+            xAxis: {
+                labels: {
+                    formatter: function () {
+                        return Highcharts.dateFormat('%e %b %y', this.value);
+                    }
+                }
+            }
+        });
     }
 }
 
@@ -370,7 +378,7 @@ class TouchTimeChartBuilder extends ChartBuilderBase {
     get _tooltipOptions () {
         return {
             tooltip: {
-                footerFormat: '<span style="font-style: italic; font-weight: bold; font-size: 1.1em;">Total: {point.total:.2f} (h)</span>',
+                footerFormat: '<span class="highcharts-tooltip-footer">Total: {point.total:.2f} (h)</span>',
                 valueSuffix: ' (h)'
             }
         };
@@ -406,6 +414,25 @@ class TouchTimeChartBuilder extends ChartBuilderBase {
             throw new Error('FilterCallback must be defined');
         }
         return new HighchartChartWrapper(highchartChart, this._filterCallback);
+    }
+}
+
+class TouchTimeChartByWeekBuilder extends WeeklyChartBuilder {
+    constructor (divID) {
+        super(divID);
+        Highcharts.merge(true, this.options, {
+            tooltip: {
+                footerFormat: '<span class="highcharts-tooltip-footer">Total: {point.total:.2f} (s)</span>',
+                valueSuffix: ' (s)'
+            }
+        });
+        Highcharts.merge(true, this.options, {
+            yAxis: {
+                title: {
+                    text: 'Effort (s)'
+                }
+            }
+        });
     }
 }
 
