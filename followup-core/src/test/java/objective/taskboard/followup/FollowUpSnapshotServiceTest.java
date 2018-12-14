@@ -33,6 +33,7 @@ public class FollowUpSnapshotServiceTest {
     private FollowupClusterProvider clusterProvider = mock(FollowupClusterProvider.class);
     private ReleaseHistoryProvider releaseHistoryProvider = mock(ReleaseHistoryProvider.class);
     private ApplicationEventPublisher eventPublisher = mock(ApplicationEventPublisher.class);
+    private SynthesisSynchronizer synthesisSyncronizer = new SynthesisSynchronizerImpl(projectService, dailySynthesisRepository);
     
     private ZoneId timezone = ZoneId.of("UTC");
     private ProjectFilterConfiguration project1 = mock(ProjectFilterConfiguration.class);
@@ -46,7 +47,8 @@ public class FollowUpSnapshotServiceTest {
             dataGenerator, 
             clusterProvider, 
             releaseHistoryProvider,
-            eventPublisher);
+            eventPublisher,
+            synthesisSyncronizer);
 
     @Before
     public void setup() {
