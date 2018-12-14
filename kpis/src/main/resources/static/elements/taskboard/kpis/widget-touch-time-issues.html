@@ -1,0 +1,276 @@
+<dom-module id="widget-touch-time-issues">
+
+    <template>
+
+        <style>
+            #touchTimeIssues {
+                display: flex;
+                height: 100%;
+                width: 100%;
+            }
+        </style>
+
+        <widget-wrap title="Touch Time by Issues" is-ready="{{isReady}}" tags="{{tags}}" 
+                options="{{options}}" highcharts-chart="{{chartWrapper.highchartChart}}" 
+                error-message="{{errorMessage}}">
+            <div id="touchTimeIssues" class="tb-chart"></div>
+        </widget-wrap>
+
+        <modal-wrap class="filters-modal" title="Filters">
+            <modal-wrap-content>
+                <h3 class="tb-label">Issue Types</h3>
+                <div id="issueTypes" class="config-slot-0 dc-chart--no-float"></div>
+            </modal-wrap-content>
+            <modal-wrap-footer>
+                <tb-button button=[[_btFilterClose]]></tb-button>
+            </modal-wrap-footer>
+        </modal-wrap>
+
+        <modal-wrap class="settings-modal" title="Settings">
+            <modal-wrap-content>
+                <h3 class="tb-label">Level</h3>
+                <div>
+                    <label id="labelLevel"></label>
+                    <paper-radio-group class="radio-group" selected="{{settingIssueLevel}}" aria-labelledby="labelLevel">
+                        <paper-radio-button name="Demand">Demand</paper-radio-button>
+                        <paper-radio-button name="Features">Feature</paper-radio-button>
+                        <paper-radio-button name="Subtasks">Subtask</paper-radio-button>
+                    </paper-radio-group>
+                </div>
+            </modal-wrap-content>
+            <modal-wrap-footer>
+                <tb-button button="[[_btLevelSave]]"></tb-button>
+            </modal-wrap-footer>
+        </modal-wrap>
+
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'widget-touch-time-issues',
+
+                properties: {
+                    selectedProjectKey: {
+                        type: String,
+                        notify: true
+                    },
+                    selectedDate: {
+                        type: String,
+                        notify: true,
+                        value: ''
+                    },
+                    isReady: {
+                        type: Boolean,
+                        notify: true,
+                        value: false
+                    },
+                    errorMessage: {
+                        type: String,
+                        notify: true,
+                        value: ''
+                    },
+                    chartWrapper: {
+                        type: Object,
+                        notify: true,
+                        value: null
+                    },
+                    tags: {
+                        type: Array
+                    },
+                    options: {
+                        type: Array,
+                        value: null
+                    },
+                    settingIssueLevel: {
+                        type: String,
+                        notify: true,
+                        value: 'Subtasks'
+                    },
+                    localStorageLevelItemName: {
+                        type: String,
+                        computed: '_computeLocalStorageLevelItemName(selectedProjectKey)'
+                    },
+                    _btFilterClose: {
+                        type: Object,
+                        value: null
+                    },
+                    _btLevelSave: {
+                        type: Object,
+                        value: null
+                    },
+                    _plotData: {
+                        type: Object,
+                        value: null
+                    }
+                },
+
+                observers: [
+                    '_onProjectSelected(selectedProjectKey, selectedDate)'
+                ],
+
+                _onProjectSelected: function (newSelectedProjectKey, previousSelectedProjectKey) {
+                    if (newSelectedProjectKey === previousSelectedProjectKey) {
+                        return;
+                    }
+                    this._reloadChart();
+                },
+
+                _getSavedLevel: function () {
+                    return localStorage.getItem(this.localStorageLevelItemName) || 'Subtasks';
+                },
+
+                _computeLocalStorageLevelItemName: function (selectedProjectKey) {
+                    return `dashboard.touchTimeIssues-chart.${selectedProjectKey}.level`;
+                },
+
+                ready: function () {
+                    ChartUtils.registerOptions(this);
+                    this._btFilterClose = ButtonBuilder('Ok').onClick(() => this.$$('.filters-modal').close()).build();
+                    this._btLevelSave = ButtonBuilder('Save').onClick(() => {
+                        let savedLevel = this._getSavedLevel();
+                        if (savedLevel === this.settingIssueLevel) {
+                            this.$$('.settings-modal').close();
+                            return;
+                        }
+                        localStorage.setItem(this.localStorageLevelItemName, this.settingIssueLevel);
+                        this.$$('.settings-modal').close();
+                        this._reloadChart();
+                    }).build();
+                },
+
+                reset: function () {
+                    this.isReady = false;
+                    this.errorMessage = '';
+                    this.set('options.0.cssClasses', '');
+                    this.set('options.0.hidden', true);
+
+                    if (this.xhr) {
+                        this.xhr.abort();
+                        this.xhr = null;
+                    }
+                    if (this.chartWrapper) {
+                        this.chartWrapper.destroy();
+                        this.chartWrapper = null;
+                    }
+                },
+
+                _createIssueListFilter: function () {
+                    this.set('options.0.hidden', false);
+                    new IssueTypeFilter(this._plotData.issueTypes, this.$.issueTypes, (selectedTypes, isToggledAll) => {
+                        this._plotData.typeDimension.filterFunction((issueType) => selectedTypes.includes(issueType));
+                        this.set('options.0.cssClasses', isToggledAll ? '' : 'widget__button_highlighted');
+                        this.recreateChart();
+                    });
+                },
+
+                _reloadChart: function() {
+                    this.reset();
+                    const savedLevel = this._getSavedLevel();
+                    const timezone = taskboard.getTimeZoneIdFromBrowser();
+                    this.tags = [savedLevel];
+                    const url = `/api/projects/${this.selectedProjectKey}/followup/touchtime/byIssues?level=${savedLevel}&timezone=${timezone}`;
+                    this.xhr = $.getJSON(url);
+                    this.xhr.done((data) => {
+                        data = data.points;
+                        if (data.length === 0) {
+                            this.errorMessage = 'Touch Time chart has no data';
+                            return;
+                        }
+
+                        this._prepareData(data);
+                        this._createIssueListFilter();
+                        this._createChart();
+                        this.isReady = true;
+                    });
+                    this.xhr.fail((error) => {
+                        this.errorMessage = error.responseText;
+                    });
+                },
+
+                _prepareData: function (data) {
+                    const issueTypes = ChartUtils.extractUniqueValuesOfPropertyFromArray(data, 'issueType'); 
+                    const issueKeys = ChartUtils.extractUniqueValuesOfPropertyFromArray(data, 'issueKey');
+
+                    const ndx = crossfilter(data);
+                    const statusesDimension = ndx.dimension('issueStatus');
+                    const typeDimension = ndx.dimension('issueType');
+                    const startProgressingDateDimension = ndx.dimension('startProgressingDate');
+                    const endProgressingDateDimension = ndx.dimension('endProgressingDate');
+                    const statusesGroup = statusesDimension.group();
+                    ChartUtils.groupChartDataByGroupKey(statusesGroup, 'issueKey', 'effortInHours');
+
+                    this._plotData = Object.freeze({
+                        issueTypes: issueTypes,
+                        issueKeys: issueKeys,
+                        statusesGroup: statusesGroup,
+                        typeDimension: typeDimension,
+                        startProgressingDateDimension: startProgressingDateDimension,
+                        endProgressingDateDimension: endProgressingDateDimension
+                    });
+                },
+
+                _createChart: function () {
+                    const filterByTimeline = (timelineRange) => {
+                        timelineRange = [timelineRange[0], addDaysToDate(timelineRange[1], 1).getTime()];
+                        this._plotData.startProgressingDateDimension.filterRange(timelineRange);
+                        this._plotData.endProgressingDateDimension.filterRange(timelineRange);
+                        const selectedIssueKeys = new Set(this._plotData.endProgressingDateDimension.top(Infinity).map(i => i.issueKey));
+                        return selectedIssueKeys;
+                    };
+                    const selectedIssueKeys = filterByTimeline(dcDateRangeChartsService.getTimelineRange());
+                    const effortByStatusByIssueKey = [...this._plotData.statusesGroup.all()];
+                    const selectedIssueKeysOrdered = this._orderIssueKeysByTotalEffort(selectedIssueKeys, effortByStatusByIssueKey);
+                    const series = this._transformToHighchartsSeries(effortByStatusByIssueKey, selectedIssueKeysOrdered);
+
+                    this.chartWrapper = new TouchTimeChartBuilder('touchTimeIssues')
+                        .withChartType('bar')
+                        .withTooltipNumberOfDecimals(2)
+                        .withCategories(selectedIssueKeysOrdered)
+                        .withSeriesData(series)
+                        .withTimelineFilterCallback(this.recreateChart.bind(this))
+                        .build();
+                    dcDateRangeChartsService.registerHighchartsNotifyOnlyChart(this.chartWrapper);
+                },
+
+                _orderIssueKeysByTotalEffort: function (selectedIssueKeys, effortByStatusByIssueKey) {
+                    const totalEffortByIssueKey = effortByStatusByIssueKey
+                        .map(( { value: effortByIssueKey } ) => effortByIssueKey)
+                        .reduce((previous, current) => {
+                            Object.keys(current).forEach(issueKey => previous[issueKey] = (previous[issueKey] || 0) + current[issueKey]);
+                            return previous;
+                        }, {});
+
+                    return Object.entries(totalEffortByIssueKey)
+                        .sort((entry1, entry2) => this._sortTotalEffort(entry1[1], entry2[1], { ascending: false }))
+                        .map(entry => entry[0])
+                        .filter(issueKey => selectedIssueKeys.has(issueKey));
+                },
+
+                _sortTotalEffort: function (totalEffort1, totalEffort2, {ascending = true} = {}) {
+                    if (ascending) {
+                        return totalEffort1 - totalEffort2;
+                    }
+                    return totalEffort2 - totalEffort1;
+                },
+
+                _transformToHighchartsSeries: function (effortByStatusByIssueKey, issueKeysOrderLUT) {
+                    return effortByStatusByIssueKey.map(
+                        ({key: status, value: effortByIssueKey}) => {
+                            return {
+                                name: status, 
+                                data: issueKeysOrderLUT.map((issueKey) => effortByIssueKey[issueKey])
+                            };
+                        }
+                    );
+                },
+
+                recreateChart: function () {
+                    this.chartWrapper.destroy();
+                    this._createChart();
+                }
+
+            });
+        })();
+    </script>
+</dom-module>

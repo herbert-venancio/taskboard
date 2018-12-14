@@ -31,7 +31,7 @@ class TouchTimeKPIController {
     private Map<String,TouchTimeProvider<?>> providerMap;
     
 
-    @Autowired    
+    @Autowired
     public TouchTimeKPIController(ProjectDashboardOperationalPermission projectDashboardOperationalPermission,
 			ProjectService projectService, TouchTimeByWeekDataProvider touchTimeByWeekDataProvider,
 			TouchTimeKPIDataProvider touchTimeKpiDataProvider) {
@@ -40,7 +40,7 @@ class TouchTimeKPIController {
 		this.projectService = projectService;
 
     	this.providerMap = new LinkedHashMap<>();
-    	this.providerMap.put("byissues", touchTimeKpiDataProvider);
+    	this.providerMap.put("byIssues", touchTimeKpiDataProvider);
     	this.providerMap.put("byWeek", touchTimeByWeekDataProvider);
 	}
 
