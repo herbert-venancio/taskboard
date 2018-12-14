@@ -51,6 +51,9 @@ class IssueSelectorService {
     }
 
     unselectAllIssues() {
+        if (!this.hasAnyIssueSelected())
+            return;
+
         this._internalUnselectAllIssues();
         taskboard.makeAllStepsSortable();
     }
