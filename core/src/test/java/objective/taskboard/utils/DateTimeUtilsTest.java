@@ -188,4 +188,28 @@ public class DateTimeUtilsTest {
                 , ZonedDateTime.of(2020, 1, 3, 0, 0, 0, 0, ZoneId.systemDefault())
         );
     }
+
+    @Test
+    public void secondsToHours_happyPath() {
+        final double hours = DateTimeUtils.secondsToHours(3600);
+        assertThat(hours).isEqualTo(1.0);
+    }
+
+    @Test
+    public void secondsToHours_whenSecondsIsNotFullHour_thenShouldConvertItRight() {
+        final double hours = DateTimeUtils.secondsToHours(600);
+        assertThat(hours, is(closeTo(0.166, 0.001)));
+    }
+
+    @Test
+    public void hoursToSeconds_happyPath() {
+        final long seconds = DateTimeUtils.hoursToSeconds(1.0);
+        assertThat(seconds).isEqualTo(3600L);
+    }
+
+    @Test
+    public void hoursToSeconds_whenHourFractionDoesNotCompleteFullSecond_thenShouldTruncateSeconds() {
+        final long seconds = DateTimeUtils.hoursToSeconds(0.166);
+        assertThat(seconds).isEqualTo(597L);
+    }
 }

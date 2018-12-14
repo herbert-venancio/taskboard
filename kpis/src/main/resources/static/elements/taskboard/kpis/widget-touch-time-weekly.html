@@ -176,7 +176,7 @@
                     const ndx = crossfilter(data);
                     const statusesDimension = ndx.dimension('status');
                     const statusesGroup = statusesDimension.group();
-                    ChartUtils.groupChartDataByGroupKey(statusesGroup, 'date', 'effort');
+                    ChartUtils.groupChartDataByGroupKey(statusesGroup, 'date', 'effortInHours');
 
                     this._plotData = Object.freeze({
                         statusesGroup: statusesGroup,

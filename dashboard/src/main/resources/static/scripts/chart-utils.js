@@ -422,14 +422,14 @@ class TouchTimeChartByWeekBuilder extends WeeklyChartBuilder {
         super(divID);
         Highcharts.merge(true, this.options, {
             tooltip: {
-                footerFormat: '<span class="highcharts-tooltip-footer">Total: {point.total:.2f} (s)</span>',
-                valueSuffix: ' (s)'
+                footerFormat: '<span class="highcharts-tooltip-footer">Total: {point.total:.2f} (h)</span>',
+                valueSuffix: ' (h)'
             }
         });
         Highcharts.merge(true, this.options, {
             yAxis: {
                 title: {
-                    text: 'Effort (s)'
+                    text: 'Effort (h)'
                 }
             }
         });
