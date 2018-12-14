@@ -50,8 +50,9 @@ node("single-executor") {
 
             stage('Sonar') {
                 def SONAR_URL = env.SONARQUBE_URL
+                sh "${mvnHome}/bin/mvn --batch-mode jacoco:merge -DmultimoduleRootDirectory=\$(pwd)"
                 if (isMasterBranch()) {
-                    sh "${mvnHome}/bin/mvn --batch-mode -V sonar:sonar -Dsonar.host.url=${SONAR_URL} -Dsonar.buildbreaker.skip=true"
+                    sh "${mvnHome}/bin/mvn --batch-mode -V sonar:sonar -Dsonar.host.url=${SONAR_URL} -DmultimoduleRootDirectory=\$(pwd) -Dsonar.buildbreaker.skip=true"
                 } else if (isPullRequest()) {
                     withCredentials([string(credentialsId: 'TASKBOARD_SDLC_SONAR', variable: 'GITHUB_OAUTH')]) {
                         def PR_ID = env.CHANGE_ID
@@ -60,7 +61,8 @@ node("single-executor") {
                         -Dsonar.analysis.mode=preview \
                         -Dsonar.github.pullRequest=${PR_ID} \
                         -Dsonar.github.oauth=${GITHUB_OAUTH} \
-                        -Dsonar.github.repository=${GIT_REPO}"
+                        -Dsonar.github.repository=${GIT_REPO} \
+                        -DmultimoduleRootDirectory=\$(pwd)"
                     }
                 }
             }
