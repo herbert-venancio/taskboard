@@ -1,4 +1,5 @@
 import {Component, OnInit} from '@angular/core';
+import {LegacyAppRouter} from '../../core/legacy-app-router';
 import {AuthService} from 'app/auth/auth.service';
 import {LoggedInUser} from '../../auth/logged-in-user';
 
@@ -11,7 +12,10 @@ export class NavComponent implements OnInit {
     title: String = 'Taskboard';
     loggedInUser: LoggedInUser;
 
-    constructor(private authService: AuthService) {}
+    constructor(
+        private legacyAppRouter: LegacyAppRouter,
+        private authService: AuthService
+    ) {}
 
     ngOnInit() {
         this.authService.getLoggedInUser().subscribe(user => this.loggedInUser = user);
@@ -19,5 +23,9 @@ export class NavComponent implements OnInit {
 
     logout() {
         this.authService.logout();
+    }
+
+    backToHome() {
+        this.legacyAppRouter.goToHome();
     }
 }
