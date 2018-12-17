@@ -81,6 +81,10 @@ public class KpiPropertiesMocker {
         public KpiPropertiesMocker and() {
             return KpiPropertiesMocker.this;
         }
+
+        public KpiEnvironment eoKp() {
+            return fatherEnvironment;
+        }
         
     }
 

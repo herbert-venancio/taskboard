@@ -39,7 +39,7 @@ public class IssueTypeChildrenStatusHierarchy {
             this.fatherStatus = featureStatus;
         }
         
-        public List<Long> getChildrenTypeId() {
+        public List<Long> getChildrenTypeIds() {
             return childrenTypeId;
         }
         
@@ -47,7 +47,7 @@ public class IssueTypeChildrenStatusHierarchy {
             this.childrenTypeId = childrenTypeId;
         }
 
-        public List<String> getChildrenStatus() {
+        public List<String> getChildrenStatuses() {
             return childrenStatus;
         }
 

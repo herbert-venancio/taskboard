@@ -43,7 +43,7 @@ public class StatusTransition {
         return next.map(n -> n.findWithTransition(status)).orElse(Optional.empty());
     }
     
-    public void putWorklog(Worklog worklog) { 
+    public void putWorklog(Worklog worklog) {
         this.worklogs.add(worklog);
     }
     
@@ -58,7 +58,7 @@ public class StatusTransition {
         Optional<DatedStatusTransition> nextWithDate = next.flatMap(n -> n.withDate());
         
         boolean nextIsOnDate = nextWithDate.map(n -> n.isOnDate(worklog)).orElse(false);
-        boolean nextReceiveWorklog = nextWithDate.map(n -> n.isProgressingStatus || n.hasNextOnDateThatCouldReceiveWorklog(worklog, true)).orElse(false); 
+        boolean nextReceiveWorklog = nextWithDate.map(n -> n.isProgressingStatus || n.hasNextOnDateThatCouldReceiveWorklog(worklog, true)).orElse(false);
         
         return nextIsOnDate && nextReceiveWorklog;
     }
@@ -75,26 +75,26 @@ public class StatusTransition {
         return !nextIsProgressing && nextHasNextProgressing && worklogIsAfterNext;
     }
 
-    boolean hasFutureProgressingStatusBeforeNonProgressingReceiver(Worklog worklog) { 
-        Optional<StatusTransition> nextProgressing = next.flatMap(n-> n.whichIsProgressing());  
-        return nextProgressing.map(n -> n.hasNextOnDateThatCouldReceiveWorklog(worklog, false)).orElse(false);  
+    boolean hasFutureProgressingStatusBeforeNonProgressingReceiver(Worklog worklog) {
+        Optional<StatusTransition> nextProgressing = next.flatMap(n-> n.whichIsProgressing());
+        return nextProgressing.map(n -> n.hasNextOnDateThatCouldReceiveWorklog(worklog, false)).orElse(false);
     }
 
-    public Long getEffort() { 
-        return worklogs.stream().mapToLong(w -> Long.valueOf(w.timeSpentSeconds)).reduce(Long::sum).orElse(0); 
-    } 
+    public Long getEffort() {
+        return worklogs.stream().mapToLong(w -> Long.valueOf(w.timeSpentSeconds)).reduce(Long::sum).orElse(0);
+    }
     
     public Long getEffortUntilDate(ZonedDateTime dateLimit) {
         ZoneId zone = dateLimit.getZone();
         LocalDate localDateLimit = dateLimit.toLocalDate();
         return worklogs.stream()
                 .filter(w -> !DateTimeUtils.toLocalDate(w.started, zone).isAfter(localDateLimit))
-                .mapToLong(w -> Long.valueOf(w.timeSpentSeconds)).reduce(Long::sum).orElse(0); 
-    } 
+                .mapToLong(w -> Long.valueOf(w.timeSpentSeconds)).reduce(Long::sum).orElse(0);
+    }
     
-    public Optional<DatedStatusTransition> withDate() { 
-        return next.flatMap(n -> n.withDate()); 
-    } 
+    public Optional<DatedStatusTransition> withDate() {
+        return next.flatMap(n -> n.withDate());
+    }
 
     protected Optional<ZonedDateTime> minimumDateFromWorklog(ZoneId timezone) {
         return this.worklogs.stream().map(w -> DateTimeUtils.get(w.started, timezone)).min(Comparators.naturalOrder());
@@ -104,21 +104,21 @@ public class StatusTransition {
         return isProgressingStatus && !this.worklogs.isEmpty();
     }
  
-    public Optional<StatusTransition> whichIsProgressing() { 
-        return this.isProgressingStatus() ? Optional.of(this) : flatNext(n -> n.whichIsProgressing()); 
-    } 
+    public Optional<StatusTransition> whichIsProgressing() {
+        return this.isProgressingStatus() ? Optional.of(this) : flatNext(n -> n.whichIsProgressing());
+    }
     
-    protected boolean hasNextOnDateThatCouldReceiveWorklog(Worklog worklog, boolean couldReceive) { 
-        Optional<DatedStatusTransition> nextWithDate = next.flatMap(n -> n.withDate()); 
-        return nextWithDate.map(n -> (n.isProgressingStatus == couldReceive) && n.isOnDate(worklog)).orElse(false); 
+    protected boolean hasNextOnDateThatCouldReceiveWorklog(Worklog worklog, boolean couldReceive) {
+        Optional<DatedStatusTransition> nextWithDate = next.flatMap(n -> n.withDate());
+        return nextWithDate.map(n -> (n.isProgressingStatus == couldReceive) && n.isOnDate(worklog)).orElse(false);
     }
 
     public Optional<StatusTransition> find(String status) {
         return this.status.equalsIgnoreCase(status)? Optional.of(this) : flatNext(n->n.find(status));
     }
 
-    Optional<StatusTransition> flatNext(Function<? super StatusTransition, Optional<StatusTransition>> mapper) { 
-        return next.flatMap(mapper); 
+    Optional<StatusTransition> flatNext(Function<? super StatusTransition, Optional<StatusTransition>> mapper) {
+        return next.flatMap(mapper);
     }
 
     public Long totalEffort() {
