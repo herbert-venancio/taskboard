@@ -1,5 +1,7 @@
 @import "../../../../../styles/obj-ds/utils/all";
 
+$tab-height: 40px;
+
 :host {
     display: flex;
     flex-direction: column;
@@ -19,7 +21,7 @@
     display: inline-flex;
     border-right: 1px solid $obj-color-dark-snow;
     max-width: 128px;
-    height: 40px;
+    height: $tab-height;
     padding: 0 16px;
     align-items: center;
     font-family: $obj-font-ptsans-caption;
@@ -41,6 +43,13 @@
             left: 0;
             position: absolute;
         }
+    }
+
+    .tab-name {
+       line-height: $tab-height;
+       white-space: nowrap;
+       overflow: hidden;
+       text-overflow: ellipsis;
     }
 }
 

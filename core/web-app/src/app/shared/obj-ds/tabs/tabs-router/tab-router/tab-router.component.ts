@@ -5,7 +5,7 @@ import {filter} from 'rxjs/operators';
 
 @Component({
     selector: TAB_ROUTER_SELECTOR,
-    template: `{{ name }}`
+    template: `<span class="tab-name" [title]="name">{{ name }}</span>`
 })
 export class TabRouterComponent implements OnInit {
 
