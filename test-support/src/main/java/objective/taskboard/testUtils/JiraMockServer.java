@@ -23,11 +23,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.StrSubstitutor;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -241,6 +243,9 @@ public class JiraMockServer {
                 switch(aKey) {
                     case "assignee":
                         setAssignee(fields, reqFields.getJSONObject(aKey));
+                        break;
+                    case "description":
+                        setDescription(fields, reqFields);
                         break;
                     case "customfield_11456"://co-assignee
                         setCoassignee(fields, aKey, reqFields.getJSONArray(aKey));
@@ -510,6 +515,10 @@ public class JiraMockServer {
         makeAssignee.put("name", each.get("name"));
         fields.put("assignee", makeAssignee);
         fields.put("updated", nowIso8601());
+    }
+
+    private static void setDescription(JSONObject fields, JSONObject reqFields) throws JSONException {
+        fields.put("description", reqFields.getString("description"));
     }
 
     private static String nowIso8601() {

@@ -315,9 +315,60 @@
                 width: 100%;
                 border: 1px solid #e5e5e5;
                 margin-top: 16px;
+                border-radius:4px;
+                position:relative;
             }
-            .description-row {
+
+            .description-box .wrapper-edit {
+                position:absolute;
+                right:0;
+                top:0;
+                width: 20px;
+                height: 100%;
+                border-top-right-radius: 4px;
+                border-bottom-right-radius: 4px;
+                background-color: #e8e8e8;
+                text-align:center;
+                display:none;
+            }
+            
+            .description-box:hover .wrapper-edit {
+                display:block;
+            }
+            
+            .description-box__field {
+                text-align:left;
+                resize:none;
+                border-top:0;
+                border-right:0;
+                padding:10px;
+                border-bottom:1px solid #E8E8E8;
+                border-left:0;
+                width:100%;
+                height:20vh;
+            }
+
+            .description-box__footer {
+                padding:16px 24px;
+                justify-content:flex-end;
+                display:flex;
+            }
+            
+            
+            .wrapper-edit iron-icon {
+                cursor:pointer;
+                color:#8e8e8e;
+                width:12px;
+                height:12px;
+            }
+                        
+            .description-box__footer paper-button.tb-button__default {
+                margin-right:15px;
+            }
+
+            .details-row.description-row {
                 width: 100%;
+                margin:0;
             }
             .description-row--collapsed {
                 overflow-y: hidden;
@@ -329,7 +380,7 @@
                 color: #8e8e8e !important;
             }
             .description-row marked-element {
-                padding: 8px;
+                padding:0 24px 0 8px;
                 width: 100%;
             }
 
@@ -754,13 +805,13 @@
                       on-iron-overlay-opened="_afterOpen"
                       data-status$="{{_modalStatus}}">
 
-                <div id="glasspane-updated" class$="glasspane {{issueChangeStateClass}}" on-tap="refreshIfUpdated">
-                    <span>This issue has been updated. <br>Click to refresh its contents.</span>
-                </div>
+            <div id="glasspane-updated" class$="glasspane {{issueChangeStateClass}}" on-tap="refreshIfUpdated">
+                <span>This issue has been updated. <br>Click to refresh its contents.</span>
+            </div>
 
-                <div id="glasspane-deleted" class$="glasspane {{issueDeleteStateClass}}" on-tap="close">
-                    <span>This issue has been deleted. <br>Click to close.</span>
-                </div>
+            <div id="glasspane-deleted" class$="glasspane {{issueDeleteStateClass}}" on-tap="close">
+                <span>This issue has been deleted. <br>Click to close.</span>
+            </div>
 
             <paper-card class="card-custom" on-tap="_cardTapped">
 
@@ -806,7 +857,7 @@
                                             {{transition.name}}
                                         </paper-button>
                                     </template>
-                                    <template is="dom-if" if="{{!transition.id}}">        
+                                    <template is="dom-if" if="{{!transition.id}}">
                                         <paper-button 
                                             class="transition-button current-status">
                                             {{transition.name}}
@@ -817,7 +868,6 @@
                         <template is="dom-if" if="{{!hasRecords(transitions)}}">
                             <paper-spinner active="true" alt="Loading..."></paper-spinner>
                         </template>
-                                                
                         <div class="block-button-container">Block</div>
                         <paper-toggle-button iron-label-target 
                             class="tb-toggle-button block-button" checked="{{blocked}}"
@@ -825,7 +875,7 @@
                             enabled="{{_canToggleBlockState()}}">
                         </paper-toggle-button>
                     </div>
-                    
+
                     <div class="panel-parent">
                         <div class="leftPanel">
                             <template is="dom-if" if="{{item.blocked}}">
@@ -882,15 +932,29 @@
                             <div class="subtitle">Description</div>
 
                             <div class="description-box">
-                                <div class$="details-row  description-row {{getDescriptionClass(item)}}">
-                                    <marked-element markdown="{{getDescription(item)}}"></marked-element>
-                                </div>
-                                <template is="dom-if" if="{{descriptionTooLong}}">
-                                <div class="descriptionShowMore" on-tap="_toggleShowMoreOrLess">
-                                    <iron-icon icon="taskboard-icons:showmore"></iron-icon>
-                                    [[showMoreOrLess]]
-                                </div>
+                               <template is="dom-if" if="{{!descriptionIsEditable}}">
+                                    <div class$="details-row  description-row {{getDescriptionClass(item)}}">
+                                        <marked-element markdown="{{getDescription(item)}}"></marked-element>
+                                        <div class="wrapper-edit">
+                                            <iron-icon class="description-edit" icon="taskboard-icons:edit" on-tap="_openDescriptionEditMode"></iron-icon>
+                                        </div>
+                                    </div>
+                                    <template is="dom-if" if="{{descriptionTooLong}}">
+                                        <div class="descriptionShowMore" on-tap="_toggleShowMoreOrLess">
+                                            <iron-icon icon="taskboard-icons:showmore"></iron-icon>
+                                            [[showMoreOrLess]]
+                                        </div>
+                                    </template>
                                 </template>
+
+                                <template is="dom-if" if="{{descriptionIsEditable}}">
+                                    <textarea class="description-box__field" name="description" id="description" value={{item.description::input}}></textarea>
+                                    <div class="description-box__footer">
+                                        <paper-button class="tb-button tb-button__default" on-tap="_closeDescriptionEditMode">Cancelar</paper-button>
+                                        <paper-button class="tb-button tb-button--type_button" on-tap="_saveIssueDescription">Salvar</paper-button>
+                                    </div>
+                                </template>
+
                             </div>
 
                             <template is="dom-if" if="{{canHaveSubtasks}}">
@@ -903,7 +967,7 @@
                                             <div class="tshirtSizesView" title="Click to see tshirt sizes">
                                                 <iron-icon icon="taskboard-icons:view" on-tap="_showTShirtBubble">Ballparks</iron-icon>
                                                 <label on-tap="_showTShirtBubble">
-                                                Ballparks
+                                                    Ballparks
                                                 </label>
                                             </div>
                                             <div class="tshirt-bubble" on-tap="_stopPropagation">
@@ -1217,6 +1281,11 @@
                         value: false
                     },
 
+                    descriptionIsEditable: {
+                        type: Boolean,
+                        value: false,
+                    },
+
                     showMoreOrLess: {
                         type: String,
                         notify: true,
@@ -1397,18 +1466,18 @@
                         userPicker.focus()
                         $(self.$.addAssigneeButton).hide();
                         if (self.isNotAssignedToMySelf(self.item))
-                        	$(self.$$("#assignToMe")).hide();
+                        $(self.$$("#assignToMe")).hide();
                     }
                     userPicker.close = function() {
                         $(userPicker).hide();
                         $(self.$.addAssigneeButton).show();
                         if (self.isNotAssignedToMySelf(self.item))
-                        	$(self.$$("#assignToMe")).show();
+                        $(self.$$("#assignToMe")).show();
                     }
-	            },
+            },
 
                 _closePicker: function(e) {
-					e.target.close();
+                     e.target.close();
                 },
 
                 _closeAllPickers: function() {
@@ -1426,6 +1495,26 @@
 
                     this.descriptionExpanded = !this.descriptionExpanded;
                 },
+
+                _openDescriptionEditMode: function() {
+                     this.descriptionIsEditable = true;
+                },
+                
+                _closeDescriptionEditMode: function() {
+                     this.descriptionIsEditable = false;
+                },
+                
+                _saveIssueDescription: function() {
+                    var self = this;
+
+                    this._issueAction("saveDescription", "save description " + this.item.issueKey, this.item.description)
+                    .fail(function(){
+                            self.descriptionIsEditable = true;
+                     }).done(function() {
+                         self._closeDescriptionEditMode();
+                     });
+                },
+                
 
                 _expandDescription: function() {
                     var element = this.$$(".description-row");
@@ -1474,7 +1563,7 @@
 
                 _addMeAsAssignee: function (e) {
                     try {
-                    	e.target.close();
+                        e.target.close();
                     }catch(ex){}
                     var self = this;
                     var issueBefore = this.item;
@@ -1532,16 +1621,16 @@
                     var callback = function(issue) {
                         self._setIssueLocalState(self.item, true, null);
                         self._issueAction("block-task", "block issue " + issue.issueKey, issue.lastBlockReason)
-							.fail(function(){
-                        	    self.blocked = false;
-                        	});
+                            .fail(function(){
+                                self.blocked = false;
+                            });
                     };
 
                     var fields = [{id: "lastBlockReason",
                         name: taskboard.getFieldName({fieldId: CUSTOMFIELD.LAST_BLOCK_REASON}),
                         type: TYPE_FIELD.TEXTAREA}];
 
-         			self.$.fieldsRequiredDialog.openDialog(fields, "Block", self.item, callback);
+                    self.$.fieldsRequiredDialog.openDialog(fields, "Block", self.item, callback);
                 },
 
                 blockCancelled: function() {
@@ -1550,9 +1639,9 @@
 
                 unblock: function () {
                     this._issueAction("unblock-task", "unblock issue " + this.item.issueKey, {})
-    					.fail(function(){
-                    	    self.blocked = true;
-                    	});
+                        .fail(function(){
+                            self.blocked = true;
+                        });
                 },
 
                 requestTransition: function (e) {
@@ -1668,6 +1757,7 @@
                     this.set('descriptionTooLong', false);
                     $(this.$$(".tshirt-bubble")).hide();
                     var self = this;
+                    
                     if (this.canHaveSubtasks) {
                         this._collapseDescription();
                         setTimeout(function() {
@@ -1680,7 +1770,7 @@
                         },10)
                     }
                     else setTimeout(function() {
-                        self._expandDescription();
+                       self._expandDescription();
                     },10);
 
                 },
