@@ -6,12 +6,12 @@ public class TouchTimeChartByWeekDataPoint {
     
     public final Date date;
     public final String status;
-    public final double effort;
+    public final double effortInHours;
 
-    public TouchTimeChartByWeekDataPoint(Date date, String status, double effort) {
+    public TouchTimeChartByWeekDataPoint(Date date, String status, double effortInHours) {
         this.date = date;
         this.status = status;
-        this.effort = effort;
+        this.effortInHours = effortInHours;
     }
 
 }

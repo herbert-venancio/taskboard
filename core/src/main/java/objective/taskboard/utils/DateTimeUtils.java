@@ -186,4 +186,8 @@ public class DateTimeUtils {
     public static double secondsToHours(double seconds) {
         return seconds / DateTimeUtils.HOUR_IN_SECONDS;
     }
+
+    public static long hoursToSeconds(double hours) {
+        return (long) (hours * DateTimeUtils.HOUR_IN_SECONDS);
+    }
 }

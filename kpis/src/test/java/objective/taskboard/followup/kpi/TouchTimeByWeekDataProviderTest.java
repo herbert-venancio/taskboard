@@ -80,44 +80,44 @@ public class TouchTimeByWeekDataProviderTest {
                 .endsAt("2018-11-17")
                 .haveIssues("I-1","I-2","I-3")
                 .with("I-1")
-                    .on("Doing").hasEffort(300l)
-                    .on("Reviewing").hasEffort(0l)
+                    .on("Doing").hasEffort(3.0)
+                    .on("Reviewing").hasEffort(0)
                 .with("I-2")
-                    .on("Doing").hasEffort(100l)
-                    .on("Reviewing").hasEffort(200l)
+                    .on("Doing").hasEffort(1.0)
+                    .on("Reviewing").hasEffort(2.0)
                 .with("I-3")
-                    .on("Doing").hasEffort(200l)
-                    .on("Reviewing").hasEffort(100l)
+                    .on("Doing").hasEffort(2.0)
+                    .on("Reviewing").hasEffort(1.0)
             .atWeekStartingAtSunday("2018-11-18")
                 .endsAt("2018-11-24")
                 .haveIssues("I-1","I-2","I-4")
                 .with("I-1")
-                    .on("Doing").hasEffort(600l)
-                    .on("Reviewing").hasEffort(400l)
+                    .on("Doing").hasEffort(6.0)
+                    .on("Reviewing").hasEffort(4.0)
                 .with("I-2")
-                    .on("Doing").hasEffort(100l)
-                    .on("Reviewing").hasEffort(600l)
+                    .on("Doing").hasEffort(1.0)
+                    .on("Reviewing").hasEffort(6.0)
                 .with("I-4")
-                    .on("Doing").hasEffort(200l)
-                    .on("Reviewing").hasEffort(200l)
+                    .on("Doing").hasEffort(2.0)
+                    .on("Reviewing").hasEffort(2.0)
             .atWeekStartingAtSunday("2018-11-25")
                 .endsAt("2018-12-01")
                 .haveIssues("I-1")
                     .with("I-1")
-                        .on("Doing").hasEffort(600l)
-                        .on("Reviewing").hasEffort(400l);
+                        .on("Doing").hasEffort(6.0)
+                        .on("Reviewing").hasEffort(4.0);
                     
         when(issueKpiService.getIssuesFromCurrentState("TASKB", ZONE_ID,SUBTASKS)).thenReturn(issues);
         subject = getProvider();
         TouchTimeChartByWeekDataSet dataSet = subject.getDataSet("TASKB", KpiLevel.SUBTASKS, ZoneId.systemDefault());
         givenDataSet(dataSet)
             .hasSize(6).pointsIterator()
-            .atDate("2018-11-11").andStatus("Doing").hasEffort(200.0d).next()
-            .atDate("2018-11-11").andStatus("Reviewing").hasEffort(100.0d).next()
-            .atDate("2018-11-18").andStatus("Doing").hasEffort(300.0d).next()
-            .atDate("2018-11-18").andStatus("Reviewing").hasEffort(400.0d).next()
-            .atDate("2018-11-25").andStatus("Doing").hasEffort(600.0d).next()
-            .atDate("2018-11-25").andStatus("Reviewing").hasEffort(400.0d);
+            .atDate("2018-11-11").andStatus("Doing").hasEffort(2.0).next()
+            .atDate("2018-11-11").andStatus("Reviewing").hasEffort(1.0).next()
+            .atDate("2018-11-18").andStatus("Doing").hasEffort(3.0).next()
+            .atDate("2018-11-18").andStatus("Reviewing").hasEffort(4.0).next()
+            .atDate("2018-11-25").andStatus("Doing").hasEffort(6.0).next()
+            .atDate("2018-11-25").andStatus("Reviewing").hasEffort(4.0);
     }
     
     @Test
@@ -134,32 +134,32 @@ public class TouchTimeByWeekDataProviderTest {
                 .endsAt("2018-11-17")
                 .haveIssues("I-1","I-2","I-3")
                 .with("I-1")
-                    .on("Doing").hasEffort(300l)
-                    .on("Reviewing").hasEffort(0l)
+                    .on("Doing").hasEffort(3.0)
+                    .on("Reviewing").hasEffort(0)
                 .with("I-2")
-                    .on("Doing").hasEffort(100l)
-                    .on("Reviewing").hasEffort(200l)
+                    .on("Doing").hasEffort(1.0)
+                    .on("Reviewing").hasEffort(2.0)
                 .with("I-3")
-                    .on("Doing").hasEffort(200l)
-                    .on("Reviewing").hasEffort(100l)
+                    .on("Doing").hasEffort(2.0)
+                    .on("Reviewing").hasEffort(1.0)
             .atWeekStartingAtSunday("2018-11-18")
                 .endsAt("2018-11-24")
                 .haveIssues("I-1","I-2","I-4")
                 .with("I-1")
-                    .on("Doing").hasEffort(600l)
-                    .on("Reviewing").hasEffort(400l)
+                    .on("Doing").hasEffort(6.0)
+                    .on("Reviewing").hasEffort(4.0)
                 .with("I-2")
-                    .on("Doing").hasEffort(100l)
-                    .on("Reviewing").hasEffort(600l)
+                    .on("Doing").hasEffort(1.0)
+                    .on("Reviewing").hasEffort(6.0)
                 .with("I-4")
-                    .on("Doing").hasEffort(200l)
-                    .on("Reviewing").hasEffort(200l)
+                    .on("Doing").hasEffort(2.0)
+                    .on("Reviewing").hasEffort(2.0)
             .atWeekStartingAtSunday("2018-11-25")
                 .endsAt("2018-12-01")
                 .haveIssues("I-1")
                     .with("I-1")
-                        .on("Doing").hasEffort(600l)
-                        .on("Reviewing").hasEffort(400l);
+                        .on("Doing").hasEffort(6.0)
+                        .on("Reviewing").hasEffort(4.0);
         
         
         when(issueKpiService.getIssuesFromCurrentState("TASKB", ZONE_ID,SUBTASKS)).thenReturn(issues);
@@ -168,8 +168,8 @@ public class TouchTimeByWeekDataProviderTest {
         
         givenDataSet(dataSet)
             .hasSize(2).pointsIterator()
-            .atDate("2018-11-11").andStatus("Doing").hasEffort(200.0d).next()
-            .atDate("2018-11-11").andStatus("Reviewing").hasEffort(100.0d);
+            .atDate("2018-11-11").andStatus("Doing").hasEffort(2.0).next()
+            .atDate("2018-11-11").andStatus("Reviewing").hasEffort(1.0);
     }
     
     @Test
@@ -286,10 +286,10 @@ public class TouchTimeByWeekDataProviderTest {
                 .addTransition("To Review","2018-11-16")
                 .addTransition("Reviewing","2018-11-20")
                 .addTransition("Done","2018-11-27")
-                .addWorklog("2018-11-10",100)
-                .addWorklog("2018-11-15",200)
-                .addWorklog("2018-11-19",300)
-                .addWorklog("2018-11-23",400);
+                .addWorklog("2018-11-10",1.0)
+                .addWorklog("2018-11-15",2.0)
+                .addWorklog("2018-11-19",3.0)
+                .addWorklog("2018-11-23",4.0);
         
         builder.mockingSubtask("I-2", "Dev")
                 .setProjectKeyToCurrentIssue("TASKB")
@@ -298,9 +298,9 @@ public class TouchTimeByWeekDataProviderTest {
                 .addTransition("To Review","2018-11-14")
                 .addTransition("Reviewing","2018-11-15")
                 .addTransition("Done","2018-11-22")
-                .addWorklog("2018-11-14",100)
-                .addWorklog("2018-11-16",200)
-                .addWorklog("2018-11-20",400);
+                .addWorklog("2018-11-14",1.0)
+                .addWorklog("2018-11-16",2.0)
+                .addWorklog("2018-11-20",4.0);
         
         builder.mockingSubtask("I-3", "Dev")
                 .setProjectKeyToCurrentIssue("TASKB")
@@ -309,8 +309,8 @@ public class TouchTimeByWeekDataProviderTest {
                 .addTransition("To Review","2018-11-13")
                 .addTransition("Reviewing","2018-11-14")
                 .addTransition("Done","2018-11-16")
-                .addWorklog("2018-11-12",200)
-                .addWorklog("2018-11-15",100);
+                .addWorklog("2018-11-12",2.0)
+                .addWorklog("2018-11-15",1.0);
         
         builder.mockingSubtask("I-4", "Dev")
                 .setProjectKeyToCurrentIssue("TASKB")
@@ -319,8 +319,8 @@ public class TouchTimeByWeekDataProviderTest {
                 .addTransition("To Review","2018-11-21")
                 .addTransition("Reviewing","2018-11-22")
                 .addTransition("Done","2018-11-24")
-                .addWorklog("2018-11-20",200)
-                .addWorklog("2018-11-23",200);
+                .addWorklog("2018-11-20",2.0)
+                .addWorklog("2018-11-23",2.0);
         
     }
     
@@ -366,7 +366,7 @@ public class TouchTimeByWeekDataProviderTest {
             private TouchTimeByWeekPointAsserter hasEffort(double effort) {
                 assertThat(subject.date,is(DateTimeUtils.parseStringToDate(date)));
                 assertThat(subject.status,is(status));
-                assertThat(subject.effort,is(effort));
+                assertThat(subject.effortInHours,is(effort));
                 return this;
             }
             
@@ -443,6 +443,10 @@ public class TouchTimeByWeekDataProviderTest {
                 private SingleIssueAsserter hasEffort(long effort) {
                     Assert.assertThat(issue.getEffortUntilDate(currentStatus, DateAsserter.this.week.getMaximum().atStartOfDay(ZONE_ID)), is(effort));
                     return this;
+                }
+                
+                private SingleIssueAsserter hasEffort(double effortInHours) {
+                    return hasEffort(DateTimeUtils.hoursToSeconds(effortInHours));
                 }
                 
                 private SingleIssueAsserter with(String issue) {
