@@ -72,6 +72,10 @@ function getDateFromIso(isoString) {
     return moment(isoString, 'YYYY-MM-DD').toDate();
 }
 
+function getTimestampFromIso(isoString) {
+    return moment(getDateFromIso(isoString)).unix();
+}
+
 function addDaysToDate(date, days) {
     var newDate = new Date(date.valueOf());
     newDate.setDate(newDate.getDate() + days);

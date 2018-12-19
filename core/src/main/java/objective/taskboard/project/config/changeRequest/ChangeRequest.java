@@ -6,8 +6,6 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.Validate;
@@ -17,14 +15,6 @@ import objective.taskboard.domain.TaskboardEntity;
 
 @Entity
 @Table(name = "change_request")
-@NamedQueries({
-    @NamedQuery(
-            name="ChangeRequest.listByProject", 
-            query="SELECT p FROM ChangeRequest p WHERE p.project = :project ORDER BY p.date DESC"),
-    @NamedQuery(
-            name="ChangeRequest.getBaseline",
-            query="SELECT p FROM ChangeRequest p WHERE p.project = :project AND p.isBaseline = true")
-})
 public class ChangeRequest extends TaskboardEntity {
 
     @ManyToOne(fetch = FetchType.EAGER)

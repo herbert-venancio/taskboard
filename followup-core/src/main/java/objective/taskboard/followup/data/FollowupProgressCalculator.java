@@ -33,7 +33,15 @@ public class FollowupProgressCalculator {
         this.snapshotService = snapshotService;
     }
 
-    public ProgressData calculate(ZoneId timezone, String projectKey, int projectionSampleSize, boolean stopOnCompleteProjection) 
+    public ProgressData calculateWithCompleteProjection(ZoneId timezone, String projectKey, int projectionSampleSize) {
+        return calculate(timezone, projectKey, projectionSampleSize, true);
+    }
+
+    public ProgressData calculateWithExpectedProjection(ZoneId timezone, String projectKey, int projectionSampleSize) {
+        return calculate(timezone, projectKey, projectionSampleSize, false);
+    }
+
+    private ProgressData calculate(ZoneId timezone, String projectKey, int projectionSampleSize, boolean stopOnCompleteProjection) 
             throws ClusterNotConfiguredException, ProjectDatesNotConfiguredException {
 
         FollowUpSnapshot snapshot = snapshotService.getFromCurrentState(timezone, projectKey);
@@ -61,6 +69,7 @@ public class FollowupProgressCalculator {
         EffortHistoryRow lastRow = historyRows.get(historyRows.size()-1);
 
         LocalDate startingDate = firstRow.date;
+
         LocalDate finalProjectDate = projectDeliveryDate.isBefore(lastRow.date) ? lastRow.date : projectDeliveryDate;
 
         addExpectedProgress(progressData, projectStartDate, projectDeliveryDate, finalProjectDate);
@@ -96,11 +105,17 @@ public class FollowupProgressCalculator {
         double projectedBacklog = lastRow.sumEffortBacklog;
         progressData.actualProjection.add(progressData.actual.get(progressData.actual.size()-1));
         LocalDate startingDateIt = firstRow.date.plusDays(countOfExistingDays);
-
         long dayCount = countOfExistingDays;
-        boolean processProjection = finalProjectDate.isAfter(LocalDate.from(lastActualDate)) || stopOnCompleteProjection;
+
+        boolean deliveryDateHasntPassed = finalProjectDate.isAfter(LocalDate.from(lastActualDate));
+
+        boolean generateComplete = shouldGenerateCompleteProjection(stopOnCompleteProjection, projectedProgressFactor,
+                actualProjectionFactor, deliveryDateHasntPassed);
+
+        boolean generateProjection = shouldGenerateProjectionPoints(projectedProgressFactor, actualProjectionFactor,
+                deliveryDateHasntPassed, generateComplete);
         
-        while (processProjection) {
+        while (generateProjection) {
             
             if(projectedProgress < 1.0 || projectedBacklog > 0.0) {
                 projectedProgress = Math.min(1.0, projectedProgress + projectedProgressFactor);
@@ -110,23 +125,44 @@ public class FollowupProgressCalculator {
             progressData.actualProjection.add(new ProgressDataPoint(startingDateIt, projectedProgress, projectedActual, projectedBacklog));
             startingDateIt = startingDateIt.plus(Period.ofDays(1));
 
-            if (stopOnCompleteProjection) {
-                if (projectedProgress >= 1)
-                    processProjection = false;
-            } else {
-                if (dayCount >= totalDayCount)
-                    processProjection = false;
-                else dayCount++;
-            }
-
+            generateProjection = shouldGenerateNextProjectionPoint(generateComplete, totalDayCount,
+                    projectedProgress, dayCount);
+            dayCount++;
         }
+    }
+
+    private boolean shouldGenerateNextProjectionPoint(boolean generateComplete, long totalDayCount,
+            double projectedProgress, long dayCount) {
+
+        boolean generateNextPoint = true;
+        if (generateComplete) {
+            if (projectedProgress >= 1)
+                generateNextPoint = false;
+        } else {
+            if (dayCount >= totalDayCount)
+                generateNextPoint = false;
+        }
+        return generateNextPoint;
+    }
+
+    private boolean shouldGenerateProjectionPoints(double projectedProgressFactor, double actualProjectionFactor,
+            boolean deliveryDateHasntPassed, boolean processComplete) {
+        return deliveryDateHasntPassed || processComplete 
+                && (actualProjectionFactor > 0 && projectedProgressFactor > 0);
+    }
+
+    private boolean shouldGenerateCompleteProjection(boolean stopOnCompleteProjection, double projectedProgressFactor,
+            double actualProjectionFactor, boolean deliveryDateHasntPassed) {
+        if ((actualProjectionFactor <= 0 || projectedProgressFactor <= 0) && deliveryDateHasntPassed) 
+            stopOnCompleteProjection = false;
+        return stopOnCompleteProjection;
     }
 
     private void addExpectedProgress(ProgressData progressData, LocalDate startingDate, LocalDate expectedDeliveryDate, LocalDate finalProjectDate) {
         LocalDate startingDateIt = startingDate;
-        
+
         long expectedProjectDuration = ChronoUnit.DAYS.between(startingDateIt.atStartOfDay(), expectedDeliveryDate.atStartOfDay());
-        
+
         double dayNumber = 0;
         while(startingDateIt.isBefore(finalProjectDate) || startingDateIt.equals(finalProjectDate)) {
             double progress = Math.min(dayNumber/expectedProjectDuration, 1.0);

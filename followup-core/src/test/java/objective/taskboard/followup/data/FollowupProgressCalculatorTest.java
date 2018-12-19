@@ -29,10 +29,10 @@ public class FollowupProgressCalculatorTest {
     private FollowupProgressCalculator subject = new FollowupProgressCalculator(snapshotService);
 
     @Test
-    public void calculateWithEmptyHistory_shouldReturnEmptyActualAndProjectionShouldBeEqualToExpected() {
+    public void calculateWithExpectedProjectionWithEmptyHistory_shouldReturnEmptyActualAndProjectionShouldBeEqualToExpected() {
         currentSnapshot(LocalDate.of(2018, 1, 1), LocalDate.of(2018, 1, 10));
         
-        ProgressData progressData = subject.calculate(TIMEZONE, PROJECT, 40, false);
+        ProgressData progressData = subject.calculateWithExpectedProjection(TIMEZONE, PROJECT, 40);
         
         assertEquals(0, progressData.actual.size());
         assertEquals(0, progressData.actualProjection.size());
@@ -40,12 +40,12 @@ public class FollowupProgressCalculatorTest {
     }
 
     @Test
-    public void calculate_shouldCalculateEffort() {
+    public void calculateWithExpectedProjection_shouldcalculateWithExpectedProjectionEffort() {
         currentSnapshot(LocalDate.of(2018, 1, 1), LocalDate.of(2018, 1, 10),
                 new EffortHistoryRow(LocalDate.of(2018, 1, 1),      1,       10)
                 );
 
-        ProgressData progressData = subject.calculate(TIMEZONE, PROJECT, 40, false);
+        ProgressData progressData = subject.calculateWithExpectedProjection(TIMEZONE, PROJECT, 40);
         
         assertEquals(.091, progressData.actual.get(0).progress, 0.001);
         assertEquals(.091, progressData.actualProjection.get(0).progress, 0.001);
@@ -53,12 +53,12 @@ public class FollowupProgressCalculatorTest {
     }
     
     @Test
-    public void calculate_shouldCalculateExpectedEffortForAllDatesInTheRange() {
+    public void calculateWithExpectedProjection_shouldcalculateWithExpectedProjectionExpectedEffortForAllDatesInTheRange() {
         currentSnapshot(LocalDate.of(2018, 1, 1), LocalDate.of(2018, 1, 10),
                 new EffortHistoryRow(LocalDate.of(2018, 1, 1),      1,       10)
                 );
         
-        ProgressData progressData = subject.calculate(TIMEZONE, PROJECT, 40, false);
+        ProgressData progressData = subject.calculateWithExpectedProjection(TIMEZONE, PROJECT, 40);
         
         List<ProgressDataPoint> expected = progressData.expected;
         assertEquals(10, expected.size());
@@ -68,13 +68,13 @@ public class FollowupProgressCalculatorTest {
     }
     
     @Test
-    public void calculate_whenDeliveryDateIsInThePast_ExpectedProgressPastDeliveryIsAlways100percent() {
+    public void calculateWithExpectedProjection_whenDeliveryDateIsInThePast_ExpectedProgressPastDeliveryIsAlways100percent() {
         currentSnapshot(LocalDate.of(2018, 1, 1), LocalDate.of(2018, 1, 10), 
                 new EffortHistoryRow(LocalDate.of(2018, 1, 1),  1,       10),
                 new EffortHistoryRow(LocalDate.of(2018, 1, 11), 1,       10)
                 );
         
-        ProgressData progressData = subject.calculate(TIMEZONE, PROJECT, 40, false);
+        ProgressData progressData = subject.calculateWithExpectedProjection(TIMEZONE, PROJECT, 40);
         
         List<ProgressDataPoint> expected = progressData.expected;
         assertEquals(11, expected.size());
@@ -83,13 +83,13 @@ public class FollowupProgressCalculatorTest {
     }
     
     @Test
-    public void calculateWithOneSample_shouldCalculateProjectionBasedOnAvgOfLastEffort() {
+    public void calculateWithExpectedProjectionWithOneSample_shouldcalculateWithExpectedProjectionProjectionBasedOnAvgOfLastEffort() {
         currentSnapshot(LocalDate.of(2018, 1, 1), LocalDate.of(2018, 1, 10),
                 new EffortHistoryRow(LocalDate.of(2018, 1, 1),      0,       10),
                 new EffortHistoryRow(LocalDate.of(2018, 1, 2),      0.7,     10)
                 );
         
-        ProgressData progressData = subject.calculate(TIMEZONE, PROJECT, 40, false);
+        ProgressData progressData = subject.calculateWithExpectedProjection(TIMEZONE, PROJECT, 40);
 
         assertEquals(.065, progressData.actual.get(1).progress, 0.001);
         assertEquals(9, progressData.actualProjection.size());
@@ -104,14 +104,14 @@ public class FollowupProgressCalculatorTest {
     }
     
     @Test
-    public void calculateWhenDeliveryDateIsBeforeLastActualDate_projectionShouldBeEmptyAndEndDateMustMatchLastActualDate() {
+    public void calculateWithExpectedProjectionWhenDeliveryDateIsBeforeLastActualDate_projectionShouldBeEmptyAndEndDateMustMatchLastActualDate() {
         currentSnapshot(LocalDate.of(2018, 1, 1), LocalDate.of(2018, 1, 2),
                 new EffortHistoryRow(LocalDate.of(2018, 1, 1), 0,   10),
                 new EffortHistoryRow(LocalDate.of(2018, 1, 2), 0.7, 10),
                 new EffortHistoryRow(LocalDate.of(2018, 1, 3), 1,   10)
                 );
         
-        ProgressData progressData = subject.calculate(TIMEZONE, PROJECT, 40, false);
+        ProgressData progressData = subject.calculateWithExpectedProjection(TIMEZONE, PROJECT, 40);
         
         assertEquals(1, progressData.actualProjection.size());
         assertEquals(LocalDate.of(2018, 1, 3), progressData.endingDate);
@@ -119,14 +119,14 @@ public class FollowupProgressCalculatorTest {
     
     
     @Test
-    public void calculate_givenProjectionSize_shouldCalculateProjectionWithGivenSize() {
+    public void calculateWithExpectedProjection_givenProjectionSize_shouldcalculateWithExpectedProjectionProjectionWithGivenSize() {
         currentSnapshot(LocalDate.of(2018, 1, 1), LocalDate.of(2018, 1, 10),
                 new EffortHistoryRow(LocalDate.of(2018, 1, 1),      0,       10),
                 new EffortHistoryRow(LocalDate.of(2018, 1, 2),      0.7,     9.3),
                 new EffortHistoryRow(LocalDate.of(2018, 1, 3),      1.8,     8.2)
                 );
         
-        ProgressData progressData = subject.calculate(TIMEZONE, PROJECT, 2, false);
+        ProgressData progressData = subject.calculateWithExpectedProjection(TIMEZONE, PROJECT, 2);
         
         assertEquals(.07, progressData.actual.get(1).progress, 0.001);
         assertEquals(8, progressData.actualProjection.size());
@@ -144,7 +144,7 @@ public class FollowupProgressCalculatorTest {
                 , new EffortHistoryRow(LocalDate.of(2018, 1, 2), 2.5, 7.5)
         );
 
-        ProgressData progressData = subject.calculate(TIMEZONE, PROJECT, 2, false);
+        ProgressData progressData = subject.calculateWithExpectedProjection(TIMEZONE, PROJECT, 2);
 
         assertThat(progressData.actualProjection).allMatch(p -> p.progress <= 1.0);
         assertThat(progressData.actualProjection).extracting(p -> p.sumEffortDone)
@@ -154,13 +154,45 @@ public class FollowupProgressCalculatorTest {
     }
 
     @Test
+    public void whenProjectionIsSteepAndCalculateCompleteProjection_shouldStopAt100Percent() {
+        currentSnapshot(LocalDate.of(2018, 1, 1), LocalDate.of(2018, 1, 7),
+                new EffortHistoryRow(LocalDate.of(2018, 1, 1), 0, 10)
+                , new EffortHistoryRow(LocalDate.of(2018, 1, 2), 2.5, 7.5)
+        );
+
+        ProgressData progressData = subject.calculateWithCompleteProjection(TIMEZONE, PROJECT, 2);
+
+        assertThat(progressData.actualProjection).allMatch(p -> p.progress <= 1.0);
+        assertThat(progressData.actualProjection).extracting(p -> p.sumEffortDone)
+                .containsExactly(2.5, 5.0, 7.5, 10.0);
+        assertThat(progressData.actualProjection).extracting(p -> p.sumEffortBacklog)
+                .containsExactly(7.5, 5.0, 2.5, 0.0);
+    }
+
+    @Test
+    public void whenProjectionIsStoppedAndEndhasPassed_shouldNotHaveProjection() {
+        currentSnapshot(LocalDate.of(2018, 1, 1), LocalDate.of(2018, 1, 2),
+                new EffortHistoryRow(LocalDate.of(2018, 1, 1), 0, 10)
+                , new EffortHistoryRow(LocalDate.of(2018, 1, 2), 2.5, 7.5)
+                , new EffortHistoryRow(LocalDate.of(2018, 1, 3), 2.5, 7.5)
+        );
+
+        ProgressData progressData = subject.calculateWithCompleteProjection(TIMEZONE, PROJECT, 2);
+
+        assertThat(progressData.actualProjection).extracting(p -> p.sumEffortDone)
+                .containsExactly(2.5);
+        assertThat(progressData.actualProjection).extracting(p -> p.sumEffortBacklog)
+                .containsExactly(7.5);
+    }
+
+    @Test
     public void givenHistoryNearDaylightSavingTime_whenMissingHistoryDays_shouldInterpolateCorrectly() throws ParseException {
         currentSnapshot(LocalDate.of(2017, 10, 13), LocalDate.of(2017, 10, 20),
                 new EffortHistoryRow(LocalDate.of(2017, 10, 13), 0, 10)
                 , new EffortHistoryRow(LocalDate.of(2017, 10, 16), 3, 7)
         );
 
-        ProgressData progressData = subject.calculate(TIMEZONE, PROJECT, 40, false);
+        ProgressData progressData = subject.calculateWithExpectedProjection(TIMEZONE, PROJECT, 40);
 
         assertThat(progressData.actual).extracting(p -> p.date)
                 .containsExactly(
@@ -172,14 +204,14 @@ public class FollowupProgressCalculatorTest {
     }
 
     @Test
-    public void whenCalculate_backlogProjectionShouldBeMeanOfSamplesDelta() {
+    public void whencalculateWithExpectedProjection_backlogProjectionShouldBeMeanOfSamplesDelta() {
         currentSnapshot(LocalDate.of(2018, 1, 1), LocalDate.of(2018, 1, 7),
                 new EffortHistoryRow(LocalDate.of(2018, 1, 1), 0, 7)
                 , new EffortHistoryRow(LocalDate.of(2018, 1, 2), 0, 8)
                 , new EffortHistoryRow(LocalDate.of(2018, 1, 3), 0, 10)
         );
 
-        ProgressData progressData = subject.calculate(TIMEZONE, PROJECT, 3, false);
+        ProgressData progressData = subject.calculateWithExpectedProjection(TIMEZONE, PROJECT, 3);
 
         assertThat(progressData.actualProjection).extracting(p -> p.sumEffortBacklog)
                 .containsExactly(10.0, 11.5, 13.0, 14.5, 16.0);

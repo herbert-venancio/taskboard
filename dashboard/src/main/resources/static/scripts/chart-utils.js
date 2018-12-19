@@ -50,8 +50,7 @@ class ChartUtils {
                 startOfWeek: 0,
                 tickColor: '#8E8E8E',
                 tickInterval: null,
-                tickPixelInterval: 100,
-                type: 'datetime'
+                tickPixelInterval: 100
             },
             yAxis: {
                 gridLineColor: '#CCC',
@@ -177,6 +176,7 @@ class ChartBuilderBase {
         this.options = ChartUtils.getDefaultHighchartsOptions();
         this.options.chart.renderTo = divID;
         this.options.credits = false;
+        this.hasPlotLine = false;
         this.options.chart.events = {
             selection: function (event) {
                 const hideResetButton = () => {
@@ -226,9 +226,22 @@ class ChartBuilderBase {
         Highcharts.merge(true, this.options, {series: seriesData});
         return this;
     }
+    
+    withPlotLineAt (date) {
+        this.plotLineDate = date;
+        this.hasPlotLine = true;
+        return this;
+    }
 
     build () {
         const chart = Highcharts.chart(this.options);
+        if (this.hasPlotLine) {
+            chart.xAxis[0].addPlotLine({
+                value: this.plotLineDate,
+                color: 'grey',
+                width: 2,
+                id: 'projectionStart'});
+        }
         return chart;
     }
 }
@@ -260,6 +273,7 @@ class ProgressChartBuilder extends ChartBuilderBase {
         this.options.yAxis.max = 100;
         this.options.yAxis.labels.format = '{value}%';
         this.options.yAxis.title.text = 'Progress %';
+        this.options.xAxis.type = 'datetime';
         this.options.tooltip.headerFormat = null;
         this.options.tooltip.footerFormat = null;
         this.options.tooltip.pointFormat = '<b>{point.x:%d/%m/%Y}: {point.y:.1f}%</b>';
@@ -275,6 +289,7 @@ class ProgressChartBuilder extends ChartBuilderBase {
 class CFDChartBuilder extends ChartBuilderBase {
     constructor (divID) {
         super(divID);
+        this.options.xAxis.type = 'datetime';
         Highcharts.merge(true, this.options, this._plotOptions);
         Highcharts.merge(true, this.options, this._tooltipOptions);
         Highcharts.merge(true, this.options, this._xAxisOptions);
@@ -353,6 +368,7 @@ class CFDChartBuilder extends ChartBuilderBase {
 class TouchTimeChartBuilder extends ChartBuilderBase {
     constructor (divID) {
         super(divID);
+        this.options.xAxis.type = 'datetime';
         Highcharts.merge(true, this.options, this._chartOptions);
         Highcharts.merge(true, this.options, this._tooltipOptions);
         Highcharts.merge(true, this.options, this._xAxisOptions);
@@ -449,5 +465,29 @@ class HighchartChartWrapper {
 
     destroy () {
         this.highchartChart.destroy();
+    }
+}
+
+class BudgetChartBuilder extends ChartBuilderBase {
+    constructor(divID, startDate, endDate, projectionDate){
+
+        super(divID);
+        this.options.title.text = 'Projection date: ' + ((projectionDate !== null ) ? projectionDate : '...');
+        this.options.title.style = {'color' : '#8E8E8E','cursor': 'default', 'fontSize': '14px'};
+        this.options.title.align = 'left';
+        this.options.title.verticalAlign = 'bottom';
+        this.options.xAxis.labels.format = '{value:%e %b %y}';
+        this.options.yAxis.labels.format = '{value}h';
+        this.options.yAxis.title.text = 'Hours';
+        this.options.tooltip.headerFormat = null;
+        this.options.tooltip.footerFormat = null;
+        this.options.tooltip.pointFormat = '<b>{point.x:%d/%m/%Y}: {point.y:.1f}h</b>';
+        this.options.tooltip.shared = false;
+        this.options.plotOptions = {
+            spline : {
+                pointStart: startDate,
+                pointEnd: endDate
+            }
+        };
     }
 }

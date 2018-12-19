@@ -31,62 +31,61 @@ public class BudgetChartCalculatorTest {
     public void scopeDone_mustHaveActualScopeDoneValues() {
         
         BudgetChartCalculator subject = new BudgetChartCalculatorBuilder()
-                .withStartAndEndDate("2018-10-21", "2018-10-22")
-                .withScopeDonePoint("2018-10-21", 0.0, 42.0, 15.0)
+                .withStartDate("2018-10-21")
+                .withEndDate("2018-10-22")
+                .point().date("2018-10-21").progress(0).effortDone(42).effortBacklog(15).addPointToDone()
                 .build();
         BudgetChartData data = subject.calculate(systemDefault, project);
-        List<BudgetChartDataPoint> scopeDone = data.scopeDone;
 
-        assertResults(scopeDone, "2018-10-21 | 42.0");
+        assertResults(data.scopeDone, "2018-10-21 | 42.0");
     }
 
     @Test
     public void scopeTotal_mustHaveActualScopeTotalValues() {
 
        BudgetChartCalculator subject = new BudgetChartCalculatorBuilder()
-               .withStartAndEndDate("2018-10-20", "2018-10-22")
-               .withScopeDonePoint("2018-10-21", 0.0, 42.0, 15.0)
+               .withStartDate("2018-10-20")
+               .withEndDate("2018-10-22")
+               .point().date("2018-10-21").progress(0).effortDone(42).effortBacklog(15).addPointToDone()
                .build();
         BudgetChartData data = subject.calculate(systemDefault, project);
-        List<BudgetChartDataPoint> scopeTotal = data.scopeTotal;
 
-        assertResults(scopeTotal, "2018-10-21 | 62.7");
+        assertResults(data.scopeTotal, "2018-10-21 | 62.7");
     }
 
     @Test
     public void budget_mustHaveActualBudgetValues() {
 
        BudgetChartCalculator subject = new BudgetChartCalculatorBuilder()
-               .withStartAndEndDate("2018-10-20", "2018-10-21")
-               .withScopeDonePoint("2018-10-21", 0.0, 42.0, 15.0)
-               .withBudgetValue("ChangeRequest1", "2018-10-21", 25, false)
-               .withBudgetValue("Baseline", "2018-10-20", 500, true)
+               .withStartDate("2018-10-20")
+               .withEndDate("2018-10-21")
+               .point().date("2018-10-21").progress(0).effortDone(42).effortBacklog(15).addPointToDone()
+               .budgetValue().name("ChangeRequest1").budgetDate("2018-10-21").budgetIncrease(25).isBaseline(false).addBudgetValue()
+               .budgetValue().name("Baseline").budgetDate("2018-10-20").budgetIncrease(500).isBaseline(true).addBudgetValue()
                .build();
         BudgetChartData data = subject.calculate(systemDefault, project);
-        
-        List<BudgetChartDataPoint> budget = data.budget;
-        
-        assertResults(budget, 
+
+        assertResults(data.budget, 
             "2018-10-20 | 500.0",
             "2018-10-21 | 525.0"
         );
     }
 
     @Test
-    public void scopeDoneProjection_mustHaveActualProjectionValues() {
+    public void scopeDonewithScopeDonePointsProjection_mustHaveActualProjectionValues() {
         
         BudgetChartCalculator subject = new BudgetChartCalculatorBuilder()
-                .withStartAndEndDate("2018-10-21", "2018-10-23")
-                .withScopeDonePoint("2018-10-21", 0.0, 42.0, 15.0)
-                .withScopeDoneProjectionPoint("2018-10-21",0.4, 40.0, 60.0)
-                .withScopeDoneProjectionPoint("2018-10-22",0.5, 50.0, 50.0)
-                .withScopeDoneProjectionPoint("2018-10-23",0.6, 60.0, 40.0)
+                .withStartDate("2018-10-21")
+                .withEndDate("2018-10-23")
+                .point().date("2018-10-21").progress(0).effortDone(42).effortBacklog(15).addPointToDone()
+                .point().date("2018-10-21").progress(0.4).effortDone(40.0).effortBacklog(60.0).addPointToProjection()
+                .point().date("2018-10-22").progress(0.5).effortDone(50.0).effortBacklog(50.0).addPointToProjection()
+                .point().date("2018-10-23").progress(0.6).effortDone(60.0).effortBacklog(40.0).addPointToProjection()
                 .build();
 
         BudgetChartData data = subject.calculate(systemDefault, project);
-        List<BudgetChartDataPoint> scopeDoneProjection = data.scopeDoneProjection;
 
-        assertResults(scopeDoneProjection,
+        assertResults(data.scopeDoneProjection,
                 "2018-10-21 | 40.0",
                 "2018-10-22 | 50.0",
                 "2018-10-23 | 60.0"
@@ -96,17 +95,17 @@ public class BudgetChartCalculatorTest {
     @Test
     public void scopeTotalProjection_mustHaveActualTotalProjectionValues() {
         BudgetChartCalculator subject = new BudgetChartCalculatorBuilder()
-                .withStartAndEndDate("2018-10-21", "2018-10-23")
-                .withScopeDonePoint("2018-10-21", 0.0, 42.0, 15.0)
-                .withScopeDoneProjectionPoint("2018-10-21", 0.4, 40.0, 60.0)
-                .withScopeDoneProjectionPoint("2018-10-22", 0.5, 50.0, 70.0)
-                .withScopeDoneProjectionPoint("2018-10-23", 0.6, 60.0, 80.0)
+                .withStartDate("2018-10-21")
+                .withEndDate("2018-10-23")
+                .point().date("2018-10-21").progress(0.0).effortDone(42.0).effortBacklog(15.0).addPointToDone()
+                .point().date("2018-10-21").progress(0.4).effortDone(40.0).effortBacklog(60.0).addPointToProjection()
+                .point().date("2018-10-22").progress(0.5).effortDone(50.0).effortBacklog(70.0).addPointToProjection()
+                .point().date("2018-10-23").progress(0.6).effortDone(60.0).effortBacklog(80.0).addPointToProjection()
                 .build();
 
         BudgetChartData data = subject.calculate(systemDefault, project);
-        List<BudgetChartDataPoint> scopeTotalProjection = data.scopeTotalProjection;
 
-        assertResults(scopeTotalProjection,
+        assertResults(data.scopeTotalProjection,
                 "2018-10-21 | 110.0",
                 "2018-10-22 | 132.0",
                 "2018-10-23 | 154.0"
@@ -116,14 +115,15 @@ public class BudgetChartCalculatorTest {
     @Test
     public void scopeDoneProjection_mustHaveFinalProjectionDate() {
         BudgetChartCalculator subject = new BudgetChartCalculatorBuilder()
-                .withStartAndEndDate("2018-10-21", "2018-10-26")
-                .withScopeDonePoint("2018-10-21", 0.0, 42.0, 15.0)
-                .withScopeDoneProjectionPoint("2018-10-21", 0.5, 50.0, 50.0)
-                .withScopeDoneProjectionPoint("2018-10-22", 0.6, 60.0, 40.0)
-                .withScopeDoneProjectionPoint("2018-10-23", 0.7, 70.0, 30.0)
-                .withScopeDoneProjectionPoint("2018-10-24", 0.8, 80.0, 20.0)
-                .withScopeDoneProjectionPoint("2018-10-25", 0.9, 90.0, 10.0)
-                .withScopeDoneProjectionPoint("2018-10-26", 1.0, 100.0, 0.0)
+                .withStartDate("2018-10-21")
+                .withEndDate("2018-10-26")
+                .point().date("2018-10-21").progress(0.0).effortDone(42.0).effortBacklog(15.0).addPointToDone()
+                .point().date("2018-10-21").progress(0.5).effortDone(50.0).effortBacklog(50.0).addPointToProjection()
+                .point().date("2018-10-22").progress(0.6).effortDone(60.0).effortBacklog(40.0).addPointToProjection()
+                .point().date("2018-10-23").progress(0.7).effortDone(70.0).effortBacklog(30.0).addPointToProjection()
+                .point().date("2018-10-24").progress(0.8).effortDone(80.0).effortBacklog(20.0).addPointToProjection()
+                .point().date("2018-10-25").progress(0.9).effortDone(90.0).effortBacklog(10.0).addPointToProjection()
+                .point().date("2018-10-26").progress(1.0).effortDone(100.0).effortBacklog(0.0).addPointToProjection()
                 .build();
 
         BudgetChartData data = subject.calculate(systemDefault, project);
@@ -150,34 +150,117 @@ public class BudgetChartCalculatorTest {
     }
 
     private class BudgetChartCalculatorBuilder {
+        private class ProgressDataPointDraft {
+            private LocalDate date;
+            private double progress;
+            private double effortDone;
+            private double effortBacklog;
+        }
+
+        private class ChangeRequestDraft {
+            private String name;
+            private LocalDate date;
+            private int budgetIncrease;
+            private boolean isBaseline;
+        }
+
         private ChangeRequestService changeRequestService = mock(ChangeRequestService.class);
         private FollowupProgressCalculator calculator = mock(FollowupProgressCalculator.class);
         private List<ChangeRequest> changeRequests = new ArrayList<ChangeRequest>();
         private ProgressData value = new ProgressData();
+        private ProgressDataPointDraft progressDataPointDraft;
+        private ChangeRequestDraft changeRequestDraft;
+
+        public BudgetChartCalculatorBuilder point() {
+            progressDataPointDraft = new ProgressDataPointDraft();
+            return this;
+        }
+
+        public BudgetChartCalculatorBuilder date(String date) {
+            progressDataPointDraft.date = LocalDate.parse(date);
+            return this;
+        }
         
-        public BudgetChartCalculatorBuilder withStartAndEndDate(String startDate, String endDate) {
+        public BudgetChartCalculatorBuilder progress (double progress) {
+            progressDataPointDraft.progress = progress;
+            return this;
+        }
+        
+        public BudgetChartCalculatorBuilder effortDone(double effortDone) {
+            progressDataPointDraft.effortDone = effortDone;
+            return this;
+        }
+        
+        public BudgetChartCalculatorBuilder effortBacklog(double effortBacklog) {
+            progressDataPointDraft.effortBacklog = effortBacklog;
+            return this;
+        }
+        
+        public BudgetChartCalculatorBuilder budgetValue() {
+            changeRequestDraft = new ChangeRequestDraft();
+            return this;
+        }
+        
+        public BudgetChartCalculatorBuilder name(String name) {
+            changeRequestDraft.name = name;
+            return this;
+        }
+        
+        public BudgetChartCalculatorBuilder budgetDate(String date) {
+            changeRequestDraft.date = LocalDate.parse(date);
+            return this;
+        }
+        
+        public BudgetChartCalculatorBuilder budgetIncrease(int budgetIncrease) {
+            changeRequestDraft.budgetIncrease = budgetIncrease;
+            return this;
+        }
+        
+        public BudgetChartCalculatorBuilder isBaseline(boolean isBaseline) {
+            changeRequestDraft.isBaseline = isBaseline;
+            return this;
+        }
+        
+        public BudgetChartCalculatorBuilder addPointToProjection() {
+            value.actualProjection.add(new ProgressDataPoint(
+                    progressDataPointDraft.date,
+                    progressDataPointDraft.progress,
+                    progressDataPointDraft.effortDone,
+                    progressDataPointDraft.effortBacklog));
+            return this;
+        }
+
+        public BudgetChartCalculatorBuilder addPointToDone() {
+            value.actual.add(new ProgressDataPoint(
+                    progressDataPointDraft.date,
+                    progressDataPointDraft.progress,
+                    progressDataPointDraft.effortDone,
+                    progressDataPointDraft.effortBacklog));
+            return this;
+        }
+        
+        public BudgetChartCalculatorBuilder addBudgetValue() {
+            changeRequests.add(new ChangeRequest(
+                    project, 
+                    changeRequestDraft.name, 
+                    changeRequestDraft.date, 
+                    changeRequestDraft.budgetIncrease, 
+                    changeRequestDraft.isBaseline));
+           return this;
+        }
+        
+        public BudgetChartCalculatorBuilder withStartDate(String startDate) {
             value.startingDate = LocalDate.parse(startDate);
+            return this;
+        }
+
+        public BudgetChartCalculatorBuilder withEndDate(String endDate) {
             value.endingDate = LocalDate.parse(endDate);
-            return this;
-        }
-        
-        public BudgetChartCalculatorBuilder withScopeDonePoint(String date, double progress, double effortDone, double effortBacklog) {
-            value.actual.add(new ProgressDataPoint(LocalDate.parse(date), progress, effortDone, effortBacklog));
-            return this;
-        }
-        
-        public BudgetChartCalculatorBuilder withBudgetValue(String name, String date, int budgetIncrease, boolean isBaseline ) {
-            changeRequests.add(new ChangeRequest(project, name, LocalDate.parse(date), budgetIncrease, isBaseline));
-            return this;
-        }
-        
-        public BudgetChartCalculatorBuilder withScopeDoneProjectionPoint(String date, double progress, double effortDone, double effortBacklog) {
-            value.actualProjection.add(new ProgressDataPoint(LocalDate.parse(date), progress, effortDone, effortBacklog));
             return this;
         }
 
         public BudgetChartCalculator build() {
-            when(calculator.calculate(systemDefault, "PROJECT", 2, true)).thenReturn(value);
+            when(calculator.calculateWithCompleteProjection(systemDefault, "PROJECT", 2)).thenReturn(value);
             when(changeRequestService.listByProject(project)).thenReturn(changeRequests);
             when(project.getProjectKey()).thenReturn("PROJECT");
             when(project.getProjectionTimespan()).thenReturn(2);

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.data.FollowupProgressCalculator;
@@ -15,6 +16,7 @@ import objective.taskboard.followup.data.ProgressData;
 import objective.taskboard.project.config.changeRequest.ChangeRequest;
 import objective.taskboard.project.config.changeRequest.ChangeRequestService;
 
+@Component
 public class BudgetChartCalculator {
 
     private FollowupProgressCalculator calculator;
@@ -27,7 +29,8 @@ public class BudgetChartCalculator {
     }
 
     public BudgetChartData calculate(ZoneId systemDefault, ProjectFilterConfiguration project) {
-        ProgressData progressData = calculator.calculate(systemDefault, project.getProjectKey(), project.getProjectionTimespan(), true);
+        ProgressData progressData = calculator.calculateWithCompleteProjection(
+                systemDefault, project.getProjectKey(), project.getProjectionTimespan());
 
         BudgetChartData budgetChartData = new BudgetChartData(); 
 
@@ -43,70 +46,90 @@ public class BudgetChartCalculator {
 
         calculateProjectionDate(budgetChartData);
 
+        budgetChartData.startingDate = progressData.startingDate;
+        budgetChartData.endingDate = progressData.endingDate;
+
         return budgetChartData;
     }
 
     private void calculateProjectionDate(BudgetChartData budgetChartData) {
-        LocalDate lastScopeDoneDay = budgetChartData.scopeDone.get(budgetChartData.scopeDone.size() - 1).date;
-
-        budgetChartData.projectionDate = lastScopeDoneDay.plusDays(budgetChartData.scopeDoneProjection.size());
+        if (budgetChartData.scopeDoneProjection.size() > 1) {
+            LocalDate lastScopeDoneDay = budgetChartData.scopeDone.get(budgetChartData.scopeDone.size() - 1).date;
+            budgetChartData.projectionDate = lastScopeDoneDay.plusDays(budgetChartData.scopeDoneProjection.size());
+        }
     }
 
-    private void addScopeTotalProjection(ProjectFilterConfiguration project, ProgressData progressData,
-            BudgetChartData budgetChartData) {
-        budgetChartData.scopeTotalProjection = progressData.actualProjection.stream().map( point -> {
-            double scopeTotalProjection = (point.sumEffortBacklog + point.sumEffortDone) * (1 + ((project.getRiskPercentage().doubleValue()) / 100));
-            BudgetChartDataPoint bcd = new BudgetChartDataPoint(point.date, scopeTotalProjection);
-            return bcd;
-        }).collect(Collectors.toList());
+    private void addScopeTotalProjection(
+            ProjectFilterConfiguration project, 
+            ProgressData progressData,
+            BudgetChartData budgetChartData) 
+    {
+        budgetChartData.scopeTotalProjection = progressData.actualProjection.stream()
+            .map( point -> {
+                double scopeTotalProjection = 
+                        (point.sumEffortBacklog + point.sumEffortDone) * (1 + ((project.getRiskPercentage().doubleValue()) / 100));
+                return new BudgetChartDataPoint(point.date, scopeTotalProjection);
+            }).collect(Collectors.toList());
     }
 
-    private void addBudget(ProjectFilterConfiguration project, ProgressData progressData,
-            BudgetChartData budgetChartData) {
+    private void addBudget(
+            ProjectFilterConfiguration project, 
+            ProgressData progressData,
+            BudgetChartData budgetChartData) 
+    {
         List<ChangeRequest> changeRequests = changeRequestService.listByProject(project);
         Collections.reverse(changeRequests);
-        List<BudgetChartDataPoint>budget = new ArrayList<BudgetChartDataPoint>();
+        List<BudgetChartDataPoint> budget = new ArrayList<>();
 
-        int dateIndex = 0;
+        int crIndex = 0;
         int budgetSum = 0;
         LocalDate currentDate = progressData.startingDate;
         LocalDate endDate = progressData.endingDate;
 
         while (!currentDate.isAfter(endDate)) {
-            if (changeRequests.size() > dateIndex && changeRequests.get(dateIndex).getDate().equals(currentDate)) {
-                budgetSum += changeRequests.get(dateIndex).getBudgetIncrease();
-                dateIndex++;
+            if (isNextChangeRequestAppliable(changeRequests, crIndex, currentDate)) {
+                budgetSum += changeRequests.get(crIndex).getBudgetIncrease();
+                crIndex++;
             }
-            
+
             budget.add(new BudgetChartDataPoint(currentDate, budgetSum));
-            
+
             currentDate = currentDate.plusDays(1l);
         }
 
         budgetChartData.budget = budget;
     }
 
-    private void addScopeDoneProjection(ProgressData progressData, BudgetChartData budgetChartData) {
-        budgetChartData.scopeDoneProjection = progressData.actualProjection.stream().map( point -> {
-            BudgetChartDataPoint bcd = new BudgetChartDataPoint(point.date, point.sumEffortDone);
-            return bcd;
-        }).collect(Collectors.toList());
+    private boolean isNextChangeRequestAppliable(List<ChangeRequest> changeRequests, int dateIndex, LocalDate currentDate) {
+        return changeRequests.size() > dateIndex && changeRequests.get(dateIndex).getDate().equals(currentDate);
     }
 
-    private void addScopeTotal(ProjectFilterConfiguration project, ProgressData progressData,
-            BudgetChartData budgetChartData) {
-        budgetChartData.scopeTotal = progressData.actual.stream().map( point -> {
-            double scopeTotal = (point.sumEffortBacklog + point.sumEffortDone) * (1 + ((project.getRiskPercentage().doubleValue()) / 100));
-            BudgetChartDataPoint bcd = new BudgetChartDataPoint(point.date, scopeTotal);
-            return bcd;
-        }).collect(Collectors.toList());
+    private void addScopeDoneProjection(ProgressData progressData, BudgetChartData budgetChartData) {
+        budgetChartData.scopeDoneProjection = progressData.actualProjection.stream()
+            .map( point -> {
+                    return new BudgetChartDataPoint(point.date, point.sumEffortDone);
+            }).collect(Collectors.toList());
+    }
+
+    private void addScopeTotal(
+            ProjectFilterConfiguration project, 
+            ProgressData progressData,
+            BudgetChartData budgetChartData) 
+    {
+            
+        budgetChartData.scopeTotal = progressData.actual.stream()
+            .map( point -> {
+                double scopeTotal = 
+                        (point.sumEffortBacklog + point.sumEffortDone) * (1 + ((project.getRiskPercentage().doubleValue()) / 100));
+                return new BudgetChartDataPoint(point.date, scopeTotal);
+            }).collect(Collectors.toList());
     }
 
     private void addScopeDone(ProgressData progressData, BudgetChartData budgetChartData) {
-        budgetChartData.scopeDone = progressData.actual.stream().map( point -> {
-            BudgetChartDataPoint bcd = new BudgetChartDataPoint(point.date, point.sumEffortDone);
-            return bcd;
-        }).collect(Collectors.toList());
+        budgetChartData.scopeDone = progressData.actual.stream()
+            .map( point -> {
+                    return new BudgetChartDataPoint(point.date, point.sumEffortDone);
+            }).collect(Collectors.toList());
     }
 
 }
