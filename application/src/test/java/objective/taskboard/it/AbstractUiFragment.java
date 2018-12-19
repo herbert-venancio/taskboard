@@ -231,6 +231,10 @@ public abstract class AbstractUiFragment {
         });
     }
 
+    protected void waitForHover(By by) {
+        new Actions(webDriver).moveToElement(getElementWhenItExistsAndIsVisible(by)).perform();
+    }
+
     protected void setInputValue(WebElement input, String value) {
         input.clear();
         input.sendKeys(value);

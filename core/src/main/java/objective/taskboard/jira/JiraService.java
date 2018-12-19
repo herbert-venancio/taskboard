@@ -219,6 +219,15 @@ public class JiraService {
     public void unblock(String issueKey) {
         setBlocked(issueKey, false, "");
     }
+    
+    public void saveDescription(String issueKey, String value) {
+        Response result = updateIssue(issueKey, JiraIssue.Input.builder(properties)
+                .description(value)
+                .build());
+
+        if (HttpStatus.valueOf(result.getStatus()) != HttpStatus.NO_CONTENT)
+            throw new FrontEndMessageException("Unexpected return code during saveDescription: " + result.getStatus());
+    }
 
     public void setTeams(String issueKey, List<Long> teamsIds) {
         log.debug("⬣⬣⬣⬣⬣  setTeams");

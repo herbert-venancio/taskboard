@@ -24,6 +24,7 @@ import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -389,6 +390,20 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
         return syncIssueTeams(issueKey, issue);
     }
 
+    public Issue saveDescription(String issueKey, String description) {
+       jiraBean.saveDescription(issueKey, description);
+
+        Issue issue = getIssueCopyByKeyOrCry(issueKey);
+        
+        if (!issue.getDescription().equals(description)) {
+            issue.setDescription(description);
+            issue.setRemoteIssueUpdatedDate(new Date());
+            putIssue(issue);
+        }
+        
+        return issue;
+    }
+
     private Issue syncIssueTeams(String issueKey, Issue issue) {
         jiraBean.setTeams(issue.getIssueKey(),issue.getRawAssignedTeamsIds());
         return updateIssueBuffer(issueKey);
@@ -537,5 +552,4 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
 
         private static final long serialVersionUID = 1L;
     }
-
 }

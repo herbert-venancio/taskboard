@@ -2,6 +2,7 @@ package objective.taskboard.it;
 
 import static org.openqa.selenium.By.cssSelector;
 import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
+import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElement;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
@@ -12,7 +13,10 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
+
+import objective.taskboard.utils.ThreadUtils;
 
 class IssueDetails extends AbstractUiFragment {
 
@@ -149,6 +153,26 @@ class IssueDetails extends AbstractUiFragment {
         WebElement transitionButton = issueDetailRoot.findElement(By.cssSelector("[data-transition-name='"+transitionName+"']"));
         waitForClick(transitionButton);
         return this;
+    }
+
+    public void setDescription(String description) {
+        assertIsOpened();
+
+        waitForHover(By.cssSelector(".description-box.issue-detail"));
+
+        waitForClick(By.cssSelector(".description-edit"));
+
+        WebElement descriptionField = issueDetailRoot.findElement(By.className("description-box__field"));
+        setInputValue(descriptionField, description);
+
+        waitForClick(By.xpath("//*[contains(text(), 'Salvar')]"));
+
+        assertDescription(description);
+    }
+
+    public void assertDescription(String text) {
+        WebElement descriptionContentArea = webDriver.findElement(By.cssSelector(".description-box marked-element"));
+        waitTextInElement(descriptionContentArea, text);
     }
 
     public IssueDetails confirm() {
