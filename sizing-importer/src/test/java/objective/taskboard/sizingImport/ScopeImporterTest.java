@@ -1,10 +1,25 @@
 package objective.taskboard.sizingImport;
 
+import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.customField;
+import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.demand;
+import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.demandType;
+import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.featureType;
+import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.phase;
+import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.withProject;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Collections;
+
+import org.assertj.core.api.OptionalAssert;
 import org.junit.Test;
+
+import objective.taskboard.domain.converter.IssueFieldsExtractor;
+import objective.taskboard.jira.client.JiraIssueDto;
 
 public class ScopeImporterTest {
 
     private ScopeImporterTestDSL dsl = new ScopeImporterTestDSL();
+    private ScopeImporterTestDSL2 dsl2 = new ScopeImporterTestDSL2();
 
     @Test
     public void importNoLines_shouldFinishWithSuccessWithoutLinesToImport() {
@@ -538,5 +553,57 @@ public class ScopeImporterTest {
                 .withSuccessfulIssueImported("PX-15")
             .and()
                 .noVersionHaveBeenCreated();
+    }
+
+    @Test
+    public void whenImportLineWithExistingDemand_shouldBeLinkedToDemand() {
+        givenJira(
+                withProject()
+                        .key("PX")
+                        .withVersion("One")
+                        .withIssueTypes(
+                                demandType()
+                                        .name("Demand")
+                                        .withCustomFields(
+                                                customField().name("Release")
+                                        ),
+                                featureType()
+                                        .name("Feature")
+                                        .withCustomFields(
+                                                customField().name("Release")
+                                        )
+                        )
+                        .withIssues(
+                                demand().key("PX-1")
+                        )
+        );
+
+        whenImportSizing(
+                phase("One").demand("Demand Summary").feature("Feature Summary")
+        ).intoProject("PX");
+
+        assertThatIssue("PX-2")
+                .isPresent()
+                .hasValueSatisfying(issue -> {
+                    String parentKey = extractParentKey(issue);
+                    assertThat(parentKey)
+                            .isEqualTo("PX-1");
+                });
+    }
+
+    private void givenJira(ScopeImporterTestDSL2.JiraProjectBuilder... builders) {
+        dsl2.jira(builders);
+    }
+
+    private ScopeImporterTestDSL2.SizingInvocationBuilder whenImportSizing(ScopeImporterTestDSL2.SizingLineBuilder... builders) {
+        return dsl2.sizing(builders);
+    }
+
+    private OptionalAssert<JiraIssueDto> assertThatIssue(String key) {
+        return dsl2.assertThatIssue(key);
+    }
+
+    private String extractParentKey(JiraIssueDto issue) {
+        return IssueFieldsExtractor.extractParentKey(dsl2.jiraProperties, issue, Collections.singletonList("is demanded by"));
     }
 }
