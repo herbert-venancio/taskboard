@@ -10,6 +10,7 @@ public interface Permissions {
     String PROJECT_DASHBOARD_VIEW = "project.dashboard.view";
     String PROJECT_DASHBOARD_TACTICAL = "project.dashboard.tactical";
     String PROJECT_DASHBOARD_OPERATIONAL = "project.dashboard.operational";
+    String PROJECT_DASHBOARD_CUSTOMER = "project.dashboard.customer";
 
     String FOLLOWUP_TEMPLATE_EDIT = "followup.template.edit";
     String SIZING_IMPORT_VIEW = "sizing.import.view";

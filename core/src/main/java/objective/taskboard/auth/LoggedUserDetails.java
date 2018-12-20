@@ -35,6 +35,7 @@ public class LoggedUserDetails {
         public static final String PROJECT_ADMINISTRATORS = "Administrators";
         public static final String PROJECT_DEVELOPERS = "Developers";
         public static final String PROJECT_KPI = "KPI";
+        public static final String PROJECT_CUSTOMERS = "Customer";
 
         public Long id;
         public String name;

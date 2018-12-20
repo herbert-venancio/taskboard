@@ -68,7 +68,7 @@ public class FollowUpProgressControllerTest {
         when(projectDashboardTacticalPermission.isAuthorizedFor(PROJECT_KEY)).thenReturn(true);
         when(cacheManager.getCache(DASHBOARD_PROGRESS_DATA)).thenReturn(new GuavaCacheManager(DASHBOARD_PROGRESS_DATA).getCache(DASHBOARD_PROGRESS_DATA));
         when(projects.getProjectByKey(PROJECT_KEY)).thenReturn(Optional.of(project));
-        when(calculator.calculate(eq(determineTimeZoneId(ZONE_ID)), eq(PROJECT_KEY), anyInt())).thenReturn(new ProgressData());
+        when(calculator.calculateWithExpectedProjection(eq(determineTimeZoneId(ZONE_ID)), eq(PROJECT_KEY), anyInt())).thenReturn(new ProgressData());
 
         subject.initCache();
     }
@@ -88,7 +88,7 @@ public class FollowUpProgressControllerTest {
                 .httpStatus(OK)
                 .bodyClass(ProgressData.class);
 
-        verify(calculator).calculate(determineTimeZoneId(ZONE_ID), PROJECT_KEY, projectionTimespan);
+        verify(calculator).calculateWithExpectedProjection(determineTimeZoneId(ZONE_ID), PROJECT_KEY, projectionTimespan);
     }
 
     @Test
@@ -97,7 +97,7 @@ public class FollowUpProgressControllerTest {
                 .httpStatus(OK)
                 .bodyClass(ProgressData.class);
         
-        verify(calculator).calculate(determineTimeZoneId(ZONE_ID), PROJECT_KEY, PROJECT_PROJECTION_TIMESPAN);
+        verify(calculator).calculateWithExpectedProjection(determineTimeZoneId(ZONE_ID), PROJECT_KEY, PROJECT_PROJECTION_TIMESPAN);
     }
 
     @Test
@@ -140,7 +140,7 @@ public class FollowUpProgressControllerTest {
 
     @Test
     public void ifProjectDatesIsNotConfigured_returnInternalServerError() throws Exception {
-        when(calculator.calculate(any(), any(), anyInt())).thenThrow(new ProjectDatesNotConfiguredException());
+        when(calculator.calculateWithExpectedProjection(any(), any(), anyInt())).thenThrow(new ProjectDatesNotConfiguredException());
 
         AssertResponse.of(subject.progress(PROJECT_KEY, ZONE_ID, Optional.empty()))
                 .httpStatus(INTERNAL_SERVER_ERROR)
@@ -149,7 +149,7 @@ public class FollowUpProgressControllerTest {
 
     @Test
     public void ifSnapshotHasNoClusterConfiguration_returnInternalServerError() throws Exception {
-        when(calculator.calculate(any(), any(), anyInt())).thenThrow(new ClusterNotConfiguredException());
+        when(calculator.calculateWithExpectedProjection(any(), any(), anyInt())).thenThrow(new ClusterNotConfiguredException());
         
         AssertResponse.of(subject.progress(PROJECT_KEY, ZONE_ID, Optional.empty()))
                 .httpStatus(INTERNAL_SERVER_ERROR)

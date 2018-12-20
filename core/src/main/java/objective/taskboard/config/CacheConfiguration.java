@@ -50,6 +50,7 @@ public class CacheConfiguration {
     public static final String ISSUE_LINKS_METADATA = "issueLinksMetadata";
     public static final String JIRA_TIME_ZONE = "jiraTimeZone";
     public static final String DASHBOARD_PROGRESS_DATA = "dashboardProgressData";
+    public static final String DASHBOARD_BUDGET_DATA = "dashboardBudgetData";
     public static final String JIRA_USER = "jiraUser";
     public static final String COLOR_BY_ISSUETYPE_AND_STATUS = "colorByIssueTypeAndStatus";
     public static final String CONFIGURATION_COLOR = "getColorByIssueTypeAndStatusMap";
@@ -75,6 +76,7 @@ public class CacheConfiguration {
                 new GuavaCache(HOLIDAYS, CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).concurrencyLevel(1).build()),
                 new GuavaCache(JIRA_TIME_ZONE, CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.DAYS).concurrencyLevel(1).build()),
                 new GuavaCache(DASHBOARD_PROGRESS_DATA, CacheBuilder.newBuilder().maximumSize(20).expireAfterWrite(1, TimeUnit.DAYS).concurrencyLevel(1).build()),
+                new GuavaCache(DASHBOARD_BUDGET_DATA, CacheBuilder.newBuilder().maximumSize(20).expireAfterWrite(1, TimeUnit.DAYS).concurrencyLevel(1).build()),
                 new GuavaCache(JIRA_USER, CacheBuilder.newBuilder().expireAfterWrite(6, TimeUnit.HOURS).concurrencyLevel(1).build()),
                 new GuavaCache(USER_PREFERENCES, CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.DAYS).concurrencyLevel(1).build())
         ));
