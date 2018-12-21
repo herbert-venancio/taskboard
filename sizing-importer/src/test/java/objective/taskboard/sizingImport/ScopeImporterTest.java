@@ -574,7 +574,7 @@ public class ScopeImporterTest {
                                         )
                         )
                         .withIssues(
-                                demand().key("PX-1")
+                                demand().key("PX-1").summary("Demand Summary")
                         )
         );
 
@@ -589,6 +589,8 @@ public class ScopeImporterTest {
                     assertThat(parentKey)
                             .isEqualTo("PX-1");
                 });
+        assertThatIssue("PX-3")
+                .isNotPresent();
     }
 
     private void givenJira(ScopeImporterTestDSL2.JiraProjectBuilder... builders) {

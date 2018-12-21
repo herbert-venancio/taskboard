@@ -1,6 +1,8 @@
 package objective.taskboard.sizingImport;
 
 import static java.util.stream.Collectors.toMap;
+import static objective.taskboard.sizingImport.SizingImportJiraMock.NOT_MOCKED_EXCEPTION_ANSWER;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
@@ -17,6 +19,7 @@ import org.assertj.core.api.OptionalAssert;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.client.JiraCreateIssue;
 import objective.taskboard.jira.client.JiraIssueDto;
+import objective.taskboard.jira.client.JiraIssueDtoSearch;
 import objective.taskboard.jira.data.JiraIssue;
 import objective.taskboard.jira.data.JiraProject;
 import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
@@ -24,7 +27,7 @@ import objective.taskboard.jira.properties.JiraProperties;
 
 public class ScopeImporterTestDSL2 {
 
-    private final ScopeImporterJiraMock jiraMock = new ScopeImporterJiraMock();
+    private final SizingImportJiraMock jiraMock = new SizingImportJiraMock();
     private final SizingImportConfig importConfig = new SizingImportConfig();
     public final JiraProperties jiraProperties = new JiraProperties();
     private final MetadataService metadataService = mock(MetadataService.class);
@@ -50,9 +53,11 @@ public class ScopeImporterTestDSL2 {
         customfield.setRelease(release);
         jiraProperties.setCustomfield(customfield);
 
+        doAnswer(NOT_MOCKED_EXCEPTION_ANSWER).when(jiraEndpoint).request(any());
         doReturn(jiraMock.projectRest).when(jiraEndpoint).request(eq(JiraProject.Service.class));
         doReturn(jiraMock.createMetadataRest).when(jiraEndpoint).request(eq(JiraCreateIssue.Service.class));
         doReturn(jiraMock.issueRest).when(jiraEndpoint).request(eq(JiraIssue.Service.class));
+        doReturn(jiraMock.searchRest).when(jiraEndpoint).request(eq(JiraIssueDtoSearch.Service.class));
         doAnswer(invocation -> jiraMock.linkTypeRest.all()
                 .issueLinkTypes.stream()
                 .collect(toMap(l -> l.id, l -> l))
@@ -169,8 +174,8 @@ public class ScopeImporterTestDSL2 {
             return this;
         }
 
-        public void build(ScopeImporterTestDSL2 dsl, ScopeImporterJiraMock jira) {
-            ScopeImporterJiraMock.ScopeImporterJiraProjectMock project = jira.createProject(key, name);
+        public void build(ScopeImporterTestDSL2 dsl, SizingImportJiraMock jira) {
+            SizingImportJiraMock.ScopeImporterJiraProjectMock project = jira.createProject(key, name);
             versions.forEach(v -> v.build(dsl, project));
             issueTypes.forEach(t -> t.build(dsl, project));
             issues.forEach(i -> i.build(dsl, project));
@@ -186,7 +191,7 @@ public class ScopeImporterTestDSL2 {
             return this;
         }
 
-        public void build(ScopeImporterTestDSL2 dsl, ScopeImporterJiraMock.ScopeImporterJiraProjectMock project) {
+        public void build(ScopeImporterTestDSL2 dsl, SizingImportJiraMock.ScopeImporterJiraProjectMock project) {
             project.createVersion(name);
         }
     }
@@ -240,8 +245,8 @@ public class ScopeImporterTestDSL2 {
             return this;
         }
 
-        public void build(ScopeImporterTestDSL2 dsl, ScopeImporterJiraMock.ScopeImporterJiraProjectMock project) {
-            ScopeImporterJiraMock.ScopeImporterJiraIssueTypeMock issueType = dsl.jiraMock.createIssueType(name, lane == Lane.SUBTASK);
+        public void build(ScopeImporterTestDSL2 dsl, SizingImportJiraMock.ScopeImporterJiraProjectMock project) {
+            SizingImportJiraMock.ScopeImporterJiraIssueTypeMock issueType = dsl.jiraMock.createIssueType(name, lane == Lane.SUBTASK);
             this.fields.forEach(field -> field.build(dsl, issueType));
 
             if (lane != null) {
@@ -255,6 +260,8 @@ public class ScopeImporterTestDSL2 {
                         details.setId(issueType.id);
                         dsl.jiraProperties.getIssuetype().getFeatures().add(details);
                         break;
+                    default:
+                    	break;
                 }
             }
 
@@ -283,7 +290,7 @@ public class ScopeImporterTestDSL2 {
             return this;
         }
 
-        public void build(ScopeImporterTestDSL2 dsl, ScopeImporterJiraMock.ScopeImporterJiraIssueTypeMock issueType) {
+        public void build(ScopeImporterTestDSL2 dsl, SizingImportJiraMock.ScopeImporterJiraIssueTypeMock issueType) {
             JiraCreateIssue.FieldInfoMetadata field = issueType.createField(name, required);
             if(isTshirtSize)
                 dsl.jiraProperties.getCustomfield().getTShirtSize().getIds().add(field.id);
@@ -297,6 +304,7 @@ public class ScopeImporterTestDSL2 {
 
         private String key;
         private String type;
+        private String summary;
 
         public JiraIssueBuilder key(String key) {
             this.key = key;
@@ -304,20 +312,33 @@ public class ScopeImporterTestDSL2 {
         }
 
         public JiraIssueBuilder isDemand() {
-            return this;
+            return type("Demand");
         }
 
         public JiraIssueBuilder isFeature() {
-            this.type = "Feature";
-            return this;
+            return type("Feature");
         }
 
         public JiraIssueBuilder isSubtask() {
+            return type("Sub-task");
+        }
+
+        public JiraIssueBuilder type(String type) {
+            this.type = type;
             return this;
         }
 
-        public void build(ScopeImporterTestDSL2 dsl, ScopeImporterJiraMock.ScopeImporterJiraProjectMock project) {
-            project.createIssue(key);
+        public JiraIssueBuilder summary(String summary) {
+            this.summary = summary;
+            return this;
+        }
+
+        public void build(ScopeImporterTestDSL2 dsl, SizingImportJiraMock.ScopeImporterJiraProjectMock project) {
+            SizingImportJiraMock.ScopeImporterJiraIssueMock issue = project.createIssue(key);
+            if(type != null)
+                issue.setField("issuetype", type);
+            if(summary != null)
+                issue.setField("summary", summary);
         }
     }
 
@@ -364,6 +385,12 @@ public class ScopeImporterTestDSL2 {
         public SizingLineBuilder feature(String feature) {
             values.put(SheetColumnDefinitionProviderScope.FEATURE.getName(), new SizingImportLine.ImportValue(FEATURE_COLUMN, feature));
             values.put(SheetColumnDefinitionProviderScope.TYPE.getName(), new SizingImportLine.ImportValue(TYPE_COLUMN, "Feature"));
+            return this;
+        }
+
+        public SizingLineBuilder timebox(String timebox) {
+            values.put(SheetColumnDefinitionProviderScope.TIMEBOX.getName(), new SizingImportLine.ImportValue(TIMEBOX_COLUMN, timebox));
+            values.put(SheetColumnDefinitionProviderScope.TYPE.getName(), new SizingImportLine.ImportValue(TYPE_COLUMN, "Timebox"));
             return this;
         }
 

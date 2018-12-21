@@ -1,11 +1,12 @@
 package objective.taskboard.sizingImport;
 
 import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.*;
+import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.EXTRA_FIELD_ID_TAG;
+import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.SIZING_FIELD_ID_TAG;
+import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.TIMEBOX;
 import static objective.taskboard.sizingImport.SizingImportConfig.SHEET_SCOPE;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -58,7 +59,7 @@ class ScopeImporter {
                 .collect(toMap(t -> t.name, Function.identity()));
         
         Map<Name, Version> importedVersions = recoverImportedVersions(project);
-        Map<Name, ImportedDemand> importedDemands = recoverImportedDemands(allLines);
+        Map<Name, ImportedDemand> importedDemands = recoverImportedDemands(project, allLines);
 
         for (SizingImportLineScope line : linesToImport) {
             importerNotifier.notifyLineImportStarted(line);
@@ -187,21 +188,16 @@ class ScopeImporter {
         return version;
     }
 
-    private Map<Name, ImportedDemand> recoverImportedDemands(List<SizingImportLineScope> allLines) {
-        Map<Name, List<SizingImportLineScope>> importedLinesByDemand = allLines.stream()
-                .filter(SizingImportLineScope::isImported)
-                .collect(groupingBy(l -> new Name(l.getDemand())));
-
-        return importedLinesByDemand.entrySet().stream()
-                .map((entry) -> { 
-                    Name demandName = entry.getKey();
-                    List<SizingImportLineScope> linesOfDemand = entry.getValue();
-                    
-                    return findFirstDemandKey(linesOfDemand)
-                            .map(demandKey -> new ImportedDemand(demandKey, demandName)); 
-                })
+    private Map<Name, ImportedDemand> recoverImportedDemands(JiraProject project, List<SizingImportLineScope> allLines) {
+        return allLines.parallelStream()
+                .map(line -> new Name(line.getDemand()))
+                .distinct()
+                .map(demand -> jiraFacade.findDemandBySummary(project.key, demand.value))
                 .filter(Optional::isPresent)
-                .map(Optional::get)
+                .map(result -> {
+                    JiraIssueDto demand = result.get();
+                    return new ImportedDemand(demand.getKey(), new Name(demand.getSummary()));
+                })
                 .collect(toMap(ImportedDemand::getName, d -> d));
     }
 
@@ -251,17 +247,6 @@ class ScopeImporter {
 
     private boolean isTimeBoxFeature(final String typeLine) {
             return TIMEBOX.getName().equalsIgnoreCase(typeLine);
-    }
-
-    private Optional<String> findFirstDemandKey(List<SizingImportLineScope> linesOfDemand) {
-        return linesOfDemand.stream()
-                .map(line -> {
-                    JiraIssueDto feature = jiraFacade.getIssue(line.getJiraKey());
-                    return jiraFacade.getDemandKeyGivenFeature(feature);
-                })
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .findFirst();
     }
 
     private boolean isInvalidTimeboxValue(final String timeboxValue) {
