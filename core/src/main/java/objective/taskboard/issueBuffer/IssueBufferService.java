@@ -1,25 +1,7 @@
-/*-
- * [LICENSE]
- * Taskboard
- * - - -
- * Copyright (C) 2015 - 2016 Objective Solutions
- * - - -
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * [/LICENSE]
- */
 package objective.taskboard.issueBuffer;
 
+import static java.util.concurrent.Executors.newScheduledThreadPool;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
@@ -76,6 +58,8 @@ import retrofit.RetrofitError;
 @Service
 public class IssueBufferService implements ApplicationListener<ProjectUpdateEvent> {
     private static final String CACHE_FILENAME = "issues.dat";
+    private static final int UPDATE_ISSUEBUFFER_BACKGROUND_DELAY = 10;
+    public static final int THREAD_POOL_SIZE = 1;
 
     private static final Logger log = LoggerFactory.getLogger(IssueBufferService.class);
 
@@ -194,11 +178,10 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
         final Issue issue = issueConverter.convertSingleIssue(jiraIssue, parentProviderFetchesMissingParents);
         putIssue(issue);
 
-        updateIssueBuffer();// triggers a background update, because this change might affect other issues 
-
+        updateIssueBufferInBackground();
         return getIssueByKey(issue.getIssueKey());
     }
-    
+
     private synchronized Issue putJiraIssue(JiraIssueDto jiraIssue) {
         final Issue issue = issueConverter.convertSingleIssue(jiraIssue, parentProviderFetchesMissingParents);
         putIssue(issue);
@@ -551,5 +534,11 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
         }
 
         private static final long serialVersionUID = 1L;
+    }
+
+    private void updateIssueBufferInBackground() {
+        log.info("Scheduling to perform 'updateIssueBuffer()' after {} seconds.", UPDATE_ISSUEBUFFER_BACKGROUND_DELAY);
+        newScheduledThreadPool(THREAD_POOL_SIZE)
+                .schedule(() -> updateIssueBuffer(), UPDATE_ISSUEBUFFER_BACKGROUND_DELAY, SECONDS);
     }
 }
