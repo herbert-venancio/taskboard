@@ -81,9 +81,13 @@ public class IssueKpi {
         return statusTransition.map(s -> s.getEffort()).orElse(0l);
     }
 
-    public Long getEffortUntilDate(String status, ZonedDateTime dateLimit) {
+    public Long getEffortFromStatusUntilDate(String status, ZonedDateTime dateLimit) {
         Optional<StatusTransition> statusTransition =  firstStatus.flatMap(f -> f.find(status));
         return statusTransition.map(s -> s.getEffortUntilDate(dateLimit)).orElse(0l);
+    }
+
+    public long getEffortUntilDate(ZonedDateTime dateLimit) {
+        return firstStatus.map(s -> s.collectEffortUntilDate(dateLimit)).orElse(0L);
     }
 
     public List<Worklog> getWorklogFromChildrenTypeId(Long subtaskType) {

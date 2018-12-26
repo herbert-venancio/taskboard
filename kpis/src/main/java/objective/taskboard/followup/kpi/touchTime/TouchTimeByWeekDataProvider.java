@@ -102,7 +102,7 @@ public class TouchTimeByWeekDataProvider implements TouchTimeProvider<TouchTimeC
             List<IssueKpi> issuesToCount = issues.stream().filter(filter).collect(Collectors.toList());
             ZonedDateTime lastDayOfWeek = endOfWeek(week);
             double averageEffortInHours = issuesToCount.stream()
-                .mapToLong(issue -> issue.getEffortUntilDate(status, lastDayOfWeek))
+                .mapToLong(issue -> issue.getEffortFromStatusUntilDate(status, lastDayOfWeek))
                 .mapToDouble(DateTimeUtils::secondsToHours)
                 .average()
                 .orElse(0d);

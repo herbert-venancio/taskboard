@@ -5,12 +5,11 @@ import org.junit.Test;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi;
 
 public class IssueKpiTest {
-    
-    private DSLKpi dsl = dsl();
-    
+
+
     @Test
     public void checkStatusOnDay_happyDay() {
-        dsl
+        dsl()
         .environment()
             .givenIssue("I-1")
                 .type("Subtask")
@@ -44,7 +43,7 @@ public class IssueKpiTest {
 
     @Test
     public void checkStatusOnDay_emptyTransitions() {
-        dsl
+        dsl()
         .environment()
             .givenIssue("I-1")
                 .type("Subtask")
@@ -78,7 +77,7 @@ public class IssueKpiTest {
 
     @Test
     public void checkStatusOnDay_openIssue() {
-        dsl
+        dsl()
         .environment()
             .givenIssue("I-1")
                 .type("Subtask")
@@ -97,10 +96,10 @@ public class IssueKpiTest {
                     .isOnStatus("To Do")
                     .isNotOnStatus("Doing").eoDc();
     }
-    
+
     @Test
     public void checkStatusOnDay_futureIssue() {
-        dsl
+        dsl()
         .environment()
             .givenIssue("I-1")
                 .type("Subtask")
@@ -123,10 +122,10 @@ public class IssueKpiTest {
                     .isNotOnStatus("Doing")
                     .isNotOnStatus("Done").eoDc();
     }
-    
+
     @Test
     public void hasTransitedToStatus_happyDay() {
-        dsl
+        dsl()
         .environment()
             .givenIssue("I-1")
                 .type("Subtask")
@@ -147,10 +146,10 @@ public class IssueKpiTest {
             .atDate("2020-01-03")
                 .hasTransitedToAnyStatus("Done").eoDc();
     }
-    
+
     @Test
     public void hasTransitedToStatus_nonExistentStatus() {
-        dsl
+        dsl()
         .environment()
             .givenIssue("I-1")
                 .type("Subtask")
@@ -171,10 +170,10 @@ public class IssueKpiTest {
             .atDate("2020-01-03")
                 .hasNotTransitedToAnyStatus("Integrating","Cancelled").eoDc();
     }
-    
+
     @Test
     public void hasTransitedToStatus_onlyOneStatusTransited() {
-        dsl
+        dsl()
         .environment()
             .givenIssue("I-1")
                 .type("Subtask")
@@ -195,10 +194,10 @@ public class IssueKpiTest {
                 .atDate("2020-01-03")
                     .hasTransitedToAnyStatus("Doing","Done").eoDc();
     }
-    
+
     @Test
     public void hasTransitedToStatus_onlyNotTransited() {
-        dsl
+        dsl()
         .environment()
             .givenIssue("I-1")
                 .type("Subtask")
@@ -219,10 +218,10 @@ public class IssueKpiTest {
             .atDate("2020-01-03")
                 .hasNotTransitedToAnyStatus("Doing").eoDc();
     }
-    
+
     @Test
     public void hasTransitedToStatus_earliestTransition() {
-        dsl
+        dsl()
             .environment()
                 .givenIssue("I-1")
                     .type("Subtask")
@@ -243,10 +242,10 @@ public class IssueKpiTest {
                     .atDate("2020-01-03")
                         .hasNotTransitedToAnyStatus("Doing","Done").eoDc();
     }
-    
+
     @Test
     public void getWorklogFromChildren() {
-        dsl 
+        dsl()
         .environment()
             .givenIssue("PROJ-01")
                 .type("Feature")
@@ -276,10 +275,10 @@ public class IssueKpiTest {
                 .withChild("PROJ-02")
                     .atStatus("Doing").hasTotalEffort(300l);
     }
-    
+
     @Test
     public void wrongConfiguration_dontGetWorklogFromChildren() {
-        dsl
+        dsl()
         .environment()
             .givenIssue("PROJ-01")
                 .type("Feature")
@@ -309,10 +308,10 @@ public class IssueKpiTest {
             .withChild("PROJ-02")
                 .atStatus("Doing").hasTotalEffort(300l);
     }
-    
+
     @Test
     public void getWorklogFromChildrenStatus_happyDay() {
-        dsl. 
+        dsl().
         environment()
             .givenIssue("PROJ-01")
                 .type("Feature")
@@ -346,10 +345,10 @@ public class IssueKpiTest {
                     .atStatus("Doing")
                         .hasTotalEffort(300l);
     }
-    
+
     @Test
     public void wrongConfiguration_dontGetWorklogFromChildrenStatus() {
-        dsl. 
+        dsl().
         environment()
             .givenIssue("PROJ-01")
                 .type("Feature")
@@ -382,7 +381,7 @@ public class IssueKpiTest {
 
     @Test
     public void getRangeByProgressingStatuses_happyDay() {
-        dsl. 
+        dsl().
         environment()
             .todayIs("2020-01-06")
             .givenIssue("PROJ-01")
@@ -403,10 +402,10 @@ public class IssueKpiTest {
                         .startsOn("2020-01-02").endsOn("2020-01-05");
     }
 
-    
+
     @Test
     public void getRangeByProgressingStatuses_onlyOneProgressingWithDate() {
-        dsl. 
+        dsl().
         environment()
             .todayIs("2020-01-06")
             .givenIssue("PROJ-01")
@@ -426,11 +425,11 @@ public class IssueKpiTest {
                 .rangeBasedOnProgressingStatuses()
                         .startsOn("2020-01-02").endsOn("2020-01-06");
     }
-    
-    
+
+
     @Test
     public void getRangeByProgressingStatuses_doingIssue() {
-        dsl. 
+        dsl().
         environment()
             .todayIs("2020-01-03")
             .givenIssue("PROJ-01")
@@ -450,12 +449,12 @@ public class IssueKpiTest {
                 .rangeBasedOnProgressingStatuses()
                         .startsOn("2020-01-02").endsOn("2020-01-03");
     }
-    
-    
+
+
     @Test
     public void getRangeByProgressingStatuses_straightToReview_workingOnDoing() {
-        
-        dsl. 
+
+        dsl().
         environment()
             .todayIs("2020-01-10")
             .givenIssue("PROJ-01")
@@ -479,10 +478,10 @@ public class IssueKpiTest {
                         .startsOn("2020-01-01").endsOn("2020-01-08")
                 .atStatus("Doing").hasTotalEffort(300l);
     }
-    
+
     @Test
     public void getRangeByProgressingStatuses_openIssue_workingOnReview() {
-        dsl. 
+        dsl().
         environment()
             .todayIs("2020-01-10")
             .givenIssue("PROJ-01")
@@ -507,10 +506,10 @@ public class IssueKpiTest {
                 .atStatus("Doing").doesNotHaveEffort()
                 .atStatus("Reviewing").hasTotalEffort(300l);
     }
-    
+
     @Test
     public void getRangeByProgressingStatuses_straightToDone_workingOnDoing() {
-        dsl. 
+        dsl().
         environment()
             .todayIs("2020-01-10")
             .givenIssue("PROJ-01")
@@ -534,10 +533,10 @@ public class IssueKpiTest {
                         .startsOn("2020-01-03").endsOn("2020-01-06")
                 .atStatus("Doing").hasTotalEffort(300l);
     }
-    
+
     @Test
     public void getRangeByProgressingStatuses_straightToDone_workingOnReview() {
-        dsl. 
+        dsl().
         environment()
             .todayIs("2020-01-10")
             .givenIssue("PROJ-01")
@@ -561,10 +560,10 @@ public class IssueKpiTest {
                         .startsOn("2020-01-06").endsOn("2020-01-06")
                 .atStatus("Reviewing").hasTotalEffort(300l);
     }
-        
+
     @Test
     public void getRangeByProgressingStatuses_datesOnlyOnNoProgressingStatuses_worklogDistributed() {
-        dsl. 
+        dsl().
         environment()
             .todayIs("2020-01-10")
             .givenIssue("PROJ-01")
@@ -592,10 +591,10 @@ public class IssueKpiTest {
                 .atStatus("Doing").hasTotalEffort(300l).eoSa()
                 .atStatus("Reviewing").hasTotalEffort(700l);
     }
-    
+
     @Test
     public void getRangeByProgressingStatuses_openIssue() {
-        dsl. 
+        dsl().
         environment()
             .todayIs("2020-01-10")
             .givenIssue("PROJ-01")
@@ -614,11 +613,11 @@ public class IssueKpiTest {
                 .issueKpi("PROJ-01")
                 .rangeBasedOnProgressingStatuses().isNotPresent();
     }
-    
-    
+
+
     @Test
     public void getRangeByProgressingStatuses_closedIssue_WithoutWorking() {
-        dsl. 
+        dsl().
         environment()
             .todayIs("2020-01-10")
             .givenIssue("PROJ-01")
@@ -637,10 +636,10 @@ public class IssueKpiTest {
                 .issueKpi("PROJ-01")
                 .rangeBasedOnProgressingStatuses().isNotPresent();
     }
-    
+
     @Test
     public void getRangeByProgressingStatuses_straightToDone_worklogOnReviewAfterDone() {
-        dsl. 
+        dsl().
         environment()
             .todayIs("2020-01-10")
             .givenIssue("PROJ-01")
@@ -665,11 +664,11 @@ public class IssueKpiTest {
                 .atStatus("Doing").doesNotHaveEffort()
                 .atStatus("Reviewing").hasTotalEffort(100l);
     }
-    
+
     @Test
     public void getAllWorklog_untilDate() {
-        
-        dsl. 
+
+        dsl().
         environment()
             .todayIs("2020-01-10")
             .givenIssue("PROJ-01")
@@ -678,27 +677,43 @@ public class IssueKpiTest {
                 .withTransitions()
                     .status("To Do").date("2020-01-01")
                     .status("Doing").date("2020-01-02")
-                    .status("Done").date("2020-01-03")
+                    .status("To Review").date("2020-01-04")
+                    .status("Reviewing").date("2020-01-04")
+                    .status("Done").date("2020-01-05")
                 .eoT()
                 .worklogs()
-                    .at("2020-01-02").timeSpentInSeconds(300)
-                    .at("2020-01-03").timeSpentInSeconds(500)
+                    .at("2020-01-02").timeSpentInSeconds(200)
+                    .at("2020-01-03").timeSpentInSeconds(300)
+                    .at("2020-01-04").timeSpentInSeconds(700)
                 .eoW()
             .eoI()
         .then()
             .assertThat()
                 .issueKpi("PROJ-01")
                     .atStatus("Doing")
-                        .hasTotalEffort(800l)
-                        .untilDate("2020-01-02").hasEffort(300l)
-                        .untilDate("2020-01-03").hasEffort(800l)
-                    .eoSa();
-        
+                        .hasTotalEffort(500L)
+                        .untilDate("2020-01-02").hasEffort(200L)
+                        .untilDate("2020-01-03").hasEffort(500L)
+                        .untilDate("2020-01-04").hasEffort(500L)
+                        .untilDate("2020-01-05").hasEffort(500L)
+                    .eoSa()
+                    .atStatus("Reviewing")
+                        .hasTotalEffort(700L)
+                        .untilDate("2020-01-02").hasEffort(0L)
+                        .untilDate("2020-01-03").hasEffort(0L)
+                        .untilDate("2020-01-04").hasEffort(700L)
+                        .untilDate("2020-01-05").hasEffort(700L)
+                    .eoSa()
+                    .atDate("2020-01-02").hasEffort(200L).eoDc()
+                    .atDate("2020-01-03").hasEffort(500L).eoDc()
+                    .atDate("2020-01-04").hasEffort(1200L).eoDc()
+                    .atDate("2020-01-05").hasEffort(1200L);
+
     }
 
     private DSLKpi dsl() {
-        this.dsl = new DSLKpi();
-        this.dsl.environment()
+        DSLKpi dsl = new DSLKpi();
+        dsl.environment()
             .withStatus("To Do").isNotProgressing()
             .withStatus("Doing").isProgressing()
             .withStatus("To Review").isNotProgressing()
@@ -707,7 +722,8 @@ public class IssueKpiTest {
             .withSubtaskType("Subtask")
             .withFeatureType("Feature");
 
-        return this.dsl;
+        return dsl;
     }
-    
+
 }
+

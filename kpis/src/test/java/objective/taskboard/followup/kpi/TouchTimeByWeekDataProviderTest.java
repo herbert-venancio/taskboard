@@ -441,7 +441,7 @@ public class TouchTimeByWeekDataProviderTest {
                 }
                 
                 private SingleIssueAsserter hasEffort(long effort) {
-                    Assert.assertThat(issue.getEffortUntilDate(currentStatus, DateAsserter.this.week.getMaximum().atStartOfDay(ZONE_ID)), is(effort));
+                    Assert.assertThat(issue.getEffortFromStatusUntilDate(currentStatus, DateAsserter.this.week.getMaximum().atStartOfDay(ZONE_ID)), is(effort));
                     return this;
                 }
                 
