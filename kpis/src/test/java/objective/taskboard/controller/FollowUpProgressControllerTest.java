@@ -69,8 +69,6 @@ public class FollowUpProgressControllerTest {
         when(cacheManager.getCache(DASHBOARD_PROGRESS_DATA)).thenReturn(new GuavaCacheManager(DASHBOARD_PROGRESS_DATA).getCache(DASHBOARD_PROGRESS_DATA));
         when(projects.getProjectByKey(PROJECT_KEY)).thenReturn(Optional.of(project));
         when(calculator.calculateWithExpectedProjection(eq(determineTimeZoneId(ZONE_ID)), eq(PROJECT_KEY), anyInt())).thenReturn(new ProgressData());
-
-        subject.initCache();
     }
 
     private void setupValidProject() {
@@ -110,15 +108,6 @@ public class FollowUpProgressControllerTest {
     }
 
     @Test
-    public void ifSomeErrorOccur_returnInternalServerError() throws Exception {
-        when(projects.getProjectByKey(PROJECT_KEY)).thenReturn(null);
-
-        AssertResponse.of(subject.progress(PROJECT_KEY, ZONE_ID, Optional.empty()))
-                .httpStatus(INTERNAL_SERVER_ERROR)
-                .bodyAsString("Unexpected behavior. Please, report this error to the administrator.");
-    }
-
-    @Test
     public void ifProjectNotFound_returnNotFound() throws Exception {
         when(projects.getProjectByKey(PROJECT_KEY)).thenReturn(Optional.empty());
 
@@ -154,6 +143,15 @@ public class FollowUpProgressControllerTest {
         AssertResponse.of(subject.progress(PROJECT_KEY, ZONE_ID, Optional.empty()))
                 .httpStatus(INTERNAL_SERVER_ERROR)
                 .bodyAsString("No cluster configuration found for project "+ PROJECT_KEY +".");
+    }
+    
+    @Test
+    public void ifExceptionIsThrown_returnInternalServerError() throws Exception {
+        when(calculator.calculateWithExpectedProjection(any(), any(), anyInt())).thenThrow(new RuntimeException());
+        
+        AssertResponse.of(subject.progress(PROJECT_KEY, ZONE_ID, Optional.empty()))
+                .httpStatus(INTERNAL_SERVER_ERROR)
+                .bodyAsString("Unexpected behavior. Please, report this error to the administrator.");
     }
 
 }
