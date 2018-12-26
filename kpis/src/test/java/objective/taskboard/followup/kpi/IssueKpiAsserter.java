@@ -61,7 +61,7 @@ public class IssueKpiAsserter {
         private List<Worklog> childrenWorklogs;
 
         public SubtaskChecker(IssueTypeDTO type) {
-            this.childrenWorklogs = subject.getWorklogFromChildren(type.id());
+            this.childrenWorklogs = subject.getWorklogFromChildrenTypeId(type.id());
         }
         
         public SubtaskChecker(String status) {
@@ -177,6 +177,11 @@ public class IssueKpiAsserter {
             return this;
         }
         
+        public StatusAsserter hasTotalEffortInHours(double effort) {
+            long effortInseconds = DateTimeUtils.hoursToSeconds(effort);
+            return hasTotalEffort(effortInseconds);
+        }
+
         public IssueKpiAsserter doesNotHaveEffort() {
             assertThat(IssueKpiAsserter.this.subject.getEffort(this.status), is(0l));
             

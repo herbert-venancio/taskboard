@@ -42,7 +42,7 @@ public class IssueKpi {
     public boolean hasTransitedToAnyStatusOnDay(ZonedDateTime date, String... statuses) {
         Stream<DatedStatusTransition> all = getStatusesWithTransition(statuses);
         Optional<LocalDate> earliestTransition = earliestOfStatuses(all);
-        
+
         return earliestTransition.map(ld -> ld.equals(date.toLocalDate())).orElse(false);
     }
 
@@ -54,18 +54,18 @@ public class IssueKpi {
     public String toString() {
         return String.format("[%s]", pKey);
     }
-    
+
     public String getIssueKey() {
         return pKey;
     }
-    
+
     public KpiLevel getLevel() {
         return level;
     }
 
     public void addChild(IssueKpi issueKpi) {
         children.add(issueKpi);
-        
+
     }
 
     List<IssueKpi> getChildren() {
@@ -80,20 +80,18 @@ public class IssueKpi {
         Optional<StatusTransition> statusTransition =  firstStatus.flatMap(f -> f.find(status));
         return statusTransition.map(s -> s.getEffort()).orElse(0l);
     }
-    
+
     public Long getEffortUntilDate(String status, ZonedDateTime dateLimit) {
         Optional<StatusTransition> statusTransition =  firstStatus.flatMap(f -> f.find(status));
         return statusTransition.map(s -> s.getEffortUntilDate(dateLimit)).orElse(0l);
     }
 
-    public List<Worklog> getWorklogFromChildren(Long subtaskType) {
+    public List<Worklog> getWorklogFromChildrenTypeId(Long subtaskType) {
         return children.stream()
-                .filter(c -> c.issueType.isPresent())
-                .filter(c -> c.issueType.get().getId().equals(subtaskType))
+                .filter(c -> c.issueType.map(type -> type.getId().equals(subtaskType)).orElse(false))
                 .map(c -> c.collectWorklogs())
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
-        
     }
 
     private List<Worklog> collectWorklogs() {
@@ -103,7 +101,7 @@ public class IssueKpi {
     private Stream<DatedStatusTransition> getStatusesWithTransition(String... statuses) {
         if(!firstStatus.isPresent())
             return Stream.empty();
-        
+
         return Stream.of(statuses)
                 .map(s -> firstStatus.get().findWithTransition(s))
                 .filter(s -> s.isPresent())
@@ -122,10 +120,7 @@ public class IssueKpi {
     public List<Worklog> getWorklogFromChildrenStatus(String childrenStatus) {
         return children.stream()
                 .map(c -> c.findStatus(childrenStatus))
-                .filter(s -> s.isPresent())
-                .map(s -> s.get())
-                .map(s -> s.getWorklogs())
-                .flatMap(List::stream)
+                .flatMap(s -> s.map(x -> x.getWorklogs().stream()).orElse(Stream.empty()))
                 .collect(Collectors.toList());
     }
 
@@ -134,14 +129,14 @@ public class IssueKpi {
         Optional<ZonedDateTime> firstDateOp = firstStatus.flatMap(s -> s.firstDateOnProgressing(timezone));
         if(!firstDateOp.isPresent())
             return Optional.empty();
-        
+
         LocalDate firstDate = firstDateOp.get().toLocalDate();
         LocalDate now = ZonedDateTime.ofInstant(clock.now(),timezone).toLocalDate();
         LocalDate lastDate = firstStatus.flatMap(s -> s.getDateAfterLeavingLastProgressingStatus()).orElse(now);
 
         if(firstDate.isAfter(lastDate))
             return Optional.of(RangeUtils.between(firstDate, firstDate));
-        
+
         return Optional.of(RangeUtils.between(firstDate, lastDate));
     }
 

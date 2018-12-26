@@ -41,7 +41,7 @@ public class IssueKpiMocker {
     }
     
     public IssueKpiMocker subtask(String subtaskKey) {
-        IssueKpiMocker child = new IssueKpiMocker(fatherEnvironment,transitionBuilder,subtaskKey);
+        IssueKpiMocker child = new IssueKpiMocker(fatherEnvironment,new TransitionsBuilder(fatherEnvironment),subtaskKey);
         child.setParent(this);
         child.isSubtask();
         children.add(child);
@@ -175,6 +175,11 @@ public class IssueKpiMocker {
 
             public WorklogsBuilder timeSpentInSeconds(int seconds) {
                 this.timeSpentInSeconds = seconds;
+                return WorklogsBuilder.this;
+            }
+            
+            public WorklogsBuilder timeSpentInHours(double hours) {
+                this.timeSpentInSeconds = Math.toIntExact(DateTimeUtils.hoursToSeconds(hours));
                 return WorklogsBuilder.this;
             }
             

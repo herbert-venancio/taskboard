@@ -1,41 +1,59 @@
 package objective.taskboard.followup.kpi;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import objective.taskboard.data.Worklog;
 import objective.taskboard.followup.kpi.properties.IssueTypeChildrenStatusHierarchy;
+import objective.taskboard.followup.kpi.properties.IssueTypeChildrenStatusHierarchy.Hierarchy;
 
 public class ChildrenWorklogDistributor {
 
     private IssueTypeChildrenStatusHierarchy hierarchies;
+    private IssueKpi issueKpi;
+    private Set<Worklog> worklogsAlreadyDistributed = new HashSet<>();
 
-    public ChildrenWorklogDistributor(IssueTypeChildrenStatusHierarchy hierarchies) {
+    public static void distributeWorklogs(IssueTypeChildrenStatusHierarchy hierarchies, IssueKpi issueKpi) {
+        new ChildrenWorklogDistributor(hierarchies, issueKpi).distributeWorklogs();
+    }
+
+    private ChildrenWorklogDistributor(IssueTypeChildrenStatusHierarchy hierarchies, IssueKpi issueKpi) {
         this.hierarchies = hierarchies;
+        this.issueKpi = issueKpi;
     }
 
-    public void distributeWorklogs(IssueKpi kpi) {
-        this.hierarchies.getHierarchies().stream().forEach( h -> {
-            String status = h.getFatherStatus();
-            List<Long> subtasks = h.getChildrenTypeId();
-            List<String> childrenStatuses = h.getChildrenStatus();
-            kpi.findStatus(status).ifPresent(s -> {
-                setupWorklog(kpi,s,subtasks);
-                setupWorklogs(kpi,s,childrenStatuses);
-            });
-        });
+    private void distributeWorklogs() {
+        for (Hierarchy hierarchy : hierarchies.getHierarchies()) {
+            String fatherStatus = hierarchy.getFatherStatus();
+            List<Long> childrenTypeIds = hierarchy.getChildrenTypeIds();
+            List<String> childrenStatuses = hierarchy.getChildrenStatuses();
+            issueKpi.findStatus(fatherStatus)
+                    .ifPresent(statusTransition -> {
+                        distributeWorklogsFromChildrenTypeIds(statusTransition, childrenTypeIds);
+                        distributeWorklogsFromChildrenStatus(statusTransition, childrenStatuses);
+                    });
+        }
     }
 
-    private void setupWorklogs(IssueKpi kpi, StatusTransition status, List<String> childrenStatuses) {
-        childrenStatuses.stream()
-            .map( s -> kpi.getWorklogFromChildrenStatus(s))
-            .flatMap(List::stream)
-            .forEach(w -> status.putWorklog(w));
+    private void distributeWorklogsFromChildrenTypeIds(StatusTransition statusTransition, List<Long> childrenTypeIds) {
+        for (long childTypeId : childrenTypeIds) {
+            List<Worklog> worklogs = issueKpi.getWorklogFromChildrenTypeId(childTypeId);
+            for (Worklog worklog : worklogs) {
+                statusTransition.putWorklog(worklog);
+                worklogsAlreadyDistributed.add(worklog);
+            }
+        }
     }
 
-    private void setupWorklog(IssueKpi kpi, StatusTransition status, List<Long> subtasks) {
-        subtasks.stream()
-            .map( typeId -> kpi.getWorklogFromChildren(typeId))
-            .flatMap(List::stream)
-            .forEach(w -> status.putWorklog(w));        
+    private void distributeWorklogsFromChildrenStatus(StatusTransition statusTransition, List<String> childrenStatuses) {
+        for (String childStatus : childrenStatuses) {
+            List<Worklog> worklogs = issueKpi.getWorklogFromChildrenStatus(childStatus);
+            for (Worklog worklog : worklogs) {
+                if (!worklogsAlreadyDistributed.contains(worklog)) {
+                    statusTransition.putWorklog(worklog);
+                }
+            }
+        }
     }
-    
 }

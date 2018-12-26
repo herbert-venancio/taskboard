@@ -15,7 +15,6 @@ import objective.taskboard.followup.kpi.enviroment.KPIEnvironmentBuilder;
 @RunWith(MockitoJUnitRunner.class)
 public class FeatureCycleEffortTest {
 
-    private ChildrenWorklogDistributor distributor;
     private KPIEnvironmentBuilder builder = new KPIEnvironmentBuilder();
     
     @Before
@@ -24,8 +23,6 @@ public class FeatureCycleEffortTest {
         configureFeatureStatuses(builder);
         configureSubtasksStatuses(builder);
         configureHierarchy(builder);
-        
-        distributor = new ChildrenWorklogDistributor(builder.getMockedKPIProperties().getFeaturesHierarchy()); 
     }
 
     @Test
@@ -69,7 +66,7 @@ public class FeatureCycleEffortTest {
         IssueKpi kpi = builder.withIssue("PROJ-01").buildCurrentIssueAsKpi();
         
         
-        distributor.distributeWorklogs(kpi);
+        ChildrenWorklogDistributor.distributeWorklogs(builder.getMockedKPIProperties().getFeaturesHierarchy(), kpi);
         
         assertStatusWorklog(kpi.findStatus("Open"),0l);
         assertStatusWorklog(kpi.findStatus("To Plan"),0l);
@@ -164,7 +161,7 @@ public class FeatureCycleEffortTest {
         IssueKpi kpi = builder.withIssue("PROJ-01").buildCurrentIssueAsKpi();
         
 
-        distributor.distributeWorklogs(kpi);
+        ChildrenWorklogDistributor.distributeWorklogs(builder.getMockedKPIProperties().getFeaturesHierarchy(), kpi);
         
         assertStatusWorklog(kpi.findStatus("Open"),0l);
         assertStatusWorklog(kpi.findStatus("To Plan"),0l);
@@ -219,7 +216,7 @@ public class FeatureCycleEffortTest {
 
         IssueKpi kpi = builder.withIssue("PROJ-01").buildCurrentIssueAsKpi();
         
-        distributor.distributeWorklogs(kpi);
+        ChildrenWorklogDistributor.distributeWorklogs(builder.getMockedKPIProperties().getFeaturesHierarchy(), kpi);
         
         assertStatusWorklog(kpi.findStatus("Open"),0l);
         assertStatusWorklog(kpi.findStatus("To Plan"),0l);

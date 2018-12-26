@@ -93,9 +93,8 @@ public class IssueKpiTransformer {
     }
     
     private void mapChildrenWorklog(IssueTypeChildrenStatusHierarchy hierarchyProperty, List<IssueKpi> issues) {
-        ChildrenWorklogDistributor distributor = new ChildrenWorklogDistributor(hierarchyProperty);
         for (IssueKpi issueKpi : issues) {
-            distributor.distributeWorklogs(issueKpi);
+            ChildrenWorklogDistributor.distributeWorklogs(hierarchyProperty, issueKpi);
         }
     }
 

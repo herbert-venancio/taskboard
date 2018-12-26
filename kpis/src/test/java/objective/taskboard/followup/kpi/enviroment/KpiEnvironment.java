@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import org.junit.Assert;
 
 import objective.taskboard.followup.kpi.IssueTypeKpi;
+import objective.taskboard.followup.kpi.enviroment.DSLKpi.BehaviorFactory;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
 import objective.taskboard.testUtils.FixedClock;
 import objective.taskboard.utils.Clock;
@@ -48,7 +49,11 @@ public class KpiEnvironment {
         return kpiContext;
     }
 
-    public KpiPropertiesMocker kpiProperties() {
+    public BehaviorFactory when() {
+        return kpiContext.when();
+    }
+
+    public KpiPropertiesMocker givenKpiProperties() {
         return kpiPropertiesMocker;
     }
     
@@ -57,7 +62,12 @@ public class KpiEnvironment {
         clock.setNow(zonedDate.toInstant());
         return this;
     }
-    
+
+    public KpiEnvironment withDemandType(String name) {
+        typeRepository.addDemand(name);
+        return this;
+    }
+
     public KpiEnvironment withFeatureType(String name) {
         typeRepository.addFeature(name);
         return this;
@@ -110,7 +120,12 @@ public class KpiEnvironment {
     private class IssueTypeRepository {
         private long id = 1l;
         private Map<String,IssueTypeDTO> types = new LinkedHashMap<>();
-        
+
+        private void addDemand(String name) {
+            IssueTypeDTO dto = new IssueTypeDTO(id++, name);
+            storeType(name, dto);
+        }
+
         private void addFeature(String name) {
             IssueTypeDTO dto = new IssueTypeDTO(id++, name);
             storeType(name, dto);
