@@ -53,10 +53,21 @@ public class BudgetChartCalculator {
     }
 
     private void calculateProjectionDate(BudgetChartData budgetChartData) {
-        if (budgetChartData.scopeDoneProjection.size() > 1) {
+        if (isProjectionDateAvailable(budgetChartData) ) {
             LocalDate lastScopeDoneDay = budgetChartData.scopeDone.get(budgetChartData.scopeDone.size() - 1).date;
             budgetChartData.projectionDate = lastScopeDoneDay.plusDays(budgetChartData.scopeDoneProjection.size());
         }
+    }
+
+    private boolean isProjectionDateAvailable(BudgetChartData budgetChartData) {
+        if ( budgetChartData.scopeDoneProjection.size() <= 1) 
+            return false;
+
+        BudgetChartDataPoint bcdFirst =
+            budgetChartData.scopeDoneProjection.get(0);
+        BudgetChartDataPoint bcdLast =
+            budgetChartData.scopeDoneProjection.get(budgetChartData.scopeDoneProjection.size() - 1);
+        return bcdFirst.value < bcdLast.value;
     }
 
     private void addScopeTotalProjection(

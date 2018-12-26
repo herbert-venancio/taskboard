@@ -2,6 +2,7 @@ package objective.taskboard.followup.budget;
 
 import static java.util.stream.Collectors.joining;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -129,6 +130,22 @@ public class BudgetChartCalculatorTest {
         BudgetChartData data = subject.calculate(systemDefault, project);
 
         assertEquals(LocalDate.parse("2018-10-27"), data.projectionDate);
+    }
+    
+    @Test
+    public void scopeDoneProjectionStalled_mustHaveNoFinalProjectionDate() {
+        BudgetChartCalculator subject = new BudgetChartCalculatorBuilder()
+                .withStartDate("2018-10-21")
+                .withEndDate("2018-10-23")
+                .point().date("2018-10-21").progress(0.0).effortDone(42.0).effortBacklog(15.0).addPointToDone()
+                .point().date("2018-10-21").progress(0.5).effortDone(50.0).effortBacklog(50.0).addPointToProjection()
+                .point().date("2018-10-22").progress(0.5).effortDone(50.0).effortBacklog(50.0).addPointToProjection()
+                .point().date("2018-10-23").progress(0.5).effortDone(50.0).effortBacklog(50.0).addPointToProjection()
+                .build();
+
+        BudgetChartData data = subject.calculate(systemDefault, project);
+
+        assertNull( data.projectionDate);
     }
 
     private String budgetChartDataPointToString(BudgetChartDataPoint p) {
