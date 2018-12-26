@@ -1,6 +1,7 @@
 package objective.taskboard.issueBuffer;
 
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
+import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.joining;
 import static objective.taskboard.domain.converter.IssueTeamService.TeamOrigin.DEFAULT_BY_PROJECT;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -9,6 +10,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.after;
 
 import java.io.IOException;
 import java.net.URI;
@@ -19,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -148,10 +153,18 @@ public class IssueBufferServiceTest {
     private JiraService jiraBean;
 
     @Autowired
+    public JiraIssueService jiraIssueBean;
+
+    @Autowired
     private IssueTeamService issueTeamService;
 
     @Autowired
     private IssueBufferService issueBufferService;
+
+    @Before
+    public void setUp() {
+        Mockito.reset(jiraIssueBean);
+    }
 
     @After
     public void resetIssueBuffer() {
@@ -279,6 +292,22 @@ public class IssueBufferServiceTest {
         List<User> assigneeList = usernameCaptor.getValue();
         assertEquals("TASKB-1", actualIssue);
         assertEquals("albert", assigneeList.stream().map(a->a.name).collect(joining(",")));
+    }
+
+    @Test
+    public void whenDoATransition_shouldUpdateAllIssuesInAnotherThreadAfterTenSeconds() {
+        WebHookBody payload1 = payload("create-TASKB-1.json");
+
+        when(jiraBean.getIssueByKey("TASKB-1"))
+            .thenReturn(Optional.of(payload1.issue));
+
+        issueBufferService.doTransition("TASKB-1", 123L, emptyMap());
+
+        verify(jiraIssueBean, times(0))
+            .searchAllProjectIssues(any(), any());
+
+        verify(jiraIssueBean, after(10_000).atLeast(1))
+            .searchAllProjectIssues(any(), any());
     }
 
     public static WebHookBody payload(String file)  {
