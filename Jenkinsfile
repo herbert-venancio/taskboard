@@ -34,7 +34,7 @@ node("single-executor") {
                 try {
                     timeout(time: 40, unit: TimeUnit.MINUTES) {
                         wrap([$class: 'Xvnc']) {
-                            sh "${mvnHome}/bin/mvn --batch-mode -V -U -Dmaven.test.failure.ignore=true clean install -P packaging-war,dev"
+                            sh "${mvnHome}/bin/mvn --batch-mode -V -U -Dmaven.test.failure.ignore=true clean install"
                         }
                     }
                 } finally {
@@ -81,16 +81,16 @@ node("single-executor") {
             throw ex
         }
         if (isMasterBranch() || isPostBuildBranch()) {
-            def project = readMavenPom file: ''
+            def project = readApplicationPom()
             stage('Deploy Maven') {
-                sh "${mvnHome}/bin/mvn --batch-mode -V clean deploy -DskipTests -P packaging-war,dev -DaltDeploymentRepository=repo::default::$SNAPSHOT_URL"
+                sh "${mvnHome}/bin/mvn --batch-mode -V clean deploy -DskipTests -DaltDeploymentRepository=repo::default::$SNAPSHOT_URL"
                 if (!params.RELEASE) {
                     def downloadUrl = extractDownloadUrl(project)
                     addDownloadBadge(downloadUrl)
                 }
             }
             stage('Deploy Docker') {
-                if (params.RELEASE) 
+                if (params.RELEASE)
                     print "Skipping deploy during release"
                 else {
                     def tag = isMasterBranch() ? 'latest' : env.BRANCH_NAME
@@ -109,7 +109,7 @@ node("single-executor") {
                 stage('Release') {
                     echo 'Releasing...'
                     sh "git checkout ${env.BRANCH_NAME}"
-                    sh "${mvnHome}/bin/mvn --batch-mode -Dresume=false release:prepare release:perform -DaltReleaseDeploymentRepository=repo::default::$RELEASE_URL -Darguments=\"-DaltDeploymentRepository=internal::default::$RELEASE_URL -P packaging-war,dev -DskipTests=true -Dmaven.test.skip=true -Dmaven.javadoc.skip=true\""
+                    sh "${mvnHome}/bin/mvn --batch-mode -Dresume=false release:prepare release:perform -DaltReleaseDeploymentRepository=repo::default::$RELEASE_URL -Darguments=\"-DaltDeploymentRepository=internal::default::$RELEASE_URL -DskipTests=true -Dmaven.test.skip=true -Dmaven.javadoc.skip=true\""
                     def downloadUrl = extractDownloadUrl(project)
                     addDownloadBadge(downloadUrl)
                     updateJobDescription(downloadUrl)
@@ -127,6 +127,13 @@ def isMasterBranch() {
 
 def isPostBuildBranch() {
     return env.BRANCH_NAME ==~ /^\d+(\.[0-9]+)*\.X$/
+}
+
+def readApplicationPom() {
+    dir('application') {
+        sh "${env.M2_HOME}/bin/mvn --batch-mode -V -U -N help:effective-pom -Doutput=effectivePom.xml"
+        return readMavenPom(file: 'effectivePom.xml')
+    }
 }
 
 def extractDownloadUrl(project) {

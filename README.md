@@ -42,11 +42,16 @@ mvn clean verify
 ```
 
 That's all!
- 
+
 
 ## Generating a war
-By default, the genarated artifact is a **jar**. Alternatively you can generate a **war** by activating the `packaging-war` maven profile: \
- `mvn package -P packaging-war`
+The generated artifact is a war. Just run:
+
+`mvn package`
+
+After build it'll be located at:
+
+`application/target/application-{version}.war`
 
 ## Updating the Followup Template
 
@@ -134,8 +139,7 @@ mvn sonar:sonar -Dsonar.host.url=http://sonar-sdlc -Dsonar.analysis.mode=preview
 There are many ways to do that. See [Spring Boot External Config](http://docs.spring.io/spring-boot/docs/1.3.1.RELEASE/reference/html/boot-features-external-config.html).
 
 2. Execute/deploy app:
-    * If you have generated a **jar** file: one way is to create a file named `application.properties` and run `java -Dspring.config.location=[path to application.properties] -jar [path to taskboard.jar]`.
-    * If you have generated a **war** file: one option is to configure the properties as system properties on container.
+    * one option is to configure the properties as system properties on container.
 
 ## Filters
 
