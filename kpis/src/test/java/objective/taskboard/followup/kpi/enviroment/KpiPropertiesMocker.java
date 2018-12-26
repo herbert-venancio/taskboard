@@ -27,22 +27,27 @@ public class KpiPropertiesMocker {
         featureHierarchyBuilder.put(fatherStatus,builder);
         return builder;
     }
-    
+
     public KpiPropertiesMocker withKpiProperties(KPIProperties kpiProperties) {
         this.kpiProperties = kpiProperties;
         return this;
     }
-    
+
     public KPIProperties getKpiProperties() {
         buildHierarchies();
+        mockProgressingStatuses(fatherEnvironment.getStatusRepository().getProgressingStatuses());
         return kpiProperties;
     }
-    
+
+    private void mockProgressingStatuses(List<String> progressingStatuses) {
+        Mockito.when(kpiProperties.getProgressingStatuses()).thenReturn(progressingStatuses);
+    }
+
     private void buildHierarchies() {
         IssueTypeChildrenStatusHierarchy hierarchy = new IssueTypeChildrenStatusHierarchy();
         List<Hierarchy> hierachies = featureHierarchyBuilder.values().stream().map(builder -> builder.buildHierachy()).collect(Collectors.toList());
         hierarchy.setHierarchies(hierachies);
-        
+
         Mockito.when(kpiProperties.getFeaturesHierarchy()).thenReturn(hierarchy);
     }
 
@@ -55,7 +60,7 @@ public class KpiPropertiesMocker {
         public HierarchyBuilder(String fatherStatus) {
             this.fatherStatus = fatherStatus;
         }
-        
+
         public Hierarchy buildHierachy() {
             Hierarchy hierarchy = new Hierarchy();
             hierarchy.setFatherStatus(fatherStatus);
@@ -72,12 +77,12 @@ public class KpiPropertiesMocker {
             childrenTypes.add(type);
             return this;
         }
-        
+
         public HierarchyBuilder putChildrenStatus(String status) {
             childrenStatuses.add(status);
             return this;
         }
-        
+
         public KpiPropertiesMocker and() {
             return KpiPropertiesMocker.this;
         }
@@ -85,7 +90,7 @@ public class KpiPropertiesMocker {
         public KpiEnvironment eoKp() {
             return fatherEnvironment;
         }
-        
+
     }
 
 }

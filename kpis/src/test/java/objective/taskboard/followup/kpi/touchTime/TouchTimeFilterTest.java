@@ -34,7 +34,7 @@ public class TouchTimeFilterTest {
 		                    .status("Reviewing").date("2018-01-14")
 		                    .status("Done").date("2018-01-15")
 		                    .eoT()
-		                .buildAsIssueKpi();
+		                .buildIssueKpi();
         filter()
         	.startingAt("2018-01-10").endingAt("2018-01-20")
         	.todayIs("2018-02-25")
@@ -56,7 +56,7 @@ public class TouchTimeFilterTest {
 		                    .status("Reviewing").date("2018-01-07")
 		                    .status("Done").date("2018-01-09")
 		                    .eoT()
-		                .buildAsIssueKpi();
+		                .buildIssueKpi();
         
         filter()
 	    	.startingAt("2018-01-10").endingAt("2018-01-20")
@@ -79,7 +79,7 @@ public class TouchTimeFilterTest {
 		                    .status("Reviewing").date("2018-01-07")
 		                    .status("Done").date("2018-01-10")
 		                    .eoT()
-		                .buildAsIssueKpi();
+		                .buildIssueKpi();
         
         filter()
 	    	.startingAt("2018-01-10").endingAt("2018-01-20")
@@ -101,7 +101,7 @@ public class TouchTimeFilterTest {
 		                    .status("Reviewing").date("2018-01-27")
 		                    .status("Done").date("2018-01-31")
 		                    .eoT()
-		                .buildAsIssueKpi();
+		                .buildIssueKpi();
         
         filter()
 	    	.startingAt("2018-01-10").endingAt("2018-01-20")
@@ -123,7 +123,7 @@ public class TouchTimeFilterTest {
 		                    .status("Reviewing").date("2018-01-27")
 		                    .status("Done").date("2018-01-31")
 		                    .eoT()
-		                .buildAsIssueKpi();
+		                .buildIssueKpi();
         
         filter()
 	    	.startingAt("2018-01-10").endingAt("2018-01-20")
@@ -145,7 +145,7 @@ public class TouchTimeFilterTest {
 		                    .status("Reviewing").date("2018-01-13")
 		                    .status("Done").date("2018-01-20")
 		                    .eoT()
-		                .buildAsIssueKpi();
+		                .buildIssueKpi();
         
         filter()
 	    	.startingAt("2018-01-10").endingAt("2018-01-20")
@@ -167,7 +167,7 @@ public class TouchTimeFilterTest {
 		                    .status("Reviewing").noDate()
 		                    .status("Done").noDate()
 		                    .eoT()
-		                .buildAsIssueKpi();
+		                .buildIssueKpi();
         
         filter()
 	    	.startingAt("2018-01-10").endingAt("2018-01-20")
@@ -189,7 +189,7 @@ public class TouchTimeFilterTest {
 		                    .status("Reviewing").noDate()
 		                    .status("Done").noDate()
 		                    .eoT()
-		                .buildAsIssueKpi();
+		                .buildIssueKpi();
         
         filter()
 	    	.startingAt("2018-01-10").endingAt("2018-01-20")
@@ -212,7 +212,7 @@ public class TouchTimeFilterTest {
 		                    .status("Reviewing").noDate()
 		                    .status("Done").noDate()
 		                    .eoT()
-		                .buildAsIssueKpi();
+		                .buildIssueKpi();
         
         filter()
 	    	.startingAt("2018-01-10").endingAt("2018-01-20")

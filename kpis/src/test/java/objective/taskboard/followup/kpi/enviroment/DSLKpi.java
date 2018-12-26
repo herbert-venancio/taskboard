@@ -60,8 +60,13 @@ public class DSLKpi {
             this.kpiContext = kpiContext;
         }
 
-        public IssueBehavior issueKpi(String pkey) {
+        public IssueBehavior givenIssueKpi(String pkey) {
             return issues.computeIfAbsent(pkey, (key) -> new IssueBehavior(kpiContext.getIssueKpi(key)));
+        }
+
+        public <T> DSLSimpleBehavior<T> appliesBehavior(DSLSimpleBehavior<T> behavior) {
+            behavior.behave(kpiContext.environment);
+            return behavior;
         }
 
         public class IssueBehavior {
@@ -71,7 +76,7 @@ public class DSLKpi {
                 this.kpi = kpi;
             }
 
-            public IssueBehavior appliesBehavior(DSLBehavior behavior) {
+            public IssueBehavior appliesBehavior(DSLBehavior<IssueKpi> behavior) {
                 behavior.execute(kpiContext.environment, kpi);
                 return this;
             }
