@@ -30,4 +30,9 @@ public class TouchTimeSubtaskConfiguration {
     public void setTypeIds(List<Long> typeIds) {
         this.typeIds = typeIds;
     }
+    @Override
+    public String toString() {
+        return "TouchTimeSubtaskConfiguration [stackName=" + stackName + ", statuses=" + statuses + ", typeIds="
+                + typeIds + "]";
+    }
 }

@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -166,6 +167,23 @@ public class IssueKpiAsserter {
         public IssueKpiAsserter eoDc() {
             return IssueKpiAsserter.this;
 
+        }
+
+        public MultipleStatusesAsserter forStatuses(String ...statuses) {
+            return new MultipleStatusesAsserter(Arrays.asList(statuses));
+        }
+
+        public class MultipleStatusesAsserter {
+            private List<String> statuses;
+
+            private MultipleStatusesAsserter(List<String> statuses) {
+                this.statuses = statuses;
+            }
+
+            public MultipleStatusesAsserter hasEffortSumInSeconds(long effortSumInSeconds) {
+                assertThat(subject.getEffortSumInSecondsFromStatusesUntilDate(statuses, DateChecker.this.date), is(effortSumInSeconds));
+                return this;
+            }
         }
 
     }

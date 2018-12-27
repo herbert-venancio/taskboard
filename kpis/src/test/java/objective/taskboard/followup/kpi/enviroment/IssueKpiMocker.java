@@ -18,12 +18,15 @@ import org.mockito.Mockito;
 
 import objective.taskboard.data.Issue;
 import objective.taskboard.data.Worklog;
+import objective.taskboard.followup.kpi.ChildrenWorklogDistributor;
 import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.IssueTypeKpi;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.StatusTransition;
 import objective.taskboard.followup.kpi.SubtaskWorklogDistributor;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment.IssueTypeDTO;
+import objective.taskboard.followup.kpi.properties.IssueTypeChildrenStatusHierarchy;
+import objective.taskboard.followup.kpi.properties.KPIProperties;
 import objective.taskboard.utils.DateTimeUtils;
 
 public class IssueKpiMocker {
@@ -53,24 +56,26 @@ public class IssueKpiMocker {
     public IssueKpiMocker subtask(String subtaskKey) {
         return createChild(subtaskKey).isSubtask();
     }
-    
-    public IssueKpiMocker feature(String subtaskKey) { 
-        if(this.level != KpiLevel.DEMAND) 
-            Assert.fail("Features must be called only inside a Demand"); 
-         
-        return createChild(subtaskKey).isFeature(); 
-    } 
- 
-    private IssueKpiMocker createChild(String subtaskKey) { 
-        return new IssueKpiMocker(fatherEnvironment,subtaskKey).setParent(this); 
-    } 
+
+    public IssueKpiMocker feature(String subtaskKey) {
+        if(this.level != KpiLevel.DEMAND)
+            Assert.fail("Features must be called only inside a Demand");
+
+        return createChild(subtaskKey).isFeature();
+    }
+
+    private IssueKpiMocker createChild(String subtaskKey) {
+        IssueKpiMocker child = new IssueKpiMocker(fatherEnvironment,subtaskKey).setParent(this);
+        child.project(projectKey);
+        return child;
+    }
 
     private IssueKpiMocker setParent(IssueKpiMocker parent) {
         this.parent = parent;
         parent.addChild(this);
         return this;
     }
-    
+
     private IssueKpiMocker addChild(IssueKpiMocker child) {
         this.children.add(child);
         return this;
@@ -81,16 +86,16 @@ public class IssueKpiMocker {
             Assert.fail("Parent issue not configured");
         return this.parent;
     }
-    
-    public IssueKpiMocker endOfFeature() { 
-        return endOfSubtask(); 
-    } 
+
+    public IssueKpiMocker endOfFeature() {
+        return endOfSubtask();
+    }
 
     public IssueKpiMocker type(String type) {
         this.type = fatherEnvironment.getOptionalType(type);
         return this;
     }
-    
+
     public IssueKpiMocker emptyType() {
         this.type = Optional.empty();
         return this;
@@ -99,7 +104,7 @@ public class IssueKpiMocker {
     public String getIssueKey() {
         return pKey;
     }
-   
+
     public Optional<IssueTypeKpi> getIssueTypeKpi() {
         return type.map(IssueTypeDTO::buildIssueTypeKpi);
     }
@@ -119,18 +124,18 @@ public class IssueKpiMocker {
         return this;
     }
 
-    public IssueKpiMocker unmappedLevel() { 
-        this.level = KpiLevel.UNMAPPED; 
-        return this; 
+    public IssueKpiMocker unmappedLevel() {
+        this.level = KpiLevel.UNMAPPED;
+        return this;
     }
-    
+
     public KpiLevel level() {
         return level;
     }
 
-    public IssueKpiMocker project(String projectKey) { 
-        this.projectKey = projectKey; 
-        return this; 
+    public IssueKpiMocker project(String projectKey) {
+        this.projectKey = projectKey;
+        return this;
     }
 
     public TransitionsBuilder withTransitions() {
@@ -140,11 +145,11 @@ public class IssueKpiMocker {
     public WorklogsBuilder worklogs() {
         return worklogsBuilder;
     }
-    
+
     public Map<String, ZonedDateTime> getReversedTransitions() {
         return transitionBuilder.getReversedTransitions();
     }
-    
+
     public List<IssueKpiMocker> allMockers() {
         List<IssueKpiMocker> allMockers = new LinkedList<>();
         allMockers.add(this);
@@ -153,7 +158,7 @@ public class IssueKpiMocker {
     }
 
     public IssueKpi buildIssueKpi() {
-        Optional<StatusTransition> firstChain = this.transitionBuilder.getFirtStatusTransition();
+        Optional<StatusTransition> firstChain = this.transitionBuilder.getFirstStatusTransition();
         Optional<IssueTypeKpi> kpiType = getIssueType();
 
         IssueKpi kpi = new IssueKpi(pKey, kpiType, level,firstChain,fatherEnvironment.getClock());
@@ -166,7 +171,7 @@ public class IssueKpiMocker {
 
         return kpi;
     }
-    
+
     public Issue mockedIssue() {
         if(this.mockedIssue == null)
             mockAllJiraIssue();
@@ -174,23 +179,22 @@ public class IssueKpiMocker {
     }
 
     public List<IssueKpi> buildAllIssuesKpi() {
-        Optional<StatusTransition> firstChain = this.transitionBuilder.getFirtStatusTransition();
+        Optional<StatusTransition> firstChain = this.transitionBuilder.getFirstStatusTransition();
         Optional<IssueTypeKpi> kpiType = getIssueType();
         LinkedList<IssueKpi> allIssues = new LinkedList<>();
         IssueKpi kpi = new IssueKpi(pKey, kpiType, level,firstChain,fatherEnvironment.getClock());
         allIssues.add(kpi);
-        if (level == KpiLevel.SUBTASKS) {
-            this.worklogsBuilder.setup(kpi);
-        }
 
         for (IssueKpiMocker issueKpiMocker : children) {
             List<IssueKpi> childrenIssuesKpis = issueKpiMocker.buildAllIssuesKpi();
             childrenIssuesKpis.forEach(c -> kpi.addChild(c));
             allIssues.addAll(childrenIssuesKpis);
         }
+
+        distributeWorklogs(kpi);
         return allIssues;
     }
-    
+
     public List<Issue> mockAllJiraIssue() {
         List<Issue> allIssues = new LinkedList<>();
         allIssues.add(mock());
@@ -198,10 +202,10 @@ public class IssueKpiMocker {
             List<Issue> childrenIssuesKpis = childIssueKpiMocker.mockAllJiraIssue();
             allIssues.addAll(childrenIssuesKpis);
         }
-        
+
         return allIssues;
     }
-    
+
     public Issue mock() {
         Issue issue = Mockito.mock(Issue.class);
         when(issue.getProjectKey()).thenReturn(projectKey);
@@ -226,13 +230,28 @@ public class IssueKpiMocker {
         return transitionBuilder.currentStatus().id();
     }
 
+    private void distributeWorklogs(IssueKpi kpi) {
+        if (level == KpiLevel.UNMAPPED) {
+            return;
+        }
+        if (level == KpiLevel.SUBTASKS) {
+            this.worklogsBuilder.setup(kpi);
+            return;
+        }
+        KPIProperties kpiProperties = this.fatherEnvironment.getKPIProperties();
+        IssueTypeChildrenStatusHierarchy hierarchy = level == KpiLevel.FEATURES
+                                                            ? kpiProperties.getFeaturesHierarchy()
+                                                            : kpiProperties.getDemandHierarchy();
+        ChildrenWorklogDistributor.distributeWorklogs(hierarchy, kpi);
+    }
+
     private Optional<IssueTypeKpi> getIssueType() {
         if(type == null)
             Assert.fail("Configure a type or explicitly call emptyType()");
-        
+
         return type.map(dto -> new IssueTypeKpi(dto.id(),dto.name()));
     }
-    
+
     @Override
     public String toString() {
         String typeName = this.type.map(t -> t.name()).orElse("NOT CONFIGURED");

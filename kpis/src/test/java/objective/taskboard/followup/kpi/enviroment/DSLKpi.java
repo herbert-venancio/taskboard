@@ -44,7 +44,7 @@ public class DSLKpi {
         }
 
         public StatusTransitionAsserter statusTransition() {
-            Optional<StatusTransition> firstStatus = environment.statusTransition().getFirtStatusTransition();
+            Optional<StatusTransition> firstStatus = environment.statusTransition().getFirstStatusTransition();
             ZoneId timezone = environment().getTimezone();
             return new StatusTransitionAsserter(timezone,firstStatus);
         }
@@ -62,6 +62,12 @@ public class DSLKpi {
 
         public IssueBehavior givenIssueKpi(String pkey) {
             return issues.computeIfAbsent(pkey, (key) -> new IssueBehavior(kpiContext.getIssueKpi(key)));
+        }
+        
+        public <T> ExceptionBehavior<T> expectExceptionFromBehavior(DSLSimpleBehavior<T> behavior){
+            ExceptionBehavior<T> exceptionBehavior = new ExceptionBehavior<>(behavior);
+            exceptionBehavior.behave(kpiContext.environment);
+            return exceptionBehavior;
         }
 
         public <T> DSLSimpleBehavior<T> appliesBehavior(DSLSimpleBehavior<T> behavior) {

@@ -38,8 +38,7 @@ public class KpiEnvironment {
     private DSLKpi kpiContext;
     private FixedClock clock = new FixedClock();
     private ZoneId timezone = ZoneId.systemDefault();
-    private String projectKey;
-    
+
     private MockedServices services = new MockedServices(this);
 
     public KpiEnvironment() {}
@@ -56,7 +55,7 @@ public class KpiEnvironment {
         this.timezone = timezone;
         return this;
     }
-    
+
     public ZoneId getTimezone() {
         return timezone;
     }
@@ -69,21 +68,12 @@ public class KpiEnvironment {
         return kpiContext.when();
     }
 
-    public KpiPropertiesMocker givenKpiProperties() {
+    public KpiPropertiesMocker withKpiProperties() {
         return kpiPropertiesMocker;
     }
 
     public JiraPropertiesMocker withJiraProperties() {
         return jiraPropertiesMocker;
-    }
-
-    public KpiEnvironment forProject(String projectKey) {
-        this.projectKey = projectKey;
-        return this;
-    }
-
-    public String getProjectKey() {
-        return this.projectKey;
     }
 
     public KpiEnvironment todayIs(String date) {
@@ -96,7 +86,7 @@ public class KpiEnvironment {
         typeRepository.addDemand(name);
         return this;
     }
-    
+
     public IssueTypeRepository types() {
         return typeRepository;
     }
@@ -116,7 +106,7 @@ public class KpiEnvironment {
         StatusDto status = statusRepository.create(name);
         return status;
     }
-    
+
     public MockedServices services() {
         return services;
     }
@@ -142,10 +132,19 @@ public class KpiEnvironment {
     }
 
     public IssueKpiMocker givenIssue(String pKey) {
-        issues.putIfAbsent(pKey, new IssueKpiMocker(this, pKey));
+        IssueKpiMocker issueMocker = new IssueKpiMocker(this, pKey);
+        issues.putIfAbsent(pKey, issueMocker);
         return issues.get(pKey);
     }
 
+
+    public IssueKpiMocker givenSubtask(String pkey) {
+        return givenIssue(pkey).isSubtask();
+    }
+
+    public IssueKpiMocker givenFeature(String pkey) {
+        return givenIssue(pkey).isFeature();
+    }
 
     public StatusDto getStatus(String name) {
         return statusRepository.statuses.get(name);
@@ -175,22 +174,22 @@ public class KpiEnvironment {
                 .forEach(i -> map.get(i.getLevel()).add(i));
         return map;
     }
-    
+
     public KpiEnvironment mockAllIssues() {
         issues.values().forEach(i -> i.mockAllJiraIssue());
         return this;
     }
-    
+
     public List<Issue> collectIssuesMocked() {
         return getAllIssueMockers().stream().map( i -> i.mockedIssue()).collect(Collectors.toList());
     }
-    
+
     public List<IssueKpiMocker> getAllIssueMockers(){
         return issues.values().stream()
                 .map(i -> i.allMockers())
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
-        
+
     }
 
     public class IssueTypeRepository {
@@ -251,7 +250,7 @@ public class KpiEnvironment {
 
     public class StatusRepository {
 
-        private long id = 1l; 
+        private long id = 1l;
         private Map<String,StatusDto> statuses = new LinkedHashMap<>();
 
         private StatusDto create(String name) {
@@ -266,23 +265,23 @@ public class KpiEnvironment {
                     .map(s -> s.name())
                     .collect(Collectors.toList());
         }
-        
-        public StatusRepository withProgressingStatuses(String... statuses) { 
-            createBulk(true,statuses); 
-            return this; 
+
+        public StatusRepository withProgressingStatuses(String... statuses) {
+            createBulk(true,statuses);
+            return this;
         }
 
-        public StatusRepository withNotProgressingStatuses(String... statuses) { 
-            createBulk(false,statuses); 
-            return this; 
+        public StatusRepository withNotProgressingStatuses(String... statuses) {
+            createBulk(false,statuses);
+            return this;
         }
 
         private void createBulk(boolean isProgressing,String... statuses) {
-            Stream.of(statuses).forEach(s -> 
+            Stream.of(statuses).forEach(s ->
                 create(s)
                 .setProgressingStatus(isProgressing));
         }
-        
+
         public KpiEnvironment eoS() {
             return KpiEnvironment.this;
         }

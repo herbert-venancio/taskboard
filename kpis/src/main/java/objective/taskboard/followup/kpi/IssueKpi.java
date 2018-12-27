@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.Range;
 
 import objective.taskboard.data.Worklog;
+import objective.taskboard.followup.kpi.touchTime.TouchTimeWeekRange;
 import objective.taskboard.utils.Clock;
 import objective.taskboard.utils.RangeUtils;
 
@@ -48,6 +49,10 @@ public class IssueKpi {
 
     public String getIssueTypeName() {
         return issueType.map(t -> t.getType()).orElse("Unmapped");
+    }
+
+    public Optional<IssueTypeKpi> getIssueType() {
+        return issueType;
     }
 
     @Override
@@ -90,31 +95,18 @@ public class IssueKpi {
         return firstStatus.map(s -> s.collectEffortUntilDate(dateLimit)).orElse(0L);
     }
 
+    public Long getEffortSumInSecondsFromStatusesUntilDate(List<String> statuses, ZonedDateTime dateLimit) {
+        return statuses.stream()
+                .map(s -> this.getEffortFromStatusUntilDate(s, dateLimit))
+                .collect(Collectors.summingLong(effortInSeconds -> effortInSeconds));
+    }
+
     public List<Worklog> getWorklogFromChildrenTypeId(Long subtaskType) {
         return children.stream()
                 .filter(c -> c.issueType.map(type -> type.getId().equals(subtaskType)).orElse(false))
                 .map(c -> c.collectWorklogs())
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
-    }
-
-    private List<Worklog> collectWorklogs() {
-        return firstStatus.map(s -> s.collectWorklog()).orElseGet(Collections::emptyList);
-    }
-
-    private Stream<DatedStatusTransition> getStatusesWithTransition(String... statuses) {
-        if(!firstStatus.isPresent())
-            return Stream.empty();
-
-        return Stream.of(statuses)
-                .map(s -> firstStatus.get().findWithTransition(s))
-                .filter(s -> s.isPresent())
-                .map(s -> s.get());
-    }
-
-    private Optional<LocalDate> earliestOfStatuses(Stream<DatedStatusTransition> all) {
-        Optional<ZonedDateTime> minimum = all.map(s -> s.getDate()).min(Comparator.naturalOrder());
-        return minimum.flatMap(zd -> Optional.of(zd.toLocalDate()));
     }
 
     public Optional<StatusTransition> findStatus(String status) {
@@ -142,6 +134,29 @@ public class IssueKpi {
             return Optional.of(RangeUtils.between(firstDate, firstDate));
 
         return Optional.of(RangeUtils.between(firstDate, lastDate));
+    }
+
+    public boolean isProgressingDuringWeek(TouchTimeWeekRange week) {
+        return getDateRangeBasedOnProgressingStatuses(week.getTimezone()).map(range -> week.overlaps(range)).orElse(false);
+    }
+
+    private List<Worklog> collectWorklogs() {
+        return firstStatus.map(s -> s.collectWorklog()).orElseGet(Collections::emptyList);
+    }
+
+    private Stream<DatedStatusTransition> getStatusesWithTransition(String... statuses) {
+        if(!firstStatus.isPresent())
+            return Stream.empty();
+
+        return Stream.of(statuses)
+                .map(s -> firstStatus.get().findWithTransition(s))
+                .filter(s -> s.isPresent())
+                .map(s -> s.get());
+    }
+
+    private Optional<LocalDate> earliestOfStatuses(Stream<DatedStatusTransition> all) {
+        Optional<ZonedDateTime> minimum = all.map(s -> s.getDate()).min(Comparator.naturalOrder());
+        return minimum.flatMap(zd -> Optional.of(zd.toLocalDate()));
     }
 
 }

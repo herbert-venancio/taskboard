@@ -172,21 +172,21 @@
                 },
 
                 _prepareData: function (data) {
-                    const issueStatusesOrderedLUT = ChartUtils.extractUniqueValuesOfPropertyFromArray(data, 'status').reverse();
+                    const stackNamesOrderedLUT = ChartUtils.extractUniqueValuesOfPropertyFromArray(data, 'stackName');
                     const ndx = crossfilter(data);
-                    const statusesDimension = ndx.dimension('status');
-                    const statusesGroup = statusesDimension.group();
-                    ChartUtils.groupChartDataByGroupKey(statusesGroup, 'date', 'effortInHours');
+                    const stackNamesDimension = ndx.dimension('stackName');
+                    const stackNamesGroup = stackNamesDimension.group();
+                    ChartUtils.groupChartDataByGroupKey(stackNamesGroup, 'date', 'effortInHours');
 
                     this._plotData = Object.freeze({
-                        statusesGroup: statusesGroup,
-                        issueStatusesOrderedLUT: issueStatusesOrderedLUT
+                        stackNamesGroup: stackNamesGroup,
+                        stackNamesOrderedLUT: stackNamesOrderedLUT
                     });
                 },
 
                 _createChart: function () {
-                    const effortByStatusByWeek = [...this._plotData.statusesGroup.all()];
-                    const series = this._transformToHighchartsSeries(effortByStatusByWeek, this._plotData.issueStatusesOrderedLUT);
+                    const effortByStackNameByWeek = [...this._plotData.stackNamesGroup.all()];
+                    const series = this._transformToHighchartsSeries(effortByStackNameByWeek, this._plotData.stackNamesOrderedLUT);
 
                     this.chart = new TouchTimeChartByWeekBuilder('touchTimeWeekly')
                         .withChartType('column')
@@ -202,13 +202,13 @@
                     dcDateRangeChartsService.applySelection(this.chart);
                 },
 
-                _transformToHighchartsSeries: function (effortByStatusByWeek, issueStatusesOrderedLUT) {
-                    effortByStatusByWeek.sort(( { key: statusA }, { key: statusB } ) => 
-                        issueStatusesOrderedLUT.indexOf(statusA) - issueStatusesOrderedLUT.indexOf(statusB));
-                    return effortByStatusByWeek.map(
-                        ({key: status, value: effortByWeek}) => {
+                _transformToHighchartsSeries: function (effortByStackNameByWeek, stackNamesOrderedLUT) {
+                    effortByStackNameByWeek.sort(( { key: nameA }, { key: nameB } ) => 
+                        stackNamesOrderedLUT.indexOf(nameA) - stackNamesOrderedLUT.indexOf(nameB));
+                    return effortByStackNameByWeek.map(
+                        ({key: stackName, value: effortByWeek}) => {
                             return {
-                                name: status, 
+                                name: stackName, 
                                 data: this._transformToHighchartsData(effortByWeek)
                             };
                         }

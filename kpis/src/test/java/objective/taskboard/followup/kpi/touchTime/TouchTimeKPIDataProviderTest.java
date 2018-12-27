@@ -29,7 +29,6 @@ public class TouchTimeKPIDataProviderTest {
     public void getTouchTimeChartDataSet_happyPath() {
         DSLKpi dsl = new DSLKpi();
         dsl.environment()
-            .forProject("TASKB")
 
             .withStatus("Open").isNotProgressing()
             .withStatus("To Plan").isNotProgressing()
@@ -54,6 +53,7 @@ public class TouchTimeKPIDataProviderTest {
         .eoJp()
         .givenIssue("I-1")
             .isFeature()
+            .project("TASKB")
             .type("Task")
             .withTransitions()
                 .status("Open").date("2018-11-05")
@@ -79,6 +79,7 @@ public class TouchTimeKPIDataProviderTest {
         .eoI()
         .givenIssue("I-3")
             .isDemand()
+            .project("TASKB")
             .type("Demand")
             .withTransitions()
                 .status("Open").date("2018-11-05")
@@ -123,7 +124,6 @@ public class TouchTimeKPIDataProviderTest {
     public void getTouchTimeChartDataSet_whenNoIssues_thenEmptyDataSet() {
         DSLKpi dsl = new DSLKpi();
         dsl.environment()
-            .forProject("TASKB")
 
             .withStatus("Open").isNotProgressing()
             .withStatus("To Plan").isNotProgressing()
@@ -173,7 +173,7 @@ public class TouchTimeKPIDataProviderTest {
         public void behave(KpiEnvironment environment) {
             KPIProperties kpiProperties = environment.getKPIProperties();
             JiraProperties jiraProperties = environment.getJiraProperties();
-            IssueKpiService issueKpiService = environment.services().issueKpi().getService();
+            IssueKpiService issueKpiService = environment.services().issueKpi().getServiceForProject(projectKey);
             TouchTimeKPIDataProvider suject = new TouchTimeKPIDataProvider(issueKpiService, jiraProperties, kpiProperties);
             this.dataset = suject.getDataSet(projectKey, issueLevel, timezone);
         }

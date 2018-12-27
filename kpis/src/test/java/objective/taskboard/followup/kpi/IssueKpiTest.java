@@ -711,6 +711,114 @@ public class IssueKpiTest {
 
     }
 
+    @Test
+    public void getEffortSumFromStatusesUntilDate_happyPath() {
+        dsl()
+        .environment()
+            .todayIs("2020-01-10")
+            .givenIssue("I-1")
+                .isFeature()
+                .type("Task")
+                .withTransitions()
+                    .status("To Do").date("2020-01-01")
+                    .status("Doing").date("2020-01-02")
+                    .status("To Review").date("2020-01-04")
+                    .status("Reviewing").date("2020-01-04")
+                    .status("Done").date("2020-01-05")
+                .eoT()
+                .worklogs()
+                    .at("2020-01-02").timeSpentInSeconds(200)
+                    .at("2020-01-03").timeSpentInSeconds(300)
+                    .at("2020-01-04").timeSpentInSeconds(700)
+                .eoW()
+            .eoI()
+        .then()
+            .assertThat()
+                .issueKpi("I-1")
+                    .atDate("2020-01-10").forStatuses("Doing", "Reviewing").hasEffortSumInSeconds(1200L);
+    }
+
+    @Test
+    public void getEffortSumFromStatusesUntilDate_whenUsingOnlyOneStatus_thenHappyPath() {
+        dsl()
+        .environment()
+            .todayIs("2020-01-10")
+            .givenIssue("I-1")
+                .isFeature()
+                .type("Task")
+                .withTransitions()
+                    .status("To Do").date("2020-01-01")
+                    .status("Doing").date("2020-01-02")
+                    .status("To Review").date("2020-01-04")
+                    .status("Reviewing").date("2020-01-04")
+                    .status("Done").date("2020-01-05")
+                .eoT()
+                .worklogs()
+                    .at("2020-01-02").timeSpentInSeconds(200)
+                    .at("2020-01-03").timeSpentInSeconds(300)
+                    .at("2020-01-04").timeSpentInSeconds(700)
+                .eoW()
+            .eoI()
+        .then()
+            .assertThat()
+                .issueKpi("I-1")
+                    .atDate("2020-01-10").forStatuses("Doing").hasEffortSumInSeconds(500L);
+    }
+
+    @Test
+    public void getEffortSumFromStatusesUntilDate_whenNoStatuses_thenSumIsZero() {
+        dsl()
+        .environment()
+            .todayIs("2020-01-10")
+            .givenIssue("I-1")
+                .isFeature()
+                .type("Task")
+                .withTransitions()
+                    .status("To Do").date("2020-01-01")
+                    .status("Doing").date("2020-01-02")
+                    .status("To Review").date("2020-01-04")
+                    .status("Reviewing").date("2020-01-04")
+                    .status("Done").date("2020-01-05")
+                .eoT()
+                .worklogs()
+                    .at("2020-01-02").timeSpentInSeconds(200)
+                    .at("2020-01-03").timeSpentInSeconds(300)
+                    .at("2020-01-04").timeSpentInSeconds(700)
+                .eoW()
+            .eoI()
+        .then()
+            .assertThat()
+                .issueKpi("I-1")
+                    .atDate("2020-01-10").forStatuses().hasEffortSumInSeconds(0L);
+    }
+
+    @Test
+    public void getEffortSumFromStatusesUntilDate_whenInvalidStatuses_thenSumIsZero() {
+        dsl()
+        .environment()
+            .todayIs("2020-01-10")
+            .givenIssue("I-1")
+                .isFeature()
+                .type("Task")
+                .withTransitions()
+                    .status("To Do").date("2020-01-01")
+                    .status("Doing").date("2020-01-02")
+                    .status("To Review").date("2020-01-04")
+                    .status("Reviewing").date("2020-01-04")
+                    .status("Done").date("2020-01-05")
+                .eoT()
+                .worklogs()
+                    .at("2020-01-02").timeSpentInSeconds(200)
+                    .at("2020-01-03").timeSpentInSeconds(300)
+                    .at("2020-01-04").timeSpentInSeconds(700)
+                .eoW()
+            .eoI()
+        .then()
+            .assertThat()
+                .issueKpi("I-1")
+                    .atDate("2020-01-10").forStatuses("Foo", "Bar").hasEffortSumInSeconds(0L);
+    }
+
     private DSLKpi dsl() {
         DSLKpi dsl = new DSLKpi();
         dsl.environment()

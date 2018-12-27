@@ -50,21 +50,20 @@ public class MockedServices {
     public class IssueKpiServiceMocker {
         private IssueKpiService service = Mockito.mock(IssueKpiService.class);
 
-        public IssueKpiService getService() {
-            mockService();
+        public IssueKpiService getServiceForProject(String projectKey) {
+            mockServiceForProject(projectKey);
             return service;
         }
 
-        private void mockService() {
+        private void mockServiceForProject(String projectKey) {
             Map<KpiLevel, List<IssueKpi>> issuesByLevel = environment.buildAllIssues();
-            Stream.of(KpiLevel.values()).forEach(level -> {
-                mockIssuesForLevel(level, issuesByLevel.get(level));
-            });
+            Stream.of(KpiLevel.values())
+                .forEach(level -> mockIssuesForProjectAndLevel(projectKey, level, issuesByLevel.get(level)));
 
         }
 
-        private void mockIssuesForLevel(KpiLevel level, List<IssueKpi> issuesByLevel) {
-            Mockito.when(service.getIssuesFromCurrentState(environment.getProjectKey(),environment.getTimezone(), level))
+        private void mockIssuesForProjectAndLevel(String projectKey, KpiLevel level, List<IssueKpi> issuesByLevel) {
+            Mockito.when(service.getIssuesFromCurrentState(projectKey, environment.getTimezone(), level))
                 .thenReturn(issuesByLevel);
         }
 

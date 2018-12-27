@@ -11,7 +11,7 @@ import objective.taskboard.followup.kpi.enviroment.KpiPropertiesMocker;
 public class FeatureTouchTimeTest {
 
     private DSLWrapper dslWrapper = dsl();
-    
+
     @Test
     public void happyDay() {
         withProperties()
@@ -33,7 +33,7 @@ public class FeatureTouchTimeTest {
             .atFeatureHierarchy("Planning")
                 .withChildrenType("Feature Planning")
                 .withChildrenType("Tech Planning");
-        
+
         withFeature("PROJ-01")
             .withSubtask("Feature Planning").withWorklog(2.0).eoS()
             .withSubtask("Tech Planning").withWorklog(3.0).eoS()
@@ -46,7 +46,7 @@ public class FeatureTouchTimeTest {
             .withSubtask("Functional Test").withWorklog(10.0).eoS()
             .withSubtask("Feature Review").withWorklog(11.5).eoS()
             .withSubtask("QA").withWorklog(12.0);
-        
+
         when("PROJ-01")
             .appliesBehavior(distributeWorklogs())
         .then()
@@ -114,7 +114,7 @@ public class FeatureTouchTimeTest {
                     .atStatus("Done").hasTotalEffortInHours(0.0).eoSa()
                     .atStatus("Cancelled").hasTotalEffortInHours(0.0).eoSa();
     }
-    
+
     @Test
     public void multipleWorklogs() {
         withProperties()
@@ -166,7 +166,7 @@ public class FeatureTouchTimeTest {
         return (environment, subject) ->
                 ChildrenWorklogDistributor.distributeWorklogs(environment.getKPIProperties().getFeaturesHierarchy(), subject);
     }
-    
+
     private KpiPropertiesMocker withProperties() {
         return dslWrapper.getKpiPropertiesMocker();
     }
@@ -178,24 +178,24 @@ public class FeatureTouchTimeTest {
     private DSLWrapper withFeature(String pKey) {
         return dslWrapper.prepareToCreateSubtask(pKey);
     }
-    
+
     private DSLWrapper dsl() {
         return new DSLWrapper()
                     .configureTypes()
                     .configureStatuses();
     }
-    
+
     private class DSLWrapper {
         private DSLKpi dsl = new DSLKpi();
         private int subtaskNumber = 2;
         private String currentFather;
-        
+
         public SubtaskBuilder withSubtask(String type) {
             return buildSubtask(type).simpleWorklow();
         }
 
         public KpiPropertiesMocker getKpiPropertiesMocker() {
-            return dsl.environment().givenKpiProperties();
+            return dsl.environment().withKpiProperties();
         }
 
         public SubtaskBuilder withSubtaskWithTwoProgressingStatusAtSameDay(String type) {
@@ -274,8 +274,8 @@ public class FeatureTouchTimeTest {
 
         private class SubtaskBuilder {
             private IssueKpiMocker subtask;
-            private String worklogDate; 
-            
+            private String worklogDate;
+
             public SubtaskBuilder(String father, String key, String type) {
                 this.subtask = dsl.environment()
                             .givenIssue(father)
@@ -377,11 +377,11 @@ public class FeatureTouchTimeTest {
                         .status("Done").date("2020-01-11")
                         .status("Cancelled").noDate()
                     .eoT();
-            
+
                 return this;
             }
         }
-        
+
     }
 
 }
