@@ -10,9 +10,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.after;
 
 import java.io.IOException;
 import java.net.URI;
@@ -295,19 +292,19 @@ public class IssueBufferServiceTest {
     }
 
     @Test
-    public void whenDoATransition_shouldUpdateAllIssuesInAnotherThreadAfterTenSeconds() {
+    public void whenDoATransition_statusShouldBeUpdated() {
         WebHookBody payload1 = payload("create-TASKB-1.json");
-
+        
         when(jiraBean.getIssueByKey("TASKB-1"))
             .thenReturn(Optional.of(payload1.issue));
 
-        issueBufferService.doTransition("TASKB-1", 123L, emptyMap());
-
-        verify(jiraIssueBean, times(0))
-            .searchAllProjectIssues(any(), any());
-
-        verify(jiraIssueBean, after(10_000).atLeast(1))
-            .searchAllProjectIssues(any(), any());
+        Issue issue = issueBufferService.doTransition("TASKB-1", 10000L, emptyMap());
+        
+        assertThat(issue.getStatus())
+        	.isEqualTo(10000L);
+        
+        assertThat(issueBufferService.getIssueByKey("TASKB-1").getStatus())
+        	.isEqualTo(10000L);
     }
 
     public static WebHookBody payload(String file)  {
