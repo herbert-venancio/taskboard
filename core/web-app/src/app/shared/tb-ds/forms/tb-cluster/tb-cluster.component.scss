@@ -1,10 +1,7 @@
 @import 'obj-ds/utils/all';
 
-.body-with-scroll {
-    max-height: calc(100vh - 350px);
-    overflow-y: auto;
-    width: calc(100% + 16px);
-    padding-right: 16px;
+:host {
+    display: block;
 }
 
 obj-expansion-panel:last-of-type {

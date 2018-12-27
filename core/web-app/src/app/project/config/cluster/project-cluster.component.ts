@@ -7,8 +7,8 @@ import { SnackbarControl, SnackbarLevel } from 'app/shared/obj-ds/snackbar/snack
 import { ClusterItemDto } from 'app/shared/tb-ds/forms/tb-cluster/cluster-item-dto.model';
 import { TbClusterComponent } from 'app/shared/tb-ds/forms/tb-cluster/tb-cluster.component';
 import { ProjectClusterService } from './project-cluster.service';
-import { RecalculateResult } from './project-cluster-recalculate-modal.component';
-import * as moment from 'moment';
+import { RecalculateResult } from 'app/shared/tb-ds/forms/tb-cluster-recalculate-modal/tb-cluster-recalculate-modal.component';
+import { buildClusterToolbarSubtitle } from 'app/shared/tb-ds/forms/tb-cluster-algorithm/tb-cluster-algorithm.utils';
 
 @Component({
     selector: 'tb-project-cluster',
@@ -48,13 +48,13 @@ export class ProjectClusterComponent extends ComponentLeaveConfirmation implemen
         this.pageLoader.show();
         this.clusterItems.splice(0);
 
-    this.projectClusterService.get(this.projectKey)
-        .subscribe(data => {
-            this.clusterItems = data;
-            this.changesCandidates = [];
-            this.hasBaseCluster = data.some(f => f.fromBaseCluster);
-            this.pageLoader.hide();
-        });
+        this.projectClusterService.get(this.projectKey)
+            .subscribe(data => {
+                this.clusterItems = data;
+                this.changesCandidates = [];
+                this.hasBaseCluster = data.some(f => f.fromBaseCluster);
+                this.pageLoader.hide();
+            });
     }
 
     callSaveOfClusterComponent() {
@@ -76,7 +76,7 @@ export class ProjectClusterComponent extends ComponentLeaveConfirmation implemen
                     this.clusterComponent.markAsPristine();
                     this.refresh();
                 },
-                error => {
+                () => {
                     this.pageLoader.hide();
                     this.showMessage('Error', 'Failed to save the project cluster', SnackbarLevel.Error);
                 });
@@ -92,20 +92,7 @@ export class ProjectClusterComponent extends ComponentLeaveConfirmation implemen
 
     setChangesCandidates(results: RecalculateResult) {
         this.changesCandidates = results.newClusters;
-        this.toolbarSubtitle = this.buildToolbarSubtitle(results.startDate, results.endDate);
-    }
-
-    private buildToolbarSubtitle(startDate: moment.Moment, endDate: moment.Moment): string {
-        const format = moment.localeData().longDateFormat('L');
-        const start = startDate ? startDate.format(format) : '';
-        const end   = endDate   ? endDate.format(format) : '';
-        if (start && end)
-            return `(between ${start} and ${end})`;
-        if (start)
-            return `(after ${start})`;
-        if (end)
-            return `(before ${end})`;
-        return '';
+        this.toolbarSubtitle = buildClusterToolbarSubtitle(results.startDate, results.endDate);
     }
 
     private showMessage(title: string, message: string, level: SnackbarLevel) {

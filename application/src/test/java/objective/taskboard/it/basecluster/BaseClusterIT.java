@@ -180,4 +180,46 @@ public class BaseClusterIT extends AbstractUIWithCoverageIntegrationTest {
                 "New base cluster"
             );
     }
+
+    @Test
+    public void whenRecalculate_shouldShowCurrentValueAndNewValueFields() {
+        MainPage mainPage = LoginUtils.doLoginAsAdmin(webDriver);
+
+        BaseClusterPage baseCluster = mainPage
+            .openMenuFilters()
+                .assertBaseClusterButtonVisible()
+            .openBaseClusterSearch()
+                .edit("Base Sizing Cluster");
+
+        baseCluster
+            .assertCycle("Alpha Test", "XS", "1")
+            .openRecalculate()
+                .setStartDate("asdf")
+                .setEndDate("99/99/9999")
+                .assertStartDateHasNoError()
+                .assertEndDateHasNoError()
+            .recalculate()
+                .assertRecalculateIsOpened()
+                .assertStartDateHasError()
+                .assertEndDateHasError()
+                .setStartDate("01/01/2015")
+                .setEndDate("12/31/2017")
+            .recalculate()
+                .assertProjectsHaveError()
+                .selectProject("PROJ1")
+                .selectProject("TASKB")
+            .recalculate()
+                .assertRecalculateIsClosed();
+
+        baseCluster.assertCurrentValueNewValueIsShown("Alpha Test", "XS");
+
+        String newCycleValue = baseCluster.getNewCycleValue("Alpha Test", "XS");
+
+        baseCluster
+            .selectNewCycleValue("Alpha Test")
+                .save()
+                .assertCycle("Alpha Test", "XS", newCycleValue)
+            .refreshPage()
+                .assertCycle("Alpha Test", "XS", newCycleValue);
+    }
 }

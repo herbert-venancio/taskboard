@@ -42,4 +42,12 @@ export class BaseClusterService {
         return this.http.get<BaseClusterDto>(creationURI)
             .pipe(retry(3));
     }
+
+    getAuthorizedProjectNames(): Observable<string[]> {
+        const authorizedProjectNamesURI = this.baseClusterUrl + '/projects';
+
+        return this.http.get<string[]>(authorizedProjectNamesURI)
+            .pipe(retry(3));
+    }
+
 }

@@ -1,6 +1,7 @@
 package objective.taskboard.it.basecluster;
 
 import static objective.taskboard.it.AbstractIntegrationTest.getAppBaseUrl;
+import static objective.taskboard.it.components.ClusterComponent.CLUSTER_TAG;
 import static objective.taskboard.it.components.SnackBarComponent.SNACK_BAR_TAG;
 import static org.openqa.selenium.By.cssSelector;
 import static org.openqa.selenium.support.PageFactory.initElements;
@@ -11,6 +12,9 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
 import objective.taskboard.it.AbstractAppUiFragment;
+import objective.taskboard.it.components.ButtonComponent;
+import objective.taskboard.it.components.ClusterComponent;
+import objective.taskboard.it.components.ClusterRecalculateModalComponent;
 import objective.taskboard.it.components.SnackBarComponent;
 import objective.taskboard.it.components.guards.LeaveConfirmationGuard;
 
@@ -30,6 +34,8 @@ public class BaseClusterPage extends AbstractAppUiFragment {
     @FindBy(css="button#tb-cluster-back-to-project")
     private WebElement backToSearchButton;
 
+    private ButtonComponent recalculate;
+    private ClusterComponent cluster;
     private SnackBarComponent snackbar;
 
     public BaseClusterPage(WebDriver webDriver) {
@@ -37,6 +43,8 @@ public class BaseClusterPage extends AbstractAppUiFragment {
         initElements(webDriver, this);
         assertPageIsOpen();
 
+        this.recalculate = new ButtonComponent(webDriver, By.cssSelector(PAGE_TAG + " obj-toolbar button"));
+        this.cluster = new ClusterComponent(webDriver, cssSelector(PAGE_TAG + " " + CLUSTER_TAG));
         this.snackbar = new SnackBarComponent(webDriver, cssSelector(SNACK_BAR_TAG + "#tb-base-cluster-snackbar"));
     }
 
@@ -46,6 +54,11 @@ public class BaseClusterPage extends AbstractAppUiFragment {
 
     public static String getEditionPageUrl(final int clusterId) {
         return getAppBaseUrl() + "base-cluster/" + clusterId;
+    }
+
+    public ClusterRecalculateModalComponent openRecalculate() {
+        recalculate.click();
+        return new ClusterRecalculateModalComponent(webDriver);
     }
 
     public BaseClusterPage assertName(final String expectedName) {
@@ -59,14 +72,36 @@ public class BaseClusterPage extends AbstractAppUiFragment {
     }
 
     public BaseClusterPage setEffort(final String issueType, final String size, final String effort) {
-        WebElement input = getElementWhenItExistsAndIsVisible(By.id(issueType + "-effort-" + size));
-        setInputValue(input, effort);
+        cluster.setEffort(issueType, size, effort);
+        return this;
+    }
+
+    public BaseClusterPage assertEffort(final String issueType, final String size, final String expectedEffort) {
+        cluster.assertEffort(issueType, size, expectedEffort);
         return this;
     }
 
     public BaseClusterPage setCycle(final String issueType, final String size, final String cycle) {
-        WebElement input = getElementWhenItExistsAndIsVisible(By.id(issueType + "-cycle-" + size));
-        setInputValue(input, cycle);
+        cluster.setCycle(issueType, size, cycle);
+        return this;
+    }
+
+    public BaseClusterPage assertCycle(final String issueType, final String size, final String expectedCycle) {
+        cluster.assertCycle(issueType, size, expectedCycle);
+        return this;
+    }
+
+    public String getNewCycleValue(String issueType, String size) {
+        return cluster.getCycleValue(issueType, size);
+    }
+
+    public BaseClusterPage selectNewCycleValue(String issueType) {
+        cluster.selectNewCycleValue(issueType);
+        return this;
+    }
+
+    public BaseClusterPage assertCurrentValueNewValueIsShown(String issueType, String tsize) {
+        cluster.assertCurrentValueNewValueIsShown(issueType, tsize);
         return this;
     }
 
@@ -102,18 +137,6 @@ public class BaseClusterPage extends AbstractAppUiFragment {
         return new BaseClusterSearchPage(webDriver);
     }
 
-    public BaseClusterPage assertCycle(final String issueType, final String size, final String expectedCycle) {
-        WebElement input = getElementWhenItExistsAndIsVisible(By.id(issueType + "-cycle-" + size));
-        waitAttributeValueInElement(input, "value", expectedCycle);
-        return this;
-    }
-
-    public BaseClusterPage assertEffort(final String issueType, final String size, final String expectedEffort) {
-        WebElement input = getElementWhenItExistsAndIsVisible(By.id(issueType + "-effort-" + size));
-        waitAttributeValueInElement(input, "value", expectedEffort);
-        return this;
-    }
-
     public BaseClusterPage refreshPage() {
         webDriver.navigate().refresh();
         assertPageIsOpen();
@@ -132,4 +155,5 @@ public class BaseClusterPage extends AbstractAppUiFragment {
         waitPageLoaderBeHide();
         return this;
     }
+
 }

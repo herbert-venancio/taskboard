@@ -1,8 +1,9 @@
-<obj-modal #recalculateCluster modal-title="Recalculate project cluster">
+<obj-modal #recalculateCluster [modal-title]="modalTitle">
     <obj-modal-content>
         <tb-cluster-algorithm
             #form
-            [project]="project"
+            [projects]="projects"
+            [selectableProjects]="selectableProjects"
             (submitted)="closeModal($event)"
             (results)="onResults($event)"
             (errorEvent)="onErrors($event)">

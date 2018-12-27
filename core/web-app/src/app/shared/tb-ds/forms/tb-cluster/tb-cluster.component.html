@@ -1,6 +1,6 @@
 <form id="tbClusterForm" #tbClusterForm="ngForm" (ngSubmit)="sendSaveEvent()" autocomplete="off" tbLeaveConfirmation>
 
-    <div class="body-with-scroll">
+    <div class="panels">
         <obj-expansion-panel *ngFor="let group of groupedItems"
             [title]="group.issueType"
             [attr.data-issue-type]="group.issueType"

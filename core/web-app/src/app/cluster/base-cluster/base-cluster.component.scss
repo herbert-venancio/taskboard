@@ -60,3 +60,10 @@ label {
 .title {
     margin-bottom: 16px;
 }
+
+.body-with-scroll {
+    max-height: calc(100vh - 388px);
+    overflow-y: auto;
+    width: calc(100% + 16px);
+    padding-right: 16px;
+}

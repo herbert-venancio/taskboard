@@ -1,9 +1,4 @@
-import {
-    Component,
-    OnInit,
-    ViewChild,
-    ElementRef
-} from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgForm } from '@angular/forms';
@@ -15,6 +10,8 @@ import { ComponentLeaveConfirmation } from 'app/shared/form-utils/leave-confirma
 import { BaseClusterDto } from './base-cluster-dto.model';
 import { ClusterItemDto } from 'app/shared/tb-ds/forms/tb-cluster/cluster-item-dto.model';
 import { TbClusterComponent } from 'app/shared/tb-ds/forms/tb-cluster/tb-cluster.component';
+import { RecalculateResult } from '../../shared/tb-ds/forms/tb-cluster-recalculate-modal/tb-cluster-recalculate-modal.component';
+import { buildClusterToolbarSubtitle } from '../../shared/tb-ds/forms/tb-cluster-algorithm/tb-cluster-algorithm.utils';
 
 @Component({
   selector: 'tb-base-cluster',
@@ -26,6 +23,8 @@ import { TbClusterComponent } from 'app/shared/tb-ds/forms/tb-cluster/tb-cluster
 })
 export class BaseClusterComponent extends ComponentLeaveConfirmation implements OnInit {
 
+    toolbarSubtitle: string;
+
     baseClusterId: number;
     baseClusterName: string;
 
@@ -34,7 +33,9 @@ export class BaseClusterComponent extends ComponentLeaveConfirmation implements 
     @ViewChild(TbClusterComponent) clusterComponent: TbClusterComponent;
 
     clusterItems: ClusterItemDto[] = [];
+    changesCandidates: ClusterItemDto[] = [];
     isBaseClusterFormVerified: boolean = false;
+    projectNames: string[] = [];
 
     constructor(
         private title: Title,
@@ -107,17 +108,6 @@ export class BaseClusterComponent extends ComponentLeaveConfirmation implements 
         this.isBaseClusterFormVerified = false;
     }
 
-    private loadCluster(baseClusterId: number) {
-        this.spinner.show();
-
-        if (baseClusterId)
-            this.findBaseCluster(baseClusterId);
-        else
-            this.setCreationModel();
-
-        this.spinner.hide();
-    }
-
     private update(dto: BaseClusterDto) {
         this.service.update(this.baseClusterId, dto)
             .subscribe(() => {
@@ -142,19 +132,45 @@ export class BaseClusterComponent extends ComponentLeaveConfirmation implements 
         this.clusterComponent.markAsPristine();
     }
 
+    private loadCluster(baseClusterId: number) {
+        if (baseClusterId)
+            this.findBaseCluster(baseClusterId);
+        else
+            this.setCreationModel();
+
+        this.loadProjects();
+    }
+
+    private loadProjects() {
+        this.service.getAuthorizedProjectNames()
+            .subscribe(projectNames => this.projectNames = projectNames);
+    }
+
     private findBaseCluster(baseClusterId: number) {
-        this.service.findOne(baseClusterId)
-            .subscribe(baseCluster => {
+        this.spinner.show();
+        this.service.findOne(baseClusterId).subscribe(
+            baseCluster => {
                 this.setCurrentBaseCluster(baseCluster);
                 this.showCreatedMessageIfNewBaseCluster();
-                },
-                error => this.showMessage('Error', error.error, SnackbarLevel.Error)
-            );
+                this.spinner.hide();
+            },
+            error => {
+                this.showMessage('Error', error.error, SnackbarLevel.Error);
+                this.spinner.hide();
+            });
     }
 
     private setCreationModel() {
-        this.service.getNewModel()
-            .subscribe(m => this.setCurrentBaseCluster(m));
+        this.spinner.show();
+        this.service.getNewModel().subscribe(
+            baseClusterModel => {
+                this.setCurrentBaseCluster(baseClusterModel);
+                this.spinner.hide();
+            },
+            error => {
+                this.showMessage('Error', error.error, SnackbarLevel.Error);
+                this.spinner.hide();
+            });
     }
 
     private setCurrentBaseCluster(dto: BaseClusterDto) {
@@ -175,5 +191,14 @@ export class BaseClusterComponent extends ComponentLeaveConfirmation implements 
             description: message,
             level: messageLevel
         });
+    }
+
+    showErrorFormMessage(message: string) {
+        this.showMessage('Cluster recalculation error', message, SnackbarLevel.Error);
+    }
+
+    setChangesCandidates(results: RecalculateResult) {
+        this.changesCandidates = results.newClusters;
+        this.toolbarSubtitle = buildClusterToolbarSubtitle(results.startDate, results.endDate);
     }
 }

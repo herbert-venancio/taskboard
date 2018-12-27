@@ -1,7 +1,9 @@
 package objective.taskboard.cluster.base;
 
-
+import static java.util.stream.Collectors.toList;
+import static objective.taskboard.auth.authorizer.Permissions.PROJECT_ADMINISTRATION;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequest;
 
 import java.net.URI;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import objective.taskboard.auth.authorizer.permission.TaskboardAdministrationPermission;
 import objective.taskboard.followup.cluster.SizingCluster;
+import objective.taskboard.jira.AuthorizedProjectsService;
 
 @RestController
 @RequestMapping("/ws/base-cluster")
@@ -27,21 +30,25 @@ public class BaseClusterController {
 
     private static final String CLUSTERS_NOT_FOUND = "Clusters not found.";
     private static final String CLUSTER_NOT_FOUND = "Cluster not found.";
+
     private final BaseClusterService service;
     private final TaskboardAdministrationPermission taskboardAdministrationPermission;
+    private final AuthorizedProjectsService authorizedProjectsService;
 
     @Autowired
     public BaseClusterController(
         final BaseClusterService service,
-        final TaskboardAdministrationPermission taskboardAdministrationPermission
+        final TaskboardAdministrationPermission taskboardAdministrationPermission,
+        final AuthorizedProjectsService authorizedProjectsService
     ) {
         this.service = service;
         this.taskboardAdministrationPermission = taskboardAdministrationPermission;
+        this.authorizedProjectsService = authorizedProjectsService;
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> get(@PathVariable final Long id) {
-        if(hasTaskboardAdministrivePermission())
+        if (!taskboardAdministrationPermission.isAuthorized())
             return clusterNotFoundResponse();
 
         Optional<BaseClusterDto> cluster = service.findById(id);
@@ -54,7 +61,7 @@ public class BaseClusterController {
 
     @GetMapping("/{id}/items")
     public ResponseEntity<?> getAllItems(@PathVariable final Long id) {
-        if(hasTaskboardAdministrivePermission())
+        if (!taskboardAdministrationPermission.isAuthorized())
             return clusterNotFoundResponse();
 
         Optional<BaseClusterDto> cluster = service.findById(id);
@@ -67,7 +74,7 @@ public class BaseClusterController {
 
     @GetMapping
     public ResponseEntity<?> getAll() {
-        if(hasTaskboardAdministrivePermission())
+        if (!taskboardAdministrationPermission.isAuthorized())
             return clusterNotFoundResponse();
 
         List<BaseClusterDto> clusters = service.findAll();
@@ -80,16 +87,16 @@ public class BaseClusterController {
 
     @GetMapping("/new")
     public ResponseEntity<?> getEmptyCluster() {
-        BaseClusterDto creationModel = service.getNewModel();
-        if(hasTaskboardAdministrivePermission())
+        if (!taskboardAdministrationPermission.isAuthorized())
             return clusterNotFoundResponse();
 
+        BaseClusterDto creationModel = service.getNewModel();
         return ResponseEntity.ok(creationModel);
     }
 
     @PostMapping
     public ResponseEntity<?> create(@RequestBody final BaseClusterDto cluster) {
-        if(hasTaskboardAdministrivePermission())
+        if (!taskboardAdministrationPermission.isAuthorized())
             return clusterNotFoundResponse();
 
         SizingCluster savedCluster = service.create(cluster);
@@ -104,6 +111,9 @@ public class BaseClusterController {
 
     @PutMapping("{id}")
     public ResponseEntity<?> update(@PathVariable("id") final Long id, @RequestBody final BaseClusterDto cluster) {
+        if (!taskboardAdministrationPermission.isAuthorized())
+            return clusterNotFoundResponse();
+
         Optional<BaseClusterDto> savedCluster = service.update(id, cluster);
         if (!savedCluster.isPresent())
             return clusterNotFoundResponse();
@@ -111,8 +121,16 @@ public class BaseClusterController {
         return ResponseEntity.ok(savedCluster.get());
     }
 
-    private boolean hasTaskboardAdministrivePermission() {
-        return !taskboardAdministrationPermission.isAuthorized();
+    @GetMapping("projects")
+    public ResponseEntity<?> getAuthorizedProjectNames() {
+        if (!taskboardAdministrationPermission.isAuthorized())
+            return new ResponseEntity<>(NOT_FOUND);
+
+        List<String> authorizedProjectNames = authorizedProjectsService.getTaskboardProjects(PROJECT_ADMINISTRATION).stream()
+                .map(p -> p.getProjectKey())
+                .collect(toList());
+
+        return new ResponseEntity<>(authorizedProjectNames, OK);
     }
 
     private ResponseEntity<?> clusterNotFoundResponse() {

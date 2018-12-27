@@ -25,3 +25,10 @@
     color: $obj-color-smoke;
     line-height: 14px;
 }
+
+.body-with-scroll {
+    max-height: calc(100vh - 309px);
+    overflow-y: auto;
+    width: calc(100% + 16px);
+    padding-right: 16px;
+}

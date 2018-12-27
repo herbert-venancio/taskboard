@@ -1,6 +1,6 @@
 <form #tbClusterAlgorithm="ngForm" (ngSubmit)="runAllClusterings()">
 
-    <obj-label-field label="Start date">
+    <obj-label-field label="Start date" class="date">
         <input type="text"
             name="startDate"
             #startDateField="objTextField"
@@ -15,7 +15,7 @@
         </obj-error-messages>
     </obj-label-field>
 
-    <obj-label-field label="End date">
+    <obj-label-field label="End date" class="date field-margin">
         <input type="text"
             name="endDate"
             #endDateField="objTextField"
@@ -31,4 +31,24 @@
             <obj-error-message error="sameOrAfter">End date should be same or after Start date</obj-error-message>
         </obj-error-messages>
     </obj-label-field>
+
+    <obj-label-field *ngIf="selectableProjectsCheckboxes"
+                     class="projects"
+                     label="Projects">
+        <div class="checkbox-list">
+            <label *ngFor="let checkboxProject of selectableProjectsCheckboxes"
+                   class="checkbox-wrapper"
+                   title="{{checkboxProject.label}}">
+                <input class="checkbox"
+                       type="checkbox"
+                       name="selectable-project"
+                       value="{{checkboxProject.value}}"
+                       [(ngModel)]="checkboxProject.checked"/>
+                <span class="label">
+                    {{checkboxProject.label}}
+                </span>
+            </label>
+        </div>
+    </obj-label-field>
+
 </form>
