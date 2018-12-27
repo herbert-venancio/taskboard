@@ -1,7 +1,5 @@
 package objective.taskboard.issueBuffer;
 
-import static java.util.concurrent.Executors.newScheduledThreadPool;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
@@ -58,7 +56,6 @@ import retrofit.RetrofitError;
 @Service
 public class IssueBufferService implements ApplicationListener<ProjectUpdateEvent> {
     private static final String CACHE_FILENAME = "issues.dat";
-    private static final int UPDATE_ISSUEBUFFER_BACKGROUND_DELAY = 10;
     public static final int THREAD_POOL_SIZE = 1;
 
     private static final Logger log = LoggerFactory.getLogger(IssueBufferService.class);
@@ -178,7 +175,6 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
         final Issue issue = issueConverter.convertSingleIssue(jiraIssue, parentProviderFetchesMissingParents);
         putIssue(issue);
 
-        updateIssueBufferInBackground();
         return getIssueByKey(issue.getIssueKey());
     }
 
@@ -534,11 +530,5 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
         }
 
         private static final long serialVersionUID = 1L;
-    }
-
-    private void updateIssueBufferInBackground() {
-        log.info("Scheduling to perform 'updateIssueBuffer()' after {} seconds.", UPDATE_ISSUEBUFFER_BACKGROUND_DELAY);
-        newScheduledThreadPool(THREAD_POOL_SIZE)
-                .schedule(() -> updateIssueBuffer(), UPDATE_ISSUEBUFFER_BACKGROUND_DELAY, SECONDS);
     }
 }
