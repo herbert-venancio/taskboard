@@ -550,7 +550,7 @@ public class JiraMockServer {
 
     @SuppressWarnings("rawtypes")
     private static String makeFakeRequest(Map searchData) {
-        long startAt = Math.round((Double)searchData.get("startAt"));
+        long startAt = Math.round((Double)searchData.getOrDefault("startAt", 0.0));
         String jql = searchData.get("jql").toString();
         String result = loadSearchDataCached(startAt, jql);
         if (result == null)

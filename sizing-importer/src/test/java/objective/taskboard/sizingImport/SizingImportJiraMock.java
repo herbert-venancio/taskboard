@@ -23,7 +23,9 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
-import org.assertj.core.api.OptionalAssert;
+import org.assertj.core.api.AbstractOptionalAssert;
+import org.assertj.core.error.BasicErrorMessageFactory;
+import org.assertj.core.internal.Failures;
 import org.mockito.stubbing.Answer;
 
 import com.google.gson.Gson;
@@ -580,8 +582,8 @@ class SizingImportJiraMock {
             this.jiraMock = jiraMock;
         }
 
-        public OptionalAssert<JiraIssueDto> assertThatIssue(String key) {
-            return assertThat(jiraMock.findIssueByKey(key).map(ScopeImporterJiraIssueMock::asJiraIssue));
+        public AssertIssue assertThatIssue(String key) {
+            return new AssertIssue(jiraMock, key);
         }
 
         public AssertJira assertThatNoIssuesHaveBeenCreated() {
@@ -592,6 +594,45 @@ class SizingImportJiraMock {
         public AssertJira assertThatNoVersionHaveBeenCreated() {
             verify(jiraMock.versionRest, never()).create(any());
             return this;
+        }
+    }
+
+    public static class AssertIssue extends AbstractOptionalAssert<AssertIssue, JiraIssueDto> {
+
+        private final SizingImportJiraMock jiraMock;
+        private final String issueKey;
+
+        public AssertIssue(SizingImportJiraMock jiraMock, String issueKey) {
+            super(jiraMock.findIssueByKey(issueKey).map(ScopeImporterJiraIssueMock::asJiraIssue), AssertIssue.class);
+            this.jiraMock = jiraMock;
+            this.issueKey = issueKey;
+        }
+
+        public AssertIssue hasLink(String linkDescription, String otherKey) {
+            for(Triple<JiraLinkTypeDto, ScopeImporterJiraIssueMock, ScopeImporterJiraIssueMock> link : jiraMock.links) {
+                JiraLinkTypeDto type = link.getLeft();
+                ScopeImporterJiraIssueMock inward = link.getMiddle();
+                ScopeImporterJiraIssueMock outward = link.getRight();
+                if(issueKey.equals(inward.key)
+                        && linkDescription.equals(type.outward)
+                        && otherKey.equals(outward.key))
+                    return myself;
+                if(issueKey.equals(outward.key)
+                        && linkDescription.equals(type.inward)
+                        && otherKey.equals(inward.key))
+                    return myself;
+            }
+            throw Failures.instance().failure(info, ShouldBeLinked.shouldBeLinked(issueKey, linkDescription, otherKey));
+        }
+    }
+
+    private static class ShouldBeLinked extends BasicErrorMessageFactory {
+        public ShouldBeLinked(String issueKey, String linkDescription, String otherKey) {
+            super("%nLink:%n <%s> %s <%s>%nnot found.", issueKey, linkDescription, otherKey);
+        }
+
+        public static ShouldBeLinked shouldBeLinked(String issueKey, String linkDescription, String otherKey) {
+            return new ShouldBeLinked(issueKey, linkDescription, otherKey);
         }
     }
 }

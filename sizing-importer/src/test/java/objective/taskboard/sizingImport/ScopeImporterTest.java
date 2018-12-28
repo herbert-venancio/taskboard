@@ -581,11 +581,7 @@ public class ScopeImporterTest {
         then().jira()
                 .assertThatIssue("PX-2")
                 .isPresent()
-                .hasValueSatisfying(issue -> {
-                    String parentKey = extractParentKey(issue);
-                    assertThat(parentKey)
-                            .isEqualTo("PX-1");
-                });
+                .hasLink("is demanded by", "PX-1");
         then().jira()
                 .assertThatIssue("PX-3")
                 .isNotPresent();
@@ -601,10 +597,6 @@ public class ScopeImporterTest {
 
     private ScopeImporterTestDSL2.SizingInvocationBuilder whenImportSizing(ScopeImporterTestDSL2.SizingLineBuilder... builders) {
         return dsl2.sizing(builders);
-    }
-
-    private String extractParentKey(JiraIssueDto issue) {
-        return IssueFieldsExtractor.extractParentKey(dsl2.jiraProperties, issue, Collections.singletonList("is demanded by"));
     }
 
     private ScopeImporterTestDSL2.AssertWrapper then() {

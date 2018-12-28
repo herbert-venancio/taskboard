@@ -22,7 +22,6 @@ import objective.taskboard.jira.client.JiraCreateIssue;
 import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.client.JiraIssueDtoSearch;
 import objective.taskboard.jira.client.JiraIssueTypeDto;
-import objective.taskboard.jira.client.JiraLinkDto;
 import objective.taskboard.jira.client.JiraLinkTypeDto;
 import objective.taskboard.jira.data.JiraIssue;
 import objective.taskboard.jira.data.JiraProject;
@@ -100,16 +99,6 @@ public class JiraFacade {
         }
     }
 
-    public Optional<String> getDemandKeyGivenFeature(JiraIssueDto feature) {
-        String demandIssueLinkName = getDemandLink().name;
-
-        return feature.getIssueLinks().stream()
-                .filter(link -> link.getIssueLinkType().getName().equals(demandIssueLinkName))
-                .map(JiraLinkDto::getTargetIssueKey)
-                .findFirst();
-    }
-
-    
     private JiraLinkTypeDto getDemandLink() {
         return metadataService.getIssueLinksMetadata().get(jiraProperties.getIssuelink().getDemandId().toString());
     }
@@ -141,10 +130,6 @@ public class JiraFacade {
                 .projects.stream()
                 .flatMap(p -> p.issueTypes.stream())
                 .collect(toList());
-    }
-
-    public JiraIssueDto getIssue(String issueKey) {
-        return jiraEndpoint.request(JiraIssueDto.Service.class).get(issueKey);
     }
 
     public String getJiraUrl() {
