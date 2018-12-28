@@ -1,563 +1,413 @@
 package objective.taskboard.sizingImport;
 
-import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.column;
-import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.customField;
-import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.demand;
-import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.feature;
-import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.featureType;
-import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.line;
-import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.phase;
-import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.tshirtSizeField;
-import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.withProject;
-import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.withRequiredExtraField;
-import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.EXTRA_FIELD_ID_TAG;
-import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.SIZING_FIELD_ID_TAG;
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.Collections;
+import static objective.taskboard.sizingImport.ScopeImporterTestDSL.column;
+import static objective.taskboard.sizingImport.ScopeImporterTestDSL.customField;
+import static objective.taskboard.sizingImport.ScopeImporterTestDSL.demand;
+import static objective.taskboard.sizingImport.ScopeImporterTestDSL.feature;
+import static objective.taskboard.sizingImport.ScopeImporterTestDSL.featureType;
+import static objective.taskboard.sizingImport.ScopeImporterTestDSL.line;
+import static objective.taskboard.sizingImport.ScopeImporterTestDSL.phase;
+import static objective.taskboard.sizingImport.ScopeImporterTestDSL.tshirtSizeField;
+import static objective.taskboard.sizingImport.ScopeImporterTestDSL.withProject;
+import static objective.taskboard.sizingImport.ScopeImporterTestDSL.withRequiredExtraField;
 
 import org.junit.Test;
-
-import objective.taskboard.domain.converter.IssueFieldsExtractor;
-import objective.taskboard.jira.client.JiraIssueDto;
 
 public class ScopeImporterTest {
 
     private ScopeImporterTestDSL dsl = new ScopeImporterTestDSL();
-    private ScopeImporterTestDSL2 dsl2 = new ScopeImporterTestDSL2();
 
     @Test
     public void importNoLines_shouldFinishWithSuccessWithoutLinesToImport() {
-        dsl.jira()
-            .withProject()
+        dsl.jira(
+            withProject()
                 .key("PX")
-            .eoP();
+        );
 
         dsl.sizing()
-            .importedToProject("PX")
-            .then()
-                .withLinesToImport(0)
-                .importIsFinished()
-            .and()
-                .noIssuesHaveBeenCreated();
+            .importedToProject("PX");
+
+        then().importEvents()
+                .assertThatLinesToImportIs(0)
+                .importFinished();
+        then().jira()
+                .assertThatNoIssuesHaveBeenCreated();
     }
 
     @Test
     public void importALineAlreadyImported_shouldFinishWithSuccessWithoutLinesToImport() {
-        dsl.jira()
-            .withProject()
+        dsl.jira(
+            withProject()
                 .key("PX")
-                .withIssues()
-                    .issue()
-                        .key("PX-1")
-                        .isDemand()
-                    .eoI()
-                .eoIs()
-            .eoP();
+        );
 
-        dsl.sizing()
-            .lines()
-                .line()
+        dsl.sizing(
+                line()
                     .phase("One")
                     .demand("Blue")
                     .feature("Banana")
                     .key("PX-10")
-                .eoL()
-            .eoLs()
-            .importedToProject("PX")
-            .then()
-                .withLinesToImport(0)
-                .importIsFinished()
-            .and()
-                .noIssuesHaveBeenCreated();
+        )
+            .importedToProject("PX");
+
+        then().importEvents()
+                .assertThatLinesToImportIs(0)
+                .importFinished();
+        then().jira()
+                .assertThatNoIssuesHaveBeenCreated();
     }
 
     @Test
     public void importLineMissingFeatureValue_shouldRejectLineAndReportError() {
-        dsl.jira()
-            .withProject()
+        dsl.jira(
+            withProject()
                 .key("PX")
-                .withIssues()
-                    .issue()
-                        .key("PX-1")
-                    .eoI()
-                .eoIs()
-                .withFeatureType()
-                    .feature()
-                        .name("Feature")
-                    .eoF()
-                .eoFt()
-            .eoP();
+                .withIssues(
+                    demand()
+                        .key("PX-1"),
+                    feature()
+                        .summary("Feature")
+                )
+        );
 
-        dsl.sizing()
-            .lines()
-                .line()
+        dsl.sizing(
+                line()
                     .phase("One")
                     .demand("Blue")
                     .feature("")
-                .eoL()
-            .eoLs()
-                .importedToProject("PX")
-            .then()
-                .withLinesToImport(1)
-                .withError("Feature should be informed")
-                .importIsFinished()
-            .and()
-                .noIssuesHaveBeenCreated();
+        )
+                .importedToProject("PX");
+
+        then().importEvents()
+                .assertThatLinesToImportIs(1)
+                .assertThatContainsError("Feature should be informed")
+                .importFinished();
+        then().jira()
+                .assertThatNoIssuesHaveBeenCreated();
     }
 
     @Test
     public void importLineWithInvalidType_shouldRejectLineAndReportError() {
-        dsl.jira()
-            .withProject()
+        dsl.jira(
+            withProject()
                 .key("PX")
-                .withIssues()
-                    .issue()
+                .withIssues(
+                    feature()
                         .key("PX-1")
-                        .name("Banana")
-                    .eoI()
-                .eoIs()
-                .withFeatureType()
-                    .feature()
-                        .name("Feature")
-                    .eoF()
-                    .feature()
-                        .name("Task")
-                    .eoF()
-                    .feature()
+                        .summary("Banana")
+                )
+                .withIssueTypes(
+                    featureType()
+                        .name("Feature"),
+                    featureType()
+                        .name("Task"),
+                    featureType()
                         .name("Timebox")
-                    .eoF()
-                .eoFt()
-            .eoP();
+                )
+        );
 
-        dsl.sizing()
-            .lines()
-                .line()
+        dsl.sizing(
+                line()
                     .phase("One")
                     .demand("Blue")
                     .name("Banana")
                     .type("Bug")
-                .eoL()
-            .eoLs()
-                .importedToProject("PX")
-            .then()
-                .withLinesToImport(1)
-                .withError("Type should be one of the following: Feature, Task, Timebox")
-                .importIsFinished()
-            .and()
-                .noIssuesHaveBeenCreated();
+        )
+                .importedToProject("PX");
+
+        then().importEvents()
+                .assertThatLinesToImportIs(1)
+                .assertThatContainsError("Type should be one of the following: Feature, Task, Timebox")
+                .importFinished();
+        then().jira()
+                .assertThatNoIssuesHaveBeenCreated();
     }
 
     @Test
     public void importLineWithMissingRequiredSizingFieldValue_ShouldRejectLineAndReportError() {
-        dsl.jira()
-            .withProject()
+        dsl.jira(
+            withProject()
                 .key("PX")
-                .withIssues()
-                    .issue()
+                .withIssues(
+                    feature()
                         .key("PX-1")
-                    .eoI()
-                .eoIs()
-                .withFeatureType()
-                    .feature()
-                        .name("Feature")
-                        .withCustomField()
-                            .name("Dev TSize")
-                            .withId("f1")
-                            .isRequired()
-                        .eoCf()
-                        .withCustomField()
-                            .name("UAT TSize")
-                            .withId("f2")
-                        .eoCf()
-                    .eoF()
-                .eoFt()
-            .eoP();
+                )
+                .withIssueTypes(
+                    featureType().name("Feature")
+                    .withCustomFields(
+                            tshirtSizeField()
+                                .name("Dev TSize")
+                                .required(true),
+                            tshirtSizeField()
+                                .name("UAT TSize")
+                    )
+                )
+        );
 
-        dsl.sizing()
-            .lines()
-                .line()
+        dsl.sizing(
+                line()
                     .phase("One")
                     .demand("Blue")
                     .feature("Banana")
-                .eoL()
-            .eoLs()
-            .importedToProject("PX")
-            .then()
-                .rejectLine(1)
-                .withError("Dev TSize should be informed")
-            .and()
-                .noIssuesHaveBeenCreated();
+        )
+            .importedToProject("PX");
+
+        then().importEvents()
+                .assertThatLineWithErrorAt(1)
+                .assertThatContainsError("Dev TSize should be informed");
+        then().jira()
+                .assertThatNoIssuesHaveBeenCreated();
     }
 
     @Test
     public void importLineWithMissingRequiredExtraFieldValue_ShouldRejectLineAndReportError() {
-        dsl.jira()
-            .withProject()
+        dsl.jira(
+            withProject()
                 .key("PX")
-                .withIssues()
-                    .issue()
+                .withIssues(
+                    feature()
                         .key("PX-1")
-                        .name("Blue")
-                    .eoI()
-                .eoIs()
-                .withFeatureType()
-                    .feature()
+                        .summary("Blue")
+                )
+                .withIssueTypes(
+                    featureType()
                         .name("Feature")
-                        .withCustomField()
+                        .withCustomFields(
+                            customField()
                             .name("Use Cases")
-                            .withId("f9")
-                            .isRequired()
-                        .eoCf()
-                    .eoF()
-                .eoFt()
-            .eoP();
+                            .required(true)
+                        )
+                )
+        );
 
-        dsl.sizing()
-            .lines()
-                .line()
+        givenImportConfig(
+            withRequiredExtraField("Use Cases")
+        );
+
+        dsl.sizing(
+                line()
                     .phase("One")
                     .demand("Blue")
                     .feature("Banana")
-                .eoL()
-            .eoLs()
-                .importedToProject("PX")
-            .then()
-                .rejectLine(1)
-                .withError("Use Cases should be informed")
-            .and()
-                .noIssuesHaveBeenCreated();
+        )
+                .importedToProject("PX");
+
+        then().importEvents()
+                .assertThatLineWithErrorAt(1)
+                .assertThatContainsError("Use Cases should be informed");
+        then().jira()
+                .assertThatNoIssuesHaveBeenCreated();
     }
 
     @Test
     public void importLineWithoutSizingAndExtraFields_shouldImportWithSuccessAndReportIt() {
-        dsl.jira()
-            .withProject()
+        dsl.jira(
+            withProject()
                 .key("PX")
-                .withIssues()
-                    .issue()
-                        .key("PX-1")
-                        .name("Blue")
-                        .isDemand()
-                    .eoI()
-                    .issue()
-                        .key("PX-15")
-                        .name("Banana")
-                    .eoI()
-                .eoIs()
-                .withFeatureType()
-                    .feature()
-                        .name("Feature")
-                    .eoF()
-                .eoFt()
-            .eoP();
+        );
 
-        dsl.sizing()
-            .lines()
-                .line()
+        dsl.sizing(
+                line()
                     .phase("One")
                     .demand("Blue")
                     .feature("Banana")
-                .eoL()
-            .eoLs()
-                .importedToProject("PX")
-            .then()
-                .importIsFinished()
-                .withSuccessfulIssueImported("PX-15");
+        )
+                .importedToProject("PX");
+
+        then().importEvents()
+                .importFinished()
+                .withSuccessfulIssueImported("PX-2");
     }
 
     @Test
     public void importTimeboxLine_shouldImportWithSuccessAndReportHim() {
-        dsl.jira()
-            .withProject()
+        dsl.jira(
+            withProject()
                 .key("PX")
-                .withIssues()
-                    .issue()
-                        .key("PX-1")
-                        .name("Blue")
-                        .isDemand()
-                    .eoI()
-                    .issue()
-                        .key("PX-15")
-                        .name("Banana")
-                    .eoI()
-                .eoIs()
-                .withFeatureType()
-                    .feature()
+                .withIssueTypes(
+                    featureType()
                         .name("Timebox")
-                    .eoF()
-                .eoFt()
-            .eoP();
+                )
+        );
 
-        dsl.sizing()
-            .config()
-                .withTimeboxColumnLetter("S")
-            .eoC()
-            .lines()
-                .line()
+        dsl.sizing(
+                line()
                     .phase("One")
                     .demand("Infrastructure")
                     .name("Proof of Concept")
                     .timebox("80")
-                .eoL()
-            .eoLs()
-                .importedToProject("PX")
-            .then()
-                .importIsFinished()
-                .withSuccessfulIssueImported("PX-15");
+        )
+                .importedToProject("PX");
+
+        then().importEvents()
+                .importFinished()
+                .withSuccessfulIssueImported("PX-2");
     }
 
     @Test
     public void importFourLinesWithOneLineAlreadyImported_shouldImportThreeIssuesAndReportTheSuccess() {
-        dsl.jira()
-            .withProject()
+        dsl.jira(
+            withProject()
                 .name("Project X")
                 .key("PX")
-                .withIssues()
-                    .issue()
-                        .key("PX-2")
-                        .name("Blue")
-                        .isDemand()
-                    .eoI()
-                    .issue()
-                        .key("PX-3")
-                        .name("Red")
-                        .isDemand()
-                    .eoI()
-                    .issue()
-                        .key("PX-15")
-                        .name("Banana")
-                    .eoI()
-                    .issue()
-                        .key("PX-16")
-                        .name("Lemon")
-                    .eoI()
-                    .issue()
-                        .key("PX-17")
-                        .name("Grape")
-                    .eoI()
-                .eoIs()
-                .withFeatureType()
-                    .feature()
+                .withIssues(
+                    demand().key("PX-2").summary("White"),
+                    feature().key("PX-1")
+                )
+                .withIssueTypes(
+                    featureType()
                         .name("Feature")
-                        .withCustomField()
-                            .name("Dev TSize")
-                            .withId("f1")
-                        .eoCf()
-                        .withCustomField()
-                            .name("UAT TSize")
-                            .withId("f2")
-                        .eoCf()
-                        .withCustomField()
-                            .name("Use Cases")
-                            .withId("f3")
-                        .eoCf()
-                    .eoF()
-                    .feature()
+                        .withCustomFields(
+                            tshirtSizeField()
+                                .name("Dev TSize"),
+                            tshirtSizeField()
+                                .name("UAT TSize"),
+                            customField()
+                                .name("Use Cases")
+                        ),
+                    featureType()
                         .name("Task")
-                        .withCustomField()
-                            .name("Task TSize")
-                            .withId("f5")
-                        .eoCf()
-                    .eoF()
-                .eoFt()
-            .eoP();
+                        .withCustomFields(
+                            tshirtSizeField()
+                                .name("Task TSize")
+                        )
+                    )
+        );
 
-        dsl.sizing()
-            .config()
-                .extraField()
-                    .columnHeader("Dev TSize")
-                    .id("f1")
-                    .mappedToColumn("E")
-                .eoEf()
-                .extraField()
-                    .columnHeader("UAT TSize")
-                    .id("f2")
-                    .mappedToColumn("F")
-                .eoEf()
-                .extraField()
-                    .columnHeader("Task TSize")
-                    .id("f5")
-                    .mappedToColumn("G")
-                .eoEf()
-                .extraField()
-                    .columnHeader("Use Cases")
-                    .id("f3")
-                    .mappedToColumn("H")
-                .eoEf()
-            .eoC()
-            .lines()
-                .line()
+        givenImportConfig(
+                withRequiredExtraField("Use Cases")
+        );
+
+        dsl.sizing(
+                line()
                     .phase("One")
                     .demand("Blue")
-                    .feature("Banana")
-                .eoL()
-                .line()
+                    .feature("Banana"),
+                line()
                     .phase("One")
                     .demand("Blue")
                     .task("Lemon")
-                    .withExtraColumns()
-                        .column()
-                            .name("Task TSize")
+                    .with(
+                        column()
+                            .forTShirtField("Task TSize")
                             .value("M")
-                            .isTypeSizing()
-                        .eoC()
-                    .eoEc()
-                .eoL()
-                .line()
+                    ),
+                line()
                     .phase("One")
                     .demand("Red")
                     .feature("Grape")
-                    .withExtraColumns()
-                        .column()
-                            .name("Dev TSize")
-                            .value("X")
-                            .isTypeSizing()
-                        .eoC()
-                        .column()
-                            .name("UAT TSize")
-                            .value("S")
-                        .eoC()
-                        .column()
-                            .name("Use Cases")
+                    .with(
+                        column()
+                            .forTShirtField("Dev TSize")
+                            .value("XL"),
+                        column()
+                            .forTShirtField("UAT TSize")
+                            .value("S"),
+                        column()
+                            .forCustomField("Use Cases")
                             .value("User picks and eats")
-                        .eoC()
-                    .eoEc()
-                .eoL()
-                .line()
+                    ),
+                line()
                     .phase("One")
                     .demand("White")
                     .feature("Jackfruit")
                     .key("PX-1")
-                .eoL()
-            .eoLs()
-                .importedToProject("PX")
-            .then()
-                .withSuccessfulIssuesImported("PX-15", "PX-16", "PX-17")
-                .importIsFinished();
+        )
+                .importedToProject("PX");
+
+        then().importEvents()
+                .withSuccessfulIssuesImported("PX-4", "PX-5", "PX-7")
+                .importFinished();
     }
 
     @Test
     public void importLineWithUnsupportedFields_shouldRejectLineReportingErrorToTwoExtraValuesOfLine() {
-        dsl.jira()
-            .withProject()
+        dsl.jira(
+            withProject()
                 .key("PX")
                 .name("Project X")
-                .withIssues()
-                    .issue()
-                        .key("PX-1")
-                        .name("Blue")
-                        .isDemand()
-                    .eoI()
-                    .issue()
-                        .key("PX-15")
-                        .name("Banana")
-                    .eoI()
-                .eoIs()
-                .withFeatureType()
-                    .feature()
+                .withIssueTypes(
+                    featureType()
                         .name("Feature")
-                        .withCustomField()
+                        .withCustomFields(
+                            customField()
                             .name("Dev TSize")
-                            .withId("f1")
-                        .eoCf()
-                    .eoF()
-                .eoFt()
-            .eoP();
+                        )
+                )
+                .withCustomFields(
+                    customField().name("Use Cases"),
+                    customField().name("UAT TSize")
+                )
+        );
 
-        dsl.sizing()
-            .config()
-                .extraField()
-                    .id("f1")
-                    .columnHeader("Dev TSize")
-                    .mappedToColumn("E")
-                .eoEf()
-                .extraField()
-                    .id("f3")
-                    .columnHeader("Use Cases")
-                    .mappedToColumn("G")
-                .eoEf()
-            .eoC()
-            .lines()
-                .line()
+        givenImportConfig(
+                withRequiredExtraField("Dev TSize"),
+                withRequiredExtraField("Use Cases")
+        );
+
+        dsl.sizing(
+                line()
                     .phase("One")
                     .demand("Blue")
                     .feature("Banana")
-                    .withExtraColumns()
-                        .column()
-                            .name("Dev TSize")
-                            .value("X")
-                            .isTypeSizing()
-                        .eoC()
-                        .column()
-                            .name("UAT TSize")
-                            .value("S")
-                            .isTypeSizing()
-                        .eoC()
-                        .column()
-                            .name("Use Cases")
+                    .with(
+                        column()
+                            .forTShirtField("Dev TSize")
+                            .value("XS"),
+                        column()
+                            .forTShirtField("UAT TSize")
+                            .value("S"),
+                        column()
+                            .forCustomField("Use Cases")
                             .value("User picks and eats")
-                        .eoC()
-                    .eoEc()
-                .eoL()
-            .eoLs()
-                .importedToProject("PX")
-            .then()
-                .rejectLine(1)
-                .withError(
-                    "Column “UAT TSize” is not valid for the type Feature and should be left blank; " +
-                    "Column “Use Cases” is not valid for the type Feature and should be left blank"
-                )
-            .and()
-                .noIssuesHaveBeenCreated();
+                    )
+        )
+                .importedToProject("PX");
+
+        then().importEvents()
+                .assertThatLineWithErrorAt(1)
+                .assertThatContainsError("Column “UAT TSize” is not valid for the type Feature and should be left blank")
+                .assertThatContainsError("Column “Use Cases” is not valid for the type Feature and should be left blank");
+        then().jira()
+                .assertThatNoIssuesHaveBeenCreated();
     }
 
     @Test
     public void importALineWithExistingVersion_ensureToNotCreateAVersion() {
-        dsl.jira()
-            .withProject()
+        dsl.jira(
+            withProject()
                 .key("PX")
                 .name("Project X")
                 .withVersion("One")
-                .withIssues()
-                    .issue()
+                .withIssues(
+                    demand()
                         .key("PX-1")
-                        .name("Blue")
-                        .isDemand()
-                    .eoI()
-                    .issue()
-                        .key("PX-15")
-                        .name("Lemon")
-                    .eoI()
-                .eoIs()
-                .withFeatureType()
-                    .feature()
-                        .name("Feature")
-                    .eoF()
-                .eoFt()
-            .eoP();
+                        .summary("Blue"),
+                    feature()
+                        .key("PX-10")
+                        .summary("Banana")
+                )
+        );
 
-        dsl.sizing()
-            .lines()
-                .line()
+        dsl.sizing(
+                line()
                     .phase("One")
                     .demand("Blue")
                     .feature("Banana")
-                    .key("PX-10")
-                .eoL()
-                .line()
+                    .key("PX-10"),
+                line()
                     .phase("One")
                     .demand("Blue")
                     .feature("Lemon")
                     .key("")
-                .eoL()
-            .eoLs()
-                .importedToProject("PX")
-            .then()
-                .importIsFinished()
-                .withSuccessfulIssueImported("PX-15")
-            .and()
-                .noVersionHaveBeenCreated();
+        )
+                .importedToProject("PX");
+
+        then().importEvents()
+                .importFinished()
+                .withSuccessfulIssueImported("PX-11");
+        then().jira()
+                .assertThatNoVersionHaveBeenCreated();
     }
 
     @Test
@@ -576,8 +426,8 @@ public class ScopeImporterTest {
         ).intoProject("PX");
 
         then().importEvents()
-                .assertThatImportedIssues("PX-2")
-                .assertThatImportFinished();
+                .withSuccessfulIssueImported("PX-2")
+                .importFinished();
         then().jira()
                 .assertThatIssue("PX-2")
                 .isPresent()
@@ -587,19 +437,19 @@ public class ScopeImporterTest {
                 .isNotPresent();
     }
 
-    private void givenJira(ScopeImporterTestDSL2.JiraProjectBuilder... builders) {
-        dsl2.jira(builders);
+    private void givenJira(ScopeImporterTestDSL.JiraProjectBuilder... builders) {
+        dsl.jira(builders);
     }
 
-    private void givenImportConfig(ScopeImporterTestDSL2.ImportConfigBuilder... builders) {
-        dsl2.importConfig(builders);
+    private void givenImportConfig(ScopeImporterTestDSL.ImportConfigBuilder... builders) {
+        dsl.importConfig(builders);
     }
 
-    private ScopeImporterTestDSL2.SizingInvocationBuilder whenImportSizing(ScopeImporterTestDSL2.SizingLineBuilder... builders) {
-        return dsl2.sizing(builders);
+    private ScopeImporterTestDSL.SizingInvocationBuilder whenImportSizing(ScopeImporterTestDSL.SizingLineBuilder... builders) {
+        return dsl.sizing(builders);
     }
 
-    private ScopeImporterTestDSL2.AssertWrapper then() {
-        return dsl2.then();
+    private ScopeImporterTestDSL.AssertWrapper then() {
+        return dsl.then();
     }
 }

@@ -1,720 +1,542 @@
 package objective.taskboard.sizingImport;
 
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toMap;
+import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.EXTRA_FIELD_ID_TAG;
+import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.SIZING_FIELD_ID_TAG;
+import static objective.taskboard.sizingImport.SizingImportJiraMock.NOT_MOCKED_EXCEPTION_ANSWER;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.client.JiraCreateIssue;
-import objective.taskboard.jira.client.JiraIssueDto;
+import objective.taskboard.jira.client.JiraIssueDtoSearch;
 import objective.taskboard.jira.data.JiraIssue;
 import objective.taskboard.jira.data.JiraProject;
 import objective.taskboard.jira.data.Version;
-import objective.taskboard.sizingImport.SheetColumnDefinition.ColumnTag;
-
-import static java.util.Collections.singletonMap;
-import static java.util.stream.Collectors.joining;
-import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.EXTRA_FIELD_ID_TAG;
-import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.SIZING_FIELD_ID_TAG;
-
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.apache.commons.lang3.StringUtils.join;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-
-import static java.util.stream.Collectors.toList;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.springframework.util.StringUtils.hasText;
-
-import com.google.gson.Gson;
+import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
+import objective.taskboard.jira.properties.JiraProperties;
 
 public class ScopeImporterTestDSL {
 
+    private final SizingImportJiraMock jiraMock = new SizingImportJiraMock();
     private final SizingImportConfig importConfig = new SizingImportConfig();
-    private final JiraFacade jiraFacade = mock(JiraFacade.class);
+    private final JiraProperties jiraProperties = new JiraProperties();
+    private final MetadataService metadataService = mock(MetadataService.class);
+    private final JiraEndpointAsLoggedInUser jiraEndpoint = mock(JiraEndpointAsLoggedInUser.class);
+    private final JiraFacade jiraFacade = new JiraFacade(jiraEndpoint, jiraProperties, metadataService);
     private final SizingSheetImporterNotifier importerNotifier = new SizingSheetImporterNotifier();
-    private static SizingImporterRecorder recorder;
+    private final SizingImporterRecorder recorder = new SizingImporterRecorder();
 
     public ScopeImporterTestDSL() {
-        when(jiraFacade.findDemandBySummary(any(), any()))
-                .thenReturn(Optional.empty());
+        importerNotifier.addListener(recorder);
+
+        JiraProperties.IssueType issueType = new JiraProperties.IssueType();
+        issueType.setFeatures(new ArrayList<>());
+        issueType.setSubtasks(new ArrayList<>());
+        jiraProperties.setIssuetype(issueType);
+
+        JiraProperties.IssueLink issueLink = new JiraProperties.IssueLink();
+        issueLink.setDemandId(Integer.parseInt(jiraMock.findLinkTypeByNameOrThrow("Demand").id));
+        jiraProperties.setIssuelink(issueLink);
+
+        JiraProperties.CustomField.TShirtSize tshirtSize = new JiraProperties.CustomField.TShirtSize();
+        JiraProperties.CustomField.CustomFieldDetails release = new JiraProperties.CustomField.CustomFieldDetails();
+        JiraProperties.CustomField customfield = new JiraProperties.CustomField();
+        tshirtSize.setIds(new ArrayList<>());
+        customfield.setTShirtSize(tshirtSize);
+        customfield.setRelease(release);
+        jiraProperties.setCustomfield(customfield);
+
+        doAnswer(NOT_MOCKED_EXCEPTION_ANSWER).when(jiraEndpoint).request(any());
+        doReturn(jiraMock.projectRest).when(jiraEndpoint).request(eq(JiraProject.Service.class));
+        doReturn(jiraMock.createMetadataRest).when(jiraEndpoint).request(eq(JiraCreateIssue.Service.class));
+        doReturn(jiraMock.issueRest).when(jiraEndpoint).request(eq(JiraIssue.Service.class));
+        doReturn(jiraMock.searchRest).when(jiraEndpoint).request(eq(JiraIssueDtoSearch.Service.class));
+        doReturn(jiraMock.versionRest).when(jiraEndpoint).request(eq(Version.Service.class));
+        doAnswer(invocation -> jiraMock.linkTypeRest.all()
+                .issueLinkTypes.stream()
+                .collect(toMap(l -> l.id, l -> l))
+        ).when(metadataService).getIssueLinksMetadata();
     }
 
-    protected DSLJiraBuilder jira() {
-        return new DSLJiraBuilder(this);
+    public void jira(JiraProjectBuilder... builders) {
+        Arrays.stream(builders)
+                .forEach(b -> b.build(this, jiraMock));
     }
 
-    protected DSLSizingBuilder sizing() {
-        recorder = new SizingImporterRecorder();
-        return new DSLSizingBuilder();
+    public void importConfig(ImportConfigBuilder... builders) {
+        Arrays.stream(builders)
+                .forEach(b -> b.build(this, importConfig));
     }
 
-    class DSLJiraBuilder {
-
-        private ScopeImporterTestDSL scopeImporterTestDSL;
-
-        public DSLJiraBuilder(ScopeImporterTestDSL scopeImporterTestDSL) {
-            this.scopeImporterTestDSL = scopeImporterTestDSL;
-        }
-
-        public DSLProjectJiraBuilder withProject() {
-            return new DSLProjectJiraBuilder(this);
-        }
-
-        public ScopeImporterTestDSL eoJ() {
-            return this.scopeImporterTestDSL;
-        }
+    public SizingInvocationBuilder sizing(SizingLineBuilder... builders) {
+        SizingInvocationBuilder invocationBuilder = new SizingInvocationBuilder(this);
+        Arrays.stream(builders)
+                .forEach(b -> b.build(this, invocationBuilder));
+        return invocationBuilder;
     }
 
-    class DSLProjectJiraBuilder {
-
-        private DSLJiraBuilder dslJiraBuilder;
-
-        private String projectKey;
-        private String projectName;
-        private String version;
-        private DSLIssues dslIssues;
-
-        public DSLProjectJiraBuilder(final DSLJiraBuilder dslJiraBuilder) {
-            this.dslJiraBuilder = dslJiraBuilder;
-        }
-
-        public DSLProjectJiraBuilder key(final String projectKey) {
-            this.projectKey = projectKey;
-            return this;
-        }
-
-        public DSLIssues withIssues() {
-            dslIssues = new DSLIssues(this);
-            return dslIssues;
-        }
-
-        public DSLFeatureTypeBuilder withFeatureType() {
-            return new DSLFeatureTypeBuilder(this);
-        }
-
-        public DSLProjectJiraBuilder name(final String projectName) {
-            this.projectName = projectName;
-            return this;
-        }
-
-        public DSLProjectJiraBuilder withVersion(final String version) {
-            this.version = version;
-
-            when(jiraFacade.createVersion(projectKey, this.version))
-                    .thenReturn(new Version("1", this.version));
-            return this;
-        }
-
-        public ScopeImporterTestDSL eoP() {
-            when(jiraFacade.getProject(projectKey))
-                .thenReturn(jiraProject(projectKey, projectName, getVersion()));
-
-            return this.dslJiraBuilder.eoJ();
-        }
-
-        private List<Version> getVersion() {
-            if (hasText(version))
-                return asList(new Version("1", this.version));
-
-            return emptyList();
-        }
-
-        private JiraProject jiraProject(String key, String name, List<Version> versions) {
-            return new JiraProject("0", key, versions, name);
-        }
+    public static JiraProjectBuilder withProject() {
+        return new JiraProjectBuilder();
     }
 
-    class DSLIssues {
-
-        DSLProjectJiraBuilder dslProjectJiraBuilder;
-
-        public DSLIssues(final DSLProjectJiraBuilder dslProjectJiraBuilder) {
-            this.dslProjectJiraBuilder = dslProjectJiraBuilder;
-        }
-
-        public DSLProjectJiraBuilder eoIs() {
-            return dslProjectJiraBuilder;
-        }
-
-        public DSLIssue issue() {
-            return new DSLIssue(this);
-        }
+    public static JiraIssueBuilder demand() {
+        return new JiraIssueBuilder().isDemand();
     }
 
-    class DSLIssue {
+    public static JiraIssueBuilder feature() {
+        return new JiraIssueBuilder().isFeature();
+    }
 
-        private DSLIssues dslIssues;
+    public static JiraIssueBuilder issue() {
+        return new JiraIssueBuilder();
+    }
 
-        private String demandKey = null;
-        private String name = null;
-        private boolean isDemand = false;
+    public static SizingLineBuilder line() {
+        return new SizingLineBuilder();
+    }
 
-        public DSLIssue(final DSLIssues dslIssues) {
-            this.dslIssues = dslIssues;
+    public static SizingLineBuilder phase(String name) {
+        return line().phase(name);
+    }
+
+    public static SizingExtraColumnBuilder column() {
+        return new SizingExtraColumnBuilder();
+    }
+
+    public static JiraIssueTypeBuilder demandType() {
+        return new JiraIssueTypeBuilder().isDemand().withCustomFields("Release");
+    }
+
+    public static JiraIssueTypeBuilder featureType() {
+        return new JiraIssueTypeBuilder().isFeature().withCustomFields("Release");
+    }
+
+    public static JiraIssueTypeCustomFieldBuilder customField() {
+        return new JiraIssueTypeCustomFieldBuilder();
+    }
+
+    public static JiraIssueTypeCustomFieldBuilder tshirtSizeField() {
+        return customField().isTshirtSize().allowedValues("XS", "S", "M", "L", "XL");
+    }
+
+    public static JiraIssueTypeBuilder[] defaultIssueTypes() {
+        return new JiraIssueTypeBuilder[] {
+                demandType().name("Demand"),
+                featureType().name("Feature")
+        };
+    }
+
+    public static ImportConfigBuilder withRequiredExtraField(String name) {
+        return new ImportConfigBuilder().columnHeader(name);
+    }
+
+    public AssertWrapper then() {
+        return new AssertWrapper(this);
+    }
+
+    public static class AssertWrapper {
+
+        private final ScopeImporterTestDSL dsl;
+
+        private AssertWrapper(ScopeImporterTestDSL dsl) {
+            this.dsl = dsl;
         }
 
-        public DSLIssue key(final String demandKey) {
-            this.demandKey = demandKey;
-            return this;
+        public SizingImporterRecorder.AssertImportEvents importEvents() {
+            return dsl.recorder.then();
         }
 
-        public DSLIssue name(final String name) {
-            this.name = name;
-            return this;
-        }
-
-        public DSLIssue isDemand() {
-            this.isDemand = true;
-            return this;
-        }
-
-        public DSLIssues eoI() {
-            if (isDemand) {
-                when(jiraFacade.createDemand(any(), any(), any()))
-                        .thenReturn(new JiraIssue(demandKey));
-
-                when(jiraFacade.findDemandBySummary(any(), eq(name)))
-                        .thenReturn(Optional.of(createDemand(demandKey, name)));
-            } else {
-
-                if (hasText(name)) {
-
-                    when(jiraFacade.createFeature(any(), any(), any(),  eq(name), any(), any()))
-                            .thenReturn(new JiraIssue(demandKey));
-                } else {
-
-                    when(jiraFacade.createFeature(any(), any(), any(),  any(), any(), any()))
-                            .thenReturn(new JiraIssue(demandKey));
-                }
-
-                when(jiraFacade.createTimebox(any(), any(), any(),  any(), any(), any(), any()))
-                        .thenReturn(new JiraIssue(demandKey));
-            }
-
-            return dslIssues;
+        public SizingImportJiraMock.AssertJira jira() {
+            return dsl.jiraMock.then();
         }
     }
 
-    class DSLFeatureTypeBuilder {
+    static class JiraProjectBuilder {
 
-        DSLProjectJiraBuilder jiraBuilder;
-        private List<DSLFeatureIssueBuilder> features = new ArrayList<>();
-
-        public DSLFeatureTypeBuilder(final DSLProjectJiraBuilder jiraBuilder) {
-            this.jiraBuilder = jiraBuilder;
-        }
-
-        public DSLFeatureIssueBuilder feature() {
-            return new DSLFeatureIssueBuilder(this);
-        }
-
-        public DSLProjectJiraBuilder eoFt() {
-            when(jiraFacade.requestFeatureTypes(jiraBuilder.projectKey))
-                .thenReturn(getIssueTypeMetadataList());
-
-            if (!features.isEmpty()) {
-                List <String> fields = new ArrayList<>();
-
-                features.forEach(f -> f.customFields.forEach(c -> fields.add(c.id)));
-
-                when(jiraFacade.getSizingFieldIds())
-                        .thenReturn(fields);
-            }
-            return jiraBuilder;
-        }
-
-        private List<JiraCreateIssue.IssueTypeMetadata> getIssueTypeMetadataList() {
-            return features.stream()
-                .map(f -> new JiraCreateIssue.IssueTypeMetadata(f.id, f.featureTypeName, f.isSubTask, toFields(f.customFields)))
-                .collect(toList());
-        }
-
-        private Map<String, JiraCreateIssue.FieldInfoMetadata> toFields(final List<DSLCustomFieldBuilder> dslFields) {
-            Map<String, JiraCreateIssue.FieldInfoMetadata> fields = new HashMap<>();
-            dslFields.forEach(f -> fields.put(f.id, new JiraCreateIssue.FieldInfoMetadata(f.id, f.isRequired, f.name)));
-
-            return fields;
-        }
-    }
-
-    class DSLFeatureIssueBuilder {
-
-        private final Long id = 30L;
-        private final DSLFeatureTypeBuilder featureTypeBuilder;
-        private String featureTypeName;
-        private boolean isSubTask;
-        private List<DSLCustomFieldBuilder> customFields = new ArrayList<>();
-
-        public DSLFeatureIssueBuilder(final DSLFeatureTypeBuilder dslFeatureTypeBuilder) {
-            this.featureTypeBuilder = dslFeatureTypeBuilder;
-        }
-
-        public DSLCustomFieldBuilder withCustomField() {
-            return new DSLCustomFieldBuilder(this);
-        }
-
-        public DSLFeatureIssueBuilder name(final String featureTypeName) {
-            this.featureTypeName = featureTypeName;
-            return this;
-        }
-
-        public DSLFeatureTypeBuilder eoF() {
-            featureTypeBuilder.features.add(this);
-            return featureTypeBuilder;
-        }
-    }
-
-    class DSLCustomFieldBuilder {
-
-        private final DSLFeatureIssueBuilder featureIssueBuilder;
-        private String name;
-        private String id;
-        private boolean isRequired;
-
-        public DSLCustomFieldBuilder(DSLFeatureIssueBuilder featureIssueBuilder) {
-            this.featureIssueBuilder = featureIssueBuilder;
-        }
-
-        public DSLCustomFieldBuilder name(final String name) {
-            this.name = name;
-            return this;
-        }
-
-        public DSLCustomFieldBuilder withId(final String id) {
-            this.id = id;
-            return this;
-        }
-
-        public DSLCustomFieldBuilder isRequired() {
-            this.isRequired = true;
-            return this;
-        }
-
-        public DSLFeatureIssueBuilder eoCf() {
-            featureIssueBuilder.customFields.add(this);
-            return featureIssueBuilder;
-        }
-    }
-
-    class DSLSizingBuilder {
-
-        private ScopeImporter scopeImporter = null;
-        private DSLLines dslLines = new DSLLines(this);
-
-        public DSLConfigBuilder config() {
-            return new DSLConfigBuilder(this);
-        }
-
-        public DSLLines lines() {
-            return this.dslLines;
-        }
-
-        public DSLSizingBuilder importedToProject(final String projectKey) {
-            importerNotifier.addListener(recorder);
-            scopeImporter = new ScopeImporter(importConfig, jiraFacade, importerNotifier);
-
-            scopeImporter.executeImport(projectKey, dslLines.getLinesToImport());
-            return this;
-        }
-
-        public DSLAssertBuilder then() {
-            return new DSLAssertBuilder(this);
-        }
-
-        public void noIssuesHaveBeenCreated() {
-            verify(jiraFacade, never()).createVersion(any(), any());
-            verify(jiraFacade, never()).createDemand(any(), any(), any());
-            verify(jiraFacade, never()).createFeature(any(), any(), any(), any(), any(), any());
-        }
-
-        public void noVersionHaveBeenCreated() {
-            verify(jiraFacade, never()).createVersion(any(), any());
-        }
-    }
-
-    class DSLConfigBuilder {
-
-        private DSLSizingBuilder sizingBuilder;
-        private List<DSLExtraField> extraFields = new ArrayList<DSLExtraField>();
-        private String timeboxColumn = "";
-
-        public DSLConfigBuilder(DSLSizingBuilder sizingBuilder) {
-            this.sizingBuilder = sizingBuilder;
-        }
-
-        public DSLExtraField extraField() {
-            return new DSLExtraField(this);
-        }
-
-        public DSLSizingBuilder eoC() {
-            this.extraFields
-                .forEach(e ->
-                    importConfig.getSheetMap().getExtraFields()
-                        .add(new SizingImportConfig.SheetMap.ExtraField(e.id, e.columnHeader, e.mappedColumn))
-                );
-
-            if (hasText(timeboxColumn))
-                importConfig.getSheetMap().setTimebox(timeboxColumn);
-
-            return this.sizingBuilder;
-        }
-
-        public DSLConfigBuilder withTimeboxColumnLetter(final String letter) {
-            this.timeboxColumn = letter;
-            return this;
-        }
-    }
-
-    class DSLExtraField {
-
-        private DSLConfigBuilder config;
-        private String id;
-        private String columnHeader;
-        private String mappedColumn;
-
-        public DSLExtraField(final DSLConfigBuilder config) {
-            this.config = config;
-        }
-
-        public DSLExtraField id(final String id) {
-            this.id = id;
-            return this;
-        }
-
-        public DSLExtraField columnHeader(final String columnHeader) {
-            this.columnHeader = columnHeader;
-            return this;
-        }
-
-        public DSLExtraField mappedToColumn(final String mappedColumn) {
-            this.mappedColumn = mappedColumn;
-            return this;
-        }
-
-        public DSLConfigBuilder eoEf() {
-            config.extraFields.add(this);
-            return config;
-        }
-    }
-
-    class DSLLines {
-
-        private DSLSizingBuilder sizingBuilder;
-        private List<DSLLine> lines = new ArrayList<>();
-
-        private final SheetColumn PHASE_COLUMN = new SheetColumn(SheetColumnDefinitionProviderScope.PHASE, "A");
-        private final SheetColumn DEMAND_COLUMN = new SheetColumn(SheetColumnDefinitionProviderScope.DEMAND, "B");
-        private final SheetColumn FEATURE_COLUMN = new SheetColumn(SheetColumnDefinitionProviderScope.FEATURE, "C");
-        private final SheetColumn TYPE_COLUMN = new SheetColumn(SheetColumnDefinitionProviderScope.TYPE, "D");
-        private final SheetColumn KEY_COLUMN = new SheetColumn(SheetColumnDefinitionProviderScope.KEY, "C");
-        private final SheetColumn TIMEBOX_COLUMN = new SheetColumn(SheetColumnDefinitionProviderScope.TIMEBOX, "S");
-
-        public DSLLines(final DSLSizingBuilder sizingBuilder) {
-            this.sizingBuilder = sizingBuilder;
-        }
-
-        public DSLLine line() {
-            return new DSLLine(this);
-        }
-
-        protected DSLSizingBuilder eoLs() {
-            return sizingBuilder;
-        }
-
-        public List<SizingImportLineScope> getLinesToImport() {
-            return this.lines.stream()
-                .map(this::toSizingImportLineScope)
-                    .collect(toList());
-        }
-
-        private SizingImportLineScope toSizingImportLineScope(final DSLLine line) {
-            List<SizingImportLine.ImportValue> values = new ArrayList<>();
-            values.addAll(
-                asList(
-                    new SizingImportLine.ImportValue(PHASE_COLUMN, line.phase),
-                    new SizingImportLine.ImportValue(DEMAND_COLUMN, line.name),
-                    new SizingImportLine.ImportValue(FEATURE_COLUMN, line.featureName),
-                    new SizingImportLine.ImportValue(TYPE_COLUMN, line.type),
-                    new SizingImportLine.ImportValue(KEY_COLUMN, line.key),
-                    new SizingImportLine.ImportValue(TIMEBOX_COLUMN, line.timeboxValue)
-                )
-            );
-            List<DSLExtraColumn> extraColumns = line.extraColumns.columns;
-
-            if (!extraColumns.isEmpty()) {
-                List<SizingImportLine.ImportValue> extraValues = extraColumns.stream()
-                        .map(e -> new SizingImportLine.ImportValue(toSheetColumn(e), e.value))
-                        .collect(toList());
-
-                values.addAll(extraValues);
-            }
-            AtomicInteger lineNumber = new AtomicInteger();
-
-            return new SizingImportLineScope(lineNumber.getAndIncrement(), values);
-        }
-
-        private SheetColumn toSheetColumn(final DSLExtraColumn extraColumn) {
-            String definition = EXTRA_FIELD_ID_TAG;
-
-            if (extraColumn.isTypeSizing)
-                definition = SIZING_FIELD_ID_TAG;
-
-            Optional<SizingImportConfig.SheetMap.ExtraField> extraFieldConfiguration =
-                importConfig.getSheetMap().getExtraFields()
-                    .stream()
-                    .filter(f -> f.getColumnHeader().equals(extraColumn.headerName))
-                    .findFirst();
-
-            String tagValue = "xxxx";
-            String sheetLetter = "xxxx";
-
-            if (extraFieldConfiguration.isPresent()) {
-                tagValue = extraFieldConfiguration.get().getFieldId();
-                sheetLetter = extraFieldConfiguration.get().getColumnLetter();
-            }
-
-            return new SheetColumn(new SheetColumnDefinition(extraColumn.headerName, new ColumnTag(definition, tagValue)), sheetLetter);
-        }
-    }
-
-    class DSLLine {
-
-        private DSLLines dsLlines;
-
-        private String phase;
-        private String name;
-        private String featureName;
-        private String timeboxValue;
-        private String type;
         private String key;
+        private String name;
+        private List<JiraProjectVersionBuilder> versions = new ArrayList<>();
+        private List<JiraIssueTypeBuilder> issueTypes = new ArrayList<>();
+        private List<JiraIssueBuilder> issues = new ArrayList<>();
+        private List<JiraIssueTypeCustomFieldBuilder> fields = new ArrayList<>();
 
-        private DSLExtraColumns extraColumns = new DSLExtraColumns(this);
-
-        public DSLLine(final DSLLines dsLlines) {
-            this.dsLlines = dsLlines;
-        }
-
-        public DSLLine phase(final String phase) {
-            this.phase = phase;
-            return this;
-        }
-
-        public DSLLine demand(final String name) {
-            this.name = name;
-            return this;
-        }
-
-        public DSLLine feature(final String featureName) {
-            this.featureName = featureName;
-            this.type = "Feature";
-            return this;
-        }
-
-        public DSLLine task(final String featureName) {
-            this.featureName = featureName;
-            this.type = "Task";
-            return this;
-        }
-
-        public DSLLine key(final String key) {
+        public JiraProjectBuilder key(String key) {
             this.key = key;
             return this;
         }
 
-        public DSLLine type(final String type) {
+        public JiraProjectBuilder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public JiraProjectBuilder withVersions(String... versions) {
+            Arrays.stream(versions)
+                    .forEach(this::withVersion);
+            return this;
+        }
+
+        public JiraProjectBuilder withVersion(String version) {
+            versions.add(new JiraProjectVersionBuilder().name(version));
+            return this;
+        }
+
+        public JiraProjectBuilder withIssueTypes(JiraIssueTypeBuilder... builders) {
+            issueTypes.addAll(asList(builders));
+            return this;
+        }
+
+        public JiraProjectBuilder withIssues(JiraIssueBuilder... builders) {
+            issues.addAll(asList(builders));
+            return this;
+        }
+
+        public JiraProjectBuilder withCustomFields(JiraIssueTypeCustomFieldBuilder... builders) {
+            fields.addAll(asList(builders));
+            return this;
+        }
+
+        public void build(ScopeImporterTestDSL dsl, SizingImportJiraMock jira) {
+            SizingImportJiraMock.ScopeImporterJiraProjectMock project = jira.createProject(key, name);
+            versions.forEach(v -> v.build(dsl, project));
+            fields.forEach(f -> f.build(dsl, dsl.jiraMock));
+            if(issueTypes.isEmpty())
+                issueTypes.addAll(asList(defaultIssueTypes()));
+            else if(issueTypes.stream().noneMatch(type -> type.lane == Lane.DEMAND))
+                issueTypes.add(demandType().name("Demand"));
+            issueTypes.forEach(t -> t.build(dsl, project));
+            issues.forEach(i -> i.build(dsl, project));
+        }
+    }
+
+    static class JiraProjectVersionBuilder {
+
+        private String name;
+
+        public JiraProjectVersionBuilder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public void build(ScopeImporterTestDSL dsl, SizingImportJiraMock.ScopeImporterJiraProjectMock project) {
+            project.createVersion(name);
+        }
+    }
+
+    enum Lane {
+        DEMAND,
+        FEATURE,
+        SUBTASK,
+        CONTINUOUS
+    }
+
+    static class JiraIssueTypeBuilder {
+
+        private String name;
+        private Lane lane;
+        private List<JiraIssueTypeCustomFieldBuilder> fields = new ArrayList<>();
+
+        public JiraIssueTypeBuilder isDemand() {
+            this.lane = Lane.DEMAND;
+            return this;
+        }
+
+        public JiraIssueTypeBuilder isFeature() {
+            this.lane = Lane.FEATURE;
+            return this;
+        }
+
+        public JiraIssueTypeBuilder isSubtask() {
+            this.lane = Lane.SUBTASK;
+            return this;
+        }
+
+        public JiraIssueTypeBuilder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public JiraIssueTypeBuilder withCustomFields(JiraIssueTypeCustomFieldBuilder... builders) {
+            fields.addAll(asList(builders));
+            return this;
+        }
+
+        public JiraIssueTypeBuilder withCustomFields(String... fieldNames) {
+            Arrays.stream(fieldNames)
+                    .map(name -> {
+                        JiraIssueTypeCustomFieldBuilder field = new JiraIssueTypeCustomFieldBuilder();
+                        field.name = name;
+                        return field;
+                    })
+                    .forEach(fields::add);
+            return this;
+        }
+
+        public void build(ScopeImporterTestDSL dsl, SizingImportJiraMock.ScopeImporterJiraProjectMock project) {
+            SizingImportJiraMock.ScopeImporterJiraIssueTypeMock issueType = dsl.jiraMock.createIssueType(name, lane == Lane.SUBTASK);
+            this.fields.forEach(field -> field.build(dsl, issueType));
+
+            if (lane != null) {
+                JiraProperties.IssueType.IssueTypeDetails details = new JiraProperties.IssueType.IssueTypeDetails();
+                switch (lane) {
+                    case DEMAND:
+                        details.setId(issueType.id);
+                        dsl.jiraProperties.getIssuetype().setDemand(details);
+                        break;
+                    case FEATURE:
+                        details.setId(issueType.id);
+                        dsl.jiraProperties.getIssuetype().getFeatures().add(details);
+                        break;
+                    default:
+                    	break;
+                }
+            }
+
+            project.addIssueType(issueType);
+        }
+    }
+
+    static class JiraIssueTypeCustomFieldBuilder {
+
+        private String name;
+        private boolean required;
+        private boolean isTshirtSize;
+        private List<String> allowedValues;
+
+        public JiraIssueTypeCustomFieldBuilder isTshirtSize() {
+            isTshirtSize = true;
+            return this;
+        }
+
+        public JiraIssueTypeCustomFieldBuilder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public JiraIssueTypeCustomFieldBuilder required(boolean required) {
+            this.required = required;
+            return this;
+        }
+
+        public JiraIssueTypeCustomFieldBuilder allowedValues(String... values) {
+            allowedValues = asList(values);
+            return this;
+        }
+
+        public void build(ScopeImporterTestDSL dsl, SizingImportJiraMock jira) {
+            JiraCreateIssue.FieldInfoMetadata field = jira.createCustomField(name, required, allowedValues);
+            postProcess(dsl, field);
+        }
+
+        public void build(ScopeImporterTestDSL dsl, SizingImportJiraMock.ScopeImporterJiraIssueTypeMock issueType) {
+            JiraCreateIssue.FieldInfoMetadata field = issueType.createCustomField(name, required, allowedValues);
+            postProcess(dsl, field);
+        }
+
+        private void postProcess(ScopeImporterTestDSL dsl, JiraCreateIssue.FieldInfoMetadata field) {
+            if (isTshirtSize)
+                dsl.jiraProperties.getCustomfield().getTShirtSize().getIds().add(field.id);
+            if ("Release".equals(name)) {
+                dsl.jiraProperties.getCustomfield().getRelease().setId(field.id);
+            }
+        }
+    }
+
+    static class JiraIssueBuilder {
+
+        private String key;
+        private String type;
+        private String summary;
+
+        public JiraIssueBuilder key(String key) {
+            this.key = key;
+            return this;
+        }
+
+        public JiraIssueBuilder isDemand() {
+            return type("Demand");
+        }
+
+        public JiraIssueBuilder isFeature() {
+            return type("Feature");
+        }
+
+        public JiraIssueBuilder type(String type) {
             this.type = type;
             return this;
         }
 
-        public DSLLine name(final String featureName) {
-            this.featureName = featureName;
+        public JiraIssueBuilder summary(String summary) {
+            this.summary = summary;
             return this;
         }
 
-        public DSLLine timebox(final String timeboxValue) {
-            this.type = "Timebox";
-            this.timeboxValue = timeboxValue;
-            return this;
-        }
-
-        public DSLLines eoL() {
-            this.dsLlines.lines.add(this);
-            return this.dsLlines;
-        }
-
-        public DSLExtraColumns withExtraColumns() {
-            return this.extraColumns;
+        public void build(ScopeImporterTestDSL dsl, SizingImportJiraMock.ScopeImporterJiraProjectMock project) {
+            SizingImportJiraMock.ScopeImporterJiraIssueMock issue = project.createIssue(key);
+            if(type != null)
+                issue.setField("issuetype", type);
+            if(summary != null)
+                issue.setField("summary", summary);
         }
     }
 
-    class DSLExtraColumns {
+    static class ImportConfigBuilder {
 
-        private DSLLine dslLine;
-        private List<DSLExtraColumn> columns = new ArrayList<>();
+        private String columnHeader;
+        private String columnLetter;
 
-        public DSLExtraColumns(final DSLLine dslLine) {
-            this.dslLine = dslLine;
-        }
-
-        public DSLExtraColumn column() {
-            return new DSLExtraColumn(this);
-        }
-
-        public DSLLine eoEc() {
-            return  dslLine;
-        }
-    }
-
-    class DSLExtraColumn {
-
-        private DSLExtraColumns dslExtraColumns;
-        private String headerName;
-        private String value;
-        private boolean isTypeSizing = false;
-
-        public DSLExtraColumn(final DSLExtraColumns dslExtraColumns) {
-            this.dslExtraColumns = dslExtraColumns;
-        }
-
-        public DSLExtraColumn name(final String headerName) {
-            this.headerName = headerName;
+        public ImportConfigBuilder columnHeader(String name) {
+            this.columnHeader = name;
             return this;
         }
 
-        public DSLExtraColumn value(final String value) {
+        public void build(ScopeImporterTestDSL dsl, SizingImportConfig importConfig) {
+            String id = dsl.jiraMock.findCustomFieldByNameOrThrow(columnHeader).id;
+            importConfig.getSheetMap().getExtraFields().add(
+                    new SizingImportConfig.SheetMap.ExtraField(id, columnHeader, columnLetter)
+            );
+        }
+    }
+
+    static class SizingInvocationBuilder {
+
+        private List<SizingImportLineScope> lines = new ArrayList<>();
+        private ScopeImporterTestDSL dsl;
+
+        private SizingInvocationBuilder(ScopeImporterTestDSL dsl) {
+            this.dsl = dsl;
+        }
+
+        public SizingInvocationBuilder importedToProject(String projectKey) {
+            return intoProject(projectKey);
+        }
+
+        public SizingInvocationBuilder intoProject(String projectKey) {
+            ScopeImporter scopeImporter = new ScopeImporter(dsl.importConfig, dsl.jiraFacade, dsl.importerNotifier);
+
+            scopeImporter.executeImport(projectKey, lines);
+            return this;
+        }
+    }
+
+    static class SizingLineBuilder {
+
+        private static final SheetColumn PHASE_COLUMN = new SheetColumn(SheetColumnDefinitionProviderScope.PHASE, "A");
+        private static final SheetColumn DEMAND_COLUMN = new SheetColumn(SheetColumnDefinitionProviderScope.DEMAND, "B");
+        private static final SheetColumn FEATURE_COLUMN = new SheetColumn(SheetColumnDefinitionProviderScope.FEATURE, "C");
+        private static final SheetColumn TYPE_COLUMN = new SheetColumn(SheetColumnDefinitionProviderScope.TYPE, "D");
+        private static final SheetColumn KEY_COLUMN = new SheetColumn(SheetColumnDefinitionProviderScope.KEY, "C");
+        private static final SheetColumn TIMEBOX_COLUMN = new SheetColumn(SheetColumnDefinitionProviderScope.TIMEBOX, "S");
+
+        private Map<String, SizingImportLine.ImportValue> values = new HashMap<>();
+        private List<SizingExtraColumnBuilder> extras = new ArrayList<>();
+
+        public SizingLineBuilder phase(String phase) {
+            values.put(SheetColumnDefinitionProviderScope.PHASE.getName(), new SizingImportLine.ImportValue(PHASE_COLUMN, phase));
+            return this;
+        }
+
+        public SizingLineBuilder demand(String demand) {
+            values.put(SheetColumnDefinitionProviderScope.DEMAND.getName(), new SizingImportLine.ImportValue(DEMAND_COLUMN, demand));
+            return this;
+        }
+
+        public SizingLineBuilder name(String name) {
+            values.put(SheetColumnDefinitionProviderScope.FEATURE.getName(), new SizingImportLine.ImportValue(FEATURE_COLUMN, name));
+            return this;
+        }
+
+        public SizingLineBuilder feature(String feature) {
+            return name(feature).type("Feature");
+        }
+
+        public SizingLineBuilder task(String task) {
+            return name(task).type("Task");
+        }
+
+        public SizingLineBuilder timebox(String timebox) {
+            values.put(SheetColumnDefinitionProviderScope.TIMEBOX.getName(), new SizingImportLine.ImportValue(TIMEBOX_COLUMN, timebox));
+            return type("Timebox");
+        }
+
+        public SizingLineBuilder type(String typeName) {
+            values.put(SheetColumnDefinitionProviderScope.TYPE.getName(), new SizingImportLine.ImportValue(TYPE_COLUMN, typeName));
+            return this;
+        }
+
+        public SizingLineBuilder key(String key) {
+            values.put(SheetColumnDefinitionProviderScope.KEY.getName(), new SizingImportLine.ImportValue(KEY_COLUMN, key));
+            return this;
+        }
+
+        public SizingLineBuilder with(SizingExtraColumnBuilder... builders) {
+            extras.addAll(asList(builders));
+            return this;
+        }
+
+        public void build(ScopeImporterTestDSL dsl, SizingInvocationBuilder sizingInvocationBuilder) {
+            int index = sizingInvocationBuilder.lines.size();
+            List<SizingImportLine.ImportValue> values = new ArrayList<>(this.values.values());
+            extras.forEach(extra -> extra.build(dsl, values));
+            SizingImportLineScope lineScope = new SizingImportLineScope(index, values);
+            sizingInvocationBuilder.lines.add(lineScope);
+        }
+    }
+
+    static class SizingExtraColumnBuilder {
+
+        private String customFieldName = "";
+        private Set<String> tags = new HashSet<>();
+        private String letter = "";
+        private String value = "";
+
+        public SizingExtraColumnBuilder forCustomField(String name) {
+            customFieldName = name;
+            tags.add(EXTRA_FIELD_ID_TAG);
+            return this;
+        }
+
+        public SizingExtraColumnBuilder forTShirtField(String name) {
+            customFieldName = name;
+            tags.add(SIZING_FIELD_ID_TAG);
+            return this;
+        }
+
+        public SizingExtraColumnBuilder letter(String letter) {
+            this.letter = letter;
+            return this;
+        }
+
+        public SizingExtraColumnBuilder value(String value) {
             this.value = value;
             return this;
         }
 
-        public DSLExtraColumns eoC() {
-            this.dslExtraColumns.columns.add(this);
-            return dslExtraColumns;
-        }
-
-        public DSLExtraColumn isTypeSizing() {
-            this.isTypeSizing = true;
-            return this;
-        }
-    }
-
-    class DSLAssertBuilder {
-
-        private DSLSizingBuilder sizingBuilder;
-
-        public DSLAssertBuilder(final DSLSizingBuilder sizingBuilder) {
-            this.sizingBuilder = sizingBuilder;
-        }
-
-        public DSLAssertBuilder rejectLine(final int expectedLineError) {
-            String errorLine = getEventsReturned()
-                    .stream()
-                    .filter(f -> f.startsWith("Line error - Row index: "))
-                    .findFirst().orElse("");
-
-            int errorNumber = 0;
-            if (hasText(errorLine)) {
-                int errorNumberIndex = new Integer(removeNonNumericCharacters(errorLine));
-                errorNumber = errorNumberIndex + 1;
-            }
-            assertEquals(expectedLineError, errorNumber);
+        public SizingExtraColumnBuilder tag(String tag) {
+            this.tags.add(tag);
             return this;
         }
 
-        public DSLAssertBuilder withError(final String expected) {
-            List<String> events = getEventsReturned();
-
-            String errorLine = events
-                .stream()
-                .filter(f -> f.contains("errors: "))
-                .collect(joining(", "));
-
-            String[] split = errorLine.split("errors: ");
-            assertEquals(expected, split[split.length - 1]);
-            return this;
+        public void build(ScopeImporterTestDSL dsl, List<SizingImportLine.ImportValue> values) {
+            String fieldId = dsl.jiraMock.findCustomFieldByNameOrThrow(customFieldName).id;
+            SheetColumnDefinition.ColumnTag[] tags = this.tags.stream()
+                    .map(t -> new SheetColumnDefinition.ColumnTag(t, fieldId))
+                    .toArray(SheetColumnDefinition.ColumnTag[]::new);
+            SheetColumnDefinition definition = new SheetColumnDefinition(customFieldName, tags);
+            values.add(new SizingImportLine.ImportValue(new SheetColumn(definition, letter), value));
         }
-
-        public DSLAssertBuilder withLinesToImport(final int expectedNumberOfLinesToImport) {
-            List<String> events = getEventsReturned();
-            int linesToImport = getQuantityOfLinesToImport(events);
-
-            assertEquals(expectedNumberOfLinesToImport, linesToImport);
-            return this;
-        }
-
-        public DSLAssertBuilder importIsFinished() {
-            List<String> events = getEventsReturned();
-
-            int lastIndex = events.size() - 1;
-            String lastLine = events.get(lastIndex);
-
-            assertEquals("Import finished", lastLine);
-            return this;
-        }
-
-        public DSLAssertBuilder withSuccessfulIssueImported(final String expectedKey) {
-            List<String> events = getEventsReturned();
-            String keys = extractIssueKeys(events);
-
-            assertEquals(expectedKey, keys);
-            return this;
-        }
-
-        public DSLAssertBuilder withSuccessfulIssuesImported(String...expectedIssueKeys) {
-            List<String> events = getEventsReturned();
-            String keys = extractIssueKeys(events);
-
-            String current = join(expectedIssueKeys, ", ");
-            assertEquals(current, keys);
-            return this;
-        }
-
-        public DSLSizingBuilder and() {
-            return sizingBuilder;
-        }
-
-        private String removeNonNumericCharacters(final String string) {
-            return string.replaceAll("\\D+","");
-        }
-
-        private int getQuantityOfLinesToImport(final List<String> events) {
-            String firstLineEvent = events.get(0);
-
-            if (!hasText(firstLineEvent))
-                return -1;
-
-            int linesToImportIndex = firstLineEvent.lastIndexOf(':') + 1;
-            String linesToImportString = firstLineEvent.substring(linesToImportIndex).trim();
-            return new Integer(linesToImportString);
-        }
-
-        private String extractIssueKeys(final List<String> events) {
-            return events
-                    .stream()
-                    .filter(f -> f.contains("issue key: "))
-                    .map(e -> e.substring(e.indexOf("issue key: ") + 11))
-                    .collect(joining(", "));
-        }
-        private List<String> getEventsReturned() {
-            List<String> events = recorder.getEvents();
-            if (events.isEmpty()) {
-                fail("No events found!");
-            }
-            return events;
-        }
-    }
-
-    private static JiraIssueDto createDemand(String key, String summary) {
-        Map<String, Object> json = new HashMap<>();
-        json.put("key", key);
-        json.put("fields", singletonMap("summary", summary));
-
-        Gson gson = new Gson();
-        return gson.fromJson(gson.toJsonTree(json), JiraIssueDto.class);
     }
 }
