@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, ViewChild, Input } from '@angular/core';
+import { Component, EventEmitter, Output, ViewChild, Input, OnInit } from '@angular/core';
 import { PageSpinner } from 'app/core/page-spinner/page-spinner';
 import { TbClusterAlgorithmComponent } from 'app/shared/tb-ds/forms/tb-cluster-algorithm/tb-cluster-algorithm.component';
 import { ClusterItemDto } from 'app/shared/tb-ds/forms/tb-cluster/cluster-item-dto.model';
@@ -14,27 +14,24 @@ export class RecalculateResult {
 }
 
 @Component({
-    selector: 'tb-project-cluster-recalculate-modal',
-    templateUrl: './project-cluster-recalculate-modal.component.html'
+    selector: 'tb-cluster-recalculate-modal',
+    templateUrl: './tb-cluster-recalculate-modal.component.html'
 })
-export class ProjectClusterRecalculateModalComponent {
+export class TbClusterRecalculateModalComponent {
 
-    @Input('project')
-    project: string;
+    @Input() modalTitle: string;
+    @Input() projects: string[];
+    @Input() selectableProjects: string[];
 
-    @Output('result')
-    result = new EventEmitter<RecalculateResult>();
-    @Output('errorEvent')
-    errorEvent = new EventEmitter();
+    @Output() result = new EventEmitter<RecalculateResult>();
+    @Output() errorEvent = new EventEmitter();
 
     @ViewChild(TbClusterAlgorithmComponent) algorithmComponent: TbClusterAlgorithmComponent;
     @ViewChild(ModalComponent) algorithmComponentModal: ModalComponent;
 
     constructor(
         private pageLoader: PageSpinner
-    ) {
-
-    }
+    ) {}
 
     open() {
         this.algorithmComponentModal.open();

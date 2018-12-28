@@ -8,6 +8,12 @@
 
     <div class="content">
 
+        <obj-toolbar [title]="baseClusterName" [subtitle]="toolbarSubtitle">
+            <button obj-flat-button (click)="recalculateCluster.open()">
+                <obj-icon iconName="recalculate"></obj-icon>Recalculate
+            </button>
+        </obj-toolbar>
+
         <form #baseClusterForm="ngForm" (ngSubmit)="saveBaseCluster()" autocomplete="off" tbLeaveConfirmation>
             <label>Name</label>
 
@@ -16,7 +22,6 @@
                 name="baseClusterName"
                 objTextField
                 [(ngModel)]="baseClusterName"
-                #clusterInput
                 #name="objTextField"
                 required
                 tbNotEmpty/>
@@ -29,8 +34,19 @@
 
         </form>
 
-        <tb-cluster [clusterItems]="clusterItems"
-            (saveEvent)="save($event)" (errorEvent)="handleError($event)">
+        <tb-cluster-recalculate-modal
+            #recalculateCluster
+            modalTitle="Recalculate cluster"
+            [selectableProjects]="projectNames"
+            (result)="setChangesCandidates($event)"
+            (errorEvent)="showErrorFormMessage($event)">
+        </tb-cluster-recalculate-modal>
+
+        <tb-cluster class="body-with-scroll"
+            [clusterItems]="clusterItems"
+            [changesCandidates]="changesCandidates"
+            (saveEvent)="save($event)"
+            (errorEvent)="handleError($event)">
         </tb-cluster>
 
         <div class="footer">

@@ -5,10 +5,9 @@ import {ProjectProfileComponent} from './config/profile/project-profile.componen
 import {ProjectTeamsComponent} from './config/teams/project-teams.component';
 import {ProjectClusterComponent} from './config/cluster/project-cluster.component';
 import {ProjectChangeRequestsComponent} from './config/changeRequests/project-changeRequests.component';
-import {ProjectClusterRecalculateModalComponent} from './config/cluster/project-cluster-recalculate-modal.component';
 import {FormsModule} from '@angular/forms';
 import {NgSelectModule} from '@ng-select/ng-select';
-import {ProjectConfigComponent} from "./config/project-config.component";
+import {ProjectConfigComponent} from './config/project-config.component';
 
 @NgModule({
     imports: [
@@ -21,7 +20,6 @@ import {ProjectConfigComponent} from "./config/project-config.component";
         ProjectProfileComponent,
         ProjectTeamsComponent,
         ProjectClusterComponent,
-        ProjectClusterRecalculateModalComponent,
         ProjectChangeRequestsComponent,
         ProjectConfigComponent
     ]

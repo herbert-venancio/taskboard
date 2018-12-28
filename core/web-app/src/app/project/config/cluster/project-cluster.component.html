@@ -4,15 +4,19 @@
     </button>
 </obj-toolbar>
 
-<tb-project-cluster-recalculate-modal
+<tb-cluster-recalculate-modal
     #recalculateCluster
-    [project]="projectKey"
+    modalTitle="Recalculate project cluster"
+    [projects]="[projectKey]"
     (result)="setChangesCandidates($event)"
     (errorEvent)="showErrorFormMessage($event)">
-</tb-project-cluster-recalculate-modal>
+</tb-cluster-recalculate-modal>
 
-<tb-cluster [clusterItems]="clusterItems" [changesCandidates]="changesCandidates"
-    (saveEvent)="save($event)" (errorEvent)="showErrorFormMessage($event)">
+<tb-cluster class="body-with-scroll"
+    [clusterItems]="clusterItems"
+    [changesCandidates]="changesCandidates"
+    (saveEvent)="save($event)"
+    (errorEvent)="showErrorFormMessage($event)">
 </tb-cluster>
 
 <div class="footer">

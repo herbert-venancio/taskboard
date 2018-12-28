@@ -1,12 +1,60 @@
 @import 'obj-ds/utils/all';
 
+:host {
+    width: 354px;
+    display: block;
+}
+
 form {
     display: flex;
+    flex-wrap: wrap;
 }
-obj-label-field {
-    margin-left: 24px;
 
-    &:first-child {
-        margin-left: 0;
+.date {
+    width: 165px;
+}
+
+.field-margin {
+    margin-left: 24px;
+}
+
+.projects {
+    width: 100%;
+    margin-top: 24px;
+}
+
+.checkbox-list {
+    display: flex;
+    flex-wrap: wrap;
+
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.checkbox-wrapper {
+    display: flex;
+    width: calc(50% - 12px);
+    margin-top: 8px;
+    &:nth-child(-n + 2) {
+        margin-top: 0;
+    }
+    &:nth-child(2n) {
+        margin-left: 12px;
+    }
+    &:nth-child(2n + 1) {
+        margin-right: 12px;
+    }
+
+    .checkbox {
+        margin: 0 8px 0 0;
+    }
+    .label {
+        font-size: 12px;
+        font-family: $obj-font-ptsans;
+        color: $obj-color-black;
+
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 }

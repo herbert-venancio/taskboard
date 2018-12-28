@@ -21,39 +21,38 @@ public class ProjectClusterConfigurationIT extends AuthenticatedIntegrationTest 
     public void shouldSaveOnlyValidValues() {
         goToClusterConfiguration(TASKB)
             .assertSaveDisabled(true)
-            .setEffort("Alpha Test", "S", "")
-            .setCycle("Alpha Bug", "M", "-1")
+                .setEffort("Alpha Test", "S", "")
+                .setCycle("Alpha Bug", "M", "-1")
             .assertSaveDisabled(false)
             .save()
-            .assertSnackbarErrorIsOpen()
-
-            .assertIsFromBaseCluster("Alpha Test", "S", true)
-            .setEffort("Alpha Test", "S", "3.13")
-            .setCycle("Alpha Bug", "M", "4")
+                .assertSnackbarErrorIsOpen()
+                .assertIsFromBaseCluster("Alpha Test", "S", true)
+                .setEffort("Alpha Test", "S", "3.13")
+                .setCycle("Alpha Bug", "M", "4")
             .save()
-            .assertIsFromBaseCluster("Alpha Test", "S", false)
-            .assertSnackbarSavedIsOpen()
-            .assertSaveDisabled(true)
+                .assertIsFromBaseCluster("Alpha Test", "S", false)
+                .assertSnackbarSavedIsOpen()
+                .assertSaveDisabled(true)
             .refresh()
-            .assertIsFromBaseCluster("Alpha Test", "S", false)
-            .assertEffort("Alpha Test", "S", "3.13")
-            .assertCycle("Alpha Bug", "M", "4");
+                .assertIsFromBaseCluster("Alpha Test", "S", false)
+                .assertEffort("Alpha Test", "S", "3.13")
+                .assertCycle("Alpha Bug", "M", "4");
     }
 
     @Test
     public void whenLeaveWithoutSave_shouldConfirm() {
         goToClusterConfiguration(TASKB)
             .setEffort("Alpha Test", "S", "3.13")
-            .selectProfileTab().expectConfirmationAndStay()
+                .selectProfileTab().expectConfirmationAndStay()
 
             .save()
-            .selectProfileTab().expectNoConfirmation()
-            .goToClusterConfiguration()
-            .setEffort("Alpha Test", "S", "2.13")
-            .selectProfileTab().expectConfirmationAndLeave()
+                .selectProfileTab().expectNoConfirmation()
+                .goToClusterConfiguration()
+                .setEffort("Alpha Test", "S", "2.13")
+                .selectProfileTab().expectConfirmationAndLeave()
 
             .goToClusterConfiguration()
-            .assertEffort("Alpha Test", "S", "3.13");
+                .assertEffort("Alpha Test", "S", "3.13");
     }
 
     @Test
@@ -61,18 +60,16 @@ public class ProjectClusterConfigurationIT extends AuthenticatedIntegrationTest 
         ProjectClusterConfiguration projectClusterConfigurationTab = goToClusterConfiguration(TASKB);
         projectClusterConfigurationTab
                 .openRecalculate()
-                .setStartDate("asdf")
-                .setEndDate("99/99/9999")
-                .assertStartDateHasNoError()
-                .assertEndDateHasNoError()
-                .clickRecalculate()
-                .assertIsOpen()
-                .assertStartDateHasErrorMessage()
-                .assertEndDateHasErrorMessage()
-                .setStartDate("01/01/2015")
-                .setEndDate("12/31/2017")
-                .clickRecalculate()
-                .assertIsClosed();
+                    .setStartDate("asdf")
+                    .setEndDate("99/99/9999")
+                .recalculate()
+                    .assertRecalculateIsOpened()
+                    .assertStartDateHasError()
+                    .assertEndDateHasError()
+                    .setStartDate("01/01/2015")
+                    .setEndDate("12/31/2017")
+                .recalculate()
+                    .assertRecalculateIsClosed();
 
         projectClusterConfigurationTab
                 .assertCurrentValueNewValueIsShown("Alpha Test", "XS")
@@ -80,16 +77,16 @@ public class ProjectClusterConfigurationIT extends AuthenticatedIntegrationTest 
                 .assertCurrentValueNewValueIsShown("Backend Development", "M")
                 .assertCurrentValueNewValueIsShown("BALLPARK - Alpha Test", "L")
                 .assertCurrentValueNewValueIsShown("BALLPARK - Planning", "XL")
-                .setEffort("Alpha Test", "XS", "4.5")
-                .setCycle("BALLPARK - Alpha Test", "L", "14.5")
+                    .setEffort("Alpha Test", "XS", "4.5")
+                    .setCycle("BALLPARK - Alpha Test", "L", "14.5")
                 .save()
-                .assertEffort("Alpha Test", "XS", "4.5")
-                .assertCycle("BALLPARK - Alpha Test", "L", "14.5");
+                    .assertEffort("Alpha Test", "XS", "4.5")
+                    .assertCycle("BALLPARK - Alpha Test", "L", "14.5");
     }
 
     private ProjectClusterConfiguration goToClusterConfiguration(ProjectInfo projectInfo) {
         return ProjectConfigurationOperator.openFromMainMenu(mainPage, projectInfo)
             .openAdvancedConfigurations()
-            .selectClusterConfiguration();
+                .selectClusterConfiguration();
     }
 }
