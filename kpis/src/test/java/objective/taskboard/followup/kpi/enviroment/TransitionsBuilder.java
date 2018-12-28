@@ -5,8 +5,10 @@ import static objective.taskboard.utils.DateTimeUtils.parseStringToDate;
 import static org.junit.Assert.fail;
 
 import java.time.ZonedDateTime;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import objective.taskboard.data.Worklog;
@@ -19,6 +21,7 @@ public class TransitionsBuilder {
     private TransitionDto firstTransition;
     private IssueKpiMocker kpiMocker;
     private final KpiEnvironment fatherEnvironment;
+    private Optional<TransitionDto> lastTransitionWithDate = Optional.empty();
 
     public TransitionsBuilder(KpiEnvironment fatherEnvironment) {
         this.fatherEnvironment = fatherEnvironment;
@@ -79,6 +82,32 @@ public class TransitionsBuilder {
     public TransitionWorklog withWorklogs() {
         return new TransitionWorklog();
     }
+    
+    private void lastTransited(TransitionDto transitionDto) {
+        this.lastTransitionWithDate = Optional.of(transitionDto);
+    }
+    
+    public StatusDto currentStatus() {
+        return lastTransitionWithDate.map( l -> l.status).orElse(firstTransition.status);
+    }
+    
+    public Map<String, ZonedDateTime> getReversedTransitions() {
+        LinkedList<TransitionDto> reversedOrder = new LinkedList<>();
+        
+        
+        TransitionDto currentIndex = firstTransition;
+        while(currentIndex.next.isPresent()) {
+           reversedOrder.push(currentIndex);
+           currentIndex = currentIndex.next.get();
+        }
+        
+        Map<String,ZonedDateTime> transitions = new LinkedHashMap<>();
+        for (TransitionDto transition : reversedOrder) {
+            transitions.put(transition.status.name(), transition.date.orElse(null));
+        }
+        
+        return transitions;
+    }
 
     public class TransitionDto {
         private StatusDto status;
@@ -98,6 +127,7 @@ public class TransitionsBuilder {
 
             this.next.get().setNext(last);
         }
+
 
         public Optional<StatusTransition> build() {
             if (!next.isPresent())
@@ -125,6 +155,7 @@ public class TransitionsBuilder {
 
         public TransitionsBuilder date(String date) {
             this.date = Optional.of(parseDateTime(date));
+            TransitionsBuilder.this.lastTransited(this);
             return TransitionsBuilder.this;
         }
 
@@ -177,7 +208,5 @@ public class TransitionsBuilder {
         private void registerWorklog() {
             TransitionsBuilder.this.put(new Worklog("a.developer", parseStringToDate(date), timeSpentInSeconds),status);
         }
-
     }
-
 }

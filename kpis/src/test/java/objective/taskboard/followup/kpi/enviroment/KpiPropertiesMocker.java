@@ -16,7 +16,8 @@ public class KpiPropertiesMocker {
 
     private KPIProperties kpiProperties = Mockito.mock(KPIProperties.class);
     private KpiEnvironment fatherEnvironment;
-    private Map<String,HierarchyBuilder> featureHierarchyBuilder = new LinkedHashMap<>();
+    private Map<String, HierarchyBuilder> featureHierarchyBuilder = new LinkedHashMap<>();
+    private Map<String, HierarchyBuilder> demandHierarchyBuilder = new LinkedHashMap<>();
 
     public KpiPropertiesMocker(KpiEnvironment environment) {
         this.fatherEnvironment = environment;
@@ -24,7 +25,13 @@ public class KpiPropertiesMocker {
 
     public HierarchyBuilder atFeatureHierarchy(String fatherStatus) {
         HierarchyBuilder builder = new HierarchyBuilder(fatherStatus);
-        featureHierarchyBuilder.put(fatherStatus,builder);
+        featureHierarchyBuilder.put(fatherStatus, builder);
+        return builder;
+    }
+
+    public HierarchyBuilder atDemandHierarchy(String fatherStatus) {
+        HierarchyBuilder builder = new HierarchyBuilder(fatherStatus);
+        demandHierarchyBuilder.put(fatherStatus, builder);
         return builder;
     }
 
@@ -35,8 +42,12 @@ public class KpiPropertiesMocker {
 
     public KPIProperties getKpiProperties() {
         buildHierarchies();
-        mockProgressingStatuses(fatherEnvironment.getStatusRepository().getProgressingStatuses());
+        mockProgressingStatuses(fatherEnvironment.statuses().getProgressingStatuses());
         return kpiProperties;
+    }
+
+    public KpiEnvironment eoKpi() {
+        return fatherEnvironment;
     }
 
     private void mockProgressingStatuses(List<String> progressingStatuses) {
@@ -44,11 +55,27 @@ public class KpiPropertiesMocker {
     }
 
     private void buildHierarchies() {
-        IssueTypeChildrenStatusHierarchy hierarchy = new IssueTypeChildrenStatusHierarchy();
-        List<Hierarchy> hierachies = featureHierarchyBuilder.values().stream().map(builder -> builder.buildHierachy()).collect(Collectors.toList());
-        hierarchy.setHierarchies(hierachies);
+        buildDemands();
+        buildFeatures();
+    }
 
+    private void buildDemands() {
+        IssueTypeChildrenStatusHierarchy hierarchy = getHierarchy(demandHierarchyBuilder);
+        Mockito.when(kpiProperties.getDemandHierarchy()).thenReturn(hierarchy);
+    }
+
+    private void buildFeatures() {
+        IssueTypeChildrenStatusHierarchy hierarchy = getHierarchy(featureHierarchyBuilder);
         Mockito.when(kpiProperties.getFeaturesHierarchy()).thenReturn(hierarchy);
+    }
+
+    private IssueTypeChildrenStatusHierarchy getHierarchy(Map<String, HierarchyBuilder> hierarchyBuilder) {
+        IssueTypeChildrenStatusHierarchy hierarchy = new IssueTypeChildrenStatusHierarchy();
+        List<Hierarchy> hierachies = hierarchyBuilder.values().stream()
+                .map(builder -> builder.buildHierachy())
+                .collect(Collectors.toList());
+        hierarchy.setHierarchies(hierachies);
+        return hierarchy;
     }
 
     public class HierarchyBuilder {
@@ -83,7 +110,7 @@ public class KpiPropertiesMocker {
             return this;
         }
 
-        public KpiPropertiesMocker and() {
+        public KpiPropertiesMocker eoH() {
             return KpiPropertiesMocker.this;
         }
 

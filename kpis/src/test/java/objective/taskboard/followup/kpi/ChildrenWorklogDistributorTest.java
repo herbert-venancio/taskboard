@@ -12,7 +12,7 @@ public class ChildrenWorklogDistributorTest {
     public void distribution_whenDistributingEffortByTypesOnly_thenShouldDistributeCorrectly() {
         defaultEnvironment()
         .givenKpiProperties()
-            .atFeatureHierarchy("Planning").putChildrenType("Tech Analysis").and()
+            .atFeatureHierarchy("Planning").putChildrenType("Tech Analysis").eoH()
             .atFeatureHierarchy("Developing").putChildrenType("Backend Development")
         .eoKp()
         .givenIssue("I-1")
@@ -70,7 +70,7 @@ public class ChildrenWorklogDistributorTest {
     public void distribution_whenDistributingEffortByTypeAndStatus_thenShouldIgnoreStatusToAvoidDuplicity() {
         defaultEnvironment()
         .givenKpiProperties()
-            .atFeatureHierarchy("Planning").putChildrenType("Tech Analysis").and()
+            .atFeatureHierarchy("Planning").putChildrenType("Tech Analysis").eoH()
             .atFeatureHierarchy("Developing").putChildrenStatus("Doing").putChildrenStatus("Reviewing")
         .eoKp()
         .givenIssue("I-1")
