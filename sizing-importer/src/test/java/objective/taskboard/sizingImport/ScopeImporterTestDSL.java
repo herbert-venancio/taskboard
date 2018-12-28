@@ -7,6 +7,7 @@ import objective.taskboard.jira.data.JiraProject;
 import objective.taskboard.jira.data.Version;
 import objective.taskboard.sizingImport.SheetColumnDefinition.ColumnTag;
 
+import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.joining;
 import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.EXTRA_FIELD_ID_TAG;
 import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.SIZING_FIELD_ID_TAG;
@@ -175,9 +176,6 @@ public class ScopeImporterTestDSL {
 
         public DSLIssues eoI() {
             if (isDemand) {
-                when(jiraFacade.getDemandKeyGivenFeature(any()))
-                        .thenReturn(Optional.of(demandKey));
-
                 when(jiraFacade.createDemand(any(), any(), any()))
                         .thenReturn(new JiraIssue(demandKey));
 
@@ -714,9 +712,7 @@ public class ScopeImporterTestDSL {
     private static JiraIssueDto createDemand(String key, String summary) {
         Map<String, Object> json = new HashMap<>();
         json.put("key", key);
-        Map<String, Object> fields = new TreeMap<>();
-        fields.put("summary", summary);
-        json.put("fields", fields);
+        json.put("fields", singletonMap("summary", summary));
 
         Gson gson = new Gson();
         return gson.fromJson(gson.toJsonTree(json), JiraIssueDto.class);

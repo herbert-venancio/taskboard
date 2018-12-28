@@ -1,16 +1,21 @@
 package objective.taskboard.sizingImport;
 
+import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.column;
 import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.customField;
 import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.demand;
-import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.demandType;
+import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.feature;
 import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.featureType;
+import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.line;
 import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.phase;
+import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.tshirtSizeField;
 import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.withProject;
+import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.withRequiredExtraField;
+import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.EXTRA_FIELD_ID_TAG;
+import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.SIZING_FIELD_ID_TAG;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collections;
 
-import org.assertj.core.api.OptionalAssert;
 import org.junit.Test;
 
 import objective.taskboard.domain.converter.IssueFieldsExtractor;
@@ -561,18 +566,6 @@ public class ScopeImporterTest {
                 withProject()
                         .key("PX")
                         .withVersion("One")
-                        .withIssueTypes(
-                                demandType()
-                                        .name("Demand")
-                                        .withCustomFields(
-                                                customField().name("Release")
-                                        ),
-                                featureType()
-                                        .name("Feature")
-                                        .withCustomFields(
-                                                customField().name("Release")
-                                        )
-                        )
                         .withIssues(
                                 demand().key("PX-1").summary("Demand Summary")
                         )
@@ -582,14 +575,19 @@ public class ScopeImporterTest {
                 phase("One").demand("Demand Summary").feature("Feature Summary")
         ).intoProject("PX");
 
-        assertThatIssue("PX-2")
+        then().importEvents()
+                .assertThatImportedIssues("PX-2")
+                .assertThatImportFinished();
+        then().jira()
+                .assertThatIssue("PX-2")
                 .isPresent()
                 .hasValueSatisfying(issue -> {
                     String parentKey = extractParentKey(issue);
                     assertThat(parentKey)
                             .isEqualTo("PX-1");
                 });
-        assertThatIssue("PX-3")
+        then().jira()
+                .assertThatIssue("PX-3")
                 .isNotPresent();
     }
 
@@ -597,15 +595,19 @@ public class ScopeImporterTest {
         dsl2.jira(builders);
     }
 
+    private void givenImportConfig(ScopeImporterTestDSL2.ImportConfigBuilder... builders) {
+        dsl2.importConfig(builders);
+    }
+
     private ScopeImporterTestDSL2.SizingInvocationBuilder whenImportSizing(ScopeImporterTestDSL2.SizingLineBuilder... builders) {
         return dsl2.sizing(builders);
     }
 
-    private OptionalAssert<JiraIssueDto> assertThatIssue(String key) {
-        return dsl2.assertThatIssue(key);
-    }
-
     private String extractParentKey(JiraIssueDto issue) {
         return IssueFieldsExtractor.extractParentKey(dsl2.jiraProperties, issue, Collections.singletonList("is demanded by"));
+    }
+
+    private ScopeImporterTestDSL2.AssertWrapper then() {
+        return dsl2.then();
     }
 }

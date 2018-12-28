@@ -189,7 +189,7 @@ class ScopeImporter {
     }
 
     private Map<Name, ImportedDemand> recoverImportedDemands(JiraProject project, List<SizingImportLineScope> allLines) {
-        return allLines.parallelStream()
+        return allLines.stream()
                 .map(line -> new Name(line.getDemand()))
                 .distinct()
                 .map(demand -> jiraFacade.findDemandBySummary(project.key, demand.value))

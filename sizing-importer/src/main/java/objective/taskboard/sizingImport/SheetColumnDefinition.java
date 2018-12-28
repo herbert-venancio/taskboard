@@ -58,9 +58,5 @@ public class SheetColumnDefinition {
             this.key = key;
             this.value = value;
         }
-        
-        public ColumnTag(String key) {
-            this(key, null);
-        }
     }
 }

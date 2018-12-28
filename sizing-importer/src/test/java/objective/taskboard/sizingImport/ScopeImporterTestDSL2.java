@@ -1,5 +1,6 @@
 package objective.taskboard.sizingImport;
 
+import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toMap;
 import static objective.taskboard.sizingImport.SizingImportJiraMock.NOT_MOCKED_EXCEPTION_ANSWER;
 import static org.mockito.Matchers.any;
@@ -14,14 +15,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.assertj.core.api.OptionalAssert;
-
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.client.JiraCreateIssue;
-import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.client.JiraIssueDtoSearch;
 import objective.taskboard.jira.data.JiraIssue;
 import objective.taskboard.jira.data.JiraProject;
+import objective.taskboard.jira.data.Version;
 import objective.taskboard.jira.endpoint.JiraEndpointAsLoggedInUser;
 import objective.taskboard.jira.properties.JiraProperties;
 
@@ -34,8 +33,11 @@ public class ScopeImporterTestDSL2 {
     private final JiraEndpointAsLoggedInUser jiraEndpoint = mock(JiraEndpointAsLoggedInUser.class);
     private final JiraFacade jiraFacade = new JiraFacade(jiraEndpoint, jiraProperties, metadataService);
     private final SizingSheetImporterNotifier importerNotifier = new SizingSheetImporterNotifier();
+    private final SizingImporterRecorder recorder = new SizingImporterRecorder();
 
     public ScopeImporterTestDSL2() {
+        importerNotifier.addListener(recorder);
+
         JiraProperties.IssueType issueType = new JiraProperties.IssueType();
         issueType.setFeatures(new ArrayList<>());
         issueType.setSubtasks(new ArrayList<>());
@@ -58,6 +60,7 @@ public class ScopeImporterTestDSL2 {
         doReturn(jiraMock.createMetadataRest).when(jiraEndpoint).request(eq(JiraCreateIssue.Service.class));
         doReturn(jiraMock.issueRest).when(jiraEndpoint).request(eq(JiraIssue.Service.class));
         doReturn(jiraMock.searchRest).when(jiraEndpoint).request(eq(JiraIssueDtoSearch.Service.class));
+        doReturn(jiraMock.versionRest).when(jiraEndpoint).request(eq(Version.Service.class));
         doAnswer(invocation -> jiraMock.linkTypeRest.all()
                 .issueLinkTypes.stream()
                 .collect(toMap(l -> l.id, l -> l))
@@ -69,10 +72,15 @@ public class ScopeImporterTestDSL2 {
                 .forEach(b -> b.build(this, jiraMock));
     }
 
+    public void importConfig(ImportConfigBuilder... builders) {
+        Arrays.stream(builders)
+                .forEach(b -> b.build(this, importConfig));
+    }
+
     public SizingInvocationBuilder sizing(SizingLineBuilder... builders) {
         SizingInvocationBuilder invocationBuilder = new SizingInvocationBuilder(this);
         Arrays.stream(builders)
-                .forEach(b -> b.build(invocationBuilder));
+                .forEach(b -> b.build(this, invocationBuilder));
         return invocationBuilder;
     }
 
@@ -88,35 +96,28 @@ public class ScopeImporterTestDSL2 {
         return new JiraIssueBuilder().isFeature();
     }
 
-    public static JiraIssueBuilder subtask() {
-        return new JiraIssueBuilder().isSubtask();
-    }
     public static JiraIssueBuilder issue() {
         return new JiraIssueBuilder();
     }
 
+    public static SizingLineBuilder line() {
+        return new SizingLineBuilder();
+    }
+
     public static SizingLineBuilder phase(String name) {
-        return new SizingLineBuilder().phase(name);
+        return line().phase(name);
+    }
+
+    public static SizingExtraColumnBuilder column(String name) {
+        return new SizingExtraColumnBuilder().name(name);
     }
 
     public static JiraIssueTypeBuilder demandType() {
-        return new JiraIssueTypeBuilder().isDemand();
+        return new JiraIssueTypeBuilder().isDemand().withCustomFields("Release");
     }
 
     public static JiraIssueTypeBuilder featureType() {
-        return new JiraIssueTypeBuilder().isFeature();
-    }
-
-    public static JiraIssueTypeBuilder subtaskType() {
-        return new JiraIssueTypeBuilder().isSubtask();
-    }
-
-    public static JiraIssueTypeBuilder timeboxType() {
-        return new JiraIssueTypeBuilder();
-    }
-
-    public static JiraIssueTypeBuilder continuousType() {
-        return new JiraIssueTypeBuilder();
+        return new JiraIssueTypeBuilder().isFeature().withCustomFields("Release");
     }
 
     public static JiraIssueTypeCustomFieldBuilder customField() {
@@ -124,15 +125,39 @@ public class ScopeImporterTestDSL2 {
     }
 
     public static JiraIssueTypeCustomFieldBuilder tshirtSizeField() {
-        return customField().isTshirtSize();
+        return customField().isTshirtSize().allowedValues("XS", "S", "M", "L", "XL");
     }
 
-    public static JiraIssueTypeCustomFieldBuilder tshirtSizeField(String name) {
-        return tshirtSizeField().name(name);
+    public static JiraIssueTypeBuilder[] defaultIssueTypes() {
+        return new JiraIssueTypeBuilder[] {
+                demandType().name("Demand"),
+                featureType().name("Feature")
+        };
     }
 
-    public OptionalAssert<JiraIssueDto> assertThatIssue(String key) {
-        return jiraMock.assertThatIssue(key);
+    public static ImportConfigBuilder withRequiredExtraField(String name) {
+        return new ImportConfigBuilder().columnHeader(name);
+    }
+
+    public AssertWrapper then() {
+        return new AssertWrapper(this);
+    }
+
+    public static class AssertWrapper {
+
+        private final ScopeImporterTestDSL2 dsl;
+
+        private AssertWrapper(ScopeImporterTestDSL2 dsl) {
+            this.dsl = dsl;
+        }
+
+        public SizingImporterRecorder.AssertImportEvents importEvents() {
+            return dsl.recorder.then();
+        }
+
+        public SizingImportJiraMock.AssertJira jira() {
+            return dsl.jiraMock.then();
+        }
     }
 
     static class JiraProjectBuilder {
@@ -142,6 +167,7 @@ public class ScopeImporterTestDSL2 {
         private List<JiraProjectVersionBuilder> versions = new ArrayList<>();
         private List<JiraIssueTypeBuilder> issueTypes = new ArrayList<>();
         private List<JiraIssueBuilder> issues = new ArrayList<>();
+        private List<JiraIssueTypeCustomFieldBuilder> fields = new ArrayList<>();
 
         public JiraProjectBuilder key(String key) {
             this.key = key;
@@ -165,18 +191,28 @@ public class ScopeImporterTestDSL2 {
         }
 
         public JiraProjectBuilder withIssueTypes(JiraIssueTypeBuilder... builders) {
-            issueTypes.addAll(Arrays.asList(builders));
+            issueTypes.addAll(asList(builders));
             return this;
         }
 
         public JiraProjectBuilder withIssues(JiraIssueBuilder... builders) {
-            issues.addAll(Arrays.asList(builders));
+            issues.addAll(asList(builders));
+            return this;
+        }
+
+        public JiraProjectBuilder withCustomFields(JiraIssueTypeCustomFieldBuilder... builders) {
+            fields.addAll(asList(builders));
             return this;
         }
 
         public void build(ScopeImporterTestDSL2 dsl, SizingImportJiraMock jira) {
             SizingImportJiraMock.ScopeImporterJiraProjectMock project = jira.createProject(key, name);
             versions.forEach(v -> v.build(dsl, project));
+            fields.forEach(f -> f.build(dsl, dsl.jiraMock));
+            if(issueTypes.isEmpty())
+                issueTypes.addAll(asList(defaultIssueTypes()));
+            else if(issueTypes.stream().noneMatch(type -> type.lane == Lane.DEMAND))
+                issueTypes.add(demandType().name("Demand"));
             issueTypes.forEach(t -> t.build(dsl, project));
             issues.forEach(i -> i.build(dsl, project));
         }
@@ -230,7 +266,7 @@ public class ScopeImporterTestDSL2 {
         }
 
         public JiraIssueTypeBuilder withCustomFields(JiraIssueTypeCustomFieldBuilder... builders) {
-            fields.addAll(Arrays.asList(builders));
+            fields.addAll(asList(builders));
             return this;
         }
 
@@ -274,6 +310,7 @@ public class ScopeImporterTestDSL2 {
         private String name;
         private boolean required;
         private boolean isTshirtSize;
+        private List<String> allowedValues;
 
         public JiraIssueTypeCustomFieldBuilder isTshirtSize() {
             isTshirtSize = true;
@@ -290,11 +327,25 @@ public class ScopeImporterTestDSL2 {
             return this;
         }
 
+        public JiraIssueTypeCustomFieldBuilder allowedValues(String... values) {
+            allowedValues = asList(values);
+            return this;
+        }
+
+        public void build(ScopeImporterTestDSL2 dsl, SizingImportJiraMock jira) {
+            JiraCreateIssue.FieldInfoMetadata field = jira.createCustomField(name, required, allowedValues);
+            postProcess(dsl, field);
+        }
+
         public void build(ScopeImporterTestDSL2 dsl, SizingImportJiraMock.ScopeImporterJiraIssueTypeMock issueType) {
-            JiraCreateIssue.FieldInfoMetadata field = issueType.createField(name, required);
-            if(isTshirtSize)
+            JiraCreateIssue.FieldInfoMetadata field = issueType.createCustomField(name, required, allowedValues);
+            postProcess(dsl, field);
+        }
+
+        private void postProcess(ScopeImporterTestDSL2 dsl, JiraCreateIssue.FieldInfoMetadata field) {
+            if (isTshirtSize)
                 dsl.jiraProperties.getCustomfield().getTShirtSize().getIds().add(field.id);
-            if("Release".equals(name)) {
+            if ("Release".equals(name)) {
                 dsl.jiraProperties.getCustomfield().getRelease().setId(field.id);
             }
         }
@@ -319,10 +370,6 @@ public class ScopeImporterTestDSL2 {
             return type("Feature");
         }
 
-        public JiraIssueBuilder isSubtask() {
-            return type("Sub-task");
-        }
-
         public JiraIssueBuilder type(String type) {
             this.type = type;
             return this;
@@ -342,6 +389,24 @@ public class ScopeImporterTestDSL2 {
         }
     }
 
+    static class ImportConfigBuilder {
+
+        private String columnHeader;
+        private String columnLetter;
+
+        public ImportConfigBuilder columnHeader(String name) {
+            this.columnHeader = name;
+            return this;
+        }
+
+        public void build(ScopeImporterTestDSL2 dsl, SizingImportConfig importConfig) {
+            String id = dsl.jiraMock.findCustomFieldByNameOrThrow(columnHeader).id;
+            importConfig.getSheetMap().getExtraFields().add(
+                    new SizingImportConfig.SheetMap.ExtraField(id, columnHeader, columnLetter)
+            );
+        }
+    }
+
     static class SizingInvocationBuilder {
 
         private List<SizingImportLineScope> lines = new ArrayList<>();
@@ -351,9 +416,11 @@ public class ScopeImporterTestDSL2 {
             this.dsl = dsl;
         }
 
+        public SizingInvocationBuilder importedToProject(String projectKey) {
+            return intoProject(projectKey);
+        }
+
         public SizingInvocationBuilder intoProject(String projectKey) {
-            SizingImporterRecorder recorder = new SizingImporterRecorder();
-            dsl.importerNotifier.addListener(recorder);
             ScopeImporter scopeImporter = new ScopeImporter(dsl.importConfig, dsl.jiraFacade, dsl.importerNotifier);
 
             scopeImporter.executeImport(projectKey, lines);
@@ -371,6 +438,7 @@ public class ScopeImporterTestDSL2 {
         private static final SheetColumn TIMEBOX_COLUMN = new SheetColumn(SheetColumnDefinitionProviderScope.TIMEBOX, "S");
 
         private Map<String, SizingImportLine.ImportValue> values = new HashMap<>();
+        private List<SizingExtraColumnBuilder> extras = new ArrayList<>();
 
         public SizingLineBuilder phase(String phase) {
             values.put(SheetColumnDefinitionProviderScope.PHASE.getName(), new SizingImportLine.ImportValue(PHASE_COLUMN, phase));
@@ -382,15 +450,26 @@ public class ScopeImporterTestDSL2 {
             return this;
         }
 
-        public SizingLineBuilder feature(String feature) {
-            values.put(SheetColumnDefinitionProviderScope.FEATURE.getName(), new SizingImportLine.ImportValue(FEATURE_COLUMN, feature));
-            values.put(SheetColumnDefinitionProviderScope.TYPE.getName(), new SizingImportLine.ImportValue(TYPE_COLUMN, "Feature"));
+        public SizingLineBuilder name(String name) {
+            values.put(SheetColumnDefinitionProviderScope.FEATURE.getName(), new SizingImportLine.ImportValue(FEATURE_COLUMN, name));
             return this;
+        }
+
+        public SizingLineBuilder feature(String feature) {
+            return name(feature).type("Feature");
+        }
+
+        public SizingLineBuilder task(String task) {
+            return name(task).type("Task");
         }
 
         public SizingLineBuilder timebox(String timebox) {
             values.put(SheetColumnDefinitionProviderScope.TIMEBOX.getName(), new SizingImportLine.ImportValue(TIMEBOX_COLUMN, timebox));
-            values.put(SheetColumnDefinitionProviderScope.TYPE.getName(), new SizingImportLine.ImportValue(TYPE_COLUMN, "Timebox"));
+            return type("Timebox");
+        }
+
+        public SizingLineBuilder type(String typeName) {
+            values.put(SheetColumnDefinitionProviderScope.TYPE.getName(), new SizingImportLine.ImportValue(TYPE_COLUMN, typeName));
             return this;
         }
 
@@ -399,13 +478,54 @@ public class ScopeImporterTestDSL2 {
             return this;
         }
 
-        public void build(SizingInvocationBuilder sizingInvocationBuilder) {
+        public SizingLineBuilder with(SizingExtraColumnBuilder... builders) {
+            extras.addAll(asList(builders));
+            return this;
+        }
+
+        public void build(ScopeImporterTestDSL2 dsl, SizingInvocationBuilder sizingInvocationBuilder) {
             int index = sizingInvocationBuilder.lines.size();
-            sizingInvocationBuilder.lines.add(
-                    new SizingImportLineScope(index, new ArrayList<>(values.values()))
-            );
+            List<SizingImportLine.ImportValue> values = new ArrayList<>(this.values.values());
+            extras.forEach(extra -> extra.build(dsl, values));
+            SizingImportLineScope lineScope = new SizingImportLineScope(index, values);
+            sizingInvocationBuilder.lines.add(lineScope);
         }
     }
 
+    static class SizingExtraColumnBuilder {
 
+        private String columnName = "";
+        private List<String> tags = new ArrayList<>();
+        private String letter = "";
+        private String value = "";
+
+        public SizingExtraColumnBuilder name(String name) {
+            this.columnName = name;
+            return this;
+        }
+
+        public SizingExtraColumnBuilder letter(String letter) {
+            this.letter = letter;
+            return this;
+        }
+
+        public SizingExtraColumnBuilder value(String value) {
+            this.value = value;
+            return this;
+        }
+
+        public SizingExtraColumnBuilder tag(String tag) {
+            this.tags.add(tag);
+            return this;
+        }
+
+        public void build(ScopeImporterTestDSL2 dsl, List<SizingImportLine.ImportValue> values) {
+            String fieldId = dsl.jiraMock.findCustomFieldByNameOrThrow(columnName).id;
+            SheetColumnDefinition.ColumnTag[] tags = this.tags.stream()
+                    .map(t -> new SheetColumnDefinition.ColumnTag(t, fieldId))
+                    .toArray(SheetColumnDefinition.ColumnTag[]::new);
+            SheetColumnDefinition definition = new SheetColumnDefinition(columnName, tags);
+            values.add(new SizingImportLine.ImportValue(new SheetColumn(definition, letter), value));
+        }
+    }
 }
