@@ -1,10 +1,30 @@
 package objective.taskboard.sizingImport;
 
+import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.column;
+import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.customField;
+import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.demand;
+import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.feature;
+import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.featureType;
+import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.line;
+import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.phase;
+import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.tshirtSizeField;
+import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.withProject;
+import static objective.taskboard.sizingImport.ScopeImporterTestDSL2.withRequiredExtraField;
+import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.EXTRA_FIELD_ID_TAG;
+import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.SIZING_FIELD_ID_TAG;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Collections;
+
 import org.junit.Test;
+
+import objective.taskboard.domain.converter.IssueFieldsExtractor;
+import objective.taskboard.jira.client.JiraIssueDto;
 
 public class ScopeImporterTest {
 
     private ScopeImporterTestDSL dsl = new ScopeImporterTestDSL();
+    private ScopeImporterTestDSL2 dsl2 = new ScopeImporterTestDSL2();
 
     @Test
     public void importNoLines_shouldFinishWithSuccessWithoutLinesToImport() {
@@ -538,5 +558,48 @@ public class ScopeImporterTest {
                 .withSuccessfulIssueImported("PX-15")
             .and()
                 .noVersionHaveBeenCreated();
+    }
+
+    @Test
+    public void whenImportLineWithExistingDemand_shouldBeLinkedToDemand() {
+        givenJira(
+                withProject()
+                        .key("PX")
+                        .withVersion("One")
+                        .withIssues(
+                                demand().key("PX-1").summary("Demand Summary")
+                        )
+        );
+
+        whenImportSizing(
+                phase("One").demand("Demand Summary").feature("Feature Summary")
+        ).intoProject("PX");
+
+        then().importEvents()
+                .assertThatImportedIssues("PX-2")
+                .assertThatImportFinished();
+        then().jira()
+                .assertThatIssue("PX-2")
+                .isPresent()
+                .hasLink("is demanded by", "PX-1");
+        then().jira()
+                .assertThatIssue("PX-3")
+                .isNotPresent();
+    }
+
+    private void givenJira(ScopeImporterTestDSL2.JiraProjectBuilder... builders) {
+        dsl2.jira(builders);
+    }
+
+    private void givenImportConfig(ScopeImporterTestDSL2.ImportConfigBuilder... builders) {
+        dsl2.importConfig(builders);
+    }
+
+    private ScopeImporterTestDSL2.SizingInvocationBuilder whenImportSizing(ScopeImporterTestDSL2.SizingLineBuilder... builders) {
+        return dsl2.sizing(builders);
+    }
+
+    private ScopeImporterTestDSL2.AssertWrapper then() {
+        return dsl2.then();
     }
 }

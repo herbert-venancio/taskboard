@@ -5,7 +5,9 @@ import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byKey;
 import static objective.taskboard.utils.StreamUtils.instancesOf;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -18,8 +20,8 @@ import objective.taskboard.jira.FrontEndMessageException;
 import objective.taskboard.jira.MetadataService;
 import objective.taskboard.jira.client.JiraCreateIssue;
 import objective.taskboard.jira.client.JiraIssueDto;
+import objective.taskboard.jira.client.JiraIssueDtoSearch;
 import objective.taskboard.jira.client.JiraIssueTypeDto;
-import objective.taskboard.jira.client.JiraLinkDto;
 import objective.taskboard.jira.client.JiraLinkTypeDto;
 import objective.taskboard.jira.data.JiraIssue;
 import objective.taskboard.jira.data.JiraProject;
@@ -97,16 +99,6 @@ public class JiraFacade {
         }
     }
 
-    public Optional<String> getDemandKeyGivenFeature(JiraIssueDto feature) {
-        String demandIssueLinkName = getDemandLink().name;
-
-        return feature.getIssueLinks().stream()
-                .filter(link -> link.getIssueLinkType().getName().equals(demandIssueLinkName))
-                .map(JiraLinkDto::getTargetIssueKey)
-                .findFirst();
-    }
-
-    
     private JiraLinkTypeDto getDemandLink() {
         return metadataService.getIssueLinksMetadata().get(jiraProperties.getIssuelink().getDemandId().toString());
     }
@@ -140,10 +132,6 @@ public class JiraFacade {
                 .collect(toList());
     }
 
-    public JiraIssueDto getIssue(String issueKey) {
-        return jiraEndpoint.request(JiraIssueDto.Service.class).get(issueKey);
-    }
-
     public String getJiraUrl() {
         return jiraProperties.getUrl();
     }
@@ -167,6 +155,20 @@ public class JiraFacade {
                     .build()
             );
         return issue;
+    }
+
+    public Optional<JiraIssueDto> findDemandBySummary(String projectKey, String summary) {
+        Map<String, Object> input = new HashMap<>();
+        input.put("jql", "project = " + projectKey
+                + " AND issuetype = " + jiraProperties.getIssuetype().getDemand().getId()
+                + " AND summary ~ '" + summary + "'");
+
+        JiraIssueDtoSearch searchResult = jiraEndpoint.request(JiraIssueDtoSearch.Service.class)
+                .search(input);
+
+        return searchResult.getIssues().stream()
+                .filter(i -> StringUtils.equalsIgnoreCase(i.getSummary(), summary))
+                .findFirst();
     }
 
     abstract static class IssueFieldValue {

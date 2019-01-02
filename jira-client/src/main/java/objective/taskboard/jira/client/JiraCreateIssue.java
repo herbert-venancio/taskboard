@@ -190,6 +190,13 @@ public class JiraCreateIssue {
     }
 
     public static class CustomFieldOption {
+
+        public CustomFieldOption() { }
+
+        public CustomFieldOption(String value) {
+            this.value = value;
+        }
+
         public String value;
     }
 }

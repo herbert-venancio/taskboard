@@ -1,11 +1,13 @@
 package objective.taskboard.sizingImport;
 
 import objective.taskboard.jira.client.JiraCreateIssue;
+import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.data.JiraIssue;
 import objective.taskboard.jira.data.JiraProject;
 import objective.taskboard.jira.data.Version;
 import objective.taskboard.sizingImport.SheetColumnDefinition.ColumnTag;
 
+import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.joining;
 import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.EXTRA_FIELD_ID_TAG;
 import static objective.taskboard.sizingImport.SheetColumnDefinitionProviderScope.SIZING_FIELD_ID_TAG;
@@ -29,12 +31,19 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.util.StringUtils.hasText;
 
+import com.google.gson.Gson;
+
 public class ScopeImporterTestDSL {
 
     private final SizingImportConfig importConfig = new SizingImportConfig();
     private final JiraFacade jiraFacade = mock(JiraFacade.class);
     private final SizingSheetImporterNotifier importerNotifier = new SizingSheetImporterNotifier();
     private static SizingImporterRecorder recorder;
+
+    public ScopeImporterTestDSL() {
+        when(jiraFacade.findDemandBySummary(any(), any()))
+                .thenReturn(Optional.empty());
+    }
 
     protected DSLJiraBuilder jira() {
         return new DSLJiraBuilder(this);
@@ -167,11 +176,11 @@ public class ScopeImporterTestDSL {
 
         public DSLIssues eoI() {
             if (isDemand) {
-                when(jiraFacade.getDemandKeyGivenFeature(any()))
-                        .thenReturn(Optional.of(demandKey));
-
                 when(jiraFacade.createDemand(any(), any(), any()))
                         .thenReturn(new JiraIssue(demandKey));
+
+                when(jiraFacade.findDemandBySummary(any(), eq(name)))
+                        .thenReturn(Optional.of(createDemand(demandKey, name)));
             } else {
 
                 if (hasText(name)) {
@@ -698,5 +707,14 @@ public class ScopeImporterTestDSL {
             }
             return events;
         }
+    }
+
+    private static JiraIssueDto createDemand(String key, String summary) {
+        Map<String, Object> json = new HashMap<>();
+        json.put("key", key);
+        json.put("fields", singletonMap("summary", summary));
+
+        Gson gson = new Gson();
+        return gson.fromJson(gson.toJsonTree(json), JiraIssueDto.class);
     }
 }
