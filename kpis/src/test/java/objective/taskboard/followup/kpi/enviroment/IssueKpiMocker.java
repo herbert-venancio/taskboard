@@ -33,17 +33,16 @@ public class IssueKpiMocker {
     private WorklogsBuilder worklogsBuilder = new WorklogsBuilder();
     private final String pKey;
     private Optional<IssueTypeDTO> type;
-    private KpiLevel level;
+    private KpiLevel level = KpiLevel.UNMAPPED;
 
     private List<IssueKpiMocker> children = new LinkedList<>();
     private IssueKpiMocker parent;
     private String projectKey;
     private Issue mockedIssue;
 
-    IssueKpiMocker(KpiEnvironment fatherEnvironment, TransitionsBuilder transitionBuilder,String pKey) {
+    IssueKpiMocker(KpiEnvironment fatherEnvironment, String pKey) {
         this.fatherEnvironment = fatherEnvironment;
-        this.transitionBuilder = transitionBuilder;
-        this.transitionBuilder.setIssueKpi(this);
+        this.transitionBuilder = new TransitionsBuilder(this);
         this.pKey = pKey;
     }
 
@@ -52,29 +51,28 @@ public class IssueKpiMocker {
     }
 
     public IssueKpiMocker subtask(String subtaskKey) {
-        IssueKpiMocker child = createChild(subtaskKey);
-        child.isSubtask();
-        return child;
+        return createChild(subtaskKey).isSubtask();
     }
     
     public IssueKpiMocker feature(String subtaskKey) { 
         if(this.level != KpiLevel.DEMAND) 
             Assert.fail("Features must be called only inside a Demand"); 
          
-        IssueKpiMocker child = createChild(subtaskKey); 
-        child.isFeature(); 
-        return child; 
+        return createChild(subtaskKey).isFeature(); 
     } 
  
     private IssueKpiMocker createChild(String subtaskKey) { 
-        IssueKpiMocker child = new IssueKpiMocker(fatherEnvironment,new TransitionsBuilder(fatherEnvironment),subtaskKey); 
-        child.setParent(this); 
-        children.add(child); 
-        return child; 
+        return new IssueKpiMocker(fatherEnvironment,subtaskKey).setParent(this); 
     } 
 
     private IssueKpiMocker setParent(IssueKpiMocker parent) {
         this.parent = parent;
+        parent.addChild(this);
+        return this;
+    }
+    
+    private IssueKpiMocker addChild(IssueKpiMocker child) {
+        this.children.add(child);
         return this;
     }
 
@@ -93,17 +91,17 @@ public class IssueKpiMocker {
         return this;
     }
     
+    public IssueKpiMocker emptyType() {
+        this.type = Optional.empty();
+        return this;
+    }
+
     public String getIssueKey() {
         return pKey;
     }
    
     public Optional<IssueTypeKpi> getIssueTypeKpi() {
-        return fatherEnvironment.types().getIssueTypeKpi(type);
-    }
-
-    public IssueKpiMocker emptyType() {
-        this.type = Optional.empty();
-        return this;
+        return type.map(IssueTypeDTO::buildIssueTypeKpi);
     }
 
     public IssueKpiMocker isFeature() {
@@ -127,7 +125,7 @@ public class IssueKpiMocker {
     }
     
     public KpiLevel level() {
-        return level != null ? level : KpiLevel.UNMAPPED;
+        return level;
     }
 
     public IssueKpiMocker project(String projectKey) { 
@@ -139,16 +137,11 @@ public class IssueKpiMocker {
         return transitionBuilder;
     }
 
-    public IssueKpiMocker withTransitions(TransitionsBuilder transitions) {
-        this.transitionBuilder = transitions;
-        return this;
-    }
-
     public WorklogsBuilder worklogs() {
         return worklogsBuilder;
     }
     
-    public Map<String, ZonedDateTime> getReveredTransitions() {
+    public Map<String, ZonedDateTime> getReversedTransitions() {
         return transitionBuilder.getReversedTransitions();
     }
     
@@ -200,16 +193,16 @@ public class IssueKpiMocker {
     
     public List<Issue> mockAllJiraIssue() {
         List<Issue> allIssues = new LinkedList<>();
-        allIssues.add(mockThis());
-        for (IssueKpiMocker issueKpiMocker : children) {
-            List<Issue> childrenIssuesKpis = issueKpiMocker.mockAllJiraIssue();
+        allIssues.add(mock());
+        for (IssueKpiMocker childIssueKpiMocker : children) {
+            List<Issue> childrenIssuesKpis = childIssueKpiMocker.mockAllJiraIssue();
             allIssues.addAll(childrenIssuesKpis);
         }
         
         return allIssues;
     }
     
-    private Issue mockThis() {
+    public Issue mock() {
         Issue issue = Mockito.mock(Issue.class);
         when(issue.getProjectKey()).thenReturn(projectKey);
         when(issue.getStatus()).thenReturn(getStatusId());
@@ -219,13 +212,13 @@ public class IssueKpiMocker {
         when(issue.isFeature()).thenReturn(FEATURES == this.level);
         when(issue.isSubTask()).thenReturn(SUBTASKS == this.level);
         when(issue.getWorklogs()).thenReturn(worklogsBuilder.getWorklogs());
-        if(hasFather())
+        if(hasParentIssue())
             when(issue.getParent()).thenReturn(parent.pKey);
         this.mockedIssue = issue;
         return issue;
     }
 
-    private boolean hasFather() {
+    private boolean hasParentIssue() {
         return parent != null;
     }
 
@@ -235,12 +228,9 @@ public class IssueKpiMocker {
 
     private Optional<IssueTypeKpi> getIssueType() {
         if(type == null)
-            Assert.fail("Configure a type or explicitly cal emptyType()");
-        if(!type.isPresent())
-            return Optional.empty();
-
-        IssueTypeDTO dto = type.get();
-        return Optional.of( new IssueTypeKpi(dto.id(), dto.name()));
+            Assert.fail("Configure a type or explicitly call emptyType()");
+        
+        return type.map(dto -> new IssueTypeKpi(dto.id(),dto.name()));
     }
     
     @Override

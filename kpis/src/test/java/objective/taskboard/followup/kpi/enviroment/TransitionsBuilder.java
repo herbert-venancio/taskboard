@@ -59,10 +59,6 @@ public class TransitionsBuilder {
         firstTransition.setNext(transition);
     }
 
-    public void setIssueKpi(IssueKpiMocker issueKpiMocker) {
-        this.kpiMocker = issueKpiMocker;
-    }
-    
     public IssueKpiMocker eoT() {
         if (kpiMocker == null)
             throw new IllegalArgumentException("No IssueKpi configured");
@@ -155,7 +151,7 @@ public class TransitionsBuilder {
 
         public TransitionsBuilder date(String date) {
             this.date = Optional.of(parseDateTime(date));
-            TransitionsBuilder.this.lastTransited(this);
+            lastTransited(this);
             return TransitionsBuilder.this;
         }
 

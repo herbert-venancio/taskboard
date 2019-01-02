@@ -72,6 +72,8 @@ public class IssueKpiServiceTest {
     @Mock
     private Clock clock;
     
+    private IssueKpiService kpiService;
+    
     @Before
     public void setup() {
         JiraProperties.Followup followup = Mockito.mock(JiraProperties.Followup.class);
@@ -87,6 +89,8 @@ public class IssueKpiServiceTest {
         IssueTypeChildrenStatusHierarchy subtasksHierarchy = new IssueTypeChildrenStatusHierarchy();
         subtasksHierarchy.setHierarchies(Arrays.asList(hierarch));
         Mockito.when(kpiProperties.getFeaturesHierarchy()).thenReturn(subtasksHierarchy);
+        
+        kpiService = kpiService();
      }
 
     @Test
@@ -112,7 +116,7 @@ public class IssueKpiServiceTest {
         
         Mockito.when(factory.getItems(optionalDs)).thenReturn(Arrays.asList(issueAdapter));
         
-        List<IssueKpi> issues = kpiService().getIssues(optionalDs);
+        List<IssueKpi> issues = kpiService.getIssues(optionalDs);
         
         assertThat(issues.size(),is(1));
         IssueKpi issue = issues.get(0);
@@ -164,7 +168,6 @@ public class IssueKpiServiceTest {
         when(issueBufferService.getAllIssues()).thenReturn(issues);
         when(factory.getItems(issues, ZONE_ID)).thenReturn(builder.buildAllIssuesAsAdapter());
         
-        IssueKpiService kpiService = kpiService();
         List<IssueKpi> demandsIssues = kpiService.getIssuesFromCurrentState("PROJ", ZONE_ID, DEMAND);
         List<IssueKpi> featuresIssues = kpiService.getIssuesFromCurrentState("PROJ", ZONE_ID, FEATURES);
         List<IssueKpi> subtasksIssues = kpiService.getIssuesFromCurrentState("PROJ", ZONE_ID, SUBTASKS);
@@ -246,7 +249,7 @@ public class IssueKpiServiceTest {
         when(issueBufferService.getAllIssues()).thenReturn(issues);
         when(factory.getItems(issues, ZONE_ID)).thenReturn(builder.buildAllIssuesAsAdapter());
         
-        List<IssueKpi> subtasks = kpiService().getIssuesFromCurrentState("PROJ", ZONE_ID, SUBTASKS);
+        List<IssueKpi> subtasks = kpiService.getIssuesFromCurrentState("PROJ", ZONE_ID, SUBTASKS);
         
         assertExistingIssue(subtasks,"I-2",300l);
         assertNonExistingIssue(subtasks, "I-3");
@@ -301,7 +304,7 @@ public class IssueKpiServiceTest {
         when(issueBufferService.getAllIssues()).thenReturn(issues);
         when(factory.getItems(issues, ZONE_ID)).thenReturn(builder.buildAllIssuesAsAdapter());
 
-        List<IssueKpi> subtasks = kpiService().getIssuesFromCurrentState("PROJ", ZONE_ID, SUBTASKS);
+        List<IssueKpi> subtasks = kpiService.getIssuesFromCurrentState("PROJ", ZONE_ID, SUBTASKS);
 
         assertNonExistingIssue(subtasks,"I-2");
         assertExistingIssue(subtasks, "I-3",0l);
@@ -350,13 +353,13 @@ public class IssueKpiServiceTest {
         
         return builder;
     }
-    
-    private IssueKpiService kpiService() {
-        return new IssueKpiService(issueBufferService,projectService,jiraProperties,kpiProperties,clock,factory); 
-    }
 
     private Instant getIntant(String date) {
     	return LocalDate.parse(date).atStartOfDay(ZONE_ID).toInstant();
     }
-    
+
+    private IssueKpiService kpiService() {
+        return new IssueKpiService(issueBufferService,projectService,jiraProperties,kpiProperties,clock,factory);
+    }
+
 }

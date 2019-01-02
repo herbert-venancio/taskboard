@@ -1,17 +1,16 @@
 package objective.taskboard.followup.kpi.enviroment;
 
-import org.mockito.Mockito;
-
 import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.jira.properties.JiraProperties.Followup;
 import objective.taskboard.jira.properties.StatusConfiguration.StatusPriorityOrder;
 
 public class JiraPropertiesMocker {
-    private JiraProperties jiraProperties = Mockito.mock(JiraProperties.class);
+    private JiraProperties jiraProperties = new JiraProperties();
     private String[] statusesOrdered;
-    private KpiEnvironment fatherEnvironment;
+    private KpiEnvironment environment;
+    
     public JiraPropertiesMocker(KpiEnvironment kpiEnvironment) {
-        this.fatherEnvironment = kpiEnvironment;
+        this.environment = kpiEnvironment;
     }
 
     public JiraProperties getJiraProperties() {
@@ -21,13 +20,13 @@ public class JiraPropertiesMocker {
     }
 
     private void mockFollowup() {
-        Mockito.when(jiraProperties.getFollowup()).thenReturn(new Followup());
+        jiraProperties.setFollowup(new Followup());
     }
 
     private void mockStatusPriorityOrder() {
         StatusPriorityOrder statusOrder = new StatusPriorityOrder();
         statusOrder.setSubtasks(statusesOrdered);
-        Mockito.when(jiraProperties.getStatusPriorityOrder()).thenReturn(statusOrder);
+        jiraProperties.setStatusPriorityOrder(statusOrder);
     }
 
     public JiraPropertiesMocker withSubtaskStatusPriorityOrder(String ...statusesOrdered) {
@@ -36,7 +35,7 @@ public class JiraPropertiesMocker {
     }
 
     public KpiEnvironment eoJp() {
-        return fatherEnvironment;
+        return environment;
     }
 
     

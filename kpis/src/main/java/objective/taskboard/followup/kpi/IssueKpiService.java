@@ -51,7 +51,7 @@ public class IssueKpiService {
         ProjectFilterConfiguration project =  projectService.getTaskboardProjectOrCry(projectKey);
         ProjectTimelineRange range = new ProjectRangeByConfiguration(project);
 
-        List<Issue> issuesVisibleToUser= issueBufferService.getAllIssues().stream()
+        List<Issue> issuesVisibleToUser = issueBufferService.getAllIssues().stream()
                 .filter(new FollowupIssueFilter(jiraProperties, projectKey))
                 .collect(Collectors.toList());
 

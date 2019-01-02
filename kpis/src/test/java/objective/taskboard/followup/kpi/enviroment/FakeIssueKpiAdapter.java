@@ -1,7 +1,6 @@
 package objective.taskboard.followup.kpi.enviroment;
 
 import java.time.ZonedDateTime;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -11,7 +10,7 @@ import objective.taskboard.followup.kpi.transformer.IssueKpiDataItemAdapter;
 
 public class FakeIssueKpiAdapter implements IssueKpiDataItemAdapter {
 
-    private Map<String,ZonedDateTime> transitions = new LinkedHashMap<>();
+    private Map<String,ZonedDateTime> transitions;
     private String issueKey;
     private Optional<IssueTypeKpi> issueType;
     private KpiLevel level;

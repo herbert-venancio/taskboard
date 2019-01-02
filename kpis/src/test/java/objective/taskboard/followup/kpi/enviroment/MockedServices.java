@@ -17,14 +17,14 @@ import objective.taskboard.issueBuffer.IssueBufferService;
 
 public class MockedServices {
 
-    private KpiEnvironment fatherEnvironment;
+    private KpiEnvironment environment;
     private ProjectServiceMocker projects = new ProjectServiceMocker(this);
     private IssueKpiServiceMocker issueKpiServices = new IssueKpiServiceMocker();
     private IssueBufferServiceMocker issueBufferService = new IssueBufferServiceMocker();
     private IssueKpiDataItemAdapterFactoryMocker factory = new IssueKpiDataItemAdapterFactoryMocker();
 
     public MockedServices(KpiEnvironment fatherEnvironment) {
-        this.fatherEnvironment = fatherEnvironment;
+        this.environment = fatherEnvironment;
     }
 
     public ProjectServiceMocker projects() {
@@ -44,7 +44,7 @@ public class MockedServices {
     }
 
     public KpiEnvironment eoS() {
-        return fatherEnvironment;
+        return environment;
     }
 
     public class IssueKpiServiceMocker {
@@ -56,7 +56,7 @@ public class MockedServices {
         }
 
         private void mockService() {
-            Map<KpiLevel, List<IssueKpi>> issuesByLevel = fatherEnvironment.buildAllIssues();
+            Map<KpiLevel, List<IssueKpi>> issuesByLevel = environment.buildAllIssues();
             Stream.of(KpiLevel.values()).forEach(level -> {
                 mockIssuesForLevel(level, issuesByLevel.get(level));
             });
@@ -64,12 +64,12 @@ public class MockedServices {
         }
 
         private void mockIssuesForLevel(KpiLevel level, List<IssueKpi> issuesByLevel) {
-            Mockito.when(service.getIssuesFromCurrentState(fatherEnvironment.getProjectKey(),fatherEnvironment.getTimezone(), level))
+            Mockito.when(service.getIssuesFromCurrentState(environment.getProjectKey(),environment.getTimezone(), level))
                 .thenReturn(issuesByLevel);
         }
 
         public KpiEnvironment eoIks() {
-            return fatherEnvironment;
+            return environment;
         }
 
     }
@@ -91,10 +91,16 @@ public class MockedServices {
 
         List<Issue> getIssues() {
             if (allIssues == null)
-                allIssues = fatherEnvironment.mockAllIssues().collectIssuesMocked();
+                allIssues = mockIssues();
 
             return allIssues;
 
+        }
+
+        private List<Issue> mockIssues() {
+            return environment.getAllIssueMockers().stream()
+                    .map(i -> i.mock())
+                    .collect(Collectors.toList());
         }
     }
 
@@ -103,12 +109,12 @@ public class MockedServices {
 
         public IssueKpiDataItemAdapterFactory getComponent() {
             List<Issue> issues = issueBufferService.getIssues();
-            Mockito.when(factory.getItems(issues, fatherEnvironment.getTimezone())).thenReturn(getMappedItemAdapters());
+            Mockito.when(factory.getItems(issues, environment.getTimezone())).thenReturn(getMappedItemAdapters());
             return factory;
         }
 
         private List<IssueKpiDataItemAdapter> getMappedItemAdapters() {
-            return fatherEnvironment.getAllIssueMockers().stream()
+            return environment.getAllIssueMockers().stream()
                     .filter(m -> test(m))
                     .map(m -> buildAdapter(m))
                     .collect(Collectors.toList());
@@ -119,7 +125,7 @@ public class MockedServices {
         }
 
         private IssueKpiDataItemAdapter buildAdapter(IssueKpiMocker mocked) {
-            return new FakeIssueKpiAdapter(mocked.getReveredTransitions(), mocked.getIssueKey(),mocked.getIssueTypeKpi(), mocked.level());
+            return new FakeIssueKpiAdapter(mocked.getReversedTransitions(), mocked.getIssueKey(),mocked.getIssueTypeKpi(), mocked.level());
         }
 
     }

@@ -142,7 +142,7 @@ public class KpiEnvironment {
     }
 
     public IssueKpiMocker givenIssue(String pKey) {
-        issues.putIfAbsent(pKey, new IssueKpiMocker(this, new TransitionsBuilder(this), pKey));
+        issues.putIfAbsent(pKey, new IssueKpiMocker(this, pKey));
         return issues.get(pKey);
     }
 
@@ -229,14 +229,14 @@ public class KpiEnvironment {
             return Optional.of(types.get(type));
         }
 
-        public IssueTypeRepository bulkPutFeatures(String...features) {
+        public IssueTypeRepository addFeatures(String...features) {
             for (String featureType : features) {
                 addFeature(featureType);
             }
             return this;
         }
 
-        public IssueTypeRepository bulkPutSubtasks(String... subtasks) {
+        public IssueTypeRepository addSubtasks(String... subtasks) {
             for (String subtaskType : subtasks) {
                 addSubtask(subtaskType);
             }
@@ -245,14 +245,6 @@ public class KpiEnvironment {
 
         public KpiEnvironment eoT() {
             return KpiEnvironment.this;
-        }
-
-        public Optional<IssueTypeKpi> getIssueTypeKpi(Optional<IssueTypeDTO> type) {
-            return type.flatMap(t -> buildIssueTypeKpi(t));
-        }
-
-        private Optional<IssueTypeKpi> buildIssueTypeKpi(IssueTypeDTO type) {
-            return Optional.of(new IssueTypeKpi(type.id(), type.name()));
         }
 
     }
@@ -268,12 +260,6 @@ public class KpiEnvironment {
             return status;
         }
 
-        private StatusDto create(String name, boolean isProgressing) {
-            StatusDto status = create(name);
-            status.setProgressingStatus(isProgressing);
-            return status;
-        }
-
         public List<String> getProgressingStatuses() {
             return statuses.values().stream()
                     .filter(s -> s.isProgressingStatus())
@@ -281,18 +267,20 @@ public class KpiEnvironment {
                     .collect(Collectors.toList());
         }
         
-        public StatusRepository withProgressingSatuses(String... statuses) { 
+        public StatusRepository withProgressingStatuses(String... statuses) { 
             createBulk(true,statuses); 
             return this; 
         }
 
-        public StatusRepository withNotProgressingSatuses(String... statuses) { 
+        public StatusRepository withNotProgressingStatuses(String... statuses) { 
             createBulk(false,statuses); 
             return this; 
         }
 
         private void createBulk(boolean isProgressing,String... statuses) {
-            Stream.of(statuses).forEach(s -> create(s,isProgressing));
+            Stream.of(statuses).forEach(s -> 
+                create(s)
+                .setProgressingStatus(isProgressing));
         }
         
         public KpiEnvironment eoS() {
@@ -320,7 +308,7 @@ public class KpiEnvironment {
 
         public String name() {
             return name;
-    }
+        }
 
     }
     public static class StatusDto {

@@ -35,11 +35,6 @@ public class KpiPropertiesMocker {
         return builder;
     }
 
-    public KpiPropertiesMocker withKpiProperties(KPIProperties kpiProperties) {
-        this.kpiProperties = kpiProperties;
-        return this;
-    }
-
     public KPIProperties getKpiProperties() {
         buildHierarchies();
         mockProgressingStatuses(fatherEnvironment.statuses().getProgressingStatuses());

@@ -26,8 +26,16 @@ public class ProjectServiceMocker {
     }
     
     public ProjectService getService() {
+        configureExceptionToNotConfiguredProjects();
         projects.values().stream().forEach(p -> p.mockProject(projectService));
         return projectService;
+    }
+
+    private void configureExceptionToNotConfiguredProjects() {
+        Mockito.when(projectService.getTaskboardProjectOrCry(Mockito.any())).thenAnswer(i -> {
+            String projectKey = i.getArgumentAt(0, String.class);
+            throw new IllegalArgumentException("Project with key '" + projectKey + "' not found");
+        });
     }
 
     public MockedServices eoPs() {
@@ -50,7 +58,7 @@ public class ProjectServiceMocker {
             Mockito.when(project.getStartDate()).thenReturn(getStartDate());
             Mockito.when(project.getDeliveryDate()).thenReturn(getDeliveryDate());
                     
-            Mockito.when(projectService.getTaskboardProjectOrCry(key)).thenReturn(project);
+            Mockito.doReturn(project).when(projectService).getTaskboardProjectOrCry(key);
             
         }
 
