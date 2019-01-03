@@ -23,9 +23,12 @@
     <template>
 
         <style>
+            #planned-x-ballpark {
+                height: 100%;
+            }
         </style>
 
-        <widget-wrap title="Planned X Ballpark" is-ready="{{isReady}}" has-reset="true" error-message="{{errorMessage}}" chart="{{chart}}">
+        <widget-wrap title="Planned X Ballpark" is-ready="{{isReady}}" has-reset="true" error-message="{{errorMessage}}" highcharts-chart="{{chart}}">
 
             <div id="planned-x-ballpark" class="tb-chart"></div>
 
@@ -41,26 +44,12 @@
                 properties: {
                     selectedProjectKey: {
                         type: String,
-                        notify: true
-                    },
-                    selectedDate: {
-                        type: String,
                         notify: true,
-                        value: '',
+                        observer: '_onProjectSelected'
                     },
                     isReady: {
                         type: Boolean,
                         notify: true,
-                        value: false
-                    },
-                    selectedCategory: {
-                        type: String
-                    },
-                    dataCategory: {
-                        type: String
-                    },
-                    _isChartRendered: {
-                        type: Boolean,
                         value: false
                     },
                     errorMessage: {
@@ -70,80 +59,44 @@
                     chart:  {
                         type: Object,
                         notify: true,
-                        value: function() { return {}; }
+                        value: null
                     },
                 },
-
-                observers: [
-                    '_onProjectSelected(selectedProjectKey, selectedDate)',
-                    '_onCategorySelected(selectedCategory)'
-                ],
-
-                _onProjectSelected: function(selectedProjectKey, selectedDate) {
-                    this.set('_isChartRendered', false);
-                    if(this.isSelectedCategory())
-                        this.drawPlannedBallparkChart(selectedProjectKey);
-                },
-
-                _onCategorySelected: function(selectedCategory) {
-                    if(this.isSelectedCategory())
-                        this.drawPlannedBallparkChart(this.selectedProjectKey);
-                },
-
-                isSelectedCategory: function() {
-                    return this.dataCategory === this.selectedCategory;
-                },
-
-                drawPlannedBallparkChart: function(projectKey) {
-                    if(this._isChartRendered)
+                
+                _onProjectSelected: function (newSelectedProjectKey, previousSelectedProjectKey) {
+                    if (newSelectedProjectKey === previousSelectedProjectKey) {
                         return;
+                    }
+                    this._drawPlannedBallparkChart(newSelectedProjectKey);
+                },
+
+                _drawPlannedBallparkChart: function(projectKey) {
 
                     if(!projectKey)
                         return;
 
-                    var self = this;
+                    this._resetChartAndWidget();
 
-                    self._resetChartAndWidget();
+                    let url = `/api/projects/${projectKey}/followup/planned-ballpark`;
+                    this.xhr = $.getJSON(url);
+                    this.xhr.done((data) => {
 
-                    this.xhr = d3.json("/api/projects/" + projectKey + "/followup/planned-ballpark", function(error, data) {
-                        if(error) {
-                            self._handleError(error);
+                        if (!data.length) {
+                            this.errorMessage = 'Planned X Ballpark has no data';
                             return;
                         }
 
-                        var chart = dc.tbPieChart("#planned-x-ballpark");
+                        this.chart  = new PieChartBuilder('planned-x-ballpark')
+                                                .withChartType('pie')
+                                                .withSeriesData([{ name: 'Brands', colorByPoint: true, data: data}])
+                                                .build();
 
-                        var plannedXBallpark = crossfilter(data);
+                        this.isReady = true;
+                    });
 
-                        var plannedXBallparkDimension = plannedXBallpark.dimension(function(d) { return d.type; });
-                        var plannedXBallparkGroup = plannedXBallparkDimension.group().reduceSum(function(d){ return d.totalEffort;});
-                        var all = plannedXBallparkDimension.groupAll().reduceSum(function(d){return d.totalEffort;});
-
-                        chart
-                            .dimension(plannedXBallparkDimension)
-                            .group(plannedXBallparkGroup)
-                            .label(function(data) {
-                                var label = data.key;
-                                if(all.value()) {
-                                    label += ' (' + dcUtils.percentFormat(data.value / all.value() * 100) + '%)';
-                                }
-                                return label;
-                            })
-                            .title(function(data) {
-                                return "Total Effort for " + data.key + ": " + data.value + " of " + all.value();
-                            })
-                            .colors(
-                                dcUtils.getDefaultColors()
-                            );
-
-                        dcUtils.defaultPieChartConfiguration(chart);
-
-                        chart.render();
-
-                        self.set('isReady', true);
-                        self.set('_isChartRendered', true);
-                        self.set('chart', chart);
-                     });
+                    this.xhr.fail((error) => {
+                        _handleError(error);
+                    });
                 },
 
                 _handleError: function(error) {
@@ -151,17 +104,16 @@
                 },
 
                 _resetChartAndWidget: function() {
-                    this.set('_isChartRendered', false);
-                    this.set('errorMessage', null);
-                    this.set('isReady', false);
+                    this.errorMessage = null;
+                    this.isReady = false;
 
                     if (this.xhr) {
                         this.xhr.abort();
                         this.xhr = null;
                     }
-                    if (!_.isEmpty(this.chart)) {
-                        dc.deregisterChart(this.chart);
-                        this.set('chart', {});
+                    if (this.chart) {
+                        this.chart.destroy();
+                        this.chart = null;
                     }
                 }
 
