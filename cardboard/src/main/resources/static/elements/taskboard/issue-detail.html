@@ -303,6 +303,7 @@
                 position:absolute;
                 right:0;
                 top:0;
+                cursor:pointer;
                 width: 20px;
                 height: 100%;
                 border-top-right-radius: 4px;
@@ -915,8 +916,8 @@
                                <template is="dom-if" if="{{!descriptionIsEditable}}">
                                     <div class$="details-row  description-row {{getDescriptionClass(item)}}">
                                         <marked-element markdown="{{getDescription(item)}}"></marked-element>
-                                        <div class="wrapper-edit">
-                                            <iron-icon class="description-edit" icon="taskboard-icons:edit" on-tap="_openDescriptionEditMode"></iron-icon>
+                                        <div class="wrapper-edit" on-tap="_openDescriptionEditMode">
+                                            <iron-icon class="description-edit" icon="taskboard-icons:edit"></iron-icon>
                                         </div>
                                     </div>
                                     <template is="dom-if" if="{{descriptionTooLong}}">
@@ -930,11 +931,10 @@
                                 <template is="dom-if" if="{{descriptionIsEditable}}">
                                     <textarea class="description-box__field" name="description" id="description" value={{item.description::input}}></textarea>
                                     <div class="description-box__footer">
-                                        <paper-button class="tb-button tb-button__default" on-tap="_closeDescriptionEditMode">Cancelar</paper-button>
-                                        <paper-button class="tb-button tb-button--type_button" on-tap="_saveIssueDescription">Salvar</paper-button>
+                                        <paper-button class="tb-button tb-button__default" on-tap="_closeDescriptionEditMode">Cancel</paper-button>
+                                        <paper-button class="tb-button tb-button--type_button description--save-button" on-tap="_saveIssueDescription">Save</paper-button>
                                     </div>
                                 </template>
-
                             </div>
 
                             <template is="dom-if" if="{{canHaveSubtasks}}">

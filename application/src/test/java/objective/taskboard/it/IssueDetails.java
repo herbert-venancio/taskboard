@@ -160,12 +160,12 @@ class IssueDetails extends AbstractUiFragment {
 
         waitForHover(By.cssSelector(".description-box.issue-detail"));
 
-        waitForClick(By.cssSelector(".description-edit"));
+        waitForClick(By.cssSelector(".wrapper-edit"));
 
         WebElement descriptionField = issueDetailRoot.findElement(By.className("description-box__field"));
         setInputValue(descriptionField, description);
 
-        waitForClick(By.xpath("//*[contains(text(), 'Salvar')]"));
+        waitForClick(By.cssSelector(".description--save-button"));
 
         assertDescription(description);
     }
