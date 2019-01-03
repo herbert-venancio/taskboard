@@ -95,12 +95,12 @@ public class KpiPropertiesMocker {
             return KpiPropertiesMocker.this.fatherEnvironment.collectTypeIds(childrenTypes);
         }
 
-        public HierarchyBuilder putChildrenType(String type) {
+        public HierarchyBuilder withChildrenType(String type) {
             childrenTypes.add(type);
             return this;
         }
 
-        public HierarchyBuilder putChildrenStatus(String status) {
+        public HierarchyBuilder withChildrenStatus(String status) {
             childrenStatuses.add(status);
             return this;
         }

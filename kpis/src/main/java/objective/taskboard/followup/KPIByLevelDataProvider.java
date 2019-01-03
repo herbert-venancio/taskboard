@@ -6,11 +6,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import objective.taskboard.followup.FollowUpData;
-import objective.taskboard.followup.FollowUpSnapshot;
-import objective.taskboard.followup.FollowUpSnapshotService;
-import objective.taskboard.followup.FollowUpTimeline;
-
 public abstract class KPIByLevelDataProvider<C,D> {
 
     @Autowired
