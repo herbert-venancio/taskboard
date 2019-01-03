@@ -24,23 +24,28 @@ import objective.taskboard.utils.Clock;
 @Service
 public class IssueKpiService {
 
-    @Autowired
     private IssueBufferService issueBufferService;
-
-    @Autowired
     private ProjectService projectService;
-
-    @Autowired
     private JiraProperties jiraProperties;
-
-    @Autowired
     private KPIProperties kpiProperties;
-
-    @Autowired
     private Clock clock;
-
-    @Autowired
     private IssueKpiDataItemAdapterFactory factory;
+    
+    @Autowired
+    public IssueKpiService(
+            IssueBufferService issueBufferService, 
+            ProjectService projectService,
+            JiraProperties jiraProperties, 
+            KPIProperties kpiProperties, 
+            Clock clock,
+            IssueKpiDataItemAdapterFactory factory) {
+        this.issueBufferService = issueBufferService;
+        this.projectService = projectService;
+        this.jiraProperties = jiraProperties;
+        this.kpiProperties = kpiProperties;
+        this.clock = clock;
+        this.factory = factory;
+    }
 
     public List<IssueKpi> getIssuesFromCurrentState(String projectKey, ZoneId timezone, KpiLevel kpiLevel){
         ProjectFilterConfiguration project =  projectService.getTaskboardProjectOrCry(projectKey);
@@ -52,6 +57,7 @@ public class IssueKpiService {
 
         List<IssueKpiDataItemAdapter> items = factory.getItems(issuesVisibleToUser,timezone);
         List<IssueKpi> issuesKpi = new IssueKpiTransformer(kpiProperties, clock)
+                
                                         .withItems(items)
                                         .withOriginalIssues(issuesVisibleToUser)
                                         .mappingHierarchically()

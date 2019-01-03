@@ -11,11 +11,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.Assert;
 
+import objective.taskboard.data.Issue;
 import objective.taskboard.followup.kpi.IssueKpi;
-import objective.taskboard.followup.kpi.IssueKpiService;
 import objective.taskboard.followup.kpi.IssueTypeKpi;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi.BehaviorFactory;
@@ -31,7 +32,6 @@ public class KpiEnvironment {
     private StatusRepository statusRepository = new StatusRepository();
     private KpiPropertiesMocker kpiPropertiesMocker = new KpiPropertiesMocker(this);
     private JiraPropertiesMocker jiraPropertiesMocker = new JiraPropertiesMocker(this);
-    private IssueKpiServiceMocker issueKpiServiceMocker = new IssueKpiServiceMocker(this);
     private TransitionsBuilder transitionsBuilder = new TransitionsBuilder(this);
 
     private Map<String,IssueKpiMocker> issues = new LinkedHashMap<>();
@@ -39,6 +39,8 @@ public class KpiEnvironment {
     private FixedClock clock = new FixedClock();
     private ZoneId timezone = ZoneId.systemDefault();
     private String projectKey;
+    
+    private MockedServices services = new MockedServices(this);
 
     public KpiEnvironment() {}
 
@@ -50,6 +52,11 @@ public class KpiEnvironment {
         return clock;
     }
 
+    public KpiEnvironment withTimezone(ZoneId timezone) {
+        this.timezone = timezone;
+        return this;
+    }
+    
     public ZoneId getTimezone() {
         return timezone;
     }
@@ -68,10 +75,6 @@ public class KpiEnvironment {
 
     public JiraPropertiesMocker withJiraProperties() {
         return jiraPropertiesMocker;
-    }
-
-    public IssueKpiServiceMocker withIssueKpiService() {
-        return issueKpiServiceMocker;
     }
 
     public KpiEnvironment forProject(String projectKey) {
@@ -93,11 +96,16 @@ public class KpiEnvironment {
         typeRepository.addDemand(name);
         return this;
     }
+    
+    public IssueTypeRepository types() {
+        return typeRepository;
+    }
 
     public KpiEnvironment withFeatureType(String name) {
         typeRepository.addFeature(name);
         return this;
     }
+
 
     public KpiEnvironment withSubtaskType(String name) {
         typeRepository.addSubtask(name);
@@ -108,6 +116,10 @@ public class KpiEnvironment {
         StatusDto status = statusRepository.create(name);
         return status;
     }
+    
+    public MockedServices services() {
+        return services;
+    }
 
     public KPIProperties getKPIProperties() {
         return kpiPropertiesMocker.getKpiProperties();
@@ -115,10 +127,6 @@ public class KpiEnvironment {
 
     public JiraProperties getJiraProperties() {
         return jiraPropertiesMocker.getJiraProperties();
-    }
-
-    public IssueKpiService getIssueKpiService() {
-        return issueKpiServiceMocker.getIssueKpiService();
     }
 
     public TransitionsBuilder statusTransition() {
@@ -134,7 +142,7 @@ public class KpiEnvironment {
     }
 
     public IssueKpiMocker givenIssue(String pKey) {
-        issues.putIfAbsent(pKey, new IssueKpiMocker(this, new TransitionsBuilder(this), pKey));
+        issues.putIfAbsent(pKey, new IssueKpiMocker(this, pKey));
         return issues.get(pKey);
     }
 
@@ -151,7 +159,7 @@ public class KpiEnvironment {
         return typeRepository.getOptional(type);
     }
 
-    public StatusRepository getStatusRepository() {
+    public StatusRepository statuses() {
         return statusRepository;
     }
 
@@ -167,14 +175,32 @@ public class KpiEnvironment {
                 .forEach(i -> map.get(i.getLevel()).add(i));
         return map;
     }
+    
+    public KpiEnvironment mockAllIssues() {
+        issues.values().forEach(i -> i.mockAllJiraIssue());
+        return this;
+    }
+    
+    public List<Issue> collectIssuesMocked() {
+        return getAllIssueMockers().stream().map( i -> i.mockedIssue()).collect(Collectors.toList());
+    }
+    
+    public List<IssueKpiMocker> getAllIssueMockers(){
+        return issues.values().stream()
+                .map(i -> i.allMockers())
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+        
+    }
 
-    private class IssueTypeRepository {
+    public class IssueTypeRepository {
         private long id = 1l;
         private Map<String,IssueTypeDTO> types = new LinkedHashMap<>();
 
-        private void addDemand(String name) {
+        public IssueTypeRepository addDemand(String name) {
             IssueTypeDTO dto = new IssueTypeDTO(id++, name);
             storeType(name, dto);
+            return this;
         }
 
         private void addFeature(String name) {
@@ -203,14 +229,33 @@ public class KpiEnvironment {
             return Optional.of(types.get(type));
         }
 
+        public IssueTypeRepository addFeatures(String...features) {
+            for (String featureType : features) {
+                addFeature(featureType);
+            }
+            return this;
+        }
+
+        public IssueTypeRepository addSubtasks(String... subtasks) {
+            for (String subtaskType : subtasks) {
+                addSubtask(subtaskType);
+            }
+            return this;
+        }
+
+        public KpiEnvironment eoT() {
+            return KpiEnvironment.this;
+        }
+
     }
 
-    class StatusRepository {
+    public class StatusRepository {
 
+        private long id = 1l; 
         private Map<String,StatusDto> statuses = new LinkedHashMap<>();
 
         private StatusDto create(String name) {
-            StatusDto status = new StatusDto(KpiEnvironment.this,name);
+            StatusDto status = new StatusDto(id++,KpiEnvironment.this,name);
             statuses.put(name,status);
             return status;
         }
@@ -221,6 +266,27 @@ public class KpiEnvironment {
                     .map(s -> s.name())
                     .collect(Collectors.toList());
         }
+        
+        public StatusRepository withProgressingStatuses(String... statuses) { 
+            createBulk(true,statuses); 
+            return this; 
+        }
+
+        public StatusRepository withNotProgressingStatuses(String... statuses) { 
+            createBulk(false,statuses); 
+            return this; 
+        }
+
+        private void createBulk(boolean isProgressing,String... statuses) {
+            Stream.of(statuses).forEach(s -> 
+                create(s)
+                .setProgressingStatus(isProgressing));
+        }
+        
+        public KpiEnvironment eoS() {
+            return KpiEnvironment.this;
+        }
+
     }
 
     public static class IssueTypeDTO {
@@ -243,17 +309,23 @@ public class KpiEnvironment {
         public String name() {
             return name;
         }
-    }
 
+    }
     public static class StatusDto {
 
         private String name;
         private boolean isProgressingStatus;
         private KpiEnvironment environment;
+        private long id;
 
-        private StatusDto(KpiEnvironment environment, String name) {
+        private StatusDto(long id, KpiEnvironment environment, String name) {
+            this.id = id;
             this.environment = environment;
             this.name = name;
+        }
+
+        private void setProgressingStatus(boolean isProgressing) {
+            this.isProgressingStatus = isProgressing;
         }
 
         public KpiEnvironment isProgressing() {
@@ -274,11 +346,13 @@ public class KpiEnvironment {
             return isProgressingStatus;
         }
 
+        public long id() {
+            return id;
+        }
+
         @Override
         public String toString() {
             return this.name;
         }
-
     }
-
 }
