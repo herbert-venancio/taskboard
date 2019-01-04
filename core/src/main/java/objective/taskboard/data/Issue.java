@@ -261,6 +261,10 @@ public class Issue extends IssueScratch implements Serializable {
         return classOfService;
     }
 
+    public void setClassOfServiceValue(final String classOfService) {
+        this.classOfService.setValue(classOfService);
+    }
+
     public List<Changelog> getChangelog() {
         return changelog;
     }

@@ -730,11 +730,16 @@
             }
             #class-of-service-value {
                 border-radius: 5px;
-                padding: 2px 5px;
+                padding: 4px 6px;
                 width: min-content;
                 white-space: nowrap;
-                display: inline-block;
+                display: flex;
             }
+
+            #class-of-service-selector {
+                cursor:pointer;
+            }
+
             .hidden-section {
                 display: none;
             }
@@ -888,9 +893,32 @@
                                 </div>
                                 <div class="details-column">
                                     <div class="subsubtitle">Class of service</div>
-                                    <div id="class-of-service-value" class="sub-content classofservice" style$="background-color:{{item.color}}">
-                                        {{item.classOfServiceValue}}
-                                    </div>
+                                    
+                                    <paper-material id="class-of-service-value" class="sub-content classofservice" style$="background-color:{{item.color}}">
+                                        <template is="dom-if" if="{{classOfServicePickerIsVisible}}">
+                                            <span id="class-of-service-selector" on-tap="_showClassOfServicePicker"
+                                                    data-picker$="classOfServiceSelector">{{item.classOfServiceValue}}</span>
+                                            <iron-icon class="icon-tiny assignee-button" icon="taskboard-icons:change-team"
+                                                on-tap="_showClassOfServicePicker"
+                                                title="Replace {{item.classOfServiceValue}} by another class of service">
+                                            </iron-icon>
+                                        </template>
+                                        
+                                        <template is="dom-if" if="{{!classOfServicePickerIsVisible}}">
+                                            <span>{{item.classOfServiceValue}}</span>
+                                        </template>
+                                    </paper-material>
+                                    
+                                    <class-of-service-picker
+                                        id="classOfServiceSelector"
+                                        class="people-picker"
+                                        options="{{classOfServiceOptions}}""
+                                        on-selected-class-of-service = "_changeClassOfService"
+                                        on-close-clicked = "_closePicker"
+                                        on-tap="_stopPropagation"
+                                        >
+                                    </class-of-service-picker>
+
                                 </div>
                                 <template is="dom-if" if="{{item.release}}">
                                     <div class="details-column">
@@ -1280,6 +1308,17 @@
                     isOpen: {
                         type: Boolean,
                         value: false
+                    },
+
+                    classOfServiceOptions: {
+                        type: Array,
+                        value: [],
+                        notify: true
+                    },
+
+                    classOfServicePickerIsVisible: {
+                        type: Boolean,
+                        value: false
                     }
                 },
 
@@ -1380,6 +1419,15 @@
                     this._closeAllPickers();
                     this.$.pickerForAddAssignee.open();
                 },
+                
+                _showClassOfServicePicker: function(e) {
+                    e.stopPropagation();
+                    this._closeAllPickers();
+                    this.$.classOfServiceSelector.open();
+                    var label = this.$$('#class-of-service-value')
+                    $(this.$.classOfServiceSelector).css("width", $(label).width()+40)
+                    this.$.classOfServiceSelector.open(label);
+                },
 
                 _addOrReplaceTeam: function(e) {
                     var teamPicker = e.target;
@@ -1415,6 +1463,21 @@
                     this._issueAction('addAssigneeToIssue', 'add assignee to issue', {username: selectedUsername})
                         .always(function() {
                             userPicker.close();
+                        })
+                },
+
+                _changeClassOfService: function(e) {
+                    var classOfServicePicker = e.target,
+                        selectedClassOfService = classOfServicePicker.selected;
+
+                    if (!selectedClassOfService) {
+                        classOfServicePicker.close();
+                        return;
+                    }
+
+                    this._issueAction('saveClassOfService', 'change class of service of issue' + this.item.issueKey, selectedClassOfService)
+                        .always(function() {
+                            classOfServicePicker.close();
                         })
                 },
 
@@ -1454,11 +1517,25 @@
                         if (self.isNotAssignedToMySelf(self.item))
                         $(self.$$("#assignToMe")).show();
                     }
-            },
 
+                    var classOfServicePicker = self.$.classOfServiceSelector;
+                    classOfServicePicker.open = function(label) {
+                        classOfServicePicker.clear();
+                        $(classOfServicePicker).show();
+                        classOfServicePicker.focus();
+                        classOfServicePicker.label = $(label);
+                        classOfServicePicker.label.hide();
+                    }
+                    classOfServicePicker.close = function() {
+                        $(classOfServicePicker).hide();
+                        if (classOfServicePicker.label)
+                            classOfServicePicker.label.show();
+                    }
+                },
+               
                 _closePicker: function(e) {
                      e.target.close();
-                },
+                 },
 
                 _closeAllPickers: function() {
                     var pickers = Polymer.dom(this.root).querySelectorAll(".people-picker");
@@ -1726,9 +1803,21 @@
                 },
 
                 opendialog: function (item) {
+                    var self = this;
                     this.closeIfOpenedDialog();
                     this.isObserving = false;
                     this.setCard(item);
+                    this.classOfServiceOptions = [];
+                    this.classOfServicePickerIsVisible = false;
+                    
+                    this.getFieldOptions(item, 'Class of Service', function(data, el) {
+                        self.classOfServiceOptions = data;
+                        
+                        if (data.length > 1) {
+                            self.classOfServicePickerIsVisible = true;
+                        }
+                    });
+                    
                     this.$.modal.open();
                     this.isOpen = true;
 
@@ -1802,6 +1891,34 @@
                     }
 
                     this._updateIssueLocalState();
+                },
+                
+                getFieldOptions: function(item , fieldName, callback) {
+                    var self = this,
+                        fieldOptions = [];
+
+                    $.ajax({
+                        url: '/ws/issues/project-metadata?projectKey=' + item.projectKey,
+                        type: 'get',
+                        success: function (data, textStatus, jQxhr) {
+                            var fieldsFromIssueType,
+                                selectedIssueType = data.issuetypes.filter(function(issuetype) {
+                                    return (issuetype.id === item.type); 
+                                });
+                            
+      
+                            fieldFromIssueType = selectedIssueType['0'].fields.filter(function(field) {
+                                return (field.name == fieldName);
+                            });
+                            
+                            fieldOptions = fieldFromIssueType['0'] ? fieldFromIssueType['0'].allowedValues : fieldOptions
+                            callback.apply(null, [fieldOptions]);
+                            return fieldOptions;
+                        },
+                        error: function (jqXhr, textStatus, errorThrown){
+                            console.log(errorThrown);
+                        }
+                    });
                 },
 
                 getDescriptionClass: function() {

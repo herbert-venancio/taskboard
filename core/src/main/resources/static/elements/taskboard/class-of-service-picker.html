@@ -1,0 +1,62 @@
+<dom-module id="class-of-service-picker">
+    <template>
+        <tag-picker
+                id = "class-of-service-selector-autocomplete"
+                source="{{options}}"
+                text-property="value"
+                value-property="value"
+                on-selected-value="_onSelect"
+                on-close-suggestions-clicked="_onClose"
+                >
+        </tag-picker>
+    </template>
+
+    <script>
+        (function () {
+            Polymer({
+                is: 'class-of-service-picker',
+                properties: {
+                    selected: {
+                        type: String
+                    },
+                    options: {
+                        type: Array
+                    }
+                },
+                
+                attached: function() {
+                    this.tagPicker = this.$$('tag-picker');
+                    this.tagPicker.setQueryFn(function(source, query) {
+                        var suggestions = source.filter(function(t) {
+                            return t.value.toLowerCase().indexOf(query.toLowerCase()) !== -1;
+                        });
+                        if (suggestions.length === 0)
+                            return [{"classOfServiceValue":"No matches"}];
+
+                        return suggestions;
+                    }.bind(this));
+                },
+                
+                clear: function() {
+                    this.tagPicker.clear();
+                },
+                
+                focus: function() {
+                    this.tagPicker.focus();
+                    this.tagPicker.suggestions(this.options);
+                },
+                
+                _onSelect: function(e) {
+                    var classOfService = e.detail;
+                    if (classOfService)
+                        this.selected = classOfService.value;
+                    this.fire("selected-class-of-service", {target: this})
+                },
+                
+                _onClose: function(e) {
+                    this.fire("close-clicked", {target: this})
+                }
+            });
+        })();
+    </script>
+</dom-module>

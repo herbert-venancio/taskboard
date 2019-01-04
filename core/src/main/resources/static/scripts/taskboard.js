@@ -29,6 +29,10 @@ function Taskboard() {
         return TEAMS;
     }
 
+    this.getAvailableClassesOfService = function() {
+        return CLASSES_OF_SERVICE;
+    }
+
     this.getTeamById = function(id) {
         return TEAMS_BY_ID[id];
     }
@@ -118,7 +122,7 @@ function Taskboard() {
 
     this.findIssueByKey = function(issueKey){
         return findInArray(this.issues, i => i.issueKey === issueKey);
-    }
+    };
 
     this.setLaneConfiguration = function(laneConfiguration) {
         _laneConfiguration = laneConfiguration;

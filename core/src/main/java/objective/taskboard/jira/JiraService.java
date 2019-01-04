@@ -20,8 +20,10 @@
  */
 package objective.taskboard.jira;
 
+import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byId;
 import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byName;
 import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byNames;
+import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byValue;
 
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -227,6 +229,16 @@ public class JiraService {
 
         if (HttpStatus.valueOf(result.getStatus()) != HttpStatus.NO_CONTENT)
             throw new FrontEndMessageException("Unexpected return code during saveDescription: " + result.getStatus());
+    }
+
+    public void saveClassOfService(String issueKey, String classOfService) {
+
+        Response result = updateIssue(issueKey, JiraIssue.Input.builder(properties)
+                .classOfService(byValue(classOfService))
+                .build());
+
+        if (HttpStatus.valueOf(result.getStatus()) != HttpStatus.NO_CONTENT)
+            throw new FrontEndMessageException("Unexpected return code during saveClassOfService: " + result.getStatus());
     }
 
     public void setTeams(String issueKey, List<Long> teamsIds) {
