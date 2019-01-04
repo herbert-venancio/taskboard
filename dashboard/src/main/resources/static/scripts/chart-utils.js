@@ -233,6 +233,11 @@ class ChartBuilderBase {
         return this;
     }
 
+    withColors (colors) {
+        this.options.colors = colors;
+        return this;
+    }
+
     build () {
         const chart = Highcharts.chart(this.options);
         if (this.hasPlotLine) {
@@ -248,24 +253,25 @@ class ChartBuilderBase {
 
 class PieChartBuilder extends ChartBuilderBase {
     constructor (divID) {
-        super(divID)
-        this.options.chart.plotBorderWidth = null
-        this.options.chart.plotShadow = false
-        this.options.tooltip.pointFormat = '{series.name}: <b>{point.percentage:.2f}%</b>'
-        this.options.tooltip.reversed = false
+        super(divID);
+        this.options.chart.plotBorderWidth = null;
+        this.options.chart.plotShadow = false;
+        this.options.tooltip.reversed = false;
         this.options.plotOptions.pie = { 
             allowPointSelect: true, 
             cursor: 'pointer', 
-            dataLabels: { 
-                enabled: true, 
-                format: '<b>{point.name}</b>: {point.percentage:.1f} %', 
-                style: { 
-                    color: '#8E8E8E',
-                    textOutline: "0px"
-                }, 
-                showInLegend: true 
-            }
-        }
+            showInLegend: true,
+            dataLabels: {
+                enabled: true,
+                formatter: function(){
+                    if(this.y > 0){
+                    	return `<b>${this.point.name}</b> : ${this.point.percentage.toFixed(2)} %`
+                    }
+                },
+                softConnector: false,
+                distance: 0
+            },
+        };
     }
 }
 

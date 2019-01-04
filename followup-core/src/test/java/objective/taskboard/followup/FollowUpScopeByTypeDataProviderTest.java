@@ -49,14 +49,14 @@ public class FollowUpScopeByTypeDataProviderTest {
         when(fc.isEmpty()).thenReturn(false);
         
         FollowUpSnapshot snapshot = getSnapshot(LocalDate.of(2018, 1, 1), asList(row));
-        when(snapshotService.get(Optional.empty(), ZONE_ID, PROJECT_KEY)).thenReturn(snapshot);
+        when(snapshotService.getFromCurrentState(ZONE_ID, PROJECT_KEY)).thenReturn(snapshot);
     }
 
     @Test
     public void ifIsBaselineBacklog_thenSumBaselineBacklog() {
         when(rowService.isBaselineBacklog(row)).thenReturn(true);
 
-        data = subject.getScopeByTypeData(PROJECT_KEY, Optional.empty(), ZONE_ID);
+        data = subject.getScopeByTypeData(PROJECT_KEY, ZONE_ID);
 
         Double expectedOthers = 0D;
         assertEffortEstimateByType(INTANGIBLE_DONE, expectedOthers);
@@ -73,7 +73,7 @@ public class FollowUpScopeByTypeDataProviderTest {
     public void ifIsBaselineDone_thenSumBaselineDone() {
         when(rowService.isBaselineDone(row)).thenReturn(true);
 
-        data = subject.getScopeByTypeData(PROJECT_KEY, Optional.empty(), ZONE_ID);
+        data = subject.getScopeByTypeData(PROJECT_KEY, ZONE_ID);
 
         Double expectedOthers = 0D;
         assertEffortEstimateByType(INTANGIBLE_DONE, expectedOthers);
@@ -91,7 +91,7 @@ public class FollowUpScopeByTypeDataProviderTest {
         when(rowService.isRework(row)).thenReturn(true);
         when(rowService.isDone(row)).thenReturn(true);
 
-        data = subject.getScopeByTypeData(PROJECT_KEY, Optional.empty(), ZONE_ID);
+        data = subject.getScopeByTypeData(PROJECT_KEY, ZONE_ID);
 
         Double expectedOthers = 0D;
         assertEffortEstimateByType(INTANGIBLE_DONE, expectedOthers);
@@ -109,7 +109,7 @@ public class FollowUpScopeByTypeDataProviderTest {
         when(rowService.isRework(row)).thenReturn(true);
         when(rowService.isBacklog(row)).thenReturn(true);
 
-        data = subject.getScopeByTypeData(PROJECT_KEY, Optional.empty(), ZONE_ID);
+        data = subject.getScopeByTypeData(PROJECT_KEY, ZONE_ID);
 
         Double expectedOthers = 0D;
         assertEffortEstimateByType(INTANGIBLE_DONE, expectedOthers);
@@ -127,7 +127,7 @@ public class FollowUpScopeByTypeDataProviderTest {
         when(rowService.isNewScope(row)).thenReturn(true);
         when(rowService.isDone(row)).thenReturn(true);
 
-        data = subject.getScopeByTypeData(PROJECT_KEY, Optional.empty(), ZONE_ID);
+        data = subject.getScopeByTypeData(PROJECT_KEY, ZONE_ID);
 
         Double expectedOthers = 0D;
         assertEffortEstimateByType(INTANGIBLE_DONE, expectedOthers);
@@ -145,7 +145,7 @@ public class FollowUpScopeByTypeDataProviderTest {
         when(rowService.isNewScope(row)).thenReturn(true);
         when(rowService.isBacklog(row)).thenReturn(true);
 
-        data = subject.getScopeByTypeData(PROJECT_KEY, Optional.empty(), ZONE_ID);
+        data = subject.getScopeByTypeData(PROJECT_KEY, ZONE_ID);
 
         Double expectedOthers = 0D;
         assertEffortEstimateByType(INTANGIBLE_DONE, expectedOthers);
@@ -163,7 +163,7 @@ public class FollowUpScopeByTypeDataProviderTest {
         when(rowService.isIntangible(row)).thenReturn(true);
         when(rowService.isDone(row)).thenReturn(true);
 
-        data = subject.getScopeByTypeData(PROJECT_KEY, Optional.empty(), ZONE_ID);
+        data = subject.getScopeByTypeData(PROJECT_KEY, ZONE_ID);
 
         Double expectedOthers = 0D;
         assertEffortEstimateByType(INTANGIBLE_DONE, EFFORT_ESTIMATE);
@@ -181,7 +181,7 @@ public class FollowUpScopeByTypeDataProviderTest {
         when(rowService.isIntangible(row)).thenReturn(true);
         when(rowService.isBacklog(row)).thenReturn(true);
 
-        data = subject.getScopeByTypeData(PROJECT_KEY, Optional.empty(), ZONE_ID);
+        data = subject.getScopeByTypeData(PROJECT_KEY, ZONE_ID);
 
         Double expectedOthers = 0D;
         assertEffortEstimateByType(INTANGIBLE_DONE, expectedOthers);
@@ -199,9 +199,9 @@ public class FollowUpScopeByTypeDataProviderTest {
         List<FromJiraDataRow> rows = asList(row, row, row);
         FollowUpSnapshot snapshot = getSnapshot(LocalDate.of(2018, 1, 1), rows);
         when(rowService.isBaselineBacklog(row)).thenReturn(true);
-        when(snapshotService.get(Optional.empty(), ZONE_ID, PROJECT_KEY)).thenReturn(snapshot);
+        when(snapshotService.getFromCurrentState(ZONE_ID, PROJECT_KEY)).thenReturn(snapshot);
 
-        data = subject.getScopeByTypeData(PROJECT_KEY, Optional.empty(), ZONE_ID);
+        data = subject.getScopeByTypeData(PROJECT_KEY, ZONE_ID);
 
         Double expectedOthers = 0D;
         Double expectedTwoRows = EFFORT_ESTIMATE * rows.size();
@@ -220,9 +220,9 @@ public class FollowUpScopeByTypeDataProviderTest {
         List<FromJiraDataRow> rows = asList(row, row, row);
         FollowUpSnapshot snapshot = getSnapshot(LocalDate.of(2018, 1, 1), rows);
         when(rowService.isBaselineBacklog(row)).thenReturn(true);
-        when(snapshotService.get(Optional.empty(), ZONE_ID, PROJECT_KEY)).thenReturn(snapshot);
+        when(snapshotService.getFromCurrentState(ZONE_ID, PROJECT_KEY)).thenReturn(snapshot);
 
-        data = subject.getScopeByTypeData(PROJECT_KEY, Optional.empty(), ZONE_ID);
+        data = subject.getScopeByTypeData(PROJECT_KEY, ZONE_ID);
 
         Double total = data.values.stream().mapToDouble(i -> i.effortEstimate).sum();
         assertEquals(total, data.total);
@@ -230,7 +230,7 @@ public class FollowUpScopeByTypeDataProviderTest {
 
     @Test
     public void ifHasValues_thenFillAllInformationFields() {
-        data = subject.getScopeByTypeData(PROJECT_KEY, Optional.empty(), ZONE_ID);
+        data = subject.getScopeByTypeData(PROJECT_KEY, ZONE_ID);
         assertEquals(PROJECT_KEY, data.projectKey);
         assertEquals(ZONE_ID.getId(), data.zoneId);
     }

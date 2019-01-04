@@ -1,12 +1,10 @@
 package objective.taskboard.followup;
 
-import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,10 +33,10 @@ public class FollowUpScopeByTypeDataProvider {
         this.rowService = rowService;
     }
 
-    public FollowUpScopeByTypeDataSet getScopeByTypeData(String projectKey, Optional<LocalDate> date, ZoneId zoneId) 
+    public FollowUpScopeByTypeDataSet getScopeByTypeData(String projectKey, ZoneId zoneId)
             throws ClusterNotConfiguredException {
 
-        final FollowUpSnapshot snapshot = snapshotService.get(date, zoneId, projectKey);
+        final FollowUpSnapshot snapshot = snapshotService.getFromCurrentState(zoneId, projectKey);
         final Map<String, Double> map = initTypes();
 
         if (!snapshot.hasClusterConfiguration())
@@ -94,13 +92,8 @@ public class FollowUpScopeByTypeDataProvider {
         Iterator<Entry<String, Double>> entries = map.entrySet().iterator();
         while (entries.hasNext()) {
             Entry<String, Double> entry = entries.next();
-            dataSet.values.add(new FollowUpScopeByTypeDataItem(entry.getKey(), entry.getValue(), getPercent(entry.getValue(), dataSet.total)));
+            dataSet.values.add(new FollowUpScopeByTypeDataItem(entry.getKey(), entry.getValue()));
         }
         return dataSet;
-    }
-
-    private Double getPercent(Double value, Double total) {
-        Double percent = (value / total) * 100D;
-        return percent.isNaN() ? 0D : percent;
     }
 }

@@ -23,9 +23,13 @@
     <template>
 
         <style>
+            #scope-by-type {
+                height: 100%;
+                width: 100%;
+            }
         </style>
 
-        <widget-wrap title="Scope By Type" is-ready="{{isReady}}" chart="{{chart}}" has-reset="true" error-message="{{errorMessage}}">
+        <widget-wrap title="Scope By Type" is-ready="{{isReady}}" highcharts-chart="{{chart}}" has-reset="true" error-message="{{errorMessage}}">
 
             <div id="scope-by-type" class="tb-chart"></div>
 
@@ -41,116 +45,80 @@
                 properties: {
                     selectedProjectKey: {
                         type: String,
-                        notify: true
-                    },
-                    selectedDate: {
-                        type: String,
                         notify: true,
-                        value: ''
-                    },
-                    isReady: {
-                        type: Boolean,
-                        notify: true,
-                        value: false
+                        observer: '_onProjectSelected'
                     },
                     chart: {
                         type: Object,
                         notify: true,
-                        value: function() { return {}; }
+                        value: null
                     },
                     errorMessage: {
                         type: String,
                         notify: true
                     },
+                    isReady: {
+                        type: Boolean,
+                        notify: true,
+                        value: false
+                    }
                 },
 
-                observers: [
-                    '_onProjectSelected(selectedProjectKey, selectedDate)',
-                ],
+                _onProjectSelected: function(newSelectedProjectKey, oldSelectedProjectKey) {
 
-                _onProjectSelected: function(selectedProjectKey, selectedDate) {
+                    if (newSelectedProjectKey === oldSelectedProjectKey)
+                        return;
 
-                    var self = this;
+                    this._reset();
 
-                    self._reset();
+                    let url = `/api/projects/${newSelectedProjectKey}/followup/scope-by-type?timezone=${taskboard.getTimeZoneIdFromBrowser()}`
 
-                    var url = "/api/projects/"+ selectedProjectKey +"/followup/scope-by-type?date="+ selectedDate +"&timezone="+ taskboard.getTimeZoneIdFromBrowser();
+                    this.xhr = $.getJSON(url);
+                    this.xhr.done((data) => {
 
-                    self.xhr = d3.json(url, function(error, data) {
+                        let orderedValues = data.values.sort( (firstElement, secondElement) => firstElement.name.localeCompare(secondElement.name) ).reverse();
 
-                        if (error) {
-                            self.set('errorMessage', 'Impossible to generate Scope By Type. '+ error.responseText);
-                            return;
-                        }
+                        this.chart = new PieChartBuilder('scope-by-type')
+                                            .withChartType('pie')
+                                            .withSeriesData([{ name: 'Hours', colorByPoint: true, data: orderedValues}])
+                                            .withColors(this._getColors())
+                                            .build();
 
-                        var chart = dc.tbPieChart("#scope-by-type");
-
-                        var ndx = crossfilter(data.values);
-                        var chartDimension = ndx.dimension(function (d) {
-                            return d.type;
-                        });
-                        var chartGroup = chartDimension.group().reduceSum(function(d) {
-                            return d.effortEstimate;
-                        });
-
-                        chart
-                            .dimension(chartDimension)
-                            .group(chartGroup)
-                            .label(function(d) {
-                                if (d.key === 'empty')
-                                    return 'Empty';
-
-                                var value = findInArray(data.values, function(v) {
-                                    return v.type === d.key;
-                                });
-                                return d.key + ' (' + dcUtils.percentFormat(value.percent) + '%)';
-                            })
-                            .title(function(d) {
-                                if (d.key === 'empty')
-                                    return 'Empty';
-
-                                return d.key + ': ' + d.value;
-                            })
-                            .colors(
-                                self._getChartColors()
-                            );
-
-                        dcUtils.defaultPieChartConfiguration(chart);
-
-                        chart.render();
-
-                        self.set('chart', chart);
-                        self.set('isReady', true);
+                        this.isReady = true;
                     });
 
+                    this.xhr.fail((error) => {
+                        this.errorMessage = `Impossible to generate Scope By Type. ${error.responseText}`;
+                    });
+                },
+
+                _getColors() {
+                    return [
+                        dcUtils.colors.REWORK_DONE,
+                        dcUtils.colors.REWORK_BACKLOG,
+                        dcUtils.colors.NEWSCOPE_DONE,
+                        dcUtils.colors.NEWSCOPE_BACKLOG,
+                        dcUtils.colors.INTANGIBLE_DONE,
+                        dcUtils.colors.INTANGIBLE_BACKLOG,
+                        dcUtils.colors.BASELINE_DONE,
+                        dcUtils.colors.BASELINE_BACKLOG
+                    ]
                 },
 
                 _reset: function() {
-                    this.set('errorMessage', null);
-                    this.set('isReady', false);
+                    this.errorMessage = null;
+                    this.isReady = false;
 
                     if (this.xhr) {
                         this.xhr.abort();
                         this.xhr = null;
                     }
-                    if (!_.isEmpty(this.chart)) {
-                        dc.deregisterChart(this.chart);
-                        this.set('chart', {});
+
+                    if (this.chart) {
+                        this.chart.destroy();
+                        this.chart = null;
                     }
                 },
-
-                _getChartColors: function() {
-                    var baselineBacklog = dcUtils.colors.BASELINE_BACKLOG,
-                        baselineDone = dcUtils.colors.BASELINE_DONE,
-                        intangibleBacklog = dcUtils.colors.INTANGIBLE_BACKLOG,
-                        intangibleDone = dcUtils.colors.INTANGIBLE_DONE,
-                        newScopeBacklog = dcUtils.colors.NEWSCOPE_BACKLOG,
-                        newScopeDone = dcUtils.colors.NEWSCOPE_DONE,
-                        reworkBacklog = dcUtils.colors.REWORK_BACKLOG,
-                        reworkDone = dcUtils.colors.REWORK_DONE;
-                    return dcUtils.getChartColorsFromArray([baselineBacklog, baselineDone, intangibleBacklog, intangibleDone, newScopeBacklog, newScopeDone, reworkBacklog, reworkDone]);
-                }
-
             });
         })();
     </script>

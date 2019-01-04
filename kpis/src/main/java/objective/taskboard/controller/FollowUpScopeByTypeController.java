@@ -3,10 +3,8 @@ package objective.taskboard.controller;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
-import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.zone.ZoneRulesException;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -40,8 +38,7 @@ public class FollowUpScopeByTypeController {
 
     @RequestMapping(value = "/api/projects/{projectKey}/followup/scope-by-type", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> scopeByTypeData(
-            @PathVariable("projectKey") String projectKey, 
-            @RequestParam("date") Optional<LocalDate> date, 
+            @PathVariable("projectKey") String projectKey,
             @RequestParam("timezone") String timezone) {
 
         if (!dashboardTacticalPermission.isAuthorizedFor(projectKey))
@@ -58,7 +55,7 @@ public class FollowUpScopeByTypeController {
 
         ZoneId zoneId = isEmpty(timezone) ? ZoneId.systemDefault() : ZoneId.of(timezone);
         try {
-            FollowUpScopeByTypeDataSet scopeByTypeData = scopeByTypeDataProvider.getScopeByTypeData(projectKey, date, zoneId);
+            FollowUpScopeByTypeDataSet scopeByTypeData = scopeByTypeDataProvider.getScopeByTypeData(projectKey, zoneId);
             return ResponseEntity.ok(scopeByTypeData);
         }catch(ClusterNotConfiguredException e) {//NOSONAR
             return new ResponseEntity<>("No cluster configuration found for project " + projectKey + ".", INTERNAL_SERVER_ERROR);

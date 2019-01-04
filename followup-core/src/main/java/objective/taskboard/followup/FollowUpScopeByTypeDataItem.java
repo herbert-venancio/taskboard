@@ -1,13 +1,15 @@
 package objective.taskboard.followup;
 
-public class FollowUpScopeByTypeDataItem {
-    public String type;
-    public Double effortEstimate;
-    public Double percent;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-    public FollowUpScopeByTypeDataItem(String type, Double effortEstimate, Double percent) {
+public class FollowUpScopeByTypeDataItem {
+    @JsonProperty("name")
+    public String type;
+    @JsonProperty("y")
+    public Double effortEstimate;
+
+    public FollowUpScopeByTypeDataItem(String type, Double effortEstimate) {
         this.type = type;
         this.effortEstimate = effortEstimate;
-        this.percent = percent;
     }
 }
