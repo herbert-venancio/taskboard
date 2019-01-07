@@ -148,6 +148,11 @@ export class TbClusterAlgorithmComponent implements OnInit {
         return value * 8;
     }
 
+    validateDateFields(){
+        var control = this.tbClusterAlgorithm.control.get("endDate");
+        control.updateValueAndValidity();
+    }
+
     buildDateRange(): DateRange {
         const startDate = this.startDate ? this.startDate.format('YYYY-MM-DD') : null;
         const endDate = this.endDate ? this.endDate.format('YYYY-MM-DD') : null;
