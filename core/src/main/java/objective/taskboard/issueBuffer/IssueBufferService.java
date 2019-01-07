@@ -383,6 +383,20 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
         return issue;
     }
 
+    public Issue saveClassOfService(String issueKey, String classOfService) {
+        jiraBean.saveClassOfService(issueKey, classOfService);
+
+        Issue issue = getIssueCopyByKeyOrCry(issueKey);
+
+        if (!issue.getClassOfServiceValue().equals(classOfService)) {
+            issue.setClassOfServiceValue(classOfService);
+            issue.setRemoteIssueUpdatedDate(new Date());
+            putIssue(issue);
+        }
+
+        return issue;
+    }
+
     private Issue syncIssueTeams(String issueKey, Issue issue) {
         jiraBean.setTeams(issue.getIssueKey(),issue.getRawAssignedTeamsIds());
         return updateIssueBuffer(issueKey);

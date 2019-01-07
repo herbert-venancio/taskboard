@@ -243,6 +243,16 @@ class IssueDetails extends AbstractUiFragment {
         return this;
     }
 
+    public IssueDetails setClassOfService(String classOfService) {
+        assertIsOpened();
+        String pickerSelector = "#classOfServiceSelector";
+
+        WebElement classOfServiceTag = issueDetailRoot.findElement(By.id("class-of-service-selector"));
+        waitForClick(classOfServiceTag);
+
+        return selectStringInPicker(classOfService, pickerSelector);
+    }
+
     public IssueDetails assertClassOfService(String classOfServiceExpected) {
         assertIsOpened();
         WebElement classOfServiceValue = issueDetailRoot.findElement(By.id("class-of-service-value"));
@@ -311,6 +321,10 @@ class IssueDetails extends AbstractUiFragment {
 
     private By replaceButtonSelector(String team) {
         return cssSelector(".assignee-button[title='Replace "+ team +" by another team']");
+    }
+    
+    private By replaceClassOfServiceSelector(String classOfService) {
+        return cssSelector(".assignee-button[title='Replace " + classOfService + " by another class of service']");
     }
 
 }

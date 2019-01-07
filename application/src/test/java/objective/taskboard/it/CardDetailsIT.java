@@ -23,4 +23,22 @@ public class CardDetailsIT extends AuthenticatedIntegrationTest {
 
     }
 
+    @Test
+    public void whenClassOfServiceIsReplaced_ShouldUpdateIssueImmediatlyWithNewClassOfService() {
+        MainPage mainPage = MainPage.produce(webDriver);
+
+        mainPage.errorToast().close();
+
+        mainPage.issue("TASKB-235")
+            .click()
+            .issueDetails()
+            .assertClassOfService("Standard")
+            .setClassOfService("Expedite");
+
+        mainPage.reload();
+        
+        mainPage.issue("TASKB-235")
+            .issueDetails()
+            .assertClassOfService("Expedite");
+    }
 }

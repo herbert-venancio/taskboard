@@ -163,7 +163,12 @@ public class IssueController {
     public CardDto saveDescription(@PathVariable("issue") String issueKey, @RequestBody String description) {
         return toCardDto(issueBufferService.saveDescription(issueKey, description));
     }
-    
+
+    @RequestMapping(path ="saveClassOfService/{issue}", method = RequestMethod.POST)
+    public CardDto saveClassOfService(@PathVariable("issue") String issueKey, @RequestBody String classOfService) {
+        return toCardDto(issueBufferService.saveClassOfService(issueKey, classOfService));
+    }
+
     @RequestMapping(path = "transition", method = RequestMethod.POST)
     public CardDto transition(@RequestBody TransitionRequestDTO tr) throws JSONException {
         Map<String, Object> fields = tr.fields == null ? Collections.emptyMap() : tr.fields;

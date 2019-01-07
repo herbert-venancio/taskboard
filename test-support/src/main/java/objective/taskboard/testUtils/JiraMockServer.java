@@ -464,7 +464,7 @@ public class JiraMockServer {
 
     private static void setClassOfService(JSONObject fields, String aKey, JSONObject newClassOfService) throws JSONException {
         JSONObject makeClassOfService = createEmptyClassOfService();
-        makeClassOfService.put("id", newClassOfService.get("id"));
+        makeClassOfService.put("id", "");
         makeClassOfService.put("value", newClassOfService.get("value"));
         fields.put(aKey, newClassOfService);
         fields.put("updated", nowIso8601());

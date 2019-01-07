@@ -54,6 +54,10 @@ public class CustomField implements Serializable {
         return this.optionId;
     }
 
+    public void setValue(final String value) {
+        this.value = value;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
