@@ -246,6 +246,29 @@ class ChartBuilderBase {
     }
 }
 
+class PieChartBuilder extends ChartBuilderBase {
+    constructor (divID) {
+        super(divID)
+        this.options.chart.plotBorderWidth = null
+        this.options.chart.plotShadow = false
+        this.options.tooltip.pointFormat = '{series.name}: <b>{point.percentage:.2f}%</b>'
+        this.options.tooltip.reversed = false
+        this.options.plotOptions.pie = { 
+            allowPointSelect: true, 
+            cursor: 'pointer', 
+            dataLabels: { 
+                enabled: true, 
+                format: '<b>{point.name}</b>: {point.percentage:.1f} %', 
+                style: { 
+                    color: '#8E8E8E',
+                    textOutline: "0px"
+                }, 
+                showInLegend: true 
+            }
+        }
+    }
+}
+
 class WeeklyChartBuilder extends ChartBuilderBase {
     constructor (divID) {
         super(divID);
