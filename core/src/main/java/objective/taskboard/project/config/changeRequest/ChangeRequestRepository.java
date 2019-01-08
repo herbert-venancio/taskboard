@@ -9,7 +9,7 @@ import objective.taskboard.domain.ProjectFilterConfiguration;
 
 interface ChangeRequestRepository extends JpaRepository<ChangeRequest, Long> {
 
-    List<ChangeRequest> findByProjectOrderByDateDesc(ProjectFilterConfiguration project);
+    List<ChangeRequest> findByProjectOrderByRequestDateDesc(ProjectFilterConfiguration project);
     Optional<ChangeRequest> findBaselineIsTrueByProject(ProjectFilterConfiguration project);
     
 }

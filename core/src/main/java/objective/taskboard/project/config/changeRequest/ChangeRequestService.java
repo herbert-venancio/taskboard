@@ -35,7 +35,7 @@ public class ChangeRequestService {
         if (!projectAdministrationPermission.isAuthorizedFor(project.getProjectKey()))
             throw new AccessDeniedException("The current user doesn't have administrative permissions for this project."); 
         
-        return changeRequestRepository.findByProjectOrderByDateDesc(project);
+        return changeRequestRepository.findByProjectOrderByRequestDateDesc(project);
     }
 
     @Transactional
@@ -44,7 +44,7 @@ public class ChangeRequestService {
         if (!projectAdministrationPermission.isAuthorizedFor(project.getProjectKey()))
             throw new AccessDeniedException("The current user doesn't have administrative permissions for this project.");
         
-        List<ChangeRequest> existingCrs = changeRequestRepository.findByProjectOrderByDateDesc(project);
+        List<ChangeRequest> existingCrs = changeRequestRepository.findByProjectOrderByRequestDateDesc(project);
 
         addNewItems(requestCrs, project);
         updateExistingItems(requestCrs, existingCrs);
@@ -65,7 +65,7 @@ public class ChangeRequestService {
             Optional<ChangeRequest> existentBaseline = changeRequestRepository.findBaselineIsTrueByProject(project);
 
             if (existentBaseline.isPresent()) {
-                existentBaseline.get().setDate(startDate);
+                existentBaseline.get().setRequestDate(startDate);
             } else {
                 ChangeRequest baseline = new ChangeRequest(project, "Baseline", startDate, 0, true);
                 changeRequestRepository.save(baseline);
@@ -75,7 +75,7 @@ public class ChangeRequestService {
 
     private void addNewItems(List<ChangeRequest> requestCrs, ProjectFilterConfiguration project) {
         requestCrs.stream().filter(cr -> cr.getId() == null).map(
-                cr -> new ChangeRequest(project, cr.getName(), cr.getDate(), cr.getBudgetIncrease(), cr.isBaseline()))
+                cr -> new ChangeRequest(project, cr.getName(), cr.getRequestDate(), cr.getBudgetIncrease(), cr.isBaseline()))
                 .forEach(i -> changeRequestRepository.save(i));
     }
 
@@ -88,7 +88,7 @@ public class ChangeRequestService {
                     ChangeRequest existingCr = existingCrsById.get(cr.getId());
 
                     existingCr.setName(cr.getName());
-                    existingCr.setDate(cr.getDate());
+                    existingCr.setRequestDate(cr.getRequestDate());
                     existingCr.setBudgetIncrease(cr.getBudgetIncrease());
                 });
     }

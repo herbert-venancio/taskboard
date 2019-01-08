@@ -1,0 +1,1 @@
+alter table CHANGE_REQUEST rename column "DATE" to "REQUEST_DATE"

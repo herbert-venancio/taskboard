@@ -79,7 +79,7 @@ class ChangeRequestController {
             ChangeRequestDto changeRequestDto = new ChangeRequestDto();
             changeRequestDto.id = changeRequest.getId();
             changeRequestDto.name = changeRequest.getName();
-            changeRequestDto.date = changeRequest.getDate();
+            changeRequestDto.date = changeRequest.getRequestDate();
             changeRequestDto.budgetIncrease = changeRequest.getBudgetIncrease();
             changeRequestDto.isBaseline = changeRequest.isBaseline();
             changeRequestDto.project = changeRequest.getProject().getProjectKey();
@@ -91,7 +91,7 @@ class ChangeRequestController {
             ChangeRequest changeRequest = new ChangeRequest();
             changeRequest.setId(changeRequestDto.id);
             changeRequest.setName(changeRequestDto.name);
-            changeRequest.setDate(changeRequestDto.date);
+            changeRequest.setRequestDate(changeRequestDto.date);
             changeRequest.setBudgetIncrease(changeRequestDto.budgetIncrease);
             changeRequest.setIsBaseline(changeRequestDto.isBaseline);
 

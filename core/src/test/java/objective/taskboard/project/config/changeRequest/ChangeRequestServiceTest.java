@@ -151,7 +151,7 @@ public class ChangeRequestServiceTest {
         ChangeRequest anyCr = new ChangeRequest();
         anyCr.setId(1L);
         anyCr.setName("Change Request");
-        anyCr.setDate(LocalDate.now());
+        anyCr.setRequestDate(LocalDate.now());
 
         return Arrays.asList(anyCr);
     }
@@ -170,7 +170,7 @@ public class ChangeRequestServiceTest {
     
     private void assertChangeRequestsFromRepo(String... expectedChangeRequests) {    
         when(changeRequestRepository.findBaselineIsTrueByProject(any(ProjectFilterConfiguration.class))).thenCallRealMethod();
-        assertChangeRequests(changeRequestRepository.findByProjectOrderByDateDesc(project), expectedChangeRequests);
+        assertChangeRequests(changeRequestRepository.findByProjectOrderByRequestDateDesc(project), expectedChangeRequests);
     }
 
     private ChangeRequest changeRequest(String name, String date, int budgetIncrease, boolean isBaseline) {
@@ -181,7 +181,7 @@ public class ChangeRequestServiceTest {
         return String.format("%s | %s | %s | %s | %s", 
                 i.getProject().getProjectKey(),
                 i.getName(),
-                i.getDate(),
+                i.getRequestDate(),
                 i.getBudgetIncrease(), 
                 i.isBaseline());
     }
@@ -193,7 +193,7 @@ public class ChangeRequestServiceTest {
         public ChangeRequestServiceBuilder(){
             when(changeRequestRepository.save(any(ChangeRequest.class))).thenCallRealMethod();
             when(changeRequestRepository.findBaselineIsTrueByProject(any(ProjectFilterConfiguration.class))).thenCallRealMethod();
-            when(changeRequestRepository.findByProjectOrderByDateDesc(any(ProjectFilterConfiguration.class))).thenCallRealMethod();
+            when(changeRequestRepository.findByProjectOrderByRequestDateDesc(any(ProjectFilterConfiguration.class))).thenCallRealMethod();
             doCallRealMethod().when(changeRequestRepository).delete(any(ChangeRequest.class));         
         
         }
