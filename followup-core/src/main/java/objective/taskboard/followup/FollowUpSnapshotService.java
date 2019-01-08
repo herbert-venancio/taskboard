@@ -11,6 +11,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import objective.taskboard.domain.FollowupDailySynthesis;
@@ -35,7 +36,8 @@ public class FollowUpSnapshotService {
     private final FollowUpDataGenerator dataGenerator;
     private final FollowupClusterProvider clusterProvider;
     private final ReleaseHistoryProvider releaseHistoryProvider;
-    
+    private final ApplicationEventPublisher eventPublisher;
+
     @Autowired
     public FollowUpSnapshotService(
             Clock clock,
@@ -44,7 +46,8 @@ public class FollowUpSnapshotService {
             FollowupDailySynthesisRepository dailySynthesisRepository, 
             FollowUpDataGenerator dataGenerator,
             FollowupClusterProvider clusterProvider,
-            ReleaseHistoryProvider releaseHistoryProvider) {
+            ReleaseHistoryProvider releaseHistoryProvider,
+            ApplicationEventPublisher eventPublisher) {
         this.clock = clock;
         this.historyRepository = historyRepository;
         this.projectService = projectService;
@@ -52,6 +55,7 @@ public class FollowUpSnapshotService {
         this.dataGenerator = dataGenerator;
         this.clusterProvider = clusterProvider;
         this.releaseHistoryProvider = releaseHistoryProvider;
+        this.eventPublisher = eventPublisher;
     }
 
     public FollowUpSnapshot getFromCurrentState(ZoneId timezone, String projectKey) {
@@ -106,7 +110,7 @@ public class FollowUpSnapshotService {
 
         return new FollowUpSnapshot(timeline, data, cluster, valuesProvider);
     }
-  
+
     public void storeSnapshots(ZoneId timezone) {
         log.info("Snapshots storage started...");
         for (ProjectFilterConfiguration pf : projectService.getTaskboardProjects()) {
@@ -117,6 +121,8 @@ public class FollowUpSnapshotService {
             log.info("Snapshot storage of project " + projectKey + " completed.");
         }
         log.info("Snapshots storage completed.");
+        log.info("Publishing event for clearing the followup caches");
+        eventPublisher.publishEvent(new SnapshotGeneratedEvent(this));
     }
 
     private void storeSnapshot(ZoneId timezone, String projectKey) {
@@ -161,7 +167,7 @@ public class FollowUpSnapshotService {
                 effortHistoryRow.sumEffortDone, 
                 effortHistoryRow.sumEffortBacklog));
     }
-    
+
     private interface FollowupDataSupplier {
         FollowUpData get(FollowupCluster cluster);
     }

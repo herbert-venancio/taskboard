@@ -14,6 +14,7 @@ import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.context.ApplicationEventPublisher;
 
 import objective.taskboard.domain.FollowupDailySynthesis;
 import objective.taskboard.domain.ProjectFilterConfiguration;
@@ -31,6 +32,7 @@ public class FollowUpSnapshotServiceTest {
     private FollowUpDataGenerator dataGenerator = mock(FollowUpDataGenerator.class);
     private FollowupClusterProvider clusterProvider = mock(FollowupClusterProvider.class);
     private ReleaseHistoryProvider releaseHistoryProvider = mock(ReleaseHistoryProvider.class);
+    private ApplicationEventPublisher eventPublisher = mock(ApplicationEventPublisher.class);
     
     private ZoneId timezone = ZoneId.of("UTC");
     private ProjectFilterConfiguration project1 = mock(ProjectFilterConfiguration.class);
@@ -43,7 +45,8 @@ public class FollowUpSnapshotServiceTest {
             dailySynthesisRepository, 
             dataGenerator, 
             clusterProvider, 
-            releaseHistoryProvider);
+            releaseHistoryProvider,
+            eventPublisher);
 
     @Before
     public void setup() {
