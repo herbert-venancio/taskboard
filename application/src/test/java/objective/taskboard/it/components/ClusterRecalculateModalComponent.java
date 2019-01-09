@@ -36,7 +36,7 @@ public class ClusterRecalculateModalComponent extends AbstractComponent {
     }
 
     public ClusterRecalculateModalComponent assertStartDateHasError() {
-        assertThat(clusterAlgorithmForm.endDateErrorMessages.hasErrorMessages()).isTrue();
+        assertThat(clusterAlgorithmForm.startDateErrorMessages.hasErrorMessages()).isTrue();
         return this;
     }
 

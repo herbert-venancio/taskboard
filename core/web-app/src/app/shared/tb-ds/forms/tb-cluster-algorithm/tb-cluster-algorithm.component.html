@@ -7,6 +7,7 @@
             [placeholder]="dateDisplayFormat"
             objTextField
             tbDateInput
+            (change)="validateDateFields()"
             [(ngModel)]="startDate"
             title="Calculate clusters selecting issues that were completed after this date."
             />

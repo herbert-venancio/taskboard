@@ -9,12 +9,11 @@ import * as moment from 'moment';
 export class SameOrAfterDirective implements Validator {
 
     @Input('tbSameOrAfter')
-    otherValue: moment.Moment;
+    otherValue: any;
 
     validate(control: AbstractControl): ValidationErrors | null {
         const value = control.value as moment.Moment;
-        const valid = value == null || value.isSameOrAfter(this.otherValue);
-
+        const valid = value == null || this.otherValue == undefined || value.isSameOrAfter(this.otherValue);
         return valid ? null : {'sameOrAfter': true};
     }
 }
