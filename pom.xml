@@ -1,6 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -12,7 +10,7 @@
 
 	<groupId>br.com.objective</groupId>
 	<artifactId>taskboard-parent</artifactId>
-	<version>0.0.75-SNAPSHOT</version>
+	<version>0.0.75</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -69,7 +67,7 @@
 		<url>https://github.com/objective-solutions/taskboard</url>
 		<connection>scm:git:git@github.com/objective-solutions/taskboard.git</connection>
 		<developerConnection>scm:git:git@github.com:objective-solutions/taskboard.git</developerConnection>
-		<tag>HEAD</tag>
+		<tag>taskboard-parent-0.0.75</tag>
 	</scm>
 	<build>
 		<resources>
@@ -152,8 +150,7 @@
 				</executions>
 				<configuration>
 					<fileSets>
-						<fileSet
-							implementation="org.apache.maven.shared.model.fileset.FileSet">
+						<fileSet implementation="org.apache.maven.shared.model.fileset.FileSet">
 							<directory>${project.build.directory}</directory>
 							<includes>
 								<include>*.exec</include>
