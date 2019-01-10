@@ -1,26 +1,5 @@
-/*-
- * [LICENSE]
- * Taskboard
- * - - -
- * Copyright (C) 2015 - 2016 Objective Solutions
- * - - -
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * [/LICENSE]
- */
 package objective.taskboard.jira;
 
-import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byId;
 import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byName;
 import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byNames;
 import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byValue;
@@ -47,7 +26,6 @@ import com.google.common.collect.ImmutableList;
 import objective.taskboard.auth.CredentialsHolder;
 import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.data.User;
-import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.client.JiraResolutionDto;
 import objective.taskboard.jira.client.JiraServerInfoDto;
 import objective.taskboard.jira.data.JiraIssue;
@@ -178,28 +156,6 @@ public class JiraService {
         log.debug("⬣⬣⬣⬣⬣  getTransitions (master)");
         Iterable<Transition> response = jiraEndpointAsMaster.request(Transitions.Service.class).get(issueKey).transitions;
         return ImmutableList.copyOf(response);
-    }
-
-    public Optional<JiraIssueDto> getIssueByKey(String key) {
-        log.debug("⬣⬣⬣⬣⬣  getIssueByKey");
-        try {
-            return Optional.of(jiraEndpointAsUser.request(JiraIssueDto.Service.class).get(key));
-        }catch(retrofit.RetrofitError e) {
-            if (e.getResponse().getStatus() == 404)
-                return Optional.empty();
-            throw e;
-        }
-    }
-
-    public JiraIssueDto getIssueByKeyAsMaster(String key) {
-        log.debug("⬣⬣⬣⬣⬣  getIssueByKeyAsMaster");
-        try {
-            return jiraEndpointAsMaster.request(JiraIssueDto.Service.class).get(key);
-        } catch(retrofit.RetrofitError e) {
-            if (e.getResponse().getStatus() == 404)
-                return null;
-            throw e;
-        }
     }
 
     public String createIssueAsMaster(JiraIssue.Input issueInput) {

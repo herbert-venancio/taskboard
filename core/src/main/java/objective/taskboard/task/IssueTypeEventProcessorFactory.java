@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import objective.taskboard.domain.Filter;
 import objective.taskboard.issueBuffer.IssueBufferService;
-import objective.taskboard.jira.JiraService;
+import objective.taskboard.jira.JiraIssueService;
 import objective.taskboard.jira.WebhookSubtaskCreatorService;
 import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.data.WebHookBody;
@@ -22,7 +22,7 @@ public class IssueTypeEventProcessorFactory implements JiraEventProcessorFactory
     private FilterCachedRepository filterCachedRepository;
 
     @Autowired
-    private JiraService jiraService;
+    private JiraIssueService jiraIssueService;
 
     @Autowired
     private IssueBufferService issueBufferService;
@@ -84,7 +84,7 @@ public class IssueTypeEventProcessorFactory implements JiraEventProcessorFactory
         private Optional<JiraIssueDto> fetchIssue() {
             if (webHook == WebhookEvent.ISSUE_DELETED)
                 return Optional.empty();
-            return Optional.ofNullable(jiraService.getIssueByKeyAsMaster(issueKey));
+            return jiraIssueService.searchIssueByKey(issueKey);
         }
     }
 }

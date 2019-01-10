@@ -199,31 +199,6 @@ public class JiraMockServer {
             return makeFakeRequest(searchData);
         });
 
-        get("/rest/api/latest/issue/:issueKey",  (req, res) ->{
-            String issueKey = req.params(":issueKey");
-            if (issueHasBeenDeleted(issueKey))
-                return "";
-
-            JSONObject issueDataForKey = getIssueDataForKey(issueKey);
-            if (issueDataForKey != null) {
-                JSONObject jsonObject = issueDataForKey.getJSONArray("issues").getJSONObject(0);
-                jsonObject = applyIssueEdits(clone(jsonObject));
-                jsonObject.put("names", issueDataForKey.getJSONObject("names"));
-                jsonObject.put("schema", issueDataForKey.getJSONObject("schema"));
-                return jsonObject.toString();
-            }
-
-            String loadMockData = loadMockData(issueKey+".json");
-
-            if (loadMockData == null)
-                return null;
-
-            JSONObject issueData = new JSONObject(loadMockData);
-            String self = issueData.getString("self").replace("54.68.128.117:8100", "localhost:4567");
-            issueData.put("self", self);
-            return issueData.toString();
-        });
-
         put("/rest/api/latest/issue/:issueKey",  (req, res) ->{
             JSONObject reqData = new JSONObject(req.body());
             String issueKey = req.params(":issueKey");
