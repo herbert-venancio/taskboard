@@ -23,4 +23,13 @@ public class ButtonComponent extends AbstractComponent {
         waitAssertEquals(disabled, () -> isDisabled());
     }
 
+    public void assertIsEnabled() {
+        waitElementIsEnabled(component());
+    }
+
+    public void assertIsDisabled() {
+        waitElementIsDisabled(component());
+    }
+
+    
 }
