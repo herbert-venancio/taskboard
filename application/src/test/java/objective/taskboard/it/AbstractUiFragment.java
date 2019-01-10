@@ -10,7 +10,6 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentI
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBe;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
@@ -23,6 +22,7 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.interactions.Actions;
@@ -197,7 +197,16 @@ public abstract class AbstractUiFragment {
     protected void waitForClick(WebElement element) {
         waitVisibilityOfElement(element);
         waitUntil(elementToBeClickable(element));
-        element.click();
+        waitUntil(w -> {
+            try {
+                element.click();
+                return true;
+            } catch(WebDriverException ex) {
+                if (ex.getMessage().matches("(?sm).*Element .* is not clickable at point .* because another element .* obscures it.*"))
+                    return false;
+                throw ex;
+            }
+        });
     }
 
     protected void waitForClickHoldingAKey(WebElement element, Keys keyHolding) {
