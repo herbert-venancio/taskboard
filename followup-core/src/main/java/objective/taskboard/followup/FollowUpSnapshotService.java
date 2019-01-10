@@ -73,8 +73,8 @@ public class FollowUpSnapshotService {
     }
     
     public FollowUpSnapshot get(Optional<LocalDate> date, ZoneId timezone, String projectKey) {
-        return date.isPresent() 
-                ? getFromHistory(date.get(), timezone, projectKey) 
+        return date.isPresent()
+                ? getFromHistory(date.get(), timezone, projectKey)
                 : getFromCurrentState(timezone, projectKey);
     }
 
