@@ -169,6 +169,11 @@ public class IssueController {
         return toCardDto(issueBufferService.saveClassOfService(issueKey, classOfService));
     }
 
+    @RequestMapping(path = "saveSummary/{issue}", method = RequestMethod.POST)
+    public CardDto saveSummary(@PathVariable("issue") String issueKey, @RequestBody String summary) {
+        return toCardDto(issueBufferService.saveSummary(issueKey, summary));
+    }
+    
     @RequestMapping(path = "transition", method = RequestMethod.POST)
     public CardDto transition(@RequestBody TransitionRequestDTO tr) throws JSONException {
         Map<String, Object> fields = tr.fields == null ? Collections.emptyMap() : tr.fields;

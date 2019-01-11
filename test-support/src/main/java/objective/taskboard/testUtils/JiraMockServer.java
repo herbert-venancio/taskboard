@@ -219,6 +219,9 @@ public class JiraMockServer {
                     case "assignee":
                         setAssignee(fields, reqFields.getJSONObject(aKey));
                         break;
+                    case "summary":
+                        setSummary(fields, reqFields);
+                        break;
                     case "description":
                         setDescription(fields, reqFields);
                         break;
@@ -494,6 +497,10 @@ public class JiraMockServer {
 
     private static void setDescription(JSONObject fields, JSONObject reqFields) throws JSONException {
         fields.put("description", reqFields.getString("description"));
+    }
+
+    private static void setSummary(JSONObject fields, JSONObject reqFields) throws JSONException {
+        fields.put("summary", reqFields.getString("summary"));
     }
 
     private static String nowIso8601() {

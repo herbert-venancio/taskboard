@@ -196,6 +196,15 @@ public class JiraService {
         if (HttpStatus.valueOf(result.getStatus()) != HttpStatus.NO_CONTENT)
             throw new FrontEndMessageException("Unexpected return code during saveClassOfService: " + result.getStatus());
     }
+    
+    public void saveSummary(String issueKey, String summary) {
+        Response result = updateIssue(issueKey, JiraIssue.Input.builder(properties)
+                .summary(summary)
+                .build());
+
+        if (HttpStatus.valueOf(result.getStatus()) != HttpStatus.NO_CONTENT)
+            throw new FrontEndMessageException("Unexpected return code during saveSummary: " + result.getStatus());
+    }
 
     public void setTeams(String issueKey, List<Long> teamsIds) {
         log.debug("⬣⬣⬣⬣⬣  setTeams");
