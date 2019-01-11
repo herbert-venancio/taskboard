@@ -89,12 +89,77 @@
                 display: flex;
             }
 
-            .card-header-title span {
+            .card-header-title .card-name-wrapper {
                 font-size: 16px;
                 line-height: 22px;
-                display: block;
+                width:calc(100% - 40px);
+                display: flex;
+                align-items:center;
                 font-family: 'ptsans-caption-bold', Verdana, Arial, Helvetica, sans-serif;
                 color: #F5F5F5;
+            }
+
+            .card-summary-wrapper {
+                cursor:pointer;
+                display:flex;
+                padding-left:5px;
+                margin-left:5px;
+                border:1px solid transparent;
+                line-height:23px;
+                height:24px;
+                border-radius:3px;
+            }
+
+            .card-summary-wrapper.edit-summary-wrapper {
+                flex-grow:1;
+                justify-content:space-between;
+            }
+
+            .card-summary-wrapper .card--icons-wrapper paper-button {
+                display:none;
+            }
+
+            .card--icons-wrapper paper-button {
+                text-align:center;
+                margin:0;
+                min-width:24px;
+                height:23px;
+            }
+
+            .card-summary-wrapper.edit-summary-wrapper .card--icons-wrapper paper-button {
+                min-width:18px;
+                color:#8E8E8E;
+                padding:0;
+            }
+
+            .card--icons-wrapper iron-icon {
+                width:16px;
+                height:16px;
+            }
+
+            .card--icons-wrapper paper-button.card-name__edit-button {
+                margin-left:5px;
+                background-color:#8E8E8E;
+            }
+
+            .card-summary-wrapper:hover, 
+            .card-summary-wrapper.edit-summary-wrapper {
+                border-color:#999;
+            }
+
+            .card-summary-wrapper.view-summary-wrapper:hover .card--icons-wrapper .card-name__edit-button,
+            .card-summary-wrapper.edit-summary-wrapper .card--icons-wrapper paper-button {
+                display:inline-flex;
+            }
+
+            .card-summary-wrapper.edit-summary-wrapper .card-summary-field {
+                font-family:'ptsans-regular', Verdana, Arial, Helvetica, sans-serif;
+                font-size:16px;
+                width: calc(100% - 45px);
+                border: 0;
+                background-color: transparent;
+                color: #fff;
+                outline: none;
             }
 
             .sub-content {
@@ -745,7 +810,7 @@
             }
             .button-open-jira {
                 min-width: auto;
-                padding: 0px 0px 0px 5px;
+                padding: 0px 5px 0px 0px;
                 margin: 0px 0px 0px 0px;
             }
             .button-open-jira iron-icon {
@@ -815,10 +880,37 @@
                             </template>
                         </div>
                         <div class="card-header-title">
-                            <span id="card-name">{{item.issueKey}} {{item.summary}}</span>
                             <paper-button class="button-open-jira" on-tap="openJira" title="Open {{item.issueKey}} on Jira">
                                 <iron-icon icon="open-in-new"></iron-icon>
                             </paper-button>
+                            <div class="card-name-wrapper" title="{{item.issueKey}} {{item.summary}}">
+                                <div>{{item.issueKey}}</div>
+
+                                <template is="dom-if" if="{{!editSummaryIsOpen}}">
+                                    <div class="card-summary-wrapper view-summary-wrapper" on-tap=_toggleSummaryEditMode>
+                                        <div class="card-summary-value">{{item.summary}}</div>
+                                        <div class="card--icons-wrapper">
+                                            <paper-button class="card-name__edit-button">
+                                                <iron-icon icon="create"></iron-icon>
+                                            </paper-button>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <template is="dom-if" if="{{editSummaryIsOpen}}">
+                                    <div class="card-summary-wrapper edit-summary-wrapper">
+                                        <input class="card-summary-field" type="text" value="{{newSummaryValue::input}}" />
+                                        <div class="card--icons-wrapper">
+                                            <paper-button class="card-name__cancel-button" on-tap="_toggleSummaryEditMode">
+                                                <iron-icon icon="close"></iron-icon>
+                                            </paper-button>
+                                            <paper-button class="card-name__done-button" on-tap="_updateIssueSummary">
+                                                <iron-icon icon="done"></iron-icon>
+                                            </paper-button>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
                         </div>
                     </div>
                     <div class="card-header-buttons">
@@ -1182,6 +1274,11 @@
                         notify: true
                     },
 
+                    newSummaryValue: {
+                        type: String,
+                        value: ''
+                    },
+
                     timetracking: {
                         type: Object,
                         notify: true
@@ -1319,6 +1416,11 @@
                     classOfServicePickerIsVisible: {
                         type: Boolean,
                         value: false
+                    },
+
+                    editSummaryIsOpen: {
+                        type: Boolean,
+                        value: false
                     }
                 },
 
@@ -1330,7 +1432,7 @@
 
                 attached: function() {
                     var self = this;
-
+                    
                     self.isObserving = false;
                     new MutationObserver(function(mutations) {
                         if (!self.isObserving)
@@ -2023,6 +2125,9 @@
                     this.isUpdating = false;
                     this.errorMessage = null;
                     this.set('_modalStatus', this._modalStatuses.CLOSED);
+
+                    this.editSummaryIsOpen = false;
+                    this.descriptionIsEditable = false;
                 },
 
                 getIssueTypeName: function(issueTypeId) {
@@ -2167,6 +2272,33 @@
 
                 _shouldShowCycleTime: function(cycleTime) {
                     return cycleTime !== null;
+                },
+
+                _toggleSummaryEditMode: function() {
+                    var summaryField = '',
+                        self = this;
+
+                    this.newSummaryValue = this.item.summary;
+
+                    this.editSummaryIsOpen = !this.editSummaryIsOpen;
+
+                    if (this.editSummaryIsOpen) {
+                        setTimeout(function() {
+                            summaryField = document.querySelector('.card-summary-field');
+                            summaryField.focus();
+                        }, 10)
+                    }
+                },
+
+                _updateIssueSummary: function(e) {
+                    var self = this;
+                    
+                    this._issueAction("saveSummary", "save summary " + this.item.issueKey, this.newSummaryValue)
+                    .fail(function(){
+                            self.editSummaryIsOpen = true;
+                     }).done(function() {
+                         self._toggleSummaryEditMode();
+                     });
                 }
             });
         })();

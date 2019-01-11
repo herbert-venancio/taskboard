@@ -2,7 +2,6 @@ package objective.taskboard.it;
 
 import static org.openqa.selenium.By.cssSelector;
 import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
-import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElement;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
@@ -13,14 +12,13 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
-
-import objective.taskboard.utils.ThreadUtils;
 
 class IssueDetails extends AbstractUiFragment {
 
     WebElement issueDetailRoot;
+    SummaryEdit summaryEdit = new SummaryEdit();
+
     public IssueDetails(WebDriver driver) {
         super(driver);
         issueDetailRoot = webDriver.findElement(By.cssSelector("paper-dialog.issue-detail"));
@@ -133,7 +131,7 @@ class IssueDetails extends AbstractUiFragment {
     }
 
     public IssueDetails assertCardName(String cardNameExpected) {
-        waitTextInElement(getElementWhenItExists(By.id("card-name")), cardNameExpected);
+    	waitUntil(attributeToBe(By.className("card-name-wrapper"), "title", cardNameExpected));
         return this;
     }
 
@@ -173,6 +171,24 @@ class IssueDetails extends AbstractUiFragment {
     public void assertDescription(String text) {
         WebElement descriptionContentArea = webDriver.findElement(By.cssSelector(".description-box marked-element"));
         waitTextInElement(descriptionContentArea, text);
+    }
+
+    public IssueDetails setSummary(String summary) {
+        summaryEdit.startEdit();
+        summaryEdit.setInputValue(summary);
+        summaryEdit.confirmSubmit(summary);
+        return this;
+    }
+
+    public IssueDetails setSummaryAndCancel(String summary) {
+        summaryEdit.startEdit();
+        summaryEdit.setInputValue(summary);
+        summaryEdit.cancelSubmit();
+        return this;
+    }
+
+    public void assertSummary(String value) {
+        summaryEdit.assertSummary(value);
     }
 
     public IssueDetails confirm() {
@@ -323,8 +339,31 @@ class IssueDetails extends AbstractUiFragment {
         return cssSelector(".assignee-button[title='Replace "+ team +" by another team']");
     }
     
-    private By replaceClassOfServiceSelector(String classOfService) {
-        return cssSelector(".assignee-button[title='Replace " + classOfService + " by another class of service']");
-    }
+    private class SummaryEdit {
+        public void startEdit() {
+            assertIsOpened();
 
+            waitForHover(By.cssSelector(".view-summary-wrapper"));
+            waitForClick(By.cssSelector(".card-name__edit-button"));
+        }
+
+        public void setInputValue(String value) {
+            WebElement summaryField = issueDetailRoot.findElement(By.className("card-summary-field"));
+            IssueDetails.this.setInputValue(summaryField, value);
+        }
+
+        public void confirmSubmit(String value) {
+            waitForClick(By.cssSelector(".card-name__done-button"));
+            assertSummary(value);
+        }
+
+        public void cancelSubmit() {
+            waitForClick(By.cssSelector(".card-name__cancel-button"));
+        }
+
+        public void assertSummary(String text) {
+            WebElement summaryContentArea = webDriver.findElement(By.cssSelector(".card-summary-value"));
+            waitTextInElement(summaryContentArea, text);
+        }
+    }
 }

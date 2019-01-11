@@ -393,8 +393,13 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
             issue.setRemoteIssueUpdatedDate(new Date());
             putIssue(issue);
         }
-
+        
         return issue;
+    }
+
+    public Issue saveSummary(String issueKey, String summary) {
+        jiraBean.saveSummary(issueKey, summary);
+        return updateIssueBuffer(issueKey);
     }
 
     private Issue syncIssueTeams(String issueKey, Issue issue) {

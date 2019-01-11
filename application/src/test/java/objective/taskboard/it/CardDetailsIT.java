@@ -41,4 +41,46 @@ public class CardDetailsIT extends AuthenticatedIntegrationTest {
             .issueDetails()
             .assertClassOfService("Expedite");
     }
+
+
+    @Test
+    public void whenSummaryIsCanceled_ShouldKeepOldValueAfterReloadPage() {
+        MainPage mainPage = MainPage.produce(webDriver);
+
+        mainPage.errorToast().close();
+
+        mainPage.issue("TASKB-601")
+            .click()
+            .issueDetails()
+            .assertSummary("Desenvolvimento");
+        
+        mainPage.issue("TASKB-601")
+            .issueDetails()
+            .setSummaryAndCancel("New title for issue")
+            .assertSummary("Desenvolvimento");
+
+        mainPage.reload();
+
+        mainPage.issue("TASKB-601")
+            .issueDetails()
+            .assertSummary("Desenvolvimento");
+    }
+
+    @Test
+    public void whenSummaryIsChanged_ShouldKeepNewValueAfterReloadPage() {
+        MainPage mainPage = MainPage.produce(webDriver);
+
+        mainPage.errorToast().close();
+
+        mainPage.issue("TASKB-235")
+            .click()
+            .issueDetails()
+            .setSummary("New title for issue");
+
+        mainPage.reload();
+
+        mainPage.issue("TASKB-235")
+            .issueDetails()
+            .assertSummary("New title for issue");
+    }
 }
