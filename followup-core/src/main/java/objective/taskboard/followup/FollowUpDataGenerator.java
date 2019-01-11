@@ -24,6 +24,7 @@ import org.springframework.util.StringUtils;
 
 import objective.taskboard.Constants;
 import objective.taskboard.data.Issue;
+import objective.taskboard.data.Worklog;
 import objective.taskboard.followup.cluster.FollowupCluster;
 import objective.taskboard.followup.cluster.FollowupClusterProvider;
 import objective.taskboard.followup.kpi.FollowupIssueFilter;
@@ -289,14 +290,10 @@ public class FollowUpDataGenerator {
         private Double timeSpentInHour(Issue issue) {
             if (issue == null)
                 return 0.0;
-            if (issue.getTimeTracking() == null)
-                return 0.0;
-            if (!issue.getTimeTracking().getTimeSpentMinutes().isPresent())
-                return 0.0;
             
-            Integer minutes = issue.getTimeTracking().getTimeSpentMinutes().orElse(0);
+            Integer timeInSeconds = issue.getWorklogs().stream().map(w -> w.timeSpentSeconds).reduce(0, (a,b)->a+b);
             
-            return toHour(minutes);
+            return toHour(timeInSeconds/60);
         }
 
         private Double originalEstimateInHour(Issue issue) {

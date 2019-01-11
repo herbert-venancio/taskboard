@@ -351,6 +351,7 @@ public abstract class FollowUpDataGeneratorTestBase {
 
         public IssueBuilder timeSpentInHours(Integer hours) {
             this.timeSpentMinutes = hours * 60;
+            worklog("jon.doe", "2018-11-27", this.timeSpentMinutes*60);
             return this;
         }
 
