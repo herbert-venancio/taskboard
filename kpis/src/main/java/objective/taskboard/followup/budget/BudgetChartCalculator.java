@@ -112,7 +112,7 @@ public class BudgetChartCalculator {
     }
 
     private boolean isNextChangeRequestAppliable(List<ChangeRequest> changeRequests, int dateIndex, LocalDate currentDate) {
-        return changeRequests.size() > dateIndex && changeRequests.get(dateIndex).getDate().equals(currentDate);
+        return changeRequests.size() > dateIndex && changeRequests.get(dateIndex).getRequestDate().equals(currentDate);
     }
 
     private void addScopeDoneProjection(ProgressData progressData, BudgetChartData budgetChartData) {

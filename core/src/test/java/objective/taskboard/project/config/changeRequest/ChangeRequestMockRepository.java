@@ -14,7 +14,7 @@ public abstract class ChangeRequestMockRepository implements ChangeRequestReposi
     private static long id = 0;
 
     @Override
-    public List<ChangeRequest> findByProjectOrderByDateDesc(ProjectFilterConfiguration project) {
+    public List<ChangeRequest> findByProjectOrderByRequestDateDesc(ProjectFilterConfiguration project) {
         return data.values().stream()
                 .filter(i -> i.getProject().equals(project))
                 .collect(toList());

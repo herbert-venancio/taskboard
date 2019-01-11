@@ -22,14 +22,14 @@ public class ChangeRequest extends TaskboardEntity {
     private ProjectFilterConfiguration project;
 
     private String name;
-    private LocalDate date;
+    private LocalDate requestDate;
     private Integer budgetIncrease;
     private Boolean isBaseline;
 
     public ChangeRequest(ProjectFilterConfiguration project, String name, LocalDate date, int budgetIncrease, boolean isBaseline) {
         setProject(project);
         setName(name);
-        setDate(date);
+        setRequestDate(date);
         setBudgetIncrease(budgetIncrease);
         setIsBaseline(isBaseline);
     }
@@ -54,13 +54,13 @@ public class ChangeRequest extends TaskboardEntity {
         this.name = name;
     }
 
-    public LocalDate getDate() {
-        return date;
+    public LocalDate getRequestDate() {
+        return requestDate;
     }
 
-    public void setDate(LocalDate date) {
+    public void setRequestDate(LocalDate date) {
         Validate.notNull(date);
-        this.date = date;
+        this.requestDate = date;
     }
 
     public Integer getBudgetIncrease() {
