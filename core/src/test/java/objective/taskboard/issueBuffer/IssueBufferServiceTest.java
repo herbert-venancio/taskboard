@@ -226,7 +226,6 @@ public class IssueBufferServiceTest {
     public void addTeamToIssue_ShouldAddTeamToIssueAndSendToJira() {
         WebHookBody payload1 = payload("create-TASKB-1.json");
         issueBufferService.updateByEvent(payload1.webhookEvent, "TASKB-1", Optional.of(payload1.issue));
-        when(jiraIssueBean.searchIssueByKey("TASKB-1")).thenReturn(Optional.of(payload1.issue));
 
         when(issueTeamService.getDefaultTeamId(Mockito.any())).thenReturn(1L);
         when(issueTeamService.resolveTeamsOrigin(Mockito.any())).thenReturn(DEFAULT_BY_PROJECT);
@@ -294,17 +293,17 @@ public class IssueBufferServiceTest {
     @Test
     public void whenDoATransition_statusShouldBeUpdated() {
         WebHookBody payload1 = payload("create-TASKB-1.json");
-        
-        when(jiraIssueBean.searchIssueByKey("TASKB-1"))
-            .thenReturn(Optional.of(payload1.issue));
+
+        when(jiraBean.getIssueByKeyAsMaster("TASKB-1"))
+                .thenReturn(payload1.issue);
 
         Issue issue = issueBufferService.doTransition("TASKB-1", 10000L, emptyMap());
-        
+
         assertThat(issue.getStatus())
-        	.isEqualTo(10000L);
-        
+                .isEqualTo(10000L);
+
         assertThat(issueBufferService.getIssueByKey("TASKB-1").getStatus())
-        	.isEqualTo(10000L);
+                .isEqualTo(10000L);
     }
 
     public static WebHookBody payload(String file)  {

@@ -23,9 +23,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.StrSubstitutor;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -88,13 +86,12 @@ public class JiraMockServer {
         post("/reset", (req, res) ->{
             dirtySearchIssuesByKey.clear();
             deletedSearchIssuesByKey.clear();
+            projectsByKey.clear();
             username = null;
             searchFailureEnabled = false;
             searchAfterInitEnabled = false;
             transitionFailureEnabled = false;
             webhooks.clear();
-            projectEdits.clear();
-            issueEdits.clear();
             return "";
         });
 
@@ -133,8 +130,7 @@ public class JiraMockServer {
         });
 
         get("/rest/api/latest/project/:projectkey", (req, res) ->{
-            String project = loadMockData("project_" + req.params(":projectkey") + ".response.json");
-            return applyProjectEdits(project);
+            return getProjectDataForKey(req.params(":projectkey"));
         });
 
         get("rest/api/latest/status",  (req, res) ->{
@@ -198,6 +194,14 @@ public class JiraMockServer {
 
             Map searchData = gson.fromJson(req.body(), java.util.Map.class);
             return makeFakeRequest(searchData);
+        });
+
+        get("/rest/api/latest/issue/:issueKey",  (req, res) ->{
+            String issueKey = req.params(":issueKey");
+            if (issueHasBeenDeleted(issueKey))
+                return "";
+
+            return getIssueData(issueKey);
         });
 
         put("/rest/api/latest/issue/:issueKey",  (req, res) ->{
@@ -324,43 +328,30 @@ public class JiraMockServer {
             JSONObject body = new JSONObject(req.body());
             final String versionId = req.params(":versionId");
             final String newName = body.getString("name");
-            projectEdits.add(project -> {
-                try {
-                    if(!"TASKB".equals(project.getString("key")))
-                        return;
 
-                    JSONArray array = project.getJSONArray("versions");
-                    for(int i = 0; i < array.length(); ++i) {
-                        JSONObject version = array.getJSONObject(i);
-                        if(!versionId.equals(version.getString("id")))
-                            continue;
+            JSONObject project = getProjectDataForKey("TASKB");
+            JSONArray array = project.getJSONArray("versions");
+            for(int i = 0; i < array.length(); ++i) {
+                JSONObject version = array.getJSONObject(i);
+                if(!versionId.equals(version.getString("id")))
+                    continue;
 
-                        version.put("name", newName);
-                    }
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-            issueEdits.add(issue -> {
-               try {
-                   JSONObject fields = issue.getJSONObject("fields");
-
-                   JSONObject project = fields.getJSONObject("project");
-                   if(!"TASKB".equals(project.getString("key")))
-                       return;
-
-                   if(fields.isNull("customfield_11455"))
-                       return;
-
-                   JSONObject versionCustomField = fields.getJSONObject("customfield_11455");
-                   if(!versionId.equals(versionCustomField.getString("id")))
-                       return;
-
-                   versionCustomField.put("name", newName);
-               } catch (JSONException e) {
-                   throw new RuntimeException(e);
-               }
-            });
+                version.put("name", newName);
+            }
+            searchIssuesByKey.keySet().stream()
+                    .map(JiraMockServer::getIssueData)
+                    .filter(issue -> !issue.isNull("fields"))
+                    .map(issue -> (JSONObject)issue.opt("fields"))
+                    .filter(fields -> !fields.isNull("customfield_11455"))
+                    .map(fields -> (JSONObject)fields.opt("customfield_11455"))
+                    .filter(versionCustomField -> versionId.equals(versionCustomField.opt("id")))
+                    .forEach(versionCustomField -> {
+                        try {
+                            versionCustomField.put("name", newName);
+                        } catch (JSONException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    });
             sendWebhookWithContentInResourceFile("TASKB", "jira:version_updated", "TASKB_version_update.json");
             // not really correct response
             return loadMockData("createversion.response.json");
@@ -412,31 +403,18 @@ public class JiraMockServer {
         return URLConnection.guessContentTypeFromStream(is);
     }
 
-    private String applyProjectEdits(String project) throws JSONException {
-        if(StringUtils.isEmpty(project) || projectEdits.isEmpty())
-            return project;
-
-        return applyEdits(new JSONObject(project), projectEdits).toString();
-    }
-
-    private static JSONObject applyIssueEdits(JSONObject issue) {
-        return applyEdits(issue, issueEdits);
-    }
-
-    private static JSONObject applyEdits(JSONObject t, List<Consumer<JSONObject>> edits) {
-        for(Consumer<JSONObject> edit : edits) {
-            edit.accept(t);
-        }
-        return t;
-    }
-
     private static JSONObject getIssueDataForKey(String issueKey) {
-        JSONObject issueSearchData = dirtySearchIssuesByKey.get(issueKey);
-        if (issueSearchData == null) {
-            issueSearchData = clone(searchIssuesByKey.get(issueKey));
-            dirtySearchIssuesByKey.put(issueKey, issueSearchData);
-        }
-        return issueSearchData;
+        return dirtySearchIssuesByKey.computeIfAbsent(issueKey, key -> clone(searchIssuesByKey.get(key)));
+    }
+
+    private static JSONObject getProjectDataForKey(String projectKey) {
+        return projectsByKey.computeIfAbsent(projectKey, key -> {
+            try {
+                return new JSONObject(loadMockData("project_" + key + ".response.json"));
+            } catch (JSONException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
     }
 
     private static int countIssueCreated;
@@ -685,26 +663,22 @@ public class JiraMockServer {
 
     private static JSONObject clone(JSONObject jsonObject) {
         try {
-            if (jsonObject == null) {
-                System.out.println();
-            }
             return new JSONObject(jsonObject.toString());
         } catch (JSONException e) {
             throw new IllegalStateException(e);
         }
     }
 
-    private static Map<String, String> issueKeyByIssueId = new LinkedHashMap<String, String>();
+    private static Map<String, String> issueKeyByIssueId = new LinkedHashMap<>();
     private static Map<String, JSONObject> searchIssuesByKey = new LinkedHashMap<>();
     private static Map<String, JSONObject> dirtySearchIssuesByKey = new LinkedHashMap<>();
     private static Map<String, JSONObject> deletedSearchIssuesByKey = new LinkedHashMap<>();
+    private static Map<String, JSONObject> projectsByKey = new LinkedHashMap<>();
     private static String username;
     private static boolean searchFailureEnabled = false;
     private static boolean searchAfterInitEnabled = false;
     private static boolean transitionFailureEnabled = false;
     private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
-    private static List<Consumer<JSONObject>> projectEdits = new ArrayList<>();
-    private static List<Consumer<JSONObject>> issueEdits = new ArrayList<>();
     private static List<WebHookConfiguration> webhooks = new ArrayList<>();
     private static ExecutorService executorService = Executors.newSingleThreadExecutor();
     private boolean loadPlugin = true;
@@ -843,9 +817,9 @@ public class JiraMockServer {
         return count >= startAt && count < (startAt + MAX_RESULTS);
     }
 
-    private static Object getIssueData(String issueKey) {
+    private static JSONObject getIssueData(String issueKey) {
         try {
-            return getIssueDataForKey(issueKey).getJSONArray("issues").get(0);
+            return getIssueDataForKey(issueKey).getJSONArray("issues").getJSONObject(0);
         } catch (JSONException e) {
             throw new IllegalStateException(e);
         }
