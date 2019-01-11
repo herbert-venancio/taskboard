@@ -1,23 +1,3 @@
-/*-
- * [LICENSE]
- * Taskboard
- * - - -
- * Copyright (C) 2015 - 2016 Objective Solutions
- * - - -
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * [/LICENSE]
- */
 package objective.taskboard.jira;
 
 import static com.google.common.collect.Sets.newHashSet;
@@ -35,6 +15,7 @@ import org.springframework.stereotype.Service;
 import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.client.JiraIssueDtoSearch;
 import objective.taskboard.jira.client.JiraWorklogResultSetDto;
+import objective.taskboard.jira.endpoint.AuthorizedJiraEndpoint;
 import objective.taskboard.jira.endpoint.JiraEndpointAsMaster;
 import objective.taskboard.jira.properties.JiraProperties;
 
@@ -89,16 +70,9 @@ public class JiraSearchService {
                 jiraEndpointAsMaster
                         .request(JiraIssueDtoSearch.Service.class)
                         .search(input);
-        
-        searchResult.getIssues().stream().forEach(issue -> {
-            JiraWorklogResultSetDto worklogs = issue.getWorklogs();
-            if (worklogs.total > worklogs.maxResults) {
-                log.debug("⬣⬣⬣⬣⬣  issue " + issue.getKey() +" has more more worklogs. Total of: " + worklogs.total);
-                JiraWorklogResultSetDto worklogsForIssue = jiraEndpointAsMaster.request(JiraWorklogResultSetDto.Service.class).worklogsForIssue(issue.getKey());
-                issue.setWorklogs(worklogsForIssue);
-            }
-        });
-        
+
+        searchResult.getIssues().forEach(issue -> postProcessWorklogs(jiraEndpointAsMaster, issue));
+
         log.debug("⬣⬣⬣⬣⬣  searchIssues... ongoing..." + (searchResult.getStartAt() + searchResult.getMaxResults())+ "/" + searchResult.getTotal());
         return searchResult;
     }
@@ -123,4 +97,13 @@ public class JiraSearchService {
         return fields;
     }
 
+    public static JiraIssueDto postProcessWorklogs(AuthorizedJiraEndpoint jiraEndpoint, JiraIssueDto issue) {
+        JiraWorklogResultSetDto worklogs = issue.getWorklogs();
+        if (worklogs.total > worklogs.maxResults) {
+            log.debug("⬣⬣⬣⬣⬣  issue " + issue.getKey() +" has more more worklogs. Total of: " + worklogs.total);
+            JiraWorklogResultSetDto worklogsForIssue = jiraEndpoint.request(JiraWorklogResultSetDto.Service.class).worklogsForIssue(issue.getKey());
+            issue.setWorklogs(worklogsForIssue);
+        }
+        return issue;
+    }
 }

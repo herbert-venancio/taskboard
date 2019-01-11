@@ -23,11 +23,7 @@ import retrofit.http.Path;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class JiraIssueDto {
-    public interface Service {
-        @GET("/rest/api/latest/issue/{issueKey}?expand=schema,names,changelog")
-        JiraIssueDto get(@Path("issueKey") String issueKey);
-    }
-    
+
     private ChangelogDto changelog;
     private String key;
     private Long id;

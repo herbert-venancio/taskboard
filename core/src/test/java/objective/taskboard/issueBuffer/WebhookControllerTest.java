@@ -11,6 +11,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -25,7 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import objective.taskboard.controller.WebhookController;
 import objective.taskboard.domain.Filter;
-import objective.taskboard.jira.JiraService;
+import objective.taskboard.jira.JiraIssueService;
 import objective.taskboard.jira.WebhookSubtaskCreatorService;
 import objective.taskboard.jira.data.WebHookBody;
 import objective.taskboard.jira.data.WebhookEvent;
@@ -44,7 +45,7 @@ public class WebhookControllerTest {
         private ProjectFilterConfigurationCachedRepository projectFilterConfigurationCachedRepository;
 
         @MockBean
-        private JiraService jiraService;
+        private JiraIssueService jiraIssueService;
 
         @MockBean
         private WebhookSubtaskCreatorService webhookSubtaskCreatorService;
@@ -102,10 +103,10 @@ public class WebhookControllerTest {
         WebHookBody payload1 = payload("create-TASKB-1.json");
         WebHookBody payload2 = payload("create-TASKB-2-subtaskof-TASKB-1.json");
 
-        given(mocks.jiraService.getIssueByKeyAsMaster(eq("TASKB-1")))
-                .willReturn(payload1.issue);
-        given(mocks.jiraService.getIssueByKeyAsMaster(eq("TASKB-2")))
-                .willReturn(payload2.issue);
+        given(mocks.jiraIssueService.searchIssueByKey(eq("TASKB-1")))
+                .willReturn(Optional.of(payload1.issue));
+        given(mocks.jiraIssueService.searchIssueByKey(eq("TASKB-2")))
+                .willReturn(Optional.of(payload2.issue));
 
         // create parent
         webhookController.webhook(payload1, "TASKB");
@@ -123,8 +124,8 @@ public class WebhookControllerTest {
         WebHookBody payload1 = payload("update-TASKB-2-converttotask.json");
         WebHookBody payload2 = payload("update-TASKB-2-converttosubtaskof-TASKB-1.json");
 
-        given(mocks.jiraService.getIssueByKeyAsMaster(eq("TASKB-2")))
-                .willReturn(payload1.issue, payload2.issue);
+        given(mocks.jiraIssueService.searchIssueByKey(eq("TASKB-2")))
+                .willReturn(Optional.of(payload1.issue), Optional.of(payload2.issue));
 
         // convert child to task
         webhookController.webhook(payload1, "TASKB");
@@ -140,8 +141,8 @@ public class WebhookControllerTest {
     public void delete() throws IOException {
         WebHookBody payload = payload("delete-TASKB-2.json");
 
-        given(mocks.jiraService.getIssueByKeyAsMaster(eq("TASKB-2")))
-                .willReturn(payload.issue);
+        given(mocks.jiraIssueService.searchIssueByKey(eq("TASKB-2")))
+                .willReturn(Optional.of(payload.issue));
 
         // delete child
         webhookController.webhook(payload, "TASKB");
