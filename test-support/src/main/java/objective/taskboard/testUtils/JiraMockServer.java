@@ -15,6 +15,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -442,9 +443,23 @@ public class JiraMockServer {
 
     private static void setClassOfService(JSONObject fields, String aKey, JSONObject newClassOfService) throws JSONException {
         JSONObject makeClassOfService = createEmptyClassOfService();
-        makeClassOfService.put("id", "");
-        makeClassOfService.put("value", newClassOfService.get("value"));
-        fields.put(aKey, newClassOfService);
+        JSONObject meta = new JSONObject(loadMockData("createmeta.response.json"));
+        JSONObject project = meta.getJSONArray("projects").getJSONObject(0);
+        JSONObject issuetype = project.getJSONArray("issuetypes").getJSONObject(0);
+        JSONArray allowedValues = issuetype.getJSONObject("fields").getJSONObject("customfield_11440").getJSONArray("allowedValues");
+
+        Map<String, Long> valueToIdMap = new HashMap<>();
+        for(int i = 0; i < allowedValues.length(); ++i) {
+            JSONObject value = allowedValues.getJSONObject(i);
+            Long id = value.getLong("id");
+            String name = value.getString("value");
+            valueToIdMap.put(name, id);
+        }
+        String value = newClassOfService.getString("value");
+        Long id = valueToIdMap.get(value);
+        makeClassOfService.put("id", id);
+        makeClassOfService.put("value", value);
+        fields.put(aKey, makeClassOfService);
         fields.put("updated", nowIso8601());
     }
 

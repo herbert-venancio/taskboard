@@ -4,7 +4,6 @@ import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -371,30 +370,12 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
 
     public Issue saveDescription(String issueKey, String description) {
        jiraBean.saveDescription(issueKey, description);
-
-        Issue issue = getIssueCopyByKeyOrCry(issueKey);
-        
-        if (!issue.getDescription().equals(description)) {
-            issue.setDescription(description);
-            issue.setRemoteIssueUpdatedDate(new Date());
-            putIssue(issue);
-        }
-        
-        return issue;
+       return updateIssueBuffer(issueKey);
     }
 
     public Issue saveClassOfService(String issueKey, String classOfService) {
         jiraBean.saveClassOfService(issueKey, classOfService);
-
-        Issue issue = getIssueCopyByKeyOrCry(issueKey);
-
-        if (!issue.getClassOfServiceValue().equals(classOfService)) {
-            issue.setClassOfServiceValue(classOfService);
-            issue.setRemoteIssueUpdatedDate(new Date());
-            putIssue(issue);
-        }
-        
-        return issue;
+        return updateIssueBuffer(issueKey);
     }
 
     public Issue saveSummary(String issueKey, String summary) {
