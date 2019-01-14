@@ -56,7 +56,10 @@
             </template>
 
             <div id="boardStepIssues" class="wrap layout horizontal sortable-board-step step-list">
-                <template id="boardStepIssuesFiltered" is="dom-repeat" items="[[filteredIssues]]" as="issue">
+                <template id="boardStepIssuesFiltered" is="dom-repeat"
+                          items="[[filteredIssues]]" as="issue"
+                          initial-count="[[_initialCountLoad]]">
+
                     <issue-item
                             id="[[issue.issueKey]]"
                             class$="[[issueItemClasses]]"
@@ -148,6 +151,10 @@
                     filterUpdatedHook: {
                         type: Date,
                         value: new Date()
+                    },
+                    _initialCountLoad: {
+                        type: Number,
+                        value: 5
                     }
                 },
 
@@ -164,6 +171,10 @@
                         throw "Failed to enable prioritization because the step item could not be found";
                     }
                     this.updateCanChangePrioritization();
+                },
+
+                ready: function() {
+                    this._initialCountLoad = undefined;
                 },
 
                 _isExpedite: function(classOfServiceValue) {
