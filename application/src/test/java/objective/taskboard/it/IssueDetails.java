@@ -131,17 +131,28 @@ class IssueDetails extends AbstractUiFragment {
     }
 
     public IssueDetails assertCardName(String cardNameExpected) {
-    	waitUntil(attributeToBe(By.className("card-name-wrapper"), "title", cardNameExpected));
+        waitUntil(attributeToBe(By.className("card-name-wrapper"), "title", cardNameExpected));
+        return this;
+    }
+
+    public IssueDetails assertCardKey(String cardKeyExpected) {
+        waitUntil(attributeToBe(By.cssSelector(".card-name-wrapper .card-key"), "data-issue-key", cardKeyExpected));
         return this;
     }
 
     public IssueDetails openParentCard() {
-        waitForClick(getElementWhenItExists(By.id("parent-card-name")));
-        return this;
+        return openAnotherCardByClick(By.id("parent-card-name"));
     }
 
     public IssueDetails openFirstChildCard() {
-        waitForClick(getElementWhenItExists(By.id("child-issue-0")));
+        return openAnotherCardByClick(By.id("child-issue-0"));
+    }
+
+    private IssueDetails openAnotherCardByClick(By by) {
+        String issueKeyToBeOpened = getElementWhenItExists(by).getAttribute("data-issue-key");
+        waitForClick(by);
+        assertIsOpened();
+        assertCardKey(issueKeyToBeOpened);
         return this;
     }
 

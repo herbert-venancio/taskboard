@@ -884,7 +884,7 @@
                                 <iron-icon icon="open-in-new"></iron-icon>
                             </paper-button>
                             <div class="card-name-wrapper" title="{{item.issueKey}} {{item.summary}}">
-                                <div>{{item.issueKey}}</div>
+                                <div class="card-key" data-issue-key$="{{item.issueKey}}">{{item.issueKey}}</div>
 
                                 <template is="dom-if" if="{{!editSummaryIsOpen}}">
                                     <div class="card-summary-wrapper view-summary-wrapper" on-tap=_toggleSummaryEditMode>
