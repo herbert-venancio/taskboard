@@ -1,16 +1,9 @@
 package objective.taskboard.issueBuffer;
 
-import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
-import static java.util.Arrays.asList;
-import static objective.taskboard.issueBuffer.IssueBufferServiceTest.payload;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
-import static org.mockito.BDDMockito.willReturn;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.times;
-
-import java.io.IOException;
+import static objective.taskboard.issueBuffer.WebhookControllerTestDSL.webHook;
+import static objective.taskboard.issueBuffer.WebhookControllerTestDSL.withArguments;
+import static org.hamcrest.Matchers.anything;
+import static org.hamcrest.Matchers.equalTo;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -21,13 +14,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import objective.taskboard.controller.WebhookController;
-import objective.taskboard.domain.Filter;
 import objective.taskboard.jira.JiraService;
 import objective.taskboard.jira.WebhookSubtaskCreatorService;
-import objective.taskboard.jira.data.WebHookBody;
 import objective.taskboard.jira.data.WebhookEvent;
 import objective.taskboard.repository.FilterCachedRepository;
 import objective.taskboard.repository.ProjectFilterConfigurationCachedRepository;
@@ -40,26 +29,9 @@ import objective.taskboard.testUtils.OptionalAutowiredDependenciesInitializer;
 public class WebhookControllerTest {
 
     public static class Configuration {
-        @MockBean
-        private ProjectFilterConfigurationCachedRepository projectFilterConfigurationCachedRepository;
-
-        @MockBean
-        private JiraService jiraService;
 
         @MockBean
         private WebhookSubtaskCreatorService webhookSubtaskCreatorService;
-
-        @MockBean
-        private FilterCachedRepository filterCachedRepository;
-
-        @MockBean
-        private IssueBufferService issueBufferService;
-
-        @Bean
-        public ObjectMapper mapper() {
-            return new ObjectMapper()
-                    .configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
-        }
 
         @Bean
         public WebhookController webhookController() {
@@ -77,8 +49,17 @@ public class WebhookControllerTest {
         }
     }
 
-    @Autowired
-    private Configuration mocks;
+    @MockBean
+    private ProjectFilterConfigurationCachedRepository projectFilterConfigurationCachedRepository;
+
+    @MockBean
+    private JiraService jiraService;
+
+    @MockBean
+    private FilterCachedRepository filterCachedRepository;
+
+    @MockBean
+    private IssueBufferService issueBufferService;
 
     @Autowired
     private WebhookController webhookController;
@@ -86,68 +67,75 @@ public class WebhookControllerTest {
     @Autowired
     private IssueEventProcessScheduler issueEventProcessScheduler;
 
+    private WebhookControllerTestDSL dsl;
+
     @Before
     public void setup() {
-        willReturn(true).given(mocks.projectFilterConfigurationCachedRepository).exists(eq("TASKB"));
-
-        Filter taskFilter = new Filter();
-        taskFilter.setIssueTypeId(10000L);
-        Filter subtaskFilter = new Filter();
-        subtaskFilter.setIssueTypeId(10001L);
-        willReturn(asList(taskFilter, subtaskFilter)).given(mocks.filterCachedRepository).getCache();
+        dsl = new WebhookControllerTestDSL(
+                projectFilterConfigurationCachedRepository,
+                filterCachedRepository,
+                jiraService,
+                issueEventProcessScheduler,
+                webhookController
+        );
     }
 
     @Test
-    public void create() throws IOException {
-        WebHookBody payload1 = payload("create-TASKB-1.json");
-        WebHookBody payload2 = payload("create-TASKB-2-subtaskof-TASKB-1.json");
+    public void create() {
+        givenJiraSend(
+                webHook("create-TASKB-1.json"),
+                webHook("create-TASKB-2-subtaskof-TASKB-1.json")
+        );
 
-        given(mocks.jiraService.getIssueByKeyAsMaster(eq("TASKB-1")))
-                .willReturn(payload1.issue);
-        given(mocks.jiraService.getIssueByKeyAsMaster(eq("TASKB-2")))
-                .willReturn(payload2.issue);
+        whenProcessItems();
 
-        // create parent
-        webhookController.webhook(payload1, "TASKB");
-        // create child
-        webhookController.webhook(payload2, "TASKB");
-
-        issueEventProcessScheduler.processItems();
-
-        then(mocks.issueBufferService).should().updateByEvent(eq(WebhookEvent.ISSUE_CREATED), eq("TASKB-1"), any());
-        then(mocks.issueBufferService).should().updateByEvent(eq(WebhookEvent.ISSUE_CREATED), eq("TASKB-2"), any());
+        then(issueBufferService).updateByEvent()
+                .shouldHaveBeenCalled(
+                        withArguments(equalTo(WebhookEvent.ISSUE_CREATED), equalTo("TASKB-1"), anything()),
+                        withArguments(equalTo(WebhookEvent.ISSUE_CREATED), equalTo("TASKB-2"), anything())
+                );
     }
 
     @Test
-    public void update() throws IOException {
-        WebHookBody payload1 = payload("update-TASKB-2-converttotask.json");
-        WebHookBody payload2 = payload("update-TASKB-2-converttosubtaskof-TASKB-1.json");
+    public void update() {
+        givenJiraSend(
+                webHook("update-TASKB-2-converttotask.json"),
+                webHook("update-TASKB-2-converttosubtaskof-TASKB-1.json")
+        );
 
-        given(mocks.jiraService.getIssueByKeyAsMaster(eq("TASKB-2")))
-                .willReturn(payload1.issue, payload2.issue);
+        whenProcessItems();
 
-        // convert child to task
-        webhookController.webhook(payload1, "TASKB");
-        // undo convert
-        webhookController.webhook(payload2, "TASKB");
-
-        issueEventProcessScheduler.processItems();
-
-        then(mocks.issueBufferService).should(times(2)).updateByEvent(eq(WebhookEvent.ISSUE_UPDATED), eq("TASKB-2"), any());
+        then(issueBufferService).updateByEvent()
+                .shouldHaveBeenCalled(
+                        withArguments(equalTo(WebhookEvent.ISSUE_UPDATED), equalTo("TASKB-2"), anything()),
+                        withArguments(equalTo(WebhookEvent.ISSUE_UPDATED), equalTo("TASKB-2"), anything())
+                );
     }
 
     @Test
-    public void delete() throws IOException {
-        WebHookBody payload = payload("delete-TASKB-2.json");
+    public void delete() {
+        givenJiraSend(
+                webHook("delete-TASKB-2.json")
+        );
 
-        given(mocks.jiraService.getIssueByKeyAsMaster(eq("TASKB-2")))
-                .willReturn(payload.issue);
+        whenProcessItems();
 
-        // delete child
-        webhookController.webhook(payload, "TASKB");
-
-        issueEventProcessScheduler.processItems();
-
-        then(mocks.issueBufferService).should().updateByEvent(eq(WebhookEvent.ISSUE_DELETED), eq("TASKB-2"), any());
+        then(issueBufferService).updateByEvent()
+                .shouldHaveBeenCalled(
+                        withArguments(equalTo(WebhookEvent.ISSUE_DELETED), equalTo("TASKB-2"), anything())
+                );
     }
+
+    private void givenJiraSend(WebhookControllerTestDSL.WebhookPayloadBuilder... builders) {
+        dsl.jiraSend(builders);
+    }
+
+    private void whenProcessItems() {
+        dsl.whenProcessItems();
+    }
+
+    private WebhookControllerTestDSL.IssueBufferServiceAssert then(IssueBufferService issueBufferService) {
+        return dsl.then(issueBufferService);
+    }
+
 }
