@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>br.com.objective</groupId>
 		<artifactId>taskboard-parent</artifactId>
-		<version>0.0.77</version>
+		<version>0.0.78-SNAPSHOT</version>
 	</parent>
 	<artifactId>followup-core</artifactId>
 	<dependencies>
