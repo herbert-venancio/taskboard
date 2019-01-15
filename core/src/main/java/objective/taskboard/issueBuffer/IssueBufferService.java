@@ -1,5 +1,6 @@
 package objective.taskboard.issueBuffer;
 
+import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
@@ -9,6 +10,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -55,8 +58,6 @@ import retrofit.RetrofitError;
 @Service
 public class IssueBufferService implements ApplicationListener<ProjectUpdateEvent> {
     private static final String CACHE_FILENAME = "issues.dat";
-    public static final int THREAD_POOL_SIZE = 1;
-
     private static final Logger log = LoggerFactory.getLogger(IssueBufferService.class);
 
     @Autowired
@@ -258,16 +259,15 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
     }
 
     public synchronized List<Issue> getVisibleIssues() {
-        return cardsRepo.values().stream()
-                .filter(this::isAccessible)
-                .collect(Collectors.toList());
+        return filterVisibleIssues(cardsRepo.values());
     }
 
     public synchronized List<Issue> getVisibleIssuesByIds(List<Long> issuesIds) {
-        return issuesIds.stream()
-                .map(id->cardsRepo.getById(id))
-                .filter(this::isAccessible)
-                .collect(Collectors.toList());
+        List<Issue> issues = issuesIds.stream()
+            .map(cardsRepo::getById)
+            .collect(Collectors.toList());
+
+        return filterVisibleIssues(issues);
     }
 
     private boolean isAccessible(Issue t) {
@@ -530,5 +530,16 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
         }
 
         private static final long serialVersionUID = 1L;
+    }
+
+    private List<Issue> filterVisibleIssues(Collection<Issue> issues) {
+        return issues.stream()
+            .filter(Objects::nonNull)
+            .filter(Issue::isVisible)
+            .collect(groupingBy(Issue::getProjectKey))
+                .entrySet().stream()
+                .filter(p -> projectService.isNonArchivedAndUserHasAccess(p.getKey()))
+                .flatMap(i -> i.getValue().stream())
+                .collect(toList());
     }
 }
