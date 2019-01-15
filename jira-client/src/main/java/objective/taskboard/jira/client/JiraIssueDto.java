@@ -23,27 +23,31 @@ import retrofit.http.Path;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class JiraIssueDto {
+    public interface Service {
+        @GET("/rest/api/latest/issue/{issueKey}?expand=schema,names,changelog")
+        JiraIssueDto get(@Path("issueKey") String issueKey);
+    }
 
     private ChangelogDto changelog;
     private String key;
     private Long id;
-    
+
     @JsonProperty
     private JiraIssueDtoFields fields;
 
     public String getKey() {
         return key;
     }
-    
+
     public Long getId() {
         return id;
     }
-    
+
     public List<ChangelogGroupDto> getChangelog() {
         if (changelog == null)
             return null;
         return changelog.getHistories();
-    }    
+    }
 
     public JiraUserDto getAssignee() {
         return fields.assignee;
@@ -114,13 +118,13 @@ public class JiraIssueDto {
             return Collections.emptyList();
         return fields.subtasks;
     }
-    
+
     public JiraWorklogResultSetDto getWorklogs() {
         if (fields.worklog == null)
             return new JiraWorklogResultSetDto();
         return fields.worklog;
     }
-    
+
     public void setWorklogs(JiraWorklogResultSetDto worklogsForIssue) {
         this.fields.worklog = worklogsForIssue;
     }
@@ -138,21 +142,21 @@ public class JiraIssueDto {
     public static class JSONObjectAdapter {
         public Object object;
         public JSONObjectAdapter() {
-            
+
         }
 
         public JSONObjectAdapter(Object jsonObjectValue) {
             this.object = jsonObjectValue;
         }
     }
-    
+
     public static class JSONObjectAdapterDeserializer extends StdDeserializer<JSONObjectAdapter> {
         private static final long serialVersionUID = 1894757527363240771L;
 
         public JSONObjectAdapterDeserializer(){
             this(null);
         }
-        
+
         protected JSONObjectAdapterDeserializer(Class<?> vc) {
             super(vc);
         }

@@ -1,5 +1,6 @@
 package objective.taskboard.jira;
 
+import static objective.taskboard.jira.JiraSearchService.postProcessWorklogs;
 import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byName;
 import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byNames;
 import static objective.taskboard.jira.data.JiraIssue.FieldBuilder.byValue;
@@ -26,6 +27,7 @@ import com.google.common.collect.ImmutableList;
 import objective.taskboard.auth.CredentialsHolder;
 import objective.taskboard.config.CacheConfiguration;
 import objective.taskboard.data.User;
+import objective.taskboard.jira.client.JiraIssueDto;
 import objective.taskboard.jira.client.JiraResolutionDto;
 import objective.taskboard.jira.client.JiraServerInfoDto;
 import objective.taskboard.jira.data.JiraIssue;
@@ -156,6 +158,28 @@ public class JiraService {
         log.debug("⬣⬣⬣⬣⬣  getTransitions (master)");
         Iterable<Transition> response = jiraEndpointAsMaster.request(Transitions.Service.class).get(issueKey).transitions;
         return ImmutableList.copyOf(response);
+    }
+
+    public Optional<JiraIssueDto> getIssueByKey(String key) {
+        log.debug("⬣⬣⬣⬣⬣  getIssueByKey");
+        try {
+            return Optional.of(postProcessWorklogs(jiraEndpointAsUser, jiraEndpointAsUser.request(JiraIssueDto.Service.class).get(key)));
+        }catch(retrofit.RetrofitError e) {
+            if (e.getResponse().getStatus() == 404)
+                return Optional.empty();
+            throw e;
+        }
+    }
+
+    public JiraIssueDto getIssueByKeyAsMaster(String key) {
+        log.debug("⬣⬣⬣⬣⬣  getIssueByKeyAsMaster");
+        try {
+            return postProcessWorklogs(jiraEndpointAsMaster, jiraEndpointAsMaster.request(JiraIssueDto.Service.class).get(key));
+        } catch(retrofit.RetrofitError e) {
+            if (e.getResponse().getStatus() == 404)
+                return null;
+            throw e;
+        }
     }
 
     public String createIssueAsMaster(JiraIssue.Input issueInput) {

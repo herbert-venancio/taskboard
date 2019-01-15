@@ -97,7 +97,7 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
     private final ParentProvider parentProviderFetchesMissingParents = parentKey -> {
         Issue parent = cardsRepo.get(parentKey);
         if (parent == null)
-            parent = updateIssueBufferFetchParentIfNeeded(jiraIssueService.searchIssueByKey(parentKey).orElse(null));
+            parent = updateIssueBufferFetchParentIfNeeded(jiraBean.getIssueByKeyAsMaster(parentKey));
         return Optional.of(parent);
     };
 
@@ -164,10 +164,10 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
     }
 
     public synchronized Issue updateIssueBuffer(final String key) {
-        Optional<JiraIssueDto> foundIssue = jiraIssueService.searchIssueByKey(key);
-        if (!foundIssue.isPresent())
+        JiraIssueDto foundIssue = jiraBean.getIssueByKeyAsMaster(key);
+        if (foundIssue == null)
             return cardsRepo.remove(key);
-        return updateIssueBufferFetchParentIfNeeded(foundIssue.get());
+        return updateIssueBufferFetchParentIfNeeded(foundIssue);
     }
 
     public synchronized Issue updateIssueBufferFetchParentIfNeeded(final JiraIssueDto jiraIssue) {
