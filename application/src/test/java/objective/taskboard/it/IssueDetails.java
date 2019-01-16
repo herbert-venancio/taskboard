@@ -131,7 +131,7 @@ class IssueDetails extends AbstractUiFragment {
     }
 
     public IssueDetails assertCardName(String cardNameExpected) {
-        waitUntil(attributeToBe(By.className("card-name-wrapper"), "title", cardNameExpected));
+        waitUntil(attributeToBe(By.className("card-name-wrapper"), "data-title", cardNameExpected));
         return this;
     }
 
