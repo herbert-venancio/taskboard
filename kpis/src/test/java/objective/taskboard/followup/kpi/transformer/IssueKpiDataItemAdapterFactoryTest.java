@@ -21,15 +21,14 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import objective.taskboard.followup.AnalyticsTransitionsDataRow;
 import objective.taskboard.followup.AnalyticsTransitionsDataSet;
-import objective.taskboard.followup.KpiHelper;
 import objective.taskboard.followup.IssueTransitionService;
+import objective.taskboard.followup.KpiHelper;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.enviroment.KPIEnvironmentBuilder;
 import objective.taskboard.jira.MetadataService;
@@ -54,13 +53,13 @@ public class IssueKpiDataItemAdapterFactoryTest {
     @Mock
     private IssueTransitionService transitionService;
     
-    @InjectMocks
-    private IssueKpiDataItemAdapterFactory subject = new IssueKpiDataItemAdapterFactory();
+    private IssueKpiDataItemAdapterFactory subject;
     
     @Before
     public void setup() {
         setupPriorityOrder();
         setupIssueType();
+        subject = new IssueKpiDataItemAdapterFactory(metadataService,jiraProperties,transitionService);
     }
     
     @Test

@@ -1,26 +1,26 @@
 package objective.taskboard.followup.kpi.enviroment;
 
+import static objective.taskboard.followup.kpi.KpiLevel.DEMAND;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.Assert;
 
 import objective.taskboard.data.Issue;
-import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.IssueTypeKpi;
 import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi.BehaviorFactory;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
+import objective.taskboard.followup.kpi.transformer.IssueKpiDataItemAdapter;
 import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.testUtils.FixedClock;
 import objective.taskboard.utils.Clock;
@@ -63,6 +63,10 @@ public class KpiEnvironment {
     public DSLKpi then() {
         return kpiContext;
     }
+    
+    public DSLKpi eoE() {
+        return kpiContext;
+    }
 
     public BehaviorFactory when() {
         return kpiContext.when();
@@ -101,6 +105,7 @@ public class KpiEnvironment {
         typeRepository.addSubtask(name);
         return this;
     }
+    
 
     public StatusDto withStatus(String name) {
         StatusDto status = statusRepository.create(name);
@@ -162,19 +167,6 @@ public class KpiEnvironment {
         return statusRepository;
     }
 
-    public Map<KpiLevel, List<IssueKpi>> buildAllIssues() {
-        Map<KpiLevel, List<IssueKpi>> map = new HashMap<>();
-        map.put(KpiLevel.DEMAND, new LinkedList<>());
-        map.put(KpiLevel.FEATURES, new LinkedList<>());
-        map.put(KpiLevel.SUBTASKS, new LinkedList<>());
-        map.put(KpiLevel.UNMAPPED, new LinkedList<>());
-        issues.values().stream()
-                .map(i -> i.buildAllIssuesKpi())
-                .flatMap(List::stream)
-                .forEach(i -> map.get(i.getLevel()).add(i));
-        return map;
-    }
-
     public KpiEnvironment mockAllIssues() {
         issues.values().forEach(i -> i.mockAllJiraIssue());
         return this;
@@ -189,7 +181,10 @@ public class KpiEnvironment {
                 .map(i -> i.allMockers())
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
-
+    }
+    
+    public List<IssueKpiDataItemAdapter> getAllIssuesAdapters() {
+        return getAllIssueMockers().stream().map(IssueKpiMocker::buildAsAdapter).collect(Collectors.toList());
     }
 
     public class IssueTypeRepository {
@@ -197,18 +192,24 @@ public class KpiEnvironment {
         private Map<String,IssueTypeDTO> types = new LinkedHashMap<>();
 
         public IssueTypeRepository addDemand(String name) {
-            IssueTypeDTO dto = new IssueTypeDTO(id++, name);
+            IssueTypeDTO dto = new IssueTypeDTO(id++, DEMAND,name);
             storeType(name, dto);
             return this;
         }
-
+        
+        public IssueTypeRepository addUnmapped(String name) {
+            IssueTypeDTO dto = new IssueTypeDTO(id++, KpiLevel.UNMAPPED,name);
+            storeType(name, dto);
+            return this;
+        }
+        
         private void addFeature(String name) {
-            IssueTypeDTO dto = new IssueTypeDTO(id++, name);
+            IssueTypeDTO dto = new IssueTypeDTO(id++, KpiLevel.FEATURES,name);
             storeType(name, dto);
         }
 
         private void addSubtask(String name) {
-            IssueTypeDTO dto = new IssueTypeDTO(id++, name);
+            IssueTypeDTO dto = new IssueTypeDTO(id++, KpiLevel.SUBTASKS,name);
             storeType(name, dto);
         }
 
@@ -245,7 +246,14 @@ public class KpiEnvironment {
         public KpiEnvironment eoT() {
             return KpiEnvironment.this;
         }
+        
+        public List<IssueTypeDTO> configuredForLevel(KpiLevel level){
+            return types.values().stream().filter(t -> level == t.level()).collect(Collectors.toList());
+        }
 
+        public void foreach(Consumer<? super IssueTypeDTO> action) {
+            this.types.values().forEach(action);
+        }
     }
 
     public class StatusRepository {
@@ -291,10 +299,16 @@ public class KpiEnvironment {
     public static class IssueTypeDTO {
         private long id;
         private String name;
+        private KpiLevel level = KpiLevel.UNMAPPED;
 
-        public IssueTypeDTO(long id, String name) {
+        public IssueTypeDTO(long id, KpiLevel level, String name) {
             this.id = id;
             this.name = name;
+            this.level = level;
+        }
+
+        public KpiLevel level() {
+            return level;
         }
 
         public IssueTypeKpi buildIssueTypeKpi() {
@@ -307,6 +321,10 @@ public class KpiEnvironment {
 
         public String name() {
             return name;
+        }
+
+        public boolean isSubtask() {
+            return level == KpiLevel.SUBTASKS;
         }
 
     }

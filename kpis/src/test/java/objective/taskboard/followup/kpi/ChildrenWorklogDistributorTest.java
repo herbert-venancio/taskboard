@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import objective.taskboard.followup.kpi.enviroment.DSLBehavior;
 import objective.taskboard.followup.kpi.enviroment.DSLKpi;
+import objective.taskboard.followup.kpi.enviroment.IssueKpiMocker;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 
 public class ChildrenWorklogDistributorTest {
@@ -19,8 +20,8 @@ public class ChildrenWorklogDistributorTest {
                 .withChildrenType("Backend Development")
             .eoH()
         .eoKp()
-        .givenIssue("I-1")
-            .isFeature()
+        .givenFeature("I-1")
+            .project("PROJ")
             .type("Task")
             .withTransitions()
                 .status("Open").date("2018-12-10")
@@ -83,6 +84,7 @@ public class ChildrenWorklogDistributorTest {
             .eoH()
         .eoKp()
         .givenIssue("I-1")
+            .project("PROJ")
             .isFeature()
             .type("Task")
             .withTransitions()
@@ -159,10 +161,11 @@ public class ChildrenWorklogDistributorTest {
             .todayIs("2018-12-17");
     }
 
-    private class DistributeWorklogBehavior implements DSLBehavior<IssueKpi> {
+    private class DistributeWorklogBehavior implements DSLBehavior<IssueKpiMocker> {
 
         @Override
-        public void execute(KpiEnvironment environment, IssueKpi issueKpi) {
+        public void execute(KpiEnvironment environment, IssueKpiMocker issueKpiMocker) {
+            IssueKpi issueKpi = issueKpiMocker.preventWorklogDistribution().buildIssueKpi();
             ChildrenWorklogDistributor.distributeWorklogs(environment.getKPIProperties().getFeaturesHierarchy(), issueKpi);
         }
 

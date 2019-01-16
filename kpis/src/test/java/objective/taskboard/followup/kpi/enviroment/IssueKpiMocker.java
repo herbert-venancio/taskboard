@@ -27,6 +27,7 @@ import objective.taskboard.followup.kpi.SubtaskWorklogDistributor;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment.IssueTypeDTO;
 import objective.taskboard.followup.kpi.properties.IssueTypeChildrenStatusHierarchy;
 import objective.taskboard.followup.kpi.properties.KPIProperties;
+import objective.taskboard.followup.kpi.transformer.IssueKpiDataItemAdapter;
 import objective.taskboard.utils.DateTimeUtils;
 
 public class IssueKpiMocker {
@@ -42,6 +43,7 @@ public class IssueKpiMocker {
     private IssueKpiMocker parent;
     private String projectKey;
     private Issue mockedIssue;
+    private boolean shouldDistributeWorklog = true;
 
     IssueKpiMocker(KpiEnvironment fatherEnvironment, String pKey) {
         this.fatherEnvironment = fatherEnvironment;
@@ -132,6 +134,14 @@ public class IssueKpiMocker {
     public KpiLevel level() {
         return level;
     }
+    
+    public String project() {
+        return projectKey;
+    }
+    
+    public boolean noProjectConfigured() {
+        return projectKey == null;
+    }
 
     public IssueKpiMocker project(String projectKey) {
         this.projectKey = projectKey;
@@ -156,6 +166,10 @@ public class IssueKpiMocker {
         children.forEach(c -> allMockers.addAll(c.allMockers()));
         return allMockers;
     }
+    
+    public IssueKpiDataItemAdapter buildAsAdapter() {
+        return new FakeIssueKpiAdapter(getReversedTransitions(), getIssueKey(),getIssueTypeKpi(), level());
+    }
 
     public IssueKpi buildIssueKpi() {
         Optional<StatusTransition> firstChain = this.transitionBuilder.getFirstStatusTransition();
@@ -167,7 +181,7 @@ public class IssueKpiMocker {
             .map(c -> c.buildIssueKpi())
             .forEach(c -> kpi.addChild(c));
 
-        this.worklogsBuilder.setup(kpi);
+        distributeWorklogs(kpi);
 
         return kpi;
     }
@@ -211,7 +225,7 @@ public class IssueKpiMocker {
         when(issue.getProjectKey()).thenReturn(projectKey);
         when(issue.getStatus()).thenReturn(getStatusId());
         when(issue.getIssueKey()).thenReturn(pKey);
-        when(issue.getIssueTypeName()).thenReturn(type.map(t -> t.name()).orElse("Unmapped"));
+        when(issue.getIssueTypeName()).thenReturn(getIssueType().map(t -> t.getType()).orElse("Unmapped"));
         when(issue.isDemand()).thenReturn(DEMAND == this.level);
         when(issue.isFeature()).thenReturn(FEATURES == this.level);
         when(issue.isSubTask()).thenReturn(SUBTASKS == this.level);
@@ -229,8 +243,15 @@ public class IssueKpiMocker {
     private long getStatusId() {
         return transitionBuilder.currentStatus().id();
     }
+    
+    public IssueKpiMocker preventWorklogDistribution() {
+        this.shouldDistributeWorklog  = false;
+        return this;
+    }
 
     private void distributeWorklogs(IssueKpi kpi) {
+        if(!shouldDistributeWorklog)
+            return;
         if (level == KpiLevel.UNMAPPED) {
             return;
         }
@@ -247,8 +268,8 @@ public class IssueKpiMocker {
 
     private Optional<IssueTypeKpi> getIssueType() {
         if(type == null)
-            Assert.fail("Configure a type or explicitly call emptyType()");
-
+            Assert.fail("Configure a type or explicitly call emptyType(). Issue key:"+pKey);
+        
         return type.map(dto -> new IssueTypeKpi(dto.id(),dto.name()));
     }
 
@@ -313,5 +334,4 @@ public class IssueKpiMocker {
             }
         }
     }
-
 }

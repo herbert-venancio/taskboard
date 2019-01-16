@@ -5,6 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import org.assertj.core.api.Assertions;
+
 import objective.taskboard.followup.kpi.IssueKpi;
 import objective.taskboard.followup.kpi.IssueKpiAsserter;
 import objective.taskboard.followup.kpi.StatusTransition;
@@ -15,18 +17,32 @@ public class DSLKpi {
     private KpiEnvironment environment = new KpiEnvironment(this);
     private AsserterFactory assertFactory = new AsserterFactory();
     private BehaviorFactory behaviorFactory = new BehaviorFactory(this);
-    private Map<String,IssueKpi> issues = new LinkedHashMap<>();
+    private Map<String,IssueKpi> issues;
 
     public KpiEnvironment environment() {
         return environment;
     }
+    
+    public DSLKpi withNoIssuesConfigured() {
+        Assertions.assertThat(environment.getAllIssueMockers()).hasSize(0);
+        return this;
+    }
 
     public IssueKpi getIssueKpi(String pKey) {
-        issues.putIfAbsent(pKey, environment.givenIssue(pKey).buildIssueKpi());
+        initializeIssuesIfNeeded();
+        
+        Assertions.assertThat(issues).as("Issue %s not found",pKey).containsKey(pKey);
         return issues.get(pKey);
     }
 
+    private void initializeIssuesIfNeeded() {
+        if(this.issues == null)
+            this.issues = environment.services().issueKpi().getIssues();
+    }
+
     public BehaviorFactory when() {
+        environment.services().mockAll();
+        
         return behaviorFactory;
     }
 
@@ -36,10 +52,10 @@ public class DSLKpi {
 
     public class AsserterFactory{
 
-        private Map<String, IssueKpiAsserter> issuesAsserter = new LinkedHashMap<>();
+        private Map<String, IssueKpiAsserter<AsserterFactory>> issuesAsserter = new LinkedHashMap<>();
 
-        public IssueKpiAsserter issueKpi(String pKey) {
-            issuesAsserter.putIfAbsent(pKey,new IssueKpiAsserter(getIssueKpi(pKey), environment));
+        public IssueKpiAsserter<AsserterFactory> issueKpi(String pKey) {
+            issuesAsserter.putIfAbsent(pKey,new IssueKpiAsserter<AsserterFactory>(getIssueKpi(pKey), environment,this));
             return issuesAsserter.get(pKey);
         }
 
@@ -61,7 +77,7 @@ public class DSLKpi {
         }
 
         public IssueBehavior givenIssueKpi(String pkey) {
-            return issues.computeIfAbsent(pkey, (key) -> new IssueBehavior(kpiContext.getIssueKpi(key)));
+            return issues.computeIfAbsent(pkey, (key) -> new IssueBehavior(kpiContext.environment.givenIssue(key)));
         }
         
         public <T> ExceptionBehavior<T> expectExceptionFromBehavior(DSLSimpleBehavior<T> behavior){
@@ -76,13 +92,13 @@ public class DSLKpi {
         }
 
         public class IssueBehavior {
-            private IssueKpi kpi;
+            private IssueKpiMocker kpi;
 
-            public IssueBehavior(IssueKpi kpi) {
-                this.kpi = kpi;
+            public IssueBehavior(IssueKpiMocker issueKpiMocker) {
+                this.kpi = issueKpiMocker;
             }
 
-            public IssueBehavior appliesBehavior(DSLBehavior<IssueKpi> behavior) {
+            public IssueBehavior appliesBehavior(DSLBehavior<IssueKpiMocker> behavior) {
                 behavior.execute(kpiContext.environment, kpi);
                 return this;
             }
@@ -92,6 +108,4 @@ public class DSLKpi {
             }
         }
     }
-
-
 }

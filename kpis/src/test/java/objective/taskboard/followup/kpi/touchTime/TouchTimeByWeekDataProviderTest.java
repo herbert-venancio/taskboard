@@ -639,7 +639,7 @@ public class TouchTimeByWeekDataProviderTest {
         public void behave(KpiEnvironment environment) {
             KPIProperties kpiProperties = environment.getKPIProperties();
             JiraProperties jiraProperties = environment.getJiraProperties();
-            IssueKpiService issueKpiService = environment.services().issueKpi().getServiceForProject(projectKey);
+            IssueKpiService issueKpiService = environment.services().issueKpi().getService();
             ProjectService projectService = environment.services().projects().getService();
             TouchTimeByWeekDataProvider subject = new TouchTimeByWeekDataProvider(issueKpiService, projectService, kpiProperties, jiraProperties);
             this.dataset = subject.getDataSet(projectKey, issueLevel, timezone);
