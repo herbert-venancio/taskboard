@@ -1,5 +1,7 @@
 package objective.taskboard.followup.kpi.transformer;
 
+import static java.util.Collections.emptyMap;
+
 import java.time.ZonedDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,6 +28,8 @@ public class AnalyticDataRowAdapter implements IssueKpiDataItemAdapter {
 
     @Override
     public Map<String, ZonedDateTime> getTransitions() {
+        if(statusHeader.isEmpty())
+            return emptyMap();
         Map<String,ZonedDateTime> transitions = new LinkedHashMap<>();
         
         for (int i = 0; i < row.transitionsDates.size(); i++) {
