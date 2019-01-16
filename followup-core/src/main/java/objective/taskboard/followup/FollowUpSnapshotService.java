@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
-import objective.taskboard.domain.FollowupDailySynthesis;
 import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.followup.ReleaseHistoryProvider.ProjectRelease;
 import objective.taskboard.followup.cluster.FollowupCluster;
@@ -37,7 +36,8 @@ public class FollowUpSnapshotService {
     private final FollowupClusterProvider clusterProvider;
     private final ReleaseHistoryProvider releaseHistoryProvider;
     private final ApplicationEventPublisher eventPublisher;
-
+    private final SynthesisSynchronizer synthesisSyncronizer;
+    
     @Autowired
     public FollowUpSnapshotService(
             Clock clock,
@@ -47,7 +47,8 @@ public class FollowUpSnapshotService {
             FollowUpDataGenerator dataGenerator,
             FollowupClusterProvider clusterProvider,
             ReleaseHistoryProvider releaseHistoryProvider,
-            ApplicationEventPublisher eventPublisher) {
+            ApplicationEventPublisher eventPublisher,
+            SynthesisSynchronizer synthesisSyncronizer) {
         this.clock = clock;
         this.historyRepository = historyRepository;
         this.projectService = projectService;
@@ -56,6 +57,7 @@ public class FollowUpSnapshotService {
         this.clusterProvider = clusterProvider;
         this.releaseHistoryProvider = releaseHistoryProvider;
         this.eventPublisher = eventPublisher;
+        this.synthesisSyncronizer = synthesisSyncronizer;
     }
 
     public FollowUpSnapshot getFromCurrentState(ZoneId timezone, String projectKey) {
@@ -148,24 +150,8 @@ public class FollowUpSnapshotService {
     }
 
     private synchronized void syncSynthesis(String projectKey, LocalDate date, ZoneId timezone, boolean override) {
-        ProjectFilterConfiguration project = projectService.getTaskboardProjectOrCry(projectKey);
-
-        if (dailySynthesisRepository.exists(project.getId(), date)) {
-            if (override) {
-                dailySynthesisRepository.remove(project.getId(), date);
-            } else {
-                return;
-            }
-        }
-
         FollowUpSnapshot snapshot = getFromHistory(date, timezone, projectKey);
-        EffortHistoryRow effortHistoryRow = snapshot.getEffortHistoryRow();
-
-        dailySynthesisRepository.add(new FollowupDailySynthesis(
-                project.getId(), 
-                date, 
-                effortHistoryRow.sumEffortDone, 
-                effortHistoryRow.sumEffortBacklog));
+        synthesisSyncronizer.syncSynthesis(snapshot, projectKey, date, override);
     }
 
     private interface FollowupDataSupplier {
