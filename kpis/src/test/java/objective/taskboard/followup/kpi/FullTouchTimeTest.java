@@ -82,7 +82,7 @@ public class FullTouchTimeTest {
         prepareTask(dsl);
         prepareFeature(dsl);
         prepareContinuous(dsl);
-        
+
         dsl
             .when()
                 .appliesBehavior(buildAllIssues("PROJ",ZONE_ID))
@@ -573,7 +573,7 @@ public class FullTouchTimeTest {
                     .addSubtasks("UX", "Alpha Test", "Alpha Bug")
                     .addSubtasks("Functional Test", "Functional Review", "QA")
                 .eoT()
-                .givenKpiProperties()
+                .withKpiProperties()
                     .atFeatureHierarchy("QAing")
                         .withChildrenType("QA")
                     .eoH()
@@ -604,7 +604,7 @@ public class FullTouchTimeTest {
                         .withChildrenStatus("Internal QAing")
                         .withChildrenStatus("QAing")
                     .eoH()
-                .eoKpi()
+                .eoKp()
                 .statuses()
                     .withProgressingStatuses("Doing", "UATing", "Planning")
                     .withProgressingStatuses("Developing", "Internal QAing", "QAing")
@@ -619,7 +619,7 @@ public class FullTouchTimeTest {
 
     private AllIssuesBehavior buildAllIssues(String project, ZoneId zoneId) {
         return new AllIssuesBehavior(project,zoneId);
-    }   
+    }
 
     private class AllIssuesBehavior implements DSLSimpleBehavior<EffortAsserter>{
 
@@ -634,33 +634,33 @@ public class FullTouchTimeTest {
 
         @Override
         public void behave(KpiEnvironment environment) {
-            
+
             environment.withTimezone(zoneId);
             JiraProperties jiraProperties = environment.getJiraProperties();
             KPIProperties kpiProperties = environment.getKPIProperties();
             Clock clock = environment.getClock();
-            
+
             MockedServices services = environment.services();
-         
+
             IssueBufferService issueBufferService = services.issuesBuffer().getService();
             ProjectService projectService = services.projects().getService();
             IssueKpiDataItemAdapterFactory factory = services.itemAdapterFactory().getComponent();
-            
+
             IssueKpiService subject = new IssueKpiService(issueBufferService, projectService, jiraProperties, kpiProperties, clock, factory);
-            
+
             for (KpiLevel level : KpiLevel.values()) {
                 allIssues.put(level, subject.getIssuesFromCurrentState(project, zoneId, level));
             }
-            
+
         }
 
         @Override
         public EffortAsserter then() {
             return new EffortAsserter(allIssues);
         }
-    
+
     }
-    
+
     private class EffortAsserter {
 
         private Map<KpiLevel, LevelAsserter> allLevelAsserter = new EnumMap<>(KpiLevel.class);
@@ -668,11 +668,11 @@ public class FullTouchTimeTest {
         public EffortAsserter(Map<KpiLevel, List<IssueKpi>> allIssues) {
             allIssues.entrySet().forEach( entry -> allLevelAsserter.put(entry.getKey(), new LevelAsserter(entry.getValue())));
         }
-        
+
         public LevelAsserter at(KpiLevel level) {
             return allLevelAsserter.get(level);
         }
-        
+
         private class LevelAsserter {
 
             private List<IssueKpi> issues;
@@ -680,23 +680,23 @@ public class FullTouchTimeTest {
             public LevelAsserter(List<IssueKpi> issues) {
                 this.issues = issues;
             }
-            
+
             public LevelAsserter hasSize(int size) {
                 assertThat(issues.size(),is(size));
                 return this;
             }
-            
+
             public IssueEffortAsserter issue(String pkey) {
                 Optional<IssueKpi> issue = issues.stream().filter(i -> pkey.equals(i.getIssueKey())).findFirst();
                 if(!issue.isPresent())
                     Assert.fail(String.format("Issue %s not found", pkey));
                 return new IssueEffortAsserter(issue.get());
             }
-            
+
             public EffortAsserter eoL() {
                 return EffortAsserter.this;
             }
-            
+
             private class IssueEffortAsserter {
 
                 private IssueKpi issueKpi;
@@ -705,23 +705,23 @@ public class FullTouchTimeTest {
                 public IssueEffortAsserter(IssueKpi issueKpi) {
                     this.issueKpi = issueKpi;
                 }
-                
+
                 public IssueEffortAsserter at(String status) {
                     this.status = status;
                     return this;
                 }
-                
+
                 public IssueEffortAsserter hasEffort(double hours) {
                     assertThat(issueKpi.getEffort(status),is(DateTimeUtils.hoursToSeconds(hours)));
                     return this;
                 }
-                
+
                 public LevelAsserter eoI() {
                     return LevelAsserter.this;
                 }
-                
+
             }
-            
+
         }
     }
 }

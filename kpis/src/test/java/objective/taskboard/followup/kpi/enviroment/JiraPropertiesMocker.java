@@ -6,9 +6,11 @@ import objective.taskboard.jira.properties.StatusConfiguration.StatusPriorityOrd
 
 public class JiraPropertiesMocker {
     private JiraProperties jiraProperties = new JiraProperties();
-    private String[] statusesOrdered;
     private KpiEnvironment environment;
-    
+    private String[] subtasksStatusesOrdered;
+    private String[] featuresStatusesOrdered;
+    private String[] demandStatusesOrdered;
+
     public JiraPropertiesMocker(KpiEnvironment kpiEnvironment) {
         this.environment = kpiEnvironment;
     }
@@ -25,12 +27,24 @@ public class JiraPropertiesMocker {
 
     private void mockStatusPriorityOrder() {
         StatusPriorityOrder statusOrder = new StatusPriorityOrder();
-        statusOrder.setSubtasks(statusesOrdered);
+        statusOrder.setSubtasks(subtasksStatusesOrdered);
+        statusOrder.setTasks(featuresStatusesOrdered);
+        statusOrder.setDemands(demandStatusesOrdered);
         jiraProperties.setStatusPriorityOrder(statusOrder);
     }
 
     public JiraPropertiesMocker withSubtaskStatusPriorityOrder(String ...statusesOrdered) {
-        this.statusesOrdered = statusesOrdered;
+        this.subtasksStatusesOrdered = statusesOrdered;
+        return this;
+    }
+
+    public JiraPropertiesMocker withFeaturesStatusPriorityOrder(String ...statusesOrdered) {
+        this.featuresStatusesOrdered = statusesOrdered;
+        return this;
+    }
+
+    public JiraPropertiesMocker withDemandStatusPriorityOrder(String ...statusesOrdered) {
+        this.demandStatusesOrdered = statusesOrdered;
         return this;
     }
 
@@ -38,5 +52,5 @@ public class JiraPropertiesMocker {
         return environment;
     }
 
-    
+
 }

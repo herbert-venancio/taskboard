@@ -27,10 +27,14 @@ public class KPIProperties {
 
     @NotEmpty
     @Valid
-    private List<String> progressingStatuses; 
+    private List<String> progressingStatuses;
 
     @Valid
     private CumulativeFlowDiagramProperties CumulativeFlowDiagram = new CumulativeFlowDiagramProperties();
+
+    @NotEmpty
+    @Valid
+    private List<TouchTimeSubtaskConfiguration> touchTimeSubtaskConfigs;
 
     public IssueTypeChildrenStatusHierarchy getFeaturesHierarchy() {
         return featuresHierarchy;
@@ -62,6 +66,14 @@ public class KPIProperties {
 
     public void setCumulativeFlowDiagram(CumulativeFlowDiagramProperties cumulativeFlowDiagram) {
         CumulativeFlowDiagram = cumulativeFlowDiagram;
+    }
+
+    public List<TouchTimeSubtaskConfiguration> getTouchTimeSubtaskConfigs() {
+        return touchTimeSubtaskConfigs;
+    }
+
+    public void setTouchTimeSubtaskConfigs(List<TouchTimeSubtaskConfiguration> touchTimeSubtaskConfigs) {
+        this.touchTimeSubtaskConfigs = touchTimeSubtaskConfigs;
     }
 
 }

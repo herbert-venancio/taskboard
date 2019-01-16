@@ -51,17 +51,17 @@ public class KPIEnvironmentBuilder {
 
     private KPIProperties kpiProperties = Mockito.mock(KPIProperties.class);
     private List<String> progressingStatuses;
-    
+
     private StatusPriorityOrder priorityOrder = new StatusPriorityOrder();
-    
+
     private MetadataService metadataService = Mockito.mock(MetadataService.class);
     private IssueTransitionService transitionService = Mockito.mock(IssueTransitionService.class);
-    
+
     private FixedClock clock = new FixedClock();
 
     public KPIEnvironmentBuilder() {}
 
-    
+
     public KPIEnvironmentBuilder withIssueTransitionService(IssueTransitionService transitionService) {
         this.transitionService = transitionService;
         return this;
@@ -130,7 +130,7 @@ public class KPIEnvironmentBuilder {
         IssueTypeChildrenStatusHierarchy demandHierarchy = new IssueTypeChildrenStatusHierarchy();
         demandHierarchy.setHierarchies(getHierachies(DEMAND));
         Mockito.when(kpiProperties.getDemandHierarchy()).thenReturn(demandHierarchy);
-        
+
         List<String> configuredProgresingStatuses = getConfiguredProgressingStatuses();
         Mockito.when(kpiProperties.getProgressingStatuses()).thenReturn(configuredProgresingStatuses);
     }
@@ -295,14 +295,14 @@ public class KPIEnvironmentBuilder {
     public List<IssueKpi> buildAllIssuesAsKpi() {
         return this.issues.values().stream().map(b -> b.build()).collect(Collectors.toList());
     }
-    
+
     public Map<KpiLevel,List<IssueKpi>> buildMapOfIssuesKpi() {
         List<IssueKpi> issuesKpi = this.issues.values().stream().map(b -> b.build()).collect(Collectors.toList());
         Map<KpiLevel,List<IssueKpi>> issuesByLevel = new EnumMap<>(KpiLevel.class);
         for (KpiLevel level : KpiLevel.values()) {
             issuesByLevel.put(level, issuesKpi.stream().filter(i -> i.getLevel() == level).collect(Collectors.toList()));
         }
-        
+
         return issuesByLevel;
     }
 
@@ -326,7 +326,7 @@ public class KPIEnvironmentBuilder {
             this.priorityOrder.setTasks(statuses);
         if(level.equals(SUBTASKS))
             this.priorityOrder.setSubtasks(statuses);
-        
+
         return this;
     }
 

@@ -68,7 +68,7 @@ public class TransitionsBuilder {
     public KpiEnvironment eoSt() {
         return fatherEnvironment;
     }
-    public Optional<StatusTransition> getFirtStatusTransition() {
+    public Optional<StatusTransition> getFirstStatusTransition() {
         if (firstTransition == null)
             throw new IllegalArgumentException("Issue with no transition configured");
 

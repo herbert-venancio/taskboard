@@ -11,11 +11,11 @@ import objective.taskboard.domain.ProjectFilterConfiguration;
 import objective.taskboard.jira.ProjectService;
 
 public class ProjectServiceMocker {
-    
+
     private MockedServices services;
     private ProjectService projectService = Mockito.mock(ProjectService.class);
     private Map<String, ProjectBuilder> projects = new LinkedHashMap<>();
-    
+
     public ProjectServiceMocker(MockedServices services) {
         this.services = services;
     }
@@ -24,7 +24,7 @@ public class ProjectServiceMocker {
         projects.putIfAbsent(key, new ProjectBuilder(key));
         return projects.get(key);
     }
-    
+
     public ProjectService getService() {
         configureExceptionToNotConfiguredProjects();
         projects.values().stream().forEach(p -> p.mockProject(projectService));
@@ -54,20 +54,20 @@ public class ProjectServiceMocker {
 
         public void mockProject(ProjectService projectService) {
             ProjectFilterConfiguration project = Mockito.mock(ProjectFilterConfiguration.class);
-            
+
             Mockito.when(project.getStartDate()).thenReturn(getStartDate());
             Mockito.when(project.getDeliveryDate()).thenReturn(getDeliveryDate());
-                    
+
             Mockito.doReturn(project).when(projectService).getTaskboardProjectOrCry(key);
-            
+
         }
 
         private Optional<LocalDate> getStartDate() {
-            return Optional.ofNullable(LocalDate.parse(startDate));
+            return Optional.ofNullable(startDate).map(LocalDate::parse);
         }
 
         private Optional<LocalDate> getDeliveryDate() {
-            return Optional.ofNullable(LocalDate.parse(deliveryDate));
+            return Optional.ofNullable(deliveryDate).map(LocalDate::parse);
         }
 
         public ProjectBuilder startAt(String startDate) {

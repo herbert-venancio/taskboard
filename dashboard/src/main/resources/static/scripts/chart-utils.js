@@ -285,6 +285,7 @@ class WeeklyChartBuilder extends ChartBuilderBase {
         });
         Highcharts.merge(true, this.options, {
             xAxis: {
+                type: 'datetime',
                 labels: {
                     formatter: function () {
                         return Highcharts.dateFormat('%e %b %y', this.value);
@@ -397,7 +398,6 @@ class CFDChartBuilder extends ChartBuilderBase {
 class TouchTimeChartBuilder extends ChartBuilderBase {
     constructor (divID) {
         super(divID);
-        this.options.xAxis.type = 'datetime';
         Highcharts.merge(true, this.options, this._chartOptions);
         Highcharts.merge(true, this.options, this._tooltipOptions);
         Highcharts.merge(true, this.options, this._xAxisOptions);
