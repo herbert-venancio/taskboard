@@ -264,13 +264,11 @@ class PieChartBuilder extends ChartBuilderBase {
             dataLabels: {
                 enabled: true,
                 formatter: function(){
-                    if(this.y > 0){
-                    	return `<b>${this.point.name}</b> : ${this.point.percentage.toFixed(2)} %`
+                    if (this.y > 0){
+                        return `${this.point.percentage.toFixed(2)} %`;
                     }
-                },
-                softConnector: false,
-                distance: 0
-            },
+                }
+            }
         };
     }
 }
