@@ -1,6 +1,7 @@
 package objective.taskboard.followup.kpi;
 
 import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
@@ -45,7 +46,7 @@ public class IssueKpiAsserter<T> {
 
     public IssueKpiAsserter<T> hasChild(String childKey) {
         Optional<IssueKpi> child = findChildByKey(childKey);
-        Assert.assertTrue(String.format("Child %s not found", childKey), child.isPresent());
+        assertThat(child).as("Child %s not found", childKey).isPresent();
         return this;
     }
 
