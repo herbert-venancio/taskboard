@@ -124,7 +124,10 @@ public class ProjectController {
 
         TeamFilterConfiguration team = createTeamAndConfigurations(defaultTeam.name, data.teamLeader, data.teamLeader, defaultTeam.members);
 
-        projectService.saveTaskboardProject(new ProjectFilterConfiguration(data.projectKey, team.getTeamId()));
+        ProjectFilterConfiguration project = new ProjectFilterConfiguration(data.projectKey, team.getTeamId());
+        project.setBaseClusterId(data.baseClusterId);
+
+        projectService.saveTaskboardProject(project);
     }
 
     private void validateTeamDoesntExist(String teamName) {
