@@ -157,6 +157,10 @@ public class JiraIssue {
         public CustomInputBuilder classOfService(FieldBuilder fieldBuilder) {
             return field(jiraProperties.getCustomfield().getClassOfService().getId(), fieldBuilder);
         }
+
+        public CustomInputBuilder tShirtSize(FieldBuilder fieldBuilder) {
+            return field(jiraProperties.getCustomfield().getTShirtSize().getMainTShirtSizeFieldId(), fieldBuilder);
+        }
     }
 
     public static class FieldBuilder {

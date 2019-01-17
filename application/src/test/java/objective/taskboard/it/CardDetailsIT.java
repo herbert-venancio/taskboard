@@ -42,7 +42,6 @@ public class CardDetailsIT extends AuthenticatedIntegrationTest {
             .assertClassOfService("Expedite");
     }
 
-
     @Test
     public void whenSummaryIsCanceled_ShouldKeepOldValueAfterReloadPage() {
         MainPage mainPage = MainPage.produce(webDriver);
@@ -71,16 +70,35 @@ public class CardDetailsIT extends AuthenticatedIntegrationTest {
         MainPage mainPage = MainPage.produce(webDriver);
 
         mainPage.errorToast().close();
-
+        
         mainPage.issue("TASKB-235")
             .click()
             .issueDetails()
             .setSummary("New title for issue");
-
+    
         mainPage.reload();
-
+    
         mainPage.issue("TASKB-235")
             .issueDetails()
             .assertSummary("New title for issue");
+    }
+        
+    @Test
+    public void whenSizeIsReplaced_ShouldUpdateIssueImmediatlyWithNewSize() {
+        MainPage mainPage = MainPage.produce(webDriver);
+
+        mainPage.errorToast().close();
+
+        mainPage.issue("TASKB-624")
+            .click()
+            .issueDetails()
+            .assertTShirtSize("S")
+            .setTShirtSize("M");
+
+        mainPage.reload();
+
+        mainPage.issue("TASKB-624")
+            .issueDetails()
+            .assertTShirtSize("M");
     }
 }

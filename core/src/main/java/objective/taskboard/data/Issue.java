@@ -239,6 +239,10 @@ public class Issue extends IssueScratch implements Serializable {
         return classOfService == null ? defaultClassOfService : (String)classOfService.getValue();
     }
 
+    public String getClassOfServiceFieldId() {
+        return jiraProperties.getCustomfield().getClassOfService().getId();
+    }
+
     private Long getClassOfServiceId() {
         CustomField classOfService = getClassOfServiceCustomField();
         return classOfService == null ? 0L : classOfService.getOptionId();
@@ -359,6 +363,10 @@ public class Issue extends IssueScratch implements Serializable {
         if (tshirtSizes.size() == 1)
             return tshirtSizes.get(0).getValue().toString();
         return "";
+    }
+
+    public String getCardTshirtSizeFieldId() {
+        return jiraProperties.getCustomfield().getTShirtSize().getMainTShirtSizeFieldId();
     }
 
     public Long getId() {

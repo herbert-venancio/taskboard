@@ -230,6 +230,15 @@ public class JiraService {
             throw new FrontEndMessageException("Unexpected return code during saveSummary: " + result.getStatus());
     }
 
+    public void saveTshirt(String issueKey, String size) {
+        Response result = updateIssue(issueKey, JiraIssue.Input.builder(properties)
+                .tShirtSize(byValue(size))
+                .build());
+
+        if (HttpStatus.valueOf(result.getStatus()) != HttpStatus.NO_CONTENT)
+            throw new FrontEndMessageException("Unexpected return code during saveTshirt: " + result.getStatus());
+    }
+
     public void setTeams(String issueKey, List<Long> teamsIds) {
         log.debug("⬣⬣⬣⬣⬣  setTeams");
         String assignedTeamCfId = properties.getCustomfield().getAssignedTeams().getId();
