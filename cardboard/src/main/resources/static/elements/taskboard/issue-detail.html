@@ -419,7 +419,9 @@
             .details-row.description-row {
                 width: 100%;
                 margin:0;
+                cursor:text;
             }
+
             .description-row--collapsed {
                 overflow-y: hidden;
                 max-height: 20vh;
@@ -902,7 +904,7 @@
                                 </template>
 
                                 <template is="dom-if" if="{{editSummaryIsOpen}}">
-                                    <div class="card-summary-wrapper edit-summary-wrapper">
+                                    <div class="card-summary-wrapper edit-summary-wrapper" on-keyup="_keyEventsSummary">
                                         <input class="card-summary-field" type="text" value="{{newSummaryValue::input}}" />
                                         <div class="card--icons-wrapper">
                                             <paper-button class="card-name__cancel-button" on-tap="_toggleSummaryEditMode" title="Click to Cancel">
@@ -1038,9 +1040,9 @@
 
                             <div class="description-box">
                                <template is="dom-if" if="{{!descriptionIsEditable}}">
-                                    <div class$="details-row  description-row {{getDescriptionClass(item)}}">
+                                    <div class$="details-row  description-row {{getDescriptionClass(item)}}" on-tap="_openDescriptionEditMode" title="Click to Edit">
                                         <marked-element markdown="{{getDescription(item)}}"></marked-element>
-                                        <div class="wrapper-edit" on-tap="_openDescriptionEditMode">
+                                        <div class="wrapper-edit">
                                             <iron-icon class="description-edit" icon="taskboard-icons:edit"></iron-icon>
                                         </div>
                                     </div>
@@ -1661,6 +1663,11 @@
 
                 _openDescriptionEditMode: function() {
                      this.descriptionIsEditable = true;
+
+                     setTimeout(function() {
+                         descriptionField = document.querySelector('.description-box__field');
+                         descriptionField.focus();
+                     }, 10)
                 },
                 
                 _closeDescriptionEditMode: function() {
@@ -2294,7 +2301,7 @@
                     }
                 },
 
-                _updateIssueSummary: function(e) {
+                _updateIssueSummary : function(e) {
                     var self = this;
                     
                     this._issueAction("saveSummary", "save summary " + this.item.issueKey, this.newSummaryValue)
@@ -2303,6 +2310,18 @@
                      }).done(function() {
                          self._toggleSummaryEditMode();
                      });
+                },
+
+                _keyEventsSummary: function(event) {
+                    var key = event.key;
+
+                    if (key === "Escape") {
+                        this._toggleSummaryEditMode();
+                    }
+                    
+                    if (key === "Enter") {
+                        this._updateIssueSummary();
+                    }
                 }
             });
         })();
