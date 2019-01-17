@@ -80,45 +80,62 @@ node("single-executor") {
             handleError('objective-solutions/taskboard', 'devops@objective.com.br', 'objective-solutions-user')
             throw ex
         }
-        if (isMasterBranch() || isPostBuildBranch()) {
-            def project = readApplicationPom()
-            stage('Deploy Maven') {
-                sh "${mvnHome}/bin/mvn --batch-mode -V clean deploy -DskipTests -DaltDeploymentRepository=repo::default::$SNAPSHOT_URL"
-                if (!params.RELEASE) {
-                    def downloadUrl = extractDownloadUrl(project)
-                    addDownloadBadge(downloadUrl)
-                }
-            }
-            stage('Deploy Docker') {
-                if (params.RELEASE)
-                    print "Skipping deploy during release"
-                else {
-                    def tag = isMasterBranch() ? 'latest' : env.BRANCH_NAME
-                    dir('liferay-environment-bootstrap') {
-                        git branch: 'master', credentialsId: 'objective-solutions-user-rsa', url: 'git@gitlab:sdlc/liferay-environment-bootstrap.git'
 
-                        dir ('dockers/taskboard') {
-                            sh 'cp ../../../application/target/application-*-SNAPSHOT.war ./taskboard.war'
-                            sh "sudo docker build -t dockercb:5000/taskboard-snapshot:$tag ."
-                            sh "sudo docker push dockercb:5000/taskboard-snapshot:$tag"
-                        }
-                    }
-                }
+        def isOfficialBranch = isMasterBranch() || isPostBuildBranch()
+        if (!isOfficialBranch)
+            return;
+
+        stage('Deploy Maven') {
+            sh "${mvnHome}/bin/mvn --batch-mode -V clean deploy -DskipTests -P packaging-war,dev -DaltDeploymentRepository=repo::default::$SNAPSHOT_URL"
+        }
+
+        def project = readMavenPom file: ''
+        stage('Release') {
+            when {
+                params.RELEASE 
+            } 
+            steps {
+                echo 'Releasing...'
+                sh "git checkout ${env.BRANCH_NAME}"
+                sh "${mvnHome}/bin/mvn --batch-mode -Dresume=false release:prepare release:perform -DaltReleaseDeploymentRepository=repo::default::$RELEASE_URL -Darguments=\"-DaltDeploymentRepository=internal::default::$RELEASE_URL -P packaging-war,dev -DskipTests=true -Dmaven.test.skip=true -Dmaven.javadoc.skip=true\""
+
+                def applicationProject = readApplicationPom()
+                def downloadUrl = extractDownloadUrl(applicationProject)
+                addDownloadBadge(downloadUrl)
+                updateJobDescription(downloadUrl)
+                if(isMasterBranch())
+                    createPostBuildBranch()
             }
-            if (params.RELEASE) {
-                stage('Release') {
-                    echo 'Releasing...'
-                    sh "git checkout ${env.BRANCH_NAME}"
-                    sh "${mvnHome}/bin/mvn --batch-mode -Dresume=false release:prepare release:perform -DaltReleaseDeploymentRepository=repo::default::$RELEASE_URL -Darguments=\"-DaltDeploymentRepository=internal::default::$RELEASE_URL -DskipTests=true -Dmaven.test.skip=true -Dmaven.javadoc.skip=true\""
-                    def downloadUrl = extractDownloadUrl(project)
-                    addDownloadBadge(downloadUrl)
-                    updateJobDescription(downloadUrl)
-                    if(isMasterBranch())
-                        createPostBuildBranch(project)
-                }
+        }
+
+        stage('Deploy Docker') {
+            def projectVersion = project.version.replace("-SNAPSHOT", "");
+            def tag = "";
+            if (params.RELEASE)
+                deployDocker("devopsobj/objective-taskboard:$projectVersion", "devopsobj", "")
+            else {
+                tag = isMasterBranch() ? 'snapshot-master' : 'snapshot-'+projectVersion;
+                deployDocker("repo:5000/objective-taskboard:$tag", "repo-admin", "repo:5000")
             }
         }
     }
+}
+
+def deployDocker(imageFullName, dockerCredentialId, dockerServer) {
+    dir('liferay-environment-bootstrap') {
+        git branch: 'master', credentialsId: 'objective-solutions-user-rsa', url: 'git@gitlab:sdlc/liferay-environment-bootstrap.git'
+
+        dir ('dockers/taskboard') {
+            sh 'cp ../../../application/target/application*.war ./taskboard.war'
+            sh "sudo docker build -t $imageFullName ."
+
+            withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: dockerCredentialId,
+                usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASSWORD']]) {
+                sh "sudo docker login -u='${DOCKER_USER}' -p='$DOCKER_PASSWORD' $dockerServer"
+                sh "sudo docker push $imageName:$tag"
+            }
+        }
+    }    
 }
 
 def isMasterBranch() {
@@ -180,7 +197,6 @@ def createPostBuildBranch(project) {
     sh """
         git checkout -b $pbBranch $tagName
         mvn release:update-versions -DdevelopmentVersion=$pbVersion
-        git add pom.xml
         mvn scm:checkin -Dmessage="[jenkins-pipeline] prepare post-build branch $pbBranch"
     """
 }
