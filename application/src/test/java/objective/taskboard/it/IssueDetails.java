@@ -287,6 +287,22 @@ class IssueDetails extends AbstractUiFragment {
         return this;
     }
 
+    public IssueDetails setTShirtSize(String size) {
+        assertIsOpened();
+        String pickerSelector = "#tShirtSelector";
+
+        WebElement tShirtTag = getElementWhenItExists(By.id("tshirt-selector"));
+        waitForClick(tShirtTag);
+        return selectStringInPicker(size, pickerSelector);
+    }
+
+    public IssueDetails assertTShirtSize(String size) {
+        assertIsOpened();
+        WebElement tShirtValue = getElementWhenItExists(By.id("tshirt-value"));
+        waitTextInElement(tShirtValue, size);
+        return this;
+    }
+
     public IssueDetails assertIssueType(String issueTypeExpected) {
         assertIsOpened();
         waitUntilElementExistsWithText(cssSelector(".issue-detail.issue-type .text"), issueTypeExpected);

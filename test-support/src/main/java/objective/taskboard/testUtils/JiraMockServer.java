@@ -239,6 +239,9 @@ public class JiraMockServer {
                     case "customfield_11440"://Class Of Service
                         setClassOfService(fields, aKey, reqFields.getJSONObject(aKey));
                         break;
+                    case "customfield_11457": //T-Shirt Size
+                        setTShirtSize(fields, aKey, reqFields.getJSONObject(aKey));
+                        break;
                     case "customfield_11455"://Release
                         setRelease(fields, aKey, reqFields.getJSONObject(aKey));
                         break;
@@ -441,6 +444,29 @@ public class JiraMockServer {
         fields.put("updated", nowIso8601());
     }
 
+    private static void setTShirtSize(JSONObject fields, String aKey, JSONObject newTShirtSize) throws JSONException {
+        JSONObject makeTShirtSize = createEmptyTShirtSize();
+        JSONObject meta = new JSONObject(loadMockData("createmeta.response.json"));
+        JSONObject project = meta.getJSONArray("projects").getJSONObject(0);
+        JSONObject issuetype = project.getJSONArray("issuetypes").getJSONObject(0);
+        JSONArray allowedValues = issuetype.getJSONObject("fields").getJSONObject("customfield_11441").getJSONArray("allowedValues");
+
+        Map<String, Long> valueToIdMap = new HashMap<>();
+        for(int i = 0; i < allowedValues.length(); ++i) {
+            JSONObject value = allowedValues.getJSONObject(i);
+            Long id = value.getLong("id");
+            String name = value.getString("value");
+            valueToIdMap.put(name, id);
+        }
+
+        String value = newTShirtSize.getString("value");
+        Long id = valueToIdMap.get(value);
+        makeTShirtSize.put("id", id);
+        makeTShirtSize.put("value", value);
+        fields.put(aKey, makeTShirtSize);
+        fields.put("updated", nowIso8601());
+    }
+
     private static void setRelease(JSONObject fields, String aKey, JSONObject newRelease) throws JSONException {
         fields.put(aKey, newRelease);
         fields.put("updated", nowIso8601());
@@ -452,6 +478,14 @@ public class JiraMockServer {
         classOfService.put("self", "");
         classOfService.put("value", "");
         return classOfService;
+    }
+
+    private static JSONObject createEmptyTShirtSize() throws JSONException {
+        JSONObject tShirtSize = new JSONObject();
+        tShirtSize.put("id", "");
+        tShirtSize.put("self", "");
+        tShirtSize.put("value", "");
+        return tShirtSize;
     }
 
     private static void setStatus(JSONObject fields, JSONObject newStatus) throws JSONException {

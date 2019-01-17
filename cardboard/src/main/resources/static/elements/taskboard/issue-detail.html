@@ -625,9 +625,18 @@
                 background-color: #8e8e8e !important;
                 cursor: pointer;
             }
+            
+            .tshirt {
+                background-color: #8e8e8e !important;
+            }
 
-            .parent-team iron-icon {
+            .parent-team iron-icon, 
+            .tshirt iron-icon {
                 color: #e5e5e5 !important;
+            }
+
+            #tshirt-selector {
+                cursor:pointer;
             }
 
             .people-picker {
@@ -639,7 +648,7 @@
                 padding-left: 6px;
                 padding-right: 6px;
                 white-space: nowrap;
-                margin: 2px 0px;
+                margin: 0px;
                 height: 24px;
             }
 
@@ -799,12 +808,16 @@
             .text {
                 font-size: 14px;
             }
-            #class-of-service-value {
+            #class-of-service-value,
+            #tshirt-value {
+                float:left;
                 border-radius: 5px;
-                padding: 4px 6px;
-                width: min-content;
+                padding: 0px 6px;
                 white-space: nowrap;
                 display: flex;
+                height:24px;
+                line-height:24px;
+                margin:0;
             }
 
             #class-of-service-selector {
@@ -832,6 +845,7 @@
                 --paper-toggle-button-unchecked-bar: {
                     border: 1px solid #aaaaaa
                 }
+
                 --paper-toggle-button-checked-bar-color: white;
                 --paper-toggle-button-checked-bar: {
                     border: 1px solid #aaaaaa
@@ -1025,15 +1039,38 @@
                                             <span>{{item.release.name}}</span>
                                         </div>
                                     </div>
-                                </template>
-                                <template is="dom-if" if="{{item.cardTshirtSize}}">
-                                    <div class="details-column">
-                                        <div class="subsubtitle">Size</div>
-                                        <div class="sub-content">
-                                            {{item.cardTshirtSize}}
+                                </template> 
+                                 <div class="details-column">
+                                    <template is="dom-if" if="{{item.cardTshirtSize}}">
+                                        <div>
+                                            <div class="subsubtitle">Size</div>
+
+                                            <template is="dom-if" if="{{tShirtPickerIsVisible}}">
+                                                <paper-material id="tshirt-value" class="sub-content tshirt tag">
+                                                    <span id="tshirt-selector" on-tap="_showTShirtPicker"
+                                                            data-picker$="tShirtSelector">{{item.cardTshirtSize}}</span>
+                                                    <iron-icon class="icon-tiny assignee-button" icon="taskboard-icons:change-team"
+                                                        on-tap="_showTShirtPicker"
+                                                        title="Replace {{item.cardTshirtSize}} by another size">
+                                                    </iron-icon>
+                                                </paper-material>
+                                            </template>
+                                            <template is="dom-if" if="{{!tShirtPickerIsVisible}}">
+                                                <span class="tshirt-description">{{item.cardTshirtSize}}</span>
+                                            </template>
                                         </div>
-                                    </div>
-                                </template>
+                                    </template>
+
+                                    <tshirt-picker
+                                        id="tShirtSelector"
+                                        class="people-picker"
+                                        options="{{tShirtOptions}}"
+                                        on-selected-tshirt = "_changeTShirt"
+                                        on-close-clicked = "_closePicker"
+                                        on-tap="_stopPropagation"
+                                        >
+                                    </tshirt-picker>
+                                </div>
                             </div>
 
                             <div class="subtitle">Description</div>
@@ -1427,6 +1464,17 @@
                     editSummaryIsOpen: {
                         type: Boolean,
                         value: false
+                    },
+
+                    tShirtOptions: {
+                        type: Array,
+                        value: [],
+                        notify: true
+                    },
+
+                    tShirtPickerIsVisible: {
+                        type: Boolean,
+                        value: false
                     }
                 },
 
@@ -1532,9 +1580,18 @@
                     e.stopPropagation();
                     this._closeAllPickers();
                     this.$.classOfServiceSelector.open();
-                    var label = this.$$('#class-of-service-value')
-                    $(this.$.classOfServiceSelector).css("width", $(label).width()+40)
+                    var label = this.$$('#class-of-service-value');
+                    $(this.$.classOfServiceSelector).css("width", $(label).width()+40);
                     this.$.classOfServiceSelector.open(label);
+                },
+
+                _showTShirtPicker: function(e) {
+                    e.stopPropagation();
+                    this._closeAllPickers();
+                    this.$.tShirtSelector.open();
+                    var label = this.$$('#tshirt-value');
+                    $(this.$.tShirtSelector).css("width", $(label).width() + 40);
+                    this.$.tShirtSelector.open(label);
                 },
 
                 _addOrReplaceTeam: function(e) {
@@ -1589,6 +1646,21 @@
                         })
                 },
 
+                _changeTShirt: function(e) {
+                    var tShirtPicker = e.target,
+                        selectedTShirt = tShirtPicker.selected;
+
+                    if (!selectedTShirt) {
+                        tShirtPicker.close();
+                        return;
+                    }
+
+                    this._issueAction('saveTshirt', 'chang size of issue' + this.item.issueKey, selectedTShirt)
+                        .always(function() {
+                            tShirtPicker.close();
+                        })
+                },
+
                 _setupPickers: function() {
                     // setup replacement pickers
                     var self = this;
@@ -1639,8 +1711,22 @@
                         if (classOfServicePicker.label)
                             classOfServicePicker.label.show();
                     }
+
+                    var tShirtPicker = self.$.tShirtSelector;
+                    tShirtPicker.open = function(label) {
+                        tShirtPicker.clear();
+                        $(tShirtPicker).show();
+                        tShirtPicker.focus();
+                        tShirtPicker.label = $(label);
+                        tShirtPicker.label.hide();
+                    }
+                    tShirtPicker.close = function() {
+                        $(tShirtPicker).hide();
+                        if (tShirtPicker.label)
+                            tShirtPicker.label.show();
+                    }
                 },
-               
+
                 _closePicker: function(e) {
                      e.target.close();
                  },
@@ -1922,15 +2008,22 @@
                     this.setCard(item);
                     this.classOfServiceOptions = [];
                     this.classOfServicePickerIsVisible = false;
-                    
-                    this.getFieldOptions(item, 'Class of Service', function(data, el) {
+                    this.getFieldOptions(item, item.classOfServiceFieldId, function(data, el) {
                         self.classOfServiceOptions = data;
-                        
+
                         if (data.length > 1) {
                             self.classOfServicePickerIsVisible = true;
                         }
                     });
                     
+                    this.getFieldOptions(item, item.cardTshirtSizeFieldId, function(data, el) {
+                        self.tShirtOptions = data;
+
+                        if (data.length > 1) {
+                            self.tShirtPickerIsVisible = true;
+                        }
+                    });
+
                     this.$.modal.open();
                     this.isOpen = true;
 
@@ -1954,7 +2047,6 @@
                     else setTimeout(function() {
                        self._expandDescription();
                     },10);
-
                 },
 
                 _resizeModal: function() {
@@ -1962,7 +2054,6 @@
                 },
 
                 setCard: function(item) {
-
                     this.hasSubtasks = (typeof item.subtasks !== undefined && item.subtasks.length > 0);
                     this.canHaveSubtasks = item.feature || item.demand;
 
@@ -2006,7 +2097,7 @@
                     this._updateIssueLocalState();
                 },
                 
-                getFieldOptions: function(item , fieldName, callback) {
+                getFieldOptions: function(item , fieldId, callback) {
                     var self = this,
                         fieldOptions = [];
 
@@ -2021,7 +2112,7 @@
                             
       
                             fieldFromIssueType = selectedIssueType['0'].fields.filter(function(field) {
-                                return (field.name == fieldName);
+                                return (field.id == fieldId);
                             });
                             
                             fieldOptions = fieldFromIssueType['0'] ? fieldFromIssueType['0'].allowedValues : fieldOptions

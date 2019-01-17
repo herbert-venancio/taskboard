@@ -55,6 +55,7 @@ public class CardDto {
     public boolean usingDefaultTeam;
     public boolean usingParentTeam;
     public String classOfServiceValue;
+    public String classOfServiceFieldId;
     public boolean demand;
     public boolean feature;
     public boolean subTask;
@@ -63,6 +64,7 @@ public class CardDto {
     public boolean completed;
     public List<CustomField> subtasksTshirtSizes;
     public String cardTshirtSize;
+    public String cardTshirtSizeFieldId;
     public String typeIconUri;
     public long parentType;
     public String parentTypeIconUri;
@@ -104,6 +106,7 @@ public class CardDto {
         cardDto.priorityOrder = issue.getPriorityOrder();
         
         cardDto.classOfServiceValue = issue.getClassOfServiceValue();
+        cardDto.classOfServiceFieldId = issue.getClassOfServiceFieldId();
         cardDto.demand = issue.isDemand();
         cardDto.feature = issue.isFeature();
         cardDto.subTask = issue.isSubTask();
@@ -113,6 +116,7 @@ public class CardDto {
 
         cardDto.subtasksTshirtSizes = issue.getSubtasksTshirtSizes();
         cardDto.cardTshirtSize = issue.getCardTshirtSize();
+        cardDto.cardTshirtSizeFieldId = issue.getCardTshirtSizeFieldId();
         cardDto.typeIconUri = issue.getTypeIconUri();
         cardDto.release = issue.getRelease();
         
@@ -165,6 +169,7 @@ public class CardDto {
                 , dto.timeTracking
                 , dto.release
                 , dto.classOfServiceValue
+                , dto.classOfServiceFieldId
                 , dto.additionalEstimatedHours
                 , dto.cancelled
                 , dto.completed
@@ -183,6 +188,7 @@ public class CardDto {
                 , dto.usingParentTeam
                 , dto.subTask
                 , dto.cardTshirtSize
+                , dto.cardTshirtSizeFieldId
                 , dto.parentTypeIconUri
                 , dto.statusOrder
                 , dto.subtasks

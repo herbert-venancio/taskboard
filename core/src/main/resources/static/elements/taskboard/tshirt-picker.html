@@ -1,10 +1,10 @@
-<dom-module id="team-picker">
+<dom-module id="tshirt-picker">
     <template>
         <tag-picker
-                id = "team-selector-autocomplete"
-                source="{{availableTeams}}"
-                text-property="teamName"
-                value-property="id"
+                id = "tshirt-selector-autocomplete"
+                source="{{options}}"
+                text-property="value"
+                value-property="value"
                 on-selected-value="_onSelect"
                 on-close-suggestions-clicked="_onClose"
                 >
@@ -14,31 +14,27 @@
     <script>
         (function () {
             Polymer({
-                is: 'team-picker',
+                is: 'tshirt-picker',
                 properties: {
                     selected: {
                         type: String
+                    },
+                    options: {
+                        type: Array
                     }
                 },
                 
-                availableTeams: {
-                    type: Array,
-                    value: []
-                },                
-
                 attached: function() {
                     this.tagPicker = this.$$('tag-picker');
                     this.tagPicker.setQueryFn(function(source, query) {
                         var suggestions = source.filter(function(t) {
-                            return t.teamName.toLowerCase().indexOf(query.toLowerCase()) !== -1;
+                            return t.value.toLowerCase().indexOf(query.toLowerCase()) !== -1;
                         });
                         if (suggestions.length === 0)
-                            return [{"teamName":"No matches"}];
+                            return [{"cardTshirtSize":"No matches"}];
 
                         return suggestions;
                     }.bind(this));
-
-                    this.availableTeams = taskboard.getAvailableTeams();
                 },
                 
                 clear: function() {
@@ -47,17 +43,17 @@
                 
                 focus: function() {
                     this.tagPicker.focus();
-                    this.tagPicker.suggestions(this.availableTeams);
+                    this.tagPicker.suggestions(this.options);
                 },
                 
-                _onSelect: function(item) {
-                    var team = item.detail;
-                    if (team)
-                        this.selected = team.id;
-                    this.fire("selected-team", {target: this})
+                _onSelect: function(e) {
+                    var tShirt = e.detail;
+                    if (tShirt)
+                        this.selected = tShirt.value;
+                    this.fire("selected-tshirt", {target: this})
                 },
                 
-                _onClose: function() {
+                _onClose: function(e) {
                     this.fire("close-clicked", {target: this})
                 }
             });

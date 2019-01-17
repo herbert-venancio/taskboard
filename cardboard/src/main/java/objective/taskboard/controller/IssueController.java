@@ -173,6 +173,11 @@ public class IssueController {
     public CardDto saveSummary(@PathVariable("issue") String issueKey, @RequestBody String summary) {
         return toCardDto(issueBufferService.saveSummary(issueKey, summary));
     }
+
+    @RequestMapping(path ="saveTshirt/{issue}", method = RequestMethod.POST)
+    public CardDto saveTshirt(@PathVariable("issue") String issueKey, @RequestBody String size) {
+        return toCardDto(issueBufferService.saveTshirt(issueKey, size));
+    }
     
     @RequestMapping(path = "transition", method = RequestMethod.POST)
     public CardDto transition(@RequestBody TransitionRequestDTO tr) throws JSONException {

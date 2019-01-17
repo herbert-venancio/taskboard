@@ -383,6 +383,11 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
         return updateIssueBuffer(issueKey);
     }
 
+    public Issue saveTshirt(String issueKey, String size) {
+        jiraBean.saveTshirt(issueKey, size);
+        return updateIssueBuffer(issueKey);
+    }
+
     private Issue syncIssueTeams(String issueKey, Issue issue) {
         jiraBean.setTeams(issue.getIssueKey(),issue.getRawAssignedTeamsIds());
         return updateIssueBuffer(issueKey);
