@@ -25,6 +25,7 @@ import java.util.List;
 public class ProjectCreationData {
     public String projectKey;
     public String teamLeader;
+    public Long baseClusterId;
     public ProjectCreationDataTeam defaultTeam;
 
     public static class ProjectCreationDataTeam {
