@@ -91,10 +91,7 @@ node("single-executor") {
 
         def project = readMavenPom file: ''
         stage('Release') {
-            when {
-                params.RELEASE 
-            } 
-            steps {
+            if (params.RELEASE) {
                 echo 'Releasing...'
                 sh "git checkout ${env.BRANCH_NAME}"
                 sh "${mvnHome}/bin/mvn --batch-mode -Dresume=false release:prepare release:perform -DaltReleaseDeploymentRepository=repo::default::$RELEASE_URL -Darguments=\"-DaltDeploymentRepository=internal::default::$RELEASE_URL -P packaging-war,dev -DskipTests=true -Dmaven.test.skip=true -Dmaven.javadoc.skip=true\""
