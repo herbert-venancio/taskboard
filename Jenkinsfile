@@ -129,7 +129,7 @@ def deployDocker(imageFullName, dockerCredentialId, dockerServer) {
             withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: dockerCredentialId,
                 usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASSWORD']]) {
                 sh "sudo docker login -u='${DOCKER_USER}' -p='$DOCKER_PASSWORD' $dockerServer"
-                sh "sudo docker push $imageName:$tag"
+                sh "sudo docker push $imageFullName"
             }
         }
     }    
