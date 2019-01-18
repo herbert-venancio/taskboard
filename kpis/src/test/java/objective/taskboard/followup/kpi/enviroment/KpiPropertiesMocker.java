@@ -58,7 +58,7 @@ public class KpiPropertiesMocker {
         return kpiProperties;
     }
 
-    public KpiEnvironment eoKp() {
+    public KpiEnvironment eoKP() {
         return fatherEnvironment;
     }
 

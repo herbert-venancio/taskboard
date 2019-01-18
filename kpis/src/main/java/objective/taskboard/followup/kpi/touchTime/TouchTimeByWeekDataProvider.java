@@ -5,12 +5,11 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -96,7 +95,7 @@ public class TouchTimeByWeekDataProvider implements TouchTimeProvider<TouchTimeC
         private DataCollector getDataCollector(KpiLevel level) {
             if (level == KpiLevel.SUBTASKS)
                 return new DataCollectorBySubtasksConfigs(projectRange, timezone, issues);
-            return new DataCollectorByProgresingStatuses(projectRange, timezone, issues, level);
+            return new DataCollectorByProgressingStatuses(projectRange, timezone, issues, level);
         }
     }
 
@@ -136,11 +135,11 @@ public class TouchTimeByWeekDataProvider implements TouchTimeProvider<TouchTimeC
 
     }
 
-    private class DataCollectorByProgresingStatuses extends DataCollector {
+    private class DataCollectorByProgressingStatuses extends DataCollector {
 
         private List<String> progressingStatuses;
 
-        public DataCollectorByProgresingStatuses(Range<LocalDate> projectRange, ZoneId timezone, List<IssueKpi> issues, KpiLevel level) {
+        public DataCollectorByProgressingStatuses(Range<LocalDate> projectRange, ZoneId timezone, List<IssueKpi> issues, KpiLevel level) {
             super(projectRange, timezone, issues);
             this.progressingStatuses = getProgressingStatuses(level);
         }
@@ -181,7 +180,6 @@ public class TouchTimeByWeekDataProvider implements TouchTimeProvider<TouchTimeC
 
     private class DataCollectorBySubtasksConfigs extends DataCollector {
         private Table<TouchTimeWeekRange, String, List<Double>> effortsByStackNameByWeek = HashBasedTable.create();
-        private Set<IssueKpi> issuesAlreadyCountedByType = new HashSet<>();
 
         public DataCollectorBySubtasksConfigs(Range<LocalDate> projectRange, ZoneId timezone, List<IssueKpi> issues) {
             super(projectRange, timezone, issues);
@@ -198,20 +196,15 @@ public class TouchTimeByWeekDataProvider implements TouchTimeProvider<TouchTimeC
         }
 
         private void aggregate(TouchTimeWeekRange week, List<IssueKpi> issuesFromWeek) {
-            issuesAlreadyCountedByType.clear();
+            List<IssueKpi> issuesFromWeekCopy = new LinkedList<>(issuesFromWeek);
+            
             for (TouchTimeSubtaskConfiguration conf : kpiProperties.getTouchTimeSubtaskConfigs()) {
-                collectEffortFromTypesForStack(conf.getStackName(), conf.getTypeIds(), week, issuesFromWeek);
-                collectEffortFromStatusesForStack(conf.getStackName(), conf.getStatuses(), week, issuesFromWeek);
+                List<IssueKpi> issuesSelectedByType = filterIssuesByTypes(conf.getTypeIds(), issuesFromWeek);
+                effortsByStackNameByWeek.put(week,conf.getStackName(),getEffortsFromIssues(week, issuesSelectedByType));
+                issuesFromWeekCopy.removeAll(issuesSelectedByType);
+                
+                collectEffortFromStatusesForStack(conf.getStackName(), conf.getStatuses(), week, issuesFromWeekCopy);
             }
-        }
-
-        private void collectEffortFromTypesForStack(String stackName, List<Long> typesIds, TouchTimeWeekRange week, List<IssueKpi> issuesFromWeek) {
-            List<IssueKpi> issuesSelectedByType = filterIssuesByTypes(typesIds, issuesFromWeek);
-            issuesAlreadyCountedByType.addAll(issuesSelectedByType);
-            effortsByStackNameByWeek.put(
-                    week,
-                    stackName,
-                    getEffortsFromIssues(week, issuesSelectedByType));
         }
 
         private List<IssueKpi> filterIssuesByTypes(List<Long> typesIds, List<IssueKpi> issuesFromWeek) {
@@ -232,17 +225,10 @@ public class TouchTimeByWeekDataProvider implements TouchTimeProvider<TouchTimeC
         }
 
         private void collectEffortFromStatusesForStack(String stackName, List<String> statuses, TouchTimeWeekRange week, List<IssueKpi> issuesFromWeek) {
-            List<IssueKpi> remainingIssues = filterIssuesAlreadyUsed(issuesFromWeek);
-            remainingIssues.stream()
+            issuesFromWeek.stream()
                 .map(i -> i.getEffortSumInSecondsFromStatusesUntilDate(statuses, week.getLastDay()))
                 .mapToDouble(DateTimeUtils::secondsToHours)
                 .forEach(effortSumInHours -> effortsByStackNameByWeek.get(week, stackName).add(effortSumInHours));
-        }
-
-        private List<IssueKpi> filterIssuesAlreadyUsed(List<IssueKpi> issues) {
-            return issues.stream()
-            .filter(i -> !issuesAlreadyCountedByType.contains(i))
-            .collect(Collectors.toList());
         }
 
         private List<TouchTimeChartByWeekDataPoint> transformToDataPoints() {

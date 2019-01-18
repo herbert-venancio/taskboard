@@ -604,7 +604,7 @@ public class FullTouchTimeTest {
                         .withChildrenStatus("Internal QAing")
                         .withChildrenStatus("QAing")
                     .eoH()
-                .eoKp()
+                .eoKP()
                 .statuses()
                     .withProgressingStatuses("Doing", "UATing", "Planning")
                     .withProgressingStatuses("Developing", "Internal QAing", "QAing")

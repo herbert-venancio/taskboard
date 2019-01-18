@@ -1,6 +1,7 @@
 package objective.taskboard.followup.kpi;
 
 import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
@@ -22,23 +23,35 @@ import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 import objective.taskboard.followup.kpi.enviroment.KpiEnvironment.IssueTypeDTO;
 import objective.taskboard.utils.DateTimeUtils;
 
-public class IssueKpiAsserter {
+public class IssueKpiAsserter<T> {
 
-    private IssueKpi subject;
+    protected IssueKpi subject;
     private Map<String, StatusAsserter> statusesAsserter = new LinkedHashMap<>();
     private KpiEnvironment environment;
+    private T fatherContext;
 
-    public IssueKpiAsserter(IssueKpi subject, KpiEnvironment environment) {
+    public IssueKpiAsserter(IssueKpi subject, KpiEnvironment environment, T fatherContext) {
         this.subject = subject;
         this.environment = environment;
+        this.fatherContext = fatherContext;
     }
 
-    public IssueKpiAsserter withChild(String childKey) {
-        Optional<IssueKpi> child = subject.getChildren().stream().filter(c -> childKey.equals(c.getIssueKey())).findFirst();
+    public IssueKpiAsserter<IssueKpiAsserter<T>> withChild(String childKey) {
+        Optional<IssueKpi> child = findChildByKey(childKey);
         if(!child.isPresent())
             Assert.fail(String.format("Child %s not found", childKey));
 
-        return new IssueKpiAsserter(child.get(),this.environment);
+        return new IssueKpiAsserter<IssueKpiAsserter<T>>(child.get(),this.environment,this);
+    }
+
+    public IssueKpiAsserter<T> hasChild(String childKey) {
+        Optional<IssueKpi> child = findChildByKey(childKey);
+        assertThat(child).as("Child %s not found", childKey).isPresent();
+        return this;
+    }
+
+    public T eoIA() {
+        return fatherContext;
     }
 
     public StatusAsserter atStatus(String status) {
@@ -60,6 +73,10 @@ public class IssueKpiAsserter {
 
     public RangeAsserter rangeBasedOnProgressingStatuses() {
         return new RangeAsserter();
+    }
+
+    private Optional<IssueKpi> findChildByKey(String childKey) {
+        return subject.getChildren().stream().filter(c -> childKey.equals(c.getIssueKey())).findFirst();
     }
 
     public class SubtaskChecker {
@@ -84,7 +101,7 @@ public class IssueKpiAsserter {
             return this;
         }
 
-        public IssueKpiAsserter eoSc() {
+        public IssueKpiAsserter<T> eoSc() {
             return IssueKpiAsserter.this;
         }
 
@@ -106,7 +123,7 @@ public class IssueKpiAsserter {
             return this;
         }
 
-        public IssueKpiAsserter endsOn(String end) {
+        public IssueKpiAsserter<T> endsOn(String end) {
             Optional<Range<LocalDate>> opRange = getRange();
             assertTrue(opRange.isPresent());
             Range<LocalDate> range = opRange.get();
@@ -123,7 +140,7 @@ public class IssueKpiAsserter {
             return subject.getDateRangeBasedOnProgressingStatuses(environment.getTimezone());
         }
 
-        public IssueKpiAsserter isNotPresent() {
+        public IssueKpiAsserter<T> isNotPresent() {
             Optional<Range<LocalDate>> opRange = getRange();
             assertFalse(opRange.isPresent());
             return IssueKpiAsserter.this;
@@ -164,7 +181,7 @@ public class IssueKpiAsserter {
             return this;
         }
 
-        public IssueKpiAsserter eoDc() {
+        public IssueKpiAsserter<T> eoDc() {
             return IssueKpiAsserter.this;
 
         }
@@ -205,7 +222,7 @@ public class IssueKpiAsserter {
             return hasTotalEffort(effortInseconds);
         }
 
-        public IssueKpiAsserter doesNotHaveEffort() {
+        public IssueKpiAsserter<T> doesNotHaveEffort() {
             assertThat(IssueKpiAsserter.this.subject.getEffort(this.status), is(0l));
 
             return IssueKpiAsserter.this;
@@ -215,7 +232,7 @@ public class IssueKpiAsserter {
             return new WithDate(DateTimeUtils.parseDateTime(date));
         }
 
-        public IssueKpiAsserter eoSa() {
+        public IssueKpiAsserter<T> eoSa() {
             return IssueKpiAsserter.this;
         }
 
@@ -230,6 +247,11 @@ public class IssueKpiAsserter {
                 assertThat(subject.getEffortFromStatusUntilDate(status, date),is(effort));
                 return StatusAsserter.this;
             }
+
+        }
+
+        public StatusAsserter hasNoEffort() {
+            return hasTotalEffortInHours(0);
         }
     }
 }

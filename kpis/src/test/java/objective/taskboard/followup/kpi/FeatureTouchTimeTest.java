@@ -161,10 +161,12 @@ public class FeatureTouchTimeTest {
                     .atStatus("Cancelled").hasTotalEffortInHours(0.0).eoSa();
     }
 
-    private DSLBehavior<IssueKpi> distributeWorklogs() {
+    private DSLBehavior<IssueKpiMocker> distributeWorklogs() {
 
-        return (environment, subject) ->
-                ChildrenWorklogDistributor.distributeWorklogs(environment.getKPIProperties().getFeaturesHierarchy(), subject);
+        return (environment, subject) ->{
+            IssueKpi kpi = subject.preventWorklogDistribution().buildIssueKpi();
+            ChildrenWorklogDistributor.distributeWorklogs(environment.getKPIProperties().getFeaturesHierarchy(), kpi);
+        };
     }
 
     private KpiPropertiesMocker withProperties() {
@@ -225,6 +227,7 @@ public class FeatureTouchTimeTest {
         public DSLWrapper prepareToCreateSubtask(String pKey) {
             currentFather = pKey;
             givenFeature(pKey)
+                .project("PROJ")
                 .type("Feature")
                 .withTransitions()
                     .status("Open").date("2020-01-01")

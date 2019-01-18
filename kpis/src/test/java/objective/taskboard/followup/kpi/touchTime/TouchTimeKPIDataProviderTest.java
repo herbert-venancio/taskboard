@@ -173,7 +173,7 @@ public class TouchTimeKPIDataProviderTest {
         public void behave(KpiEnvironment environment) {
             KPIProperties kpiProperties = environment.getKPIProperties();
             JiraProperties jiraProperties = environment.getJiraProperties();
-            IssueKpiService issueKpiService = environment.services().issueKpi().getServiceForProject(projectKey);
+            IssueKpiService issueKpiService = environment.services().issueKpi().getService();
             TouchTimeKPIDataProvider suject = new TouchTimeKPIDataProvider(issueKpiService, jiraProperties, kpiProperties);
             this.dataset = suject.getDataSet(projectKey, issueLevel, timezone);
         }

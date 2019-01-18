@@ -90,12 +90,12 @@ public class TransitionsBuilder {
     public Map<String, ZonedDateTime> getReversedTransitions() {
         LinkedList<TransitionDto> reversedOrder = new LinkedList<>();
         
-        
         TransitionDto currentIndex = firstTransition;
         while(currentIndex.next.isPresent()) {
            reversedOrder.push(currentIndex);
            currentIndex = currentIndex.next.get();
         }
+        reversedOrder.push(currentIndex);
         
         Map<String,ZonedDateTime> transitions = new LinkedHashMap<>();
         for (TransitionDto transition : reversedOrder) {

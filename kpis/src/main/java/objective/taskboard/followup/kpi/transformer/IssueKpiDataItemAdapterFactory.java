@@ -24,15 +24,22 @@ import objective.taskboard.jira.properties.JiraProperties;
 @Service
 public class IssueKpiDataItemAdapterFactory {
 
-    @Autowired
     private MetadataService metadataService;
     
-    @Autowired
     private JiraProperties jiraProperties;
     
-    @Autowired
     private IssueTransitionService transitionService;
     
+    @Autowired
+    public IssueKpiDataItemAdapterFactory(
+            MetadataService metadataService, 
+            JiraProperties jiraProperties,
+            IssueTransitionService transitionService) {
+        this.metadataService = metadataService;
+        this.jiraProperties = jiraProperties;
+        this.transitionService = transitionService;
+    }
+
     public List<IssueKpiDataItemAdapter> getItems(Optional<AnalyticsTransitionsDataSet> dataSet){
         if(!dataSet.isPresent())
             return Arrays.asList();

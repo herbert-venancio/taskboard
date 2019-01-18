@@ -2,8 +2,10 @@ package objective.taskboard.followup.kpi.enviroment;
 
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.mockito.Mockito;
 
@@ -13,7 +15,7 @@ import objective.taskboard.jira.ProjectService;
 public class ProjectServiceMocker {
 
     private MockedServices services;
-    private ProjectService projectService = Mockito.mock(ProjectService.class);
+    private ProjectService projectService;
     private Map<String, ProjectBuilder> projects = new LinkedHashMap<>();
 
     public ProjectServiceMocker(MockedServices services) {
@@ -26,9 +28,20 @@ public class ProjectServiceMocker {
     }
 
     public ProjectService getService() {
-        configureExceptionToNotConfiguredProjects();
-        projects.values().stream().forEach(p -> p.mockProject(projectService));
+        if(projectService == null)
+            mockService();
         return projectService;
+    }
+    
+    public List<String> getProjectsKeys(){
+        return projects.values().stream().map(p -> p.key).collect(Collectors.toList());
+    }
+
+     void mockService() {
+         projectService =  Mockito.mock(ProjectService.class);
+         configureExceptionToNotConfiguredProjects();
+         projects.values().stream().forEach(p -> p.mockProject(projectService));
+        
     }
 
     private void configureExceptionToNotConfiguredProjects() {

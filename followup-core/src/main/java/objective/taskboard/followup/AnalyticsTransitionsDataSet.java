@@ -1,5 +1,7 @@
 package objective.taskboard.followup;
 
+import static java.util.Collections.emptyList;
+
 import java.util.List;
 
 public class AnalyticsTransitionsDataSet extends TransitionDataSet<AnalyticsTransitionsDataRow> {
@@ -9,10 +11,16 @@ public class AnalyticsTransitionsDataSet extends TransitionDataSet<AnalyticsTran
     }
 
     public int getInitialIndexStatusHeaders() {
-        return headers.size() - rows.get(0).transitionsDates.size();
+        return headers.size() - transitionsSize();
+    }
+
+    private int transitionsSize() {
+        return rows.get(0).transitionsDates.size();
     }
     
     public List<String> getStatusHeader(){
+        if(headers.size() < transitionsSize())
+            return emptyList();
         return headers.subList(getInitialIndexStatusHeaders(), headers.size());
     }
 
