@@ -1824,6 +1824,7 @@
                     var self = this;
                     var issueBefore = this.item;
                     var issue = clone(this.item);
+                    self._setIssueLocalState(this.item, true, null);
 
                     var requestBody = issue.issueKey;
                     $.ajax({
