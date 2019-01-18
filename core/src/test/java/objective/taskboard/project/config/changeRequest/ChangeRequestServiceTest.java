@@ -18,6 +18,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 
 import objective.taskboard.auth.authorizer.permission.ProjectAdministrationPermission;
@@ -188,6 +189,7 @@ public class ChangeRequestServiceTest {
 
     private class ChangeRequestServiceBuilder {
         private ProjectAdministrationPermission projectAdministrationPermission = mock(ProjectAdministrationPermission.class);
+        private ApplicationEventPublisher eventPublisher = mock(ApplicationEventPublisher.class);
         int id = 0;
 
         public ChangeRequestServiceBuilder(){
@@ -224,7 +226,7 @@ public class ChangeRequestServiceTest {
         }
 
         public ChangeRequestService build(){
-            return new ChangeRequestService(changeRequestRepository, projectAdministrationPermission);
+            return new ChangeRequestService(changeRequestRepository, projectAdministrationPermission, eventPublisher);
         }
     }
 }

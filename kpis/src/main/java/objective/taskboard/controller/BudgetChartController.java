@@ -4,6 +4,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
+import objective.taskboard.followup.ChangeRequestUpdatedEvent;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
@@ -37,6 +38,11 @@ public class BudgetChartController {
     @CacheEvict(allEntries=true)
     @EventListener
     public void clearCache(SnapshotGeneratedEvent event) {
+    }
+
+    @CacheEvict(allEntries=true)
+    @EventListener
+    public void clearCache(ChangeRequestUpdatedEvent event) {
     }
 
     @Cacheable(key = "#projectKey + #zoneId")
