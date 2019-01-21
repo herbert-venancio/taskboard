@@ -126,6 +126,19 @@ public class WebhookControllerTest {
                 );
     }
 
+    @Test
+    public void whenMoveIssueToAnotherProject_ShouldCallIssueMovedWebhookEvent() {
+        givenJiraSend(webHook("TASKB-237_movePayload.json"));
+
+        whenProcessItems();
+
+        then(issueBufferService)
+            .updateByEvent()
+            .shouldHaveBeenCalled(
+                withArguments(equalTo(WebhookEvent.ISSUE_MOVED), equalTo("PROJ1-066"), anything())
+            );
+}
+
     private void givenJiraSend(WebhookControllerTestDSL.WebhookPayloadBuilder... builders) {
         dsl.jiraSend(builders);
     }

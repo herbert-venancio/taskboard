@@ -1,23 +1,3 @@
-/*-
- * [LICENSE]
- * Taskboard
- * - - -
- * Copyright (C) 2015 - 2016 Objective Solutions
- * - - -
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * [/LICENSE]
- */
 package objective.taskboard.it;
 
 import static java.util.Arrays.asList;
@@ -30,6 +10,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.junit.Before;
 import org.junit.Rule;
 
@@ -46,6 +28,7 @@ public abstract class AbstractIntegrationTest {
     private static final String JIRA_LOCAL_REST_API_ISSUE_URL = "http://localhost:4567/rest/api/latest/issue/";
     private static final ExecutorService service = Executors.newSingleThreadExecutor();
     private static final long TIMEOUT_IN_SECONDS = 120;
+    private static final String TASKB_PROJECT_KEY = "TASKB";
 
     @Rule
     public CleanupDataFolderRule clean = new CleanupDataFolderRule(Paths.get("rootDataTest/data/followup-templates"));
@@ -111,6 +94,32 @@ public abstract class AbstractIntegrationTest {
                 .put(); 
     }
 
+    protected static void emulateMoveIssueToProject(final String sourceIssueKey, final String destinationProjectKey) {
+        String jsonBody = IOUtilities.resourceToString("webhook/" + destinationProjectKey + "_movePayload.json");
+        String newIssueKey = getNewIssueKey(jsonBody);
+
+        emulateCreateIssueWithoutWebhookNotification(newIssueKey, jsonBody);
+        emulateDeleteIssueWithoutWebhookNotification(sourceIssueKey);
+        sendNotificationByWebhook(newIssueKey, "-issue_moved.json", destinationProjectKey);
+    }
+
+    private static String getNewIssueKey(final String jsonBody) {
+        String newIssueKey;
+        try {
+            JSONObject jsonObject = new JSONObject(jsonBody);
+
+            newIssueKey = jsonObject
+                .getJSONArray("issues")
+                .getJSONObject(0)
+                .get("key")
+                .toString();
+
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+        return newIssueKey;
+    }
+
     protected static void emulateUpdateIssue(String issueKey, IssueUpdateFieldJson... jsonList) {
         if (jsonList.length == 0)
             throw new IllegalArgumentException();
@@ -122,32 +131,42 @@ public abstract class AbstractIntegrationTest {
     }
 
     private static void emulateUpdateIssue(String issueKey, String fieldsJson) {
-        RequestBuilder 
-            .url(JIRA_LOCAL_REST_API_ISSUE_URL + issueKey) 
-            .body("{\"fields\":" + fieldsJson + "}") 
-            .put(); 
- 
-        String payloadJson = "_updatePayload.json";
-        sendNotificationByWebhook(issueKey, payloadJson); 
-    }
-
-    protected static void emulateDeleteIssue(String issueKey) { 
-        RequestBuilder 
+        RequestBuilder
             .url(JIRA_LOCAL_REST_API_ISSUE_URL + issueKey)
-            .delete(); 
- 
-        String payloadJson = "_deletePayload.json";
-        sendNotificationByWebhook(issueKey, payloadJson); 
+            .body("{\"fields\":" + fieldsJson + "}")
+            .put();
+
+        String payloadJson = "_updatePayload.json";
+        sendNotificationByWebhook(issueKey, payloadJson, TASKB_PROJECT_KEY);
     }
 
-    private static void sendNotificationByWebhook(String issueKey, String payloadJson) {
+    protected static void emulateDeleteIssue(final String issueKey) {
+        emulateDeleteIssueWithoutWebhookNotification(issueKey);
+
+        String payloadJson = "_deletePayload.json";
+        sendNotificationByWebhook(issueKey, payloadJson, TASKB_PROJECT_KEY);
+    }
+
+    private static void sendNotificationByWebhook(String issueKey, String payloadJson, final String projectKey) {
         String body = IOUtilities.resourceToString("webhook/" + issueKey + payloadJson);
 
-        RequestBuilder 
-            .url(getSiteBase()+"/webhook/TASKB") 
-            .header("Content-Type", "application/json") 
-            .body(body) 
+        RequestBuilder
+            .url(getSiteBase() + "/webhook/" + projectKey)
+            .header("Content-Type", "application/json")
+            .body(body)
             .post();
-    } 
+    }
 
+    private static void emulateDeleteIssueWithoutWebhookNotification(final String issueKey) {
+        RequestBuilder
+            .url(JIRA_LOCAL_REST_API_ISSUE_URL + issueKey)
+            .delete();
+    }
+
+    protected static void emulateCreateIssueWithoutWebhookNotification(final String issueKey, final String createBody) {
+        RequestBuilder
+                .url(JIRA_LOCAL_REST_API_ISSUE_URL + issueKey)
+                .body(createBody)
+                .post();
+    }
 }

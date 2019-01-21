@@ -104,7 +104,6 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
 
     private IssueBufferState state = IssueBufferState.uninitialised;
 
-    
     private List<IssueUpdate> issuesUpdatedByEvent = new ArrayList<>();
     private Set<String> projectsUpdatedByEvent = new HashSet<>();
 
@@ -214,8 +213,7 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
         if (issueDidntExistBefore)
             // created
             scheduleNotificationsForLinkedIssues(issueAfterUpdate);
-        else
-        if (issueAfterUpdate == null)
+        else if (issueAfterUpdate == null)
             // removed
             scheduleNotificationsForLinkedIssues(issueBeforeUpdate);
         else
@@ -225,18 +223,20 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
 
     private synchronized void updateCardFromWebhookEvent(WebhookEvent event, final String issueKey, Optional<JiraIssueDto> issue) {
         if (event == WebhookEvent.ISSUE_DELETED) {
-            issuesUpdatedByEvent.add(new IssueUpdate(cardsRepo.get(issueKey), IssueUpdateType.DELETED));
-            cardsRepo.remove(issueKey);
+            removeIssueAndAddDeletionEvent(issueKey);
             return;
         }
+
         if (!issue.isPresent())
             return;
-
+        
+        if (event == WebhookEvent.ISSUE_MOVED) {
+            Issue movedIssue = cardsRepo.getById(issue.get().getId());
+            removeIssueAndAddDeletionEvent(movedIssue.getIssueKey());
+            scheduleNotificationsForLinkedIssues(movedIssue);
+        }
         Issue updated = putJiraIssue(issue.get());
-
-        IssueUpdateType updateType = IssueUpdateType.UPDATED;
-        if (event == WebhookEvent.ISSUE_CREATED)
-            updateType = IssueUpdateType.CREATED;
+        IssueUpdateType updateType = getIssueType(event);
 
         issuesUpdatedByEvent.add(new IssueUpdate(updated, updateType));
     }
@@ -546,5 +546,17 @@ public class IssueBufferService implements ApplicationListener<ProjectUpdateEven
                 .filter(p -> projectService.isNonArchivedAndUserHasAccess(p.getKey()))
                 .flatMap(i -> i.getValue().stream())
                 .collect(toList());
+    }
+
+    private void removeIssueAndAddDeletionEvent(final String issueKey) {
+        issuesUpdatedByEvent.add(new IssueUpdate(cardsRepo.get(issueKey), IssueUpdateType.DELETED));
+        cardsRepo.remove(issueKey);
+    }
+
+    private IssueUpdateType getIssueType(final WebhookEvent webhookEvent) {
+        if (webhookEvent == WebhookEvent.ISSUE_UPDATED)
+            return IssueUpdateType.UPDATED;
+
+        return IssueUpdateType.CREATED;
     }
 }
