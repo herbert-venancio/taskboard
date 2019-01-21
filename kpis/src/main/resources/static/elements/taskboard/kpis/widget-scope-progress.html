@@ -1,33 +1,18 @@
-<!--
-  [LICENSE]
-  Taskboard
-  ---
-  Copyright (C) 2015 - 2016 Objective Solutions
-  ---
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU Affero General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
-  
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-  
-  You should have received a copy of the GNU Affero General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  [/LICENSE]
-  -->
 <dom-module id="widget-scope-progress">
 
     <template>
 
         <style>
+            #scope-progress {
+                height: 100%;
+                width: 100%;
+            }
         </style>
 
-        <widget-wrap title="Scope Progress" is-ready="{{isReady}}" error-message="{{errorMessage}}" options="{{options}}" chart="{{chart}}">
+        <widget-wrap title="Scope Progress" is-ready="{{isReady}}" error-message="{{errorMessage}}" options="{{options}}" highcharts-chart="{{chart}}">
             <div id="scope-progress" class="tb-chart"></div>
         </widget-wrap>
+
 
         <modal-wrap id="modal"
                     title="Scope Progress Filters"
@@ -91,11 +76,19 @@
                     },
                     chart: {
                         type: Object,
-                        readOnly: true,
-                        notify: true
+                        notify: true,
+                        value: null
                     },
                     options: {
                         type: Array,
+                        value: []
+                    },
+                    _plotSeries: {
+                        type: Object,
+                        value: []
+                    },
+                    _plotStartLines: {
+                        type: Object,
                         value: []
                     },
                     tempProjectionTimespan: {
@@ -112,12 +105,20 @@
                     '_resetProjectionTimespan(selectedProjectKey, selectedDate)',
                     '_onProjectSelected(selectedProjectKey, selectedDate)',
                 ],
-                
+
                 ready: function() {
                     this._createChartOptions();
 
-                    var btUpdate = ButtonBuilder('Update chart').id('update').onClick(this.updateFilters.bind(this)).build();
+                    var btUpdate = ButtonBuilder('Update chart')
+                        .id('update')
+                        .onClick(() => {
+                            this.$.modal.close();
+                            this.reloadChart();
+                        })
+                        .build();
+
                     this.set('_btUpdate', btUpdate);
+                    this.reloadChart();
                 },
 
                 _createChartOptions: function() {
@@ -134,41 +135,46 @@
                 },
 
                 _onProjectSelected: function(selectedProjectKey, selectedDate) {
+                    this.reloadChart();
+                },
+
+                reloadChart: function () {
                     this.reset();
+                    const timezone = taskboard.getTimeZoneIdFromBrowser();
+                    let url = `/api/projects/${this.selectedProjectKey}/followup/progress?timezone=${timezone}`;
 
-                    var self = this;
+                    if (this.tempProjectionTimespan)
+                        url = `${url}&projection=${this.tempProjectionTimespan}`;
 
-                    var url = "/api/projects/"+selectedProjectKey+"/followup/progress?timezone=" + taskboard.getTimeZoneIdFromBrowser();
-
-                    if (self.tempProjectionTimespan)
-                        url = url + "&projection=" + self.tempProjectionTimespan;
-
-                    this.xhr = d3.json(url, function(error, data) {
-                        if(self.handleError(error, data))
+                    this.xhr = $.getJSON(url);
+                    this.xhr.done((data) => {
+                        if(!data.actual.length && !data.actualProjection.length && !data.expected.length) {
+                            this.errorMessage = 'Scope Progress has no data';
                             return;
+                        }
+                        this._prepareData(data);
+                        this._createChart();
 
-                        if (!self.tempProjectionTimespan)
-                            self.set('tempProjectionTimespan', data.projectionTimespan);
-
-                        self.setData(data);
-                        self.createChart(getDateFromIso(data.startingDate), getDateFromIso(data.endingDate));
-                        self.updateChart();
-
-                        self.set('isReady', true);
+                        this.isReady = true;
+                        this.errorMessage = '';
+                    });
+                    this.xhr.fail((error) => {
+                        this.errorMessage = error.responseText;
                     });
                 },
 
                 reset: function() {
-                    this.set('isReady', false);
-                    this.set('errorMessage', '');
+                    this.isReady = false;
+                    this.errorMessage = '';
+
                     if(this.xhr) {
                         this.xhr.abort();
                         this.xhr = null;
                     }
-                    if(!_.isEmpty(this.chart)) {
-                        dcDateRangeChartsService.deregisterChartInRange(this.chart);
-                        dc.deregisterChart(this.chart);
-                        this._setChart({});
+                    if(this.chart) {
+                        dcDateRangeChartsService.deregisterHighchartsChart(this.chart);
+                        this.chart.destroy();
+                        this.chart = null;
                     }
                 },
 
@@ -176,22 +182,11 @@
                     this.set('tempProjectionTimespan', null);
                 },
 
-                handleError: function(error, data) {
-                    if(error) {
-                        this.set('errorMessage', error.responseText);
-                        return true;
-                    }
+                _prepareData: function(data) {
 
-                    if(!data.actual.length && !data.actualProjection.length && !data.expected.length) {
-                        this.set('errorMessage', 'Scope Progress has no data');
-                        return true;
-                    }
-
-                    return false;
-                },
-
-                setData: function(data) {
-                    var self = this;
+                    this.tempProjectionTimespan = data.projectionTimespan;
+                    this.startDate = getDateFromIso(data.startingDate);
+                    this.endDate = getDateFromIso(data.endingDate);
 
                     this.chartData = {
                         types: ["Actual", "Projection"]
@@ -202,19 +197,19 @@
                     // remove first element of projection, since it repeats last actual element
                     data.actualProjection.shift();
 
-                    var series = [data.actual, data.actualProjection];
-                    for(var i = 0; i < series.length; ++i) {
-                        series[i].forEach(function(d, index) {
-                            self.chartData.data.push({
+                    const series = [data.actual, data.actualProjection];
+
+                    series.forEach((serie, i) =>
+                        serie.forEach((d) =>
+                            this.chartData.data.push({
                                 type         : i,
                                 date         : getDateFromIso(d.date),
                                 value        : d.progress * 100,
                                 sumDone      : d.sumEffortDone,
                                 sumBacklog   : d.sumEffortBacklog
                             })
-                        });
-                    }
-
+                        )
+                    );
                     this.ndx = crossfilter(this.chartData.data);
                     this.dimension = this.ndx.dimension(function(d) {
                         return d.date;
@@ -243,79 +238,88 @@
                     function fInit() {
                         return [0, 0, 0, 0];
                     }
-                    this.group = this.dimension.group().reduce(fAdd, fRemove, fInit);
+                    const group = this.dimension.group().reduce(fAdd, fRemove, fInit);
+                    this._parseDataToHichartsFormat(group);
+                    this._setYearsStartLineToPlot(group);
                 },
 
-                createChart: function(startDate, endDate) {
-                    var self = this;
+                _createChart: function() {
+                    const builder = new ScopeProgressChartBuilder('scope-progress', this.startDate, this._plotStartLines)
+                        .withChartType('column')
+                        .withSeriesData(this._plotSeries);
 
-                    var chart = dc.barChart("#scope-progress");
+                    this.chart = builder.build();
 
-                    chart
-                        // chart configuration
-                        .margins({top: 15, right: 20, bottom: 20, left: 50})
-                        .legend(
-                            dcUtils
-                                .getDefaultLegend()
-                                .x(95).y(20)
-                                .itemHeight(13)
-                                .itemWidth(90)
-                                .horizontal(true)
-                                .legendWidth(180)
-                        )
-                        .colors(
-                            self._getChartColors()
-                        )
-                        .transitionDuration(0)
-
-                        // axis
-                        .yAxisLabel("Effort (hours)")
-                        .elasticY(false)
-                        .yAxisPadding('15%')
-
-                        // mouse interaction
-                        .brushOn(false)       // don't select with drag-n-drop
-                        .title(function(d) {  // popup text on mouse over data points
-                            return this.layer + ": " + dcUtils.percentFormat(d.value[INDICES[this.layer]]) + " h (" + d.key.toLocaleDateString() + ")";
-                        });
-
-                    dcUtils.setupChartDateTicks(chart, startDate, endDate, 12);
-
-                    this._setChart(chart);
+                    dcDateRangeChartsService.registerHighchartsChart(this.chart);
+                    dcDateRangeChartsService.applySelection(this.chart);
                 },
 
-                updateChart: function() {
-                    function selectStack(index) {
-                        return function(d) {
-                            return d.value[index];
-                        }
+                _parseDataToHichartsFormat: function(groupData) {
+                    const toSerieFormat = (type, color) => {
+                        var serie = {};
+                        serie.name = type;
+                        serie.color = color;
+                        serie.data = [];
+
+                        return serie;
                     }
 
-                    this.chart
-                        .x(d3.time.scale().domain(this.chartData.dateRange))
-                        .dimension(this.dimension)
-                        .group(this.group, LAYERS[DONE_INDEX], selectStack(DONE_INDEX))
-                        .stack(this.group, LAYERS[DONE_PROJECTION_INDEX], selectStack(DONE_PROJECTION_INDEX))
-                        .stack(this.group, LAYERS[BACKLOG_INDEX], selectStack(BACKLOG_INDEX))
-                        .stack(this.group, LAYERS[BACKLOG_PROJECTION_INDEX], selectStack(BACKLOG_PROJECTION_INDEX));
+                    const toDataFormat = (date, value) => {
+                        return [
+                            new Date(date).getTime(),
+                            value
+                        ]
+                    };
 
-                    dcDateRangeChartsService.registerChartInRangeAndRender(this.chart);
+                    const highChartSeriesData = [];
+                    const done = toSerieFormat('Done', dcUtils.colors.DONE);
+                    const backlog = toSerieFormat('Backlog', dcUtils.colors.BACKLOG);
+                    const doneProjection = toSerieFormat('Done Projection', dcUtils.colors.DONE_PROJECTION);
+                    const backlogProjection = toSerieFormat('Backlog Projection', dcUtils.colors.BACKLOG_PROJECTION);
+
+                    groupData.all()
+                        .forEach(d => {
+                            done.data.push(toDataFormat(d.key, d.value[DONE_INDEX]));
+                            backlog.data.push(toDataFormat(d.key, d.value[BACKLOG_INDEX]));
+                            doneProjection.data.push(toDataFormat(d.key, d.value[DONE_PROJECTION_INDEX]));
+                            backlogProjection.data.push(toDataFormat(d.key, d.value[BACKLOG_PROJECTION_INDEX]));
+                        });
+
+                    highChartSeriesData.push(done);
+                    highChartSeriesData.push(backlog);
+                    highChartSeriesData.push(doneProjection);
+                    highChartSeriesData.push(backlogProjection);
+
+                    this._plotSeries = highChartSeriesData;
                 },
 
-                _getChartColors: function() {
-                    return dcUtils.getChartColorsFromArray([
-                        dcUtils.colors.DONE,
-                        dcUtils.colors.DONE_PROJECTION,
-                        dcUtils.colors.BACKLOG,
-                        dcUtils.colors.BACKLOG_PROJECTION
-                    ]);
-                },
+                _setYearsStartLineToPlot: function(groupData) {
 
-                updateFilters: function() {
-                    this.$.modal.close();
-                    this._onProjectSelected(this.selectedProjectKey, this.selectedDate);
-                },
+                    this._plotStartLines = [];
 
+                    const toPlotLineFormat = (timeValue) => {
+                        var line = {};
+                        line.id = timeValue,
+                        line.color = 'white';
+                        line.width = 1,
+                        line.value = timeValue,
+                        line.zIndex = 999 + timeValue,
+
+                        line.label = {
+                            text: new Date(timeValue).getFullYear(),
+                            rotation: 0,
+                            style: { color: 'white'}
+                        };
+
+                        return line;
+                    }
+
+                    if (groupData.all().length === 0)
+                        return;
+
+                    const allYears = [...new Set(groupData.all().map(d => new Date(d.key).getFullYear()))]
+                    this._plotStartLines = allYears.map(y => toPlotLineFormat(new Date(y, 0, 1).getTime()));
+                }
             });
         })();
     </script>
