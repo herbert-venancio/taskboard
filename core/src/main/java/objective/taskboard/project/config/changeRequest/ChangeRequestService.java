@@ -9,7 +9,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import objective.taskboard.followup.ChangeRequestUpdatedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,12 +24,15 @@ public class ChangeRequestService {
 
     private final ChangeRequestRepository changeRequestRepository;
     private final ProjectAdministrationPermission projectAdministrationPermission;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Autowired
     public ChangeRequestService(ChangeRequestRepository changeRequestRepository,
-        ProjectAdministrationPermission projectAdministrationPermission) {
+        ProjectAdministrationPermission projectAdministrationPermission,
+                                ApplicationEventPublisher eventPublisher) {
         this.changeRequestRepository = changeRequestRepository;
         this.projectAdministrationPermission = projectAdministrationPermission;
+        this.eventPublisher = eventPublisher;
     }
 
     public List<ChangeRequest> listByProject(ProjectFilterConfiguration project) {
@@ -49,6 +54,8 @@ public class ChangeRequestService {
         addNewItems(requestCrs, project);
         updateExistingItems(requestCrs, existingCrs);
         deleteMissingItems(requestCrs, existingCrs);
+
+        eventPublisher.publishEvent(new ChangeRequestUpdatedEvent(this));
     }
 
     @Transactional
@@ -70,6 +77,8 @@ public class ChangeRequestService {
                 ChangeRequest baseline = new ChangeRequest(project, "Baseline", startDate, 0, true);
                 changeRequestRepository.save(baseline);
             }
+
+            eventPublisher.publishEvent(new ChangeRequestUpdatedEvent(this));
         }
     }
 
