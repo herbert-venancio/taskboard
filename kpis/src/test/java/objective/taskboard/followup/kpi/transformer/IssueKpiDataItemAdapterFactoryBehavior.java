@@ -69,7 +69,6 @@ public abstract class IssueKpiDataItemAdapterFactoryBehavior implements DSLSimpl
             this.level = level;
         }
 
-
         @Override
         protected List<IssueKpiDataItemAdapter> getItems(KpiEnvironment environment,IssueKpiDataItemAdapterFactory subject) {
             GenerateAnalyticsDataSets datasetFactory = new GenerateAnalyticsDataSets(environment);

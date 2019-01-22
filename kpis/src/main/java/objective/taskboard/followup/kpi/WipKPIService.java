@@ -10,11 +10,16 @@ import org.springframework.stereotype.Service;
 
 import objective.taskboard.followup.WipDataSet;
 import objective.taskboard.followup.WipRow;
+import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.jira.properties.StatusConfiguration;
 
 @Service
 public class WipKPIService extends KPIUsingStatusService<WipDataSet,WipRow>{
  
+    public WipKPIService(JiraProperties jiraProperties, IssueKpiService issueKpiService) {
+        super(jiraProperties, issueKpiService);
+    }
+
     @Override
     protected List<WipRow> makeRows(String[] statuses, Map<String, List<IssueKpi>> issues, ZonedDateTime date) {
         List<WipRow> rows = new LinkedList<>();

@@ -142,6 +142,9 @@ public class KpiEnvironment {
         return issues.get(pKey);
     }
 
+    public IssueKpiMocker givenDemand(String pKey) {
+        return givenIssue(pKey).isDemand();
+    }
 
     public IssueKpiMocker givenSubtask(String pkey) {
         return givenIssue(pkey).isSubtask();

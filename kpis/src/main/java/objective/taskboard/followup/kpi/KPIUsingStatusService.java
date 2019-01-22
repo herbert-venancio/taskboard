@@ -24,12 +24,16 @@ import objective.taskboard.jira.properties.StatusConfiguration;
 
 public abstract class KPIUsingStatusService<DS,R> {
     
-    @Autowired
     protected JiraProperties jiraProperties;
     
-    @Autowired
     private IssueKpiService issueKpiService;
     
+    @Autowired
+    public KPIUsingStatusService(JiraProperties jiraProperties, IssueKpiService issueKpiService) {
+        this.jiraProperties = jiraProperties;
+        this.issueKpiService = issueKpiService;
+    }
+
     public List<DS> getData(FollowUpData followupData) {
         StatusConfiguration configuration = getConfiguration();
 
