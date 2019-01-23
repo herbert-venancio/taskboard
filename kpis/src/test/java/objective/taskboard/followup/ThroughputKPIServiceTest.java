@@ -1,150 +1,216 @@
 package objective.taskboard.followup;
 
-import static objective.taskboard.followup.KpiHelper.getDefaultFollowupData;
-import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.when;
+import static objective.taskboard.followup.FollowUpTransitionsDataProvider.TYPE_DEMAND;
+import static objective.taskboard.followup.FollowUpTransitionsDataProvider.TYPE_FEATURES;
+import static objective.taskboard.followup.FollowUpTransitionsDataProvider.TYPE_SUBTASKS;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
 
-import objective.taskboard.followup.kpi.IssueKpi;
-import objective.taskboard.followup.kpi.IssueKpiService;
-import objective.taskboard.followup.kpi.IssueTypeKpi;
-import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.ThroughputKPIService;
-import objective.taskboard.followup.kpi.enviroment.IssueKpiBuilder;
-import objective.taskboard.followup.kpi.enviroment.StatusTransitionBuilder.DefaultStatus;
-import objective.taskboard.jira.properties.JiraProperties;
-import objective.taskboard.jira.properties.StatusConfiguration.FinalStatuses;
-import objective.taskboard.testUtils.FixedClock;
+import objective.taskboard.followup.kpi.enviroment.DSLKpi;
+import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehavior;
+import objective.taskboard.followup.kpi.enviroment.GenerateAnalyticsDataSets;
+import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 
-@RunWith(MockitoJUnitRunner.class)
 public class ThroughputKPIServiceTest {
- 
-    private static final int DEMAND_TRANSITIONS_DATASET_INDEX = 0;
-    private static final int FEATURES_TRANSITIONS_DATASET_INDEX = 1;
-    private static final int SUBTASK_TRANSITIONS_DATASET_INDEX = 2;
-    
-    private static final DefaultStatus TODO = new DefaultStatus("To Do",false);
-    private static final DefaultStatus DOING = new DefaultStatus("Doing",true);
-    private static final DefaultStatus DONE = new DefaultStatus("Done",false);
-    
-    @Mock
-    private JiraProperties jiraProperties;
-    
-    @Mock
-    private IssueKpiService issueService;
-    
-    @Spy
-    @InjectMocks
-    private ThroughputKPIService throughputKpiService = new ThroughputKPIService();
-    
-    
-    @Before
-    public void setupProperties() {
-        
-        String[] defaultDoneStatuses = new String[] {"Done","Cancelled"};
-        FinalStatuses finalStatuses = new FinalStatuses();
-        
-        finalStatuses.setDemands(defaultDoneStatuses);
-        finalStatuses.setTasks(defaultDoneStatuses);
-        finalStatuses.setSubtasks(defaultDoneStatuses);
-        
-        when(jiraProperties.getFinalStatuses()).thenReturn(finalStatuses);
-        
-        FixedClock clock = new FixedClock();
-        final String today = "2017-09-28";
-        clock.setNow(parseDateTime(today).toInstant());
-        
-        IssueKpi demand = new IssueKpiBuilder("I-1",new IssueTypeKpi(1l,"Demand"),KpiLevel.DEMAND, clock)
-                .addTransition(TODO,"2017-09-25")
-                .addTransition(DOING,"2017-09-26")
-                .addTransition(DONE,"2017-09-27")
-                .build();
-        
-        IssueKpi os = new IssueKpiBuilder("I-2",new IssueTypeKpi(2l,"OS"),KpiLevel.FEATURES, clock)
-                .addTransition(TODO,"2017-09-25")
-                .addTransition(DOING,"2017-09-26")
-                .addTransition(DONE)
-                .build();
-        
-        IssueKpi feature = new IssueKpiBuilder("I-3",new IssueTypeKpi(3l,"Feature"),KpiLevel.FEATURES, clock)
-                .addTransition(TODO,"2017-09-25")
-                .addTransition(DOING,"2017-09-26")
-                .addTransition(DONE)
-                .build();
-        
-        IssueKpi subtask = new IssueKpiBuilder("I-4",new IssueTypeKpi(4l,"Sub-task"),KpiLevel.SUBTASKS, clock)
-                .addTransition(TODO,"2017-09-25")
-                .addTransition(DOING)
-                .addTransition(DONE)
-                .build();
-        
-        when(issueService.getIssues(Mockito.any()))
-                .thenReturn(Arrays.asList(demand,os))
-                .thenReturn(Arrays.asList(feature))
-                .thenReturn(Arrays.asList(subtask));
-        
-    }
-    
+
     @Test
     public void checkThroughputRows() {
-        List<ThroughputDataSet> tpDataSets = throughputKpiService.getData(getDefaultFollowupData());
-        List<ThroughputRow> demandsRows = tpDataSets.get(DEMAND_TRANSITIONS_DATASET_INDEX).rows;
-        
-        assertThat(demandsRows.size(),is(6));
-        assertRow(demandsRows.get(0),parseDateTime("2017-09-25"),"Demand",0L);
-        assertRow(demandsRows.get(1),parseDateTime("2017-09-25"),"OS",0L);
-        
-        assertRow(demandsRows.get(2),parseDateTime("2017-09-26"),"Demand",0L);
-        assertRow(demandsRows.get(3),parseDateTime("2017-09-26"),"OS",0L);
-        
-        assertRow(demandsRows.get(4),parseDateTime("2017-09-27"),"Demand",1L);
-        assertRow(demandsRows.get(5),parseDateTime("2017-09-27"),"OS",0L);
-        
-        List<ThroughputRow> featureRows = tpDataSets.get(FEATURES_TRANSITIONS_DATASET_INDEX).rows;
-        
-        assertThat(featureRows.size(),is(2));
-        assertRow(featureRows.get(0),parseDateTime("2017-09-25"),"Feature",0L);
-        assertRow(featureRows.get(1),parseDateTime("2017-09-26"),"Feature",0L);
-        
-        List<ThroughputRow> subtasksRows = tpDataSets.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows;
-        
-        assertThat(subtasksRows.size(),is(1));
-        assertRow(subtasksRows.get(0),parseDateTime("2017-09-25"),"Sub-task",0L);
-    }
-    
-    @Test
-    public void checkEmptyDataSets() {
-        List<ThroughputDataSet> tpDataSets = throughputKpiService.getData(KpiHelper.getEmptyFollowupData());
-        
-        List<ThroughputRow> demandsRows = tpDataSets.get(DEMAND_TRANSITIONS_DATASET_INDEX).rows;
-        assertThat(demandsRows.size(),is(0));
-        
-        List<ThroughputRow> featureRows = tpDataSets.get(FEATURES_TRANSITIONS_DATASET_INDEX).rows;
-        assertThat(featureRows.size(),is(0));
-        
-        List<ThroughputRow> subtasksRows = tpDataSets.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows;
-        assertThat(subtasksRows.size(),is(0));
+        dsl()
+            .environment()
+                .givenDemand("I-1")
+                    .type("Demand")
+                    .project("PROJ")
+                    .withTransitions()
+                        .status("To Do").date("2017-09-25")
+                        .status("Doing").date("2017-09-26")
+                        .status("Done").date("2017-09-27")
+                    .eoT()
+                    .feature("I-2")
+                        .type("OS")
+                        .withTransitions()
+                            .status("To Do").date("2017-09-25")
+                            .status("Doing").date("2017-09-26")
+                            .status("Done").noDate()
+                        .eoT()
+                        .endOfFeature()
+                    .feature("I-3")
+                        .type("Feature")
+                        .withTransitions()
+                            .status("To Do").date("2017-09-25")
+                            .status("Doing").date("2017-09-26")
+                            .status("Done").noDate()
+                        .eoT()
+                        .subtask("I-4")
+                            .type("Subtask")
+                            .withTransitions()
+                                .status("To Do").date("2017-09-25")
+                                .status("Doing").noDate()
+                                .status("Done").noDate()
+                            .eoT()
+                        .endOfSubtask()
+                    .endOfFeature()
+                .eoI()
+            .when()
+                .appliesBehavior(generateThroughputDataSet())
+            .then()
+                .withDataSet(TYPE_DEMAND)
+                    .hasSize(3)
+                        .row(0).hasDate("2017-09-25").hasType("Demand").hasTotalThroughput(0l).eoR()
+                        .row(1).hasDate("2017-09-26").hasType("Demand").hasTotalThroughput(0l).eoR()
+                        .row(2).hasDate("2017-09-27").hasType("Demand").hasTotalThroughput(1l).eoR()
+                    .eoDS()
+                .withDataSet(TYPE_FEATURES)
+                    .hasSize(4)
+                        .row(0).hasDate("2017-09-25").hasType("Feature").hasTotalThroughput(0l).eoR()
+                        .row(1).hasDate("2017-09-25").hasType("OS").hasTotalThroughput(0l).eoR()
+                        .row(2).hasDate("2017-09-26").hasType("Feature").hasTotalThroughput(0l).eoR()
+                        .row(3).hasDate("2017-09-26").hasType("OS").hasTotalThroughput(0l).eoR()
+                    .eoDS()
+                .withDataSet(TYPE_SUBTASKS)
+                    .hasSize(1)
+                        .row(0).hasDate("2017-09-25").hasType("Subtask").hasTotalThroughput(0l).eoR()
+                    .eoDS();
     }
 
-    
-    private void assertRow(ThroughputRow tpRow, ZonedDateTime date, String type, Long count) {
-        assertThat(tpRow.date,is(date));
-        assertThat(tpRow.issueType,is(type));
-        assertThat(tpRow.count,is(count));
+    @Test
+    public void checkEmptyDataSets() {
+        dsl()
+        .when()
+            .appliesBehavior(generateThroughputDataSet())
+        .then()
+            .withDataSet(TYPE_DEMAND).isEmpty().eoDS()
+            .withDataSet(TYPE_FEATURES).isEmpty().eoDS()
+            .withDataSet(TYPE_SUBTASKS).isEmpty().eoDS();
     }
-    
+
+    private DSLKpi dsl() {
+        DSLKpi dsl = new DSLKpi();
+        dsl
+            .environment()
+                .withJiraProperties()
+                    .finalStatuses()
+                        .onDemand("Done")
+                        .onFeature("Done")
+                        .onSubtasks("Done")
+                    .eoFS()
+                    .withDemandStatusPriorityOrder("Done","Doing","To Do")
+                    .withFeaturesStatusPriorityOrder("Done","Doing","To Do")
+                    .withSubtaskStatusPriorityOrder("Done","Doing","To Do")
+                .eoJp()
+                .statuses()
+                    .withNotProgressingStatuses("To Do","Done")
+                    .withProgressingStatuses("Doing")
+                .eoS()
+                .withDemandType("Demand")
+                .withFeatureType("OS")
+                .withFeatureType("Feature")
+                .withSubtaskType("Subtask");
+        return dsl;
+    }
+
+    private GenerateThroughputDataSets generateThroughputDataSet() {
+        return new GenerateThroughputDataSets();
+    }
+
+    private class GenerateThroughputDataSets implements DSLSimpleBehavior<ThroughputAllSetsAsserter> {
+        private ThroughputAllSetsAsserter asserter;
+
+        @Override
+        public void behave(KpiEnvironment environment) {
+            GenerateAnalyticsDataSets datasetFactory = new GenerateAnalyticsDataSets(environment);
+            
+            environment.services().issueKpi().prepareFromDataSet(datasetFactory);
+            
+            ThroughputKPIService subject = new ThroughputKPIService(environment.getJiraProperties(), environment.services().issueKpi().getService());
+            
+            this.asserter = new ThroughputAllSetsAsserter(subject.getData(datasetFactory.buildFollowupData()));
+        }
+
+        @Override
+        public ThroughputAllSetsAsserter then() {
+            return this.asserter;
+        }
+    }
+    private class ThroughputAllSetsAsserter {
+        
+        private Map<String, ThroughputDataSet> dataSets;
+        
+        public ThroughputAllSetsAsserter(List<ThroughputDataSet> dataSets) {
+            this.dataSets = dataSets.stream().collect(Collectors.toMap(d -> d.issueType, Function.identity()));
+        }
+
+        public ThroughputDataSetAsserter withDataSet(String type) {
+           ThroughputDataSet throughputDataSet = dataSets.get(type);
+           assertThat(throughputDataSet).as("DataSet with issueType %s not found",type).isNotNull();
+           
+           return new ThroughputDataSetAsserter(throughputDataSet);
+        }
+        
+        private class ThroughputDataSetAsserter {
+            private ThroughputDataSet subject;
+
+            private ThroughputDataSetAsserter(ThroughputDataSet subject) {
+                this.subject = subject;
+            }
+
+            public ThroughputDataSetAsserter isEmpty() {
+                return hasSize(0);
+            }
+
+            public ThroughputAllSetsAsserter eoDS() {
+                return ThroughputAllSetsAsserter.this;
+            }
+
+            private ThroughputDataSetAsserter hasSize(int size) {
+                assertExistsRows();
+                assertThat(subject.rows).hasSize(size);
+                return this;
+            }
+
+            private void assertExistsRows() {
+                assertThat(subject.rows).isNotNull();
+            }
+            
+            private ThroughputDataRowAsserter row(int row) {
+                assertExistsRows();
+                assertThat(row).isLessThan(subject.rows.size());
+                return new ThroughputDataRowAsserter(subject.rows.get(row));
+            }
+            
+            private class ThroughputDataRowAsserter {
+                private ThroughputRow row;
+
+                public ThroughputDataRowAsserter(ThroughputRow row) {
+                    this.row = row;
+                }
+
+                public ThroughputDataSetAsserter eoR() {
+                    return ThroughputDataSetAsserter.this;
+                }
+
+                public ThroughputDataRowAsserter hasTotalThroughput(long value) {
+                    assertThat(row.count).isEqualTo(value);
+                    return this;
+                }
+
+                public ThroughputDataRowAsserter hasType(String type) {
+                    assertThat(row.issueType).isEqualTo(type);
+                    return this;
+                }
+
+                public ThroughputDataRowAsserter hasDate(String date) {
+                    assertThat(row.date.toLocalDate().toString()).isEqualTo(date);
+                    return this;
+                }
+            }
+        }
+    }
+
 }

@@ -9,10 +9,15 @@ import org.springframework.stereotype.Service;
 
 import objective.taskboard.followup.ThroughputDataSet;
 import objective.taskboard.followup.ThroughputRow;
+import objective.taskboard.jira.properties.JiraProperties;
 import objective.taskboard.jira.properties.StatusConfiguration;
 
 @Service
 public class ThroughputKPIService extends KPIUsingStatusService<ThroughputDataSet,ThroughputRow> {
+
+    public ThroughputKPIService(JiraProperties jiraProperties, IssueKpiService issueKpiService) {
+        super(jiraProperties, issueKpiService);
+    }
 
     @Override
     protected List<ThroughputRow> makeRows(String[] statuses, Map<String, List<IssueKpi>> issues, ZonedDateTime date) {

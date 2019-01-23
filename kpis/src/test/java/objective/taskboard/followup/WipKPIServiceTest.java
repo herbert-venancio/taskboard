@@ -1,146 +1,222 @@
 package objective.taskboard.followup;
 
-import static objective.taskboard.followup.KpiHelper.getDefaultFollowupData;
-import static objective.taskboard.followup.KpiHelper.getEmptyFollowupData;
-import static objective.taskboard.utils.DateTimeUtils.parseDateTime;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.when;
+import static objective.taskboard.followup.FollowUpTransitionsDataProvider.TYPE_DEMAND;
+import static objective.taskboard.followup.FollowUpTransitionsDataProvider.TYPE_FEATURES;
+import static objective.taskboard.followup.FollowUpTransitionsDataProvider.TYPE_SUBTASKS;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
 
-import objective.taskboard.followup.kpi.IssueKpi;
-import objective.taskboard.followup.kpi.IssueKpiService;
-import objective.taskboard.followup.kpi.IssueTypeKpi;
-import objective.taskboard.followup.kpi.KpiLevel;
 import objective.taskboard.followup.kpi.WipKPIService;
-import objective.taskboard.followup.kpi.enviroment.IssueKpiBuilder;
-import objective.taskboard.followup.kpi.enviroment.StatusTransitionBuilder.DefaultStatus;
-import objective.taskboard.jira.properties.JiraProperties;
-import objective.taskboard.jira.properties.StatusConfiguration.StatusCountingOnWip;
-import objective.taskboard.testUtils.FixedClock;
+import objective.taskboard.followup.kpi.enviroment.DSLKpi;
+import objective.taskboard.followup.kpi.enviroment.DSLSimpleBehavior;
+import objective.taskboard.followup.kpi.enviroment.GenerateAnalyticsDataSets;
+import objective.taskboard.followup.kpi.enviroment.KpiEnvironment;
 
-@RunWith(MockitoJUnitRunner.class)
 public class WipKPIServiceTest {
 
-    private static final int DEMAND_TRANSITIONS_DATASET_INDEX = 0;
-    private static final int FEATURES_TRANSITIONS_DATASET_INDEX = 1;
-    private static final int SUBTASK_TRANSITIONS_DATASET_INDEX = 2;
-    
-    private static final DefaultStatus TODO = new DefaultStatus("To Do",false);
-    private static final DefaultStatus DOING = new DefaultStatus("Doing",true);
-    private static final DefaultStatus DONE = new DefaultStatus("Done",false);
-
-    @Mock
-    private JiraProperties jiraProperties;
-
-    @Mock
-    private IssueKpiService issueService;
-        
-    @Spy
-    @InjectMocks
-    private WipKPIService wipKpiService = new WipKPIService();
-
-    @Before
-    public void setupProperties() {
-
-        StatusCountingOnWip statusCountingOnWip = new StatusCountingOnWip();
-        statusCountingOnWip.setDemands(new String[] { "Doing" });
-        statusCountingOnWip.setTasks(new String[] {"Doing" });
-        statusCountingOnWip.setSubtasks(new String[] { "Doing"});
-
-        when(jiraProperties.getStatusCountingOnWip()).thenReturn(statusCountingOnWip);
-        
-        FixedClock clock = new FixedClock();
-        final String today = "2017-09-28";
-        clock.setNow(parseDateTime(today).toInstant());
-        
-        IssueKpi demand = new IssueKpiBuilder("I-1",new IssueTypeKpi(1l,"Demand"),KpiLevel.DEMAND, clock)
-                .addTransition(TODO,"2017-09-25")
-                .addTransition(DOING,"2017-09-26")
-                .addTransition(DONE,"2017-09-27")
-                .build();
-        
-        IssueKpi os = new IssueKpiBuilder("I-2",new IssueTypeKpi(2l,"OS"),KpiLevel.FEATURES, clock)
-                .addTransition(TODO,"2017-09-25")
-                .addTransition(DOING,"2017-09-26")
-                .addTransition(DONE)
-                .build();
-        
-        IssueKpi feature = new IssueKpiBuilder("I-3",new IssueTypeKpi(3l,"Feature"),KpiLevel.FEATURES, clock)
-                .addTransition(TODO,"2017-09-25")
-                .addTransition(DOING,"2017-09-26")
-                .addTransition(DONE)
-                .build();
-        
-        IssueKpi subtask = new IssueKpiBuilder("I-4",new IssueTypeKpi(4l,"Sub-task"),KpiLevel.SUBTASKS, clock)
-                .addTransition(TODO,"2017-09-25")
-                .addTransition(DOING)
-                .addTransition(DONE)
-                .build();
-        
-        when(issueService.getIssues(Mockito.any()))
-            .thenReturn(Arrays.asList(demand,os))
-            .thenReturn(Arrays.asList(feature))
-            .thenReturn(Arrays.asList(subtask));
-
-
-    }
-    
-   
     @Test
     public void checkWipRows() {
-        List<WipDataSet> wipDataSets = wipKpiService.getData(getDefaultFollowupData());
-        List<WipRow> demandsRows = wipDataSets.get(DEMAND_TRANSITIONS_DATASET_INDEX).rows;
-
-        assertThat(demandsRows.size(), is(6));
-        assertRow(demandsRows.get(0), parseDateTime("2017-09-25"), "Demand", "Doing", 0L);
-        assertRow(demandsRows.get(1), parseDateTime("2017-09-25"), "OS", "Doing", 0L);
-        assertRow(demandsRows.get(2), parseDateTime("2017-09-26"), "Demand", "Doing", 1L);
-        assertRow(demandsRows.get(3), parseDateTime("2017-09-26"), "OS", "Doing", 1L);
-        assertRow(demandsRows.get(4), parseDateTime("2017-09-27"), "Demand", "Doing", 0L);
-        assertRow(demandsRows.get(5), parseDateTime("2017-09-27"), "OS", "Doing", 1L);
-        
-        List<WipRow> featuresRows = wipDataSets.get(FEATURES_TRANSITIONS_DATASET_INDEX).rows;
-        assertThat(featuresRows.size(), is(2));
-        assertRow(featuresRows.get(0), parseDateTime("2017-09-25"), "Feature", "Doing", 0L);
-        assertRow(featuresRows.get(1), parseDateTime("2017-09-26"), "Feature", "Doing", 1L);
-        
-        List<WipRow> subtasksRows = wipDataSets.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows;
-        assertThat(subtasksRows.size(), is(1));
-        assertRow(subtasksRows.get(0), parseDateTime("2017-09-25"), "Sub-task", "Doing", 0L);
+        dsl()
+            .environment()
+                .givenDemand("I-1")
+                    .type("Demand")
+                    .project("PROJ")
+                    .withTransitions()
+                        .status("To Do").date("2017-09-25")
+                        .status("Doing").date("2017-09-26")
+                        .status("Done").date("2017-09-27")
+                   .eoT()
+                   .feature("I-2")
+                       .type("OS")
+                       .withTransitions()
+                           .status("To Do").date("2017-09-25")
+                           .status("Doing").date("2017-09-26")
+                           .status("Done").noDate()
+                       .eoT()
+                   .endOfFeature()
+                   .feature("I-3")
+                       .type("Feature")
+                       .withTransitions()
+                           .status("To Do").date("2017-09-25")
+                           .status("Doing").date("2017-09-26")
+                           .status("Done").noDate()
+                       .eoT()
+                       .subtask("I-4")
+                           .type("Subtask")
+                           .withTransitions()
+                               .status("To Do").date("2017-09-25")
+                               .status("Doing").noDate()
+                               .status("Done").noDate()
+                           .eoT()
+                       .endOfSubtask()
+                   .endOfFeature()
+               .eoI()
+           .when()
+               .appliesBehavior(generateDataSet())
+           .then()
+               .withDataSet(TYPE_DEMAND)
+                   .hasSize(3)
+                       .row(0).hasDate("2017-09-25").hasType("Demand").hasStatus("Doing").hasTotalWip(0L).eoR()
+                       .row(1).hasDate("2017-09-26").hasType("Demand").hasStatus("Doing").hasTotalWip(1L).eoR()
+                       .row(2).hasDate("2017-09-27").hasType("Demand").hasStatus("Doing").hasTotalWip(0L).eoR()
+                   .eoDS()
+               .withDataSet(TYPE_FEATURES)
+                   .hasSize(4)
+                       .row(0).hasDate("2017-09-25").hasType("Feature").hasStatus("Doing").hasTotalWip(0L).eoR()
+                       .row(1).hasDate("2017-09-25").hasType("OS").hasStatus("Doing").hasTotalWip(0L).eoR()
+                       .row(2).hasDate("2017-09-26").hasType("Feature").hasStatus("Doing").hasTotalWip(1L).eoR()
+                       .row(3).hasDate("2017-09-26").hasType("OS").hasStatus("Doing").hasTotalWip(1L).eoR()
+                   .eoDS()
+               .withDataSet(TYPE_SUBTASKS)
+                   .hasSize(1)
+                       .row(0).hasDate("2017-09-25").hasType("Subtask").hasStatus("Doing").hasTotalWip(0L).eoR()
+               .eoDS();
     }
     
     @Test
     public void checkEmptyDataSets() {
-        List<WipDataSet> wipDataSets = wipKpiService.getData(getEmptyFollowupData());
-        
-        List<WipRow> demandsRows = wipDataSets.get(DEMAND_TRANSITIONS_DATASET_INDEX).rows;
-        assertThat(demandsRows.size(), is(0));
-        
-        List<WipRow> featuresRows = wipDataSets.get(FEATURES_TRANSITIONS_DATASET_INDEX).rows;
-        assertThat(featuresRows.size(), is(0));
-        
-        List<WipRow> subtasksRows = wipDataSets.get(SUBTASK_TRANSITIONS_DATASET_INDEX).rows;
-        assertThat(subtasksRows.size(), is(0));
+        dsl()
+        .when()
+           .appliesBehavior(generateDataSet())
+       .then()
+           .withDataSet(TYPE_DEMAND).isEmpty().eoDS()
+           .withDataSet(TYPE_FEATURES).isEmpty().eoDS()
+           .withDataSet(TYPE_SUBTASKS).isEmpty().eoDS();
     }
 
-    private void assertRow(WipRow wipRow, ZonedDateTime date, String type, String status, Long count) {
-        assertThat(wipRow.date, is(date));
-        assertThat(wipRow.type, is(type));
-        assertThat(wipRow.status, is(status));
-        assertThat(wipRow.count, is(count));
+    private GenerateWipDataSets generateDataSet() {
+        return new GenerateWipDataSets();
+    }
+    
+    private DSLKpi dsl() {
+        DSLKpi dsl = new DSLKpi();
+        dsl
+            .environment()
+                .withJiraProperties()
+                    .statusCountingOnWip()
+                        .onDemand("Doing")
+                        .onFeature("Doing")
+                        .onSubtasks("Doing")
+                    .eoSCW()
+                    .withDemandStatusPriorityOrder("Done","Doing","To Do")
+                    .withFeaturesStatusPriorityOrder("Done","Doing","To Do")
+                    .withSubtaskStatusPriorityOrder("Done","Doing","To Do")
+                .eoJp()
+                .statuses()
+                    .withNotProgressingStatuses("To Do","Done")
+                    .withProgressingStatuses("Doing")
+                .eoS()
+                .withDemandType("Demand")
+                .withFeatureType("OS")
+                .withFeatureType("Feature")
+                .withSubtaskType("Subtask");
+        return dsl;
+    }
+
+    private class GenerateWipDataSets implements DSLSimpleBehavior<WipAllSetsAsserter> {
+        private WipAllSetsAsserter asserter;
+
+        @Override
+        public void behave(KpiEnvironment environment) {
+            GenerateAnalyticsDataSets datasetFactory = new GenerateAnalyticsDataSets(environment);
+            
+            environment.services().issueKpi().prepareFromDataSet(datasetFactory);
+            
+            WipKPIService subject = new WipKPIService(environment.getJiraProperties(), environment.services().issueKpi().getService());
+            
+            this.asserter = new WipAllSetsAsserter(subject.getData(datasetFactory.buildFollowupData()));
+        }
+
+        @Override
+        public WipAllSetsAsserter then() {
+            return this.asserter;
+        }
+    }
+
+    private class WipAllSetsAsserter {
+        
+        private Map<String, WipDataSet> dataSets;
+        
+        public WipAllSetsAsserter(List<WipDataSet> dataSets) {
+            this.dataSets = dataSets.stream().collect(Collectors.toMap(d -> d.issueType, Function.identity()));
+        }
+
+        public WipDataSetAsserter withDataSet(String type) {
+            WipDataSet throughputDataSet = dataSets.get(type);
+           assertThat(throughputDataSet).as("DataSet with issueType %s not found",type).isNotNull();
+           
+           return new WipDataSetAsserter(throughputDataSet);
+        }
+        
+        private class WipDataSetAsserter {
+            private WipDataSet subject;
+
+            private WipDataSetAsserter(WipDataSet subject) {
+                this.subject = subject;
+            }
+
+            public WipDataSetAsserter isEmpty() {
+                return hasSize(0);
+            }
+
+            public WipAllSetsAsserter eoDS() {
+                return WipAllSetsAsserter.this;
+            }
+
+            private WipDataSetAsserter hasSize(int size) {
+                assertExistsRows();
+                assertThat(subject.rows).hasSize(size);
+                return this;
+            }
+
+            private void assertExistsRows() {
+                assertThat(subject.rows).isNotNull();
+            }
+            
+            private WipDataRowAsserter row(int row) {
+                assertExistsRows();
+                assertThat(row).isLessThan(subject.rows.size());
+                return new WipDataRowAsserter(subject.rows.get(row));
+            }
+            
+            private class WipDataRowAsserter {
+                private WipRow row;
+
+                public WipDataRowAsserter(WipRow row) {
+                    this.row = row;
+                }
+
+                public WipDataSetAsserter eoR() {
+                    return WipDataSetAsserter.this;
+                }
+
+                public WipDataRowAsserter hasTotalWip(long value) {
+                    assertThat(row.count).isEqualTo(value);
+                    return this;
+                }
+
+                public WipDataRowAsserter hasType(String type) {
+                    assertThat(row.type).isEqualTo(type);
+                    return this;
+                }
+
+                public WipDataRowAsserter hasDate(String date) {
+                    assertThat(row.date.toLocalDate().toString()).isEqualTo(date);
+                    return this;
+                }
+
+                public WipDataRowAsserter hasStatus(String status) {
+                    assertThat(row.status).isEqualTo(status);
+                    return this;
+                }
+            }
+        }
     }
 
 }

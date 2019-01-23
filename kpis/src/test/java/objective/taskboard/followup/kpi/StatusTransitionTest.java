@@ -17,7 +17,7 @@ public class StatusTransitionTest {
                 .eoSt()
             .then()
             .assertThat()
-                .statusTransition().isPresent()
+                .statusTransition()
                     .atDate("2020-01-01").isStatus("To Do")
                     .atDate("2020-01-02").isStatus("Doing")
                     .atDate("2020-01-03").isStatus("Done")
@@ -35,7 +35,7 @@ public class StatusTransitionTest {
             .eoSt()
         .then()
         .assertThat()
-            .statusTransition().isPresent()
+            .statusTransition()
                 .atDate("2020-01-01").isStatus("To Do")
                 .atDate("2020-01-02").isStatus("To Do")
                 .atDate("2020-01-03").isStatus("Done")
@@ -51,7 +51,7 @@ public class StatusTransitionTest {
             .eoSt()
         .then()
         .assertThat()
-            .statusTransition().isPresent()
+            .statusTransition()
                 .atDate("2020-01-01").isStatus("To Do")
                 .atDate("2020-01-02").isStatus("To Do");
     }
@@ -67,7 +67,7 @@ public class StatusTransitionTest {
             .eoSt()
         .then()
         .assertThat()
-            .statusTransition().isPresent()
+            .statusTransition()
                 .atDate("2020-01-01").doesNotHaveStatus()
                 .atDate("2020-01-02").isStatus("To Do")
                 .atDate("2020-01-03").isStatus("Doing")
@@ -87,7 +87,7 @@ public class StatusTransitionTest {
             .eoSt()
         .then()
         .assertThat()
-            .statusTransition().isPresent()
+            .statusTransition()
                 .firstDateOnProgressing().is("2020-01-03");
     }
     
@@ -104,7 +104,7 @@ public class StatusTransitionTest {
             .eoSt()
         .then()
         .assertThat()
-            .statusTransition().isPresent()
+            .statusTransition()
                 .firstDateOnProgressing().is("2020-01-05");
     }
     
@@ -121,7 +121,7 @@ public class StatusTransitionTest {
             .eoSt()
         .then()
         .assertThat()
-            .statusTransition().isPresent()
+            .statusTransition()
                 .firstDateOnProgressing().isNotPresent();
     }
 
@@ -139,7 +139,7 @@ public class StatusTransitionTest {
             .eoSt()
         .then()
         .assertThat()
-            .statusTransition().isPresent()
+            .statusTransition()
                 .firstDateOnProgressing().isNotPresent();
     }
 
@@ -162,7 +162,7 @@ public class StatusTransitionTest {
             .eoSt()
         .then()
         .assertThat()
-            .statusTransition().isPresent()
+            .statusTransition()
                 .firstDateOnProgressing().is("2020-01-02");
 
     }
@@ -184,7 +184,7 @@ public class StatusTransitionTest {
             .eoSt()
         .then()
         .assertThat()
-            .statusTransition().isPresent()
+            .statusTransition()
                 .firstDateOnProgressing().is("2020-01-01");
     }
     
@@ -204,7 +204,7 @@ public class StatusTransitionTest {
             .eoSt()
         .then()
         .assertThat()
-            .statusTransition().isPresent()
+            .statusTransition()
                 .firstDateOnProgressing().is("2020-01-03");
     }
     
@@ -224,7 +224,7 @@ public class StatusTransitionTest {
             .eoSt()
         .then()
         .assertThat()
-            .statusTransition().isPresent()
+            .statusTransition()
                 .firstDateOnProgressing().is("2020-01-06");
     }
     
@@ -241,7 +241,7 @@ public class StatusTransitionTest {
             .eoSt()
         .then()
         .assertThat()
-            .statusTransition().isPresent()
+            .statusTransition()
                 .dateAterLeavingLastProgressingStatus().is("2020-01-06");
     }
     
@@ -258,7 +258,7 @@ public class StatusTransitionTest {
             .eoSt()
         .then()
         .assertThat()
-            .statusTransition().isPresent()
+            .statusTransition()
                 .dateAterLeavingLastProgressingStatus().is("2020-01-06");
     }
     
@@ -275,7 +275,7 @@ public class StatusTransitionTest {
             .eoSt()
         .then()
         .assertThat()
-            .statusTransition().isPresent()
+            .statusTransition()
                 .dateAterLeavingLastProgressingStatus().isNotPresent();
     }
     
@@ -289,7 +289,7 @@ public class StatusTransitionTest {
             .eoSt()
         .then()
         .assertThat()
-            .statusTransition().isPresent()
+            .statusTransition()
                 .dateAterLeavingLastProgressingStatus().isNotPresent();
     }
     

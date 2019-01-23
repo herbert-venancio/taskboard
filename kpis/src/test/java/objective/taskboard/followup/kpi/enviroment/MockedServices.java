@@ -1,6 +1,7 @@
 package objective.taskboard.followup.kpi.enviroment;
 
 import static java.util.Collections.emptyList;
+import static org.mockito.Mockito.when;
 
 import java.time.ZoneId;
 import java.util.LinkedHashMap;
@@ -95,6 +96,13 @@ public class MockedServices {
             return issues;
         }
 
+        public void prepareFromDataSet(GenerateAnalyticsDataSets factory) {
+            Stream.of(KpiLevel.values()).forEach(level -> 
+                when(getService().getIssues(factory.getOptionalDataSetForLevel(level)))
+                    .thenReturn(getIssuesByLevel(level))
+            );
+        }
+        
         private void mockService() {
             List<IssueKpiMocker> allIssues = environment.getAllIssueMockers();
             issues = new LinkedHashMap<>();
@@ -127,6 +135,14 @@ public class MockedServices {
 
         private void saveIssues(List<IssueKpi> issuesByProject) {
             issuesByProject.stream().forEach(issue -> issues.put(issue.getIssueKey(),issue));
+        }
+
+        public Map<KpiLevel, List<IssueKpi>> getIssuesByLevel() { 
+            return getIssues().values().stream().collect(Collectors.groupingBy(IssueKpi::getLevel)); 
+        }
+        
+        private List<IssueKpi> getIssuesByLevel(KpiLevel level){
+            return Optional.ofNullable(getIssuesByLevel().get(level)).orElse(emptyList());
         }
 
         private void checkProjectConfigured(List<IssueKpiMocker> issuesToCheck) {
@@ -269,7 +285,7 @@ public class MockedServices {
 
         private void mockService() {
             metadataService = Mockito.mock(MetadataService.class);
-            
+
             environment.types().foreach(typeDto ->{
                 JiraIssueTypeDto jiraDto = new JiraIssueTypeDto(typeDto.id(), typeDto.name(), typeDto.isSubtask());
                 Mockito.when(metadataService.getIssueTypeByName(typeDto.name())).thenReturn(Optional.of(jiraDto));
@@ -277,7 +293,4 @@ public class MockedServices {
         }
         
     }
-
-    
-
 }
