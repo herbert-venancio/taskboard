@@ -204,6 +204,14 @@ public class JiraMockServer {
             return getIssueData(issueKey);
         });
 
+        post("/rest/api/latest/issue/:issueKey",  (req, res) ->{
+            String issueKey = req.params(":issueKey");
+            JSONObject reqData = new JSONObject(req.body());
+
+            dirtySearchIssuesByKey.put(issueKey, reqData);
+            return "";
+        });
+
         put("/rest/api/latest/issue/:issueKey",  (req, res) ->{
             JSONObject reqData = new JSONObject(req.body());
             String issueKey = req.params(":issueKey");

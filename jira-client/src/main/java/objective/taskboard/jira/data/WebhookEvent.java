@@ -7,6 +7,7 @@ public enum WebhookEvent {
     ISSUE_CREATED(Category.ISSUE, "jira:issue_created"),
     ISSUE_DELETED(Category.ISSUE, "jira:issue_deleted"),
     ISSUE_UPDATED(Category.ISSUE, "jira:issue_updated"),
+    ISSUE_MOVED(Category.ISSUE, "jira:issue_updated"),
     WORKLOG_UPDATED(Category.ISSUE, "jira:worklog_updated"),
     VERSION_CREATED(Category.VERSION, "jira:version_created"),
     VERSION_DELETED(Category.VERSION, "jira:version_deleted"),

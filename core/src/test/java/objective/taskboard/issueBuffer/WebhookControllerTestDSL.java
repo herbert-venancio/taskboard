@@ -52,12 +52,23 @@ public class WebhookControllerTestDSL {
         this.webhookController = webhookController;
 
         willReturn(true).given(projectFilterConfigurationCachedRepository).exists(eq("TASKB"));
+        willReturn(true).given(projectFilterConfigurationCachedRepository).exists(eq("PROJ1"));
+
 
         Filter taskFilter = new Filter();
         taskFilter.setIssueTypeId(10000L);
+
         Filter subtaskFilter = new Filter();
         subtaskFilter.setIssueTypeId(10001L);
-        willReturn(asList(taskFilter, subtaskFilter)).given(filterCachedRepository).getCache();
+
+        Filter demand = new Filter();
+        demand.setIssueTypeId(10600L);
+
+        Filter feature = new Filter();
+        feature.setIssueTypeId(10601L);
+
+        willReturn(asList(taskFilter, subtaskFilter, demand, feature))
+            .given(filterCachedRepository).getCache();
     }
 
     public void jiraSend(WebhookPayloadBuilder... builders) {
@@ -88,7 +99,7 @@ public class WebhookControllerTestDSL {
             WebHookBody payload = payload(fileName);
             JiraIssueDto issue = payload.issue;
             willReturn(issue).given(jiraService).getIssueByKeyAsMaster(eq(issue.getKey()));
-            webhookController.webhook(payload, "TASKB");
+            webhookController.webhook(payload, issue.getProject().getKey());
         }
     }
 

@@ -4,12 +4,13 @@ import static java.util.Optional.ofNullable;
 
 import java.util.List;
 
+import objective.taskboard.jira.data.IssueEventTypeName;
+import objective.taskboard.jira.data.WebhookEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import objective.taskboard.jira.client.JiraIssueDto;
@@ -49,6 +50,9 @@ public class WebhookController {
 
         if(!belongsToAnyProject(projectKey))
             return;
+
+        if (body.issueEventTypeName == IssueEventTypeName.ISSUE_MOVED)
+            body.webhookEvent = WebhookEvent.ISSUE_MOVED;
 
         for(JiraEventProcessorFactory factory : jiraEventProcessorFactories) {
             factory.create(body, projectKey)
