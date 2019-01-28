@@ -18,11 +18,13 @@ class ChartUtils {
                     color: '#8E8E8E'
                 },
                 itemStyle: {
-                    color: '#8E8E8E'
+                    color: '#8E8E8E',
+                    fontWeight: 'normal'
                 },
                 layout: 'vertical',
                 reversed: true,
-                verticalAlign: 'top'
+                verticalAlign: 'top',
+                itemMarginBottom: 4
             },
             plotOptions: {
                 series: {
