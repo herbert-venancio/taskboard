@@ -4,7 +4,6 @@
 
         <style>
             #touchTimeIssues {
-                display: flex;
                 height: 100%;
                 width: 100%;
             }
@@ -212,9 +211,9 @@
 
                 _createChart: function () {
                     const filterByTimeline = (timelineRange) => {
-                        timelineRange = [timelineRange[0], addDaysToDate(timelineRange[1], 1).getTime()];
-                        this._plotData.startProgressingDateDimension.filterRange(timelineRange);
-                        this._plotData.endProgressingDateDimension.filterRange(timelineRange);
+                        const [tlStart, tlEnd] = timelineRange;
+                        this._plotData.startProgressingDateDimension.filter((start) => start <= tlEnd);
+                        this._plotData.endProgressingDateDimension.filter((end) => end >= tlStart);
                         const selectedIssueKeys = new Set(this._plotData.endProgressingDateDimension.top(Infinity).map(i => i.issueKey));
                         return selectedIssueKeys;
                     };
