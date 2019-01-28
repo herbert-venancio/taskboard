@@ -60,7 +60,7 @@ class ChartUtils {
                 tickPixelInterval: 100
             },
             yAxis: {
-                gridLineColor: '#CCC',
+                gridLineColor: '#555555',
                 labels: {
                     style: {
                         color: '#8E8E8E'
