@@ -30,13 +30,13 @@ public class IssueKpiService {
     private KPIProperties kpiProperties;
     private Clock clock;
     private IssueKpiDataItemAdapterFactory factory;
-    
+
     @Autowired
     public IssueKpiService(
-            IssueBufferService issueBufferService, 
+            IssueBufferService issueBufferService,
             ProjectService projectService,
-            JiraProperties jiraProperties, 
-            KPIProperties kpiProperties, 
+            JiraProperties jiraProperties,
+            KPIProperties kpiProperties,
             Clock clock,
             IssueKpiDataItemAdapterFactory factory) {
         this.issueBufferService = issueBufferService;
@@ -47,7 +47,7 @@ public class IssueKpiService {
         this.factory = factory;
     }
 
-    public List<IssueKpi> getIssuesFromCurrentState(String projectKey, ZoneId timezone, KpiLevel kpiLevel){
+    public List<IssueKpi> getIssuesFromCurrentState(String projectKey, ZoneId timezone, KpiLevel kpiLevel) throws IllegalArgumentException {
         ProjectFilterConfiguration project =  projectService.getTaskboardProjectOrCry(projectKey);
         ProjectTimelineRange range = new ProjectRangeByConfiguration(project);
 
@@ -57,7 +57,7 @@ public class IssueKpiService {
 
         List<IssueKpiDataItemAdapter> items = factory.getItems(issuesVisibleToUser,timezone);
         List<IssueKpi> issuesKpi = new IssueKpiTransformer(kpiProperties, clock)
-                
+
                                         .withItems(items)
                                         .withOriginalIssues(issuesVisibleToUser)
                                         .mappingHierarchically()

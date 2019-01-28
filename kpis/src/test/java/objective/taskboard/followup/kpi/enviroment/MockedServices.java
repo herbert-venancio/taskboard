@@ -42,7 +42,7 @@ public class MockedServices {
     public MockedServices(KpiEnvironment fatherEnvironment) {
         this.environment = fatherEnvironment;
     }
-    
+
     public void mockAll() {
         projects.mockService();
         issueKpiServices.mockService();
@@ -63,7 +63,7 @@ public class MockedServices {
     public IssueBufferServiceMocker issuesBuffer() {
         return issueBufferService;
     }
-    
+
     public TransitionServiceMocker issuesTransition() {
         return transitionsService;
     }
@@ -71,7 +71,7 @@ public class MockedServices {
     public IssueKpiDataItemAdapterFactoryMocker itemAdapterFactory() {
         return factory;
     }
-    
+
     public MetadataServiceMocker metadata() {
         return metadataService;
     }
@@ -89,7 +89,7 @@ public class MockedServices {
                 mockService();
             return service;
         }
-        
+
         public Map<String,IssueKpi> getIssues(){
             if(issues == null)
                 mockService();
@@ -97,17 +97,21 @@ public class MockedServices {
         }
 
         public void prepareFromDataSet(GenerateAnalyticsDataSets factory) {
-            Stream.of(KpiLevel.values()).forEach(level -> 
+            Stream.of(KpiLevel.values()).forEach(level ->
                 when(getService().getIssues(factory.getOptionalDataSetForLevel(level)))
                     .thenReturn(getIssuesByLevel(level))
             );
         }
-        
+
+        public Map<KpiLevel, List<IssueKpi>> getIssuesByLevel() {
+            return getIssues().values().stream().collect(Collectors.groupingBy(IssueKpi::getLevel));
+        }
+
         private void mockService() {
             List<IssueKpiMocker> allIssues = environment.getAllIssueMockers();
             issues = new LinkedHashMap<>();
-            
-            Stream.of(KpiLevel.values()) 
+
+            Stream.of(KpiLevel.values())
                 .forEach(level -> {
                     List<IssueKpiMocker> leveledIssues = allIssues.stream().filter(i -> level.equals(i.level())).collect(Collectors.toList());
                     mockIssues(level, leveledIssues);
@@ -116,11 +120,11 @@ public class MockedServices {
         }
 
         private void mockIssues(KpiLevel level, List<IssueKpiMocker> issuesByLevel) {
-            
+
             checkProjectConfigured(issuesByLevel);
-            
+
             Map<String,List<IssueKpiMocker>> byProject = issuesByLevel.stream().collect(Collectors.groupingBy(IssueKpiMocker::project));
-            
+
             byProject.entrySet().stream().forEach(entry -> {
                 String projectKey = entry.getKey();
                 List<IssueKpi> issuesByProject = entry.getValue().stream()
@@ -130,17 +134,13 @@ public class MockedServices {
                 Mockito.when(service.getIssuesFromCurrentState(projectKey, environment.getTimezone(), level))
                     .thenReturn(issuesByProject);
             });
-            
+
         }
 
         private void saveIssues(List<IssueKpi> issuesByProject) {
             issuesByProject.stream().forEach(issue -> issues.put(issue.getIssueKey(),issue));
         }
 
-        public Map<KpiLevel, List<IssueKpi>> getIssuesByLevel() { 
-            return getIssues().values().stream().collect(Collectors.groupingBy(IssueKpi::getLevel)); 
-        }
-        
         private List<IssueKpi> getIssuesByLevel(KpiLevel level){
             return Optional.ofNullable(getIssuesByLevel().get(level)).orElse(emptyList());
         }
@@ -157,13 +157,13 @@ public class MockedServices {
         public KpiEnvironment eoIks() {
             return environment;
         }
-        
+
         public IssueKpiService buildServiceInstance() {
 
             JiraProperties jiraProperties = environment.getJiraProperties();
             KPIProperties kpiProperties = environment.getKPIProperties();
             Clock clock = environment.getClock();
-            
+
             IssueBufferService issueBufferService = issuesBuffer().getService();
             ProjectService projectService = projects().getService();
             IssueKpiDataItemAdapterFactory factory = itemAdapterFactory().getComponent();
@@ -172,7 +172,7 @@ public class MockedServices {
         }
 
     }
-    
+
     public class IssueBufferServiceMocker {
 
         private IssueBufferService service;
@@ -248,10 +248,10 @@ public class MockedServices {
         }
 
     }
-    
+
     public class TransitionServiceMocker {
         private IssueTransitionService transitionService;
-        
+
         public IssueTransitionService getService() {
             if(transitionService == null)
                 mockService();
@@ -260,7 +260,7 @@ public class MockedServices {
 
         private void mockService() {
             transitionService = Mockito.mock(IssueTransitionService.class);
-            
+
             ZoneId timezone = environment.getTimezone();
             JiraProperties jiraProperties = environment.getJiraProperties();
             ensureIssuesAreMocked();
@@ -273,10 +273,10 @@ public class MockedServices {
             issueBufferService.getIssues();
         }
     }
-    
+
     public class MetadataServiceMocker {
         private MetadataService metadataService;
-        
+
         public MetadataService getService() {
             if(metadataService == null)
                 mockService();
@@ -291,6 +291,6 @@ public class MockedServices {
                 Mockito.when(metadataService.getIssueTypeByName(typeDto.name())).thenReturn(Optional.of(jiraDto));
             });
         }
-        
+
     }
 }
