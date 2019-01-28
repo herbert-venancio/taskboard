@@ -1,16 +1,38 @@
+div.highcharts-tooltip {	
+    font-family: 'ptsans-regular', Verdana, Arial, Helvetica, sans-serif;
+}
+.highcharts-tooltip--text-bold {
+    font-weight: bold;
+}
 .highcharts-tooltip-header {
-    font-size: 10px;
+    font-size: 12px;
+    margin-bottom: 8px;
 }
 .highcharts-tooltip-header__title {
     margin: 0;
 }
 .highcharts-tooltip-header__subtitle {
     font-size: 0.95em;
-    margin-top: 0;
     margin-bottom: 2px;
+    margin-top: 0;
 }
-.highcharts-tooltip-footer {
-    font-style: italic;
-    font-weight: bold;
-    font-size: 1.1em;
+.highcharts-tooltip-item {
+    margin-top: 5px;
+}
+.highcharts-tooltip-item__label {
+    display: inline-block;
+}
+.highcharts-tooltip-item__value {
+    display: inline-block;
+}
+.highcharts-tooltip-subcycle-status {
+    border-radius: 5px;
+    color: white;
+    font-size: 10px;
+    height: 16px;
+    margin-right: 8px;
+    padding: 2px 8px;
+}
+.highcharts-tooltip-subcycle-status--bgcolor-red {
+    background-color: #a1423c;
 }
